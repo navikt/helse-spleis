@@ -2,8 +2,6 @@ package no.nav.helse.person
 
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Sykmelding
-import no.nav.helse.utbetalingstidslinje.Historie
-import java.time.LocalDate
 
 internal class ForkastetVedtaksperiode(
     private val vedtaksperiode: Vedtaksperiode,
@@ -34,9 +32,7 @@ internal class ForkastetVedtaksperiode(
 
         internal fun finnForrigeAvsluttaPeriode(
             forkastede: Iterable<ForkastetVedtaksperiode>,
-            vedtaksperiode: Vedtaksperiode,
-            referanse: LocalDate,
-            historie: Historie
-        ) = Vedtaksperiode.finnForrigeAvsluttaPeriode(forkastede.perioder(), vedtaksperiode, referanse, historie)
+            vedtaksperiode: Vedtaksperiode
+        ) = Vedtaksperiode.finnForrigeAvsluttaPeriode(forkastede.perioder(), vedtaksperiode)
     }
 }

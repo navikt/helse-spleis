@@ -118,6 +118,12 @@ internal class Arbeidsgiver private constructor(
                 .distinct()
             return infotrygdhistorikk.ingenUkjenteArbeidsgivere(orgnumre, skjæringstidspunkt)
         }
+
+        internal fun skjæringstidspunkt(arbeidsgivere: List<Arbeidsgiver>, periode: Periode, infotrygdhistorikk: Infotrygdhistorikk) =
+            infotrygdhistorikk.skjæringstidspunkt(periode, arbeidsgivere.map(Arbeidsgiver::egenSykdomstidslinje))
+
+        internal fun skjæringstidspunkter(arbeidsgivere: List<Arbeidsgiver>, periode: Periode, infotrygdhistorikk: Infotrygdhistorikk) =
+            infotrygdhistorikk.skjæringstidspunkter(periode, arbeidsgivere.map(Arbeidsgiver::egenSykdomstidslinje))
     }
 
     internal fun accept(visitor: ArbeidsgiverVisitor) {
@@ -486,7 +492,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun oppdaterSykdom(hendelse: SykdomstidslinjeHendelse) = sykdomshistorikk.håndter(hendelse)
 
-    internal fun sykdomstidslinje(): Sykdomstidslinje {
+    private fun sykdomstidslinje(): Sykdomstidslinje {
         return person.historikkFor(organisasjonsnummer, egenSykdomstidslinje())
     }
 
@@ -656,6 +662,39 @@ internal class Arbeidsgiver private constructor(
 
     internal fun harSykdom() = sykdomshistorikk.harSykdom()
 
+    internal fun periodetype(periode: Periode): Periodetype {
+        val skjæringstidspunkt = sykdomstidslinje().skjæringstidspunkt(periode.endInclusive) ?: periode.start
+        return when {
+            erFørstegangsbehandling(periode) -> Periodetype.FØRSTEGANGSBEHANDLING
+            forlengerInfotrygd(periode) -> when {
+                Utbetaling.harBetalt(utbetalinger, Periode(skjæringstidspunkt, periode.start.minusDays(1))) -> Periodetype.INFOTRYGDFORLENGELSE
+                else -> Periodetype.OVERGANG_FRA_IT
+            }
+            !Utbetaling.harBetalt(utbetalinger, skjæringstidspunkt) -> Periodetype.FØRSTEGANGSBEHANDLING
+            else -> Periodetype.FORLENGELSE
+        }
+    }
+
+    private fun erFørstegangsbehandling(periode: Periode) =
+        skjæringstidspunkt(periode) in periode
+
+    internal fun erForlengelse(periode: Periode) =
+        !erFørstegangsbehandling(periode)
+
+    internal fun forlengerInfotrygd(periode: Periode) =
+        person.harInfotrygdUtbetalt(organisasjonsnummer, skjæringstidspunkt(periode))
+
+    private fun skjæringstidspunkt(periode: Periode) = sykdomstidslinje().skjæringstidspunkt(periode.endInclusive) ?: periode.start
+
+    internal fun avgrensetPeriode(periode: Periode) =
+        Periode(maxOf(periode.start, sykdomstidslinje().skjæringstidspunkt(periode.endInclusive) ?: periode.start), periode.endInclusive)
+
+    internal fun forrigeSkjæringstidspunktInnenforArbeidsgiverperioden(regler: ArbeidsgiverRegler, nyFørsteSykedag: LocalDate): LocalDate? {
+        val sykdomstidslinje = sykdomstidslinje()
+        if (sykdomstidslinje.harNyArbeidsgiverperiodeFør(regler, nyFørsteSykedag)) return null
+        return sykdomstidslinje.skjæringstidspunkt(nyFørsteSykedag.minusDays(1))
+    }
+
     internal fun oppdatertUtbetalingstidslinje(periode: Periode, historie: Historie, infotrygdhistorikk: Infotrygdhistorikk) =
         historie.beregnUtbetalingstidslinje(organisasjonsnummer, periode, inntektshistorikk, NormalArbeidstaker, infotrygdhistorikk)
 
@@ -671,11 +710,10 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
-    internal fun forrigeAvsluttaPeriodeMedVilkårsvurdering(vedtaksperiode: Vedtaksperiode, historie: Historie): Vedtaksperiode? {
-        val referanse = historie.skjæringstidspunkt(vedtaksperiode.periode()) ?: return null
-        return Vedtaksperiode.finnForrigeAvsluttaPeriode(vedtaksperioder, vedtaksperiode, referanse, historie) ?:
+    internal fun forrigeAvsluttaPeriodeMedVilkårsvurdering(vedtaksperiode: Vedtaksperiode): Vedtaksperiode? {
+        return Vedtaksperiode.finnForrigeAvsluttaPeriode(vedtaksperioder, vedtaksperiode) ?:
         // TODO: leiter frem fra forkasta perioder — vilkårsgrunnlag ol. felles data bør lagres på Arbeidsgivernivå
-        ForkastetVedtaksperiode.finnForrigeAvsluttaPeriode(forkastede, vedtaksperiode, referanse, historie)
+        ForkastetVedtaksperiode.finnForrigeAvsluttaPeriode(forkastede, vedtaksperiode)
     }
 
     internal fun opprettReferanseTilInntekt(fra: LocalDate, til: LocalDate) = inntektshistorikk.opprettReferanse(fra, til, UUID.randomUUID())
@@ -683,6 +721,9 @@ internal class Arbeidsgiver private constructor(
     private fun trimTidligereBehandletDager(hendelse: Inntektsmelding) {
         ForkastetVedtaksperiode.overlapperMedForkastet(forkastede, hendelse)
     }
+
+    internal fun harDagUtenSøknad(periode: Periode) =
+        sykdomstidslinje().harDagUtenSøknad(periode)
 
     private fun <Hendelse: ArbeidstakerHendelse> ingenHåndtert(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean, errortekst: String) {
         if (ingenHåndtert(hendelse, håndterer)) return

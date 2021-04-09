@@ -237,6 +237,12 @@ class Person private constructor(
         observers.add(observer)
     }
 
+    internal fun skjæringstidspunkt(periode: Periode) =
+        Arbeidsgiver.skjæringstidspunkt(arbeidsgivere, periode, infotrygdhistorikk)
+
+    internal fun skjæringstidspunkter(periode: Periode) =
+        Arbeidsgiver.skjæringstidspunkter(arbeidsgivere, periode, infotrygdhistorikk)
+
     internal fun trengerHistorikkFraInfotrygd(hendelse: ArbeidstakerHendelse, cutoff: LocalDateTime? = null): Boolean {
         val tidligsteDato = arbeidsgivere.mapNotNull { it.tidligsteDato() }.minOrNull()!!
         return infotrygdhistorikk.oppfriskNødvendig(hendelse, tidligsteDato, cutoff)
@@ -250,6 +256,9 @@ class Person private constructor(
 
     internal fun historikkFor(orgnummer: String, sykdomstidslinje: Sykdomstidslinje) =
         infotrygdhistorikk.historikkFor(orgnummer, sykdomstidslinje)
+
+    internal fun harInfotrygdUtbetalt(orgnummer: String, skjæringstidspunkt: LocalDate) =
+        infotrygdhistorikk.harBetalt(orgnummer, skjæringstidspunkt)
 
     internal fun accept(visitor: PersonVisitor) {
         visitor.preVisitPerson(this, opprettet, aktørId, fødselsnummer, dødsdato)

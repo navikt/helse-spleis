@@ -87,12 +87,6 @@ internal class Historie(person: Person, infotrygdhistorikk: Infotrygdhistorikk) 
         spleisbøtte.add(orgnummer, tidslinje)
     }
 
-    internal fun forrigeSkjæringstidspunktInnenforArbeidsgiverperioden(regler: ArbeidsgiverRegler, orgnummer: String, nyFørsteSykedag: LocalDate): LocalDate? {
-        val sykdomstidslinje = sykdomstidslinje(orgnummer)
-        if (sykdomstidslinje.harNyArbeidsgiverperiodeFør(regler, nyFørsteSykedag)) return null
-        return sykdomstidslinje.skjæringstidspunkt(nyFørsteSykedag.minusDays(1))
-    }
-
     private fun erArbeidsgiverperiodenGjennomførtFør(organisasjonsnummer: String, dagen: LocalDate): Boolean {
         if (infotrygdbøtte.harBetalt(organisasjonsnummer, dagen)) return true
         val skjæringstidspunkt = skjæringstidspunkt(organisasjonsnummer, dagen til dagen)

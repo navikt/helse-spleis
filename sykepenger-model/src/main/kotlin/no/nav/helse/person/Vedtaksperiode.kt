@@ -57,12 +57,7 @@ internal class Vedtaksperiode private constructor(
 ) : Aktivitetskontekst, Comparable<Vedtaksperiode> {
 
     private val regler = NormalArbeidstaker
-    private val skjæringstidspunkt
-        get() =
-            skjæringstidspunktFraInfotrygd
-                ?: person.historie().skjæringstidspunkt(periode)
-                ?: periode.start
-
+    private val skjæringstidspunkt get() = skjæringstidspunktFraInfotrygd ?: person.skjæringstidspunkt(periode)
     private val utbetaling get() = utbetalinger.lastOrNull()
 
     internal constructor(
@@ -239,7 +234,7 @@ internal class Vedtaksperiode private constructor(
 
     internal fun starterEtter(other: Vedtaksperiode) = this.sykmeldingsperiode.start > other.sykmeldingsperiode.start
 
-    internal fun periodetype() = person.historie().periodetype(organisasjonsnummer, periode)
+    internal fun periodetype() = arbeidsgiver.periodetype(periode)
 
     internal fun inntektskilde() = inntektskilde
 
@@ -796,7 +791,7 @@ internal class Vedtaksperiode private constructor(
         ) {
             validation(hendelse) {
                 onError { vedtaksperiode.tilstand(hendelse, TilInfotrygd) }
-                valider { infotrygdhistorikk.validerOverlappende(this, person.historie(), vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode) }
+                valider { infotrygdhistorikk.validerOverlappende(this, arbeidsgiver.avgrensetPeriode(vedtaksperiode.periode), vedtaksperiode.skjæringstidspunkt) }
                 onSuccess { info("Utbetalingshistorikk sjekket; fant ingen feil.") }
             }
         }
@@ -1104,9 +1099,7 @@ internal class Vedtaksperiode private constructor(
             val historie = person.historie()
             validation(ytelser) {
                 onError { vedtaksperiode.tilstand(ytelser, AvsluttetIngenEndring) }
-                valider {
-                    infotrygdhistorikk.valider(this, historie, vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt)
-                }
+                valider { infotrygdhistorikk.valider(this, arbeidsgiver, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt) }
                 valider { ytelser.valider(vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt) }
                 lateinit var engineForTimeline: ArbeidsgiverUtbetalinger
                 valider("Feil ved kalkulering av utbetalingstidslinjer") {
@@ -1339,25 +1332,23 @@ internal class Vedtaksperiode private constructor(
             hendelse: ArbeidstakerHendelse,
             infotrygdhistorikk: Infotrygdhistorikk
         ) {
-            val historie = person.historie()
             validation(hendelse) {
                 onError { vedtaksperiode.tilstand(hendelse, TilInfotrygd) }
-                valider { infotrygdhistorikk.validerOverlappende(this, historie, vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode) }
+                valider { infotrygdhistorikk.validerOverlappende(this, arbeidsgiver.avgrensetPeriode(vedtaksperiode.periode), vedtaksperiode.skjæringstidspunkt) }
                 onError { person.invaliderAllePerioder(hendelse, null) }
                 validerHvis("Er ikke overgang fra IT og har flere arbeidsgivere", !Toggles.FlereArbeidsgivereFørstegangsbehandling.enabled) {
-                    historie.forlengerInfotrygd(vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode) || !person.harFlereArbeidsgivereMedSykdom()
+                    arbeidsgiver.forlengerInfotrygd(vedtaksperiode.periode) || !person.harFlereArbeidsgivereMedSykdom()
                 }
                 onSuccess {
-                    if (historie.erForlengelse(vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode)) {
+                    if (arbeidsgiver.erForlengelse(vedtaksperiode.periode)) {
                         info("Oppdaget at perioden er en forlengelse")
                         return@onSuccess vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
                     }
                     if (!Toggles.PraksisendringEnabled.enabled) return@onSuccess
 
                     val førsteSykedag = vedtaksperiode.sykdomstidslinje.førsteSykedag() ?: return@onSuccess
-                    val forrigeSkjæringstidspunkt = historie.forrigeSkjæringstidspunktInnenforArbeidsgiverperioden(
+                    val forrigeSkjæringstidspunkt = arbeidsgiver.forrigeSkjæringstidspunktInnenforArbeidsgiverperioden(
                         vedtaksperiode.regler,
-                        vedtaksperiode.organisasjonsnummer,
                         førsteSykedag
                     ) ?: return@onSuccess
 
@@ -1415,7 +1406,7 @@ internal class Vedtaksperiode private constructor(
             .plusDays(4)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            if (vedtaksperiode.arbeidsgiver.sykdomstidslinje().harDagUtenSøknad(vedtaksperiode.periode)) {
+            if (vedtaksperiode.arbeidsgiver.harDagUtenSøknad(vedtaksperiode.periode)) {
                 hendelse.error("Tidslinjen inneholder minst én dag med kilde sykmelding")
                 return vedtaksperiode.tilstand(hendelse, TilInfotrygd)
             }
@@ -1442,13 +1433,11 @@ internal class Vedtaksperiode private constructor(
         ) {
             vedtaksperiode.fjernArbeidsgiverperiodeVedOverlappMedIT(infotrygdhistorikk)
             val historie = person.historie()
-            val periodetype = historie.periodetype(vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode)
-            lateinit var skjæringstidspunkt: LocalDate
+            val periodetype = vedtaksperiode.periodetype()
+            vedtaksperiode.skjæringstidspunktFraInfotrygd = person.skjæringstidspunkt(vedtaksperiode.periode)
             validation(ytelser) {
                 onError { vedtaksperiode.tilstand(ytelser, TilInfotrygd) }
-                valider { historie.skjæringstidspunkt(vedtaksperiode.periode)?.also { skjæringstidspunkt = it } != null }
-                onSuccess { vedtaksperiode.skjæringstidspunktFraInfotrygd = skjæringstidspunkt }
-                valider { infotrygdhistorikk.valider(this, historie, vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode, skjæringstidspunkt) }
+                valider { infotrygdhistorikk.valider(this, arbeidsgiver, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt) }
                 valider { ytelser.valider(vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt) }
                 validerHvis("Har ikke overgang for alle arbeidsgivere i Infotrygd", periodetype == OVERGANG_FRA_IT) {
                     person.kunOvergangFraInfotrygd(vedtaksperiode)
@@ -1457,11 +1446,11 @@ internal class Vedtaksperiode private constructor(
                     person.ingenUkjenteArbeidsgivere(vedtaksperiode, vedtaksperiode.skjæringstidspunkt)
                 }
                 onSuccess { infotrygdhistorikk.addInntekter(person, this) }
-                onSuccess { infotrygdhistorikk.lagreVilkårsgrunnlag(skjæringstidspunkt, periodetype, person.vilkårsgrunnlagHistorikk) }
+                onSuccess { infotrygdhistorikk.lagreVilkårsgrunnlag(vedtaksperiode.skjæringstidspunkt, periodetype, person.vilkårsgrunnlagHistorikk) }
 
                 valider {
-                    person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)?.isOk()
-                        ?: return@håndter info("Mangler vilkårsgrunnlag for $skjæringstidspunkt").also {
+                    person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt)?.isOk()
+                        ?: return@håndter info("Mangler vilkårsgrunnlag for $vedtaksperiode.skjæringstidspunkt").also {
                             vedtaksperiode.tilstand(ytelser, AvventerVilkårsprøving)
                         }
                 }
@@ -1473,11 +1462,11 @@ internal class Vedtaksperiode private constructor(
                         }
                         else -> {
                             vedtaksperiode.forlengelseFraInfotrygd = NEI
-                            arbeidsgiver.forrigeAvsluttaPeriodeMedVilkårsvurdering(vedtaksperiode, historie)?.also { vedtaksperiode.kopierManglende(it) }
+                            arbeidsgiver.forrigeAvsluttaPeriodeMedVilkårsvurdering(vedtaksperiode)?.also { vedtaksperiode.kopierManglende(it) }
                         }
                     }
                 }
-                harNødvendigInntekt(person, skjæringstidspunkt)
+                harNødvendigInntekt(person, vedtaksperiode.skjæringstidspunkt)
                 lateinit var engineForTimeline: ArbeidsgiverUtbetalinger
                 valider("Feil ved kalkulering av utbetalingstidslinjer") {
                     val utbetalingstidslinjer = try {
@@ -1889,13 +1878,11 @@ internal class Vedtaksperiode private constructor(
 
         internal fun finnForrigeAvsluttaPeriode(
             perioder: List<Vedtaksperiode>,
-            vedtaksperiode: Vedtaksperiode,
-            skjæringstidspunkt: LocalDate,
-            historie: Historie
+            vedtaksperiode: Vedtaksperiode
         ) = perioder
             .filter { it < vedtaksperiode }
             .filter { it.erAvsluttet() }
-            .lastOrNull { historie.skjæringstidspunkt(it.periode()) == skjæringstidspunkt }
+            .lastOrNull { it.skjæringstidspunkt == vedtaksperiode.skjæringstidspunkt }
 
         internal fun aktivitetsloggMedForegåendeUtenUtbetaling(vedtaksperiode: Vedtaksperiode): Aktivitetslogg {
             val tidligereUbetalt = vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)?.takeIf {

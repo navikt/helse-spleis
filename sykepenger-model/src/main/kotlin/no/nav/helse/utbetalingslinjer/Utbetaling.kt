@@ -428,6 +428,14 @@ internal class Utbetaling private constructor(
             }
         }
 
+        internal fun harBetalt(utbetalinger: List<Utbetaling>, periode: Periode): Boolean {
+            return utbetalinger.utbetaltTidslinje().harBetalt(periode)
+        }
+
+        internal fun harBetalt(utbetalinger: List<Utbetaling>, dato: LocalDate): Boolean {
+            return utbetalinger.utbetaltTidslinje().harBetalt(dato)
+        }
+
         internal fun List<Utbetaling>.utbetaltTidslinje() =
             aktive()
                 .map { it.utbetalingstidslinje }
