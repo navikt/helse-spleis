@@ -7,7 +7,7 @@ import java.util.*
 
 class Simulering(
     meldingsreferanseId: UUID,
-    internal val vedtaksperiodeId: String,
+    private val vedtaksperiodeId: String,
     private val aktørId: String,
     private val fødselsnummer: String,
     private val orgnummer: String,
@@ -15,6 +15,9 @@ class Simulering(
     private val melding: String,
     internal val simuleringResultat: SimuleringResultat?
 ) : ArbeidstakerHendelse(meldingsreferanseId) {
+
+    internal fun erRelevant(other: UUID) = other.toString() == vedtaksperiodeId
+
     override fun aktørId() = aktørId
     override fun fødselsnummer() = fødselsnummer
     override fun organisasjonsnummer() = orgnummer

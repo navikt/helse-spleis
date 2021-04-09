@@ -13,7 +13,7 @@ class Ytelser(
     private val aktørId: String,
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
-    internal val vedtaksperiodeId: String,
+    private val vedtaksperiodeId: String,
     private val utbetalingshistorikk: Utbetalingshistorikk?,
     private val foreldrepermisjon: Foreldrepermisjon,
     private val pleiepenger: Pleiepenger,
@@ -25,6 +25,8 @@ class Ytelser(
     private val dagpenger: Dagpenger,
     aktivitetslogg: Aktivitetslogg
 ) : ArbeidstakerHendelse(meldingsreferanseId, aktivitetslogg) {
+
+    internal fun erRelevant(other: UUID) = other.toString() == vedtaksperiodeId
 
     internal fun oppdaterHistorikk(historikk: Infotrygdhistorikk) {
         utbetalingshistorikk?.oppdaterHistorikk(historikk)

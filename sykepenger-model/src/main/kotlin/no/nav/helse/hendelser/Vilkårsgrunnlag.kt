@@ -7,7 +7,7 @@ import java.util.*
 
 class Vilkårsgrunnlag(
     meldingsreferanseId: UUID,
-    internal val vedtaksperiodeId: String,
+    private val vedtaksperiodeId: String,
     private val aktørId: String,
     private val fødselsnummer: String,
     private val orgnummer: String,
@@ -16,6 +16,8 @@ class Vilkårsgrunnlag(
     private val medlemskapsvurdering: Medlemskapsvurdering
     ) : ArbeidstakerHendelse(meldingsreferanseId) {
     private var grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata? = null
+
+    internal fun erRelevant(other: UUID) = other.toString() == vedtaksperiodeId
 
     override fun aktørId() = aktørId
     override fun fødselsnummer() = fødselsnummer

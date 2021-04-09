@@ -184,7 +184,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(ytelser: Ytelser, infotrygdhistorikk: Infotrygdhistorikk, dødsdato: LocalDate?) {
-        if (id.toString() != ytelser.vedtaksperiodeId) return
+        if (!ytelser.erRelevant(id)) return
         kontekst(ytelser)
         tilstand.håndter(person, arbeidsgiver, this, ytelser, infotrygdhistorikk, dødsdato)
     }
@@ -196,13 +196,13 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag) {
-        if (id.toString() != vilkårsgrunnlag.vedtaksperiodeId) return
+        if (!vilkårsgrunnlag.erRelevant(id)) return
         kontekst(vilkårsgrunnlag)
         tilstand.håndter(this, vilkårsgrunnlag)
     }
 
     internal fun håndter(simulering: Simulering) {
-        if (id.toString() != simulering.vedtaksperiodeId) return
+        if (!simulering.erRelevant(id)) return
         kontekst(simulering)
         tilstand.håndter(this, simulering)
     }
