@@ -188,7 +188,7 @@ internal class Arbeidsgiver private constructor(
     internal fun håndter(sykmelding: Sykmelding) {
         sykmelding.kontekst(this)
         ForkastetVedtaksperiode.overlapperMedForkastet(forkastede, sykmelding)
-        if (vedtaksperioder.toList().map { it.håndter(sykmelding) }.none { it } && !sykmelding.hasErrorsOrWorse()) {
+        if (!ingenHåndtert(sykmelding, Vedtaksperiode::håndter) && !sykmelding.hasErrorsOrWorse()) {
             sykmelding.info("Lager ny vedtaksperiode")
             nyVedtaksperiode(sykmelding).håndter(sykmelding)
             vedtaksperioder.sort()
@@ -198,17 +198,13 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(søknad: Søknad) {
         søknad.kontekst(this)
-        if (vedtaksperioder.toList().map { it.håndter(søknad) }.none { it }) {
-            søknad.error("Forventet ikke søknad. Har nok ikke mottatt sykmelding")
-        }
+        ingenHåndtert(søknad, Vedtaksperiode::håndter, "Forventet ikke søknad. Har nok ikke mottatt sykmelding")
         finalize(søknad)
     }
 
     internal fun håndter(søknad: SøknadArbeidsgiver) {
         søknad.kontekst(this)
-        if (vedtaksperioder.toList().map { it.håndter(søknad) }.none { it }) {
-            søknad.error("Forventet ikke søknad til arbeidsgiver. Har nok ikke mottatt sykmelding")
-        }
+        ingenHåndtert(søknad, Vedtaksperiode::håndter, "Forventet ikke søknad til arbeidsgiver. Har nok ikke mottatt sykmelding")
         finalize(søknad)
     }
 
@@ -225,11 +221,11 @@ internal class Arbeidsgiver private constructor(
         inntektsmelding.cacheRefusjon(this)
         trimTidligereBehandletDager(inntektsmelding)
         if (vedtaksperiodeId != null) {
-            if (!vedtaksperioder.any { it.håndter(inntektsmelding, vedtaksperiodeId) })
+            if (!énHåndtert(inntektsmelding) { håndter(inntektsmelding, vedtaksperiodeId) })
                 return inntektsmelding.info("Vedtaksperiode overlapper ikke med replayet Inntektsmelding")
             inntektsmelding.info("Replayer inntektsmelding til påfølgende perioder som overlapper.")
         }
-        if (!håndter(inntektsmelding, Vedtaksperiode::håndter) && vedtaksperiodeId == null)
+        if (!ingenHåndtert(inntektsmelding, Vedtaksperiode::håndter) && vedtaksperiodeId == null)
             inntektsmelding.error("Forventet ikke inntektsmelding. Har nok ikke mottatt sykmelding")
 
         finalize(inntektsmelding)
@@ -241,32 +237,32 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(utbetalingshistorikk: Utbetalingshistorikk, infotrygdhistorikk: Infotrygdhistorikk) {
         utbetalingshistorikk.kontekst(this)
-        vedtaksperioder.toList().forEach { it.håndter(utbetalingshistorikk, infotrygdhistorikk) }
+        håndter(utbetalingshistorikk) { håndter(utbetalingshistorikk, infotrygdhistorikk) }
         finalize(utbetalingshistorikk)
     }
 
     internal fun håndter(ytelser: Ytelser, infotrygdhistorikk: Infotrygdhistorikk, dødsdato: LocalDate?) {
         ytelser.kontekst(this)
-        vedtaksperioder.toList().forEach { it.håndter(ytelser, infotrygdhistorikk, dødsdato) }
+        håndter(ytelser) { håndter(ytelser, infotrygdhistorikk, dødsdato) }
         finalize(ytelser)
     }
 
     internal fun håndter(utbetalingsgodkjenning: Utbetalingsgodkjenning) {
         utbetalingsgodkjenning.kontekst(this)
         utbetalinger.forEach { it.håndter(utbetalingsgodkjenning) }
-        vedtaksperioder.toList().forEach { it.håndter(utbetalingsgodkjenning) }
+        håndter(utbetalingsgodkjenning, Vedtaksperiode::håndter)
         finalize(utbetalingsgodkjenning)
     }
 
     internal fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag) {
         vilkårsgrunnlag.kontekst(this)
-        vedtaksperioder.toList().forEach { it.håndter(vilkårsgrunnlag) }
+        håndter(vilkårsgrunnlag, Vedtaksperiode::håndter)
         finalize(vilkårsgrunnlag)
     }
 
     internal fun håndter(simulering: Simulering) {
         simulering.kontekst(this)
-        vedtaksperioder.toList().forEach { it.håndter(simulering) }
+        håndter(simulering, Vedtaksperiode::håndter)
         finalize(simulering)
     }
 
@@ -279,7 +275,7 @@ internal class Arbeidsgiver private constructor(
     internal fun håndter(utbetaling: UtbetalingHendelse) {
         utbetaling.kontekst(this)
         utbetalinger.forEach { it.håndter(utbetaling) }
-        vedtaksperioder.forEach { it.håndter(utbetaling) }
+        håndter(utbetaling, Vedtaksperiode::håndter)
         finalize(utbetaling)
     }
 
@@ -291,10 +287,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(påminnelse: Påminnelse): Boolean {
         påminnelse.kontekst(this)
-        return vedtaksperioder
-            .toList()
-            .any { it.håndter(påminnelse) }
-            .apply { finalize(påminnelse) }
+        return énHåndtert(påminnelse, Vedtaksperiode::håndter).also { finalize(påminnelse) }
     }
 
     internal fun håndter(hendelse: AnnullerUtbetaling) {
@@ -472,7 +465,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(hendelse: OverstyrTidslinje) {
         hendelse.kontekst(this)
-        vedtaksperioder.toList().forEach { it.håndter(hendelse) }
+        håndter(hendelse, Vedtaksperiode::håndter)
     }
 
     internal fun oppdaterSykdom(hendelse: SykdomstidslinjeHendelse) = sykdomshistorikk.håndter(hendelse)
@@ -602,7 +595,8 @@ internal class Arbeidsgiver private constructor(
     private fun finalize(hendelse: ArbeidstakerHendelse) {
         while (skalGjenopptaBehandling) {
             skalGjenopptaBehandling = false
-            vedtaksperioder.any { it.håndter(GjenopptaBehandling(hendelse)) }
+            val gjenopptaBehandling = GjenopptaBehandling(hendelse)
+            énHåndtert(gjenopptaBehandling, Vedtaksperiode::håndter)
             Vedtaksperiode.gjentaHistorikk(hendelse, person)
         }
     }
@@ -663,14 +657,36 @@ internal class Arbeidsgiver private constructor(
         ForkastetVedtaksperiode.overlapperMedForkastet(forkastede, hendelse)
     }
 
-    private fun <Hendelse: ArbeidstakerHendelse> håndter(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean): Boolean {
+    private fun <Hendelse: ArbeidstakerHendelse> ingenHåndtert(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean, errortekst: String) {
+        if (ingenHåndtert(hendelse, håndterer)) return
+        hendelse.error(errortekst)
+    }
+
+    private fun <Hendelse: ArbeidstakerHendelse> håndter(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Unit) {
+        looper { håndterer(it, hendelse) }
+    }
+
+    private fun <Hendelse: ArbeidstakerHendelse> énHåndtert(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean): Boolean {
         var håndtert = false
+        looper { håndtert = håndtert || håndterer(it, hendelse) }
+        return håndtert
+    }
+
+    private fun <Hendelse: ArbeidstakerHendelse> ingenHåndtert(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean): Boolean {
+        var håndtert = false
+        looper { håndtert = håndterer(it, hendelse) || håndtert }
+        return håndtert
+    }
+
+    // støtter å loope over vedtaksperioder som modifiseres pga. forkasting.
+    // dvs. vi stopper å interere så snart listen har endret seg
+    private fun looper(handler: (Vedtaksperiode) -> Unit) {
+        val size = vedtaksperioder.size
         var neste = 0
-        while (neste < vedtaksperioder.size) {
-            håndtert = håndterer(vedtaksperioder[neste], hendelse) || håndtert
+        while (size == vedtaksperioder.size && neste < size) {
+            handler(vedtaksperioder[neste])
             neste += 1
         }
-        return håndtert
     }
 
     internal class JsonRestorer private constructor() {
