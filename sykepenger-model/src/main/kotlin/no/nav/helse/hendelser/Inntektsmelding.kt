@@ -102,7 +102,7 @@ class Inntektsmelding(
         )
     }
 
-    override fun erRelevant(other: Periode): Boolean {
+    override fun erRelevantMed(other: Periode): Boolean {
         if (førsteFraværsdagErEtterArbeidsgiverperioden()) return førsteFraværsdag in other
         return arbeidsgiverperiode?.overlapperMed(other) ?: false
     }
