@@ -155,13 +155,9 @@ internal class Vedtaksperiode private constructor(
         tilstand.håndter(this, søknad)
     }
 
-    internal fun håndter(inntektsmelding: Inntektsmelding, other: UUID): Boolean {
-        if (other != id) return false
-        return håndter(inntektsmelding)
-    }
-
-    internal fun håndter(inntektsmelding: Inntektsmelding): Boolean {
-        return overlapperMed(inntektsmelding).also {
+    internal fun håndter(inntektsmelding: Inntektsmelding, other: UUID? = null): Boolean {
+        val overlapper = overlapperMed(inntektsmelding) && (other == null || other == id)
+        return overlapper.also {
             if (arbeidsgiver.harRefusjonOpphørt(periode.endInclusive) && !erAvsluttet()) {
                 kontekst(inntektsmelding)
                 inntektsmelding.error("Refusjon opphører i perioden")
@@ -172,10 +168,6 @@ internal class Vedtaksperiode private constructor(
             kontekst(inntektsmelding)
             tilstand.håndter(this, inntektsmelding)
         }
-    }
-
-    internal fun håndter(inntektsmelding: InntektsmeldingReplay): Boolean {
-        return inntektsmelding.håndter(this, id, periode)
     }
 
     internal fun håndterHistorikkFraInfotrygd(hendelse: ArbeidstakerHendelse, infotrygdhistorikk: Infotrygdhistorikk) {

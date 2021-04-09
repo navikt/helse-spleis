@@ -26,7 +26,7 @@ class Inntektsmelding(
     ferieperioder: List<Periode>,
     private val arbeidsforholdId: String?,
     private val begrunnelseForReduksjonEllerIkkeUtbetalt: String?,
-    private val harOpphørAvNaturalytelser: Boolean = false
+    private val harOpphørAvNaturalytelser: Boolean = false,
 ) : SykdomstidslinjeHendelse(meldingsreferanseId) {
 
     private val beste = { venstre: Dag, høyre: Dag ->

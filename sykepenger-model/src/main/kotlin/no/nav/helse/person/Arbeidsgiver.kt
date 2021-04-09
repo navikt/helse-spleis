@@ -220,22 +220,23 @@ internal class Arbeidsgiver private constructor(
         if (refusjonOpphører.firstOrNull() != opphørsdato) refusjonOpphører.add(0, opphørsdato)
     }
 
-    internal fun håndter(inntektsmelding: Inntektsmelding) {
+    internal fun håndter(inntektsmelding: Inntektsmelding, vedtaksperiodeId: UUID? = null) {
         inntektsmelding.kontekst(this)
         inntektsmelding.cacheRefusjon(this)
         trimTidligereBehandletDager(inntektsmelding)
-        if (vedtaksperioder.toList().map { it.håndter(inntektsmelding) }.none { it }) {
-            inntektsmelding.error("Forventet ikke inntektsmelding. Har nok ikke mottatt sykmelding")
+        if (vedtaksperiodeId != null) {
+            if (!vedtaksperioder.any { it.håndter(inntektsmelding, vedtaksperiodeId) })
+                return inntektsmelding.info("Vedtaksperiode overlapper ikke med replayet Inntektsmelding")
+            inntektsmelding.info("Replayer inntektsmelding til påfølgende perioder som overlapper.")
         }
+        if (!håndter(inntektsmelding, Vedtaksperiode::håndter) && vedtaksperiodeId == null)
+            inntektsmelding.error("Forventet ikke inntektsmelding. Har nok ikke mottatt sykmelding")
+
         finalize(inntektsmelding)
     }
 
     internal fun håndter(inntektsmelding: InntektsmeldingReplay) {
-        inntektsmelding.kontekst(this)
-        inntektsmelding.cacheRefusjon(this)
-        inntektsmelding.trimTidligereBehandletDager(this)
-        vedtaksperioder.toList().forEach { it.håndter(inntektsmelding) }
-        finalize(inntektsmelding)
+        inntektsmelding.fortsettÅBehandle(this)
     }
 
     internal fun håndter(utbetalingshistorikk: Utbetalingshistorikk, infotrygdhistorikk: Infotrygdhistorikk) {
@@ -658,8 +659,18 @@ internal class Arbeidsgiver private constructor(
 
     internal fun opprettReferanseTilInntekt(fra: LocalDate, til: LocalDate) = inntektshistorikk.opprettReferanse(fra, til, UUID.randomUUID())
 
-    internal fun trimTidligereBehandletDager(hendelse: Inntektsmelding) {
+    private fun trimTidligereBehandletDager(hendelse: Inntektsmelding) {
         ForkastetVedtaksperiode.overlapperMedForkastet(forkastede, hendelse)
+    }
+
+    private fun <Hendelse: ArbeidstakerHendelse> håndter(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean): Boolean {
+        var håndtert = false
+        var neste = 0
+        while (neste < vedtaksperioder.size) {
+            håndtert = håndterer(vedtaksperioder[neste], hendelse) || håndtert
+            neste += 1
+        }
+        return håndtert
     }
 
     internal class JsonRestorer private constructor() {
