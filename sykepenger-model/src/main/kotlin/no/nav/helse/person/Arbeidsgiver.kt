@@ -14,7 +14,6 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetaltTidslinje
 import no.nav.helse.utbetalingslinjer.UtbetalingObserver
 import no.nav.helse.utbetalingstidslinje.*
@@ -197,8 +196,6 @@ internal class Arbeidsgiver private constructor(
         utbetalinger.add(utbetaling)
         utbetaling.register(this)
     }
-
-    private fun utbetalteUtbetalinger() = utbetalinger.aktive()
 
     internal fun nåværendeTidslinje() =
         beregnetUtbetalingstidslinjer.lastOrNull()?.utbetalingstidslinje() ?: throw IllegalStateException("mangler utbetalinger")
@@ -695,19 +692,26 @@ internal class Arbeidsgiver private constructor(
         return sykdomstidslinje.skjæringstidspunkt(nyFørsteSykedag.minusDays(1))
     }
 
-    internal fun oppdatertUtbetalingstidslinje(periode: Periode, historie: Historie, infotrygdhistorikk: Infotrygdhistorikk) =
-        historie.beregnUtbetalingstidslinje(organisasjonsnummer, periode, inntektshistorikk, NormalArbeidstaker, infotrygdhistorikk)
+    internal fun utbetalingstidslinje(periode: Periode, skjæringstidspunkter: List<LocalDate>, infotrygdhistorikk: Infotrygdhistorikk): Utbetalingstidslinje {
+        val builder = UtbetalingstidslinjeBuilder(
+            skjæringstidspunkter = skjæringstidspunkter,
+            inntektshistorikk = inntektshistorikk,
+            forlengelseStrategy = { dagen -> erArbeidsgiverperiodenGjennomførtFør(infotrygdhistorikk, dagen) },
+            arbeidsgiverRegler = NormalArbeidstaker
+        )
+        val utbetalingstidlinje = builder.result(sykdomstidslinje().fremTilOgMed(periode.endInclusive))
+        val tidligsteDato = tidligsteDato() ?: return Utbetalingstidslinje()
+        return infotrygdhistorikk.fjernHistorikk(utbetalingstidlinje, organisasjonsnummer, tidligsteDato)
+    }
+
+    private fun erArbeidsgiverperiodenGjennomførtFør(infotrygdhistorikk: Infotrygdhistorikk, dagen: LocalDate): Boolean {
+        val skjæringstidspunkt = skjæringstidspunkt(dagen til dagen)
+        return infotrygdhistorikk.harBetalt(organisasjonsnummer, skjæringstidspunkt)
+    }
 
     internal fun støtterReplayFor(vedtaksperiode: Vedtaksperiode, regler: ArbeidsgiverRegler): Boolean {
         return finnSykeperiodeRettEtter(vedtaksperiode) == null
             && !sykdomstidslinje().harNyArbeidsgiverperiodeEtter(regler, vedtaksperiode.periode().endInclusive)
-    }
-
-    internal fun append(bøtte: Historie.Historikkbøtte) {
-        if (harSykdom()) bøtte.add(organisasjonsnummer, sykdomshistorikk.sykdomstidslinje())
-        utbetalteUtbetalinger().forEach {
-            it.append(organisasjonsnummer, bøtte)
-        }
     }
 
     internal fun forrigeAvsluttaPeriodeMedVilkårsvurdering(vedtaksperiode: Vedtaksperiode): Vedtaksperiode? {

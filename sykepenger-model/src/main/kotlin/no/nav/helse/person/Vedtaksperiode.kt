@@ -1096,7 +1096,6 @@ internal class Vedtaksperiode private constructor(
             infotrygdhistorikk: Infotrygdhistorikk,
             dødsdato: LocalDate?
         ) {
-            val historie = person.historie()
             validation(ytelser) {
                 onError { vedtaksperiode.tilstand(ytelser, AvsluttetIngenEndring) }
                 valider { infotrygdhistorikk.valider(this, arbeidsgiver, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt) }
@@ -1104,7 +1103,7 @@ internal class Vedtaksperiode private constructor(
                 lateinit var engineForTimeline: ArbeidsgiverUtbetalinger
                 valider("Feil ved kalkulering av utbetalingstidslinjer") {
                     val utbetalingstidslinjer = try {
-                        person.utbetalingstidslinjer(vedtaksperiode.periode, historie)
+                        person.utbetalingstidslinjer(vedtaksperiode.periode)
                     } catch (e: IllegalArgumentException) {
                         sikkerLogg.warn("Feilet i builder for vedtaksperiode ${vedtaksperiode.id} - ${e.message}")
                         return@valider false
@@ -1432,7 +1431,6 @@ internal class Vedtaksperiode private constructor(
             dødsdato: LocalDate?
         ) {
             vedtaksperiode.fjernArbeidsgiverperiodeVedOverlappMedIT(infotrygdhistorikk)
-            val historie = person.historie()
             val periodetype = vedtaksperiode.periodetype()
             vedtaksperiode.skjæringstidspunktFraInfotrygd = person.skjæringstidspunkt(vedtaksperiode.periode)
             validation(ytelser) {
@@ -1470,7 +1468,7 @@ internal class Vedtaksperiode private constructor(
                 lateinit var engineForTimeline: ArbeidsgiverUtbetalinger
                 valider("Feil ved kalkulering av utbetalingstidslinjer") {
                     val utbetalingstidslinjer = try {
-                        person.utbetalingstidslinjer(vedtaksperiode.periode, historie)
+                        person.utbetalingstidslinjer(vedtaksperiode.periode)
                     } catch (e: IllegalArgumentException) {
                         sikkerLogg.warn("Feilet i builder for vedtaksperiode ${vedtaksperiode.id} - ${e.message}")
                         return@valider false

@@ -5,19 +5,17 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Periodetype.*
-import no.nav.helse.person.Person
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import java.time.LocalDate
 
-internal class Historie(person: Person, infotrygdhistorikk: Infotrygdhistorikk) {
+internal class Historie(infotrygdhistorikk: Infotrygdhistorikk) {
     private val infotrygdbøtte = Historikkbøtte()
     private val spleisbøtte = Historikkbøtte(konverterUtbetalingstidslinje = true)
     private val sykdomstidslinjer get() = infotrygdbøtte.sykdomstidslinjer() + spleisbøtte.sykdomstidslinjer()
 
     init {
-        person.append(spleisbøtte)
         infotrygdhistorikk.append(infotrygdbøtte)
     }
 
@@ -88,11 +86,8 @@ internal class Historie(person: Person, infotrygdhistorikk: Infotrygdhistorikk) 
     }
 
     private fun erArbeidsgiverperiodenGjennomførtFør(organisasjonsnummer: String, dagen: LocalDate): Boolean {
-        if (infotrygdbøtte.harBetalt(organisasjonsnummer, dagen)) return true
         val skjæringstidspunkt = skjæringstidspunkt(organisasjonsnummer, dagen til dagen)
-        if (skjæringstidspunkt == dagen) return false
-        if (infotrygdbøtte.harBetalt(organisasjonsnummer, skjæringstidspunkt)) return true
-        return spleisbøtte.harBetalt(organisasjonsnummer, skjæringstidspunkt)
+        return infotrygdbøtte.harBetalt(organisasjonsnummer, skjæringstidspunkt)
     }
 
     private fun sykdomstidslinje(orgnummer: String) =

@@ -14,7 +14,7 @@ import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Alder
-import no.nav.helse.utbetalingstidslinje.Historie
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -37,8 +37,6 @@ class Person private constructor(
     ) : this(aktørId, fødselsnummer, mutableListOf(), Aktivitetslogg(), LocalDateTime.now(), Infotrygdhistorikk(), VilkårsgrunnlagHistorikk(), null)
 
     private val observers = mutableListOf<PersonObserver>()
-
-    internal fun historie() = Historie(this, infotrygdhistorikk)
 
     fun håndter(sykmelding: Sykmelding) = håndter(sykmelding, "sykmelding") { sykmelding.forGammel() }
 
@@ -360,14 +358,12 @@ class Person private constructor(
     internal fun sammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =
         arbeidsgivere.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt)
 
-    internal fun append(bøtte: Historie.Historikkbøtte) {
-        arbeidsgivere.forEach { it.append(bøtte) }
-    }
-
-    internal fun utbetalingstidslinjer(periode: Periode, historie: Historie) =
-        arbeidsgivereMedSykdom()
-            .map { arbeidsgiver -> arbeidsgiver to arbeidsgiver.oppdatertUtbetalingstidslinje(periode, historie, infotrygdhistorikk) }
+    internal fun utbetalingstidslinjer(periode: Periode): Map<Arbeidsgiver, Utbetalingstidslinje> {
+        val skjæringstidspunkter = skjæringstidspunkter(periode)
+        return arbeidsgivereMedSykdom()
+            .map { arbeidsgiver -> arbeidsgiver to arbeidsgiver.utbetalingstidslinje(periode, skjæringstidspunkter, infotrygdhistorikk) }
             .toMap()
+    }
 
     private fun finnArbeidsgiverForInntekter(arbeidsgiver: String, aktivitetslogg: IAktivitetslogg): Arbeidsgiver {
         return arbeidsgivere.finnEllerOpprett(arbeidsgiver) {

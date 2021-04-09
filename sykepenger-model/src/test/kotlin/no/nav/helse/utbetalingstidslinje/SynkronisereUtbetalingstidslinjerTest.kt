@@ -64,7 +64,7 @@ internal class SynkronisereUtbetalingstidslinjerTest {
 
     @Test
     fun skjæringstidspunkt() {
-        val historie = Historie(person, Infotrygdhistorikk())
+        val historie = Historie(Infotrygdhistorikk())
         assertEquals(1.januar, historie.skjæringstidspunkt(Periode(1.januar, 31.januar)))
         assertEquals(1.januar, historie.skjæringstidspunkt(Periode(1.februar, 28.februar)))
         assertEquals(1.januar, historie.skjæringstidspunkt(Periode(1.mars, 30.mars)))
@@ -95,7 +95,7 @@ internal class SynkronisereUtbetalingstidslinjerTest {
 
     @Test
     fun `Padding utbetalingstidslinjene til sammenhengendeperiode`() {
-        person.utbetalingstidslinjer(1.januar til 31.januar, Historie(person, Infotrygdhistorikk())).also {
+        person.utbetalingstidslinjer(1.januar til 31.januar).also {
             assertEquals(4, it.size)
             assertEquals(181, it[arb1]?.size)
             assertEquals(59, it[arb2]?.size)

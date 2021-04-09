@@ -2,7 +2,6 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Inntektshistorikk
-import no.nav.helse.person.Person
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
@@ -46,7 +45,7 @@ internal abstract class HistorieTest {
     }
 
     private fun resetHistorie() {
-        historie = Historie(Person(AKTØRID, FNR), infotrygdhistorikk)
+        historie = Historie(infotrygdhistorikk)
     }
 
     protected fun refusjon(fom: LocalDate, tom: LocalDate, inntekt: Inntekt = 1000.daglig, grad: Prosentdel = 100.prosent, orgnr: String = AG1) =
