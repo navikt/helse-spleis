@@ -78,6 +78,10 @@ internal class InfotrygdhistorikkElement private constructor(
         }
     }
 
+    internal fun harBetalt(organisasjonsnummer: String, dato: LocalDate): Boolean {
+        return utbetalingstidslinje(organisasjonsnummer).harBetalt(dato)
+    }
+
     internal fun kanSlettes() =
         !lagretInntekter && !lagretVilkårsgrunnlag
 

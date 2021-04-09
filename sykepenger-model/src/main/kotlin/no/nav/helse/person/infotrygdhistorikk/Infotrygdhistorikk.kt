@@ -70,6 +70,11 @@ internal class Infotrygdhistorikk private constructor(
         return siste.historikkFor(orgnummer, sykdomstidslinje)
     }
 
+    internal fun harBetalt(organisasjonsnummer: String, dato: LocalDate): Boolean {
+        if (!harHistorikk()) return false
+        return siste.harBetalt(organisasjonsnummer, dato)
+    }
+
     internal fun sisteSykepengedag(orgnummer: String): LocalDate? {
         if (!harHistorikk()) return null
         return siste.sisteSykepengedag(orgnummer)

@@ -361,6 +361,24 @@ internal class InfotrygdhistorikkTest {
         assertEquals(12, SykdomstidslinjeInspektør(historikk.historikkFor("ag3", Sykdomstidslinje())).dager.filterNot { it.value is Dag.UkjentDag }.size)
     }
 
+    @Test
+    fun `har betalt - tom historikk`() {
+        assertFalse(historikk.harBetalt("ag1", 1.januar))
+    }
+
+    @Test
+    fun `har betalt`() {
+        historikk.oppdaterHistorikk(historikkelement(listOf(
+            Utbetalingsperiode("ag1", 1.januar til 10.januar, 100.prosent, 1500.daglig),
+            Utbetalingsperiode("ag2", 10.januar til 20.januar, 100.prosent, 1500.daglig),
+            Friperiode(20.januar til 31.januar)
+        )))
+        assertTrue(historikk.harBetalt("ag1", 1.januar))
+        assertFalse(historikk.harBetalt("ag2", 1.januar))
+        assertTrue(historikk.harBetalt("ag2", 10.januar))
+        assertFalse(historikk.harBetalt("ag1", 20.januar))
+    }
+
     private fun historikkelement(
         perioder: List<Infotrygdperiode> = emptyList(),
         inntekter: List<Inntektsopplysning> = emptyList(),
