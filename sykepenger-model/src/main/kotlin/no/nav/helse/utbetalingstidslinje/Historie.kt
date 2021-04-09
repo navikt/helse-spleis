@@ -104,11 +104,6 @@ internal class Historie(person: Person, infotrygdhistorikk: Infotrygdhistorikk) 
     private fun sykdomstidslinje(orgnummer: String) =
         infotrygdbøtte.sykdomstidslinje(orgnummer).merge(spleisbøtte.sykdomstidslinje(orgnummer), replace)
 
-    internal fun harForlengelseForAlleArbeidsgivereIInfotrygdhistorikken(
-        orgnummerForOverlappendeVedtaksperioder: List<String>,
-        skjæringstidspunkt: LocalDate
-    ) = infotrygdbøtte.harForlengelseForAlleArbeidsgivereIInfotrygdhistorikken(orgnummerForOverlappendeVedtaksperioder, skjæringstidspunkt)
-
     internal companion object {
         private const val ALLE_ARBEIDSGIVERE = "UKJENT"
     }
@@ -156,14 +151,6 @@ internal class Historie(person: Person, infotrygdhistorikk: Infotrygdhistorikk) 
 
         internal fun harBetalt(orgnr: String, dato: LocalDate) =
             utbetalingstidslinje(orgnr).harBetalt(dato)
-
-        private fun orgnummerMedOverlappendeSykdomstidlinje(skjæringstidspunkt: LocalDate) =
-            sykdomstidslinjer.filter { (_, sykdomstidlinje) -> sykdomstidlinje.førsteSykedagEtter(skjæringstidspunkt) != null }.keys
-
-        internal fun harForlengelseForAlleArbeidsgivereIInfotrygdhistorikken(
-            orgnummerForOverlappendeVedtaksperioder: List<String>,
-            skjæringstidspunkt: LocalDate
-        ) = orgnummerForOverlappendeVedtaksperioder.containsAll(orgnummerMedOverlappendeSykdomstidlinje(skjæringstidspunkt))
     }
 
     private enum class InternPeriodetype(private val periodetype: Periodetype) {
