@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.*
 import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
@@ -30,6 +31,7 @@ internal class InfotrygdhistorikkElementTest {
 
     @BeforeEach
     fun setup() {
+        resetSeed(1.januar)
         aktivitetslogg = Aktivitetslogg()
     }
 
@@ -166,25 +168,70 @@ internal class InfotrygdhistorikkElementTest {
 
     @Test
     fun `sykdomstidslinje - ferie`() {
-        val ferie = Friperiode(1.januar til 10.januar)
-        val inspektør = SykdomstidslinjeInspektør(ferie.sykdomstidslinje(kilde))
+        val periode = Friperiode(1.januar til 10.januar)
+        val inspektør = SykdomstidslinjeInspektør(periode.sykdomstidslinje(kilde))
         assertTrue(inspektør.dager.values.all { it is Dag.Feriedag })
         assertEquals(10, inspektør.dager.size)
     }
 
     @Test
     fun `sykdomstidslinje - ukjent`() {
-        val ferie = UkjentInfotrygdperiode(1.januar til 10.januar)
-        val inspektør = SykdomstidslinjeInspektør(ferie.sykdomstidslinje(kilde))
+        val periode = UkjentInfotrygdperiode(1.januar til 10.januar)
+        val inspektør = SykdomstidslinjeInspektør(periode.sykdomstidslinje(kilde))
         assertTrue(inspektør.dager.isEmpty())
     }
 
     @Test
     fun `sykdomstidslinje - utbetaling`() {
-        val utbetaling = Utbetalingsperiode("ag1", 1.januar til 10.januar, 100.prosent, 25000.månedlig)
-        val inspektør = SykdomstidslinjeInspektør(utbetaling.sykdomstidslinje(kilde))
+        val periode = Utbetalingsperiode("ag1", 1.januar til 10.januar, 100.prosent, 25000.månedlig)
+        val inspektør = SykdomstidslinjeInspektør(periode.sykdomstidslinje(kilde))
         assertTrue(inspektør.dager.values.all { it is Dag.Sykedag || it is Dag.SykHelgedag })
         assertEquals(10, inspektør.dager.size)
+    }
+
+    @Test
+    fun `historikk for - ferie`() {
+        val periode = Friperiode(1.januar til 10.januar)
+        val inspektør = SykdomstidslinjeInspektør(periode.historikkFor("orgnr", Sykdomstidslinje(), kilde))
+        assertTrue(inspektør.dager.values.all { it is Dag.Feriedag })
+        assertEquals(10, inspektør.dager.size)
+    }
+
+    @Test
+    fun `historikk for - ukjent`() {
+        val periode = UkjentInfotrygdperiode(1.januar til 10.januar)
+        val inspektør = SykdomstidslinjeInspektør(periode.historikkFor("orgnr", Sykdomstidslinje(), kilde))
+        assertTrue(inspektør.dager.isEmpty())
+    }
+
+    @Test
+    fun `historikk for - utbetaling`() {
+        val periode = Utbetalingsperiode("ag1", 1.januar til 10.januar, 100.prosent, 25000.månedlig)
+        val inspektør = SykdomstidslinjeInspektør(periode.historikkFor("ag1", Sykdomstidslinje(), kilde))
+        assertTrue(inspektør.dager.values.all { it is Dag.Sykedag || it is Dag.SykHelgedag })
+        assertEquals(10, inspektør.dager.size)
+    }
+
+    @Test
+    fun `historikk for annet orgnr - utbetaling`() {
+        val periode = Utbetalingsperiode("ag1", 1.januar til 10.januar, 100.prosent, 25000.månedlig)
+        val inspektør = SykdomstidslinjeInspektør(periode.historikkFor("noe helt annet", Sykdomstidslinje(), kilde))
+        assertTrue(inspektør.dager.isEmpty())
+    }
+
+    @Test
+    fun `historikk for overskriver ikke`() {
+        val sykdomstidslinje = 10.A + 5.n_ + 5.S
+        val element = historikkelement(listOf(
+            Utbetalingsperiode("ag1", 1.januar til 10.januar, 100.prosent, 25000.månedlig),
+            Friperiode(11.januar til 15.januar)
+        ))
+        val inspektør = SykdomstidslinjeInspektør(element.historikkFor("ag1", sykdomstidslinje))
+        assertEquals(8, inspektør.dager.filter { it.value is Dag.Arbeidsdag }.size)
+        assertEquals(2, inspektør.dager.filter { it.value is Dag.FriskHelgedag }.size)
+        assertEquals(5, inspektør.dager.filter { it.value is Dag.Feriedag }.size)
+        assertEquals(4, inspektør.dager.filter { it.value is Dag.Sykedag }.size)
+        assertEquals(1, inspektør.dager.filter { it.value is Dag.SykHelgedag }.size)
     }
 
     @Test

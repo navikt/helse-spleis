@@ -2,6 +2,7 @@ package no.nav.helse.person.infotrygdhistorikk
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.*
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingstidslinje.Historie
@@ -69,6 +70,12 @@ internal class InfotrygdhistorikkElement private constructor(
                 lagretInntekter = false,
                 lagretVilkårsgrunnlag = false
             )
+    }
+
+    internal fun historikkFor(orgnummer: String, sykdomstidslinje: Sykdomstidslinje): Sykdomstidslinje {
+        return perioder.fold(sykdomstidslinje) { result, periode ->
+            periode.historikkFor(orgnummer, result, kilde)
+        }
     }
 
     internal fun kanSlettes() =

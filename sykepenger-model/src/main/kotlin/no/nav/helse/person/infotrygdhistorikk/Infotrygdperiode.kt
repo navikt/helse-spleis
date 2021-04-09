@@ -3,6 +3,7 @@ package no.nav.helse.person.infotrygdhistorikk
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.InfotrygdhistorikkVisitor
+import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Historie
@@ -18,6 +19,11 @@ abstract class Infotrygdperiode(private val periode: Periode) : ClosedRange<Loca
     internal abstract fun accept(visitor: InfotrygdhistorikkVisitor)
     internal open fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode) {}
     internal open fun validerOverlapp(aktivitetslogg: IAktivitetslogg, periode: Periode) {}
+
+    internal fun historikkFor(orgnummer: String, sykdomstidslinje: Sykdomstidslinje, kilde: SykdomstidslinjeHendelse.Hendelseskilde): Sykdomstidslinje {
+        if (!gjelder(orgnummer)) return sykdomstidslinje
+        return sykdomstidslinje(kilde).merge(sykdomstidslinje, replace)
+    }
 
     internal fun overlapperMed(other: Periode) = periode.overlapperMed(other)
     internal open fun gjelder(orgnummer: String) = true

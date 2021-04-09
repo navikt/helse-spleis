@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetalingshistorikk
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.Historie
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
@@ -62,6 +63,11 @@ internal class Infotrygdhistorikk private constructor(
     internal fun utbetalingstidslinje(periode: Periode): Utbetalingstidslinje {
         if (!harHistorikk()) return Utbetalingstidslinje()
         return siste.utbetalingstidslinje().kutt(periode.endInclusive)
+    }
+
+    internal fun historikkFor(orgnummer: String, sykdomstidslinje: Sykdomstidslinje): Sykdomstidslinje {
+        if (!harHistorikk()) return sykdomstidslinje
+        return siste.historikkFor(orgnummer, sykdomstidslinje)
     }
 
     internal fun sisteSykepengedag(orgnummer: String): LocalDate? {

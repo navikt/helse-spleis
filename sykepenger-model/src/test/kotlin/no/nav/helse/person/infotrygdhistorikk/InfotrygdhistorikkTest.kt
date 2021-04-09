@@ -4,9 +4,9 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.person.*
 import no.nav.helse.serde.PersonData
 import no.nav.helse.serde.PersonData.InfotrygdhistorikkElementData.Companion.tilModellObjekt
-import no.nav.helse.testhelpers.februar
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.mars
+import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -27,6 +27,7 @@ internal class InfotrygdhistorikkTest {
 
     @BeforeEach
     fun setup() {
+        resetSeed(1.januar)
         historikk = Infotrygdhistorikk()
         aktivitetslogg = Aktivitetslogg()
     }
@@ -341,6 +342,23 @@ internal class InfotrygdhistorikkTest {
         )))
         assertEquals(10.januar, historikk.sisteSykepengedag("ag1"))
         assertEquals(20.januar, historikk.sisteSykepengedag("ag2"))
+    }
+
+    @Test
+    fun `historikk for - tom historikk`() {
+        assertEquals(0, historikk.historikkFor("ornr", Sykdomstidslinje()).count())
+        assertEquals(1, historikk.historikkFor("ornr", 1.S).count())
+    }
+
+    @Test
+    fun `historikk for`() {
+        historikk.oppdaterHistorikk(historikkelement(listOf(
+            Utbetalingsperiode("ag1", 1.januar til 10.januar, 100.prosent, 1500.daglig),
+            Utbetalingsperiode("ag2", 10.januar til 20.januar, 100.prosent, 1500.daglig),
+            Friperiode(20.januar til 31.januar)
+        )))
+        assertEquals(22, SykdomstidslinjeInspektør(historikk.historikkFor("ag1", Sykdomstidslinje())).dager.filterNot { it.value is Dag.UkjentDag }.size)
+        assertEquals(12, SykdomstidslinjeInspektør(historikk.historikkFor("ag3", Sykdomstidslinje())).dager.filterNot { it.value is Dag.UkjentDag }.size)
     }
 
     private fun historikkelement(
