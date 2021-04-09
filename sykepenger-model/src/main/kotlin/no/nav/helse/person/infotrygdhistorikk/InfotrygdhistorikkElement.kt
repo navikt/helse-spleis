@@ -83,6 +83,16 @@ internal class InfotrygdhistorikkElement private constructor(
         return utbetalingstidslinje(organisasjonsnummer).harBetalt(dato)
     }
 
+    internal fun ingenUkjenteArbeidsgivere(organisasjonsnumre: List<String>, dato: LocalDate): Boolean {
+        return perioder.none { periode ->
+            periode.utbetalingEtter(organisasjonsnumre, dato).also {
+                if (it) {
+                    val a = "shit"
+                }
+            }
+        }
+    }
+
     internal fun sykdomstidslinje(): Sykdomstidslinje {
         return perioder.fold(Sykdomstidslinje()) { result, periode ->
             result.merge(periode.sykdomstidslinje(kilde), sammenhengendeSykdom)

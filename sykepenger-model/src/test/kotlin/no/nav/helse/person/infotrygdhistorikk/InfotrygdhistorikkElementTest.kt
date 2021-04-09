@@ -249,6 +249,19 @@ internal class InfotrygdhistorikkElementTest {
     }
 
     @Test
+    fun `ingen ukjente arbeidsgivere`() {
+        val element = historikkelement(listOf(
+            Utbetalingsperiode("ag3", 1.januar til 9.januar, 100.prosent, 25000.månedlig),
+            Utbetalingsperiode("ag1", 10.januar til 20.januar, 100.prosent, 25000.månedlig),
+            Utbetalingsperiode("ag2", 10.januar til 20.januar, 100.prosent, 25000.månedlig),
+        ))
+        assertTrue(element.ingenUkjenteArbeidsgivere(listOf("ag1", "ag2", "ag3"), 1.januar))
+        assertTrue(element.ingenUkjenteArbeidsgivere(listOf("ag1", "ag2"), 10.januar))
+        assertFalse(element.ingenUkjenteArbeidsgivere(listOf("ag1", "ag2"), 1.januar))
+        assertFalse(element.ingenUkjenteArbeidsgivere(listOf("ag1"), 10.januar))
+    }
+
+    @Test
     fun `hensyntar ikke statslønn i overlapp-validering`() {
         val element = historikkelement(harStatslønn = true)
         assertTrue(element.validerOverlappende(aktivitetslogg, 1.januar til 31.januar, 1.januar))

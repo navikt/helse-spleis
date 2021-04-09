@@ -1451,7 +1451,10 @@ internal class Vedtaksperiode private constructor(
                 valider { infotrygdhistorikk.valider(this, historie, vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode, skjæringstidspunkt) }
                 valider { ytelser.valider(vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt) }
                 validerHvis("Har ikke overgang for alle arbeidsgivere i Infotrygd", periodetype == OVERGANG_FRA_IT) {
-                    person.harForlengelseForAlleArbeidsgivereIInfotrygdhistorikken(historie, vedtaksperiode)
+                    person.kunOvergangFraInfotrygd(vedtaksperiode)
+                }
+                validerHvis("Har utbetalinger fra andre arbeidsgivere etter skjæringstidspunktet", periodetype == OVERGANG_FRA_IT) {
+                    person.ingenUkjenteArbeidsgivere(vedtaksperiode, vedtaksperiode.skjæringstidspunkt)
                 }
                 onSuccess { infotrygdhistorikk.addInntekter(person, this) }
                 onSuccess { infotrygdhistorikk.lagreVilkårsgrunnlag(skjæringstidspunkt, periodetype, person.vilkårsgrunnlagHistorikk) }
@@ -1934,15 +1937,6 @@ internal class Vedtaksperiode private constructor(
                         inntektsmelding.trimLeft(it.periode.endInclusive)
                 }
         }
-
-        internal fun harForlengelseForAlleArbeidsgivereIInfotrygdhistorikken(
-            vedtaksperioder: List<Vedtaksperiode>,
-            historie: Historie,
-            vedtaksperiode: Vedtaksperiode
-        ) = historie.harForlengelseForAlleArbeidsgivereIInfotrygdhistorikken(
-            vedtaksperioder.filter { it.periode.overlapperMed(vedtaksperiode.periode) }.map { it.organisasjonsnummer },
-            vedtaksperiode.skjæringstidspunkt
-        )
 
         internal fun gjentaHistorikk(hendelse: ArbeidstakerHendelse, person: Person) {
             val nåværende = person.nåværendeVedtaksperioder()

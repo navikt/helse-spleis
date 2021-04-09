@@ -27,6 +27,7 @@ abstract class Infotrygdperiode(private val periode: Periode) : ClosedRange<Loca
 
     internal fun overlapperMed(other: Periode) = periode.overlapperMed(other)
     internal open fun gjelder(orgnummer: String) = true
+    internal open fun utbetalingEtter(orgnumre: List<String>, dato: LocalDate) = false
 
     override fun hashCode() = Objects.hash(this::class, periode)
     override fun equals(other: Any?): Boolean {

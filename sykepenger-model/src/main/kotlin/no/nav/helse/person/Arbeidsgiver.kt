@@ -97,11 +97,26 @@ internal class Arbeidsgiver private constructor(
                     .any { it.periode().overlapperMed(vedtaksperiode.periode()) }
             }
 
-        internal fun harForlengelseForAlleArbeidsgivereIInfotrygdhistorikken(
+        internal fun kunOvergangFraInfotrygd(
             arbeidsgivere: Iterable<Arbeidsgiver>,
-            historie: Historie,
             vedtaksperiode: Vedtaksperiode
-        ) = Vedtaksperiode.harForlengelseForAlleArbeidsgivereIInfotrygdhistorikken(arbeidsgivere.flatMap { it.vedtaksperioder }, historie, vedtaksperiode)
+        ) = arbeidsgivere
+                .flatMap { it.vedtaksperioder }
+                .filter { it.periode().overlapperMed(vedtaksperiode.periode()) }
+                .all { it.periodetype() == Periodetype.OVERGANG_FRA_IT }
+
+        internal fun ingenUkjenteArbeidsgivere(
+            arbeidsgivere: Iterable<Arbeidsgiver>,
+            vedtaksperiode: Vedtaksperiode,
+            infotrygdhistorikk: Infotrygdhistorikk,
+            skjæringstidspunkt: LocalDate
+        ): Boolean {
+            val orgnumre = arbeidsgivere
+                .filter { it.vedtaksperioder.any { it.periode().overlapperMed(vedtaksperiode.periode()) } }
+                .map { it.organisasjonsnummer }
+                .distinct()
+            return infotrygdhistorikk.ingenUkjenteArbeidsgivere(orgnumre, skjæringstidspunkt)
+        }
     }
 
     internal fun accept(visitor: ArbeidsgiverVisitor) {

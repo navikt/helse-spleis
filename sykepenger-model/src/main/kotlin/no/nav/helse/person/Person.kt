@@ -371,8 +371,11 @@ class Person private constructor(
 
     internal fun minimumInntekt(skjæringstidspunkt: LocalDate): Inntekt = Alder(fødselsnummer).minimumInntekt(skjæringstidspunkt)
 
-    internal fun harForlengelseForAlleArbeidsgivereIInfotrygdhistorikken(historie: Historie, vedtaksperiode: Vedtaksperiode) =
-        Arbeidsgiver.harForlengelseForAlleArbeidsgivereIInfotrygdhistorikken(arbeidsgivere, historie, vedtaksperiode)
+    internal fun kunOvergangFraInfotrygd(vedtaksperiode: Vedtaksperiode) =
+        Arbeidsgiver.kunOvergangFraInfotrygd(arbeidsgivere, vedtaksperiode)
+
+    internal fun ingenUkjenteArbeidsgivere(vedtaksperiode: Vedtaksperiode, skjæringstidspunkt: LocalDate) =
+        Arbeidsgiver.ingenUkjenteArbeidsgivere(arbeidsgivere, vedtaksperiode, infotrygdhistorikk, skjæringstidspunkt)
 
     internal fun søppelbøtte(hendelse: ArbeidstakerHendelse, periode: Periode) {
         infotrygdhistorikk.tøm()

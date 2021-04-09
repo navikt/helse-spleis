@@ -548,10 +548,6 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
 
         håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
-        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
-
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
         assertTilstand(a1, TIL_INFOTRYGD)
         assertTilstand(a2, TIL_INFOTRYGD)
     }

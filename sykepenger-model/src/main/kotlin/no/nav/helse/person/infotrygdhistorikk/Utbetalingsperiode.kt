@@ -56,6 +56,8 @@ class Utbetalingsperiode(
     }
 
     override fun gjelder(orgnummer: String) = orgnummer == this.orgnr
+    override fun utbetalingEtter(orgnumre: List<String>, dato: LocalDate) =
+        start >= dato && this.orgnr !in orgnumre
 
     override fun hashCode() =
         Objects.hash(orgnr, start, endInclusive, grad, inntekt)

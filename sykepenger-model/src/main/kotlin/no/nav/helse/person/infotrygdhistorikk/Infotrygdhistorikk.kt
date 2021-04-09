@@ -75,6 +75,11 @@ internal class Infotrygdhistorikk private constructor(
         return siste.harBetalt(organisasjonsnummer, dato)
     }
 
+    internal fun ingenUkjenteArbeidsgivere(organisasjonsnumre: List<String>, dato: LocalDate): Boolean {
+        if (!harHistorikk()) return true
+        return siste.ingenUkjenteArbeidsgivere(organisasjonsnumre, dato)
+    }
+
     internal fun skjæringstidspunkt(periode: Periode, tidslinjer: List<Sykdomstidslinje>): LocalDate {
         return Sykdomstidslinje.skjæringstidspunkt(periode.endInclusive, tidslinjer + listOf(sykdomstidslinje())) ?: periode.start
     }
