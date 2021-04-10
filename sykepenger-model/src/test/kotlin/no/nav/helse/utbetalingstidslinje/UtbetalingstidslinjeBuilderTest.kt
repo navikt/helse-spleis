@@ -25,6 +25,8 @@ internal class UtbetalingstidslinjeBuilderTest {
     private val hendelseId = UUID.randomUUID()
     private lateinit var tidslinje: Utbetalingstidslinje
     private val inspektør get() = TestTidslinjeInspektør(tidslinje)
+    private val infotrygdUtbetaling = fun (dager: List<LocalDate>) =
+        Forlengelsestrategi { _, dagen -> dagen in dager }
 
     @BeforeEach
     internal fun reset() {
@@ -34,10 +36,52 @@ internal class UtbetalingstidslinjeBuilderTest {
     @Test
     fun `to dager blir betalt av arbeidsgiver`() {
         2.S.utbetalingslinjer()
-        assertEquals(null, inspektør.dagtelling[NavDag::class])
+        assertEquals(1, inspektør.dagtelling.size)
         assertEquals(2, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
     }
 
+    @Test
+    fun `overgang fra infotrygd`() {
+        2.S.utbetalingslinjer(strategi = infotrygdUtbetaling(listOf(1.januar)))
+        assertEquals(1, inspektør.dagtelling.size)
+        assertEquals(2, inspektør.dagtelling[NavDag::class])
+    }
+
+    @Test
+    fun `sammenblandet infotrygd og spleis`() {
+        (2.S + 15.A + 2.S).utbetalingslinjer(strategi = infotrygdUtbetaling(listOf(1.januar)))
+        assertEquals(2, inspektør.dagtelling.size)
+        assertEquals(4, inspektør.dagtelling[NavDag::class])
+    }
+
+    @Test
+    fun `ny arbeidsgiverperiode i spleis`() {
+        (2.S + 16.A + 20.S).utbetalingslinjer(strategi = infotrygdUtbetaling(listOf(1.januar)))
+        assertEquals(4, inspektør.dagtelling.size)
+        assertEquals(16, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+        assertEquals(5, inspektør.dagtelling[NavDag::class])
+        assertEquals(1, inspektør.dagtelling[NavHelgDag::class])
+    }
+
+    @Test
+    fun `infotrygd midt i`() {
+        (20.S + 32.A + 20.S).utbetalingslinjer(strategi = infotrygdUtbetaling(listOf(22.februar)))
+        assertEquals(4, inspektør.dagtelling.size)
+        assertEquals(16, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+        assertEquals(32, inspektør.dagtelling[Arbeidsdag::class])
+        assertEquals(17, inspektør.dagtelling[NavDag::class])
+        assertEquals(7, inspektør.dagtelling[NavHelgDag::class])
+    }
+
+    @Test
+    fun `alt infotrygd`() {
+        (20.S + 32.A + 20.S).utbetalingslinjer(strategi = infotrygdUtbetaling(listOf(2.januar, 22.februar)))
+        assertEquals(4, inspektør.dagtelling.size)
+        assertEquals(16, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+        assertEquals(32, inspektør.dagtelling[Arbeidsdag::class])
+        assertEquals(17, inspektør.dagtelling[NavDag::class])
+        assertEquals(7, inspektør.dagtelling[NavHelgDag::class])
+    }
 
     @Test
     fun `sykedager i periode som starter i helg får riktig inntekt`() {
@@ -762,13 +806,13 @@ internal class UtbetalingstidslinjeBuilderTest {
     private fun Sykdomstidslinje.utbetalingslinjer(
         inntektshistorikk: Inntektshistorikk = this@UtbetalingstidslinjeBuilderTest.inntektshistorikk,
         skjæringstidspunkter: List<LocalDate> = listOf(1.januar, 1.februar, 1.mars),
-        forlengelseStrategy: (LocalDate) -> Boolean = { false }
+        strategi: Forlengelsestrategi = Forlengelsestrategi.Ingen
     ) {
         tidslinje = UtbetalingstidslinjeBuilder(
+            sykdomstidslinje = this,
             skjæringstidspunkter = skjæringstidspunkter,
-            inntektshistorikk = inntektshistorikk,
-            forlengelseStrategy = forlengelseStrategy
-        ).result(this)
+            inntektshistorikk = inntektshistorikk
+        ).apply { forlengelsestrategi(strategi) }.result(periode()!!)
     }
 
     private class TestTidslinjeInspektør(tidslinje: Utbetalingstidslinje) : UtbetalingsdagVisitor {

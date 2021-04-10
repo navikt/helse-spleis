@@ -1,5 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.Dag
@@ -11,16 +12,28 @@ import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 
+internal fun interface IUtbetalingstidslinjeBuilder {
+    fun result(periode: Periode): Utbetalingstidslinje
+}
+
+internal fun interface Forlengelsestrategi {
+    fun erArbeidsgiverperiodenGjennomførtFør(sykdomstidslinje: Sykdomstidslinje,  dagen: LocalDate): Boolean
+
+    companion object {
+        val Ingen = Forlengelsestrategi { _, _ -> false }
+    }
+}
 /**
  *  Forstår opprettelsen av en Utbetalingstidslinje
  */
 
 internal class UtbetalingstidslinjeBuilder internal constructor(
+    private val sykdomstidslinje: Sykdomstidslinje,
     private val skjæringstidspunkter: List<LocalDate>,
     private val inntektshistorikk: Inntektshistorikk,
-    private val forlengelseStrategy: (LocalDate) -> Boolean = { false },
     private val arbeidsgiverRegler: ArbeidsgiverRegler = NormalArbeidstaker
-) : SykdomstidslinjeVisitor {
+) : SykdomstidslinjeVisitor, IUtbetalingstidslinjeBuilder {
+    private var forlengelseStrategy: Forlengelsestrategi = Forlengelsestrategi.Ingen
     private var tilstand: UtbetalingState = Initiell
 
     private var sykedagerIArbeidsgiverperiode = 0
@@ -28,6 +41,10 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     private var fridager = 0
 
     private val tidslinje = Utbetalingstidslinje()
+
+    internal fun forlengelsestrategi(strategi: Forlengelsestrategi) {
+        this.forlengelseStrategy = strategi
+    }
 
     private fun inntektForDatoOrNull(dato: LocalDate) =
         skjæringstidspunkter
@@ -46,8 +63,8 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
             ?.let { (skjæringstidspunkt, inntekt) -> inntekt(inntekt, inntekt.dekningsgrunnlag(arbeidsgiverRegler), skjæringstidspunkt) }
             ?: inntekt(INGEN, skjæringstidspunkt = dato)
 
-    internal fun result(sykdomstidslinje: Sykdomstidslinje): Utbetalingstidslinje {
-        sykdomstidslinje.accept(this)
+    override fun result(periode: Periode): Utbetalingstidslinje {
+        sykdomstidslinje.fremTilOgMed(periode.endInclusive).accept(this)
         return tidslinje
     }
 
@@ -201,7 +218,8 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     }
 
     private fun arbeidsgiverperiodeGjennomført(dagen: LocalDate): Boolean {
-        if (sykedagerIArbeidsgiverperiode == 0 && forlengelseStrategy(dagen)) sykedagerIArbeidsgiverperiode = arbeidsgiverRegler.gjennomførArbeidsgiverperiode()
+        if (sykedagerIArbeidsgiverperiode == 0 && forlengelseStrategy.erArbeidsgiverperiodenGjennomførtFør(sykdomstidslinje, dagen))
+            sykedagerIArbeidsgiverperiode = arbeidsgiverRegler.gjennomførArbeidsgiverperiode()
         return arbeidsgiverRegler.arbeidsgiverperiodenGjennomført(sykedagerIArbeidsgiverperiode)
     }
 

@@ -47,13 +47,13 @@ internal class Historie(infotrygdhistorikk: Infotrygdhistorikk) {
         infotrygdhistorikk: Infotrygdhistorikk
     ): Utbetalingstidslinje {
         val builder = UtbetalingstidslinjeBuilder(
+            sykdomstidslinje = sykdomstidslinje(organisasjonsnummer),
             skjæringstidspunkter = skjæringstidspunkter(periode),
             inntektshistorikk = inntektshistorikk,
-            forlengelseStrategy = { dagen -> erArbeidsgiverperiodenGjennomførtFør(organisasjonsnummer, dagen) },
             arbeidsgiverRegler = arbeidsgiverRegler
         )
-        val utbetalingstidlinje = builder.result(sykdomstidslinje(organisasjonsnummer).fremTilOgMed(periode.endInclusive))
-        return infotrygdhistorikk.fjernHistorikk(utbetalingstidlinje, organisasjonsnummer, spleisbøtte.tidligsteDato(organisasjonsnummer))
+        return infotrygdhistorikk.builder(organisasjonsnummer, builder, spleisbøtte.tidligsteDato(organisasjonsnummer))
+            .result(periode)
     }
 
     internal fun erForlengelse(orgnr: String, periode: Periode) =

@@ -242,7 +242,7 @@ class Person private constructor(
         Arbeidsgiver.skjæringstidspunkter(arbeidsgivere, periode, infotrygdhistorikk)
 
     internal fun trengerHistorikkFraInfotrygd(hendelse: ArbeidstakerHendelse, cutoff: LocalDateTime? = null): Boolean {
-        val tidligsteDato = arbeidsgivere.mapNotNull { it.tidligsteDato() }.minOrNull()!!
+        val tidligsteDato = arbeidsgivereMedSykdom().minOf { it.tidligsteDato() }
         return infotrygdhistorikk.oppfriskNødvendig(hendelse, tidligsteDato, cutoff)
     }
 
@@ -361,8 +361,11 @@ class Person private constructor(
     internal fun utbetalingstidslinjer(periode: Periode): Map<Arbeidsgiver, Utbetalingstidslinje> {
         val skjæringstidspunkter = skjæringstidspunkter(periode)
         return arbeidsgivereMedSykdom()
-            .map { arbeidsgiver -> arbeidsgiver to arbeidsgiver.utbetalingstidslinje(periode, skjæringstidspunkter, infotrygdhistorikk) }
-            .toMap()
+            .map { arbeidsgiver -> arbeidsgiver to infotrygdhistorikk.builder(
+                organisasjonsnummer = arbeidsgiver.organisasjonsnummer(),
+                builder = arbeidsgiver.builder(skjæringstidspunkter),
+                tidligsteDato = arbeidsgiver.tidligsteDato()
+            ).result(periode) }.toMap()
     }
 
     private fun finnArbeidsgiverForInntekter(arbeidsgiver: String, aktivitetslogg: IAktivitetslogg): Arbeidsgiver {
