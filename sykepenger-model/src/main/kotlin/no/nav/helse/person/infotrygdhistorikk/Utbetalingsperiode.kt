@@ -6,7 +6,6 @@ import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.erHelg
-import no.nav.helse.utbetalingstidslinje.Historie
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel
@@ -34,11 +33,6 @@ class Utbetalingsperiode(
     private fun nyDag(utbetalingstidslinje: Utbetalingstidslinje, dato: LocalDate) {
         if (dato.erHelg()) utbetalingstidslinje.addHelg(dato, Økonomi.sykdomsgrad(grad).inntekt(Inntekt.INGEN, skjæringstidspunkt = dato))
         else utbetalingstidslinje.addNAVdag(dato, Økonomi.sykdomsgrad(grad).inntekt(inntekt, skjæringstidspunkt = dato))
-    }
-
-    override fun append(bøtte: Historie.Historikkbøtte, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
-        bøtte.add(orgnr, sykdomstidslinje(kilde))
-        bøtte.add(orgnr, utbetalingstidslinje())
     }
 
     override fun accept(visitor: InfotrygdhistorikkVisitor) {

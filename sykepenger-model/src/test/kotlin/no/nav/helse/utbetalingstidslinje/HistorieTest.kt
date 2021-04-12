@@ -106,12 +106,11 @@ internal abstract class HistorieTest {
         }
         val sykdomstidslinje = arbeidsgiverSykdomstidslinje.getValue(orgnr)
         val builder = UtbetalingstidslinjeBuilder(
-            sykdomstidslinje = infotrygdhistorikk.historikkFor(orgnr, sykdomstidslinje),
             skjæringstidspunkter = infotrygdhistorikk.skjæringstidspunkter(arbeidsgiverSykdomstidslinje.values.toList()),
             inntektshistorikk = inntektshistorikk,
             arbeidsgiverRegler = regler
         )
-        return infotrygdhistorikk.builder(orgnr, builder, sykdomstidslinje.førsteDag()).result(periode)
+        return infotrygdhistorikk.builder(orgnr, builder).result(sykdomstidslinje, periode)
     }
 
     protected fun skjæringstidspunkt(fom: LocalDate) = infotrygdhistorikk.skjæringstidspunkt(Periode(fom, fom), arbeidsgiverSykdomstidslinje.values.toList())

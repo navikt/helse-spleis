@@ -342,7 +342,7 @@ internal class ArbeidsgiverUtbetalingerTest {
         aktivitetslogg = Aktivitetslogg()
         ArbeidsgiverUtbetalinger(
             NormalArbeidstaker,
-            mapOf(arbeidsgiver to IUtbetalingstidslinjeBuilder { arbeidsgiverTidslinje }),
+            mapOf(arbeidsgiver to IUtbetalingstidslinjeBuilder { _, _ -> arbeidsgiverTidslinje }),
             historiskTidslinje,
             Alder(fnr),
             null

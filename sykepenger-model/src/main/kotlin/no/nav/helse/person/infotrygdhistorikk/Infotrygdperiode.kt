@@ -6,7 +6,6 @@ import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.utbetalingstidslinje.Historie
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
 import java.util.*
@@ -14,7 +13,6 @@ import java.util.*
 abstract class Infotrygdperiode(private val periode: Periode) : ClosedRange<LocalDate> by(periode), Iterable<LocalDate> by(periode) {
     internal open fun sykdomstidslinje(kilde: SykdomstidslinjeHendelse.Hendelseskilde): Sykdomstidslinje = Sykdomstidslinje()
     internal open fun utbetalingstidslinje(): Utbetalingstidslinje = Utbetalingstidslinje()
-    internal open fun append(bøtte: Historie.Historikkbøtte, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {}
 
     internal abstract fun accept(visitor: InfotrygdhistorikkVisitor)
     internal open fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode) {}

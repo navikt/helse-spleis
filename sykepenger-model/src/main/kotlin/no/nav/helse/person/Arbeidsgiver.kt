@@ -118,10 +118,10 @@ internal class Arbeidsgiver private constructor(
         }
 
         internal fun skjæringstidspunkt(arbeidsgivere: List<Arbeidsgiver>, periode: Periode, infotrygdhistorikk: Infotrygdhistorikk) =
-            infotrygdhistorikk.skjæringstidspunkt(periode, arbeidsgivere.map(Arbeidsgiver::egenSykdomstidslinje))
+            infotrygdhistorikk.skjæringstidspunkt(periode, arbeidsgivere.map(Arbeidsgiver::sykdomstidslinje))
 
         internal fun skjæringstidspunkter(arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) =
-            infotrygdhistorikk.skjæringstidspunkter(arbeidsgivere.map(Arbeidsgiver::egenSykdomstidslinje))
+            infotrygdhistorikk.skjæringstidspunkter(arbeidsgivere.map(Arbeidsgiver::sykdomstidslinje))
     }
 
     internal fun accept(visitor: ArbeidsgiverVisitor) {
@@ -489,16 +489,12 @@ internal class Arbeidsgiver private constructor(
     internal fun oppdaterSykdom(hendelse: SykdomstidslinjeHendelse) = sykdomshistorikk.håndter(hendelse)
 
     private fun sykdomstidslinje(): Sykdomstidslinje {
-        return person.historikkFor(organisasjonsnummer, egenSykdomstidslinje())
-    }
-
-    private fun egenSykdomstidslinje(): Sykdomstidslinje {
         val sykdomstidslinje = if (sykdomshistorikk.harSykdom()) sykdomshistorikk.sykdomstidslinje() else Sykdomstidslinje()
         return Utbetaling.sykdomstidslinje(utbetalinger, sykdomstidslinje)
     }
 
     internal fun tidligsteDato(): LocalDate {
-        return egenSykdomstidslinje().førsteDag()
+        return sykdomstidslinje().førsteDag()
     }
 
     internal fun fjernDager(periode: Periode) = sykdomshistorikk.fjernDager(periode)
@@ -659,7 +655,7 @@ internal class Arbeidsgiver private constructor(
     internal fun harSykdom() = sykdomshistorikk.harSykdom()
 
     internal fun periodetype(periode: Periode): Periodetype {
-        val skjæringstidspunkt = sykdomstidslinje().skjæringstidspunkt(periode.endInclusive) ?: periode.start
+        val skjæringstidspunkt = skjæringstidspunkt(periode)
         return when {
             erFørstegangsbehandling(periode) -> Periodetype.FØRSTEGANGSBEHANDLING
             forlengerInfotrygd(periode) -> when {
@@ -680,25 +676,27 @@ internal class Arbeidsgiver private constructor(
     internal fun forlengerInfotrygd(periode: Periode) =
         person.harInfotrygdUtbetalt(organisasjonsnummer, skjæringstidspunkt(periode))
 
-    private fun skjæringstidspunkt(periode: Periode) = sykdomstidslinje().skjæringstidspunkt(periode.endInclusive) ?: periode.start
+    private fun skjæringstidspunkt(periode: Periode) = person.skjæringstidspunkt(organisasjonsnummer, sykdomstidslinje(), periode)
 
     internal fun avgrensetPeriode(periode: Periode) =
-        Periode(maxOf(periode.start, sykdomstidslinje().skjæringstidspunkt(periode.endInclusive) ?: periode.start), periode.endInclusive)
+        Periode(maxOf(periode.start, skjæringstidspunkt(periode)), periode.endInclusive)
 
     internal fun forrigeSkjæringstidspunktInnenforArbeidsgiverperioden(regler: ArbeidsgiverRegler, nyFørsteSykedag: LocalDate): LocalDate? {
-        val sykdomstidslinje = sykdomstidslinje()
+        val sykdomstidslinje = person.historikkFor(organisasjonsnummer, sykdomstidslinje())
         if (sykdomstidslinje.harNyArbeidsgiverperiodeFør(regler, nyFørsteSykedag)) return null
         return sykdomstidslinje.skjæringstidspunkt(nyFørsteSykedag.minusDays(1))
     }
 
     internal fun builder(regler: ArbeidsgiverRegler, skjæringstidspunkter: List<LocalDate>): UtbetalingstidslinjeBuilder {
         return UtbetalingstidslinjeBuilder(
-            sykdomstidslinje = sykdomstidslinje(),
             skjæringstidspunkter = skjæringstidspunkter,
             inntektshistorikk = inntektshistorikk,
             arbeidsgiverRegler = regler
         )
     }
+
+    internal fun build(builder: IUtbetalingstidslinjeBuilder, periode: Periode) =
+        builder.result(sykdomstidslinje(), periode)
 
     internal fun beregn(aktivitetslogg: IAktivitetslogg, arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger, periode: Periode): Boolean {
         try {
@@ -707,11 +705,6 @@ internal class Arbeidsgiver private constructor(
             aktivitetslogg.error("Feil ved utbetalingstidslinjebygging: %s", err.message)
         }
         return !aktivitetslogg.hasErrorsOrWorse()
-    }
-
-    internal fun støtterReplayFor(vedtaksperiode: Vedtaksperiode, regler: ArbeidsgiverRegler): Boolean {
-        return finnSykeperiodeRettEtter(vedtaksperiode) == null
-            && !sykdomstidslinje().harNyArbeidsgiverperiodeEtter(regler, vedtaksperiode.periode().endInclusive)
     }
 
     internal fun forrigeAvsluttaPeriodeMedVilkårsvurdering(vedtaksperiode: Vedtaksperiode): Vedtaksperiode? {

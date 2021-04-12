@@ -26,7 +26,7 @@ internal class UtbetalingstidslinjeBuilderTest {
     private lateinit var tidslinje: Utbetalingstidslinje
     private val inspektør get() = TestTidslinjeInspektør(tidslinje)
     private val infotrygdUtbetaling = fun (dager: List<LocalDate>) =
-        Forlengelsestrategi { _, dagen -> dagen in dager }
+        Forlengelsestrategi { dagen -> dagen in dager }
 
     @BeforeEach
     internal fun reset() {
@@ -809,10 +809,9 @@ internal class UtbetalingstidslinjeBuilderTest {
         strategi: Forlengelsestrategi = Forlengelsestrategi.Ingen
     ) {
         tidslinje = UtbetalingstidslinjeBuilder(
-            sykdomstidslinje = this,
             skjæringstidspunkter = skjæringstidspunkter,
             inntektshistorikk = inntektshistorikk
-        ).apply { forlengelsestrategi(strategi) }.result(periode()!!)
+        ).apply { forlengelsestrategi(strategi) }.result(this, periode()!!)
     }
 
     private class TestTidslinjeInspektør(tidslinje: Utbetalingstidslinje) : UtbetalingsdagVisitor {

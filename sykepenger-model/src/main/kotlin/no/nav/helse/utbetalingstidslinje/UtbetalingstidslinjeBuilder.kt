@@ -13,14 +13,14 @@ import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 
 internal fun interface IUtbetalingstidslinjeBuilder {
-    fun result(periode: Periode): Utbetalingstidslinje
+    fun result(sykdomstidslinje: Sykdomstidslinje, periode: Periode): Utbetalingstidslinje
 }
 
 internal fun interface Forlengelsestrategi {
-    fun erArbeidsgiverperiodenGjennomførtFør(sykdomstidslinje: Sykdomstidslinje,  dagen: LocalDate): Boolean
+    fun erArbeidsgiverperiodenGjennomførtFør(dagen: LocalDate): Boolean
 
     companion object {
-        val Ingen = Forlengelsestrategi { _, _ -> false }
+        val Ingen = Forlengelsestrategi { false }
     }
 }
 /**
@@ -28,7 +28,6 @@ internal fun interface Forlengelsestrategi {
  */
 
 internal class UtbetalingstidslinjeBuilder internal constructor(
-    private val sykdomstidslinje: Sykdomstidslinje,
     private val skjæringstidspunkter: List<LocalDate>,
     private val inntektshistorikk: Inntektshistorikk,
     private val arbeidsgiverRegler: ArbeidsgiverRegler = NormalArbeidstaker
@@ -63,7 +62,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
             ?.let { (skjæringstidspunkt, inntekt) -> inntekt(inntekt, inntekt.dekningsgrunnlag(arbeidsgiverRegler), skjæringstidspunkt) }
             ?: inntekt(INGEN, skjæringstidspunkt = dato)
 
-    override fun result(periode: Periode): Utbetalingstidslinje {
+    override fun result(sykdomstidslinje: Sykdomstidslinje, periode: Periode): Utbetalingstidslinje {
         sykdomstidslinje.fremTilOgMed(periode.endInclusive).accept(this)
         return tidslinje
     }
@@ -218,7 +217,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     }
 
     private fun arbeidsgiverperiodeGjennomført(dagen: LocalDate): Boolean {
-        if (sykedagerIArbeidsgiverperiode == 0 && forlengelseStrategy.erArbeidsgiverperiodenGjennomførtFør(sykdomstidslinje, dagen))
+        if (sykedagerIArbeidsgiverperiode == 0 && forlengelseStrategy.erArbeidsgiverperiodenGjennomførtFør(dagen))
             sykedagerIArbeidsgiverperiode = arbeidsgiverRegler.gjennomførArbeidsgiverperiode()
         return arbeidsgiverRegler.arbeidsgiverperiodenGjennomført(sykedagerIArbeidsgiverperiode)
     }

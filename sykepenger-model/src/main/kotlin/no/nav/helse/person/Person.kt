@@ -85,8 +85,7 @@ class Person private constructor(
             arbeidsgivere = arbeidsgivereMedSykdom().map { it to
                 infotrygdhistorikk.builder(
                     organisasjonsnummer = it.organisasjonsnummer(),
-                    builder = it.builder(regler, skjæringstidspunkter),
-                    tidligsteDato = it.tidligsteDato()
+                    builder = it.builder(regler, skjæringstidspunkter)
                 )
             }.toMap(),
             infotrygdtidslinje = infotrygdhistorikk.utbetalingstidslinje(),
@@ -254,6 +253,9 @@ class Person private constructor(
     fun addObserver(observer: PersonObserver) {
         observers.add(observer)
     }
+
+    internal fun skjæringstidspunkt(orgnummer: String, sykdomstidslinje: Sykdomstidslinje, periode: Periode) =
+        infotrygdhistorikk.skjæringstidspunkt(orgnummer, periode, sykdomstidslinje)
 
     internal fun skjæringstidspunkt(periode: Periode) =
         Arbeidsgiver.skjæringstidspunkt(arbeidsgivere, periode, infotrygdhistorikk)

@@ -6,7 +6,6 @@ import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.erHelg
-import no.nav.helse.utbetalingstidslinje.Historie
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import java.time.LocalDate
@@ -107,10 +106,6 @@ internal class InfotrygdhistorikkElement private constructor(
     internal fun lagreVilkårsgrunnlag(skjæringstidspunkt: LocalDate, vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk) {
         lagretVilkårsgrunnlag = true
         vilkårsgrunnlagHistorikk.lagre(skjæringstidspunkt, VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag())
-    }
-
-    internal fun append(bøtte: Historie.Historikkbøtte) {
-        perioder.forEach { it.append(bøtte, kilde) }
     }
 
     internal fun valider(aktivitetslogg: IAktivitetslogg, periodetype: Periodetype, periode: Periode, skjæringstidspunkt: LocalDate?): Boolean {

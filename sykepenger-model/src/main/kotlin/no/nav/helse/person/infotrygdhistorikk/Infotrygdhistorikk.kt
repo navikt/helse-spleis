@@ -5,7 +5,6 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetalingshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.utbetalingstidslinje.Historie
 import no.nav.helse.utbetalingstidslinje.IUtbetalingstidslinjeBuilder
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilder
@@ -52,11 +51,6 @@ internal class Infotrygdhistorikk private constructor(
         siste.addInntekter(person, aktivitetslogg)
     }
 
-    internal fun append(bøtte: Historie.Historikkbøtte) {
-        if (!harHistorikk()) return
-        siste.append(bøtte)
-    }
-
     internal fun utbetalingstidslinje(): Utbetalingstidslinje {
         if (!harHistorikk()) return Utbetalingstidslinje()
         return siste.utbetalingstidslinje()
@@ -75,6 +69,10 @@ internal class Infotrygdhistorikk private constructor(
     internal fun ingenUkjenteArbeidsgivere(organisasjonsnumre: List<String>, dato: LocalDate): Boolean {
         if (!harHistorikk()) return true
         return siste.ingenUkjenteArbeidsgivere(organisasjonsnumre, dato)
+    }
+
+    internal fun skjæringstidspunkt(organisasjonsnummer: String, periode: Periode, tidslinje: Sykdomstidslinje): LocalDate {
+        return Sykdomstidslinje.skjæringstidspunkt(periode.endInclusive, listOf(historikkFor(organisasjonsnummer, tidslinje))) ?: periode.start
     }
 
     internal fun skjæringstidspunkt(periode: Periode, tidslinjer: List<Sykdomstidslinje>): LocalDate {
@@ -121,9 +119,9 @@ internal class Infotrygdhistorikk private constructor(
         visitor.postVisitInfotrygdhistorikk()
     }
 
-    internal fun builder(organisasjonsnummer: String, builder: UtbetalingstidslinjeBuilder, tidligsteDato: LocalDate): IUtbetalingstidslinjeBuilder {
+    internal fun builder(organisasjonsnummer: String, builder: UtbetalingstidslinjeBuilder): IUtbetalingstidslinjeBuilder {
         if (!harHistorikk()) return builder
-        return Infotrygdhistorikkdekoratør(this, builder, organisasjonsnummer, tidligsteDato)
+        return Infotrygdhistorikkdekoratør(builder, organisasjonsnummer)
     }
 
     private fun oppfrisket(cutoff: LocalDateTime) =
@@ -134,20 +132,21 @@ internal class Infotrygdhistorikk private constructor(
 
     private fun harHistorikk() = elementer.isNotEmpty()
 
-    private class Infotrygdhistorikkdekoratør(
-        private val infotrygdhistorikk: Infotrygdhistorikk,
+    private inner class Infotrygdhistorikkdekoratør(
         private val builder: UtbetalingstidslinjeBuilder,
-        private val organisasjonsnummer: String,
-        private val tidligsteDato: LocalDate
+        private val organisasjonsnummer: String
     ): IUtbetalingstidslinjeBuilder {
+        private lateinit var samletSykdomstidslinje: Sykdomstidslinje
+
         init {
-            builder.forlengelsestrategi { sykdomstidslinje, dagen ->
-                infotrygdhistorikk.harBetalt(organisasjonsnummer, sykdomstidslinje.skjæringstidspunkt(dagen) ?: dagen)
+            builder.forlengelsestrategi { dagen ->
+                harBetalt(organisasjonsnummer, samletSykdomstidslinje.skjæringstidspunkt(dagen) ?: dagen)
             }
         }
 
-        override fun result(periode: Periode): Utbetalingstidslinje {
-            return infotrygdhistorikk.siste.fjernHistorikk(builder.result(periode), organisasjonsnummer, tidligsteDato)
+        override fun result(sykdomstidslinje: Sykdomstidslinje, periode: Periode): Utbetalingstidslinje {
+            samletSykdomstidslinje = historikkFor(organisasjonsnummer, sykdomstidslinje)
+            return siste.fjernHistorikk(builder.result(samletSykdomstidslinje, periode), organisasjonsnummer, sykdomstidslinje.førsteDag())
         }
     }
 }
