@@ -235,7 +235,10 @@ internal class Vedtaksperiode private constructor(
     internal fun behandleOutOfOrderSykmelding(sykmelding: Sykmelding) {
         if (this.sykmeldingsperiode.start > sykmelding.periode().start) {
             when (tilstand) {
-                MottattSykmeldingFerdigGap -> tilstand(sykmelding, MottattSykmeldingUferdigForlengelse)
+                MottattSykmeldingFerdigGap -> tilstand(
+                    sykmelding,
+                    if (sykmelding.periode().erRettFør(sykmeldingsperiode)) MottattSykmeldingUferdigForlengelse else MottattSykmeldingUferdigGap
+                )
             }
         }
     }
