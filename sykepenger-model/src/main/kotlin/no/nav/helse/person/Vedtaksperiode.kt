@@ -232,7 +232,16 @@ internal class Vedtaksperiode private constructor(
     internal fun erSykeperiodeRettFør(other: Vedtaksperiode) =
         this.periode.erRettFør(other.periode) && !this.sykdomstidslinje.erSisteDagArbeidsdag() && !other.sykdomstidslinje.erFørsteDagArbeidsdag()
 
-    internal fun starterEtter(other: Vedtaksperiode) = this.sykmeldingsperiode.start > other.sykmeldingsperiode.start
+    internal fun behandleOutOfOrderSykmelding(sykmelding: Sykmelding) {
+        if (this.sykmeldingsperiode.start > sykmelding.periode().start) {
+            when (tilstand) {
+                MottattSykmeldingFerdigGap -> tilstand(sykmelding, MottattSykmeldingUferdigForlengelse)
+            }
+        }
+    }
+
+    internal fun støtterIkkeOutOfOrderSykmelding(other: Vedtaksperiode) = this.sykmeldingsperiode.start > other.sykmeldingsperiode.start
+        && this.tilstand !in listOf(MottattSykmeldingUferdigForlengelse, MottattSykmeldingUferdigGap)
 
     internal fun periodetype() = arbeidsgiver.periodetype(periode)
 
@@ -494,7 +503,8 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun overlappendeVedtaksperioder() = person.nåværendeVedtaksperioder().filter { periode.overlapperMed(it.periode) }
-    private fun Iterable<Vedtaksperiode>.alleAndreAvventerArbeidsgivere() = first() == this@Vedtaksperiode && drop(1).all { it.tilstand == AvventerArbeidsgivere }
+    private fun Iterable<Vedtaksperiode>.alleAndreAvventerArbeidsgivere() =
+        first() == this@Vedtaksperiode && drop(1).all { it.tilstand == AvventerArbeidsgivere }
 
     private fun forberedMuligUtbetaling(vilkårsgrunnlag: Vilkårsgrunnlag) {
         forberedMuligUtbetaling(vilkårsgrunnlag) { nesteTilstand ->
@@ -791,7 +801,13 @@ internal class Vedtaksperiode private constructor(
         ) {
             validation(hendelse) {
                 onError { vedtaksperiode.tilstand(hendelse, TilInfotrygd) }
-                valider { infotrygdhistorikk.validerOverlappende(this, arbeidsgiver.avgrensetPeriode(vedtaksperiode.periode), vedtaksperiode.skjæringstidspunkt) }
+                valider {
+                    infotrygdhistorikk.validerOverlappende(
+                        this,
+                        arbeidsgiver.avgrensetPeriode(vedtaksperiode.periode),
+                        vedtaksperiode.skjæringstidspunkt
+                    )
+                }
                 onSuccess { info("Utbetalingshistorikk sjekket; fant ingen feil.") }
             }
         }
@@ -861,7 +877,7 @@ internal class Vedtaksperiode private constructor(
                 return vedtaksperiode.tilstand(sykmelding, TilInfotrygd)
             if (!vedtaksperiode.person.forlengerIkkeBareAnnenArbeidsgiver(vedtaksperiode.arbeidsgiver, vedtaksperiode))
                 return vedtaksperiode.person.invaliderAllePerioder(sykmelding, "Forlenger annen arbeidsgiver, men ikke seg selv")
-            if (vedtaksperiode.arbeidsgiver.harPeriodeEtter(vedtaksperiode)) {
+            if (vedtaksperiode.arbeidsgiver.støtterIkkeOutOfOrderSykmelding(vedtaksperiode)) {
                 sykmelding.error("Mottatt out of order sykmeldinger - det støttes ikke før replay av hendelser er på plass")
                 return vedtaksperiode.tilstand(sykmelding, TilInfotrygd)
             }
@@ -894,7 +910,10 @@ internal class Vedtaksperiode private constructor(
             val periodeFør = vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)
             val nesteTilstand = when {
                 periodeFør == null -> AvventerInntektsmeldingEllerHistorikkFerdigGap
-                vedtaksperiode.arbeidsgiver.grunnlagForSykepengegrunnlag(periodeFør.skjæringstidspunkt, periodeFør.periode.start) == null -> AvventerInntektsmeldingFerdigForlengelse
+                vedtaksperiode.arbeidsgiver.grunnlagForSykepengegrunnlag(
+                    periodeFør.skjæringstidspunkt,
+                    periodeFør.periode.start
+                ) == null -> AvventerInntektsmeldingFerdigForlengelse
                 else -> AvventerHistorikk
             }
             vedtaksperiode.håndter(søknad, nesteTilstand)
@@ -1218,7 +1237,10 @@ internal class Vedtaksperiode private constructor(
             val periodeFør = vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)
             val nesteTilstand = when {
                 periodeFør == null -> AvventerInntektsmeldingEllerHistorikkFerdigGap
-                vedtaksperiode.arbeidsgiver.grunnlagForSykepengegrunnlag(periodeFør.skjæringstidspunkt, periodeFør.periode.start) == null -> AvventerInntektsmeldingFerdigForlengelse
+                vedtaksperiode.arbeidsgiver.grunnlagForSykepengegrunnlag(
+                    periodeFør.skjæringstidspunkt,
+                    periodeFør.periode.start
+                ) == null -> AvventerInntektsmeldingFerdigForlengelse
                 else -> AvventerHistorikk
             }
             vedtaksperiode.tilstand(gjenopptaBehandling, nesteTilstand)
@@ -1314,7 +1336,13 @@ internal class Vedtaksperiode private constructor(
         ) {
             validation(hendelse) {
                 onError { vedtaksperiode.tilstand(hendelse, TilInfotrygd) }
-                valider { infotrygdhistorikk.validerOverlappende(this, arbeidsgiver.avgrensetPeriode(vedtaksperiode.periode), vedtaksperiode.skjæringstidspunkt) }
+                valider {
+                    infotrygdhistorikk.validerOverlappende(
+                        this,
+                        arbeidsgiver.avgrensetPeriode(vedtaksperiode.periode),
+                        vedtaksperiode.skjæringstidspunkt
+                    )
+                }
                 onError { person.invaliderAllePerioder(hendelse, null) }
                 validerHvis("Er ikke overgang fra IT og har flere arbeidsgivere", !Toggles.FlereArbeidsgivereFørstegangsbehandling.enabled) {
                     arbeidsgiver.forlengerInfotrygd(vedtaksperiode.periode) || !person.harFlereArbeidsgivereMedSykdom()
@@ -1657,7 +1685,8 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             hendelse: ArbeidstakerHendelse,
             infotrygdhistorikk: Infotrygdhistorikk
-        ) {}
+        ) {
+        }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             val utbetaling = vedtaksperiode.utbetaling()
@@ -1684,7 +1713,8 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             hendelse: ArbeidstakerHendelse,
             infotrygdhistorikk: Infotrygdhistorikk
-        ) {}
+        ) {
+        }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
     }
@@ -1702,7 +1732,8 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             hendelse: ArbeidstakerHendelse,
             infotrygdhistorikk: Infotrygdhistorikk
-        ) {}
+        ) {
+        }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: UtbetalingHendelse) {
             sjekkUtbetalingstatus(vedtaksperiode, hendelse)

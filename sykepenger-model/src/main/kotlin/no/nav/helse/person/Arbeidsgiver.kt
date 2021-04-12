@@ -203,12 +203,18 @@ internal class Arbeidsgiver private constructor(
         beregnetUtbetalingstidslinjer.add(sykdomshistorikk.lagUtbetalingstidslinjeberegning(organisasjonsnummer, utbetalingstidslinje))
     }
 
+    private fun behandleOutOfOrderSykmelding(sykmelding: Sykmelding) {
+        vedtaksperioder.forEach { it.behandleOutOfOrderSykmelding(sykmelding) }
+    }
+
     internal fun håndter(sykmelding: Sykmelding) {
         sykmelding.kontekst(this)
         ForkastetVedtaksperiode.overlapperMedForkastet(forkastede, sykmelding)
         if (!ingenHåndtert(sykmelding, Vedtaksperiode::håndter) && !sykmelding.hasErrorsOrWorse()) {
             sykmelding.info("Lager ny vedtaksperiode")
-            nyVedtaksperiode(sykmelding).håndter(sykmelding)
+            val vedtaksperiode = nyVedtaksperiode(sykmelding)
+            behandleOutOfOrderSykmelding(sykmelding)
+            vedtaksperiode.håndter(sykmelding)
             vedtaksperioder.sort()
         }
         finalize(sykmelding)
@@ -605,9 +611,9 @@ internal class Arbeidsgiver private constructor(
     internal fun finnSykeperiodeRettEtter(vedtaksperiode: Vedtaksperiode) =
         vedtaksperioder.firstOrNull { other -> vedtaksperiode.erSykeperiodeRettFør(other) }
 
-    internal fun harPeriodeEtter(vedtaksperiode: Vedtaksperiode) =
-        vedtaksperioder.any { other -> other.starterEtter(vedtaksperiode) }
-            || ForkastetVedtaksperiode.harPeriodeEtter(forkastede, vedtaksperiode)
+    internal fun støtterIkkeOutOfOrderSykmelding(vedtaksperiode: Vedtaksperiode) =
+        vedtaksperioder.any { periode -> periode.støtterIkkeOutOfOrderSykmelding(vedtaksperiode) }
+            || ForkastetVedtaksperiode.harPeriodeSomIkkeStøtterOutOfOrderSykmelding(forkastede, vedtaksperiode)
 
     internal fun tidligerePerioderFerdigBehandlet(vedtaksperiode: Vedtaksperiode) =
         Vedtaksperiode.tidligerePerioderFerdigBehandlet(vedtaksperioder, vedtaksperiode)
@@ -744,7 +750,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     // støtter å loope over vedtaksperioder som modifiseres pga. forkasting.
-    // dvs. vi stopper å interere så snart listen har endret seg
+    // dvs. vi stopper å iterere så snart listen har endret seg
     private fun looper(handler: (Vedtaksperiode) -> Unit) {
         val size = vedtaksperioder.size
         var neste = 0

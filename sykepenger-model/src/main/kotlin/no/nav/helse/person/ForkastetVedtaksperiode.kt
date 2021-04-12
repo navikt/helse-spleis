@@ -27,8 +27,8 @@ internal class ForkastetVedtaksperiode(
         internal fun finnForkastetSykeperiodeRettFør(forkastede: Iterable<ForkastetVedtaksperiode>, other: Vedtaksperiode) =
             forkastede.perioder().firstOrNull { vedtaksperiode -> vedtaksperiode.erSykeperiodeRettFør(other) }
 
-        internal fun harPeriodeEtter(forkastede: Iterable<ForkastetVedtaksperiode>, other: Vedtaksperiode) =
-            forkastede.perioder().any { vedtaksperiode -> vedtaksperiode.starterEtter(other) }
+        internal fun harPeriodeSomIkkeStøtterOutOfOrderSykmelding(forkastede: Iterable<ForkastetVedtaksperiode>, other: Vedtaksperiode) =
+            forkastede.perioder().any { vedtaksperiode -> vedtaksperiode.støtterIkkeOutOfOrderSykmelding(other) }
 
         internal fun finnForrigeAvsluttaPeriode(
             forkastede: Iterable<ForkastetVedtaksperiode>,
