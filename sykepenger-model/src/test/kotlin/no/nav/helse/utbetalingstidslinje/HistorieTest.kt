@@ -1,11 +1,13 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
+import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
@@ -34,24 +36,18 @@ internal abstract class HistorieTest {
         const val AG2 = "2345"
     }
 
+    private val tidligereUtbetalinger = mutableMapOf<String, Utbetalingstidslinje>()
+    private val arbeidsgiverSykdomstidslinje = mutableMapOf<String, Sykdomstidslinje>()
     protected lateinit var infotrygdhistorikk: Infotrygdhistorikk
-    protected lateinit var historie: Historie
 
     @BeforeEach
     fun beforeEach() {
         infotrygdhistorikk = Infotrygdhistorikk()
-        resetHistorie()
+        arbeidsgiverSykdomstidslinje.clear()
         resetSeed()
     }
 
-    private fun resetHistorie() {
-        historie = Historie(infotrygdhistorikk)
-    }
-
-    protected fun refusjon(fom: LocalDate, tom: LocalDate, inntekt: Inntekt = 1000.daglig, grad: Prosentdel = 100.prosent, orgnr: String = AG1) =
-        Utbetalingsperiode(orgnr, fom til tom, grad, inntekt)
-
-    protected fun bruker(fom: LocalDate, tom: LocalDate, inntekt: Inntekt = 1000.daglig, grad: Prosentdel = 100.prosent, orgnr: String = AG1) =
+    protected fun utbetaling(fom: LocalDate, tom: LocalDate, inntekt: Inntekt = 1000.daglig, grad: Prosentdel = 100.prosent, orgnr: String = AG1) =
         Utbetalingsperiode(orgnr, fom til tom, grad, inntekt)
 
     protected fun ferie(fom: LocalDate, tom: LocalDate) =
@@ -75,7 +71,17 @@ internal abstract class HistorieTest {
     protected fun LocalDate.dagerMellom(tom: LocalDate) =
         ChronoUnit.DAYS.between(this, tom).toInt() + 1
 
-    protected fun sykedager(fom: LocalDate, tom: LocalDate, grad: Prosentdel = 100.prosent, kilde: Hendelseskilde = INGEN) = Sykdomstidslinje.sykedager(fom, tom, grad, kilde)
+    protected fun sykedager(fom: LocalDate, tom: LocalDate, grad: Prosentdel = 100.prosent, kilde: Hendelseskilde = INGEN) =
+        Sykdomstidslinje.sykedager(fom, tom, grad, kilde)
+
+    protected fun addTidligereUtbetaling(orgnr: String, utbetalingstidslinje: Utbetalingstidslinje) {
+        tidligereUtbetalinger[orgnr] = tidligereUtbetalinger.getOrDefault(orgnr, Utbetalingstidslinje()) + utbetalingstidslinje
+        addSykdomshistorikk(orgnr, Utbetalingstidslinje.konverter(tidligereUtbetalinger.getValue(orgnr)))
+    }
+
+    protected fun addSykdomshistorikk(orgnr: String, sykdomstidslinje: Sykdomstidslinje) {
+        arbeidsgiverSykdomstidslinje[orgnr] = arbeidsgiverSykdomstidslinje.getOrDefault(orgnr, Sykdomstidslinje()).merge(sykdomstidslinje, replace)
+    }
 
     protected fun historie(vararg perioder: no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode) {
         infotrygdhistorikk.oppdaterHistorikk(
@@ -89,26 +95,32 @@ internal abstract class HistorieTest {
                 harStatslønn = false
             )
         )
-        resetHistorie()
     }
 
-    protected fun beregn(orgnr: String, periode: no.nav.helse.hendelser.Periode, vararg inntektsdatoer: LocalDate, regler: ArbeidsgiverRegler = NormalArbeidstaker): Utbetalingstidslinje {
+    protected fun beregn(orgnr: String, periode: Periode, vararg inntektsdatoer: LocalDate, regler: ArbeidsgiverRegler = NormalArbeidstaker): Utbetalingstidslinje {
         val inntektshistorikk = Inntektshistorikk()
         inntektshistorikk {
             inntektsdatoer.forEach {
                 addInntektsmelding(it, UUID.randomUUID(), 25000.månedlig)
             }
         }
-        return historie.beregnUtbetalingstidslinje(orgnr, periode, inntektshistorikk, regler, infotrygdhistorikk)
+        val sykdomstidslinje = arbeidsgiverSykdomstidslinje.getValue(orgnr)
+        val builder = UtbetalingstidslinjeBuilder(
+            sykdomstidslinje = infotrygdhistorikk.historikkFor(orgnr, sykdomstidslinje),
+            skjæringstidspunkter = infotrygdhistorikk.skjæringstidspunkter(arbeidsgiverSykdomstidslinje.values.toList()),
+            inntektshistorikk = inntektshistorikk,
+            arbeidsgiverRegler = regler
+        )
+        return infotrygdhistorikk.builder(orgnr, builder, sykdomstidslinje.førsteDag()).result(periode)
     }
 
-    protected fun skjæringstidspunkt(fom: LocalDate) = historie.skjæringstidspunkt(no.nav.helse.hendelser.Periode(fom, fom))
+    protected fun skjæringstidspunkt(fom: LocalDate) = infotrygdhistorikk.skjæringstidspunkt(Periode(fom, fom), arbeidsgiverSykdomstidslinje.values.toList())
 
     protected fun assertSkjæringstidspunkter(vararg datoer: LocalDate) {
-        assertEquals(datoer.toList(), historie.skjæringstidspunkter())
+        assertEquals(datoer.toList(), infotrygdhistorikk.skjæringstidspunkter(arbeidsgiverSykdomstidslinje.values.toList()))
     }
 
-    protected fun assertAlleDager(utbetalingstidslinje: Utbetalingstidslinje, periode: no.nav.helse.hendelser.Periode, vararg dager: KClass<out Utbetalingstidslinje.Utbetalingsdag>) {
+    protected fun assertAlleDager(utbetalingstidslinje: Utbetalingstidslinje, periode: Periode, vararg dager: KClass<out Utbetalingstidslinje.Utbetalingsdag>) {
         utbetalingstidslinje.subset(periode).also { tidslinje ->
             assertTrue(tidslinje.all { it::class in dager }) {
                 val ulikeDager = tidslinje.filter { it::class !in dager }
@@ -120,7 +132,7 @@ internal abstract class HistorieTest {
         }
     }
 
-    protected fun assertSkjæringstidspunkt(utbetalingstidslinje: Utbetalingstidslinje, periode: no.nav.helse.hendelser.Periode, forventetSkjæringstidspunkt: LocalDate?) {
+    protected fun assertSkjæringstidspunkt(utbetalingstidslinje: Utbetalingstidslinje, periode: Periode, forventetSkjæringstidspunkt: LocalDate?) {
         utbetalingstidslinje.subset(periode).also { tidslinje ->
             assertTrue(tidslinje.all { it.økonomi.reflection { _, _, _, skjæringstidspunkt, _, _, _, _, _ ->
                 skjæringstidspunkt == forventetSkjæringstidspunkt

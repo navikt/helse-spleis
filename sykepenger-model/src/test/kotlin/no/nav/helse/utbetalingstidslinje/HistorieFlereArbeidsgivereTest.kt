@@ -11,9 +11,9 @@ internal class HistorieFlereArbeidsgivereTest : HistorieTest() {
 
     @Test
     fun `infotrygd ag1 - spleis ag 2 - spleis ag 1`() {
-        historie(refusjon(17.januar, 31.januar, orgnr = AG1))
-        historie.add(AG2, sykedager(1.februar, 28.februar))
-        historie.add(AG1, sykedager(1.mars, 31.mars))
+        historie(utbetaling(17.januar, 31.januar, orgnr = AG1))
+        addSykdomshistorikk(AG2, sykedager(1.februar, 28.februar))
+        addSykdomshistorikk(AG1, sykedager(1.mars, 31.mars))
         val utbetalingstidslinjeAG1 = beregn(AG1, 1.mars til 31.mars, 17.januar, 1.mars)
         assertSkjæringstidspunkt(utbetalingstidslinjeAG1, 1.mars til 31.mars, 17.januar)
         assertAlleDager(utbetalingstidslinjeAG1, 1.mars til 16.mars, ArbeidsgiverperiodeDag::class)
