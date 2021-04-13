@@ -29,7 +29,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             opptjeningvurdering = Opptjeningvurdering(listOf(Opptjeningvurdering.Arbeidsforhold("123456789", 1.desember(2017)))),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja)
         )
-        vilkårsgrunnlag.valider(1000.månedlig, 1000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING)
+        vilkårsgrunnlag.valider(10000.månedlig, 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING)
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag, 1.januar)
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
         assertTrue(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!.isOk())
@@ -48,7 +48,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             opptjeningvurdering = Opptjeningvurdering(listOf(Opptjeningvurdering.Arbeidsforhold("123456789", 1.desember(2017)))),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei)
         )
-        vilkårsgrunnlag.valider(0.månedlig, 0.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING)
+        vilkårsgrunnlag.valider(10000.månedlig, 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING)
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag, 1.januar)
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
         assertFalse(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!.isOk())

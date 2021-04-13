@@ -2314,7 +2314,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(4.november(2020), 13.november(2020), 100.prosent))
         håndterInntektsmelding(listOf(Periode(16.oktober(2020), 23.oktober(2020)), Periode(28.oktober(2020), 4.november(2020))), 28.oktober(2020))
 
-        val historikk = arrayOf(Utbetalingsperiode(UNG_PERSON_FNR_2018, 9.mai(2018) til  31.mai(2018), 100.prosent, 1621.daglig))
+        val historikk = arrayOf(Utbetalingsperiode(UNG_PERSON_FNR_2018, 9.mai(2018) til 31.mai(2018), 100.prosent, 1621.daglig))
         val inntekter = listOf(Inntektsopplysning("0", 9.mai(2018), 40000.månedlig, true))
         håndterYtelser(5.vedtaksperiode, *historikk, inntektshistorikk = inntekter)
         håndterVilkårsgrunnlag(5.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
@@ -2576,9 +2576,11 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(24))
         håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
-        håndterUtbetalingshistorikk(1.vedtaksperiode, Utbetalingsperiode(ORGNUMMER, 1.januar til 31.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
-            Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true)
-        ))
+        håndterUtbetalingshistorikk(
+            1.vedtaksperiode, Utbetalingsperiode(ORGNUMMER, 1.januar til 31.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
+                Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true)
+            )
+        )
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_HISTORIKK)
     }
 
@@ -2786,7 +2788,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Forkaster etterfølgende perioder dersom vilkårsprøving feilet på første periode`() {
+    fun `Forkaster etterfølgende perioder dersom vilkårsprøving feilet pga avvik i inntekt på første periode`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2021), 1.januar(2021), 100.prosent))
         håndterSøknad(Sykdom(1.januar(2021), 1.januar(2021), 100.prosent))
 
@@ -2852,6 +2854,53 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVSLUTTET_UTEN_UTBETALING
+        )
+    }
+
+    @Test
+    fun `Forkaster ikke etterfølgende perioder dersom vilkårsprøving feiler pga minimum inntekt på første periode`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar(2021), 1.januar(2021), 100.prosent))
+        håndterSøknad(Sykdom(1.januar(2021), 1.januar(2021), 100.prosent))
+
+        val arbeidsgiverperioder = listOf(
+            1.januar(2021) til 16.januar(2021)
+        )
+        val inntektsmeldingId = håndterInntektsmelding(
+            arbeidsgiverperioder = arbeidsgiverperioder,
+            beregnetInntekt = 1000.månedlig,
+            førsteFraværsdag = 1.januar(2021),
+            refusjon = Triple(null, 1000.månedlig, emptyList())
+        )
+
+        håndterYtelser(1.vedtaksperiode)
+
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.januar(2020) til 1.desember(2020) inntekter {
+                    ORGNUMMER inntekt 1000
+                }
+            }
+        ))
+
+        håndterSykmelding(Sykmeldingsperiode(2.januar(2021), 20.januar(2021), 100.prosent))
+        håndterSøknad(Sykdom(2.januar(2021), 20.januar(2021), 100.prosent))
+
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            )
+
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
+            AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE
         )
     }
 }

@@ -67,8 +67,4 @@ internal class UtbetalingstidslinjeTest {
             assertTrue(it[22.januar] is Dag.Feriedag)
         }
     }
-
-    private fun undersøke(tidslinje: Utbetalingstidslinje) {
-        inspektør = UtbetalingstidslinjeInspektør(tidslinje)
-    }
 }

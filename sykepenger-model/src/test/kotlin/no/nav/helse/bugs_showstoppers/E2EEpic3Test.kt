@@ -1577,8 +1577,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.januar(2019), 31.januar(2019), 100.prosent))
         håndterSøknad(Sykdom(1.januar(2019), 31.januar(2019), 100.prosent))
-        håndterUtbetalingshistorikk(2.vedtaksperiode, RefusjonTilArbeidsgiver(1.desember, 31.desember, INNTEKT, 100.prosent, ORGNUMMER), inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(1.desember, INNTEKT, ORGNUMMER, true)))
-        håndterYtelser(2.vedtaksperiode, RefusjonTilArbeidsgiver(1.desember, 31.desember, INNTEKT, 100.prosent, ORGNUMMER), inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(1.desember, INNTEKT, ORGNUMMER, true)))
+        håndterUtbetalingshistorikk(2.vedtaksperiode, Utbetalingsperiode(ORGNUMMER, Periode(1.desember, 31.desember), 100.prosent, INNTEKT), inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.desember, INNTEKT, true)))
+        håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt(2.vedtaksperiode)
@@ -1602,7 +1602,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
                 Periode(1.januar(2020), 16.januar(2020))
             ), førsteFraværsdag = 1.januar(2020), refusjon = Triple(null, INNTEKT, emptyList())
         )
-        håndterYtelser(3.vedtaksperiode, RefusjonTilArbeidsgiver(1.desember, 31.desember, INNTEKT, 100.prosent, ORGNUMMER), inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(1.desember, INNTEKT, ORGNUMMER, true)))
+        håndterYtelser(3.vedtaksperiode)
         håndterVilkårsgrunnlag(
             3.vedtaksperiode,
             INNTEKT,
@@ -1615,7 +1615,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
                 }
             )
         )
-        håndterYtelser(3.vedtaksperiode, RefusjonTilArbeidsgiver(1.desember, 31.desember, INNTEKT, 100.prosent, ORGNUMMER), inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(1.desember, INNTEKT, ORGNUMMER, true)))
+        håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
         håndterUtbetalt(3.vedtaksperiode)

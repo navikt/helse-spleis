@@ -28,7 +28,7 @@ internal class OpptjeningvurderingTest {
 
     @Test
     fun `tom eldre enn fom`() {
-        assertFalse(undersøke(listOf(
+        assertTrue(undersøke(listOf(
             Opptjeningvurdering.Arbeidsforhold(ORGNUMMER, 1.november(2017)),
             Opptjeningvurdering.Arbeidsforhold(ORGNUMMER, 10.desember(2017), 1.desember(2017))
         )) {

@@ -31,6 +31,7 @@ import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
 import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerfilter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Prosent
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -1587,11 +1588,21 @@ internal class Vedtaksperiode private constructor(
                 onSuccess { infotrygdhistorikk.addInntekter(person, this) }
                 onSuccess { infotrygdhistorikk.lagreVilkårsgrunnlag(vedtaksperiode.skjæringstidspunkt, periodetype, person.vilkårsgrunnlagHistorikk) }
 
-                valider {
-                    person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt)?.isOk()
-                        ?: return@håndter info("Mangler vilkårsgrunnlag for $vedtaksperiode.skjæringstidspunkt").also {
+                onSuccess {
+                    if (person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt) == null) {
+                        return@håndter info("Mangler vilkårsgrunnlag for $vedtaksperiode.skjæringstidspunkt").also {
                             vedtaksperiode.tilstand(ytelser, AvventerVilkårsprøving)
                         }
+                    }
+                }
+                valider {
+                    val vilkårsgrunnlagElement = person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt)
+                    if (vilkårsgrunnlagElement is VilkårsgrunnlagHistorikk.Grunnlagsdata) {
+                            vilkårsgrunnlagElement.avviksprosent?.let { avvik -> avvik < Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT } ?: true
+                        }
+                    else {
+                        true
+                    }
                 }
 
                 onSuccess {

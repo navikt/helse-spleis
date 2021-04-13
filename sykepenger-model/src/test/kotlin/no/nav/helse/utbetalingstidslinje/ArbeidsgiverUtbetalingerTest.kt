@@ -1,16 +1,19 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Person
+import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
@@ -42,18 +45,25 @@ internal class ArbeidsgiverUtbetalingerTest {
     }
 
     @Test
-    @Disabled
-    fun `avgrenset betaling pga minimum inntekt`() { // TODO: test et annet sted
-        undersøke(UNG_PERSON_FNR_2018, 5.NAV(12), 2.HELG, 5.NAV)
+    fun `avgrenset betaling pga minimum inntekt`() {
+        val vilkårsgrunnlagElement = VilkårsgrunnlagHistorikk.Grunnlagsdata(
+            sammenligningsgrunnlag = 1000.månedlig,
+            avviksprosent = Prosent.prosent(0.0),
+            antallOpptjeningsdagerErMinst = 28,
+            harOpptjening = true,
+            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+            harMinimumInntekt = false,
+            vurdertOk = true
+        )
+        undersøke(UNG_PERSON_FNR_2018, 5.NAV(12), 2.HELG, 5.NAV, vilkårsgrunnlagElement = vilkårsgrunnlagElement)
 
         assertEquals(12, inspektør.size)
-        assertEquals(5, inspektør.navDagTeller)
+        assertEquals(0, inspektør.navDagTeller)
         assertEquals(2, inspektør.navHelgDagTeller)
-        assertEquals(5, inspektør.avvistDagTeller)
-        assertEquals(6000, inspektør.totalUtbetaling())
-        assertEquals(19.desember, maksdato)
-        assertEquals(243, gjenståendeSykedager)
-        assertTrue(aktivitetslogg.hasWarningsOrWorse())
+        assertEquals(10, inspektør.avvistDagTeller)
+        assertEquals(0, inspektør.totalUtbetaling())
+        assertEquals(26.desember, maksdato)
+        assertEquals(248, gjenståendeSykedager)
         assertFalse(aktivitetslogg.hasErrorsOrWorse())
     }
 
@@ -327,16 +337,20 @@ internal class ArbeidsgiverUtbetalingerTest {
         assertFalse(aktivitetslogg.hasErrorsOrWorse())
     }
 
-    private fun undersøke(fnr: String, vararg utbetalingsdager: Utbetalingsdager) {
+    private fun undersøke(
+        fnr: String,
+        vararg utbetalingsdager: Utbetalingsdager,
+        vilkårsgrunnlagElement: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement? = null
+    ) {
         val tidslinje = tidslinjeOf(*utbetalingsdager)
-        undersøke(fnr, tidslinje, tidslinjeOf())
+        undersøke(fnr, tidslinje, tidslinjeOf(), vilkårsgrunnlagElement)
     }
 
-    // TODO
     private fun undersøke(
         fnr: String,
         arbeidsgiverTidslinje: Utbetalingstidslinje,
-        historiskTidslinje: Utbetalingstidslinje
+        historiskTidslinje: Utbetalingstidslinje,
+        vilkårsgrunnlagElement: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement? = null
     ) {
         val arbeidsgiver = Arbeidsgiver(Person("aktørid", fnr), "88888888")
         // seed arbeidsgiver med sykdomshistorikk
@@ -349,13 +363,24 @@ internal class ArbeidsgiverUtbetalingerTest {
             sykmeldingSkrevet = 1.januar.atStartOfDay(),
             mottatt = 1.januar.atStartOfDay()
         ))
+        val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
+        vilkårsgrunnlagHistorikk.lagre(1.januar, vilkårsgrunnlagElement ?: VilkårsgrunnlagHistorikk.Grunnlagsdata(
+            sammenligningsgrunnlag = 30000.månedlig,
+            avviksprosent = Prosent.prosent(0.0),
+            antallOpptjeningsdagerErMinst = 28,
+            harOpptjening = true,
+            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+            harMinimumInntekt = true,
+            vurdertOk = true
+        ))
         aktivitetslogg = Aktivitetslogg()
         ArbeidsgiverUtbetalinger(
             NormalArbeidstaker,
             mapOf(arbeidsgiver to IUtbetalingstidslinjeBuilder { _, _ -> arbeidsgiverTidslinje }),
             historiskTidslinje,
             Alder(fnr),
-            null
+            null,
+            vilkårsgrunnlagHistorikk
         ).also {
             it.beregn(aktivitetslogg, "88888888", Periode(1.januar, 31.desember(2019)),)
             it.tidslinjeEngine.beregnGrenser(31.desember(2019))

@@ -36,9 +36,6 @@ internal class Utbetalingstidslinje private constructor(
             .map { it.periode() }
             .reduce(Periode::merge)
 
-        fun avvis(tidslinjer: List<Utbetalingstidslinje>, dager: List<LocalDate>, periode: Periode, begrunnelser: List<Begrunnelse>) =
-            tidslinjer.count { it.avvis(dager, periode, begrunnelser) } > 0
-
         internal fun konverter(utbetalingstidslinje: Utbetalingstidslinje) =
             utbetalingstidslinje
                 .mapNotNull {
@@ -58,6 +55,9 @@ internal class Utbetalingstidslinje private constructor(
 
         private fun Utbetalingsdag.erSykedag() =
             this is NavDag || this is NavHelgDag || this is ArbeidsgiverperiodeDag || this is AvvistDag
+
+        fun avvis(tidslinjer: List<Utbetalingstidslinje>, dager: List<LocalDate>, periode: Periode, begrunnelser: List<Begrunnelse>) =
+            tidslinjer.count { it.avvis(dager, periode, begrunnelser) } > 0
 
         fun avvis(tidslinjer: List<Utbetalingstidslinje>, begrunnelser: List<Begrunnelse>, fom: LocalDate, tom: LocalDate?) =
             tidslinjer.forEach { it.avvis(begrunnelser, fom, tom)}
