@@ -46,14 +46,13 @@ internal class NyOgFremtidigSøknadOutOfOrder : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Kaster fortsatt ut hvis perioden er utbetalt`() {
+    fun `ny sykmelding overlapper med periode trukket tilbake pga inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterInntektsmelding(listOf(20.januar til 4.februar))
 
         håndterSykmelding(Sykmeldingsperiode(20.januar, 31.januar, 100.prosent))
 
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
     }
 
     @Test
@@ -77,20 +76,24 @@ internal class NyOgFremtidigSøknadOutOfOrder : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Sykmelding i omvendt rekkefølge kaster ut etterfølgende som ikke er avsluttet — uten replay`() {
+    fun `Sykmelding i omvendt rekkefølge - gap`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 2.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(10.januar, 20.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterSykmelding(Sykmeldingsperiode(3.januar, 5.januar, 100.prosent))
 
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(
-            2.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_UFERDIG_GAP,
-            AVVENTER_SØKNAD_UFERDIG_GAP,
-            TIL_INFOTRYGD
-        )
-        assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_SØKNAD_UFERDIG_GAP, TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `Sykmelding i omvendt rekkefølge - forlengelse`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 2.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(10.januar, 20.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 9.januar, 100.prosent))
+
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_SØKNAD_UFERDIG_GAP, TIL_INFOTRYGD)
     }
 }

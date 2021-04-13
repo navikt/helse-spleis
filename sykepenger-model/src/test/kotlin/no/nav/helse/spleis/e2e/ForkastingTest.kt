@@ -103,6 +103,16 @@ internal class ForkastingTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `Sykmelding i omvendt rekkefølge kaster ut etterfølgende som ikke er avsluttet — uten replay`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 2.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(10.januar, 20.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 5.januar, 100.prosent))
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP)
+        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE)
+    }
+
+    @Test
     fun `søknad med papirsykmelding`() {
         håndterSykmelding(Sykmeldingsperiode(21.januar, 28.februar, 100.prosent))
         håndterSøknad(
@@ -149,6 +159,22 @@ internal class ForkastingTest : AbstractEndToEndTest() {
             MOTTATT_SYKMELDING_FERDIG_GAP,
             TIL_INFOTRYGD
         )
+    }
+
+    @Test
+    fun `Håndterer ny sykmelding som ligger tidligere i tid med forlengelse`() {
+        håndterSykmelding(Sykmeldingsperiode(23.mars(2020), 29.mars(2020), 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(30.mars(2020), 2.april(2020), 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(10.april(2020), 20.april(2020), 100.prosent))
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE)
+        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP)
+
+        håndterSykmelding(Sykmeldingsperiode(19.mars(2020), 22.mars(2020), 100.prosent))
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE)
+        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP)
+        assertTilstander(4.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
     }
 
     @Test

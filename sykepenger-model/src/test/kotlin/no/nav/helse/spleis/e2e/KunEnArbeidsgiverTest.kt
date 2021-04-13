@@ -2560,14 +2560,14 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `man kan ikke opprette en vedtaksperiode før en forkastet periode`() {
+    fun `man kan opprette en vedtaksperiode før en forkastet periode`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 20.februar, 100.prosent), Utdanning(21.februar, 28.februar))
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
 
-        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
-        assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
+        assertFalse(inspektør.periodeErForkastet(1.vedtaksperiode))
+        assertFalse(inspektør.periodeErForkastet(2.vedtaksperiode))
     }
 
     @Test

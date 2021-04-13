@@ -55,6 +55,9 @@ internal class Arbeidsgiver private constructor(
         internal val SENERE_EXCLUSIVE = fun(senereEnnDenne: Vedtaksperiode): VedtaksperioderFilter {
             return fun(vedtaksperiode: Vedtaksperiode) = vedtaksperiode > senereEnnDenne
         }
+        internal val SENERE_INCLUSIVE = fun(senereEnnDenne: Vedtaksperiode): VedtaksperioderFilter {
+            return fun(vedtaksperiode: Vedtaksperiode) = vedtaksperiode >= senereEnnDenne
+        }
         internal val ALLE: VedtaksperioderFilter = { true }
 
         internal fun Iterable<Arbeidsgiver>.nåværendeVedtaksperioder() = mapNotNull { it.vedtaksperioder.nåværendeVedtaksperiode() }
@@ -203,19 +206,14 @@ internal class Arbeidsgiver private constructor(
         beregnetUtbetalingstidslinjer.add(sykdomshistorikk.lagUtbetalingstidslinjeberegning(organisasjonsnummer, utbetalingstidslinje))
     }
 
-    private fun behandleOutOfOrderSykmelding(sykmelding: Sykmelding) {
-        vedtaksperioder.forEach { it.behandleOutOfOrderSykmelding(sykmelding) }
-    }
-
     internal fun håndter(sykmelding: Sykmelding) {
         sykmelding.kontekst(this)
         ForkastetVedtaksperiode.overlapperMedForkastet(forkastede, sykmelding)
         if (!ingenHåndtert(sykmelding, Vedtaksperiode::håndter) && !sykmelding.hasErrorsOrWorse()) {
             sykmelding.info("Lager ny vedtaksperiode")
-            val vedtaksperiode = nyVedtaksperiode(sykmelding)
-            behandleOutOfOrderSykmelding(sykmelding)
-            vedtaksperiode.håndter(sykmelding)
+            val ny = nyVedtaksperiode(sykmelding).also { it.håndter(sykmelding) }
             vedtaksperioder.sort()
+            håndter(sykmelding) { nyPeriode(ny, sykmelding) }
         }
         finalize(sykmelding)
     }

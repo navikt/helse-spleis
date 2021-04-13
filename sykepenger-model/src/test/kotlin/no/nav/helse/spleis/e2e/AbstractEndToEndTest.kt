@@ -69,8 +69,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     }
 
     protected fun assertTilstander(id: UUID, vararg tilstander: TilstandType) {
-        assertFalse(inspektør.periodeErForkastet(id)) { "Perioden er forkastet" }
-        assertTrue(inspektør.periodeErIkkeForkastet(id)) { "Perioden er forkastet" }
+        assertFalse(inspektør.periodeErForkastet(id)) { "Perioden er forkastet med tilstander: ${observatør.tilstander[id]}" }
+        assertTrue(inspektør.periodeErIkkeForkastet(id)) { "Perioden er forkastet med tilstander: ${observatør.tilstander[id]}" }
         assertEquals(tilstander.asList(), observatør.tilstander[id])
     }
 
@@ -222,7 +222,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         vedtaksperiodeId: UUID
     ) {
         val inntektsmeldinggenerator = inntektsmeldinger[inntektsmeldingId] ?: fail { "Fant ikke inntektsmelding med id $inntektsmeldingId" }
-        assertTrue(observatør.bedtOmInntektsmeldingReplay(vedtaksperiodeId))
+        assertTrue(observatør.bedtOmInntektsmeldingReplay(vedtaksperiodeId)) { "Vedtaksperioden har ikke bedt om replay av inntektsmelding" }
         inntektsmeldingReplay(inntektsmeldinggenerator(), vedtaksperiodeId)
             .håndter(Person::håndter)
     }
