@@ -8,9 +8,12 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 
 /*
     TESTPLAN
@@ -79,14 +82,13 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    @Disabled("AvventerInntektsmeldingUferdigGap ber ikke om replay av Inntektsmelding")
     fun `uferdig gap foran med inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 20.januar, 100.prosent))
-        val inntektsmeldingId = håndterInntektsmelding(listOf(3.januar til 18.januar), førsteFraværsdag = 25.januar)
+        håndterInntektsmelding(listOf(3.januar til 18.januar), førsteFraværsdag = 25.januar)
         håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent))
-        håndterInntektsmeldingReplay(inntektsmeldingId, 2.vedtaksperiode)
+        assertFalse(observatør.bedtOmInntektsmeldingReplay(2.vedtaksperiode)) { "Periode 2 vil be om replay av inntektsmelding så snart perioden foran er ferdigbehandlet" }
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP, AVVENTER_UFERDIG_GAP)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP)
     }
 
     @Test
@@ -120,14 +122,13 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    @Disabled("Periode 2 (med søknad) ber ikke om replay. Avventer avklaring. Periode 2 vil uansett gå videre når periode 1 ferdigbehandles.")
     fun `uferdig forlengelse (kort) foran med inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 16.januar, 100.prosent))
-        val inntektsmeldingId = håndterInntektsmelding(listOf(3.januar til 18.januar))
+        håndterInntektsmelding(listOf(3.januar til 18.januar))
         håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent))
-        håndterInntektsmeldingReplay(inntektsmeldingId, 2.vedtaksperiode)
+        assertFalse(observatør.bedtOmInntektsmeldingReplay(2.vedtaksperiode)) { "Periode 2 vil be om replay av inntektsmelding så snart perioden foran er ferdigbehandlet" }
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, AVVENTER_UFERDIG_FORLENGELSE)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE)
     }
 
     @Test
@@ -142,10 +143,11 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
     @Test
     fun `forkastet uferdig forlengelse foran med refusjon opphørt`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 24.januar, 100.prosent))
-        håndterInntektsmelding(listOf(3.januar til 18.januar), refusjon = Triple(25.januar, INNTEKT, emptyList()))
+        val inntektsmeldingId = håndterInntektsmelding(listOf(3.januar til 18.januar), refusjon = Triple(25.januar, INNTEKT, emptyList()))
         håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent))
+        håndterInntektsmeldingReplay(inntektsmeldingId, 2.vedtaksperiode)
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, TIL_INFOTRYGD)
     }
 
     @Test
