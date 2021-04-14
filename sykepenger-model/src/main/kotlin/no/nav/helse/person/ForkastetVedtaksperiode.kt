@@ -1,7 +1,7 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.Sykmelding
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 
 internal class ForkastetVedtaksperiode(
     private val vedtaksperiode: Vedtaksperiode,
@@ -16,8 +16,8 @@ internal class ForkastetVedtaksperiode(
     internal companion object {
         private fun Iterable<ForkastetVedtaksperiode>.perioder() = map { it.vedtaksperiode }
 
-        internal fun overlapperMedForkastet(forkastede: Iterable<ForkastetVedtaksperiode>, sykmelding: Sykmelding) {
-            Vedtaksperiode.overlapperMedForkastet(forkastede.perioder(), sykmelding)
+        internal fun overlapperMedForkastet(forkastede: Iterable<ForkastetVedtaksperiode>, hendelse: SykdomstidslinjeHendelse) {
+            Vedtaksperiode.overlapperMedForkastet(forkastede.perioder(), hendelse)
         }
 
         internal fun overlapperMedForkastet(forkastede: Iterable<ForkastetVedtaksperiode>, inntektsmelding: Inntektsmelding) {

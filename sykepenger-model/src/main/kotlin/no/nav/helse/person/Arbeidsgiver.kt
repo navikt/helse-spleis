@@ -1,5 +1,6 @@
 package no.nav.helse.person
 
+import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.Vedtaksperiode.Companion.harInntekt
 import no.nav.helse.person.Vedtaksperiode.Companion.medSkjæringstidspunkt
@@ -207,21 +208,25 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun håndter(sykmelding: Sykmelding) {
-        sykmelding.kontekst(this)
-        ForkastetVedtaksperiode.overlapperMedForkastet(forkastede, sykmelding)
-        if (!ingenHåndtert(sykmelding, Vedtaksperiode::håndter) && !sykmelding.hasErrorsOrWorse()) {
-            sykmelding.info("Lager ny vedtaksperiode")
-            val ny = nyVedtaksperiode(sykmelding).also { it.håndter(sykmelding) }
-            vedtaksperioder.sort()
-            håndter(sykmelding) { nyPeriode(ny, sykmelding) }
-        }
-        finalize(sykmelding)
+        håndterEllerOpprettVedtaksperiode(sykmelding, Vedtaksperiode::håndter)
     }
 
     internal fun håndter(søknad: Søknad) {
+        if (Toggles.OppretteVedtaksperioderVedSøknad.enabled) return håndterEllerOpprettVedtaksperiode(søknad, Vedtaksperiode::håndter)
         søknad.kontekst(this)
         ingenHåndtert(søknad, Vedtaksperiode::håndter, "Forventet ikke søknad. Har nok ikke mottatt sykmelding")
         finalize(søknad)
+    }
+
+    private fun <Hendelse: SykdomstidslinjeHendelse> håndterEllerOpprettVedtaksperiode(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean) {
+        hendelse.kontekst(this)
+        ForkastetVedtaksperiode.overlapperMedForkastet(forkastede, hendelse)
+        if (!ingenHåndtert(hendelse, håndterer) && !hendelse.hasErrorsOrWorse()) {
+            hendelse.info("Lager ny vedtaksperiode pga. ${hendelse.kilde}")
+            val ny = nyVedtaksperiode(hendelse).also { håndterer(it, hendelse) }
+            håndter(hendelse) { nyPeriode(ny, hendelse) }
+        }
+        finalize(hendelse)
     }
 
     internal fun håndter(søknad: SøknadArbeidsgiver) {
@@ -587,21 +592,21 @@ internal class Arbeidsgiver private constructor(
         return fun(vedtaksperiode: Vedtaksperiode) = tidligereOgEttergølgende1 != null && vedtaksperiode in tidligereOgEttergølgende1
     }
 
-    private fun nyVedtaksperiode(sykmelding: Sykmelding): Vedtaksperiode {
+    private fun nyVedtaksperiode(hendelse: SykdomstidslinjeHendelse): Vedtaksperiode {
         return Vedtaksperiode(
             person = person,
             arbeidsgiver = this,
-            id = UUID.randomUUID(),
-            aktørId = sykmelding.aktørId(),
-            fødselsnummer = sykmelding.fødselsnummer(),
-            organisasjonsnummer = sykmelding.organisasjonsnummer()
+            hendelse = hendelse
         ).also {
             vedtaksperioder.add(it)
+            vedtaksperioder.sort()
         }
     }
 
     internal fun finnSykeperiodeRettFør(vedtaksperiode: Vedtaksperiode) =
-        vedtaksperioder.firstOrNull { other -> other.erSykeperiodeRettFør(vedtaksperiode) }
+        vedtaksperioder.firstOrNull { other ->
+            other.erSykeperiodeRettFør(vedtaksperiode)
+        }
 
     internal fun finnForkastetSykeperiodeRettFør(vedtaksperiode: Vedtaksperiode) =
         ForkastetVedtaksperiode.finnForkastetSykeperiodeRettFør(forkastede, vedtaksperiode)
