@@ -614,10 +614,6 @@ internal class Arbeidsgiver private constructor(
     internal fun finnSykeperiodeRettEtter(vedtaksperiode: Vedtaksperiode) =
         vedtaksperioder.firstOrNull { other -> vedtaksperiode.erSykeperiodeRettFør(other) }
 
-    internal fun støtterIkkeOutOfOrderSykmelding(vedtaksperiode: Vedtaksperiode) =
-        vedtaksperioder.any { periode -> periode.støtterIkkeOutOfOrderSykmelding(vedtaksperiode) }
-            || ForkastetVedtaksperiode.harPeriodeSomIkkeStøtterOutOfOrderSykmelding(forkastede, vedtaksperiode)
-
     internal fun tidligerePerioderFerdigBehandlet(vedtaksperiode: Vedtaksperiode) =
         Vedtaksperiode.tidligerePerioderFerdigBehandlet(vedtaksperioder, vedtaksperiode)
 

@@ -239,9 +239,6 @@ internal class Vedtaksperiode private constructor(
     internal fun erSykeperiodeRettFør(other: Vedtaksperiode) =
         this.periode.erRettFør(other.periode) && !this.sykdomstidslinje.erSisteDagArbeidsdag() && !other.sykdomstidslinje.erFørsteDagArbeidsdag()
 
-    internal fun støtterIkkeOutOfOrderSykmelding(other: Vedtaksperiode) = this.sykmeldingsperiode.start > other.sykmeldingsperiode.start
-        && this.tilstand !in listOf(MottattSykmeldingUferdigForlengelse, MottattSykmeldingUferdigGap)
-
     internal fun periodetype() = arbeidsgiver.periodetype(periode)
 
     internal fun inntektskilde() = inntektskilde
