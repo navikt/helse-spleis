@@ -1050,7 +1050,7 @@ internal data class PersonData(
                     }
                     TypeData.AvvistDag -> {
                         Utbetalingstidslinje.Utbetalingsdag.AvvistDag(
-                            dato = dato, økonomi = økonomi, begrunnelser = begrunnelser?.map { it.tilBegrunnelse() } ?: begrunnelse?.let { listOf(it.tilBegrunnelse()) } ?: error("Prøver å deserialisere avvist dag uten begrunnelse")
+                            dato = dato, økonomi = økonomi, begrunnelser = begrunnelser?.map { it.tilBegrunnelse() } ?: error("Prøver å deserialisere avvist dag uten begrunnelse")
                         )
                     }
                     TypeData.UkjentDag -> {
