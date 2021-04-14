@@ -1,3 +1,3 @@
-FROM navikt/java:14
+FROM navikt/java:15
 
 COPY sykepenger-mediators/build/libs/*.jar ./
