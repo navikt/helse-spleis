@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.SøknadArbeidsgiver
 import no.nav.helse.hendelser.til
@@ -9,8 +10,7 @@ import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -27,7 +27,7 @@ import org.junit.jupiter.api.TestInstance
     Med ferdig forlengelse foran med IM      |     x      |
     Med ferdig forlengelse foran  uten IM    |     x      |
     Forlengelse med refusjon opphørt         |     x      |
-    Overlapper med forkastet                 |            |
+    Overlapper med forkastet                 |     x      |
     Med perioder etter (out of order)        |     -      |
     ^-- med Inntektsmelding                  |            |
     Med uferdig gap etter                    |            |
@@ -47,6 +47,20 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
     @AfterAll
     fun teardown() {
         Toggles.OppretteVedtaksperioderVedSøknad.disable()
+    }
+
+    @Test
+    fun `overlapper med forkastet periode`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 2.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 2.januar, 100.prosent), andreInntektskilder = listOf(
+            Søknad.Inntektskilde(false, "SELVSTENDIG_NÆRINGSDRIVENDE") // <-- TIL_INFOTRYGD
+        ))
+        håndterSøknad(Sykdom(3.januar, 31.januar, 100.prosent))
+        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
+        assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
+        assertEquals(2, inspektør.vedtaksperiodeTeller)
+        assertTrue(hendelselogg.hasErrorsOrWorse())
     }
 
     @Test
