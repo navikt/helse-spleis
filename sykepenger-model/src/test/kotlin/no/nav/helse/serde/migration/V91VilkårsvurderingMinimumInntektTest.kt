@@ -5,7 +5,7 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
-internal class V84VilkårsvurderingMinimumInntektTest {
+internal class V91VilkårsvurderingMinimumInntektTest {
     @Test
     fun `Endrer vilkårsvurdering for skjæringstidspunkt til periode med avviste dager grunnet MinimumInntekt-filter`() {
         val result = migrer(enVedtaksperiodeUtenMinimumInntekt)
@@ -32,7 +32,7 @@ internal class V84VilkårsvurderingMinimumInntektTest {
 
     private fun toNode(json: String) = serdeObjectMapper.readTree(json)
 
-    private fun migrer(json: String) = listOf(V84VilkårsvurderingMinimumInntekt())
+    private fun migrer(json: String) = listOf(V91VilkårsvurderingMinimumInntekt())
         .migrate(toNode(json))
 
     @Language("JSON")
@@ -66,7 +66,8 @@ internal class V84VilkårsvurderingMinimumInntektTest {
                   {
                     "type": "AvvistDag",
                     "dato": "2018-01-02",
-                    "begrunnelse": "MinimumInntekt"
+                    "begrunnelser": ["MinimumInntekt"],
+                    "skjæringstidspunkt": "2018-01-01"
                   }
                 ]
                }
@@ -87,7 +88,7 @@ internal class V84VilkårsvurderingMinimumInntektTest {
           "vurdertOk": true
         }
       ],
-      "skjemaVersjon": 83
+      "skjemaVersjon": 90
     }
     """.trimIndent()
 
@@ -122,7 +123,8 @@ internal class V84VilkårsvurderingMinimumInntektTest {
                   {
                     "type": "AvvistDag",
                     "dato": "2018-01-02",
-                    "begrunnelse": "MinimumInntekt"
+                    "begrunnelser": ["MinimumInntekt"],
+                    "skjæringstidspunkt": "2018-01-01"
                   }
                 ]
                }
@@ -144,7 +146,7 @@ internal class V84VilkårsvurderingMinimumInntektTest {
           "vurdertOk": false
         }
       ],
-      "skjemaVersjon": 84
+      "skjemaVersjon": 91
     }
     """.trimIndent()
 
@@ -178,7 +180,8 @@ internal class V84VilkårsvurderingMinimumInntektTest {
                   {
                     "type": "AvvistDag",
                     "dato": "2018-01-02",
-                    "begrunnelse": "SykepengedagerOppbrukt"
+                    "begrunnelser": ["SykepengedagerOppbrukt"],
+                    "skjæringstidspunkt": "2018-01-01"
                   }
                 ]
                }
@@ -199,7 +202,7 @@ internal class V84VilkårsvurderingMinimumInntektTest {
           "vurdertOk": true
         }
       ],
-      "skjemaVersjon": 83
+      "skjemaVersjon": 90
     }"""
 
     @Language("JSON")
@@ -232,7 +235,8 @@ internal class V84VilkårsvurderingMinimumInntektTest {
                   {
                     "type": "AvvistDag",
                     "dato": "2018-01-02",
-                    "begrunnelse": "SykepengedagerOppbrukt"
+                    "begrunnelser": ["SykepengedagerOppbrukt"],
+                    "skjæringstidspunkt": "2018-01-01"
                   }
                 ]
                }
@@ -254,7 +258,7 @@ internal class V84VilkårsvurderingMinimumInntektTest {
           "vurdertOk": true
         }
       ],
-      "skjemaVersjon": 84
+      "skjemaVersjon": 91
     }
     """
 
@@ -317,7 +321,7 @@ internal class V84VilkårsvurderingMinimumInntektTest {
           "vurdertOk": true
         }
       ],
-      "skjemaVersjon": 83
+      "skjemaVersjon": 90
     }"""
 
     @Language("JSON")
@@ -380,7 +384,7 @@ internal class V84VilkårsvurderingMinimumInntektTest {
           "vurdertOk": true
         }
       ],
-      "skjemaVersjon": 84
+      "skjemaVersjon": 91
     }
     """
 
@@ -417,7 +421,7 @@ internal class V84VilkårsvurderingMinimumInntektTest {
           "vurdertOk": true
         }
       ],
-      "skjemaVersjon": 83
+      "skjemaVersjon": 90
     }"""
 
     @Language("JSON")
@@ -453,7 +457,7 @@ internal class V84VilkårsvurderingMinimumInntektTest {
           "vurdertOk": true
         }
       ],
-      "skjemaVersjon": 84
+      "skjemaVersjon": 91
     }
     """
 
