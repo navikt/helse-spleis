@@ -234,10 +234,7 @@ internal class Vedtaksperiode private constructor(
 
     override fun compareTo(other: Vedtaksperiode) = this.periode.endInclusive.compareTo(other.periode.endInclusive)
 
-    // TODO: burde sammenligne at skjæringstidspunkt er lik for *this* og *other*, men det vil
-    // ikke fungere optimalt med perioder hvor vi trenger IT-historikk for å avdekke riktig skjæringstidspunkt
-    internal fun erSykeperiodeRettFør(other: Vedtaksperiode) =
-        this.periode.erRettFør(other.periode) && !this.sykdomstidslinje.erSisteDagArbeidsdag() && !other.sykdomstidslinje.erFørsteDagArbeidsdag()
+    internal fun erSykeperiodeRettFør(other: Vedtaksperiode) = this.sykdomstidslinje.erRettFør(other.sykdomstidslinje)
 
     internal fun periodetype() = arbeidsgiver.periodetype(periode)
 
@@ -377,7 +374,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndterOverlappendeSøknad(søknad: Søknad, nesteTilstand: Vedtaksperiodetilstand? = null) {
-        if (søknad.sykdomstidslinje().erSisteDagArbeidsdag()) return overlappendeSøknadIkkeStøttet(
+        if (søknad.harArbeidsdager()) return overlappendeSøknadIkkeStøttet(
             søknad,
             "Mottatt flere søknader for perioden - siste søknad inneholder arbeidsdag"
         )

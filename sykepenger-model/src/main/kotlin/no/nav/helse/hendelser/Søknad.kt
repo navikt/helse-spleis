@@ -67,6 +67,8 @@ class Søknad constructor(
 
     internal fun harAndreInntektskilder() = andreInntektskilder.isNotEmpty()
 
+    internal fun harArbeidsdager() = perioder.filterIsInstance<Søknadsperiode.Arbeid>().isNotEmpty()
+
     private fun avskjæringsdato(): LocalDate = sendtTilNAV.toLocalDate().minusMonths(3).withDayOfMonth(1)
 
     data class Merknad(val type: String, val beskrivelse: String?)

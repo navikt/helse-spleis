@@ -19,7 +19,6 @@ import java.time.LocalDate
 import java.time.temporal.ChronoUnit.DAYS
 import java.util.*
 import java.util.stream.Collectors.toMap
-import kotlin.NoSuchElementException
 
 internal class Sykdomstidslinje private constructor(
     private val dager: SortedMap<LocalDate, Dag>,
@@ -184,8 +183,12 @@ internal class Sykdomstidslinje private constructor(
         return periode.start < other.periode.start
     }
 
-    internal fun erFørsteDagArbeidsdag() = this.dager.keys.firstOrNull()?.let(::erArbeidsdag) ?: true
-    internal fun erSisteDagArbeidsdag() = this.dager.keys.lastOrNull()?.let(::erArbeidsdag) ?: true
+    internal fun erRettFør(other: Sykdomstidslinje): Boolean {
+        return this.sisteDag().erRettFør(other.førsteDag()) && !this.erSisteDagArbeidsdag() && !other.erFørsteDagArbeidsdag()
+    }
+
+    private fun erFørsteDagArbeidsdag() = this.dager.keys.firstOrNull()?.let(::erArbeidsdag) ?: true
+    private fun erSisteDagArbeidsdag() = this.dager.keys.lastOrNull()?.let(::erArbeidsdag) ?: true
 
     internal fun harSykedager() = any { it is Sykedag || it is SykHelgedag || it is ForeldetSykedag }
 
