@@ -707,8 +707,7 @@ internal class Arbeidsgiver private constructor(
         try {
             arbeidsgiverUtbetalinger.beregn(aktivitetslogg, organisasjonsnummer, periode)
         } catch (err: UtbetalingstidslinjeBuilderException) {
-            aktivitetslogg.info("Feilmelding: ${err.message}")
-            aktivitetslogg.error("Feil ved utbetalingstidslinjebygging (%s)", err::class.simpleName)
+            err.logg(aktivitetslogg)
         }
         return !aktivitetslogg.hasErrorsOrWorse()
     }

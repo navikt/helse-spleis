@@ -1,6 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.Dag
@@ -706,11 +707,18 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     }
 }
 
-internal sealed class UtbetalingstidslinjeBuilderException(message: String) : RuntimeException(message) {
+internal sealed class UtbetalingstidslinjeBuilderException(private val kort: String, message: String) : RuntimeException(message) {
+    internal fun logg(aktivitetslogg: IAktivitetslogg) {
+        aktivitetslogg.info("Feilmelding: $message")
+        aktivitetslogg.error("Feil ved utbetalingstidslinjebygging: $kort")
+    }
+
     internal class ManglerInntektException(dagen: LocalDate, skjæringstidspunkter: List<LocalDate>) : UtbetalingstidslinjeBuilderException(
+        "Mangler inntekt for dag",
         "Fant ikke inntekt for $dagen med skjæringstidspunkter $skjæringstidspunkter"
     )
     internal class UforventetDagException(dag: Dag, melding: String) : UtbetalingstidslinjeBuilderException(
+        "Forventet ikke ${dag::class.simpleName}",
         "Forventet ikke ${dag::class.simpleName} i utbetalingstidslinjen. Melding: $melding"
     )
 }
