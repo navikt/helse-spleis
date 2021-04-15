@@ -1351,6 +1351,10 @@ internal class Vedtaksperiode private constructor(
     internal object AvventerUferdigForlengelse : Vedtaksperiodetilstand {
         override val type = AVVENTER_UFERDIG_FORLENGELSE
 
+        override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: SykdomstidslinjeHendelse) {
+            // it's all good
+        }
+
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             vedtaksperiode.håndterOverlappendeSøknad(søknad)
         }
