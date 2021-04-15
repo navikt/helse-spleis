@@ -169,7 +169,7 @@ class Person private constructor(
         observers.forEach { it.vedtaksperiodeUtbetalt(event) }
     }
 
-    fun vedtaksperiodeEndret(event: PersonObserver.VedtaksperiodeEndretTilstandEvent) {
+    fun vedtaksperiodeEndret(event: PersonObserver.VedtaksperiodeEndretEvent) {
         observers.forEach {
             it.vedtaksperiodeEndret(event)
             it.personEndret(

@@ -309,11 +309,11 @@ internal class Vedtaksperiode private constructor(
         block()
 
         event.kontekst(tilstand)
-        emitVedtaksperiodeEndret(tilstand, event, previousState)
+        emitVedtaksperiodeEndret(event, previousState)
         tilstand.entering(this, event)
     }
 
-    private fun håndterInntektsmelding(hendelse: Inntektsmelding) {
+    private fun håndterInntektsmelding(hendelse: Inntektsmelding, hvisIngenErrors: () -> Unit) {
         arbeidsgiver.addInntekt(hendelse, skjæringstidspunkt)
         periode = periode.oppdaterFom(hendelse.periode())
         oppdaterHistorikk(hendelse)
@@ -330,19 +330,14 @@ internal class Vedtaksperiode private constructor(
         }
         hendelse.valider(periode)
         if (hendelse.hasErrorsOrWorse()) return tilstand(hendelse, TilInfotrygd)
+        hvisIngenErrors()
         hendelse.info("Fullført behandling av inntektsmelding")
     }
 
-    private fun håndterInntektsmelding(hendelse: Inntektsmelding, nesteTilstand: Vedtaksperiodetilstand) {
-        håndterInntektsmelding(hendelse)
-        if (hendelse.hasErrorsOrWorse()) return
-        tilstand(hendelse, nesteTilstand)
-    }
-
     private fun håndterInntektsmelding(hendelse: Inntektsmelding, hvisInntektGjelder: Vedtaksperiodetilstand, hvisInntektIkkeGjelder: Vedtaksperiodetilstand) {
-        håndterInntektsmelding(hendelse)
-        if (hendelse.hasErrorsOrWorse()) return
-        tilstand(hendelse, if (hendelse.inntektenGjelderFor(skjæringstidspunkt til periode.endInclusive)) hvisInntektGjelder else hvisInntektIkkeGjelder)
+        håndterInntektsmelding(hendelse) {
+            tilstand(hendelse, if (hendelse.inntektenGjelderFor(skjæringstidspunkt til periode.endInclusive)) hvisInntektGjelder else hvisInntektIkkeGjelder)
+        }
     }
 
     private fun oppdaterHistorikk(hendelse: SykdomstidslinjeHendelse) {
@@ -461,20 +456,19 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun emitVedtaksperiodeEndret(
-        currentState: Vedtaksperiodetilstand,
         hendelse: ArbeidstakerHendelse,
-        previousState: Vedtaksperiodetilstand
+        previousState: Vedtaksperiodetilstand = tilstand
     ) {
-        val event = PersonObserver.VedtaksperiodeEndretTilstandEvent(
+        val event = PersonObserver.VedtaksperiodeEndretEvent(
             vedtaksperiodeId = id,
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
-            gjeldendeTilstand = currentState.type,
+            gjeldendeTilstand = tilstand.type,
             forrigeTilstand = previousState.type,
             aktivitetslogg = hendelse.aktivitetsloggMap(),
             hendelser = hendelseIder,
-            makstid = currentState.makstid(this, LocalDateTime.now())
+            makstid = tilstand.makstid(this, LocalDateTime.now())
         )
 
         person.vedtaksperiodeEndret(event)
@@ -994,7 +988,9 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             inntektsmelding: Inntektsmelding
         ) {
-            vedtaksperiode.håndterInntektsmelding(inntektsmelding, AvventerSøknadUferdigForlengelse)
+            vedtaksperiode.håndterInntektsmelding(inntektsmelding) {
+                vedtaksperiode.tilstand(inntektsmelding, AvventerSøknadUferdigForlengelse)
+            }
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: SøknadArbeidsgiver) {
@@ -1914,8 +1910,10 @@ internal class Vedtaksperiode private constructor(
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: SykdomstidslinjeHendelse) {}
         override fun nyPeriodeRettFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: SykdomstidslinjeHendelse) {}
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            vedtaksperiode.håndterInntektsmelding(inntektsmelding)
-            vedtaksperiode.arbeidsgiver.gjenopptaBehandling()
+            vedtaksperiode.håndterInntektsmelding(inntektsmelding) {
+                vedtaksperiode.emitVedtaksperiodeEndret(inntektsmelding)
+                vedtaksperiode.arbeidsgiver.gjenopptaBehandling()
+            }
         }
 
         override fun håndter(

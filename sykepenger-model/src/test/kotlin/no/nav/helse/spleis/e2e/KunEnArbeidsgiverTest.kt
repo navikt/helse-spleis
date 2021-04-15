@@ -2834,4 +2834,24 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             TIL_INFOTRYGD
         )
     }
+
+    @Test
+    fun `Sender vedtaksperiode_endret når inntektsmelidng kommer i AVSLUTTET_UTEN_UTBETALING`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar(2021), 1.januar(2021), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(1.januar(2021), 1.januar(2021), 100.prosent))
+
+        assertEquals(2,observatør.hendelseider(1.vedtaksperiode).size)
+
+        val hendelseId = håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021)), førsteFraværsdag = 1.januar(2021))
+
+        assertEquals(3, observatør.hendelseider(1.vedtaksperiode).size)
+        assertTrue(hendelseId in observatør.hendelseider(1.vedtaksperiode))
+
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVSLUTTET_UTEN_UTBETALING
+        )
+    }
 }

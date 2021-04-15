@@ -61,7 +61,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     }
 
     protected fun assertSisteTilstand(id: UUID, tilstand: TilstandType) {
-        assertEquals(tilstand, observatør.tilstander[id]?.last())
+        assertEquals(tilstand, observatør.tilstandsendringer[id]?.last())
     }
 
     protected fun assertTilstander(indeks: Int, vararg tilstander: TilstandType) {
@@ -69,9 +69,9 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     }
 
     protected fun assertTilstander(id: UUID, vararg tilstander: TilstandType) {
-        assertFalse(inspektør.periodeErForkastet(id)) { "Perioden er forkastet med tilstander: ${observatør.tilstander[id]}" }
-        assertTrue(inspektør.periodeErIkkeForkastet(id)) { "Perioden er forkastet med tilstander: ${observatør.tilstander[id]}" }
-        assertEquals(tilstander.asList(), observatør.tilstander[id])
+        assertFalse(inspektør.periodeErForkastet(id)) { "Perioden er forkastet med tilstander: ${observatør.tilstandsendringer[id]}" }
+        assertTrue(inspektør.periodeErIkkeForkastet(id)) { "Perioden er forkastet med tilstander: ${observatør.tilstandsendringer[id]}" }
+        assertEquals(tilstander.asList(), observatør.tilstandsendringer[id])
     }
 
     protected fun assertForkastetPeriodeTilstander(indeks: Int, vararg tilstander: TilstandType) {
@@ -81,19 +81,19 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     protected fun assertForkastetPeriodeTilstander(id: UUID, vararg tilstander: TilstandType) {
         assertTrue(inspektør.periodeErForkastet(id)) { "Perioden er ikke forkastet" }
         assertFalse(inspektør.periodeErIkkeForkastet(id)) { "Perioden er ikke forkastet" }
-        assertEquals(tilstander.asList(), observatør.tilstander[id])
+        assertEquals(tilstander.asList(), observatør.tilstandsendringer[id])
     }
 
     protected fun assertForkastetPeriodeTilstander(orgnummer: String, id: UUID, vararg tilstander: TilstandType) {
         assertTrue(inspektør(orgnummer).periodeErForkastet(id)) { "Perioden er ikke forkastet" }
         assertFalse(inspektør(orgnummer).periodeErIkkeForkastet(id)) { "Perioden er ikke forkastet" }
-        assertEquals(tilstander.asList(), observatør.tilstander[id])
+        assertEquals(tilstander.asList(), observatør.tilstandsendringer[id])
     }
 
     protected fun assertSisteForkastetPeriodeTilstand(orgnummer: String, id: UUID, tilstand: TilstandType){
         assertTrue(inspektør(orgnummer).periodeErForkastet(id)) { "Perioden er ikke forkastet" }
         assertFalse(inspektør(orgnummer).periodeErIkkeForkastet(id)) { "Perioden er ikke forkastet" }
-        assertEquals(tilstand, observatør.tilstander[id]?.last())
+        assertEquals(tilstand, observatør.tilstandsendringer[id]?.last())
 
     }
 
@@ -1026,7 +1026,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         val etterspurtBehov = EtterspurtBehov.finnEtterspurtBehov(ikkeBesvarteBehov, type, vedtaksperiodeId, orgnummer)
         assertTrue(ikkeBesvarteBehov.remove(etterspurtBehov)) {
             "Forventer at $type skal være etterspurt før ${løsning.simpleName} håndteres. Perioden er i ${
-                observatør.tilstander[vedtaksperiodeId]?.last()
+                observatør.tilstandsendringer[vedtaksperiodeId]?.last()
             }.\nAktivitetsloggen:\n${inspektør.personLogg}"
         }
     }
@@ -1035,7 +1035,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         val etterspurtBehov = EtterspurtBehov.finnEtterspurtBehov(ikkeBesvarteBehov, type, vedtaksperiodeId, orgnummer)
         assertFalse(etterspurtBehov in ikkeBesvarteBehov) {
             "Forventer ikke at $type skal være etterspurt før ${løsning.simpleName} håndteres. Perioden er i ${
-                observatør.tilstander[vedtaksperiodeId]?.last()
+                observatør.tilstandsendringer[vedtaksperiodeId]?.last()
             }"
         }
     }

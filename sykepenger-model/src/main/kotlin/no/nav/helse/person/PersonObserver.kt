@@ -33,7 +33,7 @@ interface PersonObserver {
         val organisasjonsnummer: String
     )
 
-    data class VedtaksperiodeEndretTilstandEvent(
+    data class VedtaksperiodeEndretEvent(
         val vedtaksperiodeId: UUID,
         val aktørId: String,
         val fødselsnummer: String,
@@ -178,7 +178,7 @@ interface PersonObserver {
     fun inntektsmeldingReplay(event: InntektsmeldingReplayEvent) {}
     fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, påminnelse: Påminnelse) {}
     fun vedtaksperiodeIkkePåminnet(påminnelse: Påminnelse, vedtaksperiodeId: UUID, nåværendeTilstand: TilstandType) {}
-    fun vedtaksperiodeEndret(event: VedtaksperiodeEndretTilstandEvent) {}
+    fun vedtaksperiodeEndret(event: VedtaksperiodeEndretEvent) {}
     fun vedtaksperiodeReberegnet(vedtaksperiodeId: UUID) {}
     fun vedtaksperiodeAvbrutt(event: VedtaksperiodeAvbruttEvent) {}
     fun vedtaksperiodeUtbetalt(event: UtbetaltEvent) {}

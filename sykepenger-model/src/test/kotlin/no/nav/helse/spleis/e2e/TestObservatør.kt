@@ -1,13 +1,13 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.PersonObserver.VedtaksperiodeEndretTilstandEvent
+import no.nav.helse.person.PersonObserver.VedtaksperiodeEndretEvent
 import no.nav.helse.person.TilstandType
 import org.junit.jupiter.api.fail
 import java.util.*
 
 internal class TestObservatør : PersonObserver {
-    internal val tilstander = mutableMapOf<UUID, MutableList<TilstandType>>()
+    internal val tilstandsendringer = mutableMapOf<UUID, MutableList<TilstandType>>()
     val utbetalteVedtaksperioder = mutableListOf<UUID>()
     val reberegnedeVedtaksperioder = mutableListOf<UUID>()
     val manglendeInntektsmeldingVedtaksperioder = mutableListOf<UUID>()
@@ -15,7 +15,7 @@ internal class TestObservatør : PersonObserver {
 
     private lateinit var sisteVedtaksperiode: UUID
     private val vedtaksperioder = mutableMapOf<String, MutableSet<UUID>>()
-    private val tilstandsendringer = mutableMapOf<UUID, MutableList<VedtaksperiodeEndretTilstandEvent>>()
+    private val vedtaksperiodeendringer = mutableMapOf<UUID, MutableList<VedtaksperiodeEndretEvent>>()
 
     val utbetaltEventer = mutableListOf<PersonObserver.UtbetaltEvent>()
     val avbruttEventer = mutableListOf<PersonObserver.VedtaksperiodeAvbruttEvent>()
@@ -24,7 +24,7 @@ internal class TestObservatør : PersonObserver {
     val inntektsmeldingReplayEventer = mutableListOf<UUID>()
 
     fun hendelseider(vedtaksperiodeId: UUID) =
-        tilstandsendringer[vedtaksperiodeId]?.last()?.hendelser ?: fail { "VedtaksperiodeId $vedtaksperiodeId har ingen hendelser tilknyttet" }
+        vedtaksperiodeendringer[vedtaksperiodeId]?.last()?.hendelser ?: fail { "VedtaksperiodeId $vedtaksperiodeId har ingen hendelser tilknyttet" }
     fun sisteVedtaksperiode() = sisteVedtaksperiode
     fun sisteVedtaksperiode(orgnummer: String) = vedtaksperioder.getValue(orgnummer).last()
     fun vedtaksperiode(orgnummer: String, indeks: Int) = vedtaksperioder.getValue(orgnummer).toList()[indeks]
@@ -35,11 +35,13 @@ internal class TestObservatør : PersonObserver {
         avstemming = result
     }
 
-    override fun vedtaksperiodeEndret(event: VedtaksperiodeEndretTilstandEvent) {
+    override fun vedtaksperiodeEndret(event: VedtaksperiodeEndretEvent) {
         sisteVedtaksperiode = event.vedtaksperiodeId
-        tilstandsendringer.getOrPut(event.vedtaksperiodeId) { mutableListOf(event) }.add(event)
+        vedtaksperiodeendringer.getOrPut(event.vedtaksperiodeId) { mutableListOf(event) }.add(event)
         vedtaksperioder.getOrPut(event.organisasjonsnummer) { mutableSetOf() }.add(sisteVedtaksperiode)
-        tilstander.getOrPut(event.vedtaksperiodeId) { mutableListOf(TilstandType.START) }.add(event.gjeldendeTilstand)
+        if(event.gjeldendeTilstand != event.forrigeTilstand) {
+            tilstandsendringer.getOrPut(event.vedtaksperiodeId) { mutableListOf(TilstandType.START) }.add(event.gjeldendeTilstand)
+        }
         if (event.gjeldendeTilstand == TilstandType.AVSLUTTET) utbetalteVedtaksperioder.add(event.vedtaksperiodeId)
     }
 

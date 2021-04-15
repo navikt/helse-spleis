@@ -156,7 +156,7 @@ internal class PersonMediator(
         )
     }
 
-    override fun vedtaksperiodeEndret(event: PersonObserver.VedtaksperiodeEndretTilstandEvent) {
+    override fun vedtaksperiodeEndret(event: PersonObserver.VedtaksperiodeEndretEvent) {
         queueMessage(
             "vedtaksperiode_endret", JsonMessage.newMessage(
                 mapOf(
