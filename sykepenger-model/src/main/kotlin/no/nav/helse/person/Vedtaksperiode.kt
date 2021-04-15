@@ -240,8 +240,10 @@ internal class Vedtaksperiode private constructor(
 
     internal fun inntektskilde() = inntektskilde
 
+    private fun inntekt() = arbeidsgiver.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periode.start)
+    private fun harInntekt() = inntekt() != null
     private fun avgjørTilstandForInntekt(): Vedtaksperiodetilstand {
-        if (arbeidsgiver.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periode.start) == null) return AvventerInntektsmeldingFerdigForlengelse
+        if (!harInntekt()) return AvventerInntektsmeldingFerdigForlengelse
         return AvventerHistorikk
     }
 
@@ -477,8 +479,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun vedtakFattet(hendelse: ArbeidstakerHendelse) {
         val sykepengegrunnlag = person.sykepengegrunnlag(skjæringstidspunkt, periode.start) ?: Inntekt.INGEN
-        val inntekt = arbeidsgiver.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periode.start) ?: Inntekt.INGEN
-        Utbetaling.vedtakFattet(utbetaling, hendelse, person, id, periode, hendelseIder, skjæringstidspunkt, sykepengegrunnlag, inntekt)
+        Utbetaling.vedtakFattet(utbetaling, hendelse, person, id, periode, hendelseIder, skjæringstidspunkt, sykepengegrunnlag, inntekt() ?: Inntekt.INGEN)
     }
 
     private fun tickleForArbeidsgiveravhengighet(påminnelse: Påminnelse) {
@@ -683,7 +684,7 @@ internal class Vedtaksperiode private constructor(
         val sykepengegrunnlag = requireNotNull(person.sykepengegrunnlag(skjæringstidspunkt, periode.start)) {
             "Forventet sykepengegrunnlag ved opprettelse av utbetalt-event"
         }
-        val inntekt = requireNotNull(arbeidsgiver.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periode.start)) {
+        val inntekt = requireNotNull(inntekt()) {
             "Forventet inntekt ved opprettelse av utbetalt-event"
         }
         utbetaling().ferdigstill(hendelse, person, periode, sykepengegrunnlag, inntekt, hendelseIder)
@@ -2014,7 +2015,7 @@ internal class Vedtaksperiode private constructor(
 
         internal fun List<Vedtaksperiode>.harInntekt() =
             this.takeIf { it.isNotEmpty() }
-                ?.any { it.arbeidsgiver.grunnlagForSykepengegrunnlag(it.skjæringstidspunkt, it.periode.start) != null } ?: true
+                ?.any { it.harInntekt() } ?: true
 
         internal fun overlapperMedForkastet(forkastede: Iterable<Vedtaksperiode>, hendelse: SykdomstidslinjeHendelse) {
             forkastede
