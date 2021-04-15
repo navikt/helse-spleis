@@ -240,7 +240,7 @@ internal class Vedtaksperiode private constructor(
 
     internal fun inntektskilde() = inntektskilde
 
-    private fun tilstandVedForlengelse(): Vedtaksperiodetilstand {
+    private fun avgjørTilstandForInntekt(): Vedtaksperiodetilstand {
         if (arbeidsgiver.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periode.start) == null) return AvventerInntektsmeldingFerdigForlengelse
         return AvventerHistorikk
     }
@@ -870,68 +870,72 @@ internal class Vedtaksperiode private constructor(
         override val type = START
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
-            håndter(
+            vedtaksperiode.oppdaterHistorikk(sykmelding)
+            if (sykmelding.valider(vedtaksperiode.periode).hasErrorsOrWorse())
+                return vedtaksperiode.tilstand(sykmelding, TilInfotrygd)
+
+            vedtaksperiode.tilstand(sykmelding, avgjørNesteTilstand(
                 vedtaksperiode = vedtaksperiode,
                 hendelse = sykmelding,
                 ferdigForlengelse = MottattSykmeldingFerdigForlengelse,
                 uferdigForlengelse = MottattSykmeldingUferdigForlengelse,
                 ferdigGap = MottattSykmeldingFerdigGap,
                 uferdigGap = MottattSykmeldingUferdigGap
-            )
+            ))
             sykmelding.info("Fullført behandling av sykmelding")
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            val periodeFør = vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)
+            val periodeRettFør = vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)
             val ferdig = vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode)
 
-            // TODO: sjekke om vi heller kan kalle denne i felles håndter()-metode
-            if (periodeFør != null || ferdig) {
-                if (!vedtaksperiode.person.forlengerAlleArbeidsgivereSammePeriode(vedtaksperiode)) return vedtaksperiode.person.invaliderAllePerioder(
-                    søknad, "Invaliderer alle perioder for flere arbeidsgivere fordi forlengelser hos alle arbeidsgivere ikke gjelder samme periode"
-                )
+            // TODO: flytte til felles avgjørNesteTilstand
+            if (periodeRettFør != null || ferdig) {
+                if (!vedtaksperiode.person.forlengerAlleArbeidsgivereSammePeriode(vedtaksperiode)) {
+                    return vedtaksperiode.person.invaliderAllePerioder(
+                        søknad,
+                        "Invaliderer alle perioder for flere arbeidsgivere fordi forlengelser hos alle arbeidsgivere ikke gjelder samme periode"
+                    )
+                }
             }
 
-            håndter(
+            vedtaksperiode.håndterSøknad(søknad, avgjørNesteTilstand(
                 vedtaksperiode = vedtaksperiode,
                 hendelse = søknad,
-                ferdigForlengelse = periodeFør?.tilstandVedForlengelse() ?: AvventerInntektsmeldingEllerHistorikkFerdigGap,
+                ferdigForlengelse = vedtaksperiode.avgjørTilstandForInntekt(),
                 uferdigForlengelse = AvventerInntektsmeldingUferdigForlengelse,
                 ferdigGap = AvventerInntektsmeldingEllerHistorikkFerdigGap,
                 uferdigGap = AvventerInntektsmeldingUferdigGap
-            )
+            ))
             søknad.info("Fullført behandling av søknad")
         }
 
-        private fun håndter(
+        private fun avgjørNesteTilstand(
             vedtaksperiode: Vedtaksperiode,
             hendelse: SykdomstidslinjeHendelse,
             ferdigForlengelse: Vedtaksperiodetilstand,
             uferdigForlengelse: Vedtaksperiodetilstand,
             ferdigGap: Vedtaksperiodetilstand,
             uferdigGap: Vedtaksperiodetilstand,
-        ) {
-            vedtaksperiode.oppdaterHistorikk(hendelse)
-            if (hendelse.valider(vedtaksperiode.periode).hasErrorsOrWorse())
-                return vedtaksperiode.tilstand(hendelse, TilInfotrygd)
-            if (!vedtaksperiode.person.forlengerIkkeBareAnnenArbeidsgiver(vedtaksperiode.arbeidsgiver, vedtaksperiode))
-                return vedtaksperiode.person.invaliderAllePerioder(hendelse, "Forlenger annen arbeidsgiver, men ikke seg selv")
-
+        ): Vedtaksperiodetilstand {
             val periodeRettFør = vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)
             val forlengelse = periodeRettFør != null
             val ferdig = vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode)
             val refusjonOpphørt = vedtaksperiode.arbeidsgiver.harRefusjonOpphørt(vedtaksperiode.periode.endInclusive)
 
-            vedtaksperiode.tilstand(
-                hendelse, when {
-                    forlengelse && refusjonOpphørt -> TilInfotrygd.also { hendelse.error("Refusjon er opphørt.") }
-                    forlengelse && ferdig -> ferdigForlengelse
-                    forlengelse && !ferdig -> uferdigForlengelse
-                    !forlengelse && ferdig -> ferdigGap
-                    !forlengelse && !ferdig -> uferdigGap
-                    else -> hendelse.severe("Klarer ikke bestemme hvilken tilstand vi skal til")
-                }
-            )
+            if (!vedtaksperiode.person.forlengerIkkeBareAnnenArbeidsgiver(vedtaksperiode.arbeidsgiver, vedtaksperiode)) {
+                vedtaksperiode.person.invaliderAllePerioder(hendelse, "Forlenger annen arbeidsgiver, men ikke seg selv")
+                return TilInfotrygd
+            }
+
+            return when {
+                forlengelse && refusjonOpphørt -> TilInfotrygd.also { hendelse.error("Refusjon er opphørt.") }
+                forlengelse && ferdig -> ferdigForlengelse
+                forlengelse && !ferdig -> uferdigForlengelse
+                !forlengelse && ferdig -> ferdigGap
+                !forlengelse && !ferdig -> uferdigGap
+                else -> hendelse.severe("Klarer ikke bestemme hvilken tilstand vi skal til")
+            }
         }
     }
 
@@ -942,8 +946,7 @@ internal class Vedtaksperiode private constructor(
             if (!vedtaksperiode.person.forlengerAlleArbeidsgivereSammePeriode(vedtaksperiode)) return vedtaksperiode.person.invaliderAllePerioder(
                 søknad, "Invaliderer alle perioder for flere arbeidsgivere fordi forlengelser hos alle arbeidsgivere ikke gjelder samme periode"
             )
-            val periodeFør = vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)
-            vedtaksperiode.håndterSøknad(søknad, periodeFør?.tilstandVedForlengelse() ?: AvventerInntektsmeldingEllerHistorikkFerdigGap)
+            vedtaksperiode.håndterSøknad(søknad, vedtaksperiode.avgjørTilstandForInntekt())
             søknad.info("Fullført behandling av søknad")
         }
 
@@ -1320,8 +1323,12 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
-            val periodeFør = vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)
-            vedtaksperiode.tilstand(gjenopptaBehandling, periodeFør?.tilstandVedForlengelse() ?: AvventerInntektsmeldingEllerHistorikkFerdigGap)
+            vedtaksperiode.tilstand(gjenopptaBehandling,
+                if (vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode) == null)
+                    AvventerInntektsmeldingEllerHistorikkFerdigGap
+                else
+                    vedtaksperiode.avgjørTilstandForInntekt()
+            )
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
