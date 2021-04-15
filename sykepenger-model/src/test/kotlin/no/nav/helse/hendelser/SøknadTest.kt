@@ -38,6 +38,13 @@ internal class SøknadTest {
     }
 
     @Test
+    fun `tillater ikke andre inntektskilder dersom én arbeidsgiver`() {
+        søknad(Sykdom(1.januar, 10.januar, 100.prosent), andreInntektskilder = listOf(Søknad.Inntektskilde(true, "ANDRE_ARBEIDSFORHOLD")))
+        assertFalse(søknad.valider(EN_PERIODE).hasErrorsOrWorse())
+        assertTrue(søknad.validerEnArbeidsgiver().hasErrorsOrWorse())
+    }
+
+    @Test
     fun `søknad med ferie`() {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent), Ferie(2.januar, 4.januar))
         assertFalse(søknad.valider(EN_PERIODE).hasErrorsOrWorse())

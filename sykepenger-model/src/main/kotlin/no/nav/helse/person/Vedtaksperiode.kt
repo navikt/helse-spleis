@@ -351,18 +351,13 @@ internal class Vedtaksperiode private constructor(
         hendelseIder.add(hendelse.meldingsreferanseId())
     }
 
-    private fun håndterSøknad(søknad: Søknad, nesteTilstand: Vedtaksperiodetilstand) {
-        if (!person.harFlereArbeidsgivereMedSykdom() && søknad.harAndreInntektskilder()) return tilstand(søknad, TilInfotrygd)
-        håndterSøknad(søknad as SykdomstidslinjeHendelse, nesteTilstand)
-    }
-
     private fun håndterSøknad(hendelse: SykdomstidslinjeHendelse, nesteTilstand: Vedtaksperiodetilstand?) {
         periode = periode.oppdaterFom(hendelse.periode())
         oppdaterHistorikk(hendelse)
-        if (hendelse.valider(periode).hasErrorsOrWorse()) return person.invaliderAllePerioder(
-            hendelse,
-            "Invaliderer alle perioder pga flere arbeidsgivere og feil i søknad"
-        )
+        if (!person.harFlereArbeidsgivereMedSykdom()) hendelse.validerEnArbeidsgiver()
+        hendelse.valider(periode)
+        if (hendelse.hasErrorsOrWorse())
+            return person.invaliderAllePerioder(hendelse, "Invaliderer alle perioder pga flere arbeidsgivere og feil i søknad")
         nesteTilstand?.also { tilstand(hendelse, it) }
     }
 

@@ -48,6 +48,11 @@ class Søknad constructor(
 
     override fun aktørId() = aktørId
 
+    override fun validerEnArbeidsgiver(): IAktivitetslogg {
+        if (andreInntektskilder.isNotEmpty()) error("Søknad inneholder andre inntektskilder og vi kjenner bare til én arbeidsgiver")
+        return this
+    }
+
     override fun valider(periode: Periode): IAktivitetslogg {
         perioder.forEach { it.valider(this) }
         andreInntektskilder.forEach { it.valider(this) }
@@ -64,8 +69,6 @@ class Søknad constructor(
     }
 
     override fun melding(klassName: String) = "Søknad"
-
-    internal fun harAndreInntektskilder() = andreInntektskilder.isNotEmpty()
 
     internal fun harArbeidsdager() = perioder.filterIsInstance<Søknadsperiode.Arbeid>().isNotEmpty()
 
