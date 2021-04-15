@@ -778,6 +778,18 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `ny sykmelding rett før en avventer uferdig gap (inntektsmelding etter søknad)`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(29.januar, 31.januar, 100.prosent)) // begynner på mandag
+        håndterSøknad(Sykdom(29.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), 29.januar)
+        håndterSykmelding(Sykmeldingsperiode(21.januar, 26.januar, 100.prosent)) // slutter på fredagen før periode 2
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP, AVVENTER_UFERDIG_GAP, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, TIL_INFOTRYGD)
+    }
+
+    @Test
     fun `ny sykmelding før en ferdig forlengelse`() {
         håndterSykmelding(Sykmeldingsperiode(10.februar, 15.februar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(16.februar, 25.februar, 100.prosent))
