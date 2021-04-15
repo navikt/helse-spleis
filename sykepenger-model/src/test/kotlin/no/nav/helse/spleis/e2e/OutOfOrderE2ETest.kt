@@ -706,7 +706,7 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
 
     @Test
     @Disabled("MottattSykmeldingFerdigForlengelse tar ikke i mot Inntektsmelding")
-    fun `ny sykmelding før en ferdig forlengelse som avventer søknad`() {
+    fun `ny sykmelding før en ferdig forlengelse som avventer søknad (inntektsmelding etter søknad arbeidsgiver)`() {
         håndterSykmelding(Sykmeldingsperiode(8.februar, 15.februar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(16.februar, 25.februar, 100.prosent))
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(8.februar, 15.februar, 100.prosent))
@@ -714,6 +714,18 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 9.januar, 100.prosent))
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_SØKNAD_FERDIG_FORLENGELSE, AVVENTER_SØKNAD_UFERDIG_FORLENGELSE)
+        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
+    }
+
+    @Test
+    fun `ny sykmelding før en ferdig forlengelse som avventer søknad (inntektsmelding før søknad arbeidsgiver)`() {
+        håndterSykmelding(Sykmeldingsperiode(8.februar, 15.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(16.februar, 25.februar, 100.prosent))
+        håndterInntektsmelding(listOf(8.februar til 23.februar))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(8.februar, 15.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 9.januar, 100.prosent))
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_SØKNAD_UFERDIG_FORLENGELSE, AVVENTER_SØKNAD_FERDIG_FORLENGELSE, AVVENTER_SØKNAD_UFERDIG_FORLENGELSE)
         assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
     }
 
