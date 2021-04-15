@@ -69,6 +69,16 @@ internal class VilkårsgrunnlagHistorikk private constructor(
         override fun accept(skjæringstidspunkt: LocalDate, vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {
             vilkårsgrunnlagHistorikkVisitor.visitGrunnlagsdata(skjæringstidspunkt, this)
         }
+
+        internal fun grunnlagsdataMedMinimumInntektsvurdering(minimumInntektVurdering: Boolean) = Grunnlagsdata(
+            sammenligningsgrunnlag = sammenligningsgrunnlag,
+            avviksprosent = avviksprosent,
+            antallOpptjeningsdagerErMinst = antallOpptjeningsdagerErMinst,
+            harOpptjening = harOpptjening,
+            medlemskapstatus = medlemskapstatus,
+            harMinimumInntekt = minimumInntektVurdering,
+            vurdertOk = vurdertOk && minimumInntektVurdering
+        )
     }
 
     internal class InfotrygdVilkårsgrunnlag : VilkårsgrunnlagElement {

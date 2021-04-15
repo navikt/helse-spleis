@@ -68,6 +68,11 @@ internal class Arbeidsgiver private constructor(
                 .takeIf { it.isNotEmpty() }
                 ?.summer()
 
+        internal fun List<Arbeidsgiver>.grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
+            this.mapNotNull { it.inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt) }
+                .takeIf { it.isNotEmpty() }
+                ?.summer()
+
         internal fun List<Arbeidsgiver>.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =
             this.mapNotNull { it.inntektshistorikk.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt) }
                 .takeIf { it.isNotEmpty() }

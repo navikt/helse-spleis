@@ -379,6 +379,9 @@ class Person private constructor(
     internal fun sammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =
         arbeidsgivere.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt)
 
+    private fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
+        arbeidsgivere.grunnlagForSykepengegrunnlag(skjæringstidspunkt)
+
     private fun finnArbeidsgiverForInntekter(arbeidsgiver: String, aktivitetslogg: IAktivitetslogg): Arbeidsgiver {
         return arbeidsgivere.finnEllerOpprett(arbeidsgiver) {
             aktivitetslogg.info("Ny arbeidsgiver med organisasjonsnummer %s for denne personen", arbeidsgiver)
@@ -403,5 +406,11 @@ class Person private constructor(
     internal fun søppelbøtte(hendelse: ArbeidstakerHendelse, periode: Periode) {
         infotrygdhistorikk.tøm()
         arbeidsgivere.forEach { it.søppelbøtte(hendelse, it.tidligereOgEttergølgende(periode), ForkastetÅrsak.IKKE_STØTTET) }
+    }
+
+    internal fun oppdaterHarMinimumInntekt(skjæringstidspunkt: LocalDate, grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata) {
+        val harMinimumInntekt = grunnlagForSykepengegrunnlag(skjæringstidspunkt)?.let { it > Alder(fødselsnummer).minimumInntekt(skjæringstidspunkt) } ?: false
+        val grunnlagsdataMedHarMinimumInntekt = grunnlagsdata.grunnlagsdataMedMinimumInntektsvurdering(harMinimumInntekt)
+        vilkårsgrunnlagHistorikk.lagre(skjæringstidspunkt, grunnlagsdataMedHarMinimumInntekt)
     }
 }

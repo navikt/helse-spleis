@@ -1589,10 +1589,14 @@ internal class Vedtaksperiode private constructor(
                 onSuccess { infotrygdhistorikk.lagreVilkårsgrunnlag(vedtaksperiode.skjæringstidspunkt, periodetype, person.vilkårsgrunnlagHistorikk) }
 
                 onSuccess {
-                    if (person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt) == null) {
-                        return@håndter info("Mangler vilkårsgrunnlag for $vedtaksperiode.skjæringstidspunkt").also {
+                    val vilkårsgrunnlag = person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt)
+                        ?: return@håndter info("Mangler vilkårsgrunnlag for $vedtaksperiode.skjæringstidspunkt").also {
                             vedtaksperiode.tilstand(ytelser, AvventerVilkårsprøving)
                         }
+                    if (vilkårsgrunnlag is VilkårsgrunnlagHistorikk.Grunnlagsdata && vilkårsgrunnlag.harMinimumInntekt == null) {
+                        // Må gjøres frem til 1.oktober 2021. Etter denne datoen kan denne koden slettes,
+                            // fordi da vil vi ikke ha noen forlengelser til perioder som har harMinimumInntekt = null til behandling lenger.
+                        person.oppdaterHarMinimumInntekt(vedtaksperiode.skjæringstidspunkt, vilkårsgrunnlag)
                     }
                 }
                 valider {

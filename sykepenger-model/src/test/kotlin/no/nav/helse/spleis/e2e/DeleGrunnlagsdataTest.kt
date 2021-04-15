@@ -11,6 +11,8 @@ import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -283,5 +285,87 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         assertNotEquals(inspektør.vilkårsgrunnlag(1.vedtaksperiode), inspektør.vilkårsgrunnlag(2.vedtaksperiode))
         assertEquals(NEI, inspektør.forlengelseFraInfotrygd(1.vedtaksperiode))
         assertEquals(NEI, inspektør.forlengelseFraInfotrygd(2.vedtaksperiode))
+    }
+
+    @Test
+    fun `når vilkårsgrunnlag mangler sjekk på minimum inntekt gjøres denne sjekken - søknad arbeidsgiver`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(1.januar, 16.januar, 100.prosent))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)), refusjon = Triple(null, 1000.månedlig, emptyList()))
+
+        val vilkårsgrunnlagElement = VilkårsgrunnlagHistorikk.Grunnlagsdata(
+            sammenligningsgrunnlag = 1000.månedlig,
+            avviksprosent = Prosent.prosent(0.0),
+            antallOpptjeningsdagerErMinst = 29,
+            harOpptjening = true,
+            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+            harMinimumInntekt = null,
+            vurdertOk = true
+        )
+        person.vilkårsgrunnlagHistorikk.lagre(1.januar, vilkårsgrunnlagElement)
+
+        håndterSykmelding(Sykmeldingsperiode(17.januar, 17.februar, 100.prosent))
+        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(17.januar, 17.februar, 100.prosent))
+        håndterYtelser(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        UtbetalingstidslinjeInspektør(inspektør.utbetalingUtbetalingstidslinje(0)).also {
+            assertEquals(0, it.navDagTeller)
+            assertEquals(16, it.arbeidsgiverperiodeDagTeller)
+            assertEquals(23, it.avvistDagTeller)
+        }
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_GODKJENNING,
+            AVSLUTTET
+        )
+    }
+
+    @Test
+    fun `når vilkårsgrunnlag mangler sjekk på minimum inntekt gjøres denne sjekken`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 16.januar, 100.prosent))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)), refusjon = Triple(null, 1000.månedlig, emptyList()))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, 1000.månedlig)
+        val vilkårsgrunnlagElement = VilkårsgrunnlagHistorikk.Grunnlagsdata(
+            sammenligningsgrunnlag = 1000.månedlig,
+            avviksprosent = Prosent.prosent(0.0),
+            antallOpptjeningsdagerErMinst = 29,
+            harOpptjening = true,
+            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+            harMinimumInntekt = null,
+            vurdertOk = true
+        )
+        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        person.vilkårsgrunnlagHistorikk.lagre(1.januar, vilkårsgrunnlagElement)
+
+        assertTilstander(
+            1.vedtaksperiode,
+            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, AVSLUTTET_UTEN_UTBETALING
+        )
+        håndterSykmelding(Sykmeldingsperiode(17.januar, 17.februar, 100.prosent))
+        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(17.januar, 17.februar, 100.prosent))
+        håndterYtelser(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        UtbetalingstidslinjeInspektør(inspektør.utbetalingUtbetalingstidslinje(1)).also {
+            assertEquals(0, it.navDagTeller)
+            assertEquals(16, it.arbeidsgiverperiodeDagTeller)
+            assertEquals(23, it.avvistDagTeller)
+        }
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_GODKJENNING,
+            AVSLUTTET
+        )
+        assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
+        assertNotNull(inspektør.vilkårsgrunnlag(2.vedtaksperiode))
     }
 }
