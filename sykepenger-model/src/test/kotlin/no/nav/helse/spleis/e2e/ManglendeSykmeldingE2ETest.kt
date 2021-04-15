@@ -59,8 +59,37 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(3.januar, 31.januar, 100.prosent))
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
         assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
-        assertEquals(2, inspektør.vedtaksperiodeTeller)
+        assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+    }
+
+    @Test
+    fun `overlapper med periode - eldst først`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 3.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 4.januar, 100.prosent))
         assertTrue(hendelselogg.hasErrorsOrWorse())
+        assertEquals(1, inspektør.vedtaksperiodeTeller)
+        håndterSøknad(Sykdom(1.januar, 3.januar, 100.prosent))
+        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+        håndterSøknad(Sykdom(3.januar, 4.januar, 100.prosent))
+        assertEquals(2, inspektør.vedtaksperiodeTeller)
+        assertTrue(hendelselogg.hasWarningsOrWorse())
+        assertEquals(1.januar til 3.januar, inspektør.periode(2.vedtaksperiode))
+    }
+
+    @Test
+    fun `overlapper med periode - eldst sist`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 3.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 4.januar, 100.prosent))
+        assertTrue(hendelselogg.hasErrorsOrWorse())
+        assertEquals(1, inspektør.vedtaksperiodeTeller)
+        håndterSøknad(Sykdom(3.januar, 4.januar, 100.prosent))
+        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+        håndterSøknad(Sykdom(1.januar, 3.januar, 100.prosent))
+        assertEquals(2, inspektør.vedtaksperiodeTeller)
+        assertTrue(hendelselogg.hasWarningsOrWorse())
+        assertEquals(1.januar til 4.januar, inspektør.periode(2.vedtaksperiode))
     }
 
     @Test

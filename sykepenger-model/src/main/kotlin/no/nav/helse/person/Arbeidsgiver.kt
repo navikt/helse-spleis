@@ -208,6 +208,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun håndter(sykmelding: Sykmelding) {
+        ForkastetVedtaksperiode.overlapperMedForkastet(forkastede, sykmelding)
         håndterEllerOpprettVedtaksperiode(sykmelding, Vedtaksperiode::håndter)
     }
 
@@ -220,7 +221,6 @@ internal class Arbeidsgiver private constructor(
 
     private fun <Hendelse: SykdomstidslinjeHendelse> håndterEllerOpprettVedtaksperiode(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean) {
         hendelse.kontekst(this)
-        ForkastetVedtaksperiode.overlapperMedForkastet(forkastede, hendelse)
         if (!ingenHåndtert(hendelse, håndterer) && !hendelse.hasErrorsOrWorse()) {
             hendelse.info("Lager ny vedtaksperiode pga. ${hendelse.kilde}")
             val ny = nyVedtaksperiode(hendelse).also { håndterer(it, hendelse) }
