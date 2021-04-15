@@ -219,6 +219,13 @@ internal class Arbeidsgiver private constructor(
         finalize(søknad)
     }
 
+    internal fun håndter(søknad: SøknadArbeidsgiver) {
+        if (Toggles.OppretteVedtaksperioderVedSøknad.enabled) return håndterEllerOpprettVedtaksperiode(søknad, Vedtaksperiode::håndter)
+        søknad.kontekst(this)
+        ingenHåndtert(søknad, Vedtaksperiode::håndter, "Forventet ikke søknad til arbeidsgiver. Har nok ikke mottatt sykmelding")
+        finalize(søknad)
+    }
+
     private fun <Hendelse: SykdomstidslinjeHendelse> håndterEllerOpprettVedtaksperiode(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean) {
         hendelse.kontekst(this)
         if (!ingenHåndtert(hendelse, håndterer) && !hendelse.hasErrorsOrWorse()) {
@@ -227,12 +234,6 @@ internal class Arbeidsgiver private constructor(
             håndter(hendelse) { nyPeriode(ny, hendelse) }
         }
         finalize(hendelse)
-    }
-
-    internal fun håndter(søknad: SøknadArbeidsgiver) {
-        søknad.kontekst(this)
-        ingenHåndtert(søknad, Vedtaksperiode::håndter, "Forventet ikke søknad til arbeidsgiver. Har nok ikke mottatt sykmelding")
-        finalize(søknad)
     }
 
     internal fun harRefusjonOpphørt(periodeTom: LocalDate): Boolean {

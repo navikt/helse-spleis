@@ -889,6 +889,11 @@ internal class Vedtaksperiode private constructor(
             sykmelding.info("Fullført behandling av sykmelding")
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: SøknadArbeidsgiver) {
+            vedtaksperiode.håndterSøknad(søknad, AvsluttetUtenUtbetaling)
+            søknad.info("Fullført behandling av søknad arbeidsgiver")
+        }
+
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             val periodeRettFør = vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)
             val ferdig = vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode)
