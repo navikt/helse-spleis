@@ -286,7 +286,6 @@ internal class Vedtaksperiode private constructor(
         sammeArbeidsgiverperiode(other) && erUtbetalt()
 
     internal fun periode() = periode
-    internal fun opprinneligPeriode() = sykmeldingsperiode
 
     private fun kontekst(hendelse: ArbeidstakerHendelse) {
         hendelse.kontekst(this)
@@ -2019,7 +2018,7 @@ internal class Vedtaksperiode private constructor(
 
         internal fun overlapperMedForkastet(forkastede: Iterable<Vedtaksperiode>, hendelse: SykdomstidslinjeHendelse) {
             forkastede
-                .filter { it.sykmeldingsperiode.overlapperMed(hendelse.periode()) }
+                .filter { it.periode.overlapperMed(hendelse.periode()) }
                 .forEach {
                     hendelse.error("${hendelse.kilde} overlapper med forkastet vedtaksperiode")
                     hendelse.info("${hendelse.kilde} overlapper med forkastet vedtaksperiode ${it.id}, hendelse sykmeldingsperiode: ${hendelse.periode()}, vedtaksperiode sykmeldingsperiode: ${it.periode}")
@@ -2029,7 +2028,7 @@ internal class Vedtaksperiode private constructor(
         internal fun overlapperMedForkastet(forkastede: Iterable<Vedtaksperiode>, inntektsmelding: Inntektsmelding) {
             forkastede
                 .forEach {
-                    if (it.sykmeldingsperiode.overlapperMed(inntektsmelding.periode()) &&
+                    if (it.periode.overlapperMed(inntektsmelding.periode()) &&
                         it.inntektsmeldingId != inntektsmelding.meldingsreferanseId() // Pga replay :(
                     )
                         inntektsmelding.trimLeft(it.periode.endInclusive)
