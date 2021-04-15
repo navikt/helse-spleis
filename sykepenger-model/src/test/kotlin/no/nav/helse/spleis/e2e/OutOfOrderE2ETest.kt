@@ -676,4 +676,15 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
             TIL_INFOTRYGD
         )
     }
+
+    @Test
+    fun `ny sykmelding før en ferdig forlengelse`() {
+        håndterSykmelding(Sykmeldingsperiode(10.februar, 15.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(16.februar, 25.februar, 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(10.februar, 15.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 9.januar, 100.prosent))
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE)
+        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
+    }
 }

@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.SøknadArbeidsgiver
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.TilstandType.*
+import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterAll
@@ -28,12 +29,12 @@ import org.junit.jupiter.api.TestInstance
     Med ferdig forlengelse foran  uten IM    |     x      |
     Forlengelse med refusjon opphørt         |     x      |
     Overlapper med forkastet                 |     x      |
-    Med perioder etter (out of order)        |     -      |
-    ^-- med Inntektsmelding                  |            |
-    Med uferdig gap etter                    |            |
-    Med uferdig forlengelse etter            |            |
-    Med ferdig gap etter                     |            |
-    Med ferdig forlengelse etter             |            |                          Sende inn kort AG-søknad. Sende inn Sykmelding. Sende inn Søknad foran kort AG-søknad.
+    Med perioder etter (out of order)        |     x      |
+    ^-- med Inntektsmelding                  |     x      |
+    Med uferdig gap etter                    |     x      |
+    Med uferdig forlengelse etter            |     x      |
+    Med ferdig gap etter                     |     x      |
+    Med ferdig forlengelse etter             |     x      |                          Sende inn kort AG-søknad. Sende inn Sykmelding. Sende inn Søknad foran kort AG-søknad.
 */
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -231,5 +232,85 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(3.januar til 18.januar), refusjon = Triple(21.januar, INNTEKT, emptyList()))
         håndterSøknad(Sykdom(21.januar, 31.januar, 100.prosent))
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `ferdig gap foran med refusjon opphørt`() {
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 20.januar, 100.prosent))
+        håndterSøknad(Sykdom(3.januar, 20.januar, 100.prosent))
+        håndterInntektsmelding(listOf(3.januar til 18.januar), refusjon = Triple(21.januar, INNTEKT, emptyList()))
+        håndterSykmelding(Sykmeldingsperiode(21.januar, 24.januar, 100.prosent))
+        håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent))
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `nyere ferdig gap som blir forlengelse`() {
+        håndterSykmelding(Sykmeldingsperiode(19.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(3.januar, 18.januar, 100.prosent))
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+    }
+
+    @Test
+    fun `nyere ferdig gap som blir uferdig gap`() {
+        håndterSykmelding(Sykmeldingsperiode(20.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(3.januar, 18.januar, 100.prosent))
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, MOTTATT_SYKMELDING_UFERDIG_GAP)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+    }
+
+    @Test
+    fun `nyere uferdig gap`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 2.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(19.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(10.januar, 18.januar, 100.prosent))
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE)
+        assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP)
+    }
+
+
+    @Test
+    fun `nyere uferdig forlengelse`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 2.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(19.januar, 24.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(25.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(10.januar, 18.januar, 100.prosent))
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE)
+        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE)
+        assertTilstander(4.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP)
+    }
+
+    @Test
+    fun `søknad lager sammenhengende med uferdig`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 2.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(19.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(3.januar, 18.januar, 100.prosent))
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE)
+        assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE)
+    }
+
+    @Test
+    fun `søknad lager sammenhengende med ferdig`() {
+        nyttVedtak(3.januar, 20.januar)
+        håndterSykmelding(Sykmeldingsperiode(25.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(21.januar, 24.januar, 100.prosent))
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE)
+        assertTilstander(3.vedtaksperiode, START, AVVENTER_HISTORIKK)
+    }
+
+    @Test
+    fun `nyere ferdig forlengelse`() {
+        håndterSykmelding(Sykmeldingsperiode(10.februar, 15.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(16.februar, 25.februar, 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(10.februar, 15.februar, 100.prosent))
+        håndterSøknad(Sykdom(3.januar, 9.januar, 100.prosent))
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE)
+        assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
     }
 }
