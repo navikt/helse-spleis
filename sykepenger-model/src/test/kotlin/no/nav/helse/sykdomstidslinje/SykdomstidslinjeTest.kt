@@ -2,17 +2,31 @@ package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class SykdomstidslinjeTest {
 
+    @BeforeEach
+    fun setup() {
+        resetSeed()
+    }
+
     @Test
     fun `tom tidslinje er gyldig`() {
         assertEquals(0, Sykdomstidslinje().count())
+    }
+
+    @Test
+    fun `sykdomstidslinje er rett før når det ikke er arbeidsdag mellom`() {
+        assertTrue(1.S.erRettFør(1.S))
+        assertTrue(1.F.erRettFør(1.F))
+        assertTrue((1.S + 1.UK).erRettFør(2.UK + 1.F))
+        assertFalse(1.S.erRettFør(1.A + 5.S))
+        assertFalse((1.S + 1.A).erRettFør(1.S))
     }
 
     @Test
