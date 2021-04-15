@@ -62,6 +62,32 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `sykmelding foran periode AvventerSøknadUferdigForlengelse`() {
+        håndterSykmelding(Sykmeldingsperiode(3.mars, 4.mars, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(6.mars, 8.mars, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(9.mars, 10.mars, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(13.mars, 22.mars, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(23.mars, 31.mars, 100.prosent))
+        håndterInntektsmeldingMedValidering(
+            1.vedtaksperiode, listOf(
+                3.mars til 4.mars,
+                6.mars til 8.mars,
+                9.mars til 10.mars,
+                13.mars til 22.mars
+            ), 13.mars
+        )
+
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_ARBEIDSGIVERSØKNAD_FERDIG_GAP, AVVENTER_ARBEIDSGIVERSØKNAD_UFERDIG_GAP)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_ARBEIDSGIVERSØKNAD_UFERDIG_GAP)
+        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_SØKNAD_UFERDIG_FORLENGELSE)
+        assertTilstander(4.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_SØKNAD_UFERDIG_GAP)
+        assertTilstander(5.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE)
+        assertTilstander(6.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
+    }
+
+    @Test
     fun `korte arbeidsgiversøknader med inntektsmelding - gap`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 4.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(15.januar, 16.januar, 100.prosent))
@@ -685,6 +711,17 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 9.januar, 100.prosent))
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE)
+        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
+    }
+    @Test
+    fun `ny sykmelding før en ferdig forlengelse med inntektsmelding`() {
+        håndterSykmelding(Sykmeldingsperiode(10.februar, 15.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(16.februar, 25.februar, 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(10.februar, 15.februar, 100.prosent))
+        håndterSøknad(Sykdom(16.februar, 25.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 9.januar, 100.prosent))
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE)
         assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
     }
 }
