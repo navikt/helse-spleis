@@ -706,8 +706,9 @@ internal class Arbeidsgiver private constructor(
     internal fun beregn(aktivitetslogg: IAktivitetslogg, arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger, periode: Periode): Boolean {
         try {
             arbeidsgiverUtbetalinger.beregn(aktivitetslogg, organisasjonsnummer, periode)
-        } catch (err: IllegalArgumentException) {
-            aktivitetslogg.error("Feil ved utbetalingstidslinjebygging: %s", err.message)
+        } catch (err: UtbetalingstidslinjeBuilderException) {
+            aktivitetslogg.info("Feilmelding: ${err.message}")
+            aktivitetslogg.error("Feil ved utbetalingstidslinjebygging (%s)", err::class.simpleName)
         }
         return !aktivitetslogg.hasErrorsOrWorse()
     }

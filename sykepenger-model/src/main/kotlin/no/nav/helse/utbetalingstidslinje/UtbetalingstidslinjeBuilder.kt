@@ -8,6 +8,8 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
+import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException.ManglerInntektException
+import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException.UforventetDagException
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
@@ -55,7 +57,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
             }
 
     private fun inntektForDato(dato: LocalDate) =
-        requireNotNull(inntektForDatoOrNull(dato)) { "Fant ikke inntekt for $dato med skjæringstidspunkter $skjæringstidspunkter" }
+        inntektForDatoOrNull(dato) ?: throw ManglerInntektException(dato, skjæringstidspunkter)
 
     private fun Økonomi.inntektIfNotNull(dato: LocalDate) =
         inntektForDatoOrNull(dato)
@@ -122,7 +124,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         dato: LocalDate,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde,
         melding: String
-    ) = throw IllegalArgumentException("Forventet ikke problemdag i utbetalingstidslinjen. Melding: $melding")
+    ) = throw UforventetDagException(dag, melding)
 
     private fun addForeldetDag(dagen: LocalDate, økonomi: Økonomi) {
         val (skjæringstidspunkt, inntekt) = inntektForDato(dagen)
@@ -702,5 +704,13 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         ) {
         }
     }
+}
 
+internal sealed class UtbetalingstidslinjeBuilderException(message: String) : RuntimeException(message) {
+    internal class ManglerInntektException(dagen: LocalDate, skjæringstidspunkter: List<LocalDate>) : UtbetalingstidslinjeBuilderException(
+        "Fant ikke inntekt for $dagen med skjæringstidspunkter $skjæringstidspunkter"
+    )
+    internal class UforventetDagException(dag: Dag, melding: String) : UtbetalingstidslinjeBuilderException(
+        "Forventet ikke ${dag::class.simpleName} i utbetalingstidslinjen. Melding: $melding"
+    )
 }
