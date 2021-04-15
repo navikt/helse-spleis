@@ -9,7 +9,6 @@ import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
@@ -705,7 +704,6 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    @Disabled("MottattSykmeldingFerdigForlengelse tar ikke i mot Inntektsmelding")
     fun `ny sykmelding før en ferdig forlengelse som avventer søknad (inntektsmelding etter søknad arbeidsgiver)`() {
         håndterSykmelding(Sykmeldingsperiode(8.februar, 15.februar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(16.februar, 25.februar, 100.prosent))

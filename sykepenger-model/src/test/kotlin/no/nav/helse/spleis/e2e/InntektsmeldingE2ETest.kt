@@ -863,4 +863,14 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertEquals(7.februar til 7.februar, inspektør.periode(3.vedtaksperiode))
         assertEquals(23.februar til 25.februar, inspektør.periode(4.vedtaksperiode))
     }
+
+    @Test
+    fun `inntektsmelding i ferdig forlengelse (periode etter søknad arbeidsgiver)`() {
+        håndterSykmelding(Sykmeldingsperiode(8.februar, 15.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(16.februar, 25.februar, 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(8.februar, 15.februar, 100.prosent))
+        håndterInntektsmelding(listOf(8.februar til 23.februar))
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_SØKNAD_FERDIG_FORLENGELSE)
+    }
 }

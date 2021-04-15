@@ -94,6 +94,7 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
             3.vedtaksperiode,
             TilstandType.START,
             TilstandType.MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+            TilstandType.AVVENTER_SØKNAD_FERDIG_FORLENGELSE,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_VILKÅRSPRØVING,
             TilstandType.AVVENTER_HISTORIKK,
