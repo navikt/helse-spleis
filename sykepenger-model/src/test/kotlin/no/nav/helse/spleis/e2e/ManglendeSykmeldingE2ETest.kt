@@ -75,6 +75,32 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `søknad etter forkastet med inntektsmelding`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 2.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(8.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 2.januar, 100.prosent), andreInntektskilder = listOf(
+            Søknad.Inntektskilde(false, "SELVSTENDIG_NÆRINGSDRIVENDE") // <-- TIL_INFOTRYGD
+        ))
+        håndterSøknad(Sykdom(8.februar, 28.februar, 100.prosent))
+        håndterInntektsmelding(listOf(8.februar til 23.februar))
+        assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_HISTORIKK)
+    }
+
+    @Test
+    fun `søknad etter forkastet med inntektsmelding (med kort arbeidsgiverperiode)`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 2.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(8.februar, 12.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(14.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 2.januar, 100.prosent), andreInntektskilder = listOf(
+            Søknad.Inntektskilde(false, "SELVSTENDIG_NÆRINGSDRIVENDE") // <-- TIL_INFOTRYGD
+        ))
+        håndterSøknad(Sykdom(14.februar, 28.februar, 100.prosent))
+        håndterInntektsmelding(listOf(8.februar til 12.februar, 14.februar til 23.februar), 14.februar)
+        assertTilstander(4.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_HISTORIKK)
+        assertEquals(14.februar til 28.februar, inspektør.periode(4.vedtaksperiode))
+    }
+
+    @Test
     fun `søknad ag - overlapper med periode - eldst først`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 3.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(3.januar, 4.januar, 100.prosent))

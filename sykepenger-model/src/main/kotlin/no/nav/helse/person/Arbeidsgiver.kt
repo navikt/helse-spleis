@@ -722,7 +722,7 @@ internal class Arbeidsgiver private constructor(
     internal fun opprettReferanseTilInntekt(fra: LocalDate, til: LocalDate) = inntektshistorikk.opprettReferanse(fra, til, UUID.randomUUID())
 
     private fun trimTidligereBehandletDager(hendelse: Inntektsmelding) {
-        ForkastetVedtaksperiode.overlapperMedForkastet(forkastede, hendelse)
+        ForkastetVedtaksperiode.overlapperMedForkastet(vedtaksperioder, forkastede, hendelse)
     }
 
     internal fun harDagUtenSøknad(periode: Periode) =

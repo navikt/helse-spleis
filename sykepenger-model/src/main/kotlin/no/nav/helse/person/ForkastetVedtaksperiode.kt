@@ -20,8 +20,8 @@ internal class ForkastetVedtaksperiode(
             Vedtaksperiode.overlapperMedForkastet(forkastede.perioder(), hendelse)
         }
 
-        internal fun overlapperMedForkastet(forkastede: Iterable<ForkastetVedtaksperiode>, inntektsmelding: Inntektsmelding) {
-            Vedtaksperiode.overlapperMedForkastet(forkastede.perioder(), inntektsmelding)
+        internal fun overlapperMedForkastet(aktive: Iterable<Vedtaksperiode>, forkastede: Iterable<ForkastetVedtaksperiode>, inntektsmelding: Inntektsmelding) {
+            Vedtaksperiode.overlapperMedForkastet(aktive, forkastede.perioder(), inntektsmelding)
         }
 
         internal fun finnForkastetSykeperiodeRettFør(forkastede: Iterable<ForkastetVedtaksperiode>, other: Vedtaksperiode) =

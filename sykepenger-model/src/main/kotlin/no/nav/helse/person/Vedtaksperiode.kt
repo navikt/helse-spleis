@@ -2051,10 +2051,12 @@ internal class Vedtaksperiode private constructor(
                 }
         }
 
-        internal fun overlapperMedForkastet(forkastede: Iterable<Vedtaksperiode>, inntektsmelding: Inntektsmelding) {
+        internal fun overlapperMedForkastet(aktive: Iterable<Vedtaksperiode>, forkastede: Iterable<Vedtaksperiode>, inntektsmelding: Inntektsmelding) {
             forkastede
-                .filter { it.periode.overlapperMed(inntektsmelding.periode()) }
-                .forEach { inntektsmelding.trimLeft(it.periode.endInclusive) }
+                .map { it.periode }
+                .filterNot { forkastet -> aktive.any { aktiv -> forkastet.overlapperMed(aktiv.periode) } }
+                .filter { it.overlapperMed(inntektsmelding.periode()) }
+                .forEach { inntektsmelding.trimLeft(it.endInclusive) }
         }
 
         internal fun gjentaHistorikk(hendelse: ArbeidstakerHendelse, person: Person) {
