@@ -30,6 +30,22 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `Søknad som er lengre tilbake støttes ikke`() {
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(3.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `Søknad som er lengre frem støttes ikke`() {
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(3.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 1.februar, 100.prosent))
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, TIL_INFOTRYGD)
+    }
+
+    @Test
     fun `Støtter ikke korrigerende søknad på utbetalt vedtaksperiode`() {
         nyttVedtak(1.januar, 31.januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(31.januar, 31.januar))

@@ -370,6 +370,10 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndterOverlappendeSøknad(søknad: Søknad, nesteTilstand: Vedtaksperiodetilstand? = null) {
+        if (søknad.periode().utenfor(periode)) return overlappendeSøknadIkkeStøttet(
+            søknad,
+            "Overlappende søknad starter før, eller slutter etter, opprinnelig periode"
+        )
         if (søknad.harArbeidsdager()) return overlappendeSøknadIkkeStøttet(
             søknad,
             "Mottatt flere søknader for perioden - siste søknad inneholder arbeidsdag"

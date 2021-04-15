@@ -72,6 +72,7 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
         håndterSøknad(Sykdom(3.januar, 4.januar, 100.prosent))
+        assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
         assertEquals(2, inspektør.vedtaksperiodeTeller)
         assertTrue(hendelselogg.hasWarningsOrWorse())
         assertEquals(1.januar til 3.januar, inspektør.periode(2.vedtaksperiode))
@@ -88,8 +89,9 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
         håndterSøknad(Sykdom(1.januar, 3.januar, 100.prosent))
         assertEquals(2, inspektør.vedtaksperiodeTeller)
+        assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
         assertTrue(hendelselogg.hasWarningsOrWorse())
-        assertEquals(1.januar til 4.januar, inspektør.periode(2.vedtaksperiode))
+        assertEquals(3.januar til 4.januar, inspektør.periode(2.vedtaksperiode))
     }
 
     @Test
