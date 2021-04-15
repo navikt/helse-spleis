@@ -754,6 +754,30 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `ny sykmelding før en avventer uferdig gap (inntektsmelding før søknad)`() {
+        håndterSykmelding(Sykmeldingsperiode(10.januar, 10.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(8.februar, 28.februar, 100.prosent))
+        håndterInntektsmelding(listOf(8.februar til 23.februar))
+        håndterSøknad(Sykdom(8.februar, 28.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 9.januar, 100.prosent))
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_SØKNAD_UFERDIG_GAP, AVVENTER_UFERDIG_GAP)
+        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
+    }
+
+    @Test
+    fun `ny sykmelding før en avventer uferdig gap (inntektsmelding etter søknad)`() {
+        håndterSykmelding(Sykmeldingsperiode(10.januar, 10.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(8.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(8.februar, 28.februar, 100.prosent))
+        håndterInntektsmelding(listOf(8.februar til 23.februar))
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 9.januar, 100.prosent))
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP, AVVENTER_UFERDIG_GAP)
+        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
+    }
+
+    @Test
     fun `ny sykmelding før en ferdig forlengelse`() {
         håndterSykmelding(Sykmeldingsperiode(10.februar, 15.februar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(16.februar, 25.februar, 100.prosent))
