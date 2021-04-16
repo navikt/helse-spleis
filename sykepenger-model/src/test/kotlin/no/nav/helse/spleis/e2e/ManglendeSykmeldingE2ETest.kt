@@ -87,7 +87,21 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `søknad etter forkastet med inntektsmelding (med kort arbeidsgiverperiode)`() {
+    fun `søknad etter forkastet med inntektsmelding (med forlengelse av kort arbeidsgiverperiode) - strekkes ikke tilbake`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 2.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(8.februar, 13.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(14.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 2.januar, 100.prosent), andreInntektskilder = listOf(
+            Søknad.Inntektskilde(false, "SELVSTENDIG_NÆRINGSDRIVENDE") // <-- TIL_INFOTRYGD
+        ))
+        håndterSøknad(Sykdom(14.februar, 28.februar, 100.prosent))
+        håndterInntektsmelding(listOf(8.februar til 22.februar))
+        assertTilstander(4.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_HISTORIKK)
+        assertEquals(14.februar til 28.februar, inspektør.periode(4.vedtaksperiode))
+    }
+
+    @Test
+    fun `søknad etter forkastet med inntektsmelding (med gap til kort arbeidsgiverperiode) - strekkes ikke tilbake`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 2.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(8.februar, 12.februar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(14.februar, 28.februar, 100.prosent))
@@ -110,7 +124,6 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
         assertTilstander(2.vedtaksperiode, START, AVSLUTTET_UTEN_UTBETALING)
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(3.januar, 4.januar, 100.prosent))
-        println(inspektør.personLogg)
         assertFalse(inspektør.periodeErForkastet(2.vedtaksperiode))
         assertEquals(2, inspektør.vedtaksperiodeTeller)
         assertTrue(hendelselogg.hasWarningsOrWorse())
