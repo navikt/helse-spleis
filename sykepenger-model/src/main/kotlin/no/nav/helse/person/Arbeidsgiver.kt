@@ -215,20 +215,20 @@ internal class Arbeidsgiver private constructor(
     internal fun håndter(søknad: Søknad) {
         if (Toggles.OppretteVedtaksperioderVedSøknad.enabled) return håndterEllerOpprettVedtaksperiode(søknad, Vedtaksperiode::håndter)
         søknad.kontekst(this)
-        ingenHåndtert(søknad, Vedtaksperiode::håndter, "Forventet ikke søknad. Har nok ikke mottatt sykmelding")
+        noenHarHåndtert(søknad, Vedtaksperiode::håndter, "Forventet ikke søknad. Har nok ikke mottatt sykmelding")
         finalize(søknad)
     }
 
     internal fun håndter(søknad: SøknadArbeidsgiver) {
         if (Toggles.OppretteVedtaksperioderVedSøknad.enabled) return håndterEllerOpprettVedtaksperiode(søknad, Vedtaksperiode::håndter)
         søknad.kontekst(this)
-        ingenHåndtert(søknad, Vedtaksperiode::håndter, "Forventet ikke søknad til arbeidsgiver. Har nok ikke mottatt sykmelding")
+        noenHarHåndtert(søknad, Vedtaksperiode::håndter, "Forventet ikke søknad til arbeidsgiver. Har nok ikke mottatt sykmelding")
         finalize(søknad)
     }
 
     private fun <Hendelse: SykdomstidslinjeHendelse> håndterEllerOpprettVedtaksperiode(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean) {
         hendelse.kontekst(this)
-        if (!ingenHåndtert(hendelse, håndterer)) {
+        if (!noenHarHåndtert(hendelse, håndterer)) {
             if (hendelse.forGammel()) return hendelse.error("Forventet ikke ${hendelse.kilde}. Oppretter ikke vedtaksperiode.")
             if (!hendelse.hasErrorsOrWorse()) {
                 hendelse.info("Lager ny vedtaksperiode pga. ${hendelse.kilde}")
@@ -252,11 +252,11 @@ internal class Arbeidsgiver private constructor(
         inntektsmelding.cacheRefusjon(this)
         trimTidligereBehandletDager(inntektsmelding)
         if (vedtaksperiodeId != null) {
-            if (!énHåndtert(inntektsmelding) { håndter(inntektsmelding, vedtaksperiodeId) })
+            if (!énHarHåndtert(inntektsmelding) { håndter(inntektsmelding, vedtaksperiodeId) })
                 return inntektsmelding.info("Vedtaksperiode overlapper ikke med replayet Inntektsmelding")
             inntektsmelding.info("Replayer inntektsmelding til påfølgende perioder som overlapper.")
         }
-        if (!ingenHåndtert(inntektsmelding, Vedtaksperiode::håndter) && vedtaksperiodeId == null)
+        if (!noenHarHåndtert(inntektsmelding, Vedtaksperiode::håndter) && vedtaksperiodeId == null)
             inntektsmelding.error("Forventet ikke inntektsmelding. Har nok ikke mottatt sykmelding")
 
         finalize(inntektsmelding)
@@ -318,7 +318,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(påminnelse: Påminnelse): Boolean {
         påminnelse.kontekst(this)
-        return énHåndtert(påminnelse, Vedtaksperiode::håndter).also { finalize(påminnelse) }
+        return énHarHåndtert(påminnelse, Vedtaksperiode::håndter).also { finalize(påminnelse) }
     }
 
     internal fun håndter(hendelse: AnnullerUtbetaling) {
@@ -630,7 +630,7 @@ internal class Arbeidsgiver private constructor(
         while (skalGjenopptaBehandling) {
             skalGjenopptaBehandling = false
             val gjenopptaBehandling = GjenopptaBehandling(hendelse)
-            énHåndtert(gjenopptaBehandling, Vedtaksperiode::håndter)
+            énHarHåndtert(gjenopptaBehandling, Vedtaksperiode::håndter)
             Vedtaksperiode.gjentaHistorikk(hendelse, person)
         }
     }
@@ -731,8 +731,8 @@ internal class Arbeidsgiver private constructor(
     internal fun harDagUtenSøknad(periode: Periode) =
         sykdomstidslinje().harDagUtenSøknad(periode)
 
-    private fun <Hendelse: ArbeidstakerHendelse> ingenHåndtert(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean, errortekst: String) {
-        if (ingenHåndtert(hendelse, håndterer)) return
+    private fun <Hendelse: ArbeidstakerHendelse> noenHarHåndtert(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean, errortekst: String) {
+        if (noenHarHåndtert(hendelse, håndterer)) return
         hendelse.error(errortekst)
     }
 
@@ -740,13 +740,13 @@ internal class Arbeidsgiver private constructor(
         looper { håndterer(it, hendelse) }
     }
 
-    private fun <Hendelse: ArbeidstakerHendelse> énHåndtert(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean): Boolean {
+    private fun <Hendelse: ArbeidstakerHendelse> énHarHåndtert(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean): Boolean {
         var håndtert = false
         looper { håndtert = håndtert || håndterer(it, hendelse) }
         return håndtert
     }
 
-    private fun <Hendelse: ArbeidstakerHendelse> ingenHåndtert(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean): Boolean {
+    private fun <Hendelse: ArbeidstakerHendelse> noenHarHåndtert(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean): Boolean {
         var håndtert = false
         looper { håndtert = håndterer(it, hendelse) || håndtert }
         return håndtert
