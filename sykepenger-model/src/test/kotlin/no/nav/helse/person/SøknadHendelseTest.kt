@@ -4,7 +4,8 @@ import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Egenmelding
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
@@ -36,13 +37,6 @@ internal class SøknadHendelseTest : AbstractPersonTest() {
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
-    }
-
-    @Test
-    fun `mangler Sykmelding`() {
-        person.håndter(søknad(Sykdom(1.januar,  5.januar, 100.prosent)))
-        assertTrue(inspektør.personLogg.hasErrorsOrWorse())
-        assertEquals(0, inspektør.vedtaksperiodeTeller)
     }
 
     @Test

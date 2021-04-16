@@ -35,13 +35,6 @@ internal class SøknadArbeidsgiverHendelseTest : AbstractPersonTest() {
     }
 
     @Test
-    fun `mangler Sykmelding`() {
-        person.håndter(søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 100.prosent)))
-        assertTrue(inspektør.personLogg.hasErrorsOrWorse())
-        assertEquals(0, inspektør.vedtaksperiodeTeller)
-    }
-
-    @Test
     fun `andre søknad ignoreres`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent)))
         person.håndter(søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 100.prosent)))

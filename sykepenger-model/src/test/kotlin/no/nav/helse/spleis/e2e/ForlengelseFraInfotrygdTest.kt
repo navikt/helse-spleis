@@ -128,7 +128,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `forlengelsesperiode der refusjon opphører`() {
+    fun `forlengelsesperiode der refusjon opphører - med søknad for forkastet periode`() {
         håndterSykmelding(Sykmeldingsperiode(13.mars(2020), 29.mars(2020), 100.prosent))
         håndterInntektsmeldingMedValidering(
             1.vedtaksperiode,
@@ -140,7 +140,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(13.mars(2020), 29.mars(2020), 100.prosent))
         håndterSøknad(Sykdom(30.mars(2020), 14.april(2020), 100.prosent))
         håndterUtbetalingshistorikk(
-            2.vedtaksperiode,
+            3.vedtaksperiode,
             Utbetalingsperiode(ORGNUMMER, 13.mars(2020) til 29.mars(2020), 100.prosent, 1000.daglig),
             inntektshistorikk = listOf(
                 Inntektsopplysning(
@@ -154,9 +154,36 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             2.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
+            AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
             TIL_INFOTRYGD
         )
+        assertForkastetPeriodeTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `forlengelsesperiode der refusjon opphører`() {
+        håndterSykmelding(Sykmeldingsperiode(13.mars(2020), 29.mars(2020), 100.prosent))
+        håndterInntektsmeldingMedValidering(
+            1.vedtaksperiode,
+            listOf(Periode(13.mars(2020), 28.mars(2020))),
+            førsteFraværsdag = 13.mars(2020),
+            refusjon = Triple(31.mars(2020), INNTEKT, emptyList())
+        )
+        håndterSykmelding(Sykmeldingsperiode(30.mars(2020), 14.april(2020), 100.prosent))
+        håndterSøknad(Sykdom(30.mars(2020), 14.april(2020), 100.prosent))
+        håndterUtbetalingshistorikk(
+            2.vedtaksperiode,
+            Utbetalingsperiode(ORGNUMMER, 13.mars(2020) til 29.mars(2020), 100.prosent, 1000.daglig),
+            inntektshistorikk = listOf(
+                Inntektsopplysning(
+                    ORGNUMMER,
+                    13.mars(2020), INNTEKT, true, 31.mars(2020)
+                )
+            )
+        )
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, TIL_INFOTRYGD)
     }
 
     @Test
