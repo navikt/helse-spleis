@@ -12,7 +12,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-class Søknad constructor(
+class Søknad(
     meldingsreferanseId: UUID,
     private val fnr: String,
     private val aktørId: String,
@@ -38,6 +38,10 @@ class Søknad constructor(
             .map { it.sykdomstidslinje(avskjæringsdato(), kilde) }
             .filter { it.periode()?.start?.isAfter(sykdomsperiode.start.minusDays(tidslinjegrense)) ?: false }
             .merge(søknadDagturnering::beste)
+    }
+
+    override fun forGammel() = (sykdomsperiode.endInclusive < avskjæringsdato()).also {
+        if (it) error("Søknaden kan ikke være eldre enn avskjæringsdato")
     }
 
     override fun sykdomstidslinje() = sykdomstidslinje

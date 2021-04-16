@@ -42,6 +42,7 @@ abstract class SykdomstidslinjeHendelse(
         internal fun erAvType(meldingstype: Melding) = this.type == kildenavn(meldingstype)
     }
 
+    internal open fun forGammel() = false
     internal abstract fun sykdomstidslinje(): Sykdomstidslinje
 
     internal fun erRelevant(other: Periode) = !trimmetForbi() && erRelevantMed(other)

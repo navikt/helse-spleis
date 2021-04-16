@@ -177,6 +177,6 @@ internal class SøknadArbeidsgiverHendelseTest : AbstractPersonTest() {
             aktørId = "12345",
             orgnummer = orgnummer,
             sykeperioder = sykeperioder.toList(),
-            mottatt = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.plusMonths(3)?.atStartOfDay() ?: LocalDateTime.now()
+            opprettet = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.plusMonths(3)?.atStartOfDay() ?: LocalDateTime.now()
         )
 }

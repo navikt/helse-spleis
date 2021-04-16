@@ -9,6 +9,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.september
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.*
@@ -27,6 +28,13 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
     @AfterAll
     fun teardown() {
         Toggles.OppretteVedtaksperioderVedSøknad.disable()
+    }
+
+    @Test
+    fun `kan ikke sende inn en gammel søknad`() {
+        håndterSøknad(Sykdom(3.januar, 31.januar, 100.prosent), sendtTilNav = 1.september)
+        assertTrue(hendelselogg.hasErrorsOrWorse())
+        assertEquals(0, inspektør.vedtaksperiodeTeller)
     }
 
     @Test

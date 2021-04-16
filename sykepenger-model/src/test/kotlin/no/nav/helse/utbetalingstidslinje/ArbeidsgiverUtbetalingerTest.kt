@@ -12,7 +12,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 
 internal class ArbeidsgiverUtbetalingerTest {
@@ -338,7 +337,14 @@ internal class ArbeidsgiverUtbetalingerTest {
     ) {
         val arbeidsgiver = Arbeidsgiver(Person("aktørid", fnr), "88888888")
         // seed arbeidsgiver med sykdomshistorikk
-        arbeidsgiver.håndter(Sykmelding(UUID.randomUUID(), UNG_PERSON_FNR_2018, "", "", listOf(Sykmeldingsperiode(1.januar, 2.januar, 100.prosent)), LocalDateTime.now()))
+        arbeidsgiver.håndter(Sykmelding(
+            meldingsreferanseId = UUID.randomUUID(),
+            fnr = UNG_PERSON_FNR_2018,
+            aktørId = "",
+            orgnummer = "",
+            sykeperioder = listOf(Sykmeldingsperiode(1.januar, 2.januar, 100.prosent)),
+            opprettet = 1.januar.atStartOfDay()
+        ))
         aktivitetslogg = Aktivitetslogg()
         ArbeidsgiverUtbetalinger(
             NormalArbeidstaker,

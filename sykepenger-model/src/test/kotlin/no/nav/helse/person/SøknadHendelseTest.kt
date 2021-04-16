@@ -103,6 +103,6 @@ internal class SøknadHendelseTest : AbstractPersonTest() {
             aktørId = "12345",
             orgnummer = orgnummer,
             sykeperioder = sykeperioder.toList(),
-            mottatt = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now()
+            opprettet = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now()
         )
 }

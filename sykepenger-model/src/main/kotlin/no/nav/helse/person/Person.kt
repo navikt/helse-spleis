@@ -40,7 +40,7 @@ class Person private constructor(
 
     private val observers = mutableListOf<PersonObserver>()
 
-    fun håndter(sykmelding: Sykmelding) = håndter(sykmelding, "sykmelding") { sykmelding.forGammel() }
+    fun håndter(sykmelding: Sykmelding) = håndter(sykmelding, "sykmelding")
 
     fun håndter(søknad: Søknad) = håndter(søknad, "søknad")
 
@@ -55,11 +55,9 @@ class Person private constructor(
 
     private fun håndter(
         hendelse: SykdomstidslinjeHendelse,
-        hendelsesmelding: String,
-        avvisIf: () -> Boolean = { false }
+        hendelsesmelding: String
     ) {
         registrer(hendelse, "Behandler $hendelsesmelding")
-        if (avvisIf()) return
         val arbeidsgiver = finnEllerOpprettArbeidsgiver(hendelse)
         hendelse.fortsettÅBehandle(arbeidsgiver)
     }

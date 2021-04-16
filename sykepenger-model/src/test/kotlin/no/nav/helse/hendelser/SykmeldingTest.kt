@@ -65,7 +65,7 @@ internal class SykmeldingTest {
             aktørId = "12345",
             orgnummer = "987654321",
             sykeperioder = sykeperioder.toList(),
-            mottatt = mottatt ?: tidligsteFom ?: LocalDateTime.now()
+            opprettet = mottatt ?: tidligsteFom ?: LocalDateTime.now()
         )
     }
 

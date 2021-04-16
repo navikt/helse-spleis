@@ -41,7 +41,7 @@ internal class HistoriePeriodetypeTest {
             aktørId = aktørId,
             orgnummer = AG1,
             sykeperioder = listOf(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent)),
-            mottatt = 1.februar.atStartOfDay()
+            opprettet = 1.februar.atStartOfDay()
         ))
     }
 
