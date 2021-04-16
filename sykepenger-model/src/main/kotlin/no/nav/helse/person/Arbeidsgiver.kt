@@ -229,7 +229,7 @@ internal class Arbeidsgiver private constructor(
     private fun <Hendelse: SykdomstidslinjeHendelse> håndterEllerOpprettVedtaksperiode(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean) {
         hendelse.kontekst(this)
         if (!ingenHåndtert(hendelse, håndterer)) {
-            if (hendelse.forGammel()) return hendelse.error("Forventet ikke ${hendelse.kilde}")
+            if (hendelse.forGammel()) return hendelse.error("Forventet ikke ${hendelse.kilde}. Oppretter ikke vedtaksperiode.")
             if (!hendelse.hasErrorsOrWorse()) {
                 hendelse.info("Lager ny vedtaksperiode pga. ${hendelse.kilde}")
                 val ny = nyVedtaksperiode(hendelse).also { håndterer(it, hendelse) }
