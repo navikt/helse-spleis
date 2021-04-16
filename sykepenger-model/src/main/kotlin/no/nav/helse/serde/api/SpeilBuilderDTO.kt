@@ -220,7 +220,9 @@ enum class BegrunnelseDTO {
     MinimumInntekt,
     EgenmeldingUtenforArbeidsgiverperiode,
     MinimumSykdomsgrad,
-    EtterDødsdato
+    EtterDødsdato,
+    ManglerMedlemskap,
+    ManglerOpptjening
 }
 
 interface HendelseDTO {

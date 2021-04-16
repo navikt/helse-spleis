@@ -349,7 +349,8 @@ internal class JsonBuilder : AbstractBuilder() {
                     Medlemskapsvurdering.Medlemskapstatus.VetIkke -> JsonMedlemskapstatus.VET_IKKE
                 },
                 "harMinimumInntekt" to grunnlagsdata.harMinimumInntekt,
-                "vurdertOk" to grunnlagsdata.vurdertOk
+                "vurdertOk" to grunnlagsdata.vurdertOk,
+                "meldingsreferanseId" to grunnlagsdata.meldingsreferanseId
             ))
         }
 

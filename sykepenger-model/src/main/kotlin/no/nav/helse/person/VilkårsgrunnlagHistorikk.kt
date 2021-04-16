@@ -7,6 +7,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 import java.time.LocalDate
+import java.util.*
 
 internal class VilkårsgrunnlagHistorikk private constructor(
     private val historikk: MutableMap<LocalDate, VilkårsgrunnlagElement>
@@ -58,7 +59,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(
         internal val harOpptjening: Boolean,
         internal val medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
         internal val harMinimumInntekt: Boolean?,
-        internal val vurdertOk: Boolean
+        internal val vurdertOk: Boolean,
+        internal val meldingsreferanseId: UUID
     ) : VilkårsgrunnlagElement {
 
         override fun valider(aktivitetslogg: Aktivitetslogg) {
@@ -77,7 +79,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(
             harOpptjening = harOpptjening,
             medlemskapstatus = medlemskapstatus,
             harMinimumInntekt = minimumInntektVurdering,
-            vurdertOk = vurdertOk && minimumInntektVurdering
+            vurdertOk = vurdertOk && minimumInntektVurdering,
+            meldingsreferanseId = meldingsreferanseId
         )
     }
 
@@ -95,7 +98,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(
     private fun finnBegrunnelser(vilkårsgrunnlag: VilkårsgrunnlagHistorikk.Grunnlagsdata): List<Begrunnelse> {
         val begrunnelser = mutableListOf<Begrunnelse>()
 
-        if (vilkårsgrunnlag.medlemskapstatus === Medlemskapsvurdering.Medlemskapstatus.Nei) begrunnelser.add(Begrunnelse.ManglerMedlemskap)
+        if (vilkårsgrunnlag.medlemskapstatus == Medlemskapsvurdering.Medlemskapstatus.Nei) begrunnelser.add(Begrunnelse.ManglerMedlemskap)
         if (vilkårsgrunnlag.harMinimumInntekt == false) begrunnelser.add(Begrunnelse.ManglerMedlemskap)
         if (!vilkårsgrunnlag.harOpptjening) begrunnelser.add(Begrunnelse.ManglerOpptjening)
         return begrunnelser

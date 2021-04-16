@@ -43,7 +43,7 @@ internal class VedtaksperiodeBuilder(
         TilstandType.TIL_UTBETALING,
         TilstandType.AVVENTER_ARBEIDSGIVERE
     )
-    private val warnings = hentWarnings(vedtaksperiode)
+    private val warnings = hentWarnings(vedtaksperiode) + (dataForVilkårsvurdering?.let { hentVilkårsgrunnlagWarnings(vedtaksperiode, id, it.meldingsreferanseId) } ?: emptyList())
     private val beregnetSykdomstidslinje = mutableListOf<SykdomstidslinjedagDTO>()
 
     private val medlemskapstatusDTO: MedlemskapstatusDTO? = dataForVilkårsvurdering?.let { grunnlagsdata ->
@@ -280,6 +280,25 @@ internal class VedtaksperiodeBuilder(
                         }
                 }
             })
+        return aktiviteter.distinctBy { it.melding }
+    }
+
+    private fun hentVilkårsgrunnlagWarnings(vedtaksperiode: Vedtaksperiode, vedtaksperiodeId: UUID, vilkårsgrunnlagId: UUID): List<AktivitetDTO> {
+        val aktiviteter = mutableListOf<AktivitetDTO>()
+        Vedtaksperiode.hentVilkårsgrunnlagAktiviteter(vedtaksperiode).accept(object : AktivitetsloggVisitor {
+            override fun visitWarn(
+                kontekster: List<SpesifikkKontekst>,
+                aktivitet: Aktivitetslogg.Aktivitet.Warn,
+                melding: String,
+                tidsstempel: String
+            ) {
+                kontekster.filter { it.kontekstType == "Vilkårsgrunnlag" }
+                    .map { it.kontekstMap["meldingsreferanseId"] }
+                    .map(UUID::fromString)
+                    .find { it == vilkårsgrunnlagId }
+                    ?.also { aktiviteter.add(AktivitetDTO(vedtaksperiodeId, "W", melding, tidsstempel)) }
+            }
+        })
         return aktiviteter.distinctBy { it.melding }
     }
 

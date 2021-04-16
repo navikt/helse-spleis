@@ -46,7 +46,8 @@ class Vilkårsgrunnlag(
             harOpptjening = opptjeningvurdering.harOpptjening(),
             medlemskapstatus = medlemskapsvurdering.medlemskapstatus,
             harMinimumInntekt = harMinimumInntekt,
-            vurdertOk = inntektsvurderingOk && opptjeningvurderingOk && medlemskapsvurderingOk && harMinimumInntekt
+            vurdertOk = inntektsvurderingOk && opptjeningvurderingOk && medlemskapsvurderingOk && harMinimumInntekt,
+            meldingsreferanseId = meldingsreferanseId()
         )
         return this
     }

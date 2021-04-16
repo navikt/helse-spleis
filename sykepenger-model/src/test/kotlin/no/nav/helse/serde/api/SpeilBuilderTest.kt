@@ -1,5 +1,6 @@
 package no.nav.helse.serde.api
 
+import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
@@ -10,6 +11,7 @@ import no.nav.helse.serde.api.InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.Omregne
 import no.nav.helse.serde.mapping.SpeilDagtype
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -984,10 +986,155 @@ class SpeilBuilderTest {
         ).also { (søknad, _) ->
             person.håndter(søknad)
         }
-        person.håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
         person.håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId, dødsdato = 1.januar))
 
         assertEquals(1.januar, serializePersonForSpeil(person).dødsdato)
+    }
+
+    @Test
+    fun `Forlengelse får med warnings fra vilkårsprøving gjort i forrige periode`() {
+        val fom = 1.januar
+        val tom = 31.januar
+        val forlengelseFom = 1.februar
+        val forlengelseTom = 28.februar
+        val person = Person(aktørId, fnr)
+        sykmelding(fom = fom, tom = tom).also { (sykmelding, sykmeldingDTO) ->
+            person.håndter(sykmelding)
+        }
+        person.fangeVedtaksperiodeId()
+        søknad(
+            hendelseId = UUID.randomUUID(),
+            fom = fom,
+            tom = tom,
+            sendtSøknad = fom.plusDays(1).atStartOfDay()
+        ).also { (søknad, _) -> person.håndter(søknad) }
+        inntektsmelding(
+            fom = fom,
+            refusjon = Inntektsmelding.Refusjon(opphørsdato = null, inntekt = 1000.månedlig, endringerIRefusjon = emptyList()),
+            beregnetInntekt = 1000.månedlig
+        ).also { (inntektsmelding, _) -> person.håndter(inntektsmelding) }
+        person.håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+        person.håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId, inntektsvurdering = Inntektsvurdering(inntektperioder {
+            inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            1.januar(2017) til 1.desember(2017) inntekter {
+                orgnummer inntekt 1000.månedlig
+            }
+        })))
+        person.håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+        person.håndter(
+            utbetalingsgodkjenning(
+                vedtaksperiodeId = vedtaksperiodeId,
+                automatiskBehandling = false,
+                aktivitetslogg = person.aktivitetslogg
+            )
+        )
+
+        sykmelding(
+            fom = forlengelseFom,
+            tom = forlengelseTom
+        ).also { (sykmelding, _) -> person.håndter(sykmelding) }
+        person.fangeVedtaksperiodeId()
+        søknad(
+            hendelseId = UUID.randomUUID(),
+            fom = forlengelseFom,
+            tom = forlengelseTom,
+            sendtSøknad = forlengelseTom.atStartOfDay()
+        ).also { (søknad, _) -> person.håndter(søknad) }
+        person.håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+        person.håndter(
+            utbetalingsgodkjenning(
+                vedtaksperiodeId = vedtaksperiodeId,
+                automatiskBehandling = false,
+                aktivitetslogg = person.aktivitetslogg
+            )
+        )
+
+        val serialisertVedtaksperiode = serializePersonForSpeil(person).arbeidsgivere.single().vedtaksperioder.last() as VedtaksperiodeDTO
+        assertTrue(serialisertVedtaksperiode.aktivitetslogg.any { it.melding == "Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag" })
+    }
+
+    @Test
+    fun `Vedtaksperioder fra flere arbeidsgivere får samme vilkårsgrunnlag-warnings`() {
+        Toggles.FlereArbeidsgivereFørstegangsbehandling.enable {
+            val fom = 1.januar
+            val tom = 31.januar
+            val person = Person(aktørId, fnr)
+            person.håndter(sykmelding(orgnummer = orgnummer, fom = fom, tom = tom).first)
+            person.håndter(sykmelding(orgnummer = orgnummer2, fom = fom, tom = tom, grad = 100.prosent).first)
+            val vedtaksperiodeId1 = person.collectVedtaksperiodeIder(orgnummer).last()
+            val vedtaksperiodeId2 = person.collectVedtaksperiodeIder(orgnummer2).last()
+            person.håndter(
+                søknad(
+                    hendelseId = UUID.randomUUID(),
+                    fom = fom,
+                    tom = tom,
+                    sendtSøknad = fom.plusDays(1).atStartOfDay()
+                ).first
+            )
+            person.håndter(
+                inntektsmelding(
+                    organisasjonsnummer = orgnummer,
+                    fom = fom,
+                    refusjon = Inntektsmelding.Refusjon(opphørsdato = null, inntekt = 1000.månedlig, endringerIRefusjon = emptyList()),
+                    beregnetInntekt = 1000.månedlig
+                ).first
+            )
+            person.håndter(
+                inntektsmelding(
+                    organisasjonsnummer = orgnummer2,
+                    fom = fom,
+                    refusjon = Inntektsmelding.Refusjon(opphørsdato = null, inntekt = 1000.månedlig, endringerIRefusjon = emptyList()),
+                    beregnetInntekt = 1000.månedlig
+                ).first
+            )
+            person.håndter(søknad(orgnummer = orgnummer2, fom = fom, tom = tom, grad = 100.prosent).first)
+            person.håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId2, orgnummer = orgnummer2))
+            person.håndter(vilkårsgrunnlag(
+                vedtaksperiodeId = vedtaksperiodeId2,
+                inntektsvurdering = Inntektsvurdering(inntektperioder {
+                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                    1.januar(2017) til 1.desember(2017) inntekter {
+                        orgnummer inntekt 1000.månedlig
+                        orgnummer2 inntekt 1000.månedlig
+                    }
+                }),
+                organisasjonsnummer = orgnummer2
+            ))
+
+            person.håndter(
+                ytelser(
+                    vedtaksperiodeId = vedtaksperiodeId1,
+                    orgnummer = orgnummer
+                )
+            )
+            person.håndter(
+                utbetalingsgodkjenning(
+                    vedtaksperiodeId = vedtaksperiodeId1,
+                    automatiskBehandling = false,
+                    aktivitetslogg = person.aktivitetslogg
+                )
+            )
+            person.håndter(
+                ytelser(
+                    vedtaksperiodeId = vedtaksperiodeId2,
+                    orgnummer = orgnummer2
+                )
+            )
+            person.håndter(
+                utbetalingsgodkjenning(
+                    vedtaksperiodeId = vedtaksperiodeId2,
+                    automatiskBehandling = false,
+                    aktivitetslogg = person.aktivitetslogg
+                )
+            )
+
+            val vedtaksperioder = serializePersonForSpeil(person)
+                .arbeidsgivere.flatMap { it.vedtaksperioder }
+
+            assertEquals(2, vedtaksperioder.size)
+            assertTrue((vedtaksperioder.first() as VedtaksperiodeDTO).aktivitetslogg.any { it.melding == "Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag" })
+            assertTrue((vedtaksperioder.last() as VedtaksperiodeDTO).aktivitetslogg.any { it.melding == "Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag" })
+        }
     }
 
     private fun <T> Collection<T>.assertOnNonEmptyCollection(func: (T) -> Unit) {
@@ -1029,7 +1176,7 @@ class SpeilBuilderTest {
         private const val aktørId = "12345"
         private const val fnr = "12020052345"
         private const val orgnummer = "987654321"
-        private const val orgnummer2 = "1234"
+        private const val orgnummer2 = "123456789"
         private lateinit var vedtaksperiodeId: String
         private val vedtaksperiodeIder: MutableList<String> = mutableListOf()
         private val utbetalingsliste: MutableMap<String, List<Utbetaling>> = mutableMapOf()
@@ -1563,19 +1710,22 @@ class SpeilBuilderTest {
 
         private fun inntektsmelding(
             hendelseId: UUID = UUID.randomUUID(),
-            fom: LocalDate
-        ) = Inntektsmelding(
-            meldingsreferanseId = hendelseId,
-            refusjon = Inntektsmelding.Refusjon(
+            fom: LocalDate,
+            refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(
                 opphørsdato = null,
                 inntekt = 31000.månedlig,
                 endringerIRefusjon = emptyList()
             ),
-            orgnummer = orgnummer,
+            beregnetInntekt: Inntekt = 31000.månedlig,
+            organisasjonsnummer: String = orgnummer
+        ) = Inntektsmelding(
+            meldingsreferanseId = hendelseId,
+            refusjon = refusjon,
+            orgnummer = organisasjonsnummer,
             fødselsnummer = fnr,
             aktørId = aktørId,
             førsteFraværsdag = fom,
-            beregnetInntekt = 31000.månedlig,
+            beregnetInntekt = beregnetInntekt,
             arbeidsgiverperioder = listOf(Periode(fom, fom.plusDays(15))),
             ferieperioder = emptyList(),
             arbeidsforholdId = null,
@@ -1583,25 +1733,27 @@ class SpeilBuilderTest {
             mottatt = LocalDateTime.now()
         ) to InntektsmeldingDTO(
             id = hendelseId.toString(),
-            beregnetInntekt = 31000.00,
+            beregnetInntekt = beregnetInntekt.reflection { _, månedlig, _, _ -> månedlig },
             mottattDato = fom.atStartOfDay()
         )
 
         private fun vilkårsgrunnlag(
             vedtaksperiodeId: String,
-            medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja
-        ) = Vilkårsgrunnlag(
-            meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = vedtaksperiodeId,
-            aktørId = aktørId,
-            fødselsnummer = fnr,
-            orgnummer = orgnummer,
-            inntektsvurdering = Inntektsvurdering(inntektperioder {
+            medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+            inntektsvurdering: Inntektsvurdering = Inntektsvurdering(inntektperioder {
                 inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
                 1.januar(2017) til 1.desember(2017) inntekter {
                     orgnummer inntekt 31000.månedlig
                 }
             }),
+            organisasjonsnummer: String = orgnummer
+        ) = Vilkårsgrunnlag(
+            meldingsreferanseId = UUID.randomUUID(),
+            vedtaksperiodeId = vedtaksperiodeId,
+            aktørId = aktørId,
+            fødselsnummer = fnr,
+            orgnummer = organisasjonsnummer,
+            inntektsvurdering = inntektsvurdering,
             opptjeningvurdering = Opptjeningvurdering(
                 listOf(
                     Opptjeningvurdering.Arbeidsforhold(

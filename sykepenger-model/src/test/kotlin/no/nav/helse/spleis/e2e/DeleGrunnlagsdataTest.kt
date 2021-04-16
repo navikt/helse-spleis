@@ -16,6 +16,7 @@ import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import java.util.*
 
 internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
 
@@ -300,7 +301,8 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
             harOpptjening = true,
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             harMinimumInntekt = null,
-            vurdertOk = true
+            vurdertOk = true,
+            meldingsreferanseId = UUID.randomUUID()
         )
         person.vilkårsgrunnlagHistorikk.lagre(1.januar, vilkårsgrunnlagElement)
 
@@ -337,7 +339,8 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
             harOpptjening = true,
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             harMinimumInntekt = null,
-            vurdertOk = true
+            vurdertOk = true,
+            meldingsreferanseId = UUID.randomUUID()
         )
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)

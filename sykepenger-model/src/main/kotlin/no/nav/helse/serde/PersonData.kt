@@ -160,7 +160,8 @@ internal data class PersonData(
         private val antallOpptjeningsdagerErMinst: Int?,
         private val medlemskapstatus: JsonMedlemskapstatus?,
         private val harMinimumInntekt: Boolean?,
-        private val vurdertOk: Boolean?
+        private val vurdertOk: Boolean?,
+        private val meldingsreferanseId: UUID?
     ) {
         internal fun parseDataForVilkårsvurdering(): Pair<LocalDate, VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement> = skjæringstidspunkt to when (type) {
             GrunnlagsdataType.Vilkårsprøving -> VilkårsgrunnlagHistorikk.Grunnlagsdata(
@@ -174,7 +175,8 @@ internal data class PersonData(
                     JsonMedlemskapstatus.VET_IKKE -> Medlemskapsvurdering.Medlemskapstatus.VetIkke
                 },
                 harMinimumInntekt = harMinimumInntekt,
-                vurdertOk = vurdertOk!!
+                vurdertOk = vurdertOk!!,
+                meldingsreferanseId = meldingsreferanseId!!
             )
             GrunnlagsdataType.Infotrygd -> VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag()
         }

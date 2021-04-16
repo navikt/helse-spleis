@@ -413,4 +413,23 @@ class Person private constructor(
         val grunnlagsdataMedHarMinimumInntekt = grunnlagsdata.grunnlagsdataMedMinimumInntektsvurdering(harMinimumInntekt)
         vilkårsgrunnlagHistorikk.lagre(skjæringstidspunkt, grunnlagsdataMedHarMinimumInntekt)
     }
+
+    internal fun warningsFraVilkårsgrunnlag(vilkårsgrunnlagId: UUID): List<Aktivitetslogg.Aktivitet> {
+        val aktiviteter = mutableListOf<Aktivitetslogg.Aktivitet>()
+        aktivitetslogg.accept(object : AktivitetsloggVisitor {
+            override fun visitWarn(
+                kontekster: List<SpesifikkKontekst>,
+                aktivitet: Aktivitetslogg.Aktivitet.Warn,
+                melding: String,
+                tidsstempel: String
+            ) {
+                kontekster.filter { it.kontekstType == "Vilkårsgrunnlag" }
+                    .map { it.kontekstMap["meldingsreferanseId"] }
+                    .map(UUID::fromString)
+                    .find { it == vilkårsgrunnlagId }
+                    ?.also { aktiviteter.add(aktivitet) }
+            }
+        })
+        return aktiviteter
+    }
 }

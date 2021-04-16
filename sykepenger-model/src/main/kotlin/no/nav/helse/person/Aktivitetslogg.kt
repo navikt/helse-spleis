@@ -84,6 +84,14 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
         }
     }
 
+    internal fun logg(vararg kontekst: String): Aktivitetslogg {
+        return Aktivitetslogg(this).also { aktivitetslogg ->
+            aktivitetslogg.aktiviteter.addAll(this.aktiviteter.filter { aktivitet ->
+                kontekst.any { kontekst -> kontekst in aktivitet.kontekster.map { it.kontekstType } }
+            })
+        }
+    }
+
     override fun kontekster() =
         aktiviteter
             .groupBy { it.kontekst(listOf("Person", "Arbeidsgiver", "Vedtaksperiode")) }

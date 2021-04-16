@@ -2039,6 +2039,10 @@ internal class Vedtaksperiode private constructor(
             return vedtaksperiode.person.aktivitetslogg.logg(*aktivitetskontekster.toTypedArray())
         }
 
+        internal fun hentVilkårsgrunnlagAktiviteter(vedtaksperiode: Vedtaksperiode): Aktivitetslogg {
+            return vedtaksperiode.person.aktivitetslogg.logg("Vilkårsgrunnlag")
+        }
+
         internal fun tidligerePerioderFerdigBehandlet(perioder: List<Vedtaksperiode>, vedtaksperiode: Vedtaksperiode) =
             perioder
                 .filter { it < vedtaksperiode }
