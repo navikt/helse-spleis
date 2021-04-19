@@ -767,6 +767,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
+            if (Toggles.OverlappendeSykmelding.enabled) return vedtaksperiode.oppdaterHistorikk(sykmelding)
             sykmelding.error("Mottatt overlappende sykmeldinger - det støttes ikke før replay av hendelser er på plass")
             if (!skalForkastesVedOverlapp) return
             vedtaksperiode.tilstand(sykmelding, TilInfotrygd)

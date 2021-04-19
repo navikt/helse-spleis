@@ -53,7 +53,7 @@ abstract class SykdomstidslinjeHendelse(
     }
 
     private val aldri = LocalDate.MIN til LocalDate.MIN
-    private fun trimmetForbi() = periode() == aldri
+    internal fun trimmetForbi() = periode() == aldri
     internal fun periode(): Periode {
         val periode = sykdomstidslinje().periode() ?: aldri
         val fom = nesteFom ?: return periode
