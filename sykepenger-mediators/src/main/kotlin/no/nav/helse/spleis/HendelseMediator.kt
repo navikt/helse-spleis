@@ -176,10 +176,12 @@ internal class HendelseMediator(
     }
 
     private fun person(hendelse: PersonHendelse): Person {
-        return personRepository.hentPerson(hendelse.fødselsnummer()) ?: Person(
-            aktørId = hendelse.aktørId(),
-            fødselsnummer = hendelse.fødselsnummer()
-        )
+        return personRepository.hentPerson(hendelse.fødselsnummer())
+            ?.deserialize(hendelseRepository::hentAlleHendelser) ?:
+            Person(
+                aktørId = hendelse.aktørId(),
+                fødselsnummer = hendelse.fødselsnummer()
+            )
     }
 
     private fun finalize(personMediator: PersonMediator, message: HendelseMessage, hendelse: PersonHendelse) {

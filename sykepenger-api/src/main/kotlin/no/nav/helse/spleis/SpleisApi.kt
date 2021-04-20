@@ -23,31 +23,6 @@ import no.nav.helse.serde.api.SykmeldingDTO as SerdeSykmeldingDTO
 import no.nav.helse.serde.api.SøknadArbeidsgiverDTO as SerdeSøknadArbeidsgiverDTO
 import no.nav.helse.serde.api.SøknadNavDTO as SerdeSøknadNavDTO
 
-internal fun Application.spleisApi(dataSource: DataSource, authProviderName: String) {
-    val hendelseDao = HendelseDao(dataSource)
-    val personDao = PersonDao(dataSource)
-
-    routing {
-        authenticate(authProviderName) {
-            get("/api/person/{aktørId}") {
-                personDao.hentPersonAktørId(call.parameters["aktørId"]!!)
-                    ?.let { håndterPerson(it, hendelseDao) }
-                    ?.let { call.respond(it) }
-                    ?: call.respond(HttpStatusCode.NotFound, "Resource not found")
-            }
-
-
-            get("/api/person/fnr/{fnr}") {
-                personDao.hentPerson(call.parameters["fnr"]!!)
-                    ?.let { håndterPerson(it, hendelseDao) }
-                    ?.let { call.respond(it) }
-                    ?: call.respond(HttpStatusCode.NotFound, "Resource not found")
-            }
-
-        }
-    }
-}
-
 internal fun Application.spesialistApi(dataSource: DataSource, authProviderName: String) {
     val hendelseDao = HendelseDao(dataSource)
     val personDao = PersonDao(dataSource)
@@ -56,6 +31,7 @@ internal fun Application.spesialistApi(dataSource: DataSource, authProviderName:
         authenticate(authProviderName) {
             get("/api/person-snapshot") {
                 personDao.hentPerson(call.request.header("fnr")!!)
+                    ?.deserialize(hendelseDao::hentAlleHendelser)
                     ?.let { håndterPerson(it, hendelseDao) }
                     ?.let { call.respond(it) }
                     ?: call.respond(HttpStatusCode.NotFound, "Resource not found")

@@ -84,6 +84,18 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         else -> null.also { log.warn("ukjent meldingstype ${melding::class.simpleName}: melding lagres ikke") }
     }
 
+    internal fun hentAlleHendelser(): Map<UUID, String> {
+        return using(sessionOf(dataSource)) { session ->
+            session.run(
+                queryOf(
+                    "SELECT melding_id,data FROM melding WHERE melding_type IN (?, ?, ?, ?)",
+                    NY_SØKNAD, SENDT_SØKNAD_ARBEIDSGIVER, SENDT_SØKNAD_NAV, INNTEKTSMELDING
+                ).map {
+                    UUID.fromString(it.string("melding_id")) to it.string("data")
+                }.asList).toMap()
+        }
+    }
+
     private enum class Meldingstype {
         NY_SØKNAD,
         SENDT_SØKNAD_ARBEIDSGIVER,

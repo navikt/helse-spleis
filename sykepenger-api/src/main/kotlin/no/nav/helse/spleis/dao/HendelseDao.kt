@@ -25,6 +25,18 @@ internal class HendelseDao(private val dataSource: DataSource) {
         }
     }
 
+    fun hentAlleHendelser(): Map<UUID, String> {
+        return using(sessionOf(dataSource)) { session ->
+            session.run(
+                queryOf(
+                    "SELECT melding_id,data FROM melding WHERE melding_type IN (${Meldingstype.values().joinToString { "?" }})",
+                    *Meldingstype.values().map(Enum<*>::name).toTypedArray()
+                ).map {
+                    UUID.fromString(it.string("melding_id")) to it.string("data")
+                }.asList).toMap()
+        }
+    }
+
     internal enum class Meldingstype {
         NY_SØKNAD,
         SENDT_SØKNAD_NAV,

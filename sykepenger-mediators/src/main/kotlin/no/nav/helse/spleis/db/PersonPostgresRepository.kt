@@ -18,7 +18,7 @@ internal class PersonPostgresRepository(private val dataSource: DataSource) : Pe
             session.run(query.map {
                 SerialisertPerson(it.string("data"))
             }.asSingle)
-        }?.deserialize()?.also {
+        }?.also {
             PostgresProbe.personLestFraDb()
         }
 }

@@ -18,9 +18,9 @@ internal class JsonMigrationTest {
         var invocationCount = 0
         val supplier = {
             invocationCount += 1
-            mapOf(UUID.randomUUID() to objectMapper.createObjectNode())
+            mapOf(UUID.randomUUID() to "{}")
         }
-        val meldinger = mutableListOf<Map<UUID, JsonNode>>()
+        val meldinger = mutableListOf<Map<UUID, String>>()
         listOf(
             object : JsonMigration(1) {
                 override val description = ""
