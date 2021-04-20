@@ -68,7 +68,7 @@ internal class V90HendelsekildeTidsstempel : JsonMigration(version = 90) {
         if (id in tidsstempler) return tidsstempler.getValue(id)
         val tidsstempel = meldingerSupplier.hentMeldinger()[id]?.let {
             tidsstempelFraMelding(type, serdeObjectMapper.readTree(it))?.let { LocalDateTime.parse(it) }
-        } ?: throw IllegalStateException("Forventet at $id skal eksistere")
+        } ?: LocalDateTime.now()
         tidsstempler[id] = tidsstempel
         return tidsstempel
     }
