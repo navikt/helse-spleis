@@ -27,7 +27,7 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
 
     @AfterAll
     fun teardown() {
-        Toggles.OppretteVedtaksperioderVedSøknad.disable()
+        Toggles.OppretteVedtaksperioderVedSøknad.pop()
     }
 
     @Test
