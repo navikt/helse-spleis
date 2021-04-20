@@ -83,7 +83,7 @@ internal class HistoriePeriodetypeTest {
         Sykdomstidslinje.sykedager(fom, tom, grad, kilde)
 
     private fun addTidligereUtbetalinger(utbetalingstidslinje: Utbetalingstidslinje) {
-        arbeidsgiver.oppdaterSykdom(object : SykdomstidslinjeHendelse(UUID.randomUUID()) {
+        arbeidsgiver.oppdaterSykdom(object : SykdomstidslinjeHendelse(UUID.randomUUID(), LocalDateTime.now()) {
             override fun organisasjonsnummer() = AG1
             override fun aktørId() = aktørId
             override fun fødselsnummer() = UNG_PERSON_FNR_2018
@@ -135,7 +135,7 @@ internal class HistoriePeriodetypeTest {
     }
 
     private fun addSykdomshistorikk(sykdomstidslinje: Sykdomstidslinje) {
-        arbeidsgiver.oppdaterSykdom(object : SykdomstidslinjeHendelse(UUID.randomUUID()) {
+        arbeidsgiver.oppdaterSykdom(object : SykdomstidslinjeHendelse(UUID.randomUUID(), LocalDateTime.now()) {
             override fun organisasjonsnummer() = AG1
             override fun aktørId() = aktørId
             override fun fødselsnummer() = UNG_PERSON_FNR_2018

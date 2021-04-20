@@ -8,6 +8,7 @@ import no.nav.helse.rapids_rivers.asOptionalLocalDate
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import java.time.LocalDateTime
 
 // Understands a JSON message representing an Inntektsmelding
 internal open class InntektsmeldingMessage(packet: JsonMessage) : HendelseMessage(packet) {
@@ -40,7 +41,8 @@ internal open class InntektsmeldingMessage(packet: JsonMessage) : HendelseMessag
         ferieperioder = ferieperioder,
         arbeidsforholdId = arbeidsforholdId,
         begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-        harOpphørAvNaturalytelser = harOpphørAvNaturalytelser
+        harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
+        opprettet = LocalDateTime.now()
     )
 
     override fun behandle(mediator: IHendelseMediator) {

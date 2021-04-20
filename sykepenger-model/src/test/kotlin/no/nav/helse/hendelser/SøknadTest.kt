@@ -220,7 +220,8 @@ internal class SøknadTest {
             andreInntektskilder = andreInntektskilder,
             sendtTilNAV = Søknadsperiode.søknadsperiode(perioder.toList())?.endInclusive?.atStartOfDay() ?: LocalDateTime.now(),
             permittert = permittert,
-            merknaderFraSykmelding = merknaderFraSykmelding
+            merknaderFraSykmelding = merknaderFraSykmelding,
+            opprettet = LocalDateTime.now()
         )
     }
 }

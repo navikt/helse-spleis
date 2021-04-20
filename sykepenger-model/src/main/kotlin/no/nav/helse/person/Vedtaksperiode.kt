@@ -357,6 +357,11 @@ internal class Vedtaksperiode private constructor(
         nesteTilstand?.also { tilstand(hendelse, it) }
     }
 
+    private fun håndterOverlappendeSykmelding(sykmelding: Sykmelding) {
+        if (sykmelding.periode().utenfor(periode)) periode = Periode(periode.start, sykmelding.periode().start.minusDays(1))
+        return oppdaterHistorikk(sykmelding)
+    }
+
     private fun overlappendeSøknadIkkeStøttet(søknad: Søknad, egendefinertFeiltekst: String? = null) {
         søknad.trimLeft(periode.endInclusive)
         søknad.error(egendefinertFeiltekst ?: "Mottatt flere søknader for perioden - det støttes ikke før replay av hendelser er på plass")
@@ -767,7 +772,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
-            if (Toggles.OverlappendeSykmelding.enabled) return vedtaksperiode.oppdaterHistorikk(sykmelding)
+            if (Toggles.OverlappendeSykmelding.enabled) return vedtaksperiode.håndterOverlappendeSykmelding(sykmelding)
             sykmelding.error("Mottatt overlappende sykmeldinger - det støttes ikke før replay av hendelser er på plass")
             if (!skalForkastesVedOverlapp) return
             vedtaksperiode.tilstand(sykmelding, TilInfotrygd)

@@ -7,6 +7,7 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.IAktivitetslogg
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 import kotlin.reflect.KClass
 
@@ -14,30 +15,38 @@ internal typealias Melding = KClass<out SykdomstidslinjeHendelse>
 
 abstract class SykdomstidslinjeHendelse(
     meldingsreferanseId: UUID,
+    private val opprettet: LocalDateTime,
     melding: Melding? = null,
     private val aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
 ) : ArbeidstakerHendelse(meldingsreferanseId, aktivitetslogg) {
 
-    protected constructor(meldingsreferanseId: UUID, other: SykdomstidslinjeHendelse) : this(meldingsreferanseId, null, other.aktivitetslogg)
+    protected constructor(meldingsreferanseId: UUID, other: SykdomstidslinjeHendelse) : this(meldingsreferanseId, other.opprettet, null, other.aktivitetslogg)
 
     private var nesteFom: LocalDate? = null
 
-    internal val kilde: Hendelseskilde = Hendelseskilde(melding ?: this::class, meldingsreferanseId())
+    internal val kilde: Hendelseskilde = Hendelseskilde(melding ?: this::class, meldingsreferanseId(), opprettet)
 
-    internal class Hendelseskilde(private val type: String, private val meldingsreferanseId: UUID) {
+    internal class Hendelseskilde(
+        private val type: String,
+        private val meldingsreferanseId: UUID,
+        private val opprettet: LocalDateTime
+    ) : Comparable<Hendelseskilde> {
         internal constructor(
             hendelse: Melding,
-            meldingsreferanseId: UUID
-        ) : this(kildenavn(hendelse), meldingsreferanseId)
+            meldingsreferanseId: UUID,
+            opprettet: LocalDateTime
+        ) : this(kildenavn(hendelse), meldingsreferanseId, opprettet)
 
         companion object {
-            internal val INGEN = Hendelseskilde(SykdomstidslinjeHendelse::class, UUID.randomUUID())
+            internal val INGEN = Hendelseskilde(SykdomstidslinjeHendelse::class, UUID.randomUUID(), LocalDateTime.now())
 
             private fun kildenavn(hendelse: Melding): String =
                 hendelse.simpleName ?: "Ukjent"
         }
 
+        override operator fun compareTo(other: Hendelseskilde) = this.opprettet.compareTo(other.opprettet)
         override fun toString() = type
+        internal fun opprettet() = opprettet
         internal fun meldingsreferanseId() = meldingsreferanseId
         internal fun erAvType(meldingstype: Melding) = this.type == kildenavn(meldingstype)
     }

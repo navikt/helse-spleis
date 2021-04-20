@@ -6,6 +6,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 data class ManuellOverskrivingDag(
@@ -24,13 +25,12 @@ class OverstyrTidslinje(
     private val aktørId: String,
     private val organisasjonsnummer: String,
     dager: List<ManuellOverskrivingDag>
-) : SykdomstidslinjeHendelse(meldingsreferanseId) {
+) : SykdomstidslinjeHendelse(meldingsreferanseId, LocalDateTime.now()) {
 
     private val sykdomstidslinje: Sykdomstidslinje
 
     init {
         sykdomstidslinje = dager.map {
-            val kilde = Hendelseskilde(OverstyrTidslinje::class, meldingsreferanseId)
             when (it.type) {
                 Dagtype.Sykedag -> Sykdomstidslinje.sykedager(
                     førsteDato = it.dato,

@@ -19,6 +19,7 @@ import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 internal class TurneringsnøkkelTest {
@@ -49,7 +50,7 @@ internal class TurneringsnøkkelTest {
         assertEquals(SykHelgedag_SØ, fraDag(SykHelgedag(enDag, økonomi, søknad)))
     }
 
-    private sealed class TestHendelse() : SykdomstidslinjeHendelse(UUID.randomUUID()) {
+    private sealed class TestHendelse() : SykdomstidslinjeHendelse(UUID.randomUUID(), LocalDateTime.now()) {
         companion object {
             val søknad = Søknad.kilde
             val inntektsmelding = Inntektsmelding.kilde

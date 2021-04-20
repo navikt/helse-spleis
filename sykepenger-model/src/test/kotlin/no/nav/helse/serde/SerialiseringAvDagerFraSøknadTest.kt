@@ -19,6 +19,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 import java.util.*
 
 internal class SerialiseringAvDagerFraSøknadTest {
@@ -111,7 +112,8 @@ internal class SerialiseringAvDagerFraSøknadTest {
         andreInntektskilder = emptyList(),
         sendtTilNAV = 5.januar.atStartOfDay(),
         permittert = false,
-        merknaderFraSykmelding = emptyList()
+        merknaderFraSykmelding = emptyList(),
+        opprettet = LocalDateTime.now()
     )
 }
 

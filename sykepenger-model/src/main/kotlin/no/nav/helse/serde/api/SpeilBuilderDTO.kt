@@ -110,7 +110,8 @@ data class SykdomstidslinjedagDTO(
 ) {
     data class KildeDTO(
         val type: SpeilKildetype,
-        val kildeId: UUID
+        val kildeId: UUID,
+        val opprettet: LocalDateTime
     )
 }
 

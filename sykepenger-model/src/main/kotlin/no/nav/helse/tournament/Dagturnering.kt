@@ -46,6 +46,7 @@ internal class Dagturnering(private val source: String) {
             "C" -> Column
             "X" -> Impossible
             "L" -> Latest
+            "LR" -> LatestOrRow
             else -> throw RuntimeException("$cellValue is not a known strategy for deciding between days")
         }
 }
@@ -71,8 +72,13 @@ internal object Column : Strategy() {
 }
 
 internal object Latest : Strategy() {
-    override fun decide(row: Dag, column: Dag): Dag = column
-    override fun decideInverse(row: Dag, column: Dag) = column
+    override fun decide(row: Dag, column: Dag): Dag = column.sisteAv(row)
+    override fun decideInverse(row: Dag, column: Dag) = column.sisteAv(row)
+}
+
+internal object LatestOrRow : Strategy() {
+    override fun decide(row: Dag, column: Dag): Dag = row.sisteAv(column)
+    override fun decideInverse(row: Dag, column: Dag) = column.sisteAv(row)
 }
 
 internal object Impossible : Strategy() {

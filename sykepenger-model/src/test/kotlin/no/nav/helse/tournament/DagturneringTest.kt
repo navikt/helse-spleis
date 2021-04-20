@@ -7,22 +7,53 @@ import no.nav.helse.testhelpers.TestEvent.Companion.inntektsmelding
 import no.nav.helse.testhelpers.TestEvent.Companion.sykmelding
 import no.nav.helse.testhelpers.TestEvent.Companion.søknad
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class DagturneringTest {
 
     @Test
-    fun `Arbeidsdag fra søknad vinner over sykedag fra sykmelding`() {
-        val sykmeldingSykedag = Sykdomstidslinje.sykedager(1.mandag, 1.mandag, 100.prosent, sykmelding)
-        val søknadArbeidsdag = Sykdomstidslinje.arbeidsdager(1.mandag, 1.mandag, søknad)
+    fun `ny sykmelding vinner over gammel sykmelding`() {
+        val nyere = Sykdomstidslinje.sykedager(1.mandag, 1.mandag, 100.prosent, TestEvent.Sykmelding(8.januar.atStartOfDay()).kilde)
+        val eldre = Sykdomstidslinje.sykedager(1.mandag, 1.mandag, 50.prosent, TestEvent.Sykmelding(1.januar.atStartOfDay()).kilde)
+        val tidslinje = nyere.merge(eldre, dagturnering::beste)
+        assertTrue(tidslinje[1.mandag] is Sykedag, "Dagen må være sykedag")
+        assertEquals(100, SykdomstidslinjeInspektør(tidslinje).grader[1.mandag]) { "Nyere sykmelding skal vinne" }
+    }
+    @Test
+    fun `ny sykmelding vinner over gammel sykmelding - inverse`() {
+        val nyere = Sykdomstidslinje.sykedager(1.mandag, 1.mandag, 100.prosent, TestEvent.Sykmelding(8.januar.atStartOfDay()).kilde)
+        val eldre = Sykdomstidslinje.sykedager(1.mandag, 1.mandag, 50.prosent, TestEvent.Sykmelding(1.januar.atStartOfDay()).kilde)
+        val tidslinje = eldre.merge(nyere, dagturnering::beste)
+        assertTrue(tidslinje[1.mandag] is Sykedag, "Dagen må være sykedag")
+        assertEquals(100, SykdomstidslinjeInspektør(tidslinje).grader[1.mandag]) { "Nyere sykmelding skal vinne" }
+    }
 
+    @Test
+    fun `ny sykmelding vinner over gammel søknad`() {
+        val nyere = Sykdomstidslinje.sykedager(1.mandag, 1.mandag, 100.prosent, TestEvent.Sykmelding(8.januar.atStartOfDay()).kilde)
+        val eldre = Sykdomstidslinje.sykedager(1.mandag, 1.mandag, 50.prosent, TestEvent.Søknad(1.januar.atStartOfDay()).kilde)
+        val tidslinje = nyere.merge(eldre, dagturnering::beste)
+        assertTrue(tidslinje[1.mandag] is Sykedag, "Dagen må være sykedag")
+        assertEquals(100, SykdomstidslinjeInspektør(tidslinje).grader[1.mandag]) { "Nyere sykmelding skal vinne" }
+    }
+    @Test
+    fun `ny sykmelding vinner over gammel søknad - inverse`() {
+        val nyere = Sykdomstidslinje.sykedager(1.mandag, 1.mandag, 100.prosent, TestEvent.Sykmelding(8.januar.atStartOfDay()).kilde)
+        val eldre = Sykdomstidslinje.sykedager(1.mandag, 1.mandag, 50.prosent, TestEvent.Søknad(1.januar.atStartOfDay()).kilde)
+        val tidslinje = eldre.merge(nyere, dagturnering::beste)
+        assertTrue(tidslinje[1.mandag] is Sykedag, "Dagen må være sykedag")
+        assertEquals(100, SykdomstidslinjeInspektør(tidslinje).grader[1.mandag]) { "Nyere sykmelding skal vinne" }
+    }
+
+    @Test
+    fun `Arbeidsdag fra søknad vinner over sykedag fra sykmelding når tidspunkt er likt`() {
+        val tidspunkt = 1.januar.atStartOfDay()
+        val sykmeldingSykedag = Sykdomstidslinje.sykedager(1.mandag, 1.mandag, 100.prosent, TestEvent.Sykmelding(tidspunkt).kilde)
+        val søknadArbeidsdag = Sykdomstidslinje.arbeidsdager(1.mandag, 1.mandag, TestEvent.Søknad(tidspunkt).kilde)
         val tidslinje = sykmeldingSykedag.merge(søknadArbeidsdag, dagturnering::beste)
-
-        assertTrue(
-            tidslinje[1.mandag] is Arbeidsdag,
-            "Torsdag er en arbeidsdag etter kombinering av sykmelding og søknad"
-        )
+        assertEquals(Arbeidsdag::class, tidslinje[1.mandag]::class, "Torsdag er en arbeidsdag etter kombinering av sykmelding og søknad")
     }
 
     @Test

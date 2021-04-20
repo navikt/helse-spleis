@@ -93,7 +93,8 @@ internal class SøknadHendelseTest : AbstractPersonTest() {
             andreInntektskilder = emptyList(),
             sendtTilNAV = Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay(),
             permittert = false,
-            merknaderFraSykmelding = emptyList()
+            merknaderFraSykmelding = emptyList(),
+            opprettet = LocalDateTime.now()
         )
 
     private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode, orgnummer: String = "987654321") =

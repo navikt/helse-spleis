@@ -1505,7 +1505,7 @@ class SpeilBuilderTest {
             aktørId = aktørId,
             orgnummer = orgnummer,
             sykeperioder = listOf(Sykmeldingsperiode(fom, tom, grad)),
-            opprettet = fom.plusMonths(3).atStartOfDay()
+            opprettet = fom.atStartOfDay()
         ) to SykmeldingDTO(
             id = hendelseId.toString(),
             fom = fom,
@@ -1530,7 +1530,8 @@ class SpeilBuilderTest {
             andreInntektskilder = emptyList(),
             sendtTilNAV = sendtSøknad,
             permittert = false,
-            merknaderFraSykmelding = emptyList()
+            merknaderFraSykmelding = emptyList(),
+            opprettet = LocalDateTime.now()
         ) to SøknadNavDTO(
             id = hendelseId.toString(),
             fom = fom,
@@ -1549,7 +1550,8 @@ class SpeilBuilderTest {
             fnr = fnr,
             aktørId = aktørId,
             orgnummer = orgnummer,
-            perioder = listOf(SøknadArbeidsgiver.Søknadsperiode(fom, tom, 100.prosent, 0.prosent))
+            perioder = listOf(SøknadArbeidsgiver.Søknadsperiode(fom, tom, 100.prosent, 0.prosent)),
+            opprettet = LocalDateTime.now()
         ) to SøknadArbeidsgiverDTO(
             id = hendelseId.toString(),
             fom = fom,
@@ -1576,7 +1578,8 @@ class SpeilBuilderTest {
             arbeidsgiverperioder = listOf(Periode(fom, fom.plusDays(15))),
             ferieperioder = emptyList(),
             arbeidsforholdId = null,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = null
+            begrunnelseForReduksjonEllerIkkeUtbetalt = null,
+            opprettet = LocalDateTime.now()
         ) to InntektsmeldingDTO(
             id = hendelseId.toString(),
             beregnetInntekt = 31000.00,

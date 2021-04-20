@@ -5,6 +5,7 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 import java.util.*
 
 internal class SykdomstidslinjeHendelseTest {
@@ -25,7 +26,7 @@ internal class SykdomstidslinjeHendelseTest {
         ), Testhendelse().toSpesifikkKontekst().kontekstMap)
     }
 
-    private class Testhendelse : SykdomstidslinjeHendelse(MELDING) {
+    private class Testhendelse : SykdomstidslinjeHendelse(MELDING, LocalDateTime.now()) {
         override fun aktørId() = AKTØR
         override fun fødselsnummer() = FØDSELSNUMMER
         override fun organisasjonsnummer() = ORGNR

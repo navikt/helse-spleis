@@ -155,7 +155,8 @@ internal class SøknadArbeidsgiverHendelseTest : AbstractPersonTest() {
             andreInntektskilder = emptyList(),
             sendtTilNAV = Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay(),
             permittert = false,
-            merknaderFraSykmelding = emptyList()
+            merknaderFraSykmelding = emptyList(),
+            opprettet = LocalDateTime.now()
         )
 
     private fun søknadArbeidsgiver(
@@ -167,7 +168,8 @@ internal class SøknadArbeidsgiverHendelseTest : AbstractPersonTest() {
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "12345",
             orgnummer = orgnummer,
-            perioder = listOf(*perioder)
+            perioder = listOf(*perioder),
+            opprettet = LocalDateTime.now()
         )
 
     private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode, orgnummer: String = "987654321") =

@@ -144,7 +144,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             id,
             *sykeperioder,
             mottatt = mottatt,
-            orgnummer = orgnummer
+            orgnummer = orgnummer,
         ).håndter(Person::håndter)
         sykmeldinger[id] = sykeperioder
         return id
@@ -164,14 +164,16 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         andreInntektskilder: List<Søknad.Inntektskilde> = emptyList(),
         sendtTilNav: LocalDate = Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive,
         id: UUID = UUID.randomUUID(),
-        orgnummer: String = ORGNUMMER
+        orgnummer: String = ORGNUMMER,
+        opprettet: LocalDateTime = LocalDateTime.now()
     ): UUID {
         søknad(
             id,
             *perioder,
             andreInntektskilder = andreInntektskilder,
             sendtTilNav = sendtTilNav,
-            orgnummer = orgnummer
+            orgnummer = orgnummer,
+            opprettet = opprettet
         ).håndter(Person::håndter)
         søknader[id] = Triple(sendtTilNav, andreInntektskilder, perioder)
         return id
@@ -558,7 +560,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         vararg perioder: Søknad.Søknadsperiode,
         andreInntektskilder: List<Søknad.Inntektskilde> = emptyList(),
         sendtTilNav: LocalDate = Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive,
-        orgnummer: String = ORGNUMMER
+        orgnummer: String = ORGNUMMER,
+        opprettet: LocalDateTime = LocalDateTime.now()
     ): Søknad {
         return Søknad(
             meldingsreferanseId = id,
@@ -569,7 +572,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             andreInntektskilder = andreInntektskilder,
             sendtTilNAV = sendtTilNav.atStartOfDay(),
             permittert = false,
-            merknaderFraSykmelding = emptyList()
+            merknaderFraSykmelding = emptyList(),
+            opprettet = opprettet
         ).apply {
             hendelselogg = this
         }
@@ -584,7 +588,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             fnr = UNG_PERSON_FNR_2018,
             aktørId = AKTØRID,
             orgnummer = orgnummer,
-            perioder = listOf(*perioder)
+            perioder = listOf(*perioder),
+            opprettet = LocalDateTime.now()
         ).apply {
             hendelselogg = this
         }
@@ -625,7 +630,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
                 ferieperioder = ferieperioder,
                 arbeidsforholdId = null,
                 begrunnelseForReduksjonEllerIkkeUtbetalt = null,
-                harOpphørAvNaturalytelser = harOpphørAvNaturalytelser
+                harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
+                opprettet = LocalDateTime.now()
             )
         }
         inntektsmeldinger[id] = inntektsmeldinggenerator

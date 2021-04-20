@@ -21,8 +21,9 @@ class Søknad(
     private val andreInntektskilder: List<Inntektskilde>,
     private val sendtTilNAV: LocalDateTime,
     private val permittert: Boolean,
-    private val merknaderFraSykmelding: List<Merknad>
-) : SykdomstidslinjeHendelse(meldingsreferanseId) {
+    private val merknaderFraSykmelding: List<Merknad>,
+    private val opprettet: LocalDateTime,
+) : SykdomstidslinjeHendelse(meldingsreferanseId, opprettet) {
 
     private val sykdomsperiode: Periode
     private val sykdomstidslinje: Sykdomstidslinje

@@ -75,7 +75,7 @@ internal class SykdomstidslinjeBuilder(private val sykdomstidslinjeListe: Mutabl
         val dagDto = SykdomstidslinjedagDTO(
             dato,
             dag.toSpeilDagtype(),
-            SykdomstidslinjedagDTO.KildeDTO(kilde.toSpeilKildetype(), kilde.meldingsreferanseId()),
+            SykdomstidslinjedagDTO.KildeDTO(kilde.toSpeilKildetype(), kilde.meldingsreferanseId(), kilde.opprettet()),
             økonomi?.reflection { grad, _, _, _, _, _, _, _, _ -> grad }
         )
 
