@@ -7,7 +7,7 @@ import java.time.LocalDateTime
 internal class V57UtbetalingAvsluttet : JsonMigration(version = 57) {
     override val description: String = "Utvider Utbetaling med avsluttet-tidspunkt"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode
             .path("arbeidsgivere")
             .forEach { arbeidsgiver ->

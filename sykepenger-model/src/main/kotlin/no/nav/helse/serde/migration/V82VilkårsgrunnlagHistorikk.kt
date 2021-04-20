@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 
 internal class V82VilkårsgrunnlagHistorikk : JsonMigration(version = 82) {
     override val description: String = "Flytter dataForVilkårsvurdering opp til personnivå"
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         val vilkårsgrunnlagHistorikk = mutableMapOf<String, JsonNode>()
 
         hentVilkårsgrunnlag(vilkårsgrunnlagHistorikk, jsonNode["arbeidsgivere"]

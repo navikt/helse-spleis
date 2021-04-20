@@ -15,7 +15,7 @@ internal class V19KlippOverlappendeVedtaksperioder : JsonMigration(version = 19)
     private val datoKey = "dato"
     private val log = LoggerFactory.getLogger(this.javaClass.name)
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         var tom: LocalDate? = null
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             arbeidsgiver.path("vedtaksperioder").forEach { periode ->

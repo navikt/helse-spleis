@@ -6,7 +6,7 @@ import java.time.LocalDate
 internal class V31LeggerTilInntektendringTidsstempel : JsonMigration(version = 31) {
     override val description: String = "Legger til tidsstempel felt i inntektsendring"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         val tidsstempel = LocalDate.now().atStartOfDay().toString()
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             arbeidsgiver.path("inntekter").forEach { inntekt ->

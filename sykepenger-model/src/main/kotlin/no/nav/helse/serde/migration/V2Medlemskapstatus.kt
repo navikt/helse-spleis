@@ -11,7 +11,7 @@ internal class V2Medlemskapstatus : JsonMigration(version = 2) {
     private val medlemskapstatusKey = "medlemskapstatus"
     private val vetIkke = "VET_IKKE"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             arbeidsgiver.path("vedtaksperioder").forEach { periode ->
                 migrerVilkårsvurdering(periode.path("dataForVilkårsvurdering"))

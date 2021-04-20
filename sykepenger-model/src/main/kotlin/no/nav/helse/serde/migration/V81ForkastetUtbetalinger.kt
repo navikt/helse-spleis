@@ -13,7 +13,7 @@ internal class V81ForkastetUtbetalinger : JsonMigration(version = 81) {
     }
     override val description: String = "Migrerer gamle IKKE_UTBETALT til FORKASTET."
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             arbeidsgiver.path("utbetalinger").forEach { element ->
                 migrateUtbetaling(element as ObjectNode)

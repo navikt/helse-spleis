@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 internal class V20AvgrensVedtaksperiode : JsonMigration(version = 20) {
     override val description: String = "Legger til eksplisitt avgrensing av vedtaksperioden"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             migrerVedtaksperioder(arbeidsgiver.path("vedtaksperioder").toList())
             migrerVedtaksperioder(arbeidsgiver.path("forkastede").toList())

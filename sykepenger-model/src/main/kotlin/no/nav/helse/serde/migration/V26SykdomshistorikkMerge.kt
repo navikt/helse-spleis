@@ -10,7 +10,7 @@ internal class V26SykdomshistorikkMerge : JsonMigration(version = 26) {
     private val log = LoggerFactory.getLogger("sykdomshistorikk-merge")
     override val description = "Legger inn en sykdomstidslinje i arbeidsgiver som er sammensatt fra vedtaksperioder"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         val arbeidsgivere = jsonNode.path("arbeidsgivere")
 
         // Check for trashed vedtaksperioder with no history. These can not be migrated and must be removed.

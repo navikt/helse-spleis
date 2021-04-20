@@ -20,7 +20,7 @@ internal class V6LeggTilNySykdomstidslinje : JsonMigration(version = 6) {
     private val søknad = "Søknad"
     private val sykmelding = "Sykmelding"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             arbeidsgiver.path("vedtaksperioder").forEach { periode ->
                 val hendelser = collectHendelseIds(periode)

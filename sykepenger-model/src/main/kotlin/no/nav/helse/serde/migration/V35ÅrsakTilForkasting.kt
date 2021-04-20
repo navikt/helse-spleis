@@ -9,7 +9,7 @@ import no.nav.helse.person.ForkastetÅrsak
 internal class V35ÅrsakTilForkasting : JsonMigration(version = 35) {
     override val description: String = "Legger til årsak-felt i forkastede-listen"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         for (arbeidsgiver in jsonNode["arbeidsgivere"]) {
             arbeidsgiver as ObjectNode
             arbeidsgiver.replace("forkastede", leggTilÅrsak(arbeidsgiver["forkastede"]))

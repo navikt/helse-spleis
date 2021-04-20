@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 internal class V67FeilStatusOgTypePåAnnulleringer : JsonMigration(version = 67) {
     override val description: String = "Endrer status og type på automatisk genererte utbetalte annulleringer"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         // Denne var for inngripende. Vi må komme igjen sterkere om det enda er et problem
     }
 }

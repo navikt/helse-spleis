@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 internal class V36BonkersNavnPåForkastedePerioder : JsonMigration(version = 36) {
     override val description: String = "Retter serialisering av et pair"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         for (arbeidsgiver in jsonNode["arbeidsgivere"]) {
             endreNavnPåKeys(arbeidsgiver["forkastede"])
         }

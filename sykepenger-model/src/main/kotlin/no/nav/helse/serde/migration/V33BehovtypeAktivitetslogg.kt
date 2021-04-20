@@ -7,7 +7,7 @@ internal class V33BehovtypeAktivitetslogg : JsonMigration(version = 33) {
 
     override val description = "Migrerer navneendring for behovtype InntekterForSammenligningsgrunnlag i aktivitetslogg"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         val aktivitetslogg = jsonNode["aktivitetslogg"] as ObjectNode
 
         aktivitetslogg["aktiviteter"]

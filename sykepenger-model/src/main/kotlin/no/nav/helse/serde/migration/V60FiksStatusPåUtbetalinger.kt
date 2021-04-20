@@ -12,7 +12,7 @@ internal class V60FiksStatusPåUtbetalinger : JsonMigration(version = 60) {
 
     override val description: String = "Setter riktig status på utbetalinger"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode
             .path("arbeidsgivere")
             .forEach { arbeidsgiver ->

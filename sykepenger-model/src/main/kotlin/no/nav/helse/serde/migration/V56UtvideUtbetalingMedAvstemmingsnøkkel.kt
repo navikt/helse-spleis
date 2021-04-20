@@ -15,7 +15,7 @@ internal class V56UtvideUtbetalingMedAvstemmingsnøkkel : JsonMigration(version 
 
     override val description: String = "Utvider Utbetaling med avstemmingsnøkkel"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         val konteksttyper = konteksttyper(jsonNode)
         val kontekstdetaljer = kontekstdetaljer(jsonNode)
 

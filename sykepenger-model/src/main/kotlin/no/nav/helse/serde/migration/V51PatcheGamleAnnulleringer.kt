@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 internal class V51PatcheGamleAnnulleringer : JsonMigration(version = 51) {
     override val description: String = "Patcher gamle annulleringer av allerede annullerte utbetalinger"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         val annullerteFagsystemIder = mutableSetOf<String>()
 
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->

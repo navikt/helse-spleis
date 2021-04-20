@@ -9,7 +9,7 @@ internal class V61MigrereUtbetaltePerioderITilInfotrygd : JsonMigration(version 
 
     override val description: String = "Setter utbetalte forkastede perioder i TIL_INFOTRYGD til AVSLUTTET"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode
             .path("arbeidsgivere")
             .forEach { arbeidsgiver ->

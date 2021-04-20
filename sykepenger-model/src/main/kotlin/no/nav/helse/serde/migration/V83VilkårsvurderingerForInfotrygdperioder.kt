@@ -7,7 +7,7 @@ import no.nav.helse.serde.serdeObjectMapper
 internal class V83VilkårsvurderingerForInfotrygdperioder : JsonMigration(version = 83) {
     override val description: String = "Legger til skjæringstidspunkt på vilkårsvurderinger fra infotrygdperioder"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         val originaleHistorikkElementer = jsonNode["vilkårsgrunnlagHistorikk"]
             .filter { it["type"].asText() == "Vilkårsprøving" }
 

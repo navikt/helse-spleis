@@ -11,7 +11,7 @@ internal class V71SetteOpprettetTidspunkt : JsonMigration(version = 71) {
     }
     override val description: String = "Sette opprettet-tidspunkt for Person"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         val tidligste = jsonNode
             .path("aktivitetslogg")
             .path("aktiviteter")

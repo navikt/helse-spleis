@@ -7,7 +7,7 @@ import java.time.LocalDate
 internal class V34OpprinneligPeriodePåVedtaksperiode : JsonMigration(version = 34) {
     override val description: String = "Setter opprinneligPeriode = periode dersom nøkkel ikke eksisterer"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         for (arbeidsgiver in jsonNode["arbeidsgivere"]) {
             kopierHendelseIderFraHistorikk(arbeidsgiver["vedtaksperioder"])
             kopierHendelseIderFraHistorikk(arbeidsgiver["forkastede"])

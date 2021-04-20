@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 internal class V58Utbetalingtype : JsonMigration(version = 58) {
     override val description: String = "Utvider Utbetaling med type"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode
             .path("arbeidsgivere")
             .forEach { arbeidsgiver ->

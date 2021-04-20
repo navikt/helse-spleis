@@ -10,7 +10,7 @@ internal class V16StatusIUtbetaling : JsonMigration(version = 16) {
 
     override val description = "Legger til statusfelt på utbetaling"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         val meldinger = jsonNode["aktivitetslogg"]["aktiviteter"].map {
             it["melding"].textValue() to LocalDateTime.parse(
                 it["tidsstempel"].textValue(),

@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 internal class V28HendelsesIderPåVedtaksperiode : JsonMigration(version = 28) {
     override val description: String = "Kopierer hendelsesider fra sykdomshistorikk til vedtaksperioden."
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         for (arbeidsgiver in jsonNode["arbeidsgivere"]) {
             kopierHendelseIderFraHistorikk(arbeidsgiver["vedtaksperioder"])
             kopierHendelseIderFraHistorikk(arbeidsgiver["forkastede"])

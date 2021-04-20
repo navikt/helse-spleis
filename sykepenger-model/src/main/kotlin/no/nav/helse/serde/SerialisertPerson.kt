@@ -114,18 +114,18 @@ class SerialisertPerson(val json: String) {
 
     val skjemaVersjon = gjeldendeVersjon()
 
-    private fun migrate(jsonNode: JsonNode) {
+    private fun migrate(jsonNode: JsonNode, meldingerSupplier: MeldingerSupplier) {
         try {
-            migrations.migrate(jsonNode)
+            migrations.migrate(jsonNode, meldingerSupplier)
         } catch (err: Exception) {
             throw JsonMigrationException("Feil under migrering: ${err.message}", err)
         }
     }
 
-    fun deserialize(): Person {
+    fun deserialize(meldingerSupplier: MeldingerSupplier = MeldingerSupplier.empty): Person {
         val jsonNode = serdeObjectMapper.readTree(json)
 
-        migrate(jsonNode)
+        migrate(jsonNode, meldingerSupplier)
 
         try {
             val personData: PersonData = requireNotNull(serdeObjectMapper.treeToValue(jsonNode))

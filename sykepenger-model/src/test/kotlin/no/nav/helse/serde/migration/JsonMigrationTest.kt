@@ -8,9 +8,38 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.util.*
 
 internal class JsonMigrationTest {
     private val objectMapper = jacksonObjectMapper()
+
+    @Test
+    fun `henter bare meldinger én gang`() {
+        var invocationCount = 0
+        val supplier = {
+            invocationCount += 1
+            mapOf(UUID.randomUUID() to objectMapper.createObjectNode())
+        }
+        val meldinger = mutableListOf<Map<UUID, JsonNode>>()
+        listOf(
+            object : JsonMigration(1) {
+                override val description = ""
+                override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+                    meldinger.add(meldingerSupplier.hentMeldinger())
+                }
+            },
+            object : JsonMigration(2) {
+                override val description = ""
+                override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+                    meldinger.add(meldingerSupplier.hentMeldinger())
+                }
+            }
+        ).migrate(objectMapper.createObjectNode(), supplier)
+
+        assertEquals(1, invocationCount)
+        assertEquals(2, meldinger.size)
+        assertEquals(meldinger.first(), meldinger.last())
+    }
 
     @Test
     fun `kan migrere JSON uten skjemaversjon`() {
@@ -98,7 +127,7 @@ internal class JsonMigrationTest {
         JsonMigration(version) {
         override val description = "Test migration"
 
-        override fun doMigration(jsonNode: ObjectNode) {
+        override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
             jsonNode.put(field, value)
         }
     }

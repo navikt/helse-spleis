@@ -7,7 +7,7 @@ internal class V66SjekkeEtterutbetalingerForFeil : JsonMigration(version = 66) {
     override val description: String = "Sjekker etterutbetalinger for feil"
     private val log = LoggerFactory.getLogger("tjenestekall")
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         /* migrering gjort */
     }
 }

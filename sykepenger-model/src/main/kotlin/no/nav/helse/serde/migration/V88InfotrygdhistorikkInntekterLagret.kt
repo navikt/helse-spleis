@@ -6,7 +6,7 @@ import java.time.LocalDateTime
 internal class V88InfotrygdhistorikkInntekterLagret : JsonMigration(version = 88) {
     override val description: String = "Infotrygdhistorikk med statslønn"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         val hendelseIder = jsonNode.path("arbeidsgivere").flatMap { arbeidsgiver ->
             arbeidsgiver.path("inntektshistorikk").flatMap { innslag ->
                 innslag.path("inntektsopplysninger").filter { opplysning ->

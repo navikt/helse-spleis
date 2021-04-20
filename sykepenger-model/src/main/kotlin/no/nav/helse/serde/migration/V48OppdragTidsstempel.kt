@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 internal class V48OppdragTidsstempel : JsonMigration(version = 48) {
     override val description: String = "Setter tidsstempel på når oppdraget ble laget"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             arbeidsgiver.path("utbetalinger").forEach { utbetaling ->
                 val tidsstempel = utbetaling.path("tidsstempel").asText()

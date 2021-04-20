@@ -19,7 +19,7 @@ internal class V55UtvideUtbetalingMedVurdering : JsonMigration(version = 55) {
 
     override val description: String = "Utvider Utbetaling med vurdering"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         val kontekster = kontekster(jsonNode)
         val aktiviteter = jsonNode
             .path("aktivitetslogg")

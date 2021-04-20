@@ -18,7 +18,7 @@ internal class V18UtbetalingstidslinjeØkonomi : JsonMigration(version = 18) {
 
     private lateinit var inntektshistorikk: Inntektshistorikk
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             arbeidsgiver.path("utbetalinger").forEach { utbetaling ->
                 opprettØkonomi(utbetaling.path("utbetalingstidslinje").path("dager"))

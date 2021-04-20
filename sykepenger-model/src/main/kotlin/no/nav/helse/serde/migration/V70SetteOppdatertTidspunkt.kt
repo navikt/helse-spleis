@@ -7,7 +7,7 @@ import java.time.LocalDateTime
 internal class V70SetteOppdatertTidspunkt : JsonMigration(version = 70) {
     override val description: String = "Sette oppdatert-tidspunkt for Utbetaling"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             arbeidsgiver.path("utbetalinger").forEach { utbetaling ->
                 val opprettet = LocalDateTime.parse(utbetaling.path("tidsstempel").asText())

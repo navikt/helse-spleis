@@ -8,7 +8,7 @@ internal class V62VurderingGodkjentBoolean : JsonMigration(version = 62) {
         "GODKJENT", "GODKJENT_UTEN_UTBETALING", "SENDT", "OVERFØRT", "UTBETALING_FEILET", "UTBETALT", "ANNULLERT"
     )
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode
             .path("arbeidsgivere")
             .forEach { arbeidsgiver ->

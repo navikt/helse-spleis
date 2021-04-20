@@ -7,7 +7,7 @@ import java.time.LocalDate
 internal class V44MaksdatoIkkeNullable : JsonMigration(version = 44) {
     override val description: String = "gjør maksdato til ikke-null vha LocalDate.MAX som nullobjekt"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             settMaksdatoDefault(arbeidsgiver.path("vedtaksperioder"))
             settMaksdatoDefaultForkastede(arbeidsgiver.path("forkastede"))

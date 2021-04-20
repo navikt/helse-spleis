@@ -11,7 +11,7 @@ internal class V89RetteOppFeilTilstand : JsonMigration(version = 89) {
         "b30e6003-f4df-4cb0-b08d-ea24008600a1",
     )
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             arbeidsgiver.path("vedtaksperioder").firstOrNull {
                 vedtaksperiodeIder.contains(it.path("id").asText())

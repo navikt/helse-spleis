@@ -8,7 +8,7 @@ import java.time.temporal.ChronoUnit
 internal class V3BeregnerGjenståendeSykedagerFraMaksdato : JsonMigration(version = 3) {
     override val description = "Beregner gjenstående sykedager fra maksdato og legger til dette i vedtaksperioden"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode["arbeidsgivere"].forEach { arbeidsgiver ->
             val utbetalingsdager =
                 arbeidsgiver["utbetalinger"]

@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 internal class V85FjernerAvsluttetUtenUtbetalingMedInntektsmelding : JsonMigration(version = 85) {
     override val description: String = "Fjerner AvsluttetUtenUtbetalingMedInntektsmelding"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode["arbeidsgivere"].flatMap { arbeidsgiver -> arbeidsgiver["vedtaksperioder"] }.byttTilstand()
         jsonNode["arbeidsgivere"].flatMap { arbeidsgiver -> arbeidsgiver["forkastede"] }.map { forkastet -> forkastet["vedtaksperiode"] }.byttTilstand()
     }

@@ -14,7 +14,7 @@ internal class V69SetteOpprettetOgOppdatertTidspunkt : JsonMigration(version = 6
 
     override val description: String = "Sette opprettet- og oppdatert-tidspunkt for Vedtaksperiode"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         val kontekster = kontekster(jsonNode)
         val aktiviteter = jsonNode
             .path("aktivitetslogg")

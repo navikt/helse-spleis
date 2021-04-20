@@ -7,7 +7,7 @@ internal class V73MergeAvventerGapOgAvventerInntektsmeldingFerdigGap : JsonMigra
 
     override val description: String = "Merger AVVENTER_GAP og AVVENTER_INNTEKTSMELDING_FERDIG_GAP"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             arbeidsgiver.path("vedtaksperioder").mergeTilstander()
             arbeidsgiver.path("forkastede").mergeTilstanderForkastede()

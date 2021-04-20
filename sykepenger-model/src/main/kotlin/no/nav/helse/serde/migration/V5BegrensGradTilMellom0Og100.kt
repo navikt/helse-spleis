@@ -11,7 +11,7 @@ internal class V5BegrensGradTilMellom0Og100 : JsonMigration(version = 5) {
     private val hendelsetidslinjeKey = "hendelseSykdomstidslinje"
     private val beregnetTidslinjeKey = "beregnetSykdomstidslinje"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             arbeidsgiver.path("vedtaksperioder").forEach { periode ->
                 periode.path("sykdomshistorikk").forEach { historikkElement ->

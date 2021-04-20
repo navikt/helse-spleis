@@ -10,7 +10,7 @@ internal class V10EndreNavnPåSykdomstidslinjer : JsonMigration(version = 10) {
     private val nyHendelsetidslinjeKey = "nyHendelseSykdomstidslinje"
     private val nyBeregnetTidslinjeKey = "nyBeregnetSykdomstidslinje"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             arbeidsgiver.path("vedtaksperioder").forEach { periode ->
                 periode.path("sykdomshistorikk").forEach { historikkElement ->

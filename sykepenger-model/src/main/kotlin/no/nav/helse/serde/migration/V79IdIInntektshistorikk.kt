@@ -7,7 +7,7 @@ import java.util.*
 internal class V79IdIInntektshistorikk : JsonMigration(version = 79) {
     override val description: String = "Legger på ID i inntektshistorikk for innslag og opplysninger"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode["arbeidsgivere"]
             .flatMap { it["inntektshistorikk"] }
             .onEach {

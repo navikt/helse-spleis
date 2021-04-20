@@ -8,7 +8,7 @@ import java.time.LocalDate
 internal class V25ManglendeForlengelseFraInfotrygd : JsonMigration(version = 25) {
     override val description = "Legger til riktig periodetype"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             arbeidsgiver.path("vedtaksperioder").zipWithNext().forEach { (periodeA, periodeB) ->
                 if (periodeA.erInfotrygdforlengelse() && periodeA.etterfølgesAv(periodeB)) {

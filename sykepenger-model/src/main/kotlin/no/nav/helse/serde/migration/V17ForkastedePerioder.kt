@@ -7,7 +7,7 @@ internal class V17ForkastedePerioder : JsonMigration(version = 17) {
 
     override val description = "Legger til forkastede perioder"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode["arbeidsgivere"].forEach { arbeidsgiver ->
             val index = arbeidsgiver["vedtaksperioder"].indexOfLast { vedtaksperiode ->
                 vedtaksperiode["tilstand"].textValue() == "TIL_INFOTRYGD"

@@ -7,7 +7,7 @@ internal class V30AvviksprosentSomNullable : JsonMigration(version = 30) {
 
     override val description = "Gjør avviksprosent nullable i stedet for NaN"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             (arbeidsgiver.path("vedtaksperioder") + arbeidsgiver.path("forkastede"))
                 .forEach { periode ->

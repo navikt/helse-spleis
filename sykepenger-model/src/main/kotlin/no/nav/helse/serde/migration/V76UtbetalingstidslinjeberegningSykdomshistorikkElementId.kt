@@ -7,7 +7,7 @@ import java.util.*
 internal class V76UtbetalingstidslinjeberegningSykdomshistorikkElementId : JsonMigration(version = 76) {
     override val description: String = "Legger på sykdomshistorikkelementId på Utbetalingstidslinjeberegning"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             val sykdomshistorikkelementer = arbeidsgiver.path("sykdomshistorikk").map { element ->
                 UUID.fromString(element.path("id").asText()) to LocalDateTime.parse(element.path("tidsstempel").asText())

@@ -7,7 +7,7 @@ internal class V32SletterForkastedePerioderUtenHistorikk : JsonMigration(version
     private val log = LoggerFactory.getLogger("SletterForkastedePerioderUtenHistorikk")
     override val description: String = "Sletter forkastede perioder som mangler historikk"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         val arbeidsgivere = jsonNode.path("arbeidsgivere")
 
         // Check for trashed vedtaksperioder with no history. These can not be migrated and must be removed.

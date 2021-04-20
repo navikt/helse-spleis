@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 internal class V15ØkonomiSykdomstidslinjer : JsonMigration(version = 15) {
     override val description = "sett 100 prosent arbeidsgiverutbetaling i Sykdomstidslinje"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             arbeidsgiver.path("vedtaksperioder").forEach { periode ->
                 periode.path("sykdomshistorikk").forEach { element ->

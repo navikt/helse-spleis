@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 internal class V39SetterAutomatiskBehandlingPåVedtaksperiode : JsonMigration(version = 39) {
     override val description: String = "Setter automatiskBehandling = false på alle godkjente vedtaksperioder"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode["arbeidsgivere"].forEach { arbeidsgiver ->
             vedtaksperioder(arbeidsgiver["vedtaksperioder"])
             forkastede(arbeidsgiver["forkastede"])

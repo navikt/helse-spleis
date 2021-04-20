@@ -24,7 +24,7 @@ internal class V53KnytteVedtaksperiodeTilUtbetaling : JsonMigration(version = 53
 
     private val log = LoggerFactory.getLogger("tjenestekall")
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         val konteksttyper = konteksttyper(jsonNode)
         val kontekstdetaljer = kontekstdetaljer(jsonNode)
 

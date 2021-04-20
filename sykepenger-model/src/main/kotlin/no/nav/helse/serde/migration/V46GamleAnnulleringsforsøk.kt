@@ -11,7 +11,7 @@ internal class V46GamleAnnulleringsforsøk : JsonMigration(version = 46) {
      * Disse utbetalingene sjekkes og annulleres utenfor spleis og vi anter herfra at de er ferdig annullert
      */
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             arbeidsgiver.path("utbetalinger")
                 .filter { it["arbeidsgiverOppdrag"]["linjer"].size() == 1 }

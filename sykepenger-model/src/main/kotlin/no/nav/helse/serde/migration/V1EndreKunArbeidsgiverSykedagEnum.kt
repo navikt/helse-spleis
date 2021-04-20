@@ -14,7 +14,7 @@ internal class V1EndreKunArbeidsgiverSykedagEnum : JsonMigration(version = 1) {
     private val foreldetSykedagtype = "FORELDET_SYKEDAG"
     private val kunArbeidsgiverSykedagtype = "KUN_ARBEIDSGIVER_SYKEDAG"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             arbeidsgiver.path("vedtaksperioder").forEach { periode ->
                 periode.path("sykdomshistorikk").forEach { historikkElement ->

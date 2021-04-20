@@ -9,7 +9,7 @@ internal class V54UtvideUtbetaling : JsonMigration(version = 54) {
 
     private val log = LoggerFactory.getLogger("tjenestekall")
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             val aktive = arbeidsgiver.path("vedtaksperioder").toList()
             val forkastede = arbeidsgiver.path("forkastede").map { it.path("vedtaksperiode") }

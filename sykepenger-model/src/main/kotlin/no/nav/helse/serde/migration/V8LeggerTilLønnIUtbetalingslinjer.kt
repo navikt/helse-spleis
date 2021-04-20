@@ -6,7 +6,7 @@ import kotlin.math.roundToInt
 internal class V8LeggerTilLønnIUtbetalingslinjer : JsonMigration(version = 8) {
     override val description = "Legger til lønn i utbetalingslinjer basert på dagsats og grad"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode["arbeidsgivere"].forEach { arbeidsgiver ->
             arbeidsgiver["utbetalinger"].forEach { utbetaling ->
                 utbetaling["arbeidsgiverOppdrag"]["linjer"].forEach { linje ->

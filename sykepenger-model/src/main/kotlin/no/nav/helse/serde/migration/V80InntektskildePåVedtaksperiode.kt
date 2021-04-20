@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 internal class V80InntektskildePåVedtaksperiode : JsonMigration(version = 80) {
     override val description: String = "Legger på inntektskilde på vedtaksperioder"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode["arbeidsgivere"]
             .flatMap { it["vedtaksperioder"] + it["forkastede"].map { forkastet -> forkastet["vedtaksperiode"] } }
             .forEach {

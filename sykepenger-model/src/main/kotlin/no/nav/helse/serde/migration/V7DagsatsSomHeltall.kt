@@ -7,7 +7,7 @@ import kotlin.math.roundToInt
 internal class V7DagsatsSomHeltall : JsonMigration(version = 7) {
     override val description = "Runder av dagsats til nærmeste krone"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode["arbeidsgivere"].forEach { arbeidsgiver ->
             arbeidsgiver["utbetalinger"].forEach { utbetaling ->
                 utbetaling.path("utbetalingstidslinje")

@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 internal class V43RenamerSkjæringstidspunkt : JsonMigration(version = 43) {
     override val description: String = "beregningsdatoFraInfotrygd renames til skjæringstidspunktFraInfotrygd"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             renameSkjæringstidspunkt(arbeidsgiver.path("vedtaksperioder"))
             renameSkjæringstidspunktForkastede(arbeidsgiver.path("forkastede"))
