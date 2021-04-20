@@ -89,7 +89,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
             session.run(
                 queryOf(
                     "SELECT melding_id,data FROM melding WHERE fnr = ? AND melding_type IN (?, ?, ?, ?, ?)",
-                    fødselsnummer, NY_SØKNAD.name, SENDT_SØKNAD_ARBEIDSGIVER.name, SENDT_SØKNAD_NAV.name, INNTEKTSMELDING.name, OVERSTYRTIDSLINJE.name
+                    fødselsnummer.toLong(), NY_SØKNAD.name, SENDT_SØKNAD_ARBEIDSGIVER.name, SENDT_SØKNAD_NAV.name, INNTEKTSMELDING.name, OVERSTYRTIDSLINJE.name
                 ).map {
                     UUID.fromString(it.string("melding_id")) to it.string("data")
                 }.asList).toMap()

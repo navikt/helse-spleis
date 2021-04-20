@@ -30,7 +30,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
             session.run(
                 queryOf(
                     "SELECT melding_id,data FROM melding WHERE fnr = ? AND melding_type IN (${Meldingstype.values().joinToString { "?" }})",
-                    fødselsnummer, *Meldingstype.values().map(Enum<*>::name).toTypedArray()
+                    fødselsnummer.toLong(), *Meldingstype.values().map(Enum<*>::name).toTypedArray()
                 ).map {
                     UUID.fromString(it.string("melding_id")) to it.string("data")
                 }.asList).toMap()
