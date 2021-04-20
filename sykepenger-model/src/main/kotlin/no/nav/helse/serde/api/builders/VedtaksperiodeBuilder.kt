@@ -38,6 +38,7 @@ internal class VedtaksperiodeBuilder(
     private val fullstendig = tilstand.type in listOf(
         TilstandType.AVSLUTTET,
         TilstandType.AVVENTER_GODKJENNING,
+        TilstandType.AVVENTER_GODKJENNING_REVURDERING,
         TilstandType.UTBETALING_FEILET,
         TilstandType.TIL_UTBETALING,
         TilstandType.AVVENTER_ARBEIDSGIVERE
