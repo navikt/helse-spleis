@@ -1,14 +1,11 @@
 package no.nav.helse.spleis
 
-import io.ktor.application.Application
-import io.ktor.application.ApplicationCallPipeline
-import io.ktor.application.call
-import io.ktor.features.callId
-import io.ktor.http.HttpStatusCode
-import io.ktor.http.content.OutgoingContent
-import io.ktor.request.httpMethod
-import io.ktor.request.uri
-import io.ktor.response.ApplicationSendPipeline
+import io.ktor.application.*
+import io.ktor.features.*
+import io.ktor.http.*
+import io.ktor.http.content.*
+import io.ktor.request.*
+import io.ktor.response.*
 import io.prometheus.client.Counter
 import io.prometheus.client.Histogram
 import org.slf4j.Logger
@@ -37,7 +34,7 @@ internal fun Application.requestResponseTracing(logger: Logger) {
                 proceed()
             }
         } catch (err: Throwable) {
-            logger.info("exception thrown during processing: ${err.message} callId=${call.callId} ", err)
+            logger.info("exception thrown during processing: ${err.message} callId=${call.callId}")
             throw err
         }
     }
