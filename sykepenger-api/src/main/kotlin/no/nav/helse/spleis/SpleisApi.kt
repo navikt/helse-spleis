@@ -30,8 +30,9 @@ internal fun Application.spesialistApi(dataSource: DataSource, authProviderName:
     routing {
         authenticate(authProviderName) {
             get("/api/person-snapshot") {
-                personDao.hentPerson(call.request.header("fnr")!!)
-                    ?.deserialize(hendelseDao::hentAlleHendelser)
+                val fnr = call.request.header("fnr")!!
+                personDao.hentPerson(fnr)
+                    ?.deserialize { hendelseDao.hentAlleHendelser(fnr) }
                     ?.let { håndterPerson(it, hendelseDao) }
                     ?.let { call.respond(it) }
                     ?: call.respond(HttpStatusCode.NotFound, "Resource not found")

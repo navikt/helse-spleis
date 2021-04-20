@@ -25,12 +25,12 @@ internal class HendelseDao(private val dataSource: DataSource) {
         }
     }
 
-    fun hentAlleHendelser(): Map<UUID, String> {
+    fun hentAlleHendelser(fødselsnummer: String): Map<UUID, String> {
         return using(sessionOf(dataSource)) { session ->
             session.run(
                 queryOf(
-                    "SELECT melding_id,data FROM melding WHERE melding_type IN (${Meldingstype.values().joinToString { "?" }})",
-                    *Meldingstype.values().map(Enum<*>::name).toTypedArray()
+                    "SELECT melding_id,data FROM melding WHERE fnr = ? AND melding_type IN (${Meldingstype.values().joinToString { "?" }})",
+                    fødselsnummer, *Meldingstype.values().map(Enum<*>::name).toTypedArray()
                 ).map {
                     UUID.fromString(it.string("melding_id")) to it.string("data")
                 }.asList).toMap()

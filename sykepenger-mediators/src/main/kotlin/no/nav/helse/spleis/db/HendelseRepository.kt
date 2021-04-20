@@ -84,12 +84,12 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         else -> null.also { log.warn("ukjent meldingstype ${melding::class.simpleName}: melding lagres ikke") }
     }
 
-    internal fun hentAlleHendelser(): Map<UUID, String> {
+    internal fun hentAlleHendelser(fødselsnummer: String): Map<UUID, String> {
         return using(sessionOf(dataSource)) { session ->
             session.run(
                 queryOf(
-                    "SELECT melding_id,data FROM melding WHERE melding_type IN (?, ?, ?, ?, ?)",
-                    NY_SØKNAD.name, SENDT_SØKNAD_ARBEIDSGIVER.name, SENDT_SØKNAD_NAV.name, INNTEKTSMELDING.name, OVERSTYRTIDSLINJE.name
+                    "SELECT melding_id,data FROM melding WHERE fnr = ? AND melding_type IN (?, ?, ?, ?, ?)",
+                    fødselsnummer, NY_SØKNAD.name, SENDT_SØKNAD_ARBEIDSGIVER.name, SENDT_SØKNAD_NAV.name, INNTEKTSMELDING.name, OVERSTYRTIDSLINJE.name
                 ).map {
                     UUID.fromString(it.string("melding_id")) to it.string("data")
                 }.asList).toMap()
