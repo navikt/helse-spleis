@@ -22,11 +22,11 @@ internal class V90HendelsekildeTidsstempel : JsonMigration(version = 90) {
             }
 
             arbeidsgiver.path("vedtaksperioder").forEach { vedtaksperiode ->
-                migrerSykdomstidslinje(vedtaksperiode.path("sykdomstidslinje"))
+                migrerSykdomstidslinje(meldingerSupplier, vedtaksperiode.path("sykdomstidslinje"))
             }
 
             arbeidsgiver.path("forkastede").forEach { forkastet ->
-                migrerSykdomstidslinje(forkastet.path("vedtaksperiode").path("sykdomstidslinje"))
+                migrerSykdomstidslinje(meldingerSupplier, forkastet.path("vedtaksperiode").path("sykdomstidslinje"))
             }
         }
     }
@@ -37,10 +37,11 @@ internal class V90HendelsekildeTidsstempel : JsonMigration(version = 90) {
         }
     }
 
-    private fun migrerSykdomstidslinje(tidslinje: JsonNode) {
+    private fun migrerSykdomstidslinje(meldingerSupplier: MeldingerSupplier, tidslinje: JsonNode) {
         tidslinje.path("dager").forEach { dag ->
             val id = UUID.fromString(dag.path("kilde").path("id").asText())
-            migrerKilde(dag.path("kilde") as ObjectNode, requireNotNull(tidsstempler[id]) { "Forventet at $id skal eksistere" })
+            val type = dag.path("kilde").path("type").asText()
+            migrerKilde(dag.path("kilde") as ObjectNode, finnTidsstempel(meldingerSupplier, id, type))
         }
     }
 
@@ -59,6 +60,15 @@ internal class V90HendelsekildeTidsstempel : JsonMigration(version = 90) {
         val tidsstempel = meldingerSupplier.hentMeldinger()[id]?.let {
             tidsstempelFraMelding(type, serdeObjectMapper.readTree(it))?.let { LocalDateTime.parse(it) }
         } ?: elementtidsstempler[id] ?: elementtidsstempel
+        tidsstempler[id] = tidsstempel
+        return tidsstempel
+    }
+
+    private fun finnTidsstempel(meldingerSupplier: MeldingerSupplier, id: UUID, type: String): LocalDateTime {
+        if (id in tidsstempler) return tidsstempler.getValue(id)
+        val tidsstempel = meldingerSupplier.hentMeldinger()[id]?.let {
+            tidsstempelFraMelding(type, serdeObjectMapper.readTree(it))?.let { LocalDateTime.parse(it) }
+        } ?: throw IllegalStateException("Forventet at $id skal eksistere")
         tidsstempler[id] = tidsstempel
         return tidsstempel
     }

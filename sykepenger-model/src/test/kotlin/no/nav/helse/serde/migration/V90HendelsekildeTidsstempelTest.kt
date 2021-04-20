@@ -10,6 +10,7 @@ internal class V90HendelsekildeTidsstempelTest {
     private val meldingerSupplier = MeldingerSupplier {
         mapOf(
             UUID.fromString("e878d0ab-a739-412c-a990-a2f2d75171f3") to """{ "sykmeldingSkrevet": "2021-03-20T12:00:00.100022738" }""", // Sykmelding
+            UUID.fromString("05e30169-070a-4c05-bab1-ad3825260e98") to """{ "sykmeldingSkrevet": "2021-03-02T12:00:00.100022738" }""", // Sykmelding
             UUID.fromString("debff1f8-f721-4506-8f80-7e89078cb85a") to """{ "sykmeldingSkrevet": "2021-03-10T12:00:00.100022738" }""", // Sykmelding
             UUID.fromString("66c0e3cf-8773-4c5c-bc3c-54d94cdf323f") to """{ "sykmeldingSkrevet": "2021-03-15T12:00:00.100022738" }""", // Søknad
             UUID.fromString("282bedc2-3cbc-4c34-9e59-1dc04ec33da9") to """{ "sykmeldingSkrevet": "2021-03-05T12:00:00.100022738" }""", // Søknad
@@ -294,6 +295,12 @@ internal class V90HendelsekildeTidsstempelTest {
                     "kilde": {
                       "type": "SykdomstidslinjeHendelse",
                       "id": "d68a7798-d732-44b3-9456-3301e5832014"
+                    }
+                  },
+                  {
+                    "kilde": {
+                      "type": "Sykmelding",
+                      "id": "05e30169-070a-4c05-bab1-ad3825260e98"
                     }
                   }
                 ]
@@ -601,6 +608,13 @@ internal class V90HendelsekildeTidsstempelTest {
                       "type": "SykdomstidslinjeHendelse",
                       "id": "d68a7798-d732-44b3-9456-3301e5832014",
                       "tidsstempel": "2021-04-20T12:00:00.100022738"
+                    }
+                  },
+                  {
+                    "kilde": {
+                      "type": "Sykmelding",
+                      "id": "05e30169-070a-4c05-bab1-ad3825260e98",
+                      "tidsstempel": "2021-03-02T12:00:00.100022738"
                     }
                   }
                 ]
