@@ -497,7 +497,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             fødselsnummer = UNG_PERSON_FNR_2018,
             aktørId = AKTØRID,
             organisasjonsnummer = ORGNUMMER,
-            dager = overstyringsdager
+            dager = overstyringsdager,
+            opprettet = LocalDateTime.now()
         ).håndter(Person::håndter)
     }
 
@@ -569,7 +570,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             andreInntektskilder = andreInntektskilder,
             sendtTilNAV = sendtTilNav.atStartOfDay(),
             permittert = false,
-            merknaderFraSykmelding = emptyList()
+            merknaderFraSykmelding = emptyList(),
+            opprettet = Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.start.atStartOfDay()
         ).apply {
             hendelselogg = this
         }
@@ -584,7 +586,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             fnr = UNG_PERSON_FNR_2018,
             aktørId = AKTØRID,
             orgnummer = orgnummer,
-            perioder = listOf(*perioder)
+            perioder = listOf(*perioder),
+            opprettet = LocalDateTime.now()
         ).apply {
             hendelselogg = this
         }
@@ -625,7 +628,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
                 ferieperioder = ferieperioder,
                 arbeidsforholdId = null,
                 begrunnelseForReduksjonEllerIkkeUtbetalt = null,
-                harOpphørAvNaturalytelser = harOpphørAvNaturalytelser
+                harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
+                mottatt = LocalDateTime.now()
             )
         }
         inntektsmeldinger[id] = inntektsmeldinggenerator

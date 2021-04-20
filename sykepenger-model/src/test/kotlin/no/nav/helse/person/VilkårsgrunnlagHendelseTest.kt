@@ -190,7 +190,8 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
         andreInntektskilder = emptyList(),
         sendtTilNAV = 31.januar.atStartOfDay(),
         permittert = false,
-        merknaderFraSykmelding = emptyList()
+        merknaderFraSykmelding = emptyList(),
+        opprettet = LocalDateTime.now()
     ).apply {
         hendelse = this
     }
@@ -210,7 +211,8 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
             arbeidsgiverperioder = arbeidsgiverperioder,
             ferieperioder = emptyList(),
             arbeidsforholdId = null,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = null
+            begrunnelseForReduksjonEllerIkkeUtbetalt = null,
+            mottatt = LocalDateTime.now()
         ).apply {
             hendelse = this
         }

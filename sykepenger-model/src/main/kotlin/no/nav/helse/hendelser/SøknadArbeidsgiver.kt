@@ -8,6 +8,7 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.økonomi.Prosentdel
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 class SøknadArbeidsgiver constructor(
@@ -15,8 +16,9 @@ class SøknadArbeidsgiver constructor(
     private val fnr: String,
     private val aktørId: String,
     private val orgnummer: String,
-    private val perioder: List<Søknadsperiode>
-) : SykdomstidslinjeHendelse(meldingsreferanseId, Søknad::class) {
+    private val perioder: List<Søknadsperiode>,
+    opprettet: LocalDateTime
+) : SykdomstidslinjeHendelse(meldingsreferanseId, opprettet, Søknad::class) {
 
     private val fom: LocalDate
     private val tom: LocalDate

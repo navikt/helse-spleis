@@ -28,7 +28,8 @@ internal class OverstyrTidslinjeMessage(val packet: JsonMessage) : HendelseMessa
                 fødselsnummer = fødselsnummer,
                 aktørId = aktørId,
                 organisasjonsnummer = organisasjonsnummer,
-                dager = dager
+                dager = dager,
+                opprettet = opprettet
             )
         )
 }

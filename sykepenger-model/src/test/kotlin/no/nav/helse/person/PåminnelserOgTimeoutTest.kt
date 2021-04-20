@@ -229,7 +229,8 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
             andreInntektskilder = emptyList(),
             sendtTilNAV = 20.januar.atStartOfDay(),
             permittert = false,
-            merknaderFraSykmelding = emptyList()
+            merknaderFraSykmelding = emptyList(),
+            opprettet = LocalDateTime.now()
         ).apply {
             hendelse = this
         }
@@ -269,7 +270,8 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
             arbeidsgiverperioder = arbeidsgiverperiode.toList(),
             ferieperioder = emptyList(),
             arbeidsforholdId = null,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = null
+            begrunnelseForReduksjonEllerIkkeUtbetalt = null,
+            mottatt = LocalDateTime.now()
         ).apply {
             hendelse = this
         }

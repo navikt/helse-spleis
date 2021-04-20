@@ -12,6 +12,7 @@ import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 class Inntektsmelding(
@@ -27,7 +28,8 @@ class Inntektsmelding(
     private val arbeidsforholdId: String?,
     private val begrunnelseForReduksjonEllerIkkeUtbetalt: String?,
     private val harOpphørAvNaturalytelser: Boolean = false,
-) : SykdomstidslinjeHendelse(meldingsreferanseId) {
+    mottatt: LocalDateTime
+) : SykdomstidslinjeHendelse(meldingsreferanseId, mottatt) {
 
     private val beste = { venstre: Dag, høyre: Dag ->
         when {

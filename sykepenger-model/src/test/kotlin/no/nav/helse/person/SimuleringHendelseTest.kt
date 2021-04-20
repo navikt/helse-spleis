@@ -132,7 +132,8 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
             andreInntektskilder = emptyList(),
             sendtTilNAV = sisteSykedag.atStartOfDay(),
             permittert = false,
-            merknaderFraSykmelding = emptyList()
+            merknaderFraSykmelding = emptyList(),
+            opprettet = LocalDateTime.now()
         ).apply {
             hendelse = this
         }
@@ -149,7 +150,8 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
             arbeidsgiverperioder = listOf(Periode(førsteSykedag, førsteSykedag.plusDays(16))),
             ferieperioder = emptyList(),
             arbeidsforholdId = null,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = null
+            begrunnelseForReduksjonEllerIkkeUtbetalt = null,
+            mottatt = LocalDateTime.now()
         ).apply {
             hendelse = this
         }

@@ -234,7 +234,8 @@ internal class YtelserHendelseTest : AbstractPersonTest() {
             andreInntektskilder = emptyList(),
             sendtTilNAV = sisteSykedag.atStartOfDay(),
             permittert = false,
-            merknaderFraSykmelding = emptyList()
+            merknaderFraSykmelding = emptyList(),
+            opprettet = LocalDateTime.now()
         )
 
     private fun inntektsmelding(
@@ -255,7 +256,8 @@ internal class YtelserHendelseTest : AbstractPersonTest() {
             arbeidsgiverperioder = listOf(Periode(førsteSykedag, førsteSykedag.plusDays(16))),
             ferieperioder = emptyList(),
             arbeidsforholdId = null,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = null
+            begrunnelseForReduksjonEllerIkkeUtbetalt = null,
+            mottatt = LocalDateTime.now()
         )
 
     private fun vilkårsgrunnlag() =

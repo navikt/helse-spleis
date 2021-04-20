@@ -31,7 +31,8 @@ internal class SendtSøknadArbeidsgiverMessage(packet: JsonMessage) : SøknadMes
         fnr = fødselsnummer,
         aktørId = aktørId,
         orgnummer = orgnummer,
-        perioder = perioder
+        perioder = perioder,
+        opprettet = søknadOpprettet
     )
 
     override fun behandle(mediator: IHendelseMediator) {

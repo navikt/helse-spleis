@@ -10,6 +10,7 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 import java.util.stream.Collectors
 
@@ -85,7 +86,7 @@ internal val Int.UK
             .collect(Collectors.toMap<LocalDate, LocalDate, Dag>({ it }, { UkjentDag(it, TestHendelse.kilde) }))
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
-private object TestHendelse : SykdomstidslinjeHendelse(UUID.randomUUID()) {
+private object TestHendelse : SykdomstidslinjeHendelse(UUID.randomUUID(), LocalDateTime.now()) {
     private const val UNG_PERSON_FNR_2018 = "12020052345"
     private const val AKTØRID = "42"
     private const val ORGNUMMER = "987654321"

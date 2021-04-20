@@ -19,7 +19,7 @@ class Sykmelding(
     private val orgnummer: String,
     sykeperioder: List<Sykmeldingsperiode>,
     private val opprettet: LocalDateTime
-) : SykdomstidslinjeHendelse(meldingsreferanseId) {
+) : SykdomstidslinjeHendelse(meldingsreferanseId, opprettet) {
 
     private val sykdomstidslinje: Sykdomstidslinje
     private val periode: Periode

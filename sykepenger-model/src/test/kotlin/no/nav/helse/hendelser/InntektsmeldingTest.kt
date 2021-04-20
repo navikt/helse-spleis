@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 internal class InntektsmeldingTest {
@@ -648,7 +649,8 @@ internal class InntektsmeldingTest {
             arbeidsgiverperioder = arbeidsgiverperioder,
             ferieperioder = ferieperioder,
             arbeidsforholdId = arbeidsforholdId,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt
+            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+            mottatt = LocalDateTime.now()
         )
     }
 }

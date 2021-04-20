@@ -1,6 +1,5 @@
 package no.nav.helse.serde.reflection
 
-import no.nav.helse.serde.PersonData
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.maybe
@@ -25,7 +24,8 @@ internal fun serialisertSykdomstidslinjedag(
 
 private fun SykdomstidslinjeHendelse.Hendelseskilde.toJson() = mapOf(
     "type" to toString(),
-    "id" to meldingsreferanseId()
+    "id" to meldingsreferanseId(),
+    "tidsstempel" to tidsstempel()
 )
 
 private fun Dag.toJsonType() = when (this) {

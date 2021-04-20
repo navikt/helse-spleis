@@ -222,7 +222,8 @@ internal class VilkårsgrunnlagTest {
         andreInntektskilder = emptyList(),
         sendtTilNAV = 30.januar.atStartOfDay(),
         permittert = false,
-        merknaderFraSykmelding = emptyList()
+        merknaderFraSykmelding = emptyList(),
+        opprettet = LocalDateTime.now()
     )
 
     private fun inntektsmelding() =
@@ -237,7 +238,8 @@ internal class VilkårsgrunnlagTest {
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
             ferieperioder = listOf(),
             arbeidsforholdId = null,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = null
+            begrunnelseForReduksjonEllerIkkeUtbetalt = null,
+            mottatt = LocalDateTime.now()
         )
 
     private fun ytelser() = Ytelser(

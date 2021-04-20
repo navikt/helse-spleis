@@ -30,7 +30,8 @@ internal class ArbeidsgiverTest {
             arbeidsgiverperioder = listOf(Periode(10.september, 10.september.plusDays(16))),
             ferieperioder = emptyList(),
             arbeidsforholdId = null,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = null
+            begrunnelseForReduksjonEllerIkkeUtbetalt = null,
+            mottatt = LocalDateTime.now()
         )
         val person = Person("aktørId", "fnr")
         val arbeidsgiver = Arbeidsgiver(person, "12345678")

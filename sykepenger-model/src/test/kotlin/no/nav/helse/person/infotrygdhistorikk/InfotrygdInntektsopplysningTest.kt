@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 internal class InfotrygdInntektsopplysningTest {
@@ -214,6 +215,7 @@ internal class InfotrygdInntektsopplysningTest {
         arbeidsgiverperioder = arbeidsgiverperioder,
         ferieperioder = emptyList(),
         arbeidsforholdId = null,
-        begrunnelseForReduksjonEllerIkkeUtbetalt = null
+        begrunnelseForReduksjonEllerIkkeUtbetalt = null,
+        mottatt = LocalDateTime.now()
     )
 }

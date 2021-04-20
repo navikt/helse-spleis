@@ -370,7 +370,8 @@ internal class SkjæringstidspunktTest {
             andreInntektskilder = emptyList(),
             sendtTilNAV = Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay(),
             permittert = false,
-            merknaderFraSykmelding = emptyList()
+            merknaderFraSykmelding = emptyList(),
+            opprettet = LocalDateTime.now()
         )
     }
 
@@ -394,7 +395,8 @@ internal class SkjæringstidspunktTest {
             arbeidsgiverperioder = arbeidsgiverperioder,
             ferieperioder = ferieperioder,
             arbeidsforholdId = null,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = null
+            begrunnelseForReduksjonEllerIkkeUtbetalt = null,
+            mottatt = LocalDateTime.now()
         )
     }
 

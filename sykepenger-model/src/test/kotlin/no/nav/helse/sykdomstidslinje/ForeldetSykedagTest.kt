@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 import kotlin.reflect.KClass
 
@@ -78,7 +79,8 @@ internal class ForeldetSykedagTest {
             andreInntektskilder = emptyList(),
             sendtTilNAV = sendtTilNAV.atStartOfDay(),
             permittert = false,
-            merknaderFraSykmelding = emptyList()
+            merknaderFraSykmelding = emptyList(),
+            opprettet = LocalDateTime.now()
         )
     }
 
@@ -88,7 +90,8 @@ internal class ForeldetSykedagTest {
             fnr = UNG_PERSON_FNR_2018,
             aktørId = AKTØRID,
             orgnummer = ORGNUMMER,
-            perioder = listOf(SøknadArbeidsgiver.Søknadsperiode(18.januar, 14.februar, 100.prosent)) // 10 sykedag januar & februar
+            perioder = listOf(SøknadArbeidsgiver.Søknadsperiode(18.januar, 14.februar, 100.prosent)), // 10 sykedag januar & februar
+            opprettet = LocalDateTime.now()
         )
     }
 

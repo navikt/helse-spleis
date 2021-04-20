@@ -26,7 +26,7 @@ internal class InfotrygdhistorikkElement private constructor(
     private var lagretVilkårsgrunnlag: Boolean
 ) {
     private val perioder = perioder.sortedBy { it.start }
-    private val kilde = SykdomstidslinjeHendelse.Hendelseskilde("Infotrygdhistorikk", id)
+    private val kilde = SykdomstidslinjeHendelse.Hendelseskilde("Infotrygdhistorikk", id, tidsstempel)
 
     init {
         if (!erTom()) requireNotNull(hendelseId) { "HendelseID må være satt når elementet inneholder data" }

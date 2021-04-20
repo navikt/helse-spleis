@@ -2,10 +2,7 @@ package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.asLocalDate
-import no.nav.helse.rapids_rivers.asOptionalLocalDate
-import no.nav.helse.rapids_rivers.isMissingOrNull
+import no.nav.helse.rapids_rivers.*
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 
@@ -20,6 +17,7 @@ internal open class InntektsmeldingMessage(packet: JsonMessage) : HendelseMessag
     private val arbeidsforholdId = packet["arbeidsforholdId"].takeIf (JsonNode::isTextual)?.asText()
     private val orgnummer = packet["virksomhetsnummer"].asText()
     private val aktørId = packet["arbeidstakerAktorId"].asText()
+    private val mottatt = packet["mottattDato"].asLocalDateTime()
     private val førsteFraværsdag = packet["foersteFravaersdag"].asOptionalLocalDate()
     private val beregnetInntekt = packet["beregnetInntekt"].asDouble()
     private val arbeidsgiverperioder = packet["arbeidsgiverperioder"].map(::asPeriode)
@@ -40,7 +38,8 @@ internal open class InntektsmeldingMessage(packet: JsonMessage) : HendelseMessag
         ferieperioder = ferieperioder,
         arbeidsforholdId = arbeidsforholdId,
         begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-        harOpphørAvNaturalytelser = harOpphørAvNaturalytelser
+        harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
+        mottatt = mottatt
     )
 
     override fun behandle(mediator: IHendelseMediator) {

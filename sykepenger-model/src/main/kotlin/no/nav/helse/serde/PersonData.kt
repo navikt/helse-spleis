@@ -6,7 +6,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.*
-import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.infotrygdhistorikk.*
 import no.nav.helse.serde.PersonData.InfotrygdhistorikkElementData.Companion.tilModellObjekt
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagElement.Companion.tilModellObjekt
@@ -598,10 +597,11 @@ internal data class PersonData(
 
             data class KildeData(
                 private val type: String,
-                private val id: UUID
+                private val id: UUID,
+                private val tidsstempel: LocalDateTime
             ) {
                 internal fun parseKilde() =
-                    SykdomstidslinjeHendelse.Hendelseskilde(type, id)
+                    SykdomstidslinjeHendelse.Hendelseskilde(type, id, tidsstempel)
             }
         }
 

@@ -420,7 +420,8 @@ class JsonBuilderTest {
             andreInntektskilder = emptyList(),
             sendtTilNAV = sendtSøknad,
             permittert = false,
-            merknaderFraSykmelding = emptyList()
+            merknaderFraSykmelding = emptyList(),
+            opprettet = LocalDateTime.now()
         )
 
         fun inntektsmelding(
@@ -439,7 +440,8 @@ class JsonBuilderTest {
             arbeidsgiverperioder = perioder,
             ferieperioder = emptyList(),
             arbeidsforholdId = null,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = null
+            begrunnelseForReduksjonEllerIkkeUtbetalt = null,
+            mottatt = LocalDateTime.now()
         )
 
         fun vilkårsgrunnlag(vedtaksperiodeId: String) = Vilkårsgrunnlag(

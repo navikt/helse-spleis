@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 internal class CreateØkonomiTest {
@@ -125,7 +126,7 @@ internal class CreateØkonomiTest {
     ) = PersonData.ArbeidsgiverData.SykdomstidslinjeData.DagData(
         1.januar,
         PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG,
-        PersonData.ArbeidsgiverData.SykdomstidslinjeData.KildeData("type", UUID.randomUUID()),
+        PersonData.ArbeidsgiverData.SykdomstidslinjeData.KildeData("type", UUID.randomUUID(), LocalDateTime.now()),
         grad,
         arbeidsgiverBetalingProsent,
         aktuellDagsinntekt,
