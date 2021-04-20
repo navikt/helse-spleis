@@ -176,7 +176,7 @@ internal data class PersonData(
                 },
                 harMinimumInntekt = harMinimumInntekt,
                 vurdertOk = vurdertOk!!,
-                meldingsreferanseId = meldingsreferanseId!!
+                meldingsreferanseId = meldingsreferanseId
             )
             GrunnlagsdataType.Infotrygd -> VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag()
         }

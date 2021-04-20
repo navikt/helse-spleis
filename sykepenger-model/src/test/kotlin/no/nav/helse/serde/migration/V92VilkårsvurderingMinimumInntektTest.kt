@@ -5,7 +5,7 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
-internal class V91VilkårsvurderingMinimumInntektTest {
+internal class V92VilkårsvurderingMinimumInntektTest {
     @Test
     fun `Endrer vilkårsvurdering for skjæringstidspunkt til periode med avviste dager grunnet MinimumInntekt-filter`() {
         val result = migrer(enVedtaksperiodeUtenMinimumInntekt)
@@ -32,7 +32,7 @@ internal class V91VilkårsvurderingMinimumInntektTest {
 
     private fun toNode(json: String) = serdeObjectMapper.readTree(json)
 
-    private fun migrer(json: String) = listOf(V91VilkårsvurderingMinimumInntekt())
+    private fun migrer(json: String) = listOf(V92VilkårsvurderingMinimumInntekt())
         .migrate(toNode(json))
 
     @Language("JSON")
@@ -88,7 +88,7 @@ internal class V91VilkårsvurderingMinimumInntektTest {
           "vurdertOk": true
         }
       ],
-      "skjemaVersjon": 90
+      "skjemaVersjon": 91
     }
     """.trimIndent()
 
@@ -146,7 +146,7 @@ internal class V91VilkårsvurderingMinimumInntektTest {
           "vurdertOk": false
         }
       ],
-      "skjemaVersjon": 91
+      "skjemaVersjon": 92
     }
     """.trimIndent()
 
@@ -202,7 +202,7 @@ internal class V91VilkårsvurderingMinimumInntektTest {
           "vurdertOk": true
         }
       ],
-      "skjemaVersjon": 90
+      "skjemaVersjon": 91
     }"""
 
     @Language("JSON")
@@ -258,7 +258,7 @@ internal class V91VilkårsvurderingMinimumInntektTest {
           "vurdertOk": true
         }
       ],
-      "skjemaVersjon": 91
+      "skjemaVersjon": 92
     }
     """
 
@@ -321,7 +321,7 @@ internal class V91VilkårsvurderingMinimumInntektTest {
           "vurdertOk": true
         }
       ],
-      "skjemaVersjon": 90
+      "skjemaVersjon": 91
     }"""
 
     @Language("JSON")
@@ -384,7 +384,7 @@ internal class V91VilkårsvurderingMinimumInntektTest {
           "vurdertOk": true
         }
       ],
-      "skjemaVersjon": 91
+      "skjemaVersjon": 92
     }
     """
 
@@ -421,7 +421,7 @@ internal class V91VilkårsvurderingMinimumInntektTest {
           "vurdertOk": true
         }
       ],
-      "skjemaVersjon": 90
+      "skjemaVersjon": 91
     }"""
 
     @Language("JSON")
@@ -457,7 +457,7 @@ internal class V91VilkårsvurderingMinimumInntektTest {
           "vurdertOk": true
         }
       ],
-      "skjemaVersjon": 91
+      "skjemaVersjon": 92
     }
     """
 

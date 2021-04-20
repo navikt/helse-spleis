@@ -60,7 +60,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(
         internal val medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
         internal val harMinimumInntekt: Boolean?,
         internal val vurdertOk: Boolean,
-        internal val meldingsreferanseId: UUID
+        internal val meldingsreferanseId: UUID?
     ) : VilkårsgrunnlagElement {
 
         override fun valider(aktivitetslogg: Aktivitetslogg) {

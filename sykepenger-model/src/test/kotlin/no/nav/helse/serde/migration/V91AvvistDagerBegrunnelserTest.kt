@@ -5,7 +5,7 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
-internal class V90AvvistDagerBegrunnelserTest {
+internal class V91AvvistDagerBegrunnelserTest {
     @Test
     fun `Flytter enkel begrunnelse til liste av begrunnelser for alle avviste dager`() {
         val result = migrer(enVedtaksperiodeMedAvvisteDager)
@@ -20,7 +20,7 @@ internal class V90AvvistDagerBegrunnelserTest {
 
     private fun toNode(json: String) = serdeObjectMapper.readTree(json)
 
-    private fun migrer(json: String) = listOf(V90AvvistDagerBegrunnelser())
+    private fun migrer(json: String) = listOf(V91AvvistDagerBegrunnelser())
         .migrate(toNode(json))
 
     @Language("JSON")
@@ -70,7 +70,7 @@ internal class V90AvvistDagerBegrunnelserTest {
           "forkastede": []
         }
       ],
-      "skjemaVersjon": 89
+      "skjemaVersjon": 90
     }
     """.trimIndent()
 
@@ -121,7 +121,7 @@ internal class V90AvvistDagerBegrunnelserTest {
           "forkastede": []
         }
       ],
-      "skjemaVersjon": 90
+      "skjemaVersjon": 91
     }
     """.trimIndent()
 
@@ -174,7 +174,7 @@ internal class V90AvvistDagerBegrunnelserTest {
           "vedtaksperioder": []
         }
       ],
-      "skjemaVersjon": 89
+      "skjemaVersjon": 90
     }
     """.trimIndent()
 
@@ -227,7 +227,7 @@ internal class V90AvvistDagerBegrunnelserTest {
           "vedtaksperioder": []
         }
       ],
-      "skjemaVersjon": 90
+      "skjemaVersjon": 91
     }
     """.trimIndent()
 
