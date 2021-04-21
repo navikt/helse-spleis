@@ -3,11 +3,14 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.ArbeidsgiverVisitor
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.mai
 import no.nav.helse.testhelpers.mars
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -19,6 +22,7 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.*
 
 internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
 
@@ -74,6 +78,146 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
         )
 
         assertEquals(3, inspektør.utbetalinger.size)
+        assertEquals(6, inspektør.forbrukteSykedager(0))
+        assertEquals(19, inspektør.forbrukteSykedager(1))
+        assertEquals(18, inspektør.forbrukteSykedager(2))
+    }
+
+    private class PølsepakkeBuilder(private val arbeidsgiver: Arbeidsgiver) : ArbeidsgiverVisitor {
+        private var byggetilstand: ArbeidsgiverVisitor = Initiell()
+
+        private val handleposer = mutableListOf(mutableListOf<Utbetaling>())
+        private val handlepose get() = handleposer.last()
+
+        init {
+            arbeidsgiver.accept(this)
+
+            /*
+
+                    |-------|               | ----- R-pølse ----- |
+
+                    |-------|               |---------------------|
+
+
+             */
+        }
+
+        private fun nyHandlepose() {
+            handleposer.add(handlepose.toMutableList()) // tar kopi
+        }
+
+        private fun nyRevurdering(utbetaling: Utbetaling) {
+            nyHandlepose()
+            nyUtbetaling(utbetaling)
+        }
+
+        private fun erstattEksisterende(utbetaling: Utbetaling): Boolean {
+            val indeks = handlepose.indexOfLast { it.hørerSammen(utbetaling) }.takeUnless { it == -1 } ?: return false
+            handlepose.removeAt(indeks)
+            handlepose.add(indeks, utbetaling)
+            return true
+        }
+
+        private fun nyUtbetaling(utbetaling: Utbetaling) {
+            if (erstattEksisterende(utbetaling)) return
+            handlepose.add(utbetaling)
+        }
+
+        override fun preVisitUtbetalinger(utbetalinger: List<Utbetaling>) {
+            byggetilstand = SamleUtbetalinger()
+        }
+
+        override fun preVisitUtbetaling(
+            utbetaling: Utbetaling,
+            id: UUID,
+            beregningId: UUID,
+            type: Utbetaling.Utbetalingtype,
+            tilstand: Utbetaling.Tilstand,
+            tidsstempel: LocalDateTime,
+            oppdatert: LocalDateTime,
+            arbeidsgiverNettoBeløp: Int,
+            personNettoBeløp: Int,
+            maksdato: LocalDate,
+            forbrukteSykedager: Int?,
+            gjenståendeSykedager: Int?
+        ) {
+            byggetilstand.preVisitUtbetaling(utbetaling, id, beregningId, type, tilstand, tidsstempel, oppdatert, arbeidsgiverNettoBeløp, personNettoBeløp, maksdato, forbrukteSykedager, gjenståendeSykedager)
+        }
+
+        override fun postVisitUtbetalinger(utbetalinger: List<Utbetaling>) {
+            byggetilstand = Initiell()
+        }
+
+        private inner class Initiell : ArbeidsgiverVisitor {}
+
+        private inner class SamleUtbetalinger : ArbeidsgiverVisitor {
+            override fun preVisitUtbetaling(
+                utbetaling: Utbetaling,
+                id: UUID,
+                beregningId: UUID,
+                type: Utbetaling.Utbetalingtype,
+                tilstand: Utbetaling.Tilstand,
+                tidsstempel: LocalDateTime,
+                oppdatert: LocalDateTime,
+                arbeidsgiverNettoBeløp: Int,
+                personNettoBeløp: Int,
+                maksdato: LocalDate,
+                forbrukteSykedager: Int?,
+                gjenståendeSykedager: Int?
+            ) {
+                if (type == Utbetaling.Utbetalingtype.REVURDERING) nyRevurdering(utbetaling)
+                else nyUtbetaling(utbetaling)
+            }
+        }
+    }
+
+    @Test
+    fun `lager masse data`() {
+        nyttVedtak(3.januar, 26.januar)
+        forlengVedtak(27.januar, 14.februar)
+        forlengVedtak(15.februar, 31.mars)
+
+        nyttVedtak(3.mai, 30.mai)
+
+        håndterOverstyring((20.januar til 22.januar).map { manuellFeriedag(it) })
+        håndterYtelser(3.vedtaksperiode)   // No history
+        håndterSimulering(3.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(3.vedtaksperiode, true)
+        håndterUtbetalt(3.vedtaksperiode)
+
+        val a = PølsepakkeBuilder(inspektør.arbeidsgiver)
+
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+        )
+
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+        )
+
+        assertEquals(5, inspektør.utbetalinger.size)
         assertEquals(6, inspektør.forbrukteSykedager(0))
         assertEquals(19, inspektør.forbrukteSykedager(1))
         assertEquals(18, inspektør.forbrukteSykedager(2))

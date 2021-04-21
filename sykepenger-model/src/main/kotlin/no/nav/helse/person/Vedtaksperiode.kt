@@ -1960,7 +1960,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
             if (Toggles.RevurderUtbetaltPeriode.enabled) {
-                if (vedtaksperiode.arbeidsgiver.blokkeresRevurdering(vedtaksperiode)) hendelse.severe("Overstyrer ikke en vedtaksperiode som er avsluttet")
+                //if (vedtaksperiode.arbeidsgiver.blokkeresRevurdering(vedtaksperiode)) hendelse.severe("Overstyrer ikke en vedtaksperiode som er avsluttet")
                 vedtaksperiode.arbeidsgiver.låsOpp(vedtaksperiode.periode)
                 vedtaksperiode.oppdaterHistorikk(hendelse)
                 vedtaksperiode.arbeidsgiver.lås(vedtaksperiode.periode)
