@@ -24,7 +24,7 @@ spec:
       cpu: 500m
       memory: 2Gi
   replicas:
-    min: 24
+    min: 6
     max: 24
     cpuThresholdPercentage: 75
   prometheus:
@@ -47,8 +47,6 @@ spec:
     value: tbd-spleis-v1
   - name: KAFKA_RESET_POLICY
     value: none
-  - name: KAFKA_MAX_RECORDS
-    value: "10"
   - name: DATABASE_HOST
     value: a01dbfl039.adeo.no
   - name: DATABASE_PORT
