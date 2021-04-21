@@ -8,7 +8,7 @@ import no.nav.helse.serde.serdeObjectMapper
 internal class V91AvvistDagerBegrunnelser : JsonMigration(version = 91) {
     override val description: String = "Flytter 'begrunnelse' på AvvistDag-er til 'begrunnelser' som er en liste"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode.path("arbeidsgivere")
             .forEach { arbeidsgiver ->
                 arbeidsgiver.path("vedtaksperioder")

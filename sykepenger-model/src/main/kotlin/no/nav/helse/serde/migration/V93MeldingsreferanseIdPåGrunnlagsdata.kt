@@ -7,7 +7,7 @@ internal class V93MeldingsreferanseIdPåGrunnlagsdata : JsonMigration(version = 
     override val description: String =
         "Legger til meldingsreferanseId på grunnlagsdata. Bruker hendelsesId-en som er lagret på sammenligningsgrunnlaget for samme skjæringstidspunkt."
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode.path("vilkårsgrunnlagHistorikk")
             .forEach { vilkårsgrunnlag ->
                 if (vilkårsgrunnlag["type"].asText() != "Vilkårsprøving") return@forEach

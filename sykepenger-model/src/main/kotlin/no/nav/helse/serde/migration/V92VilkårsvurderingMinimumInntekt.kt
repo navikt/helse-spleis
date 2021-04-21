@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 internal class V92VilkårsvurderingMinimumInntekt : JsonMigration(version = 92) {
     override val description: String = "Legger til minimumInntekt på vilkårsvurderinger for skjæringstidspunkt der vi har avvist dager pga minimum inntekt"
 
-    override fun doMigration(jsonNode: ObjectNode) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         val skjæringstidspunkterUtenMinimumInntekt = jsonNode.path("arbeidsgivere")
             .flatMap { arbeidsgiver -> arbeidsgiver.path("vedtaksperioder") }
             .flatMap { vedtaksperiode -> vedtaksperiode.path("utbetalingstidslinje").path("dager") }
