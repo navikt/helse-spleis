@@ -283,7 +283,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
             aktørId = AKTØRID,
             orgnummer = ORGNUMMER,
             sykeperioder = listOf(Sykmeldingsperiode(førsteSykedag, sisteSykedag, 100.prosent)),
-            opprettet = førsteSykedag.plusMonths(3).atStartOfDay()
+            sykmeldingSkrevet = førsteSykedag.plusMonths(3).atStartOfDay()
         ).apply {
             hendelse = this
         }
@@ -299,7 +299,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
             sendtTilNAV = sisteSykedag.atStartOfDay(),
             permittert = false,
             merknaderFraSykmelding = emptyList(),
-            opprettet = LocalDateTime.now()
+            sykmeldingSkrevet = LocalDateTime.now()
         ).apply {
             hendelse = this
         }

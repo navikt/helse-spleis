@@ -221,7 +221,7 @@ internal class YtelserHendelseTest : AbstractPersonTest() {
             aktørId = "aktørId",
             orgnummer = ORGNUMMER,
             sykeperioder = listOf(Sykmeldingsperiode(førsteSykedag, sisteSykedag, 100.prosent)),
-            opprettet = førsteSykedag.plusMonths(3).atStartOfDay()
+            sykmeldingSkrevet = førsteSykedag.plusMonths(3).atStartOfDay()
         )
 
     private fun søknad() =
@@ -235,7 +235,7 @@ internal class YtelserHendelseTest : AbstractPersonTest() {
             sendtTilNAV = sisteSykedag.atStartOfDay(),
             permittert = false,
             merknaderFraSykmelding = emptyList(),
-            opprettet = LocalDateTime.now()
+            sykmeldingSkrevet = LocalDateTime.now()
         )
 
     private fun inntektsmelding(

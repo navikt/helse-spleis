@@ -93,7 +93,7 @@ internal class SerialiseringAvDagerFraSøknadTest {
         aktørId = aktørId,
         orgnummer = orgnummer,
         sykeperioder = listOf(Sykmeldingsperiode(1.januar, 2.januar, 100.prosent)),
-        opprettet = 4.april.atStartOfDay()
+        sykmeldingSkrevet = 4.april.atStartOfDay()
     )
 
     private val søknad get() = Søknad(
@@ -113,7 +113,7 @@ internal class SerialiseringAvDagerFraSøknadTest {
         sendtTilNAV = 5.januar.atStartOfDay(),
         permittert = false,
         merknaderFraSykmelding = emptyList(),
-        opprettet = LocalDateTime.now()
+        sykmeldingSkrevet = LocalDateTime.now()
     )
 }
 

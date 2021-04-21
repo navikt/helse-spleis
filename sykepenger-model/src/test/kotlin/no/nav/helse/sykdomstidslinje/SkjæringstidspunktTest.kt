@@ -356,7 +356,7 @@ internal class SkjæringstidspunktTest {
             aktørId = AKTØRID,
             orgnummer = ORGNUMMER,
             sykeperioder = sykeperioder.toList(),
-            opprettet = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now()
+            sykmeldingSkrevet = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now()
         )
     }
 
@@ -371,7 +371,7 @@ internal class SkjæringstidspunktTest {
             sendtTilNAV = Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay(),
             permittert = false,
             merknaderFraSykmelding = emptyList(),
-            opprettet = LocalDateTime.now()
+            sykmeldingSkrevet = LocalDateTime.now()
         )
     }
 

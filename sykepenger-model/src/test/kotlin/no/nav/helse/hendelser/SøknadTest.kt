@@ -221,7 +221,7 @@ internal class SøknadTest {
             sendtTilNAV = Søknadsperiode.søknadsperiode(perioder.toList())?.endInclusive?.atStartOfDay() ?: LocalDateTime.now(),
             permittert = permittert,
             merknaderFraSykmelding = merknaderFraSykmelding,
-            opprettet = LocalDateTime.now()
+            sykmeldingSkrevet = LocalDateTime.now()
         )
     }
 }

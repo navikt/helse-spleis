@@ -174,7 +174,7 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
         aktørId = "aktørId",
         orgnummer = ORGNUMMER,
         sykeperioder = perioder,
-        opprettet = Sykmeldingsperiode.periode(perioder)?.start?.atStartOfDay() ?: LocalDateTime.now()
+        sykmeldingSkrevet = Sykmeldingsperiode.periode(perioder)?.start?.atStartOfDay() ?: LocalDateTime.now()
     ).apply {
         hendelse = this
     }
@@ -191,7 +191,7 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
         sendtTilNAV = 31.januar.atStartOfDay(),
         permittert = false,
         merknaderFraSykmelding = emptyList(),
-        opprettet = LocalDateTime.now()
+        sykmeldingSkrevet = LocalDateTime.now()
     ).apply {
         hendelse = this
     }

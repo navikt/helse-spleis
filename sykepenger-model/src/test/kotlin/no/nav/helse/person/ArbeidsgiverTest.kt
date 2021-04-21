@@ -50,7 +50,7 @@ internal class ArbeidsgiverTest {
             aktørId = "aktørId",
             orgnummer = "orgnr",
             sykeperioder = sykeperioder.toList(),
-            opprettet = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now()
+            sykmeldingSkrevet = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now()
         )
     }
 }

@@ -17,6 +17,7 @@ internal abstract class SøknadRiver(
 
     private fun validateSøknad(packet: JsonMessage) {
         packet.requireKey("fnr", "aktorId", "arbeidsgiver.orgnummer", "status")
+        packet.require("sykmeldingSkrevet", JsonNode::asLocalDateTime)
         packet.require("opprettet", JsonNode::asLocalDateTime)
         packet.require("fom", JsonNode::asLocalDate)
         packet.require("tom", JsonNode::asLocalDate)

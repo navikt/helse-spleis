@@ -32,6 +32,7 @@ internal class NyeSøknaderRiverTest : RiverTest() {
         startSyketilfelle = LocalDate.now(),
         arbeidGjenopptatt = LocalDate.now(),
         korrigerer = "korrigerer",
+        sykmeldingSkrevet = LocalDateTime.now(),
         opprettet = LocalDateTime.now(),
         sendtNav = null,
         sendtArbeidsgiver = LocalDateTime.now(),

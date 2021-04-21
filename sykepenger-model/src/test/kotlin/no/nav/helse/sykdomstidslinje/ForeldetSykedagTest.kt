@@ -80,7 +80,7 @@ internal class ForeldetSykedagTest {
             sendtTilNAV = sendtTilNAV.atStartOfDay(),
             permittert = false,
             merknaderFraSykmelding = emptyList(),
-            opprettet = LocalDateTime.now()
+            sykmeldingSkrevet = LocalDateTime.now()
         )
     }
 
@@ -91,7 +91,7 @@ internal class ForeldetSykedagTest {
             aktørId = AKTØRID,
             orgnummer = ORGNUMMER,
             perioder = listOf(SøknadArbeidsgiver.Søknadsperiode(18.januar, 14.februar, 100.prosent)), // 10 sykedag januar & februar
-            opprettet = LocalDateTime.now()
+            sykmeldingSkrevet = LocalDateTime.now()
         )
     }
 

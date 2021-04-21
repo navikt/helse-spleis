@@ -18,8 +18,8 @@ class Sykmelding(
     private val aktørId: String,
     private val orgnummer: String,
     sykeperioder: List<Sykmeldingsperiode>,
-    private val opprettet: LocalDateTime
-) : SykdomstidslinjeHendelse(meldingsreferanseId, opprettet) {
+    private val sykmeldingSkrevet: LocalDateTime
+) : SykdomstidslinjeHendelse(meldingsreferanseId, sykmeldingSkrevet) {
 
     private val sykdomstidslinje: Sykdomstidslinje
     private val periode: Periode
@@ -35,7 +35,7 @@ class Sykmelding(
         return this
     }
 
-    override fun forGammel() = (periode.start < opprettet.toLocalDate().minusMonths(6)).also {
+    override fun forGammel() = (periode.start < sykmeldingSkrevet.toLocalDate().minusMonths(6)).also {
         if (it) error("Sykmelding kan ikke være eldre enn 6 måneder fra opprettelse")
     }
 

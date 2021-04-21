@@ -7,6 +7,6 @@ import no.nav.helse.rapids_rivers.asLocalDateTime
 internal abstract class SøknadMessage(packet: JsonMessage) :
     HendelseMessage(packet) {
 
-    protected val søknadOpprettet = packet["opprettet"].asLocalDateTime()
+    protected val sykmeldingSkrevet = packet["sykmeldingSkrevet"].asLocalDateTime()
     override val fødselsnummer = packet["fnr"].asText()
 }

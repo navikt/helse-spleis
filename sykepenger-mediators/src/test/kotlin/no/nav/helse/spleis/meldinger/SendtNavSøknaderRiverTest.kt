@@ -37,7 +37,7 @@ internal class SendtNavSøknaderRiverTest : RiverTest() {
                 tom = LocalDate.now(),
                 type = FravarstypeDTO.FERIE
             )
-        )
+        ),
     ) = SykepengesoknadDTO(
         id = UUID.randomUUID().toString(),
         type = SoknadstypeDTO.ARBEIDSTAKERE,
@@ -55,6 +55,7 @@ internal class SendtNavSøknaderRiverTest : RiverTest() {
         korrigerer = "korrigerer",
         opprettet = LocalDateTime.now(),
         sendtNav = LocalDateTime.now(),
+        sykmeldingSkrevet = LocalDateTime.now(),
         sendtArbeidsgiver = LocalDateTime.now(),
         egenmeldinger = listOf(PeriodeDTO(fom = LocalDate.now(), tom = LocalDate.now())),
         soknadsperioder = soknadsperioder,

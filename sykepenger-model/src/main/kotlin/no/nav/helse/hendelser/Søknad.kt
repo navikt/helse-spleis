@@ -22,8 +22,8 @@ class Søknad(
     private val sendtTilNAV: LocalDateTime,
     private val permittert: Boolean,
     private val merknaderFraSykmelding: List<Merknad>,
-    opprettet: LocalDateTime
-) : SykdomstidslinjeHendelse(meldingsreferanseId, opprettet) {
+    sykmeldingSkrevet: LocalDateTime
+) : SykdomstidslinjeHendelse(meldingsreferanseId, sykmeldingSkrevet) {
 
     private val sykdomsperiode: Periode
     private val sykdomstidslinje: Sykdomstidslinje

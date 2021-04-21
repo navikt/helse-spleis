@@ -73,7 +73,7 @@ internal class SendtSøknadNavMessage(private val packet: JsonMessage) : Søknad
         sendtTilNAV = sendtNav,
         permittert = permittert,
         merknaderFraSykmelding = merknaderFraSykmelding,
-        opprettet = søknadOpprettet
+        sykmeldingSkrevet = sykmeldingSkrevet
     )
 
     override fun behandle(mediator: IHendelseMediator) {

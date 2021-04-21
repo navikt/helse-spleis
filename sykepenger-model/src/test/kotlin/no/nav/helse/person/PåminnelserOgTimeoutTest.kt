@@ -230,7 +230,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
             sendtTilNAV = 20.januar.atStartOfDay(),
             permittert = false,
             merknaderFraSykmelding = emptyList(),
-            opprettet = LocalDateTime.now()
+            sykmeldingSkrevet = LocalDateTime.now()
         ).apply {
             hendelse = this
         }
@@ -250,7 +250,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
             aktørId = "12345",
             orgnummer = ORGNUMMER,
             sykeperioder = perioder.toList(),
-            opprettet = Sykmeldingsperiode.periode(perioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now()
+            sykmeldingSkrevet = Sykmeldingsperiode.periode(perioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now()
         ).apply {
             hendelse = this
         }

@@ -156,7 +156,7 @@ internal class SøknadArbeidsgiverHendelseTest : AbstractPersonTest() {
             sendtTilNAV = Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay(),
             permittert = false,
             merknaderFraSykmelding = emptyList(),
-            opprettet = LocalDateTime.now()
+            sykmeldingSkrevet = LocalDateTime.now()
         )
 
     private fun søknadArbeidsgiver(
@@ -169,7 +169,7 @@ internal class SøknadArbeidsgiverHendelseTest : AbstractPersonTest() {
             aktørId = "12345",
             orgnummer = orgnummer,
             perioder = listOf(*perioder),
-            opprettet = LocalDateTime.now()
+            sykmeldingSkrevet = LocalDateTime.now()
         )
 
     private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode, orgnummer: String = "987654321") =
@@ -179,6 +179,6 @@ internal class SøknadArbeidsgiverHendelseTest : AbstractPersonTest() {
             aktørId = "12345",
             orgnummer = orgnummer,
             sykeperioder = sykeperioder.toList(),
-            opprettet = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.plusMonths(3)?.atStartOfDay() ?: LocalDateTime.now()
+            sykmeldingSkrevet = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.plusMonths(3)?.atStartOfDay() ?: LocalDateTime.now()
         )
 }

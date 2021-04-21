@@ -11,14 +11,14 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-class SøknadArbeidsgiver constructor(
+class SøknadArbeidsgiver(
     meldingsreferanseId: UUID,
     private val fnr: String,
     private val aktørId: String,
     private val orgnummer: String,
     private val perioder: List<Søknadsperiode>,
-    opprettet: LocalDateTime
-) : SykdomstidslinjeHendelse(meldingsreferanseId, opprettet, Søknad::class) {
+    sykmeldingSkrevet: LocalDateTime
+) : SykdomstidslinjeHendelse(meldingsreferanseId, sykmeldingSkrevet, Søknad::class) {
 
     private val fom: LocalDate
     private val tom: LocalDate

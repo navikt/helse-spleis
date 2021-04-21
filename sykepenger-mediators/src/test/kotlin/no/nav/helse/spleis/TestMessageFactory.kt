@@ -52,7 +52,8 @@ internal class TestMessageFactory(
             egenmeldinger = emptyList(),
             fravar = emptyList(),
             soknadsperioder = perioder.toList(),
-            opprettet = fom.plusMonths(3)?.atStartOfDay()
+            opprettet = fom.plusMonths(3)?.atStartOfDay(),
+            sykmeldingSkrevet = fom.atStartOfDay()
         )
         return nyHendelse("ny_søknad", nySøknad.toMap())
     }
@@ -75,7 +76,8 @@ internal class TestMessageFactory(
             egenmeldinger = egenmeldinger,
             fravar = emptyList(),
             soknadsperioder = perioder.toList(),
-            opprettet = LocalDateTime.now()
+            opprettet = LocalDateTime.now(),
+            sykmeldingSkrevet = perioder.minOfOrNull { it.fom!! }!!.atStartOfDay()
         )
         return nyHendelse("sendt_søknad_arbeidsgiver", sendtSøknad.toMap())
     }
@@ -103,7 +105,8 @@ internal class TestMessageFactory(
             fravar = ferie,
             andreInntektskilder = andreInntektskilder,
             soknadsperioder = perioder.toList(),
-            opprettet = LocalDateTime.now()
+            opprettet = LocalDateTime.now(),
+            sykmeldingSkrevet = perioder.minOfOrNull { it.fom!! }!!.atStartOfDay()
         )
         return nyHendelse("sendt_søknad_nav", sendtSøknad.toMap())
     }

@@ -210,7 +210,7 @@ internal class VilkårsgrunnlagTest {
         aktørId = aktørId,
         orgnummer = orgnummer,
         sykeperioder = listOf(Sykmeldingsperiode(16.januar, 30.januar, 100.prosent)),
-        opprettet = 1.april.atStartOfDay()
+        sykmeldingSkrevet = 1.april.atStartOfDay()
     )
 
     private fun søknad() = Søknad(
@@ -223,7 +223,7 @@ internal class VilkårsgrunnlagTest {
         sendtTilNAV = 30.januar.atStartOfDay(),
         permittert = false,
         merknaderFraSykmelding = emptyList(),
-        opprettet = LocalDateTime.now()
+        sykmeldingSkrevet = LocalDateTime.now()
     )
 
     private fun inntektsmelding() =

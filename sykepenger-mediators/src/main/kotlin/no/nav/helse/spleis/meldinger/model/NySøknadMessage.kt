@@ -26,7 +26,7 @@ internal class NySøknadMessage(packet: JsonMessage) : SøknadMessage(packet) {
         aktørId = aktørId,
         orgnummer = orgnummer,
         sykeperioder = sykeperioder,
-        opprettet = søknadOpprettet
+        sykmeldingSkrevet = sykmeldingSkrevet
     )
 
     override fun behandle(mediator: IHendelseMediator) {

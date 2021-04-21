@@ -128,7 +128,7 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
         aktørId = AKTØRID,
         orgnummer = orgnr,
         sykeperioder = sykeperioder.toList(),
-        opprettet = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now()
+        sykmeldingSkrevet = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now()
     )
 
     private fun søknad(vararg perioder: Søknad.Søknadsperiode, orgnummer: String = ORGNUMMER) =
@@ -142,6 +142,6 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
             sendtTilNAV = Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay(),
             permittert = false,
             merknaderFraSykmelding = emptyList(),
-            opprettet = LocalDateTime.now()
+            sykmeldingSkrevet = LocalDateTime.now()
         )
 }
