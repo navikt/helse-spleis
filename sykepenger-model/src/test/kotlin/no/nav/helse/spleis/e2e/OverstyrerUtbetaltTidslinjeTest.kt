@@ -106,7 +106,8 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
             handleposer.add(handlepose.toMutableList()) // tar kopi
         }
 
-        private fun nyRevurdering(utbetaling: Utbetaling) {
+        // ny rad for revurderinger, annulleringer
+        private fun nyRad(utbetaling: Utbetaling) {
             nyHandlepose()
             nyUtbetaling(utbetaling)
         }
@@ -165,8 +166,8 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
                 forbrukteSykedager: Int?,
                 gjenståendeSykedager: Int?
             ) {
-                if (type == Utbetaling.Utbetalingtype.REVURDERING) nyRevurdering(utbetaling)
-                else nyUtbetaling(utbetaling)
+                if (type == Utbetaling.Utbetalingtype.UTBETALING) nyUtbetaling(utbetaling)
+                else nyRad(utbetaling)
             }
         }
     }
