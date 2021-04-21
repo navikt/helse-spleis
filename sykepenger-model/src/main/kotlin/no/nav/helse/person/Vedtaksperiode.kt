@@ -467,6 +467,7 @@ internal class Vedtaksperiode private constructor(
             gjeldendeTilstand = tilstand.type,
             forrigeTilstand = previousState.type,
             aktivitetslogg = hendelse.aktivitetsloggMap(),
+            harVedtaksperiodeWarnings = person.aktivitetslogg.logg(this).let { it.hasWarningsOrWorse() && !it.hasErrorsOrWorse() },
             hendelser = hendelseIder,
             makstid = tilstand.makstid(this, LocalDateTime.now())
         )
