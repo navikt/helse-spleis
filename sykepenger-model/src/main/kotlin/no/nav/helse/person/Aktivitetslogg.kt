@@ -5,6 +5,8 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov
 import no.nav.helse.serde.reflection.AktivitetsloggReflect
 import no.nav.helse.serde.reflection.OppdragReflect
 import no.nav.helse.utbetalingslinjer.Oppdrag
+import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -317,6 +319,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                     periodeTom: LocalDate,
                     vedtaksperiodeaktivitetslogg: Aktivitetslogg,
                     periodetype: Periodetype,
+                    utbetalingtype: Utbetalingtype,
                     inntektskilde: Inntektskilde,
                     aktiveVedtaksperioder: List<AktivVedtaksperiode>
                 ) {
@@ -325,6 +328,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                             "periodeFom" to periodeFom.toString(),
                             "periodeTom" to periodeTom.toString(),
                             "periodetype" to periodetype.name,
+                            "utbetalingtype" to utbetalingtype.name,
                             "inntektskilde" to inntektskilde.name,
                             "warnings" to Aktivitetslogg().apply {
                                 aktiviteter.addAll(vedtaksperiodeaktivitetslogg.warn())

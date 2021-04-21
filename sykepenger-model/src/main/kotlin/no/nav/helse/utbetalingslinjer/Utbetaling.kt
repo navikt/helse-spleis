@@ -603,6 +603,7 @@ internal class Utbetaling private constructor(
                 periodeTom = vedtaksperiode.periode().endInclusive,
                 vedtaksperiodeaktivitetslogg = aktivitetslogg.logg(vedtaksperiode),
                 periodetype = vedtaksperiode.periodetype(),
+                utbetalingtype = utbetaling.type,
                 inntektskilde = vedtaksperiode.inntektskilde(),
                 aktiveVedtaksperioder =  aktiveVedtaksperioder
             )
