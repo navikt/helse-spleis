@@ -2,10 +2,13 @@ package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
+import org.slf4j.LoggerFactory
 
 internal class V93MeldingsreferanseIdPåGrunnlagsdata : JsonMigration(version = 93) {
     override val description: String =
         "Legger til meldingsreferanseId på grunnlagsdata. Bruker hendelsesId-en som er lagret på sammenligningsgrunnlaget for samme skjæringstidspunkt."
+
+    private val log = LoggerFactory.getLogger("tjenestekall")
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode.path("vilkårsgrunnlagHistorikk")
@@ -22,6 +25,7 @@ internal class V93MeldingsreferanseIdPåGrunnlagsdata : JsonMigration(version = 
                         if (sammenligningsgrunnlag != null) return@loop
                     }
                 }
+                if (sammenligningsgrunnlag == null) log.info("Meldingsreferanse på vilkårsgrunnlag er null. AktørId: ${jsonNode["aktørId"].asText()}")
                 (vilkårsgrunnlag as ObjectNode).set<JsonNode>("meldingsreferanseId", sammenligningsgrunnlag?.path("hendelseId"))
             }
     }

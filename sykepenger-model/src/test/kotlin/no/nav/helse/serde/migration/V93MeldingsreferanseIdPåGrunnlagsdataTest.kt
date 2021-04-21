@@ -39,6 +39,7 @@ internal class V93MeldingsreferanseIdPåGrunnlagsdataTest {
     @Language("JSON")
     private val grunnlagsdataUtenMeldingsreferanseId = """
     {
+      "aktørId": "1000000000000",
       "arbeidsgivere": [
     {
       "inntektshistorikk": [
@@ -100,6 +101,7 @@ internal class V93MeldingsreferanseIdPåGrunnlagsdataTest {
     @Language("JSON")
     private val expectedGrunnlagsdataMedMeldingsreferanseId = """
     {
+      "aktørId": "1000000000000",
       "arbeidsgivere": [
     {
       "inntektshistorikk": [
@@ -162,6 +164,7 @@ internal class V93MeldingsreferanseIdPåGrunnlagsdataTest {
     @Language("JSON")
     private val arbeidsgiverUtenInntektshistorikk = """
     {
+      "aktørId": "1000000000000",
       "arbeidsgivere": [
         {
           "inntektshistorikk": []
@@ -226,6 +229,7 @@ internal class V93MeldingsreferanseIdPåGrunnlagsdataTest {
     @Language("JSON")
     private val expectedArbeidsgiverUtenInntektshistorikk = """
     {
+      "aktørId": "1000000000000",
       "arbeidsgivere": [
         {
           "inntektshistorikk": []
@@ -291,6 +295,7 @@ internal class V93MeldingsreferanseIdPåGrunnlagsdataTest {
     @Language("JSON")
     private val arbeidsgiverUtenInntektshistorikkLiggerSist = """
     {
+      "aktørId": "1000000000000",
       "arbeidsgivere": [
         {
           "inntektshistorikk": [
@@ -355,6 +360,7 @@ internal class V93MeldingsreferanseIdPåGrunnlagsdataTest {
     @Language("JSON")
     private val expectedArbeidsgiverUtenInntektshistorikkLiggerSist = """
     {
+      "aktørId": "1000000000000",
       "arbeidsgivere": [
         {
           "inntektshistorikk": [
@@ -420,6 +426,7 @@ internal class V93MeldingsreferanseIdPåGrunnlagsdataTest {
     @Language("JSON")
     private val utenSkattSammenligningsgrunnlag = """
     {
+      "aktørId": "1000000000000",
       "arbeidsgivere": [
     {
       "inntektshistorikk": [
@@ -455,6 +462,7 @@ internal class V93MeldingsreferanseIdPåGrunnlagsdataTest {
     @Language("JSON")
     private val expectedUtenSkattSammenligningsgrunnlag = """
     {
+      "aktørId": "1000000000000",
       "arbeidsgivere": [
     {
       "inntektshistorikk": [
