@@ -292,11 +292,12 @@ internal class VedtaksperiodeBuilder(
                 melding: String,
                 tidsstempel: String
             ) {
-                kontekster.filter { it.kontekstType == "Vilkårsgrunnlag" }
-                    .map { it.kontekstMap["meldingsreferanseId"] }
+                if (kontekster.filter { it.kontekstType == "Vilkårsgrunnlag" }
+                    .mapNotNull { it.kontekstMap["meldingsreferanseId"] }
                     .map(UUID::fromString)
-                    .find { it == vilkårsgrunnlagId }
-                    ?.also { aktiviteter.add(AktivitetDTO(vedtaksperiodeId, "W", melding, tidsstempel)) }
+                    .any { it == vilkårsgrunnlagId } ) {
+                        aktiviteter.add(AktivitetDTO(vedtaksperiodeId, "W", melding, tidsstempel))
+                }
             }
         })
         return aktiviteter.distinctBy { it.melding }
