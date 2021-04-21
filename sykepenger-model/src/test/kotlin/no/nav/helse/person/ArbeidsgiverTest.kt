@@ -44,13 +44,15 @@ internal class ArbeidsgiverTest {
     }
 
     private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode): Sykmelding {
+        val periode = Sykmeldingsperiode.periode(sykeperioder.toList())
         return Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = "fnr",
             aktørId = "aktørId",
             orgnummer = "orgnr",
             sykeperioder = sykeperioder.toList(),
-            sykmeldingSkrevet = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now()
+            sykmeldingSkrevet = periode?.start!!.atStartOfDay(),
+            mottatt = periode.endInclusive.atStartOfDay()
         )
     }
 }

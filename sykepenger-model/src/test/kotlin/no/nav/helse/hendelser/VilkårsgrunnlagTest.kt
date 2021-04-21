@@ -210,7 +210,8 @@ internal class VilkårsgrunnlagTest {
         aktørId = aktørId,
         orgnummer = orgnummer,
         sykeperioder = listOf(Sykmeldingsperiode(16.januar, 30.januar, 100.prosent)),
-        sykmeldingSkrevet = 1.april.atStartOfDay()
+        sykmeldingSkrevet = 1.april.atStartOfDay(),
+        mottatt = 1.april.atStartOfDay()
     )
 
     private fun søknad() = Søknad(

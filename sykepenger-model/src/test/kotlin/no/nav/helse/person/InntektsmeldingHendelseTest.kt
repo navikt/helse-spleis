@@ -128,7 +128,8 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
         aktørId = AKTØRID,
         orgnummer = orgnr,
         sykeperioder = sykeperioder.toList(),
-        sykmeldingSkrevet = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now()
+        sykmeldingSkrevet = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now(),
+        mottatt = Sykmeldingsperiode.periode(sykeperioder.toList())!!.endInclusive.atStartOfDay()
     )
 
     private fun søknad(vararg perioder: Søknad.Søknadsperiode, orgnummer: String = ORGNUMMER) =

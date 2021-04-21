@@ -402,7 +402,8 @@ class JsonBuilderTest {
             aktørId = aktørId,
             orgnummer = orgnummer,
             sykeperioder = listOf(Sykmeldingsperiode(fom, tom, 100.prosent)),
-            sykmeldingSkrevet = fom.plusMonths(3).atStartOfDay()
+            sykmeldingSkrevet = fom.atStartOfDay(),
+            mottatt = tom.atStartOfDay()
         )
 
         fun søknad(

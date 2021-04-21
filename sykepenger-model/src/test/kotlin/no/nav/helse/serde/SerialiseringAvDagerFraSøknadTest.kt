@@ -93,7 +93,8 @@ internal class SerialiseringAvDagerFraSøknadTest {
         aktørId = aktørId,
         orgnummer = orgnummer,
         sykeperioder = listOf(Sykmeldingsperiode(1.januar, 2.januar, 100.prosent)),
-        sykmeldingSkrevet = 4.april.atStartOfDay()
+        sykmeldingSkrevet = 4.april.atStartOfDay(),
+        mottatt = 4.april.atStartOfDay()
     )
 
     private val søknad get() = Søknad(

@@ -250,7 +250,8 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
             aktørId = "12345",
             orgnummer = ORGNUMMER,
             sykeperioder = perioder.toList(),
-            sykmeldingSkrevet = Sykmeldingsperiode.periode(perioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now()
+            sykmeldingSkrevet = Sykmeldingsperiode.periode(perioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now(),
+            mottatt = Sykmeldingsperiode.periode(perioder.toList())!!.endInclusive.atStartOfDay()
         ).apply {
             hendelse = this
         }

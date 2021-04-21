@@ -159,7 +159,8 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
             aktørId = "aktørId",
             orgnummer = ORGNUMMER,
             sykeperioder = listOf(Sykmeldingsperiode(førsteSykedag, sisteSykedag, 100.prosent)),
-            sykmeldingSkrevet = førsteSykedag.plusMonths(3).atStartOfDay()
+            sykmeldingSkrevet = førsteSykedag.atStartOfDay(),
+            mottatt = sisteSykedag.atStartOfDay()
         ).apply {
             hendelse = this
         }

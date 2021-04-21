@@ -174,7 +174,8 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
         aktørId = "aktørId",
         orgnummer = ORGNUMMER,
         sykeperioder = perioder,
-        sykmeldingSkrevet = Sykmeldingsperiode.periode(perioder)?.start?.atStartOfDay() ?: LocalDateTime.now()
+        sykmeldingSkrevet = Sykmeldingsperiode.periode(perioder)?.start?.atStartOfDay() ?: LocalDateTime.now(),
+        mottatt = Sykmeldingsperiode.periode(perioder.toList())!!.endInclusive.atStartOfDay()
     ).apply {
         hendelse = this
     }

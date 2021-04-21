@@ -343,7 +343,8 @@ internal class ArbeidsgiverUtbetalingerTest {
             aktørId = "",
             orgnummer = "",
             sykeperioder = listOf(Sykmeldingsperiode(1.januar, 2.januar, 100.prosent)),
-            sykmeldingSkrevet = 1.januar.atStartOfDay()
+            sykmeldingSkrevet = 1.januar.atStartOfDay(),
+            mottatt = 1.januar.atStartOfDay()
         ))
         aktivitetslogg = Aktivitetslogg()
         ArbeidsgiverUtbetalinger(

@@ -535,7 +535,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             aktørId = AKTØRID,
             orgnummer = orgnummer,
             sykeperioder = listOf(*sykeperioder),
-            sykmeldingSkrevet = mottatt ?: Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now()
+            sykmeldingSkrevet = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now(),
+            mottatt = mottatt ?: Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now()
         ).apply {
             hendelselogg = this
         }
@@ -548,7 +549,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             aktørId = AKTØRID,
             orgnummer = orgnummer,
             sykeperioder = sykeperioder.toList(),
-            sykmeldingSkrevet = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.plusYears(2)?.atStartOfDay() ?: LocalDateTime.now()
+            sykmeldingSkrevet = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now(),
+            mottatt = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.plusMonths(7)?.atStartOfDay() ?: LocalDateTime.now()
         ).apply {
             hendelselogg = this
         }

@@ -55,20 +55,21 @@ internal class TestMessageFactory(
             opprettet = fom.plusMonths(3)?.atStartOfDay(),
             sykmeldingSkrevet = fom.atStartOfDay()
         )
-        return nyHendelse("ny_søknad", nySøknad.toMap())
+        return nyHendelse("ny_søknad", mapOf("@opprettet" to fom.atStartOfDay()) + nySøknad.toMap())
     }
 
     fun lagSøknadArbeidsgiver(
         perioder: List<SoknadsperiodeDTO>,
         egenmeldinger: List<PeriodeDTO> = emptyList()
     ): String {
+        val fom = perioder.minOfOrNull { it.fom!! }!!
         val sendtSøknad = SykepengesoknadDTO(
             status = SoknadsstatusDTO.SENDT,
             id = UUID.randomUUID().toString(),
             aktorId = aktørId,
             fodselsnummer = SkjultVerdi(fødselsnummer),
             arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer),
-            fom = perioder.minOfOrNull { it.fom!! },
+            fom = fom,
             tom = perioder.maxOfOrNull { it.tom!! },
             type = SoknadstypeDTO.ARBEIDSTAKERE,
             startSyketilfelle = LocalDate.now(),
@@ -77,7 +78,7 @@ internal class TestMessageFactory(
             fravar = emptyList(),
             soknadsperioder = perioder.toList(),
             opprettet = LocalDateTime.now(),
-            sykmeldingSkrevet = perioder.minOfOrNull { it.fom!! }!!.atStartOfDay()
+            sykmeldingSkrevet = fom.atStartOfDay()
         )
         return nyHendelse("sendt_søknad_arbeidsgiver", sendtSøknad.toMap())
     }
@@ -89,13 +90,14 @@ internal class TestMessageFactory(
         egenmeldinger: List<PeriodeDTO> = emptyList(),
         andreInntektskilder: List<InntektskildeDTO>? = null
     ): String {
+        val fom = perioder.minOfOrNull { it.fom!! }
         val sendtSøknad = SykepengesoknadDTO(
             status = SoknadsstatusDTO.SENDT,
             id = UUID.randomUUID().toString(),
             aktorId = aktørId,
             fodselsnummer = SkjultVerdi(fødselsnummer),
             arbeidsgiver = ArbeidsgiverDTO(orgnummer = orgnummer),
-            fom = perioder.minOfOrNull { it.fom!! },
+            fom = fom,
             tom = perioder.maxOfOrNull { it.tom!! },
             type = SoknadstypeDTO.ARBEIDSTAKERE,
             startSyketilfelle = LocalDate.now(),
@@ -106,7 +108,7 @@ internal class TestMessageFactory(
             andreInntektskilder = andreInntektskilder,
             soknadsperioder = perioder.toList(),
             opprettet = LocalDateTime.now(),
-            sykmeldingSkrevet = perioder.minOfOrNull { it.fom!! }!!.atStartOfDay()
+            sykmeldingSkrevet = fom!!.atStartOfDay()
         )
         return nyHendelse("sendt_søknad_nav", sendtSøknad.toMap())
     }

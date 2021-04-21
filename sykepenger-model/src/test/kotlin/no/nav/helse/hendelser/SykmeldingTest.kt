@@ -47,25 +47,27 @@ internal class SykmeldingTest {
 
     @Test
     fun `sykmelding ikke eldre enn 6 måneder får ikke error`() {
-        sykmelding(Sykmeldingsperiode(1.januar, 12.januar, 100.prosent), mottatt = 1.juli.atStartOfDay())
+        sykmelding(Sykmeldingsperiode(1.januar, 12.januar, 100.prosent), mottatt = 12.juli.atStartOfDay())
         assertFalse(sykmelding.valider(sykmelding.periode()).hasErrorsOrWorse())
     }
 
     @Test
     fun `sykmelding eldre enn 6 måneder får error`() {
-        sykmelding(Sykmeldingsperiode(1.januar, 12.januar, 100.prosent), mottatt = 2.juli.atStartOfDay())
+        sykmelding(Sykmeldingsperiode(1.januar, 12.januar, 100.prosent), mottatt = 13.juli.atStartOfDay())
         assertTrue(sykmelding.valider(sykmelding.periode()).hasErrorsOrWorse())
     }
 
     private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode, mottatt: LocalDateTime? = null) {
         val tidligsteFom = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay()
+        val sisteTom = Sykmeldingsperiode.periode(sykeperioder.toList())?.endInclusive?.atStartOfDay()
         sykmelding = Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "12345",
             orgnummer = "987654321",
             sykeperioder = sykeperioder.toList(),
-            sykmeldingSkrevet = mottatt ?: tidligsteFom ?: LocalDateTime.now()
+            sykmeldingSkrevet = tidligsteFom ?: LocalDateTime.now(),
+            mottatt = mottatt ?: sisteTom ?: LocalDateTime.now()
         )
     }
 

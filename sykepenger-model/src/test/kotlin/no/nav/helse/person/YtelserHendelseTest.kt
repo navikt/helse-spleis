@@ -221,7 +221,8 @@ internal class YtelserHendelseTest : AbstractPersonTest() {
             aktørId = "aktørId",
             orgnummer = ORGNUMMER,
             sykeperioder = listOf(Sykmeldingsperiode(førsteSykedag, sisteSykedag, 100.prosent)),
-            sykmeldingSkrevet = førsteSykedag.plusMonths(3).atStartOfDay()
+            sykmeldingSkrevet = førsteSykedag.atStartOfDay(),
+            mottatt = sisteSykedag.atStartOfDay()
         )
 
     private fun søknad() =

@@ -1505,7 +1505,8 @@ class SpeilBuilderTest {
             aktørId = aktørId,
             orgnummer = orgnummer,
             sykeperioder = listOf(Sykmeldingsperiode(fom, tom, grad)),
-            sykmeldingSkrevet = fom.plusMonths(3).atStartOfDay()
+            sykmeldingSkrevet = fom.atStartOfDay(),
+            mottatt = tom.atStartOfDay()
         ) to SykmeldingDTO(
             id = hendelseId.toString(),
             fom = fom,
