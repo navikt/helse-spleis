@@ -244,6 +244,13 @@ internal class Utbetalingstidslinje private constructor(
             return this.prioritet.compareTo(other.prioritet)
         }
 
+        override fun equals(other: Any?): Boolean {
+            if (other !is Utbetalingsdag) return false
+            if (this::class != other::class) return false
+            if (this.dato != other.dato) return false
+            return (this.økonomi == other.økonomi)
+        }
+
         internal abstract fun accept(visitor: UtbetalingsdagVisitor)
 
         internal class ArbeidsgiverperiodeDag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {

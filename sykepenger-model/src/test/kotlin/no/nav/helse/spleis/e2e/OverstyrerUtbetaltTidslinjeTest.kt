@@ -11,6 +11,7 @@ import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mai
 import no.nav.helse.testhelpers.mars
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterEach
@@ -84,19 +85,36 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
     private class PølsepakkeBuilder(private val arbeidsgiver: Arbeidsgiver) : ArbeidsgiverVisitor {
 
         class Pølsepakke(private val utbetaling: Utbetaling) {
+            private var endringFra: LocalDate? = null
+            constructor(utbetaling: Utbetaling, other: Pølsepakke) : this(utbetaling) {
+                utbetaling.utbetalingstidslinje().plus(other.utbetaling.utbetalingstidslinje()) { venstre, høyre ->
+                    høyre.also { finnFørsteEndring(venstre, høyre) }
+
+                }
+            }
+
+            private fun finnFørsteEndring(venstre: Utbetalingstidslinje.Utbetalingsdag, høyre: Utbetalingstidslinje.Utbetalingsdag) {
+                if (endringFra != null) return
+                if (høyre == venstre) return
+                endringFra = høyre.dato
+            }
+
             private val perioder = mutableSetOf<Periode>()
 
             fun kobleTilPerioder(other: Utbetaling, perioder: Set<Periode>) {
                 if (!utbetaling.hørerSammen(other)) return
                 this.perioder.addAll(perioder)
             }
+
+            fun hørerSammen(other: Utbetaling) = utbetaling.hørerSammen(other)
+
         }
 
         private var byggetilstand: ArbeidsgiverVisitor = Initiell()
 
         private val utbetalingTilPerioder = mutableMapOf<Utbetaling, MutableSet<Periode>>()
 
-        private val handleposer = mutableListOf(mutableListOf<Utbetaling>())
+        private val handleposer = mutableListOf(mutableListOf<Pølsepakke>())
         private val handlepose get() = handleposer.last()
 
         init {
@@ -113,7 +131,7 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
         }
 
         fun build(): List<List<Pølsepakke>> {
-            return handleposer.map { it.map(::Pølsepakke).onEach { utbetalingTilPerioder.forEach{(utbetaling, perioder) ->
+            return handleposer.onEach { it.onEach { utbetalingTilPerioder.forEach{(utbetaling, perioder) ->
                 it.kobleTilPerioder(utbetaling, perioder)
             }} }
         }
@@ -136,14 +154,14 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
 
         private fun erstattEksisterende(utbetaling: Utbetaling): Boolean {
             val indeks = handlepose.indexOfLast { it.hørerSammen(utbetaling) }.takeUnless { it == -1 } ?: return false
-            handlepose.removeAt(indeks)
-            handlepose.add(indeks, utbetaling)
+            val removed = handlepose.removeAt(indeks)
+            handlepose.add(indeks, Pølsepakke(utbetaling, removed))
             return true
         }
 
         private fun nyUtbetaling(utbetaling: Utbetaling) {
             if (erstattEksisterende(utbetaling)) return
-            handlepose.add(utbetaling)
+            handlepose.add(Pølsepakke(utbetaling))
         }
 
         override fun preVisitVedtaksperiode(

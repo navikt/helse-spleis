@@ -268,6 +268,20 @@ internal class Økonomi private constructor(
             null, null, null
         )
 
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is Økonomi) return false
+        if (this.grad != other.grad) return false
+        if (this.arbeidsgiverBetalingProsent != other.arbeidsgiverBetalingProsent) return false
+        if (this.aktuellDagsinntekt != other.aktuellDagsinntekt) return false
+        if (this.dekningsgrunnlag != other.dekningsgrunnlag) return false
+        if (this.skjæringstidspunkt != other.skjæringstidspunkt) return false
+        if (this.totalGrad != other.totalGrad) return false
+        if (this.arbeidsgiverbeløp != other.arbeidsgiverbeløp) return false
+        if (this.personbeløp != other.personbeløp) return false
+        return (this.er6GBegrenset == other.er6GBegrenset)
+    }
+
     private fun grad() = tilstand.grad(this)
 
     private fun betal() = this.also { tilstand.betal(this) }
