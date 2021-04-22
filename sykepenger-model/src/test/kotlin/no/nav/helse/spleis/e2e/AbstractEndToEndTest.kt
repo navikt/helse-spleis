@@ -202,7 +202,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         orgnummer: String = ORGNUMMER,
         id: UUID = UUID.randomUUID(),
         beregnetInntekt: Inntekt = refusjon.second,
-        harOpphørAvNaturalytelser: Boolean = false
+        harOpphørAvNaturalytelser: Boolean = false,
+        arbeidsforholdId: String? = null,
     ): UUID {
         inntektsmelding(
             id,
@@ -212,7 +213,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             førsteFraværsdag = førsteFraværsdag,
             refusjon = refusjon,
             orgnummer = orgnummer,
-            harOpphørAvNaturalytelser = harOpphørAvNaturalytelser
+            harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
+            arbeidsforholdId = arbeidsforholdId
         ).håndter(Person::håndter)
         return id
     }
@@ -615,7 +617,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOfOrNull { it.start } ?: 1.januar,
         refusjon: Triple<LocalDate?, Inntekt, List<LocalDate>> = Triple(null, beregnetInntekt, emptyList()),
         orgnummer: String = ORGNUMMER,
-        harOpphørAvNaturalytelser: Boolean = false
+        harOpphørAvNaturalytelser: Boolean = false,
+        arbeidsforholdId: String? = null
     ): Inntektsmelding {
         val inntektsmeldinggenerator = {
             Inntektsmelding(
@@ -628,7 +631,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
                 beregnetInntekt = beregnetInntekt,
                 arbeidsgiverperioder = arbeidsgiverperioder,
                 ferieperioder = ferieperioder,
-                arbeidsforholdId = null,
+                arbeidsforholdId = arbeidsforholdId,
                 begrunnelseForReduksjonEllerIkkeUtbetalt = null,
                 harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
                 mottatt = LocalDateTime.now()
