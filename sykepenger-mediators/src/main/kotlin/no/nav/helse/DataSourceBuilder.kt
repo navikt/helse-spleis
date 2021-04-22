@@ -27,8 +27,6 @@ internal class DataSourceBuilder(env: Map<String, String>) {
         env["DATABASE_PASSWORD"]?.let { this.password = it }
 
         maximumPoolSize = 1
-        minimumIdle = 1
-        idleTimeout = 10001
         connectionTimeout = 1000
         maxLifetime = 30001
     }
