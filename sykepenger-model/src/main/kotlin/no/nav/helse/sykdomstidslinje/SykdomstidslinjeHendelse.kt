@@ -30,7 +30,7 @@ abstract class SykdomstidslinjeHendelse(
         private val type: String,
         private val meldingsreferanseId: UUID,
         private val tidsstempel: LocalDateTime
-    ) {
+    ): Comparable<Hendelseskilde> {
         internal constructor(
             hendelse: Melding,
             meldingsreferanseId: UUID,
@@ -44,6 +44,7 @@ abstract class SykdomstidslinjeHendelse(
                 hendelse.simpleName ?: "Ukjent"
         }
 
+        override operator fun compareTo(other: Hendelseskilde) = this.tidsstempel.compareTo(other.tidsstempel)
         override fun toString() = type
         internal fun tidsstempel() = tidsstempel
         internal fun meldingsreferanseId() = meldingsreferanseId

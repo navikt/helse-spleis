@@ -71,8 +71,8 @@ internal object Column : Strategy() {
 }
 
 internal object Latest : Strategy() {
-    override fun decide(row: Dag, column: Dag): Dag = column
-    override fun decideInverse(row: Dag, column: Dag) = column
+    override fun decide(row: Dag, column: Dag) = row.sisteAv(column)
+    override fun decideInverse(row: Dag, column: Dag) = row.sisteAv(column)
 }
 
 internal object Impossible : Strategy() {

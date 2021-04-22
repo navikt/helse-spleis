@@ -14,11 +14,11 @@ internal sealed class TestEvent(opprettet: LocalDateTime) : SykdomstidslinjeHend
     private val ORGNUMMER = "987654321"
 
     companion object {
-        val søknad = Søknad(LocalDateTime.now()).kilde
-        val inntektsmelding = Inntektsmelding(LocalDateTime.now()).kilde
-        val sykmelding = Sykmelding(LocalDateTime.now()).kilde
-        val aareg = Aareg(LocalDateTime.now()).kilde
-        val testkilde = TestHendelse(LocalDateTime.now()).kilde
+        val søknad get() = Søknad(LocalDateTime.now()).kilde
+        val inntektsmelding get() = Inntektsmelding(LocalDateTime.now()).kilde
+        val sykmelding get() = Sykmelding(LocalDateTime.now()).kilde
+        val aareg get() = Aareg(LocalDateTime.now()).kilde
+        val testkilde get() = TestHendelse(LocalDateTime.now()).kilde
     }
 
     // Objects impersonating real-life sources of sickness timeline days

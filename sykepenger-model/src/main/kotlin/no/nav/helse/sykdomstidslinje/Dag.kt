@@ -53,6 +53,12 @@ internal sealed class Dag(
         }
     }
 
+    internal fun sisteAv(other: Dag) =
+        when {
+            this.kilde > other.kilde -> this
+            else -> other
+        }
+
     internal fun kommerFra(hendelse: Melding) = kilde.erAvType(hendelse)
 
     internal fun problem(other: Dag): Dag =
@@ -64,7 +70,6 @@ internal sealed class Dag(
     protected open fun equals(other: Dag) = this.dato == other.dato// && this.kilde == other.kilde
 
     override fun hashCode() = dato.hashCode() * 37 + this::class.hashCode()
-
     internal open fun accept(visitor: SykdomstidslinjeVisitor) {}
 
     internal class UkjentDag(
