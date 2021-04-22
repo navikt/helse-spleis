@@ -43,7 +43,7 @@ internal class VedtaksperiodeBuilder(
         TilstandType.TIL_UTBETALING,
         TilstandType.AVVENTER_ARBEIDSGIVERE
     )
-    private val warnings = hentWarnings(vedtaksperiode) + (dataForVilkårsvurdering?.meldingsreferanseId?.let { hentVilkårsgrunnlagWarnings(vedtaksperiode, id, it) } ?: emptyList())
+    private val warnings = (hentWarnings(vedtaksperiode) + (dataForVilkårsvurdering?.meldingsreferanseId?.let { hentVilkårsgrunnlagWarnings(vedtaksperiode, id, it) } ?: emptyList())).distinctBy { it.melding }
     private val beregnetSykdomstidslinje = mutableListOf<SykdomstidslinjedagDTO>()
 
     private val medlemskapstatusDTO: MedlemskapstatusDTO? = dataForVilkårsvurdering?.let { grunnlagsdata ->
