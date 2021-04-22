@@ -2,9 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
-import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.ArbeidsgiverVisitor
+import no.nav.helse.person.*
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
@@ -84,7 +82,19 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
     }
 
     private class PølsepakkeBuilder(private val arbeidsgiver: Arbeidsgiver) : ArbeidsgiverVisitor {
+
+        class Pølsepakke(private val utbetaling: Utbetaling) {
+            private val perioder = mutableSetOf<Periode>()
+
+            fun kobleTilPerioder(other: Utbetaling, perioder: Set<Periode>) {
+                if (!utbetaling.hørerSammen(other)) return
+                this.perioder.addAll(perioder)
+            }
+        }
+
         private var byggetilstand: ArbeidsgiverVisitor = Initiell()
+
+        private val utbetalingTilPerioder = mutableMapOf<Utbetaling, MutableSet<Periode>>()
 
         private val handleposer = mutableListOf(mutableListOf<Utbetaling>())
         private val handlepose get() = handleposer.last()
@@ -102,11 +112,23 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
              */
         }
 
+        fun build(): List<List<Pølsepakke>> {
+            return handleposer.map { it.map(::Pølsepakke).onEach { utbetalingTilPerioder.forEach{(utbetaling, perioder) ->
+                it.kobleTilPerioder(utbetaling, perioder)
+            }} }
+        }
+
         private fun nyHandlepose() {
             handleposer.add(handlepose.toMutableList()) // tar kopi
         }
 
-        // ny rad for revurderinger, annulleringer
+        private fun kobleVedtaksperiodeTilUtbetaling(periode: Periode, utbetaling: Utbetaling) {
+            val key = utbetalingTilPerioder.keys.firstOrNull { it.hørerSammen(utbetaling) } ?: utbetaling
+            utbetalingTilPerioder.getOrPut(key) { mutableSetOf() }.add(periode)
+
+        }
+
+        // ny rad for revurderinger, annulleringer, etterutbetalinger
         private fun nyRad(utbetaling: Utbetaling) {
             nyHandlepose()
             nyUtbetaling(utbetaling)
@@ -122,6 +144,42 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
         private fun nyUtbetaling(utbetaling: Utbetaling) {
             if (erstattEksisterende(utbetaling)) return
             handlepose.add(utbetaling)
+        }
+
+        override fun preVisitVedtaksperiode(
+            vedtaksperiode: Vedtaksperiode,
+            id: UUID,
+            tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
+            opprettet: LocalDateTime,
+            oppdatert: LocalDateTime,
+            periode: Periode,
+            opprinneligPeriode: Periode,
+            skjæringstidspunkt: LocalDate,
+            periodetype: Periodetype,
+            forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
+            hendelseIder: List<UUID>,
+            inntektsmeldingId: UUID?,
+            inntektskilde: Inntektskilde
+        ) {
+            byggetilstand = KobleVedtaksperiodeTilUtbetaling(periode)
+        }
+
+        override fun postVisitVedtaksperiode(
+            vedtaksperiode: Vedtaksperiode,
+            id: UUID,
+            tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
+            opprettet: LocalDateTime,
+            oppdatert: LocalDateTime,
+            periode: Periode,
+            opprinneligPeriode: Periode,
+            skjæringstidspunkt: LocalDate,
+            periodetype: Periodetype,
+            forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
+            hendelseIder: List<UUID>,
+            inntektsmeldingId: UUID?,
+            inntektskilde: Inntektskilde
+        ) {
+            byggetilstand = Initiell()
         }
 
         override fun preVisitUtbetalinger(utbetalinger: List<Utbetaling>) {
@@ -148,7 +206,6 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
         override fun postVisitUtbetalinger(utbetalinger: List<Utbetaling>) {
             byggetilstand = Initiell()
         }
-
         private inner class Initiell : ArbeidsgiverVisitor {}
 
         private inner class SamleUtbetalinger : ArbeidsgiverVisitor {
@@ -170,6 +227,26 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
                 else nyRad(utbetaling)
             }
         }
+
+
+        private inner class KobleVedtaksperiodeTilUtbetaling(private val periode: Periode) : ArbeidsgiverVisitor {
+            override fun preVisitUtbetaling(
+                utbetaling: Utbetaling,
+                id: UUID,
+                beregningId: UUID,
+                type: Utbetaling.Utbetalingtype,
+                tilstand: Utbetaling.Tilstand,
+                tidsstempel: LocalDateTime,
+                oppdatert: LocalDateTime,
+                arbeidsgiverNettoBeløp: Int,
+                personNettoBeløp: Int,
+                maksdato: LocalDate,
+                forbrukteSykedager: Int?,
+                gjenståendeSykedager: Int?
+            ) {
+                kobleVedtaksperiodeTilUtbetaling(periode, utbetaling)
+            }
+        }
     }
 
     @Test
@@ -187,6 +264,7 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalt(3.vedtaksperiode)
 
         val a = PølsepakkeBuilder(inspektør.arbeidsgiver)
+        val b = a.build()
 
         assertTilstander(
             1.vedtaksperiode,
