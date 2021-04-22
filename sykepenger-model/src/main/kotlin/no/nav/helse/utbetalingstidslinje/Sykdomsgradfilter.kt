@@ -1,6 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.merge
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.økonomi.Økonomi
 
@@ -14,7 +15,7 @@ internal class Sykdomsgradfilter(
         val avvisteDager = Utbetalingstidslinje.periode(tidslinjer).filter { dato ->
             Økonomi.totalSykdomsgrad(tidslinjer.map { it[dato].økonomi }).erUnderGrensen()
         }
-        if (Utbetalingstidslinje.avvis(tidslinjer, avvisteDager, periode, listOf(Begrunnelse.MinimumSykdomsgrad)))
+        if (Utbetalingstidslinje.avvis(tidslinjer, avvisteDager.merge(), periode, listOf(Begrunnelse.MinimumSykdomsgrad)))
             return aktivitetslogg.warn("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %%. Vurder å sende brev")
         aktivitetslogg.info("Ingen avviste dager på grunn av 20 %% samlet sykdomsgrad-regel for denne perioden")
     }

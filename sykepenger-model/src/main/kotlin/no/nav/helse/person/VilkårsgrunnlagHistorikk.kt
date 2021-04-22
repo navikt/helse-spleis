@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.til
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
@@ -37,12 +38,12 @@ internal class VilkårsgrunnlagHistorikk private constructor(
 
         sortertHistorikk.entries.zipWithNext { (fom, vilkårsgrunnlagElement), (tom, _) ->
             if (vilkårsgrunnlagElement is Grunnlagsdata) {
-                finnBegrunnelser(vilkårsgrunnlagElement).takeIf { it.isNotEmpty() }?.let { Utbetalingstidslinje.avvis(tidslinjer, it, fom, tom) }
+                finnBegrunnelser(vilkårsgrunnlagElement).takeIf { it.isNotEmpty() }?.let { Utbetalingstidslinje.avvis(tidslinjer, fom til tom, it) }
             }
         }
         val sisteHistorikk = sortertHistorikk.getValue(sortertHistorikk.lastKey())
         if (sisteHistorikk is Grunnlagsdata) {
-            finnBegrunnelser(sisteHistorikk).takeIf { it.isNotEmpty() }?.let { Utbetalingstidslinje.avvis(tidslinjer, it, sortertHistorikk.lastKey(), null) }
+            finnBegrunnelser(sisteHistorikk).takeIf { it.isNotEmpty() }?.let { Utbetalingstidslinje.avvis(tidslinjer, sortertHistorikk.lastKey() til LocalDate.MAX, it) }
         }
     }
 

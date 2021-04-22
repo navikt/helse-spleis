@@ -1,7 +1,7 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.hendelser.Periode.Companion.merge
 import no.nav.helse.hendelser.Periode.Companion.slutterEtter
-import no.nav.helse.hendelser.Periode.Companion.slåSammen
 import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -164,39 +164,13 @@ internal class PeriodeTest {
     }
 
     @Test
-    fun `slå sammen to lister som ikke overlapper med hverandre`() {
-        assertEquals(
-            listOf(1.mars til 5.mars, 1.mai til 5.mai, 1.juli til 5.juli),
-            (listOf(1.mars til 5.mars, 1.juli til 5.juli, 1.mai til 5.mai)).slåSammen()
-        )
-        assertEquals(
-            (listOf(1.mars til 5.mars, 1.juli til 5.juli, 1.mai til 5.mai)).slåSammen(),
-            (listOf(1.mai til 5.mai, 1.mars til 5.mars, 1.juli til 5.juli)).slåSammen()
-        )
-    }
-
-    @Test
-    fun `ved å slå sammen to lister fjerner dubletter`() {
-        assertEquals(
-            listOf(1.mai til 5.mai, 1.juli til 5.juli),
-            (listOf(1.mai til 5.mai, 1.juli til 5.juli, 1.mai til 5.mai)).slåSammen()
-        )
-    }
-
-    @Test
-    fun `sammenslåing av tilstøtende periode`() {
-        assertEquals(
-            listOf(1.mai til 10.mai),
-            listOf(1.mai til 5.mai, 6.mai til 10.mai).slåSammen()
-        )
-    }
-
-    @Test
-    fun `slå sammen to lister med overlappende elementer`() {
-        assertEquals(
-            listOf(1.mai til 7.mai, 1.juli til 5.juli),
-            (listOf(3.mai til 7.mai, 1.juli til 5.juli, 1.mai til 5.mai)).slåSammen()
-        )
+    fun `slår sammen dager`() {
+        assertTrue(emptyList<LocalDate>().merge().isEmpty())
+        assertEquals(listOf(1.januar til 1.januar), listOf(1.januar, 1.januar).merge())
+        assertEquals(listOf(1.januar til 1.januar), listOf(1.januar).merge())
+        assertEquals(listOf(1.januar til 2.januar), listOf(2.januar, 1.januar).merge())
+        assertEquals(listOf(1.januar til 1.januar, 3.januar til 3.januar), listOf(1.januar, 3.januar).merge())
+        assertEquals(listOf(1.januar til 5.januar, 8.januar til 8.januar), listOf(1.januar, 2.januar, 3.januar, 4.januar, 5.januar, 8.januar).merge())
     }
 
     @Test

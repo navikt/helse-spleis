@@ -1,13 +1,13 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.contains
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
 import no.nav.helse.sykdomstidslinje.erHelg
-import no.nav.helse.utbetalingstidslinje.Begrunnelse.Companion.avvis
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
@@ -56,11 +56,12 @@ internal class Utbetalingstidslinje private constructor(
         private fun Utbetalingsdag.erSykedag() =
             this is NavDag || this is NavHelgDag || this is ArbeidsgiverperiodeDag || this is AvvistDag
 
-        fun avvis(tidslinjer: List<Utbetalingstidslinje>, dager: List<LocalDate>, periode: Periode, begrunnelser: List<Begrunnelse>) =
-            tidslinjer.count { it.avvis(dager, periode, begrunnelser) } > 0
-
-        fun avvis(tidslinjer: List<Utbetalingstidslinje>, begrunnelser: List<Begrunnelse>, fom: LocalDate, tom: LocalDate?) =
-            tidslinjer.forEach { it.avvis(begrunnelser, fom, tom)}
+        fun avvis(tidslinjer: List<Utbetalingstidslinje>, avvistPeriode: Periode, periode: Periode, begrunnelser: List<Begrunnelse>) =
+            avvis(tidslinjer, listOf(avvistPeriode), periode, begrunnelser)
+        fun avvis(tidslinjer: List<Utbetalingstidslinje>, avvistPeriode: Periode, begrunnelser: List<Begrunnelse>) =
+            avvis(tidslinjer, listOf(avvistPeriode), avvistPeriode, begrunnelser)
+        fun avvis(tidslinjer: List<Utbetalingstidslinje>, avvistePerioder: List<Periode>, periode: Periode, begrunnelser: List<Begrunnelse>) =
+            tidslinjer.count { it.avvis(avvistePerioder, periode, begrunnelser) } > 0
     }
 
     internal fun er6GBegrenset(): Boolean {
@@ -75,28 +76,18 @@ internal class Utbetalingstidslinje private constructor(
         visitor.postVisit(this)
     }
 
-    private fun avvis(avvisteDatoer: List<LocalDate>, periode: Periode, begrunnelser: List<Begrunnelse>): Boolean {
+    private fun avvis(avvisteDatoer: List<Periode>, periode: Periode, begrunnelser: List<Begrunnelse>): Boolean {
         var result = false
         utbetalingsdager.forEachIndexed { index, utbetalingsdag ->
-            val avvist = avvis(avvisteDatoer, periode, index, utbetalingsdag, begrunnelser)
-            if (!result) result = avvist
+            result = avvis(avvisteDatoer, periode, index, utbetalingsdag, begrunnelser) || result
         }
         return result
     }
 
-    private fun avvis(avvisteDatoer: List<LocalDate>, periode: Periode, index: Int, utbetalingsdag: Utbetalingsdag, begrunnelser: List<Begrunnelse>): Boolean {
+    private fun avvis(avvisteDatoer: List<Periode>, periode: Periode, index: Int, utbetalingsdag: Utbetalingsdag, begrunnelser: List<Begrunnelse>): Boolean {
         if (utbetalingsdag.dato !in avvisteDatoer) return false
-        val avvistDag = begrunnelser.avvis(utbetalingsdag) ?: return false
-        utbetalingsdager[index] = avvistDag
+        utbetalingsdager[index] = (utbetalingsdag.avvis(begrunnelser) ?: return false)
         return utbetalingsdag.dato in periode
-    }
-
-    private fun avvis(begrunnelser: List<Begrunnelse>, fom: LocalDate, tom: LocalDate?) {
-        utbetalingsdager.forEachIndexed { index, utbetalingsdag ->
-            if (utbetalingsdag.dato >= fom && (tom == null || utbetalingsdag.dato < tom) && utbetalingsdag is NavDag) {
-                utbetalingsdager[index] = utbetalingsdag.avvistDag(begrunnelser)
-            }
-        }
     }
 
     internal fun addArbeidsgiverperiodedag(dato: LocalDate, økonomi: Økonomi) {
@@ -255,6 +246,11 @@ internal class Utbetalingstidslinje private constructor(
             return this.prioritet.compareTo(other.prioritet)
         }
 
+        internal fun avvis(begrunnelser: List<Begrunnelse>) = begrunnelser
+            .filter { it.avvis(this) }
+            .takeIf(List<*>::isNotEmpty)
+            ?.let { AvvistDag(dato, økonomi, it) }
+
         internal abstract fun accept(visitor: UtbetalingsdagVisitor)
 
         internal class ArbeidsgiverperiodeDag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
@@ -279,22 +275,12 @@ internal class Utbetalingstidslinje private constructor(
             }
 
             override fun accept(visitor: UtbetalingsdagVisitor) = økonomi.accept(visitor, this, dato)
-
-            internal fun avvistDag(begrunnelser: List<Begrunnelse>) =
-                AvvistDag(dato, økonomi, begrunnelser)
-
-            internal fun avvistDag(begrunnelse: Begrunnelse) = avvistDag(listOf(begrunnelse))
         }
 
         internal class NavHelgDag(dato: LocalDate, økonomi: Økonomi) :
             Utbetalingsdag(dato, økonomi) {
             override val prioritet = 40
             override fun accept(visitor: UtbetalingsdagVisitor) = økonomi.accept(visitor, this, dato)
-
-            internal fun avvistDag(begrunnelser: List<Begrunnelse>) =
-                AvvistDag(dato, økonomi, begrunnelser)
-
-            internal fun avvistDag(begrunnelse: Begrunnelse) = avvistDag(listOf(begrunnelse))
         }
 
         internal class Arbeidsdag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
@@ -335,11 +321,9 @@ internal class Utbetalingstidslinje private constructor(
     }
 }
 
-internal sealed class Begrunnelse(private val avvisstrategi: (Begrunnelse, Utbetalingsdag) -> AvvistDag? = navdager) {
+internal sealed class Begrunnelse(private val avvisstrategi: (Utbetalingsdag) -> Boolean = navdager) {
 
-    internal fun avvis(utbetalingsdag: Utbetalingsdag): AvvistDag? {
-        return avvisstrategi(this, utbetalingsdag)
-    }
+    internal fun avvis(utbetalingsdag: Utbetalingsdag) = avvisstrategi(utbetalingsdag)
 
     object SykepengedagerOppbrukt : Begrunnelse()
     object MinimumInntekt : Begrunnelse()
@@ -349,22 +333,8 @@ internal sealed class Begrunnelse(private val avvisstrategi: (Begrunnelse, Utbet
     object ManglerOpptjening : Begrunnelse()
     object ManglerMedlemskap : Begrunnelse()
 
-    internal companion object {
-        internal fun List<Begrunnelse>.avvis(dag: Utbetalingsdag): AvvistDag? {
-            val begrunnelser = this.mapNotNull { it.avvis(dag) }
-            if (begrunnelser.isEmpty()) return null
-            return AvvistDag(dag.dato, dag.økonomi, this)
-        }
-
-        private val navdager = { begrunnelse: Begrunnelse, dag: Utbetalingsdag ->
-            if (dag !is NavDag) null
-            else dag.avvistDag(begrunnelse)
-        }
-        private val inklNavHelg = { begrunnelse: Begrunnelse, dag: Utbetalingsdag ->
-            navdager(begrunnelse, dag) ?: run {
-                if (dag !is NavHelgDag) null
-                else dag.avvistDag(begrunnelse)
-            }
-        }
+    private companion object {
+        private val navdager = { dag: Utbetalingsdag -> dag is NavDag }
+        private val inklNavHelg = { dag: Utbetalingsdag -> dag is NavDag || dag is NavHelgDag }
     }
 }

@@ -7,7 +7,6 @@ import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.AvvistDag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -91,7 +90,7 @@ internal class ØkonomiDagTest {
         val a = tidslinjeOf(2.NAV(1200))
         val b = tidslinjeOf(2.NAV(1200))
         val c = tidslinjeOf(2.NAV(1200))
-            .onEach { (it as NavDag).avvistDag(listOf(Begrunnelse.MinimumInntekt)) }
+            .onEach { it.avvis(listOf(Begrunnelse.MinimumInntekt)) }
         MaksimumUtbetaling(listOf(a, b, c), Aktivitetslogg(), 1.januar).betal()
         assertØkonomi(a, 724)
         assertØkonomi(b, 724)

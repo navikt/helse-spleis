@@ -1,6 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.IAktivitetslogg
 import java.time.LocalDate
 
@@ -10,11 +11,10 @@ internal class AvvisDagerEtterDødsdatofilter(
     private val dødsdato: LocalDate?,
     private val aktivitetslogg: IAktivitetslogg
 ) {
-
+    private val avvisFra = dødsdato?.plusDays(1) ?: LocalDate.MAX
     internal fun filter() {
-        if (dødsdato == null) return
-        val avvisteDager = periode.filter { dato -> dato > dødsdato }.takeIf(List<*>::isNotEmpty) ?: return
-        if (Utbetalingstidslinje.avvis(tidslinjer, avvisteDager, periode, listOf(Begrunnelse.EtterDødsdato)))
+        if (dødsdato == null || avvisFra !in periode) return
+        if (Utbetalingstidslinje.avvis(tidslinjer, avvisFra til LocalDate.MAX, periode, listOf(Begrunnelse.EtterDødsdato)))
             return aktivitetslogg.info("Utbetaling stoppet etter $dødsdato grunnet dødsfall")
         aktivitetslogg.info("Personen døde $dødsdato, utenfor den aktuelle perioden.")
     }
