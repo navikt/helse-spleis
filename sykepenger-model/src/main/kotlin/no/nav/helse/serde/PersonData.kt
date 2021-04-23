@@ -620,7 +620,7 @@ internal data class PersonData(
             private val dataForSimulering: DataForSimuleringData?,
             private val sykdomstidslinje: SykdomstidslinjeData,
             private val hendelseIder: MutableList<UUID>,
-            private val inntektsmeldingId: UUID?,
+            private val inntektsmeldingInfo: InntektsmeldingInfoData?,
             private val fom: LocalDate,
             private val tom: LocalDate,
             private val sykmeldingFom: LocalDate,
@@ -656,7 +656,7 @@ internal data class PersonData(
                         dataForSimulering?.parseDataForSimulering(),
                         sykdomstidslinje.createSykdomstidslinje(),
                         hendelseIder,
-                        inntektsmeldingId,
+                        inntektsmeldingInfo?.parseInntektsmeldingInfo(),
                         Periode(fom, tom),
                         Periode(sykmeldingFom, sykmeldingTom),
                         this.utbetalinger.map { utbetalinger.getValue(it) }.toMutableList(),
@@ -704,6 +704,13 @@ internal data class PersonData(
                 TilstandType.AVVENTER_SIMULERING_REVURDERING -> Vedtaksperiode.AvventerSimuleringRevurdering
                 TilstandType.AVVENTER_GODKJENNING_REVURDERING -> Vedtaksperiode.AvventerGodkjenningRevurdering
                 TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING -> Vedtaksperiode.AvventerArbeidsgivereRevurdering
+            }
+
+            data class InntektsmeldingInfoData(
+                private val id: UUID,
+                private val arbeidsforholdId: String?
+            ) {
+                internal fun parseInntektsmeldingInfo() = InntektsmeldingInfo(id, arbeidsforholdId)
             }
 
             data class DataForSimuleringData(

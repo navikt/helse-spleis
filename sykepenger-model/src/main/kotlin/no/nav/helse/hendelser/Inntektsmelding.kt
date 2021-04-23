@@ -24,7 +24,7 @@ class Inntektsmelding(
     internal val førsteFraværsdag: LocalDate?,
     internal val beregnetInntekt: Inntekt,
     private val arbeidsgiverperioder: List<Periode>,
-    private val arbeidsforholdId: String?,
+    internal val arbeidsforholdId: String?,
     private val begrunnelseForReduksjonEllerIkkeUtbetalt: String?,
     private val harOpphørAvNaturalytelser: Boolean = false,
     mottatt: LocalDateTime

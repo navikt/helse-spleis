@@ -50,7 +50,7 @@ internal class Vedtaksperiode private constructor(
     private var dataForSimulering: Simulering.SimuleringResultat?,
     private var sykdomstidslinje: Sykdomstidslinje,
     private val hendelseIder: MutableList<UUID>,
-    private var inntektsmeldingId: UUID?,
+    private var inntektsmeldingInfo: InntektsmeldingInfo?,
     private var periode: Periode,
     private val sykmeldingsperiode: Periode,
     private val utbetalinger: MutableList<Utbetaling>,
@@ -68,7 +68,8 @@ internal class Vedtaksperiode private constructor(
     internal constructor(
         person: Person,
         arbeidsgiver: Arbeidsgiver,
-        hendelse: SykdomstidslinjeHendelse
+        hendelse: SykdomstidslinjeHendelse,
+        inntektsmeldingInfo: InntektsmeldingInfo? = null
     ) : this(
         person = person,
         arbeidsgiver = arbeidsgiver,
@@ -81,7 +82,7 @@ internal class Vedtaksperiode private constructor(
         dataForSimulering = null,
         sykdomstidslinje = hendelse.sykdomstidslinje(),
         hendelseIder = mutableListOf(),
-        inntektsmeldingId = null,
+        inntektsmeldingInfo = inntektsmeldingInfo,
         periode = hendelse.periode(),
         sykmeldingsperiode = hendelse.periode(),
         utbetalinger = mutableListOf(),
@@ -103,7 +104,7 @@ internal class Vedtaksperiode private constructor(
             periodetype(),
             forlengelseFraInfotrygd,
             hendelseIder,
-            inntektsmeldingId,
+            inntektsmeldingInfo,
             inntektskilde
         )
         sykdomstidslinje.accept(visitor)
@@ -124,7 +125,7 @@ internal class Vedtaksperiode private constructor(
             periodetype(),
             forlengelseFraInfotrygd,
             hendelseIder,
-            inntektsmeldingId,
+            inntektsmeldingInfo,
             inntektskilde
         )
     }
@@ -319,7 +320,7 @@ internal class Vedtaksperiode private constructor(
         arbeidsgiver.addInntekt(hendelse, skjæringstidspunkt)
         periode = periode.oppdaterFom(hendelse.periode())
         oppdaterHistorikk(hendelse)
-        inntektsmeldingId = hendelse.meldingsreferanseId()
+        inntektsmeldingInfo = InntektsmeldingInfo(id = hendelse.meldingsreferanseId(), arbeidsforholdId = hendelse.arbeidsforholdId)
 
         val tilstøtende = arbeidsgiver.finnSykeperiodeRettFør(this)
         hendelse.førsteFraværsdag?.also {
@@ -1641,8 +1642,8 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun kopierManglende(other: Vedtaksperiode) {
-        if (this.inntektsmeldingId == null)
-            this.inntektsmeldingId = other.inntektsmeldingId?.also { this.hendelseIder.add(it) }
+        if (this.inntektsmeldingInfo == null)
+            this.inntektsmeldingInfo = other.inntektsmeldingInfo?.also { this.hendelseIder.add(it.id) }
     }
 
     internal object AvventerSimulering : Vedtaksperiodetilstand {
@@ -1767,7 +1768,7 @@ internal class Vedtaksperiode private constructor(
                 it.periodetype()
             )
         }
-        utbetaling().godkjenning(hendelse, this, aktiveVedtaksperioder, person.aktivitetslogg)
+        utbetaling().godkjenning(hendelse, this, aktiveVedtaksperioder, inntektsmeldingInfo?.arbeidsforholdId, person.aktivitetslogg)
     }
 
     internal object AvventerGodkjenningRevurdering : Vedtaksperiodetilstand {
@@ -2113,3 +2114,8 @@ enum class Inntektskilde {
     EN_ARBEIDSGIVER,
     FLERE_ARBEIDSGIVERE
 }
+
+data class InntektsmeldingInfo(
+    internal val id: UUID,
+    internal val arbeidsforholdId: String?
+)

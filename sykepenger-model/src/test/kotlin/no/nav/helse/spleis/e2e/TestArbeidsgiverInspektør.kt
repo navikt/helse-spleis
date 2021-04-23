@@ -114,7 +114,7 @@ internal class TestArbeidsgiverInspektør(
         periodetype: Periodetype,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: List<UUID>,
-        inntektsmeldingId: UUID?,
+        inntektsmeldingInfo: InntektsmeldingInfo?,
         inntektskilde: Inntektskilde
     ) {
         inVedtaksperiode = true
@@ -147,7 +147,7 @@ internal class TestArbeidsgiverInspektør(
         periodetype: Periodetype,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: List<UUID>,
-        inntektsmeldingId: UUID?,
+        inntektsmeldingInfo: InntektsmeldingInfo?,
         inntektskilde: Inntektskilde
     ) {
         vedtaksperiodeindeks += 1

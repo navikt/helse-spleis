@@ -5,7 +5,6 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov
 import no.nav.helse.serde.reflection.AktivitetsloggReflect
 import no.nav.helse.serde.reflection.OppdragReflect
 import no.nav.helse.utbetalingslinjer.Oppdrag
-import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -34,7 +33,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
         add(Aktivitet.Warn(kontekster.toSpesifikk(), String.format(melding, *params)))
     }
 
-    override fun behov(type: Behov.Behovtype, melding: String, detaljer: Map<String, Any>) {
+    override fun behov(type: Behov.Behovtype, melding: String, detaljer: Map<String, Any?>) {
         add(Behov(type, kontekster.toSpesifikk(), melding, detaljer))
     }
 
@@ -185,7 +184,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
             val type: Behovtype,
             kontekster: List<SpesifikkKontekst>,
             private val melding: String,
-            private val detaljer: Map<String, Any> = emptyMap(),
+            private val detaljer: Map<String, Any?> = emptyMap(),
             private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
         ) : Aktivitet(50, 'N', melding, tidsstempel, kontekster) {
             companion object {
@@ -329,7 +328,8 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                     periodetype: Periodetype,
                     utbetalingtype: Utbetalingtype,
                     inntektskilde: Inntektskilde,
-                    aktiveVedtaksperioder: List<AktivVedtaksperiode>
+                    aktiveVedtaksperioder: List<AktivVedtaksperiode>,
+                    arbeidsforholdId: String?,
                 ) {
                     aktivitetslogg.behov(
                         Behovtype.Godkjenning, "Forespør godkjenning fra saksbehandler", mapOf(
@@ -342,7 +342,8 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                                 aktiviteter.addAll(vedtaksperiodeaktivitetslogg.warn())
 
                             }.toMap(),
-                            "aktiveVedtaksperioder" to aktiveVedtaksperioder.map(AktivVedtaksperiode::toMap)
+                            "aktiveVedtaksperioder" to aktiveVedtaksperioder.map(AktivVedtaksperiode::toMap),
+                            "arbeidsforholdId" to arbeidsforholdId
                         )
                     )
                 }
@@ -440,7 +441,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
 interface IAktivitetslogg {
     fun info(melding: String, vararg params: Any?)
     fun warn(melding: String, vararg params: Any?)
-    fun behov(type: Behov.Behovtype, melding: String, detaljer: Map<String, Any> = emptyMap())
+    fun behov(type: Behov.Behovtype, melding: String, detaljer: Map<String, Any?> = emptyMap())
     fun error(melding: String, vararg params: Any?)
     fun severe(melding: String, vararg params: Any?): Nothing
 
@@ -479,7 +480,7 @@ internal interface AktivitetsloggVisitor {
         aktivitet: Behov,
         type: Behov.Behovtype,
         melding: String,
-        detaljer: Map<String, Any>,
+        detaljer: Map<String, Any?>,
         tidsstempel: String
     ) {
     }

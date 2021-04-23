@@ -45,7 +45,7 @@ internal class AktivitetsloggReflect(aktivitetslogg: Aktivitetslogg) {
             aktivitet: Behov,
             type: Behov.Behovtype,
             melding: String,
-            detaljer: Map<String, Any>,
+            detaljer: Map<String, Any?>,
             tidsstempel: String
         ) {
             leggTilBehov(kontekster, BEHOV, type, melding, detaljer, tidsstempel)
@@ -85,7 +85,7 @@ internal class AktivitetsloggReflect(aktivitetslogg: Aktivitetslogg) {
             alvorlighetsgrad: Alvorlighetsgrad,
             type: Behov.Behovtype,
             melding: String,
-            detaljer: Map<String, Any>,
+            detaljer: Map<String, Any?>,
             tidsstempel: String
         ) {
             aktiviteter.add(

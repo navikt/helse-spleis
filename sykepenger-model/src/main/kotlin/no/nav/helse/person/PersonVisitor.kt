@@ -121,7 +121,7 @@ internal interface VedtaksperiodeVisitor : UtbetalingVisitor, SykdomstidslinjeVi
         periodetype: Periodetype,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: List<UUID>,
-        inntektsmeldingId: UUID?,
+        inntektsmeldingInfo: InntektsmeldingInfo?,
         inntektskilde: Inntektskilde
     ) {
     }
@@ -142,7 +142,7 @@ internal interface VedtaksperiodeVisitor : UtbetalingVisitor, SykdomstidslinjeVi
         periodetype: Periodetype,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: List<UUID>,
-        inntektsmeldingId: UUID?,
+        inntektsmeldingInfo: InntektsmeldingInfo?,
         inntektskilde: Inntektskilde
     ) {
     }

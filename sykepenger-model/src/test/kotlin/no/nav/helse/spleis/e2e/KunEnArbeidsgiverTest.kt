@@ -2904,7 +2904,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         )
     }
 
-    @Disabled("ÅGJØRE: Implementer dette")
     @Test
     fun `sender med arbeidsforholdId på godkjenningsbehov`() {
         val arbeidsforholdId = UUID.randomUUID().toString()
@@ -2919,5 +2918,19 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         val godkjenningsbehov = inspektør.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning)
         assertEquals(arbeidsforholdId, godkjenningsbehov.detaljer()["arbeidsforholdId"])
+    }
+
+    @Test
+    fun `sender ikke med arbeidsforholdId på godkjenningsbehov når det mangler`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+
+        val godkjenningsbehov = inspektør.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning)
+        assertNull(godkjenningsbehov.detaljer()["arbeidsforholdId"])
     }
 }

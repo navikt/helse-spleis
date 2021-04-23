@@ -52,7 +52,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         aktivitet: Aktivitetslogg.Aktivitet.Behov,
         type: Aktivitetslogg.Aktivitet.Behov.Behovtype,
         melding: String,
-        detaljer: Map<String, Any>,
+        detaljer: Map<String, Any?>,
         tidsstempel: String
     ) {
         delegatee.visitBehov(kontekster, aktivitet, type, melding, detaljer, tidsstempel)
@@ -237,7 +237,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         periodetype: Periodetype,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: List<UUID>,
-        inntektsmeldingId: UUID?,
+        inntektsmeldingInfo: InntektsmeldingInfo?,
         inntektskilde: Inntektskilde
     ) {
         delegatee.preVisitVedtaksperiode(
@@ -252,7 +252,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             periodetype,
             forlengelseFraInfotrygd,
             hendelseIder,
-            inntektsmeldingId,
+            inntektsmeldingInfo,
             inntektskilde
         )
     }
@@ -277,7 +277,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         periodetype: Periodetype,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: List<UUID>,
-        inntektsmeldingId: UUID?,
+        inntektsmeldingInfo: InntektsmeldingInfo?,
         inntektskilde: Inntektskilde
     ) {
         delegatee.postVisitVedtaksperiode(
@@ -292,7 +292,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             periodetype,
             forlengelseFraInfotrygd,
             hendelseIder,
-            inntektsmeldingId,
+            inntektsmeldingInfo,
             inntektskilde
         )
     }

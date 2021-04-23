@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ForlengelseFraInfotrygd
+import no.nav.helse.person.InntektsmeldingInfo
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -14,7 +15,7 @@ import java.util.*
 
 internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
     private val id: UUID = vedtaksperiode["id"]
-    private val inntektsmeldingId:UUID? = vedtaksperiode["inntektsmeldingId"]
+    private val inntektsmeldingInfo = vedtaksperiode.get<InntektsmeldingInfo?>("inntektsmeldingInfo")?.toMap()
     private val skjæringstidspunktFraInfotrygd:LocalDate? = vedtaksperiode["skjæringstidspunktFraInfotrygd"]
     private val skjæringstidspunkt:LocalDate= vedtaksperiode["skjæringstidspunkt"]
     private val utbetalinger: List<UUID> = vedtaksperiode.get<List<Utbetaling>>("utbetalinger").map { UtbetalingReflect(it).toMap().getValue("id") as UUID }
@@ -70,7 +71,7 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
         "id" to id,
         "tilstand" to tilstand,
         "skjæringstidspunktFraInfotrygd" to skjæringstidspunktFraInfotrygd,
-        "inntektsmeldingId" to inntektsmeldingId,
+        "inntektsmeldingInfo" to inntektsmeldingInfo,
         "skjæringstidspunkt" to skjæringstidspunkt,
         "dataForSimulering" to dataForSimulering,
         "utbetalinger" to utbetalinger,
@@ -83,8 +84,12 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
     internal fun toSpeilMap(arbeidsgiver: Arbeidsgiver, periode: Periode) = mutableMapOf<String, Any?>(
         "id" to id,
         "skjæringstidspunkt" to skjæringstidspunkt,
-        "inntektsmeldingId" to inntektsmeldingId,
+        "inntektsmeldingInfo" to inntektsmeldingInfo,
         "inntektFraInntektsmelding" to arbeidsgiver.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periode.start)?.reflection{ _, månedlig, _, _ -> månedlig },
         "forlengelseFraInfotrygd" to forlengelseFraInfotrygd
+    )
+    internal fun InntektsmeldingInfo.toMap() = mapOf(
+        "id" to id,
+        "arbeidsforholdId" to arbeidsforholdId
     )
 }

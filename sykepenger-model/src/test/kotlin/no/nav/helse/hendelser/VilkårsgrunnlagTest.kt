@@ -151,7 +151,7 @@ internal class VilkårsgrunnlagTest {
                 periodetype: Periodetype,
                 forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
                 hendelseIder: List<UUID>,
-                inntektsmeldingId: UUID?,
+                inntektsmeldingInfo: InntektsmeldingInfo?,
                 inntektskilde: Inntektskilde
             ) {
                 _tilstand = tilstand
@@ -175,7 +175,7 @@ internal class VilkårsgrunnlagTest {
                 periodetype: Periodetype,
                 forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
                 hendelseIder: List<UUID>,
-                inntektsmeldingId: UUID?,
+                inntektsmeldingInfo: InntektsmeldingInfo?,
                 inntektskilde: Inntektskilde
             ) {
                 _id = id

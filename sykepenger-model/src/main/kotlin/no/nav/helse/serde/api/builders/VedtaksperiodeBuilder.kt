@@ -421,7 +421,7 @@ internal class VedtaksperiodeBuilder(
         periodetype: Periodetype,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: List<UUID>,
-        inntektsmeldingId: UUID?,
+        inntektsmeldingInfo: InntektsmeldingInfo?,
         inntektskilde: Inntektskilde
     ) {
         popState()

@@ -38,7 +38,7 @@ internal class VedtaksperioderBuilder(
         periodetype: Periodetype,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: List<UUID>,
-        inntektsmeldingId: UUID?,
+        inntektsmeldingInfo: InntektsmeldingInfo?,
         inntektskilde: Inntektskilde
     ) {
         val sykepengegrunnlag = arbeidsgiver.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periode.start)
@@ -56,7 +56,7 @@ internal class VedtaksperioderBuilder(
             gruppeId = gruppeId(vedtaksperiode),
             fødselsnummer = fødselsnummer,
             hendelseIder = hendelseIder,
-            inntektsmeldingId = inntektsmeldingId,
+            inntektsmeldingId = inntektsmeldingInfo?.id,
             inntektshistorikkBuilder = inntektshistorikkBuilder,
             dataForVilkårsvurdering = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) as? VilkårsgrunnlagHistorikk.Grunnlagsdata
         )
