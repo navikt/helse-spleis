@@ -236,6 +236,7 @@ internal class Vedtaksperiode private constructor(
     override fun compareTo(other: Vedtaksperiode) = this.periode.endInclusive.compareTo(other.periode.endInclusive)
 
     internal fun erSykeperiodeRettFør(other: Vedtaksperiode) = this.sykdomstidslinje.erRettFør(other.sykdomstidslinje)
+    internal fun erSykeperiodeAvsluttetUtenUtbetalingRettFør(other: Vedtaksperiode) = this.sykdomstidslinje.erRettFør(other.sykdomstidslinje) && this.tilstand == AvsluttetUtenUtbetaling
     private fun harSykeperiodeRettFør() = arbeidsgiver.finnSykeperiodeRettFør(this) != null
 
     internal fun periodetype() = arbeidsgiver.periodetype(periode)
@@ -2035,10 +2036,8 @@ internal class Vedtaksperiode private constructor(
             .lastOrNull { it.skjæringstidspunkt == vedtaksperiode.skjæringstidspunkt }
 
         internal fun aktivitetsloggMedForegåendeUtenUtbetaling(vedtaksperiode: Vedtaksperiode): Aktivitetslogg {
-            val tidligereUbetalt = vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)?.takeIf {
-                it.tilstand == AvsluttetUtenUtbetaling
-            }
-            val aktivitetskontekster = listOfNotNull<Aktivitetskontekst>(vedtaksperiode, tidligereUbetalt)
+            val tidligereUbetalt = vedtaksperiode.arbeidsgiver.finnSykeperioderAvsluttetUtenUtbetalingRettFør(vedtaksperiode)
+            val aktivitetskontekster = listOf(vedtaksperiode) + tidligereUbetalt
             return vedtaksperiode.person.aktivitetslogg.logg(*aktivitetskontekster.toTypedArray())
         }
 

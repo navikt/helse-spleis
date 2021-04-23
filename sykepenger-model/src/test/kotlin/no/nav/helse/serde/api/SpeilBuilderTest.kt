@@ -721,6 +721,19 @@ class SpeilBuilderTest {
     }
 
     @Test
+    fun `Sender med varsler for alle tidligere tilstøtende perioder som er avsluttet uten utbetaling`() { //Siden warnings ofte ligger på den første
+        val (person, hendelser) = toPerioderIngenUtbetalingDeretterUtbetaling()
+
+        val personDTO = serializePersonForSpeil(person, hendelser)
+        val vedtaksperiode = personDTO.arbeidsgivere.first().vedtaksperioder.last() as VedtaksperiodeDTO
+        assertEquals(2, vedtaksperiode.aktivitetslogg.size)
+        assertEquals("Utdanning oppgitt i perioden i søknaden. Vurder rett til sykepenger og korriger sykmeldingsperioden", vedtaksperiode.aktivitetslogg[0].melding)
+        assertEquals("Utenlandsopphold oppgitt i perioden i søknaden. Vurder rett til sykepenger og korriger sykmeldingperioden", vedtaksperiode.aktivitetslogg[1].melding)
+        assertNotEquals(vedtaksperiode.id, vedtaksperiode.aktivitetslogg[0].vedtaksperiodeId)
+        assertNotEquals(vedtaksperiode.id, vedtaksperiode.aktivitetslogg[1].vedtaksperiodeId)
+    }
+
+    @Test
     fun `legger ved kildeId sammen med dag i tidslinja`() {
         val (person, hendelser) = person()
         val personDTO = serializePersonForSpeil(person, hendelser)
@@ -1532,6 +1545,75 @@ class SpeilBuilderTest {
                     håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                     håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId, aktivitetslogg = this@run.aktivitetslogg))
 
+
+                    fangeVedtaksperiodeId()
+                    håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+
+                    håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
+                    håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId, aktivitetslogg = this@run.aktivitetslogg))
+                    fangeUtbetalinger()
+                    håndter(overføring(this@run.aktivitetslogg))
+                    håndter(utbetalt(this@run.aktivitetslogg))
+                }
+            }
+
+        private fun toPerioderIngenUtbetalingDeretterUtbetaling(
+            søknadhendelseId: UUID = UUID.randomUUID(),
+            medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja
+        ): Pair<Person, List<HendelseDTO>> =
+            Person(aktørId, fnr).run {
+                this to mutableListOf<HendelseDTO>().apply {
+                    sykmelding(fom = 1.januar, tom = 9.januar).also { (sykmelding, sykmeldingDto) ->
+                        håndter(sykmelding)
+                        add(sykmeldingDto)
+                    }
+                    søknad( //Sender inn vanlig søknad i stedet for arbeidsgiversøknad for å kunne opprette warnings
+                        hendelseId = søknadhendelseId,
+                        fom = 1.januar,
+                        tom = 9.januar,
+                        andrePerioder = listOf(Søknad.Søknadsperiode.Utdanning(3.januar, 4.januar))
+                    ).also { (sykmelding, sykmeldingDTO) ->
+                        håndter(sykmelding)
+                        add(sykmeldingDTO)
+                    }
+                    fangeVedtaksperiodeId()
+                    sykmelding(fom = 10.januar, tom = 14.januar).also { (sykmelding, sykmeldingDto) ->
+                        håndter(sykmelding)
+                        add(sykmeldingDto)
+                    }
+                    søknad(
+                        hendelseId = søknadhendelseId,
+                        fom = 10.januar,
+                        tom = 14.januar,
+                        andrePerioder = listOf(Søknad.Søknadsperiode.Utlandsopphold(11.januar, 12.januar))
+                    ).also { (sykmelding, sykmeldingDTO) ->
+                        håndter(sykmelding)
+                        add(sykmeldingDTO)
+                    }
+                    inntektsmelding(fom = 1.januar).also { (inntektsmelding, inntektsmeldingDTO) ->
+                        håndter(inntektsmelding)
+                        add(inntektsmeldingDTO)
+                    }
+                    håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+                    håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId, medlemskapstatus = medlemskapstatus))
+                    håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+                    håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId, aktivitetslogg = this@run.aktivitetslogg))
+
+                    fangeVedtaksperiodeId()
+
+                    håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+                    håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId, medlemskapstatus = medlemskapstatus))
+                    håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+                    håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId, aktivitetslogg = this@run.aktivitetslogg))
+
+                    sykmelding(fom = 15.januar, tom = 25.januar).also { (sykmelding, sykmeldingDTO) ->
+                        håndter(sykmelding)
+                        add(sykmeldingDTO)
+                    }
+                    søknad(fom = 15.januar, tom = 25.januar).also { (søknad, søknadDTO) ->
+                        håndter(søknad)
+                        add(søknadDTO)
+                    }
 
                     fangeVedtaksperiodeId()
                     håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))

@@ -617,6 +617,19 @@ internal class Arbeidsgiver private constructor(
             other.erSykeperiodeRettFør(vedtaksperiode)
         }
 
+    internal fun finnSykeperioderAvsluttetUtenUtbetalingRettFør(vedtaksperiode: Vedtaksperiode) =
+        finnSykeperioderAvsluttetUtenUtbetalingRettFør(vedtaksperiode, emptyList())
+
+
+    private fun finnSykeperioderAvsluttetUtenUtbetalingRettFør(vedtaksperiode: Vedtaksperiode, perioderFør: List<Vedtaksperiode>): List<Vedtaksperiode> {
+        vedtaksperioder.firstOrNull { other ->
+            other.erSykeperiodeAvsluttetUtenUtbetalingRettFør(vedtaksperiode)
+        }?.also {
+            return finnSykeperioderAvsluttetUtenUtbetalingRettFør(it, perioderFør + listOf(it))
+        }
+        return perioderFør
+    }
+
     internal fun finnForkastetSykeperiodeRettFør(vedtaksperiode: Vedtaksperiode) =
         ForkastetVedtaksperiode.finnForkastetSykeperiodeRettFør(forkastede, vedtaksperiode)
 
