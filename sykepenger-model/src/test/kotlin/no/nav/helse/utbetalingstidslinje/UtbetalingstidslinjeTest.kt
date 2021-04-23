@@ -3,10 +3,24 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.hendelser.til
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.testhelpers.*
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.AvvistDag
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 internal class UtbetalingstidslinjeTest {
+
+    @Test
+    fun `avviser med flere begrunnelser`() {
+        tidslinjeOf(5.NAV).also {
+            Utbetalingstidslinje.avvis(listOf(it), 1.januar til 1.januar, listOf(Begrunnelse.MinimumSykdomsgrad))
+            Utbetalingstidslinje.avvis(listOf(it), 1.januar til 1.januar, listOf(Begrunnelse.EtterDødsdato))
+            Utbetalingstidslinje.avvis(listOf(it), 1.januar til 1.januar, listOf(Begrunnelse.ManglerMedlemskap))
+            val dag = it[1.januar]
+            assertTrue(dag is AvvistDag)
+            assertEquals(3, (dag as AvvistDag).begrunnelser.size)
+        }
+    }
+
     @Test
     fun `samlet periode`() {
         assertEquals(1.januar til 1.januar, Utbetalingstidslinje.periode(listOf(tidslinjeOf(1.NAV))))

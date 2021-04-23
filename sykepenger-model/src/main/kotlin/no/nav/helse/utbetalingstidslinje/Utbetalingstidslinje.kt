@@ -249,7 +249,9 @@ internal class Utbetalingstidslinje private constructor(
         internal fun avvis(begrunnelser: List<Begrunnelse>) = begrunnelser
             .filter { it.avvis(this) }
             .takeIf(List<*>::isNotEmpty)
-            ?.let { AvvistDag(dato, økonomi, it) }
+            ?.let(::avvisDag)
+
+        protected open fun avvisDag(begrunnelser: List<Begrunnelse>) = AvvistDag(dato, økonomi, begrunnelser)
 
         internal abstract fun accept(visitor: UtbetalingsdagVisitor)
 
@@ -303,6 +305,9 @@ internal class Utbetalingstidslinje private constructor(
             }
 
             override val prioritet = 60
+            override fun avvisDag(begrunnelser: List<Begrunnelse>) =
+                AvvistDag(dato, økonomi, this.begrunnelser + begrunnelser)
+
             override fun accept(visitor: UtbetalingsdagVisitor) = økonomi.accept(visitor, this, dato)
             internal fun navDag(): Utbetalingsdag =
                 if (EgenmeldingUtenforArbeidsgiverperiode in begrunnelser) this else NavDag(dato, økonomi.låsOpp())
@@ -323,7 +328,7 @@ internal class Utbetalingstidslinje private constructor(
 
 internal sealed class Begrunnelse(private val avvisstrategi: (Utbetalingsdag) -> Boolean = navdager) {
 
-    internal fun avvis(utbetalingsdag: Utbetalingsdag) = avvisstrategi(utbetalingsdag)
+    internal fun avvis(utbetalingsdag: Utbetalingsdag) = utbetalingsdag is AvvistDag || avvisstrategi(utbetalingsdag)
 
     object SykepengedagerOppbrukt : Begrunnelse()
     object MinimumInntekt : Begrunnelse()
