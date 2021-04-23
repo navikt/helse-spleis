@@ -48,9 +48,7 @@ class V95ArbeidsforholdIdTest {
             "arbeidsforholdId": null
           }
         },
-        {
-          "inntektsmeldingInfo": null
-        }
+        {}
       ],
       "forkastede": [
         {
@@ -62,9 +60,7 @@ class V95ArbeidsforholdIdTest {
           }
         },
         {
-          "vedtaksperiode": {
-            "inntektsmeldingInfo": null
-          }
+          "vedtaksperiode": {}
         }
       ]
     }
