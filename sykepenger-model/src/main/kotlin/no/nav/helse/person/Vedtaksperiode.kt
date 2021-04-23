@@ -353,8 +353,11 @@ internal class Vedtaksperiode private constructor(
         oppdaterHistorikk(hendelse)
         if (!person.harFlereArbeidsgivereMedSykdom()) hendelse.validerEnArbeidsgiver()
         hendelse.valider(periode)
-        if (hendelse.hasErrorsOrWorse())
-            return person.invaliderAllePerioder(hendelse, "Invaliderer alle perioder pga flere arbeidsgivere og feil i søknad")
+        if (hendelse.hasErrorsOrWorse()) {
+            if (person.harFlereArbeidsgivereMedSykdom()) return person.invaliderAllePerioder(hendelse, "Invaliderer alle perioder pga flere arbeidsgivere og feil i søknad")
+            hendelse.error("Invaliderer alle perioder for arbeidsgiver pga feil i søknad")
+            return tilstand(hendelse, TilInfotrygd)
+        }
         nesteTilstand?.also { tilstand(hendelse, it) }
     }
 
