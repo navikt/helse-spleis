@@ -186,18 +186,16 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         vedtaksperiodeId: UUID,
         arbeidsgiverperioder: List<Periode>,
         førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOfOrNull { it.start } ?: 1.januar,
-        ferieperioder: List<Periode> = emptyList(),
         refusjon: Triple<LocalDate?, Inntekt, List<LocalDate>> = Triple(null, INNTEKT, emptyList()),
         beregnetInntekt: Inntekt = refusjon.second
     ): UUID {
         assertIkkeEtterspurt(Inntektsmelding::class, InntekterForSammenligningsgrunnlag, vedtaksperiodeId, ORGNUMMER)
-        return håndterInntektsmelding(arbeidsgiverperioder, førsteFraværsdag, ferieperioder, refusjon, beregnetInntekt = beregnetInntekt)
+        return håndterInntektsmelding(arbeidsgiverperioder, førsteFraværsdag, refusjon, beregnetInntekt = beregnetInntekt)
     }
 
     protected fun håndterInntektsmelding(
         arbeidsgiverperioder: List<Periode>,
         førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOfOrNull { it.start } ?: 1.januar,
-        ferieperioder: List<Periode> = emptyList(),
         refusjon: Triple<LocalDate?, Inntekt, List<LocalDate>> = Triple(null, INNTEKT, emptyList()),
         orgnummer: String = ORGNUMMER,
         id: UUID = UUID.randomUUID(),
@@ -208,7 +206,6 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         inntektsmelding(
             id,
             arbeidsgiverperioder,
-            ferieperioder = ferieperioder,
             beregnetInntekt = beregnetInntekt,
             førsteFraværsdag = førsteFraværsdag,
             refusjon = refusjon,
@@ -612,7 +609,6 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     protected fun inntektsmelding(
         id: UUID,
         arbeidsgiverperioder: List<Periode>,
-        ferieperioder: List<Periode> = emptyList(),
         beregnetInntekt: Inntekt = INNTEKT,
         førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOfOrNull { it.start } ?: 1.januar,
         refusjon: Triple<LocalDate?, Inntekt, List<LocalDate>> = Triple(null, beregnetInntekt, emptyList()),
@@ -630,7 +626,6 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
                 førsteFraværsdag = førsteFraværsdag,
                 beregnetInntekt = beregnetInntekt,
                 arbeidsgiverperioder = arbeidsgiverperioder,
-                ferieperioder = ferieperioder,
                 arbeidsforholdId = arbeidsforholdId,
                 begrunnelseForReduksjonEllerIkkeUtbetalt = null,
                 harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,

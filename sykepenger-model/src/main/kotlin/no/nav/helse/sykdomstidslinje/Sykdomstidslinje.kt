@@ -129,8 +129,16 @@ internal class Sykdomstidslinje private constructor(
     internal fun skjæringstidspunkt(kuttdato: LocalDate) =
         fremTilOgMed(kuttdato).skjæringstidspunkt()
 
-    internal fun skjæringstidspunkt() =
-        førsteSykedagEtterSisteOppholdsdag() ?: førsteSykedag()
+    internal fun skjæringstidspunkt(): LocalDate? {
+        val sisteOppholdsdag = sisteOppholdsdag()
+        if (sisteOppholdsdag != null && sisteDag() > sisteOppholdsdag) return fraOgMed(sisteOppholdsdag).finnSkjæringstidspunkt()
+        return kuttEtterSisteSykedag().finnSkjæringstidspunkt()
+    }
+
+    private fun finnSkjæringstidspunkt(): LocalDate? {
+        val sisteOppholdsdag = sisteOppholdsdag() ?: return førsteSykedag()
+        return førsteSykedagEtter(sisteOppholdsdag)
+    }
 
     internal fun skjæringstidspunkter(): List<LocalDate> {
         val skjæringstidspunkter = mutableListOf<LocalDate>()
@@ -143,9 +151,6 @@ internal class Sykdomstidslinje private constructor(
         } while (skjæringstidspunkt != null)
         return skjæringstidspunkter
     }
-
-    private fun førsteSykedagEtterSisteOppholdsdag() =
-        kuttEtterSisteSykedag().sisteOppholdsdag()?.let(::førsteSykedagEtter)
 
     internal fun førsteSykedagEtter(dato: LocalDate) =
         periode?.firstOrNull { it >= dato && erEnSykedag(this[it]) }

@@ -439,7 +439,6 @@ class JsonBuilderTest {
             førsteFraværsdag = fom,
             beregnetInntekt = 31000.månedlig,
             arbeidsgiverperioder = perioder,
-            ferieperioder = emptyList(),
             arbeidsforholdId = null,
             begrunnelseForReduksjonEllerIkkeUtbetalt = null,
             mottatt = LocalDateTime.now()

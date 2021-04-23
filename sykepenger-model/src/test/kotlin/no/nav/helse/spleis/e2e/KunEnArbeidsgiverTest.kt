@@ -846,8 +846,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(
             1.vedtaksperiode,
             listOf(Periode(3.januar, 18.januar)),
-            3.januar,
-            listOf(Periode(27.januar, 27.januar))
+            3.januar
         )
         inspektør.also { assertFalse(it.personLogg.hasWarningsOrWorse()) }
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP)
@@ -2182,7 +2181,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 16.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 16.februar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), ferieperioder = listOf(5.februar til 6.februar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
 
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
     }
@@ -2868,9 +2867,9 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         )
         val inntektsmeldingId = håndterInntektsmelding(
             arbeidsgiverperioder = arbeidsgiverperioder,
-            beregnetInntekt = 1000.månedlig,
             førsteFraværsdag = 1.januar(2021),
-            refusjon = Triple(null, 1000.månedlig, emptyList())
+            refusjon = Triple(null, 1000.månedlig, emptyList()),
+            beregnetInntekt = 1000.månedlig
         )
 
         håndterYtelser(1.vedtaksperiode)

@@ -21,7 +21,6 @@ internal open class InntektsmeldingMessage(packet: JsonMessage) : HendelseMessag
     private val førsteFraværsdag = packet["foersteFravaersdag"].asOptionalLocalDate()
     private val beregnetInntekt = packet["beregnetInntekt"].asDouble()
     private val arbeidsgiverperioder = packet["arbeidsgiverperioder"].map(::asPeriode)
-    private val ferieperioder = packet["ferieperioder"].map(::asPeriode)
     private val begrunnelseForReduksjonEllerIkkeUtbetalt =
         packet["begrunnelseForReduksjonEllerIkkeUtbetalt"].takeIf(JsonNode::isTextual)?.asText()
     private val harOpphørAvNaturalytelser = packet["opphoerAvNaturalytelser"].size() > 0
@@ -35,7 +34,6 @@ internal open class InntektsmeldingMessage(packet: JsonMessage) : HendelseMessag
         førsteFraværsdag = førsteFraværsdag,
         beregnetInntekt = beregnetInntekt.månedlig,
         arbeidsgiverperioder = arbeidsgiverperioder,
-        ferieperioder = ferieperioder,
         arbeidsforholdId = arbeidsforholdId,
         begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
         harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,

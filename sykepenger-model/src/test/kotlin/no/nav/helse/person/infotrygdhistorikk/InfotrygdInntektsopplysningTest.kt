@@ -213,7 +213,6 @@ internal class InfotrygdInntektsopplysningTest {
         førsteFraværsdag = førsteFraværsdag,
         beregnetInntekt = beregnetInntekt,
         arbeidsgiverperioder = arbeidsgiverperioder,
-        ferieperioder = emptyList(),
         arbeidsforholdId = null,
         begrunnelseForReduksjonEllerIkkeUtbetalt = null,
         mottatt = LocalDateTime.now()

@@ -32,11 +32,13 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
         // nav-perioden går fra AvventerInntektsmeldingUferdigForlengelse til AvventerUferdigForlengelse.
         // Når Inntektsmeldingen er håndtert sendes GjenopptaBehandling ut, som medfører at
         // NAV-perioden går videre til AvventerHistorikk uten å gjøre vilkårsvurdering først
-        håndterInntektsmelding(listOf(
-            9.januar til 15.januar,
-            19.januar til 26.januar,
-            29.januar til 29.januar
-        ), 29.januar)
+        håndterInntektsmelding(
+            listOf(
+                9.januar til 15.januar,
+                19.januar til 26.januar,
+                29.januar til 29.januar
+            ), 29.januar
+        )
         håndterYtelser(3.vedtaksperiode)
         håndterVilkårsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
@@ -64,13 +66,15 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
 
         // 6. og 7. januar blir FriskHelg og medfører brudd i arbeidsgiverperioden
         // og dermed ble også skjæringstidspunktet forskjøvet til 8. januar
-        håndterInntektsmelding(listOf(
-            1.januar til 3.januar,
-            4.januar til 5.januar,
-            // 6. og 7. januar er helg
-            8.januar til 12.januar,
-            13.januar til 18.januar
-        ), 1.januar)
+        håndterInntektsmelding(
+            listOf(
+                1.januar til 3.januar,
+                4.januar til 5.januar,
+                // 6. og 7. januar er helg
+                8.januar til 12.januar,
+                13.januar til 18.januar
+            ), 1.januar
+        )
 
         håndterYtelser(3.vedtaksperiode)
 
@@ -103,11 +107,13 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
         // så regnes lørdag + søndag som del av arbeidsgiverperioden også.
         // Dermed ble perioden 6. januar - 2. februar regnet som tilstøtende til 1.-5. januar, selv om
         // de to har forskjellige skjæringstidspunkt.
-        håndterInntektsmelding(listOf(
-            1.januar til 5.januar,
-            8.januar til 8.januar,
-            24.januar til 2.februar
-        ), 24.januar)
+        håndterInntektsmelding(
+            listOf(
+                1.januar til 5.januar,
+                8.januar til 8.januar,
+                24.januar til 2.februar
+            ), 24.januar
+        )
 
         håndterYtelser(3.vedtaksperiode)
 

@@ -215,10 +215,12 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
     fun `ferdig gap foran uten inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 16.januar, 100.prosent))
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(3.januar, 16.januar, 100.prosent))
-        val inntektsmeldingId = håndterInntektsmelding(listOf(
-            3.januar til 16.januar,
-            18.januar til 19.januar
-        ), førsteFraværsdag = 18.januar)
+        val inntektsmeldingId = håndterInntektsmelding(
+            listOf(
+                3.januar til 16.januar,
+                18.januar til 19.januar
+            ), førsteFraværsdag = 18.januar
+        )
         håndterSøknad(Sykdom(18.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingReplay(inntektsmeldingId, 2.vedtaksperiode)
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
@@ -308,10 +310,12 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
     fun `ferdig forlengelse foran med inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 10.januar, 100.prosent))
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(3.januar, 10.januar, 100.prosent))
-        håndterInntektsmelding(listOf(
-            3.januar til 10.januar,
-            11.januar til 18.januar
-        ))
+        håndterInntektsmelding(
+            listOf(
+                3.januar til 10.januar,
+                11.januar til 18.januar
+            )
+        )
         håndterSøknad(Sykdom(11.januar, 31.januar, 100.prosent))
         assertTilstander(2.vedtaksperiode, START, AVVENTER_HISTORIKK)
     }

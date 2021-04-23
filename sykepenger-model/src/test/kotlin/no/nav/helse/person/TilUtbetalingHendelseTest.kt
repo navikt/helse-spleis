@@ -315,7 +315,6 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
             førsteFraværsdag = førsteSykedag,
             beregnetInntekt = INNTEKT,
             arbeidsgiverperioder = listOf(Periode(førsteSykedag, førsteSykedag.plusDays(16))),
-            ferieperioder = emptyList(),
             arbeidsforholdId = null,
             begrunnelseForReduksjonEllerIkkeUtbetalt = null,
             mottatt = LocalDateTime.now()

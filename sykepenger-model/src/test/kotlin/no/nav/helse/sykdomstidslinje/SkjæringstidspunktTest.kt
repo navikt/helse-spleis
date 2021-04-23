@@ -89,9 +89,16 @@ internal class SkjæringstidspunktTest {
     }
 
     @Test
+    fun `bare ferie - tidligere sykdom`() {
+        perioder(2.S, 1.A, 14.F) { _, _, _ ->
+            assertNull(skjæringstidspunkt())
+        }
+    }
+
+    @Test
     fun `ferie i framtiden`() {
-        perioder(2.S, 2.n_, 2.F) { sykedager, _, _ ->
-            assertFørsteDagErSkjæringstidspunkt(sykedager, this)
+        perioder(2.S, 2.n_, 2.F) { _, _, _ ->
+            assertNull(skjæringstidspunkt())
         }
     }
 
@@ -394,7 +401,6 @@ internal class SkjæringstidspunktTest {
             førsteFraværsdag = førsteFraværsdag,
             beregnetInntekt = beregnetInntekt,
             arbeidsgiverperioder = arbeidsgiverperioder,
-            ferieperioder = ferieperioder,
             arbeidsforholdId = null,
             begrunnelseForReduksjonEllerIkkeUtbetalt = null,
             mottatt = LocalDateTime.now()

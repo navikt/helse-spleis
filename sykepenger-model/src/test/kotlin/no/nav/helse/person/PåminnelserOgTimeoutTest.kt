@@ -269,7 +269,6 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
             førsteFraværsdag = førsteFraværsdag,
             beregnetInntekt = 31000.månedlig,
             arbeidsgiverperioder = arbeidsgiverperiode.toList(),
-            ferieperioder = emptyList(),
             arbeidsforholdId = null,
             begrunnelseForReduksjonEllerIkkeUtbetalt = null,
             mottatt = LocalDateTime.now()

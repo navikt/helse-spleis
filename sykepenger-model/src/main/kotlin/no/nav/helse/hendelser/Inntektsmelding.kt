@@ -24,7 +24,6 @@ class Inntektsmelding(
     internal val førsteFraværsdag: LocalDate?,
     internal val beregnetInntekt: Inntekt,
     private val arbeidsgiverperioder: List<Periode>,
-    ferieperioder: List<Periode>,
     private val arbeidsforholdId: String?,
     private val begrunnelseForReduksjonEllerIkkeUtbetalt: String?,
     private val harOpphørAvNaturalytelser: Boolean = false,
@@ -55,7 +54,7 @@ class Inntektsmelding(
         if (arbeidsgiverperioder.isEmpty() && førsteFraværsdag == null) severe("Arbeidsgiverperiode er tom og førsteFraværsdag er null")
         val arbeidsgivertidslinje = arbeidsgivertidslinje()
         arbeidsgiverperiode = arbeidsgivertidslinje.periode()
-        sykdomstidslinje = listOf(arbeidsgivertidslinje, ferietidslinje(ferieperioder), førsteFraværsdagGaptidslinje(arbeidsgiverperiode)).merge(beste)
+        sykdomstidslinje = listOf(arbeidsgivertidslinje, førsteFraværsdagGaptidslinje(arbeidsgiverperiode)).merge(beste)
     }
 
     private fun arbeidsgivertidslinje(): Sykdomstidslinje {
@@ -70,9 +69,6 @@ class Inntektsmelding(
         if (periode == null) return false
         return førsteFraværsdag == periode.endInclusive.plusDays(1)
     }
-
-    private fun ferietidslinje(ferieperioder: List<Periode>): Sykdomstidslinje =
-        ferieperioder.map(::asFerietidslinje).merge(replace)
 
     private fun førsteFraværsdagGaptidslinje(arbeidsgiverperiode: Periode?): Sykdomstidslinje {
         if (førsteFraværsdag == null || førsteFraværsdagKantIKant(arbeidsgiverperiode)) return Sykdomstidslinje()
@@ -89,7 +85,6 @@ class Inntektsmelding(
     }
 
     private fun asArbeidsgivertidslinje(periode: Periode) = Sykdomstidslinje.arbeidsgiverdager(periode.start, periode.endInclusive, 100.prosent, kilde)
-    private fun asFerietidslinje(periode: Periode) = Sykdomstidslinje.feriedager(periode.start, periode.endInclusive, kilde)
 
     override fun sykdomstidslinje() = sykdomstidslinje
 

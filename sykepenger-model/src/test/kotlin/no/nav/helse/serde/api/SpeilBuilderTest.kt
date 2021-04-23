@@ -1727,7 +1727,6 @@ class SpeilBuilderTest {
             førsteFraværsdag = fom,
             beregnetInntekt = beregnetInntekt,
             arbeidsgiverperioder = listOf(Periode(fom, fom.plusDays(15))),
-            ferieperioder = emptyList(),
             arbeidsforholdId = null,
             begrunnelseForReduksjonEllerIkkeUtbetalt = null,
             mottatt = LocalDateTime.now()

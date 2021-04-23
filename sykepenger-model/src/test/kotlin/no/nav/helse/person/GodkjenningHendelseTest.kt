@@ -191,7 +191,6 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
             førsteFraværsdag = førsteSykedag,
             beregnetInntekt = 31000.månedlig,
             arbeidsgiverperioder = listOf(Periode(førsteSykedag, førsteSykedag.plusDays(16))),
-            ferieperioder = emptyList(),
             arbeidsforholdId = null,
             begrunnelseForReduksjonEllerIkkeUtbetalt = null,
             mottatt = LocalDateTime.now()

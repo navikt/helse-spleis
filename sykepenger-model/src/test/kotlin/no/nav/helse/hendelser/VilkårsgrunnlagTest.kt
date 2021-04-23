@@ -241,7 +241,6 @@ internal class VilkårsgrunnlagTest {
             førsteFraværsdag = 1.januar,
             beregnetInntekt = INNTEKT,
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
-            ferieperioder = listOf(),
             arbeidsforholdId = null,
             begrunnelseForReduksjonEllerIkkeUtbetalt = null,
             mottatt = LocalDateTime.now()

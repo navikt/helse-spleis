@@ -91,7 +91,6 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
             førsteFraværsdag = 1.januar,
             beregnetInntekt = INNTEKT_PR_MÅNED,
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
-            ferieperioder = listOf(Periode(16.januar, 31.januar)),
             arbeidsforholdId = null,
             begrunnelseForReduksjonEllerIkkeUtbetalt = null,
             mottatt = LocalDateTime.now()
@@ -116,7 +115,6 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
             førsteFraværsdag = førsteFraværsdag,
             beregnetInntekt = beregnetInntekt,
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
-            ferieperioder = emptyList(),
             arbeidsforholdId = null,
             begrunnelseForReduksjonEllerIkkeUtbetalt = null,
             mottatt = LocalDateTime.now()

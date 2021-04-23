@@ -54,37 +54,10 @@ internal class InntektsmeldingTest {
     }
 
     @Test
-    fun `ferie etter siste arbeidsgiverperiode påvirker ikke skjæringstidspunkt`() {
-        inntektsmelding(
-            arbeidsgiverperioder = listOf(Periode(1.januar, 2.januar), Periode(10.januar, 12.januar)),
-            førsteFraværsdag = 1.januar,
-            ferieperioder = listOf(Periode(16.januar, 16.januar))
-        )
-        val nyTidslinje = inntektsmelding.sykdomstidslinje()
-        assertEquals(1.januar, nyTidslinje.periode()?.start)
-        assertEquals(16.januar, nyTidslinje.periode()?.endInclusive)
-        assertEquals(10.januar, nyTidslinje.skjæringstidspunkt())
-    }
-
-    @Test
-    fun `ferie sammenhengende etter siste arbeidsgiverperiode påvirker ikke skjæringstidspunkt`() {
-        inntektsmelding(
-            arbeidsgiverperioder = listOf(Periode(1.januar, 2.januar), Periode(10.januar, 12.januar)),
-            førsteFraværsdag = 1.januar,
-            ferieperioder = listOf(Periode(15.januar, 15.januar))
-        )
-        val nyTidslinje = inntektsmelding.sykdomstidslinje()
-        assertEquals(1.januar, nyTidslinje.periode()?.start)
-        assertEquals(15.januar, nyTidslinje.periode()?.endInclusive)
-        assertEquals(10.januar, nyTidslinje.skjæringstidspunkt())
-    }
-
-    @Test
     fun `ferie sammenhengende før siste arbeidsgiverperiode påvirker ikke skjæringstidspunkt`() {
         inntektsmelding(
             arbeidsgiverperioder = listOf(Periode(1.januar, 2.januar), Periode(15.januar, 17.januar)),
-            førsteFraværsdag = 1.januar,
-            ferieperioder = listOf(Periode(10.januar, 12.januar))
+            førsteFraværsdag = 1.januar
         )
         val nyTidslinje = inntektsmelding.sykdomstidslinje()
         assertEquals(1.januar, nyTidslinje.periode()?.start)
@@ -96,8 +69,7 @@ internal class InntektsmeldingTest {
     fun `ferie og helg sammenhengende med to arbeidsgiverperioder slår sammen periodene`() {
         inntektsmelding(
             arbeidsgiverperioder = listOf(Periode(1.januar, 5.januar), Periode(15.januar, 17.januar)),
-            førsteFraværsdag = 1.januar,
-            ferieperioder = listOf(Periode(8.januar, 12.januar))
+            førsteFraværsdag = 1.januar
         )
         val nyTidslinje = inntektsmelding.sykdomstidslinje()
         assertEquals(1.januar, nyTidslinje.periode()?.start)
@@ -109,8 +81,7 @@ internal class InntektsmeldingTest {
     fun `to ferieperioder med gap, som er sammenhengende med hver sin arbeidsgiverperiode, påvirker ikke skjæringstidspunkt`() {
         inntektsmelding(
             arbeidsgiverperioder = listOf(Periode(1.januar, 5.januar), Periode(15.januar, 17.januar)),
-            førsteFraværsdag = 1.januar,
-            ferieperioder = listOf(Periode(8.januar, 9.januar), Periode(11.januar, 12.januar))
+            førsteFraværsdag = 1.januar
         )
         val nyTidslinje = inntektsmelding.sykdomstidslinje()
         assertEquals(1.januar, nyTidslinje.periode()?.start)
@@ -129,7 +100,7 @@ internal class InntektsmeldingTest {
 
     @Test
     fun `sykdom med en antatt arbeidsdag`() {
-        inntektsmelding(listOf(Periode(1.januar, 2.januar), Periode(4.januar, 5.januar)), emptyList())
+        inntektsmelding(listOf(Periode(1.januar, 2.januar), Periode(4.januar, 5.januar)))
         val nyTidslinje = inntektsmelding.sykdomstidslinje()
         assertEquals(Arbeidsdag::class, nyTidslinje[3.januar]::class)
         assertEquals(Arbeidsgiverdag::class, nyTidslinje[1.januar]::class)
@@ -151,22 +122,6 @@ internal class InntektsmeldingTest {
     }
 
     @Test
-    fun `ferieperiode med gap`() {
-        inntektsmelding(
-            listOf(Periode(1.januar, 1.januar)),
-            listOf(Periode(2.januar, 3.januar), Periode(5.januar, 6.januar)),
-            førsteFraværsdag = 1.januar
-        )
-        val nyTidslinje = inntektsmelding.sykdomstidslinje()
-        assertEquals(Arbeidsgiverdag::class, nyTidslinje[1.januar]::class)
-        assertEquals(Feriedag::class, nyTidslinje[2.januar]::class)
-        assertEquals(Feriedag::class, nyTidslinje[3.januar]::class)
-        assertEquals(UkjentDag::class, nyTidslinje[4.januar]::class)
-        assertEquals(Feriedag::class, nyTidslinje[5.januar]::class)
-        assertEquals(Feriedag::class, nyTidslinje[6.januar]::class)
-    }
-
-    @Test
     fun `første fraværsdag etter arbeidsgiverperiode blir arbeidsgiverdag`() {
         inntektsmelding(listOf(Periode(1.januar, 1.januar)), førsteFraværsdag = 3.januar)
         val nyTidslinje = inntektsmelding.sykdomstidslinje()
@@ -176,96 +131,8 @@ internal class InntektsmeldingTest {
     }
 
     @Test
-    fun `arbeidsgiverperiode og ferie med gap og første fraværsdag etterpå`() {
-        inntektsmelding(
-            listOf(Periode(1.januar, 1.januar)),
-            listOf(Periode(3.januar, 3.januar)),
-            førsteFraværsdag = 5.januar
-        )
-        val nyTidslinje = inntektsmelding.sykdomstidslinje()
-        assertEquals(Arbeidsgiverdag::class, nyTidslinje[1.januar]::class)
-        assertEquals(UkjentDag::class, nyTidslinje[2.januar]::class)
-        assertEquals(Feriedag::class, nyTidslinje[3.januar]::class)
-        assertEquals(UkjentDag::class, nyTidslinje[4.januar]::class)
-        assertEquals(Arbeidsgiverdag::class, nyTidslinje[5.januar]::class)
-    }
-
-    @Test
-    fun `ferie i arbeidsgiverperioden uten overlapp`() {
-        inntektsmelding(
-            listOf(Periode(1.januar, 2.januar), Periode(5.januar, 6.januar)),
-            listOf(Periode(3.januar, 4.januar)),
-            førsteFraværsdag = 1.januar
-        )
-        val nyTidslinje = inntektsmelding.sykdomstidslinje()
-        assertEquals(Arbeidsgiverdag::class, nyTidslinje[1.januar]::class)
-        assertEquals(Arbeidsgiverdag::class, nyTidslinje[2.januar]::class)
-        assertEquals(Feriedag::class, nyTidslinje[3.januar]::class)
-        assertEquals(Feriedag::class, nyTidslinje[4.januar]::class)
-        assertEquals(Arbeidsgiverdag::class, nyTidslinje[5.januar]::class)
-        assertEquals(ArbeidsgiverHelgedag::class, nyTidslinje[6.januar]::class)
-    }
-
-    @Test
-    fun `overlapp i ferieperioder`() {
-        inntektsmelding(
-            arbeidsgiverperioder = listOf(Periode(1.januar, 2.januar)),
-            ferieperioder = listOf(Periode(3.januar, 4.januar), Periode(3.januar, 4.januar)),
-            førsteFraværsdag = 1.januar
-        )
-        val nyTidslinje = inntektsmelding.sykdomstidslinje()
-        assertEquals(Feriedag::class, nyTidslinje[3.januar]::class)
-        assertEquals(Feriedag::class, nyTidslinje[4.januar]::class)
-    }
-
-    @Test
-    fun `førsteFraværsdag mellom ferie og arbeidsgiverperiode`() {
-        inntektsmelding(
-            listOf(Periode(4.januar, 5.januar)),
-            listOf(Periode(1.januar, 2.januar)),
-            førsteFraværsdag = 3.januar
-        )
-        val nyTidslinje = inntektsmelding.sykdomstidslinje()
-        assertEquals(Feriedag::class, nyTidslinje[1.januar]::class)
-        assertEquals(Feriedag::class, nyTidslinje[2.januar]::class)
-        assertEquals(Arbeidsgiverdag::class, nyTidslinje[3.januar]::class)
-        assertEquals(Arbeidsgiverdag::class, nyTidslinje[4.januar]::class)
-        assertEquals(Arbeidsgiverdag::class, nyTidslinje[5.januar]::class)
-    }
-
-    @Test
-    fun `førsteFraværsdag mellom arbeidsgiverperiode og ferie blir arbeidsgiverdag`() {
-        inntektsmelding(
-            listOf(Periode(1.januar, 2.januar)),
-            listOf(Periode(4.januar, 5.januar)),
-            førsteFraværsdag = 3.januar
-        )
-        val nyTidslinje = inntektsmelding.sykdomstidslinje()
-        assertEquals(Arbeidsgiverdag::class, nyTidslinje[1.januar]::class)
-        assertEquals(Arbeidsgiverdag::class, nyTidslinje[2.januar]::class)
-        assertEquals(Arbeidsgiverdag::class, nyTidslinje[3.januar]::class)
-        assertEquals(Feriedag::class, nyTidslinje[4.januar]::class)
-        assertEquals(Feriedag::class, nyTidslinje[5.januar]::class)
-    }
-
-    @Test
-    fun `ferieperiode før arbeidsgiverperiode`() {
-        inntektsmelding(
-            arbeidsgiverperioder = listOf(Periode(4.januar, 5.januar)),
-            ferieperioder = listOf(Periode(1.januar, 2.januar)),
-            førsteFraværsdag = 4.januar
-        )
-        val nyTidslinje = inntektsmelding.sykdomstidslinje()
-        assertEquals(Feriedag::class, nyTidslinje[1.januar]::class)
-        assertEquals(Feriedag::class, nyTidslinje[2.januar]::class)
-        assertEquals(UkjentDag::class, nyTidslinje[3.januar]::class)
-        assertEquals(Arbeidsgiverdag::class, nyTidslinje[4.januar]::class)
-        assertEquals(Arbeidsgiverdag::class, nyTidslinje[5.januar]::class)
-    }
-
-    @Test
     fun `arbeidsgiverperioden i inntektsmelding kan være tom`() {
-        inntektsmelding(emptyList(), ferieperioder = listOf(Periode(1.januar, 2.januar), Periode(4.januar, 5.januar)))
+        inntektsmelding(emptyList())
         assertEquals(1.januar, inntektsmelding.sykdomstidslinje().periode()?.start)
     }
 
@@ -274,28 +141,10 @@ internal class InntektsmeldingTest {
         inntektsmelding(
             arbeidsgiverperioder = listOf(
                 Periode(1.januar, 2.januar), Periode(4.januar, 5.januar), Periode(3.januar, 4.januar)
-            ),
-            ferieperioder = emptyList()
+            )
         )
         inntektsmelding.valider(Periode(1.januar, 31.januar))
         assertFalse(inntektsmelding.hasErrorsOrWorse())
-    }
-
-    @Test
-    fun `arbeidgiverdager vinner over feriedager`() {
-        inntektsmelding(
-            arbeidsgiverperioder = listOf(Periode(1.januar, 2.januar), Periode(4.januar, 5.januar)),
-            ferieperioder = listOf(Periode(3.januar, 4.januar))
-        )
-        inntektsmelding.valider(Periode(1.januar, 31.januar))
-        assertFalse(inntektsmelding.hasErrorsOrWorse())
-
-        val nyTidslinje = inntektsmelding.sykdomstidslinje()
-        assertEquals(Arbeidsgiverdag::class, nyTidslinje[1.januar]::class)
-        assertEquals(Arbeidsgiverdag::class, nyTidslinje[2.januar]::class)
-        assertEquals(Feriedag::class, nyTidslinje[3.januar]::class)
-        assertEquals(Arbeidsgiverdag::class, nyTidslinje[4.januar]::class)
-        assertEquals(Arbeidsgiverdag::class, nyTidslinje[5.januar]::class)
     }
 
     @Test
@@ -319,22 +168,14 @@ internal class InntektsmeldingTest {
 
     @Test
     fun `bruker første fraværsdag som TOM hvis både ferieperioder og arbeidsgiverperioder i inntektsmeldingen er tomme`() {
-        inntektsmelding(emptyList(), emptyList(), førsteFraværsdag = 2.januar)
+        inntektsmelding(emptyList(), førsteFraværsdag = 2.januar)
 
         assertEquals(Periode(2.januar, 2.januar), inntektsmelding.sykdomstidslinje().periode())
     }
 
     @Test
-    fun `ferieperiode og arbeidsgiverperiode blir slått sammen`() {
-        inntektsmelding(listOf(Periode(1.januar, 16.januar)), listOf(Periode(17.januar, 18.januar)))
-
-        assertEquals(Periode(1.januar, 18.januar), inntektsmelding.sykdomstidslinje().periode())
-    }
-
-    @Test
     fun `inntektsmelding med refusjon beløp != beregnetInntekt er ikke gyldig`() {
         inntektsmelding(
-            emptyList(),
             emptyList(),
             refusjonBeløp = 999999.månedlig,
             beregnetInntekt = 10000.månedlig
@@ -346,7 +187,6 @@ internal class InntektsmeldingTest {
     fun `refusjon opphører før perioden`() {
         inntektsmelding(
             listOf(Periode(1.januar, 3.januar)),
-            emptyList(),
             refusjonOpphørsdato = 1.januar,
             endringerIRefusjon = listOf(16.januar)
         )
@@ -357,7 +197,6 @@ internal class InntektsmeldingTest {
     fun `refusjon opphører etter perioden`() {
         inntektsmelding(
             listOf(Periode(1.januar, 3.januar)),
-            emptyList(),
             refusjonOpphørsdato = 11.januar,
             endringerIRefusjon = listOf(16.januar)
         )
@@ -368,7 +207,6 @@ internal class InntektsmeldingTest {
     fun `refusjon opphører i perioden`() {
         inntektsmelding(
             listOf(Periode(1.januar, 3.januar)),
-            emptyList(),
             refusjonOpphørsdato = 10.januar,
             endringerIRefusjon = listOf(16.januar)
         )
@@ -379,7 +217,6 @@ internal class InntektsmeldingTest {
     fun `endring i refusjon i perioden`() {
         inntektsmelding(
             listOf(Periode(1.januar, 3.januar)),
-            emptyList(),
             refusjonOpphørsdato = 16.januar,
             endringerIRefusjon = listOf(10.januar)
         )
@@ -430,13 +267,15 @@ internal class InntektsmeldingTest {
 
     @Test
     fun `helg mellom arbeidsgiverperiode`() {
-        inntektsmelding(listOf(
-            1.januar til 3.januar,
-            4.januar til 5.januar,
-            // 6. og 7. januar er helg
-            8.januar til 12.januar,
-            13.januar til 18.januar
-        ), førsteFraværsdag = 1.januar)
+        inntektsmelding(
+            listOf(
+                1.januar til 3.januar,
+                4.januar til 5.januar,
+                // 6. og 7. januar er helg
+                8.januar til 12.januar,
+                13.januar til 18.januar
+            ), førsteFraværsdag = 1.januar
+        )
         val nyTidslinje = inntektsmelding.sykdomstidslinje()
 
         assertEquals(8.januar, nyTidslinje.skjæringstidspunkt())
@@ -513,58 +352,6 @@ internal class InntektsmeldingTest {
     }
 
     @Test
-    fun `arbeidsgiverperiode og ferie slutter på fredag med gap i helg og første fraværsdag mandag`() {
-        inntektsmelding(
-            listOf(Periode(1.januar, 3.januar)),
-            listOf(Periode(5.januar, 5.januar)),
-            førsteFraværsdag = 8.januar
-        )
-
-        val nyTidslinje = inntektsmelding.sykdomstidslinje()
-        assertEquals(8.januar, nyTidslinje.skjæringstidspunkt())
-        assertEquals(Arbeidsgiverdag::class, nyTidslinje[1.januar]::class)
-        assertEquals(Arbeidsgiverdag::class, nyTidslinje[3.januar]::class)
-        assertEquals(UkjentDag::class, nyTidslinje[4.januar]::class)
-        assertEquals(Feriedag::class, nyTidslinje[5.januar]::class)
-        assertEquals(UkjentDag::class, nyTidslinje[6.januar]::class)
-        assertEquals(UkjentDag::class, nyTidslinje[7.januar]::class)
-        assertEquals(Arbeidsgiverdag::class, nyTidslinje[8.januar]::class)
-    }
-
-    @Test
-    fun `arbeidsgiverperiode slutter med ferie helg, første fraværsdag mandag`() {
-        inntektsmelding(
-            listOf(Periode(4.januar, 19.januar)),
-            listOf(Periode(20.januar, 21.januar)),
-            førsteFraværsdag = 22.januar
-        )
-
-        val nyTidslinje = inntektsmelding.sykdomstidslinje()
-        assertEquals(4.januar, nyTidslinje.skjæringstidspunkt())
-        assertEquals(Arbeidsgiverdag::class, nyTidslinje[4.januar]::class)
-        assertEquals(Arbeidsgiverdag::class, nyTidslinje[19.januar]::class)
-        assertEquals(Feriedag::class, nyTidslinje[20.januar]::class)
-        assertEquals(Feriedag::class, nyTidslinje[21.januar]::class)
-        assertEquals(Arbeidsgiverdag::class, nyTidslinje[22.januar]::class)
-    }
-
-    @Test
-    fun `er ikke relevant når kun ferie etter gap overlapper`() {
-        inntektsmelding(
-            listOf(Periode(1.januar, 8.januar), Periode(10.januar, 18.januar)),
-            listOf(Periode(19.januar, 23.januar)),
-            førsteFraværsdag = 10.januar
-        )
-
-        assertFalse(inntektsmelding.erRelevant(Periode(19.januar, 25.januar)))
-        assertFalse(inntektsmelding.erRelevant(Periode(20.januar, 25.januar)))
-        assertFalse(inntektsmelding.erRelevant(Periode(24.januar, 25.januar)))
-        assertTrue(inntektsmelding.erRelevant(Periode(10.januar, 25.januar)))
-        assertTrue(inntektsmelding.erRelevant(Periode(18.januar, 25.januar)))
-        assertTrue(inntektsmelding.erRelevant(Periode(1.januar, 25.januar)))
-    }
-
-    @Test
     fun `er relevant når første fraværsdag er etter gap etter arbeidsgiverperioden`() {
         inntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 22.januar)
         assertTrue(inntektsmelding.erRelevant(Periode(22.januar, 25.januar)))
@@ -592,11 +379,13 @@ internal class InntektsmeldingTest {
 
     @Test
     fun `er relevant med arbeidsgiverperioden når første fraværdag er inni arbeidsgiverperioden`() {
-        inntektsmelding(listOf(
-            3.januar til 4.januar,
-            8.januar til 9.januar,
-            15.januar til 26.januar
-        ), førsteFraværsdag = 15.januar)
+        inntektsmelding(
+            listOf(
+                3.januar til 4.januar,
+                8.januar til 9.januar,
+                15.januar til 26.januar
+            ), førsteFraværsdag = 15.januar
+        )
 
         assertTrue(inntektsmelding.erRelevant(Periode(3.januar, 4.januar)))
         assertTrue(inntektsmelding.erRelevant(Periode(8.januar, 9.januar)))
@@ -605,9 +394,11 @@ internal class InntektsmeldingTest {
 
     @Test
     fun `overlapper med arbeidsgiverperioden når første fraværsdag er kant-i-kant`() {
-        inntektsmelding(listOf(
-            1.januar til 15.januar
-        ), førsteFraværsdag = 16.januar)
+        inntektsmelding(
+            listOf(
+                1.januar til 15.januar
+            ), førsteFraværsdag = 16.januar
+        )
         assertTrue(inntektsmelding.erRelevant(Periode(3.januar, 4.januar)))
         assertTrue(inntektsmelding.erRelevant(Periode(16.januar, 20.januar)))
     }
@@ -620,7 +411,7 @@ internal class InntektsmeldingTest {
 
     @Test
     fun `lagrer inntekt for periodens skjæringstidspunkt dersom det er annerledes enn inntektmeldingens skjæringstidspunkt`() {
-        inntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 3.februar, beregnetInntekt = 2000.månedlig, refusjonBeløp = 2000.månedlig)
+        inntektsmelding(listOf(Periode(1.januar, 16.januar)), refusjonBeløp = 2000.månedlig, beregnetInntekt = 2000.månedlig, førsteFraværsdag = 3.februar)
         val inntektshistorikk = Inntektshistorikk()
         inntektsmelding.addInntekt(inntektshistorikk, 1.februar)
         assertEquals(2000.månedlig, inntektshistorikk.grunnlagForSykepengegrunnlag(1.februar))
@@ -629,7 +420,6 @@ internal class InntektsmeldingTest {
 
     private fun inntektsmelding(
         arbeidsgiverperioder: List<Periode>,
-        ferieperioder: List<Periode> = emptyList(),
         refusjonBeløp: Inntekt = 1000.månedlig,
         beregnetInntekt: Inntekt = 1000.månedlig,
         førsteFraværsdag: LocalDate? = 1.januar,
@@ -647,7 +437,6 @@ internal class InntektsmeldingTest {
             førsteFraværsdag = førsteFraværsdag,
             beregnetInntekt = beregnetInntekt,
             arbeidsgiverperioder = arbeidsgiverperioder,
-            ferieperioder = ferieperioder,
             arbeidsforholdId = arbeidsforholdId,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
             mottatt = LocalDateTime.now()
