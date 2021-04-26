@@ -112,7 +112,6 @@ class Inntektsmelding(
     override fun valider(periode: Periode): IAktivitetslogg {
         refusjon.valider(this, periode, beregnetInntekt)
         if (arbeidsgiverperioder.isEmpty()) warn("Inntektsmelding inneholder ikke arbeidsgiverperiode. Vurder om  arbeidsgiverperioden beregnes riktig")
-        if (arbeidsforholdId != null && arbeidsforholdId.isNotBlank()) warn("ArbeidsforholdsID er fylt ut i inntektsmeldingen. Kontroller om brukeren har flere arbeidsforhold i samme virksomhet. Flere arbeidsforhold støttes ikke av systemet foreløpig.")
         begrunnelseForReduksjonEllerIkkeUtbetalt?.takeIf(String::isNotBlank)?.also {
             warn(
                 "Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: %s. Vurder om dette har betydning for rett til sykepenger og beregning av arbeidsgiverperiode",

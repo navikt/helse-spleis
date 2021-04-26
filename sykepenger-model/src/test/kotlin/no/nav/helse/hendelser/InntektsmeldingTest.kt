@@ -224,15 +224,6 @@ internal class InntektsmeldingTest {
     }
 
     @Test
-    fun `arbeidsgiverperiodeId i inntektsmelding gir warning`() {
-        inntektsmelding(
-            listOf(Periode(1.januar, 10.januar)),
-            arbeidsforholdId = "1234"
-        )
-        assertTrue(inntektsmelding.valider(Periode(1.januar, 31.januar)).hasWarningsOrWorse())
-    }
-
-    @Test
     fun `begrunnelseForReduksjonEllerIkkeUtbetalt i inntektsmelding gir warning`() {
         inntektsmelding(
             listOf(Periode(1.januar, 10.januar)),
