@@ -53,6 +53,18 @@ class Sykmelding(
     override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) {
         arbeidsgiver.håndter(this)
     }
+
+    internal fun overlappIkkeStøttet(other: Periode) {
+        val hvorfor = when {
+            this.periode.start < other.start -> "starter før vedtaksperioden"
+            this.periode.endInclusive > other.endInclusive -> "slutter etter vedtaksperioden"
+            this.periode == other -> "nøyaktig samme periode som vedtaksperioden"
+            this.periode.start == other.start -> "perioden er inni vedtaksperioden (starter samme dag)"
+            this.periode.endInclusive == other.endInclusive -> "perioden er inni vedtaksperioden (slutter samme dag)"
+            else -> "perioden er inni vedtaksperioden (starter og slutter inni)"
+        }
+        error("Mottatt overlappende sykmeldinger - $hvorfor")
+    }
 }
 
 class Sykmeldingsperiode(
