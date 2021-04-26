@@ -150,9 +150,16 @@ internal class Utbetaling private constructor(
         tilstand.simuler(this, hendelse)
     }
 
-    internal fun godkjenning(hendelse: ArbeidstakerHendelse, vedtaksperiode: Vedtaksperiode, aktiveVedtaksperioder: List<Aktivitetslogg.Aktivitet.AktivVedtaksperiode>,  arbeidsforholdId: String?, aktivitetslogg: Aktivitetslogg) {
+    internal fun godkjenning(
+        hendelse: ArbeidstakerHendelse,
+        vedtaksperiode: Vedtaksperiode,
+        skjæringstidspunkt: LocalDate,
+        aktiveVedtaksperioder: List<Aktivitetslogg.Aktivitet.AktivVedtaksperiode>,
+        arbeidsforholdId: String?,
+        aktivitetslogg: Aktivitetslogg
+    ) {
         hendelse.kontekst(this)
-        tilstand.godkjenning(this, vedtaksperiode, aktiveVedtaksperioder, arbeidsforholdId, aktivitetslogg, hendelse)
+        tilstand.godkjenning(this, vedtaksperiode, skjæringstidspunkt, aktiveVedtaksperioder, arbeidsforholdId, aktivitetslogg, hendelse)
     }
 
     internal fun håndter(påminnelse: Utbetalingpåminnelse) {
@@ -534,7 +541,15 @@ internal class Utbetaling private constructor(
             aktivitetslogg.error("Forventet ikke simulering på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
         }
 
-        fun godkjenning(utbetaling: Utbetaling, vedtaksperiode: Vedtaksperiode, aktiveVedtaksperioder: List<Aktivitetslogg.Aktivitet.AktivVedtaksperiode>, arbeidsforholdId: String?, aktivitetslogg: Aktivitetslogg, hendelse: ArbeidstakerHendelse) {
+        fun godkjenning(
+            utbetaling: Utbetaling,
+            vedtaksperiode: Vedtaksperiode,
+            skjæringstidspunkt: LocalDate,
+            aktiveVedtaksperioder: List<Aktivitetslogg.Aktivitet.AktivVedtaksperiode>,
+            arbeidsforholdId: String?,
+            aktivitetslogg: Aktivitetslogg,
+            hendelse: ArbeidstakerHendelse
+        ) {
             hendelse.error("Forventet ikke å lage godkjenning på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
         }
 
@@ -596,11 +611,20 @@ internal class Utbetaling private constructor(
             utbetaling.arbeidsgiverOppdrag.simuler(aktivitetslogg, utbetaling.maksdato, systemident)
         }
 
-        override fun godkjenning(utbetaling: Utbetaling, vedtaksperiode: Vedtaksperiode, aktiveVedtaksperioder: List<Aktivitetslogg.Aktivitet.AktivVedtaksperiode>, arbeidsforholdId: String?, aktivitetslogg: Aktivitetslogg, hendelse: ArbeidstakerHendelse) {
+        override fun godkjenning(
+            utbetaling: Utbetaling,
+            vedtaksperiode: Vedtaksperiode,
+            skjæringstidspunkt: LocalDate,
+            aktiveVedtaksperioder: List<Aktivitetslogg.Aktivitet.AktivVedtaksperiode>,
+            arbeidsforholdId: String?,
+            aktivitetslogg: Aktivitetslogg,
+            hendelse: ArbeidstakerHendelse
+        ) {
             godkjenning(
                 aktivitetslogg = hendelse,
                 periodeFom = vedtaksperiode.periode().start,
                 periodeTom = vedtaksperiode.periode().endInclusive,
+                skjæringstidspunkt = skjæringstidspunkt,
                 vedtaksperiodeaktivitetslogg = aktivitetslogg.logg(vedtaksperiode),
                 periodetype = vedtaksperiode.periodetype(),
                 utbetalingtype = utbetaling.type,

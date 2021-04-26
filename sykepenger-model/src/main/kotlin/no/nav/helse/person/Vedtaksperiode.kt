@@ -1768,7 +1768,7 @@ internal class Vedtaksperiode private constructor(
                 it.periodetype()
             )
         }
-        utbetaling().godkjenning(hendelse, this, aktiveVedtaksperioder, inntektsmeldingInfo?.arbeidsforholdId, person.aktivitetslogg)
+        utbetaling().godkjenning(hendelse, this, skjæringstidspunkt, aktiveVedtaksperioder, inntektsmeldingInfo?.arbeidsforholdId, person.aktivitetslogg)
     }
 
     internal object AvventerGodkjenningRevurdering : Vedtaksperiodetilstand {

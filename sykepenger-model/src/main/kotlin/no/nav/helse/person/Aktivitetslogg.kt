@@ -324,6 +324,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                     aktivitetslogg: IAktivitetslogg,
                     periodeFom: LocalDate,
                     periodeTom: LocalDate,
+                    skjæringstidspunkt: LocalDate,
                     vedtaksperiodeaktivitetslogg: Aktivitetslogg,
                     periodetype: Periodetype,
                     utbetalingtype: Utbetalingtype,
@@ -335,6 +336,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                         Behovtype.Godkjenning, "Forespør godkjenning fra saksbehandler", mapOf(
                             "periodeFom" to periodeFom.toString(),
                             "periodeTom" to periodeTom.toString(),
+                            "skjæringstidspunkt" to skjæringstidspunkt.toString(),
                             "periodetype" to periodetype.name,
                             "utbetalingtype" to utbetalingtype.name,
                             "inntektskilde" to inntektskilde.name,
