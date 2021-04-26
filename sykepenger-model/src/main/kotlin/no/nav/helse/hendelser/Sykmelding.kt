@@ -55,13 +55,26 @@ class Sykmelding(
     }
 
     internal fun overlappIkkeStøttet(other: Periode) {
+        val slutterFør = this.periode.start < other.start
+        val slutterEtter = this.periode.endInclusive > other.endInclusive
+        val starterSammeDag = this.periode.start == other.start
+        val slutterSammeDag = this.periode.endInclusive == other.endInclusive
         val hvorfor = when {
-            this.periode.start < other.start -> "starter før vedtaksperioden"
-            this.periode.endInclusive > other.endInclusive -> "slutter etter vedtaksperioden"
-            this.periode == other -> "nøyaktig samme periode som vedtaksperioden"
-            this.periode.start == other.start -> "perioden er inni vedtaksperioden (starter samme dag)"
-            this.periode.endInclusive == other.endInclusive -> "perioden er inni vedtaksperioden (slutter samme dag)"
-            else -> "perioden er inni vedtaksperioden (starter og slutter inni)"
+            slutterFør -> when {
+                slutterEtter -> "starter før og slutter etter vedtaksperioden"
+                slutterSammeDag -> "starter før vedtaksperioden, slutter samme dag"
+                else -> "starter før vedtaksperioden, slutter inni"
+            }
+            slutterEtter -> when {
+                starterSammeDag -> "slutter etter vedtaksperioden, starter samme dag"
+                else -> "slutter etter vedtaksperioden, starter inni"
+            }
+            this.periode != other -> when {
+                starterSammeDag -> "perioden er inni vedtaksperioden (starter samme dag)"
+                slutterSammeDag -> "perioden er inni vedtaksperioden (slutter samme dag)"
+                else -> "perioden er inni vedtaksperioden (starter og slutter inni)"
+            }
+            else -> "nøyaktig samme periode som vedtaksperioden"
         }
         error("Mottatt overlappende sykmeldinger - $hvorfor")
     }
