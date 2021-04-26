@@ -136,6 +136,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
 
     protected fun håndterSykmelding(
         vararg sykeperioder: Sykmeldingsperiode,
+        sykmeldingSkrevet: LocalDateTime? = null,
         mottatt: LocalDateTime? = null,
         id: UUID = UUID.randomUUID(),
         orgnummer: String = ORGNUMMER
@@ -143,6 +144,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         sykmelding(
             id,
             *sykeperioder,
+            sykmeldingSkrevet = sykmeldingSkrevet,
             mottatt = mottatt,
             orgnummer = orgnummer
         ).håndter(Person::håndter)
@@ -164,14 +166,16 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         andreInntektskilder: List<Søknad.Inntektskilde> = emptyList(),
         sendtTilNav: LocalDate = Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive,
         id: UUID = UUID.randomUUID(),
-        orgnummer: String = ORGNUMMER
+        orgnummer: String = ORGNUMMER,
+        sykmeldingSkrevet: LocalDateTime? = null
     ): UUID {
         søknad(
             id,
             *perioder,
             andreInntektskilder = andreInntektskilder,
             sendtTilNav = sendtTilNav,
-            orgnummer = orgnummer
+            orgnummer = orgnummer,
+            sykmeldingSkrevet = sykmeldingSkrevet
         ).håndter(Person::håndter)
         søknader[id] = Triple(sendtTilNav, andreInntektskilder, perioder)
         return id
@@ -526,6 +530,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         id: UUID,
         vararg sykeperioder: Sykmeldingsperiode,
         orgnummer: String = ORGNUMMER,
+        sykmeldingSkrevet: LocalDateTime? = null,
         mottatt: LocalDateTime? = null
     ): Sykmelding {
         return Sykmelding(
@@ -534,7 +539,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             aktørId = AKTØRID,
             orgnummer = orgnummer,
             sykeperioder = listOf(*sykeperioder),
-            sykmeldingSkrevet = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now(),
+            sykmeldingSkrevet = sykmeldingSkrevet ?: Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now(),
             mottatt = mottatt ?: Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now()
         ).apply {
             hendelselogg = this
@@ -560,7 +565,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         vararg perioder: Søknad.Søknadsperiode,
         andreInntektskilder: List<Søknad.Inntektskilde> = emptyList(),
         sendtTilNav: LocalDate = Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive,
-        orgnummer: String = ORGNUMMER
+        orgnummer: String = ORGNUMMER,
+        sykmeldingSkrevet: LocalDateTime? = null
     ): Søknad {
         return Søknad(
             meldingsreferanseId = id,
@@ -572,7 +578,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             sendtTilNAV = sendtTilNav.atStartOfDay(),
             permittert = false,
             merknaderFraSykmelding = emptyList(),
-            sykmeldingSkrevet = Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.start.atStartOfDay()
+            sykmeldingSkrevet = sykmeldingSkrevet ?: Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.start.atStartOfDay()
         ).apply {
             hendelselogg = this
         }
