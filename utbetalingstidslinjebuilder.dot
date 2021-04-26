@@ -1,0 +1,11 @@
+digraph {
+    Ingenting [label= "", shape=none,height=.0,width=.0]
+
+    Ingenting -> Initiell [label="sykedagerIArbeidsgiverperiode = 0, ikkeSykedager = 0, fridager = 0"];
+
+    Initiell -> ArbeidsgiverperiodeSykedager [label="Sykedag"];
+
+    ArbeidsgiverperiodeSykedager -> ArbeidsgiverperiodeFri [label="Fridag. fridager = 0"];
+
+    ArbeidsgiverperiodeFri -> ArbeidsgiverperiodeOpphold [label="arbeidsdagerIOppholdsdager"]
+}

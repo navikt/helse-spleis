@@ -170,6 +170,36 @@ internal class UtbetalingstidslinjeBuilderTest {
     }
 
     @Test
+    fun `helg teller som opphold ved ufullstendig arbeidsgiverperiode dersom mandag er frisk`() {
+        (4.n_ + 8.S + 16.n_ + 19.S).utbetalingslinjer()
+        assertEquals(3, inspektør.dagtelling[NavDag::class])
+        assertEquals(0, inspektør.dagtelling[NavHelgDag::class] ?: 0)
+        assertEquals(24, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+        assertEquals(6, inspektør.dagtelling[Fridag::class])
+        assertEquals(10, inspektør.dagtelling[Arbeidsdag::class])
+    }
+
+    @Test
+    fun `ferie teller som opphold ved ufullstendig arbeidsgiverperiode`() {
+        (5.S + 14.F + 3.n_ + 19.S).utbetalingslinjer()
+        assertEquals(2, inspektør.dagtelling[NavDag::class])
+        assertEquals(1, inspektør.dagtelling[NavHelgDag::class] ?: 0)
+        assertEquals(21, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+        assertEquals(16, inspektør.dagtelling[Fridag::class])
+        assertEquals(1, inspektør.dagtelling[Arbeidsdag::class])
+    }
+
+    @Test
+    fun `ferie teller ikke som opphold ved ufullstendig arbeidsgiverperiode dersom syk etterpå`() {
+        (8.S + 7.F + 1.S + 9.n_ + 1.S).utbetalingslinjer()
+        assertEquals(1, inspektør.dagtelling[NavDag::class] ?: 0)
+        assertEquals(0, inspektør.dagtelling[NavHelgDag::class] ?: 0)
+        assertEquals(9, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+        assertEquals(9, inspektør.dagtelling[Fridag::class])
+        assertEquals(7, inspektør.dagtelling[Arbeidsdag::class])
+    }
+
+    @Test
     fun `Arbeidsdag etter ferie i arbeidsgiverperiode teller som gap, men ikke ferie`() {
         (15.S + 2.F + 1.A + 1.S).utbetalingslinjer()
         assertEquals(null, inspektør.dagtelling[NavDag::class])
