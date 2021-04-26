@@ -22,9 +22,10 @@ class UtbetalingHendelse(
     override fun organisasjonsnummer() = orgnummer
 
     internal fun valider() = this.apply {
-        if (status == AVVIST || status == FEIL)
-            error("Utbetaling feilet med status $status. Feilmelding fra Oppdragsystemet: $melding")
-        else if (status == AKSEPTERT_MED_FEIL) warn("Utbetalingen ble gjennomført, men med advarsel: $melding")
+        if (status == AVVIST || status == FEIL) {
+            info("Utbetaling feilet med status $status. Feilmelding fra Oppdragsystemet: $melding")
+            error("Utbetaling feilet med status $status")
+        } else if (status == AKSEPTERT_MED_FEIL) warn("Utbetalingen ble gjennomført, men med advarsel: $melding")
     }
 
     internal fun skalForsøkesIgjen() = status == FEIL

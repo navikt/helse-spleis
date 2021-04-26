@@ -388,7 +388,7 @@ internal class Vedtaksperiode private constructor(
         val grunnlagForSykepengegrunnlag = person.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periode.start)
         val sammenligningsgrunnlag = person.sammenligningsgrunnlag(skjæringstidspunkt)
 
-        if (grunnlagForSykepengegrunnlag == null) return person.invaliderAllePerioder(vilkårsgrunnlag, "Har ikke inntekt på skjæringstidspunkt $skjæringstidspunkt ved vilkårsvurdering")
+        if (grunnlagForSykepengegrunnlag == null) return person.invaliderAllePerioder(vilkårsgrunnlag, "Har ikke inntekt på skjæringstidspunkt ved vilkårsvurdering")
 
         if (vilkårsgrunnlag.valider(grunnlagForSykepengegrunnlag, sammenligningsgrunnlag ?: Inntekt.INGEN, skjæringstidspunkt, periodetype()).hasErrorsOrWorse()
                 .also {

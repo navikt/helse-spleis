@@ -46,6 +46,6 @@ internal class Validation private constructor(private val hendelse: Arbeidstaker
 internal fun Validation.harNødvendigInntekt(
     person: Person,
     skjæringstidspunkt: LocalDate
-) = valider("Vi har ikke inntektshistorikken vi trenger for $skjæringstidspunkt") {
+) = valider("Vi har ikke inntektshistorikken vi trenger for skjæringstidspunktet") {
     person.harNødvendigInntekt(skjæringstidspunkt)
 }

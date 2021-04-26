@@ -23,7 +23,10 @@ class Simulering(
     override fun organisasjonsnummer() = orgnummer
 
     internal fun valider(oppdrag: Oppdrag) = this.apply {
-        if (!simuleringOK) error("Feil under simulering: %s", melding)
+        if (!simuleringOK) {
+            info("Feil under simulering", melding)
+            error("Feil under simulering")
+        }
         when {
             simuleringResultat == null -> {
                 warn("Ingenting ble simulert")

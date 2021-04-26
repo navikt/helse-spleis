@@ -82,10 +82,8 @@ internal class Sykdomstidslinje private constructor(
         return problemmeldinger
             .distinct()
             .onEach {
-                aktivitetslogg.error(
-                    "Sykdomstidslinjen inneholder ustøttet dag. Problem oppstått fordi: %s",
-                    it
-                )
+                aktivitetslogg.info("Sykdomstidslinjen inneholder ustøttet dag. Problem oppstått fordi: %s", it)
+                aktivitetslogg.error("Sykdomstidslinjen inneholder ustøttet dag.")
             }
             .isEmpty()
     }
