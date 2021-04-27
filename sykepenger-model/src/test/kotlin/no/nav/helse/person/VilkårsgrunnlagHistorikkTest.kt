@@ -6,10 +6,11 @@ import no.nav.helse.hendelser.Opptjeningvurdering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
-import no.nav.helse.testhelpers.desember
-import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.*
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*
@@ -128,5 +129,71 @@ internal class VilkårsgrunnlagHistorikkTest {
         }
         historikk.lagreVilkårsgrunnlag(1.januar, Periodetype.FORLENGELSE, vilkårsgrunnlagHistorikk)
         assertNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
+    }
+
+    @Disabled("Work in progress")
+    @Test
+    fun `Avviser kun utbetalingsdager som har likt skjæringstidspunkt som et vilkårsgrunnlag som ikke er ok`() {
+        val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
+        val vilkårsgrunnlag1 = Vilkårsgrunnlag(
+            meldingsreferanseId = UUID.randomUUID(),
+            vedtaksperiodeId = UUID.randomUUID().toString(),
+            aktørId = "AKTØR_ID",
+            fødselsnummer = "20043769969",
+            orgnummer = "ORGNUMMER",
+            inntektsvurdering = Inntektsvurdering(emptyList()),
+            opptjeningvurdering = Opptjeningvurdering(listOf(Opptjeningvurdering.Arbeidsforhold("123456789", 1.desember(2017)))),
+            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei)
+        )
+        vilkårsgrunnlag1.valider(10000.månedlig, 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING)
+        val vilkårsgrunnlag2 = Vilkårsgrunnlag(
+            meldingsreferanseId = UUID.randomUUID(),
+            vedtaksperiodeId = UUID.randomUUID().toString(),
+            aktørId = "AKTØR_ID",
+            fødselsnummer = "20043769969",
+            orgnummer = "ORGNUMMER",
+            inntektsvurdering = Inntektsvurdering(emptyList()),
+            opptjeningvurdering = Opptjeningvurdering(listOf(Opptjeningvurdering.Arbeidsforhold("123456789", 1.desember(2017)))),
+            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja)
+        )
+        vilkårsgrunnlag2.valider(10000.månedlig, 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING)
+        vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag1, 10.januar)
+        vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag2, 1.januar)
+        val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 3.NAV, 2.HELG, 5.NAV)
+        vilkårsgrunnlagHistorikk.avvisUtbetalingsdagerMedBegrunnelse(listOf(utbetalingstidslinjeMedNavDager))
+        assertEquals(8, utbetalingstidslinjeMedNavDager.filterIsInstance<Utbetalingstidslinje.Utbetalingsdag.NavDag>().size)
+    }
+
+    @Disabled("Work in progress")
+    @Test
+    fun `Avviser kun utbetalingsdager som har likt skjæringstidspunkt som et vilkårsgrunnlag som ikke er ok - vilkårsgrunnlag fra IT`() {
+        val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
+        val vilkårsgrunnlag1 = Vilkårsgrunnlag(
+            meldingsreferanseId = UUID.randomUUID(),
+            vedtaksperiodeId = UUID.randomUUID().toString(),
+            aktørId = "AKTØR_ID",
+            fødselsnummer = "20043769969",
+            orgnummer = "ORGNUMMER",
+            inntektsvurdering = Inntektsvurdering(emptyList()),
+            opptjeningvurdering = Opptjeningvurdering(listOf(Opptjeningvurdering.Arbeidsforhold("123456789", 1.desember(2017)))),
+            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei)
+        )
+        vilkårsgrunnlag1.valider(10000.månedlig, 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING)
+        val vilkårsgrunnlag2 = Vilkårsgrunnlag(
+            meldingsreferanseId = UUID.randomUUID(),
+            vedtaksperiodeId = UUID.randomUUID().toString(),
+            aktørId = "AKTØR_ID",
+            fødselsnummer = "20043769969",
+            orgnummer = "ORGNUMMER",
+            inntektsvurdering = Inntektsvurdering(emptyList()),
+            opptjeningvurdering = Opptjeningvurdering(listOf(Opptjeningvurdering.Arbeidsforhold("123456789", 1.desember(2017)))),
+            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja)
+        )
+        vilkårsgrunnlag2.valider(10000.månedlig, 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING)
+        vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag1, 10.januar)
+        vilkårsgrunnlagHistorikk.lagre(1.januar, VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag())
+        val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 3.NAV, 2.HELG, 5.NAV)
+        vilkårsgrunnlagHistorikk.avvisUtbetalingsdagerMedBegrunnelse(listOf(utbetalingstidslinjeMedNavDager))
+        assertEquals(8, utbetalingstidslinjeMedNavDager.filterIsInstance<Utbetalingstidslinje.Utbetalingsdag.NavDag>().size)
     }
 }

@@ -15,6 +15,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.util.*
 
@@ -370,5 +371,48 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         )
         assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
         assertNotNull(inspektør.vilkårsgrunnlag(2.vedtaksperiode))
+    }
+
+    @Disabled("Work in progress")
+    @Test
+    fun `Bruker ikke vilkårsgrunnlag for annet skjæringstidpunkt ved beregning av utbetalingstidslinje, selv om skjæringstidspunktet er senere`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 21.januar, 100.prosent))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
+        håndterSøknadMedValidering(
+            1.vedtaksperiode, Sykdom(1.januar, 21.januar, 100.prosent)
+        )
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Nei)
+        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
+
+
+        håndterSykmelding(Sykmeldingsperiode(22.januar, 10.februar, 100.prosent))
+        håndterSøknadMedValidering(
+            2.vedtaksperiode, Sykdom(22.januar, 10.februar, 100.prosent)
+        )
+        håndterUtbetalingshistorikk(
+            2.vedtaksperiode,
+            Utbetalingsperiode(ORGNUMMER, 15.desember(2017) til 21.januar, 100.prosent, 1000.daglig),
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 15.desember(2017), INNTEKT, true))
+        )
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        assertForkastetPeriodeTilstander(
+            1.vedtaksperiode,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_GODKJENNING,
+            TIL_INFOTRYGD
+        )
+        UtbetalingstidslinjeInspektør(inspektør.utbetalingUtbetalingstidslinje(1)).also {
+            assertEquals(19, it.navDagTeller)
+            assertEquals(0, it.arbeidsgiverperiodeDagTeller)
+            assertEquals(0, it.avvistDagTeller)
+        }
     }
 }
