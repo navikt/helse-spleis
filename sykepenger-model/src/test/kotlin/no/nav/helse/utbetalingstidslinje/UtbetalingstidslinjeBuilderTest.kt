@@ -190,6 +190,24 @@ internal class UtbetalingstidslinjeBuilderTest {
     }
 
     @Test
+    fun `ferie fullfører nesten arbeidsgiverperioden`() {
+        (8.S + 7.F + 10.S).utbetalingslinjer()
+        assertEquals(7, inspektør.dagtelling[NavDag::class] ?: 0)
+        assertEquals(2, inspektør.dagtelling[NavHelgDag::class] ?: 0)
+        assertEquals(9, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+        assertEquals(7, inspektør.dagtelling[Fridag::class])
+    }
+
+    @Test
+    fun `ferie fullfører arbeidsgiverperioden`() {
+        (8.S + 8.F + 9.S).utbetalingslinjer()
+        assertEquals(7, inspektør.dagtelling[NavDag::class] ?: 0)
+        assertEquals(2, inspektør.dagtelling[NavHelgDag::class] ?: 0)
+        assertEquals(8, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+        assertEquals(8, inspektør.dagtelling[Fridag::class])
+    }
+
+    @Test
     fun `ferie teller ikke som opphold ved ufullstendig arbeidsgiverperiode dersom syk etterpå`() {
         (8.S + 7.F + 1.S + 9.n_ + 1.S).utbetalingslinjer()
         assertEquals(1, inspektør.dagtelling[NavDag::class] ?: 0)
