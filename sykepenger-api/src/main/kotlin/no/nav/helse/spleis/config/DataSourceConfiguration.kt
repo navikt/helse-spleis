@@ -3,6 +3,7 @@ package no.nav.helse.spleis.config
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import no.nav.vault.jdbc.hikaricp.HikariCPVaultUtil
+import java.time.Duration
 import javax.sql.DataSource
 
 // Understands how to create a data source from environment variables
@@ -32,9 +33,9 @@ internal class DataSourceConfiguration(
 
         maximumPoolSize = 3
         minimumIdle = 1
-        idleTimeout = 10001
-        connectionTimeout = 1000
-        maxLifetime = 30001
+        connectionTimeout = Duration.ofSeconds(5).toMillis()
+        maxLifetime = Duration.ofMinutes(30).toMillis()
+        idleTimeout = Duration.ofMinutes(10).toMillis()
     }
 
     init {
