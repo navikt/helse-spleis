@@ -40,7 +40,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
 
     private var sykedagerIArbeidsgiverperiode = 0
     private var ikkeSykedager = 0
-    private var fridager = 0
+    private var fridager = mutableListOf<LocalDate>()
 
     private val tidslinje = Utbetalingstidslinje()
 
@@ -67,6 +67,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
 
     override fun result(sykdomstidslinje: Sykdomstidslinje, periode: Periode): Utbetalingstidslinje {
         sykdomstidslinje.fremTilOgMed(periode.endInclusive).accept(this)
+        hengendeFridager()
         return tidslinje
     }
 
@@ -202,15 +203,6 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         tilstand.fridag(this, dagen)
     }
 
-    private fun inkrementerSykedagerIArbeidsgiverperiode(antall: Int) {
-        repeat(antall) { inkrementerSykedagerIArbeidsgiverperiode() }
-    }
-
-    private fun inkrementerSykedagerIArbeidsgiverperiode() {
-        sykedagerIArbeidsgiverperiode += 1
-        if (!arbeidsgiverperiodeGjennomført()) return
-        state(UtbetalingSykedager)
-    }
     private fun håndterArbeidsgiverdag(dagen: LocalDate) {
         inkrementerSykedagerIArbeidsgiverperiode()
         addArbeidsgiverdag(dagen)
@@ -220,9 +212,27 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         inkrementerIkkeSykedager()
         addArbeidsdag(dagen)
     }
+    private fun inkrementerSykedagerIArbeidsgiverperiode(): Boolean {
+        sykedagerIArbeidsgiverperiode += 1
+        if (!arbeidsgiverperiodeGjennomført()) return false
+        state(UtbetalingSykedager)
+        return true
+    }
 
-    private fun inkrementerIkkeSykedager(antall: Int) {
-        repeat(antall) { inkrementerIkkeSykedager() }
+    private fun inkrementerSykedagerIArbeidsgiverperiodeMedFridager() {
+        fridager.onEach {
+            if (!inkrementerSykedagerIArbeidsgiverperiode())
+                addFridag(it) // TODO: ArbeidsgiverperiodeDag
+            else addFridag(it)
+        }.clear()
+    }
+
+    private fun hengendeFridager() {
+        fridager.onEach { addFridag(it) }.clear()
+    }
+
+    private fun inkrementerIkkeSykedagerFraFridager() {
+        fridager.onEach { håndterFridagOpphold(it) }.clear()
     }
 
     private fun inkrementerIkkeSykedager() {
@@ -231,9 +241,8 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         state(Initiell)
     }
 
-    private fun håndterFridag(dato: LocalDate) {
-        fridager += 1
-        addFridag(dato)
+    private fun håndterUsikkerFridag(dato: LocalDate) {
+        fridager.add(dato)
     }
 
     private fun håndterFridagOpphold(dagen: LocalDate) {
@@ -242,7 +251,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     }
 
     private fun håndterFriEgenmeldingsdag(dato: LocalDate) {
-        inkrementerSykedagerIArbeidsgiverperiode(fridager)
+        inkrementerSykedagerIArbeidsgiverperiodeMedFridager()
         addAvvistDag(dato)
         if (arbeidsgiverperiodeGjennomført()) return
         state(ArbeidsgiverperiodeSykedager)
@@ -305,7 +314,6 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         override fun entering(splitter: UtbetalingstidslinjeBuilder) {
             splitter.sykedagerIArbeidsgiverperiode = 0
             splitter.ikkeSykedager = 0
-            splitter.fridager = 0
         }
 
         override fun sykedagerIArbeidsgiverperioden(
@@ -315,7 +323,6 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         ) {
             splitter.state(ArbeidsgiverperiodeSykedager)
             splitter.ikkeSykedager = 0
-            splitter.fridager = 0
             splitter.håndterArbeidsgiverdag(dagen)
         }
 
@@ -335,7 +342,6 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         ) {
             splitter.state(ArbeidsgiverperiodeSykedager)
             splitter.ikkeSykedager = 0
-            splitter.fridager = 0
             splitter.håndterArbeidsgiverdag(dagen)
         }
 
@@ -364,7 +370,6 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     private object ArbeidsgiverperiodeSykedager : UtbetalingState {
 
         override fun entering(splitter: UtbetalingstidslinjeBuilder) {
-            splitter.fridager = 0
             splitter.ikkeSykedager = 0
         }
 
@@ -404,7 +409,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
 
         override fun arbeidsdagerIOppholdsdager(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate) {
             splitter.state(ArbeidsgiverperiodeOpphold)
-            splitter.addArbeidsdag(dagen)
+            splitter.håndterArbeidsdag(dagen)
         }
 
         override fun arbeidsdagerEtterOppholdsdager(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate) {
@@ -413,18 +418,17 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
 
         override fun fridag(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate) {
             splitter.state(ArbeidsgiverperiodeFri)
-            splitter.addFridag(dagen)
+            splitter.håndterUsikkerFridag(dagen)
         }
     }
 
     private object ArbeidsgiverperiodeFri : UtbetalingState {
         override fun entering(splitter: UtbetalingstidslinjeBuilder) {
-            splitter.fridager = 1
             splitter.ikkeSykedager = 0
         }
 
         override fun fridag(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate) {
-            splitter.håndterFridag(dagen)
+            splitter.håndterUsikkerFridag(dagen)
         }
 
         override fun egenmeldingsdagIArbeidsgiverperioden(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate) {
@@ -433,7 +437,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
 
         override fun justerSykedagtelling(splitter: UtbetalingstidslinjeBuilder) {
             // når vi treffer en sykedag skal evt. ferie/helg i forkant telles som en del av arbeidsgiverperioden
-            splitter.inkrementerSykedagerIArbeidsgiverperiode(splitter.fridager)
+            splitter.inkrementerSykedagerIArbeidsgiverperiodeMedFridager()
         }
 
         override fun sykedagerIArbeidsgiverperioden(
@@ -448,12 +452,12 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         override fun justerIkkeSykedagtelling(splitter: UtbetalingstidslinjeBuilder) {
             // når vi treffer en arbeidsdag skal evt. ferie/helg i forkant _ikke_ telle som del av arbeidsgiverperioden,
             // men heller telles som oppholdsdager
-            splitter.inkrementerIkkeSykedager(splitter.fridager + 1)
+            splitter.inkrementerIkkeSykedagerFraFridager()
         }
 
         override fun arbeidsdagerIOppholdsdager(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate) {
             splitter.state(ArbeidsgiverperiodeOpphold)
-            splitter.addArbeidsdag(dagen)
+            splitter.håndterArbeidsdag(dagen)
         }
 
         override fun arbeidsdagerEtterOppholdsdager(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate) {
@@ -491,8 +495,6 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
 
     private object ArbeidsgiverperiodeOpphold : UtbetalingState {
         override fun entering(splitter: UtbetalingstidslinjeBuilder) {
-            splitter.ikkeSykedager = splitter.fridager + 1
-            splitter.fridager = 0
         }
 
         override fun arbeidsdagerIOppholdsdager(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate) {
@@ -547,7 +549,6 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
 
     private object UtbetalingSykedager : UtbetalingState {
         override fun entering(splitter: UtbetalingstidslinjeBuilder) {
-            splitter.fridager = 0
             splitter.ikkeSykedager = 0
         }
 
@@ -600,7 +601,6 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
 
     private object UtbetalingFri : UtbetalingState {
         override fun entering(splitter: UtbetalingstidslinjeBuilder) {
-            splitter.fridager = 1
             splitter.ikkeSykedager = 0
         }
 

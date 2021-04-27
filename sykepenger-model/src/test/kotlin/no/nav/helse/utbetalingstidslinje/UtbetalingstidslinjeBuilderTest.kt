@@ -93,6 +93,42 @@ internal class UtbetalingstidslinjeBuilderTest {
     }
 
     @Test
+    fun `bare ferie`() {
+        (20.F).utbetalingslinjer()
+        assertEquals(20, inspektør.dagtelling[Fridag::class])
+    }
+
+    @Test
+    fun `litt sykdom ellers bare ferie`() {
+        (7.S + 20.F).utbetalingslinjer()
+        assertEquals(7, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+        assertEquals(20, inspektør.dagtelling[Fridag::class])
+    }
+
+    @Test
+    fun `litt sykdom ellers bare ferie etterfulgt av arbeidsdag`() {
+        (7.S + 20.F + 1.A).utbetalingslinjer()
+        assertEquals(7, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+        assertEquals(20, inspektør.dagtelling[Fridag::class])
+        assertEquals(1, inspektør.dagtelling[Arbeidsdag::class])
+    }
+
+    @Test
+    fun `bare ferie etter arbeidsgiverperioden`() {
+        (16.S + 20.F).utbetalingslinjer()
+        assertEquals(16, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+        assertEquals(20, inspektør.dagtelling[Fridag::class])
+    }
+
+    @Test
+    fun `sykdom fra Infotrygd ellers bare ferie`() {
+        (7.S + 20.F).utbetalingslinjer(strategi = infotrygdUtbetaling(listOf(1.januar)))
+        assertEquals(5, inspektør.dagtelling[NavDag::class])
+        assertEquals(2, inspektør.dagtelling[NavHelgDag::class])
+        assertEquals(20, inspektør.dagtelling[Fridag::class])
+    }
+
+    @Test
     fun `en utbetalingslinje med tre dager`() {
         (16.S + 3.S).utbetalingslinjer()
         assertEquals(3, inspektør.dagtelling[NavDag::class])
@@ -889,6 +925,13 @@ internal class UtbetalingstidslinjeBuilderTest {
             skjæringstidspunkter = skjæringstidspunkter,
             inntektshistorikk = inntektshistorikk
         ).apply { forlengelsestrategi(strategi) }.result(this, periode()!!)
+        verifiserRekkefølge(tidslinje)
+    }
+
+    private fun verifiserRekkefølge(tidslinje: Utbetalingstidslinje) {
+        tidslinje.zipWithNext { forrige, neste ->
+            assertTrue(neste.dato > forrige.dato) { "Rekkefølgen er ikke riktig: ${neste.dato} skal være nyere enn ${forrige.dato}"}
+        }
     }
 
     private class TestTidslinjeInspektør(tidslinje: Utbetalingstidslinje) : UtbetalingsdagVisitor {
