@@ -296,6 +296,26 @@ internal class UtbetalingstidslinjeBuilderTest {
     }
 
     @Test
+    fun `starter ny arbeidsgiverperiode etter ferie og arbeidsdag dersom oppholdet er høyt nok`() {
+        (2.S + 15.F + 1.A + 17.S).utbetalingslinjer()
+        assertEquals(18, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+        assertEquals(0, inspektør.dagtelling[NavDag::class] ?: 0)
+        assertEquals(1, inspektør.dagtelling[NavHelgDag::class] ?: 0)
+        assertEquals(1, inspektør.dagtelling[Arbeidsdag::class])
+        assertEquals(15, inspektør.dagtelling[Fridag::class])
+    }
+
+    @Test
+    fun `starter ikke ny arbeidsgiverperiode etter ferie og arbeidsdag dersom oppholdet er akkurat lavt nok`() {
+        (2.S + 14.F + 1.A + 17.S).utbetalingslinjer()
+        assertEquals(16, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+        assertEquals(2, inspektør.dagtelling[NavDag::class] ?: 0)
+        assertEquals(1, inspektør.dagtelling[NavHelgDag::class] ?: 0)
+        assertEquals(1, inspektør.dagtelling[Arbeidsdag::class])
+        assertEquals(14, inspektør.dagtelling[Fridag::class])
+    }
+
+    @Test
     fun `Ferie direkte etter arbeidsgiverperioden teller ikke som opphold, selv om det er en direkte etterfølgende arbeidsdag`() {
         (16.S + 15.F + 1.A + 10.S).utbetalingslinjer()
         assertEquals(16, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
