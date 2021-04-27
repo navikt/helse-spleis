@@ -296,6 +296,15 @@ internal class UtbetalingstidslinjeBuilderTest {
     }
 
     @Test
+    fun `sykedag i helg etter ferie`() {
+        (3.n_ + 14.S + 2.F + 2.S).utbetalingslinjer()
+        assertEquals(14, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+        assertEquals(2, inspektør.dagtelling[Fridag::class])
+        assertEquals(2, inspektør.dagtelling[NavHelgDag::class])
+        assertNull(inspektør.dagtelling[NavDag::class])
+    }
+
+    @Test
     fun `starter ny arbeidsgiverperiode etter ferie og arbeidsdag dersom oppholdet er høyt nok`() {
         (2.S + 15.F + 1.A + 17.S).utbetalingslinjer()
         assertEquals(18, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
