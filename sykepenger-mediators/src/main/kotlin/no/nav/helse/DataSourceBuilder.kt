@@ -4,6 +4,7 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import no.nav.vault.jdbc.hikaricp.HikariCPVaultUtil
 import org.flywaydb.core.Flyway
+import java.time.Duration
 import javax.sql.DataSource
 
 // Understands how to create a data source from environment variables
@@ -27,8 +28,8 @@ internal class DataSourceBuilder(env: Map<String, String>) {
         env["DATABASE_PASSWORD"]?.let { this.password = it }
 
         maximumPoolSize = 1
-        connectionTimeout = 1000
-        maxLifetime = 30001
+        connectionTimeout = Duration.ofSeconds(5).toMillis()
+        maxLifetime = Duration.ofMinutes(30).toMillis()
     }
 
     init {
