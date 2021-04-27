@@ -299,7 +299,7 @@ internal class InfotrygdhistorikkTest {
     }
 
     @Test
-    fun `statslønn lager warning ved Overgang fra IT`() {
+    fun `statslønn lager error ved Overgang fra IT`() {
         historikk.oppdaterHistorikk(historikkelement(harStatslønn = true))
         aktivitetslogg.barn().also {
             assertTrue(historikk.valider(it, Periodetype.FØRSTEGANGSBEHANDLING, 1.januar til 31.januar, 1.januar))
@@ -314,8 +314,8 @@ internal class InfotrygdhistorikkTest {
             assertFalse(it.hasWarningsOrWorse())
         }
         aktivitetslogg.barn().also {
-            assertTrue(historikk.valider(it, Periodetype.OVERGANG_FRA_IT, 1.januar til 31.januar, 1.januar))
-            assertTrue(it.hasWarningsOrWorse())
+            assertFalse(historikk.valider(it, Periodetype.OVERGANG_FRA_IT, 1.januar til 31.januar, 1.januar))
+            assertTrue(it.hasErrorsOrWorse())
         }
     }
 

@@ -269,7 +269,7 @@ internal class InfotrygdhistorikkElementTest {
     }
 
     @Test
-    fun `statslønn lager warning`() {
+    fun `statslønn lager error`() {
         val element = historikkelement(harStatslønn = true)
         aktivitetslogg.barn().also {
             assertTrue(element.valider(it, Periodetype.FØRSTEGANGSBEHANDLING, 1.januar til 31.januar, 1.januar))
@@ -284,8 +284,8 @@ internal class InfotrygdhistorikkElementTest {
             assertFalse(it.hasWarningsOrWorse())
         }
         aktivitetslogg.barn().also {
-            assertTrue(element.valider(it, Periodetype.OVERGANG_FRA_IT, 1.januar til 31.januar, 1.januar))
-            assertTrue(it.hasWarningsOrWorse())
+            assertFalse(element.valider(it, Periodetype.OVERGANG_FRA_IT, 1.januar til 31.januar, 1.januar))
+            assertTrue(it.hasErrorsOrWorse())
         }
     }
 

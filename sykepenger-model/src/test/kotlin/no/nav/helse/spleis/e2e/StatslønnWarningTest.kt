@@ -38,16 +38,8 @@ internal class StatslønnWarningTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNav = 18.februar)
         val historikk = arrayOf(Utbetalingsperiode(ORGNUMMER, 1.desember(2017) til 31.desember(2017), 100.prosent, 15000.daglig))
         håndterYtelser(1.vedtaksperiode, *historikk, statslønn = true)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
-        assertTrue(
-            inspektør.personLogg.warn().toString()
-                .contains("Det er lagt inn statslønn i Infotrygd, undersøk at utbetalingen blir riktig.")
-        ) {
-            inspektør.personLogg.toString()
-        }
+        assertTrue(inspektør.personLogg.hasErrorsOrWorse())
     }
 
 }

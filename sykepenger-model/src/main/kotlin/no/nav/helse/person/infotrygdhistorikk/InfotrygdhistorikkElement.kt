@@ -134,7 +134,7 @@ internal class InfotrygdhistorikkElement private constructor(
         if (periodetype != Periodetype.OVERGANG_FRA_IT) return
         aktivitetslogg.info("Perioden er en direkte overgang fra periode med opphav i Infotrygd")
         if (!harStatslønn) return
-        aktivitetslogg.warn("Det er lagt inn statslønn i Infotrygd, undersøk at utbetalingen blir riktig.")
+        aktivitetslogg.error("Det er lagt inn statslønn i Infotrygd, undersøk at utbetalingen blir riktig.")
     }
 
     private fun valider(aktivitetslogg: IAktivitetslogg, perioder: List<Infotrygdperiode>, periode: Periode, skjæringstidspunkt: LocalDate?): Boolean {
