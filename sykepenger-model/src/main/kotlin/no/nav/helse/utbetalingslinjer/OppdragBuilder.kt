@@ -111,12 +111,12 @@ internal class OppdragBuilder(
         arbeisdsgiverLinjer.add(
             0,
             Utbetalingslinje(
-                dato,
-                dato,
-                fagområde.beløp(dag.økonomi),
-                aktuellDagsinntekt.roundToInt(),
-                grad,
-                fagsystemId
+                fom = dato,
+                tom = dato,
+                beløp = fagområde.beløp(dag.økonomi),
+                aktuellDagsinntekt = aktuellDagsinntekt.roundToInt(),
+                grad = grad,
+                refFagsystemId = fagsystemId
             )
         )
     }

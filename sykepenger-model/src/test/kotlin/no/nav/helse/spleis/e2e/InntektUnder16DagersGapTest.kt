@@ -1,10 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Toggles
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
-import no.nav.helse.hendelser.til
+import no.nav.helse.hendelser.*
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
@@ -458,7 +455,7 @@ internal class InntektUnder16DagersGapTest : AbstractEndToEndTest() {
         )
 
         håndterSykmelding(Sykmeldingsperiode(6.februar, 16.februar, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), 6.februar, refusjon = Triple(null, 32000.månedlig, emptyList()))
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), 6.februar, refusjon = Inntektsmelding.Refusjon(null, 32000.månedlig, emptyList()))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(6.februar, 16.februar, 100.prosent))
 
         håndterYtelser(2.vedtaksperiode)

@@ -97,7 +97,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
         val historikk = Utbetalingsperiode(ORGNUMMER, 1.januar til 31.januar, 100.prosent, 15000.daglig)
-        val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.januar(2018), INNTEKT, true));
+        val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.januar(2018), INNTEKT, true))
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk, inntektshistorikk = inntekter)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -292,7 +292,11 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
     fun `når vilkårsgrunnlag mangler sjekk på minimum inntekt gjøres denne sjekken - søknad arbeidsgiver`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(1.januar, 16.januar, 100.prosent))
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)), refusjon = Triple(null, 1000.månedlig, emptyList()))
+        håndterInntektsmeldingMedValidering(
+            1.vedtaksperiode,
+            listOf(Periode(1.januar, 16.januar)),
+            refusjon = Inntektsmelding.Refusjon(null, 1000.månedlig, emptyList())
+        )
 
         val vilkårsgrunnlagElement = VilkårsgrunnlagHistorikk.Grunnlagsdata(
             sammenligningsgrunnlag = 1000.månedlig,
@@ -329,7 +333,11 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
     fun `når vilkårsgrunnlag mangler sjekk på minimum inntekt gjøres denne sjekken`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 16.januar, 100.prosent))
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)), refusjon = Triple(null, 1000.månedlig, emptyList()))
+        håndterInntektsmeldingMedValidering(
+            1.vedtaksperiode,
+            listOf(Periode(1.januar, 16.januar)),
+            refusjon = Inntektsmelding.Refusjon(null, 1000.månedlig, emptyList())
+        )
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, 1000.månedlig)
         val vilkårsgrunnlagElement = VilkårsgrunnlagHistorikk.Grunnlagsdata(

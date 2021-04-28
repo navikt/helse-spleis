@@ -19,6 +19,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.api.serializePersonForSpeil
+import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.inntektperioder
@@ -190,8 +191,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         vedtaksperiodeId: UUID,
         arbeidsgiverperioder: List<Periode>,
         førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOfOrNull { it.start } ?: 1.januar,
-        refusjon: Triple<LocalDate?, Inntekt, List<LocalDate>> = Triple(null, INNTEKT, emptyList()),
-        beregnetInntekt: Inntekt = refusjon.second
+        refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(null, INNTEKT, emptyList()),
+        beregnetInntekt: Inntekt = refusjon["inntekt"]
     ): UUID {
         assertIkkeEtterspurt(Inntektsmelding::class, InntekterForSammenligningsgrunnlag, vedtaksperiodeId, ORGNUMMER)
         return håndterInntektsmelding(arbeidsgiverperioder, førsteFraværsdag, refusjon, beregnetInntekt = beregnetInntekt)
@@ -200,10 +201,10 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     protected fun håndterInntektsmelding(
         arbeidsgiverperioder: List<Periode>,
         førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOfOrNull { it.start } ?: 1.januar,
-        refusjon: Triple<LocalDate?, Inntekt, List<LocalDate>> = Triple(null, INNTEKT, emptyList()),
+        refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(null, INNTEKT, emptyList()),
         orgnummer: String = ORGNUMMER,
         id: UUID = UUID.randomUUID(),
-        beregnetInntekt: Inntekt = refusjon.second,
+        beregnetInntekt: Inntekt = refusjon["inntekt"],
         harOpphørAvNaturalytelser: Boolean = false,
         arbeidsforholdId: String? = null,
     ): UUID {
@@ -617,7 +618,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         arbeidsgiverperioder: List<Periode>,
         beregnetInntekt: Inntekt = INNTEKT,
         førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOfOrNull { it.start } ?: 1.januar,
-        refusjon: Triple<LocalDate?, Inntekt, List<LocalDate>> = Triple(null, beregnetInntekt, emptyList()),
+        refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(null, beregnetInntekt, emptyList()),
         orgnummer: String = ORGNUMMER,
         harOpphørAvNaturalytelser: Boolean = false,
         arbeidsforholdId: String? = null
@@ -625,7 +626,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         val inntektsmeldinggenerator = {
             Inntektsmelding(
                 meldingsreferanseId = id,
-                refusjon = Inntektsmelding.Refusjon(refusjon.first, refusjon.second, refusjon.third),
+                refusjon = refusjon,
                 orgnummer = orgnummer,
                 fødselsnummer = UNG_PERSON_FNR_2018,
                 aktørId = AKTØRID,

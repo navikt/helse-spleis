@@ -1083,7 +1083,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
                 Periode(2.mars(2020), 2.mars(2020)),
                 Periode(16.mars(2020), 29.mars(2020)),
                 Periode(30.mars(2020), 30.mars(2020))
-            ), førsteFraværsdag = 16.mars(2020), refusjon = Triple(null, INNTEKT, emptyList())
+            ), førsteFraværsdag = 16.mars(2020), refusjon = Inntektsmelding.Refusjon(null, INNTEKT, emptyList())
         )
 
         assertTilstander(
@@ -1124,7 +1124,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(
             1.vedtaksperiode, listOf(
                 Periode(1.januar, 16.januar)
-            ), førsteFraværsdag = 1.januar, refusjon = Triple(null, INNTEKT, emptyList())
+            ), førsteFraværsdag = 1.januar, refusjon = Inntektsmelding.Refusjon(null, INNTEKT, emptyList())
         )
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(
@@ -1165,7 +1165,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(
             1.vedtaksperiode, listOf(
                 Periode(1.januar, 16.januar)
-            ), førsteFraværsdag = 1.januar, refusjon = Triple(null, INNTEKT, emptyList())
+            ), førsteFraværsdag = 1.januar, refusjon = Inntektsmelding.Refusjon(null, INNTEKT, emptyList())
         )
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(
@@ -1206,7 +1206,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(
             2.vedtaksperiode, listOf(
                 Periode(1.januar(2020), 16.januar(2020))
-            ), førsteFraværsdag = 1.januar(2020), refusjon = Triple(null, INNTEKT, emptyList())
+            ), førsteFraværsdag = 1.januar(2020), refusjon = Inntektsmelding.Refusjon(null, INNTEKT, emptyList())
         )
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(
@@ -1262,7 +1262,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(
             1.vedtaksperiode, listOf(
                 Periode(1.januar, 16.januar)
-            ), førsteFraværsdag = 1.januar, refusjon = Triple(null, INNTEKT, emptyList())
+            ), førsteFraværsdag = 1.januar, refusjon = Inntektsmelding.Refusjon(null, INNTEKT, emptyList())
         )
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(
@@ -1299,7 +1299,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(
             2.vedtaksperiode, listOf(
                 Periode(1.januar(2020), 16.januar(2020))
-            ), førsteFraværsdag = 1.januar(2020), refusjon = Triple(null, INNTEKT, emptyList())
+            ), førsteFraværsdag = 1.januar(2020), refusjon = Inntektsmelding.Refusjon(null, INNTEKT, emptyList())
         )
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(
@@ -1355,7 +1355,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(
             1.vedtaksperiode, listOf(
                 Periode(1.januar, 16.januar)
-            ), førsteFraværsdag = 1.januar, refusjon = Triple(null, lavInntekt, emptyList())
+            ), førsteFraværsdag = 1.januar, refusjon = Inntektsmelding.Refusjon(null, lavInntekt, emptyList())
         )
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(
@@ -1400,7 +1400,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(
             2.vedtaksperiode, listOf(
                 Periode(1.januar(2020), 16.januar(2020))
-            ), førsteFraværsdag = 1.januar(2020), refusjon = Triple(null, INNTEKT, emptyList())
+            ), førsteFraværsdag = 1.januar(2020), refusjon = Inntektsmelding.Refusjon(null, INNTEKT, emptyList())
         )
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(
@@ -1459,7 +1459,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(
             1.vedtaksperiode, listOf(
                 Periode(1.januar, 16.januar)
-            ), førsteFraværsdag = 1.januar, refusjon = Triple(null, INNTEKT, emptyList())
+            ), førsteFraværsdag = 1.januar, refusjon = Inntektsmelding.Refusjon(null, INNTEKT, emptyList())
         )
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(
@@ -1517,7 +1517,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(
             3.vedtaksperiode, listOf(
                 Periode(1.januar(2020), 16.januar(2020))
-            ), førsteFraværsdag = 1.januar(2020), refusjon = Triple(null, INNTEKT, emptyList())
+            ), førsteFraværsdag = 1.januar(2020), refusjon = Inntektsmelding.Refusjon(null, INNTEKT, emptyList())
         )
         håndterYtelser(3.vedtaksperiode)
         håndterVilkårsgrunnlag(
@@ -1576,7 +1576,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             1.vedtaksperiode,
             listOf(Periode(16.mars(2020), 31.mars(2020))),
             førsteFraværsdag = 16.mars(2020),
-            refusjon = Triple(null, INNTEKT, emptyList())
+            refusjon = Inntektsmelding.Refusjon(null, INNTEKT, emptyList())
         )
         håndterSøknad(Sykdom(15.mars(2020), 8.april(2020), 100.prosent))
         håndterYtelser(1.vedtaksperiode)

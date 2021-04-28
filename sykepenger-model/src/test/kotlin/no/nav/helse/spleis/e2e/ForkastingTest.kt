@@ -131,7 +131,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
     fun `refusjon opphører i perioden`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(
-            1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)), refusjon = Triple(
+            1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)), refusjon = Inntektsmelding.Refusjon(
                 14.januar,
                 INNTEKT, emptyList()
             )
@@ -148,7 +148,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
     fun `refusjon endres i perioden`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(
-            1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)), refusjon = Triple(
+            1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)), refusjon = Inntektsmelding.Refusjon(
                 null,
                 INNTEKT, listOf(14.januar)
             )

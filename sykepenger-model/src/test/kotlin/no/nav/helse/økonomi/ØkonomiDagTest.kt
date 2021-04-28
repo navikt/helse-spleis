@@ -8,6 +8,7 @@ import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.AvvistDag
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 
 internal class ØkonomiDagTest {
@@ -89,8 +90,14 @@ internal class ØkonomiDagTest {
     fun `Beløp medNavDag som har blitt avvist`() {
         val a = tidslinjeOf(2.NAV(1200))
         val b = tidslinjeOf(2.NAV(1200))
-        val c = tidslinjeOf(2.NAV(1200))
+        val c = tidslinjeOf(2.AP(1200))
             .onEach { it.avvis(listOf(Begrunnelse.MinimumInntekt)) }
+        val apAvvist = tidslinjeOf(2.AP(1200))
+            .onEach { it.avvis(listOf(Begrunnelse.MinimumInntekt)) }
+        val navAvvist = tidslinjeOf(2.NAV(1200))
+            .onEach { it.avvis(listOf(Begrunnelse.MinimumInntekt)) }
+        assertNotEquals(apAvvist, navAvvist)
+
         MaksimumUtbetaling(listOf(a, b, c), Aktivitetslogg(), 1.januar).betal()
         assertØkonomi(a, 724)
         assertØkonomi(b, 724)

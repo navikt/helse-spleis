@@ -1295,7 +1295,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         )
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
-            refusjon = Triple(15.januar, INNTEKT, emptyList())
+            refusjon = Inntektsmelding.Refusjon(15.januar, INNTEKT, emptyList())
         )
         assertTilstander(
             1.vedtaksperiode,
@@ -2868,7 +2868,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         val inntektsmeldingId = håndterInntektsmelding(
             arbeidsgiverperioder = arbeidsgiverperioder,
             førsteFraværsdag = 1.januar(2021),
-            refusjon = Triple(null, 1000.månedlig, emptyList()),
+            refusjon = Inntektsmelding.Refusjon(null, 1000.månedlig, emptyList()),
             beregnetInntekt = 1000.månedlig
         )
 
