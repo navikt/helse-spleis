@@ -209,9 +209,8 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
 
     private fun inkrementerSykedagerIArbeidsgiverperiodeFraInfotrygd(dagen: LocalDate) {
         if (!forlengelseStrategy.erArbeidsgiverperiodenGjennomførtFør(dagen)) return
-        while (!inkrementerSykedagerIArbeidsgiverperiode()) {
-            // intentionally empty
-        }
+        sykedagerIArbeidsgiverperiode = arbeidsgiverRegler.fullførArbeidsgiverperiode()
+        state(UtbetalingSykedager)
     }
 
     private fun inkrementerSykedagerIArbeidsgiverperiodeMedFridager() {

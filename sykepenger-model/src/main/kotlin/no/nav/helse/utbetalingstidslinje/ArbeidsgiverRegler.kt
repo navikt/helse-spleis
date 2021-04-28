@@ -3,6 +3,7 @@ package no.nav.helse.utbetalingstidslinje
 internal interface ArbeidsgiverRegler {
     fun burdeStarteNyArbeidsgiverperiode(oppholdsdagerBrukt: Int): Boolean
     fun arbeidsgiverperiodenGjennomført(arbeidsgiverperiodedagerBrukt: Int): Boolean
+    fun fullførArbeidsgiverperiode(): Int
     fun dekningsgrad(): Double
     fun maksSykepengedager(): Int
     fun maksSykepengedagerOver67(): Int
@@ -17,6 +18,9 @@ internal interface ArbeidsgiverRegler {
 
             override fun arbeidsgiverperiodenGjennomført(arbeidsgiverperiodedagerBrukt: Int) =
                 arbeidsgiverperiodedagerBrukt >= arbeidsgiverperiodelengde
+
+            override fun fullførArbeidsgiverperiode() =
+                arbeidsgiverperiodelengde
 
             override fun dekningsgrad() = 1.0
             override fun maksSykepengedager() = 248
