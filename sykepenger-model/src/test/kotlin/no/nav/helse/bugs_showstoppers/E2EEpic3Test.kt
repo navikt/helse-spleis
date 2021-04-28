@@ -1793,4 +1793,36 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             assertEquals(28, it.dagtelling[Feriedag::class])
         }
     }
+
+    @Test
+    fun `venter på IM, hvorfor det ⁉️`() {
+        håndterSykmelding(
+            Sykmeldingsperiode(
+                19.februar(2021),
+                28.februar(2021),
+                100.prosent
+            )
+        )
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(19.februar(2021), 28.februar(2021), 100.prosent))
+        håndterSøknad(Sykdom(19.februar(2021), 28.februar(2021), 100.prosent))
+        håndterInntektsmelding(
+            arbeidsgiverperioder = emptyList(),
+            førsteFraværsdag = 19.februar(2021),
+            refusjon = Inntektsmelding.Refusjon(null, null, emptyList()),
+            beregnetInntekt = 22232.månedlig
+        )
+        håndterSykmelding(Sykmeldingsperiode(1.mars(2021), 7.mars(2021), 100.prosent))
+        håndterSøknad(Sykdom(1.mars(2021), 7.mars(2021), 100.prosent))
+        håndterInntektsmelding(
+            arbeidsgiverperioder = emptyList(),
+            førsteFraværsdag = 19.februar(2021),
+            orgnummer = "123123123",
+            refusjon = Inntektsmelding.Refusjon(null, null, emptyList()),
+            beregnetInntekt = 0.månedlig
+        )
+
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+    }
+
 }
