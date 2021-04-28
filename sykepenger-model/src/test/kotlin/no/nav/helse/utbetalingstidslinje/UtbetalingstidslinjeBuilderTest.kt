@@ -84,6 +84,17 @@ internal class UtbetalingstidslinjeBuilderTest {
     }
 
     @Test
+    fun `kort infotrygdperiode etter utbetalingopphold`() {
+        (16.U + 1.S + 32.n_ + 5.S + 20.S).utbetalingslinjer(strategi = infotrygdUtbetaling(listOf(19.februar)))
+        assertEquals(5, inspektør.dagtelling.size)
+        assertEquals(16, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+        assertEquals(22, inspektør.dagtelling[Arbeidsdag::class])
+        assertEquals(10, inspektør.dagtelling[Fridag::class])
+        assertEquals(20, inspektør.dagtelling[NavDag::class])
+        assertEquals(6, inspektør.dagtelling[NavHelgDag::class])
+    }
+
+    @Test
     fun `sykedager i periode som starter i helg får riktig inntekt`() {
         resetSeed(6.januar)
         (16.S + 4.S).utbetalingslinjer()

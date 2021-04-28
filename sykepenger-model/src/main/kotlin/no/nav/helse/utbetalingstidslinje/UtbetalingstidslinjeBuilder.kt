@@ -287,6 +287,9 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
 
         override fun entering(splitter: UtbetalingstidslinjeBuilder) {
             splitter.sykedagerIArbeidsgiverperiode = 0
+        }
+
+        override fun leaving(splitter: UtbetalingstidslinjeBuilder) {
             splitter.ikkeSykedager = 0
         }
 
@@ -315,11 +318,6 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     }
 
     private object ArbeidsgiverperiodeSykedager : UtbetalingState {
-
-        override fun entering(splitter: UtbetalingstidslinjeBuilder) {
-            splitter.ikkeSykedager = 0
-        }
-
         override fun sykedag(
             splitter: UtbetalingstidslinjeBuilder,
             dagen: LocalDate,
@@ -349,10 +347,6 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     }
 
     private object ArbeidsgiverperiodeFri : UtbetalingState {
-        override fun entering(splitter: UtbetalingstidslinjeBuilder) {
-            splitter.ikkeSykedager = 0
-        }
-
         override fun fridag(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate) {
             splitter.håndterUsikkerFridag(dagen)
         }
@@ -394,6 +388,10 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     }
 
     private object ArbeidsgiverperiodeOpphold : UtbetalingState {
+        override fun leaving(splitter: UtbetalingstidslinjeBuilder) {
+            splitter.ikkeSykedager = 0
+        }
+
         override fun arbeidsdag(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate) {
             splitter.håndterArbeidsdag(dagen)
         }
@@ -423,10 +421,6 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     }
 
     private object UtbetalingSykedager : UtbetalingState {
-        override fun entering(splitter: UtbetalingstidslinjeBuilder) {
-            splitter.ikkeSykedager = 0
-        }
-
         override fun sykHelgedag(
             splitter: UtbetalingstidslinjeBuilder,
             dagen: LocalDate,
@@ -492,6 +486,10 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     }
 
     private object UtbetalingOpphold : UtbetalingState {
+        override fun leaving(splitter: UtbetalingstidslinjeBuilder) {
+            splitter.ikkeSykedager = 0
+        }
+
         override fun sykedag(
             splitter: UtbetalingstidslinjeBuilder,
             dagen: LocalDate,
