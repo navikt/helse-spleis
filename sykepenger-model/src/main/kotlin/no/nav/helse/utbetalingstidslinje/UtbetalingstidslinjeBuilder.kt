@@ -201,10 +201,10 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     }
 
     private fun inkrementerSykedagerIArbeidsgiverperiode(): Boolean {
+        if (arbeidsgiverRegler.arbeidsgiverperiodenGjennomført(sykedagerIArbeidsgiverperiode)) return true
         sykedagerIArbeidsgiverperiode += 1
-        if (!arbeidsgiverRegler.arbeidsgiverperiodenGjennomført(sykedagerIArbeidsgiverperiode)) return false
-        state(UtbetalingSykedager)
-        return true
+        if (arbeidsgiverRegler.arbeidsgiverperiodenGjennomført(sykedagerIArbeidsgiverperiode)) state(UtbetalingSykedager)
+        return false
     }
 
     private fun inkrementerSykedagerIArbeidsgiverperiodeFraInfotrygd(dagen: LocalDate) {
@@ -214,11 +214,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     }
 
     private fun inkrementerSykedagerIArbeidsgiverperiodeMedFridager() {
-        fridager.onEach {
-            if (!inkrementerSykedagerIArbeidsgiverperiode())
-                addFridag(it) // TODO: ArbeidsgiverperiodeDag
-            else addFridag(it)
-        }.clear()
+        fridager.onEach { if (!inkrementerSykedagerIArbeidsgiverperiode()) addArbeidsgiverdag(it) else addFridag(it) }.clear()
     }
 
     private fun hengendeFridager() {

@@ -284,8 +284,6 @@ internal class HistorieEnArbeidsgiverTest : HistorieTest() {
         )
         addTidligereUtbetaling(AG1, tidslinjeOf(7.NAVv2, 2.FRIv2, 7.NAVv2))
         val utbetalingstidslinje = beregn(AG1, 1.januar til 17.januar, 1.januar)
-        assertAlleDager(utbetalingstidslinje, 1.januar til 7.januar, ArbeidsgiverperiodeDag::class)
-        assertAlleDager(utbetalingstidslinje, 8.januar til 9.januar, Fridag::class)
-        assertAlleDager(utbetalingstidslinje, 10.januar til 16.januar, ArbeidsgiverperiodeDag::class)
+        assertAlleDager(utbetalingstidslinje, 1.januar til 16.januar, ArbeidsgiverperiodeDag::class)
     }
 }

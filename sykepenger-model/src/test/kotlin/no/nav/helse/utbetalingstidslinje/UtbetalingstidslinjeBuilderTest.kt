@@ -184,8 +184,8 @@ internal class UtbetalingstidslinjeBuilderTest {
     fun `Ferie i arbeidsgiverperiode`() {
         (1.S + 2.F + 13.S + 1.S).utbetalingslinjer()
         assertEquals(1, inspektør.dagtelling[NavDag::class])
-        assertEquals(2, inspektør.dagtelling[Fridag::class])
-        assertEquals(14, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+        assertNull(inspektør.dagtelling[Fridag::class])
+        assertEquals(16, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
     }
 
     @Test
@@ -241,8 +241,8 @@ internal class UtbetalingstidslinjeBuilderTest {
         (8.S + 7.F + 10.S).utbetalingslinjer()
         assertEquals(7, inspektør.dagtelling[NavDag::class] ?: 0)
         assertEquals(2, inspektør.dagtelling[NavHelgDag::class] ?: 0)
-        assertEquals(9, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
-        assertEquals(7, inspektør.dagtelling[Fridag::class])
+        assertEquals(16, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+        assertNull(inspektør.dagtelling[Fridag::class])
     }
 
     @Test
@@ -250,8 +250,17 @@ internal class UtbetalingstidslinjeBuilderTest {
         (8.S + 8.F + 9.S).utbetalingslinjer()
         assertEquals(7, inspektør.dagtelling[NavDag::class] ?: 0)
         assertEquals(2, inspektør.dagtelling[NavHelgDag::class] ?: 0)
-        assertEquals(8, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
-        assertEquals(8, inspektør.dagtelling[Fridag::class])
+        assertEquals(16, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+        assertNull(inspektør.dagtelling[Fridag::class])
+    }
+
+    @Test
+    fun `ferie fullfører arbeidsgiverperioden - slutter på en fredag`() {
+        (3.n_ + 8.S + 8.F + 2.n_ + 9.S).utbetalingslinjer()
+        assertEquals(7, inspektør.dagtelling[NavDag::class] ?: 0)
+        assertEquals(2, inspektør.dagtelling[NavHelgDag::class] ?: 0)
+        assertEquals(16, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+        assertEquals(2, inspektør.dagtelling[Fridag::class])
     }
 
     @Test
@@ -259,8 +268,8 @@ internal class UtbetalingstidslinjeBuilderTest {
         (8.S + 7.F + 1.S + 9.n_ + 1.S).utbetalingslinjer()
         assertEquals(1, inspektør.dagtelling[NavDag::class] ?: 0)
         assertEquals(0, inspektør.dagtelling[NavHelgDag::class] ?: 0)
-        assertEquals(9, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
-        assertEquals(9, inspektør.dagtelling[Fridag::class])
+        assertEquals(16, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+        assertEquals(2, inspektør.dagtelling[Fridag::class])
         assertEquals(7, inspektør.dagtelling[Arbeidsdag::class])
     }
 
@@ -310,8 +319,8 @@ internal class UtbetalingstidslinjeBuilderTest {
     @Test
     fun `Ferie fullfører arbeidsgiverperioden`() {
         (10.S + 20.F + 10.S).utbetalingslinjer()
-        assertEquals(10, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
-        assertEquals(20, inspektør.dagtelling[Fridag::class])
+        assertEquals(16, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+        assertEquals(14, inspektør.dagtelling[Fridag::class])
         assertEquals(8, inspektør.dagtelling[NavDag::class])
         assertEquals(2, inspektør.dagtelling[NavHelgDag::class])
     }
@@ -363,8 +372,8 @@ internal class UtbetalingstidslinjeBuilderTest {
     @Test
     fun `sykedag i helg etter ferie`() {
         (3.n_ + 14.S + 2.F + 2.S).utbetalingslinjer()
-        assertEquals(14, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
-        assertEquals(2, inspektør.dagtelling[Fridag::class])
+        assertEquals(16, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+        assertNull(inspektør.dagtelling[Fridag::class])
         assertEquals(2, inspektør.dagtelling[NavHelgDag::class])
         assertNull(inspektør.dagtelling[NavDag::class])
     }
@@ -450,8 +459,8 @@ internal class UtbetalingstidslinjeBuilderTest {
     @Test
     fun `arbeidsgiverperioden slutter på en fredag`() {
         (3.A + 5.S + 2.F + 13.S).utbetalingslinjer()
-        assertEquals(14, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
-        assertEquals(2, inspektør.dagtelling[Fridag::class])
+        assertEquals(16, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+        assertNull(inspektør.dagtelling[Fridag::class])
         assertEquals(2, inspektør.dagtelling[NavDag::class])
         assertEquals(2, inspektør.dagtelling[NavHelgDag::class])
         assertEquals(3, inspektør.dagtelling[Arbeidsdag::class])
