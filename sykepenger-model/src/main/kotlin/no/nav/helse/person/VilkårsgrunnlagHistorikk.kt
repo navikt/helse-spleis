@@ -2,7 +2,6 @@ package no.nav.helse.person
 
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
-import no.nav.helse.hendelser.til
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
@@ -34,17 +33,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(
     internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) = historikk[skjæringstidspunkt]
 
     internal fun avvisUtbetalingsdagerMedBegrunnelse(tidslinjer: List<Utbetalingstidslinje>) {
-        val sortertHistorikk = historikk.toSortedMap()
-
-        sortertHistorikk.entries.zipWithNext { (fom, vilkårsgrunnlagElement), (tom, _) ->
-            if (vilkårsgrunnlagElement is Grunnlagsdata) {
-                finnBegrunnelser(vilkårsgrunnlagElement).takeIf { it.isNotEmpty() }?.let { Utbetalingstidslinje.avvis(tidslinjer, fom til tom, it) }
-            }
-        }
-        val sisteHistorikk = sortertHistorikk.getValue(sortertHistorikk.lastKey())
-        if (sisteHistorikk is Grunnlagsdata) {
-            finnBegrunnelser(sisteHistorikk).takeIf { it.isNotEmpty() }?.let { Utbetalingstidslinje.avvis(tidslinjer, sortertHistorikk.lastKey() til LocalDate.MAX, it) }
-        }
+        Utbetalingstidslinje.avvis(tidslinjer, finnBegrunnelser())
     }
 
     internal interface VilkårsgrunnlagElement {
@@ -96,12 +85,19 @@ internal class VilkårsgrunnlagHistorikk private constructor(
         }
     }
 
-    private fun finnBegrunnelser(vilkårsgrunnlag: VilkårsgrunnlagHistorikk.Grunnlagsdata): List<Begrunnelse> {
-        val begrunnelser = mutableListOf<Begrunnelse>()
+    private fun finnBegrunnelser(): Map<LocalDate, List<Begrunnelse>> {
+        val begrunnelserForSkjæringstidspunkt = mutableMapOf<LocalDate, List<Begrunnelse>>()
+        historikk.forEach { historikk ->
+            val vilkårsgrunnlagElement = historikk.value
+            if (vilkårsgrunnlagElement is Grunnlagsdata && !vilkårsgrunnlagElement.isOk()) {
+                val begrunnelser = mutableListOf<Begrunnelse>()
 
-        if (vilkårsgrunnlag.medlemskapstatus == Medlemskapsvurdering.Medlemskapstatus.Nei) begrunnelser.add(Begrunnelse.ManglerMedlemskap)
-        if (vilkårsgrunnlag.harMinimumInntekt == false) begrunnelser.add(Begrunnelse.ManglerMedlemskap)
-        if (!vilkårsgrunnlag.harOpptjening) begrunnelser.add(Begrunnelse.ManglerOpptjening)
-        return begrunnelser
+                if (vilkårsgrunnlagElement.medlemskapstatus == Medlemskapsvurdering.Medlemskapstatus.Nei) begrunnelser.add(Begrunnelse.ManglerMedlemskap)
+                if (vilkårsgrunnlagElement.harMinimumInntekt == false) begrunnelser.add(Begrunnelse.ManglerMedlemskap)
+                if (!vilkårsgrunnlagElement.harOpptjening) begrunnelser.add(Begrunnelse.ManglerOpptjening)
+                begrunnelserForSkjæringstidspunkt[historikk.key] = begrunnelser
+            }
+        }
+        return begrunnelserForSkjæringstidspunkt
     }
 }

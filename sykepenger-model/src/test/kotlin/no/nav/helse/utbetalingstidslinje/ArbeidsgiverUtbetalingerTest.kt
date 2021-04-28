@@ -53,7 +53,7 @@ internal class ArbeidsgiverUtbetalingerTest {
             harOpptjening = true,
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             harMinimumInntekt = false,
-            vurdertOk = true,
+            vurdertOk = false,
             meldingsreferanseId = UUID.randomUUID()
         )
         undersøke(UNG_PERSON_FNR_2018, 5.NAV(12), 2.HELG, 5.NAV, vilkårsgrunnlagElement = vilkårsgrunnlagElement)

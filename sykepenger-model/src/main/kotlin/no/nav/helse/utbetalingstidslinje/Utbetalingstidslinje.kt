@@ -58,8 +58,11 @@ internal class Utbetalingstidslinje private constructor(
 
         fun avvis(tidslinjer: List<Utbetalingstidslinje>, avvistPeriode: Periode, periode: Periode, begrunnelser: List<Begrunnelse>) =
             avvis(tidslinjer, listOf(avvistPeriode), periode, begrunnelser)
-        fun avvis(tidslinjer: List<Utbetalingstidslinje>, avvistPeriode: Periode, begrunnelser: List<Begrunnelse>) =
-            avvis(tidslinjer, listOf(avvistPeriode), avvistPeriode, begrunnelser)
+
+        fun avvis(tidslinjer: List<Utbetalingstidslinje>, begrunnelserForSkjæringstidspunkt: Map<LocalDate, List<Begrunnelse>>) {
+            tidslinjer.forEach { it.avvis(begrunnelserForSkjæringstidspunkt) }
+        }
+
         fun avvis(tidslinjer: List<Utbetalingstidslinje>, avvistePerioder: List<Periode>, periode: Periode, begrunnelser: List<Begrunnelse>) =
             tidslinjer.count { it.avvis(avvistePerioder, periode, begrunnelser) } > 0
     }
@@ -88,6 +91,16 @@ internal class Utbetalingstidslinje private constructor(
         if (utbetalingsdag.dato !in avvisteDatoer) return false
         utbetalingsdager[index] = (utbetalingsdag.avvis(begrunnelser) ?: return false)
         return utbetalingsdag.dato in periode
+    }
+
+    private fun avvis(begrunnelserForSkjæringstidspunkt: Map<LocalDate, List<Begrunnelse>>) {
+        utbetalingsdager.forEachIndexed { index, utbetalingsdag ->
+            utbetalingsdag.økonomi.reflection { _, _, _, skjæringstidspunkt, _, _, _, _, _ ->
+                begrunnelserForSkjæringstidspunkt[skjæringstidspunkt]?.also { begrunnelser ->
+                    utbetalingsdager[index] = utbetalingsdag.avvis(begrunnelser) ?: utbetalingsdag
+                }
+            }
+        }
     }
 
     internal fun addArbeidsgiverperiodedag(dato: LocalDate, økonomi: Økonomi) {

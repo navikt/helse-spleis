@@ -15,7 +15,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.util.*
 
@@ -373,7 +372,6 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         assertNotNull(inspektør.vilkårsgrunnlag(2.vedtaksperiode))
     }
 
-    @Disabled("Work in progress")
     @Test
     fun `Bruker ikke vilkårsgrunnlag for annet skjæringstidpunkt ved beregning av utbetalingstidslinje, selv om skjæringstidspunktet er senere`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 21.januar, 100.prosent))
@@ -401,6 +399,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
+            START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_SØKNAD_FERDIG_GAP,
             AVVENTER_HISTORIKK,
@@ -410,7 +409,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
             TIL_INFOTRYGD
         )
         UtbetalingstidslinjeInspektør(inspektør.utbetalingUtbetalingstidslinje(1)).also {
-            assertEquals(19, it.navDagTeller)
+            assertEquals(15, it.navDagTeller)
             assertEquals(0, it.arbeidsgiverperiodeDagTeller)
             assertEquals(0, it.avvistDagTeller)
         }

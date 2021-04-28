@@ -10,7 +10,6 @@ import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*
@@ -131,7 +130,6 @@ internal class VilkårsgrunnlagHistorikkTest {
         assertNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
     }
 
-    @Disabled("Work in progress")
     @Test
     fun `Avviser kun utbetalingsdager som har likt skjæringstidspunkt som et vilkårsgrunnlag som ikke er ok`() {
         val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
@@ -164,7 +162,6 @@ internal class VilkårsgrunnlagHistorikkTest {
         assertEquals(8, utbetalingstidslinjeMedNavDager.filterIsInstance<Utbetalingstidslinje.Utbetalingsdag.NavDag>().size)
     }
 
-    @Disabled("Work in progress")
     @Test
     fun `Avviser kun utbetalingsdager som har likt skjæringstidspunkt som et vilkårsgrunnlag som ikke er ok - vilkårsgrunnlag fra IT`() {
         val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()

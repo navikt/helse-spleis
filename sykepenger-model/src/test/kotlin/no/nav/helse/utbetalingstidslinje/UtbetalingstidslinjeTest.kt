@@ -12,9 +12,9 @@ internal class UtbetalingstidslinjeTest {
     @Test
     fun `avviser med flere begrunnelser`() {
         tidslinjeOf(5.NAV).also {
-            Utbetalingstidslinje.avvis(listOf(it), 1.januar til 1.januar, listOf(Begrunnelse.MinimumSykdomsgrad))
-            Utbetalingstidslinje.avvis(listOf(it), 1.januar til 1.januar, listOf(Begrunnelse.EtterDødsdato))
-            Utbetalingstidslinje.avvis(listOf(it), 1.januar til 1.januar, listOf(Begrunnelse.ManglerMedlemskap))
+            Utbetalingstidslinje.avvis(listOf(it), mapOf(1.januar to listOf(Begrunnelse.MinimumSykdomsgrad)))
+            Utbetalingstidslinje.avvis(listOf(it), mapOf(1.januar to listOf(Begrunnelse.EtterDødsdato)))
+            Utbetalingstidslinje.avvis(listOf(it), mapOf(1.januar to listOf(Begrunnelse.ManglerMedlemskap)))
             val dag = it[1.januar]
             assertTrue(dag is AvvistDag)
             assertEquals(3, (dag as AvvistDag).begrunnelser.size)
