@@ -554,7 +554,6 @@ internal class Arbeidsgiver private constructor(
                         fjernDager(it.periode())
                     }
                 if (vedtaksperioder.isEmpty()) sykdomshistorikk.tøm()
-                else sykdomshistorikk.fjernDagerFør(vedtaksperioder.first().periode().start)
                 gjenopptaBehandling()
             }
             ?: listOf()

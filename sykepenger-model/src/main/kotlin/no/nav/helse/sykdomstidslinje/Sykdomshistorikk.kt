@@ -5,7 +5,6 @@ import no.nav.helse.person.SykdomshistorikkVisitor
 import no.nav.helse.tournament.dagturnering
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -56,10 +55,6 @@ internal class Sykdomshistorikk private constructor(
         else
             sykdomstidslinje().merge(hendelseSykdomstidslinje, dagturnering::beste)
         return tidslinje.also { it.valider(hendelse) }
-    }
-
-    internal fun fjernDagerFør(nyFørsteDag: LocalDate) {
-        elementer.add(0, Element.opprettUtenDagerFør(nyFørsteDag, this))
     }
 
     internal fun lagUtbetalingstidslinjeberegning(organisasjonsnummer: String, utbetalingstidslinje: Utbetalingstidslinje) =
@@ -130,12 +125,6 @@ internal class Sykdomshistorikk private constructor(
                 periode: Periode
             ) : Element {
                 return Element(beregnetSykdomstidslinje = historikk.sykdomstidslinje().trim(periode))
-            }
-            internal fun opprettUtenDagerFør(
-                fraOgMed: LocalDate,
-                historikk: Sykdomshistorikk
-            ) : Element {
-                return Element(beregnetSykdomstidslinje = historikk.sykdomstidslinje().fraOgMed(fraOgMed))
             }
         }
     }
