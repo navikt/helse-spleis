@@ -74,12 +74,4 @@ internal class BesteDagTest {
         assertWinner(dag1, dag2, expectedWinner)
         assertWinner(dag2, dag1, expectedWinner)
     }
-
-    private fun assertProblemDagBidirectional(
-        dag1: Dag,
-        dag2: Dag
-    ) {
-        assertWinner(dag1, dag2, dag2.problem(dag1))
-        assertWinner(dag2, dag1, dag2.problem(dag1))
-    }
 }
