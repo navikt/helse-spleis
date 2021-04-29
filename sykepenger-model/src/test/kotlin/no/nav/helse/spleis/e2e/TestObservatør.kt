@@ -18,7 +18,7 @@ internal class TestObservatør : PersonObserver {
     private val vedtaksperiodeendringer = mutableMapOf<UUID, MutableList<VedtaksperiodeEndretEvent>>()
 
     val utbetaltEventer = mutableListOf<PersonObserver.UtbetaltEvent>()
-    val avbruttEventer = mutableListOf<PersonObserver.VedtaksperiodeAvbruttEvent>()
+    private val avbruttEventer = mutableMapOf<UUID, TilstandType>()
     val annulleringer = mutableListOf<PersonObserver.UtbetalingAnnullertEvent>()
     lateinit var avstemming: Map<String, Any>
     val inntektsmeldingReplayEventer = mutableListOf<UUID>()
@@ -30,6 +30,9 @@ internal class TestObservatør : PersonObserver {
     fun vedtaksperiode(orgnummer: String, indeks: Int) = vedtaksperioder.getValue(orgnummer).toList()[indeks]
     fun vedtaksperiodeIndeks(orgnummer: String, id: UUID) = vedtaksperioder.getValue(orgnummer).indexOf(id)
     fun bedtOmInntektsmeldingReplay(vedtaksperiodeId: UUID) = vedtaksperiodeId in inntektsmeldingReplayEventer
+
+    fun avbruttePerioder() = avbruttEventer.size
+    fun avbrutt(vedtaksperiodeId: UUID) = avbruttEventer.getValue(vedtaksperiodeId)
 
     override fun avstemt(result: Map<String, Any>) {
         avstemming = result
@@ -44,6 +47,7 @@ internal class TestObservatør : PersonObserver {
         }
         if (event.gjeldendeTilstand == TilstandType.AVSLUTTET) utbetalteVedtaksperioder.add(event.vedtaksperiodeId)
     }
+
 
     override fun vedtaksperiodeReberegnet(vedtaksperiodeId: UUID) {
         reberegnedeVedtaksperioder.add(vedtaksperiodeId)
@@ -70,6 +74,6 @@ internal class TestObservatør : PersonObserver {
     }
 
     override fun vedtaksperiodeAvbrutt(event: PersonObserver.VedtaksperiodeAvbruttEvent) {
-        avbruttEventer.add(event)
+        avbruttEventer[event.vedtaksperiodeId] = event.gjeldendeTilstand
     }
 }
