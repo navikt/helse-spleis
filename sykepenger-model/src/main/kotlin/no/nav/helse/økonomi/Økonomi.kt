@@ -35,9 +35,6 @@ internal class Økonomi private constructor(
         internal fun sykdomsgrad(grad: Prosentdel, arbeidsgiverBetalingProsent: Prosentdel = 100.prosent) =
             Økonomi(grad, arbeidsgiverBetalingProsent)
 
-        internal fun arbeidshelse(grad: Prosentdel, arbeidsgiverBetalingProsent: Prosentdel = 100.prosent) =
-            Økonomi(!grad, arbeidsgiverBetalingProsent)
-
         internal fun ikkeBetalt() = sykdomsgrad(0.prosent)
 
         internal fun totalSykdomsgrad(økonomiList: List<Økonomi>) =
@@ -46,87 +43,96 @@ internal class Økonomi private constructor(
         internal fun betal(økonomiList: List<Økonomi>, virkningsdato: LocalDate): List<Økonomi> = økonomiList.also {
             delteUtbetalinger(it)
             økonomiList.forEach { it.totalGrad = totalSykdomsgrad(økonomiList) }
-            justereForGrense(it, maksbeløp(requireNotNull(it.firstOrNull { it.skjæringstidspunkt != null }) { "Fant ingen økonomiobjekter med skjæringstidspunkt" }, virkningsdato))
+            fordelBeløp(
+                it,
+                maksbeløp(requireNotNull(it.firstOrNull { it.skjæringstidspunkt != null }) { "Fant ingen økonomiobjekter med skjæringstidspunkt" },
+                    virkningsdato
+                )
+            )
         }
 
         private fun maksbeløp(økonomi: Økonomi, virkningsdato: LocalDate) =
-            (Grunnbeløp.`6G`.dagsats(økonomi.skjæringstidspunkt!!, virkningsdato) * økonomi.totalGrad!!.roundToTwoDecimalPlaces()).rundTilDaglig()
+            (Grunnbeløp.`6G`.dagsats(økonomi.skjæringstidspunkt!!, virkningsdato) * økonomi.totalGrad!!).rundTilDaglig()
 
         private fun delteUtbetalinger(økonomiList: List<Økonomi>) = økonomiList.forEach { it.betal() }
 
-        private fun justereForGrense(økonomiList: List<Økonomi>, grense: Inntekt) {
+        private fun fordelBeløp(økonomiList: List<Økonomi>, grense: Inntekt) {
             val totalArbeidsgiver = totalArbeidsgiver(økonomiList)
             val totalPerson = totalPerson(økonomiList)
-            when {
-                (totalArbeidsgiver + totalPerson <= grense).also { isUnlimited ->
-                    økonomiList.forEach { økonomi -> økonomi.er6GBegrenset = !isUnlimited }
-                } -> return
-                totalArbeidsgiver <= grense -> justerPerson(økonomiList, totalPerson, grense - totalArbeidsgiver)
-                else -> {
-                    justerArbeidsgiver(økonomiList, totalArbeidsgiver, grense)
-                    tilbakestillPerson(økonomiList)
-                }
-            }
+
+            økonomiList.forEach { økonomi -> økonomi.er6GBegrenset = totalArbeidsgiver + totalPerson > grense }
+
+            fordelArbeidsgiverbeløp(økonomiList, totalArbeidsgiver, grense)
+            fordelPersonbeløp(økonomiList, totalPerson + totalArbeidsgiver - totalArbeidsgiver(økonomiList), grense - totalArbeidsgiver(økonomiList), grense)
         }
 
-        private fun justerPerson(økonomiList: List<Økonomi>, total: Inntekt, budsjett: Inntekt) {
-            juster(
+        private fun fordelPersonbeløp(økonomiList: List<Økonomi>, total: Inntekt, budsjett: Inntekt, grense: Inntekt) {
+            val beregningsresultat = beregnUtbetalingFørAvrunding(
                 økonomiList,
                 total,
                 budsjett,
-                { it.personbeløp!! },
-                { it, beløp -> it.personbeløp = beløp }
-            )
-            require(budsjett == totalPerson(økonomiList)) {
-                "budsjett: $budsjett != totalPerson: ${
-                    totalPerson(
-                        økonomiList
-                    )
-                }"
-            }
+            ){ it.personbeløp!! }
+
+            beregningsresultat.forEach { it.økonomi.personbeløp = it.utbetalingEtterAvrunding() }
+
+            val totaltRestbeløp =
+                (total.coerceAtMost(budsjett) - totalPerson(økonomiList))
+                    .reflection { _, _, _, dagligInt -> dagligInt }
+
+            beregningsresultat
+                .sortedByDescending { it.differanse() }
+                .take(totaltRestbeløp)
+                .forEach { it.økonomi.personbeløp = it.økonomi.personbeløp!! + 1.daglig }
         }
 
-        private fun justerArbeidsgiver(økonomiList: List<Økonomi>, total: Inntekt, budsjett: Inntekt) {
-            juster(
+        private fun fordelArbeidsgiverbeløp(økonomiList: List<Økonomi>, total: Inntekt, budsjett: Inntekt) {
+            val beregningsresultat = beregnUtbetalingFørAvrunding(
                 økonomiList,
                 total,
-                budsjett,
-                { it.arbeidsgiverbeløp!! },
-                { it, beløp -> it.arbeidsgiverbeløp = beløp }
-            )
-            require(budsjett == totalArbeidsgiver(økonomiList)) {
-                "budsjett: $budsjett != totalArbeidsgiver: ${
-                    totalArbeidsgiver(
-                        økonomiList
-                    )
-                }"
-            }
+                budsjett
+            ) { it.arbeidsgiverbeløp!! }
+
+            beregningsresultat.forEach { it.økonomi.arbeidsgiverbeløp = it.utbetalingEtterAvrunding() }
+
+            val totaltRestbeløp =
+                (total.coerceAtMost(budsjett) - totalArbeidsgiver(økonomiList))
+                    .reflection { _, _, _, dagligInt -> dagligInt }
+
+            beregningsresultat
+                .sortedByDescending { it.differanse() }
+                .take(totaltRestbeløp)
+                .forEach { it.økonomi.arbeidsgiverbeløp = it.økonomi.arbeidsgiverbeløp!! + 1.daglig }
         }
 
-        private fun juster(
+        private fun beregnUtbetalingFørAvrunding(
             økonomiList: List<Økonomi>,
             total: Inntekt,
             budsjett: Inntekt,
             get: (Økonomi) -> Inntekt,
-            set: (Økonomi, Inntekt) -> Unit
-        ) {
-            val sorterteØkonomier = økonomiList.sortedByDescending { get(it) }
-            val ratio = budsjett ratio total
-            val skalertTotal = sorterteØkonomier.onEach {
-                set(it, (get(it) * ratio).rundTilDaglig())
-            }.map(get).summer()
-
-            (budsjett - skalertTotal).also { remainder ->
-                remainder.juster { teller, justeringen ->
-                    (0 until teller).forEach { index ->
-                        set(sorterteØkonomier[index], get(sorterteØkonomier[index]) + justeringen)
-                    }
-                }
+        ): List<Beregningsresultat> {
+            if (total <= 0.daglig) {
+                return økonomiList.map { Beregningsresultat(økonomi = it, utbetalingFørAvrunding = 0.daglig) }
             }
+
+            val ratio = budsjett ratio total
+
+            return økonomiList
+                .map {
+                    val utbetalingFørAvrunding = get(it) * ratio.coerceAtMost(1.0)
+                    Beregningsresultat(
+                        økonomi = it,
+                        utbetalingFørAvrunding = utbetalingFørAvrunding
+                    )
+                }
         }
 
-        private fun tilbakestillPerson(økonomiList: List<Økonomi>) =
-            økonomiList.forEach { it.personbeløp = 0.daglig }
+        data class Beregningsresultat(
+            internal val økonomi: Økonomi,
+            internal val utbetalingFørAvrunding: Inntekt,
+        ) {
+            internal fun differanse() = (utbetalingFørAvrunding - utbetalingEtterAvrunding()).reflection { _, _, daglig, _ -> daglig }
+            internal fun utbetalingEtterAvrunding() = utbetalingFørAvrunding.rundNedTilDaglig()
+        }
 
         private fun totalArbeidsgiver(økonomiList: List<Økonomi>): Inntekt =
             økonomiList
@@ -137,6 +143,9 @@ internal class Økonomi private constructor(
             økonomiList
                 .map { it.personbeløp ?: throw IllegalStateException("utbetalinger ennå ikke beregnet") }
                 .summer()
+
+        private fun totalGradertDekningsgrunnlag(økonomiList: List<Økonomi>) =
+            totalArbeidsgiver(økonomiList) + totalPerson(økonomiList)
 
         internal fun erUnderInntektsgrensen(økonomiList: List<Økonomi>, alder: Alder, dato: LocalDate): Boolean {
             return økonomiList.map { it.aktuellDagsinntekt!! }.summer() < alder.minimumInntekt(dato)
@@ -156,44 +165,48 @@ internal class Økonomi private constructor(
 
     internal fun låsOpp() = tilstand.låsOpp(this)
 
-    internal fun <R> reflection(block: (
-        grad: Double,
-        arbeidsgiverBetalingProsent: Double,
-        dekningsgrunnlag: Double?,
-        skjæringstidspunkt: LocalDate?,
-        totalGrad: Double?,
-        aktuellDagsinntekt: Double?,
-        arbeidsgiverbeløp: Int?,
-        personbeløp: Int?,
-        er6GBegrenset: Boolean?
-    ) -> R) =
+    internal fun <R> reflection(
+        block: (
+            grad: Double,
+            arbeidsgiverBetalingProsent: Double,
+            dekningsgrunnlag: Double?,
+            skjæringstidspunkt: LocalDate?,
+            totalGrad: Double?,
+            aktuellDagsinntekt: Double?,
+            arbeidsgiverbeløp: Double?,
+            personbeløp: Double?,
+            er6GBegrenset: Boolean?
+        ) -> R
+    ) =
         tilstand.reflection(this, block)
 
-    internal fun <R> reflectionRounded(block: (
-        grad: Int,
-        arbeidsgiverBetalingProsent: Int,
-        dekningsgrunnlag: Int?,
-        aktuellDagsinntekt: Int?,
-        arbeidsgiverbeløp: Int?,
-        personbeløp: Int?,
-        er6GBegrenset: Boolean?
-    ) -> R) =
+    internal fun <R> reflectionRounded(
+        block: (
+            grad: Int,
+            arbeidsgiverBetalingProsent: Int,
+            dekningsgrunnlag: Int?,
+            aktuellDagsinntekt: Int?,
+            arbeidsgiverbeløp: Int?,
+            personbeløp: Int?,
+            er6GBegrenset: Boolean?
+        ) -> R
+    ) =
         reflection { grad: Double,
                      arbeidsgiverBetalingProsent: Double,
                      dekningsgrunnlag: Double?,
                      _: LocalDate?,
                      _: Double?,
                      aktuellDagsinntekt: Double?,
-                     arbeidsgiverbeløp: Int?,
-                     personbeløp: Int?,
+                     arbeidsgiverbeløp: Double?,
+                     personbeløp: Double?,
                      er6GBegrenset: Boolean? ->
             block(
                 grad.roundToInt(),
                 arbeidsgiverBetalingProsent.roundToInt(),
                 dekningsgrunnlag?.roundToInt(),
                 aktuellDagsinntekt?.roundToInt(),
-                arbeidsgiverbeløp,
-                personbeløp,
+                arbeidsgiverbeløp?.roundToInt(),
+                personbeløp?.roundToInt(),
                 er6GBegrenset
             )
         }
@@ -205,8 +218,8 @@ internal class Økonomi private constructor(
                      _: LocalDate?,
                      _: Double?,
                      aktuellDagsinntekt: Double?,
-                     _: Int?,
-                     _: Int?,
+                     _: Double?,
+                     _: Double?,
                      _: Boolean? ->
             block(grad, aktuellDagsinntekt)
         }
@@ -224,17 +237,19 @@ internal class Økonomi private constructor(
         }
     }
 
-    private fun <R> beløpReflection(block: (
-        grad: Double,
-        arbeidsgiverBetalingProsent: Double,
-        dekningsgrunnlag: Double?,
-        skjæringstidspunkt: LocalDate?,
-        totalGrad: Double?,
-        aktuellDagsinntekt: Double?,
-        arbeidsgiverbeløp: Int?,
-        personbeløp: Int?,
-        er6GBegrenset: Boolean?
-    ) -> R) =
+    private fun <R> beløpReflection(
+        block: (
+            grad: Double,
+            arbeidsgiverBetalingProsent: Double,
+            dekningsgrunnlag: Double?,
+            skjæringstidspunkt: LocalDate?,
+            totalGrad: Double?,
+            aktuellDagsinntekt: Double?,
+            arbeidsgiverbeløp: Double?,
+            personbeløp: Double?,
+            er6GBegrenset: Boolean?
+        ) -> R
+    ) =
         block(
             grad.toDouble(),
             arbeidsgiverBetalingProsent.toDouble(),
@@ -242,22 +257,24 @@ internal class Økonomi private constructor(
             skjæringstidspunkt,
             totalGrad?.toDouble(),
             aktuellDagsinntekt!!.reflection { _, _, daglig, _ -> daglig },
-            arbeidsgiverbeløp!!.reflection { _, _, _, daglig -> daglig },
-            personbeløp!!.reflection { _, _, _, daglig -> daglig },
+            arbeidsgiverbeløp!!.reflection { _, _, daglig, _ -> daglig },
+            personbeløp!!.reflection { _, _, daglig, _ -> daglig },
             er6GBegrenset
         )
 
-    private fun <R> inntektReflection(block: (
-        grad: Double,
-        arbeidsgiverBetalingProsent: Double,
-        dekningsgrunnlag: Double?,
-        skjæringstidspunkt: LocalDate?,
-        totalGrad: Double?,
-        aktuellDagsinntekt: Double?,
-        arbeidsgiverbeløp: Int?,
-        personbeløp: Int?,
-        er6GBegrenset: Boolean?
-    ) -> R) =
+    private fun <R> inntektReflection(
+        block: (
+            grad: Double,
+            arbeidsgiverBetalingProsent: Double,
+            dekningsgrunnlag: Double?,
+            skjæringstidspunkt: LocalDate?,
+            totalGrad: Double?,
+            aktuellDagsinntekt: Double?,
+            arbeidsgiverbeløp: Double?,
+            personbeløp: Double?,
+            er6GBegrenset: Boolean?
+        ) -> R
+    ) =
         block(
             grad.toDouble(),
             arbeidsgiverBetalingProsent.toDouble(),
@@ -276,9 +293,9 @@ internal class Økonomi private constructor(
 
     private fun _betal() {
         val total = dekningsgrunnlag!! * grad().ratio()
-        (total * arbeidsgiverBetalingProsent.ratio()).rundTilDaglig().also {
+        (total * arbeidsgiverBetalingProsent.ratio()).also {
             arbeidsgiverbeløp = it
-            personbeløp = total.rundTilDaglig() - it
+            personbeløp = total - arbeidsgiverbeløp!!
         }
     }
 
@@ -377,8 +394,8 @@ internal class Økonomi private constructor(
                 skjæringstidspunkt: LocalDate?,
                 totalGrad: Double?,
                 aktuellDagsinntekt: Double?,
-                arbeidsgiverbeløp: Int?,
-                personbeløp: Int?,
+                arbeidsgiverbeløp: Double?,
+                personbeløp: Double?,
                 er6GBegrenset: Boolean?
             ) -> R
         ): R
@@ -430,8 +447,8 @@ internal class Økonomi private constructor(
                     skjæringstidspunkt: LocalDate?,
                     totalGrad: Double?,
                     aktuellDagsinntekt: Double?,
-                    arbeidsgiverbeløp: Int?,
-                    personbeløp: Int?,
+                    arbeidsgiverbeløp: Double?,
+                    personbeløp: Double?,
                     er6GBegrenset: Boolean?
                 ) -> R
             ) =
@@ -457,8 +474,8 @@ internal class Økonomi private constructor(
                     skjæringstidspunkt: LocalDate?,
                     totalGrad: Double?,
                     aktuellDagsinntekt: Double?,
-                    arbeidsgiverbeløp: Int?,
-                    personbeløp: Int?,
+                    arbeidsgiverbeløp: Double?,
+                    personbeløp: Double?,
                     er6GBegrenset: Boolean?
                 ) -> R
             ) = økonomi.inntektReflection(block)
@@ -486,8 +503,8 @@ internal class Økonomi private constructor(
                     skjæringstidspunkt: LocalDate?,
                     totalGrad: Double?,
                     aktuellDagsinntekt: Double?,
-                    arbeidsgiverbeløp: Int?,
-                    personbeløp: Int?,
+                    arbeidsgiverbeløp: Double?,
+                    personbeløp: Double?,
                     er6GBegrenset: Boolean?
                 ) -> R
             ) = økonomi.beløpReflection(block)
@@ -512,8 +529,8 @@ internal class Økonomi private constructor(
                     skjæringstidspunkt: LocalDate?,
                     totalGrad: Double?,
                     aktuellDagsinntekt: Double?,
-                    arbeidsgiverbeløp: Int?,
-                    personbeløp: Int?,
+                    arbeidsgiverbeløp: Double?,
+                    personbeløp: Double?,
                     er6GBegrenset: Boolean?
                 ) -> R
             ) = økonomi.inntektReflection(block)
@@ -548,8 +565,8 @@ internal class Økonomi private constructor(
                     skjæringstidspunkt: LocalDate?,
                     totalGrad: Double?,
                     aktuellDagsinntekt: Double?,
-                    arbeidsgiverbeløp: Int?,
-                    personbeløp: Int?,
+                    arbeidsgiverbeløp: Double?,
+                    personbeløp: Double?,
                     er6GBegrenset: Boolean?
                 ) -> R
             ) = økonomi.beløpReflection(block)

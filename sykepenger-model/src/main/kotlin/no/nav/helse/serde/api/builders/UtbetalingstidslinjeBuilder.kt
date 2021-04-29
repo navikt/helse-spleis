@@ -57,7 +57,7 @@ internal class UtbetalingstidslinjeBuilder(
                     type = TypeDataDTO.NavDag,
                     inntekt = aktuellDagsinntekt!!.roundToInt(),
                     dato = dato,
-                    utbetaling = arbeidsgiverbeløp!!,
+                    utbetaling = arbeidsgiverbeløp!!.roundToInt(),
                     grad = grad,
                     totalGrad = totalGrad
                 )

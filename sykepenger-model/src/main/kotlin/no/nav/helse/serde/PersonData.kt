@@ -1015,8 +1015,8 @@ internal data class PersonData(
             private val begrunnelser: List<BegrunnelseData>?,
             private val grad: Double?,
             private val arbeidsgiverBetalingProsent: Double?,
-            private val arbeidsgiverbeløp: Int?,
-            private val personbeløp: Int?,
+            private val arbeidsgiverbeløp: Double?,
+            private val personbeløp: Double?,
             private val er6GBegrenset: Boolean?
         ) {
             private val økonomi

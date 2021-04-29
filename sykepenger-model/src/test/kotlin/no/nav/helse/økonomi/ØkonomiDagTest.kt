@@ -18,23 +18,23 @@ internal class ØkonomiDagTest {
         val b = tidslinjeOf(2.NAV(500))
         val c = tidslinjeOf(2.NAV(500))
         MaksimumUtbetaling(listOf(a, b, c), Aktivitetslogg(), 1.januar).betal()
-        assertØkonomi(a, 500)
-        assertØkonomi(b, 500)
-        assertØkonomi(c, 500)
+        assertØkonomi(a, 500.0)
+        assertØkonomi(b, 500.0)
+        assertØkonomi(c, 500.0)
     }
 
     @Test
     fun `Dekningsgrunnlag med desimaler`() {
         val a = tidslinjeOf(2.NAV(1200.75, 50.0))
         MaksimumUtbetaling(listOf(a), Aktivitetslogg(), 1.januar).betal()
-        assertØkonomi(a, 600)
+        assertØkonomi(a, 600.0)
     }
 
     @Test
     fun `Dekningsgrunnlag uten desimaler`() {
         val a = tidslinjeOf(2.NAV(1201, 50.0))
         MaksimumUtbetaling(listOf(a), Aktivitetslogg(), 1.januar).betal()
-        assertØkonomi(a, 601)
+        assertØkonomi(a, 601.0)
     }
 
     @Test
@@ -43,20 +43,20 @@ internal class ØkonomiDagTest {
         val b = tidslinjeOf(2.NAV(1200))
         val c = tidslinjeOf(2.NAV(1200))
         MaksimumUtbetaling(listOf(a, b, c), Aktivitetslogg(), 1.januar).betal()
-        assertØkonomi(a, 721)
-        assertØkonomi(b, 720)
-        assertØkonomi(c, 720)
+        assertØkonomi(a, 721.0)
+        assertØkonomi(b, 720.0)
+        assertØkonomi(c, 720.0)
     }
 
     @Test
     fun `bruker riktig G-verdi ved 6G-begrensning`() {
         tidslinjeOf(2.NAV(3000)).let { tidslinje ->
             MaksimumUtbetaling(listOf(tidslinje), Aktivitetslogg(), 2.januar).betal()
-            assertØkonomi(tidslinje, 2161)
+            assertØkonomi(tidslinje, 2161.0)
         }
         tidslinjeOf(2.NAV(3000), startDato = 30.april).let { tidslinje ->
             MaksimumUtbetaling(listOf(tidslinje), Aktivitetslogg(), 2.mai).betal()
-            assertØkonomi(tidslinje, 2161)
+            assertØkonomi(tidslinje, 2161.0)
         }
     }
 
@@ -66,11 +66,11 @@ internal class ØkonomiDagTest {
         val virkningsdatoForNyttGrunnbeløp = 21.september(2020)
         tidslinjeOf(2.NAV(3000), startDato = skjæringstidspunkt).let { tidslinje ->
             MaksimumUtbetaling(listOf(tidslinje), Aktivitetslogg(), skjæringstidspunkt).betal()
-            assertØkonomi(tidslinje, Grunnbeløp.`6G`.beløp(skjæringstidspunkt).rundTilDaglig().reflection { _, _, _, daglig -> daglig}) // 2019-grunnbeløp
+            assertØkonomi(tidslinje, Grunnbeløp.`6G`.beløp(skjæringstidspunkt).rundTilDaglig().reflection { _, _, daglig, _ -> daglig}) // 2019-grunnbeløp
         }
         tidslinjeOf(2.NAV(3000), startDato = skjæringstidspunkt).let { tidslinje ->
             MaksimumUtbetaling(listOf(tidslinje), Aktivitetslogg(), virkningsdatoForNyttGrunnbeløp).betal()
-            assertØkonomi(tidslinje, Grunnbeløp.`6G`.beløp(skjæringstidspunkt, virkningsdatoForNyttGrunnbeløp).rundTilDaglig().reflection { _, _, _, daglig -> daglig}) // 2020-grunnbeløp fordi virkningsdato er passert
+            assertØkonomi(tidslinje, Grunnbeløp.`6G`.beløp(skjæringstidspunkt, virkningsdatoForNyttGrunnbeløp).rundTilDaglig().reflection { _, _, daglig, _ -> daglig}) // 2020-grunnbeløp fordi virkningsdato er passert
         }
     }
 
@@ -80,9 +80,9 @@ internal class ØkonomiDagTest {
         val b = tidslinjeOf(2.NAV(1200))
         val c = tidslinjeOf(2.ARB(1200))
         MaksimumUtbetaling(listOf(a, b, c), Aktivitetslogg(), 1.januar).betal()
-        assertØkonomi(a, 724)
-        assertØkonomi(b, 724)
-        assertØkonomi(c, 0)
+        assertØkonomi(a, 721.0)
+        assertØkonomi(b, 720.0)
+        assertØkonomi(c, 0.0)
     }
 
     @Test
@@ -92,9 +92,9 @@ internal class ØkonomiDagTest {
         val c = tidslinjeOf(2.NAV(1200))
             .onEach { it.avvis(listOf(Begrunnelse.MinimumInntekt)) }
         MaksimumUtbetaling(listOf(a, b, c), Aktivitetslogg(), 1.januar).betal()
-        assertØkonomi(a, 724)
-        assertØkonomi(b, 724)
-        assertØkonomi(c, 0)
+        assertØkonomi(a, 721.0)
+        assertØkonomi(b, 720.0)
+        assertØkonomi(c, 0.0)
     }
 
     @Test
@@ -103,9 +103,9 @@ internal class ØkonomiDagTest {
         val b = tidslinjeOf(2.NAV(1200))
         val c = tidslinjeOf(2.AVV(1200, 100))
         MaksimumUtbetaling(listOf(a, b, c), Aktivitetslogg(), 1.januar).betal()
-        assertØkonomi(a, 724)
-        assertØkonomi(b, 724)
-        assertØkonomi(c, 0)
+        assertØkonomi(a, 721.0)
+        assertØkonomi(b, 720.0)
+        assertØkonomi(c, 0.0)
     }
 
     @Test
@@ -115,12 +115,12 @@ internal class ØkonomiDagTest {
         val c = tidslinjeOf(2.AVV(1200, 100))
             .onEach { (it as AvvistDag).navDag() }
         MaksimumUtbetaling(listOf(a, b, c), Aktivitetslogg(), 1.januar).betal()
-        assertØkonomi(a, 721)
-        assertØkonomi(b, 720)
-        assertØkonomi(c, 720)
+        assertØkonomi(a, 721.0)
+        assertØkonomi(b, 720.0)
+        assertØkonomi(c, 720.0)
     }
 
-    private fun assertØkonomi(tidslinje: Utbetalingstidslinje, arbeidsgiverbeløp: Int, personbeløp: Int = 0) {
+    private fun assertØkonomi(tidslinje: Utbetalingstidslinje, arbeidsgiverbeløp: Double, personbeløp: Double = 0.0) {
         tidslinje.forEach {
             it.økonomi.reflection {
                     _,

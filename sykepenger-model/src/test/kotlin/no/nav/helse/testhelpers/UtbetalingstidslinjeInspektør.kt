@@ -16,7 +16,7 @@ internal class UtbetalingstidslinjeInspektør(utbetalingstidslinje: Utbetalingst
     internal var navDagTeller = 0
     internal var navHelgDagTeller = 0
     internal var ukjentDagTeller = 0
-    internal var totalUtbetaling = 0
+    internal var totalUtbetaling = 0.0
     internal var totalInntekt = 0.0
     internal val size get() =
         arbeidsdagTeller +
@@ -35,7 +35,7 @@ internal class UtbetalingstidslinjeInspektør(utbetalingstidslinje: Utbetalingst
         navDagTeller = 0
         navHelgDagTeller = 0
         ukjentDagTeller = 0
-        totalUtbetaling = 0
+        totalUtbetaling = 0.0
         utbetalingstidslinje.accept(this)
     }
 
@@ -66,7 +66,7 @@ internal class UtbetalingstidslinjeInspektør(utbetalingstidslinje: Utbetalingst
     ) {
         økonomi.reflection { _, _, _, _, _, aktuellDagsinntekt, arbeidsgiverbeløp, _, _ ->
             navDagTeller += 1
-            totalUtbetaling += arbeidsgiverbeløp ?: 0
+            totalUtbetaling += arbeidsgiverbeløp ?: 0.0
             totalInntekt += aktuellDagsinntekt ?: 0.0
         }
     }

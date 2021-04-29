@@ -25,35 +25,35 @@ internal class MaksimumUtbetalingHendelseTest {
             1.januar
         ).betal()
         undersøke(tidslinje)
-        assertEquals(12000, inspektør.totalUtbetaling())
+        assertEquals(12000.0, inspektør.totalUtbetaling())
     }
 
     @Test fun `når inntekt er over 6G blir utbetaling lik 6G`() {
-        val tidslinje = tidslinjeOf(10.NAV(3500))
+        val tidslinje = tidslinjeOf(10.NAV(3500.0))
         MaksimumUtbetaling(
             listOf(tidslinje),
             aktivitetslogg,
             1.januar
         ).betal()
         undersøke(tidslinje)
-        assertEquals(21610, inspektør.totalUtbetaling())
+        assertEquals(21610.0, inspektør.totalUtbetaling())
     }
 
     @Test fun `utbetaling for tidslinje med ulike daginntekter blir kalkulert per dag`() {
-        val tidslinje = tidslinjeOf(10.NAV(3500), 10.NAV(1200))
+        val tidslinje = tidslinjeOf(10.NAV(3500.0), 10.NAV(1200.0))
         MaksimumUtbetaling(
             listOf(tidslinje),
             aktivitetslogg,
             1.januar
         ).betal()
         undersøke(tidslinje)
-        assertEquals(21610 + 12000, inspektør.totalUtbetaling())
+        assertEquals(21610.0 + 12000.0, inspektør.totalUtbetaling())
         assertTrue(aktivitetslogg.hasActivities())
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test fun `selv om utbetaling blir begrenset til 6G får utbetaling for tidslinje med gradert sykdom gradert utbetaling`() {
-        val tidslinje = tidslinjeOf(10.NAV(3500, 50.0))
+        val tidslinje = tidslinjeOf(10.NAV(3500.0, 50.0))
         MaksimumUtbetaling(
             listOf(tidslinje),
             aktivitetslogg,
@@ -61,11 +61,11 @@ internal class MaksimumUtbetalingHendelseTest {
 
         ).betal()
         undersøke(tidslinje)
-        assertEquals(10810, inspektør.totalUtbetaling())
+        assertEquals(10810.0, inspektør.totalUtbetaling())
     }
 
     @Test fun `utbetaling for tidslinje med gradert sykdom får gradert utbetaling`() {
-        val tidslinje = tidslinjeOf(10.NAV(1200, 50.0))
+        val tidslinje = tidslinjeOf(10.NAV(1200.0, 50.0))
         MaksimumUtbetaling(
             listOf(tidslinje),
             aktivitetslogg,
@@ -73,7 +73,7 @@ internal class MaksimumUtbetalingHendelseTest {
 
         ).betal()
         undersøke(tidslinje)
-        assertEquals(6000, inspektør.totalUtbetaling())
+        assertEquals(6000.0, inspektør.totalUtbetaling())
         assertTrue(aktivitetslogg.hasActivities())
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }

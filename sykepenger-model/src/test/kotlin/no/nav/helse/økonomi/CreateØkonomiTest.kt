@@ -64,7 +64,7 @@ internal class CreateØkonomiTest {
 
     @Test
     fun `har betalinger`() {
-        val data = utbetalingsdag(79.5, 66.67, 1500.0, 1199.6, 640, 320, null, true)
+        val data = utbetalingsdag(79.5, 66.67, 1500.0, 1199.6, 640.0, 320.0, null, true)
         createØkonomi(data).also { økonomi ->
             økonomi.reflection {
                     grad,
@@ -80,8 +80,8 @@ internal class CreateØkonomiTest {
                 assertEquals(66.67, arbeidsgiverBetalingProsent)
                 assertEquals(1500.0, aktuellDagsinntekt)
                 assertEquals(1199.6, dekningsgrunnlag)
-                assertEquals(640, arbeidsgiverbeløp)
-                assertEquals(320, personbeløp)
+                assertEquals(640.0, arbeidsgiverbeløp)
+                assertEquals(320.0, personbeløp)
                 assertTrue(er6GBegrenset as Boolean)
             }
             // Indirect test of Økonomi state
@@ -95,8 +95,8 @@ internal class CreateØkonomiTest {
         arbeidsgiverBetalingProsent: Double,
         aktuellDagsinntekt: Double,
         dekningsgrunnlag: Double,
-        arbeidsgiverbeløp: Int? = null,
-        personbeløp: Int? = null,
+        arbeidsgiverbeløp: Double? = null,
+        personbeløp: Double? = null,
         totalGrad: Prosentdel? = null,
         er6GBegrenset: Boolean = false
     ) = UtbetalingstidslinjeData.UtbetalingsdagData(

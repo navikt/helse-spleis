@@ -2,6 +2,7 @@ package no.nav.helse.økonomi
 
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import kotlin.math.absoluteValue
+import kotlin.math.floor
 import kotlin.math.roundToInt
 
 class Inntekt private constructor(private val årlig: Double) : Comparable<Inntekt> {
@@ -60,6 +61,8 @@ class Inntekt private constructor(private val årlig: Double) : Comparable<Innte
 
     internal fun rundTilDaglig() = Inntekt((årlig / ARBEIDSDAGER_PER_ÅR).roundToInt() * ARBEIDSDAGER_PER_ÅR.toDouble())
 
+    internal fun rundNedTilDaglig() = Inntekt(floor(tilDagligDouble()) * ARBEIDSDAGER_PER_ÅR)
+
     internal fun dekningsgrunnlag(regler: ArbeidsgiverRegler) = Inntekt(this.årlig * regler.dekningsgrad())
 
     internal operator fun times(scalar: Number) = Inntekt(this.årlig * scalar.toDouble())
@@ -86,13 +89,6 @@ class Inntekt private constructor(private val årlig: Double) : Comparable<Innte
 
     override fun toString(): String {
         return "[Årlig: $årlig, Månedlig: ${tilMånedligDouble()}, Daglig: ${tilDagligDouble()}]"
-    }
-
-    internal fun juster(block: (Int, Inntekt) -> Unit) {
-        tilDagligInt().absoluteValue.also {
-            if (it == 0) return
-            block(it, (tilDagligInt() / it).daglig)
-        }
     }
 
     internal fun avviksprosent(other: Inntekt) =
