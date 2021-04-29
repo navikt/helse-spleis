@@ -29,6 +29,7 @@ internal class Sykdomshistorikk private constructor(
     }
 
     internal fun tøm() {
+        if (!harSykdom()) return
         elementer.add(0, Element.empty)
     }
 
