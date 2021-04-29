@@ -235,6 +235,7 @@ internal class Arbeidsgiver private constructor(
         hendelse.kontekst(this)
         if (!noenHarHåndtert(hendelse, håndterer)) {
             if (hendelse.forGammel()) return hendelse.error("Forventet ikke ${hendelse.kilde}. Oppretter ikke vedtaksperiode.")
+            if (Utbetaling.harBetalt(utbetalinger, hendelse.periode())) return hendelse.error("Periode overlapper med tidligere utbetaling.")
             if (!hendelse.hasErrorsOrWorse()) {
                 hendelse.info("Lager ny vedtaksperiode pga. ${hendelse.kilde}")
                 val ny = nyVedtaksperiode(hendelse).also { håndterer(it, hendelse) }

@@ -7,9 +7,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.SøknadArbeidsgiver
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.TilstandType.*
-import no.nav.helse.testhelpers.februar
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.september
+import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.*
@@ -35,6 +33,20 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(3.januar, 31.januar, 100.prosent), sendtTilNav = 1.september)
         assertTrue(hendelselogg.hasErrorsOrWorse())
         assertEquals(0, inspektør.vedtaksperiodeTeller)
+    }
+
+    @Test
+    fun `overlapper med tidligere utbetalt periode`() {
+        nyttVedtak(1.januar, 31.januar)
+        forlengVedtak(1.februar, 28.februar)
+        forlengVedtak(1.mars, 31.mars)
+        forlengPeriode(1.april, 30.april)
+        håndterYtelser(4.vedtaksperiode)
+        håndterSimulering(4.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(4.vedtaksperiode, false) // <- TIL_INFOTRYGD
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        assertTrue(hendelselogg.hasErrorsOrWorse())
+        assertEquals(4, inspektør.vedtaksperiodeTeller)
     }
 
     @Test
