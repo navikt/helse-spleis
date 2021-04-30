@@ -46,7 +46,7 @@ internal class PingPongTest : AbstractEndToEndTest() {
         )
         håndterSykmelding(Sykmeldingsperiode(18.august(2020), 2.september(2020), 100.prosent))
         håndterSøknad(Sykdom(18.august(2020), 2.september(2020), 100.prosent))
-        oppfriskUtbetalingshistorikk(3.vedtaksperiode, historikk1, historikk2, inntektshistorikk = inntekter2)
+        håndterUtbetalingshistorikk(3.vedtaksperiode, historikk1, historikk2, inntektshistorikk = inntekter2)
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode, true)
@@ -64,7 +64,7 @@ internal class PingPongTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
         val historie = Utbetalingsperiode(ORGNUMMER, 1.februar til 28.februar, 100.prosent, 1000.daglig)
         val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.februar, INNTEKT, true))
-        oppfriskUtbetalingshistorikk(2.vedtaksperiode, historie, inntektshistorikk = inntekter)
+        håndterUtbetalingshistorikk(2.vedtaksperiode, historie, inntektshistorikk = inntekter)
         håndterYtelser(2.vedtaksperiode)
         assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
     }

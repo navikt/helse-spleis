@@ -17,6 +17,7 @@ import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
+import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -66,6 +67,14 @@ class Person private constructor(
         utbetalingshistorikk.kontekst(this)
         utbetalingshistorikk.oppdaterHistorikk(infotrygdhistorikk)
         finnArbeidsgiver(utbetalingshistorikk).håndter(utbetalingshistorikk, infotrygdhistorikk)
+    }
+
+    fun håndter(utbetalingshistorikk: UtbetalingshistorikkForFeriepenger) {
+        utbetalingshistorikk.kontekst(this)
+        val utbetalingstidslinjerIT = listOf(infotrygdhistorikk.utbetalingstidslinjer()).flatten()
+        val feriepengeberegner = Feriepengeberegner(utbetalingstidslinjer = utbetalingstidslinjerIT, alder = Alder(fødselsnummer), år = utbetalingshistorikk.feriepengeår)
+        feriepengeberegner.beregn()
+        // håndter dette etter hvert
     }
 
     fun håndter(ytelser: Ytelser) {

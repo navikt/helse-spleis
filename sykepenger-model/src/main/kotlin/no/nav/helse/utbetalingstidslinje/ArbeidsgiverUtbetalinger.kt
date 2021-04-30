@@ -16,7 +16,7 @@ internal class ArbeidsgiverUtbetalinger(
 ) {
     internal lateinit var tidslinjeEngine: MaksimumSykepengedagerfilter
 
-    internal fun beregn(aktivitetslogg : IAktivitetslogg, organisasjonsnummer: String, periode: Periode, virkningsdato: LocalDate = periode.endInclusive) {
+    internal fun beregn(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String, periode: Periode, virkningsdato: LocalDate = periode.endInclusive) {
         val tidslinjer = arbeidsgivere.mapValues { (arbeidsgiver, builder) ->
             arbeidsgiver.build(builder, periode)
         }

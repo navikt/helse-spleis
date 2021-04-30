@@ -26,12 +26,12 @@ internal class DobbelbehandlingIInfotrygdTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.februar, 26.februar, 100.prosent))
         håndterPåminnelse(2.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP)
         val historie2 = Utbetalingsperiode(ORGNUMMER, 26.februar til 26.mars, 100.prosent, 1000.daglig)
-        oppfriskUtbetalingshistorikk(2.vedtaksperiode, historie2)
+        håndterUtbetalingshistorikk(2.vedtaksperiode, historie2)
 
         håndterSykmelding(Sykmeldingsperiode(1.mai, 30.mai, 100.prosent))
         håndterPåminnelse(3.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP)
         val historie3 = Utbetalingsperiode(ORGNUMMER, 1.april til 1.mai, 100.prosent, 1000.daglig)
-        oppfriskUtbetalingshistorikk(3.vedtaksperiode, historie3)
+        håndterUtbetalingshistorikk(3.vedtaksperiode, historie3)
 
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)

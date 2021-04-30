@@ -15,7 +15,7 @@ import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
+import no.nav.helse.person.infotrygdhistorikk.Feriepenger
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.api.serializePersonForSpeil
@@ -32,6 +32,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.fail
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.Year
 import java.util.*
 import kotlin.reflect.KClass
 
@@ -90,7 +91,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         assertEquals(tilstander.asList(), observatør.tilstandsendringer[id])
     }
 
-    protected fun assertSisteForkastetPeriodeTilstand(orgnummer: String, id: UUID, tilstand: TilstandType){
+    protected fun assertSisteForkastetPeriodeTilstand(orgnummer: String, id: UUID, tilstand: TilstandType) {
         assertTrue(inspektør(orgnummer).periodeErForkastet(id)) { "Perioden er ikke forkastet" }
         assertFalse(inspektør(orgnummer).periodeErIkkeForkastet(id)) { "Perioden er ikke forkastet" }
         assertEquals(tilstand, observatør.tilstandsendringer[id]?.last())
@@ -268,7 +269,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         simulering(vedtaksperiodeId, simuleringOK, orgnummer).håndter(Person::håndter)
     }
 
-    protected fun oppfriskUtbetalingshistorikk(
+    protected fun håndterUtbetalingshistorikk(
         vedtaksperiodeId: UUID,
         vararg utbetalinger: Infotrygdperiode,
         inntektshistorikk: List<Inntektsopplysning>? = null,
@@ -280,41 +281,21 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         utbetalingshistorikk(
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalinger = utbetalinger.toList(),
-            inntektshistorikk = inntektshistorikk(inntektshistorikk, orgnummer),
+            inntektshistorikk = inntektshistorikk(
+                inntektshistorikk = inntektshistorikk,
+                orgnummer = orgnummer
+            ),
             orgnummer = orgnummer,
             besvart = besvart
         ).håndter(Person::håndter)
     }
 
-    protected fun håndterUtbetalingshistorikk(
-        vedtaksperiodeId: UUID,
-        vararg utbetalinger: Infotrygdperiode,
-        inntektshistorikk: List<Inntektsopplysning>? = null,
-        orgnummer: String = ORGNUMMER,
-        besvart: LocalDateTime
+    protected fun håndterUtbetalingshistorikkForFeriepenger(
+        feriepengeår: Year
     ) {
-        return oppfriskUtbetalingshistorikk(
-            vedtaksperiodeId,
-            *utbetalinger,
-            inntektshistorikk = inntektshistorikk,
-            orgnummer = orgnummer,
-            besvart = besvart
-        )
-    }
-
-    protected fun håndterUtbetalingshistorikk(
-        vedtaksperiodeId: UUID,
-        vararg utbetalinger: Infotrygdperiode,
-        inntektshistorikk: List<Inntektsopplysning>? = null,
-        orgnummer: String = ORGNUMMER
-    ) {
-        return håndterUtbetalingshistorikk(
-            vedtaksperiodeId,
-            *utbetalinger,
-            inntektshistorikk = inntektshistorikk,
-            orgnummer = orgnummer,
-            besvart = LocalDateTime.now()
-        )
+        utbetalingshistorikkForFeriepenger(
+            feriepengeår = feriepengeår
+        ).håndter(Person::håndter)
     }
 
     protected fun håndterYtelser(
@@ -714,7 +695,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         inntektshistorikk: List<Inntektsopplysning>? = null,
         orgnummer: String = ORGNUMMER,
         harStatslønn: Boolean = false,
-        besvart: LocalDateTime = LocalDateTime.now()
+        besvart: LocalDateTime = LocalDateTime.now(),
     ): Utbetalingshistorikk {
         return Utbetalingshistorikk(
             meldingsreferanseId = UUID.randomUUID(),
@@ -728,6 +709,27 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             inntektshistorikk = inntektshistorikk(inntektshistorikk, orgnummer),
             ugyldigePerioder = emptyList(),
             besvart = besvart
+        ).apply {
+            hendelselogg = this
+        }
+    }
+
+    private fun utbetalingshistorikkForFeriepenger(
+        utbetalinger: List<Infotrygdperiode> = listOf(),
+        inntektshistorikk: List<Inntektsopplysning>? = null,
+        feriepengehistorikk: List<Feriepenger> = listOf(),
+        feriepengeår: Year = Year.of(2017)
+    ): UtbetalingshistorikkForFeriepenger {
+        return UtbetalingshistorikkForFeriepenger(
+            meldingsreferanseId = UUID.randomUUID(),
+            aktørId = AKTØRID,
+            fødselsnummer = UNG_PERSON_FNR_2018,
+            feriepengeår = feriepengeår,
+            arbeidskategorikoder = emptyMap(),
+            harStatslønn = false,
+            utbetalinger = utbetalinger,
+            inntektshistorikk = inntektshistorikk(inntektshistorikk, ORGNUMMER),
+            feriepengehistorikk = feriepengehistorikk
         ).apply {
             hendelselogg = this
         }
@@ -760,12 +762,14 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         val harSpesifisertSykepengehistorikk = utbetalinger.isNotEmpty() || arbeidskategorikoder.isNotEmpty()
 
         if (!bedtOmSykepengehistorikk && harSpesifisertSykepengehistorikk) {
-            fail("Vedtaksperiode $vedtaksperiodeId har ikke bedt om Sykepengehistorikk" +
-                "\nfordi den har gjenbrukt Infotrygdhistorikk-cache." +
-                "\nTrenger ikke sende inn utbetalinger og inntektsopplysninger da." +
-                "\nEnten ta bort overflødig historikk, eller sett 'besvart'-tidspunktet tilbake i tid " +
-                "på forrige Ytelser-innsending" +
-                "\n\n${inspektør.personLogg}")
+            fail(
+                "Vedtaksperiode $vedtaksperiodeId har ikke bedt om Sykepengehistorikk" +
+                    "\nfordi den har gjenbrukt Infotrygdhistorikk-cache." +
+                    "\nTrenger ikke sende inn utbetalinger og inntektsopplysninger da." +
+                    "\nEnten ta bort overflødig historikk, eller sett 'besvart'-tidspunktet tilbake i tid " +
+                    "på forrige Ytelser-innsending" +
+                    "\n\n${inspektør.personLogg}"
+            )
         }
 
         val utbetalingshistorikk = if (!bedtOmSykepengehistorikk)

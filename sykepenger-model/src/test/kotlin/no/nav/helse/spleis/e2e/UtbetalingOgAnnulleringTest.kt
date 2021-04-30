@@ -377,7 +377,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
             håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent))
         }
         val historikk = Utbetalingsperiode(ORGNUMMER, 1.juli til 31.juli, 100.prosent, 1000.daglig)
-        oppfriskUtbetalingshistorikk(3.vedtaksperiode, historikk)
+        håndterUtbetalingshistorikk(3.vedtaksperiode, historikk)
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode, true)

@@ -61,7 +61,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.september(2020), 30.september(2020), 100.prosent))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(1.september(2020), 30.september(2020), 100.prosent))
-        oppfriskUtbetalingshistorikk(2.vedtaksperiode, *historikk2.toTypedArray(), inntektshistorikk = inntektsopplysning2)
+        håndterUtbetalingshistorikk(2.vedtaksperiode, *historikk2.toTypedArray(), inntektshistorikk = inntektsopplysning2)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -281,7 +281,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
-        oppfriskUtbetalingshistorikk(3.vedtaksperiode, Utbetalingsperiode(ORGNUMMER, 1.februar til 28.februar, 100.prosent, 1000.daglig))
+        håndterUtbetalingshistorikk(3.vedtaksperiode, Utbetalingsperiode(ORGNUMMER, 1.februar til 28.februar, 100.prosent, 1000.daglig))
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode, true)
@@ -350,7 +350,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(16.april(2020), 7.mai(2020), 50.prosent))
         håndterSøknad(Sykdom(16.april(2020), 7.mai(2020), 50.prosent))
 
-        oppfriskUtbetalingshistorikk(
+        håndterUtbetalingshistorikk(
             4.vedtaksperiode,
             Utbetalingsperiode(ORGNUMMER, 5.mars(2020) til 17.mars(2020), 100.prosent, 1000.daglig),
             Utbetalingsperiode(ORGNUMMER, 18.mars(2020) til 15.april(2020), 100.prosent, 1000.daglig),
@@ -556,7 +556,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(22.juni(2020), 11.juli(2020), 100.prosent))
         håndterSøknad(Sykdom(22.juni(2020), 11.juli(2020), 100.prosent))
-        oppfriskUtbetalingshistorikk(
+        håndterUtbetalingshistorikk(
             2.vedtaksperiode,
             Utbetalingsperiode(ORGNUMMER, 3.juni(2020) til 21.juni(2020), 100.prosent, 1000.daglig),
             inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 10.mai(2020), INNTEKT, true))
@@ -679,7 +679,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(18.august(2020), 2.september(2020), 100.prosent))
         håndterSøknad(Sykdom(18.august(2020), 2.september(2020), 100.prosent))
-        oppfriskUtbetalingshistorikk(2.vedtaksperiode, *historikk2.toTypedArray(), inntektshistorikk = inntektsopplysning2)
+        håndterUtbetalingshistorikk(2.vedtaksperiode, *historikk2.toTypedArray(), inntektshistorikk = inntektsopplysning2)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
@@ -744,7 +744,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         val tom2 = 31.desember
         håndterSykmelding(Sykmeldingsperiode(fom2, tom2, 100.prosent))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(fom2, tom2, 100.prosent))
-        oppfriskUtbetalingshistorikk(
+        håndterUtbetalingshistorikk(
             2.vedtaksperiode,
             Utbetalingsperiode(ORGNUMMER, 1.januar til 31.mai, 100.prosent, 1200.daglig),
             Utbetalingsperiode(ORGNUMMER, 1.juli til 12.desember, 100.prosent, 1200.daglig),
@@ -808,7 +808,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             Inntektsopplysning(ORGNUMMER, 10.juni(2020), INNTEKT, true),
             Inntektsopplysning(ORGNUMMER, 27.juli(2020), INNTEKT, true)
         )
-        oppfriskUtbetalingshistorikk(2.vedtaksperiode, *historikk2, inntektshistorikk = inntektsopplysning2)
+        håndterUtbetalingshistorikk(2.vedtaksperiode, *historikk2, inntektshistorikk = inntektsopplysning2)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)

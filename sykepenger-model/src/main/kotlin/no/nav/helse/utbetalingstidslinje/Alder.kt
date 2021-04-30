@@ -1,8 +1,10 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.Grunnbeløp
+import no.nav.helse.økonomi.Inntekt
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.Year
 import java.time.temporal.ChronoUnit.YEARS
 
 internal class Alder(fødselsnummer: String) {
@@ -34,8 +36,12 @@ internal class Alder(fødselsnummer: String) {
         }
     )
 
-    internal fun alderPåDato(dato: LocalDate) = YEARS.between(fødselsdag, dato).toInt();
+    internal fun alderPåDato(dato: LocalDate) = YEARS.between(fødselsdag, dato).toInt()
+    private fun alderVedSluttenAvÅret(year: Year) = YEARS.between(Year.from(fødselsdag), year).toInt()
 
     internal fun minimumInntekt(dato: LocalDate) =
         (if (dato <= redusertYtelseAlder) Grunnbeløp.halvG else Grunnbeløp.`2G`).dagsats(dato)
+
+    internal fun beregnFeriepenger(opptjeningsår: Year, beløp: Inntekt) =
+        beløp * if (alderVedSluttenAvÅret(opptjeningsår) < 59) 0.102 else 0.125
 }
