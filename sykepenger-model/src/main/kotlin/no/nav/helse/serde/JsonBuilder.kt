@@ -762,8 +762,6 @@ internal class JsonBuilder : AbstractBuilder() {
             popState()
         }
 
-        override fun visitDag(dag: UkjentDag, dato: LocalDate, kilde: Hendelseskilde) = leggTilDag(dag, kilde)
-
         override fun visitDag(dag: Arbeidsdag, dato: LocalDate, kilde: Hendelseskilde) = leggTilDag(dag, kilde)
 
         override fun visitDag(

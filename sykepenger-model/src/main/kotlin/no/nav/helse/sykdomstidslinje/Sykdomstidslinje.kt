@@ -26,6 +26,7 @@ internal class Sykdomstidslinje private constructor(
     private val låstePerioder: MutableList<Periode> = mutableListOf()
 ) : Iterable<Dag> {
 
+    // Støtte for at perioden er lengre enn vi har dager for (Map-et er sparse)
     private val periode: Periode? = periode ?: if (dager.size > 0) Periode(dager.firstKey(), dager.lastKey()) else null
 
     internal constructor(dager: Map<LocalDate, Dag> = emptyMap()) : this(dager.toSortedMap())

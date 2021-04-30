@@ -482,7 +482,7 @@ internal data class PersonData(
             private val periode: Periode?,
             private val låstePerioder: MutableList<Periode>? = mutableListOf()
         ) {
-            private val dagerMap: SortedMap<LocalDate, Dag> = DagData.parseDager(dager)
+            private val dagerMap: Map<LocalDate, Dag> = DagData.parseDager(dager)
 
             internal fun createSykdomstidslinje(): Sykdomstidslinje =
                 Sykdomstidslinje::class.primaryConstructor!!
@@ -509,8 +509,8 @@ internal data class PersonData(
                 private val melding: String?
             ) {
                 internal companion object {
-                    internal fun parseDager(dager: List<DagData>): SortedMap<LocalDate, Dag> =
-                        dager.map { it.dato to it.parseDag() }.toMap(sortedMapOf())
+                    internal fun parseDager(dager: List<DagData>): Map<LocalDate, Dag> =
+                        dager.filterNot { it.type == JsonDagType.UKJENT_DAG }.associate { it.dato to it.parseDag() }.toSortedMap()
                 }
 
                 private val økonomi
@@ -578,10 +578,7 @@ internal data class PersonData(
                         økonomi,
                         hendelseskilde
                     )
-                    JsonDagType.UKJENT_DAG -> Dag.UkjentDag(
-                        dato,
-                        hendelseskilde
-                    )
+                    else -> throw IllegalStateException("Deserialisering av $type er ikke støttet")
                 }
             }
 
