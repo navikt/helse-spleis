@@ -7,6 +7,7 @@ import no.nav.helse.serde.PersonData.InfotrygdhistorikkElementData.Companion.til
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
+import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -404,6 +405,39 @@ internal class InfotrygdhistorikkTest {
         assertEquals(listOf(1.februar, 5.januar), historikk.skjæringstidspunkter(emptyList()))
         assertEquals(listOf(1.februar, 1.januar), historikk.skjæringstidspunkter(listOf(2.S, 3.S)))
     }
+
+    @Test
+    internal fun `har endret historikk når historikk er tom`() {
+        assertFalse(historikk.harEndretHistorikk(utbetaling()))
+    }
+
+    @Test
+    internal fun `har endret historikk dersom utbetaling er eldre enn siste element`() {
+        val utbetaling = utbetaling()
+        historikk.oppdaterHistorikk(historikkelement())
+        assertTrue(historikk.harEndretHistorikk(utbetaling))
+    }
+
+    @Test
+    internal fun `har ikke endret historikk dersom utbetaling er nyere enn siste element`() {
+        historikk.oppdaterHistorikk(historikkelement())
+        val utbetaling = utbetaling()
+        assertFalse(historikk.harEndretHistorikk(utbetaling))
+    }
+
+    private fun utbetaling() = Utbetaling.lagUtbetaling(
+        utbetalinger = emptyList(),
+        fødselsnummer = "",
+        beregningId = UUID.randomUUID(),
+        organisasjonsnummer = "",
+        utbetalingstidslinje = tidslinjeOf(),
+        sisteDato = 1.januar,
+        aktivitetslogg = Aktivitetslogg(),
+        maksdato = 1.januar,
+        forbrukteSykedager = 0,
+        gjenståendeSykedager = 0,
+        forrige = null
+    )
 
     private fun historikkelement(
         perioder: List<Infotrygdperiode> = emptyList(),

@@ -1764,7 +1764,20 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.trengerGodkjenning(påminnelse)
+            vedtaksperiode.trengerHistorikkFraInfotrygd(påminnelse)
+        }
+
+        override fun håndter(
+            person: Person,
+            arbeidsgiver: Arbeidsgiver,
+            vedtaksperiode: Vedtaksperiode,
+            hendelse: ArbeidstakerHendelse,
+            infotrygdhistorikk: Infotrygdhistorikk
+        ) {
+            if (infotrygdhistorikk.harEndretHistorikk(vedtaksperiode.utbetaling())) return vedtaksperiode.tilstand(hendelse, AvventerHistorikk) {
+                hendelse.info("Infotrygdhistorikken har endret seg, reberegner periode")
+            }
+            vedtaksperiode.trengerGodkjenning(hendelse)
         }
     }
 

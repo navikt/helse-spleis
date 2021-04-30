@@ -6,6 +6,7 @@ import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.erHelg
+import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import java.time.LocalDate
@@ -229,5 +230,9 @@ internal class InfotrygdhistorikkElement private constructor(
 
     private fun oppdater(other: InfotrygdhistorikkElement) {
         other.oppdatert = this.oppdatert
+    }
+
+    internal fun harEndretHistorikk(utbetaling: Utbetaling): Boolean {
+        return utbetaling.erEldreEnn(tidsstempel)
     }
 }

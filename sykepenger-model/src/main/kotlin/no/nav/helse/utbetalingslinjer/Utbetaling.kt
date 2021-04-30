@@ -502,6 +502,10 @@ internal class Utbetaling private constructor(
         tilstand(nesteTilstand, hendelse)
     }
 
+    internal fun erEldreEnn(other: LocalDateTime): Boolean {
+        return other > tidsstempel
+    }
+
     internal interface Tilstand {
         fun forkast(utbetaling: Utbetaling, hendelse: ArbeidstakerHendelse) {
             hendelse.info("Forkaster ikke utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")

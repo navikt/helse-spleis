@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetalingshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.IUtbetalingstidslinjeBuilder
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilder
@@ -104,6 +105,11 @@ internal class Infotrygdhistorikk private constructor(
         if (harHistorikk() && element.erstatter(siste)) return false
         elementer.add(0, element)
         return true
+    }
+
+    internal fun harEndretHistorikk(utbetaling: Utbetaling): Boolean {
+        if (!harHistorikk()) return false
+        return siste.harEndretHistorikk(utbetaling)
     }
 
     internal fun tøm() {
