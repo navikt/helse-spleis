@@ -42,13 +42,7 @@ internal class MaksimumSykepengedagerfilter(
     internal fun filter(tidslinjer: List<Utbetalingstidslinje>, personTidslinje: Utbetalingstidslinje) {
         tidslinje = tidslinjer
             .reduce(Utbetalingstidslinje::plus)
-            .plus(personTidslinje) { venstre, høyre ->
-                when {
-                    høyre is NavDag -> høyre
-                    venstre !is UkjentDag -> venstre
-                    else -> høyre
-                }
-            }
+            .plus(personTidslinje)
         teller = UtbetalingTeller(alder, arbeidsgiverRegler)
         state = State.Initiell
         tidslinje.accept(this)
