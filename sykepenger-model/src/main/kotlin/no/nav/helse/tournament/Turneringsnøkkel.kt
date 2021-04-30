@@ -15,7 +15,6 @@ internal enum class Turneringsnøkkel {
     ForeldetSykedag,
     Feriedag_SØ,
     Feriedag_IM,
-    Permisjonsdag_AAREG,
     Permisjonsdag_SØ,
     SykHelgedag_SM,
     SykHelgedag_SØ,
@@ -44,8 +43,7 @@ internal enum class Turneringsnøkkel {
             dag is FriskHelgedag && dag.kommerFra(Inntektsmelding::class) -> Feriedag_IM
             dag is FriskHelgedag && dag.kommerFra(Søknad::class) -> Feriedag_SØ
             dag is Dag.ForeldetSykedag -> ForeldetSykedag
-            dag is Permisjonsdag && dag.kommerFra(Søknad::class) -> Permisjonsdag_SØ
-            dag is Permisjonsdag -> Permisjonsdag_AAREG
+            dag is Permisjonsdag -> Permisjonsdag_SØ
             dag is ProblemDag -> UbestemtDag
             dag is Sykedag && dag.kommerFra(Sykmelding::class) -> Sykedag_SM
             dag is Sykedag && dag.kommerFra(Søknad::class) -> Sykedag_SØ

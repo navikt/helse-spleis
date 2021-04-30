@@ -10,7 +10,6 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
 import no.nav.helse.tournament.Turneringsnøkkel.*
 import no.nav.helse.tournament.Turneringsnøkkel.Companion.fraDag
-import no.nav.helse.tournament.TurneringsnøkkelTest.TestHendelse.Companion.aareg
 import no.nav.helse.tournament.TurneringsnøkkelTest.TestHendelse.Companion.inntektsmelding
 import no.nav.helse.tournament.TurneringsnøkkelTest.TestHendelse.Companion.sykmelding
 import no.nav.helse.tournament.TurneringsnøkkelTest.TestHendelse.Companion.søknad
@@ -42,7 +41,6 @@ internal class TurneringsnøkkelTest {
         assertEquals(Feriedag_SØ, fraDag(FriskHelgedag(enDag, søknad)))
         assertEquals(Turneringsnøkkel.UkjentDag, fraDag(Dag.UkjentDag(enDag, INGEN)))
         assertEquals(UbestemtDag, fraDag(ProblemDag(enDag, INGEN, "")))
-        assertEquals(Permisjonsdag_AAREG, fraDag(Permisjonsdag(enDag, aareg)))
         assertEquals(Permisjonsdag_SØ, fraDag(Permisjonsdag(enDag, søknad)))
         assertEquals(Sykedag_SM, fraDag(Sykedag(enDag, økonomi, sykmelding)))
         assertEquals(Sykedag_SØ, fraDag(Sykedag(enDag, økonomi, søknad)))

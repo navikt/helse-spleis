@@ -111,14 +111,6 @@ class Søknad(
             if (periode.utenfor(søknad.sykdomsperiode)) søknad.error(beskjed)
         }
 
-        class Ferie(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom) {
-            override fun valider(søknad: Søknad) =
-                valider(søknad, "Søknaden inneholder Feriedager utenfor sykdomsvindu")
-
-            override fun sykdomstidslinje(avskjæringsdato: LocalDate, kilde: Hendelseskilde) =
-                Sykdomstidslinje.feriedager(periode.start, periode.endInclusive, kilde)
-        }
-
         class Sykdom(
             fom: LocalDate,
             tom: LocalDate,
@@ -134,6 +126,14 @@ class Søknad(
 
             override fun sykdomstidslinje(avskjæringsdato: LocalDate, kilde: Hendelseskilde) =
                 Sykdomstidslinje.sykedager(periode.start, periode.endInclusive, avskjæringsdato, sykdomsgrad, kilde)
+        }
+
+        class Ferie(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom) {
+            override fun valider(søknad: Søknad) =
+                valider(søknad, "Søknaden inneholder Feriedager utenfor sykdomsvindu")
+
+            override fun sykdomstidslinje(avskjæringsdato: LocalDate, kilde: Hendelseskilde) =
+                Sykdomstidslinje.feriedager(periode.start, periode.endInclusive, kilde)
         }
 
         class Papirsykmelding(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom) {
@@ -154,10 +154,12 @@ class Søknad(
 
         class Permisjon(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom) {
             override fun sykdomstidslinje(avskjæringsdato: LocalDate, kilde: Hendelseskilde) =
-                Sykdomstidslinje.problemdager(periode.start, periode.endInclusive, kilde, "Permisjonsdager ikke støttet")
+                Sykdomstidslinje.permisjonsdager(periode.start, periode.endInclusive, kilde)
 
-            override fun valider(søknad: Søknad) =
-                søknad.error("Søknaden inneholder en Permisjonsperiode")
+            override fun valider(søknad: Søknad) {
+                valider(søknad, "Søknaden inneholder Permisjonsdager utenfor sykdomsvindu")
+                søknad.warn("Permisjon oppgitt i perioden i søknaden. Vurder rett til sykepenger og korriger sykmeldingsperioden")
+            }
         }
 
         class Egenmelding(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom) {

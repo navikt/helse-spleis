@@ -42,6 +42,20 @@ internal class SykdomstidslinjeTest {
     }
 
     @Test
+    fun `sykeperiode med permisjon`() {
+        val sykedager = Sykdomstidslinje.sykedager(
+            1.mandag, 1.fredag, 100.prosent, TestEvent.søknad
+        )
+        val permisjonsdager = Sykdomstidslinje.permisjonsdager(
+            2.mandag, 2.fredag, TestEvent.søknad
+        )
+
+        val tidslinje = sykedager + permisjonsdager
+
+        assertEquals(" SSSSS?? PPPPP", tidslinje.toShortString())
+    }
+
+    @Test
     fun `to sykeperioder med mellomrom får riktig slutt og start dato`() {
         val tidslinje1 = Sykdomstidslinje.sykedager(1.mandag, 1.tirsdag, 100.prosent, TestEvent.søknad)
         val tidslinje2 = Sykdomstidslinje.sykedager(1.fredag, 2.mandag, 100.prosent, TestEvent.søknad)

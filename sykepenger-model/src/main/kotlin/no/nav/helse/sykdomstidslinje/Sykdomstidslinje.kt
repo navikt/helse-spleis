@@ -177,7 +177,7 @@ internal class Sykdomstidslinje private constructor(
     private fun avstandMellomSykedager(forrigeSykedag: LocalDate, nesteSykedag: LocalDate) =
         subset(forrigeSykedag.plusDays(1) til nesteSykedag.minusDays(1))
             .periode
-            ?.dropWhile { this[it] is Feriedag || (this[it] is UkjentDag && it.erHelg()) }
+            ?.dropWhile { this[it] is Feriedag || this[it] is Permisjonsdag || (this[it] is UkjentDag && it.erHelg()) }
             ?.count() ?: Int.MAX_VALUE
 
     fun starterFør(other: Sykdomstidslinje): Boolean {
@@ -253,6 +253,7 @@ internal class Sykdomstidslinje private constructor(
                     Arbeidsgiverdag::class -> "U"
                     ArbeidsgiverHelgedag::class -> "G"
                     Feriedag::class -> "F"
+                    Permisjonsdag::class -> "P"
                     FriskHelgedag::class -> "R"
                     ForeldetSykedag::class -> "K"
                     else -> "*"
@@ -394,6 +395,17 @@ internal class Sykdomstidslinje private constructor(
                 førsteDato.datesUntil(sisteDato.plusDays(1))
                     .collect(toMap<LocalDate, LocalDate, Dag>({ it }, { Feriedag(it, kilde) }))
             )
+
+        internal fun permisjonsdager(
+            førsteDato: LocalDate,
+            sisteDato: LocalDate,
+            kilde: Hendelseskilde
+        ) =
+            Sykdomstidslinje(
+                førsteDato.datesUntil(sisteDato.plusDays(1))
+                    .collect(toMap<LocalDate, LocalDate, Dag>({ it }, { Permisjonsdag(it, kilde) }))
+            )
+
         internal fun problemdager(
             førsteDato: LocalDate,
             sisteDato: LocalDate,

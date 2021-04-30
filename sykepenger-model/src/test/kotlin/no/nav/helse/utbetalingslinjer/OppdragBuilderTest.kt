@@ -57,7 +57,7 @@ internal class OppdragBuilderTest {
     }
 
     @Test
-    fun `kun helgedager med feriedager`() {
+    fun `kun helge- og fridager`() {
         opprett(4.FRI, 2.HELG, 4.FRI, 2.HELG, 4.FRI)
 
         assertEquals(0, oppdrag.size)

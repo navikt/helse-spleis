@@ -2,7 +2,6 @@ package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.testhelpers.TestEvent
 import no.nav.helse.testhelpers.mandag
-import no.nav.helse.tournament.Turneringsnøkkel
 import no.nav.helse.tournament.dagturnering
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
@@ -22,6 +21,7 @@ internal class BesteDagTest {
                 TestEvent.inntektsmelding
             )
         private val ferieFraSøknad get() = Dag.Feriedag(2.mandag, TestEvent.søknad)
+        private val permisjonFraSøknad get() = Dag.Permisjonsdag(2.mandag, TestEvent.søknad)
         private val sykedagFraSøknad get() = Dag.Sykedag(2.mandag, Økonomi.sykdomsgrad(100.prosent), TestEvent.søknad)
     }
 
@@ -39,6 +39,12 @@ internal class BesteDagTest {
     fun `ferie vinner over sykdom`() {
         assertWinner(sykedagFraSøknad, ferieFraSøknad, ferieFraSøknad)
         assertWinner(ferieFraSøknad, sykedagFraSøknad, sykedagFraSøknad)
+    }
+
+    @Test
+    fun `permisjon vinner over sykdom`() {
+        assertWinner(sykedagFraSøknad, permisjonFraSøknad, permisjonFraSøknad)
+        assertWinner(permisjonFraSøknad, sykedagFraSøknad, sykedagFraSøknad)
     }
 
     @Test

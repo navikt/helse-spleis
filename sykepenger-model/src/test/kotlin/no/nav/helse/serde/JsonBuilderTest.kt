@@ -256,10 +256,10 @@ class JsonBuilderTest {
                         tom = 9.januar,
                         sendtSøknad = sendtSøknad.atStartOfDay(),
                         perioder = listOf(
-                            Søknad.Søknadsperiode.Sykdom(1.januar, 9.januar, 100.prosent),
-                            Søknad.Søknadsperiode.Permisjon(1.januar, 9.januar)
+                            Søknad.Søknadsperiode.Sykdom(1.januar, 9.januar, 100.prosent)
                         ),
-                        hendelseId = søknadhendelseId
+                        hendelseId = søknadhendelseId,
+                        andreInntektsKilder = listOf(Søknad.Inntektskilde(true, "ANDRE_ARBEIDSFORHOLD"))
                     )
                 )
             }
@@ -411,14 +411,15 @@ class JsonBuilderTest {
             fom: LocalDate = 1.januar,
             tom: LocalDate = 31.januar,
             sendtSøknad: LocalDateTime = tom.plusDays(5).atTime(LocalTime.NOON),
-            perioder: List<Søknad.Søknadsperiode> = listOf(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent))
+            perioder: List<Søknad.Søknadsperiode> = listOf(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent)),
+            andreInntektsKilder: List<Søknad.Inntektskilde> = emptyList()
         ) = Søknad(
             meldingsreferanseId = hendelseId,
             fnr = fnr,
             aktørId = aktørId,
             orgnummer = orgnummer,
             perioder = perioder,
-            andreInntektskilder = emptyList(),
+            andreInntektskilder = andreInntektsKilder,
             sendtTilNAV = sendtSøknad,
             permittert = false,
             merknaderFraSykmelding = emptyList(),

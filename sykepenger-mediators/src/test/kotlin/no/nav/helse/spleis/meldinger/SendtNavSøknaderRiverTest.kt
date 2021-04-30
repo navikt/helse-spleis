@@ -82,6 +82,15 @@ internal class SendtNavSøknaderRiverTest : RiverTest() {
             )
         )
     ).toJson()
+    private val søknadMedPermisjon = validSøknad(
+        fravar = listOf(
+            FravarDTO(
+                fom = LocalDate.now(),
+                tom = LocalDate.now(),
+                type = FravarstypeDTO.PERMISJON
+            )
+        )
+    ).toJson()
     private val validSendtSøknadMedFaktiskGradStørreEnn100 = validSøknad(
         soknadsperioder = listOf(
             SoknadsperiodeDTO(
@@ -121,6 +130,11 @@ internal class SendtNavSøknaderRiverTest : RiverTest() {
     @Test
     fun `søknad med utlandsopphold`() {
         assertNoErrors(søknadMedUtlandsopphold)
+    }
+
+    @Test
+    fun `søknad med permisjon`() {
+        assertNoErrors(søknadMedPermisjon)
     }
 
     @Test

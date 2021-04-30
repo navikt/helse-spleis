@@ -1,7 +1,8 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.TilstandType.*
@@ -270,7 +271,10 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         }
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Permisjon(10.februar, 20.februar))    // <-- TIL_INFOTRYGD
+        håndterSøknad(
+            Sykdom(1.februar, 28.februar, 100.prosent),
+            andreInntektskilder = listOf(Søknad.Inntektskilde(false, "ANDRE_ARBEIDSFORHOLD")) // <-- for å sende til Infotrygd
+        )
         inspektør.låstePerioder.also {
             assertEquals(0, it.size)
         }

@@ -34,6 +34,7 @@ internal sealed class Dag(
                 is SykHelgedag,
                 is Arbeidsgiverdag,
                 is Feriedag,
+                is Permisjonsdag,
                 is ArbeidsgiverHelgedag -> venstre
                 else -> høyre
             }

@@ -86,7 +86,7 @@ internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `overstyrer siste utbetalte periode i en forlengelse med bare ferie`() {
+    fun `overstyrer siste utbetalte periode i en forlengelse med bare ferie og permisjon`() {
         Toggles.RevurderUtbetaltPeriode.enable {
             håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
             håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(2.januar, 18.januar)), førsteFraværsdag = 2.januar)
@@ -105,7 +105,7 @@ internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
             håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
             håndterUtbetalt(2.vedtaksperiode)
 
-            håndterOverstyring((29.januar til 23.februar).map { manuellFeriedag(it) })
+            håndterOverstyring((29.januar til 15.februar).map { manuellFeriedag(it) } + (16.februar til 23.februar).map { manuellPermisjonsdag(it) })
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -201,7 +201,7 @@ internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `feriedag i midten av en periode blir ikke utbetalt`() {
+    fun `fridager i midten av en periode blir ikke utbetalt`() {
         håndterSykmelding(Sykmeldingsperiode(2.januar, 25.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(2.januar, 17.januar)), førsteFraværsdag = 2.januar)
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(2.januar, 25.januar, 100.prosent))
@@ -209,7 +209,7 @@ internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterOverstyring(listOf(manuellFeriedag(22.januar)))
+        håndterOverstyring(listOf(manuellFeriedag(22.januar), manuellPermisjonsdag(23.januar)))
 
         assertNotEquals(TilstandType.AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
 
@@ -218,7 +218,7 @@ internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
 
         assertEquals(2, inspektør.utbetalinger.last().arbeidsgiverOppdrag().size)
         assertEquals(21.januar, inspektør.utbetalinger.last().arbeidsgiverOppdrag()[0].tom)
-        assertEquals(23.januar, inspektør.utbetalinger.last().arbeidsgiverOppdrag()[1].fom)
+        assertEquals(24.januar, inspektør.utbetalinger.last().arbeidsgiverOppdrag()[1].fom)
     }
 
     @Test
@@ -274,6 +274,7 @@ internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
 
     private fun håndterOverstyringSykedag(periode: Periode) = håndterOverstyring(periode.map { manuellSykedag(it) })
 
+    private fun manuellPermisjonsdag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Permisjonsdag)
     private fun manuellFeriedag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Feriedag)
     private fun manuellSykedag(dato: LocalDate, grad: Int = 100) = ManuellOverskrivingDag(dato, Dagtype.Sykedag, grad)
     private fun manuellArbeidsgiverdag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Egenmeldingsdag)
