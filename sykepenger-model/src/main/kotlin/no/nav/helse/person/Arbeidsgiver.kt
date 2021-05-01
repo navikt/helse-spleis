@@ -500,9 +500,16 @@ internal class Arbeidsgiver private constructor(
         )
     }
 
+    private var revurder: Vedtaksperiode? = null
+    internal fun revurder(vedtaksperiode: Vedtaksperiode) {
+        revurder = vedtaksperioder.sisteSammenhengedeUtbetaling(vedtaksperiode)
+    }
+
     internal fun håndter(hendelse: OverstyrTidslinje) {
         hendelse.kontekst(this)
         håndter(hendelse, Vedtaksperiode::håndter)
+        revurder?.revurder(hendelse)
+        finalize(hendelse)
     }
 
     internal fun oppdaterSykdom(hendelse: SykdomstidslinjeHendelse) = sykdomshistorikk.håndter(hendelse)
@@ -581,13 +588,7 @@ internal class Arbeidsgiver private constructor(
 
     //TODO: rename disse
     internal fun revurdering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-        val revurdering = Revurdering(hendelse)
-        vedtaksperioder.firstOrNull { it.avventerRevurdering(vedtaksperiode, revurdering) }
-    }
-
-    internal fun revurder(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-        val sisteUtbetalte = vedtaksperioder.sisteSammenhengedeUtbetaling(vedtaksperiode)
-        sisteUtbetalte?.revurder(hendelse)
+        håndter(hendelse) { nyRevurderingFør(vedtaksperiode, hendelse) }
     }
 
     private fun List<Vedtaksperiode>.sisteSammenhengedeUtbetaling(vedtaksperiode: Vedtaksperiode) =
@@ -654,13 +655,6 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal class GjenopptaBehandling(private val hendelse: ArbeidstakerHendelse) :
-        ArbeidstakerHendelse(hendelse) {
-        override fun organisasjonsnummer() = hendelse.organisasjonsnummer()
-        override fun aktørId() = hendelse.aktørId()
-        override fun fødselsnummer() = hendelse.fødselsnummer()
-    }
-
-    internal class Revurdering(private val hendelse: ArbeidstakerHendelse) :
         ArbeidstakerHendelse(hendelse) {
         override fun organisasjonsnummer() = hendelse.organisasjonsnummer()
         override fun aktørId() = hendelse.aktørId()
