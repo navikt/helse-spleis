@@ -75,6 +75,8 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
         kontekst(person as Aktivitetskontekst)
     }
 
+    override fun toMap(): Map<String, List<Map<String, Any>>> = AktivitetsloggReflect(this).toMap()
+
     internal fun logg(vararg kontekst: Aktivitetskontekst): Aktivitetslogg {
         return Aktivitetslogg(this).also {
             it.aktiviteter.addAll(this.aktiviteter.filter { aktivitet ->
@@ -457,6 +459,7 @@ interface IAktivitetslogg {
     fun kontekst(kontekst: Aktivitetskontekst)
     fun kontekst(person: Person)
     fun kontekster(): List<IAktivitetslogg>
+    fun toMap(): Map<String, List<Map<String, Any>>>
 }
 
 internal interface AktivitetsloggVisitor {

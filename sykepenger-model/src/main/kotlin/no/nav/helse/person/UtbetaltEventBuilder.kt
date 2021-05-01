@@ -15,9 +15,6 @@ import java.time.LocalDateTime
 import java.util.*
 
 internal fun tilUtbetaltEvent(
-    aktørId: String,
-    fødselnummer: String,
-    orgnummer: String,
     sykepengegrunnlag: Inntekt,
     inntekt: Inntekt,
     hendelseIder: List<UUID>,
@@ -30,9 +27,6 @@ internal fun tilUtbetaltEvent(
     automatiskBehandling: Boolean,
     maksdato: LocalDate
 ) = UtbetaltEventBuilder(
-    aktørId = aktørId,
-    fødselnummer = fødselnummer,
-    orgnummer = orgnummer,
     hendelseIder = hendelseIder,
     sykepengegrunnlag = sykepengegrunnlag,
     inntekt = inntekt,
@@ -47,9 +41,6 @@ internal fun tilUtbetaltEvent(
 ).result()
 
 private class UtbetaltEventBuilder(
-    private val aktørId: String,
-    private val fødselnummer: String,
-    private val orgnummer: String,
     private val hendelseIder: List<UUID>,
     private val sykepengegrunnlag: Inntekt,
     private val inntekt: Inntekt,
@@ -76,9 +67,6 @@ private class UtbetaltEventBuilder(
 
     fun result(): UtbetaltEvent {
         return UtbetaltEvent(
-            aktørId = aktørId,
-            fødselsnummer = fødselnummer,
-            organisasjonsnummer = orgnummer,
             hendelser = hendelseIder.toSet(),
             utbetalingId = utbetalingId,
             oppdrag = oppdragListe.toList(),
@@ -121,7 +109,7 @@ private class UtbetaltEventBuilder(
     override fun postVisitArbeidsgiverOppdrag(oppdrag: Oppdrag) {
         oppdragListe.add(
             UtbetaltEvent.Utbetalt(
-                mottaker = orgnummer,
+                mottaker = oppdrag.mottaker(),
                 fagområde = oppdrag.fagområde().verdi,
                 fagsystemId = oppdrag.fagsystemId(),
                 totalbeløp = oppdrag.totalbeløp(),
@@ -137,7 +125,7 @@ private class UtbetaltEventBuilder(
     override fun postVisitPersonOppdrag(oppdrag: Oppdrag) {
         oppdragListe.add(
             UtbetaltEvent.Utbetalt(
-                mottaker = fødselnummer,
+                mottaker = oppdrag.mottaker(),
                 fagområde = oppdrag.fagområde().verdi,
                 fagsystemId = oppdrag.fagsystemId(),
                 totalbeløp = oppdrag.totalbeløp(),

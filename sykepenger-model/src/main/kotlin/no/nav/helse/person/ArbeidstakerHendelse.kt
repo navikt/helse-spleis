@@ -14,6 +14,4 @@ abstract class ArbeidstakerHendelse protected constructor(
     override fun kontekst() = mapOf(
         "organisasjonsnummer" to organisasjonsnummer()
     )
-
-    internal fun aktivitetsloggMap() = aktivitetslogg.toMap()
 }

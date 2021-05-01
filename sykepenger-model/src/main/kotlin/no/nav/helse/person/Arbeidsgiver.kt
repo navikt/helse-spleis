@@ -549,7 +549,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun søppelbøtte(
-        hendelse: ArbeidstakerHendelse,
+        hendelse: IAktivitetslogg,
         filter: VedtaksperioderFilter,
         årsak: ForkastetÅrsak
     ): List<Vedtaksperiode> {
@@ -587,7 +587,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     //TODO: rename disse
-    internal fun revurdering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+    internal fun revurdering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
         håndter(hendelse) { nyRevurderingFør(vedtaksperiode, hendelse) }
     }
 
@@ -743,22 +743,22 @@ internal class Arbeidsgiver private constructor(
     internal fun harDagUtenSøknad(periode: Periode) =
         sykdomstidslinje().harDagUtenSøknad(periode)
 
-    private fun <Hendelse: ArbeidstakerHendelse> noenHarHåndtert(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean, errortekst: String) {
+    private fun <Hendelse: IAktivitetslogg> noenHarHåndtert(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean, errortekst: String) {
         if (noenHarHåndtert(hendelse, håndterer)) return
         hendelse.error(errortekst)
     }
 
-    private fun <Hendelse: ArbeidstakerHendelse> håndter(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Unit) {
+    private fun <Hendelse: IAktivitetslogg> håndter(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Unit) {
         looper { håndterer(it, hendelse) }
     }
 
-    private fun <Hendelse: ArbeidstakerHendelse> énHarHåndtert(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean): Boolean {
+    private fun <Hendelse: IAktivitetslogg> énHarHåndtert(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean): Boolean {
         var håndtert = false
         looper { håndtert = håndtert || håndterer(it, hendelse) }
         return håndtert
     }
 
-    private fun <Hendelse: ArbeidstakerHendelse> noenHarHåndtert(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean): Boolean {
+    private fun <Hendelse: IAktivitetslogg> noenHarHåndtert(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean): Boolean {
         var håndtert = false
         looper { håndtert = håndterer(it, hendelse) || håndtert }
         return håndtert

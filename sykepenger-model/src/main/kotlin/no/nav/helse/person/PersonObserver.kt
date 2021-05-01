@@ -55,9 +55,6 @@ interface PersonObserver {
     )
 
     data class UtbetaltEvent(
-        val aktørId: String,
-        val fødselsnummer: String,
-        val organisasjonsnummer: String,
         val hendelser: Set<UUID>,
         val utbetalingId: UUID,
         val oppdrag: List<Utbetalt>,

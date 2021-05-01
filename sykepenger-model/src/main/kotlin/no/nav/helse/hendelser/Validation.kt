@@ -1,16 +1,15 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Person
 import java.time.LocalDate
 
-internal class Validation private constructor(private val hendelse: ArbeidstakerHendelse) : IAktivitetslogg by(hendelse) {
+internal class Validation private constructor(private val hendelse: IAktivitetslogg) : IAktivitetslogg by(hendelse) {
     private var hasErrors = false
     private var errorBlock: Validation.() -> Unit = {}
 
     internal companion object {
-        internal inline fun validation(hendelse: ArbeidstakerHendelse, block: Validation.() -> Unit) {
+        internal inline fun validation(hendelse: IAktivitetslogg, block: Validation.() -> Unit) {
             Validation(hendelse).apply(block)
         }
     }

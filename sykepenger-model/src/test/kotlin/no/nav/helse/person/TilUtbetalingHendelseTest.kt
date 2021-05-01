@@ -47,9 +47,6 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
         assertEquals(2, observatør.utbetaltEventer.first().oppdrag.size)
 
         PersonObserver.UtbetaltEvent(
-            aktørId = AKTØRID,
-            fødselsnummer = UNG_PERSON_FNR_2018,
-            organisasjonsnummer = ORGNUMMER,
             hendelser = setOf(sykmeldingHendelseId, søknadHendelseId, inntektsmeldingHendelseId),
             utbetalingId = observatør.utbetaltEventer.first().utbetalingId,
             oppdrag = listOf(
@@ -102,11 +99,8 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
         assertEquals(2, observatør.utbetaltEventer.first().oppdrag.size)
 
         PersonObserver.UtbetaltEvent(
-            aktørId = AKTØRID,
-            fødselsnummer = UNG_PERSON_FNR_2018,
-            organisasjonsnummer = ORGNUMMER,
-            utbetalingId = observatør.utbetaltEventer.first().utbetalingId,
             hendelser = setOf(sykmeldingHendelseId, søknadHendelseId, inntektsmeldingHendelseId),
+            utbetalingId = observatør.utbetaltEventer.first().utbetalingId,
             oppdrag = listOf(
                 PersonObserver.UtbetaltEvent.Utbetalt(
                     mottaker = ORGNUMMER,

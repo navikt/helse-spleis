@@ -145,13 +145,13 @@ internal class Utbetaling private constructor(
         tilstand.overført(this, utbetalingOverført)
     }
 
-    internal fun simuler(hendelse: ArbeidstakerHendelse) {
+    internal fun simuler(hendelse: IAktivitetslogg) {
         hendelse.kontekst(this)
         tilstand.simuler(this, hendelse)
     }
 
     internal fun godkjenning(
-        hendelse: ArbeidstakerHendelse,
+        hendelse: IAktivitetslogg,
         vedtaksperiode: Vedtaksperiode,
         skjæringstidspunkt: LocalDate,
         aktiveVedtaksperioder: List<Aktivitetslogg.Aktivitet.AktivVedtaksperiode>,
@@ -177,7 +177,7 @@ internal class Utbetaling private constructor(
     }
 
     private fun vedtakFattet(
-        hendelse: ArbeidstakerHendelse,
+        hendelse: IAktivitetslogg,
         person: Person,
         vedtaksperiodeId: UUID,
         periode: Periode,
@@ -192,7 +192,7 @@ internal class Utbetaling private constructor(
 
     // TODO: fjerne når gamle "utbetalt"-event er borte
     internal fun ferdigstill(
-        hendelse: ArbeidstakerHendelse,
+        hendelse: IAktivitetslogg,
         person: Person,
         periode: Periode,
         sykepengegrunnlag: Inntekt,
@@ -218,7 +218,7 @@ internal class Utbetaling private constructor(
         return tilstand.etterutbetale(this, hendelse, utbetalingstidslinje)
     }
 
-    internal fun forkast(hendelse: ArbeidstakerHendelse) {
+    internal fun forkast(hendelse: IAktivitetslogg) {
         hendelse.kontekst(this)
         tilstand.forkast(this, hendelse)
     }
@@ -253,7 +253,7 @@ internal class Utbetaling private constructor(
 
         internal fun vedtakFattet(
             utbetaling: Utbetaling?,
-            hendelse: ArbeidstakerHendelse,
+            hendelse: IAktivitetslogg,
             person: Person,
             vedtaksperiodeId: UUID,
             periode: Periode,
@@ -480,7 +480,6 @@ internal class Utbetaling private constructor(
 
     // TODO: Fjerne når vi slutter å sende utbetalt-event fra vedtaksperiode d(-_-)b
     private fun avslutt(
-        hendelse: ArbeidstakerHendelse,
         person: Person,
         periode: Periode,
         sykepengegrunnlag: Inntekt,
@@ -488,7 +487,7 @@ internal class Utbetaling private constructor(
         hendelseIder: List<UUID>
     ) {
         val vurdering = checkNotNull(vurdering) { "Mangler vurdering" }
-        vurdering.ferdigstill(hendelse, this, person, periode, sykepengegrunnlag, inntekt, hendelseIder)
+        vurdering.ferdigstill(this, person, periode, sykepengegrunnlag, inntekt, hendelseIder)
     }
 
     private fun håndterKvittering(hendelse: UtbetalingHendelse) {
@@ -507,13 +506,13 @@ internal class Utbetaling private constructor(
     }
 
     internal interface Tilstand {
-        fun forkast(utbetaling: Utbetaling, hendelse: ArbeidstakerHendelse) {
+        fun forkast(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
             hendelse.info("Forkaster ikke utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
         }
 
         fun godkjenn(
             utbetaling: Utbetaling,
-            hendelse: ArbeidstakerHendelse,
+            hendelse: IAktivitetslogg,
             vurdering: Vurdering
         ) {
             hendelse.error("Forventet ikke godkjenning på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
@@ -552,14 +551,14 @@ internal class Utbetaling private constructor(
             aktiveVedtaksperioder: List<Aktivitetslogg.Aktivitet.AktivVedtaksperiode>,
             arbeidsforholdId: String?,
             aktivitetslogg: Aktivitetslogg,
-            hendelse: ArbeidstakerHendelse
+            hendelse: IAktivitetslogg
         ) {
             hendelse.error("Forventet ikke å lage godkjenning på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
         }
 
         fun vedtakFattet(
             utbetaling: Utbetaling,
-            hendelse: ArbeidstakerHendelse,
+            hendelse: IAktivitetslogg,
             person: Person,
             vedtaksperiodeId: UUID,
             periode: Periode,
@@ -571,7 +570,7 @@ internal class Utbetaling private constructor(
 
         fun avslutt(
             utbetaling: Utbetaling,
-            hendelse: ArbeidstakerHendelse,
+            hendelse: IAktivitetslogg,
             person: Person,
             periode: Periode,
             sykepengegrunnlag: Inntekt,
@@ -585,14 +584,14 @@ internal class Utbetaling private constructor(
     }
 
     internal object Ubetalt : Tilstand {
-        override fun forkast(utbetaling: Utbetaling, hendelse: ArbeidstakerHendelse) {
+        override fun forkast(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
             hendelse.info("Forkaster utbetaling")
             utbetaling.tilstand(Forkastet, hendelse)
         }
 
         override fun vedtakFattet(
             utbetaling: Utbetaling,
-            hendelse: ArbeidstakerHendelse,
+            hendelse: IAktivitetslogg,
             person: Person,
             vedtaksperiodeId: UUID,
             periode: Periode,
@@ -606,7 +605,7 @@ internal class Utbetaling private constructor(
             sendVedtakFattet(utbetaling, person, vedtaksperiodeId, periode, hendelseIder, skjæringstidspunkt, sykepengegrunnlag, inntekt)
         }
 
-        override fun godkjenn(utbetaling: Utbetaling, hendelse: ArbeidstakerHendelse, vurdering: Vurdering) {
+        override fun godkjenn(utbetaling: Utbetaling, hendelse: IAktivitetslogg, vurdering: Vurdering) {
             utbetaling.vurdering = vurdering
             utbetaling.tilstand(vurdering.avgjør(utbetaling), hendelse)
         }
@@ -622,7 +621,7 @@ internal class Utbetaling private constructor(
             aktiveVedtaksperioder: List<Aktivitetslogg.Aktivitet.AktivVedtaksperiode>,
             arbeidsforholdId: String?,
             aktivitetslogg: Aktivitetslogg,
-            hendelse: ArbeidstakerHendelse
+            hendelse: IAktivitetslogg
         ) {
             godkjenning(
                 aktivitetslogg = hendelse,
@@ -648,7 +647,7 @@ internal class Utbetaling private constructor(
 
         override fun vedtakFattet(
             utbetaling: Utbetaling,
-            hendelse: ArbeidstakerHendelse,
+            hendelse: IAktivitetslogg,
             person: Person,
             vedtaksperiodeId: UUID,
             periode: Periode,
@@ -662,14 +661,14 @@ internal class Utbetaling private constructor(
 
         override fun avslutt(
             utbetaling: Utbetaling,
-            hendelse: ArbeidstakerHendelse,
+            hendelse: IAktivitetslogg,
             person: Person,
             periode: Periode,
             sykepengegrunnlag: Inntekt,
             inntekt: Inntekt,
             hendelseIder: List<UUID>
         ) {
-            utbetaling.avslutt(hendelse, person, periode, sykepengegrunnlag, inntekt, hendelseIder)
+            utbetaling.avslutt(person, periode, sykepengegrunnlag, inntekt, hendelseIder)
         }
     }
 
@@ -776,7 +775,7 @@ internal class Utbetaling private constructor(
 
         override fun vedtakFattet(
             utbetaling: Utbetaling,
-            hendelse: ArbeidstakerHendelse,
+            hendelse: IAktivitetslogg,
             person: Person,
             vedtaksperiodeId: UUID,
             periode: Periode,
@@ -790,14 +789,14 @@ internal class Utbetaling private constructor(
 
         override fun avslutt(
             utbetaling: Utbetaling,
-            hendelse: ArbeidstakerHendelse,
+            hendelse: IAktivitetslogg,
             person: Person,
             periode: Periode,
             sykepengegrunnlag: Inntekt,
             inntekt: Inntekt,
             hendelseIder: List<UUID>
         ) {
-            utbetaling.avslutt(hendelse, person, periode, sykepengegrunnlag, inntekt, hendelseIder)
+            utbetaling.avslutt(person, periode, sykepengegrunnlag, inntekt, hendelseIder)
         }
     }
 
@@ -884,7 +883,6 @@ internal class Utbetaling private constructor(
             }
 
         fun ferdigstill(
-            hendelse: ArbeidstakerHendelse,
             utbetaling: Utbetaling,
             person: Person,
             periode: Periode,
@@ -894,19 +892,16 @@ internal class Utbetaling private constructor(
         ) {
             person.vedtaksperiodeUtbetalt(
                 tilUtbetaltEvent(
-                    aktørId = hendelse.aktørId(),
-                    fødselnummer = hendelse.fødselsnummer(),
-                    orgnummer = hendelse.organisasjonsnummer(),
-                    utbetaling = utbetaling,
-                    utbetalingstidslinje = utbetaling.utbetalingstidslinje(periode),
                     sykepengegrunnlag = sykepengegrunnlag,
                     inntekt = inntekt,
+                    hendelseIder = hendelseIder,
+                    utbetaling = utbetaling,
+                    utbetalingstidslinje = utbetaling.utbetalingstidslinje(periode),
+                    periode = periode,
                     forbrukteSykedager = requireNotNull(utbetaling.forbrukteSykedager),
                     gjenståendeSykedager = requireNotNull(utbetaling.gjenståendeSykedager),
                     godkjentAv = ident,
                     automatiskBehandling = automatiskBehandling,
-                    hendelseIder = hendelseIder,
-                    periode = periode,
                     maksdato = utbetaling.maksdato
                 )
             )

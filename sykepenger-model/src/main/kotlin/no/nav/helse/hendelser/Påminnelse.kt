@@ -51,7 +51,7 @@ class Påminnelse(
         )
     }
 
-    fun toMap() = mapOf(
+    fun toOutgoingMessage() = mapOf(
         "vedtaksperiodeId" to vedtaksperiodeId,
         "tilstand" to tilstand,
         "antallGangerPåminnet" to antallGangerPåminnet,

@@ -83,7 +83,7 @@ internal class PersonMediator(
     }
 
     override fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, påminnelse: Påminnelse) {
-        queueMessage("vedtaksperiode_påminnet", JsonMessage.newMessage(påminnelse.toMap()))
+        queueMessage("vedtaksperiode_påminnet", JsonMessage.newMessage(påminnelse.toOutgoingMessage()))
     }
 
     override fun vedtaksperiodeIkkePåminnet(påminnelse: Påminnelse, vedtaksperiodeId: UUID, nåværendeTilstand: TilstandType) {
@@ -213,9 +213,6 @@ internal class PersonMediator(
         queueMessage(
             "utbetalt", JsonMessage.newMessage(
                 mapOf(
-                    "aktørId" to event.aktørId,
-                    "fødselsnummer" to event.fødselsnummer,
-                    "organisasjonsnummer" to event.organisasjonsnummer,
                     "utbetalingId" to event.utbetalingId,
                     "hendelser" to event.hendelser,
                     "utbetalt" to event.oppdrag.map { utbetalt ->
