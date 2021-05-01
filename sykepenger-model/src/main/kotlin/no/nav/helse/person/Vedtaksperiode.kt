@@ -419,8 +419,8 @@ internal class Vedtaksperiode private constructor(
         dødsinformasjon(hendelse)
     }
 
-    private fun trengerHistorikkFraInfotrygd(hendelse: ArbeidstakerHendelse) {
-        person.trengerHistorikkFraInfotrygd(hendelse, this)
+    private fun trengerHistorikkFraInfotrygd(hendelse: ArbeidstakerHendelse, maksAlder: LocalDateTime? = null) {
+        person.trengerHistorikkFraInfotrygd(hendelse, this, maksAlder)
     }
 
     private fun trengerVilkårsgrunnlag(hendelse: ArbeidstakerHendelse) {
@@ -837,7 +837,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.trengerHistorikkFraInfotrygd(påminnelse)
+            vedtaksperiode.trengerHistorikkFraInfotrygd(påminnelse, LocalDateTime.now().minusHours(24))
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
@@ -1447,7 +1447,6 @@ internal class Vedtaksperiode private constructor(
             }
             vedtaksperiode.trengerHistorikkFraInfotrygd(hendelse)
         }
-
 
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: SykdomstidslinjeHendelse) {
             vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingUferdigGap)
