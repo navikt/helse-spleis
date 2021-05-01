@@ -2,13 +2,11 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
-import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
-import no.nav.helse.testhelpers.februar
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.mars
+import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -400,11 +398,48 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
     fun `forsøk på å overstyre eldre fagsystemId`() {
         nyttVedtak(3.januar, 26.januar)
         nyttVedtak(3.mars, 26.mars)
-
-        assertThrows(Aktivitetslogg.AktivitetException::class.java) {
-            håndterOverstyring((4.januar til 20.januar).map { manuellFeriedag(it) })
+        håndterOverstyring((4.januar til 20.januar).map { manuellFeriedag(it) })
+        SykdomstidslinjeInspektør(inspektør.sykdomstidslinje).also { sykdomstidslinjeInspektør ->
+            assertTrue((4.januar til 20.januar).none { sykdomstidslinjeInspektør.dager[it] == Dag.Feriedag::class })
         }
+        assertTrue(hendelselogg.hasErrorsOrWorse())
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
+        )
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
+        )
+    }
 
+    @Test
+    fun `forsøk på å overstyre eldre fagsystemId med nyere periode til godkjenning`() {
+        nyttVedtak(3.januar, 26.januar)
+        tilSimulert(3.mars, 26.mars, 100.prosent, 3.mars)
+        håndterOverstyring((4.januar til 20.januar).map { manuellFeriedag(it) })
+        SykdomstidslinjeInspektør(inspektør.sykdomstidslinje).also { sykdomstidslinjeInspektør ->
+            assertTrue((4.januar til 20.januar).none { sykdomstidslinjeInspektør.dager[it] == Dag.Feriedag::class })
+        }
+        assertTrue(hendelselogg.hasErrorsOrWorse())
         assertTilstander(
             0,
             START,
@@ -420,6 +455,100 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
         )
     }
 
+    @Test
+    fun `forsøk på å overstyre eldre fagsystemId med nyere perioder uten utbetaling, og periode med utbetaling etterpå`() {
+        nyttVedtak(3.januar, 26.januar)
+        tilSimulert(1.mai, 31.mai, 100.prosent, 1.mai)
+        håndterSykmelding(Sykmeldingsperiode(3.mars, 15.mars, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(16.mars, 26.mars, 100.prosent))
+
+        håndterOverstyring((4.januar til 20.januar).map { manuellFeriedag(it) })
+        SykdomstidslinjeInspektør(inspektør.sykdomstidslinje).also { sykdomstidslinjeInspektør ->
+            assertTrue((4.januar til 20.januar).none { sykdomstidslinjeInspektør.dager[it] == Dag.Feriedag::class })
+        }
+        assertTrue(hendelselogg.hasErrorsOrWorse())
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
+        )
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            AVVENTER_UFERDIG_GAP
+        )
+        assertTilstander(
+            3.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            MOTTATT_SYKMELDING_UFERDIG_GAP,
+            MOTTATT_SYKMELDING_FERDIG_GAP
+        )
+        assertTilstander(
+            4.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE
+        )
+    }
+
+    @Test
+    fun `forsøk på å overstyre eldre fagsystemId med nyere perioder med utbetaling, og periode uten utbetaling`() {
+        nyttVedtak(3.januar, 26.januar)
+        nyttVedtak(1.mai, 31.mai)
+        håndterSykmelding(Sykmeldingsperiode(1.juni, 14.juni, 100.prosent))
+
+        håndterOverstyring((4.januar til 20.januar).map { manuellFeriedag(it) })
+        SykdomstidslinjeInspektør(inspektør.sykdomstidslinje).also { sykdomstidslinjeInspektør ->
+            assertTrue((4.januar til 20.januar).none { sykdomstidslinjeInspektør.dager[it] == Dag.Feriedag::class })
+        }
+        assertTrue(hendelselogg.hasErrorsOrWorse())
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
+        )
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
+        )
+        assertTilstander(
+            3.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE
+        )
+    }
 
     @Test
     fun `overstyrer siste utbetalte periode med bare ferie og permisjon`() {

@@ -500,15 +500,9 @@ internal class Arbeidsgiver private constructor(
         )
     }
 
-    private var revurder: Vedtaksperiode? = null
-    internal fun revurder(vedtaksperiode: Vedtaksperiode) {
-        revurder = vedtaksperioder.sisteSammenhengedeUtbetaling(vedtaksperiode)
-    }
-
     internal fun håndter(hendelse: OverstyrTidslinje) {
         hendelse.kontekst(this)
         håndter(hendelse, Vedtaksperiode::håndter)
-        revurder?.revurder(hendelse)
         finalize(hendelse)
     }
 
@@ -586,16 +580,18 @@ internal class Arbeidsgiver private constructor(
         return results
     }
 
-    //TODO: rename disse
-    internal fun revurdering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+    internal fun revurderSisteUtbetalte(hendelse: OverstyrTidslinje, vedtaksperiode: Vedtaksperiode) {
         håndter(hendelse) { nyRevurderingFør(vedtaksperiode, hendelse) }
+        if (hendelse.hasErrorsOrWorse()) {
+            hendelse.info("Revurdering blokkeres, gjenopptar behandling")
+            return gjenopptaBehandling()
+        }
+        vedtaksperioder.sisteSammenhengedeUtbetaling(vedtaksperiode)
+            ?.revurder(hendelse, vedtaksperiode)
     }
 
     private fun List<Vedtaksperiode>.sisteSammenhengedeUtbetaling(vedtaksperiode: Vedtaksperiode) =
         this.filter { it.sammeArbeidsgiverPeriodeOgUtbetalt(vedtaksperiode) }.maxOrNull()
-
-    internal fun blokkeresRevurdering(vedtaksperiode: Vedtaksperiode) =
-        vedtaksperioder.any { it.blokkererRevurdering(vedtaksperiode) }
 
     internal fun tidligereOgEttergølgende(segSelv: Periode): VedtaksperioderFilter {
         val tidligereOgEttergølgende1 = vedtaksperioder.sorted().firstOrNull { it.periode().overlapperMed(segSelv) }?.let(::tidligereOgEttergølgende)

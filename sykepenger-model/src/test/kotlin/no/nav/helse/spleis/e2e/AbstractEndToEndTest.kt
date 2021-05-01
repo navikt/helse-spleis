@@ -42,7 +42,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     }
 
     fun speilApi() = serializePersonForSpeil(person)
-    protected lateinit var hendelselogg: ArbeidstakerHendelse
+    protected lateinit var hendelselogg: IAktivitetslogg
     protected var forventetEndringTeller = 0
     private val sykmeldinger = mutableMapOf<UUID, Array<out Sykmeldingsperiode>>()
     private val søknader = mutableMapOf<UUID, Triple<LocalDate, List<Søknad.Inntektskilde>, Array<out Søknad.Søknadsperiode>>>()
@@ -1023,6 +1023,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     }
 
     protected fun <T : PersonHendelse> T.håndter(håndter: Person.(T) -> Unit): T {
+        hendelselogg = this
         person.håndter(this)
         ikkeBesvarteBehov += EtterspurtBehov.finnEtterspurteBehov(behov())
         return this
