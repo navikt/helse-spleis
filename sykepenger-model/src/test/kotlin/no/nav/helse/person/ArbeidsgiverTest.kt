@@ -14,6 +14,9 @@ import java.time.LocalDateTime
 import java.util.*
 
 internal class ArbeidsgiverTest {
+    private companion object {
+        const val ORGNUMMER = "888888888"
+    }
     @Test
     fun `ny inntektsmelding legger på inntekt på inntektHistorie`() {
         val inntektsmelding = Inntektsmelding(
@@ -22,7 +25,7 @@ internal class ArbeidsgiverTest {
                 opphørsdato = null,
                 inntekt = 12000.månedlig
             ),
-            orgnummer = "orgnr",
+            orgnummer = ORGNUMMER,
             fødselsnummer = "fnr",
             aktørId = "aktørId",
             førsteFraværsdag = 1.januar,
@@ -33,12 +36,11 @@ internal class ArbeidsgiverTest {
             mottatt = LocalDateTime.now()
         )
         val person = Person("aktørId", "fnr")
-        val arbeidsgiver = Arbeidsgiver(person, "12345678")
-        arbeidsgiver.håndter(sykmelding(Sykmeldingsperiode(10.september, 26.september, 100.prosent)))
-        arbeidsgiver.håndter(inntektsmelding)
+        person.håndter(sykmelding(Sykmeldingsperiode(10.september, 26.september, 100.prosent)))
+        person.håndter(inntektsmelding)
         assertEquals(
             12000.månedlig,
-            arbeidsgiver.grunnlagForSykepengegrunnlag(10.september, 10.september)
+            person.arbeidsgiver(ORGNUMMER).grunnlagForSykepengegrunnlag(10.september, 10.september)
         )
     }
 
@@ -48,7 +50,7 @@ internal class ArbeidsgiverTest {
             meldingsreferanseId = UUID.randomUUID(),
             fnr = "fnr",
             aktørId = "aktørId",
-            orgnummer = "orgnr",
+            orgnummer = ORGNUMMER,
             sykeperioder = sykeperioder.toList(),
             sykmeldingSkrevet = periode?.start!!.atStartOfDay(),
             mottatt = periode.endInclusive.atStartOfDay()

@@ -5,9 +5,9 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Person
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
+import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -26,9 +26,10 @@ internal class ArbeidsgiverUtbetalingerTest {
     private lateinit var inspektør: UtbetalingstidslinjeInspektør
     private lateinit var aktivitetslogg: Aktivitetslogg
 
-    companion object {
-        internal const val UNG_PERSON_FNR_2018 = "12020052345"
-        internal const val PERSON_67_ÅR_FNR_2018 = "05015112345"
+    private companion object {
+        const val UNG_PERSON_FNR_2018 = "12020052345"
+        const val PERSON_67_ÅR_FNR_2018 = "05015112345"
+        const val ORGNUMMER = "888888888"
     }
 
     @Test
@@ -353,13 +354,13 @@ internal class ArbeidsgiverUtbetalingerTest {
         historiskTidslinje: Utbetalingstidslinje,
         vilkårsgrunnlagElement: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement? = null
     ) {
-        val arbeidsgiver = Arbeidsgiver(Person("aktørid", fnr), "88888888")
+        val person = Person("aktørid", fnr)
         // seed arbeidsgiver med sykdomshistorikk
-        arbeidsgiver.håndter(Sykmelding(
+        person.håndter(Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "",
-            orgnummer = "",
+            orgnummer = ORGNUMMER,
             sykeperioder = listOf(Sykmeldingsperiode(1.januar, 2.januar, 100.prosent)),
             sykmeldingSkrevet = 1.januar.atStartOfDay(),
             mottatt = 1.januar.atStartOfDay()
@@ -378,7 +379,7 @@ internal class ArbeidsgiverUtbetalingerTest {
         aktivitetslogg = Aktivitetslogg()
         ArbeidsgiverUtbetalinger(
             NormalArbeidstaker,
-            mapOf(arbeidsgiver to IUtbetalingstidslinjeBuilder { _, _ -> arbeidsgiverTidslinje }),
+            mapOf(person.arbeidsgiver(ORGNUMMER) to IUtbetalingstidslinjeBuilder { _, _ -> arbeidsgiverTidslinje }),
             historiskTidslinje,
             Alder(fnr),
             null,
@@ -390,7 +391,7 @@ internal class ArbeidsgiverUtbetalingerTest {
             gjenståendeSykedager = it.tidslinjeEngine.gjenståendeSykedager()
             forbrukteSykedager = it.tidslinjeEngine.forbrukteSykedager()
         }
-        inspektør = UtbetalingstidslinjeInspektør(arbeidsgiver.nåværendeTidslinje())
+        inspektør = UtbetalingstidslinjeInspektør(person.arbeidsgiver(ORGNUMMER).nåværendeTidslinje())
     }
 
 }
