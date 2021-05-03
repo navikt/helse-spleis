@@ -1886,28 +1886,6 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    internal object TilAnnullering : Vedtaksperiodetilstand {
-        override val type = TIL_ANNULLERING
-
-        override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
-            LocalDateTime.MAX
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
-            hendelse.info("Overstyrer ikke en vedtaksperiode som har gått til annullering")
-        }
-
-        override fun håndter(
-            person: Person,
-            arbeidsgiver: Arbeidsgiver,
-            vedtaksperiode: Vedtaksperiode,
-            hendelse: IAktivitetslogg,
-            infotrygdhistorikk: Infotrygdhistorikk
-        ) {
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
-    }
-
     internal object UtbetalingFeilet : Vedtaksperiodetilstand {
         override val type = UTBETALING_FEILET
         override val skalForkastesVedOverlapp = false
