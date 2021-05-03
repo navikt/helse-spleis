@@ -755,7 +755,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         val meldingsreferanseId = UUID.randomUUID()
 
         val bedtOmSykepengehistorikk = erEtterspurt(Sykepengehistorikk, vedtaksperiodeId, orgnummer, AVVENTER_HISTORIKK)
-            || erEtterspurt(Sykepengehistorikk, vedtaksperiodeId, orgnummer, AVVENTER_REVURDERING)
+            || erEtterspurt(Sykepengehistorikk, vedtaksperiodeId, orgnummer, TilstandType.AVVENTER_HISTORIKK_REVURDERING)
         if (bedtOmSykepengehistorikk) assertEtterspurt(Ytelser::class, Sykepengehistorikk, vedtaksperiodeId, orgnummer)
         val harSpesifisertSykepengehistorikk = utbetalinger.isNotEmpty() || arbeidskategorikoder.isNotEmpty()
 

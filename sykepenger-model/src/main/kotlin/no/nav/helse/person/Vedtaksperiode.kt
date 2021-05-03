@@ -560,7 +560,7 @@ internal class Vedtaksperiode private constructor(
 
         this.tilstand(hendelse, AvventerArbeidsgivereRevurdering)
         if (første.tilstand == AvventerArbeidsgivere) {
-            første.tilstand(hendelse, AvventerRevurdering)
+            første.tilstand(hendelse, AvventerHistorikkRevurdering)
         }
     }
 
@@ -1186,7 +1186,12 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal object AvventerRevurdering : Vedtaksperiodetilstand {
+        // Reserverer denne tilstanden til vi skal sjonglere out-of-order revurdering
         override val type = AVVENTER_REVURDERING
+    }
+
+    internal object AvventerHistorikkRevurdering : Vedtaksperiodetilstand {
+        override val type = AVVENTER_HISTORIKK_REVURDERING
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             hendelse.info("Forespør sykdoms- og inntektshistorikk")
@@ -2014,7 +2019,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.arbeidsgiver.låsOpp(other.periode)
             other.oppdaterHistorikk(hendelse)
             vedtaksperiode.arbeidsgiver.lås(other.periode)
-            vedtaksperiode.tilstand(hendelse, AvventerRevurdering)
+            vedtaksperiode.tilstand(hendelse, AvventerHistorikkRevurdering)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
