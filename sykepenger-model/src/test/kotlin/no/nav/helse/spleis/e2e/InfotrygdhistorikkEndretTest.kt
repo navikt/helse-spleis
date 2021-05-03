@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggles
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
@@ -11,6 +12,8 @@ import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 
@@ -18,6 +21,16 @@ internal class InfotrygdhistorikkEndretTest: AbstractEndToEndTest() {
     private val gammelHistorikk = LocalDateTime.now().minusHours(24)
     private val utbetalinger = listOf(Utbetalingsperiode(ORGNUMMER, 1.januar til 31.januar, 100.prosent, INNTEKT))
     private val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
+
+    @BeforeEach
+    fun setup() {
+        Toggles.RebregnUtbetalingVedHistorikkendring.enable()
+    }
+
+    @AfterEach
+    fun teardown() {
+        Toggles.RebregnUtbetalingVedHistorikkendring.pop()
+    }
 
     @Test
     fun `infotrygdhistorikken var tom`() {
