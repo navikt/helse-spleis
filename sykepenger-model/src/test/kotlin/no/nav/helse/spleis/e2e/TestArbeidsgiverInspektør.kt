@@ -42,7 +42,8 @@ internal class TestArbeidsgiverInspektør(
     internal lateinit var sykdomshistorikk: Sykdomshistorikk
     internal lateinit var sykdomstidslinje: Sykdomstidslinje
     internal var låstePerioder = emptyList<Periode>()
-    internal val dagtelling = mutableMapOf<KClass<out Dag>, Int>()
+    internal val sykdomshistorikkDagTeller = mutableMapOf<KClass<out Dag>, Int>()
+    internal val vedtaksperiodeDagTeller = mutableMapOf<UUID, MutableMap<KClass<out Dag>, Int>>()
     internal val utbetalinger = mutableListOf<Utbetaling>()
     private val vedtaksperiodeutbetalinger = mutableMapOf<Int, Int>()
     private val utbetalingstilstander = mutableListOf<Utbetaling.Tilstand>()
@@ -128,6 +129,7 @@ internal class TestArbeidsgiverInspektør(
         inntektskilder[vedtaksperiodeindeks] = inntektskilde
         skjæringstidspunkter[vedtaksperiodeindeks] = skjæringstidspunkt
         forlengelserFraInfotrygd[vedtaksperiodeindeks] = forlengelseFraInfotrygd
+        vedtaksperiode.accept(VedtaksperiodeDagTeller())
     }
 
     override fun preVisit(tidslinje: Utbetalingstidslinje) {
@@ -241,52 +243,99 @@ internal class TestArbeidsgiverInspektør(
         vilkårsgrunnlag[vedtaksperiodeindeks] = dataForVilkårsvurdering
     }
 
-    private inner class Dagteller : SykdomstidslinjeVisitor {
+
+
+    private inner class VedtaksperiodeDagTeller: VedtaksperiodeVisitor {
+        private lateinit var vedtaksperiodeId: UUID
+        private val telling = mutableMapOf<KClass<out Dag>, Int>()
+        override fun preVisitVedtaksperiode(
+            vedtaksperiode: Vedtaksperiode,
+            id: UUID,
+            tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
+            opprettet: LocalDateTime,
+            oppdatert: LocalDateTime,
+            periode: Periode,
+            opprinneligPeriode: Periode,
+            skjæringstidspunkt: LocalDate,
+            periodetype: Periodetype,
+            forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
+            hendelseIder: List<UUID>,
+            inntektsmeldingInfo: InntektsmeldingInfo?,
+            inntektskilde: Inntektskilde
+        ) {
+            vedtaksperiodeId = id
+        }
+
+        override fun postVisitVedtaksperiode(
+            vedtaksperiode: Vedtaksperiode,
+            id: UUID,
+            tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
+            opprettet: LocalDateTime,
+            oppdatert: LocalDateTime,
+            periode: Periode,
+            opprinneligPeriode: Periode,
+            skjæringstidspunkt: LocalDate,
+            periodetype: Periodetype,
+            forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
+            hendelseIder: List<UUID>,
+            inntektsmeldingInfo: InntektsmeldingInfo?,
+            inntektskilde: Inntektskilde
+        ) {
+            vedtaksperiodeDagTeller[id] = telling
+        }
+
+        override fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: List<Periode>) {
+            tidslinje.accept(Dagteller(telling))
+        }
+    }
+
+    private inner class Dagteller(private val akkumulator: MutableMap<KClass<out Dag>, Int> = sykdomshistorikkDagTeller) : SykdomstidslinjeVisitor {
         override fun visitDag(dag: UkjentDag, dato: LocalDate, kilde: Hendelseskilde) =
-            inkrementer(dag)
-        override fun visitDag(dag: Arbeidsdag, dato: LocalDate, kilde: Hendelseskilde) = inkrementer(dag)
+            inkrementer(dag, akkumulator)
+        override fun visitDag(dag: Arbeidsdag, dato: LocalDate, kilde: Hendelseskilde) = inkrementer(dag, akkumulator)
         override fun visitDag(
             dag: Arbeidsgiverdag,
             dato: LocalDate,
             økonomi: Økonomi,
             kilde: Hendelseskilde
-        ) = inkrementer(dag)
-        override fun visitDag(dag: Feriedag, dato: LocalDate, kilde: Hendelseskilde) = inkrementer(dag)
+        ) = inkrementer(dag, akkumulator)
+        override fun visitDag(dag: Feriedag, dato: LocalDate, kilde: Hendelseskilde) = inkrementer(dag, akkumulator)
 
-        override fun visitDag(dag: FriskHelgedag, dato: LocalDate, kilde: Hendelseskilde) = inkrementer(dag)
+        override fun visitDag(dag: FriskHelgedag, dato: LocalDate, kilde: Hendelseskilde) = inkrementer(dag, akkumulator)
         override fun visitDag(
             dag: ArbeidsgiverHelgedag,
             dato: LocalDate,
             økonomi: Økonomi,
             kilde: Hendelseskilde
-        ) = inkrementer(dag)
+        ) = inkrementer(dag, akkumulator)
         override fun visitDag(
             dag: Sykedag,
             dato: LocalDate,
             økonomi: Økonomi,
             kilde: Hendelseskilde
-        ) = inkrementer(dag)
+        ) = inkrementer(dag, akkumulator)
 
         override fun visitDag(
             dag: ForeldetSykedag,
             dato: LocalDate,
             økonomi: Økonomi,
             kilde: Hendelseskilde
-        ) = inkrementer(dag)
+        ) = inkrementer(dag, akkumulator)
 
         override fun visitDag(
             dag: SykHelgedag,
             dato: LocalDate,
             økonomi: Økonomi,
             kilde: Hendelseskilde
-        ) = inkrementer(dag)
+        ) = inkrementer(dag, akkumulator)
 
-        override fun visitDag(dag: Permisjonsdag, dato: LocalDate, kilde: Hendelseskilde) = inkrementer(dag)
+        override fun visitDag(dag: Permisjonsdag, dato: LocalDate, kilde: Hendelseskilde) = inkrementer(dag, akkumulator)
 
         override fun visitDag(dag: ProblemDag, dato: LocalDate, kilde: Hendelseskilde, melding: String) =
-            inkrementer(dag)
-        private fun inkrementer(klasse: Dag) {
-            dagtelling.compute(klasse::class) { _, value -> 1 + (value ?: 0) }
+            inkrementer(dag, akkumulator)
+
+        private fun inkrementer(klasse: Dag, akkumulator: MutableMap<KClass<out Dag>, Int>) {
+            akkumulator.compute(klasse::class) { _, value -> 1 + (value ?: 0) }
         }
     }
 
