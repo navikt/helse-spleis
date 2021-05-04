@@ -356,6 +356,13 @@ internal class Vedtaksperiode private constructor(
         hendelseIder.add(hendelse.meldingsreferanseId())
     }
 
+    private fun oppdaterHistorikkRevurdering(hendelse: SykdomstidslinjeHendelse) {
+        hendelse.padLeft(periode.start)
+        hendelse.trimLeft(periode.endInclusive)
+        arbeidsgiver.oppdaterSykdom(hendelse).subset(periode)
+        hendelseIder.add(hendelse.meldingsreferanseId())
+    }
+
     private fun håndterSøknad(hendelse: SykdomstidslinjeHendelse, nesteTilstand: Vedtaksperiodetilstand?) {
         periode = periode.oppdaterFom(hendelse.periode())
         oppdaterHistorikk(hendelse)
@@ -1995,7 +2002,7 @@ internal class Vedtaksperiode private constructor(
         override fun revurder(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje, other: Vedtaksperiode) {
             hendelse.info("Oppdaterer tidslinjen til den overstyre perioden")
             vedtaksperiode.arbeidsgiver.låsOpp(other.periode)
-            other.oppdaterHistorikk(hendelse)
+            other.oppdaterHistorikkRevurdering(hendelse)
             vedtaksperiode.arbeidsgiver.lås(other.periode)
             vedtaksperiode.tilstand(hendelse, AvventerHistorikkRevurdering)
         }

@@ -78,6 +78,22 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `overstyring blør ikke ned i sykdomstidslinja på vedtaksperiodenivå`() {
+        nyttVedtak(3.januar, 26.januar)
+        forlengVedtak(27.januar, 14.februar)
+
+        håndterOverstyring((20.januar til 22.januar).map { manuellFeriedag(it) })
+        håndterYtelser(2.vedtaksperiode)   // No history
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
+        håndterUtbetalt(2.vedtaksperiode)
+
+        assertEquals(3, inspektør.sykdomshistorikkDagTeller[Dag.Feriedag::class])
+        assertNull(inspektør.vedtaksperiodeDagTeller[1.vedtaksperiode]?.get(Dag.Feriedag::class))
+        assertNull(inspektør.vedtaksperiodeDagTeller[2.vedtaksperiode]?.get(Dag.Feriedag::class))
+    }
+
+    @Test
     fun `to perioder - overstyr dag i nyeste`() {
         nyttVedtak(3.januar, 26.januar)
         forlengVedtak(27.januar, 14.februar)
