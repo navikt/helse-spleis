@@ -1,10 +1,8 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.hendelser.Inntektsvurdering
-import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.SøknadArbeidsgiver
-import no.nav.helse.hendelser.til
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utdanning
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -810,5 +808,17 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE)
         assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
+    }
+
+    @Test
+    fun `utdanning håndteres riktig wip-tittel`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterSykmelding(Sykmeldingsperiode(1.november(2017), 31.november(2017), 100.prosent)) // out of order som forkaster periodene
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Utdanning(27.januar, 31.januar))
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, TIL_INFOTRYGD)
+//        vedtak
+//        noe som forkaster vedtaket
+//        korrigerende søknad med utdanning
+//        ingen ny periode
     }
 }
