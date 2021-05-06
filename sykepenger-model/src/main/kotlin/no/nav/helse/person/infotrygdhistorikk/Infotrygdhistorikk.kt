@@ -57,11 +57,6 @@ internal class Infotrygdhistorikk private constructor(
         return siste.utbetalingstidslinje()
     }
 
-    internal fun utbetalingstidslinjer(): List<Utbetalingstidslinje> {
-        if (!harHistorikk()) return listOf(Utbetalingstidslinje())
-        return siste.utbetalingstidslinjer()
-    }
-
     internal fun historikkFor(orgnummer: String, sykdomstidslinje: Sykdomstidslinje): Sykdomstidslinje {
         if (!harHistorikk()) return sykdomstidslinje
         return siste.historikkFor(orgnummer, sykdomstidslinje)

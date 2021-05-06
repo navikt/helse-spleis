@@ -71,9 +71,9 @@ class Person private constructor(
 
     fun håndter(utbetalingshistorikk: UtbetalingshistorikkForFeriepenger) {
         utbetalingshistorikk.kontekst(this)
-        val utbetalingstidslinjerIT = listOf(infotrygdhistorikk.utbetalingstidslinjer()).flatten()
         val feriepengeberegner = Feriepengeberegner(
             utbetalingshistorikkForFeriepenger = utbetalingshistorikk,
+            person = this,
             alder = Alder(fødselsnummer)
         )
         feriepengeberegner.beregn()
