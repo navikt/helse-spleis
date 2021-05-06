@@ -146,7 +146,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
 
-        val historikk = Utbetalingsperiode(ORGNUMMER, 1.oktober(2017) til 31.desember(2017), 100.prosent, 1000.daglig)
+        val historikk = Utbetalingsperiode(ORGNUMMER, 1.oktober(2017),  31.desember(2017), 100.prosent, 1000.daglig)
         val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.oktober(2017), INNTEKT, true))
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk, inntektshistorikk = inntekter)
         håndterYtelser(1.vedtaksperiode)
@@ -184,7 +184,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
 
         håndterYtelser(
             2.vedtaksperiode,
-            Utbetalingsperiode(ORGNUMMER, 17.januar til 24.januar, 100.prosent, 1000.daglig),
+            Utbetalingsperiode(ORGNUMMER, 17.januar,  24.januar, 100.prosent, 1000.daglig),
             inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true))
         )
 
@@ -216,7 +216,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
 
-        val historikk = Utbetalingsperiode(ORGNUMMER, 1.oktober(2017) til 31.desember(2017), 100.prosent, 1000.daglig)
+        val historikk = Utbetalingsperiode(ORGNUMMER, 1.oktober(2017),  31.desember(2017), 100.prosent, 1000.daglig)
         val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.november(2017), Inntekt.INGEN, true))
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk, inntektshistorikk = inntekter)
 

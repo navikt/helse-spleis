@@ -96,7 +96,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
-        val historikk = Utbetalingsperiode(ORGNUMMER, 1.januar til 31.januar, 100.prosent, 15000.daglig)
+        val historikk = Utbetalingsperiode(ORGNUMMER, 1.januar,  31.januar, 100.prosent, 15000.daglig)
         val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.januar(2018), INNTEKT, true));
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk, inntektshistorikk = inntekter)
         håndterYtelser(1.vedtaksperiode)
@@ -129,7 +129,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Arbeid(25.februar, 28.februar))
-        val historikk = Utbetalingsperiode(ORGNUMMER, 17.januar til 31.januar, 100.prosent, 15000.daglig)
+        val historikk = Utbetalingsperiode(ORGNUMMER, 17.januar,  31.januar, 100.prosent, 15000.daglig)
         val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 17.januar(2018), INNTEKT, true))
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk, inntektshistorikk = inntekter)
         håndterYtelser(1.vedtaksperiode)
@@ -391,7 +391,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         )
         håndterUtbetalingshistorikk(
             2.vedtaksperiode,
-            Utbetalingsperiode(ORGNUMMER, 15.desember(2017) til 21.januar, 100.prosent, 1000.daglig),
+            Utbetalingsperiode(ORGNUMMER, 15.desember(2017),  21.januar, 100.prosent, 1000.daglig),
             inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 15.desember(2017), INNTEKT, true))
         )
         håndterYtelser(2.vedtaksperiode)

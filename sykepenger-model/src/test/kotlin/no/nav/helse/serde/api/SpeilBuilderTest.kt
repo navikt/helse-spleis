@@ -420,7 +420,7 @@ class SpeilBuilderTest {
                 håndter(
                     utbetalingshistorikk(
                         vedtaksperiodeId = sisteVedtaksperiodeId,
-                        utbetalinger = listOf(Utbetalingsperiode(orgnummer, skjæringstidspunktFraInfotrygd til 4.januar, 100.prosent, 31000.månedlig))
+                        utbetalinger = listOf(Utbetalingsperiode(orgnummer, skjæringstidspunktFraInfotrygd,  4.januar, 100.prosent, 31000.månedlig))
                     )
                 )
 
@@ -438,7 +438,7 @@ class SpeilBuilderTest {
                 håndter(
                     utbetalingshistorikk(
                         vedtaksperiodeId = sisteVedtaksperiodeId,
-                        utbetalinger = listOf(Utbetalingsperiode(orgnummer, skjæringstidspunktFraInfotrygd til tom1Periode, 100.prosent, 31000.månedlig)),
+                        utbetalinger = listOf(Utbetalingsperiode(orgnummer, skjæringstidspunktFraInfotrygd,  tom1Periode, 100.prosent, 31000.månedlig)),
                         inntektshistorikk = inntektshistorikk
                     )
                 )
@@ -446,7 +446,7 @@ class SpeilBuilderTest {
                 håndter(
                     ytelser(
                         vedtaksperiodeId = sisteVedtaksperiodeId,
-                        utbetalinger = listOf(Utbetalingsperiode(orgnummer, skjæringstidspunktFraInfotrygd til tom1Periode, 100.prosent, 31000.månedlig)),
+                        utbetalinger = listOf(Utbetalingsperiode(orgnummer, skjæringstidspunktFraInfotrygd,  tom1Periode, 100.prosent, 31000.månedlig)),
                         inntektshistorikk = inntektshistorikk
                     )
                 )
@@ -871,8 +871,8 @@ class SpeilBuilderTest {
         )
 
         val utbetalinger = listOf(
-            Utbetalingsperiode(orgnr1, 20.januar(2021) til 26.januar(2021), 100.prosent, inntekt),
-            Utbetalingsperiode(orgnr2, 20.januar(2021) til 26.januar(2021), 100.prosent, inntekt)
+            Utbetalingsperiode(orgnr1, 20.januar(2021),  26.januar(2021), 100.prosent, inntekt),
+            Utbetalingsperiode(orgnr2, 20.januar(2021),  26.januar(2021), 100.prosent, inntekt)
         )
 
         person.håndter(utbetalingshistorikk(vedtaksperiodeId = vedtaksperiodeId1, utbetalinger = utbetalinger, orgnummer = orgnr1))
@@ -935,8 +935,8 @@ class SpeilBuilderTest {
         )
 
         val utbetalinger = listOf(
-            Utbetalingsperiode(orgnr1, 20.januar(2021) til 26.januar(2021), 100.prosent, inntekt),
-            Utbetalingsperiode(orgnr2, 20.januar(2021) til 26.januar(2021), 100.prosent, inntekt)
+            Utbetalingsperiode(orgnr1, 20.januar(2021),  26.januar(2021), 100.prosent, inntekt),
+            Utbetalingsperiode(orgnr2, 20.januar(2021),  26.januar(2021), 100.prosent, inntekt)
         )
 
         person.håndter(utbetalingshistorikk(vedtaksperiodeId = vedtaksperiodeId1, utbetalinger = utbetalinger, orgnummer = orgnr1))

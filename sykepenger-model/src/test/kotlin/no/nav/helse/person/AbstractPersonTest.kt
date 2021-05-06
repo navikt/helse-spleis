@@ -6,7 +6,7 @@ import org.junit.jupiter.api.BeforeEach
 
 internal abstract class AbstractPersonTest {
 
-    protected companion object {
+    internal companion object {
         const val UNG_PERSON_FNR_2018 = "12020052345"
         const val AKTØRID = "42"
         const val ORGNUMMER = "987654321"

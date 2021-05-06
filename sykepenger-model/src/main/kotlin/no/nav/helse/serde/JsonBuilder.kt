@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.*
+import no.nav.helse.person.infotrygdhistorikk.Friperiode
+import no.nav.helse.person.infotrygdhistorikk.UkjentInfotrygdperiode
+import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.serde.PersonData.UtbetalingstidslinjeData.TypeData
 import no.nav.helse.serde.api.builders.BuilderState
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
@@ -269,14 +272,14 @@ internal class JsonBuilder : AbstractBuilder() {
             element["oppdatert"] = oppdatert
         }
 
-        override fun visitInfotrygdhistorikkFerieperiode(periode: ClosedRange<LocalDate>) {
+        override fun visitInfotrygdhistorikkFerieperiode(periode: Friperiode) {
             ferieperioder.add(mapOf(
                 "fom" to periode.start,
                 "tom" to periode.endInclusive
             ))
         }
 
-        override fun visitInfotrygdhistorikkUtbetalingsperiode(orgnr: String, periode: ClosedRange<LocalDate>, grad: Prosentdel, inntekt: Inntekt) {
+        override fun visitInfotrygdhistorikkUtbetalingsperiode(orgnr: String, periode: Utbetalingsperiode, grad: Prosentdel, inntekt: Inntekt) {
             utbetalingsperioder.add(mapOf(
                 "orgnr" to orgnr,
                 "fom" to periode.start,
@@ -286,7 +289,7 @@ internal class JsonBuilder : AbstractBuilder() {
             ))
         }
 
-        override fun visitInfotrygdhistorikkUkjentPeriode(periode: ClosedRange<LocalDate>) {
+        override fun visitInfotrygdhistorikkUkjentPeriode(periode: UkjentInfotrygdperiode) {
             ukjenteperioder.add(mapOf(
                 "fom" to periode.start,
                 "tom" to periode.endInclusive

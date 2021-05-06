@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.UtbetalingHendelse
-import no.nav.helse.hendelser.til
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -20,7 +19,7 @@ internal class PingPongTest : AbstractEndToEndTest() {
 
     @Test
     fun `Forlengelser av infotrygd overgang har samme maksdato som forrige`() {
-        val historikk1 = Utbetalingsperiode(ORGNUMMER, 20.november(2019) til 29.mai(2020), 100.prosent, 1145.daglig)
+        val historikk1 = Utbetalingsperiode(ORGNUMMER, 20.november(2019),  29.mai(2020), 100.prosent, 1145.daglig)
         val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 20.november(2019), 1000.daglig, true))
         håndterSykmelding(Sykmeldingsperiode(30.mai(2020), 19.juni(2020), 100.prosent))
         håndterSøknad(Sykdom(30.mai(2020), 19.juni(2020), 100.prosent))
@@ -39,7 +38,7 @@ internal class PingPongTest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
         håndterPåminnelse(2.vedtaksperiode, AVVENTER_GODKJENNING, LocalDateTime.now().minusDays(110))
 
-        val historikk2 = Utbetalingsperiode(ORGNUMMER, 22.juni(2020) til 17.august(2020), 100.prosent, 1145.daglig)
+        val historikk2 = Utbetalingsperiode(ORGNUMMER, 22.juni(2020),  17.august(2020), 100.prosent, 1145.daglig)
         val inntekter2 = listOf(
             Inntektsopplysning(ORGNUMMER, 20.november(2019), 1000.daglig, true),
             Inntektsopplysning(ORGNUMMER, 22.juni(2020), 1000.daglig, true)
@@ -62,7 +61,7 @@ internal class PingPongTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
-        val historie = Utbetalingsperiode(ORGNUMMER, 1.februar til 28.februar, 100.prosent, 1000.daglig)
+        val historie = Utbetalingsperiode(ORGNUMMER, 1.februar,  28.februar, 100.prosent, 1000.daglig)
         val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.februar, INNTEKT, true))
         håndterUtbetalingshistorikk(2.vedtaksperiode, historie, inntektshistorikk = inntekter)
         håndterYtelser(2.vedtaksperiode)

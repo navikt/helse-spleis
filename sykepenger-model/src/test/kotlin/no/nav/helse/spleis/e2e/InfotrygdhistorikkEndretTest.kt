@@ -19,7 +19,7 @@ import java.time.LocalDateTime
 
 internal class InfotrygdhistorikkEndretTest: AbstractEndToEndTest() {
     private val gammelHistorikk = LocalDateTime.now().minusHours(24)
-    private val utbetalinger = listOf(Utbetalingsperiode(ORGNUMMER, 1.januar til 31.januar, 100.prosent, INNTEKT))
+    private val utbetalinger = listOf(Utbetalingsperiode(ORGNUMMER, 1.januar,  31.januar, 100.prosent, INNTEKT))
     private val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
 
     @BeforeEach

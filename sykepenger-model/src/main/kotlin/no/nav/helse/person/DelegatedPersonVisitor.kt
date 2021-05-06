@@ -2,6 +2,9 @@ package no.nav.helse.person
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
+import no.nav.helse.person.infotrygdhistorikk.Friperiode
+import no.nav.helse.person.infotrygdhistorikk.UkjentInfotrygdperiode
+import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -149,15 +152,15 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.visitInfotrygdhistorikkArbeidskategorikoder(arbeidskategorikoder)
     }
 
-    override fun visitInfotrygdhistorikkFerieperiode(periode: ClosedRange<LocalDate>) {
+    override fun visitInfotrygdhistorikkFerieperiode(periode: Friperiode) {
         delegatee.visitInfotrygdhistorikkFerieperiode(periode)
     }
 
-    override fun visitInfotrygdhistorikkUtbetalingsperiode(orgnr: String, periode: ClosedRange<LocalDate>, grad: Prosentdel, inntekt: Inntekt) {
+    override fun visitInfotrygdhistorikkUtbetalingsperiode(orgnr: String, periode: Utbetalingsperiode, grad: Prosentdel, inntekt: Inntekt) {
         delegatee.visitInfotrygdhistorikkUtbetalingsperiode(orgnr, periode, grad, inntekt)
     }
 
-    override fun visitInfotrygdhistorikkUkjentPeriode(periode: ClosedRange<LocalDate>) {
+    override fun visitInfotrygdhistorikkUkjentPeriode(periode: UkjentInfotrygdperiode) {
         delegatee.visitInfotrygdhistorikkUkjentPeriode(periode)
     }
 

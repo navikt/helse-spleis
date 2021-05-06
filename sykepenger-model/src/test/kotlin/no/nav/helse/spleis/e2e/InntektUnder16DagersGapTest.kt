@@ -4,7 +4,6 @@ import no.nav.helse.Toggles
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
-import no.nav.helse.hendelser.til
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
@@ -349,7 +348,7 @@ internal class InntektUnder16DagersGapTest : AbstractEndToEndTest() {
 
     @Test
     fun `Krever ny inntektsmelding ved gap på nøyaktig 16 dager - ukjent helg etter perioden fra infotrygd`() {
-        val historikk = Utbetalingsperiode(ORGNUMMER, 1.januar til 19.januar, 100.prosent, 1000.daglig)
+        val historikk = Utbetalingsperiode(ORGNUMMER, 1.januar,  19.januar, 100.prosent, 1000.daglig)
         val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
 
         håndterSykmelding(Sykmeldingsperiode(7.februar, 28.februar, 100.prosent))
@@ -372,7 +371,7 @@ internal class InntektUnder16DagersGapTest : AbstractEndToEndTest() {
 
     @Test
     fun `Krever ikke ny inntektsmelding ved gap på mindre enn 16 dager - ukjent helg etter perioden fra infotrygd`() {
-        val historikk = Utbetalingsperiode(ORGNUMMER, 1.januar til 19.januar, 100.prosent, 1000.daglig)
+        val historikk = Utbetalingsperiode(ORGNUMMER, 1.januar,  19.januar, 100.prosent, 1000.daglig)
         val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
 
         håndterSykmelding(Sykmeldingsperiode(6.februar, 28.februar, 100.prosent))
@@ -396,7 +395,7 @@ internal class InntektUnder16DagersGapTest : AbstractEndToEndTest() {
 
     @Test
     fun `Krever ikke ny inntektsmelding ved gap mindre enn 16 dager - gap fra infotrygd slutter på søndag`() {
-        val historikk = Utbetalingsperiode(ORGNUMMER, 1.januar til 21.januar, 100.prosent, 1000.daglig)
+        val historikk = Utbetalingsperiode(ORGNUMMER, 1.januar,  21.januar, 100.prosent, 1000.daglig)
         val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
 
         håndterSykmelding(Sykmeldingsperiode(6.februar, 28.februar, 100.prosent))
@@ -490,7 +489,7 @@ internal class InntektUnder16DagersGapTest : AbstractEndToEndTest() {
 
     @Test
     fun `Krever ikke ny inntektsmelding ved gap på 1 dag`() {
-        val historikk = Utbetalingsperiode(ORGNUMMER, 1.januar til 14.januar, 100.prosent, 1000.daglig)
+        val historikk = Utbetalingsperiode(ORGNUMMER, 1.januar,  14.januar, 100.prosent, 1000.daglig)
         val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
 
         håndterSykmelding(Sykmeldingsperiode(16.januar, 19.januar, 100.prosent))

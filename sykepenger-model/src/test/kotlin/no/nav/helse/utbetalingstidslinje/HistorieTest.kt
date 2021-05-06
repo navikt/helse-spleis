@@ -1,7 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.til
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
@@ -48,10 +47,10 @@ internal abstract class HistorieTest {
     }
 
     protected fun utbetaling(fom: LocalDate, tom: LocalDate, inntekt: Inntekt = 1000.daglig, grad: Prosentdel = 100.prosent, orgnr: String = AG1) =
-        Utbetalingsperiode(orgnr, fom til tom, grad, inntekt)
+        Utbetalingsperiode(orgnr, fom,  tom, grad, inntekt)
 
     protected fun ferie(fom: LocalDate, tom: LocalDate) =
-        Friperiode(fom til tom)
+        Friperiode(fom,  tom)
 
     protected fun navdager(fom: LocalDate, tom: LocalDate) =
         tidslinjeOf(fom.dagerMellom(tom).NAV, startDato = fom)

@@ -50,7 +50,7 @@ internal class YtelserHendelseTest : AbstractPersonTest() {
         val sisteHistoriskeSykedag = førsteSykedag.plusMonths(2)
         håndterYtelser(
             utbetalinger = listOf(
-                Utbetalingsperiode(ORGNUMMER, sisteHistoriskeSykedag.minusDays(14) til sisteHistoriskeSykedag, 100.prosent, 1000.daglig)
+                Utbetalingsperiode(ORGNUMMER, sisteHistoriskeSykedag.minusDays(14),  sisteHistoriskeSykedag, 100.prosent, 1000.daglig)
             ),
             inntektshistorikk = listOf(
                 Inntektsopplysning(

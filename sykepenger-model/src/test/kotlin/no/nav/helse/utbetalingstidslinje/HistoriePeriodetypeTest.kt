@@ -47,10 +47,10 @@ internal class HistoriePeriodetypeTest {
     }
 
     private fun utbetaling(fom: LocalDate, tom: LocalDate, inntekt: Inntekt = 1000.daglig, grad: Prosentdel = 100.prosent, orgnr: String = AG1) =
-        Utbetalingsperiode(orgnr, fom til tom, grad, inntekt)
+        Utbetalingsperiode(orgnr, fom,  tom, grad, inntekt)
 
     private fun ferie(fom: LocalDate, tom: LocalDate) =
-        Friperiode(fom til tom)
+        Friperiode(fom,  tom)
 
     private fun historie(vararg perioder: Infotrygdperiode) {
         person.håndter(Utbetalingshistorikk(

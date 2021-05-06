@@ -1,15 +1,18 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.person.UtbetalingsdagVisitor
-import no.nav.helse.økonomi.Økonomi
+import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
+import no.nav.helse.person.InfotrygdhistorikkVisitor
+import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
+import no.nav.helse.sykdomstidslinje.erHelg
+import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Prosentdel
 import java.time.LocalDate
 import java.time.Year
 
 internal class Feriepengeberegner(
-    private val utbetalingstidslinjer: Iterable<Utbetalingstidslinje>,
-    private val alder: Alder,
-    private val år: Year
-) : UtbetalingsdagVisitor {
+    private val utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger,
+    private val alder: Alder
+) : InfotrygdhistorikkVisitor, Iterable<LocalDate> {
     private companion object {
         private const val MAGIC_NUMBER = 48
     }
@@ -17,11 +20,11 @@ internal class Feriepengeberegner(
     private val dager = mutableSetOf<LocalDate>()
 
     init {
-        utbetalingstidslinjer.forEach { it.accept(this) }
+        utbetalingshistorikkForFeriepenger.accept(this)
     }
 
-    override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag, dato: LocalDate, økonomi: Økonomi) {
-        dager.add(dato)
+    override fun visitInfotrygdhistorikkUtbetalingsperiode(orgnr: String, periode: Utbetalingsperiode, grad: Prosentdel, inntekt: Inntekt) {
+        dager.addAll(periode.filterNot { it.erHelg() })
     }
 
     internal fun beregn() {
@@ -30,4 +33,10 @@ internal class Feriepengeberegner(
             .groupBy { Year.from(it) }
             .flatMap { (_, prÅr) -> prÅr.take(MAGIC_NUMBER) }
     }
+
+    override fun iterator() = dager
+        .sorted()
+        .groupBy { Year.from(it) }
+        .flatMap { (_, prÅr) -> prÅr.take(MAGIC_NUMBER) }
+        .iterator()
 }

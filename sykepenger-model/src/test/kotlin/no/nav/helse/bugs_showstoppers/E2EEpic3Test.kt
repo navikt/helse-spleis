@@ -68,10 +68,10 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             Inntektsopplysning(ORGNUMMER, 13.november(2017), INNTEKT, true)
         )
         val utbetalinger = arrayOf(
-            Utbetalingsperiode(ORGNUMMER, 3.april(2019) til 30.april(2019), 100.prosent, 100.daglig),
-            Utbetalingsperiode(ORGNUMMER, 18.mars(2018) til 2.april(2018), 100.prosent, 100.daglig),
-            Utbetalingsperiode(ORGNUMMER, 29.november(2017) til 3.desember(2017), 100.prosent, 100.daglig),
-            Utbetalingsperiode(ORGNUMMER, 13.november(2017) til 28.november(2017), 100.prosent, 100.daglig)
+            Utbetalingsperiode(ORGNUMMER, 3.april(2019),  30.april(2019), 100.prosent, 100.daglig),
+            Utbetalingsperiode(ORGNUMMER, 18.mars(2018),  2.april(2018), 100.prosent, 100.daglig),
+            Utbetalingsperiode(ORGNUMMER, 29.november(2017),  3.desember(2017), 100.prosent, 100.daglig),
+            Utbetalingsperiode(ORGNUMMER, 13.november(2017),  28.november(2017), 100.prosent, 100.daglig)
         )
         håndterYtelser(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
@@ -833,7 +833,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.februar(2020), 28.februar(2020), 100.prosent))
         håndterSøknad(Sykdom(1.februar(2020), 28.februar(2020), 100.prosent))
-        håndterYtelser(2.vedtaksperiode, Utbetalingsperiode(ORGNUMMER, 17.januar(2020) til 31.januar(2020), 100.prosent, 1400.daglig))
+        håndterYtelser(2.vedtaksperiode, Utbetalingsperiode(ORGNUMMER, 17.januar(2020),  31.januar(2020), 100.prosent, 1400.daglig))
 
         assertTilstander(
             1.vedtaksperiode,
@@ -1494,7 +1494,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.januar(2019), 31.januar(2019), 100.prosent))
         håndterSøknad(Sykdom(1.januar(2019), 31.januar(2019), 100.prosent))
-        håndterUtbetalingshistorikk(2.vedtaksperiode, Utbetalingsperiode(ORGNUMMER, Periode(1.desember, 31.desember), 100.prosent, INNTEKT), inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.desember, INNTEKT, true)))
+        håndterUtbetalingshistorikk(2.vedtaksperiode, Utbetalingsperiode(ORGNUMMER, 1.desember, 31.desember, 100.prosent, INNTEKT), inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.desember, INNTEKT, true)))
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -1671,7 +1671,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         assertTilstander(4.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE)
         håndterUtbetalingshistorikk(
             3.vedtaksperiode,
-            Utbetalingsperiode(ORGNUMMER, 24.juni(2020) til 11.juli(2020), 100.prosent, 1814.daglig),
+            Utbetalingsperiode(ORGNUMMER, 24.juni(2020),  11.juli(2020), 100.prosent, 1814.daglig),
             inntektshistorikk = listOf(
                 Inntektsopplysning(ORGNUMMER, 24.juni(2020), INNTEKT, true)
             )
@@ -1724,7 +1724,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         håndterUtbetalingshistorikk(
             2.vedtaksperiode,
-            Utbetalingsperiode(ORGNUMMER, 27.juli(2020) til 13.september(2020), 100.prosent, 1000.daglig),
+            Utbetalingsperiode(ORGNUMMER, 27.juli(2020),  13.september(2020), 100.prosent, 1000.daglig),
             inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 27.juli(2020), INNTEKT, true))
         )
         assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
@@ -1748,7 +1748,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         person = SerialisertPerson(person.serialize().json).deserialize()
 
-        val historikk = Utbetalingsperiode(ORGNUMMER, 17.august(2020) til 22.august(2020), 100.prosent, 1000.daglig)
+        val historikk = Utbetalingsperiode(ORGNUMMER, 17.august(2020),  22.august(2020), 100.prosent, 1000.daglig)
         håndterUtbetalingshistorikk(2.vedtaksperiode, historikk)
         håndterYtelser(2.vedtaksperiode)
 
@@ -1783,8 +1783,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
-            Utbetalingsperiode(ORGNUMMER, 1.januar til 31.januar, 100.prosent, 1000.daglig),
-            Friperiode(1.februar til 28.februar)
+            Utbetalingsperiode(ORGNUMMER, 1.januar,  31.januar, 100.prosent, 1000.daglig),
+            Friperiode(1.februar,  28.februar)
         )
 
         inspektør.also {

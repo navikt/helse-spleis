@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
@@ -35,17 +34,16 @@ internal class UtbetalingshistorikkMessage(packet: JsonMessage) : BehovMessage(p
         .mapNotNull { utbetaling ->
             val fom = utbetaling["fom"].asLocalDate()
             val tom = utbetaling["tom"].asLocalDate()
-            val periode = Periode(fom, tom)
             when (utbetaling["typeKode"].asText()) {
                 "0", "1", "5", "6" -> {
                     val grad = utbetaling["utbetalingsGrad"].asInt().prosent
                     // inntektbeløpet i Infotrygd-utbetalingene er gradert; justerer derfor "opp igjen"
                     val inntekt = utbetaling["dagsats"].asInt().daglig(grad)
                     val orgnummer = utbetaling["orgnummer"].asText()
-                    Utbetalingsperiode(orgnummer, periode, grad, inntekt)
+                    Utbetalingsperiode(orgnummer, fom, tom, grad, inntekt)
                 }
-                "9" -> Friperiode(periode)
-                "" -> UkjentInfotrygdperiode(periode)
+                "9" -> Friperiode(fom, tom)
+                "" -> UkjentInfotrygdperiode(fom, tom)
                 else -> null
             }
         }

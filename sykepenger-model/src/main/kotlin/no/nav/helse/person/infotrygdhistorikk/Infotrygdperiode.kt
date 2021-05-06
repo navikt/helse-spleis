@@ -10,7 +10,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
 import java.util.*
 
-abstract class Infotrygdperiode(private val periode: Periode) : ClosedRange<LocalDate> by(periode), Iterable<LocalDate> by(periode) {
+abstract class Infotrygdperiode(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
     internal open fun sykdomstidslinje(kilde: SykdomstidslinjeHendelse.Hendelseskilde): Sykdomstidslinje = Sykdomstidslinje()
     internal open fun utbetalingstidslinje(): Utbetalingstidslinje = Utbetalingstidslinje()
 
@@ -23,14 +23,13 @@ abstract class Infotrygdperiode(private val periode: Periode) : ClosedRange<Loca
         return sykdomstidslinje(kilde).merge(sykdomstidslinje, replace)
     }
 
-    internal fun overlapperMed(other: Periode) = periode.overlapperMed(other)
     internal open fun gjelder(orgnummer: String) = true
     internal open fun utbetalingEtter(orgnumre: List<String>, dato: LocalDate) = false
 
-    override fun hashCode() = Objects.hash(this::class, periode)
+    override fun hashCode() = Objects.hash(this::class, start, endInclusive)
     override fun equals(other: Any?): Boolean {
         if (other !is Infotrygdperiode) return false
         if (this::class != other::class) return false
-        return this.periode == other.periode
+        return super.equals(other)
     }
 }

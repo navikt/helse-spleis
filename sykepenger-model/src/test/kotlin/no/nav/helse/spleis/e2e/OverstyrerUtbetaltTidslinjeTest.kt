@@ -616,7 +616,7 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
         håndterOverstyring((3.januar til 20.januar).map { manuellFeriedag(it) } + (21.januar til 26.januar).map { manuellPermisjonsdag(it) })
         håndterYtelser(
             1.vedtaksperiode,
-            Utbetalingsperiode(ORGNUMMER, 3.januar til 26.januar, 100.prosent, 15000.daglig),
+            Utbetalingsperiode(ORGNUMMER, 3.januar,  26.januar, 100.prosent, 15000.daglig),
             inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 3.januar, 15000.daglig, true))
         )
 

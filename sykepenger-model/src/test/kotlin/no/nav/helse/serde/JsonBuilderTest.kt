@@ -314,7 +314,7 @@ class JsonBuilderTest {
             }
 
         fun personMedInfotrygdForlengelse(søknadhendelseId: UUID = UUID.randomUUID()): Person {
-            val refusjoner = listOf(Utbetalingsperiode(orgnummer, 1.desember(2017) til 31.desember(2017), 100.prosent, 31000.månedlig))
+            val refusjoner = listOf(Utbetalingsperiode(orgnummer, 1.desember(2017),  31.desember(2017), 100.prosent, 31000.månedlig))
             return Person(aktørId, fnr).apply {
                 håndter(sykmelding(fom = 1.januar, tom = 31.januar))
                 fangeVedtaksperiode()

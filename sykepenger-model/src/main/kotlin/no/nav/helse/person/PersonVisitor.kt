@@ -3,6 +3,9 @@ package no.nav.helse.person
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
+import no.nav.helse.person.infotrygdhistorikk.Friperiode
+import no.nav.helse.person.infotrygdhistorikk.UkjentInfotrygdperiode
+import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -41,9 +44,9 @@ internal interface InfotrygdhistorikkVisitor {
         harStatslønn: Boolean
     ) {}
     fun preVisitInfotrygdhistorikkPerioder() {}
-    fun visitInfotrygdhistorikkFerieperiode(periode: ClosedRange<LocalDate>) {}
-    fun visitInfotrygdhistorikkUtbetalingsperiode(orgnr: String, periode: ClosedRange<LocalDate>, grad: Prosentdel, inntekt: Inntekt) {}
-    fun visitInfotrygdhistorikkUkjentPeriode(periode: ClosedRange<LocalDate>) {}
+    fun visitInfotrygdhistorikkFerieperiode(periode: Friperiode) {}
+    fun visitInfotrygdhistorikkUtbetalingsperiode(orgnr: String, periode: Utbetalingsperiode, grad: Prosentdel, inntekt: Inntekt) {}
+    fun visitInfotrygdhistorikkUkjentPeriode(periode: UkjentInfotrygdperiode) {}
     fun postVisitInfotrygdhistorikkPerioder() {}
     fun preVisitInfotrygdhistorikkInntektsopplysninger() {}
     fun visitInfotrygdhistorikkInntektsopplysning(

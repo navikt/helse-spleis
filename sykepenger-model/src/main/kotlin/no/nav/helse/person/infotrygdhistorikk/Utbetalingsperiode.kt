@@ -15,10 +15,11 @@ import java.util.*
 
 class Utbetalingsperiode(
     private val orgnr: String,
-    periode: Periode,
+    fom: LocalDate,
+    tom: LocalDate,
     private val grad: Prosentdel,
     inntekt: Inntekt
-) : Infotrygdperiode(periode) {
+) : Infotrygdperiode(fom, tom) {
     private val inntekt = inntekt.rundTilDaglig()
 
     override fun sykdomstidslinje(kilde: SykdomstidslinjeHendelse.Hendelseskilde): Sykdomstidslinje {

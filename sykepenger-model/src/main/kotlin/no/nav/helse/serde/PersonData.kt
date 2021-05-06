@@ -4,7 +4,6 @@ import no.nav.helse.appender
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
-import no.nav.helse.hendelser.til
 import no.nav.helse.person.*
 import no.nav.helse.person.infotrygdhistorikk.*
 import no.nav.helse.serde.PersonData.InfotrygdhistorikkElementData.Companion.tilModellObjekt
@@ -50,7 +49,16 @@ internal data class PersonData(
 
     private val person = Person::class.primaryConstructor!!
         .apply { isAccessible = true }
-        .call(aktørId, fødselsnummer, arbeidsgivereliste, modelAktivitetslogg, opprettet, infotrygdhistorikk.tilModellObjekt(), vilkårsgrunnlagHistorikk.tilModellObjekt(), dødsdato)
+        .call(
+            aktørId,
+            fødselsnummer,
+            arbeidsgivereliste,
+            modelAktivitetslogg,
+            opprettet,
+            infotrygdhistorikk.tilModellObjekt(),
+            vilkårsgrunnlagHistorikk.tilModellObjekt(),
+            dødsdato
+        )
 
     internal fun createPerson(): Person {
         arbeidsgivereliste.addAll(this.arbeidsgivere.map {
@@ -105,14 +113,14 @@ internal data class PersonData(
             private val fom: LocalDate,
             private val tom: LocalDate
         ) {
-            internal fun parsePeriode() = Friperiode(fom til tom)
+            internal fun parsePeriode() = Friperiode(fom, tom)
         }
 
         data class UkjentperiodeData(
             private val fom: LocalDate,
             private val tom: LocalDate
         ) {
-            internal fun parsePeriode() = UkjentInfotrygdperiode(fom til tom)
+            internal fun parsePeriode() = UkjentInfotrygdperiode(fom, tom)
         }
 
         data class UtbetalingsperiodeData(
@@ -124,7 +132,8 @@ internal data class PersonData(
         ) {
             internal fun parsePeriode() = Utbetalingsperiode(
                 orgnr = orgnr,
-                periode = fom til tom,
+                fom = fom,
+                tom = tom,
                 grad = grad.prosent,
                 inntekt = inntekt.månedlig
             )
@@ -189,7 +198,7 @@ internal data class PersonData(
         companion object {
             private fun List<VilkårsgrunnlagElement>.toMap() =
                 map(VilkårsgrunnlagElement::parseDataForVilkårsvurdering)
-                .toMap(mutableMapOf())
+                    .toMap(mutableMapOf())
 
             internal fun List<VilkårsgrunnlagElement>.tilModellObjekt() = VilkårsgrunnlagHistorikk::class.primaryConstructor!!
                 .apply { isAccessible = true }
@@ -967,7 +976,7 @@ internal data class PersonData(
             ManglerMedlemskap,
             ManglerOpptjening;
 
-            fun tilBegrunnelse() = when(this) {
+            fun tilBegrunnelse() = when (this) {
                 SykepengedagerOppbrukt -> Begrunnelse.SykepengedagerOppbrukt
                 MinimumSykdomsgrad -> Begrunnelse.MinimumSykdomsgrad
                 EgenmeldingUtenforArbeidsgiverperiode -> Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode
@@ -978,7 +987,7 @@ internal data class PersonData(
             }
 
             internal companion object {
-                fun fraBegrunnelse(begrunnelse: Begrunnelse) = when(begrunnelse) {
+                fun fraBegrunnelse(begrunnelse: Begrunnelse) = when (begrunnelse) {
                     is Begrunnelse.SykepengedagerOppbrukt -> SykepengedagerOppbrukt
                     is Begrunnelse.MinimumSykdomsgrad -> MinimumSykdomsgrad
                     is Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode -> EgenmeldingUtenforArbeidsgiverperiode
@@ -1056,7 +1065,9 @@ internal data class PersonData(
                     }
                     TypeData.AvvistDag -> {
                         Utbetalingstidslinje.Utbetalingsdag.AvvistDag(
-                            dato = dato, økonomi = økonomi, begrunnelser = begrunnelser?.map { it.tilBegrunnelse() } ?: error("Prøver å deserialisere avvist dag uten begrunnelse")
+                            dato = dato,
+                            økonomi = økonomi,
+                            begrunnelser = begrunnelser?.map { it.tilBegrunnelse() } ?: error("Prøver å deserialisere avvist dag uten begrunnelse")
                         )
                     }
                     TypeData.UkjentDag -> {
