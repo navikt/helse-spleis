@@ -75,7 +75,13 @@ internal class OppdragReflect(private val oppdrag: Oppdrag) {
     internal fun toBehovMap() = mutableMapOf(
         "mottaker" to oppdrag["mottaker"],
         "fagområde" to oppdrag.get<Fagområde>("fagområde").verdi,
-        "linjer" to oppdrag.map { UtbetalingslinjeReflect(it).toMap() },
+        "linjer" to oppdrag.map {
+            UtbetalingslinjeReflect(it)
+                .toMap().also { linje ->
+                    // TODO: Skal bort etter apper er migrert over til sats
+                    linje["dagsats"] = linje["sats"]
+                }
+        },
         "fagsystemId" to oppdrag["fagsystemId"],
         "endringskode" to oppdrag.get<Endringskode>("endringskode").toString()
     )
@@ -84,7 +90,13 @@ internal class OppdragReflect(private val oppdrag: Oppdrag) {
     internal fun toMap() = mutableMapOf(
         "mottaker" to oppdrag["mottaker"],
         "fagområde" to oppdrag.get<Fagområde>("fagområde").verdi,
-        "linjer" to oppdrag.map { UtbetalingslinjeReflect(it).toMap() },
+        "linjer" to oppdrag.map {
+            UtbetalingslinjeReflect(it)
+                .toMap().also { linje ->
+                    // TODO: Skal bort etter apper er migrert over til sats
+                    linje["dagsats"] = linje["sats"]
+                }
+        },
         "fagsystemId" to oppdrag["fagsystemId"],
         "endringskode" to oppdrag.get<Endringskode>("endringskode").toString(),
         "sisteArbeidsgiverdag" to oppdrag["sisteArbeidsgiverdag"],
@@ -100,7 +112,7 @@ internal class UtbetalingslinjeReflect(private val utbetalingslinje: Utbetalings
     internal fun toMap() = mutableMapOf<String, Any?>(
         "fom" to utbetalingslinje.get<LocalDate>("fom").toString(),
         "tom" to utbetalingslinje.get<LocalDate>("tom").toString(),
-        "dagsats" to utbetalingslinje["beløp"],           // TODO: change "dagsats" to "beløp",
+        "sats" to utbetalingslinje["beløp"],           // TODO: change "dagsats" to "beløp",
                                                           //    but needs JSON migration and change in Need apps
         "lønn" to utbetalingslinje["aktuellDagsinntekt"], // TODO: change "lønn" to "aktuellDagsinntekt",
                                                           //    but needs JSON migration and change in Need apps

@@ -59,7 +59,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
                         PersonObserver.UtbetaltEvent.Utbetalt.Utbetalingslinje(
                             fom = 17.januar,
                             tom = 31.januar,
-                            dagsats = 1431,
+                            sats = 1431,
                             beløp = 1431,
                             grad = 100.0,
                             sykedager = 11
@@ -111,7 +111,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
                         PersonObserver.UtbetaltEvent.Utbetalt.Utbetalingslinje(
                             fom = 17.januar,
                             tom = 31.januar,
-                            dagsats = 1431,
+                            sats = 1431,
                             beløp = 1431,
                             grad = 100.0,
                             sykedager = 11

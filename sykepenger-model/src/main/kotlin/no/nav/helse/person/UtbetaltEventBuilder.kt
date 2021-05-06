@@ -152,7 +152,7 @@ private class UtbetaltEventBuilder(
             UtbetaltEvent.Utbetalt.Utbetalingslinje(
                 fom = fom,
                 tom = tom,
-                dagsats = dagsats,
+                sats = dagsats,
                 beløp = beløp!!,
                 grad = grad,
                 sykedager = linje.stønadsdager()

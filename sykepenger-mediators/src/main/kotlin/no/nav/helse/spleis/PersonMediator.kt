@@ -225,7 +225,8 @@ internal class PersonMediator(
                                 mapOf(
                                     "fom" to linje.fom,
                                     "tom" to linje.tom,
-                                    "dagsats" to linje.dagsats,
+                                    "sats" to linje.sats,
+                                    "dagsats" to linje.sats,
                                     "beløp" to linje.beløp,
                                     "grad" to linje.grad,
                                     "sykedager" to linje.sykedager

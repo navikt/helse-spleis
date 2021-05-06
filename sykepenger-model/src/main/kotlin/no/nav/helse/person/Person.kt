@@ -178,6 +178,7 @@ class Person private constructor(
         observers.forEach { it.vedtaksperiodeAvbrutt(event) }
     }
 
+    @Deprecated("Fjernes til fordel for utbetaling_utbetalt")
     fun vedtaksperiodeUtbetalt(event: PersonObserver.UtbetaltEvent) {
         observers.forEach { it.vedtaksperiodeUtbetalt(event) }
     }

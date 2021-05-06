@@ -112,6 +112,7 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
             assertDato(linje.path("fom").asText())
             assertDato(linje.path("tom").asText())
             assertTrue(linje.path("dagsats").isInt)
+            assertTrue(linje.path("sats").isInt)
             assertTrue(linje.path("lønn").isInt)
             assertTrue(linje.path("grad").isDouble)
             assertTrue(linje.path("stønadsdager").isInt)

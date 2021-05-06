@@ -930,7 +930,7 @@ internal data class PersonData(
     data class UtbetalingslinjeData(
         private val fom: LocalDate,
         private val tom: LocalDate,
-        private val dagsats: Int,
+        private val sats: Int,
         private val lønn: Int,
         private val grad: Double,
         private val refFagsystemId: String?,
@@ -946,7 +946,7 @@ internal data class PersonData(
             .call(
                 fom,
                 tom,
-                dagsats,
+                sats,
                 lønn,
                 grad,
                 refFagsystemId,

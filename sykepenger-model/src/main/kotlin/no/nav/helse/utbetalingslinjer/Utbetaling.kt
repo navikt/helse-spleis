@@ -882,6 +882,7 @@ internal class Utbetaling private constructor(
                 else -> GodkjentUtenUtbetaling
             }
 
+        @Deprecated("Fjernes til fordel for utbetaling_utbetalt")
         fun ferdigstill(
             utbetaling: Utbetaling,
             person: Person,

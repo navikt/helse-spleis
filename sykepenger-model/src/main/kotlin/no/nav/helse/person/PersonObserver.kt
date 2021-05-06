@@ -80,7 +80,7 @@ interface PersonObserver {
             data class Utbetalingslinje(
                 val fom: LocalDate,
                 val tom: LocalDate,
-                val dagsats: Int,
+                val sats: Int,
                 val beløp: Int,
                 val grad: Double,
                 val sykedager: Int
@@ -185,6 +185,7 @@ interface PersonObserver {
     fun vedtaksperiodeEndret(event: VedtaksperiodeEndretEvent) {}
     fun vedtaksperiodeReberegnet(vedtaksperiodeId: UUID) {}
     fun vedtaksperiodeAvbrutt(event: VedtaksperiodeAvbruttEvent) {}
+    @Deprecated("Fjernes til fordel for utbetaling_utbetalt")
     fun vedtaksperiodeUtbetalt(event: UtbetaltEvent) {}
     fun personEndret(personEndretEvent: PersonEndretEvent) {}
     fun vedtaksperiodeIkkeFunnet(vedtaksperiodeEvent: VedtaksperiodeIkkeFunnetEvent) {}
