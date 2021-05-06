@@ -156,10 +156,11 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     protected fun håndterSøknadMedValidering(
         vedtaksperiodeId: UUID,
         vararg perioder: Søknad.Søknadsperiode,
-        andreInntektskilder: List<Søknad.Inntektskilde> = emptyList()
+        andreInntektskilder: List<Søknad.Inntektskilde> = emptyList(),
+        orgnummer: String = ORGNUMMER
     ) {
         assertIkkeEtterspurt(Søknad::class, InntekterForSammenligningsgrunnlag, vedtaksperiodeId, ORGNUMMER)
-        håndterSøknad(*perioder, andreInntektskilder = andreInntektskilder)
+        håndterSøknad(*perioder, andreInntektskilder = andreInntektskilder, orgnummer = orgnummer)
     }
 
     protected fun håndterSøknad(

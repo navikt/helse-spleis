@@ -92,12 +92,12 @@ class Person private constructor(
         val skjæringstidspunkter = skjæringstidspunkter()
         return ArbeidsgiverUtbetalinger(
             regler = regler,
-            arbeidsgivere = arbeidsgivereMedSykdom().map { it to
+            arbeidsgivere = arbeidsgivereMedSykdom().associateWith {
                 infotrygdhistorikk.builder(
                     organisasjonsnummer = it.organisasjonsnummer(),
                     builder = it.builder(regler, skjæringstidspunkter)
                 )
-            }.toMap(),
+            },
             infotrygdtidslinje = infotrygdhistorikk.utbetalingstidslinje(),
             alder = Alder(fødselsnummer),
             dødsdato = dødsdato,

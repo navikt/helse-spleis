@@ -1,14 +1,11 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.sykdomstidslinje.erHelg
-import no.nav.helse.testhelpers.desember
-import no.nav.helse.testhelpers.inntektperioder
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.mars
+import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -20,6 +17,8 @@ import java.util.*
 internal class FeriepengeberegnerTest : AbstractEndToEndTest() {
     private companion object {
         private val alder = Alder(UNG_PERSON_FNR_2018)
+        private const val a1 = "456789123"
+        private const val a2 = "789456213"
     }
 
     @Test
@@ -57,7 +56,7 @@ internal class FeriepengeberegnerTest : AbstractEndToEndTest() {
 
     @Test
     fun `Finner datoer for feriepengeberegning med 48 sammenhengende utbetalingsdager i Oppdrag fra første januar`() {
-        detteGreieneHer(
+        byggPerson(
             arbeidsgiverperiode = 16.desember(2017) til 31.desember(2017),
             syktil = 7.mars(2018)
         )
@@ -69,7 +68,7 @@ internal class FeriepengeberegnerTest : AbstractEndToEndTest() {
 
     @Test
     fun `Finner datoer for feriepengeberegning med 49 sammenhengende utbetalingsdager i Oppdrag fra første januar`() {
-        detteGreieneHer(
+        byggPerson(
             arbeidsgiverperiode = 16.desember(2017) til 31.desember(2017),
             syktil = 8.mars(2018)
         )
@@ -81,7 +80,7 @@ internal class FeriepengeberegnerTest : AbstractEndToEndTest() {
 
     @Test
     fun `Finner datoer for feriepengeberegning med 47 sammenhengende utbetalingsdager i Oppdrag fra første januar`() {
-        detteGreieneHer(
+        byggPerson(
             arbeidsgiverperiode = 16.desember(2017) til 31.desember(2017),
             syktil = 6.mars(2018)
         )
@@ -91,111 +90,94 @@ internal class FeriepengeberegnerTest : AbstractEndToEndTest() {
         assertEquals(47, beregner.count())
     }
 
-//    @Test
-//    fun `Finner datoer for feriepengeberegning med 48 sammenhengende NAVdager fra niende mai`() {
-//        val utbetalingstidslinjer = listOf(tidslinjeOf(66.NAVv2, startDato = 9.mai))
-//
-//        MaksimumUtbetaling(utbetalingstidslinjer, Aktivitetslogg(), 1.januar).betal()
-//        Feriepengeberegner(utbetalingstidslinjer, alder, Year.of(2018)).beregn()
-//        assertFeriepengedager(utbetalingstidslinjer, 9.mai til 13.juli)
-//    }
-//
-//    @Test
-//    fun `Finner datoer for feriepengeberegning med 47 ikke-sammenhengende NAVdager`() {
-//        val utbetalingstidslinjer = listOf(tidslinjeOf(22.NAVv2, 22.ARBv2, 11.NAVv2, 11.FRIv2, 11.NAVv2, 22.AVVv2, 22.NAVv2))
-//
-//        MaksimumUtbetaling(utbetalingstidslinjer, Aktivitetslogg(), 1.januar).betal()
-//        Feriepengeberegner(utbetalingstidslinjer, alder, Year.of(2018)).beregn()
-//        assertFeriepengedager(
-//            utbetalingstidslinjer,
-//            1.januar til 22.januar,
-//            14.februar til 24.februar,
-//            8.mars til 18.mars,
-//            10.april til 1.mai
-//        )
-//    }
-//
-//    @Test
-//    fun `Finner datoer for feriepengeberegning med over 48 ikke-sammenhengende NAVdager`() {
-//        val utbetalingstidslinjer = listOf(tidslinjeOf(22.NAVv2, 22.ARBv2, 11.NAVv2, 11.FRIv2, 11.NAVv2, 22.AVVv2, 33.NAVv2))
-//
-//        MaksimumUtbetaling(utbetalingstidslinjer, Aktivitetslogg(), 1.januar).betal()
-//        Feriepengeberegner(utbetalingstidslinjer, alder, Year.of(2018)).beregn()
-//        assertFeriepengedager(
-//            utbetalingstidslinjer,
-//            1.januar til 22.januar,
-//            14.februar til 24.februar,
-//            8.mars til 18.mars,
-//            10.april til 2.mai
-//        )
-//    }
-//
-//    @Test
-//    fun `Finner datoer for feriepengeberegning med to helt overlappende utbetalingstidslinjer`() {
-//        val utbetalingstidslinjer = listOf(tidslinjeOf(66.NAVv2(500)), tidslinjeOf(66.NAVv2(500)))
-//
-//        MaksimumUtbetaling(utbetalingstidslinjer, Aktivitetslogg(), 1.januar).betal()
-//        Feriepengeberegner(utbetalingstidslinjer, alder, Year.of(2018)).beregn()
-//        assertFeriepengedager(
-//            utbetalingstidslinjer,
-//            1.januar til 7.mars,
-//            1.januar til 7.mars,
-//            dekningsgrunnlag = 500
-//        )
-//    }
-//
-//    @Test
-//    fun `Finner datoer for feriepengeberegning med to delvis overlappende utbetalingstidslinjer`() {
-//        val utbetalingstidslinjer = listOf(
-//            tidslinjeOf(7.NAVv2(500), startDato = 1.januar),
-//            tidslinjeOf(10.NAVv2(500), startDato = 3.januar)
-//        )
-//        MaksimumUtbetaling(utbetalingstidslinjer, Aktivitetslogg(), 1.januar).betal()
-//        Feriepengeberegner(utbetalingstidslinjer, alder, Year.of(2018)).beregn()
-//        assertFeriepengedager(
-//            utbetalingstidslinjer,
-//            1.januar til 7.januar,
-//            3.januar til 12.januar,
-//            dekningsgrunnlag = 500
-//        )
-//    }
-//
-//    @Test
-//    fun `Finner datoer for feriepengeberegning med to ikke-overlappende utbetalingstidslinjer`() {
-//        val utbetalingstidslinjer = listOf(
-//            tidslinjeOf(7.NAVv2(500), 14.ARBv2(500), startDato = 1.januar),
-//            tidslinjeOf(7.NAVv2(500), startDato = 15.januar)
-//        )
-//        MaksimumUtbetaling(utbetalingstidslinjer, Aktivitetslogg(), 1.januar).betal()
-//        Feriepengeberegner(utbetalingstidslinjer, alder, Year.of(2018)).beregn()
-//        assertFeriepengedager(utbetalingstidslinjer, 1.januar til 5.januar, 15.januar til 19.januar, dekningsgrunnlag = 500)
-//    }
-//
-//    //TODO: Gir testen mening lenger?
-//    @Test
-//    fun `Finner datoer for feriepengeberegning der utbetalingstidslinjen går over nyttår`() {
-//        val utbetalingstidslinjer = listOf(
-//            tidslinjeOf(92.NAVv2, 68.NAVv2, startDato = 1.oktober(2020))
-//        )
-//        MaksimumUtbetaling(utbetalingstidslinjer, Aktivitetslogg(), 1.oktober(2020)).betal()
-//        Feriepengeberegner(utbetalingstidslinjer, alder, Year.of(2020)).beregn()
-//        assertFeriepengedager(
-//            utbetalingstidslinjer,
-//            1.oktober(2020) til 7.desember(2020)
-//        )
-//        Feriepengeberegner(utbetalingstidslinjer, alder, Year.of(2021)).beregn()
-//        assertFeriepengedager(
-//            utbetalingstidslinjer,
-//            1.oktober(2020) til 7.desember(2020),
-//            1.januar(2021) til 9.mars(2021)
-//        )
-//    }
+    @Test
+    fun `Finner datoer for feriepengeberegning med 48 sammenhengende utbetalingsdager i Oppdrag fra niende mai`() {
+        byggPerson(
+            arbeidsgiverperiode = 23.april(2018) til 8.mai(2018),
+            syktil = 13.juli(2018)
+        )
 
-    private fun assertFeriepengedager(utbetalingstidslinjer: List<Utbetalingstidslinje>, vararg perioder: Periode, dekningsgrunnlag: Number = 1200) {
-        val datoer = perioder.fold(emptyList<LocalDate>()) { acc, periode ->
-            acc + periode.filterNot { it.erHelg() }
-        }
-        val expectedSum = datoer.sumByDouble { dekningsgrunnlag.toDouble() * 0.102 }
+        val beregner = Feriepengeberegner(utbetalingshistorikkForFeriepenger(), person, alder)
+
+        assertEquals(48, beregner.count())
+    }
+
+    @Test
+    fun `Finner datoer for feriepengeberegning med 47 ikke-sammenhengende utbetalingsdager i Oppdrag`() {
+        byggPerson(
+            arbeidsgiverperiode = 16.desember(2017) til 31.desember(2017),
+            syktil = 22.januar(2018)
+        )
+        byggPerson(
+            arbeidsgiverperiode = 1.mars(2018) til 16.mars(2018),
+            syktil = 28.mars(2018)
+        )
+        byggPerson(
+            arbeidsgiverperiode = 1.mai(2018) til 16.mai(2018),
+            syktil = 12.juni(2018)
+        )
+        byggPerson(
+            arbeidsgiverperiode = 1.juli(2018) til 16.juli(2018),
+            syktil = 21.juli(2018)
+        )
+
+        val beregner = Feriepengeberegner(utbetalingshistorikkForFeriepenger(), person, alder)
+
+        assertEquals(47, beregner.count())
+    }
+
+    @Test
+    fun `Finner datoer for feriepengeberegning med 48 ikke-sammenhengende utbetalingsdager i Oppdrag`() {
+        byggPerson(
+            arbeidsgiverperiode = 16.desember(2017) til 31.desember(2017),
+            syktil = 22.januar(2018)
+        )
+        byggPerson(
+            arbeidsgiverperiode = 1.mars(2018) til 16.mars(2018),
+            syktil = 28.mars(2018)
+        )
+        byggPerson(
+            arbeidsgiverperiode = 1.mai(2018) til 16.mai(2018),
+            syktil = 12.juni(2018)
+        )
+        byggPerson(
+            arbeidsgiverperiode = 1.juli(2018) til 16.juli(2018),
+            syktil = 23.juli(2018)
+        )
+
+        val beregner = Feriepengeberegner(utbetalingshistorikkForFeriepenger(), person, alder)
+
+        assertEquals(48, beregner.count())
+    }
+
+    @Test
+    fun `Finner datoer for feriepengeberegning med to helt overlappende Oppdrag`() = Toggles.FlereArbeidsgivereFørstegangsbehandling.enable {
+        byggPersonToParallelle(
+            arbeidsgiverperiode = 23.april(2018) til 8.mai(2018),
+            syktil = 13.juli(2018)
+        )
+
+        val beregner = Feriepengeberegner(utbetalingshistorikkForFeriepenger(), person, alder)
+
+        assertEquals(48, beregner.count())
+    }
+
+    @Test
+    fun `Finner datoer for feriepengeberegning med to ikke-overlappende utbetalingstidslinjer`() = Toggles.FlereArbeidsgivereFørstegangsbehandling.enable {
+        byggPerson(
+            arbeidsgiverperiode = 1.januar(2018) til 16.januar(2018),
+            syktil = 15.februar(2018),
+            orgnummer = a1
+        )
+        byggPerson(
+            arbeidsgiverperiode = 1.juli(2018) til 16.juli(2018),
+            syktil = 15.august(2018),
+            orgnummer = a2
+        )
+
+        val beregner = Feriepengeberegner(utbetalingshistorikkForFeriepenger(), person, alder)
+
+        assertEquals(44, beregner.count())
     }
 
     private fun utbetalingshistorikkForFeriepenger(utbetalinger: List<Infotrygdperiode> = emptyList()) =
@@ -211,26 +193,64 @@ internal class FeriepengeberegnerTest : AbstractEndToEndTest() {
             Year.of(2020)
         )
 
-    private fun detteGreieneHer(
+    private fun byggPerson(
         arbeidsgiverperiode: Periode = 1.januar til 16.januar,
-        syktil: LocalDate = 31.januar
+        syktil: LocalDate = 31.januar,
+        orgnummer: String = ORGNUMMER
     ) {
-        håndterSykmelding(Sykmeldingsperiode(arbeidsgiverperiode.start, syktil, 100.prosent))
-        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(arbeidsgiverperiode.start, syktil, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
-        håndterInntektsmelding(listOf(arbeidsgiverperiode))
-        håndterYtelser(1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+        håndterSykmelding(Sykmeldingsperiode(arbeidsgiverperiode.start, syktil, 100.prosent), orgnummer = orgnummer)
+        håndterSøknadMedValidering(
+            observatør.sisteVedtaksperiode(),
+            Søknad.Søknadsperiode.Sykdom(arbeidsgiverperiode.start, syktil, 100.prosent),
+            orgnummer = orgnummer
+        )
+        håndterUtbetalingshistorikk(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
+        håndterInntektsmelding(listOf(arbeidsgiverperiode), orgnummer = orgnummer)
+        håndterYtelser(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
+        håndterVilkårsgrunnlag(observatør.sisteVedtaksperiode(), inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioder {
                 inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
                 arbeidsgiverperiode.start.minusYears(1) til arbeidsgiverperiode.start.withDayOfMonth(1).minusMonths(1) inntekter {
-                    ORGNUMMER inntekt INNTEKT
+                    orgnummer inntekt INNTEKT
                 }
             }
-        ))
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        ), orgnummer = orgnummer)
+        håndterYtelser(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
+        håndterSimulering(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
+        håndterUtbetalingsgodkjenning(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
+        håndterUtbetalt(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
+    }
+
+    private fun byggPersonToParallelle(
+        arbeidsgiverperiode: Periode = 1.januar til 16.januar,
+        syktil: LocalDate = 31.januar
+    ) {
+        håndterSykmelding(Sykmeldingsperiode(arbeidsgiverperiode.start, syktil, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(arbeidsgiverperiode.start, syktil, 100.prosent), orgnummer = a2)
+        håndterSøknadMedValidering(1.vedtaksperiode(a1), Søknad.Søknadsperiode.Sykdom(arbeidsgiverperiode.start, syktil, 100.prosent), orgnummer = a1)
+        håndterSøknadMedValidering(1.vedtaksperiode(a2), Søknad.Søknadsperiode.Sykdom(arbeidsgiverperiode.start, syktil, 100.prosent), orgnummer = a2)
+        håndterUtbetalingshistorikk(1.vedtaksperiode(a1), orgnummer = a1)
+        håndterUtbetalingshistorikk(1.vedtaksperiode(a2), orgnummer = a2)
+        håndterInntektsmelding(listOf(arbeidsgiverperiode), orgnummer = a1)
+        håndterInntektsmelding(listOf(arbeidsgiverperiode), orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
+        håndterVilkårsgrunnlag(1.vedtaksperiode(a1), inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                arbeidsgiverperiode.start.minusYears(1) til arbeidsgiverperiode.start.withDayOfMonth(1).minusMonths(1) inntekter {
+                    a1 inntekt INNTEKT
+                    a2 inntekt INNTEKT
+                }
+            }
+        ), orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), orgnummer = a1)
+        håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
+
+        håndterYtelser(1.vedtaksperiode(a2), orgnummer = a2)
+        håndterSimulering(1.vedtaksperiode(a2), orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode(a2), orgnummer = a2)
+        håndterUtbetalt(1.vedtaksperiode(a2), orgnummer = a2)
     }
 }
