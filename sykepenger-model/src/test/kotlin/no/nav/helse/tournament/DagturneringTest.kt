@@ -17,7 +17,7 @@ internal class DagturneringTest {
         val sykmeldingSykedag = Sykdomstidslinje.sykedager(1.mandag, 1.mandag, 100.prosent, sykmelding)
         val søknadArbeidsdag = Sykdomstidslinje.arbeidsdager(1.mandag, 1.mandag, søknad)
 
-        val tidslinje = sykmeldingSykedag.merge(søknadArbeidsdag, dagturnering::beste)
+        val tidslinje = sykmeldingSykedag.merge(søknadArbeidsdag, Dagturnering.TURNERING::beste)
 
         assertTrue(
             tidslinje[1.mandag] is Arbeidsdag,
@@ -30,7 +30,7 @@ internal class DagturneringTest {
         val søknadSykedager = Sykdomstidslinje.sykedager(1.mandag, 1.fredag, 100.prosent, søknad)
         val søknadArbeidsdager = Sykdomstidslinje.arbeidsdager(1.torsdag, 1.fredag, søknad)
 
-        val tidslinje = søknadSykedager.merge(søknadArbeidsdager, dagturnering::beste)
+        val tidslinje = søknadSykedager.merge(søknadArbeidsdager, Dagturnering.TURNERING::beste)
         assertTrue(
             tidslinje[1.onsdag] is Sykedag,
             "Onsdag er fortsatt en sykedag etter kombinering av sykmelding og søknad"
@@ -46,7 +46,7 @@ internal class DagturneringTest {
         val sykmeldingSykHelgedag = Sykdomstidslinje.sykedager(1.søndag, 1.søndag, 100.prosent, sykmelding)
         val inntektsmeldingArbeidsgiverdag = Sykdomstidslinje.arbeidsgiverdager(1.søndag, 1.søndag, 100.prosent, inntektsmelding)
 
-        val tidslinje = inntektsmeldingArbeidsgiverdag.merge(sykmeldingSykHelgedag, dagturnering::beste)
+        val tidslinje = inntektsmeldingArbeidsgiverdag.merge(sykmeldingSykHelgedag, Dagturnering.TURNERING::beste)
 
         assertTrue(tidslinje[1.søndag] is ArbeidsgiverHelgedag)
     }
@@ -56,7 +56,7 @@ internal class DagturneringTest {
         val søknadArbeidsgiverdag = Sykdomstidslinje.arbeidsgiverdager(1.mandag, 1.mandag, 100.prosent, søknad)
         val inntektsmeldingArbeidsdag = Sykdomstidslinje.arbeidsdager(1.mandag, 1.mandag, inntektsmelding)
 
-        val tidslinje = søknadArbeidsgiverdag.merge(inntektsmeldingArbeidsdag, dagturnering::beste)
+        val tidslinje = søknadArbeidsgiverdag.merge(inntektsmeldingArbeidsdag, Dagturnering.TURNERING::beste)
 
         assertTrue(tidslinje[1.mandag] is Arbeidsdag)
     }
@@ -66,7 +66,7 @@ internal class DagturneringTest {
         val sykmeldingSykedag = Sykdomstidslinje.sykedager(1.mandag, 1.mandag, 100.prosent, sykmelding)
         val inntektsmeldingArbeidsdag = Sykdomstidslinje.arbeidsdager(1.mandag, 1.mandag, inntektsmelding)
 
-        val tidslinje = sykmeldingSykedag.merge(inntektsmeldingArbeidsdag, dagturnering::beste)
+        val tidslinje = sykmeldingSykedag.merge(inntektsmeldingArbeidsdag, Dagturnering.TURNERING::beste)
 
         assertTrue(tidslinje[1.mandag] is Arbeidsdag)
     }
@@ -76,7 +76,7 @@ internal class DagturneringTest {
         val søknadSykedag = Sykdomstidslinje.sykedager(1.mandag, 1.mandag, 100.prosent, søknad)
         val inntektsmeldingArbeidsdag = Sykdomstidslinje.arbeidsdager(1.mandag, 1.mandag, inntektsmelding)
 
-        val tidslinje = søknadSykedag.merge(inntektsmeldingArbeidsdag, dagturnering::beste)
+        val tidslinje = søknadSykedag.merge(inntektsmeldingArbeidsdag, Dagturnering.TURNERING::beste)
 
         assertTrue(tidslinje[1.mandag] is Arbeidsdag)
     }

@@ -2,12 +2,14 @@ package no.nav.helse.tournament
 
 import no.nav.helse.sykdomstidslinje.Dag
 
-internal val søknadDagturnering = Dagturnering("/dagturneringSøknad.csv")
-internal val dagturnering = Dagturnering("/dagturnering.csv")
 
-internal class Dagturnering(private val source: String) {
+internal class Dagturnering private constructor(private val source: String) {
+    companion object {
+        internal val SØKNAD = Dagturnering("/dagturneringSøknad.csv")
+        internal val TURNERING = Dagturnering("/dagturnering.csv")
+    }
 
-    private val strategies: Map<Turneringsnøkkel, Map<Turneringsnøkkel, Strategy>> by lazy { readStrategies() }
+    private val strategies: Map<Turneringsnøkkel, Map<Turneringsnøkkel, Strategy>> = readStrategies()
 
     fun beste(venstre: Dag, høyre: Dag): Dag {
         val leftKey = Turneringsnøkkel.fraDag(venstre)

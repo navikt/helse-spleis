@@ -2,7 +2,7 @@ package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.testhelpers.TestEvent
 import no.nav.helse.testhelpers.mandag
-import no.nav.helse.tournament.dagturnering
+import no.nav.helse.tournament.Dagturnering
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -68,7 +68,7 @@ internal class BesteDagTest {
         dag2: Dag,
         expectedWinner: Dag
     ) {
-        val winner = dagturnering.beste(dag1, dag2)
+        val winner = Dagturnering.TURNERING.beste(dag1, dag2)
         assertEquals(expectedWinner, winner)
     }
 

@@ -2,7 +2,7 @@ package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.SykdomshistorikkVisitor
-import no.nav.helse.tournament.dagturnering
+import no.nav.helse.tournament.Dagturnering
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
 import java.time.LocalDateTime
@@ -54,7 +54,7 @@ internal class Sykdomshistorikk private constructor(
         val tidslinje = if (elementer.isEmpty())
             hendelseSykdomstidslinje
         else
-            sykdomstidslinje().merge(hendelseSykdomstidslinje, dagturnering::beste)
+            sykdomstidslinje().merge(hendelseSykdomstidslinje, Dagturnering.TURNERING::beste)
         return tidslinje.also { it.valider(hendelse) }
     }
 

@@ -6,7 +6,7 @@ import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.merge
-import no.nav.helse.tournament.søknadDagturnering
+import no.nav.helse.tournament.Dagturnering
 import no.nav.helse.økonomi.Prosentdel
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -38,7 +38,7 @@ class Søknad(
         sykdomstidslinje = perioder
             .map { it.sykdomstidslinje(avskjæringsdato(), kilde) }
             .filter { it.periode()?.start?.isAfter(sykdomsperiode.start.minusDays(tidslinjegrense)) ?: false }
-            .merge(søknadDagturnering::beste)
+            .merge(Dagturnering.SØKNAD::beste)
     }
 
     override fun forGammel() = (sykdomsperiode.endInclusive < avskjæringsdato()).also {

@@ -3,7 +3,7 @@ package no.nav.helse.sykdomstidslinje
 import no.nav.helse.hendelser.*
 import no.nav.helse.perioder
 import no.nav.helse.testhelpers.*
-import no.nav.helse.tournament.dagturnering
+import no.nav.helse.tournament.Dagturnering
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -345,7 +345,7 @@ internal class SkjæringstidspunktTest {
     ) {
         val tidslinje = hendelse
             .map { it.sykdomstidslinje() }
-            .merge(dagturnering::beste)
+            .merge(Dagturnering.TURNERING::beste)
 
         val skjæringstidspunkt = tidslinje.skjæringstidspunkt()
         assertEquals(forventetSkjæringstidspunkt, skjæringstidspunkt) {
