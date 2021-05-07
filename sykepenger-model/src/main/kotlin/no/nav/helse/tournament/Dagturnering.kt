@@ -28,17 +28,13 @@ internal class Dagturnering private constructor(private val source: String) {
             .map { it.first() to it.drop(1) }
 
         val (_, columnHeaders) = csv.first()
-
-        return csv
-            .drop(1)
-            .map { (key, row) ->
-                enumValueOf<Turneringsnøkkel>(key) to row
-                    .mapIndexed { index, cell -> columnHeaders[index] to cell }
+        return csv.drop(1)
+            .associate { (key, row) ->
+                enumValueOf<Turneringsnøkkel>(key) to columnHeaders
+                    .zip(row)
                     .filter { (_, cell) -> cell.isNotBlank() }
-                    .map { (columnHeader, cell) -> enumValueOf<Turneringsnøkkel>(columnHeader) to strategyFor(cell) }
-                    .toMap()
+                    .associate { (columnHeader, cell) -> enumValueOf<Turneringsnøkkel>(columnHeader) to strategyFor(cell) }
             }
-            .toMap()
     }
 
     private fun strategyFor(cellValue: String) =
