@@ -7,7 +7,7 @@ internal val dagturnering = Dagturnering("/dagturnering.csv")
 
 internal class Dagturnering(private val source: String) {
 
-    private val strategies: Map<Turneringsnøkkel, Map<Turneringsnøkkel, Strategy>> = readStrategies()
+    private val strategies: Map<Turneringsnøkkel, Map<Turneringsnøkkel, Strategy>> by lazy { readStrategies() }
 
     fun beste(venstre: Dag, høyre: Dag): Dag {
         val leftKey = Turneringsnøkkel.fraDag(venstre)
@@ -19,7 +19,7 @@ internal class Dagturnering(private val source: String) {
     }
 
     private fun readStrategies(): Map<Turneringsnøkkel, Map<Turneringsnøkkel, Strategy>> {
-        val csv = this::class.java.getResourceAsStream(source)
+        val csv = this::class.java.getResourceAsStream(source)!!
             .bufferedReader(Charsets.UTF_8)
             .readLines()
             .map { it.split(",") }
