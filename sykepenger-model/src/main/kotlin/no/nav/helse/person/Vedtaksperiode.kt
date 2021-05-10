@@ -1889,6 +1889,7 @@ internal class Vedtaksperiode private constructor(
             when {
                 utbetaling.erUtbetalt() -> vedtaksperiode.tilstand(påminnelse, Avsluttet)
                 utbetaling.harFeilet() -> vedtaksperiode.tilstand(påminnelse, UtbetalingFeilet)
+                !utbetaling.erSendt() && vedtaksperiode.id == UUID.fromString("0cb7bf5a-eae9-426c-9727-f2351dcd0d99") -> vedtaksperiode.tilstand(påminnelse, AvventerHistorikk)
             }
         }
     }
