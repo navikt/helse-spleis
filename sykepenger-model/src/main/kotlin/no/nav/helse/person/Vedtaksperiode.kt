@@ -158,7 +158,8 @@ internal class Vedtaksperiode private constructor(
                 kontekst(inntektsmelding)
                 inntektsmelding.error("Refusjon opphører i perioden")
                 inntektsmelding.trimLeft(periode.endInclusive)
-                return@also tilstand(inntektsmelding, TilInfotrygd)
+                arbeidsgiver.søppelbøtte(inntektsmelding, SENERE_INCLUSIVE(this), IKKE_STØTTET)
+                return@also
             }
             if (!it) return@also inntektsmelding.trimLeft(periode.endInclusive)
             kontekst(inntektsmelding)
@@ -339,7 +340,10 @@ internal class Vedtaksperiode private constructor(
             }
         }
         hendelse.valider(periode)
-        if (hendelse.hasErrorsOrWorse()) return tilstand(hendelse, TilInfotrygd)
+        if (hendelse.hasErrorsOrWorse()) {
+            arbeidsgiver.søppelbøtte(hendelse, SENERE_INCLUSIVE(this), IKKE_STØTTET)
+            return
+        }
         hvisIngenErrors()
         hendelse.info("Fullført behandling av inntektsmelding")
     }

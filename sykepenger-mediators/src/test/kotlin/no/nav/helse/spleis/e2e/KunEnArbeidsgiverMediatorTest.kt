@@ -340,8 +340,8 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendUtbetalingshistorikk(1)
         sendNyPåminnelse(1, TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
 
-        assertTilstander(0, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVSLUTTET_UTEN_UTBETALING", "TIL_INFOTRYGD")
-        assertTilstander(1, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP", "TIL_INFOTRYGD")
+        assertForkastedeTilstander(0, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVSLUTTET_UTEN_UTBETALING")
+        assertForkastedeTilstander(1, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP", "TIL_INFOTRYGD")
     }
 
     @Test

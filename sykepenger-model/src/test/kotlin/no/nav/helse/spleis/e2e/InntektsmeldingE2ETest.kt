@@ -847,7 +847,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    @Disabled("Her forventer vi at alle periodene skal forkastes, men det skjer ikke.")
     fun `Inntektsmelding med error som treffer flere perioder`() {
         håndterSykmelding(Sykmeldingsperiode(29.mars(2021), 31.mars(2021), 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(6.april(2021), 17.april(2021), 100.prosent))
@@ -868,7 +867,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVSLUTTET_UTEN_UTBETALING,
-            TIL_INFOTRYGD
         )
 
         assertForkastetPeriodeTilstander(
@@ -877,7 +875,47 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             MOTTATT_SYKMELDING_UFERDIG_GAP,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVSLUTTET_UTEN_UTBETALING,
+        )
+
+        assertForkastetPeriodeTilstander(
+            3.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
+            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE,
             TIL_INFOTRYGD
+        )
+    }
+
+    @Test
+    fun `Inntektsmelding med error som treffer flere perioder uten gap`() {
+        håndterSykmelding(Sykmeldingsperiode(29.mars(2021), 31.mars(2021), 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.april(2021), 17.april(2021), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(29.mars(2021), 31.mars(2021), 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(18.april(2021), 2.mai(2021), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(1.april(2021), 17.april(2021), 100.prosent))
+        håndterSøknad(Sykdom(18.april(2021), 2.mai(2021), 100.prosent))
+
+        håndterInntektsmeldingMedValidering(
+            1.vedtaksperiode,
+            listOf(Periode(29.mars(2021), 31.mars(2021)), Periode(1.april(2021), 12.april(2021))),
+            refusjon = Triple(null, INNTEKT, emptyList()),
+            beregnetInntekt = INGEN
+        )
+
+        assertForkastetPeriodeTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVSLUTTET_UTEN_UTBETALING,
+        )
+
+        assertForkastetPeriodeTilstander(
+            2.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
+            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+            AVSLUTTET_UTEN_UTBETALING
         )
 
         assertForkastetPeriodeTilstander(
