@@ -6,8 +6,8 @@ import no.nav.helse.hendelser.SøknadArbeidsgiver
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.februar
@@ -127,7 +127,7 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
 
     @Test
     fun `periode etter en periode med ferie - opphav i Infotrygd`() {
-        val historikk = Utbetalingsperiode(ORGNUMMER, 1.desember(2017),  31.desember(2017), 100.prosent, INNTEKT)
+        val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.desember(2017),  31.desember(2017), 100.prosent, INNTEKT)
         val inntektshistorikk = listOf(
             Inntektsopplysning(ORGNUMMER, 1.desember(2017), INNTEKT, true)
         )
@@ -164,7 +164,7 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
 
     @Test
     fun `periode etter en periode med permisjon (gir warning) - opphav i Infotrygd`() {
-        val historikk = Utbetalingsperiode(ORGNUMMER, 1.desember(2017),  31.desember(2017), 100.prosent, INNTEKT)
+        val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.desember(2017),  31.desember(2017), 100.prosent, INNTEKT)
         val inntektshistorikk = listOf(
             Inntektsopplysning(ORGNUMMER, 1.desember(2017), INNTEKT, true)
         )

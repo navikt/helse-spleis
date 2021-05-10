@@ -2,8 +2,8 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
+import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
-import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -24,7 +24,7 @@ internal class FeriepengeberegnerTest : AbstractEndToEndTest() {
     @Test
     fun `Finner datoer for feriepengeberegning med 48 sammenhengende utbetalingsdager i IT fra første januar`() {
         val historikk = utbetalingshistorikkForFeriepenger(
-            listOf(Utbetalingsperiode(ORGNUMMER, 1.januar, 7.mars, 100.prosent, 1000.månedlig))
+            listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 7.mars, 100.prosent, 1000.månedlig))
         )
 
         val beregner = Feriepengeberegner(historikk, person, alder)
@@ -35,7 +35,7 @@ internal class FeriepengeberegnerTest : AbstractEndToEndTest() {
     @Test
     fun `Finner datoer for feriepengeberegning med 49 sammenhengende utbetalingsdager i IT fra første januar`() {
         val historikk = utbetalingshistorikkForFeriepenger(
-            listOf(Utbetalingsperiode(ORGNUMMER, 1.januar, 8.mars, 100.prosent, 1000.månedlig))
+            listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 8.mars, 100.prosent, 1000.månedlig))
         )
 
         val beregner = Feriepengeberegner(historikk, person, alder)
@@ -46,7 +46,7 @@ internal class FeriepengeberegnerTest : AbstractEndToEndTest() {
     @Test
     fun `Finner datoer for feriepengeberegning med 47 sammenhengende utbetalingsdager i IT fra første januar`() {
         val historikk = utbetalingshistorikkForFeriepenger(
-            listOf(Utbetalingsperiode(ORGNUMMER, 1.januar, 6.mars, 100.prosent, 1000.månedlig))
+            listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 6.mars, 100.prosent, 1000.månedlig))
         )
 
         val beregner = Feriepengeberegner(historikk, person, alder)

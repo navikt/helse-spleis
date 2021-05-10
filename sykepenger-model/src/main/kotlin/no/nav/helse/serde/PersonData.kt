@@ -43,7 +43,6 @@ internal data class PersonData(
     private val vilkårsgrunnlagHistorikk: List<VilkårsgrunnlagElement>,
     private val dødsdato: LocalDate?
 ) {
-
     private val arbeidsgivereliste = mutableListOf<Arbeidsgiver>()
     private val modelAktivitetslogg get() = aktivitetslogg?.konverterTilAktivitetslogg() ?: Aktivitetslogg()
 
@@ -76,7 +75,8 @@ internal data class PersonData(
         private val tidsstempel: LocalDateTime,
         private val hendelseId: UUID?,
         private val ferieperioder: List<FerieperiodeData>,
-        private val utbetalingsperioder: List<UtbetalingsperiodeData>,
+        private val arbeidsgiverutbetalingsperioder: List<ArbeidsgiverutbetalingsperiodeData>,
+        private val personutbetalingsperioder: List<PersonutbetalingsperiodeData>,
         private val ukjenteperioder: List<UkjentperiodeData>,
         private val inntekter: List<InntektsopplysningData>,
         private val arbeidskategorikoder: Map<String, LocalDate>,
@@ -99,7 +99,10 @@ internal data class PersonData(
                 id,
                 tidsstempel,
                 hendelseId,
-                utbetalingsperioder.map { it.parsePeriode() } + ferieperioder.map { it.parsePeriode() } + ukjenteperioder.map { it.parsePeriode() },
+                arbeidsgiverutbetalingsperioder.map { it.parsePeriode() }
+                    + personutbetalingsperioder.map { it.parsePeriode() }
+                    + ferieperioder.map { it.parsePeriode() }
+                    + ukjenteperioder.map { it.parsePeriode() },
                 inntekter.map { it.parseInntektsopplysning() },
                 arbeidskategorikoder,
                 ugyldigePerioder,
@@ -123,14 +126,30 @@ internal data class PersonData(
             internal fun parsePeriode() = UkjentInfotrygdperiode(fom, tom)
         }
 
-        data class UtbetalingsperiodeData(
+        data class PersonutbetalingsperiodeData(
             private val orgnr: String,
             private val fom: LocalDate,
             private val tom: LocalDate,
             private val grad: Int,
             private val inntekt: Double
         ) {
-            internal fun parsePeriode() = Utbetalingsperiode(
+            internal fun parsePeriode() = PersonUtbetalingsperiode(
+                orgnr = orgnr,
+                fom = fom,
+                tom = tom,
+                grad = grad.prosent,
+                inntekt = inntekt.månedlig
+            )
+        }
+
+        data class ArbeidsgiverutbetalingsperiodeData(
+            private val orgnr: String,
+            private val fom: LocalDate,
+            private val tom: LocalDate,
+            private val grad: Int,
+            private val inntekt: Double
+        ) {
+            internal fun parsePeriode() = ArbeidsgiverUtbetalingsperiode(
                 orgnr = orgnr,
                 fom = fom,
                 tom = tom,

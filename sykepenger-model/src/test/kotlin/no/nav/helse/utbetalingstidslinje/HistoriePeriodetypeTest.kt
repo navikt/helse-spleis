@@ -3,9 +3,9 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.*
 import no.nav.helse.person.Periodetype.*
+import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
-import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.testhelpers.*
@@ -47,7 +47,7 @@ internal class HistoriePeriodetypeTest {
     }
 
     private fun utbetaling(fom: LocalDate, tom: LocalDate, inntekt: Inntekt = 1000.daglig, grad: Prosentdel = 100.prosent, orgnr: String = AG1) =
-        Utbetalingsperiode(orgnr, fom,  tom, grad, inntekt)
+        ArbeidsgiverUtbetalingsperiode(orgnr, fom,  tom, grad, inntekt)
 
     private fun ferie(fom: LocalDate, tom: LocalDate) =
         Friperiode(fom,  tom)

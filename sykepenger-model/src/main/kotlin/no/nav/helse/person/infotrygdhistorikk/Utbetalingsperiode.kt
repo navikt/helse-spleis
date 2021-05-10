@@ -13,15 +13,13 @@ import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.util.*
 
-class Utbetalingsperiode(
+abstract class Utbetalingsperiode(
     private val orgnr: String,
     fom: LocalDate,
     tom: LocalDate,
     private val grad: Prosentdel,
-    inntekt: Inntekt
+    private val inntekt: Inntekt
 ) : Infotrygdperiode(fom, tom) {
-    private val inntekt = inntekt.rundTilDaglig()
-
     override fun sykdomstidslinje(kilde: SykdomstidslinjeHendelse.Hendelseskilde): Sykdomstidslinje {
         return Sykdomstidslinje.sykedager(start, endInclusive, grad, kilde)
     }
@@ -53,13 +51,38 @@ class Utbetalingsperiode(
     override fun gjelder(orgnummer: String) = orgnummer == this.orgnr
     override fun utbetalingEtter(orgnumre: List<String>, dato: LocalDate) =
         start >= dato && this.orgnr !in orgnumre
+}
 
-    override fun hashCode() =
-        Objects.hash(orgnr, start, endInclusive, grad, inntekt)
+class ArbeidsgiverUtbetalingsperiode(
+    private val orgnr: String,
+    fom: LocalDate,
+    tom: LocalDate,
+    private val grad: Prosentdel,
+    inntekt: Inntekt
+) : Utbetalingsperiode(orgnr, fom, tom, grad, inntekt.rundTilDaglig()) {
+    private val inntekt = inntekt.rundTilDaglig()
 
     override fun equals(other: Any?): Boolean {
-        if (other !is Utbetalingsperiode) return false
-        return this.orgnr == other.orgnr && this.start == other.start
-            && this.grad == other.grad && this.inntekt == other.inntekt
+        if (other !is ArbeidsgiverUtbetalingsperiode) return false
+        return this.orgnr == other.orgnr && this.start == other.start && this.grad == other.grad && this.inntekt == other.inntekt
     }
+
+    override fun hashCode() = Objects.hash(orgnr, start, endInclusive, grad, inntekt, this::class)
+}
+
+class PersonUtbetalingsperiode(
+    private val orgnr: String,
+    fom: LocalDate,
+    tom: LocalDate,
+    private val grad: Prosentdel,
+    inntekt: Inntekt
+) : Utbetalingsperiode(orgnr, fom, tom, grad, inntekt) {
+    private val inntekt = inntekt.rundTilDaglig()
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is PersonUtbetalingsperiode) return false
+        return this.orgnr == other.orgnr && this.start == other.start && this.grad == other.grad && this.inntekt == other.inntekt
+    }
+
+    override fun hashCode() = Objects.hash(orgnr, start, endInclusive, grad, inntekt, this::class)
 }

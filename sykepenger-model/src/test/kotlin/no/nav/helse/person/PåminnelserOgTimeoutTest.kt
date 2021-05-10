@@ -4,8 +4,8 @@ import no.nav.helse.etterspurteBehov
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.inntektperioder
@@ -369,7 +369,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
                 vedtaksperiodeId = "${1.vedtaksperiode}",
                 arbeidskategorikoder = emptyMap(),
                 harStatslønn = false,
-                perioder = listOf(Utbetalingsperiode(ORGNUMMER,17.januar(2017),  20.januar(2017),  100.prosent, 1000.daglig)),
+                perioder = listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER,17.januar(2017),  20.januar(2017),  100.prosent, 1000.daglig)),
                 inntektshistorikk = listOf(
                     Inntektsopplysning(ORGNUMMER, 17.januar(2017), 31000.månedlig, true)
                 ),

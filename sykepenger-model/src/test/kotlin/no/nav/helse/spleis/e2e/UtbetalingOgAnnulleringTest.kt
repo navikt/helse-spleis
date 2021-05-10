@@ -3,7 +3,7 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.TilstandType.*
-import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
+import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -376,7 +376,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
             håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
             håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent))
         }
-        val historikk = Utbetalingsperiode(ORGNUMMER, 1.juli,  31.juli, 100.prosent, 1000.daglig)
+        val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.juli,  31.juli, 100.prosent, 1000.daglig)
         håndterUtbetalingshistorikk(3.vedtaksperiode, historikk)
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)

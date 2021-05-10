@@ -5,8 +5,9 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.hendelser.til
+import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
+import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -18,8 +19,8 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
     @Test
     fun `maksdato blir riktig når person har brukerutbetaling på samme arbeidsgiver`() {
         val historikk = listOf(
-            Utbetalingsperiode(ORGNUMMER, 17.januar,  17.mai, 100.prosent, INNTEKT),
-            Utbetalingsperiode(ORGNUMMER, 18.mai,  30.mai, 100.prosent, INNTEKT)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar,  17.mai, 100.prosent, INNTEKT),
+            PersonUtbetalingsperiode(ORGNUMMER, 18.mai,  30.mai, 100.prosent, INNTEKT)
         )
         val inntektsopplysning = listOf(
             Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true),
@@ -49,9 +50,9 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
     @Test
     fun `maksdato blir riktig når person har gammel brukerutbetaling som selvstendig næringsdrivende`() {
         val historikk = listOf(
-            Utbetalingsperiode(ORGNUMMER, 17.januar,  30.mai, 100.prosent, INNTEKT),
-            Utbetalingsperiode(ORGNUMMER, 1.september(2017),  1.september(2017), 100.prosent, INNTEKT),
-            Utbetalingsperiode("0", 18.mai(2017),  30.mai(2017), 100.prosent, INNTEKT)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar,  30.mai, 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.september(2017),  1.september(2017), 100.prosent, INNTEKT),
+            PersonUtbetalingsperiode("0", 18.mai(2017),  30.mai(2017), 100.prosent, INNTEKT)
         )
         val inntektsopplysning = listOf(
             Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true),

@@ -5,8 +5,8 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.UtbetalingHendelse.Oppdragstatus
 import no.nav.helse.hendelser.til
+import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -27,7 +27,7 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(30.mai, 23.juni, 100.prosent))
         håndterSøknad(Sykdom(30.mai, 23.juni, 100.prosent))
         val historie1 = listOf(
-            Utbetalingsperiode(ORGNUMMER, 19.mai,  29.mai, 100.prosent, 1000.daglig)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 19.mai,  29.mai, 100.prosent, 1000.daglig)
         )
         val inntekter1 = listOf(Inntektsopplysning(ORGNUMMER, 19.mai(2018), 1000.daglig, true))
         håndterUtbetalingshistorikk(1.vedtaksperiode, *historie1.toTypedArray(), inntektshistorikk = inntekter1)
@@ -37,7 +37,7 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
 
         val historie2 = historie1 + listOf(
-            Utbetalingsperiode(ORGNUMMER, 24.juni,  12.juli, 100.prosent, 1000.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 24.juni,  12.juli, 100.prosent, 1000.daglig),
         )
         håndterSykmelding(Sykmeldingsperiode(13.juli, 31.juli, 100.prosent))
         håndterSøknad(Sykdom(13.juli, 31.juli, 100.prosent))
@@ -76,7 +76,7 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(30.mai, 23.juni, 100.prosent))
         håndterSøknad(Sykdom(30.mai, 23.juni, 100.prosent))
         val historie1 = listOf(
-            Utbetalingsperiode(ORGNUMMER, 19.mai,  29.mai, 100.prosent, 1000.daglig)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 19.mai,  29.mai, 100.prosent, 1000.daglig)
         )
         val inntekter1 = listOf(
             Inntektsopplysning(ORGNUMMER, 19.mai(2018), 1000.daglig, true)
@@ -88,7 +88,7 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
 
         val historie2 = historie1 + listOf(
-            Utbetalingsperiode(ORGNUMMER, 24.juni,  12.juli, 100.prosent, 1000.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 24.juni,  12.juli, 100.prosent, 1000.daglig),
         )
         val inntekter2 = listOf(
             Inntektsopplysning(ORGNUMMER, 24.juni(2018), 1000.daglig, true),
@@ -133,7 +133,7 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         val historie1 = listOf(
-            Utbetalingsperiode(ORGNUMMER, 1.januar,  31.januar, 100.prosent, 1000.daglig)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar,  31.januar, 100.prosent, 1000.daglig)
         )
         val inntekter1 = listOf(
             Inntektsopplysning(ORGNUMMER, 1.januar(2018), 1000.daglig, true)
@@ -145,7 +145,7 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
         val historie2 = historie1 + listOf(
             // [ nok gap til ny arbeidsgiverperiode ]
-            Utbetalingsperiode(ORGNUMMER, 5.april,  30.april, 100.prosent, 1000.daglig)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 5.april,  30.april, 100.prosent, 1000.daglig)
         )
         val inntekter2 = listOf(
             Inntektsopplysning(ORGNUMMER, 1.januar(2018), 1000.daglig, true),
@@ -186,7 +186,7 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         val historie1 = listOf(
-            Utbetalingsperiode(ORGNUMMER, 1.januar,  31.januar, 100.prosent, 1000.daglig)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar,  31.januar, 100.prosent, 1000.daglig)
         )
         val inntekter1 = listOf(Inntektsopplysning(ORGNUMMER, 1.januar(2018), 1000.daglig, true))
         håndterUtbetalingshistorikk(1.vedtaksperiode, *historie1.toTypedArray(), inntektshistorikk = inntekter1)
@@ -196,7 +196,7 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
         val historie2 = historie1 + listOf(
             // [ nok gap til ny arbeidsgiverperiode ]
-            Utbetalingsperiode(ORGNUMMER, 5.april,  10.april, 100.prosent, 1000.daglig)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 5.april,  10.april, 100.prosent, 1000.daglig)
         )
         håndterSykmelding(Sykmeldingsperiode(11.april, 30.april, 100.prosent))
         håndterSøknad(Sykdom(11.april, 30.april, 100.prosent))
@@ -242,7 +242,7 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
 
         val historie1 = listOf(
-            Utbetalingsperiode(ORGNUMMER, 1.mai,  29.mai, 100.prosent, 1000.daglig)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.mai,  29.mai, 100.prosent, 1000.daglig)
         )
 
         håndterSykmelding(Sykmeldingsperiode(30.mai, 30.juni, 100.prosent))
@@ -294,7 +294,7 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
 
         val historie1 = listOf(
-            Utbetalingsperiode(ORGNUMMER, 1.mai,  29.mai, 100.prosent, 1000.daglig)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.mai,  29.mai, 100.prosent, 1000.daglig)
         )
         håndterSykmelding(Sykmeldingsperiode(30.mai, 30.juni, 100.prosent))
         håndterSøknad(Sykdom(30.mai, 30.juni, 100.prosent))

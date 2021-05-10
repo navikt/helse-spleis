@@ -144,7 +144,7 @@ internal class InfotrygdhistorikkTest {
         historikk.lagreVilkårsgrunnlag(1.januar, Periodetype.OVERGANG_FRA_IT, VilkårsgrunnlagHistorikk())
         historikk.oppdaterHistorikk(historikkelement(
             oppdatert = tidsstempel2,
-            perioder = listOf(Utbetalingsperiode("orgnr", 1.januar,  10.januar, 100.prosent, 1000.daglig))
+            perioder = listOf(ArbeidsgiverUtbetalingsperiode("orgnr", 1.januar,  10.januar, 100.prosent, 1000.daglig))
         ))
         historikk.tøm()
         assertTrue(historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato))
@@ -183,7 +183,7 @@ internal class InfotrygdhistorikkTest {
     @Test
     fun `oppdaterer tidspunkt når ny historikk er lik gammel`() {
         val perioder = listOf(
-            Utbetalingsperiode("orgnr", 1.januar,  31.januar, 100.prosent, 25000.månedlig)
+            ArbeidsgiverUtbetalingsperiode("orgnr", 1.januar,  31.januar, 100.prosent, 25000.månedlig)
         )
         val nå = LocalDateTime.now()
         val gammel = nå.minusHours(24)
@@ -203,7 +203,7 @@ internal class InfotrygdhistorikkTest {
     @Test
     fun `utbetalingstidslinje kuttes ikke`() {
         historikk.oppdaterHistorikk(historikkelement(listOf(
-            Utbetalingsperiode("orgnr", 1.januar,  31.januar, 100.prosent, 25000.månedlig)
+            ArbeidsgiverUtbetalingsperiode("orgnr", 1.januar,  31.januar, 100.prosent, 25000.månedlig)
         )))
         historikk.utbetalingstidslinje().also {
             assertEquals(1.januar til 31.januar, it.periode())
@@ -213,8 +213,8 @@ internal class InfotrygdhistorikkTest {
     @Test
     fun `rekkefølge respekteres ved deserialisering`() {
         val perioder = listOf(
-            Utbetalingsperiode("orgnr", 1.januar,  31.januar, 100.prosent, 25000.månedlig),
-            Utbetalingsperiode("orgnr", 1.februar,  28.februar, 100.prosent, 25000.månedlig),
+            ArbeidsgiverUtbetalingsperiode("orgnr", 1.januar,  31.januar, 100.prosent, 25000.månedlig),
+            ArbeidsgiverUtbetalingsperiode("orgnr", 1.februar,  28.februar, 100.prosent, 25000.månedlig),
             Friperiode(1.mars,  31.mars)
         )
         val nå = LocalDateTime.now()
@@ -224,10 +224,11 @@ internal class InfotrygdhistorikkTest {
             tidsstempel = nå,
             hendelseId = UUID.randomUUID(),
             ferieperioder = listOf(PersonData.InfotrygdhistorikkElementData.FerieperiodeData(1.mars, 31.mars)),
-            utbetalingsperioder = listOf(
-                PersonData.InfotrygdhistorikkElementData.UtbetalingsperiodeData("orgnr", 1.februar, 28.februar, 100, 25000.0),
-                PersonData.InfotrygdhistorikkElementData.UtbetalingsperiodeData("orgnr", 1.januar, 31.januar, 100, 25000.0)
+            arbeidsgiverutbetalingsperioder = listOf(
+                PersonData.InfotrygdhistorikkElementData.ArbeidsgiverutbetalingsperiodeData("orgnr", 1.februar, 28.februar, 100, 25000.0),
+                PersonData.InfotrygdhistorikkElementData.ArbeidsgiverutbetalingsperiodeData("orgnr", 1.januar, 31.januar, 100, 25000.0)
             ),
+            personutbetalingsperioder = emptyList(),
             ukjenteperioder = emptyList(),
             inntekter = emptyList(),
             arbeidskategorikoder = emptyMap(),
@@ -257,7 +258,7 @@ internal class InfotrygdhistorikkTest {
     @Test
     fun `overlappende utbetalinger`() {
         historikk.oppdaterHistorikk(historikkelement(listOf(
-            Utbetalingsperiode("orgnr", 5.januar,  10.januar, 100.prosent, 25000.månedlig)
+            ArbeidsgiverUtbetalingsperiode("orgnr", 5.januar,  10.januar, 100.prosent, 25000.månedlig)
         )))
         aktivitetslogg.barn().also {
             assertFalse(historikk.validerOverlappende(it, 10.januar til 31.januar, 10.januar))
@@ -329,7 +330,7 @@ internal class InfotrygdhistorikkTest {
     @Test
     fun `siste sykepengedag - tom historikk for ag`() {
         historikk.oppdaterHistorikk(historikkelement(listOf(
-            Utbetalingsperiode("ag1", 1.januar,  10.januar, 100.prosent, 1500.daglig)
+            ArbeidsgiverUtbetalingsperiode("ag1", 1.januar,  10.januar, 100.prosent, 1500.daglig)
         )))
         assertNull(historikk.sisteSykepengedag("ag2"))
     }
@@ -337,8 +338,8 @@ internal class InfotrygdhistorikkTest {
     @Test
     fun `siste sykepengedag - ekskluderer ferie`() {
         historikk.oppdaterHistorikk(historikkelement(listOf(
-            Utbetalingsperiode("ag1", 1.januar,  10.januar, 100.prosent, 1500.daglig),
-            Utbetalingsperiode("ag2", 10.januar,  20.januar, 100.prosent, 1500.daglig),
+            ArbeidsgiverUtbetalingsperiode("ag1", 1.januar,  10.januar, 100.prosent, 1500.daglig),
+            ArbeidsgiverUtbetalingsperiode("ag2", 10.januar,  20.januar, 100.prosent, 1500.daglig),
             Friperiode(20.januar,  31.januar)
         )))
         assertEquals(10.januar, historikk.sisteSykepengedag("ag1"))
@@ -354,8 +355,8 @@ internal class InfotrygdhistorikkTest {
     @Test
     fun `historikk for`() {
         historikk.oppdaterHistorikk(historikkelement(listOf(
-            Utbetalingsperiode("ag1", 1.januar,  10.januar, 100.prosent, 1500.daglig),
-            Utbetalingsperiode("ag2", 10.januar,  20.januar, 100.prosent, 1500.daglig),
+            ArbeidsgiverUtbetalingsperiode("ag1", 1.januar,  10.januar, 100.prosent, 1500.daglig),
+            ArbeidsgiverUtbetalingsperiode("ag2", 10.januar,  20.januar, 100.prosent, 1500.daglig),
             Friperiode(20.januar,  31.januar)
         )))
         assertEquals(22, SykdomstidslinjeInspektør(historikk.historikkFor("ag1", Sykdomstidslinje())).dager.filterNot { it.value is Dag.UkjentDag }.size)
@@ -370,8 +371,8 @@ internal class InfotrygdhistorikkTest {
     @Test
     fun `har betalt`() {
         historikk.oppdaterHistorikk(historikkelement(listOf(
-            Utbetalingsperiode("ag1", 1.januar,  10.januar, 100.prosent, 1500.daglig),
-            Utbetalingsperiode("ag2", 10.januar,  20.januar, 100.prosent, 1500.daglig),
+            ArbeidsgiverUtbetalingsperiode("ag1", 1.januar,  10.januar, 100.prosent, 1500.daglig),
+            ArbeidsgiverUtbetalingsperiode("ag2", 10.januar,  20.januar, 100.prosent, 1500.daglig),
             Friperiode(20.januar,  31.januar)
         )))
         assertTrue(historikk.harBetalt("ag1", 1.januar))
@@ -383,11 +384,11 @@ internal class InfotrygdhistorikkTest {
     @Test
     fun `skjæringstidspunkt`() {
         historikk.oppdaterHistorikk(historikkelement(listOf(
-            Utbetalingsperiode("ag1", 5.januar,  10.januar, 100.prosent, 25000.månedlig),
+            ArbeidsgiverUtbetalingsperiode("ag1", 5.januar,  10.januar, 100.prosent, 25000.månedlig),
             Friperiode(11.januar,  12.januar),
-            Utbetalingsperiode("ag2", 13.januar,  15.januar, 100.prosent, 25000.månedlig),
-            Utbetalingsperiode("ag1", 16.januar,  20.januar, 100.prosent, 25000.månedlig),
-            Utbetalingsperiode("ag1", 1.februar,  28.februar, 100.prosent, 25000.månedlig)
+            ArbeidsgiverUtbetalingsperiode("ag2", 13.januar,  15.januar, 100.prosent, 25000.månedlig),
+            ArbeidsgiverUtbetalingsperiode("ag1", 16.januar,  20.januar, 100.prosent, 25000.månedlig),
+            ArbeidsgiverUtbetalingsperiode("ag1", 1.februar,  28.februar, 100.prosent, 25000.månedlig)
         )))
         assertEquals(5.januar, historikk.skjæringstidspunkt(5.januar til 31.januar, emptyList()))
         assertEquals(1.januar, historikk.skjæringstidspunkt(1.januar til 31.januar, listOf(2.S, 3.S)))
@@ -396,11 +397,11 @@ internal class InfotrygdhistorikkTest {
     @Test
     fun `skjæringstidspunkter`() {
         historikk.oppdaterHistorikk(historikkelement(listOf(
-            Utbetalingsperiode("ag1", 5.januar,  10.januar, 100.prosent, 25000.månedlig),
+            ArbeidsgiverUtbetalingsperiode("ag1", 5.januar,  10.januar, 100.prosent, 25000.månedlig),
             Friperiode(11.januar,  12.januar),
-            Utbetalingsperiode("ag2", 13.januar,  15.januar, 100.prosent, 25000.månedlig),
-            Utbetalingsperiode("ag1", 16.januar,  20.januar, 100.prosent, 25000.månedlig),
-            Utbetalingsperiode("ag1", 1.februar,  28.februar, 100.prosent, 25000.månedlig)
+            ArbeidsgiverUtbetalingsperiode("ag2", 13.januar,  15.januar, 100.prosent, 25000.månedlig),
+            ArbeidsgiverUtbetalingsperiode("ag1", 16.januar,  20.januar, 100.prosent, 25000.månedlig),
+            ArbeidsgiverUtbetalingsperiode("ag1", 1.februar,  28.februar, 100.prosent, 25000.månedlig)
         )))
         assertEquals(listOf(1.februar, 5.januar), historikk.skjæringstidspunkter(emptyList()))
         assertEquals(listOf(1.februar, 1.januar), historikk.skjæringstidspunkter(listOf(2.S, 3.S)))

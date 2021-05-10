@@ -4,9 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.*
-import no.nav.helse.person.infotrygdhistorikk.Friperiode
-import no.nav.helse.person.infotrygdhistorikk.UkjentInfotrygdperiode
-import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
+import no.nav.helse.person.infotrygdhistorikk.*
 import no.nav.helse.serde.PersonData.UtbetalingstidslinjeData.TypeData
 import no.nav.helse.serde.api.builders.BuilderState
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
@@ -250,7 +248,8 @@ internal class JsonBuilder : AbstractBuilder() {
         harStatslønn: Boolean
     ) : BuilderState() {
         private val ferieperioder = mutableListOf<Map<String, LocalDate>>()
-        private val utbetalingsperioder = mutableListOf<Map<String, Any>>()
+        private val arbeidsgiverutbetalingsperioder = mutableListOf<Map<String, Any>>()
+        private val personutbetalingsperioder = mutableListOf<Map<String, Any>>()
         private val ukjenteperioder = mutableListOf<Map<String, LocalDate>>()
         private val inntekter = mutableListOf<Map<String, Any?>>()
         private val arbeidskategorikoder = mutableMapOf<String, LocalDate>()
@@ -261,7 +260,8 @@ internal class JsonBuilder : AbstractBuilder() {
             element["tidsstempel"] = tidsstempel
             element["hendelseId"] = hendelseId
             element["ferieperioder"] = ferieperioder
-            element["utbetalingsperioder"] = utbetalingsperioder
+            element["arbeidsgiverutbetalingsperioder"] = arbeidsgiverutbetalingsperioder
+            element["personutbetalingsperioder"] = personutbetalingsperioder
             element["ukjenteperioder"] = ukjenteperioder
             element["inntekter"] = inntekter
             element["arbeidskategorikoder"] = arbeidskategorikoder
@@ -280,13 +280,23 @@ internal class JsonBuilder : AbstractBuilder() {
         }
 
         override fun visitInfotrygdhistorikkUtbetalingsperiode(orgnr: String, periode: Utbetalingsperiode, grad: Prosentdel, inntekt: Inntekt) {
-            utbetalingsperioder.add(mapOf(
-                "orgnr" to orgnr,
-                "fom" to periode.start,
-                "tom" to periode.endInclusive,
-                "grad" to grad.roundToInt(),
-                "inntekt" to inntekt.reflection { _, månedlig, _, _ -> månedlig }
-            ))
+            if (periode is ArbeidsgiverUtbetalingsperiode) {
+                arbeidsgiverutbetalingsperioder.add(mapOf(
+                    "orgnr" to orgnr,
+                    "fom" to periode.start,
+                    "tom" to periode.endInclusive,
+                    "grad" to grad.roundToInt(),
+                    "inntekt" to inntekt.reflection { _, månedlig, _, _ -> månedlig }
+                ))
+            } else if (periode is PersonUtbetalingsperiode) {
+                personutbetalingsperioder.add(mapOf(
+                    "orgnr" to orgnr,
+                    "fom" to periode.start,
+                    "tom" to periode.endInclusive,
+                    "grad" to grad.roundToInt(),
+                    "inntekt" to inntekt.reflection { _, månedlig, _, _ -> månedlig }
+                ))
+            }
         }
 
         override fun visitInfotrygdhistorikkUkjentPeriode(periode: UkjentInfotrygdperiode) {

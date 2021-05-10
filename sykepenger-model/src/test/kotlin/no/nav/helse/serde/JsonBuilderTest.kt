@@ -10,9 +10,9 @@ import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
+import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Oppdrag
@@ -314,7 +314,7 @@ class JsonBuilderTest {
             }
 
         fun personMedInfotrygdForlengelse(søknadhendelseId: UUID = UUID.randomUUID()): Person {
-            val refusjoner = listOf(Utbetalingsperiode(orgnummer, 1.desember(2017),  31.desember(2017), 100.prosent, 31000.månedlig))
+            val refusjoner = listOf(ArbeidsgiverUtbetalingsperiode(orgnummer, 1.desember(2017),  31.desember(2017), 100.prosent, 31000.månedlig))
             return Person(aktørId, fnr).apply {
                 håndter(sykmelding(fom = 1.januar, tom = 31.januar))
                 fangeVedtaksperiode()

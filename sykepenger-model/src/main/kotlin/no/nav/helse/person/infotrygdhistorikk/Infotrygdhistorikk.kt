@@ -132,6 +132,7 @@ internal class Infotrygdhistorikk private constructor(
 
     private fun oppfrisket(cutoff: LocalDateTime) =
         elementer.firstOrNull()?.oppfrisket(cutoff) ?: false
+
     private fun oppfrisk(aktivitetslogg: IAktivitetslogg, tidligsteDato: LocalDate) {
         utbetalingshistorikk(aktivitetslogg, oppfriskningsperiode(tidligsteDato))
     }

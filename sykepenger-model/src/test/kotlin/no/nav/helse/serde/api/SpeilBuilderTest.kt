@@ -6,9 +6,9 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
 import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
+import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.serde.api.InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO
 import no.nav.helse.serde.mapping.SpeilDagtype
 import no.nav.helse.testhelpers.*
@@ -420,7 +420,7 @@ class SpeilBuilderTest {
                 håndter(
                     utbetalingshistorikk(
                         vedtaksperiodeId = sisteVedtaksperiodeId,
-                        utbetalinger = listOf(Utbetalingsperiode(orgnummer, skjæringstidspunktFraInfotrygd,  4.januar, 100.prosent, 31000.månedlig))
+                        utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(orgnummer, skjæringstidspunktFraInfotrygd,  4.januar, 100.prosent, 31000.månedlig))
                     )
                 )
 
@@ -438,7 +438,7 @@ class SpeilBuilderTest {
                 håndter(
                     utbetalingshistorikk(
                         vedtaksperiodeId = sisteVedtaksperiodeId,
-                        utbetalinger = listOf(Utbetalingsperiode(orgnummer, skjæringstidspunktFraInfotrygd,  tom1Periode, 100.prosent, 31000.månedlig)),
+                        utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(orgnummer, skjæringstidspunktFraInfotrygd,  tom1Periode, 100.prosent, 31000.månedlig)),
                         inntektshistorikk = inntektshistorikk
                     )
                 )
@@ -446,7 +446,7 @@ class SpeilBuilderTest {
                 håndter(
                     ytelser(
                         vedtaksperiodeId = sisteVedtaksperiodeId,
-                        utbetalinger = listOf(Utbetalingsperiode(orgnummer, skjæringstidspunktFraInfotrygd,  tom1Periode, 100.prosent, 31000.månedlig)),
+                        utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(orgnummer, skjæringstidspunktFraInfotrygd,  tom1Periode, 100.prosent, 31000.månedlig)),
                         inntektshistorikk = inntektshistorikk
                     )
                 )
@@ -871,8 +871,8 @@ class SpeilBuilderTest {
         )
 
         val utbetalinger = listOf(
-            Utbetalingsperiode(orgnr1, 20.januar(2021),  26.januar(2021), 100.prosent, inntekt),
-            Utbetalingsperiode(orgnr2, 20.januar(2021),  26.januar(2021), 100.prosent, inntekt)
+            ArbeidsgiverUtbetalingsperiode(orgnr1, 20.januar(2021),  26.januar(2021), 100.prosent, inntekt),
+            ArbeidsgiverUtbetalingsperiode(orgnr2, 20.januar(2021),  26.januar(2021), 100.prosent, inntekt)
         )
 
         person.håndter(utbetalingshistorikk(vedtaksperiodeId = vedtaksperiodeId1, utbetalinger = utbetalinger, orgnummer = orgnr1))
@@ -935,8 +935,8 @@ class SpeilBuilderTest {
         )
 
         val utbetalinger = listOf(
-            Utbetalingsperiode(orgnr1, 20.januar(2021),  26.januar(2021), 100.prosent, inntekt),
-            Utbetalingsperiode(orgnr2, 20.januar(2021),  26.januar(2021), 100.prosent, inntekt)
+            ArbeidsgiverUtbetalingsperiode(orgnr1, 20.januar(2021),  26.januar(2021), 100.prosent, inntekt),
+            ArbeidsgiverUtbetalingsperiode(orgnr2, 20.januar(2021),  26.januar(2021), 100.prosent, inntekt)
         )
 
         person.håndter(utbetalingshistorikk(vedtaksperiodeId = vedtaksperiodeId1, utbetalinger = utbetalinger, orgnummer = orgnr1))
