@@ -408,10 +408,14 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         vedtaksperiodeId: UUID = 1.vedtaksperiode,
         utbetalingGodkjent: Boolean = true,
         orgnummer: String = ORGNUMMER,
-        automatiskBehandling: Boolean = false
+        automatiskBehandling: Boolean = false,
+        utbetalingId: UUID = UUID.fromString(
+            inspektør.sisteBehov(Godkjenning).kontekst()["utbetalingId"]
+                ?: throw IllegalStateException("Finner ikke utbetalingId i: ${inspektør.sisteBehov(Godkjenning).kontekst()}")
+        ),
     ) {
         assertEtterspurt(Utbetalingsgodkjenning::class, Godkjenning, vedtaksperiodeId, orgnummer)
-        utbetalingsgodkjenning(vedtaksperiodeId, utbetalingGodkjent, orgnummer, automatiskBehandling).håndter(Person::håndter)
+        utbetalingsgodkjenning(vedtaksperiodeId, utbetalingGodkjent, orgnummer, automatiskBehandling, utbetalingId).håndter(Person::håndter)
     }
 
     protected fun håndterUtbetalt(
@@ -963,16 +967,17 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         vedtaksperiodeId: UUID,
         utbetalingGodkjent: Boolean,
         orgnummer: String,
-        automatiskBehandling: Boolean
+        automatiskBehandling: Boolean,
+        utbetalingId: UUID = UUID.fromString(
+            inspektør.sisteBehov(Godkjenning).kontekst()["utbetalingId"]
+                ?: throw IllegalStateException("Finner ikke utbetalingId i: ${inspektør.sisteBehov(Godkjenning).kontekst()}")
+        ),
     ) = Utbetalingsgodkjenning(
         meldingsreferanseId = UUID.randomUUID(),
         aktørId = AKTØRID,
         fødselsnummer = UNG_PERSON_FNR_2018,
         organisasjonsnummer = orgnummer,
-        utbetalingId = UUID.fromString(
-            inspektør.sisteBehov(Godkjenning).kontekst()["utbetalingId"]
-                ?: throw IllegalStateException("Finner ikke utbetalingId i: ${inspektør.sisteBehov(Godkjenning).kontekst()}")
-        ),
+        utbetalingId = utbetalingId,
         vedtaksperiodeId = vedtaksperiodeId.toString(),
         saksbehandler = "Ola Nordmann",
         saksbehandlerEpost = "ola.nordmann@nav.no",

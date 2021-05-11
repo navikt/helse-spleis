@@ -172,6 +172,9 @@ internal class Utbetaling private constructor(
     internal fun gjelderFor(hendelse: UtbetalingHendelse) =
         hendelse.erRelevant(arbeidsgiverOppdrag.fagsystemId(), id)
 
+    internal fun gjelderFor(hendelse: Utbetalingsgodkjenning) =
+        hendelse.erRelevant(id)
+
     internal fun valider(simulering: Simulering): IAktivitetslogg {
         return arbeidsgiverOppdrag.sammenlignMed(simulering)
     }

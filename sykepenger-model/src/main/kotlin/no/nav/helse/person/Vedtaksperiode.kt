@@ -184,6 +184,7 @@ internal class Vedtaksperiode private constructor(
 
     internal fun håndter(utbetalingsgodkjenning: Utbetalingsgodkjenning) {
         if (!utbetalingsgodkjenning.erRelevant(id.toString())) return
+        if (!utbetaling().gjelderFor(utbetalingsgodkjenning)) return utbetalingsgodkjenning.info("Ignorerer løsning på godkjenningsbehov, utbetalingid på løsningen matcher ikke vedtaksperiodens nåværende utbetaling")
         kontekst(utbetalingsgodkjenning)
         tilstand.håndter(person, arbeidsgiver, this, utbetalingsgodkjenning)
     }

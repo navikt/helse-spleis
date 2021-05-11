@@ -1414,6 +1414,7 @@ class SpeilBuilderTest {
                     håndter(inntektsmelding)
                     add(inntektsmeldingDTO)
                 }
+                håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                 fangeUtbetalinger()
