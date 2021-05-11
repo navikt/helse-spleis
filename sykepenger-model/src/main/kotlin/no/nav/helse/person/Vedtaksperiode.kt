@@ -1888,6 +1888,7 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             val utbetaling = vedtaksperiode.utbetaling()
             when {
+                utbetaling.erUbetalt() -> vedtaksperiode.tilstand(påminnelse, AvventerHistorikk)
                 utbetaling.erUtbetalt() -> vedtaksperiode.tilstand(påminnelse, Avsluttet)
                 utbetaling.harFeilet() -> vedtaksperiode.tilstand(påminnelse, UtbetalingFeilet)
             }
