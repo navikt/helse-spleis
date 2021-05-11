@@ -3,10 +3,12 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
+import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.*
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
@@ -876,5 +878,27 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
         )
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
         assertEquals(2, inspektør.vedtaksperiodeTeller)
+    }
+
+    @Test
+    @Disabled("Vi har forkastet et sett med utbetalte perioder pga overlappende sykmelding, allikevel tar vi inn en tidligere periode som går til utbetaling")
+    fun `forlengelse fra IT før et utbetalt løp`() {
+        nyttVedtak(1.mars, 31.mars)
+        forlengVedtak(1.april, 14.april)
+        forlengPeriode(15.april, 20.april)
+        håndterSykmelding(Sykmeldingsperiode(15.april, 25.april, 50.prosent)) // overlapp som forkaster
+
+        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
+        assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
+        assertTrue(inspektør.periodeErForkastet(3.vedtaksperiode))
+
+        håndterSykmelding(Sykmeldingsperiode(10.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(10.februar, 28.februar, 100.prosent))
+        håndterUtbetalingshistorikk(
+            vedtaksperiodeId = 4.vedtaksperiode,
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 9.februar, 100.prosent, 1000.daglig),
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
+        )
+        assertTrue(inspektør.periodeErForkastet(4.vedtaksperiode))
     }
 }
