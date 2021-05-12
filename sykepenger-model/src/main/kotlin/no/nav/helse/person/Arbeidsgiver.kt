@@ -13,6 +13,7 @@ import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetaltTidslinje
@@ -33,6 +34,7 @@ internal class Arbeidsgiver private constructor(
     private val forkastede: MutableList<ForkastetVedtaksperiode>,
     private val utbetalinger: MutableList<Utbetaling>,
     private val beregnetUtbetalingstidslinjer: MutableList<Utbetalingstidslinjeberegning>,
+    private val feriepengeutbetalinger: MutableList<Feriepengeutbetaling>,
     private val refusjonOpphører: MutableList<LocalDate?>
 ) : Aktivitetskontekst, UtbetalingObserver {
     internal constructor(person: Person, organisasjonsnummer: String) : this(
@@ -45,11 +47,12 @@ internal class Arbeidsgiver private constructor(
         forkastede = mutableListOf(),
         utbetalinger = mutableListOf(),
         beregnetUtbetalingstidslinjer = mutableListOf(),
+        feriepengeutbetalinger = mutableListOf(),
         refusjonOpphører = mutableListOf()
     )
 
     init {
-        utbetalinger.forEach { it.register(this) }
+        utbetalinger.forEach { it.registrer(this) }
     }
 
     internal companion object {
@@ -109,9 +112,9 @@ internal class Arbeidsgiver private constructor(
             arbeidsgivere: Iterable<Arbeidsgiver>,
             vedtaksperiode: Vedtaksperiode
         ) = arbeidsgivere
-                .flatMap { it.vedtaksperioder }
-                .filter { it.periode().overlapperMed(vedtaksperiode.periode()) }
-                .all { it.periodetype() == Periodetype.OVERGANG_FRA_IT }
+            .flatMap { it.vedtaksperioder }
+            .filter { it.periode().overlapperMed(vedtaksperiode.periode()) }
+            .all { it.periodetype() == Periodetype.OVERGANG_FRA_IT }
 
         internal fun ingenUkjenteArbeidsgivere(
             arbeidsgivere: Iterable<Arbeidsgiver>,
@@ -131,6 +134,13 @@ internal class Arbeidsgiver private constructor(
 
         internal fun skjæringstidspunkter(arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) =
             infotrygdhistorikk.skjæringstidspunkter(arbeidsgivere.map(Arbeidsgiver::sykdomstidslinje))
+
+        internal fun Iterable<Arbeidsgiver>.beregnFeriepengerForAlleArbeidsgivere(
+            feriepengeberegner: Feriepengeberegner,
+            utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger
+        ) {
+            forEach { it.utbetalFeriepenger(feriepengeberegner, utbetalingshistorikkForFeriepenger) }
+        }
     }
 
     internal fun accept(visitor: ArbeidsgiverVisitor) {
@@ -149,6 +159,9 @@ internal class Arbeidsgiver private constructor(
         visitor.preVisitUtbetalingstidslinjeberegninger(beregnetUtbetalingstidslinjer)
         beregnetUtbetalingstidslinjer.forEach { it.accept(visitor) }
         visitor.postVisitUtbetalingstidslinjeberegninger(beregnetUtbetalingstidslinjer)
+        visitor.preVisitFeriepengeutbetalinger(feriepengeutbetalinger)
+        feriepengeutbetalinger.forEach { it.accept(visitor) }
+        visitor.postVisitFeriepengeutbetalinger(feriepengeutbetalinger)
         visitor.postVisitArbeidsgiver(this, id, organisasjonsnummer)
     }
 
@@ -202,7 +215,21 @@ internal class Arbeidsgiver private constructor(
 
     private fun nyUtbetaling(utbetaling: Utbetaling) {
         utbetalinger.add(utbetaling)
-        utbetaling.register(this)
+        utbetaling.registrer(this)
+    }
+
+    internal fun utbetalFeriepenger(
+        feriepengeberegner: Feriepengeberegner,
+        utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger
+    ) {
+        val feriepengeutbetaling = Feriepengeutbetaling(
+            organisasjonsnummer,
+            feriepengeberegner,
+            utbetalingshistorikkForFeriepenger
+        )
+        feriepengeutbetalinger.add(feriepengeutbetaling)
+        feriepengeutbetaling.registrer(this)
+        feriepengeutbetaling.beregn()
     }
 
     internal fun nåværendeTidslinje() =
@@ -231,7 +258,7 @@ internal class Arbeidsgiver private constructor(
         finalize(søknad)
     }
 
-    private fun <Hendelse: SykdomstidslinjeHendelse> håndterEllerOpprettVedtaksperiode(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean) {
+    private fun <Hendelse : SykdomstidslinjeHendelse> håndterEllerOpprettVedtaksperiode(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean) {
         hendelse.kontekst(this)
         if (!noenHarHåndtert(hendelse, håndterer)) {
             if (hendelse.forGammel()) return hendelse.error("Forventet ikke ${hendelse.kilde}. Oppretter ikke vedtaksperiode.")
@@ -739,22 +766,22 @@ internal class Arbeidsgiver private constructor(
     internal fun harDagUtenSøknad(periode: Periode) =
         sykdomstidslinje().harDagUtenSøknad(periode)
 
-    private fun <Hendelse: IAktivitetslogg> noenHarHåndtert(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean, errortekst: String) {
+    private fun <Hendelse : IAktivitetslogg> noenHarHåndtert(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean, errortekst: String) {
         if (noenHarHåndtert(hendelse, håndterer)) return
         hendelse.error(errortekst)
     }
 
-    private fun <Hendelse: IAktivitetslogg> håndter(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Unit) {
+    private fun <Hendelse : IAktivitetslogg> håndter(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Unit) {
         looper { håndterer(it, hendelse) }
     }
 
-    private fun <Hendelse: IAktivitetslogg> énHarHåndtert(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean): Boolean {
+    private fun <Hendelse : IAktivitetslogg> énHarHåndtert(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean): Boolean {
         var håndtert = false
         looper { håndtert = håndtert || håndterer(it, hendelse) }
         return håndtert
     }
 
-    private fun <Hendelse: IAktivitetslogg> noenHarHåndtert(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean): Boolean {
+    private fun <Hendelse : IAktivitetslogg> noenHarHåndtert(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean): Boolean {
         var håndtert = false
         looper { håndtert = håndterer(it, hendelse) || håndtert }
         return håndtert
@@ -783,6 +810,7 @@ internal class Arbeidsgiver private constructor(
                 forkastede: MutableList<ForkastetVedtaksperiode>,
                 utbetalinger: List<Utbetaling>,
                 beregnetUtbetalingstidslinjer: List<Utbetalingstidslinjeberegning>,
+                feriepengeutbetalinger: List<Feriepengeutbetaling>,
                 refusjonOpphører: List<LocalDate?>
             ) = Arbeidsgiver(
                 person,
@@ -794,6 +822,7 @@ internal class Arbeidsgiver private constructor(
                 forkastede,
                 utbetalinger.toMutableList(),
                 beregnetUtbetalingstidslinjer.toMutableList(),
+                feriepengeutbetalinger.toMutableList(),
                 refusjonOpphører.toMutableList()
             )
         }

@@ -38,12 +38,12 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.visitWarn(kontekster, aktivitet, melding, tidsstempel)
     }
 
-    override fun preVisitUtbetalingstidslinjeberegninger(bereninger: List<Utbetalingstidslinjeberegning>) {
-        delegatee.preVisitUtbetalingstidslinjeberegninger(bereninger)
+    override fun preVisitUtbetalingstidslinjeberegninger(beregninger: List<Utbetalingstidslinjeberegning>) {
+        delegatee.preVisitUtbetalingstidslinjeberegninger(beregninger)
     }
 
-    override fun postVisitUtbetalingstidslinjeberegninger(bereninger: List<Utbetalingstidslinjeberegning>) {
-        delegatee.postVisitUtbetalingstidslinjeberegninger(bereninger)
+    override fun postVisitUtbetalingstidslinjeberegninger(beregninger: List<Utbetalingstidslinjeberegning>) {
+        delegatee.postVisitUtbetalingstidslinjeberegninger(beregninger)
     }
 
     override fun visitUtbetalingstidslinjeberegning(id: UUID, tidsstempel: LocalDateTime, sykdomshistorikkElementId: UUID) {
@@ -156,8 +156,12 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.visitInfotrygdhistorikkFerieperiode(periode)
     }
 
-    override fun visitInfotrygdhistorikkUtbetalingsperiode(orgnr: String, periode: Utbetalingsperiode, grad: Prosentdel, inntekt: Inntekt) {
-        delegatee.visitInfotrygdhistorikkUtbetalingsperiode(orgnr, periode, grad, inntekt)
+    override fun visitInfotrygdhistorikkPersonUtbetalingsperiode(orgnr: String, periode: Utbetalingsperiode, grad: Prosentdel, inntekt: Inntekt) {
+        delegatee.visitInfotrygdhistorikkPersonUtbetalingsperiode(orgnr, periode, grad, inntekt)
+    }
+
+    override fun visitInfotrygdhistorikkArbeidsgiverUtbetalingsperiode(orgnr: String, periode: Utbetalingsperiode, grad: Prosentdel, inntekt: Inntekt) {
+        delegatee.visitInfotrygdhistorikkArbeidsgiverUtbetalingsperiode(orgnr, periode, grad, inntekt)
     }
 
     override fun visitInfotrygdhistorikkUkjentPeriode(periode: UkjentInfotrygdperiode) {

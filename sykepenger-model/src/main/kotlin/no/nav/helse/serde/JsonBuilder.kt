@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.*
-import no.nav.helse.person.infotrygdhistorikk.*
+import no.nav.helse.person.infotrygdhistorikk.Friperiode
+import no.nav.helse.person.infotrygdhistorikk.UkjentInfotrygdperiode
+import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.serde.PersonData.UtbetalingstidslinjeData.TypeData
 import no.nav.helse.serde.api.builders.BuilderState
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
@@ -273,37 +275,41 @@ internal class JsonBuilder : AbstractBuilder() {
         }
 
         override fun visitInfotrygdhistorikkFerieperiode(periode: Friperiode) {
-            ferieperioder.add(mapOf(
+            ferieperioder.add(
+                mapOf(
+                    "fom" to periode.start,
+                    "tom" to periode.endInclusive
+                )
+            )
+        }
+
+        override fun visitInfotrygdhistorikkArbeidsgiverUtbetalingsperiode(orgnr: String, periode: Utbetalingsperiode, grad: Prosentdel, inntekt: Inntekt) {
+            arbeidsgiverutbetalingsperioder.add(mapOf(
+                "orgnr" to orgnr,
                 "fom" to periode.start,
-                "tom" to periode.endInclusive
+                "tom" to periode.endInclusive,
+                "grad" to grad.roundToInt(),
+                "inntekt" to inntekt.reflection { _, månedlig, _, _ -> månedlig }
             ))
         }
 
-        override fun visitInfotrygdhistorikkUtbetalingsperiode(orgnr: String, periode: Utbetalingsperiode, grad: Prosentdel, inntekt: Inntekt) {
-            if (periode is ArbeidsgiverUtbetalingsperiode) {
-                arbeidsgiverutbetalingsperioder.add(mapOf(
-                    "orgnr" to orgnr,
-                    "fom" to periode.start,
-                    "tom" to periode.endInclusive,
-                    "grad" to grad.roundToInt(),
-                    "inntekt" to inntekt.reflection { _, månedlig, _, _ -> månedlig }
-                ))
-            } else if (periode is PersonUtbetalingsperiode) {
-                personutbetalingsperioder.add(mapOf(
-                    "orgnr" to orgnr,
-                    "fom" to periode.start,
-                    "tom" to periode.endInclusive,
-                    "grad" to grad.roundToInt(),
-                    "inntekt" to inntekt.reflection { _, månedlig, _, _ -> månedlig }
-                ))
-            }
+        override fun visitInfotrygdhistorikkPersonUtbetalingsperiode(orgnr: String, periode: Utbetalingsperiode, grad: Prosentdel, inntekt: Inntekt) {
+            personutbetalingsperioder.add(mapOf(
+                "orgnr" to orgnr,
+                "fom" to periode.start,
+                "tom" to periode.endInclusive,
+                "grad" to grad.roundToInt(),
+                "inntekt" to inntekt.reflection { _, månedlig, _, _ -> månedlig }
+            ))
         }
 
         override fun visitInfotrygdhistorikkUkjentPeriode(periode: UkjentInfotrygdperiode) {
-            ukjenteperioder.add(mapOf(
-                "fom" to periode.start,
-                "tom" to periode.endInclusive
-            ))
+            ukjenteperioder.add(
+                mapOf(
+                    "fom" to periode.start,
+                    "tom" to periode.endInclusive
+                )
+            )
         }
 
         override fun visitInfotrygdhistorikkInntektsopplysning(
@@ -314,14 +320,16 @@ internal class JsonBuilder : AbstractBuilder() {
             refusjonTom: LocalDate?,
             lagret: LocalDateTime?
         ) {
-            inntekter.add(mapOf(
-                "orgnr" to orgnr,
-                "sykepengerFom" to sykepengerFom,
-                "inntekt" to inntekt.reflection { _, månedlig, _, _ -> månedlig },
-                "refusjonTilArbeidsgiver" to refusjonTilArbeidsgiver,
-                "refusjonTom" to refusjonTom,
-                "lagret" to lagret
-            ))
+            inntekter.add(
+                mapOf(
+                    "orgnr" to orgnr,
+                    "sykepengerFom" to sykepengerFom,
+                    "inntekt" to inntekt.reflection { _, månedlig, _, _ -> månedlig },
+                    "refusjonTilArbeidsgiver" to refusjonTilArbeidsgiver,
+                    "refusjonTom" to refusjonTom,
+                    "lagret" to lagret
+                )
+            )
         }
 
         override fun visitInfotrygdhistorikkArbeidskategorikoder(arbeidskategorikoder: Map<String, LocalDate>) {
@@ -346,32 +354,35 @@ internal class JsonBuilder : AbstractBuilder() {
     }
 
 
-
     private class VilkårsgrunnlagHistorikkState(private val historikk: MutableList<Map<String, Any?>>) : BuilderState() {
         override fun visitGrunnlagsdata(skjæringstidspunkt: LocalDate, grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata) {
-            historikk.add(mapOf(
-                "skjæringstidspunkt" to skjæringstidspunkt,
-                "type" to "Vilkårsprøving",
-                "antallOpptjeningsdagerErMinst" to grunnlagsdata.antallOpptjeningsdagerErMinst,
-                "avviksprosent" to grunnlagsdata.avviksprosent?.ratio(),
-                "sammenligningsgrunnlag" to grunnlagsdata.sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
-                "harOpptjening" to grunnlagsdata.harOpptjening,
-                "medlemskapstatus" to when (grunnlagsdata.medlemskapstatus) {
-                    Medlemskapsvurdering.Medlemskapstatus.Ja -> JsonMedlemskapstatus.JA
-                    Medlemskapsvurdering.Medlemskapstatus.Nei -> JsonMedlemskapstatus.NEI
-                    Medlemskapsvurdering.Medlemskapstatus.VetIkke -> JsonMedlemskapstatus.VET_IKKE
-                },
-                "harMinimumInntekt" to grunnlagsdata.harMinimumInntekt,
-                "vurdertOk" to grunnlagsdata.vurdertOk,
-                "meldingsreferanseId" to grunnlagsdata.meldingsreferanseId
-            ))
+            historikk.add(
+                mapOf(
+                    "skjæringstidspunkt" to skjæringstidspunkt,
+                    "type" to "Vilkårsprøving",
+                    "antallOpptjeningsdagerErMinst" to grunnlagsdata.antallOpptjeningsdagerErMinst,
+                    "avviksprosent" to grunnlagsdata.avviksprosent?.ratio(),
+                    "sammenligningsgrunnlag" to grunnlagsdata.sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
+                    "harOpptjening" to grunnlagsdata.harOpptjening,
+                    "medlemskapstatus" to when (grunnlagsdata.medlemskapstatus) {
+                        Medlemskapsvurdering.Medlemskapstatus.Ja -> JsonMedlemskapstatus.JA
+                        Medlemskapsvurdering.Medlemskapstatus.Nei -> JsonMedlemskapstatus.NEI
+                        Medlemskapsvurdering.Medlemskapstatus.VetIkke -> JsonMedlemskapstatus.VET_IKKE
+                    },
+                    "harMinimumInntekt" to grunnlagsdata.harMinimumInntekt,
+                    "vurdertOk" to grunnlagsdata.vurdertOk,
+                    "meldingsreferanseId" to grunnlagsdata.meldingsreferanseId
+                )
+            )
         }
 
         override fun visitInfotrygdVilkårsgrunnlag(skjæringstidspunkt: LocalDate, infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag) {
-            historikk.add(mapOf(
-                "skjæringstidspunkt" to skjæringstidspunkt,
-                "type" to "Infotrygd"
-            ))
+            historikk.add(
+                mapOf(
+                    "skjæringstidspunkt" to skjæringstidspunkt,
+                    "type" to "Infotrygd"
+                )
+            )
         }
 
         override fun postVisitVilkårsgrunnlagHistorikk() {

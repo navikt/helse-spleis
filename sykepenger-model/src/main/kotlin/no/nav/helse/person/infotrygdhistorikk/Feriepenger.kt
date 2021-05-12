@@ -7,4 +7,4 @@ class Feriepenger(
     val beløp: Double,
     val fom: LocalDate,
     val tom: LocalDate
-    ) {}
+    )

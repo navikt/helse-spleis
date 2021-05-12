@@ -98,7 +98,7 @@ internal class Utbetaling private constructor(
     private fun harHåndtert(hendelse: ArbeidstakerHendelse) =
         (hendelse == forrigeHendelse).also { forrigeHendelse = hendelse }
 
-    internal fun register(observer: UtbetalingObserver) {
+    internal fun registrer(observer: UtbetalingObserver) {
         observers.add(observer)
     }
 

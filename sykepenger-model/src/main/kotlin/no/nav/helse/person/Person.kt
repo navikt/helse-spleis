@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.hendelser.*
+import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.forlengerIkkeBareAnnenArbeidsgiver
 import no.nav.helse.person.Arbeidsgiver.Companion.forlengerSammePeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSammenligningsgrunnlag
@@ -72,11 +73,12 @@ class Person private constructor(
     fun håndter(utbetalingshistorikk: UtbetalingshistorikkForFeriepenger) {
         utbetalingshistorikk.kontekst(this)
         val feriepengeberegner = Feriepengeberegner(
+            alder = Alder(fødselsnummer),
+            feriepengeår = utbetalingshistorikk.feriepengeår,
             utbetalingshistorikkForFeriepenger = utbetalingshistorikk,
-            person = this,
-            alder = Alder(fødselsnummer)
+            person = this
         )
-        feriepengeberegner.beregn()
+        arbeidsgivere.beregnFeriepengerForAlleArbeidsgivere(feriepengeberegner, utbetalingshistorikk)
         // håndter dette etter hvert
     }
 

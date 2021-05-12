@@ -10,10 +10,8 @@ import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
-import no.nav.helse.utbetalingslinjer.Endringskode
-import no.nav.helse.utbetalingslinjer.Oppdrag
-import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingslinjer.Utbetalingslinje
+import no.nav.helse.utbetalingslinjer.*
+import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
 import no.nav.helse.økonomi.Inntekt
@@ -42,10 +40,13 @@ internal interface InfotrygdhistorikkVisitor {
         lagretInntekter: Boolean,
         lagretVilkårsgrunnlag: Boolean,
         harStatslønn: Boolean
-    ) {}
+    ) {
+    }
+
     fun preVisitInfotrygdhistorikkPerioder() {}
     fun visitInfotrygdhistorikkFerieperiode(periode: Friperiode) {}
-    fun visitInfotrygdhistorikkUtbetalingsperiode(orgnr: String, periode: Utbetalingsperiode, grad: Prosentdel, inntekt: Inntekt) {}
+    fun visitInfotrygdhistorikkPersonUtbetalingsperiode(orgnr: String, periode: Utbetalingsperiode, grad: Prosentdel, inntekt: Inntekt) {}
+    fun visitInfotrygdhistorikkArbeidsgiverUtbetalingsperiode(orgnr: String, periode: Utbetalingsperiode, grad: Prosentdel, inntekt: Inntekt) {}
     fun visitInfotrygdhistorikkUkjentPeriode(periode: UkjentInfotrygdperiode) {}
     fun postVisitInfotrygdhistorikkPerioder() {}
     fun preVisitInfotrygdhistorikkInntektsopplysninger() {}
@@ -56,7 +57,9 @@ internal interface InfotrygdhistorikkVisitor {
         refusjonTilArbeidsgiver: Boolean,
         refusjonTom: LocalDate?,
         lagret: LocalDateTime?
-    ) {}
+    ) {
+    }
+
     fun postVisitInfotrygdhistorikkInntektsopplysninger() {}
     fun visitUgyldigePerioder(ugyldigePerioder: List<Pair<LocalDate?, LocalDate?>>) {}
     fun visitInfotrygdhistorikkArbeidskategorikoder(arbeidskategorikoder: Map<String, LocalDate>) {}
@@ -68,7 +71,9 @@ internal interface InfotrygdhistorikkVisitor {
         lagretInntekter: Boolean,
         lagretVilkårsgrunnlag: Boolean,
         harStatslønn: Boolean
-    ) {}
+    ) {
+    }
+
     fun postVisitInfotrygdhistorikk() {}
 }
 
@@ -80,7 +85,7 @@ internal interface VilkårsgrunnlagHistorikkVisitor {
 }
 
 internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, SykdomshistorikkVisitor, VedtaksperiodeVisitor, UtbetalingVisitor,
-    UtbetalingstidslinjeberegningVisitor {
+    UtbetalingstidslinjeberegningVisitor, FeriepengeutbetalingVisitor {
     fun preVisitArbeidsgiver(
         arbeidsgiver: Arbeidsgiver,
         id: UUID,
@@ -88,8 +93,8 @@ internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, Sykdomshistori
     ) {
     }
 
-    fun preVisitUtbetalingstidslinjeberegninger(bereninger: List<Utbetalingstidslinjeberegning>) {}
-    fun postVisitUtbetalingstidslinjeberegninger(bereninger: List<Utbetalingstidslinjeberegning>) {}
+    fun preVisitUtbetalingstidslinjeberegninger(beregninger: List<Utbetalingstidslinjeberegning>) {}
+    fun postVisitUtbetalingstidslinjeberegninger(beregninger: List<Utbetalingstidslinjeberegning>) {}
     fun preVisitUtbetalinger(utbetalinger: List<Utbetaling>) {}
     fun postVisitUtbetalinger(utbetalinger: List<Utbetaling>) {}
     fun preVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {}
@@ -104,7 +109,39 @@ internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, Sykdomshistori
         organisasjonsnummer: String
     ) {
     }
+}
 
+internal interface FeriepengeutbetalingVisitor {
+    fun preVisitFeriepengeutbetalinger(feriepengeutbetalinger: List<Feriepengeutbetaling>) {}
+    fun preVisitFeriepengeutbetaling(
+        feriepengeutbetaling: Feriepengeutbetaling,
+        infotrygdFeriepengebeløpPerson: Double,
+        infotrygdFeriepengebeløpArbeidsgiver: Double,
+        spleisFeriepengebeløpArbeidsgiver: Double
+    ) {
+    }
+
+    fun preVisitFeriepengeberegner(feriepengeberegner: Feriepengeberegner) {}
+    fun visitInfotrygdPersonDag(infotrygdPerson: Feriepengeberegner.UtbetaltDag.InfotrygdPerson, orgnummer: String, dato: LocalDate, beløp: Int) {}
+    fun visitInfotrygdArbeidsgiverDag(
+        infotrygdArbeidsgiver: Feriepengeberegner.UtbetaltDag.InfotrygdArbeidsgiver,
+        orgnummer: String,
+        dato: LocalDate,
+        beløp: Int
+    ) {
+    }
+
+    fun visitSpleisArbeidsgiverDag(spleisArbeidsgiver: Feriepengeberegner.UtbetaltDag.SpleisArbeidsgiver, orgnummer: String, dato: LocalDate, beløp: Int) {}
+    fun postVisitFeriepengeberegner(feriepengeberegner: Feriepengeberegner) {}
+    fun postVisitFeriepengeutbetaling(
+        feriepengeutbetaling: Feriepengeutbetaling,
+        infotrygdFeriepengebeløpPerson: Double,
+        infotrygdFeriepengebeløpArbeidsgiver: Double,
+        spleisFeriepengebeløpArbeidsgiver: Double
+    ) {
+    }
+
+    fun postVisitFeriepengeutbetalinger(feriepengeutbetalinger: List<Feriepengeutbetaling>) {}
 }
 
 internal interface UtbetalingstidslinjeberegningVisitor {

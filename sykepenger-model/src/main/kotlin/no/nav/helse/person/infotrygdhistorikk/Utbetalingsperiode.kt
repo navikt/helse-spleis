@@ -34,10 +34,6 @@ abstract class Utbetalingsperiode(
         else utbetalingstidslinje.addNAVdag(dato, Økonomi.sykdomsgrad(grad).inntekt(inntekt, skjæringstidspunkt = dato))
     }
 
-    override fun accept(visitor: InfotrygdhistorikkVisitor) {
-        visitor.visitInfotrygdhistorikkUtbetalingsperiode(orgnr, this, grad, inntekt)
-    }
-
     override fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode) {
         validerOverlapp(aktivitetslogg, periode)
     }
@@ -62,6 +58,10 @@ class ArbeidsgiverUtbetalingsperiode(
 ) : Utbetalingsperiode(orgnr, fom, tom, grad, inntekt.rundTilDaglig()) {
     private val inntekt = inntekt.rundTilDaglig()
 
+    override fun accept(visitor: InfotrygdhistorikkVisitor) {
+        visitor.visitInfotrygdhistorikkArbeidsgiverUtbetalingsperiode(orgnr, this, grad, inntekt)
+    }
+
     override fun equals(other: Any?): Boolean {
         if (other !is ArbeidsgiverUtbetalingsperiode) return false
         return this.orgnr == other.orgnr && this.start == other.start && this.grad == other.grad && this.inntekt == other.inntekt
@@ -78,6 +78,10 @@ class PersonUtbetalingsperiode(
     inntekt: Inntekt
 ) : Utbetalingsperiode(orgnr, fom, tom, grad, inntekt) {
     private val inntekt = inntekt.rundTilDaglig()
+
+    override fun accept(visitor: InfotrygdhistorikkVisitor) {
+        visitor.visitInfotrygdhistorikkPersonUtbetalingsperiode(orgnr, this, grad, inntekt)
+    }
 
     override fun equals(other: Any?): Boolean {
         if (other !is PersonUtbetalingsperiode) return false

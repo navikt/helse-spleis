@@ -337,6 +337,7 @@ internal data class PersonData(
                 forkastedeliste,
                 modelUtbetalinger,
                 beregnetUtbetalingstidslinjer.map { it.tilBeregnetUtbetalingstidslinje() },
+                emptyList(), //FIXME: Må restore ordentlig
                 refusjonOpphører
             )
 

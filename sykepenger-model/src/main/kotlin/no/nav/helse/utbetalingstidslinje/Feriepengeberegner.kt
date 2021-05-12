@@ -2,14 +2,22 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.InfotrygdhistorikkVisitor
-import no.nav.helse.person.Person
-import no.nav.helse.person.PersonVisitor
+import no.nav.helse.person.*
 import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
+import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.ARBEIDSGIVER
+import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.INFOTRYGD
+import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.INFOTRYGD_ARBEIDSGIVER
+import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.INFOTRYGD_PERSON
+import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.SPLEIS_ARBEIDSGIVER
+import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.and
+import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.feriepengedager
+import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.orgnummerFilter
+import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.summer
+import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.tilDato
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel
 import java.time.LocalDate
@@ -17,89 +25,205 @@ import java.time.LocalDateTime
 import java.time.Year
 import java.util.*
 
+private typealias UtbetaltDagSelector = (Feriepengeberegner.UtbetaltDag) -> Boolean
+
 internal class Feriepengeberegner(
-    private val utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger,
-    private val person: Person,
-    private val alder: Alder
-) : InfotrygdhistorikkVisitor, PersonVisitor, Iterable<LocalDate> {
+    private val alder: Alder,
+    private val feriepengeår: Year,
+    private val utbetalteDager: List<UtbetaltDag>
+) {
     private companion object {
         private const val MAGIC_NUMBER = 48
     }
 
-    private val dager = mutableSetOf<LocalDate>()
+    internal constructor(
+        alder: Alder,
+        feriepengeår: Year,
+        utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger,
+        person: Person
+    ) : this(alder, feriepengeår, FinnUtbetalteDagerVisitor(utbetalingshistorikkForFeriepenger, person).utbetalteDager())
 
-    init {
-        utbetalingshistorikkForFeriepenger.accept(this)
-        person.accept(this)
+    internal fun accept(visitor: FeriepengeutbetalingVisitor) {
+        visitor.preVisitFeriepengeberegner(this)
+        utbetalteDager.forEach { it.accept(visitor) }
+        visitor.postVisitFeriepengeberegner(this)
     }
 
-    override fun visitInfotrygdhistorikkUtbetalingsperiode(orgnr: String, periode: Utbetalingsperiode, grad: Prosentdel, inntekt: Inntekt) {
-        dager.addAll(periode.filterNot { it.erHelg() })
+    internal fun feriepengedatoer() = feriepengedager().tilDato()
+    internal fun beregnFeriepengerForInfotrygdPerson() = beregnForFilter(INFOTRYGD_PERSON)
+    internal fun beregnFeriepengerForInfotrygdPerson(orgnummer: String) = beregnForFilter(INFOTRYGD_PERSON and orgnummerFilter(orgnummer))
+    internal fun beregnFeriepengerForInfotrygdArbeidsgiver() = beregnForFilter(INFOTRYGD_ARBEIDSGIVER)
+    internal fun beregnFeriepengerForInfotrygdArbeidsgiver(orgnummer: String) = beregnForFilter(INFOTRYGD_ARBEIDSGIVER and orgnummerFilter(orgnummer))
+    internal fun beregnFeriepengerForSpleis() = beregnForFilter(SPLEIS_ARBEIDSGIVER)
+    internal fun beregnFeriepengerForSpleis(orgnummer: String) = beregnForFilter(SPLEIS_ARBEIDSGIVER and orgnummerFilter(orgnummer))
+    internal fun beregnFeriepengerForInfotrygd() = beregnForFilter(INFOTRYGD)
+    internal fun beregnFeriepengerForInfotrygd(orgnummer: String) = beregnForFilter(INFOTRYGD and orgnummerFilter(orgnummer))
+    internal fun beregnFeriepengerForArbeidsgiver(orgnummer: String) = beregnForFilter(ARBEIDSGIVER and orgnummerFilter(orgnummer))
+    internal fun beregnFeriepengedifferansenForArbeidsgiver(orgnummer: String): Double {
+        val grunnlag = feriepengedager().filter(ARBEIDSGIVER and orgnummerFilter(orgnummer)).summer()
+        val grunnlagUtbetaltAvInfotrygd = feriepengedager().filter(INFOTRYGD_ARBEIDSGIVER and orgnummerFilter(orgnummer)).summer()
+        return alder.beregnFeriepenger(feriepengeår, grunnlag - grunnlagUtbetaltAvInfotrygd)
     }
 
-    private var utbetaltUtbetaling = false
-    override fun preVisitUtbetaling(
-        utbetaling: Utbetaling,
-        id: UUID,
-        beregningId: UUID,
-        type: Utbetaling.Utbetalingtype,
-        tilstand: Utbetaling.Tilstand,
-        tidsstempel: LocalDateTime,
-        oppdatert: LocalDateTime,
-        arbeidsgiverNettoBeløp: Int,
-        personNettoBeløp: Int,
-        maksdato: LocalDate,
-        forbrukteSykedager: Int?,
-        gjenståendeSykedager: Int?
+    private fun beregnForFilter(filter: UtbetaltDagSelector): Double {
+        val grunnlag = feriepengedager().filter(filter).summer()
+        return alder.beregnFeriepenger(feriepengeår, grunnlag)
+    }
+
+    private fun feriepengedager(): List<UtbetaltDag> {
+        val itFeriepenger = utbetalteDager.filter(INFOTRYGD).feriepengedager()
+        val personreserverteDatoer = itFeriepenger.filter { (_, dager) -> dager.any(INFOTRYGD_PERSON) }.map { (dato, _) -> dato }
+
+        return utbetalteDager
+            .feriepengedager(personreserverteDatoer)
+            .flatMap { (_, dagListe) -> dagListe }
+    }
+
+    internal sealed class UtbetaltDag(
+        protected val orgnummer: String,
+        protected val dato: LocalDate,
+        protected val beløp: Int
     ) {
-        utbetaltUtbetaling = tilstand == Utbetaling.Utbetalt
-    }
+        internal companion object {
+            internal fun List<UtbetaltDag>.tilDato() = map { it.dato }.distinct()
+            private fun List<LocalDate>.inneholderBeggeEllerIngen(dato1: LocalDate, dato2: LocalDate) = (dato1 !in this).xor(dato2 in this)
+            internal fun List<UtbetaltDag>.feriepengedager(personreserverteDatoer: List<LocalDate> = emptyList()) = this
+                .sortedWith { utbetaltDag1, utbetaltDag2 ->
+                    when {
+                        personreserverteDatoer.inneholderBeggeEllerIngen(utbetaltDag1.dato, utbetaltDag2.dato) -> utbetaltDag1.dato.compareTo(utbetaltDag2.dato)
+                        utbetaltDag1.dato in personreserverteDatoer -> -1
+                        else -> 1
+                    }
+                }
+                .groupBy { it.dato }
+                .entries
+                .take(MAGIC_NUMBER)
+                .sortedBy { (dato, _) -> dato }
 
-    override fun visitUtbetalingslinje(
-        linje: Utbetalingslinje,
-        fom: LocalDate,
-        tom: LocalDate,
-        beløp: Int?,
-        aktuellDagsinntekt: Int,
-        grad: Double,
-        delytelseId: Int,
-        refDelytelseId: Int?,
-        refFagsystemId: String?,
-        endringskode: Endringskode,
-        datoStatusFom: LocalDate?
-    ) {
-        if (utbetaltUtbetaling) {
-            dager.addAll((fom til tom).filterNot { it.erHelg() })
+            internal fun List<UtbetaltDag>.summer() = sumBy { it.beløp }
+
+            internal val INFOTRYGD_PERSON: UtbetaltDagSelector = { it is InfotrygdPerson }
+            internal val INFOTRYGD_ARBEIDSGIVER: UtbetaltDagSelector = { it is InfotrygdArbeidsgiver }
+            internal val INFOTRYGD: UtbetaltDagSelector = INFOTRYGD_PERSON or INFOTRYGD_ARBEIDSGIVER
+            internal val SPLEIS_ARBEIDSGIVER: UtbetaltDagSelector = { it is SpleisArbeidsgiver }
+            internal val ARBEIDSGIVER: UtbetaltDagSelector = INFOTRYGD_ARBEIDSGIVER or SPLEIS_ARBEIDSGIVER
+            internal fun orgnummerFilter(orgnummer: String): UtbetaltDagSelector = { it.orgnummer == orgnummer }
+            private infix fun (UtbetaltDagSelector).or(other: UtbetaltDagSelector): UtbetaltDagSelector = { this(it) || other(it) }
+            internal infix fun (UtbetaltDagSelector).and(other: UtbetaltDagSelector): UtbetaltDagSelector = { this(it) && other(it) }
+        }
+
+        internal abstract fun accept(visitor: FeriepengeutbetalingVisitor)
+
+        internal class InfotrygdPerson(
+            orgnummer: String,
+            dato: LocalDate,
+            beløp: Int
+        ) : UtbetaltDag(orgnummer, dato, beløp) {
+            override fun accept(visitor: FeriepengeutbetalingVisitor) {
+                visitor.visitInfotrygdPersonDag(this, orgnummer, dato, beløp)
+            }
+        }
+
+        internal class InfotrygdArbeidsgiver(
+            orgnummer: String,
+            dato: LocalDate,
+            beløp: Int
+        ) : UtbetaltDag(orgnummer, dato, beløp) {
+            override fun accept(visitor: FeriepengeutbetalingVisitor) {
+                visitor.visitInfotrygdArbeidsgiverDag(this, orgnummer, dato, beløp)
+            }
+        }
+
+        internal class SpleisArbeidsgiver(
+            orgnummer: String,
+            dato: LocalDate,
+            beløp: Int
+        ) : UtbetaltDag(orgnummer, dato, beløp) {
+            override fun accept(visitor: FeriepengeutbetalingVisitor) {
+                visitor.visitSpleisArbeidsgiverDag(this, orgnummer, dato, beløp)
+            }
         }
     }
 
-    override fun postVisitUtbetaling(
-        utbetaling: Utbetaling,
-        id: UUID,
-        beregningId: UUID,
-        type: Utbetaling.Utbetalingtype,
-        tilstand: Utbetaling.Tilstand,
-        tidsstempel: LocalDateTime,
-        oppdatert: LocalDateTime,
-        arbeidsgiverNettoBeløp: Int,
-        personNettoBeløp: Int,
-        maksdato: LocalDate,
-        forbrukteSykedager: Int?,
-        gjenståendeSykedager: Int?
-    ) {
-        utbetaltUtbetaling = false
-    }
+    private class FinnUtbetalteDagerVisitor(
+        utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger,
+        person: Person
+    ) : InfotrygdhistorikkVisitor, PersonVisitor {
+        private val utbetalteDager = mutableListOf<UtbetaltDag>()
 
-    internal fun beregn() {
-        val datoer = dager
-            .sorted()
-            .groupBy { Year.from(it) }
-            .flatMap { (_, prÅr) -> prÅr.take(MAGIC_NUMBER) }
-    }
+        init {
+            utbetalingshistorikkForFeriepenger.accept(this)
+            person.accept(this)
+        }
 
-    override fun iterator() = dager
-        .sorted()
-        .groupBy { Year.from(it) }
-        .flatMap { (_, prÅr) -> prÅr.take(MAGIC_NUMBER) }
-        .iterator()
+        fun utbetalteDager() = utbetalteDager.toList()
+
+        override fun visitInfotrygdhistorikkPersonUtbetalingsperiode(orgnr: String, periode: Utbetalingsperiode, grad: Prosentdel, inntekt: Inntekt) {
+            utbetalteDager.addAll(periode.filterNot { it.erHelg() }
+                .map { UtbetaltDag.InfotrygdPerson(orgnr, it, inntekt.reflection { _, _, _, dagligInt -> dagligInt }) })
+        }
+
+        override fun visitInfotrygdhistorikkArbeidsgiverUtbetalingsperiode(orgnr: String, periode: Utbetalingsperiode, grad: Prosentdel, inntekt: Inntekt) {
+            utbetalteDager.addAll(periode.filterNot { it.erHelg() }
+                .map { UtbetaltDag.InfotrygdArbeidsgiver(orgnr, it, inntekt.reflection { _, _, _, dagligInt -> dagligInt }) })
+        }
+
+        private lateinit var orgnummer: String
+        override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
+            this.orgnummer = organisasjonsnummer
+        }
+
+        private var utbetaltUtbetaling = false
+        override fun preVisitUtbetaling(
+            utbetaling: Utbetaling,
+            id: UUID,
+            beregningId: UUID,
+            type: Utbetaling.Utbetalingtype,
+            tilstand: Utbetaling.Tilstand,
+            tidsstempel: LocalDateTime,
+            oppdatert: LocalDateTime,
+            arbeidsgiverNettoBeløp: Int,
+            personNettoBeløp: Int,
+            maksdato: LocalDate,
+            forbrukteSykedager: Int?,
+            gjenståendeSykedager: Int?
+        ) {
+            utbetaltUtbetaling = tilstand == Utbetaling.Utbetalt
+        }
+
+        override fun visitUtbetalingslinje(
+            linje: Utbetalingslinje,
+            fom: LocalDate,
+            tom: LocalDate,
+            beløp: Int?,
+            aktuellDagsinntekt: Int,
+            grad: Double,
+            delytelseId: Int,
+            refDelytelseId: Int?,
+            refFagsystemId: String?,
+            endringskode: Endringskode,
+            datoStatusFom: LocalDate?
+        ) {
+            if (utbetaltUtbetaling && beløp != null) {
+                utbetalteDager.addAll((fom til tom).filterNot { it.erHelg() }.map { UtbetaltDag.SpleisArbeidsgiver(this.orgnummer, it, beløp) })
+            }
+        }
+
+        override fun postVisitUtbetaling(
+            utbetaling: Utbetaling,
+            id: UUID,
+            beregningId: UUID,
+            type: Utbetaling.Utbetalingtype,
+            tilstand: Utbetaling.Tilstand,
+            tidsstempel: LocalDateTime,
+            oppdatert: LocalDateTime,
+            arbeidsgiverNettoBeløp: Int,
+            personNettoBeløp: Int,
+            maksdato: LocalDate,
+            forbrukteSykedager: Int?,
+            gjenståendeSykedager: Int?
+        ) {
+            utbetaltUtbetaling = false
+        }
+    }
 }
