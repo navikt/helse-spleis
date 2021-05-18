@@ -36,6 +36,7 @@ internal class PersonMediator(
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     }
 
+
     init {
         person.addObserver(this)
     }
@@ -291,6 +292,12 @@ internal class PersonMediator(
                 )
             )
         )
+    }
+
+    override fun hendelseIkkeHåndtert(event: PersonObserver.HendelseIkkeHåndtertEvent) {
+        queueMessage("hendelse_ikke_håndtert", JsonMessage.newMessage(
+            mapOf("hendelseId" to event.hendelseId)
+        ))
     }
 
     private fun leggPåStandardfelter(event: String, outgoingMessage: JsonMessage) = outgoingMessage.apply {

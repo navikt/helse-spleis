@@ -447,4 +447,8 @@ class Person private constructor(
         })
         return aktiviteter
     }
+
+    internal fun førerIkkeTilVidereBehandling(hendelse: PersonHendelse) {
+        observers.forEach { it.hendelseIkkeHåndtert(PersonObserver.HendelseIkkeHåndtertEvent(hendelse.meldingsreferanseId())) }
+    }
 }

@@ -261,14 +261,15 @@ internal class Arbeidsgiver private constructor(
     private fun <Hendelse : SykdomstidslinjeHendelse> håndterEllerOpprettVedtaksperiode(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean) {
         hendelse.kontekst(this)
         if (!noenHarHåndtert(hendelse, håndterer)) {
-            if (hendelse.forGammel()) return hendelse.error("Forventet ikke ${hendelse.kilde}. Oppretter ikke vedtaksperiode.")
-            if (Utbetaling.harBetalt(utbetalinger, hendelse.periode())) return hendelse.error("Periode overlapper med tidligere utbetaling.")
+            if (hendelse.forGammel()) hendelse.error("Forventet ikke ${hendelse.kilde}. Oppretter ikke vedtaksperiode.")
+            if (Utbetaling.harBetalt(utbetalinger, hendelse.periode())) hendelse.error("Periode overlapper med tidligere utbetaling.")
             if (!hendelse.hasErrorsOrWorse()) {
                 hendelse.info("Lager ny vedtaksperiode pga. ${hendelse.kilde}")
                 val ny = nyVedtaksperiode(hendelse).also { håndterer(it, hendelse) }
                 håndter(hendelse) { nyPeriode(ny, hendelse) }
             }
         }
+        if (hendelse.hasErrorsOrWorse()) person.førerIkkeTilVidereBehandling(hendelse)
         finalize(hendelse)
     }
 

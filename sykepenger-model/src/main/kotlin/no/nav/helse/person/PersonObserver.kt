@@ -179,6 +179,10 @@ interface PersonObserver {
         val hendelseId: UUID,
     )
 
+    data class HendelseIkkeHåndtertEvent(
+        val hendelseId: UUID
+    )
+
     fun inntektsmeldingReplay(event: InntektsmeldingReplayEvent) {}
     fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, påminnelse: Påminnelse) {}
     fun vedtaksperiodeIkkePåminnet(påminnelse: Påminnelse, vedtaksperiodeId: UUID, nåværendeTilstand: TilstandType) {}
@@ -196,6 +200,7 @@ interface PersonObserver {
     fun utbetalingUtenUtbetaling(event: UtbetalingUtbetaltEvent) {}
     fun annullering(event: UtbetalingAnnullertEvent) {}
     fun avstemt(result: Map<String, Any>) {}
+    fun hendelseIkkeHåndtert(event: HendelseIkkeHåndtertEvent) {}
     fun vedtakFattet(
         vedtaksperiodeId: UUID,
         periode: Periode,
