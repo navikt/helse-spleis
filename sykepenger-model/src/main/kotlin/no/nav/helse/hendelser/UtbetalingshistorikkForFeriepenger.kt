@@ -4,9 +4,9 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.person.PersonHendelse
 import no.nav.helse.person.infotrygdhistorikk.Feriepenger
+import no.nav.helse.person.infotrygdhistorikk.Feriepenger.Companion.utbetalteFeriepengerTilArbeidsgiver
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.utbetalingstidslinje.Alder
 import java.time.LocalDate
 import java.time.Year
 import java.util.*
@@ -21,7 +21,7 @@ class UtbetalingshistorikkForFeriepenger(
     private val harStatslønn: Boolean,
     private val arbeidskategorikoder: Map<String, LocalDate>,
     //FIXME: Internal?
-    internal val feriepengeår: Year,
+    internal val opptjeningsår: Year,
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
 ) : PersonHendelse(meldingsreferanseId, aktivitetslogg) {
     override fun aktørId() = aktørId
@@ -32,6 +32,6 @@ class UtbetalingshistorikkForFeriepenger(
         utbetalinger.forEach { it.accept(visitor) }
     }
 
-    internal fun beregnFeriepenger(alder: Alder, beløp: Int) =
-        alder.beregnFeriepenger(feriepengeår, beløp)
+    internal fun utbetalteFeriepengerTilArbeidsgiver(orgnummer: String) =
+        feriepengehistorikk.utbetalteFeriepengerTilArbeidsgiver(orgnummer, opptjeningsår)
 }

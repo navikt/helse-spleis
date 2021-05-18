@@ -33,7 +33,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode)
 
         håndterUtbetalingshistorikkForFeriepenger(
-            feriepengeår = Year.of(2020)
+            opptjeningsår = Year.of(2020)
         )
     }
 }

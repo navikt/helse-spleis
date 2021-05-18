@@ -29,7 +29,7 @@ private typealias UtbetaltDagSelector = (Feriepengeberegner.UtbetaltDag) -> Bool
 
 internal class Feriepengeberegner(
     private val alder: Alder,
-    private val feriepengeår: Year,
+    private val opptjeningsår: Year,
     private val utbetalteDager: List<UtbetaltDag>
 ) {
     private companion object {
@@ -38,10 +38,10 @@ internal class Feriepengeberegner(
 
     internal constructor(
         alder: Alder,
-        feriepengeår: Year,
+        opptjeningsår: Year,
         utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger,
         person: Person
-    ) : this(alder, feriepengeår, FinnUtbetalteDagerVisitor(utbetalingshistorikkForFeriepenger, person).utbetalteDager())
+    ) : this(alder, opptjeningsår, FinnUtbetalteDagerVisitor(utbetalingshistorikkForFeriepenger, person).utbetalteDager())
 
     internal fun accept(visitor: FeriepengeutbetalingVisitor) {
         visitor.preVisitFeriepengeberegner(this)
@@ -59,15 +59,25 @@ internal class Feriepengeberegner(
     internal fun beregnFeriepengerForInfotrygd() = beregnForFilter(INFOTRYGD)
     internal fun beregnFeriepengerForInfotrygd(orgnummer: String) = beregnForFilter(INFOTRYGD and orgnummerFilter(orgnummer))
     internal fun beregnFeriepengerForArbeidsgiver(orgnummer: String) = beregnForFilter(ARBEIDSGIVER and orgnummerFilter(orgnummer))
+    internal fun beregnUtbetalteFeriepengerForInfotrygdArbeidsgiver(orgnummer: String): Double {
+        val grunnlag = grunnlagForFeriepengerUtbetaltAvInfotrygd(orgnummer)
+        return alder.beregnFeriepenger(opptjeningsår, grunnlag)
+    }
+
     internal fun beregnFeriepengedifferansenForArbeidsgiver(orgnummer: String): Double {
         val grunnlag = feriepengedager().filter(ARBEIDSGIVER and orgnummerFilter(orgnummer)).summer()
-        val grunnlagUtbetaltAvInfotrygd = feriepengedager().filter(INFOTRYGD_ARBEIDSGIVER and orgnummerFilter(orgnummer)).summer()
-        return alder.beregnFeriepenger(feriepengeår, grunnlag - grunnlagUtbetaltAvInfotrygd)
+        val grunnlagUtbetaltAvInfotrygd = grunnlagForFeriepengerUtbetaltAvInfotrygd(orgnummer)
+        return alder.beregnFeriepenger(opptjeningsår, grunnlag - grunnlagUtbetaltAvInfotrygd)
+    }
+
+    private fun grunnlagForFeriepengerUtbetaltAvInfotrygd(orgnummer: String): Int {
+        val itFeriepengedager = utbetalteDager.filter(INFOTRYGD).feriepengedager().flatMap { (_, dagListe) -> dagListe }
+        return itFeriepengedager.filter(INFOTRYGD_ARBEIDSGIVER and orgnummerFilter(orgnummer)).summer()
     }
 
     private fun beregnForFilter(filter: UtbetaltDagSelector): Double {
         val grunnlag = feriepengedager().filter(filter).summer()
-        return alder.beregnFeriepenger(feriepengeår, grunnlag)
+        return alder.beregnFeriepenger(opptjeningsår, grunnlag)
     }
 
     private fun feriepengedager(): List<UtbetaltDag> {

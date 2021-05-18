@@ -36,17 +36,15 @@ internal class Feriepengeutbetaling(
     private var spleisFeriepengebeløpArbeidsgiver: Double? = null
 
     internal fun beregn() {
-        val infotrygdHarUtbetaltTilPerson = 0
-        val infotrygdHarUtbetaltTilArbeidsgiver = 0
-        val hvaViHarBeregnetAtInfotrygdHarUtbetaltTilPerson = feriepengeberegner.beregnFeriepengerForInfotrygdPerson()
-        val hvaViHarBeregnetAtInfotrygdHarUtbetaltTilArbeidsgiver = feriepengeberegner.beregnFeriepengerForInfotrygdArbeidsgiver()
+        val infotrygdHarUtbetaltTilArbeidsgiver = utbetalingshistorikkForFeriepenger.utbetalteFeriepengerTilArbeidsgiver(orgnummer)
+        val hvaViHarBeregnetAtInfotrygdHarUtbetaltTilArbeidsgiver = feriepengeberegner.beregnUtbetalteFeriepengerForInfotrygdArbeidsgiver(orgnummer)
 
         infotrygdFeriepengebeløpPerson = feriepengeberegner.beregnFeriepengerForInfotrygdPerson(orgnummer)
         infotrygdFeriepengebeløpArbeidsgiver = feriepengeberegner.beregnFeriepengerForInfotrygdArbeidsgiver(orgnummer)
         spleisFeriepengebeløpArbeidsgiver = feriepengeberegner.beregnFeriepengerForSpleis(orgnummer)
 
         val kaEFasitenSomSkaUtbetalesTeArbeidsgiver: Double = feriepengeberegner.beregnFeriepengerForArbeidsgiver(orgnummer)
-        val kaEFaktiskUtbetaltTeArbeidsgiver: Double = infotrygdFeriepengebeløpArbeidsgiver!!
+        val kaEFaktiskUtbetaltTeArbeidsgiver: Double = feriepengeberegner.beregnUtbetalteFeriepengerForInfotrygdArbeidsgiver(orgnummer)
         val kaEKorrigeringa: Double = feriepengeberegner.beregnFeriepengedifferansenForArbeidsgiver(orgnummer)
     }
 }

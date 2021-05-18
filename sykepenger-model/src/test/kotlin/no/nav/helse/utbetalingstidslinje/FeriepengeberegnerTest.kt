@@ -1,253 +1,275 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.Toggles
-import no.nav.helse.hendelser.*
-import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
-import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.testhelpers.*
-import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.til
+import no.nav.helse.testhelpers.april
+import no.nav.helse.testhelpers.februar
+import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.mars
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 import java.time.Year
-import java.util.*
 
-internal class FeriepengeberegnerTest : AbstractEndToEndTest() {
+internal class FeriepengeberegnerTest {
     private companion object {
-        private val alder = Alder(UNG_PERSON_FNR_2018)
-        private const val a1 = "456789123"
-        private const val a2 = "789456213"
+        private const val ORGNUMMER = "123456789"
+        private val UNG: Alder = Alder("01026000014")
+        private const val UNG_SATS = 0.102
+        private val GAMMEL: Alder = Alder("01025900065")
+        private const val GAMMEL_SATS = 0.125
     }
 
     @Test
-    fun `Finner datoer for feriepengeberegning med 48 sammenhengende utbetalingsdager i IT fra første januar`() {
-        val historikk = utbetalingshistorikkForFeriepenger(
-            listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 7.mars, 100.prosent, 1000.månedlig))
+    fun `kun utbetaling i spleis - 48 utbetalte dager`() {
+        val feriepengeberegner = feriepengeberegner(
+            spleisArbeidsgiver = spleisArbeidsgiver(1.januar til 17.januar)
         )
 
-        val beregner = Feriepengeberegner(alder, Year.of(2018), historikk, person)
-        assertEquals(48, beregner.feriepengedatoer().size)
+        assertEquals((1.januar til 17.januar).toList(), feriepengeberegner.feriepengedatoer())
     }
 
     @Test
-    fun `Finner datoer for feriepengeberegning med 49 sammenhengende utbetalingsdager i IT fra første januar`() {
-        val historikk = utbetalingshistorikkForFeriepenger(
-            listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 8.mars, 100.prosent, 1000.månedlig))
+    fun `kun utbetaling i spleis - 49 utbetalte dager`() {
+        val feriepengeberegner = feriepengeberegner(
+            spleisArbeidsgiver = spleisArbeidsgiver(1.januar til 18.februar)
         )
 
-        val beregner = Feriepengeberegner(alder, Year.of(2018), historikk, person)
-        assertEquals(48, beregner.feriepengedatoer().size)
+        assertEquals((1.januar til 17.februar).toList(), feriepengeberegner.feriepengedatoer())
     }
 
     @Test
-    fun `Finner datoer for feriepengeberegning med 47 sammenhengende utbetalingsdager i IT fra første januar`() {
-        val historikk = utbetalingshistorikkForFeriepenger(
-            listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 6.mars, 100.prosent, 1000.månedlig))
+    fun `feriepengedager utbetalt til person i infotrygd skal alltid være med`() {
+        val feriepengeberegner = feriepengeberegner(
+            infotrygdPerson = itPerson(1.mars til 10.mars),
+            spleisArbeidsgiver = spleisArbeidsgiver(1.januar til 17.februar)
         )
 
-        val beregner = Feriepengeberegner(alder, Year.of(2018), historikk, person)
-        assertEquals(47, beregner.feriepengedatoer().size)
+        assertEquals((1.januar til 7.februar).toList() + (1.mars til 10.mars).toList(), feriepengeberegner.feriepengedatoer())
     }
 
     @Test
-    fun `Finner datoer for feriepengeberegning med 48 sammenhengende utbetalingsdager i Oppdrag fra første januar`() {
-        byggPerson(
-            arbeidsgiverperiode = 16.desember(2017) til 31.desember(2017),
-            syktil = 7.mars(2018)
+    fun `feriepengedager beregnet fra arbeidsgiverutbetalinger i både spleis og infotrygd`() {
+        val feriepengeberegner = feriepengeberegner(
+            infotrygdArbeidsgiver = itArbeidsgiver(1.mars til 10.mars),
+            spleisArbeidsgiver = spleisArbeidsgiver(1.januar til 10.februar)
         )
 
-        val beregner = Feriepengeberegner(alder, Year.of(2018), utbetalingshistorikkForFeriepenger(), person)
-
-        assertEquals(48, beregner.feriepengedatoer().size)
+        assertEquals((1.januar til 10.februar).toList() + (1.mars til 7.mars).toList(), feriepengeberegner.feriepengedatoer())
     }
 
     @Test
-    fun `Finner datoer for feriepengeberegning med 49 sammenhengende utbetalingsdager i Oppdrag fra første januar`() {
-        byggPerson(
-            arbeidsgiverperiode = 16.desember(2017) til 31.desember(2017),
-            syktil = 8.mars(2018)
+    fun `beregner spleis sitt bidrag til feriepengene`() {
+        val feriepengeberegner = feriepengeberegner(
+            infotrygdArbeidsgiver = itArbeidsgiver(1.mars til 10.mars),
+            spleisArbeidsgiver = spleisArbeidsgiver(1.januar til 10.februar)
         )
 
-        val beregner = Feriepengeberegner(alder, Year.of(2018), utbetalingshistorikkForFeriepenger(), person)
-
-        assertEquals(48, beregner.feriepengedatoer().size)
+        assertEquals(41 * 3000 * UNG_SATS, feriepengeberegner.beregnFeriepengerForSpleis())
     }
 
     @Test
-    fun `Finner datoer for feriepengeberegning med 47 sammenhengende utbetalingsdager i Oppdrag fra første januar`() {
-        byggPerson(
-            arbeidsgiverperiode = 16.desember(2017) til 31.desember(2017),
-            syktil = 6.mars(2018)
+    fun `beregner infotrygd-person sitt bidrag til feriepengene`() {
+        val feriepengeberegner = feriepengeberegner(
+            infotrygdPerson = itPerson(20.mars til 31.mars),
+            infotrygdArbeidsgiver = itArbeidsgiver(1.mars til 10.mars),
+            spleisArbeidsgiver = spleisArbeidsgiver(1.januar til 10.februar)
         )
 
-        val beregner = Feriepengeberegner(alder, Year.of(2018), utbetalingshistorikkForFeriepenger(), person)
-
-        assertEquals(47, beregner.feriepengedatoer().size)
+        assertEquals(12 * 1000 * UNG_SATS, feriepengeberegner.beregnFeriepengerForInfotrygdPerson())
     }
 
     @Test
-    fun `Finner datoer for feriepengeberegning med 48 sammenhengende utbetalingsdager i Oppdrag fra niende mai`() {
-        byggPerson(
-            arbeidsgiverperiode = 23.april(2018) til 8.mai(2018),
-            syktil = 13.juli(2018)
+    fun `beregner infotrygd-arbeidsgiver sitt bidrag til feriepengene`() {
+        val feriepengeberegner = feriepengeberegner(
+            infotrygdPerson = itPerson(20.mars til 31.mars),
+            infotrygdArbeidsgiver = itArbeidsgiver(1.mars til 10.mars),
+            spleisArbeidsgiver = spleisArbeidsgiver(1.januar til 10.januar)
         )
 
-        val beregner = Feriepengeberegner(alder, Year.of(2018), utbetalingshistorikkForFeriepenger(), person)
-
-        assertEquals(48, beregner.feriepengedatoer().size)
+        assertEquals(10 * 2000 * UNG_SATS, feriepengeberegner.beregnFeriepengerForInfotrygdArbeidsgiver())
     }
 
     @Test
-    fun `Finner datoer for feriepengeberegning med 47 ikke-sammenhengende utbetalingsdager i Oppdrag`() {
-        byggPerson(
-            arbeidsgiverperiode = 16.desember(2017) til 31.desember(2017),
-            syktil = 22.januar(2018)
-        )
-        byggPerson(
-            arbeidsgiverperiode = 1.mars(2018) til 16.mars(2018),
-            syktil = 28.mars(2018)
-        )
-        byggPerson(
-            arbeidsgiverperiode = 1.mai(2018) til 16.mai(2018),
-            syktil = 12.juni(2018)
-        )
-        byggPerson(
-            arbeidsgiverperiode = 1.juli(2018) til 16.juli(2018),
-            syktil = 21.juli(2018)
+    fun `beregner infotrygd sitt totale bidrag til feriepengene`() {
+        val feriepengeberegner = feriepengeberegner(
+            infotrygdPerson = itPerson(20.mars til 31.mars),
+            infotrygdArbeidsgiver = itArbeidsgiver(1.mars til 10.mars),
+            spleisArbeidsgiver = spleisArbeidsgiver(1.januar til 10.januar)
         )
 
-        val beregner = Feriepengeberegner(alder, Year.of(2018), utbetalingshistorikkForFeriepenger(), person)
-
-        assertEquals(47, beregner.feriepengedatoer().size)
+        assertEquals((12 * 1000 + 10 * 2000) * UNG_SATS, feriepengeberegner.beregnFeriepengerForInfotrygd())
     }
 
     @Test
-    fun `Finner datoer for feriepengeberegning med 48 ikke-sammenhengende utbetalingsdager i Oppdrag`() {
-        byggPerson(
-            arbeidsgiverperiode = 16.desember(2017) til 31.desember(2017),
-            syktil = 22.januar(2018)
-        )
-        byggPerson(
-            arbeidsgiverperiode = 1.mars(2018) til 16.mars(2018),
-            syktil = 28.mars(2018)
-        )
-        byggPerson(
-            arbeidsgiverperiode = 1.mai(2018) til 16.mai(2018),
-            syktil = 12.juni(2018)
-        )
-        byggPerson(
-            arbeidsgiverperiode = 1.juli(2018) til 16.juli(2018),
-            syktil = 23.juli(2018)
+    fun `beregner spleis sitt bidrag til feriepengene for en arbeidsgiver`() {
+        val feriepengeberegner = feriepengeberegner(
+            spleisArbeidsgiver = spleisArbeidsgiver(1.januar til 10.januar)
         )
 
-        val beregner = Feriepengeberegner(alder, Year.of(2018), utbetalingshistorikkForFeriepenger(), person)
-
-        assertEquals(48, beregner.feriepengedatoer().size)
+        assertEquals(10 * 3000 * UNG_SATS, feriepengeberegner.beregnFeriepengerForSpleis(ORGNUMMER))
+        assertEquals(0.0, feriepengeberegner.beregnFeriepengerForSpleis("otherOrgn"))
     }
 
     @Test
-    fun `Finner datoer for feriepengeberegning med to helt overlappende Oppdrag`() = Toggles.FlereArbeidsgivereFørstegangsbehandling.enable {
-        byggPersonToParallelle(
-            arbeidsgiverperiode = 23.april(2018) til 8.mai(2018),
-            syktil = 13.juli(2018)
+    fun `beregner spleis sitt bidrag til feriepengene for to arbeidsgivere`() {
+        val feriepengeberegner = feriepengeberegner(
+            spleisArbeidsgiver = "456789123".spleisArbeidsgiver(1.januar til 10.januar) + "789123456".spleisArbeidsgiver(1.januar til 12.januar)
         )
 
-        val beregner = Feriepengeberegner(alder, Year.of(2018), utbetalingshistorikkForFeriepenger(), person)
-
-        assertEquals(48, beregner.feriepengedatoer().size)
+        assertEquals((10 + 12) * 3000 * UNG_SATS, feriepengeberegner.beregnFeriepengerForSpleis())
+        assertEquals(10 * 3000 * UNG_SATS, feriepengeberegner.beregnFeriepengerForSpleis("456789123"))
+        assertEquals(12 * 3000 * UNG_SATS, feriepengeberegner.beregnFeriepengerForSpleis("789123456"))
     }
 
     @Test
-    fun `Finner datoer for feriepengeberegning med to ikke-overlappende utbetalingstidslinjer`() = Toggles.FlereArbeidsgivereFørstegangsbehandling.enable {
-        byggPerson(
-            arbeidsgiverperiode = 1.januar(2018) til 16.januar(2018),
-            syktil = 15.februar(2018),
-            orgnummer = a1
-        )
-        byggPerson(
-            arbeidsgiverperiode = 1.juli(2018) til 16.juli(2018),
-            syktil = 15.august(2018),
-            orgnummer = a2
+    fun `beregner infotrygd-person sitt bidrag til feriepengene for en arbeidsgiver`() {
+        val feriepengeberegner = feriepengeberegner(
+            infotrygdPerson = itPerson(1.januar til 10.januar)
         )
 
-        val beregner = Feriepengeberegner(alder, Year.of(2018), utbetalingshistorikkForFeriepenger(), person)
-
-        assertEquals(44, beregner.feriepengedatoer().size)
+        assertEquals(10 * 1000 * UNG_SATS, feriepengeberegner.beregnFeriepengerForInfotrygdPerson(ORGNUMMER))
+        assertEquals(0.0, feriepengeberegner.beregnFeriepengerForInfotrygdPerson("otherOrgn"))
     }
 
-    private fun utbetalingshistorikkForFeriepenger(utbetalinger: List<Infotrygdperiode> = emptyList()) =
-        UtbetalingshistorikkForFeriepenger(
-            UUID.randomUUID(),
-            AKTØRID,
-            ORGNUMMER,
-            utbetalinger,
-            emptyList(),
-            emptyList(),
-            false,
-            emptyMap(),
-            Year.of(2020)
+    @Test
+    fun `beregner infotrygd-person sitt bidrag til feriepengene for to arbeidsgivere`() {
+        val feriepengeberegner = feriepengeberegner(
+            infotrygdPerson = "456789123".itPerson(1.januar til 10.januar) + "789123456".itPerson(1.januar til 12.januar)
         )
 
-    private fun byggPerson(
-        arbeidsgiverperiode: Periode = 1.januar til 16.januar,
-        syktil: LocalDate = 31.januar,
-        orgnummer: String = ORGNUMMER
-    ) {
-        håndterSykmelding(Sykmeldingsperiode(arbeidsgiverperiode.start, syktil, 100.prosent), orgnummer = orgnummer)
-        håndterSøknadMedValidering(
-            observatør.sisteVedtaksperiode(),
-            Søknad.Søknadsperiode.Sykdom(arbeidsgiverperiode.start, syktil, 100.prosent),
-            orgnummer = orgnummer
+        assertEquals((10 + 12) * 1000 * UNG_SATS, feriepengeberegner.beregnFeriepengerForInfotrygdPerson())
+        assertEquals(10 * 1000 * UNG_SATS, feriepengeberegner.beregnFeriepengerForInfotrygdPerson("456789123"))
+        assertEquals(12 * 1000 * UNG_SATS, feriepengeberegner.beregnFeriepengerForInfotrygdPerson("789123456"))
+    }
+
+    @Test
+    fun `beregner infotrygd-arbeidsgiver sitt bidrag til feriepengene for en arbeidsgiver`() {
+        val feriepengeberegner = feriepengeberegner(
+            infotrygdArbeidsgiver = itArbeidsgiver(1.januar til 10.januar)
         )
-        håndterUtbetalingshistorikk(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
-        håndterInntektsmelding(listOf(arbeidsgiverperiode), orgnummer = orgnummer)
-        håndterYtelser(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
-        håndterVilkårsgrunnlag(observatør.sisteVedtaksperiode(), inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
-                arbeidsgiverperiode.start.minusYears(1) til arbeidsgiverperiode.start.withDayOfMonth(1).minusMonths(1) inntekter {
-                    orgnummer inntekt INNTEKT
-                }
-            }
-        ), orgnummer = orgnummer)
-        håndterYtelser(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
-        håndterSimulering(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
-        håndterUtbetalingsgodkjenning(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
-        håndterUtbetalt(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
+
+        assertEquals(10 * 2000 * UNG_SATS, feriepengeberegner.beregnFeriepengerForInfotrygdArbeidsgiver(ORGNUMMER))
+        assertEquals(0.0, feriepengeberegner.beregnFeriepengerForInfotrygdArbeidsgiver("otherOrgn"))
     }
 
-    private fun byggPersonToParallelle(
-        arbeidsgiverperiode: Periode = 1.januar til 16.januar,
-        syktil: LocalDate = 31.januar
-    ) {
-        håndterSykmelding(Sykmeldingsperiode(arbeidsgiverperiode.start, syktil, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(arbeidsgiverperiode.start, syktil, 100.prosent), orgnummer = a2)
-        håndterSøknadMedValidering(1.vedtaksperiode(a1), Søknad.Søknadsperiode.Sykdom(arbeidsgiverperiode.start, syktil, 100.prosent), orgnummer = a1)
-        håndterSøknadMedValidering(1.vedtaksperiode(a2), Søknad.Søknadsperiode.Sykdom(arbeidsgiverperiode.start, syktil, 100.prosent), orgnummer = a2)
-        håndterUtbetalingshistorikk(1.vedtaksperiode(a1), orgnummer = a1)
-        håndterUtbetalingshistorikk(1.vedtaksperiode(a2), orgnummer = a2)
-        håndterInntektsmelding(listOf(arbeidsgiverperiode), orgnummer = a1)
-        håndterInntektsmelding(listOf(arbeidsgiverperiode), orgnummer = a2)
-        håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
-        håndterVilkårsgrunnlag(1.vedtaksperiode(a1), inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
-                arbeidsgiverperiode.start.minusYears(1) til arbeidsgiverperiode.start.withDayOfMonth(1).minusMonths(1) inntekter {
-                    a1 inntekt INNTEKT
-                    a2 inntekt INNTEKT
-                }
-            }
-        ), orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
+    @Test
+    fun `beregner infotrygd-arbeidsgiver sitt bidrag til feriepengene for to arbeidsgivere`() {
+        val feriepengeberegner = feriepengeberegner(
+            infotrygdArbeidsgiver = "456789123".itArbeidsgiver(1.januar til 10.januar) + "789123456".itArbeidsgiver(1.januar til 12.januar)
+        )
 
-        håndterYtelser(1.vedtaksperiode(a2), orgnummer = a2)
-        håndterSimulering(1.vedtaksperiode(a2), orgnummer = a2)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode(a2), orgnummer = a2)
-        håndterUtbetalt(1.vedtaksperiode(a2), orgnummer = a2)
+        assertEquals((10 + 12) * 2000 * UNG_SATS, feriepengeberegner.beregnFeriepengerForInfotrygdArbeidsgiver())
+        assertEquals(10 * 2000 * UNG_SATS, feriepengeberegner.beregnFeriepengerForInfotrygdArbeidsgiver("456789123"))
+        assertEquals(12 * 2000 * UNG_SATS, feriepengeberegner.beregnFeriepengerForInfotrygdArbeidsgiver("789123456"))
     }
+
+    @Test
+    fun `beregner infotrygd sitt totale bidrag til feriepengene for en arbeidsgiver`() {
+        val feriepengeberegner = feriepengeberegner(
+            infotrygdPerson = itPerson(1.januar til 10.januar),
+            infotrygdArbeidsgiver = itArbeidsgiver(1.januar til 12.januar)
+        )
+
+        assertEquals((10 * 1000 + 12 * 2000) * UNG_SATS, feriepengeberegner.beregnFeriepengerForInfotrygd(ORGNUMMER))
+        assertEquals(0.0, feriepengeberegner.beregnFeriepengerForInfotrygd("otherOrgn"))
+    }
+
+    @Test
+    fun `beregner infotrygd sitt totale bidrag til feriepengene for to arbeidsgivere`() {
+        val feriepengeberegner = feriepengeberegner(
+            infotrygdPerson = "456789123".itPerson(1.januar til 10.januar) + "789123456".itPerson(1.januar til 12.januar),
+            infotrygdArbeidsgiver = "456789123".itArbeidsgiver(1.januar til 14.januar) + "789123456".itArbeidsgiver(1.januar til 16.januar)
+        )
+
+        assertEquals(((10 + 12) * 1000 + (14 + 16) * 2000) * UNG_SATS, feriepengeberegner.beregnFeriepengerForInfotrygd())
+        assertEquals((10 * 1000 + 14 * 2000) * UNG_SATS, feriepengeberegner.beregnFeriepengerForInfotrygd("456789123"))
+        assertEquals((12 * 1000 + 16 * 2000) * UNG_SATS, feriepengeberegner.beregnFeriepengerForInfotrygd("789123456"))
+    }
+
+    @Test
+    fun `beregner feriepengene for gammel person`() {
+        val feriepengeberegner = feriepengeberegner(
+            alder = GAMMEL,
+            infotrygdPerson = itPerson(1.januar til 10.januar),
+            infotrygdArbeidsgiver = itArbeidsgiver(1.januar til 14.januar),
+            spleisArbeidsgiver = spleisArbeidsgiver(15.januar til 31.januar)
+        )
+
+        assertEquals((10 * 1000 + 14 * 2000) * GAMMEL_SATS, feriepengeberegner.beregnFeriepengerForInfotrygd())
+        assertEquals(17 * 3000 * GAMMEL_SATS, feriepengeberegner.beregnFeriepengerForSpleis())
+    }
+
+    @Test
+    fun `beregner totalen av feriepengene til en arbeidsgiver`() {
+        val feriepengeberegner = feriepengeberegner(
+            infotrygdPerson = itPerson(20.mars til 31.mars),
+            infotrygdArbeidsgiver = itArbeidsgiver(1.mars til 10.mars),
+            spleisArbeidsgiver = spleisArbeidsgiver(1.januar til 10.januar)
+        )
+
+        assertEquals((10 * 2000 + 10 * 3000) * UNG_SATS, feriepengeberegner.beregnFeriepengerForArbeidsgiver(ORGNUMMER))
+    }
+
+    @Test
+    fun `beregner differansen av feriepengene som er utbetalt fra infotrygd og det som faktisk skal utbetales for arbeidsgiver`() {
+        val feriepengeberegner = feriepengeberegner(
+            infotrygdPerson = itPerson(20.mars til 31.mars),
+            infotrygdArbeidsgiver = itArbeidsgiver(1.mars til 10.mars),
+            spleisArbeidsgiver = spleisArbeidsgiver(1.januar til 10.januar)
+        )
+
+        assertEquals(10 * 3000 * UNG_SATS, feriepengeberegner.beregnFeriepengedifferansenForArbeidsgiver(ORGNUMMER))
+    }
+
+    @Test
+    fun `beregner differansen av feriepengene som er utbetalt fra infotrygd og det som faktisk skal utbetales for arbeidsgiver der infotrygd har brukt opp alle feriepengedagene`() {
+        val feriepengeberegner = feriepengeberegner(
+            infotrygdPerson = itPerson(1.februar til 10.februar),
+            infotrygdArbeidsgiver = itArbeidsgiver(1.mars til 17.april),
+            spleisArbeidsgiver = spleisArbeidsgiver(1.januar til 10.januar)
+        )
+
+        assertEquals((10 * 3000 - 10 * 2000) * UNG_SATS, feriepengeberegner.beregnFeriepengedifferansenForArbeidsgiver(ORGNUMMER))
+    }
+
+    @Test
+    fun `beregner utbetalte feriepenger i infotrygd for en arbeidsgiver`() {
+        val feriepengeberegner = feriepengeberegner(
+            infotrygdPerson = itPerson(1.februar til 10.februar),
+            infotrygdArbeidsgiver = itArbeidsgiver(1.mars til 17.april),
+            spleisArbeidsgiver = spleisArbeidsgiver(1.januar til 10.januar)
+        )
+
+        assertEquals(38 * 2000 * UNG_SATS, feriepengeberegner.beregnUtbetalteFeriepengerForInfotrygdArbeidsgiver(ORGNUMMER))
+    }
+
+    private fun itPerson(periode: Periode) =
+        ORGNUMMER.itPerson(periode)
+
+    private fun String.itPerson(periode: Periode) =
+        periode.map { Feriepengeberegner.UtbetaltDag.InfotrygdPerson(this, it, 1000) }
+
+    private fun itArbeidsgiver(periode: Periode) =
+        ORGNUMMER.itArbeidsgiver(periode)
+
+    private fun String.itArbeidsgiver(periode: Periode) =
+        periode.map { Feriepengeberegner.UtbetaltDag.InfotrygdArbeidsgiver(this, it, 2000) }
+
+    private fun spleisArbeidsgiver(periode: Periode) =
+        ORGNUMMER.spleisArbeidsgiver(periode)
+
+    private fun String.spleisArbeidsgiver(periode: Periode) =
+        periode.map { Feriepengeberegner.UtbetaltDag.SpleisArbeidsgiver(this, it, 3000) }
+
+    private fun feriepengeberegner(
+        alder: Alder = UNG,
+        opptjeningsår: Year = Year.of(2018),
+        infotrygdPerson: List<Feriepengeberegner.UtbetaltDag.InfotrygdPerson> = emptyList(),
+        infotrygdArbeidsgiver: List<Feriepengeberegner.UtbetaltDag.InfotrygdArbeidsgiver> = emptyList(),
+        spleisArbeidsgiver: List<Feriepengeberegner.UtbetaltDag.SpleisArbeidsgiver> = emptyList()
+    ) = Feriepengeberegner(
+        alder,
+        opptjeningsår,
+        infotrygdPerson + infotrygdArbeidsgiver + spleisArbeidsgiver
+    )
 }

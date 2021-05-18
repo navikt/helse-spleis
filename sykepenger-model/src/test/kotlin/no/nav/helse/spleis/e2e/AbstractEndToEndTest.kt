@@ -292,10 +292,10 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     }
 
     protected fun håndterUtbetalingshistorikkForFeriepenger(
-        feriepengeår: Year
+        opptjeningsår: Year
     ) {
         utbetalingshistorikkForFeriepenger(
-            feriepengeår = feriepengeår
+            opptjeningsår = opptjeningsår
         ).håndter(Person::håndter)
     }
 
@@ -723,13 +723,13 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         utbetalinger: List<Infotrygdperiode> = listOf(),
         inntektshistorikk: List<Inntektsopplysning>? = null,
         feriepengehistorikk: List<Feriepenger> = listOf(),
-        feriepengeår: Year = Year.of(2017)
+        opptjeningsår: Year = Year.of(2017)
     ): UtbetalingshistorikkForFeriepenger {
         return UtbetalingshistorikkForFeriepenger(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
-            feriepengeår = feriepengeår,
+            opptjeningsår = opptjeningsår,
             arbeidskategorikoder = emptyMap(),
             harStatslønn = false,
             utbetalinger = utbetalinger,

@@ -74,7 +74,7 @@ class Person private constructor(
         utbetalingshistorikk.kontekst(this)
         val feriepengeberegner = Feriepengeberegner(
             alder = Alder(fødselsnummer),
-            feriepengeår = utbetalingshistorikk.feriepengeår,
+            opptjeningsår = utbetalingshistorikk.opptjeningsår,
             utbetalingshistorikkForFeriepenger = utbetalingshistorikk,
             person = this
         )
