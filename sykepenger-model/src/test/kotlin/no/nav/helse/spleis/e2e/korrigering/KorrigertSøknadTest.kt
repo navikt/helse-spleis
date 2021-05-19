@@ -88,15 +88,15 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         object : OppdragVisitor {
-            var grad: Double = 0.0
+            var grad: Double? = null
             override fun visitUtbetalingslinje(
                 linje: Utbetalingslinje,
                 fom: LocalDate,
                 tom: LocalDate,
                 satstype: Satstype,
                 beløp: Int?,
-                aktuellDagsinntekt: Int,
-                grad: Double,
+                aktuellDagsinntekt: Int?,
+                grad: Double?,
                 delytelseId: Int,
                 refDelytelseId: Int?,
                 refFagsystemId: String?,

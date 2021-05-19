@@ -136,10 +136,11 @@ internal class Arbeidsgiver private constructor(
             infotrygdhistorikk.skjæringstidspunkter(arbeidsgivere.map(Arbeidsgiver::sykdomstidslinje))
 
         internal fun Iterable<Arbeidsgiver>.beregnFeriepengerForAlleArbeidsgivere(
+            aktørId: String,
             feriepengeberegner: Feriepengeberegner,
             utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger
         ) {
-            forEach { it.utbetalFeriepenger(feriepengeberegner, utbetalingshistorikkForFeriepenger) }
+            forEach { it.utbetalFeriepenger(aktørId, feriepengeberegner, utbetalingshistorikkForFeriepenger) }
         }
     }
 
@@ -219,17 +220,18 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun utbetalFeriepenger(
+        aktørId: String,
         feriepengeberegner: Feriepengeberegner,
         utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger
     ) {
-        val feriepengeutbetaling = Feriepengeutbetaling(
+        val feriepengeutbetaling = Feriepengeutbetaling.Builder(
+            aktørId,
             organisasjonsnummer,
             feriepengeberegner,
             utbetalingshistorikkForFeriepenger
-        )
+        ).build()
         feriepengeutbetalinger.add(feriepengeutbetaling)
         feriepengeutbetaling.registrer(this)
-        feriepengeutbetaling.beregn()
     }
 
     internal fun nåværendeTidslinje() =

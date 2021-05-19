@@ -137,8 +137,8 @@ private class UtbetaltEventBuilder(
         tom: LocalDate,
         satstype: Satstype,
         beløp: Int?,
-        aktuellDagsinntekt: Int,
-        grad: Double,
+        aktuellDagsinntekt: Int?,
+        grad: Double?,
         delytelseId: Int,
         refDelytelseId: Int?,
         refFagsystemId: String?,
@@ -152,7 +152,7 @@ private class UtbetaltEventBuilder(
                 tom = tom,
                 sats = dagsats,
                 beløp = beløp!!,
-                grad = grad,
+                grad = grad!!,
                 sykedager = linje.stønadsdager()
             )
         )

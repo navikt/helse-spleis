@@ -449,7 +449,7 @@ internal class VedtaksperiodeBuilder(
                         fom = linje.fom,
                         tom = linje.tom,
                         dagsats = linje.beløp!!,
-                        grad = linje.grad
+                        grad = linje.grad!!
                     )
                 }
                 UtbetalingerDTO.UtbetalingDTO(linjer, fagsystemId)

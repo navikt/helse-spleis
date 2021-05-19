@@ -78,7 +78,7 @@ class Person private constructor(
             utbetalingshistorikkForFeriepenger = utbetalingshistorikk,
             person = this
         )
-        arbeidsgivere.beregnFeriepengerForAlleArbeidsgivere(feriepengeberegner, utbetalingshistorikk)
+        arbeidsgivere.beregnFeriepengerForAlleArbeidsgivere(aktørId, feriepengeberegner, utbetalingshistorikk)
         // håndter dette etter hvert
     }
 

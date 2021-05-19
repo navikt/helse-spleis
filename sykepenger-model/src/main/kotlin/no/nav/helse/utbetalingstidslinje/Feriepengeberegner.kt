@@ -53,6 +53,9 @@ internal class Feriepengeberegner(
     internal fun feriepengedatoer() = feriepengedager().tilDato()
     internal fun beregnFeriepengerForInfotrygdPerson() = beregnForFilter(INFOTRYGD_PERSON)
     internal fun beregnFeriepengerForInfotrygdPerson(orgnummer: String) = beregnForFilter(INFOTRYGD_PERSON and orgnummerFilter(orgnummer))
+    internal fun beregnFeriepengerForInfotrygdPersonUtenPersonhack(orgnummer: String) =
+        beregnForFilterUtenPersonhack(INFOTRYGD_PERSON and orgnummerFilter(orgnummer))
+
     internal fun beregnFeriepengerForInfotrygdArbeidsgiver() = beregnForFilter(INFOTRYGD_ARBEIDSGIVER)
     internal fun beregnFeriepengerForInfotrygdArbeidsgiver(orgnummer: String) = beregnForFilter(INFOTRYGD_ARBEIDSGIVER and orgnummerFilter(orgnummer))
     internal fun beregnFeriepengerForSpleis() = beregnForFilter(SPLEIS_ARBEIDSGIVER)
@@ -81,6 +84,11 @@ internal class Feriepengeberegner(
         return alder.beregnFeriepenger(opptjeningsår, grunnlag)
     }
 
+    private fun beregnForFilterUtenPersonhack(filter: UtbetaltDagSelector): Double {
+        val grunnlag = feriepengedagerUtenPersonhack().filter(filter).summer()
+        return alder.beregnFeriepenger(opptjeningsår, grunnlag)
+    }
+
     private fun feriepengedager(): List<UtbetaltDag> {
         val itFeriepenger = utbetalteDager.filter(INFOTRYGD).feriepengedager()
         val personreserverteDatoer = itFeriepenger.filter { (_, dager) -> dager.any(INFOTRYGD_PERSON) }.map { (dato, _) -> dato }
@@ -89,6 +97,10 @@ internal class Feriepengeberegner(
             .feriepengedager(personreserverteDatoer)
             .flatMap { (_, dagListe) -> dagListe }
     }
+
+    private fun feriepengedagerUtenPersonhack() = utbetalteDager
+        .feriepengedager()
+        .flatMap { (_, dagListe) -> dagListe }
 
     internal sealed class UtbetaltDag(
         protected val orgnummer: String,
@@ -208,8 +220,8 @@ internal class Feriepengeberegner(
             tom: LocalDate,
             satstype: Satstype,
             beløp: Int?,
-            aktuellDagsinntekt: Int,
-            grad: Double,
+            aktuellDagsinntekt: Int?,
+            grad: Double?,
             delytelseId: Int,
             refDelytelseId: Int?,
             refFagsystemId: String?,
