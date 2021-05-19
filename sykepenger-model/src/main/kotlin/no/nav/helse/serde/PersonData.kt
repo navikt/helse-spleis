@@ -950,6 +950,7 @@ internal data class PersonData(
     data class UtbetalingslinjeData(
         private val fom: LocalDate,
         private val tom: LocalDate,
+        private val satstype: String,
         private val sats: Int,
         private val lønn: Int,
         private val grad: Double,
@@ -966,6 +967,7 @@ internal data class PersonData(
             .call(
                 fom,
                 tom,
+                Satstype.valueOf(satstype),
                 sats,
                 lønn,
                 grad,

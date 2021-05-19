@@ -11,6 +11,7 @@ import no.nav.helse.testhelpers.SykdomstidslinjeInspektør
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.utbetalingslinjer.Endringskode
+import no.nav.helse.utbetalingslinjer.Satstype
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -92,6 +93,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
                 linje: Utbetalingslinje,
                 fom: LocalDate,
                 tom: LocalDate,
+                satstype: Satstype,
                 beløp: Int?,
                 aktuellDagsinntekt: Int,
                 grad: Double,

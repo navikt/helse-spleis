@@ -2,10 +2,7 @@ package no.nav.helse.person
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.PersonObserver.UtbetaltEvent
-import no.nav.helse.utbetalingslinjer.Endringskode
-import no.nav.helse.utbetalingslinjer.Oppdrag
-import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingslinjer.Utbetalingslinje
+import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
@@ -138,6 +135,7 @@ private class UtbetaltEventBuilder(
         linje: Utbetalingslinje,
         fom: LocalDate,
         tom: LocalDate,
+        satstype: Satstype,
         beløp: Int?,
         aktuellDagsinntekt: Int,
         grad: Double,

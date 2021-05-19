@@ -9,10 +9,7 @@ import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.utbetalingslinjer.Endringskode
-import no.nav.helse.utbetalingslinjer.Oppdrag
-import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingslinjer.Utbetalingslinje
+import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
 import no.nav.helse.økonomi.Inntekt
@@ -638,6 +635,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         linje: Utbetalingslinje,
         fom: LocalDate,
         tom: LocalDate,
+        satstype: Satstype,
         beløp: Int?,
         aktuellDagsinntekt: Int,
         grad: Double,
@@ -647,7 +645,20 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         endringskode: Endringskode,
         datoStatusFom: LocalDate?
     ) {
-        delegatee.visitUtbetalingslinje(linje, fom, tom, beløp, aktuellDagsinntekt, grad, delytelseId, refDelytelseId, refFagsystemId, endringskode, datoStatusFom)
+        delegatee.visitUtbetalingslinje(
+            linje,
+            fom,
+            tom,
+            satstype,
+            beløp,
+            aktuellDagsinntekt,
+            grad,
+            delytelseId,
+            refDelytelseId,
+            refFagsystemId,
+            endringskode,
+            datoStatusFom
+        )
     }
 
     override fun postVisitOppdrag(oppdrag: Oppdrag, totalBeløp: Int, nettoBeløp: Int, tidsstempel: LocalDateTime) {

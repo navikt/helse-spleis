@@ -322,6 +322,7 @@ internal class UtbetalingTest {
             linje: Utbetalingslinje,
             fom: LocalDate,
             tom: LocalDate,
+            satstype: Satstype,
             beløp: Int?,
             aktuellDagsinntekt: Int,
             grad: Double,

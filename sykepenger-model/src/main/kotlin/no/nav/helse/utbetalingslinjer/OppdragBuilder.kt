@@ -113,6 +113,7 @@ internal class OppdragBuilder(
             Utbetalingslinje(
                 dato,
                 dato,
+                Satstype.DAG,
                 fagområde.beløp(dag.økonomi),
                 aktuellDagsinntekt.roundToInt(),
                 grad,
@@ -125,7 +126,7 @@ internal class OppdragBuilder(
     private fun addLinje(dato: LocalDate, grad: Double) {
         arbeisdsgiverLinjer.add(
             0,
-            Utbetalingslinje(dato, dato, null, 0, grad, fagsystemId)
+            Utbetalingslinje(dato, dato, Satstype.DAG, null, 0, grad, fagsystemId)
         )
     }
 

@@ -895,7 +895,7 @@ internal class UtbetalingslinjeForskjellTest {
 
         internal infix fun forskjell(other: Oppdrag) = this.asUtbetalingslinjer() - other
 
-        internal fun asUtbetalingslinje() = Utbetalingslinje(fom, tom, dagsats, dagsats, grad)
+        internal fun asUtbetalingslinje() = Utbetalingslinje(fom, tom, Satstype.DAG, dagsats, dagsats, grad)
 
         private fun asUtbetalingslinjer() = linjer(asUtbetalingslinje())
     }

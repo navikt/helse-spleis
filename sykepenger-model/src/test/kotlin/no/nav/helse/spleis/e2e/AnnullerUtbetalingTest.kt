@@ -13,6 +13,7 @@ import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Oppdrag
+import no.nav.helse.utbetalingslinjer.Satstype
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
@@ -485,6 +486,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
             linje: Utbetalingslinje,
             fom: LocalDate,
             tom: LocalDate,
+            satstype: Satstype,
             beløp: Int?,
             aktuellDagsinntekt: Int,
             grad: Double,

@@ -485,6 +485,7 @@ internal interface OppdragVisitor {
         linje: Utbetalingslinje,
         fom: LocalDate,
         tom: LocalDate,
+        satstype: Satstype,
         beløp: Int?,
         aktuellDagsinntekt: Int,
         grad: Double,

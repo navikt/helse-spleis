@@ -41,14 +41,14 @@ internal class UtbetalingReflect(private val utbetaling: Utbetaling) {
         "personOppdrag" to OppdragReflect(personOppdrag).toMap(),
         "fom" to utbetaling.periode.start,
         "tom" to utbetaling.periode.endInclusive,
-        "stønadsdager" to (arbeidsgiverOppdrag.stønadsdager() + personOppdrag.stønadsdager()), //TA MED
+        "stønadsdager" to (arbeidsgiverOppdrag.stønadsdager() + personOppdrag.stønadsdager()),
         "tidsstempel" to utbetaling["tidsstempel"],
-        "status" to Utbetalingstatus.fraTilstand(utbetaling.get<Utbetaling.Tilstand>("tilstand")), //TA MED
-        "type" to utbetaling.get<Utbetaling.Utbetalingtype>("type"), //TA MED
-        "maksdato" to utbetaling.maybe<LocalDate>("maksdato"), //TA MED
-        "forbrukteSykedager" to utbetaling.maybe<Int>("forbrukteSykedager"), //TA MED
-        "gjenståendeSykedager" to utbetaling.maybe<Int>("gjenståendeSykedager"), //TA MED
-        "vurdering" to utbetaling.maybe<Utbetaling.Vurdering>("vurdering")?.let { VurderingReflect(it).toMap() }, //TA MED
+        "status" to Utbetalingstatus.fraTilstand(utbetaling["tilstand"]),
+        "type" to utbetaling.get<Utbetaling.Utbetalingtype>("type"),
+        "maksdato" to utbetaling.maybe<LocalDate>("maksdato"),
+        "forbrukteSykedager" to utbetaling.maybe<Int>("forbrukteSykedager"),
+        "gjenståendeSykedager" to utbetaling.maybe<Int>("gjenståendeSykedager"),
+        "vurdering" to utbetaling.maybe<Utbetaling.Vurdering>("vurdering")?.let { VurderingReflect(it).toMap() },
         "overføringstidspunkt" to utbetaling.maybe<LocalDateTime>("overføringstidspunkt"),
         "avstemmingsnøkkel" to utbetaling.maybe<Long>("avstemmingsnøkkel"),
         "avsluttet" to utbetaling.maybe<LocalDateTime>("avsluttet"),
@@ -75,13 +75,7 @@ internal class OppdragReflect(private val oppdrag: Oppdrag) {
     internal fun toBehovMap() = mutableMapOf(
         "mottaker" to oppdrag["mottaker"],
         "fagområde" to oppdrag.get<Fagområde>("fagområde").verdi,
-        "linjer" to oppdrag.map {
-            UtbetalingslinjeReflect(it)
-                .toMap().also { linje ->
-                    // TODO: Skal bort etter apper er migrert over til sats
-                    linje["dagsats"] = linje["sats"]
-                }
-        },
+        "linjer" to oppdrag.map { UtbetalingslinjeReflect(it).toMap() },
         "fagsystemId" to oppdrag["fagsystemId"],
         "endringskode" to oppdrag.get<Endringskode>("endringskode").toString()
     )
@@ -90,13 +84,7 @@ internal class OppdragReflect(private val oppdrag: Oppdrag) {
     internal fun toMap() = mutableMapOf(
         "mottaker" to oppdrag["mottaker"],
         "fagområde" to oppdrag.get<Fagområde>("fagområde").verdi,
-        "linjer" to oppdrag.map {
-            UtbetalingslinjeReflect(it)
-                .toMap().also { linje ->
-                    // TODO: Skal bort etter apper er migrert over til sats
-                    linje["dagsats"] = linje["sats"]
-                }
-        },
+        "linjer" to oppdrag.map { UtbetalingslinjeReflect(it).toMap() },
         "fagsystemId" to oppdrag["fagsystemId"],
         "endringskode" to oppdrag.get<Endringskode>("endringskode").toString(),
         "sisteArbeidsgiverdag" to oppdrag["sisteArbeidsgiverdag"],
@@ -112,10 +100,11 @@ internal class UtbetalingslinjeReflect(private val utbetalingslinje: Utbetalings
     internal fun toMap() = mutableMapOf<String, Any?>(
         "fom" to utbetalingslinje.get<LocalDate>("fom").toString(),
         "tom" to utbetalingslinje.get<LocalDate>("tom").toString(),
-        "sats" to utbetalingslinje["beløp"],           // TODO: change "dagsats" to "beløp",
-                                                          //    but needs JSON migration and change in Need apps
-        "lønn" to utbetalingslinje["aktuellDagsinntekt"], // TODO: change "lønn" to "aktuellDagsinntekt",
-                                                          //    but needs JSON migration and change in Need apps
+        "satstype" to utbetalingslinje.get<Satstype>("satstype").name,
+        "sats" to utbetalingslinje["beløp"],
+        // TODO: Skal bort etter apper er migrert over til sats
+        "dagsats" to utbetalingslinje["beløp"],
+        "lønn" to utbetalingslinje["aktuellDagsinntekt"],
         "grad" to utbetalingslinje["grad"],
         "stønadsdager" to utbetalingslinje.stønadsdager(),
         "totalbeløp" to utbetalingslinje.totalbeløp(),
@@ -132,7 +121,7 @@ internal class UtbetalingslinjeReflect(private val utbetalingslinje: Utbetalings
 internal class UtbetalingstidslinjeReflect(private val utbetalingstidslinje: Utbetalingstidslinje) {
     fun toMap() = mutableMapOf<String, Any?>(
         "dager" to utbetalingstidslinje.map {
-            when(it::class) {
+            when (it::class) {
                 Arbeidsdag::class -> UtbetalingsdagReflect(it, TypeData.Arbeidsdag).toMap()
                 ArbeidsgiverperiodeDag::class -> UtbetalingsdagReflect(it, TypeData.ArbeidsgiverperiodeDag).toMap()
                 NavDag::class -> UtbetalingsdagReflect(it, TypeData.NavDag).toMap()

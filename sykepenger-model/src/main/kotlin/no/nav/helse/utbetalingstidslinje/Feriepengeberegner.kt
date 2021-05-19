@@ -6,6 +6,7 @@ import no.nav.helse.person.*
 import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingslinjer.Endringskode
+import no.nav.helse.utbetalingslinjer.Satstype
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.ARBEIDSGIVER
@@ -205,6 +206,7 @@ internal class Feriepengeberegner(
             linje: Utbetalingslinje,
             fom: LocalDate,
             tom: LocalDate,
+            satstype: Satstype,
             beløp: Int?,
             aktuellDagsinntekt: Int,
             grad: Double,
