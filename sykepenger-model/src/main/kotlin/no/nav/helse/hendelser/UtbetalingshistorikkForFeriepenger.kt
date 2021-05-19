@@ -5,6 +5,7 @@ import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.person.PersonHendelse
 import no.nav.helse.person.infotrygdhistorikk.Feriepenger
 import no.nav.helse.person.infotrygdhistorikk.Feriepenger.Companion.utbetalteFeriepengerTilArbeidsgiver
+import no.nav.helse.person.infotrygdhistorikk.Feriepenger.Companion.utbetalteFeriepengerTilPerson
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import java.time.LocalDate
@@ -31,6 +32,9 @@ class UtbetalingshistorikkForFeriepenger(
     internal fun accept(visitor: InfotrygdhistorikkVisitor) {
         utbetalinger.forEach { it.accept(visitor) }
     }
+
+    internal fun utbetalteFeriepengerTilPerson() =
+        feriepengehistorikk.utbetalteFeriepengerTilPerson(opptjeningsår)
 
     internal fun utbetalteFeriepengerTilArbeidsgiver(orgnummer: String) =
         feriepengehistorikk.utbetalteFeriepengerTilArbeidsgiver(orgnummer, opptjeningsår)

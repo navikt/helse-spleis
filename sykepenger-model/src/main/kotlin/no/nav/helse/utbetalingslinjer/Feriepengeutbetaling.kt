@@ -51,12 +51,14 @@ internal class Feriepengeutbetaling private constructor(
             val infotrygdHarUtbetaltTilArbeidsgiver = utbetalingshistorikkForFeriepenger.utbetalteFeriepengerTilArbeidsgiver(orgnummer)
             val hvaViHarBeregnetAtInfotrygdHarUtbetaltTilArbeidsgiver = feriepengeberegner.beregnUtbetalteFeriepengerForInfotrygdArbeidsgiver(orgnummer)
 
-            if (infotrygdHarUtbetaltTilArbeidsgiver != hvaViHarBeregnetAtInfotrygdHarUtbetaltTilArbeidsgiver) {
+            if (infotrygdHarUtbetaltTilArbeidsgiver != hvaViHarBeregnetAtInfotrygdHarUtbetaltTilArbeidsgiver.roundToInt()) {
                 sikkerLogg.info(
                     """
-                    Validering av feriepengeberegning feilet for $aktørId
+                    Beregnet feriepengebeløp til arbeidsgiver i IT samsvarer ikke med faktisk utbetalt beløp
+                    AktørId: $aktørId
+                    Arbeidsgiver: $orgnummer
                     Infotrygd har utbetalt $infotrygdHarUtbetaltTilArbeidsgiver
-                    Vi har beregnet at infotrygd har utbetalt $hvaViHarBeregnetAtInfotrygdHarUtbetaltTilArbeidsgiver
+                    Vi har beregnet at infotrygd har utbetalt ${hvaViHarBeregnetAtInfotrygdHarUtbetaltTilArbeidsgiver.roundToInt()}
                     """.trimIndent()
                 )
             }

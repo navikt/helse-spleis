@@ -20,9 +20,11 @@ import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbe
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.økonomi.Inntekt
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import kotlin.math.roundToInt
 
 class Person private constructor(
     private val aktørId: String,
@@ -34,6 +36,9 @@ class Person private constructor(
     internal val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
     private var dødsdato: LocalDate?
 ) : Aktivitetskontekst {
+    private companion object {
+        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
+    }
 
     constructor(
         aktørId: String,
@@ -78,8 +83,22 @@ class Person private constructor(
             utbetalingshistorikkForFeriepenger = utbetalingshistorikk,
             person = this
         )
+
+        val feriepengepengebeløpPersonUtbetaltAvInfotrygd = utbetalingshistorikk.utbetalteFeriepengerTilPerson()
+        val beregnetFeriepengebeløpPersonInfotrygd = feriepengeberegner.beregnFeriepengerForInfotrygdPerson().roundToInt()
+
+        if (feriepengepengebeløpPersonUtbetaltAvInfotrygd != beregnetFeriepengebeløpPersonInfotrygd) {
+            sikkerLogg.info(
+                """
+                Beregnet feriepengebeløp til person i IT samsvarer ikke med faktisk utbetalt beløp
+                AktørId: $aktørId
+                Faktisk utbetalt beløp: $feriepengepengebeløpPersonUtbetaltAvInfotrygd
+                Beregnet beløp: $beregnetFeriepengebeløpPersonInfotrygd
+                """.trimIndent()
+            )
+        }
+
         arbeidsgivere.beregnFeriepengerForAlleArbeidsgivere(aktørId, feriepengeberegner, utbetalingshistorikk)
-        // håndter dette etter hvert
     }
 
     fun håndter(ytelser: Ytelser) {
