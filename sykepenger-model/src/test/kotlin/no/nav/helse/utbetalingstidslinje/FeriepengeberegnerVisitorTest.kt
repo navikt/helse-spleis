@@ -184,9 +184,6 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
             ORGNUMMER,
             utbetalinger,
             emptyList(),
-            emptyList(),
-            false,
-            emptyMap(),
             Year.of(2020)
         )
 

@@ -11,7 +11,7 @@ import no.nav.helse.spleis.meldinger.model.UtbetalingsgodkjenningMessage
 internal class UtbetalingsgodkjenningerRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
-) : BehovRiver(rapidsConnection, messageMediator) {
+) : ArbeidsgiverBehovRiver(rapidsConnection, messageMediator) {
     override val behov = listOf(Godkjenning)
     override val riverName = "Utbetalingsgodkjenning"
 

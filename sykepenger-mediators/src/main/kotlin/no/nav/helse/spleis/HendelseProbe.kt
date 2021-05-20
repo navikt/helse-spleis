@@ -24,6 +24,10 @@ object HendelseProbe {
         tell("Utbetalingshistorikk")
     }
 
+    fun onUtbetalingshistorikkForFeriepenger() {
+        tell("UtbetalingshistorikkForFeriepenger")
+    }
+
     fun onYtelser() {
         tell("Ytelser")
     }

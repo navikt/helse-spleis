@@ -725,7 +725,6 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
 
     private fun utbetalingshistorikkForFeriepenger(
         utbetalinger: List<Infotrygdperiode> = listOf(),
-        inntektshistorikk: List<Inntektsopplysning>? = null,
         feriepengehistorikk: List<Feriepenger> = listOf(),
         opptjeningsår: Year = Year.of(2017)
     ): UtbetalingshistorikkForFeriepenger {
@@ -733,12 +732,9 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
-            opptjeningsår = opptjeningsår,
-            arbeidskategorikoder = emptyMap(),
-            harStatslønn = false,
             utbetalinger = utbetalinger,
-            inntektshistorikk = inntektshistorikk(inntektshistorikk, ORGNUMMER),
-            feriepengehistorikk = feriepengehistorikk
+            feriepengehistorikk = feriepengehistorikk,
+            opptjeningsår = opptjeningsår
         ).apply {
             hendelselogg = this
         }

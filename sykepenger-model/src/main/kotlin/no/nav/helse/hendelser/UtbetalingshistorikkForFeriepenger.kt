@@ -7,8 +7,6 @@ import no.nav.helse.person.infotrygdhistorikk.Feriepenger
 import no.nav.helse.person.infotrygdhistorikk.Feriepenger.Companion.utbetalteFeriepengerTilArbeidsgiver
 import no.nav.helse.person.infotrygdhistorikk.Feriepenger.Companion.utbetalteFeriepengerTilPerson
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import java.time.LocalDate
 import java.time.Year
 import java.util.*
 
@@ -18,9 +16,6 @@ class UtbetalingshistorikkForFeriepenger(
     private val fødselsnummer: String,
     private val utbetalinger: List<Infotrygdperiode>,
     private val feriepengehistorikk: List<Feriepenger>,
-    private val inntektshistorikk: List<Inntektsopplysning>,
-    private val harStatslønn: Boolean,
-    private val arbeidskategorikoder: Map<String, LocalDate>,
     //FIXME: Internal?
     internal val opptjeningsår: Year,
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg()

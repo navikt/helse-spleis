@@ -11,7 +11,7 @@ import no.nav.helse.spleis.meldinger.model.YtelserMessage
 internal class YtelserRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
-) : BehovRiver(rapidsConnection, messageMediator) {
+) : ArbeidsgiverBehovRiver(rapidsConnection, messageMediator) {
     override val behov = listOf(
         Foreldrepenger,
         Pleiepenger,

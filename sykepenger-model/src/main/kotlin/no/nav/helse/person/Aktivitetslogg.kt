@@ -378,6 +378,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
 
             enum class Behovtype {
                 Sykepengehistorikk,
+                SykepengehistorikkForFeriepenger,
                 Foreldrepenger,
                 Pleiepenger,
                 Omsorgspenger,

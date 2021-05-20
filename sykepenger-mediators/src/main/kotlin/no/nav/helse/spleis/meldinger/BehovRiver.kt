@@ -22,7 +22,7 @@ internal abstract class BehovRiver(
     private fun validateBehov(packet: JsonMessage) {
         packet.demandValue("@final", true)
         packet.demandAll("@behov", behov.map(Enum<*>::name))
-        packet.requireKey("@løsning", "aktørId", "fødselsnummer", "organisasjonsnummer")
+        packet.requireKey("@løsning", "aktørId", "fødselsnummer")
         packet.require("@besvart", JsonNode::asLocalDateTime)
     }
 }

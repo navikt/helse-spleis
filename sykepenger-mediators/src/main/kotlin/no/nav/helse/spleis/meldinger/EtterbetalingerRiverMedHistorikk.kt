@@ -13,7 +13,7 @@ import java.time.LocalDateTime
 internal class EtterbetalingerRiverMedHistorikk(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
-) : BehovRiver(rapidsConnection, messageMediator) {
+) : ArbeidsgiverBehovRiver(rapidsConnection, messageMediator) {
     override val behov = listOf(Sykepengehistorikk)
     override val riverName = "Kandidat for etterbetaling med historikk"
 

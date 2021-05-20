@@ -12,7 +12,7 @@ import no.nav.helse.spleis.meldinger.model.VilkårsgrunnlagMessage
 internal class VilkårsgrunnlagRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
-) : BehovRiver(rapidsConnection, messageMediator) {
+) : ArbeidsgiverBehovRiver(rapidsConnection, messageMediator) {
     override val behov = listOf(InntekterForSammenligningsgrunnlag, Opptjening, Medlemskap)
 
     override val riverName = "Vilkårsgrunnlag"

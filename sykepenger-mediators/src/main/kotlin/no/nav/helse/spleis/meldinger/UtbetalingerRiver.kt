@@ -12,7 +12,7 @@ import no.nav.helse.spleis.meldinger.model.UtbetalingMessage
 internal class UtbetalingerRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
-) : BehovRiver(rapidsConnection, messageMediator) {
+) : ArbeidsgiverBehovRiver(rapidsConnection, messageMediator) {
     override val behov = listOf(Utbetaling)
     override val riverName = "Utbetaling"
 

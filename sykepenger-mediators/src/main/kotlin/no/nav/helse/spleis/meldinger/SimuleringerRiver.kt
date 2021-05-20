@@ -9,7 +9,7 @@ import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 internal class SimuleringerRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
-) : BehovRiver(rapidsConnection, messageMediator) {
+) : ArbeidsgiverBehovRiver(rapidsConnection, messageMediator) {
     override val behov = listOf(Simulering)
     override val riverName = "Simulering"
 
