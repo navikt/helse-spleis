@@ -33,6 +33,7 @@ internal class Feriepengeutbetaling private constructor(
             spleisFeriepengebeløpArbeidsgiver
         )
         feriepengeberegner.accept(visitor)
+        oppdrag.accept(visitor)
         visitor.postVisitFeriepengeutbetaling(
             this,
             infotrygdFeriepengebeløpPerson,

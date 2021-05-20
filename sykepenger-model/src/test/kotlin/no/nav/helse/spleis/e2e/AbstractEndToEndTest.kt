@@ -292,10 +292,14 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     }
 
     protected fun håndterUtbetalingshistorikkForFeriepenger(
-        opptjeningsår: Year
+        opptjeningsår: Year,
+        utbetalinger: List<Infotrygdperiode> = listOf(),
+        feriepengehistorikk: List<Feriepenger> = listOf()
     ) {
         utbetalingshistorikkForFeriepenger(
-            opptjeningsår = opptjeningsår
+            opptjeningsår = opptjeningsår,
+            utbetalinger = utbetalinger,
+            feriepengehistorikk = feriepengehistorikk
         ).håndter(Person::håndter)
     }
 

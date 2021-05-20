@@ -111,7 +111,7 @@ internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, Sykdomshistori
     }
 }
 
-internal interface FeriepengeutbetalingVisitor {
+internal interface FeriepengeutbetalingVisitor : OppdragVisitor {
     fun preVisitFeriepengeutbetalinger(feriepengeutbetalinger: List<Feriepengeutbetaling>) {}
     fun preVisitFeriepengeutbetaling(
         feriepengeutbetaling: Feriepengeutbetaling,
@@ -493,7 +493,8 @@ internal interface OppdragVisitor {
         refDelytelseId: Int?,
         refFagsystemId: String?,
         endringskode: Endringskode,
-        datoStatusFom: LocalDate?
+        datoStatusFom: LocalDate?,
+        klassekode: Klassekode
     ) {
     }
 

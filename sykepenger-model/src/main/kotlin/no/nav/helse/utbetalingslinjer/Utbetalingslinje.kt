@@ -40,7 +40,8 @@ internal class Utbetalingslinje internal constructor(
             refDelytelseId,
             refFagsystemId,
             endringskode,
-            datoStatusFom
+            datoStatusFom,
+            klassekode
         )
     }
 

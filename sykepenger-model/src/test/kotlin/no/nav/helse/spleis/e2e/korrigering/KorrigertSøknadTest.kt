@@ -11,6 +11,7 @@ import no.nav.helse.testhelpers.SykdomstidslinjeInspektør
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.utbetalingslinjer.Endringskode
+import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.utbetalingslinjer.Satstype
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -101,7 +102,8 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
                 refDelytelseId: Int?,
                 refFagsystemId: String?,
                 endringskode: Endringskode,
-                datoStatusFom: LocalDate?
+                datoStatusFom: LocalDate?,
+                klassekode: Klassekode
             ) {
                 this.grad = grad
             }

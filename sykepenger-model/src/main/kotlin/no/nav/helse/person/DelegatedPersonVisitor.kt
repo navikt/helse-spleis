@@ -643,7 +643,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         refDelytelseId: Int?,
         refFagsystemId: String?,
         endringskode: Endringskode,
-        datoStatusFom: LocalDate?
+        datoStatusFom: LocalDate?,
+        klassekode: Klassekode
     ) {
         delegatee.visitUtbetalingslinje(
             linje,
@@ -657,7 +658,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             refDelytelseId,
             refFagsystemId,
             endringskode,
-            datoStatusFom
+            datoStatusFom,
+            klassekode
         )
     }
 

@@ -11,10 +11,7 @@ import no.nav.helse.serde.api.TilstandstypeDTO
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
-import no.nav.helse.utbetalingslinjer.Endringskode
-import no.nav.helse.utbetalingslinjer.Oppdrag
-import no.nav.helse.utbetalingslinjer.Satstype
-import no.nav.helse.utbetalingslinjer.Utbetalingslinje
+import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -494,7 +491,8 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
             refDelytelseId: Int?,
             refFagsystemId: String?,
             endringskode: Endringskode,
-            datoStatusFom: LocalDate?
+            datoStatusFom: LocalDate?,
+            klassekode: Klassekode
         ) {
             linjer.add(linje)
             endringskoder.add(endringskode)

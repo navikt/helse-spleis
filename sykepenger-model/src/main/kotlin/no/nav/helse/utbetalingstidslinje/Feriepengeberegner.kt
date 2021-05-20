@@ -5,10 +5,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.person.*
 import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.sykdomstidslinje.erHelg
-import no.nav.helse.utbetalingslinjer.Endringskode
-import no.nav.helse.utbetalingslinjer.Satstype
-import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingslinjer.Utbetalingslinje
+import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.ARBEIDSGIVER
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.INFOTRYGD
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.INFOTRYGD_ARBEIDSGIVER
@@ -196,6 +193,15 @@ internal class Feriepengeberegner(
             this.orgnummer = organisasjonsnummer
         }
 
+        private var inUtbetalinger = false
+        override fun preVisitUtbetalinger(utbetalinger: List<Utbetaling>) {
+            inUtbetalinger = true
+        }
+
+        override fun postVisitUtbetalinger(utbetalinger: List<Utbetaling>) {
+            inUtbetalinger = false
+        }
+
         private var utbetaltUtbetaling = false
         override fun preVisitUtbetaling(
             utbetaling: Utbetaling,
@@ -226,9 +232,10 @@ internal class Feriepengeberegner(
             refDelytelseId: Int?,
             refFagsystemId: String?,
             endringskode: Endringskode,
-            datoStatusFom: LocalDate?
+            datoStatusFom: LocalDate?,
+            klassekode: Klassekode
         ) {
-            if (utbetaltUtbetaling && beløp != null) {
+            if (inUtbetalinger && utbetaltUtbetaling && beløp != null) {
                 utbetalteDager.addAll((fom til tom).filterNot { it.erHelg() }.map { UtbetaltDag.SpleisArbeidsgiver(this.orgnummer, it, beløp) })
             }
         }

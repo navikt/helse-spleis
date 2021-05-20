@@ -9,8 +9,7 @@ import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
-import no.nav.helse.utbetalingslinjer.Oppdrag
-import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.fail
@@ -45,6 +44,10 @@ internal class TestArbeidsgiverInspektør(
     internal val sykdomshistorikkDagTeller = mutableMapOf<KClass<out Dag>, Int>()
     internal val vedtaksperiodeDagTeller = mutableMapOf<UUID, MutableMap<KClass<out Dag>, Int>>()
     internal val utbetalinger = mutableListOf<Utbetaling>()
+    internal val feriepengeutbetalingslinjer = mutableListOf<Feriepengeutbetalingslinje>()
+    internal val infotrygdFeriepengebeløpPerson = mutableListOf<Double>()
+    internal val infotrygdFeriepengebeløpArbeidsgiver = mutableListOf<Double>()
+    internal val spleisFeriepengebeløpArbeidsgiver = mutableListOf<Double>()
     private val vedtaksperiodeutbetalinger = mutableMapOf<Int, Int>()
     private val utbetalingstilstander = mutableListOf<Utbetaling.Tilstand>()
     private val utbetalingIder = mutableListOf<UUID>()
@@ -57,6 +60,7 @@ internal class TestArbeidsgiverInspektør(
     private var forkastetPeriode = false
     private var inVedtaksperiode = false
     private var inUtbetaling = false
+    private var inFeriepengeutbetaling = false
     private val forlengelserFraInfotrygd = mutableMapOf<Int, ForlengelseFraInfotrygd>()
     private val hendelseIder = mutableMapOf<Int, List<UUID>>()
     private val inntektskilder = mutableMapOf<Int, Inntektskilde>()
@@ -176,6 +180,34 @@ internal class TestArbeidsgiverInspektør(
         this.nettoBeløp.add(nettoBeløp)
     }
 
+    override fun visitUtbetalingslinje(
+        linje: Utbetalingslinje,
+        fom: LocalDate,
+        tom: LocalDate,
+        satstype: Satstype,
+        beløp: Int?,
+        aktuellDagsinntekt: Int?,
+        grad: Double?,
+        delytelseId: Int,
+        refDelytelseId: Int?,
+        refFagsystemId: String?,
+        endringskode: Endringskode,
+        datoStatusFom: LocalDate?,
+        klassekode: Klassekode
+    ) {
+        if(inFeriepengeutbetaling) feriepengeutbetalingslinjer.add(Feriepengeutbetalingslinje(fom, tom, satstype, beløp, grad, klassekode, endringskode))
+    }
+
+    internal data class Feriepengeutbetalingslinje(
+        val fom: LocalDate,
+        val tom: LocalDate,
+        val satstype: Satstype,
+        val beløp: Int?,
+        val grad: Double?,
+        val klassekode: Klassekode,
+        val endringskode: Endringskode
+    )
+
     override fun preVisitUtbetaling(
         utbetaling: Utbetaling,
         id: UUID,
@@ -217,6 +249,27 @@ internal class TestArbeidsgiverInspektør(
         gjenståendeSykedager: Int?
     ) {
         inUtbetaling = false
+    }
+
+    override fun preVisitFeriepengeutbetaling(
+        feriepengeutbetaling: Feriepengeutbetaling,
+        infotrygdFeriepengebeløpPerson: Double,
+        infotrygdFeriepengebeløpArbeidsgiver: Double,
+        spleisFeriepengebeløpArbeidsgiver: Double
+    ) {
+        inFeriepengeutbetaling = true
+        this.infotrygdFeriepengebeløpArbeidsgiver.add(infotrygdFeriepengebeløpArbeidsgiver)
+        this.infotrygdFeriepengebeløpPerson.add(infotrygdFeriepengebeløpPerson)
+        this.spleisFeriepengebeløpArbeidsgiver.add(spleisFeriepengebeløpArbeidsgiver)
+    }
+
+    override fun postVisitFeriepengeutbetaling(
+        feriepengeutbetaling: Feriepengeutbetaling,
+        infotrygdFeriepengebeløpPerson: Double,
+        infotrygdFeriepengebeløpArbeidsgiver: Double,
+        spleisFeriepengebeløpArbeidsgiver: Double
+    ) {
+        inFeriepengeutbetaling = false
     }
 
     override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {

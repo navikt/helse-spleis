@@ -143,7 +143,8 @@ private class UtbetaltEventBuilder(
         refDelytelseId: Int?,
         refFagsystemId: String?,
         endringskode: Endringskode,
-        datoStatusFom: LocalDate?
+        datoStatusFom: LocalDate?,
+        klassekode: Klassekode
     ) {
         if (linje.erOpphør()) return
         utbetalingslinjer.add(
