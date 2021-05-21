@@ -6,6 +6,7 @@ import java.time.LocalDate
 
 internal class Grunnbeløp private constructor(private val multiplier: Double) {
     private val grunnbeløp = listOf(
+        106399.årlig.gyldigFra(1.mai(2021)),
         101351.årlig.gyldigFra(1.mai(2020), virkningsdato = 21.september(2020)),
         99858.årlig.gyldigFra(1.mai(2019)),
         96883.årlig.gyldigFra(1.mai(2018)),
