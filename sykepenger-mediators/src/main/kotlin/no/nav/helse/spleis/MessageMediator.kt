@@ -29,6 +29,7 @@ internal class MessageMediator(
             InntektsmeldingerRiver(it, this)
             InntektsmeldingerReplayRiver(it, this)
             UtbetalingshistorikkRiver(it, this)
+            UtbetalingshistorikkForFeriepengerRiver(it, this)
             YtelserRiver(it, this)
             VilkårsgrunnlagRiver(it, this)
             UtbetalingsgodkjenningerRiver(it, this)

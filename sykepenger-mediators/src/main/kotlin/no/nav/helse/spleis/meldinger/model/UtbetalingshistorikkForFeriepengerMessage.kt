@@ -63,7 +63,7 @@ internal class UtbetalingshistorikkForFeriepengerMessage(packet: JsonMessage) : 
         return fom != null && tom != null && fom <= tom
     }
 
-    internal fun utbetalingshistorikk(aktivitetslogg: Aktivitetslogg = Aktivitetslogg()) =
+    internal fun utbetalingshistorikkForFeriepenger(aktivitetslogg: Aktivitetslogg = Aktivitetslogg()) =
         UtbetalingshistorikkForFeriepenger(
             meldingsreferanseId = id,
             aktørId = aktørId,
@@ -75,6 +75,6 @@ internal class UtbetalingshistorikkForFeriepengerMessage(packet: JsonMessage) : 
         )
 
     override fun behandle(mediator: IHendelseMediator) {
-        mediator.behandle(this,)
+        mediator.behandle(this, utbetalingshistorikkForFeriepenger())
     }
 }

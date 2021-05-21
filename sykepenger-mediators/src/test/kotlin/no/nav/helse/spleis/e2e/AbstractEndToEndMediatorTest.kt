@@ -37,7 +37,7 @@ internal abstract class AbstractEndToEndMediatorTest {
         internal const val UNG_PERSON_FNR_2018 = "12020052345"
         internal const val AKTØRID = "42"
         internal const val ORGNUMMER = "987654321"
-        private const val INNTEKT = 31000.00
+        internal const val INNTEKT = 31000.00
     }
 
     private val meldingsfabrikk = TestMessageFactory(UNG_PERSON_FNR_2018, AKTØRID, ORGNUMMER, INNTEKT)
@@ -84,13 +84,15 @@ internal abstract class AbstractEndToEndMediatorTest {
     ) {
         assertFalse(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, InntekterForSammenligningsgrunnlag))
         assertFalse(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Opptjening))
-        testRapid.sendTestMessage(meldingsfabrikk.lagSøknadNav(
-            perioder = perioder,
-            orgnummer = orgnummer,
-            fravær = fravær,
-            egenmeldinger = egenmeldinger,
-            andreInntektskilder = andreInntektskilder
-        ))
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagSøknadNav(
+                perioder = perioder,
+                orgnummer = orgnummer,
+                fravær = fravær,
+                egenmeldinger = egenmeldinger,
+                andreInntektskilder = andreInntektskilder
+            )
+        )
     }
 
     protected fun sendKorrigerendeSøknad(
@@ -240,6 +242,12 @@ internal abstract class AbstractEndToEndMediatorTest {
                 testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
                 TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP
             )
+        )
+    }
+
+    protected fun sendUtbetalingshistorikkForFeriepenger(testdata: TestMessageFactory.UtbetalingshistorikkForFeriepengerTestdata) {
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagUtbetalingshistorikkForFeriepenger(testdata)
         )
     }
 

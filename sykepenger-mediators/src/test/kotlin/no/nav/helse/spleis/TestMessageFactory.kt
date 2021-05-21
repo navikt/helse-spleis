@@ -155,6 +155,63 @@ internal class TestMessageFactory(
         )
     }
 
+    fun lagUtbetalingshistorikkForFeriepenger(testdata: UtbetalingshistorikkForFeriepengerTestdata) = lagBehovMedLøsning(
+        vedtaksperiodeId = null,
+        tilstand = null,
+        behov = listOf("SykepengehistorikkForFeriepenger"),
+        ekstraFelter = mapOf(
+            "SykepengehistorikkForFeriepenger" to mapOf(
+                "historikkFom" to testdata.fom.toString(),
+                "historikkTom" to testdata.tom.toString()
+            )
+        ),
+        løsninger = mapOf(
+            "SykepengehistorikkForFeriepenger" to mapOf(
+                "utbetalinger" to testdata.utbetalinger.map {
+                    mapOf(
+                        "fom" to it.fom,
+                        "tom" to it.tom,
+                        "dagsats" to it.dagsats,
+                        "typeKode" to it.typekode,
+                        "utbetalingsGrad" to it.utbetalingsgrad,
+                        "orgnummer" to it.organisasjonsnummer
+                    )
+                },
+                "feriepengehistorikk" to testdata.feriepengehistorikk.map {
+                    mapOf(
+                        "orgnummer" to it.orgnummer,
+                        "beløp" to it.beløp,
+                        "fom" to it.fom,
+                        "tom" to it.tom
+                    )
+                }
+            )
+        )
+    )
+
+    class UtbetalingshistorikkForFeriepengerTestdata(
+        val fom: LocalDate,
+        val tom: LocalDate,
+        val utbetalinger: List<Utbetaling> = emptyList(),
+        val feriepengehistorikk: List<Feriepenger> = emptyList(),
+    ) {
+        class Utbetaling(
+            val fom: LocalDate,
+            val tom: LocalDate,
+            val dagsats: Double,
+            val typekode: String,
+            val utbetalingsgrad: String,
+            val organisasjonsnummer: String
+        )
+
+        class Feriepenger(
+            val orgnummer: String,
+            val beløp: Int,
+            val fom: LocalDate,
+            val tom: LocalDate
+        )
+    }
+
     class UtbetalingshistorikkTestdata(
         val fom: LocalDate,
         val tom: LocalDate,
@@ -447,7 +504,7 @@ internal class TestMessageFactory(
                 "aktørId" to aktørId,
                 "fødselsnummer" to fødselsnummer,
                 "organisasjonsnummer" to organisasjonsnummer,
-                ),
+            ),
         )
     }
 
@@ -607,10 +664,12 @@ internal class TestMessageFactory(
         )
     }
 
-    fun lagAvstemming() = nyHendelse("person_avstemming", mapOf(
-        "fødselsnummer" to fødselsnummer,
-        "aktørId" to aktørId
-    ))
+    fun lagAvstemming() = nyHendelse(
+        "person_avstemming", mapOf(
+            "fødselsnummer" to fødselsnummer,
+            "aktørId" to aktørId
+        )
+    )
 
     fun lagOverstyringTidslinje(dager: List<ManuellOverskrivingDag>): String {
         return nyHendelse(
