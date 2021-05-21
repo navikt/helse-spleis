@@ -168,93 +168,97 @@ internal class Feriepengeberegner(
     private class FinnUtbetalteDagerVisitor(
         utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger,
         person: Person
-    ) : InfotrygdhistorikkVisitor, PersonVisitor {
+    ) {
         private val utbetalteDager = mutableListOf<UtbetaltDag>()
 
         init {
-            utbetalingshistorikkForFeriepenger.accept(this)
-            person.accept(this)
+            utbetalingshistorikkForFeriepenger.accept(InfotrygdUtbetalteDagerVisitor())
+            person.accept(SpleisUtbetalteDagerVisitor())
         }
 
         fun utbetalteDager() = utbetalteDager.toList()
 
-        override fun visitInfotrygdhistorikkPersonUtbetalingsperiode(orgnr: String, periode: Utbetalingsperiode, grad: Prosentdel, inntekt: Inntekt) {
-            utbetalteDager.addAll(periode.filterNot { it.erHelg() }
-                .map { UtbetaltDag.InfotrygdPerson(orgnr, it, inntekt.reflection { _, _, _, dagligInt -> dagligInt }) })
-        }
+        private inner class InfotrygdUtbetalteDagerVisitor : InfotrygdhistorikkVisitor {
+            override fun visitInfotrygdhistorikkPersonUtbetalingsperiode(orgnr: String, periode: Utbetalingsperiode, grad: Prosentdel, inntekt: Inntekt) {
+                utbetalteDager.addAll(periode.filterNot { it.erHelg() }
+                    .map { UtbetaltDag.InfotrygdPerson(orgnr, it, inntekt.reflection { _, _, _, dagligInt -> dagligInt }) })
+            }
 
-        override fun visitInfotrygdhistorikkArbeidsgiverUtbetalingsperiode(orgnr: String, periode: Utbetalingsperiode, grad: Prosentdel, inntekt: Inntekt) {
-            utbetalteDager.addAll(periode.filterNot { it.erHelg() }
-                .map { UtbetaltDag.InfotrygdArbeidsgiver(orgnr, it, inntekt.reflection { _, _, _, dagligInt -> dagligInt }) })
-        }
-
-        private lateinit var orgnummer: String
-        override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
-            this.orgnummer = organisasjonsnummer
-        }
-
-        private var inUtbetalinger = false
-        override fun preVisitUtbetalinger(utbetalinger: List<Utbetaling>) {
-            inUtbetalinger = true
-        }
-
-        override fun postVisitUtbetalinger(utbetalinger: List<Utbetaling>) {
-            inUtbetalinger = false
-        }
-
-        private var utbetaltUtbetaling = false
-        override fun preVisitUtbetaling(
-            utbetaling: Utbetaling,
-            id: UUID,
-            beregningId: UUID,
-            type: Utbetaling.Utbetalingtype,
-            tilstand: Utbetaling.Tilstand,
-            tidsstempel: LocalDateTime,
-            oppdatert: LocalDateTime,
-            arbeidsgiverNettoBeløp: Int,
-            personNettoBeløp: Int,
-            maksdato: LocalDate,
-            forbrukteSykedager: Int?,
-            gjenståendeSykedager: Int?
-        ) {
-            utbetaltUtbetaling = tilstand == Utbetaling.Utbetalt
-        }
-
-        override fun visitUtbetalingslinje(
-            linje: Utbetalingslinje,
-            fom: LocalDate,
-            tom: LocalDate,
-            satstype: Satstype,
-            beløp: Int?,
-            aktuellDagsinntekt: Int?,
-            grad: Double?,
-            delytelseId: Int,
-            refDelytelseId: Int?,
-            refFagsystemId: String?,
-            endringskode: Endringskode,
-            datoStatusFom: LocalDate?,
-            klassekode: Klassekode
-        ) {
-            if (inUtbetalinger && utbetaltUtbetaling && beløp != null) {
-                utbetalteDager.addAll((fom til tom).filterNot { it.erHelg() }.map { UtbetaltDag.SpleisArbeidsgiver(this.orgnummer, it, beløp) })
+            override fun visitInfotrygdhistorikkArbeidsgiverUtbetalingsperiode(orgnr: String, periode: Utbetalingsperiode, grad: Prosentdel, inntekt: Inntekt) {
+                utbetalteDager.addAll(periode.filterNot { it.erHelg() }
+                    .map { UtbetaltDag.InfotrygdArbeidsgiver(orgnr, it, inntekt.reflection { _, _, _, dagligInt -> dagligInt }) })
             }
         }
 
-        override fun postVisitUtbetaling(
-            utbetaling: Utbetaling,
-            id: UUID,
-            beregningId: UUID,
-            type: Utbetaling.Utbetalingtype,
-            tilstand: Utbetaling.Tilstand,
-            tidsstempel: LocalDateTime,
-            oppdatert: LocalDateTime,
-            arbeidsgiverNettoBeløp: Int,
-            personNettoBeløp: Int,
-            maksdato: LocalDate,
-            forbrukteSykedager: Int?,
-            gjenståendeSykedager: Int?
-        ) {
-            utbetaltUtbetaling = false
+        private inner class SpleisUtbetalteDagerVisitor : PersonVisitor {
+            private lateinit var orgnummer: String
+            override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
+                this.orgnummer = organisasjonsnummer
+            }
+
+            private var inUtbetalinger = false
+            override fun preVisitUtbetalinger(utbetalinger: List<Utbetaling>) {
+                inUtbetalinger = true
+            }
+
+            override fun postVisitUtbetalinger(utbetalinger: List<Utbetaling>) {
+                inUtbetalinger = false
+            }
+
+            private var utbetaltUtbetaling = false
+            override fun preVisitUtbetaling(
+                utbetaling: Utbetaling,
+                id: UUID,
+                beregningId: UUID,
+                type: Utbetaling.Utbetalingtype,
+                tilstand: Utbetaling.Tilstand,
+                tidsstempel: LocalDateTime,
+                oppdatert: LocalDateTime,
+                arbeidsgiverNettoBeløp: Int,
+                personNettoBeløp: Int,
+                maksdato: LocalDate,
+                forbrukteSykedager: Int?,
+                gjenståendeSykedager: Int?
+            ) {
+                utbetaltUtbetaling = tilstand == Utbetaling.Utbetalt
+            }
+
+            override fun visitUtbetalingslinje(
+                linje: Utbetalingslinje,
+                fom: LocalDate,
+                tom: LocalDate,
+                satstype: Satstype,
+                beløp: Int?,
+                aktuellDagsinntekt: Int?,
+                grad: Double?,
+                delytelseId: Int,
+                refDelytelseId: Int?,
+                refFagsystemId: String?,
+                endringskode: Endringskode,
+                datoStatusFom: LocalDate?,
+                klassekode: Klassekode
+            ) {
+                if (inUtbetalinger && utbetaltUtbetaling && beløp != null) {
+                    utbetalteDager.addAll((fom til tom).filterNot { it.erHelg() }.map { UtbetaltDag.SpleisArbeidsgiver(this.orgnummer, it, beløp) })
+                }
+            }
+
+            override fun postVisitUtbetaling(
+                utbetaling: Utbetaling,
+                id: UUID,
+                beregningId: UUID,
+                type: Utbetaling.Utbetalingtype,
+                tilstand: Utbetaling.Tilstand,
+                tidsstempel: LocalDateTime,
+                oppdatert: LocalDateTime,
+                arbeidsgiverNettoBeløp: Int,
+                personNettoBeløp: Int,
+                maksdato: LocalDate,
+                forbrukteSykedager: Int?,
+                gjenståendeSykedager: Int?
+            ) {
+                utbetaltUtbetaling = false
+            }
         }
     }
 }
