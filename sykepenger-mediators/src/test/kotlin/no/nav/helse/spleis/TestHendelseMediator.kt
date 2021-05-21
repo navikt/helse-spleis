@@ -109,7 +109,7 @@ internal class TestHendelseMediator : IHendelseMediator {
         lestUtbetalingshistorikk = true
     }
 
-    override fun behandle(message: UtbetalingshistorikkForFeriepengerMessage, utbetalingshistorikk: UtbetalingshistorikkForFeriepenger) {
+    override fun behandle(message: UtbetalingshistorikkForFeriepengerMessage, utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger) {
         lestUtbetalingshistorikkForFeriepenger = true
     }
 

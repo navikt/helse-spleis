@@ -158,5 +158,4 @@ internal class UtbetalingshistorikkForFeriepengerRiverTest : RiverTest() {
       "@besvart": "${LocalDateTime.now()}"
     }
     """
-
 }

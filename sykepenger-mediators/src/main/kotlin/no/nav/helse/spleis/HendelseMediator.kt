@@ -76,10 +76,10 @@ internal class HendelseMediator(
         }
     }
 
-    override fun behandle(message: UtbetalingshistorikkForFeriepengerMessage, utbetalingshistorikk: UtbetalingshistorikkForFeriepenger) {
-        håndter(message, utbetalingshistorikk) { person ->
+    override fun behandle(message: UtbetalingshistorikkForFeriepengerMessage, utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger) {
+        håndter(message, utbetalingshistorikkForFeriepenger) { person ->
             HendelseProbe.onUtbetalingshistorikkForFeriepenger()
-            person.håndter(utbetalingshistorikk)
+            person.håndter(utbetalingshistorikkForFeriepenger)
         }
     }
 
@@ -212,7 +212,7 @@ internal interface IHendelseMediator {
     fun behandle(message: PåminnelseMessage, påminnelse: Påminnelse)
     fun behandle(message: PersonPåminnelseMessage, påminnelse: PersonPåminnelse)
     fun behandle(message: UtbetalingshistorikkMessage, utbetalingshistorikk: Utbetalingshistorikk)
-    fun behandle(message: UtbetalingshistorikkForFeriepengerMessage, utbetalingshistorikk: UtbetalingshistorikkForFeriepenger)
+    fun behandle(message: UtbetalingshistorikkForFeriepengerMessage, utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger)
     fun behandle(message: YtelserMessage, ytelser: Ytelser)
     fun behandle(message: VilkårsgrunnlagMessage, vilkårsgrunnlag: Vilkårsgrunnlag)
     fun behandle(message: UtbetalingsgodkjenningMessage, utbetalingsgodkjenning: Utbetalingsgodkjenning)
