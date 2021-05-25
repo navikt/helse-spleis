@@ -77,6 +77,11 @@ internal interface InfotrygdhistorikkVisitor {
     fun postVisitInfotrygdhistorikk() {}
 }
 
+internal interface FeriepengeutbetalingsperiodeVisitor{
+    fun visitPersonutbetalingsperiode(orgnr: String, periode: Periode, beløp: Int) {}
+    fun visitArbeidsgiverutbetalingsperiode(orgnr: String, periode: Periode, beløp: Int) {}
+}
+
 internal interface VilkårsgrunnlagHistorikkVisitor {
     fun preVisitVilkårsgrunnlagHistorikk() {}
     fun postVisitVilkårsgrunnlagHistorikk() {}

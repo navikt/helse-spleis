@@ -15,7 +15,6 @@ import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.infotrygdhistorikk.Feriepenger
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.api.serializePersonForSpeil
@@ -293,8 +292,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
 
     protected fun håndterUtbetalingshistorikkForFeriepenger(
         opptjeningsår: Year,
-        utbetalinger: List<Infotrygdperiode> = listOf(),
-        feriepengehistorikk: List<Feriepenger> = listOf(),
+        utbetalinger: List<UtbetalingshistorikkForFeriepenger.Utbetalingsperiode> = listOf(),
+        feriepengehistorikk: List<UtbetalingshistorikkForFeriepenger.Feriepenger> = listOf(),
         skalBeregnesManuelt: Boolean = false
     ) {
         utbetalingshistorikkForFeriepenger(
@@ -726,8 +725,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     }
 
     private fun utbetalingshistorikkForFeriepenger(
-        utbetalinger: List<Infotrygdperiode> = listOf(),
-        feriepengehistorikk: List<Feriepenger> = listOf(),
+        utbetalinger: List<UtbetalingshistorikkForFeriepenger.Utbetalingsperiode> = listOf(),
+        feriepengehistorikk: List<UtbetalingshistorikkForFeriepenger.Feriepenger> = listOf(),
         opptjeningsår: Year = Year.of(2017),
         skalBeregnesManuelt: Boolean
     ): UtbetalingshistorikkForFeriepenger {

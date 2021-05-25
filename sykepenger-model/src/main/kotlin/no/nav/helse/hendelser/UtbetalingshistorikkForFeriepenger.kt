@@ -1,12 +1,11 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Feriepenger.Companion.utbetalteFeriepengerTilArbeidsgiver
+import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Feriepenger.Companion.utbetalteFeriepengerTilPerson
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.InfotrygdhistorikkVisitor
+import no.nav.helse.person.FeriepengeutbetalingsperiodeVisitor
 import no.nav.helse.person.PersonHendelse
-import no.nav.helse.person.infotrygdhistorikk.Feriepenger
-import no.nav.helse.person.infotrygdhistorikk.Feriepenger.Companion.utbetalteFeriepengerTilArbeidsgiver
-import no.nav.helse.person.infotrygdhistorikk.Feriepenger.Companion.utbetalteFeriepengerTilPerson
-import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
+import java.time.LocalDate
 import java.time.Year
 import java.util.*
 
@@ -14,7 +13,7 @@ class UtbetalingshistorikkForFeriepenger(
     meldingsreferanseId: UUID,
     private val aktørId: String,
     private val fødselsnummer: String,
-    private val utbetalinger: List<Infotrygdperiode>,
+    private val utbetalinger: List<Utbetalingsperiode>,
     private val feriepengehistorikk: List<Feriepenger>,
     //FIXME: Internal?
     internal val opptjeningsår: Year,
@@ -25,7 +24,7 @@ class UtbetalingshistorikkForFeriepenger(
 
     override fun fødselsnummer() = fødselsnummer
 
-    internal fun accept(visitor: InfotrygdhistorikkVisitor) {
+    internal fun accept(visitor: FeriepengeutbetalingsperiodeVisitor) {
         utbetalinger.forEach { it.accept(visitor) }
     }
 
@@ -34,4 +33,52 @@ class UtbetalingshistorikkForFeriepenger(
 
     internal fun utbetalteFeriepengerTilArbeidsgiver(orgnummer: String) =
         feriepengehistorikk.utbetalteFeriepengerTilArbeidsgiver(orgnummer, opptjeningsår)
+
+    class Feriepenger(
+        val orgnummer: String,
+        val beløp: Int,
+        val fom: LocalDate,
+        val tom: LocalDate
+    ) {
+        internal companion object {
+            internal fun Iterable<Feriepenger>.utbetalteFeriepengerTilPerson(opptjeningsår: Year) =
+                filter { it.orgnummer.all('0'::equals) }.filter { Year.from(it.fom) == opptjeningsår.plusYears(1) }.sumBy { it.beløp }
+
+            internal fun Iterable<Feriepenger>.utbetalteFeriepengerTilArbeidsgiver(orgnummer: String, opptjeningsår: Year) =
+                filter { it.orgnummer == orgnummer }.filter { Year.from(it.fom) == opptjeningsår.plusYears(1) }.sumBy { it.beløp }
+        }
+    }
+
+    sealed class Utbetalingsperiode(
+        protected val orgnr: String,
+        fom: LocalDate,
+        tom: LocalDate,
+        protected val beløp: Int
+    ) {
+        protected val periode: Periode = fom til tom
+
+        internal abstract fun accept(visitor: FeriepengeutbetalingsperiodeVisitor)
+
+        class Personutbetalingsperiode(
+            orgnr: String,
+            fom: LocalDate,
+            tom: LocalDate,
+            beløp: Int
+        ) : Utbetalingsperiode(orgnr, fom, tom, beløp) {
+            override fun accept(visitor: FeriepengeutbetalingsperiodeVisitor) {
+                visitor.visitPersonutbetalingsperiode(orgnr, periode, beløp)
+            }
+        }
+
+        class Arbeidsgiverutbetalingsperiode(
+            orgnr: String,
+            fom: LocalDate,
+            tom: LocalDate,
+            beløp: Int
+        ) : Utbetalingsperiode(orgnr, fom, tom, beløp) {
+            override fun accept(visitor: FeriepengeutbetalingsperiodeVisitor) {
+                visitor.visitArbeidsgiverutbetalingsperiode(orgnr, periode, beløp)
+            }
+        }
+    }
 }

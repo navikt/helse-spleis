@@ -1,9 +1,9 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.*
-import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.ARBEIDSGIVER
@@ -16,8 +16,6 @@ import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companio
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.orgnummerFilter
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.summer
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.tilDato
-import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Prosentdel
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
@@ -178,15 +176,15 @@ internal class Feriepengeberegner(
 
         fun utbetalteDager() = utbetalteDager.toList()
 
-        private inner class InfotrygdUtbetalteDagerVisitor : InfotrygdhistorikkVisitor {
-            override fun visitInfotrygdhistorikkPersonUtbetalingsperiode(orgnr: String, periode: Utbetalingsperiode, grad: Prosentdel, inntekt: Inntekt) {
+        private inner class InfotrygdUtbetalteDagerVisitor : FeriepengeutbetalingsperiodeVisitor {
+            override fun visitPersonutbetalingsperiode(orgnr: String, periode: Periode, beløp: Int) {
                 utbetalteDager.addAll(periode.filterNot { it.erHelg() }
-                    .map { UtbetaltDag.InfotrygdPerson(orgnr, it, inntekt.reflection { _, _, _, dagligInt -> dagligInt }) })
+                    .map { UtbetaltDag.InfotrygdPerson(orgnr, it, beløp) })
             }
 
-            override fun visitInfotrygdhistorikkArbeidsgiverUtbetalingsperiode(orgnr: String, periode: Utbetalingsperiode, grad: Prosentdel, inntekt: Inntekt) {
+            override fun visitArbeidsgiverutbetalingsperiode(orgnr: String, periode: Periode, beløp: Int) {
                 utbetalteDager.addAll(periode.filterNot { it.erHelg() }
-                    .map { UtbetaltDag.InfotrygdArbeidsgiver(orgnr, it, inntekt.reflection { _, _, _, dagligInt -> dagligInt }) })
+                    .map { UtbetaltDag.InfotrygdArbeidsgiver(orgnr, it, beløp) })
             }
         }
 

@@ -2,11 +2,8 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
-import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.testhelpers.*
-import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -24,7 +21,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
     @Test
     fun `Finner datoer for feriepengeberegning med 48 sammenhengende utbetalingsdager i IT fra første januar`() {
         val historikk = utbetalingshistorikkForFeriepenger(
-            listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 7.mars, 100.prosent, 1000.månedlig))
+            listOf(UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(ORGNUMMER, 1.januar, 7.mars, 1000))
         )
 
         val beregner = Feriepengeberegner(alder, Year.of(2018), historikk, person)
@@ -34,7 +31,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
     @Test
     fun `Finner datoer for feriepengeberegning med 49 sammenhengende utbetalingsdager i IT fra første januar`() {
         val historikk = utbetalingshistorikkForFeriepenger(
-            listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 8.mars, 100.prosent, 1000.månedlig))
+            listOf(UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(ORGNUMMER, 1.januar, 8.mars, 1000))
         )
 
         val beregner = Feriepengeberegner(alder, Year.of(2018), historikk, person)
@@ -44,7 +41,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
     @Test
     fun `Finner datoer for feriepengeberegning med 47 sammenhengende utbetalingsdager i IT fra første januar`() {
         val historikk = utbetalingshistorikkForFeriepenger(
-            listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 6.mars, 100.prosent, 1000.månedlig))
+            listOf(UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(ORGNUMMER, 1.januar, 6.mars, 1000))
         )
 
         val beregner = Feriepengeberegner(alder, Year.of(2018), historikk, person)
@@ -177,7 +174,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
         assertEquals(44, beregner.feriepengedatoer().size)
     }
 
-    private fun utbetalingshistorikkForFeriepenger(utbetalinger: List<Infotrygdperiode> = emptyList(), skalBeregnesManuelt: Boolean = false) =
+    private fun utbetalingshistorikkForFeriepenger(utbetalinger: List<UtbetalingshistorikkForFeriepenger.Utbetalingsperiode> = emptyList(), skalBeregnesManuelt: Boolean = false) =
         UtbetalingshistorikkForFeriepenger(
             UUID.randomUUID(),
             AKTØRID,

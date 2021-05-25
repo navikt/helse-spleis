@@ -4,13 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.SykepengehistorikkForFeriepenger
-import no.nav.helse.person.infotrygdhistorikk.*
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asOptionalLocalDate
 import no.nav.helse.spleis.IHendelseMediator
-import no.nav.helse.økonomi.Inntekt.Companion.daglig
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import java.time.Year
 
 // Understands a JSON message representing an Ytelserbehov
@@ -25,28 +22,22 @@ internal class UtbetalingshistorikkForFeriepengerMessage(packet: JsonMessage) : 
             val tom = utbetaling["tom"].asLocalDate()
             when (utbetaling["typeKode"].asText()) {
                 "0", "1" -> {
-                    val grad = utbetaling["utbetalingsGrad"].asInt().prosent
-                    // inntektbeløpet i Infotrygd-utbetalingene er gradert; justerer derfor "opp igjen"
-                    val inntekt = utbetaling["dagsats"].asInt().daglig(grad)
+                    val beløp = utbetaling["dagsats"].asInt()
                     val orgnummer = utbetaling["orgnummer"].asText()
-                    PersonUtbetalingsperiode(orgnummer, fom, tom, grad, inntekt)
+                    UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Personutbetalingsperiode(orgnummer, fom, tom, beløp)
                 }
                 "5", "6" -> {
-                    val grad = utbetaling["utbetalingsGrad"].asInt().prosent
-                    // inntektbeløpet i Infotrygd-utbetalingene er gradert; justerer derfor "opp igjen"
-                    val inntekt = utbetaling["dagsats"].asInt().daglig(grad)
+                    val beløp = utbetaling["dagsats"].asInt()
                     val orgnummer = utbetaling["orgnummer"].asText()
-                    ArbeidsgiverUtbetalingsperiode(orgnummer, fom, tom, grad, inntekt)
+                    UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(orgnummer, fom, tom, beløp)
                 }
-                "9" -> Friperiode(fom, tom)
-                "" -> UkjentInfotrygdperiode(fom, tom)
                 else -> null
             }
         }
 
     private val feriepengehistorikk = packet["@løsning.${SykepengehistorikkForFeriepenger.name}.feriepengehistorikk"]
         .map { feriepenge ->
-            Feriepenger(
+            UtbetalingshistorikkForFeriepenger.Feriepenger(
                 orgnummer = feriepenge["orgnummer"].asText(),
                 beløp = feriepenge["beløp"].asInt(),
                 fom = feriepenge["fom"].asLocalDate(),

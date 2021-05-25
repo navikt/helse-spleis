@@ -2,7 +2,6 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.ArbeidsgiverVisitor
-import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.testhelpers.inntektperioder
 import no.nav.helse.testhelpers.januar
@@ -71,7 +70,7 @@ internal class FeriepengeArbeidsgiverTest() : AbstractEndToEndTest() {
         }
     }
 
-    private fun utbetalingshistorikkForFeriepenger(utbetalinger: List<Infotrygdperiode> = emptyList(), skalBeregnesManuelt: Boolean = false) =
+    private fun utbetalingshistorikkForFeriepenger(utbetalinger: List<UtbetalingshistorikkForFeriepenger.Utbetalingsperiode> = emptyList(), skalBeregnesManuelt: Boolean = false) =
         UtbetalingshistorikkForFeriepenger(
             UUID.randomUUID(),
             AKTØRID,

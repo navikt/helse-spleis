@@ -1,11 +1,7 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.hendelser.Inntektsvurdering
-import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
-import no.nav.helse.hendelser.til
+import no.nav.helse.hendelser.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.infotrygdhistorikk.Feriepenger
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Endringskode
@@ -80,8 +76,15 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
 
         håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020),
-            utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.mars(2020), 31.mars(2020), 100.prosent, INNTEKT)),
-            feriepengehistorikk = listOf(Feriepenger(ORGNUMMER, 3211, 1.mai(2021), 31.mai(2021)))
+            utbetalinger = listOf(
+                UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(
+                    ORGNUMMER,
+                    1.mars(2020),
+                    31.mars(2020),
+                    1431
+                )
+            ),
+            feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(ORGNUMMER, 3211, 1.mai(2021), 31.mai(2021)))
         )
 
         assertEquals(1431 * 22 * 0.102, inspektør.infotrygdFeriepengebeløpArbeidsgiver.first())
@@ -128,8 +131,15 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
 
         håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020),
-            utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar(2020), 31.januar(2020), 100.prosent, INNTEKT)),
-            feriepengehistorikk = listOf(Feriepenger(ORGNUMMER, 3211, 1.mai(2021), 31.mai(2021)))
+            utbetalinger = listOf(
+                UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(
+                    ORGNUMMER,
+                    1.januar(2020),
+                    31.januar(2020),
+                    1431
+                )
+            ),
+            feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(ORGNUMMER, 3211, 1.mai(2021), 31.mai(2021)))
         )
 
         assertEquals(1431 * 23 * 0.102, inspektør.infotrygdFeriepengebeløpArbeidsgiver.first())
