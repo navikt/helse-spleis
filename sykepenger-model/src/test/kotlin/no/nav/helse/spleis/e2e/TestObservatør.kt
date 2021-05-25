@@ -12,6 +12,8 @@ internal class TestObservatør : PersonObserver {
     val reberegnedeVedtaksperioder = mutableListOf<UUID>()
     val manglendeInntektsmeldingVedtaksperioder = mutableListOf<UUID>()
     val trengerIkkeInntektsmeldingVedtaksperioder = mutableListOf<UUID>()
+    val utbetalingUtenUtbetalingEventer = mutableListOf<PersonObserver.UtbetalingUtbetaltEvent>()
+    val vedtakFattetEvent = mutableMapOf<UUID, PersonObserver.VedtakFattetEvent>()
 
     private lateinit var sisteVedtaksperiode: UUID
     private val vedtaksperioder = mutableMapOf<String, MutableSet<UUID>>()
@@ -25,6 +27,7 @@ internal class TestObservatør : PersonObserver {
 
     fun hendelseider(vedtaksperiodeId: UUID) =
         vedtaksperiodeendringer[vedtaksperiodeId]?.last()?.hendelser ?: fail { "VedtaksperiodeId $vedtaksperiodeId har ingen hendelser tilknyttet" }
+
     fun sisteVedtaksperiode() = sisteVedtaksperiode
     fun sisteVedtaksperiode(orgnummer: String) = vedtaksperioder.getValue(orgnummer).last()
     fun vedtaksperiode(orgnummer: String, indeks: Int) = vedtaksperioder.getValue(orgnummer).toList()[indeks]
@@ -38,11 +41,19 @@ internal class TestObservatør : PersonObserver {
         avstemming = result
     }
 
+    override fun utbetalingUtenUtbetaling(event: PersonObserver.UtbetalingUtbetaltEvent) {
+        utbetalingUtenUtbetalingEventer.add(event)
+    }
+
+    override fun vedtakFattet(event: PersonObserver.VedtakFattetEvent) {
+        vedtakFattetEvent[event.vedtaksperiodeId] = event
+    }
+
     override fun vedtaksperiodeEndret(event: VedtaksperiodeEndretEvent) {
         sisteVedtaksperiode = event.vedtaksperiodeId
         vedtaksperiodeendringer.getOrPut(event.vedtaksperiodeId) { mutableListOf(event) }.add(event)
         vedtaksperioder.getOrPut(event.organisasjonsnummer) { mutableSetOf() }.add(sisteVedtaksperiode)
-        if(event.gjeldendeTilstand != event.forrigeTilstand) {
+        if (event.gjeldendeTilstand != event.forrigeTilstand) {
             tilstandsendringer.getOrPut(event.vedtaksperiodeId) { mutableListOf(TilstandType.START) }.add(event.gjeldendeTilstand)
         }
         if (event.gjeldendeTilstand == TilstandType.AVSLUTTET) utbetalteVedtaksperioder.add(event.vedtaksperiodeId)

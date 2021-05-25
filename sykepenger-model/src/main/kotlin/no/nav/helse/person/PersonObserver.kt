@@ -183,6 +183,16 @@ interface PersonObserver {
         val hendelseId: UUID
     )
 
+    data class VedtakFattetEvent(
+        val vedtaksperiodeId: UUID,
+        val periode: Periode,
+        val hendelseIder: List<UUID>,
+        val skjæringstidspunkt: LocalDate,
+        val sykepengegrunnlag: Double,
+        val inntekt: Double,
+        val utbetalingId: UUID?
+    )
+
     fun inntektsmeldingReplay(event: InntektsmeldingReplayEvent) {}
     fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, påminnelse: Påminnelse) {}
     fun vedtaksperiodeIkkePåminnet(påminnelse: Påminnelse, vedtaksperiodeId: UUID, nåværendeTilstand: TilstandType) {}
@@ -201,13 +211,5 @@ interface PersonObserver {
     fun annullering(event: UtbetalingAnnullertEvent) {}
     fun avstemt(result: Map<String, Any>) {}
     fun hendelseIkkeHåndtert(event: HendelseIkkeHåndtertEvent) {}
-    fun vedtakFattet(
-        vedtaksperiodeId: UUID,
-        periode: Periode,
-        hendelseIder: List<UUID>,
-        skjæringstidspunkt: LocalDate,
-        sykepengegrunnlag: Double,
-        inntekt: Double,
-        utbetalingId: UUID?
-    ) {}
+    fun vedtakFattet(event: VedtakFattetEvent) {}
 }

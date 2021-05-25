@@ -280,7 +280,15 @@ internal class Utbetaling private constructor(
             sykepengegrunnlag: Inntekt,
             inntekt: Inntekt
         ) {
-            person.vedtakFattet(vedtaksperiodeId, periode, hendelseIder, skjæringstidspunkt, sykepengegrunnlag, inntekt, if (utbetaling != null && utbetaling.harUtbetalinger()) utbetaling.id else null)
+            person.vedtakFattet(PersonObserver.VedtakFattetEvent(
+                vedtaksperiodeId,
+                periode,
+                hendelseIder,
+                skjæringstidspunkt,
+                sykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
+                inntekt.reflection { _, månedlig, _, _ -> månedlig },
+                utbetaling?.id
+            ))
         }
 
         internal fun lagRevurdering(

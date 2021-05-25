@@ -249,26 +249,8 @@ class Person private constructor(
         observers.forEach { it.utbetalingEndret(event) }
     }
 
-    internal fun vedtakFattet(
-        vedtaksperiodeId: UUID,
-        periode: Periode,
-        hendelseIder: List<UUID>,
-        skjæringstidspunkt: LocalDate,
-        sykepengegrunnlag: Inntekt,
-        inntekt: Inntekt,
-        utbetalingId: UUID?
-    ) {
-        observers.forEach {
-            it.vedtakFattet(
-                vedtaksperiodeId,
-                periode,
-                hendelseIder,
-                skjæringstidspunkt,
-                sykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
-                inntekt.reflection { _, månedlig, _, _ -> månedlig },
-                utbetalingId
-            )
-        }
+    internal fun vedtakFattet(vedtakFattetEvent: PersonObserver.VedtakFattetEvent) {
+        observers.forEach { it.vedtakFattet(vedtakFattetEvent) }
     }
 
     fun håndter(hendelse: AnnullerUtbetaling) {

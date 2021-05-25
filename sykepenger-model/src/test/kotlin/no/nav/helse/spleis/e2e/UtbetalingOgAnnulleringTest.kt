@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -21,7 +22,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
     fun `annullerer første periode før andre periode starter i en ikke-sammenhengende utbetaling med mer enn 16 dager gap`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
-        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100.prosent))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -33,7 +34,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         håndterSykmelding(Sykmeldingsperiode(15.februar, 15.mars, 100.prosent))
-        håndterSøknadMedValidering(2.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(15.februar, 15.mars, 100.prosent))
+        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(15.februar, 15.mars, 100.prosent))
         håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(15.februar, 2.mars)), førsteFraværsdag = 15.februar)
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
@@ -52,7 +53,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
     fun `annullering kaster alle etterfølgende perioder`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
-        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100.prosent))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -61,7 +62,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         håndterSykmelding(Sykmeldingsperiode(20.februar, 25.mars, 100.prosent))
-        håndterSøknadMedValidering(2.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(20.februar, 25.mars, 100.prosent))
+        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(20.februar, 25.mars, 100.prosent))
         håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(20.februar, 7.mars)), førsteFraværsdag = 20.februar)
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
@@ -70,7 +71,8 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterAnnullerUtbetaling(fagsystemId = fagsystemIdFørsteVedtaksperiode)
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
-        assertForkastetPeriodeTilstander(1.vedtaksperiode,
+        assertForkastetPeriodeTilstander(
+            1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_SØKNAD_FERDIG_GAP,
@@ -83,7 +85,8 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
             AVSLUTTET
         )
 
-        assertForkastetPeriodeTilstander(2.vedtaksperiode,
+        assertForkastetPeriodeTilstander(
+            2.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
@@ -98,7 +101,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
     fun `kan annullere selv om vi har en etterfølgende periode som har gått til infotrygd etter simulering`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
-        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100.prosent))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -108,7 +111,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(3.mars, 26.mars, 100.prosent))
         håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(3.mars, 26.mars)))
-        håndterSøknadMedValidering(2.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.mars, 26.mars, 100.prosent))
+        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(3.mars, 26.mars, 100.prosent))
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode)
@@ -124,7 +127,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
     fun `kan ikke annullere utbetaling etter sammenhengede periode TIL_UTBETALING`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
-        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100.prosent))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -133,7 +136,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         håndterSykmelding(Sykmeldingsperiode(27.januar, 15.februar, 100.prosent))
-        håndterSøknadMedValidering(2.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(27.januar, 15.februar, 100.prosent))
+        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(27.januar, 15.februar, 100.prosent))
         håndterYtelser(2.vedtaksperiode)   // No history
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
@@ -146,7 +149,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
     fun `utbetaling med teknisk feil blir stående i til utbetaling`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
-        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100.prosent))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -167,11 +170,12 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         )
         assertEquals(Utbetaling.Sendt, inspektør.utbetalingtilstand(0))
     }
+
     @Test
     fun `utbetaling med teknisk feil blir stående i til utbetaling og prøver igjen`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
-        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100.prosent))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -198,7 +202,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
     fun `utbetaling med teknisk feil for lenge går til Utbetaling feilet`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
-        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100.prosent))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -227,7 +231,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
     fun `utbetaling som blir avvist går til utbetaling feilet`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
-        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100.prosent))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -253,7 +257,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
     fun `kan forsøke utbetaling på nytt etter Utbetaling feilet`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
-        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100.prosent))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -284,7 +288,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
     fun `utbetaling går videre dersom vi går glipp av Overført-kvittering`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
-        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100.prosent))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -311,7 +315,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
     fun `Kan ikke annullere over en fastlåst annullering`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
-        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100.prosent))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -338,7 +342,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
-        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100.prosent))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -350,7 +354,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
     fun `ubetalt periode, etter utbetalt, etterutbetales ikke`() {
         (10.juni to 30.juni).also { (fom, tom) ->
             håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
-            håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent), sendtTilNav = tom)
+            håndterSøknad(Sykdom(fom, tom, 100.prosent), sendtTilNav = tom)
             håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(fom til fom.plusDays(15)))
         }
         (1.juli to 31.juli).also { (fom, tom) ->
@@ -374,9 +378,9 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
 
         (1.august to 31.august).also { (fom, tom) ->
             håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
-            håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent))
+            håndterSøknad(Sykdom(fom, tom, 100.prosent))
         }
-        val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.juli,  31.juli, 100.prosent, 1000.daglig)
+        val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.juli, 31.juli, 100.prosent, 1000.daglig)
         håndterUtbetalingshistorikk(3.vedtaksperiode, historikk)
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
@@ -401,5 +405,30 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
             assertEquals(31.august, utbetaling.arbeidsgiverOppdrag().sistedato)
             assertEquals(1, utbetaling.arbeidsgiverOppdrag().size)
         }
+    }
+
+    @Test
+    fun `vedtak_fattet skal peke på utbetaling_uten_utbetaling`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar, 15.prosent))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 17.januar, 15.prosent))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_GODKJENNING,
+            AVSLUTTET
+        )
+        assertEquals(1, observatør.utbetalingUtenUtbetalingEventer.size)
+        assertEquals(observatør.vedtakFattetEvent[1.vedtaksperiode]?.utbetalingId, observatør.utbetalingUtenUtbetalingEventer.last().utbetalingId)
     }
 }

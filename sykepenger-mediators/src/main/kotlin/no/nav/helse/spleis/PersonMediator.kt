@@ -186,26 +186,19 @@ internal class PersonMediator(
     }
 
     override fun vedtakFattet(
-        vedtaksperiodeId: UUID,
-        periode: Periode,
-        hendelseIder: List<UUID>,
-        skjæringstidspunkt: LocalDate,
-        sykepengegrunnlag: Double,
-        inntekt: Double,
-        utbetalingId: UUID?
-    ) {
+        event: PersonObserver.VedtakFattetEvent) {
         vedtak = true
         queueMessage("vedtak_fattet", JsonMessage.newMessage(
             mutableMapOf(
-                "vedtaksperiodeId" to vedtaksperiodeId,
-                "fom" to periode.start,
-                "tom" to periode.endInclusive,
-                "hendelser" to hendelseIder,
-                "skjæringstidspunkt" to skjæringstidspunkt,
-                "sykepengegrunnlag" to sykepengegrunnlag,
-                "inntekt" to inntekt
+                "vedtaksperiodeId" to event.vedtaksperiodeId,
+                "fom" to event.periode.start,
+                "tom" to event.periode.endInclusive,
+                "hendelser" to event.hendelseIder,
+                "skjæringstidspunkt" to event.skjæringstidspunkt,
+                "sykepengegrunnlag" to event.sykepengegrunnlag,
+                "inntekt" to event.inntekt
             ).apply {
-                if (utbetalingId != null) this["utbetalingId"] = utbetalingId
+                event.utbetalingId?.let { this["utbetalingId"] = it }
             }
         ))
     }

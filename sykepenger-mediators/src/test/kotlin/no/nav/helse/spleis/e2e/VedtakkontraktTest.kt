@@ -1,14 +1,14 @@
 package no.nav.helse.spleis.e2e
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.testhelpers.januar
 import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.syfo.kafka.felles.FravarDTO
 import no.nav.syfo.kafka.felles.FravarstypeDTO
 import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
-import org.junit.jupiter.api.Assertions.assertDoesNotThrow
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -54,7 +54,8 @@ internal class VedtakkontraktTest : AbstractEndToEndMediatorTest() {
     private fun assertVedtakUtenUtbetaling() {
         testRapid.inspektør.siste("vedtak_fattet").also { melding ->
             assertVedtak(melding)
-            assertTrue(melding.path("utbetalingId").let { it.isMissingNode || it.isNull })
+            assertFalse(melding["utbetalingId"].isMissingOrNull())
+            assertEquals(melding["utbetalingId"].asText(), testRapid.inspektør.siste("utbetaling_uten_utbetaling").path("utbetalingId").asText())
         }
     }
 
