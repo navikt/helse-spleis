@@ -13,6 +13,7 @@ import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companio
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.SPLEIS_ARBEIDSGIVER
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.and
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.feriepengedager
+import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.opptjeningsårFilter
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.orgnummerFilter
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.summer
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.tilDato
@@ -37,7 +38,7 @@ internal class Feriepengeberegner(
         opptjeningsår: Year,
         utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger,
         person: Person
-    ) : this(alder, opptjeningsår, FinnUtbetalteDagerVisitor(utbetalingshistorikkForFeriepenger, person).utbetalteDager())
+    ) : this(alder, opptjeningsår, FinnUtbetalteDagerVisitor(utbetalingshistorikkForFeriepenger, person).utbetalteDager(opptjeningsår))
 
     internal fun accept(visitor: FeriepengeutbetalingVisitor) {
         visitor.preVisitFeriepengeberegner(this)
@@ -126,6 +127,7 @@ internal class Feriepengeberegner(
             internal val SPLEIS_ARBEIDSGIVER: UtbetaltDagSelector = { it is SpleisArbeidsgiver }
             internal val ARBEIDSGIVER: UtbetaltDagSelector = INFOTRYGD_ARBEIDSGIVER or SPLEIS_ARBEIDSGIVER
             internal fun orgnummerFilter(orgnummer: String): UtbetaltDagSelector = { it.orgnummer == orgnummer }
+            internal fun opptjeningsårFilter(opptjeningsår: Year): UtbetaltDagSelector = { Year.from(it.dato) == opptjeningsår }
             private infix fun (UtbetaltDagSelector).or(other: UtbetaltDagSelector): UtbetaltDagSelector = { this(it) || other(it) }
             internal infix fun (UtbetaltDagSelector).and(other: UtbetaltDagSelector): UtbetaltDagSelector = { this(it) && other(it) }
         }
@@ -174,7 +176,7 @@ internal class Feriepengeberegner(
             person.accept(SpleisUtbetalteDagerVisitor())
         }
 
-        fun utbetalteDager() = utbetalteDager.toList()
+        fun utbetalteDager(opptjeningsår: Year) = utbetalteDager.filter(opptjeningsårFilter(opptjeningsår))
 
         private inner class InfotrygdUtbetalteDagerVisitor : FeriepengeutbetalingsperiodeVisitor {
             override fun visitPersonutbetalingsperiode(orgnr: String, periode: Periode, beløp: Int) {

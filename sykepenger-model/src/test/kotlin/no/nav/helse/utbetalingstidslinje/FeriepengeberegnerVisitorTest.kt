@@ -49,6 +49,16 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `Finner datoer for feriepengeberegning kun for dager i aktuelt opptjeningsår`() {
+        val historikk = utbetalingshistorikkForFeriepenger(
+            listOf(UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(ORGNUMMER, 1.desember(2017), 31.januar(2018), 1000))
+        )
+
+        val beregner = Feriepengeberegner(alder, Year.of(2018), historikk, person)
+        assertEquals(23, beregner.feriepengedatoer().size)
+    }
+
+    @Test
     fun `Finner datoer for feriepengeberegning med 48 sammenhengende utbetalingsdager i Oppdrag fra første januar`() {
         byggPerson(
             arbeidsgiverperiode = 16.desember(2017) til 31.desember(2017),
