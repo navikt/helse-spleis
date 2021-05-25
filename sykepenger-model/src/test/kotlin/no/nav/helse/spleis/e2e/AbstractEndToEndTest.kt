@@ -294,12 +294,14 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     protected fun håndterUtbetalingshistorikkForFeriepenger(
         opptjeningsår: Year,
         utbetalinger: List<Infotrygdperiode> = listOf(),
-        feriepengehistorikk: List<Feriepenger> = listOf()
+        feriepengehistorikk: List<Feriepenger> = listOf(),
+        skalBeregnesManuelt: Boolean = false
     ) {
         utbetalingshistorikkForFeriepenger(
             opptjeningsår = opptjeningsår,
             utbetalinger = utbetalinger,
-            feriepengehistorikk = feriepengehistorikk
+            feriepengehistorikk = feriepengehistorikk,
+            skalBeregnesManuelt = skalBeregnesManuelt
         ).håndter(Person::håndter)
     }
 
@@ -726,7 +728,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     private fun utbetalingshistorikkForFeriepenger(
         utbetalinger: List<Infotrygdperiode> = listOf(),
         feriepengehistorikk: List<Feriepenger> = listOf(),
-        opptjeningsår: Year = Year.of(2017)
+        opptjeningsår: Year = Year.of(2017),
+        skalBeregnesManuelt: Boolean
     ): UtbetalingshistorikkForFeriepenger {
         return UtbetalingshistorikkForFeriepenger(
             meldingsreferanseId = UUID.randomUUID(),
@@ -734,7 +737,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             fødselsnummer = UNG_PERSON_FNR_2018,
             utbetalinger = utbetalinger,
             feriepengehistorikk = feriepengehistorikk,
-            opptjeningsår = opptjeningsår
+            opptjeningsår = opptjeningsår,
+            skalBeregnesManuelt = skalBeregnesManuelt
         ).apply {
             hendelselogg = this
         }

@@ -16,6 +16,7 @@ import java.time.Year
 // Understands a JSON message representing an Ytelserbehov
 internal class UtbetalingshistorikkForFeriepengerMessage(packet: JsonMessage) : BehovMessage(packet) {
     private val aktørId = packet["aktørId"].asText()
+    private val skalBeregnesManuelt = packet["@løsning.${SykepengehistorikkForFeriepenger.name}.feriepengerSkalBeregnesManuelt"].asBoolean()
 
     private val utbetalinger = packet["@løsning.${SykepengehistorikkForFeriepenger.name}.utbetalinger"]
         .filter(::erGyldigPeriode)
@@ -71,6 +72,7 @@ internal class UtbetalingshistorikkForFeriepengerMessage(packet: JsonMessage) : 
             utbetalinger = utbetalinger,
             feriepengehistorikk = feriepengehistorikk,
             opptjeningsår = opptjeningsår,
+            skalBeregnesManuelt = skalBeregnesManuelt,
             aktivitetslogg = aktivitetslogg
         )
 

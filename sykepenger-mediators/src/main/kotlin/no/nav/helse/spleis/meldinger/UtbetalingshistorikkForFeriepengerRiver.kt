@@ -27,6 +27,7 @@ internal class UtbetalingshistorikkForFeriepengerRiver(
     internal companion object {
         fun validerSykepengehistorikk(message: JsonMessage) {
             message.requireKey("${SykepengehistorikkForFeriepenger.name}.historikkFom")
+            message.requireKey("@løsning.${SykepengehistorikkForFeriepenger.name}.feriepengerSkalBeregnesManuelt")
             message.requireArray("@løsning.${SykepengehistorikkForFeriepenger.name}.utbetalinger") {
                 interestedIn("fom", JsonNode::asLocalDate)
                 interestedIn("tom", JsonNode::asLocalDate)

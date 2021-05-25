@@ -71,14 +71,15 @@ internal class FeriepengeArbeidsgiverTest() : AbstractEndToEndTest() {
         }
     }
 
-    private fun utbetalingshistorikkForFeriepenger(utbetalinger: List<Infotrygdperiode> = emptyList()) =
+    private fun utbetalingshistorikkForFeriepenger(utbetalinger: List<Infotrygdperiode> = emptyList(), skalBeregnesManuelt: Boolean = false) =
         UtbetalingshistorikkForFeriepenger(
             UUID.randomUUID(),
             AKTØRID,
             ORGNUMMER,
             utbetalinger,
             emptyList(),
-            Year.of(2020)
+            Year.of(2020),
+            skalBeregnesManuelt
         )
 
     private fun byggPerson(

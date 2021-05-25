@@ -18,6 +18,7 @@ class UtbetalingshistorikkForFeriepenger(
     private val feriepengehistorikk: List<Feriepenger>,
     //FIXME: Internal?
     internal val opptjeningsår: Year,
+    internal val skalBeregnesManuelt: Boolean,
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
 ) : PersonHendelse(meldingsreferanseId, aktivitetslogg) {
     override fun aktørId() = aktørId
