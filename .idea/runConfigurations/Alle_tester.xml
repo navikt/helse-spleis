@@ -1,5 +1,8 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="All Tests" type="JUnit" factoryName="JUnit">
+  <configuration default="false" name="Alle tester" type="JUnit" factoryName="JUnit">
+    <selectedOptions>
+      <option name="module.classpath" visible="false" />
+    </selectedOptions>
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
     <option name="ALTERNATIVE_JRE_PATH" value="15" />
     <option name="PACKAGE_NAME" value="no.nav.helse" />

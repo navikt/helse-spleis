@@ -3,6 +3,6 @@
 build
 out
 !/.idea/codeStyles/*.xml
-!/.idea/run/*.xml
+!/.idea/runConfigurations/*.xml
 .DS_Store
 gradle.properties
