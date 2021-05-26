@@ -172,7 +172,8 @@ interface PersonObserver {
 
     data class Utbetalingsdag(
         val dato: LocalDate,
-        val type: String
+        val type: String,
+        val begrunnelser: List<String>?
     )
 
     data class InntektsmeldingLagtPåKjølEvent(

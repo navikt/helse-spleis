@@ -431,4 +431,26 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         assertEquals(1, observatør.utbetalingUtenUtbetalingEventer.size)
         assertEquals(observatør.vedtakFattetEvent[1.vedtaksperiode]?.utbetalingId, observatør.utbetalingUtenUtbetalingEventer.last().utbetalingId)
     }
+
+    @Test
+    fun `utbetaling_utbetalt tar med begrunnelse på avviste dager`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent), Sykmeldingsperiode(21.januar, 30.januar, 15.prosent))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 20.januar, 100.prosent), Sykdom(21.januar, 30.januar, 15.prosent))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        val avvisteDager = observatør.utbetalingMedUtbetalingEventer.first().utbetalingsdager.filter { it.type == "AvvistDag"}
+        val ikkeAvvisteDager = observatør.utbetalingMedUtbetalingEventer.first().utbetalingsdager.filter { it.type != "AvvistDag"}
+
+        assertEquals(1, observatør.utbetalingMedUtbetalingEventer.size)
+        assertEquals(7, avvisteDager.size)
+        assertEquals(23, ikkeAvvisteDager.size)
+        assertTrue(avvisteDager.all { it.begrunnelser == listOf("MinimumSykdomsgrad") })
+        assertTrue(ikkeAvvisteDager.all { it.begrunnelser == null })
+    }
 }

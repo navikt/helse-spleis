@@ -31,6 +31,21 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
+    fun `utbetaling med avviste dager`() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), SoknadsperiodeDTO(fom = 27.januar, tom = 30.januar, sykmeldingsgrad = 15))
+        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), SoknadsperiodeDTO(fom = 27.januar, tom = 30.januar, sykmeldingsgrad = 15)))
+        sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendYtelser(0)
+        sendVilkårsgrunnlag(0)
+        sendYtelser(0)
+        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
+        sendUtbetalingsgodkjenning(0)
+        sendUtbetaling()
+        val utbetalt = testRapid.inspektør.siste("utbetaling_utbetalt")
+        assertUtbetalt(utbetalt)
+    }
+
+    @Test
     fun `utbetaling uten utbetaling`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
@@ -74,6 +89,7 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         assertTrue(melding.path("ident").asText().isNotEmpty())
         assertTrue(melding.path("epost").asText().isNotEmpty())
         assertTrue(melding.path("utbetalingsdager").toList().isNotEmpty())
+        assertTrue(melding.path("utbetalingsdager").toList().filter { it["type"].asText() == "AvvistDag" }.all { it.hasNonNull("begrunnelser") })
         assertDatotid(melding.path("tidspunkt").asText())
         assertTrue(melding.path("automatiskBehandling").isBoolean)
         assertOppdragdetaljer(melding.path("arbeidsgiverOppdrag"), false)

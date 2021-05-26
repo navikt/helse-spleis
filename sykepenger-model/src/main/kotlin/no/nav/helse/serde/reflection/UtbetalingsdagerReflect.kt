@@ -7,12 +7,19 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 internal class UtbetalingsdagerReflect(val utbetalingstidslinje: Utbetalingstidslinje) {
 
     fun toList(): List<PersonObserver.Utbetalingsdag> {
-        return utbetalingstidslinje.map {
-            PersonObserver.Utbetalingsdag(it.dato,
-                mapDagtype(it)
-                )
+        return utbetalingstidslinje.map { utbetalingsdag ->
+            PersonObserver.Utbetalingsdag(
+                utbetalingsdag.dato,
+                mapDagtype(utbetalingsdag),
+                mapBegrunnelser(utbetalingsdag)
+            )
         }
     }
+
+    private fun mapBegrunnelser(utbetalingsdag: Utbetalingstidslinje.Utbetalingsdag) =
+        if (utbetalingsdag is Utbetalingstidslinje.Utbetalingsdag.AvvistDag)
+            utbetalingsdag.begrunnelser.map { begrunnelse -> begrunnelse.javaClass.simpleName }
+        else null
 
     private fun mapDagtype(it: Utbetalingstidslinje.Utbetalingsdag) = when (it::class) {
         Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag::class -> PersonData.UtbetalingstidslinjeData.TypeData.Arbeidsdag.name
