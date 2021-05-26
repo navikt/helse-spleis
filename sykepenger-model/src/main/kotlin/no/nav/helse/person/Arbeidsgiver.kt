@@ -23,6 +23,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.summer
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import kotlin.math.roundToInt
 
 internal class Arbeidsgiver private constructor(
     private val person: Person,
@@ -232,6 +233,10 @@ internal class Arbeidsgiver private constructor(
         ).build()
         feriepengeutbetalinger.add(feriepengeutbetaling)
         feriepengeutbetaling.registrer(this)
+
+        if (Toggles.SendFeriepengeOppdrag.enabled && feriepengeberegner.beregnFeriepengedifferansenForArbeidsgiver(organisasjonsnummer).roundToInt() != 0) {
+            feriepengeutbetaling.overfør(utbetalingshistorikkForFeriepenger.aktivitetslogg)
+        }
     }
 
     internal fun nåværendeTidslinje() =

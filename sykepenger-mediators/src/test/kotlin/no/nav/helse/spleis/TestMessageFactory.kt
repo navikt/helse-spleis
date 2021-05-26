@@ -174,7 +174,8 @@ internal class TestMessageFactory(
                         "dagsats" to it.dagsats,
                         "typeKode" to it.typekode,
                         "utbetalingsGrad" to it.utbetalingsgrad,
-                        "orgnummer" to it.organisasjonsnummer
+                        "orgnummer" to it.organisasjonsnummer,
+                        "utbetalt" to it.utbetalt
                     )
                 },
                 "feriepengehistorikk" to testdata.feriepengehistorikk.map {
@@ -184,7 +185,8 @@ internal class TestMessageFactory(
                         "fom" to it.fom,
                         "tom" to it.tom
                     )
-                }
+                },
+                "feriepengerSkalBeregnesManuelt" to testdata.feriepengerSkalBehandlesManuelt
             )
         )
     )
@@ -194,6 +196,7 @@ internal class TestMessageFactory(
         val tom: LocalDate,
         val utbetalinger: List<Utbetaling> = emptyList(),
         val feriepengehistorikk: List<Feriepenger> = emptyList(),
+        val feriepengerSkalBehandlesManuelt: Boolean = false
     ) {
         class Utbetaling(
             val fom: LocalDate,
@@ -201,7 +204,8 @@ internal class TestMessageFactory(
             val dagsats: Double,
             val typekode: String,
             val utbetalingsgrad: String,
-            val organisasjonsnummer: String
+            val organisasjonsnummer: String,
+            val utbetalt: LocalDate
         )
 
         class Feriepenger(

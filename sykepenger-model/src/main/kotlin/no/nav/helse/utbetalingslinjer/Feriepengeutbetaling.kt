@@ -1,6 +1,7 @@
 package no.nav.helse.utbetalingslinjer
 
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.FeriepengeutbetalingVisitor
 import no.nav.helse.serde.reflection.OppdragReflect
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
@@ -40,6 +41,10 @@ internal class Feriepengeutbetaling private constructor(
             infotrygdFeriepengebeløpArbeidsgiver,
             spleisFeriepengebeløpArbeidsgiver
         )
+    }
+
+    internal fun overfør(aktivitetslogg: Aktivitetslogg) {
+        oppdrag.overfør(aktivitetslogg, null, "SPLEIS")
     }
 
     internal class Builder(

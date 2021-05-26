@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingslinjer.Endringskode.*
+import no.nav.helse.utbetalingslinjer.Klassekode.RefusjonFeriepengerIkkeOpplysningspliktig
 import no.nav.helse.utbetalingslinjer.Klassekode.RefusjonIkkeOpplysningspliktig
 import java.time.LocalDate
 import kotlin.streams.toList
@@ -51,7 +52,7 @@ internal class Utbetalingslinje internal constructor(
     }
 
     internal fun datoStatusFom() = datoStatusFom
-    internal fun totalbeløp() = beløp?.let { it * stønadsdager() } ?: 0
+    internal fun totalbeløp() = beløp?.let { if (klassekode == RefusjonFeriepengerIkkeOpplysningspliktig) it else it * stønadsdager() } ?: 0
     internal fun stønadsdager() = if (!erOpphør()) filterNot(LocalDate::erHelg).size else 0
 
     internal fun dager() = fom
