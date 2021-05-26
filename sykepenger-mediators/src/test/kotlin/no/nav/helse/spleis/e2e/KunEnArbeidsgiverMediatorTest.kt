@@ -5,8 +5,7 @@ import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.person.TilstandType
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
-import no.nav.helse.testhelpers.februar
-import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.*
 import no.nav.inntektsmeldingkontrakt.Naturalytelse
 import no.nav.inntektsmeldingkontrakt.OpphoerAvNaturalytelse
 import no.nav.inntektsmeldingkontrakt.Periode
@@ -14,6 +13,7 @@ import no.nav.syfo.kafka.felles.FravarDTO
 import no.nav.syfo.kafka.felles.FravarstypeDTO
 import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 
@@ -391,5 +391,24 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
                 "AVSLUTTET"
             )
         }
+    }
+
+    @Disabled("https://trello.com/c/Ob6kSelp")
+    @Test
+    fun `spleis sender korrekt grad (avrundet) ut`() {
+        sendNySøknad(
+            SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 30)
+        )
+        sendSøknad(0, listOf(
+            SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 30, faktiskGrad = 80)
+        ))
+        sendInntektsmelding(0, listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
+        sendYtelserUtenSykepengehistorikk(0)
+        sendVilkårsgrunnlag(0)
+        sendYtelserUtenSykepengehistorikk(0)
+        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
+        sendUtbetalingsgodkjenning(0, true)
+        sendUtbetaling()
+        assertEquals(20.0, testRapid.inspektør.siste("utbetalt").path("utbetalt").first().path("utbetalingslinjer").first().path("grad").asDouble())
     }
 }
