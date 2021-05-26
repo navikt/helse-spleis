@@ -21,7 +21,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
     @Test
     fun `Finner datoer for feriepengeberegning med 48 sammenhengende utbetalingsdager i IT fra første januar`() {
         val historikk = utbetalingshistorikkForFeriepenger(
-            listOf(UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(ORGNUMMER, 1.januar, 7.mars, 1000))
+            listOf(UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(ORGNUMMER, 1.januar, 7.mars, 1000, 7.mars))
         )
 
         val beregner = Feriepengeberegner(alder, Year.of(2018), historikk, person)
@@ -31,7 +31,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
     @Test
     fun `Finner datoer for feriepengeberegning med 49 sammenhengende utbetalingsdager i IT fra første januar`() {
         val historikk = utbetalingshistorikkForFeriepenger(
-            listOf(UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(ORGNUMMER, 1.januar, 8.mars, 1000))
+            listOf(UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(ORGNUMMER, 1.januar, 8.mars, 1000, 8.mars))
         )
 
         val beregner = Feriepengeberegner(alder, Year.of(2018), historikk, person)
@@ -41,7 +41,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
     @Test
     fun `Finner datoer for feriepengeberegning med 47 sammenhengende utbetalingsdager i IT fra første januar`() {
         val historikk = utbetalingshistorikkForFeriepenger(
-            listOf(UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(ORGNUMMER, 1.januar, 6.mars, 1000))
+            listOf(UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(ORGNUMMER, 1.januar, 6.mars, 1000, 6.mars))
         )
 
         val beregner = Feriepengeberegner(alder, Year.of(2018), historikk, person)
@@ -51,11 +51,29 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
     @Test
     fun `Finner datoer for feriepengeberegning kun for dager i aktuelt opptjeningsår`() {
         val historikk = utbetalingshistorikkForFeriepenger(
-            listOf(UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(ORGNUMMER, 1.desember(2017), 31.januar(2018), 1000))
+            listOf(
+                UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(
+                    ORGNUMMER,
+                    1.desember(2017),
+                    31.januar(2018),
+                    1000,
+                    31.januar(2018)
+                )
+            )
         )
 
         val beregner = Feriepengeberegner(alder, Year.of(2018), historikk, person)
         assertEquals(23, beregner.feriepengedatoer().size)
+    }
+
+    @Test
+    fun `Teller ikke med utbetalinger gjort etter feriepengekjøring i IT`() {
+        val historikk = utbetalingshistorikkForFeriepenger(
+            listOf(UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(ORGNUMMER, 1.desember(2017), 31.januar(2018), 1000, 11.mai(2021)))
+        )
+
+        val beregner = Feriepengeberegner(alder, Year.of(2018), historikk, person)
+        assertEquals(0, beregner.feriepengedatoer().size)
     }
 
     @Test
@@ -184,7 +202,10 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
         assertEquals(44, beregner.feriepengedatoer().size)
     }
 
-    private fun utbetalingshistorikkForFeriepenger(utbetalinger: List<UtbetalingshistorikkForFeriepenger.Utbetalingsperiode> = emptyList(), skalBeregnesManuelt: Boolean = false) =
+    private fun utbetalingshistorikkForFeriepenger(
+        utbetalinger: List<UtbetalingshistorikkForFeriepenger.Utbetalingsperiode> = emptyList(),
+        skalBeregnesManuelt: Boolean = false
+    ) =
         UtbetalingshistorikkForFeriepenger(
             UUID.randomUUID(),
             AKTØRID,

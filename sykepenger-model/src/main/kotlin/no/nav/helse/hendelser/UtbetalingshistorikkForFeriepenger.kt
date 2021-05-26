@@ -53,7 +53,8 @@ class UtbetalingshistorikkForFeriepenger(
         protected val orgnr: String,
         fom: LocalDate,
         tom: LocalDate,
-        protected val beløp: Int
+        protected val beløp: Int,
+        protected val utbetalt: LocalDate
     ) {
         protected val periode: Periode = fom til tom
 
@@ -63,10 +64,11 @@ class UtbetalingshistorikkForFeriepenger(
             orgnr: String,
             fom: LocalDate,
             tom: LocalDate,
-            beløp: Int
-        ) : Utbetalingsperiode(orgnr, fom, tom, beløp) {
+            beløp: Int,
+            utbetalt: LocalDate
+        ) : Utbetalingsperiode(orgnr, fom, tom, beløp, utbetalt) {
             override fun accept(visitor: FeriepengeutbetalingsperiodeVisitor) {
-                visitor.visitPersonutbetalingsperiode(orgnr, periode, beløp)
+                visitor.visitPersonutbetalingsperiode(orgnr, periode, beløp, utbetalt)
             }
         }
 
@@ -74,10 +76,11 @@ class UtbetalingshistorikkForFeriepenger(
             orgnr: String,
             fom: LocalDate,
             tom: LocalDate,
-            beløp: Int
-        ) : Utbetalingsperiode(orgnr, fom, tom, beløp) {
+            beløp: Int,
+            utbetalt: LocalDate
+        ) : Utbetalingsperiode(orgnr, fom, tom, beløp, utbetalt) {
             override fun accept(visitor: FeriepengeutbetalingsperiodeVisitor) {
-                visitor.visitArbeidsgiverutbetalingsperiode(orgnr, periode, beløp)
+                visitor.visitArbeidsgiverutbetalingsperiode(orgnr, periode, beløp, utbetalt)
             }
         }
     }

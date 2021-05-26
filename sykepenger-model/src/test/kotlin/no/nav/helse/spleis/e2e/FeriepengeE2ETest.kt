@@ -97,7 +97,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
                     ORGNUMMER,
                     1.mars(2020),
                     31.mars(2020),
-                    1431
+                    1431,
+                    31.mars(2020)
                 )
             ),
             feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(ORGNUMMER, 3211, 1.mai(2021), 31.mai(2021)))
@@ -152,7 +153,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
                     ORGNUMMER,
                     1.januar(2020),
                     31.januar(2020),
-                    1431
+                    1431,
+                    31.januar(2020)
                 )
             ),
             feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(ORGNUMMER, 3357, 1.mai(2021), 31.mai(2021)))
@@ -230,7 +232,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
                     ORGNUMMER,
                     1.januar(2020),
                     31.januar(2020),
-                    1431
+                    1431,
+                    31.januar(2020)
                 )
             ),
             feriepengehistorikk = listOf(
@@ -270,7 +273,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
                     ORGNUMMER,
                     1.januar(2020),
                     31.januar(2020),
-                    1431
+                    1431,
+                    31.januar(2020)
                 )
             ),
             feriepengehistorikk = listOf(

@@ -179,12 +179,16 @@ internal class Feriepengeberegner(
         fun utbetalteDager(opptjeningsår: Year) = utbetalteDager.filter(opptjeningsårFilter(opptjeningsår))
 
         private inner class InfotrygdUtbetalteDagerVisitor : FeriepengeutbetalingsperiodeVisitor {
-            override fun visitPersonutbetalingsperiode(orgnr: String, periode: Periode, beløp: Int) {
+            private fun erUtbetaltEtterFeriepengekjøringIT(utbetalt: LocalDate) = LocalDate.of(2021, 5, 8) <= utbetalt
+
+            override fun visitPersonutbetalingsperiode(orgnr: String, periode: Periode, beløp: Int, utbetalt: LocalDate) {
+                if(erUtbetaltEtterFeriepengekjøringIT(utbetalt)) return
                 utbetalteDager.addAll(periode.filterNot { it.erHelg() }
                     .map { UtbetaltDag.InfotrygdPerson(orgnr, it, beløp) })
             }
 
-            override fun visitArbeidsgiverutbetalingsperiode(orgnr: String, periode: Periode, beløp: Int) {
+            override fun visitArbeidsgiverutbetalingsperiode(orgnr: String, periode: Periode, beløp: Int, utbetalt: LocalDate) {
+                if(erUtbetaltEtterFeriepengekjøringIT(utbetalt)) return
                 utbetalteDager.addAll(periode.filterNot { it.erHelg() }
                     .map { UtbetaltDag.InfotrygdArbeidsgiver(orgnr, it, beløp) })
             }

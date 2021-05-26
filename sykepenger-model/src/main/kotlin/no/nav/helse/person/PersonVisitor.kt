@@ -78,8 +78,8 @@ internal interface InfotrygdhistorikkVisitor {
 }
 
 internal interface FeriepengeutbetalingsperiodeVisitor{
-    fun visitPersonutbetalingsperiode(orgnr: String, periode: Periode, beløp: Int) {}
-    fun visitArbeidsgiverutbetalingsperiode(orgnr: String, periode: Periode, beløp: Int) {}
+    fun visitPersonutbetalingsperiode(orgnr: String, periode: Periode, beløp: Int, utbetalt: LocalDate) {}
+    fun visitArbeidsgiverutbetalingsperiode(orgnr: String, periode: Periode, beløp: Int, utbetalt: LocalDate) {}
 }
 
 internal interface VilkårsgrunnlagHistorikkVisitor {

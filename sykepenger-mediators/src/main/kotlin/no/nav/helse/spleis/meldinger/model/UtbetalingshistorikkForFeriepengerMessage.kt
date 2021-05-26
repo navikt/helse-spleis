@@ -24,12 +24,14 @@ internal class UtbetalingshistorikkForFeriepengerMessage(packet: JsonMessage) : 
                 "0", "1" -> {
                     val beløp = utbetaling["dagsats"].asInt()
                     val orgnummer = utbetaling["orgnummer"].asText()
-                    UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Personutbetalingsperiode(orgnummer, fom, tom, beløp)
+                    val utbetalt = utbetaling["utbetalt"].asLocalDate()
+                    UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Personutbetalingsperiode(orgnummer, fom, tom, beløp, utbetalt)
                 }
                 "5", "6" -> {
                     val beløp = utbetaling["dagsats"].asInt()
                     val orgnummer = utbetaling["orgnummer"].asText()
-                    UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(orgnummer, fom, tom, beløp)
+                    val utbetalt = utbetaling["utbetalt"].asLocalDate()
+                    UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(orgnummer, fom, tom, beløp, utbetalt)
                 }
                 else -> null
             }
