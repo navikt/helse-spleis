@@ -8,6 +8,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.*
+import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.Arbeidskategorikode
+import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.KodePeriode
 import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -19,12 +22,12 @@ import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.Year
 import java.util.*
 
 class JsonBuilderTest {
@@ -131,7 +134,7 @@ class JsonBuilderTest {
 
 
     @Test
-    fun `Lagrer dødsdato på person`(){
+    fun `Lagrer dødsdato på person`() {
         val fom = 1.januar
         val tom = 31.januar
         val dødPerson = Person(aktørId, fnr).apply {
@@ -157,6 +160,36 @@ class JsonBuilderTest {
     @Test
     fun `Person med infotrygdforlengelse`() {
         testSerialiseringAvPerson(personMedInfotrygdForlengelse())
+    }
+
+    @Test
+    fun `Serialisering av feriepenger`() {
+        Toggles.SendFeriepengeOppdrag.enable {
+            testSerialiseringAvPerson(personMedFeriepenger())
+        }
+    }
+
+    @Test
+    fun `Skal ikke serialisere feriepenger når toggle er disabled`() {
+        Toggles.SendFeriepengeOppdrag.disable {
+            val søknadhendelseId = UUID.randomUUID()
+
+            val personMedFeriepenger = personMedFeriepenger(søknadhendelseId = søknadhendelseId)
+
+            val jsonBuilder = JsonBuilder()
+            personMedFeriepenger.accept(jsonBuilder)
+            val json = jsonBuilder.toString()
+
+            val result = SerialisertPerson(json).deserialize()
+            val jsonBuilder2 = JsonBuilder()
+            result.accept(jsonBuilder2)
+            val json2 = jsonBuilder2.toString()
+
+            objectMapper.readTree(json).also {
+                assertFalse(it.path("arbeidsgivere").first().hasNonNull("ferieutbetalinger"))
+            }
+            assertEquals(json, json2)
+        }
     }
 
     private fun testSerialiseringAvPerson(person: Person) {
@@ -314,17 +347,19 @@ class JsonBuilderTest {
             }
 
         fun personMedInfotrygdForlengelse(søknadhendelseId: UUID = UUID.randomUUID()): Person {
-            val refusjoner = listOf(ArbeidsgiverUtbetalingsperiode(orgnummer, 1.desember(2017),  31.desember(2017), 100.prosent, 31000.månedlig))
+            val refusjoner = listOf(ArbeidsgiverUtbetalingsperiode(orgnummer, 1.desember(2017), 31.desember(2017), 100.prosent, 31000.månedlig))
             return Person(aktørId, fnr).apply {
                 håndter(sykmelding(fom = 1.januar, tom = 31.januar))
                 fangeVedtaksperiode()
                 håndter(søknad(fom = 1.januar, tom = 31.januar, hendelseId = søknadhendelseId))
                 håndter(utbetalingshistorikk(refusjoner))
-                håndter(ytelser(
-                    hendelseId = søknadhendelseId,
-                    vedtaksperiodeId = vedtaksperiodeId,
-                    inntektshistorikk = listOf(Inntektsopplysning(orgnummer, 1.desember(2017), 31000.månedlig, true)),
-                    utbetalinger = refusjoner)
+                håndter(
+                    ytelser(
+                        hendelseId = søknadhendelseId,
+                        vedtaksperiodeId = vedtaksperiodeId,
+                        inntektshistorikk = listOf(Inntektsopplysning(orgnummer, 1.desember(2017), 31000.månedlig, true)),
+                        utbetalinger = refusjoner
+                    )
                 )
                 håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
@@ -333,6 +368,73 @@ class JsonBuilderTest {
                 håndter(utbetalt())
             }
         }
+
+        fun personMedFeriepenger(
+            fom: LocalDate = 1.januar,
+            tom: LocalDate = 31.januar,
+            sendtSøknad: LocalDate = 1.april,
+            søknadhendelseId: UUID = UUID.randomUUID()
+        ): Person =
+            Person(aktørId, fnr).apply {
+                håndter(sykmelding(fom = fom, tom = tom))
+                fangeVedtaksperiode()
+                håndter(
+                    søknad(
+                        hendelseId = søknadhendelseId,
+                        fom = fom,
+                        tom = tom,
+                        sendtSøknad = sendtSøknad.atStartOfDay()
+                    )
+                )
+                fangeSykdomstidslinje()
+                håndter(inntektsmelding(fom = fom))
+                håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
+                fangeUtbetalinger()
+                håndter(overføring())
+                håndter(utbetalt())
+                fangeVedtaksperiode()
+                håndter(
+                    utbetalingshistorikkForFeriepenger(
+                        opptjeningsår = Year.of(2018),
+                        utbetalinger = listOf(
+                            Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(
+                                orgnummer,
+                                1.mars,
+                                31.mars,
+                                1431,
+                                31.mars
+                            )
+                        ),
+                        feriepengehistorikk = listOf(Feriepenger(orgnummer, 3211, 1.mai(2019), 31.mai(2019)))
+                    )
+                )
+                håndter(
+                    utbetalingshistorikkForFeriepenger(
+                        opptjeningsår = Year.of(2020),
+                        utbetalinger = listOf(
+                            Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(
+                                orgnummer,
+                                1.februar(2020),
+                                28.februar(2020),
+                                1800,
+                                28.februar(2020)
+                            ),
+                            Utbetalingsperiode.Personutbetalingsperiode(
+                                "0",
+                                1.mars(2020),
+                                31.mars(2020),
+                                1800,
+                                31.mars(2020)
+                            )
+                        ),
+                        feriepengehistorikk = listOf(Feriepenger(orgnummer, 3211, 1.mai(2021), 31.mai(2021)))
+                    )
+                )
+            }
 
         private fun Person.fangeUtbetalinger() {
             utbetalingsliste.clear()
@@ -543,6 +645,26 @@ class JsonBuilderTest {
                 arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList()),
                 dagpenger = Dagpenger(emptyList()),
                 aktivitetslogg = it
+            )
+        }
+
+        private fun utbetalingshistorikkForFeriepenger(
+            utbetalinger: List<Utbetalingsperiode> = listOf(),
+            feriepengehistorikk: List<Feriepenger> = listOf(),
+            opptjeningsår: Year = Year.of(2017),
+            skalBeregnesManuelt: Boolean = false
+        ): UtbetalingshistorikkForFeriepenger {
+            return UtbetalingshistorikkForFeriepenger(
+                meldingsreferanseId = UUID.randomUUID(),
+                aktørId = aktørId,
+                fødselsnummer = fnr,
+                utbetalinger = utbetalinger,
+                feriepengehistorikk = feriepengehistorikk,
+                opptjeningsår = opptjeningsår,
+                skalBeregnesManuelt = skalBeregnesManuelt,
+                arbeidskategorikoder = Arbeidskategorikoder(
+                    listOf(KodePeriode(LocalDate.MIN til LocalDate.MAX, Arbeidskategorikode.Arbeidstaker))
+                )
             )
         }
 

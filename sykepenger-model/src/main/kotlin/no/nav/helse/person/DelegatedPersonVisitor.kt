@@ -10,6 +10,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.*
+import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
 import no.nav.helse.økonomi.Inntekt
@@ -17,6 +18,7 @@ import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.Year
 import java.time.YearMonth
 import java.util.*
 
@@ -267,6 +269,101 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
 
     override fun visitDataForSimulering(dataForSimuleringResultat: Simulering.SimuleringResultat?) {
         delegatee.visitDataForSimulering(dataForSimuleringResultat)
+    }
+
+    override fun preVisitFeriepengeutbetalinger(feriepengeutbetalinger: List<Feriepengeutbetaling>) {
+        delegatee.preVisitFeriepengeutbetalinger(feriepengeutbetalinger)
+    }
+
+    override fun postVisitFeriepengeutbetalinger(feriepengeutbetalinger: List<Feriepengeutbetaling>) {
+        delegatee.postVisitFeriepengeutbetalinger(feriepengeutbetalinger)
+    }
+
+    override fun preVisitFeriepengeutbetaling(
+        feriepengeutbetaling: Feriepengeutbetaling,
+        infotrygdFeriepengebeløpPerson: Double,
+        infotrygdFeriepengebeløpArbeidsgiver: Double,
+        spleisFeriepengebeløpArbeidsgiver: Double,
+        overføringstidspunkt: LocalDateTime?,
+        avstemmingsnøkkel: Long?
+    ) {
+        delegatee.preVisitFeriepengeutbetaling(
+            feriepengeutbetaling,
+            infotrygdFeriepengebeløpPerson,
+            infotrygdFeriepengebeløpArbeidsgiver,
+            spleisFeriepengebeløpArbeidsgiver,
+            overføringstidspunkt,
+            avstemmingsnøkkel
+        )
+    }
+
+    override fun postVisitFeriepengeutbetaling(
+        feriepengeutbetaling: Feriepengeutbetaling,
+        infotrygdFeriepengebeløpPerson: Double,
+        infotrygdFeriepengebeløpArbeidsgiver: Double,
+        spleisFeriepengebeløpArbeidsgiver: Double,
+        overføringstidspunkt: LocalDateTime?,
+        avstemmingsnøkkel: Long?
+    ) {
+        delegatee.postVisitFeriepengeutbetaling(
+            feriepengeutbetaling,
+            infotrygdFeriepengebeløpPerson,
+            infotrygdFeriepengebeløpArbeidsgiver,
+            spleisFeriepengebeløpArbeidsgiver,
+            overføringstidspunkt,
+            avstemmingsnøkkel
+        )
+    }
+
+    override fun preVisitFeriepengeberegner(
+        feriepengeberegner: Feriepengeberegner,
+        feriepengedager: List<Feriepengeberegner.UtbetaltDag>,
+        opptjeningsår: Year,
+        utbetalteDager: List<Feriepengeberegner.UtbetaltDag>
+    ) {
+        delegatee.preVisitFeriepengeberegner(feriepengeberegner, feriepengedager, opptjeningsår, utbetalteDager)
+    }
+
+    override fun postVisitFeriepengeberegner(feriepengeberegner: Feriepengeberegner) {
+        delegatee.postVisitFeriepengeberegner(feriepengeberegner)
+    }
+
+    override fun preVisitUtbetaleDager() {
+        delegatee.preVisitUtbetaleDager()
+    }
+
+    override fun postVisitUtbetaleDager() {
+        delegatee.postVisitUtbetaleDager()
+    }
+
+    override fun preVisitFeriepengedager() {
+        delegatee.preVisitFeriepengedager()
+    }
+
+    override fun postVisitFeriepengedager() {
+        delegatee.postVisitFeriepengedager()
+    }
+
+    override fun visitInfotrygdArbeidsgiverDag(
+        infotrygdArbeidsgiver: Feriepengeberegner.UtbetaltDag.InfotrygdArbeidsgiver,
+        orgnummer: String,
+        dato: LocalDate,
+        beløp: Int
+    ) {
+        delegatee.visitInfotrygdArbeidsgiverDag(infotrygdArbeidsgiver, orgnummer, dato, beløp)
+    }
+
+    override fun visitInfotrygdPersonDag(infotrygdPerson: Feriepengeberegner.UtbetaltDag.InfotrygdPerson, orgnummer: String, dato: LocalDate, beløp: Int) {
+        delegatee.visitInfotrygdPersonDag(infotrygdPerson, orgnummer, dato, beløp)
+    }
+
+    override fun visitSpleisArbeidsgiverDag(
+        spleisArbeidsgiver: Feriepengeberegner.UtbetaltDag.SpleisArbeidsgiver,
+        orgnummer: String,
+        dato: LocalDate,
+        beløp: Int
+    ) {
+        delegatee.visitSpleisArbeidsgiverDag(spleisArbeidsgiver, orgnummer, dato, beløp)
     }
 
     override fun postVisitVedtaksperiode(
@@ -631,6 +728,10 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.preVisitOppdrag(oppdrag, totalBeløp, nettoBeløp, tidsstempel)
     }
 
+    override fun postVisitOppdrag(oppdrag: Oppdrag, totalBeløp: Int, nettoBeløp: Int, tidsstempel: LocalDateTime) {
+        delegatee.postVisitOppdrag(oppdrag, totalBeløp, nettoBeløp, tidsstempel)
+    }
+
     override fun visitUtbetalingslinje(
         linje: Utbetalingslinje,
         fom: LocalDate,
@@ -661,9 +762,5 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             datoStatusFom,
             klassekode
         )
-    }
-
-    override fun postVisitOppdrag(oppdrag: Oppdrag, totalBeløp: Int, nettoBeløp: Int, tidsstempel: LocalDateTime) {
-        delegatee.postVisitOppdrag(oppdrag, totalBeløp, nettoBeløp, tidsstempel)
     }
 }

@@ -19,6 +19,7 @@ import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.Year
 import java.time.YearMonth
 import java.util.*
 
@@ -124,11 +125,22 @@ internal interface FeriepengeutbetalingVisitor : OppdragVisitor {
         infotrygdFeriepengebeløpArbeidsgiver: Double,
         spleisFeriepengebeløpArbeidsgiver: Double,
         overføringstidspunkt: LocalDateTime?,
-        avstemmingsnøkkel: Long?,
+        avstemmingsnøkkel: Long?
     ) {
     }
 
-    fun preVisitFeriepengeberegner(feriepengeberegner: Feriepengeberegner) {}
+    fun preVisitFeriepengeberegner(
+        feriepengeberegner: Feriepengeberegner,
+        feriepengedager: List<Feriepengeberegner.UtbetaltDag>,
+        opptjeningsår: Year,
+        utbetalteDager: List<Feriepengeberegner.UtbetaltDag>
+    ) {}
+
+    fun preVisitUtbetaleDager() {}
+    fun postVisitUtbetaleDager() {}
+    fun preVisitFeriepengedager() {}
+    fun postVisitFeriepengedager() {}
+
     fun visitInfotrygdPersonDag(infotrygdPerson: Feriepengeberegner.UtbetaltDag.InfotrygdPerson, orgnummer: String, dato: LocalDate, beløp: Int) {}
     fun visitInfotrygdArbeidsgiverDag(
         infotrygdArbeidsgiver: Feriepengeberegner.UtbetaltDag.InfotrygdArbeidsgiver,
@@ -146,7 +158,7 @@ internal interface FeriepengeutbetalingVisitor : OppdragVisitor {
         infotrygdFeriepengebeløpArbeidsgiver: Double,
         spleisFeriepengebeløpArbeidsgiver: Double,
         overføringstidspunkt: LocalDateTime?,
-        avstemmingsnøkkel: Long?,
+        avstemmingsnøkkel: Long?
     ) {
     }
 

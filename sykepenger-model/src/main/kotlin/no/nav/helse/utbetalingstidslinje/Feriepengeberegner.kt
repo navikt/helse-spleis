@@ -41,8 +41,13 @@ internal class Feriepengeberegner(
     ) : this(alder, opptjeningsår, FinnUtbetalteDagerVisitor(utbetalingshistorikkForFeriepenger, person).utbetalteDager(opptjeningsår))
 
     internal fun accept(visitor: FeriepengeutbetalingVisitor) {
-        visitor.preVisitFeriepengeberegner(this)
+        visitor.preVisitFeriepengeberegner(this, feriepengedager(), opptjeningsår, utbetalteDager)
+        visitor.preVisitUtbetaleDager()
         utbetalteDager.forEach { it.accept(visitor) }
+        visitor.postVisitUtbetaleDager()
+        visitor.preVisitFeriepengedager()
+        feriepengedager().forEach{ it.accept(visitor) }
+        visitor.postVisitFeriepengedager()
         visitor.postVisitFeriepengeberegner(this)
     }
 

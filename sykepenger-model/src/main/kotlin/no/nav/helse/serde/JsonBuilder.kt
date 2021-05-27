@@ -1,6 +1,7 @@
 package no.nav.helse.serde
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.Toggles
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.*
@@ -16,13 +17,17 @@ import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
+import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling
+import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.Year
 import java.time.YearMonth
 import java.util.*
 import kotlin.collections.set
@@ -210,12 +215,133 @@ internal class JsonBuilder : AbstractBuilder() {
             pushState(VedtaksperiodeState(vedtaksperiode, vedtaksperiodeMap))
         }
 
+        private val feriepengeutbetalingListe = mutableListOf<Map<String, Any>>()
+
+        override fun preVisitFeriepengeutbetalinger(feriepengeutbetalinger: List<Feriepengeutbetaling>) {
+            feriepengeutbetalingListe.clear()
+        }
+
+        override fun postVisitFeriepengeutbetalinger(feriepengeutbetalinger: List<Feriepengeutbetaling>) {
+            if(Toggles.SendFeriepengeOppdrag.enabled) {
+                arbeidsgiverMap["feriepengeutbetalinger"] = feriepengeutbetalingListe.toList()
+            }
+        }
+
+        override fun preVisitFeriepengeutbetaling(
+            feriepengeutbetaling: Feriepengeutbetaling,
+            infotrygdFeriepengebeløpPerson: Double,
+            infotrygdFeriepengebeløpArbeidsgiver: Double,
+            spleisFeriepengebeløpArbeidsgiver: Double,
+            overføringstidspunkt: LocalDateTime?,
+            avstemmingsnøkkel: Long?
+        ) {
+            val feriepengeutbetalingMap = mutableMapOf<String, Any>(
+                "infotrygdFeriepengebeløpPerson" to infotrygdFeriepengebeløpPerson,
+                "infotrygdFeriepengebeløpArbeidsgiver" to infotrygdFeriepengebeløpArbeidsgiver,
+                "spleisFeriepengebeløpArbeidsgiver" to spleisFeriepengebeløpArbeidsgiver
+            )
+            pushState(OppdragState(feriepengeutbetalingMap))
+            pushState(FeriepengeberegnerState(feriepengeutbetalingMap))
+            feriepengeutbetalingListe.add(feriepengeutbetalingMap)
+        }
+
         override fun postVisitArbeidsgiver(
             arbeidsgiver: Arbeidsgiver,
             id: UUID,
             organisasjonsnummer: String
         ) {
             popState()
+        }
+    }
+
+    private class OppdragState(private val ferieutbetalingMap: MutableMap<String, Any>) : BuilderState() {
+        override fun preVisitOppdrag(
+            oppdrag: Oppdrag,
+            totalBeløp: Int,
+            nettoBeløp: Int,
+            tidsstempel: LocalDateTime
+        ) {
+            ferieutbetalingMap["oppdrag"] = OppdragReflect(oppdrag).toMap()
+        }
+
+        override fun postVisitOppdrag(oppdrag: Oppdrag, totalBeløp: Int, nettoBeløp: Int, tidsstempel: LocalDateTime) {
+            popState()
+        }
+    }
+
+    private class FeriepengeberegnerState(private val feriepengeutbetalingMap: MutableMap<String, Any>) : BuilderState() {
+
+        override fun preVisitFeriepengeberegner(
+            feriepengeberegner: Feriepengeberegner,
+            feriepengedager: List<Feriepengeberegner.UtbetaltDag>,
+            opptjeningsår: Year,
+            utbetalteDager: List<Feriepengeberegner.UtbetaltDag>
+        ) {
+            feriepengeutbetalingMap["opptjeningsår"] = opptjeningsår
+            pushState(FeriepengerUtbetalteDagerState(feriepengeutbetalingMap, "utbetalteDager"))
+            pushState(FeriepengerUtbetalteDagerState(feriepengeutbetalingMap, "feriepengedager"))
+        }
+
+        override fun postVisitFeriepengeberegner(feriepengeberegner: Feriepengeberegner) {
+            popState()
+        }
+    }
+
+    private class FeriepengerUtbetalteDagerState(private val ferieutbetalingMap: MutableMap<String, Any>, private val key: String) : BuilderState() {
+        private val dager = mutableListOf<Map<String, Any>>()
+
+        override fun preVisitUtbetaleDager() {
+            dager.clear()
+        }
+
+        override fun preVisitFeriepengedager() {
+            dager.clear()
+        }
+
+        override fun postVisitUtbetaleDager() {
+            ferieutbetalingMap[key] = dager.toList()
+            popState()
+        }
+
+        override fun postVisitFeriepengedager() {
+            ferieutbetalingMap[key] = dager.toList()
+            popState()
+        }
+
+        override fun visitInfotrygdArbeidsgiverDag(
+            infotrygdArbeidsgiver: Feriepengeberegner.UtbetaltDag.InfotrygdArbeidsgiver,
+            orgnummer: String,
+            dato: LocalDate,
+            beløp: Int
+        ) {
+            leggTilDag("InfotrygdArbeidsgiverDag", orgnummer, dato, beløp)
+        }
+
+        override fun visitInfotrygdPersonDag(infotrygdPerson: Feriepengeberegner.UtbetaltDag.InfotrygdPerson, orgnummer: String, dato: LocalDate, beløp: Int) {
+            leggTilDag("InfotrygdPersonDag", orgnummer, dato, beløp)
+        }
+
+        override fun visitSpleisArbeidsgiverDag(
+            spleisArbeidsgiver: Feriepengeberegner.UtbetaltDag.SpleisArbeidsgiver,
+            orgnummer: String,
+            dato: LocalDate,
+            beløp: Int
+        ) {
+            leggTilDag("SpleisArbeidsgiverDag", orgnummer, dato, beløp)
+        }
+
+        private fun leggTilDag(
+            type: String,
+            orgnummer: String,
+            dato: LocalDate,
+            beløp: Int
+        ) {
+            dager.add(mapOf(
+                "dato" to dato,
+                "type" to type,
+                "orgnummer" to orgnummer,
+                "beløp" to beløp
+            ))
         }
     }
 

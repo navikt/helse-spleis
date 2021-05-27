@@ -17,9 +17,8 @@ import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.*
-import no.nav.helse.utbetalingstidslinje.Begrunnelse
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
+import no.nav.helse.utbetalingstidslinje.*
+import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.*
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
@@ -28,6 +27,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.Year
 import java.time.YearMonth
 import java.util.*
 import kotlin.reflect.full.primaryConstructor
@@ -311,6 +311,7 @@ internal data class PersonData(
         private val forkastede: List<ForkastetVedtaksperiodeData>,
         private val utbetalinger: List<UtbetalingData>,
         private val beregnetUtbetalingstidslinjer: List<BeregnetUtbetalingstidslinjeData>,
+        private val feriepengeutbetalinger: List<FeriepengeutbetalingData> = emptyList(),
         private val refusjonOpphører: List<LocalDate?> = emptyList()
     ) {
         private val modelInntekthistorikk = Inntektshistorikk().apply {
@@ -337,7 +338,7 @@ internal data class PersonData(
                 forkastedeliste,
                 modelUtbetalinger,
                 beregnetUtbetalingstidslinjer.map { it.tilBeregnetUtbetalingstidslinje() },
-                emptyList(), //FIXME: Må restore ordentlig
+                feriepengeutbetalinger.map { it.createFeriepengeutbetaling(fødselsnummer) },
                 refusjonOpphører
             )
 
@@ -365,7 +366,6 @@ internal data class PersonData(
                 )
             })
             vedtaksperiodeliste.sort()
-
             return arbeidsgiver
         }
 
@@ -639,6 +639,58 @@ internal data class PersonData(
             val vedtaksperiode: VedtaksperiodeData,
             val årsak: ForkastetÅrsak
         )
+
+        data class FeriepengeutbetalingData(
+            private val infotrygdFeriepengebeløpPerson: Double,
+            private val infotrygdFeriepengebeløpArbeidsgiver: Double,
+            private val spleisFeriepengebeløpArbeidsgiver: Double,
+            private val oppdrag: OppdragData,
+            private val opptjeningsår: Year,
+            private val utbetalteDager: List<UtbetaltDagData>,
+            private val feriepengedager: List<UtbetaltDagData>,
+
+            ) {
+
+            internal fun createFeriepengeutbetaling(fødselsnummer: String): Feriepengeutbetaling {
+                val feriepengeberegner = createFeriepengeberegner(fødselsnummer)
+                return Feriepengeutbetaling::class.primaryConstructor!!
+                    .apply { isAccessible = true }
+                    .call(
+                        feriepengeberegner,
+                        infotrygdFeriepengebeløpPerson,
+                        infotrygdFeriepengebeløpArbeidsgiver,
+                        spleisFeriepengebeløpArbeidsgiver,
+                        oppdrag.konverterTilOppdrag()
+                    )
+            }
+
+            private fun createFeriepengeberegner(fødselsnummer: String): Feriepengeberegner {
+                val alder = Alder(fødselsnummer)
+                return Feriepengeberegner::class.primaryConstructor!!
+                    .apply { isAccessible = true }
+                    .call(
+                        alder,
+                        opptjeningsår,
+                        utbetalteDager.sortedBy { it.type }.map { it.createUtbetaltDag() }
+                    )
+            }
+
+            data class UtbetaltDagData(
+                internal val type: String,
+                private val orgnummer: String,
+                private val dato: LocalDate,
+                private val beløp: Int,
+            ) {
+                internal fun createUtbetaltDag() =
+                    when (type) {
+                        "InfotrygdPersonDag" -> InfotrygdPerson(orgnummer, dato, beløp)
+                        "InfotrygdArbeidsgiverDag" -> InfotrygdArbeidsgiver(orgnummer, dato, beløp)
+                        "SpleisArbeidsgiverDag" -> SpleisArbeidsgiver(orgnummer, dato, beløp)
+                        else -> throw IllegalArgumentException("Støtter ikke denne dagtypen: $type")
+                    }
+
+            }
+        }
 
         data class VedtaksperiodeData(
             private val id: UUID,
@@ -952,8 +1004,8 @@ internal data class PersonData(
         private val tom: LocalDate,
         private val satstype: String,
         private val sats: Int,
-        private val lønn: Int,
-        private val grad: Double,
+        private val lønn: Int?,
+        private val grad: Double?,
         private val refFagsystemId: String?,
         private val delytelseId: Int,
         private val refDelytelseId: Int?,
