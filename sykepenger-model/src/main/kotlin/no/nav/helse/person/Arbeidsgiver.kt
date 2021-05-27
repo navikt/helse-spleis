@@ -21,6 +21,7 @@ import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetaltTidslinje
 import no.nav.helse.utbetalingslinjer.UtbetalingObserver
 import no.nav.helse.utbetalingstidslinje.*
 import no.nav.helse.økonomi.Inntekt.Companion.summer
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -58,6 +59,8 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal companion object {
+        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
+
         internal val SENERE_EXCLUSIVE = fun(senereEnnDenne: Vedtaksperiode): VedtaksperioderFilter {
             return fun(vedtaksperiode: Vedtaksperiode) = vedtaksperiode > senereEnnDenne
         }
@@ -226,6 +229,11 @@ internal class Arbeidsgiver private constructor(
         feriepengeberegner: Feriepengeberegner,
         utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger
     ) {
+        if(feriepengeutbetalinger.isNotEmpty()) {
+            sikkerLogg.info("Feriepengeutbetalinger finnes fra før for aktørId $aktørId, støtter ikke rekjøring")
+            return
+        }
+
         val feriepengeutbetaling = Feriepengeutbetaling.Builder(
             aktørId,
             organisasjonsnummer,
