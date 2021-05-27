@@ -727,6 +727,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     private fun utbetalingshistorikkForFeriepenger(
         utbetalinger: List<UtbetalingshistorikkForFeriepenger.Utbetalingsperiode> = listOf(),
         feriepengehistorikk: List<UtbetalingshistorikkForFeriepenger.Feriepenger> = listOf(),
+        arbeidskategorikoder: UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder = UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder(emptyList()),
         opptjeningsår: Year = Year.of(2017),
         skalBeregnesManuelt: Boolean
     ): UtbetalingshistorikkForFeriepenger {
@@ -736,6 +737,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             fødselsnummer = UNG_PERSON_FNR_2018,
             utbetalinger = utbetalinger,
             feriepengehistorikk = feriepengehistorikk,
+            arbeidskategorikoder = arbeidskategorikoder,
             opptjeningsår = opptjeningsår,
             skalBeregnesManuelt = skalBeregnesManuelt
         ).apply {

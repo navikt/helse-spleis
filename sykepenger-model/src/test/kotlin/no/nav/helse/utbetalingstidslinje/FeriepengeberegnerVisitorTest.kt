@@ -204,16 +204,18 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
 
     private fun utbetalingshistorikkForFeriepenger(
         utbetalinger: List<UtbetalingshistorikkForFeriepenger.Utbetalingsperiode> = emptyList(),
+        arbeidskategorikoder: UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder = UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder(emptyList()),
         skalBeregnesManuelt: Boolean = false
     ) =
         UtbetalingshistorikkForFeriepenger(
-            UUID.randomUUID(),
-            AKTØRID,
-            ORGNUMMER,
-            utbetalinger,
-            emptyList(),
-            Year.of(2020),
-            skalBeregnesManuelt
+            meldingsreferanseId = UUID.randomUUID(),
+            aktørId = AKTØRID,
+            fødselsnummer = ORGNUMMER,
+            utbetalinger = utbetalinger,
+            feriepengehistorikk = emptyList(),
+            arbeidskategorikoder = arbeidskategorikoder,
+            opptjeningsår = Year.of(2020),
+            skalBeregnesManuelt = skalBeregnesManuelt,
         )
 
     private fun byggPerson(

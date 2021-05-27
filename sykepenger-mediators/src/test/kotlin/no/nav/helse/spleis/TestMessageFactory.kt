@@ -167,15 +167,16 @@ internal class TestMessageFactory(
         ),
         løsninger = mapOf(
             "SykepengehistorikkForFeriepenger" to mapOf(
+                "feriepengerSkalBeregnesManuelt" to testdata.feriepengerSkalBeregnesManuelt,
                 "utbetalinger" to testdata.utbetalinger.map {
                     mapOf(
                         "fom" to it.fom,
                         "tom" to it.tom,
+                        "utbetalt" to it.utbetalt,
                         "dagsats" to it.dagsats,
                         "typeKode" to it.typekode,
                         "utbetalingsGrad" to it.utbetalingsgrad,
-                        "orgnummer" to it.organisasjonsnummer,
-                        "utbetalt" to it.utbetalt
+                        "orgnummer" to it.organisasjonsnummer
                     )
                 },
                 "feriepengehistorikk" to testdata.feriepengehistorikk.map {
@@ -186,7 +187,7 @@ internal class TestMessageFactory(
                         "tom" to it.tom
                     )
                 },
-                "feriepengerSkalBeregnesManuelt" to testdata.feriepengerSkalBehandlesManuelt
+                "arbeidskategorikoder" to testdata.arbeidskategorikoder
             )
         )
     )
@@ -194,18 +195,19 @@ internal class TestMessageFactory(
     class UtbetalingshistorikkForFeriepengerTestdata(
         val fom: LocalDate,
         val tom: LocalDate,
+        val feriepengerSkalBeregnesManuelt: Boolean = false,
         val utbetalinger: List<Utbetaling> = emptyList(),
         val feriepengehistorikk: List<Feriepenger> = emptyList(),
-        val feriepengerSkalBehandlesManuelt: Boolean = false
+        val arbeidskategorikoder: Map<String, LocalDate> = emptyMap()
     ) {
         class Utbetaling(
             val fom: LocalDate,
             val tom: LocalDate,
+            val utbetalt: LocalDate,
             val dagsats: Double,
             val typekode: String,
             val utbetalingsgrad: String,
-            val organisasjonsnummer: String,
-            val utbetalt: LocalDate
+            val organisasjonsnummer: String
         )
 
         class Feriepenger(

@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.KodePeriode.Companion.kodeForDato
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Feriepenger.Companion.utbetalteFeriepengerTilArbeidsgiver
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Feriepenger.Companion.utbetalteFeriepengerTilPerson
 import no.nav.helse.person.Aktivitetslogg
@@ -15,6 +16,7 @@ class UtbetalingshistorikkForFeriepenger(
     private val fødselsnummer: String,
     private val utbetalinger: List<Utbetalingsperiode>,
     private val feriepengehistorikk: List<Feriepenger>,
+    private val arbeidskategorikoder: Arbeidskategorikoder,
     //FIXME: Internal?
     internal val opptjeningsår: Year,
     internal val skalBeregnesManuelt: Boolean,
@@ -83,5 +85,65 @@ class UtbetalingshistorikkForFeriepenger(
                 visitor.visitArbeidsgiverutbetalingsperiode(orgnr, periode, beløp, utbetalt)
             }
         }
+    }
+
+    class Arbeidskategorikoder(
+        private val arbeidskategorikoder: List<KodePeriode>
+    ) {
+        class KodePeriode(
+            private val periode: Periode,
+            private val arbeidskategorikode: Arbeidskategorikode
+        ) {
+            companion object {
+                fun List<Pair<String, LocalDate>>.mapTilNoeFornuftig(): List<KodePeriode> =
+                    (listOf("" to LocalDate.MIN) + this).zipWithNext { (_, forrigeTom), (kode, tom) ->
+                        KodePeriode(forrigeTom.plusDays(1) til tom, Arbeidskategorikode.finn(kode))
+                    }
+
+                internal fun List<KodePeriode>.kodeForDato(dato: LocalDate) =
+                    firstOrNull { dato in it.periode }?.arbeidskategorikode ?: Arbeidskategorikode.ErDetFlere
+            }
+        }
+
+        enum class Arbeidskategorikode(private val kode: String, internal val girRettTilFeriepenger: Boolean) {
+            Arbeidstaker("01", true),
+            ArbeidstakerSelvstendig("03", true),
+            Sjømenn("04", true),
+            Befal("08", true),
+            MenigKorporal("09", true),
+            ArbeidstakerSjømenn("10", true),
+            SvalbardArbeidere("12", true),
+            ArbeidstakerJordbruker("13", true),
+            Yrkesskade("14", true),
+            AmbassadePersonell("15", true),
+            ArbeidstakerFisker("17", true),
+            ArbeidstakerOppdragstaker("20", true),
+            FFU22("22", true),
+            ArbeidstakerALøyse("23", true),
+            ArbOppdragstakerUtenForsikring("25", true),
+            Pass("27", true), //TODO
+
+            Tom("", false), //TODO
+            Fisker("00", false),
+            Selvstendig("02", false),
+            Jordbruker("05", false),
+            Arbeidsledig("06", false),
+            Innaktiv("07", false),
+            Turnuskandidater("11", false),
+            Reindrift("16", false),
+            IkkeIBruk("18", false),
+            Oppdragstaker("19", false),
+            FFU21("21", false),
+            OppdragstakerUtenForsikring("24", false),
+            FinnesDenne("26", false), //TODO
+
+            ErDetFlere("28...", false); //TODO
+
+            companion object {
+                internal fun finn(kode: String) = values().firstOrNull { it.kode.trim() == kode.trim() } ?: ErDetFlere
+            }
+        }
+
+        internal fun harRettPåFeriepenger(dato: LocalDate) = arbeidskategorikoder.kodeForDato(dato).girRettTilFeriepenger
     }
 }

@@ -39,6 +39,7 @@ internal class UtbetalingshistorikkForFeriepengerRiver(
                 interestedIn("tom", JsonNode::asLocalDate)
                 requireKey("beløp", "orgnummer")
             }
+            message.requireKey("@løsning.${SykepengehistorikkForFeriepenger.name}.arbeidskategorikoder")
         }
     }
 }

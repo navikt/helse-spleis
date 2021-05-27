@@ -2,6 +2,7 @@ package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
+import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.KodePeriode.Companion.mapTilNoeFornuftig
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.SykepengehistorikkForFeriepenger
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -47,6 +48,14 @@ internal class UtbetalingshistorikkForFeriepengerMessage(packet: JsonMessage) : 
             )
         }
 
+    private val arbeidskategorikoder = packet["@løsning.${SykepengehistorikkForFeriepenger.name}.arbeidskategorikoder"]
+        .fields()
+        .asSequence()
+        .map { (key, value) -> key to value.asLocalDate() }
+        .toList()
+        .mapTilNoeFornuftig()
+        .let(UtbetalingshistorikkForFeriepenger::Arbeidskategorikoder)
+
     private val opptjeningsår = packet["${SykepengehistorikkForFeriepenger.name}.historikkFom"]
         .asLocalDate()
         .let(Year::from)
@@ -57,13 +66,14 @@ internal class UtbetalingshistorikkForFeriepengerMessage(packet: JsonMessage) : 
         return fom != null && tom != null && fom <= tom
     }
 
-    internal fun utbetalingshistorikkForFeriepenger(aktivitetslogg: Aktivitetslogg = Aktivitetslogg()) =
+    private fun utbetalingshistorikkForFeriepenger(aktivitetslogg: Aktivitetslogg = Aktivitetslogg()) =
         UtbetalingshistorikkForFeriepenger(
             meldingsreferanseId = id,
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             utbetalinger = utbetalinger,
             feriepengehistorikk = feriepengehistorikk,
+            arbeidskategorikoder = arbeidskategorikoder,
             opptjeningsår = opptjeningsår,
             skalBeregnesManuelt = skalBeregnesManuelt,
             aktivitetslogg = aktivitetslogg

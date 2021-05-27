@@ -70,15 +70,19 @@ internal class FeriepengeArbeidsgiverTest() : AbstractEndToEndTest() {
         }
     }
 
-    private fun utbetalingshistorikkForFeriepenger(utbetalinger: List<UtbetalingshistorikkForFeriepenger.Utbetalingsperiode> = emptyList(), skalBeregnesManuelt: Boolean = false) =
+    private fun utbetalingshistorikkForFeriepenger(
+        utbetalinger: List<UtbetalingshistorikkForFeriepenger.Utbetalingsperiode> = emptyList(),
+        skalBeregnesManuelt: Boolean = false
+    ) =
         UtbetalingshistorikkForFeriepenger(
-            UUID.randomUUID(),
-            AKTØRID,
-            ORGNUMMER,
-            utbetalinger,
-            emptyList(),
-            Year.of(2020),
-            skalBeregnesManuelt
+            meldingsreferanseId = UUID.randomUUID(),
+            aktørId = AKTØRID,
+            fødselsnummer = ORGNUMMER,
+            utbetalinger = utbetalinger,
+            feriepengehistorikk = emptyList(),
+            arbeidskategorikoder = UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder(emptyList()),
+            opptjeningsår = Year.of(2020),
+            skalBeregnesManuelt = skalBeregnesManuelt
         )
 
     private fun byggPerson(
