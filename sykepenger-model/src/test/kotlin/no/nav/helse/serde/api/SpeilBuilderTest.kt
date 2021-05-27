@@ -37,6 +37,13 @@ class SpeilBuilderTest {
     }
 
     @Test
+    fun `versjonsnummer på snapshot`() {
+        val (person, hendelser) = person()
+        val personDTO = serializePersonForSpeil(person, hendelser)
+        assertEquals(1, personDTO.versjon)
+    }
+
+    @Test
     fun `mapping av utbetalingshistorikk`() {
         val (person, hendelser) = person()
         val personDTO = serializePersonForSpeil(person, hendelser)

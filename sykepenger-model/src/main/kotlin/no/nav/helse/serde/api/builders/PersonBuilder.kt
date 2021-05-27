@@ -14,7 +14,8 @@ internal class PersonBuilder(
     private val person: Person,
     private val fødselsnummer: String,
     private val aktørId: String,
-    private val dødsdato: LocalDate?
+    private val dødsdato: LocalDate?,
+    private val versjon: Int
 ) : BuilderState(builder) {
     private val arbeidsgivere = mutableListOf<ArbeidsgiverBuilder>()
     private val inntektshistorikkBuilder = InntektshistorikkBuilder(person)
@@ -25,7 +26,8 @@ internal class PersonBuilder(
             aktørId = aktørId,
             arbeidsgivere = arbeidsgivere.map { it.build(hendelser) }.filter { it.vedtaksperioder.isNotEmpty() },
             inntektsgrunnlag = inntektshistorikkBuilder.build(),
-            dødsdato = dødsdato
+            dødsdato = dødsdato,
+            versjon = versjon
         )
     }
 

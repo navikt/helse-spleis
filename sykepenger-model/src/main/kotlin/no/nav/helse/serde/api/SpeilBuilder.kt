@@ -14,6 +14,13 @@ fun serializePersonForSpeil(person: Person, hendelser: List<HendelseDTO> = empty
 
 internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : AbstractBuilder() {
 
+    private companion object {
+        /* Økes for å signalisere til spesialist at strukturen i snapshot'et
+         * på et eller annet vis har endret seg, og at spesialist derfor må oppdatere cachede snapshots løpende
+         */
+        const val SNAPSHOT_VERSJON = 1
+    }
+
     private lateinit var personBuilder: PersonBuilder
 
     fun build() = personBuilder.build(hendelser)
@@ -25,9 +32,8 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : Abstract
         fødselsnummer: String,
         dødsdato: LocalDate?
     ) {
-        personBuilder = PersonBuilder(this, person, fødselsnummer, aktørId, dødsdato)
+        personBuilder = PersonBuilder(this, person, fødselsnummer, aktørId, dødsdato, SNAPSHOT_VERSJON)
         pushState(personBuilder)
     }
-
 }
 

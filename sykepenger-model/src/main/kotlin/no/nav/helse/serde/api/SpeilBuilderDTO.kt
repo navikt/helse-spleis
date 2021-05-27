@@ -16,7 +16,8 @@ data class PersonDTO(
     val fødselsnummer: String,
     val arbeidsgivere: List<ArbeidsgiverDTO>,
     val inntektsgrunnlag: List<InntektsgrunnlagDTO>,
-    val dødsdato: LocalDate?
+    val dødsdato: LocalDate?,
+    val versjon: Int
 )
 
 data class AktivitetDTO(
