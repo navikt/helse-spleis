@@ -41,7 +41,7 @@ class UtbetalingshistorikkForFeriepenger(
     internal fun utbetalteFeriepengerTilArbeidsgiver(orgnummer: String) =
         feriepengehistorikk.utbetalteFeriepengerTilArbeidsgiver(orgnummer, opptjeningsår)
 
-    internal fun harRettPåFeriepenger(dato: LocalDate) = arbeidskategorikoder.harRettPåFeriepenger(dato)
+    internal fun harRettPåFeriepenger(dato: LocalDate, orgnummer: String) = arbeidskategorikoder.harRettPåFeriepenger(dato, orgnummer)
 
     class Feriepenger(
         val orgnummer: String,
@@ -97,7 +97,7 @@ class UtbetalingshistorikkForFeriepenger(
     class Arbeidskategorikoder(
         private val arbeidskategorikoder: List<KodePeriode>
     ) {
-        internal fun harRettPåFeriepenger(dato: LocalDate) = arbeidskategorikoder.kodeForDato(dato).girRettTilFeriepenger
+        internal fun harRettPåFeriepenger(dato: LocalDate, orgnummer: String) = arbeidskategorikoder.kodeForDato(dato).girRettTilFeriepenger(orgnummer)
 
         class KodePeriode(
             private val periode: Periode,
@@ -109,39 +109,39 @@ class UtbetalingshistorikkForFeriepenger(
             }
         }
 
-        enum class Arbeidskategorikode(private val kode: String, internal val girRettTilFeriepenger: Boolean) {
-            Arbeidstaker("01", true),
-            ArbeidstakerSelvstendig("03", true),
-            Sjømenn("04", true),
-            Befal("08", true),
-            MenigKorporal("09", true),
-            ArbeidstakerSjømenn("10", true),
-            SvalbardArbeidere("12", true),
-            ArbeidstakerJordbruker("13", true),
-            Yrkesskade("14", true),
-            AmbassadePersonell("15", true),
-            ArbeidstakerFisker("17", true),
-            ArbeidstakerOppdragstaker("20", true),
-            FFU22("22", true),
-            ArbeidstakerALøyse("23", true),
-            ArbOppdragstakerUtenForsikring("25", true),
-            FiskerHyre("27", true),
+        enum class Arbeidskategorikode(private val kode: String, internal val girRettTilFeriepenger: (String) -> Boolean) {
+            Arbeidstaker("01", { true }),
+            ArbeidstakerSelvstendig("03", { it != "0" }),
+            Sjømenn("04", { true }),
+            Befal("08", { true }),
+            MenigKorporal("09", { true }),
+            ArbeidstakerSjømenn("10", { true }),
+            SvalbardArbeidere("12", { true }),
+            ArbeidstakerJordbruker("13", { it != "0" }),
+            Yrkesskade("14", { true }),
+            AmbassadePersonell("15", { true }),
+            ArbeidstakerFisker("17", { it != "0" }),
+            ArbeidstakerOppdragstaker("20", { it != "0" }),
+            FFU22("22", { true }),
+            ArbeidstakerALøyse("23", { it != "0" }),
+            ArbOppdragstakerUtenForsikring("25", { it != "0" }),
+            FiskerHyre("27", { true }),
 
-            Fisker("00", false),
-            Selvstendig("02", false),
-            Jordbruker("05", false),
-            Arbeidsledig("06", false),
-            Inaktiv("07", false),
-            Turnuskandidater("11", false),
-            Reindrift("16", false),
-            IkkeIBruk("18", false),
-            Oppdragstaker("19", false),
-            FFU21("21", false),
-            OppdragstakerUtenForsikring("24", false),
-            SelvstendigDagmammaDagpappa("26", false),
+            Fisker("00", { false }),
+            Selvstendig("02", { false }),
+            Jordbruker("05", { false }),
+            Arbeidsledig("06", { false }),
+            Inaktiv("07", { false }),
+            Turnuskandidater("11", { false }),
+            Reindrift("16", { false }),
+            IkkeIBruk("18", { false }),
+            Oppdragstaker("19", { false }),
+            FFU21("21", { false }),
+            OppdragstakerUtenForsikring("24", { false }),
+            SelvstendigDagmammaDagpappa("26", { false }),
 
-            InntektsopplysningerMangler("99", false),
-            Tom("", false);
+            InntektsopplysningerMangler("99", { false }),
+            Tom("", { false });
 
             companion object {
                 fun finn(kode: String) = values().firstOrNull { it.kode.trim() == kode.trim() } ?: run {

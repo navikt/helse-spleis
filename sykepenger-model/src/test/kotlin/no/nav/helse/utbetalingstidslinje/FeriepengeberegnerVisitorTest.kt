@@ -3,6 +3,7 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -108,6 +109,78 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
 
         val beregner = Feriepengeberegner(alder, Year.of(2018), historikk, person)
         assertEquals(0, beregner.feriepengedatoer().size)
+    }
+
+    @Test
+    fun `Teller ikke med utbetalinger med kombinert arbeidskategorikode og orgnummer lik 0 i IT`() {
+        val historikk = utbetalingshistorikkForFeriepenger(
+            utbetalinger = listOf(
+                UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Personutbetalingsperiode(
+                    "0",
+                    1.desember(2017),
+                    31.januar(2018),
+                    1000,
+                    31.januar(2018)
+                ),
+                UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(
+                    ORGNUMMER,
+                    1.desember(2017),
+                    31.januar(2018),
+                    1000,
+                    31.januar(2018)
+                )
+            ),
+            arbeidskategorikoder = UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder(
+                listOf(
+                    UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.KodePeriode(
+                        periode = 1.desember(2017) til 31.januar(2018),
+                        arbeidskategorikode = UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.Arbeidskategorikode.ArbeidstakerSelvstendig
+                    )
+                )
+            )
+        )
+
+        val beregner = Feriepengeberegner(alder, Year.of(2018), historikk, person)
+        assertEquals(0.0, beregner.beregnFeriepengerForInfotrygdPerson())
+    }
+
+    @Test
+    fun `Prioriterer ikke personutbetalinger med kombinert arbeidskategorikode og orgnummer lik 0 i IT`() {
+        byggPerson(
+            arbeidsgiverperiode = 1.januar(2018) til 16.januar(2018),
+            syktil = 28.mars(2018)
+        )
+
+        val historikk = utbetalingshistorikkForFeriepenger(
+            utbetalinger = listOf(
+                UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Personutbetalingsperiode(
+                    "0",
+                    1.desember(2018),
+                    31.desember(2018),
+                    1000,
+                    31.desember(2018)
+                ),
+                UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(
+                    ORGNUMMER,
+                    1.desember(2018),
+                    31.desember(2018),
+                    1000,
+                    31.desember(2018)
+                )
+            ),
+            arbeidskategorikoder = UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder(
+                listOf(
+                    UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.KodePeriode(
+                        periode = 1.desember(2018) til 31.desember(2018),
+                        arbeidskategorikode = UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.Arbeidskategorikode.ArbeidstakerSelvstendig
+                    )
+                )
+            )
+        )
+
+        val beregner = Feriepengeberegner(alder, Year.of(2018), historikk, person)
+        assertEquals((17.januar(2018) til 23.mars(2018)).filterNot { it.erHelg() }, beregner.feriepengedatoer())
+        assertEquals(0.0, beregner.beregnFeriepengerForInfotrygdPerson())
     }
 
     @Test

@@ -190,7 +190,7 @@ internal class Feriepengeberegner(
                 if(erUtbetaltEtterFeriepengekjøringIT(utbetalt)) return
                 utbetalteDager.addAll(periode
                     .filterNot { it.erHelg() }
-                    .filter { utbetalingshistorikkForFeriepenger.harRettPåFeriepenger(it) }
+                    .filter { utbetalingshistorikkForFeriepenger.harRettPåFeriepenger(it, orgnr) }
                     .map { UtbetaltDag.InfotrygdPerson(orgnr, it, beløp) })
             }
 
@@ -198,7 +198,7 @@ internal class Feriepengeberegner(
                 if(erUtbetaltEtterFeriepengekjøringIT(utbetalt)) return
                 utbetalteDager.addAll(periode
                     .filterNot { it.erHelg() }
-                    .filter { utbetalingshistorikkForFeriepenger.harRettPåFeriepenger(it) }
+                    .filter { utbetalingshistorikkForFeriepenger.harRettPåFeriepenger(it, orgnr) }
                     .map { UtbetaltDag.InfotrygdArbeidsgiver(orgnr, it, beløp) })
             }
         }

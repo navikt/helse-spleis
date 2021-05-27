@@ -9,13 +9,18 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class UtbetalingshistorikkForFeriepengerTest {
+
+    companion object {
+        private const val ORGNUMMER = "987654321"
+    }
+
     @Test
     fun `Arbeidstakere med kode 01 har rett på feriepenger`() {
         val arbeidskategorikoder = UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder(
             listOf(KodePeriode(1.januar til 31.januar, Arbeidstaker))
         )
 
-        assertTrue(arbeidskategorikoder.harRettPåFeriepenger(1.januar))
+        assertTrue(arbeidskategorikoder.harRettPåFeriepenger(1.januar, ORGNUMMER))
     }
 
     @Test
@@ -24,7 +29,7 @@ internal class UtbetalingshistorikkForFeriepengerTest {
             listOf(KodePeriode(1.januar til 31.januar, Inaktiv))
         )
 
-        assertFalse(arbeidskategorikoder.harRettPåFeriepenger(1.januar))
+        assertFalse(arbeidskategorikoder.harRettPåFeriepenger(1.januar, ORGNUMMER))
     }
 
     @Test
@@ -36,8 +41,8 @@ internal class UtbetalingshistorikkForFeriepengerTest {
             )
         )
 
-        assertFalse(arbeidskategorikoder.harRettPåFeriepenger(31.januar))
-        assertTrue(arbeidskategorikoder.harRettPåFeriepenger(1.februar))
+        assertFalse(arbeidskategorikoder.harRettPåFeriepenger(31.januar, ORGNUMMER))
+        assertTrue(arbeidskategorikoder.harRettPåFeriepenger(1.februar, ORGNUMMER))
     }
 
     @Test
@@ -49,7 +54,18 @@ internal class UtbetalingshistorikkForFeriepengerTest {
             )
         )
 
-        assertFalse(arbeidskategorikoder.harRettPåFeriepenger(31.januar))
-        assertTrue(arbeidskategorikoder.harRettPåFeriepenger(1.februar))
+        assertFalse(arbeidskategorikoder.harRettPåFeriepenger(31.januar, ORGNUMMER))
+        assertTrue(arbeidskategorikoder.harRettPåFeriepenger(1.februar, ORGNUMMER))
+    }
+
+    @Test
+    fun `Personer med kode 03 og orgnummer 0 har ikke rett på feriepenger`() {
+        val arbeidskategorikoder = UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder(
+            listOf(
+                KodePeriode(1.februar til 28.februar, ArbeidstakerSelvstendig)
+            )
+        )
+
+        assertFalse(arbeidskategorikoder.harRettPåFeriepenger(1.februar, "0"))
     }
 }
