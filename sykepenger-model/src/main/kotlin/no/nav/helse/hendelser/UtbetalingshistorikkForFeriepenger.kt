@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Feriepenger.Com
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.FeriepengeutbetalingsperiodeVisitor
 import no.nav.helse.person.PersonHendelse
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.Year
 import java.util.*
@@ -22,6 +23,10 @@ class UtbetalingshistorikkForFeriepenger(
     internal val skalBeregnesManuelt: Boolean,
     internal val aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
 ) : PersonHendelse(meldingsreferanseId, aktivitetslogg) {
+    private companion object {
+        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
+    }
+
     override fun aktørId() = aktørId
 
     override fun fødselsnummer() = fødselsnummer
@@ -139,7 +144,10 @@ class UtbetalingshistorikkForFeriepenger(
             Tom("", false);
 
             companion object {
-                fun finn(kode: String) = values().first { it.kode.trim() == kode.trim() }
+                fun finn(kode: String) = values().firstOrNull { it.kode.trim() == kode.trim() } ?: run {
+                    sikkerLogg.info("Ukjent arbeidskategorikode $kode")
+                    Tom
+                }
             }
         }
     }
