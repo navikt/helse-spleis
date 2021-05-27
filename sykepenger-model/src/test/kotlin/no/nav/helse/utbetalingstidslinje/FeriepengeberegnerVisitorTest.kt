@@ -69,7 +69,41 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
     @Test
     fun `Teller ikke med utbetalinger gjort etter feriepengekjøring i IT`() {
         val historikk = utbetalingshistorikkForFeriepenger(
-            listOf(UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(ORGNUMMER, 1.desember(2017), 31.januar(2018), 1000, 11.mai(2021)))
+            listOf(
+                UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(
+                    ORGNUMMER,
+                    1.desember(2017),
+                    31.januar(2018),
+                    1000,
+                    11.mai(2021)
+                )
+            )
+        )
+
+        val beregner = Feriepengeberegner(alder, Year.of(2018), historikk, person)
+        assertEquals(0, beregner.feriepengedatoer().size)
+    }
+
+    @Test
+    fun `Teller ikke med utbetalinger med inaktiv arbeidskategorikode i IT`() {
+        val historikk = utbetalingshistorikkForFeriepenger(
+            utbetalinger = listOf(
+                UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(
+                    ORGNUMMER,
+                    1.desember(2017),
+                    31.januar(2018),
+                    1000,
+                    31.januar(2018)
+                )
+            ),
+            arbeidskategorikoder = UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder(
+                listOf(
+                    UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.KodePeriode(
+                        periode = 1.desember(2017) til 31.januar(2018),
+                        arbeidskategorikode = UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.Arbeidskategorikode.Inaktiv
+                    )
+                )
+            )
         )
 
         val beregner = Feriepengeberegner(alder, Year.of(2018), historikk, person)
@@ -204,7 +238,14 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
 
     private fun utbetalingshistorikkForFeriepenger(
         utbetalinger: List<UtbetalingshistorikkForFeriepenger.Utbetalingsperiode> = emptyList(),
-        arbeidskategorikoder: UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder = UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder(emptyList()),
+        arbeidskategorikoder: UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder = UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder(
+            listOf(
+                UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.KodePeriode(
+                    periode = LocalDate.MIN til LocalDate.MAX,
+                    arbeidskategorikode = UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.Arbeidskategorikode.Arbeidstaker
+                )
+            )
+        ),
         skalBeregnesManuelt: Boolean = false
     ) =
         UtbetalingshistorikkForFeriepenger(

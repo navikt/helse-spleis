@@ -48,6 +48,13 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
                         fom = 1.mai(2021),
                         tom = 31.mai(2021)
                     )
+                ),
+                arbeidskategorikoder = listOf(
+                    TestMessageFactory.UtbetalingshistorikkForFeriepengerTestdata.Arbeidskategori(
+                        kode = "01",
+                        fom = 1.mars(2020),
+                        tom = 31.mars(2020)
+                    )
                 )
             )
         )
@@ -65,7 +72,7 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun `Ser bort fra perioder med arbeidskategori som ikke gir rett til feriepenger`() {
+    fun `Ser bort fra perioder med arbeidskategori som ikke gir rett til feriepenger`() = Toggles.SendFeriepengeOppdrag.enable {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 1.juni(2020), tom = 16.juni(2020))), førsteFraværsdag = 1.juni(2020))
@@ -108,11 +115,30 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
                         tom = 31.mai(2021)
                     )
                 ),
-                arbeidskategorikoder = mapOf(
-                    "07" to 31.januar(2020),
-                    "01" to 31.mars(2020)
+                arbeidskategorikoder = listOf(
+                    TestMessageFactory.UtbetalingshistorikkForFeriepengerTestdata.Arbeidskategori(
+                        kode = "07",
+                        fom = 1.januar(2020),
+                        tom = 31.januar(2020)
+                    ),
+                    TestMessageFactory.UtbetalingshistorikkForFeriepengerTestdata.Arbeidskategori(
+                        kode = "01",
+                        fom = 1.mars(2020),
+                        tom = 31.mars(2020)
+                    )
                 )
             )
         )
+
+        val behov = testRapid.inspektør.melding(testRapid.inspektør.antall() - 1)
+        val linjer = behov.path("Utbetaling").path("linjer")
+
+        assertTrue(testRapid.inspektør.behovtypeSisteMelding(Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling))
+        assertEquals(1, linjer.size())
+        assertEquals("Utbetaling", behov.path("@behov")[0].asText())
+        assertEquals("SPREFAGFER-IOP", linjer[0].path("klassekode").asText())
+        assertEquals("ENG", linjer[0].path("satstype").asText())
+        assertEquals(1460, linjer[0].path("sats").asInt())
+        assertEquals(1460, linjer[0].path("totalbeløp").asInt())
     }
 }

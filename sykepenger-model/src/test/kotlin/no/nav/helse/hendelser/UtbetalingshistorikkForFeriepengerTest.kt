@@ -1,6 +1,7 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.KodePeriode.Companion.mapTilNoeFornuftig
+import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.Arbeidskategorikode.*
+import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.KodePeriode
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -11,7 +12,7 @@ internal class UtbetalingshistorikkForFeriepengerTest {
     @Test
     fun `Arbeidstakere med kode 01 har rett på feriepenger`() {
         val arbeidskategorikoder = UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder(
-            listOf("01" to 31.januar).mapTilNoeFornuftig()
+            listOf(KodePeriode(1.januar til 31.januar, Arbeidstaker))
         )
 
         assertTrue(arbeidskategorikoder.harRettPåFeriepenger(1.januar))
@@ -20,7 +21,7 @@ internal class UtbetalingshistorikkForFeriepengerTest {
     @Test
     fun `Arbeidstakere med kode 07 har ikke rett på feriepenger`() {
         val arbeidskategorikoder = UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder(
-            listOf("07" to 31.januar).mapTilNoeFornuftig()
+            listOf(KodePeriode(1.januar til 31.januar, Inaktiv))
         )
 
         assertFalse(arbeidskategorikoder.harRettPåFeriepenger(1.januar))
@@ -30,9 +31,9 @@ internal class UtbetalingshistorikkForFeriepengerTest {
     fun `Arbeidstakere med kode 07 først og 01 etter har kun rett på feriepenger for periode med 01`() {
         val arbeidskategorikoder = UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder(
             listOf(
-                "07" to 31.januar,
-                "01" to 28.februar
-            ).mapTilNoeFornuftig()
+                KodePeriode(1.januar til 31.januar, Inaktiv),
+                KodePeriode(1.februar til 28.februar, Arbeidstaker)
+            )
         )
 
         assertFalse(arbeidskategorikoder.harRettPåFeriepenger(31.januar))
@@ -43,9 +44,9 @@ internal class UtbetalingshistorikkForFeriepengerTest {
     fun `Arbeidstakere med kode 'blank' først og 01 etter har kun rett på feriepenger for periode med 01`() {
         val arbeidskategorikoder = UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder(
             listOf(
-                "  " to 31.januar,
-                "01" to 28.februar
-            ).mapTilNoeFornuftig()
+                KodePeriode(1.januar til 31.januar, Tom),
+                KodePeriode(1.februar til 28.februar, Arbeidstaker)
+            )
         )
 
         assertFalse(arbeidskategorikoder.harRettPåFeriepenger(31.januar))

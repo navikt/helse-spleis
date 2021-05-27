@@ -149,9 +149,13 @@ internal class UtbetalingshistorikkForFeriepengerRiverTest : RiverTest() {
             }
           ],
           "harStatslønn": false,
-          "arbeidskategorikoder": {
-            "01": "2020-09-25"
-          },
+          "arbeidskategorikoder": [
+            {
+              "fom": "2019-02-04",
+              "tom": "2020-09-25",
+              "kode": "01"
+            }
+          ],
           "feriepengerSkalBeregnesManuelt": false
         }
       },

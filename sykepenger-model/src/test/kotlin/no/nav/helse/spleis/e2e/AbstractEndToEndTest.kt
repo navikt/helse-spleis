@@ -11,6 +11,8 @@ import no.nav.helse.hendelser.Opplæringspenger
 import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Simulering.*
+import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.Arbeidskategorikode.Arbeidstaker
+import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.KodePeriode
 import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
@@ -727,7 +729,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     private fun utbetalingshistorikkForFeriepenger(
         utbetalinger: List<UtbetalingshistorikkForFeriepenger.Utbetalingsperiode> = listOf(),
         feriepengehistorikk: List<UtbetalingshistorikkForFeriepenger.Feriepenger> = listOf(),
-        arbeidskategorikoder: UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder = UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder(emptyList()),
+        arbeidskategorikoder: UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder =
+            UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder(listOf(KodePeriode(LocalDate.MIN til LocalDate.MAX, Arbeidstaker))),
         opptjeningsår: Year = Year.of(2017),
         skalBeregnesManuelt: Boolean
     ): UtbetalingshistorikkForFeriepenger {

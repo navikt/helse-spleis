@@ -20,7 +20,7 @@ class UtbetalingshistorikkForFeriepenger(
     //FIXME: Internal?
     internal val opptjeningsår: Year,
     internal val skalBeregnesManuelt: Boolean,
-    internal  val aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
+    internal val aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
 ) : PersonHendelse(meldingsreferanseId, aktivitetslogg) {
     override fun aktørId() = aktørId
 
@@ -35,6 +35,8 @@ class UtbetalingshistorikkForFeriepenger(
 
     internal fun utbetalteFeriepengerTilArbeidsgiver(orgnummer: String) =
         feriepengehistorikk.utbetalteFeriepengerTilArbeidsgiver(orgnummer, opptjeningsår)
+
+    internal fun harRettPåFeriepenger(dato: LocalDate) = arbeidskategorikoder.harRettPåFeriepenger(dato)
 
     class Feriepenger(
         val orgnummer: String,
@@ -90,18 +92,15 @@ class UtbetalingshistorikkForFeriepenger(
     class Arbeidskategorikoder(
         private val arbeidskategorikoder: List<KodePeriode>
     ) {
+        internal fun harRettPåFeriepenger(dato: LocalDate) = arbeidskategorikoder.kodeForDato(dato).girRettTilFeriepenger
+
         class KodePeriode(
             private val periode: Periode,
             private val arbeidskategorikode: Arbeidskategorikode
         ) {
             companion object {
-                fun List<Pair<String, LocalDate>>.mapTilNoeFornuftig(): List<KodePeriode> =
-                    (listOf("" to LocalDate.MIN) + this).zipWithNext { (_, forrigeTom), (kode, tom) ->
-                        KodePeriode(forrigeTom.plusDays(1) til tom, Arbeidskategorikode.finn(kode))
-                    }
-
                 internal fun List<KodePeriode>.kodeForDato(dato: LocalDate) =
-                    firstOrNull { dato in it.periode }?.arbeidskategorikode ?: Arbeidskategorikode.ErDetFlere
+                    first { dato in it.periode }.arbeidskategorikode
             }
         }
 
@@ -121,29 +120,27 @@ class UtbetalingshistorikkForFeriepenger(
             FFU22("22", true),
             ArbeidstakerALøyse("23", true),
             ArbOppdragstakerUtenForsikring("25", true),
-            Pass("27", true), //TODO
+            FiskerHyre("27", true),
 
-            Tom("", false), //TODO
             Fisker("00", false),
             Selvstendig("02", false),
             Jordbruker("05", false),
             Arbeidsledig("06", false),
-            Innaktiv("07", false),
+            Inaktiv("07", false),
             Turnuskandidater("11", false),
             Reindrift("16", false),
             IkkeIBruk("18", false),
             Oppdragstaker("19", false),
             FFU21("21", false),
             OppdragstakerUtenForsikring("24", false),
-            FinnesDenne("26", false), //TODO
+            SelvstendigDagmammaDagpappa("26", false),
 
-            ErDetFlere("28...", false); //TODO
+            InntektsopplysningerMangler("99", false),
+            Tom("", false);
 
             companion object {
-                internal fun finn(kode: String) = values().firstOrNull { it.kode.trim() == kode.trim() } ?: ErDetFlere
+                fun finn(kode: String) = values().first { it.kode.trim() == kode.trim() }
             }
         }
-
-        internal fun harRettPåFeriepenger(dato: LocalDate) = arbeidskategorikoder.kodeForDato(dato).girRettTilFeriepenger
     }
 }

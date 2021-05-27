@@ -166,7 +166,7 @@ internal class Feriepengeberegner(
     }
 
     private class FinnUtbetalteDagerVisitor(
-        utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger,
+        private val utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger,
         person: Person
     ) {
         private val utbetalteDager = mutableListOf<UtbetaltDag>()
@@ -183,13 +183,17 @@ internal class Feriepengeberegner(
 
             override fun visitPersonutbetalingsperiode(orgnr: String, periode: Periode, beløp: Int, utbetalt: LocalDate) {
                 if(erUtbetaltEtterFeriepengekjøringIT(utbetalt)) return
-                utbetalteDager.addAll(periode.filterNot { it.erHelg() }
+                utbetalteDager.addAll(periode
+                    .filterNot { it.erHelg() }
+                    .filter { utbetalingshistorikkForFeriepenger.harRettPåFeriepenger(it) }
                     .map { UtbetaltDag.InfotrygdPerson(orgnr, it, beløp) })
             }
 
             override fun visitArbeidsgiverutbetalingsperiode(orgnr: String, periode: Periode, beløp: Int, utbetalt: LocalDate) {
                 if(erUtbetaltEtterFeriepengekjøringIT(utbetalt)) return
-                utbetalteDager.addAll(periode.filterNot { it.erHelg() }
+                utbetalteDager.addAll(periode
+                    .filterNot { it.erHelg() }
+                    .filter { utbetalingshistorikkForFeriepenger.harRettPåFeriepenger(it) }
                     .map { UtbetaltDag.InfotrygdArbeidsgiver(orgnr, it, beløp) })
             }
         }

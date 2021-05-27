@@ -1,8 +1,8 @@
 package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
-import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.KodePeriode.Companion.mapTilNoeFornuftig
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.SykepengehistorikkForFeriepenger
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -49,11 +49,15 @@ internal class UtbetalingshistorikkForFeriepengerMessage(packet: JsonMessage) : 
         }
 
     private val arbeidskategorikoder = packet["@løsning.${SykepengehistorikkForFeriepenger.name}.arbeidskategorikoder"]
-        .fields()
-        .asSequence()
-        .map { (key, value) -> key to value.asLocalDate() }
-        .toList()
-        .mapTilNoeFornuftig()
+        .map {
+            val fom = it["fom"].asLocalDate()
+            val tom = it["tom"].asLocalDate()
+            val kode = it["kode"].asText()
+            UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.KodePeriode(
+                periode = Periode(fom, tom),
+                arbeidskategorikode = UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.Arbeidskategorikode.finn(kode)
+            )
+        }
         .let(UtbetalingshistorikkForFeriepenger::Arbeidskategorikoder)
 
     private val opptjeningsår = packet["${SykepengehistorikkForFeriepenger.name}.historikkFom"]

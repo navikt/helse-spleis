@@ -187,7 +187,13 @@ internal class TestMessageFactory(
                         "tom" to it.tom
                     )
                 },
-                "arbeidskategorikoder" to testdata.arbeidskategorikoder
+                "arbeidskategorikoder" to testdata.arbeidskategorikoder.map {
+                    mapOf(
+                        "kode" to it.kode,
+                        "fom" to it.fom,
+                        "tom" to it.tom
+                    )
+                }
             )
         )
     )
@@ -198,7 +204,7 @@ internal class TestMessageFactory(
         val feriepengerSkalBeregnesManuelt: Boolean = false,
         val utbetalinger: List<Utbetaling> = emptyList(),
         val feriepengehistorikk: List<Feriepenger> = emptyList(),
-        val arbeidskategorikoder: Map<String, LocalDate> = emptyMap()
+        val arbeidskategorikoder: List<Arbeidskategori> = emptyList()
     ) {
         class Utbetaling(
             val fom: LocalDate,
@@ -213,6 +219,12 @@ internal class TestMessageFactory(
         class Feriepenger(
             val orgnummer: String,
             val beløp: Int,
+            val fom: LocalDate,
+            val tom: LocalDate
+        )
+
+        class Arbeidskategori(
+            val kode: String,
             val fom: LocalDate,
             val tom: LocalDate
         )
