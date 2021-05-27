@@ -78,7 +78,7 @@ class Person private constructor(
     fun håndter(utbetalingshistorikk: UtbetalingshistorikkForFeriepenger) {
         utbetalingshistorikk.kontekst(this)
 
-        if(utbetalingshistorikk.skalBeregnesManuelt){
+        if (utbetalingshistorikk.skalBeregnesManuelt) {
             val msg = "Person er markert for manuell beregning av feriepenger - aktørId: $aktørId"
             sikkerLogg.info(msg)
             utbetalingshistorikk.info(msg)
@@ -106,6 +106,12 @@ class Person private constructor(
             )
         }
 
+        utbetalingshistorikk.sikreAtArbeidsgivereEksisterer {
+            arbeidsgivere.finnEllerOpprett(it) {
+                utbetalingshistorikk.info("Ny arbeidsgiver med organisasjonsnummer %s for denne personen", it)
+                Arbeidsgiver(this, it)
+            }
+        }
         arbeidsgivere.beregnFeriepengerForAlleArbeidsgivere(aktørId, feriepengeberegner, utbetalingshistorikk)
     }
 

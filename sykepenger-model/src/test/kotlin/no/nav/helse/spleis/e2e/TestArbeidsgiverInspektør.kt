@@ -175,7 +175,7 @@ internal class TestArbeidsgiverInspektør(
         nettoBeløp: Int,
         tidsstempel: LocalDateTime
     ) {
-        if (oppdrag != arbeidsgiverOppdrag.last()) return
+        if (oppdrag != arbeidsgiverOppdrag.lastOrNull()) return
         this.totalBeløp.add(totalBeløp)
         this.nettoBeløp.add(nettoBeløp)
     }

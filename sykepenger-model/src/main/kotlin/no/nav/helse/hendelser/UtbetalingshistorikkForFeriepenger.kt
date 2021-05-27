@@ -43,6 +43,10 @@ class UtbetalingshistorikkForFeriepenger(
 
     internal fun harRettPåFeriepenger(dato: LocalDate, orgnummer: String) = arbeidskategorikoder.harRettPåFeriepenger(dato, orgnummer)
 
+    internal fun sikreAtArbeidsgivereEksisterer(opprettManglendeArbeidsgiver: (String) -> Unit) {
+        utbetalinger.forEach { it.sikreAtArbeidsgivereEksisterer(opprettManglendeArbeidsgiver) }
+    }
+
     class Feriepenger(
         val orgnummer: String,
         val beløp: Int,
@@ -68,6 +72,10 @@ class UtbetalingshistorikkForFeriepenger(
         protected val periode: Periode = fom til tom
 
         internal abstract fun accept(visitor: FeriepengeutbetalingsperiodeVisitor)
+
+        internal fun sikreAtArbeidsgivereEksisterer(opprettManglendeArbeidsgiver: (String) -> Unit) {
+            opprettManglendeArbeidsgiver(orgnr)
+        }
 
         class Personutbetalingsperiode(
             orgnr: String,

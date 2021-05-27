@@ -209,6 +209,87 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `Korrigerer en ukjent arbeidsgiver hvis feriepengene er brukt opp i spleis`() {
+        val ORGNUMMER2 = "978654321"
+        håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 30.august(2020), 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.juni(2020), 30.august(2020), 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.juni(2019) til 1.mai(2020) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        håndterUtbetalingshistorikkForFeriepenger(
+            opptjeningsår = Year.of(2020),
+            utbetalinger = listOf(
+                UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(
+                    ORGNUMMER2,
+                    1.november(2020),
+                    30.november(2020),
+                    1000,
+                    1.desember(2020)
+                )
+            ),
+            feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(ORGNUMMER2, 2142, 1.mai(2021), 31.mai(2021)))
+        )
+
+        assertEquals(1, inspektør.feriepengeutbetalingslinjer.size)
+        assertEquals(1, inspektør(ORGNUMMER2).feriepengeutbetalingslinjer.size)
+        assertEquals(7006, inspektør.feriepengeutbetalingslinjer.first().beløp)
+        assertEquals(-2142, inspektør(ORGNUMMER2).feriepengeutbetalingslinjer.first().beløp)
+    }
+
+    @Test
+    fun `Ghost arbeidsgiver fra feriepengeberegner påvirker ikke senere sykepengeberegning`() {
+        val ORGNUMMER2 = "978654321"
+        håndterUtbetalingshistorikkForFeriepenger(
+            opptjeningsår = Year.of(2020),
+            utbetalinger = listOf(
+                UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(
+                    ORGNUMMER2,
+                    1.november(2020),
+                    30.november(2020),
+                    1000,
+                    1.desember(2020)
+                )
+            ),
+            feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(ORGNUMMER2, 2142, 1.mai(2021), 31.mai(2021)))
+        )
+        håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 30.august(2020), 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.juni(2020), 30.august(2020), 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.juni(2019) til 1.mai(2020) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+
+        assertEquals(0, inspektør.feriepengeutbetalingslinjer.size)
+        assertEquals(1, inspektør(ORGNUMMER2).feriepengeutbetalingslinjer.size)
+        assertEquals(0, inspektør(ORGNUMMER2).feriepengeutbetalingslinjer.first().beløp)
+    }
+
+    @Test
     fun `Validerer at beregnet feriepengebeløp for IT finnes i lista over utbetalte feriepenger`() {
         håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 30.juni(2020), 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.juni(2020), 30.juni(2020), 100.prosent))
@@ -423,7 +504,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Totalbeløp settes til sats for utbetaling av feriepenger`(){
+    fun `Totalbeløp settes til sats for utbetaling av feriepenger`() {
         Toggles.SendFeriepengeOppdrag.enable {
             håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 30.juni(2020), 100.prosent))
             håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.juni(2020), 30.juni(2020), 100.prosent))
@@ -447,7 +528,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
                 opptjeningsår = Year.of(2020)
             )
 
-            val linje = ( inspektør.personLogg.behov().last().detaljer()["linjer"] as ArrayList<LinkedHashMap<String, String>>).first()
+            val linje = (inspektør.personLogg.behov().last().detaljer()["linjer"] as ArrayList<LinkedHashMap<String, String>>).first()
 
             assertEquals(1460, linje["sats"])
             assertEquals(1460, linje["totalbeløp"])
