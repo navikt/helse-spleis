@@ -176,6 +176,11 @@ interface PersonObserver {
         val begrunnelser: List<String>?
     )
 
+    data class FeriepengerUtbetaltEvent(
+        val arbeidsgiverOppdrag: Map<String, Any>,
+        val personOppdrag: Map<String, Any> = mapOf("linjer" to emptyList<String>())
+    )
+
     data class InntektsmeldingLagtPåKjølEvent(
         val hendelseId: UUID,
     )
@@ -209,6 +214,7 @@ interface PersonObserver {
     fun utbetalingEndret(event: UtbetalingEndretEvent) {}
     fun utbetalingUtbetalt(event: UtbetalingUtbetaltEvent) {}
     fun utbetalingUtenUtbetaling(event: UtbetalingUtbetaltEvent) {}
+    fun feriepengerUtbetalt(event: FeriepengerUtbetaltEvent) {}
     fun annullering(event: UtbetalingAnnullertEvent) {}
     fun avstemt(result: Map<String, Any>) {}
     fun hendelseIkkeHåndtert(event: HendelseIkkeHåndtertEvent) {}

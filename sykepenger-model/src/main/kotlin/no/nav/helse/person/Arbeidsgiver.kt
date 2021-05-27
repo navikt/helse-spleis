@@ -14,6 +14,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling
+import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling.Companion.gjelderFeriepengeutbetaling
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetaltTidslinje
@@ -344,8 +345,17 @@ internal class Arbeidsgiver private constructor(
         finalize(utbetaling)
     }
 
-    internal fun håndter(utbetaling: UtbetalingHendelse) {
-        utbetaling.kontekst(this)
+    internal fun håndter(utbetalingHendelse: UtbetalingHendelse) {
+        utbetalingHendelse.kontekst(this)
+        if (feriepengeutbetalinger.gjelderFeriepengeutbetaling(utbetalingHendelse)) return håndterFeriepengeUtbetaling(utbetalingHendelse)
+        håndterUtbetaling(utbetalingHendelse)
+    }
+
+    private fun håndterFeriepengeUtbetaling(utbetalingHendelse: UtbetalingHendelse) {
+        feriepengeutbetalinger.map { it.håndter(utbetalingHendelse, person) }
+   }
+
+    private fun håndterUtbetaling(utbetaling: UtbetalingHendelse) {
         utbetalinger.forEach { it.håndter(utbetaling) }
         håndter(utbetaling, Vedtaksperiode::håndter)
         finalize(utbetaling)

@@ -261,6 +261,10 @@ class Person private constructor(
         observers.forEach { it.vedtakFattet(vedtakFattetEvent) }
     }
 
+    internal fun feriepengerUtbetalt(feriepengerUtbetaltEvent: PersonObserver.FeriepengerUtbetaltEvent) {
+        observers.forEach { it.feriepengerUtbetalt(feriepengerUtbetaltEvent) }
+    }
+
     fun håndter(hendelse: AnnullerUtbetaling) {
         hendelse.kontekst(this)
         arbeidsgivere.finn(hendelse.organisasjonsnummer())?.håndter(hendelse)

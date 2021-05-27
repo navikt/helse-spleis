@@ -10,6 +10,9 @@ import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkForFeriepengerMessage
 import java.time.LocalDateTime
 
+/**
+ * Entry point for å starte utbetaling av feriepenger
+ */
 internal class UtbetalingshistorikkForFeriepengerRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator

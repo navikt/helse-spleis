@@ -122,7 +122,9 @@ internal interface FeriepengeutbetalingVisitor : OppdragVisitor {
         feriepengeutbetaling: Feriepengeutbetaling,
         infotrygdFeriepengebeløpPerson: Double,
         infotrygdFeriepengebeløpArbeidsgiver: Double,
-        spleisFeriepengebeløpArbeidsgiver: Double
+        spleisFeriepengebeløpArbeidsgiver: Double,
+        overføringstidspunkt: LocalDateTime?,
+        avstemmingsnøkkel: Long?,
     ) {
     }
 
@@ -142,7 +144,9 @@ internal interface FeriepengeutbetalingVisitor : OppdragVisitor {
         feriepengeutbetaling: Feriepengeutbetaling,
         infotrygdFeriepengebeløpPerson: Double,
         infotrygdFeriepengebeløpArbeidsgiver: Double,
-        spleisFeriepengebeløpArbeidsgiver: Double
+        spleisFeriepengebeløpArbeidsgiver: Double,
+        overføringstidspunkt: LocalDateTime?,
+        avstemmingsnøkkel: Long?,
     ) {
     }
 

@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.*
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -15,7 +14,6 @@ import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.db.LagrePersonDao
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -146,6 +144,16 @@ internal class PersonMediator(
             "personOppdrag" to event.personOppdrag,
             "utbetalingsdager" to event.utbetalingsdager
         ))
+
+    override fun feriepengerUtbetalt(event: PersonObserver.FeriepengerUtbetaltEvent) =
+        queueMessage(
+            "feriepenger_utbetalt", JsonMessage.newMessage(
+                mapOf(
+                    "arbeidsgiverOppdrag" to event.arbeidsgiverOppdrag,
+                    "personOppdrag" to event.personOppdrag,
+                )
+            )
+        )
 
     override fun vedtaksperiodeReberegnet(vedtaksperiodeId: UUID) {
         queueMessage(

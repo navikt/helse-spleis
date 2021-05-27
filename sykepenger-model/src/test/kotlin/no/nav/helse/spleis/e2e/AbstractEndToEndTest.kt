@@ -519,6 +519,41 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             hendelselogg = this
         }
 
+    protected fun håndterFeriepengerUtbetalt(
+        status: UtbetalingHendelse.Oppdragstatus = UtbetalingHendelse.Oppdragstatus.AKSEPTERT,
+        orgnummer: String = ORGNUMMER,
+        fagsystemId: String,
+        meldingsreferanseId: UUID = UUID.randomUUID()
+    ): UtbetalingHendelse {
+        return feriepengeutbetaling(
+            fagsystemId = fagsystemId,
+            status = status,
+            orgnummer = orgnummer,
+            meldingsreferanseId = meldingsreferanseId
+        ).håndter(Person::håndter)
+    }
+
+    private fun feriepengeutbetaling(
+        fagsystemId: String,
+        status: UtbetalingHendelse.Oppdragstatus,
+        orgnummer: String = ORGNUMMER,
+        meldingsreferanseId: UUID = UUID.randomUUID()
+    ) =
+        UtbetalingHendelse(
+            meldingsreferanseId = meldingsreferanseId,
+            aktørId = AKTØRID,
+            fødselsnummer = UNG_PERSON_FNR_2018,
+            orgnummer = orgnummer,
+            fagsystemId = fagsystemId,
+            utbetalingId = "",
+            status = status,
+            melding = "hey",
+            avstemmingsnøkkel = 654321L,
+            overføringstidspunkt = LocalDateTime.now()
+        ).apply {
+            hendelselogg = this
+        }
+
     protected fun sykmelding(
         id: UUID,
         vararg sykeperioder: Sykmeldingsperiode,

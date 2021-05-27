@@ -8,6 +8,7 @@ import no.nav.helse.testhelpers.januar
 import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.Year
 import java.util.*
 
@@ -62,7 +63,9 @@ internal class FeriepengeArbeidsgiverTest() : AbstractEndToEndTest() {
             feriepengeutbetaling: Feriepengeutbetaling,
             infotrygdFeriepengebeløpPerson: Double,
             infotrygdFeriepengebeløpArbeidsgiver: Double,
-            spleisFeriepengebeløpArbeidsgiver: Double
+            spleisFeriepengebeløpArbeidsgiver: Double,
+            overføringstidspunkt: LocalDateTime?,
+            avstemmingsnøkkel: Long?,
         ) {
             this.infotrygdFeriepengebeløpPerson = infotrygdFeriepengebeløpPerson
             this.infotrygdFeriepengebeløpArbeidsgiver = infotrygdFeriepengebeløpArbeidsgiver

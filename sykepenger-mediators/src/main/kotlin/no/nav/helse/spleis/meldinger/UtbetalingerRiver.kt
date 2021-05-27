@@ -22,7 +22,6 @@ internal class UtbetalingerRiver(
 
     override fun validate(message: JsonMessage) {
         message.requireKey("@løsning.${Utbetaling.name}")
-        // skip OVERFØRT; we don't need to react to it (yet)
         message.requireAny("@løsning.${Utbetaling.name}.status", gyldigeStatuser)
         message.requireKey("${Utbetaling.name}.fagsystemId", "utbetalingId", "@løsning.${Utbetaling.name}.beskrivelse")
         message.requireKey("@løsning.${Utbetaling.name}.avstemmingsnøkkel")

@@ -1,11 +1,15 @@
 package no.nav.helse.utbetalingslinjer
 
+import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.FeriepengeutbetalingVisitor
+import no.nav.helse.person.Person
+import no.nav.helse.person.PersonObserver
 import no.nav.helse.serde.reflection.OppdragReflect
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
 import java.time.Month
 import kotlin.math.roundToInt
 
@@ -16,8 +20,12 @@ internal class Feriepengeutbetaling private constructor(
     private val spleisFeriepengebeløpArbeidsgiver: Double,
     private val oppdrag: Oppdrag
 ) {
-    private companion object {
+    var overføringstidspunkt: LocalDateTime? = null
+    var avstemmingsnøkkel: Long? = null
+
+    companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
+        fun List<Feriepengeutbetaling>.gjelderFeriepengeutbetaling(hendelse: UtbetalingHendelse) = any { hendelse.erRelevant(it.oppdrag.fagsystemId()) }
     }
 
     private val observers = mutableListOf<UtbetalingObserver>()
@@ -31,7 +39,9 @@ internal class Feriepengeutbetaling private constructor(
             this,
             infotrygdFeriepengebeløpPerson,
             infotrygdFeriepengebeløpArbeidsgiver,
-            spleisFeriepengebeløpArbeidsgiver
+            spleisFeriepengebeløpArbeidsgiver,
+            overføringstidspunkt,
+            avstemmingsnøkkel,
         )
         feriepengeberegner.accept(visitor)
         oppdrag.accept(visitor)
@@ -39,8 +49,36 @@ internal class Feriepengeutbetaling private constructor(
             this,
             infotrygdFeriepengebeløpPerson,
             infotrygdFeriepengebeløpArbeidsgiver,
-            spleisFeriepengebeløpArbeidsgiver
+            spleisFeriepengebeløpArbeidsgiver,
+            overføringstidspunkt,
+            avstemmingsnøkkel,
         )
+    }
+
+    fun håndter(utbetalingHendelse: UtbetalingHendelse, person: Person) {
+        if (!utbetalingHendelse.erRelevant(oppdrag.fagsystemId())) return
+
+        utbetalingHendelse.info("Behandler svar fra Oppdrag/UR/spenn for feriepenger ")
+        utbetalingHendelse.valider()
+        val utbetaltOk = !utbetalingHendelse.hasErrorsOrWorse()
+        lagreInformasjon(utbetalingHendelse, utbetaltOk)
+
+        if (!utbetaltOk) {
+            sikkerLogg.info("Utbetaling av feriepenger med fagsystemId fagsystemId() feilet.")
+            return
+        }
+
+        person.feriepengerUtbetalt(
+            PersonObserver.FeriepengerUtbetaltEvent(
+                arbeidsgiverOppdrag = OppdragReflect(oppdrag).toMap(),
+            )
+        )
+    }
+
+    private fun lagreInformasjon(hendelse: UtbetalingHendelse, gikkBra: Boolean) {
+        overføringstidspunkt = hendelse.overføringstidspunkt
+        avstemmingsnøkkel = hendelse.avstemmingsnøkkel
+        hendelse.info("Data for feriepenger fra Oppdrag/UR: tidspunkt: $overføringstidspunkt, avstemmingsnøkkel $avstemmingsnøkkel og utbetalt ok: ${if (gikkBra) "ja" else "nei"}")
     }
 
     internal fun overfør(aktivitetslogg: Aktivitetslogg) {
