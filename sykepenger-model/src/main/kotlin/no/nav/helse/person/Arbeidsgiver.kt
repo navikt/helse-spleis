@@ -229,6 +229,7 @@ internal class Arbeidsgiver private constructor(
         feriepengeberegner: Feriepengeberegner,
         utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger
     ) {
+        utbetalingshistorikkForFeriepenger.kontekst(this)
         if(feriepengeutbetalinger.isNotEmpty()) {
             sikkerLogg.info("Feriepengeutbetalinger finnes fra før for aktørId $aktørId, støtter ikke rekjøring")
             return
