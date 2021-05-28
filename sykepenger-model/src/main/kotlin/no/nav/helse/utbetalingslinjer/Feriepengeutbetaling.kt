@@ -2,10 +2,7 @@ package no.nav.helse.utbetalingslinjer
 
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
-import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.FeriepengeutbetalingVisitor
-import no.nav.helse.person.Person
-import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.*
 import no.nav.helse.serde.reflection.OppdragReflect
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
@@ -21,8 +18,8 @@ internal class Feriepengeutbetaling private constructor(
     private val infotrygdFeriepengebeløpArbeidsgiver: Double,
     private val spleisFeriepengebeløpArbeidsgiver: Double,
     private val oppdrag: Oppdrag,
-    val utbetalingId: UUID
-) {
+    private val utbetalingId: UUID
+) : Aktivitetskontekst {
     var overføringstidspunkt: LocalDateTime? = null
     var avstemmingsnøkkel: Long? = null
 
@@ -96,8 +93,12 @@ internal class Feriepengeutbetaling private constructor(
         hendelse.info("Data for feriepenger fra Oppdrag/UR: tidspunkt: $overføringstidspunkt, avstemmingsnøkkel $avstemmingsnøkkel og utbetalt ok: ${if (gikkBra) "ja" else "nei"}")
     }
 
-    internal fun overfør(aktivitetslogg: Aktivitetslogg) {
-        oppdrag.overfør(aktivitetslogg, null, "SPLEIS")
+    override fun toSpesifikkKontekst() =
+        SpesifikkKontekst("Feriepengeutbetaling", mapOf("utbetalingId" to "$utbetalingId"))
+
+    internal fun overfør(hendelse: PersonHendelse) {
+        hendelse.kontekst(this)
+        oppdrag.overfør(hendelse, null, "SPLEIS")
     }
 
     internal class Builder(

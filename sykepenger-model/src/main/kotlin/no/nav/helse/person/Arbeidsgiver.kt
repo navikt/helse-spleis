@@ -245,7 +245,7 @@ internal class Arbeidsgiver private constructor(
         feriepengeutbetaling.registrer(this)
 
         if (Toggles.SendFeriepengeOppdrag.enabled && feriepengeberegner.beregnFeriepengedifferansenForArbeidsgiver(organisasjonsnummer).roundToInt() != 0) {
-            feriepengeutbetaling.overfør(utbetalingshistorikkForFeriepenger.aktivitetslogg)
+            feriepengeutbetaling.overfør(utbetalingshistorikkForFeriepenger)
         }
     }
 

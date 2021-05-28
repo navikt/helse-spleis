@@ -7,8 +7,7 @@ import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.testhelpers.*
 import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
 
@@ -66,6 +65,7 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
         assertEquals(1, linjer.size())
         assertEquals("Utbetaling", behov.path("@behov")[0].asText())
         assertEquals(ORGNUMMER, behov.path("organisasjonsnummer").asText())
+        assertTrue(behov.path("utbetalingId").asText().isNotBlank())
         assertEquals("SPREFAGFER-IOP", linjer[0].path("klassekode").asText())
         assertEquals("ENG", linjer[0].path("satstype").asText())
         assertEquals(1460, linjer[0].path("sats").asInt())
@@ -138,6 +138,7 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
         assertEquals(1, linjer.size())
         assertEquals("Utbetaling", behov.path("@behov")[0].asText())
         assertEquals(ORGNUMMER, behov.path("organisasjonsnummer").asText())
+        assertTrue(behov.path("utbetalingId").asText().isNotBlank())
         assertEquals("SPREFAGFER-IOP", linjer[0].path("klassekode").asText())
         assertEquals("ENG", linjer[0].path("satstype").asText())
         assertEquals(1460, linjer[0].path("sats").asInt())
@@ -210,6 +211,7 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
         assertEquals(1, linjer.size())
         assertEquals("Utbetaling", behov.path("@behov")[0].asText())
         assertEquals(ORGNUMMER, behov.path("organisasjonsnummer").asText())
+        assertTrue(behov.path("utbetalingId").asText().isNotBlank())
         assertEquals("SPREFAGFER-IOP", linjer[0].path("klassekode").asText())
         assertEquals("ENG", linjer[0].path("satstype").asText())
         assertEquals(1460, linjer[0].path("sats").asInt())
@@ -276,17 +278,19 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
             )
         )
 
-        val behov = testRapid.inspektør.melding(testRapid.inspektør.antall() - 2)
-        val linjer = behov.path("Utbetaling").path("linjer")
+        val behov1 = testRapid.inspektør.melding(testRapid.inspektør.antall() - 2)
+        val linjer1 = behov1.path("Utbetaling").path("linjer")
 
         assertTrue(testRapid.inspektør.behovtypeSisteMelding(Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling))
-        assertEquals(1, linjer.size())
-        assertEquals("Utbetaling", behov.path("@behov")[0].asText())
-        assertEquals(ORGNUMMER, behov.path("organisasjonsnummer").asText())
-        assertEquals("SPREFAGFER-IOP", linjer[0].path("klassekode").asText())
-        assertEquals("ENG", linjer[0].path("satstype").asText())
-        assertEquals(1460, linjer[0].path("sats").asInt())
-        assertEquals(1460, linjer[0].path("totalbeløp").asInt())
+        assertEquals(1, linjer1.size())
+        assertEquals("Utbetaling", behov1.path("@behov")[0].asText())
+        assertEquals(ORGNUMMER, behov1.path("organisasjonsnummer").asText())
+        val utbetalingId1 = behov1.path("utbetalingId").asText()
+        assertTrue(utbetalingId1.isNotBlank())
+        assertEquals("SPREFAGFER-IOP", linjer1[0].path("klassekode").asText())
+        assertEquals("ENG", linjer1[0].path("satstype").asText())
+        assertEquals(1460, linjer1[0].path("sats").asInt())
+        assertEquals(1460, linjer1[0].path("totalbeløp").asInt())
 
         val behov2 = testRapid.inspektør.melding(testRapid.inspektør.antall() - 1)
         val linjer2 = behov2.path("Utbetaling").path("linjer")
@@ -295,9 +299,13 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
         assertEquals(1, linjer2.size())
         assertEquals("Utbetaling", behov2.path("@behov")[0].asText())
         assertEquals("321654987", behov2.path("organisasjonsnummer").asText())
+        val utbetalingId2 = behov2.path("utbetalingId").asText()
+        assertTrue(utbetalingId2.isNotBlank())
         assertEquals("SPREFAGFER-IOP", linjer2[0].path("klassekode").asText())
         assertEquals("ENG", linjer2[0].path("satstype").asText())
         assertEquals(-334, linjer2[0].path("sats").asInt())
         assertEquals(-334, linjer2[0].path("totalbeløp").asInt())
+
+        assertNotEquals(utbetalingId1, utbetalingId2)
     }
 }
