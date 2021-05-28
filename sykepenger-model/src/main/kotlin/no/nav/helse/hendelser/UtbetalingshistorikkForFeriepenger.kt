@@ -55,7 +55,7 @@ class UtbetalingshistorikkForFeriepenger(
     ) {
         internal companion object {
             internal fun Iterable<Feriepenger>.utbetalteFeriepengerTilPerson(opptjeningsår: Year) =
-                filter { it.orgnummer.all('0'::equals) }.filter { Year.from(it.fom) == opptjeningsår.plusYears(1) }.sumBy { it.beløp }
+                filter { it.orgnummer.all('0'::equals) }.filter { Year.from(it.fom) == opptjeningsår.plusYears(1) }.map { it.beløp }
 
             internal fun Iterable<Feriepenger>.utbetalteFeriepengerTilArbeidsgiver(orgnummer: String, opptjeningsår: Year) =
                 filter { it.orgnummer == orgnummer }.filter { Year.from(it.fom) == opptjeningsår.plusYears(1) }.map { it.beløp }

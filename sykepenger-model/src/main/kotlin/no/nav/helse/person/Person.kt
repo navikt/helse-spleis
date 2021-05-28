@@ -95,7 +95,7 @@ class Person private constructor(
         val feriepengepengebeløpPersonUtbetaltAvInfotrygd = utbetalingshistorikk.utbetalteFeriepengerTilPerson()
         val beregnetFeriepengebeløpPersonInfotrygd = feriepengeberegner.beregnFeriepengerForInfotrygdPerson().roundToInt()
 
-        if (feriepengepengebeløpPersonUtbetaltAvInfotrygd != beregnetFeriepengebeløpPersonInfotrygd) {
+        if (beregnetFeriepengebeløpPersonInfotrygd !in feriepengepengebeløpPersonUtbetaltAvInfotrygd) {
             sikkerLogg.info(
                 """
                 Beregnet feriepengebeløp til person i IT samsvarer ikke med faktisk utbetalt beløp
