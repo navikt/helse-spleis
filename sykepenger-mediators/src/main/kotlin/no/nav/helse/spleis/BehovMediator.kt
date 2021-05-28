@@ -44,7 +44,7 @@ internal class BehovMediator(
                     }
                     .let { JsonMessage.newMessage(it) }
                     .also {
-                        sikkerLogg.info("sender {} som {}", id, it.toJson())
+                        sikkerLogg.info("sender behov for {}:\n{}", behovMap.keys, it.toJson())
                         rapidsConnection.publish(hendelse.fødselsnummer(), it.toJson())
                     }
             }

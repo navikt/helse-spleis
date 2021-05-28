@@ -32,7 +32,7 @@ internal abstract class HendelseMessage(private val packet: JsonMessage) {
     }
 
     internal fun logRecognized(logger: Logger) {
-        logger.info("gjenkjente melding id={} for fnr={} som {}:\n{}", id, fødselsnummer, this::class.simpleName, toJson())
+        logger.info("gjenkjente {} med id={} for fnr={}:\n{}", this::class.simpleName, id, fødselsnummer, toJson())
     }
 
     internal fun secureDiagnosticinfo() = mapOf(
