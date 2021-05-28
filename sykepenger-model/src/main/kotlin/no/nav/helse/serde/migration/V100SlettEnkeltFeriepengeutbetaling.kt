@@ -8,7 +8,8 @@ internal class V100SlettEnkeltFeriepengeutbetaling : JsonMigration(version = 100
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode["arbeidsgivere"]
-            .map { it["feriepengeutbetalinger"] as ArrayNode }
+            .map { it["feriepengeutbetalinger"] }
+            .filterIsInstance<ArrayNode>()
             .forEach { feriepengeutbetalinger ->
                 feriepengeutbetalinger.removeAll { it["utbetalingId"].asText() == "66d6a594-5b5b-41c4-be0c-1841506b594b" }
             }

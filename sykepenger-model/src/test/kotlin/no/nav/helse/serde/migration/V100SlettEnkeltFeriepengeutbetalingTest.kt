@@ -11,6 +11,11 @@ internal class V100SlettEnkeltFeriepengeutbetalingTest {
         assertEquals(toNode(expected), migrer(original))
     }
 
+    @Test
+    fun `godtar vedtaksperioder uten feriepengeutbetalinger`() {
+        assertEquals(toNode(expectedNoFerieutbetaling), migrer(noFerieutbetaling))
+    }
+
     private fun toNode(json: String) = serdeObjectMapper.readTree(json)
 
     private fun migrer(json: String) = listOf(V100SlettEnkeltFeriepengeutbetaling()).migrate(toNode(json))
@@ -46,6 +51,26 @@ private val expected = """{
           "opptjeningsår": "2018"
         }
       ]
+    }
+  ],
+  "skjemaVersjon": 100
+}
+"""
+
+@Language("JSON")
+private val noFerieutbetaling = """{
+  "arbeidsgivere": [
+    {
+    }
+  ],
+  "skjemaVersjon": 99
+}
+"""
+
+@Language("JSON")
+private val expectedNoFerieutbetaling = """{
+  "arbeidsgivere": [
+    {
     }
   ],
   "skjemaVersjon": 100
