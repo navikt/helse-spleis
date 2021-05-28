@@ -216,9 +216,14 @@ internal class Feriepengeberegner(
 
             override fun postVisitUtbetalinger(utbetalinger: List<Utbetaling>) {
                 inUtbetalinger = false
+                utbetalteDager.addAll(utbetalteDagerForFagsystemId.values.flatten())
             }
 
             private var utbetaltUtbetaling = false
+            private var annullertUtbetaling = false
+            val utbetalteDagerForFagsystemId = mutableMapOf<String, MutableList<UtbetaltDag>>()
+            var utbetalteDagerForOppdrag = mutableListOf<UtbetaltDag>()
+
             override fun preVisitUtbetaling(
                 utbetaling: Utbetaling,
                 id: UUID,
@@ -234,6 +239,14 @@ internal class Feriepengeberegner(
                 gjenståendeSykedager: Int?
             ) {
                 utbetaltUtbetaling = tilstand == Utbetaling.Utbetalt
+                annullertUtbetaling = tilstand == Utbetaling.Annullert
+            }
+
+            override fun preVisitOppdrag(oppdrag: Oppdrag, totalBeløp: Int, nettoBeløp: Int, tidsstempel: LocalDateTime) {
+                if (utbetaltUtbetaling || annullertUtbetaling) {
+                    utbetalteDagerForOppdrag = mutableListOf()
+                    utbetalteDagerForFagsystemId[oppdrag.fagsystemId()] = utbetalteDagerForOppdrag
+                }
             }
 
             override fun visitUtbetalingslinje(
@@ -252,7 +265,9 @@ internal class Feriepengeberegner(
                 klassekode: Klassekode
             ) {
                 if (inUtbetalinger && utbetaltUtbetaling && beløp != null) {
-                    utbetalteDager.addAll((fom til tom).filterNot { it.erHelg() }.map { UtbetaltDag.SpleisArbeidsgiver(this.orgnummer, it, beløp) })
+                    utbetalteDagerForOppdrag.addAll((fom til tom).filterNot { it.erHelg() }.map {
+                        UtbetaltDag.SpleisArbeidsgiver(this.orgnummer, it, beløp)
+                    })
                 }
             }
 
