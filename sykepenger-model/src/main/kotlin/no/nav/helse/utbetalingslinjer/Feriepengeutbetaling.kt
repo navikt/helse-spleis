@@ -65,7 +65,7 @@ internal class Feriepengeutbetaling private constructor(
         lagreInformasjon(utbetalingHendelse, utbetaltOk)
 
         if (!utbetaltOk) {
-            sikkerLogg.info("Utbetaling av feriepenger med fagsystemId fagsystemId() feilet.")
+            sikkerLogg.info("Utbetaling av feriepenger med utbetalingId $utbetalingId og fagsystemId ${oppdrag.fagsystemId()} feilet.")
             return
         }
 
