@@ -93,7 +93,7 @@ internal class Utbetaling private constructor(
     private val observers = mutableSetOf<UtbetalingObserver>()
     private var forrigeHendelse: ArbeidstakerHendelse? = null
 
-    internal enum class Utbetalingtype { UTBETALING, ETTERUTBETALING, ANNULLERING, REVURDERING }
+    internal enum class Utbetalingtype { UTBETALING, ETTERUTBETALING, ANNULLERING, REVURDERING, FERIEPENGER }
 
     private fun harHåndtert(hendelse: ArbeidstakerHendelse) =
         (hendelse == forrigeHendelse).also { forrigeHendelse = hendelse }

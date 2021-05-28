@@ -125,7 +125,8 @@ internal interface FeriepengeutbetalingVisitor : OppdragVisitor {
         infotrygdFeriepengebeløpArbeidsgiver: Double,
         spleisFeriepengebeløpArbeidsgiver: Double,
         overføringstidspunkt: LocalDateTime?,
-        avstemmingsnøkkel: Long?
+        avstemmingsnøkkel: Long?,
+        utbetalingId: UUID
     ) {
     }
 

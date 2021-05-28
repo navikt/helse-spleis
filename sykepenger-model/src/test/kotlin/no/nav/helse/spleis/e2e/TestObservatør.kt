@@ -15,6 +15,7 @@ internal class TestObservatør : PersonObserver {
     val utbetalingUtenUtbetalingEventer = mutableListOf<PersonObserver.UtbetalingUtbetaltEvent>()
     val utbetalingMedUtbetalingEventer = mutableListOf<PersonObserver.UtbetalingUtbetaltEvent>()
     val feriepengerUtbetaltEventer = mutableListOf<PersonObserver.FeriepengerUtbetaltEvent>()
+    val feriepengerUtbetaltEndretEventer = mutableListOf<PersonObserver.UtbetalingEndretEvent>()
     val vedtakFattetEvent = mutableMapOf<UUID, PersonObserver.VedtakFattetEvent>()
 
     private lateinit var sisteVedtaksperiode: UUID
@@ -53,6 +54,10 @@ internal class TestObservatør : PersonObserver {
 
     override fun feriepengerUtbetalt(event: PersonObserver.FeriepengerUtbetaltEvent) {
         feriepengerUtbetaltEventer.add(event)
+    }
+
+    override fun utbetalingEndret(event: PersonObserver.UtbetalingEndretEvent) {
+        feriepengerUtbetaltEndretEventer.add(event)
     }
 
     override fun vedtakFattet(event: PersonObserver.VedtakFattetEvent) {

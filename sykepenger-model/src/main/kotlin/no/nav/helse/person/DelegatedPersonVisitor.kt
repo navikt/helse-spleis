@@ -285,7 +285,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         infotrygdFeriepengebeløpArbeidsgiver: Double,
         spleisFeriepengebeløpArbeidsgiver: Double,
         overføringstidspunkt: LocalDateTime?,
-        avstemmingsnøkkel: Long?
+        avstemmingsnøkkel: Long?,
+        utbetalingId: UUID
     ) {
         delegatee.preVisitFeriepengeutbetaling(
             feriepengeutbetaling,
@@ -293,7 +294,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             infotrygdFeriepengebeløpArbeidsgiver,
             spleisFeriepengebeløpArbeidsgiver,
             overføringstidspunkt,
-            avstemmingsnøkkel
+            avstemmingsnøkkel,
+            utbetalingId
         )
     }
 

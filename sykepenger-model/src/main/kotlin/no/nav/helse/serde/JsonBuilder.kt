@@ -233,12 +233,14 @@ internal class JsonBuilder : AbstractBuilder() {
             infotrygdFeriepengebeløpArbeidsgiver: Double,
             spleisFeriepengebeløpArbeidsgiver: Double,
             overføringstidspunkt: LocalDateTime?,
-            avstemmingsnøkkel: Long?
+            avstemmingsnøkkel: Long?,
+            utbetalingId: UUID
         ) {
             val feriepengeutbetalingMap = mutableMapOf<String, Any>(
                 "infotrygdFeriepengebeløpPerson" to infotrygdFeriepengebeløpPerson,
                 "infotrygdFeriepengebeløpArbeidsgiver" to infotrygdFeriepengebeløpArbeidsgiver,
-                "spleisFeriepengebeløpArbeidsgiver" to spleisFeriepengebeløpArbeidsgiver
+                "spleisFeriepengebeløpArbeidsgiver" to spleisFeriepengebeløpArbeidsgiver,
+                "utbetalingId" to utbetalingId
             )
             pushState(OppdragState(feriepengeutbetalingMap))
             pushState(FeriepengeberegnerState(feriepengeutbetalingMap))

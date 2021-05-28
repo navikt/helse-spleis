@@ -66,6 +66,7 @@ internal class FeriepengeArbeidsgiverTest() : AbstractEndToEndTest() {
             spleisFeriepengebeløpArbeidsgiver: Double,
             overføringstidspunkt: LocalDateTime?,
             avstemmingsnøkkel: Long?,
+            utbetalingId: UUID,
         ) {
             this.infotrygdFeriepengebeløpPerson = infotrygdFeriepengebeløpPerson
             this.infotrygdFeriepengebeløpArbeidsgiver = infotrygdFeriepengebeløpArbeidsgiver

@@ -8,6 +8,7 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.serde.reflection.castAsList
 import no.nav.helse.serde.serdeObjectMapper
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Endringskode
@@ -488,7 +489,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Sender ut event etter mottak av kvittering fra oppdrag`() {
+    fun `Sender ut events etter mottak av kvittering fra oppdrag`() {
         Toggles.SendFeriepengeOppdrag.enable {
             håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 30.juni(2020), 100.prosent))
             håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.juni(2020), 30.juni(2020), 100.prosent))
@@ -525,6 +526,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
                 assertEquals("2021-05-31", linje["tom"])
                 assertEquals(1460, linje["totalbeløp"])
             }
+            assertTrue(observatør.feriepengerUtbetaltEndretEventer.any { it.arbeidsgiverOppdrag["linjer"].castAsList<Map<String, Any>>().single()["satstype"] == "ENG" })
         }
     }
 

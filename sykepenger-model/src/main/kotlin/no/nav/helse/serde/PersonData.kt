@@ -648,6 +648,7 @@ internal data class PersonData(
             private val opptjeningsår: Year,
             private val utbetalteDager: List<UtbetaltDagData>,
             private val feriepengedager: List<UtbetaltDagData>,
+            val utbetalingId: UUID,
 
             ) {
 
@@ -660,7 +661,8 @@ internal data class PersonData(
                         infotrygdFeriepengebeløpPerson,
                         infotrygdFeriepengebeløpArbeidsgiver,
                         spleisFeriepengebeløpArbeidsgiver,
-                        oppdrag.konverterTilOppdrag()
+                        oppdrag.konverterTilOppdrag(),
+                        utbetalingId
                     )
             }
 

@@ -258,6 +258,7 @@ internal class TestArbeidsgiverInspektør(
         spleisFeriepengebeløpArbeidsgiver: Double,
         overføringstidspunkt: LocalDateTime?,
         avstemmingsnøkkel: Long?,
+        utbetalingId: UUID,
     ) {
         inFeriepengeutbetaling = true
         this.infotrygdFeriepengebeløpArbeidsgiver.add(infotrygdFeriepengebeløpArbeidsgiver)

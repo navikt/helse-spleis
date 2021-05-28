@@ -7,10 +7,12 @@ import no.nav.helse.person.FeriepengeutbetalingVisitor
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.serde.reflection.OppdragReflect
+import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.time.Month
+import java.util.*
 import kotlin.math.roundToInt
 
 internal class Feriepengeutbetaling private constructor(
@@ -18,7 +20,8 @@ internal class Feriepengeutbetaling private constructor(
     private val infotrygdFeriepengebeløpPerson: Double,
     private val infotrygdFeriepengebeløpArbeidsgiver: Double,
     private val spleisFeriepengebeløpArbeidsgiver: Double,
-    private val oppdrag: Oppdrag
+    private val oppdrag: Oppdrag,
+    val utbetalingId: UUID
 ) {
     var overføringstidspunkt: LocalDateTime? = null
     var avstemmingsnøkkel: Long? = null
@@ -42,6 +45,7 @@ internal class Feriepengeutbetaling private constructor(
             spleisFeriepengebeløpArbeidsgiver,
             overføringstidspunkt,
             avstemmingsnøkkel,
+            utbetalingId
         )
         feriepengeberegner.accept(visitor)
         oppdrag.accept(visitor)
@@ -73,6 +77,17 @@ internal class Feriepengeutbetaling private constructor(
                 arbeidsgiverOppdrag = OppdragReflect(oppdrag).toMap(),
             )
         )
+
+        person.utbetalingEndret(
+            PersonObserver.UtbetalingEndretEvent(
+                utbetalingId = utbetalingId,
+                type = Utbetaling.Utbetalingtype.FERIEPENGER.name,
+                arbeidsgiverOppdrag = OppdragReflect(oppdrag).toBehovMap(),
+                personOppdrag = OppdragReflect(Oppdrag(utbetalingHendelse.fødselsnummer(), Fagområde.SykepengerRefusjon)).toBehovMap(),
+                forrigeStatus = Utbetalingstatus.fraTilstand(Utbetaling.Ubetalt).name,
+                gjeldendeStatus = Utbetalingstatus.fraTilstand(Utbetaling.Utbetalt).name
+            )
+        )
     }
 
     private fun lagreInformasjon(hendelse: UtbetalingHendelse, gikkBra: Boolean) {
@@ -96,7 +111,8 @@ internal class Feriepengeutbetaling private constructor(
             val hvaViHarBeregnetAtInfotrygdHarUtbetaltTilArbeidsgiver = feriepengeberegner.beregnUtbetalteFeriepengerForInfotrygdArbeidsgiver(orgnummer)
 
             if (hvaViHarBeregnetAtInfotrygdHarUtbetaltTilArbeidsgiver.roundToInt() != 0 &&
-                hvaViHarBeregnetAtInfotrygdHarUtbetaltTilArbeidsgiver.roundToInt() !in infotrygdHarUtbetaltTilArbeidsgiver) {
+                hvaViHarBeregnetAtInfotrygdHarUtbetaltTilArbeidsgiver.roundToInt() !in infotrygdHarUtbetaltTilArbeidsgiver
+            ) {
                 sikkerLogg.info(
                     """
                     Beregnet feriepengebeløp til arbeidsgiver i IT samsvarer ikke med faktisk utbetalt beløp
@@ -168,7 +184,8 @@ internal class Feriepengeutbetaling private constructor(
                 infotrygdFeriepengebeløpPerson = infotrygdFeriepengebeløpPerson,
                 infotrygdFeriepengebeløpArbeidsgiver = infotrygdFeriepengebeløpArbeidsgiver,
                 spleisFeriepengebeløpArbeidsgiver = spleisFeriepengebeløpArbeidsgiver,
-                oppdrag = oppdrag
+                oppdrag = oppdrag,
+                utbetalingId = UUID.randomUUID()
             )
         }
     }
