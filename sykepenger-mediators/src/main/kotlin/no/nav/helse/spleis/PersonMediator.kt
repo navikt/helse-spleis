@@ -23,7 +23,7 @@ internal class PersonMediator(
     private val hendelse: PersonHendelse,
     private val hendelseRepository: HendelseRepository
 ) : PersonObserver {
-    private val meldinger = mutableListOf<Pair<String, String>>()
+    private val meldinger = mutableListOf<Pakke>()
     private val replays = mutableListOf<String>()
     private var vedtak = false
 
@@ -48,8 +48,8 @@ internal class PersonMediator(
     private fun sendUtgåendeMeldinger(rapidsConnection: RapidsConnection) {
         if (meldinger.isEmpty()) return
         message.logOutgoingMessages(sikkerLogg, meldinger.size)
-        meldinger.forEach { (fødselsnummer, melding) ->
-            rapidsConnection.publish(fødselsnummer, melding.also { sikkerLogg.info("sender $it") })
+        meldinger.forEach { (fødselsnummer, eventName, melding) ->
+            rapidsConnection.publish(fødselsnummer, melding.also { sikkerLogg.info("sender $eventName: $it") })
         }
     }
 
@@ -61,8 +61,8 @@ internal class PersonMediator(
         }
     }
 
-    private fun queueMessage(fødselsnummer: String, message: String) {
-        meldinger.add(fødselsnummer to message)
+    private fun queueMessage(fødselsnummer: String, eventName: String, message: String) {
+        meldinger.add(Pakke(fødselsnummer, eventName, message))
     }
 
     override fun inntektsmeldingReplay(event: PersonObserver.InntektsmeldingReplayEvent) {
@@ -301,8 +301,8 @@ internal class PersonMediator(
         ))
     }
 
-    private fun leggPåStandardfelter(event: String, outgoingMessage: JsonMessage) = outgoingMessage.apply {
-        this["@event_name"] = event
+    private fun leggPåStandardfelter(eventName: String, outgoingMessage: JsonMessage) = outgoingMessage.apply {
+        this["@event_name"] = eventName
         this["@id"] = UUID.randomUUID()
         this["@opprettet"] = LocalDateTime.now()
         this["@forårsaket_av"] = message.tracinginfo()
@@ -313,7 +313,14 @@ internal class PersonMediator(
         }
     }
 
-    private fun queueMessage(event: String, outgoingMessage: JsonMessage) {
-        queueMessage(hendelse.fødselsnummer(), leggPåStandardfelter(event, outgoingMessage).toJson())
+    private fun queueMessage(eventName: String, outgoingMessage: JsonMessage) {
+        queueMessage(hendelse.fødselsnummer(), eventName, leggPåStandardfelter(eventName, outgoingMessage).toJson())
     }
+
+    private data class Pakke (
+        val fødselsnummer: String,
+        val eventName: String,
+        val blob: String,
+    )
+
 }
