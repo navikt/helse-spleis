@@ -408,7 +408,7 @@ internal class Vedtaksperiode private constructor(
 
         if (grunnlagForSykepengegrunnlag == null) return person.invaliderAllePerioder(vilkårsgrunnlag, "Har ikke inntekt på skjæringstidspunkt ved vilkårsvurdering")
 
-        if (vilkårsgrunnlag.valider(grunnlagForSykepengegrunnlag, sammenligningsgrunnlag ?: Inntekt.INGEN, skjæringstidspunkt, periodetype()).hasErrorsOrWorse()
+        if (vilkårsgrunnlag.valider(grunnlagForSykepengegrunnlag, sammenligningsgrunnlag ?: Inntekt.INGEN, skjæringstidspunkt, periodetype(), person.antallArbeidsgivereMedOverlappendeVedtaksperioder(this)).hasErrorsOrWorse()
                 .also {
                     mottaVilkårsvurdering(vilkårsgrunnlag.grunnlagsdata())
                     person.vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag, skjæringstidspunkt)

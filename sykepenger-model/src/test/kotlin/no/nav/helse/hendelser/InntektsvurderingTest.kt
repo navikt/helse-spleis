@@ -53,7 +53,7 @@ internal class InntektsvurderingTest {
     @Test
     fun `flere organisasjoner siste 3 måneder gir warning`() {
         val annenInntekt = "etAnnetOrgnr" to INNTEKT
-        assertTrue(validererOk(inntektsvurdering(inntekter(YearMonth.of(2017, 12), annenInntekt)), INNTEKT, INNTEKT))
+        assertTrue(validererOk(inntektsvurdering(inntekter(YearMonth.of(2017, 12), annenInntekt)), INNTEKT, INNTEKT, 1))
         assertTrue(aktivitetslogg.hasWarningsOrWorse())
         assertTrue(validererOk(inntektsvurdering(inntekter(YearMonth.of(2017, 11), annenInntekt)), INNTEKT, INNTEKT))
         assertTrue(aktivitetslogg.hasWarningsOrWorse())
@@ -61,6 +61,15 @@ internal class InntektsvurderingTest {
         assertTrue(aktivitetslogg.hasWarningsOrWorse())
         assertTrue(validererOk(inntektsvurdering(inntekter(YearMonth.of(2017, 9), annenInntekt)), INNTEKT, INNTEKT))
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
+        assertTrue(validererOk(inntektsvurdering(inntekter(YearMonth.of(2017, 12), annenInntekt)), INNTEKT, INNTEKT, 2))
+        assertFalse(aktivitetslogg.hasWarningsOrWorse())
+    }
+
+    @Test
+    fun `Inntekter for flere arbeidsgivere enn arbeidsgivere med overlappende sykdom gir warning`() {
+        val annenInntekt = "etAnnetOrgnr" to INNTEKT
+        assertTrue(validererOk(inntektsvurdering(inntekter(YearMonth.of(2017, 12), annenInntekt)), INNTEKT, INNTEKT))
+        assertTrue(aktivitetslogg.hasWarningsOrWorse())
     }
 
     private fun inntekter(periode: YearMonth, inntekt: Pair<String, Inntekt>) =
@@ -73,13 +82,14 @@ internal class InntektsvurderingTest {
             }
         }
 
-    private fun validererOk(inntektsvurdering: Inntektsvurdering, grunnlagForSykepengegrunnlag: Inntekt, sammenligningsgrunnlag: Inntekt): Boolean {
+    private fun validererOk(inntektsvurdering: Inntektsvurdering, grunnlagForSykepengegrunnlag: Inntekt, sammenligningsgrunnlag: Inntekt, antallArbeidsgivereMedOverlappendeVedtaksperioder: Int = 1): Boolean {
         aktivitetslogg = Aktivitetslogg()
         return inntektsvurdering.valider(
             aktivitetslogg,
             grunnlagForSykepengegrunnlag,
             sammenligningsgrunnlag,
-            Periodetype.FØRSTEGANGSBEHANDLING
+            Periodetype.FØRSTEGANGSBEHANDLING,
+            antallArbeidsgivereMedOverlappendeVedtaksperioder
         )
 
     }

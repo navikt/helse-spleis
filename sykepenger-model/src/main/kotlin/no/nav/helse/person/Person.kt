@@ -3,13 +3,13 @@ package no.nav.helse.person
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
+import no.nav.helse.person.Arbeidsgiver.Companion.antallArbeidsgivereMedOverlappendeVedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.forlengerIkkeBareAnnenArbeidsgiver
 import no.nav.helse.person.Arbeidsgiver.Companion.forlengerSammePeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSammenligningsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntekt
-import no.nav.helse.person.Arbeidsgiver.Companion.harOverlappendePeriodeHosAnnenArbeidsgiver
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -378,7 +378,10 @@ class Person private constructor(
         arbeidsgivere.forlengerIkkeBareAnnenArbeidsgiver(arbeidsgiver, vedtaksperiode)
 
     internal fun harOverlappendePeriodeHosAnnenArbeidsgiver(vedtaksperiode: Vedtaksperiode) =
-        arbeidsgivere.harOverlappendePeriodeHosAnnenArbeidsgiver(vedtaksperiode)
+        arbeidsgivere.antallArbeidsgivereMedOverlappendeVedtaksperioder(vedtaksperiode) > 1
+
+    internal fun antallArbeidsgivereMedOverlappendeVedtaksperioder(vedtaksperiode: Vedtaksperiode) =
+        arbeidsgivere.antallArbeidsgivereMedOverlappendeVedtaksperioder(vedtaksperiode)
 
     internal fun lagreDødsdato(dødsdato: LocalDate) {
         this.dødsdato = dødsdato

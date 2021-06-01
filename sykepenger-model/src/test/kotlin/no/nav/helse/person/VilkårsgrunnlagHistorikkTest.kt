@@ -29,7 +29,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             opptjeningvurdering = Opptjeningvurdering(listOf(Opptjeningvurdering.Arbeidsforhold("123456789", 1.desember(2017)))),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja)
         )
-        vilkårsgrunnlag.valider(10000.månedlig, 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING)
+        vilkårsgrunnlag.valider(10000.månedlig, 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag, 1.januar)
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
         assertTrue(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!.isOk())
@@ -48,7 +48,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             opptjeningvurdering = Opptjeningvurdering(listOf(Opptjeningvurdering.Arbeidsforhold("123456789", 1.desember(2017)))),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei)
         )
-        vilkårsgrunnlag.valider(10000.månedlig, 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING)
+        vilkårsgrunnlag.valider(10000.månedlig, 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag, 1.januar)
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
         assertFalse(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!.isOk())
@@ -143,7 +143,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             opptjeningvurdering = Opptjeningvurdering(listOf(Opptjeningvurdering.Arbeidsforhold("123456789", 1.desember(2017)))),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei)
         )
-        vilkårsgrunnlag1.valider(10000.månedlig, 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING)
+        vilkårsgrunnlag1.valider(10000.månedlig, 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)
         val vilkårsgrunnlag2 = Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = UUID.randomUUID().toString(),
@@ -154,7 +154,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             opptjeningvurdering = Opptjeningvurdering(listOf(Opptjeningvurdering.Arbeidsforhold("123456789", 1.desember(2017)))),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja)
         )
-        vilkårsgrunnlag2.valider(10000.månedlig, 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING)
+        vilkårsgrunnlag2.valider(10000.månedlig, 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag1, 10.januar)
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag2, 1.januar)
         val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 3.NAV, 2.HELG, 5.NAV)
@@ -175,7 +175,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             opptjeningvurdering = Opptjeningvurdering(listOf(Opptjeningvurdering.Arbeidsforhold("123456789", 1.desember(2017)))),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei)
         )
-        vilkårsgrunnlag1.valider(10000.månedlig, 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING)
+        vilkårsgrunnlag1.valider(10000.månedlig, 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)
         val vilkårsgrunnlag2 = Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = UUID.randomUUID().toString(),
@@ -186,7 +186,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             opptjeningvurdering = Opptjeningvurdering(listOf(Opptjeningvurdering.Arbeidsforhold("123456789", 1.desember(2017)))),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja)
         )
-        vilkårsgrunnlag2.valider(10000.månedlig, 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING)
+        vilkårsgrunnlag2.valider(10000.månedlig, 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag1, 10.januar)
         vilkårsgrunnlagHistorikk.lagre(1.januar, VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag())
         val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 3.NAV, 2.HELG, 5.NAV)

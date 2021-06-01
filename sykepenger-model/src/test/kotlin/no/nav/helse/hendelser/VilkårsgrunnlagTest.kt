@@ -126,7 +126,7 @@ internal class VilkårsgrunnlagTest {
             Opptjeningvurdering.Arbeidsforhold("ORGNR1", 1.januar, 14.januar),
             Opptjeningvurdering.Arbeidsforhold("ORGNR2", 15.januar, null)
         ))
-        vilkårsgrunnlag.valider(INNTEKT, INNTEKT, 31.januar, Periodetype.FØRSTEGANGSBEHANDLING)
+        vilkårsgrunnlag.valider(INNTEKT, INNTEKT, 31.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)
 
         assertFalse(vilkårsgrunnlag.hasWarningsOrWorse())
     }

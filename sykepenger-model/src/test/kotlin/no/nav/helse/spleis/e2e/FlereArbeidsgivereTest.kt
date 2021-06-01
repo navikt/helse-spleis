@@ -2193,6 +2193,67 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
 
     }
 
+    @Test
+    fun `To arbeidsgivere med sykdom gir ikke warning for flere inntekter de siste tre månedene`() {
+        Toggles.FlereArbeidsgivereFørstegangsbehandling.enable {
+            val periode = 1.januar(2021) til 31.januar(2021)
+            håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+            håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+            håndterUtbetalingshistorikk(1.vedtaksperiode(a1), inntektshistorikk = emptyList(), orgnummer = a1)
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+            håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021)), førsteFraværsdag = 1.januar(2021), orgnummer = a1)
+            håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021)), førsteFraværsdag = 1.januar(2021), orgnummer = a2)
+            håndterYtelser(1.vedtaksperiode(a1), inntektshistorikk = emptyList(), orgnummer = a1)
+            håndterVilkårsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1, inntektsvurdering = Inntektsvurdering(
+                inntekter = inntektperioder {
+                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                    1.januar(2020) til 1.desember(2020) inntekter {
+                        a1 inntekt INNTEKT
+                        a2 inntekt INNTEKT
+                    }
+                }
+            ))
+            håndterYtelser(1.vedtaksperiode(a1), inntektshistorikk = emptyList(), orgnummer = a1)
+            håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), true, a1)
+            håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterYtelser(1.vedtaksperiode(a2), inntektshistorikk = emptyList(), orgnummer = a2)
+            håndterSimulering(1.vedtaksperiode(a2), orgnummer = a2)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode(a2), true, a2)
+            håndterUtbetalt(1.vedtaksperiode(a2), orgnummer = a2)
+
+            assertNoWarnings(a2.inspektør)
+            assertNoWarnings(a1.inspektør)
+        }
+    }
+
+    @Test
+    fun `En arbeidsgiver får warning hvis vi finner inntekter for flere arbeidsgivere de siste tre månedene`(){
+        val periode = 1.januar(2021) til 31.januar(2021)
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+        håndterUtbetalingshistorikk(1.vedtaksperiode(a1), inntektshistorikk = emptyList(), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021)), førsteFraværsdag = 1.januar(2021), orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode(a1), inntektshistorikk = emptyList(), orgnummer = a1)
+        håndterVilkårsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.januar(2020) til 1.desember(2020) inntekter {
+                    a1 inntekt INNTEKT
+                    a2 inntekt 1000.månedlig
+                }
+            }
+        ))
+        håndterYtelser(1.vedtaksperiode(a1), inntektshistorikk = emptyList(), orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), true, a1)
+        håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
+
+        assertWarnings(a1.inspektør)
+        assertTrue(a1.inspektør.personLogg.toString().contains("Brukeren har flere inntekter de siste tre måneder enn det som er brukt i sykepengegrunnlaget. Kontroller om brukeren har andre arbeidsforhold eller ytelser på sykmeldingstidspunktet som påvirker utbetalingen."))
+    }
+
     private fun assertTilstand(
         orgnummer: String,
         tilstand: TilstandType,

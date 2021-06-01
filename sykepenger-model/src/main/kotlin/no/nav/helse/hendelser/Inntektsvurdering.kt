@@ -1,9 +1,12 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.hendelser.Inntektsvurdering.ArbeidsgiverInntekt.MånedligInntekt.Companion.nylig
-import no.nav.helse.person.*
+import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.Inntektshistorikk
+import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Periodetype.FORLENGELSE
 import no.nav.helse.person.Periodetype.INFOTRYGDFORLENGELSE
+import no.nav.helse.person.Person
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import no.nav.helse.økonomi.Inntekt.Companion.årligGjennomsnitt
@@ -26,13 +29,14 @@ class Inntektsvurdering(
         aktivitetslogg: IAktivitetslogg,
         grunnlagForSykepengegrunnlag: Inntekt,
         sammenligningsgrunnlag: Inntekt,
-        periodetype: Periodetype
+        periodetype: Periodetype,
+        antallArbeidsgivereMedOverlappendeVedtaksperioder: Int
     ): Boolean  {
 
         if (inntekter.antallMåneder() > 12) aktivitetslogg.error("Forventer 12 eller færre inntektsmåneder")
-        if (inntekter.kilder(3) > 1) {
+        if (inntekter.kilder(3) > antallArbeidsgivereMedOverlappendeVedtaksperioder) {
             val melding =
-                "Brukeren har flere inntekter de siste tre måneder. Kontroller om brukeren har flere arbeidsforhold eller andre ytelser på sykmeldingstidspunktet som påvirker utbetalingen."
+                "Brukeren har flere inntekter de siste tre måneder enn det som er brukt i sykepengegrunnlaget. Kontroller om brukeren har andre arbeidsforhold eller ytelser på sykmeldingstidspunktet som påvirker utbetalingen."
             if (periodetype in listOf(INFOTRYGDFORLENGELSE, FORLENGELSE))
                 aktivitetslogg.info(melding)
             else {
