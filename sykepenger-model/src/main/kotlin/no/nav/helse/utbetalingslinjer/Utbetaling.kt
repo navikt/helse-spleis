@@ -468,8 +468,8 @@ internal class Utbetaling private constructor(
         visitor.postVisitArbeidsgiverOppdrag(arbeidsgiverOppdrag)
         visitor.preVisitPersonOppdrag(personOppdrag)
         personOppdrag.accept(visitor)
-        vurdering?.accept(visitor)
         visitor.postVisitPersonOppdrag(personOppdrag)
+        vurdering?.accept(visitor)
         visitor.postVisitUtbetaling(this, id, beregningId, type, tilstand, tidsstempel, oppdatert, arbeidsgiverOppdrag.nettoBeløp(), personOppdrag.nettoBeløp(), maksdato, forbrukteSykedager, gjenståendeSykedager)
     }
 

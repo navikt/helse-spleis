@@ -13,14 +13,14 @@ import java.util.*
 internal class UtbetalingshistorikkBuilder : BuilderState() {
     private val utbetalingberegninger = Utbetalingberegninger()
     private val sykdomshistorikkElementBuilders = mutableListOf<SykdomshistorikkElementBuilder>()
-    private val utbetalingstidslinjeBuilders = mutableListOf<UtbetalingstidslinjeInfo>()
+    private val utbetalingstidslinjeBuilders = mutableListOf<UtbetalingInfo>()
 
-    internal fun build() = UtbetalingstidslinjeInfo
+    internal fun build() = UtbetalingInfo
         .utbetalinger(utbetalingstidslinjeBuilders, utbetalingberegninger)
         .mapNotNull { sykdomshistorikkElementBuilders.build(it.key, it.value) }
         .reversed()
 
-    private data class UtbetalingstidslinjeInfo(
+    private data class UtbetalingInfo(
         private val beregningId: UUID,
         private val type: String,
         private val maksdato: LocalDate,
@@ -28,22 +28,24 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
         private val gjenståendeSykedager: Int?,
         private val forbrukteSykedager: Int?,
         private val arbeidsgiverNettoBeløp: Int,
-        private val builder: UtbetalingstidslinjeBuilder
+        private val oppdragBuilder: OppdragBuilder,
+        private val utbetalingstidslinjeBuilder: UtbetalingstidslinjeBuilder
     ) {
         fun utbetaling() = UtbetalingshistorikkElementDTO.UtbetalingDTO(
-            utbetalingstidslinje = builder.build(),
+            utbetalingstidslinje = utbetalingstidslinjeBuilder.build(),
             beregningId = beregningId,
             type = type,
             maksdato = maksdato,
             status = status,
             gjenståendeSykedager = gjenståendeSykedager,
             forbrukteSykedager = forbrukteSykedager,
-            arbeidsgiverNettoBeløp = arbeidsgiverNettoBeløp
+            arbeidsgiverNettoBeløp = arbeidsgiverNettoBeløp,
+            arbeidsgiverFagsystemId = oppdragBuilder.build()
         )
 
         companion object {
             fun utbetalinger(
-                liste: List<UtbetalingstidslinjeInfo>,
+                liste: List<UtbetalingInfo>,
                 utbetalingberegninger: Utbetalingberegninger
             ): Map<UUID, UtbetalingshistorikkElementDTO.UtbetalingDTO> {
                 val resultat = mutableMapOf<UUID, UtbetalingshistorikkElementDTO.UtbetalingDTO>()
@@ -87,9 +89,12 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?
     ) {
+        val oppdragBuilder = OppdragBuilder()
+        pushState(oppdragBuilder)
+
         val utbetalingstidslinjeBuilder = UtbetalingstidslinjeBuilder(mutableListOf())
         utbetalingstidslinjeBuilders.add(
-            UtbetalingstidslinjeInfo(
+            UtbetalingInfo(
                 // en annullering kopierer den forrige utbetalingsens beregningId
                 beregningId = if (utbetaling.erAnnullering()) UUID.randomUUID() else beregningId,
                 type = type.name,
@@ -98,7 +103,8 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
                 gjenståendeSykedager = gjenståendeSykedager,
                 forbrukteSykedager = forbrukteSykedager,
                 arbeidsgiverNettoBeløp = arbeidsgiverNettoBeløp,
-                builder = utbetalingstidslinjeBuilder
+                oppdragBuilder = oppdragBuilder,
+                utbetalingstidslinjeBuilder = utbetalingstidslinjeBuilder
             )
         )
         pushState(utbetalingstidslinjeBuilder)
