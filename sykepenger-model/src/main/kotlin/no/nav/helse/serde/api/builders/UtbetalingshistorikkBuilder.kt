@@ -27,6 +27,7 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
         private val gjenståendeSykedager: Int?,
         private val forbrukteSykedager: Int?,
         private val arbeidsgiverNettoBeløp: Int,
+        private val vurderingBuilder: VurderingBuilder,
         private val oppdragBuilder: OppdragBuilder,
         private val utbetalingstidslinjeBuilder: UtbetalingstidslinjeBuilder
     ) {
@@ -39,7 +40,8 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
             gjenståendeSykedager = gjenståendeSykedager,
             forbrukteSykedager = forbrukteSykedager,
             arbeidsgiverNettoBeløp = arbeidsgiverNettoBeløp,
-            arbeidsgiverFagsystemId = oppdragBuilder.build()
+            arbeidsgiverFagsystemId = oppdragBuilder.build(),
+            vurdering = vurderingBuilder.build()
         )
 
         companion object {
@@ -86,6 +88,9 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?
     ) {
+        val vurderingBuilder = VurderingBuilder()
+        pushState(vurderingBuilder)
+
         val oppdragBuilder = OppdragBuilder()
         pushState(oppdragBuilder)
 
@@ -99,6 +104,7 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
                 gjenståendeSykedager = gjenståendeSykedager,
                 forbrukteSykedager = forbrukteSykedager,
                 arbeidsgiverNettoBeløp = arbeidsgiverNettoBeløp,
+                vurderingBuilder = vurderingBuilder,
                 oppdragBuilder = oppdragBuilder,
                 utbetalingstidslinjeBuilder = utbetalingstidslinjeBuilder
             )

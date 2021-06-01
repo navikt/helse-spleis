@@ -376,7 +376,14 @@ internal class VedtaksperiodeBuilder(
         this.vedtaksperiodeUtbetaling = utbetaling
     }
 
-    override fun visitVurdering(vurdering: Utbetaling.Vurdering, ident: String, epost: String, tidspunkt: LocalDateTime, automatiskBehandling: Boolean) {
+    override fun visitVurdering(
+        vurdering: Utbetaling.Vurdering,
+        ident: String,
+        epost: String,
+        tidspunkt: LocalDateTime,
+        automatiskBehandling: Boolean,
+        godkjent: Boolean
+    ) {
         if (!utbetalingGodkjent) return
         godkjentAv = ident
         godkjenttidspunkt = tidspunkt

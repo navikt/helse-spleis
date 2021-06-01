@@ -834,7 +834,7 @@ internal class Utbetaling private constructor(
         }
 
         internal fun accept(visitor: UtbetalingVisitor) {
-            visitor.visitVurdering(this, ident, epost, tidspunkt, automatiskBehandling)
+            visitor.visitVurdering(this, ident, epost, tidspunkt, automatiskBehandling, godkjent)
         }
 
         internal fun annullert(utbetaling: Utbetaling, oppdrag: Oppdrag) {
