@@ -476,7 +476,14 @@ internal interface UtbetalingVisitor : UtbetalingsdagVisitor, OppdragVisitor {
     fun postVisitArbeidsgiverOppdrag(oppdrag: Oppdrag) {}
     fun preVisitPersonOppdrag(oppdrag: Oppdrag) {}
     fun postVisitPersonOppdrag(oppdrag: Oppdrag) {}
-    fun visitVurdering(vurdering: Utbetaling.Vurdering, ident: String, epost: String, tidspunkt: LocalDateTime, automatiskBehandling: Boolean) {}
+    fun visitVurdering(
+        vurdering: Utbetaling.Vurdering,
+        ident: String,
+        epost: String,
+        tidspunkt: LocalDateTime,
+        automatiskBehandling: Boolean,
+        godkjent: Boolean
+    ) {}
     fun postVisitUtbetaling(
         utbetaling: Utbetaling,
         id: UUID,

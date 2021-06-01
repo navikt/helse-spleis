@@ -3,25 +3,10 @@ package no.nav.helse.serde.api.builders
 import no.nav.helse.serde.PersonData
 import no.nav.helse.serde.api.*
 import no.nav.helse.sykdomstidslinje.erHelg
-import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import kotlin.math.roundToInt
-
-internal class OppdragBuilder: BuilderState() {
-    private lateinit var fagsystemId: String
-
-    internal fun build() = fagsystemId
-
-    override fun preVisitArbeidsgiverOppdrag(oppdrag: Oppdrag) {
-        fagsystemId = oppdrag.fagsystemId()
-    }
-
-    override fun postVisitArbeidsgiverOppdrag(oppdrag: Oppdrag) {
-        popState()
-    }
-}
 
 internal class UtbetalingstidslinjeBuilder(
     private val utbetalingstidslinjeMap: MutableList<UtbetalingstidslinjedagDTO>

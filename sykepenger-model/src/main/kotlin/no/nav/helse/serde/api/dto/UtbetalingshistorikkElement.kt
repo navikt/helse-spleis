@@ -3,6 +3,7 @@ package no.nav.helse.serde.api.dto
 import no.nav.helse.serde.api.SykdomstidslinjedagDTO
 import no.nav.helse.serde.api.UtbetalingstidslinjedagDTO
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 data class UtbetalingshistorikkElementDTO(
@@ -21,8 +22,15 @@ data class UtbetalingshistorikkElementDTO(
         val gjenståendeSykedager: Int?,
         val forbrukteSykedager: Int?,
         val arbeidsgiverNettoBeløp: Int,
-        val arbeidsgiverFagsystemId: String
+        val arbeidsgiverFagsystemId: String,
+        val vurdering: VurderingDTO?
     ) {
         fun erAnnullering() = type == "ANNULLERING"
+        data class VurderingDTO(
+            val godkjent: Boolean,
+            val tidsstempel: LocalDateTime,
+            val automatisk: Boolean,
+            val ident: String
+        )
     }
 }

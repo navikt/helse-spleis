@@ -47,9 +47,10 @@ class SpeilBuilderTest {
     fun `mapping av utbetalingshistorikk`() {
         val (person, hendelser) = person()
         val personDTO = serializePersonForSpeil(person, hendelser)
+        val tidslinje = personDTO.arbeidsgivere.first().utbetalingshistorikk.first()
+        val utbetaling = utbetalingsliste.getValue(personDTO.arbeidsgivere.first().organisasjonsnummer).first()
 
         assertEquals(1, personDTO.arbeidsgivere.first().utbetalingshistorikk.size)
-        val tidslinje = personDTO.arbeidsgivere.first().utbetalingshistorikk.first()
         assertEquals(31, tidslinje.beregnettidslinje.size)
         assertEquals(16, tidslinje.hendelsetidslinje.size)
         assertEquals(31, tidslinje.utbetaling.utbetalingstidslinje.size)
@@ -59,10 +60,14 @@ class SpeilBuilderTest {
         assertEquals(237, tidslinje.utbetaling.gjenståendeSykedager)
         assertEquals(11, tidslinje.utbetaling.forbrukteSykedager)
         assertEquals(15741, tidslinje.utbetaling.arbeidsgiverNettoBeløp)
-        assertEquals(
-            utbetalingsliste.getValue(personDTO.arbeidsgivere.first().organisasjonsnummer).first().arbeidsgiverOppdrag().fagsystemId(),
-            tidslinje.utbetalinger.first().arbeidsgiverFagsystemId
-        )
+        assertEquals(utbetaling.arbeidsgiverOppdrag().fagsystemId(), tidslinje.utbetaling.arbeidsgiverFagsystemId)
+        assertNotNull(tidslinje.utbetaling.vurdering)
+        tidslinje.utbetaling.vurdering?.also {
+            assertEquals("en_saksbehandler_ident", it.ident)
+            assertEquals(true, it.godkjent)
+            assertEquals(false, it.automatisk)
+            assertNotNull(it.tidsstempel)
+        }
     }
 
     @Test
@@ -113,6 +118,15 @@ class SpeilBuilderTest {
         assertEquals(16.januar, eldsteHistorikkElement.hendelsetidslinje.last().dagen)
         assertEquals(1.januar, eldsteHistorikkElement.hendelsetidslinje.first().dagen)
         assertEquals(16.januar, eldsteHistorikkElement.hendelsetidslinje.last().dagen)
+
+        assertNotNull(eldsteHistorikkElement.utbetaling.vurdering)
+        assertNull(nyesteHistorikkElement.utbetaling.vurdering)
+        eldsteHistorikkElement.utbetaling.vurdering?.also {
+            assertEquals("en_saksbehandler_ident", it.ident)
+            assertEquals(true, it.godkjent)
+            assertEquals(false, it.automatisk)
+            assertNotNull(it.tidsstempel)
+        }
     }
 
     @Test
