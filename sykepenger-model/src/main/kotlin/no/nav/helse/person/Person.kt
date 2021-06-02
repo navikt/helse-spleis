@@ -9,6 +9,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.forlengerIkkeBareAnnenArbeidsg
 import no.nav.helse.person.Arbeidsgiver.Companion.forlengerSammePeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSammenligningsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSykepengegrunnlag
+import no.nav.helse.person.Arbeidsgiver.Companion.harArbeidsgivereMedOverlappendeUtbetaltePerioder
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntekt
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
@@ -478,4 +479,7 @@ class Person private constructor(
     internal fun førerIkkeTilVidereBehandling(hendelse: PersonHendelse) {
         observers.forEach { it.hendelseIkkeHåndtert(PersonObserver.HendelseIkkeHåndtertEvent(hendelse.meldingsreferanseId())) }
     }
+
+    internal fun harArbeidsgivereMedOverlappendeUtbetaltePerioder(organisasjonsnummer: String, periode: Periode) =
+        arbeidsgivere.harArbeidsgivereMedOverlappendeUtbetaltePerioder(organisasjonsnummer, periode)
 }

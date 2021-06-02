@@ -3,6 +3,7 @@ package no.nav.helse.person
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.Vedtaksperiode.Companion.harInntekt
+import no.nav.helse.person.Vedtaksperiode.Companion.harOverlappendeUtbetaltePerioder
 import no.nav.helse.person.Vedtaksperiode.Companion.medSkjæringstidspunkt
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
@@ -111,6 +112,10 @@ internal class Arbeidsgiver private constructor(
                     .vedtaksperioder
                     .any { it.periode().overlapperMed(vedtaksperiode.periode()) }
             }
+
+        internal fun Iterable<Arbeidsgiver>.harArbeidsgivereMedOverlappendeUtbetaltePerioder(orgnummer: String, periode: Periode) = this
+            .filter { it.organisasjonsnummer != orgnummer }
+            .any { it.vedtaksperioder.harOverlappendeUtbetaltePerioder(periode) }
 
         internal fun kunOvergangFraInfotrygd(
             arbeidsgivere: Iterable<Arbeidsgiver>,
@@ -229,7 +234,7 @@ internal class Arbeidsgiver private constructor(
         utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger
     ) {
         utbetalingshistorikkForFeriepenger.kontekst(this)
-        if(feriepengeutbetalinger.isNotEmpty()) {
+        if (feriepengeutbetalinger.isNotEmpty()) {
             sikkerLogg.info("Feriepengeutbetalinger finnes fra før for aktørId $aktørId, støtter ikke rekjøring")
             return
         }
@@ -361,7 +366,7 @@ internal class Arbeidsgiver private constructor(
 
     private fun håndterFeriepengeUtbetaling(utbetalingHendelse: UtbetalingHendelse) {
         feriepengeutbetalinger.map { it.håndter(utbetalingHendelse, person) }
-   }
+    }
 
     private fun håndterUtbetaling(utbetaling: UtbetalingHendelse) {
         utbetalinger.forEach { it.håndter(utbetaling) }
