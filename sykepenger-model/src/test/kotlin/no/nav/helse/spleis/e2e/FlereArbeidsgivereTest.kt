@@ -1361,6 +1361,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             orgnummer = a2
         )
         håndterYtelser(1.vedtaksperiode(orgnummer = a2), orgnummer = a2)
+        assertEquals(0, a1.inspektør.utbetalingstidslinjer(1.vedtaksperiode(a1)).size)
     }
 
     @Test
