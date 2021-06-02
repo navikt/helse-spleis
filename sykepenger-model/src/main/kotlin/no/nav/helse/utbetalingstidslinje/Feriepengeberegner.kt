@@ -264,7 +264,7 @@ internal class Feriepengeberegner(
                 datoStatusFom: LocalDate?,
                 klassekode: Klassekode
             ) {
-                if (inUtbetalinger && utbetaltUtbetaling && beløp != null) {
+                if (inUtbetalinger && utbetaltUtbetaling && beløp != null && datoStatusFom == null) {
                     utbetalteDagerForOppdrag.addAll((fom til tom).filterNot { it.erHelg() }.map {
                         UtbetaltDag.SpleisArbeidsgiver(this.orgnummer, it, beløp)
                     })
