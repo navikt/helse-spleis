@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
+import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.testhelpers.januar
 import no.nav.inntektsmeldingkontrakt.Periode
@@ -28,6 +29,23 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         sendUtbetaling()
         val utbetalt = testRapid.inspektør.siste("utbetaling_utbetalt")
         assertUtbetalt(utbetalt)
+    }
+
+    @Test
+    fun `utbetalingsdagene på utbetaling utbetalt begrenses av oppdragsperioden`() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendYtelser(0)
+        sendVilkårsgrunnlag(0)
+        sendYtelser(0)
+        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
+        sendUtbetalingsgodkjenning(0)
+        sendUtbetaling()
+        val utbetalt = testRapid.inspektør.siste("utbetaling_utbetalt")
+        assertUtbetalt(utbetalt)
+        val førsteNavDag = LocalDate.of(2018, 1, 19)
+        assertEquals(førsteNavDag, utbetalt.path("utbetalingsdager").toList().first().let { it["dato"].asLocalDate() })
     }
 
     @Test

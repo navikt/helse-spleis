@@ -449,7 +449,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
 
         assertEquals(1, observatør.utbetalingMedUtbetalingEventer.size)
         assertEquals(7, avvisteDager.size)
-        assertEquals(23, ikkeAvvisteDager.size)
+        assertEquals(7, ikkeAvvisteDager.size)
         assertTrue(avvisteDager.all { it.begrunnelser == listOf("MinimumSykdomsgrad") })
         assertTrue(ikkeAvvisteDager.all { it.begrunnelser == null })
     }
