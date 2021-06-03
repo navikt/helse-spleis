@@ -129,12 +129,12 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
     }
 
     override fun preVisitSykdomshistorikkElement(element: Sykdomshistorikk.Element, id: UUID, hendelseId: UUID?, tidsstempel: LocalDateTime) {
-        val elementBuilder = SykdomshistorikkElementBuilder(id)
+        val elementBuilder = SykdomshistorikkElementBuilder(id, tidsstempel)
         sykdomshistorikkElementBuilders.add(elementBuilder)
         pushState(elementBuilder)
     }
 
-    private class SykdomshistorikkElementBuilder(private val id: UUID) : BuilderState() { //ID er sykdomshistorikkId
+    private class SykdomshistorikkElementBuilder(private val id: UUID, private val tidsstempel: LocalDateTime) : BuilderState() { //ID er sykdomshistorikkId
         private lateinit var hendelsetidslinje: SykdomstidslinjeBuilder
         private lateinit var beregnettidslinje: SykdomstidslinjeBuilder
 
@@ -147,12 +147,14 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
                     UtbetalingshistorikkElementDTO(
                         hendelsetidslinje = it.hendelsetidslinje.build(),
                         beregnettidslinje = it.beregnettidslinje.build(),
+                        tidsstempel = it.tidsstempel,
                         utbetaling = utbetaling
                     )
                 } ?: if (utbetaling.erAnnullering()) {
                     UtbetalingshistorikkElementDTO(
                         hendelsetidslinje = emptyList(),
                         beregnettidslinje = emptyList(),
+                        tidsstempel = LocalDateTime.now(),
                         utbetaling = utbetaling
                     )
                 } else null

@@ -9,6 +9,7 @@ import java.util.*
 data class UtbetalingshistorikkElementDTO(
     val hendelsetidslinje: List<SykdomstidslinjedagDTO>,
     val beregnettidslinje: List<SykdomstidslinjedagDTO>,
+    val tidsstempel: LocalDateTime,
     val utbetaling: UtbetalingDTO
 ) {
     val beregningId = utbetaling.beregningId

@@ -62,6 +62,7 @@ class SpeilBuilderTest {
         assertEquals(15741, tidslinje.utbetaling.arbeidsgiverNettoBeløp)
         assertEquals(utbetaling.arbeidsgiverOppdrag().fagsystemId(), tidslinje.utbetaling.arbeidsgiverFagsystemId)
         assertNotNull(tidslinje.utbetaling.vurdering)
+        assertNotNull(tidslinje.tidsstempel)
         tidslinje.utbetaling.vurdering?.also {
             assertEquals("en_saksbehandler_ident", it.ident)
             assertEquals(true, it.godkjent)
