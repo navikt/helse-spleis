@@ -40,7 +40,7 @@ class SpeilBuilderTest {
     fun `versjonsnummer på snapshot`() {
         val (person, hendelser) = person()
         val personDTO = serializePersonForSpeil(person, hendelser)
-        assertEquals(1, personDTO.versjon)
+        assertNotNull(personDTO.versjon)
     }
 
     @Test
@@ -52,14 +52,13 @@ class SpeilBuilderTest {
         val tidslinje = personDTO.arbeidsgivere.first().utbetalingshistorikk.first()
         assertEquals(31, tidslinje.beregnettidslinje.size)
         assertEquals(16, tidslinje.hendelsetidslinje.size)
-        assertEquals(1, tidslinje.utbetalinger.size)
-        assertEquals(31, tidslinje.utbetalinger.first().utbetalingstidslinje.size)
+        assertEquals(31, tidslinje.utbetaling.utbetalingstidslinje.size)
 
-        assertEquals("UTBETALT", tidslinje.utbetalinger.first().status)
-        assertEquals("UTBETALING", tidslinje.utbetalinger.first().type)
-        assertEquals(237, tidslinje.utbetalinger.first().gjenståendeSykedager)
-        assertEquals(11, tidslinje.utbetalinger.first().forbrukteSykedager)
-        assertEquals(15741, tidslinje.utbetalinger.first().arbeidsgiverNettoBeløp)
+        assertEquals("UTBETALT", tidslinje.utbetaling.status)
+        assertEquals("UTBETALING", tidslinje.utbetaling.type)
+        assertEquals(237, tidslinje.utbetaling.gjenståendeSykedager)
+        assertEquals(11, tidslinje.utbetaling.forbrukteSykedager)
+        assertEquals(15741, tidslinje.utbetaling.arbeidsgiverNettoBeløp)
     }
 
     @Test
@@ -77,7 +76,7 @@ class SpeilBuilderTest {
         val personDTO = serializePersonForSpeil(person, hendelser)
 
         val vedtaksperiode = personDTO.arbeidsgivere.first().vedtaksperioder.first() as VedtaksperiodeDTO
-        val utbetalingFraHistorikk = personDTO.arbeidsgivere.first().utbetalingshistorikk.first().utbetalinger.first()
+        val utbetalingFraHistorikk = personDTO.arbeidsgivere.first().utbetalingshistorikk.first().utbetaling
         assertEquals(1, vedtaksperiode.beregningIder.size)
         assertEquals(vedtaksperiode.beregningIder.first(), utbetalingFraHistorikk.beregningId)
         assertEquals(Utbetaling.Utbetalingtype.UTBETALING.name, utbetalingFraHistorikk.type)
@@ -1167,9 +1166,72 @@ class SpeilBuilderTest {
         }
     }
 
+    @Test
+    fun `tar med annulleringer som separate historikkelementer()`() {
+        val (person, hendelser) = personToPerioderAnnullert()
+        val personDto = serializePersonForSpeil(person, hendelser)
+        val utbetalingshistorikk = personDto.arbeidsgivere.first().utbetalingshistorikk
+        assertEquals(3, utbetalingshistorikk.size)
+        val annulleringElement = utbetalingshistorikk.first { it.utbetaling.erAnnullering() }
+        assertFalse(personDto.arbeidsgivere.flatMap { it.vedtaksperioder.flatMap { vedtaksperiode -> (vedtaksperiode as VedtaksperiodeDTO).beregningIder } }.contains(annulleringElement.beregningId))
+    }
+
     private fun <T> Collection<T>.assertOnNonEmptyCollection(func: (T) -> Unit) {
         assertTrue(isNotEmpty())
         forEach(func)
+    }
+
+    private fun personToPerioderAnnullert(): Pair<Person, List<HendelseDTO>> = Person(aktørId, fnr).run {
+        this to mutableListOf<HendelseDTO>().apply {
+            sykmelding(fom = 1.januar, tom = 31.januar).also { (sykmelding, sykmeldingDTO) ->
+                håndter(sykmelding)
+                add(sykmeldingDTO)
+            }
+            fangeVedtaksperiodeId()
+            søknad(
+                fom = 1.januar,
+                tom = 31.januar,
+                sendtSøknad = 1.april.atStartOfDay()
+            ).also { (søknad, søknadDTO) ->
+                håndter(søknad)
+                add(søknadDTO)
+            }
+            inntektsmelding(fom = 1.januar).also { (inntektsmelding, inntektsmeldingDTO) ->
+                håndter(inntektsmelding)
+                add(inntektsmeldingDTO)
+            }
+            håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+            håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
+            håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+            fangeUtbetalinger()
+            håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
+            håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId, aktivitetslogg = this@run.aktivitetslogg))
+            håndter(overføring(this@run.aktivitetslogg))
+            håndter(utbetalt(this@run.aktivitetslogg))
+            sykmelding(fom = 1.februar, tom = 28.februar).also { (sykmelding, sykmeldingDTO) ->
+                håndter(sykmelding)
+                add(sykmeldingDTO)
+            }
+            fangeVedtaksperiodeId()
+            søknad(
+                fom = 1.februar,
+                tom = 28.februar,
+                sendtSøknad = 1.april.atStartOfDay()
+            ).also { (søknad, søknadDTO) ->
+                håndter(søknad)
+                add(søknadDTO)
+            }
+            håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+            håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
+            håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+            fangeUtbetalinger()
+            håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
+            håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId, aktivitetslogg = this@run.aktivitetslogg))
+            håndter(overføring(this@run.aktivitetslogg))
+            håndter(utbetalt(this@run.aktivitetslogg))
+            val utbetalteUtbetalinger = utbetalingsliste.getValue(orgnummer).filter { it.erUtbetalt() }
+            håndter(annullering(fagsystemId = utbetalteUtbetalinger.last().arbeidsgiverOppdrag().fagsystemId()))
+        }
     }
 
     private fun Person.collectVedtaksperiodeIder(orgnummer: String = SpeilBuilderTest.orgnummer) = mutableMapOf<String, List<String>>().apply {

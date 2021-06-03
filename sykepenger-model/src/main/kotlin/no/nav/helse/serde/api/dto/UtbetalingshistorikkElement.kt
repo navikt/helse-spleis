@@ -8,9 +8,9 @@ import java.util.*
 data class UtbetalingshistorikkElementDTO(
     val hendelsetidslinje: List<SykdomstidslinjedagDTO>,
     val beregnettidslinje: List<SykdomstidslinjedagDTO>,
-    val utbetalinger: List<UtbetalingDTO>
+    val utbetaling: UtbetalingDTO
 ) {
-    val beregningId = utbetalinger.firstOrNull()?.beregningId
+    val beregningId = utbetaling.beregningId
 
     data class UtbetalingDTO(
         val utbetalingstidslinje: List<UtbetalingstidslinjedagDTO>,
@@ -21,5 +21,7 @@ data class UtbetalingshistorikkElementDTO(
         val gjenståendeSykedager: Int?,
         val forbrukteSykedager: Int?,
         val arbeidsgiverNettoBeløp: Int
-    )
+    ) {
+        fun erAnnullering() = type == "ANNULLERING"
+    }
 }

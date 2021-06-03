@@ -1,5 +1,6 @@
 package no.nav.helse.serde.api.builders
 
+import no.nav.helse.serde.api.builders.UtbetalingshistorikkBuilder.SykdomshistorikkElementBuilder.Companion.build
 import no.nav.helse.serde.api.dto.UtbetalingshistorikkElementDTO
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
@@ -14,10 +15,10 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
     private val sykdomshistorikkElementBuilders = mutableListOf<SykdomshistorikkElementBuilder>()
     private val utbetalingstidslinjeBuilders = mutableListOf<UtbetalingstidslinjeInfo>()
 
-    fun build(): List<UtbetalingshistorikkElementDTO> {
-        val utbetalinger = UtbetalingstidslinjeInfo.utbetalinger(utbetalingstidslinjeBuilders, utbetalingberegninger)
-        return sykdomshistorikkElementBuilders.map { it.build(utbetalinger) }.filter { it.utbetalinger.isNotEmpty() }
-    }
+    internal fun build() = UtbetalingstidslinjeInfo
+        .utbetalinger(utbetalingstidslinjeBuilders, utbetalingberegninger)
+        .mapNotNull { sykdomshistorikkElementBuilders.build(it.key, it.value) }
+        .reversed()
 
     private data class UtbetalingstidslinjeInfo(
         private val beregningId: UUID,
@@ -44,9 +45,11 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
             fun utbetalinger(
                 liste: List<UtbetalingstidslinjeInfo>,
                 utbetalingberegninger: Utbetalingberegninger
-            ): Map<UUID, List<UtbetalingshistorikkElementDTO.UtbetalingDTO>> {
-                val resultat = mutableMapOf<UUID, MutableList<UtbetalingshistorikkElementDTO.UtbetalingDTO>>()
-                liste.forEach { resultat.getOrPut(utbetalingberegninger.sykdomshistorikkelementId(it.beregningId)) { mutableListOf() }.add(it.utbetaling()) }
+            ): Map<UUID, UtbetalingshistorikkElementDTO.UtbetalingDTO> {
+                val resultat = mutableMapOf<UUID, UtbetalingshistorikkElementDTO.UtbetalingDTO>()
+
+                // Vi bruker en random UUID fordi en annullering ikke selv sitter på en beregningsId
+                liste.forEach { resultat.getOrPut(utbetalingberegninger.sykdomshistorikkelementId(it.beregningId) ?: UUID.randomUUID()) { it.utbetaling() } }
                 return resultat
             }
         }
@@ -66,7 +69,7 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
     ) {
         companion object {
             fun sykdomshistorikkelementId(beregningInfo: List<BeregningInfo>, beregningId: UUID) =
-                beregningInfo.first { it.beregningId == beregningId }.sykdomshistorikkElementId
+                beregningInfo.firstOrNull { it.beregningId == beregningId }?.sykdomshistorikkElementId
         }
     }
 
@@ -87,7 +90,8 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
         val utbetalingstidslinjeBuilder = UtbetalingstidslinjeBuilder(mutableListOf())
         utbetalingstidslinjeBuilders.add(
             UtbetalingstidslinjeInfo(
-                beregningId = beregningId,
+                // en annullering kopierer den forrige utbetalingsens beregningId
+                beregningId = if (utbetaling.erAnnullering()) UUID.randomUUID() else beregningId,
                 type = type.name,
                 maksdato = maksdato,
                 status = Utbetalingstatus.fraTilstand(tilstand).name,
@@ -118,16 +122,30 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
         pushState(elementBuilder)
     }
 
-    private class SykdomshistorikkElementBuilder(private val id: UUID) : BuilderState() {
+    private class SykdomshistorikkElementBuilder(private val id: UUID) : BuilderState() { //ID er sykdomshistorikkId
         private lateinit var hendelsetidslinje: SykdomstidslinjeBuilder
         private lateinit var beregnettidslinje: SykdomstidslinjeBuilder
 
-        fun build(sykdomshistorikkbetalinger: Map<UUID, List<UtbetalingshistorikkElementDTO.UtbetalingDTO>>) =
-            UtbetalingshistorikkElementDTO(
-                hendelsetidslinje = hendelsetidslinje.build(),
-                beregnettidslinje = beregnettidslinje.build(),
-                utbetalinger = sykdomshistorikkbetalinger[id] ?: emptyList()
-            )
+        companion object {
+            fun List<SykdomshistorikkElementBuilder>.build(
+                historikkId: UUID,
+                utbetaling: UtbetalingshistorikkElementDTO.UtbetalingDTO
+            ): UtbetalingshistorikkElementDTO? {
+                return firstOrNull { it.id == historikkId }?.let {
+                    UtbetalingshistorikkElementDTO(
+                        hendelsetidslinje = it.hendelsetidslinje.build(),
+                        beregnettidslinje = it.beregnettidslinje.build(),
+                        utbetaling = utbetaling
+                    )
+                } ?: if (utbetaling.erAnnullering()) {
+                    UtbetalingshistorikkElementDTO(
+                        hendelsetidslinje = emptyList(),
+                        beregnettidslinje = emptyList(),
+                        utbetaling = utbetaling
+                    )
+                } else null
+            }
+        }
 
         override fun preVisitHendelseSykdomstidslinje(
             tidslinje: Sykdomstidslinje,
