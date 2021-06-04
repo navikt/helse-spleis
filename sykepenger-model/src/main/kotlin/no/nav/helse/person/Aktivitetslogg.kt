@@ -275,6 +275,21 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                     )
                 }
 
+                internal fun inntekterForSykepengegrunnlag(
+                    aktivitetslogg: IAktivitetslogg,
+                    beregningStart: YearMonth,
+                    beregningSlutt: YearMonth
+                ) {
+                    aktivitetslogg.behov(
+                        Behovtype.InntekterForSykepengegrunnlag,
+                        "Trenger inntekter for sykepengegrunnlag",
+                        mapOf(
+                            "beregningStart" to beregningStart.toString(),
+                            "beregningSlutt" to beregningSlutt.toString()
+                        )
+                    )
+                }
+
                 internal fun opptjening(aktivitetslogg: IAktivitetslogg) {
                     aktivitetslogg.behov(Behovtype.Opptjening, "Trenger informasjon om sykepengeopptjening")
                 }
@@ -389,6 +404,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                 Simulering,
                 Utbetaling,
                 InntekterForSammenligningsgrunnlag,
+                InntekterForSykepengegrunnlag,
                 Opptjening,
                 Dagpenger,
                 Arbeidsavklaringspenger,

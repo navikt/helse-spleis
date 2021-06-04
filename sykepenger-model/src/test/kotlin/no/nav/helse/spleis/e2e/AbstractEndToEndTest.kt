@@ -253,6 +253,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             assertEtterspurt(Vilkårsgrunnlag::class, behovtype, vedtaksperiodeId, orgnummer)
 
         assertEtterspurt(InntekterForSammenligningsgrunnlag)
+        assertEtterspurt(InntekterForSykepengegrunnlag)
         assertEtterspurt(Medlemskap)
         vilkårsgrunnlag(
             vedtaksperiodeId,
