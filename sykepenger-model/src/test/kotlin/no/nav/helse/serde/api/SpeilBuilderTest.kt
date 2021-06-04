@@ -18,6 +18,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -69,6 +70,21 @@ class SpeilBuilderTest {
             assertEquals(false, it.automatisk)
             assertNotNull(it.tidsstempel)
         }
+    }
+
+    @Test
+    fun `generer ett utbetalingshistorikkelement per utbetaling, selv om utbetalingene peker på samme sykdomshistorikk`() {
+        val (person, hendelser) = personToPerioderIAvventerHistorikk()
+        val personDTO = serializePersonForSpeil(person, hendelser)
+        assertEquals(2, personDTO.arbeidsgivere.first().utbetalingshistorikk.size)
+        val arbeidsgiver = personDTO.arbeidsgivere.first()
+        val førsteElement = arbeidsgiver.utbetalingshistorikk.first()
+        val andreElement = arbeidsgiver.utbetalingshistorikk[1]
+
+        assertEquals((arbeidsgiver.vedtaksperioder[1] as VedtaksperiodeDTO).beregningIder[0], førsteElement.beregningId)
+        assertEquals((arbeidsgiver.vedtaksperioder.first() as VedtaksperiodeDTO).beregningIder[0], andreElement.beregningId)
+        assertEquals(LocalDate.of(2018, 2, 28), førsteElement.utbetaling.utbetalingstidslinje.last().dato)
+        assertEquals(LocalDate.of(2018, 1, 31), andreElement.utbetaling.utbetalingstidslinje.last().dato)
     }
 
     @Test
@@ -1253,6 +1269,54 @@ class SpeilBuilderTest {
         }
     }
 
+    private fun personToPerioderIAvventerHistorikk(): Pair<Person, List<HendelseDTO>> = Person(aktørId, fnr).run {
+        this to mutableListOf<HendelseDTO>().apply {
+            sykmelding(fom = 1.januar, tom = 31.januar).also { (sykmelding, sykmeldingDTO) ->
+                håndter(sykmelding)
+                add(sykmeldingDTO)
+            }
+            søknad(
+                fom = 1.januar,
+                tom = 31.januar,
+                sendtSøknad = 1.april.atStartOfDay()
+            ).also { (søknad, søknadDTO) ->
+                håndter(søknad)
+                add(søknadDTO)
+            }
+            inntektsmelding(fom = 1.januar).also { (inntektsmelding, inntektsmeldingDTO) ->
+                håndter(inntektsmelding)
+                add(inntektsmeldingDTO)
+            }
+            sykmelding(fom = 1.februar, tom = 28.februar).also { (sykmelding, sykmeldingDTO) ->
+                håndter(sykmelding)
+                add(sykmeldingDTO)
+            }
+            søknad(
+                fom = 1.februar,
+                tom = 28.februar,
+                sendtSøknad = 2.april.atStartOfDay()
+            ).also { (søknad, søknadDTO) ->
+                håndter(søknad)
+                add(søknadDTO)
+            }
+            fangeVedtaksperiodeId()
+            håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder[0]))
+            håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeIder[0]))
+            håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder[0]))
+
+            fangeUtbetalinger()
+            håndter(simulering(vedtaksperiodeId = vedtaksperiodeIder[0]))
+            håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeIder[0], aktivitetslogg = this@run.aktivitetslogg))
+            håndter(overføring(this@run.aktivitetslogg))
+            håndter(utbetalt(this@run.aktivitetslogg))
+            fangeUtbetalinger()
+            håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder[1]))
+            håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeIder[1]))
+            håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder[1]))
+            håndter(simulering(vedtaksperiodeId = vedtaksperiodeIder[1]))
+        }
+    }
+
     private fun Person.collectVedtaksperiodeIder(orgnummer: String = SpeilBuilderTest.orgnummer) = mutableMapOf<String, List<String>>().apply {
         accept(object : PersonVisitor {
             var currentArbeidsgiver = mutableListOf<String>()
@@ -1282,6 +1346,11 @@ class SpeilBuilderTest {
         })
     }.getValue(orgnummer)
 
+    @BeforeEach
+    fun beforeEach() {
+        vedtaksperiodeIder.clear()
+        utbetalingsliste.clear()
+    }
 
     companion object {
         private const val aktørId = "12345"

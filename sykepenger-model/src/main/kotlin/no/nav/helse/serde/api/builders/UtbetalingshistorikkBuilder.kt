@@ -17,7 +17,7 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
 
     internal fun build() = UtbetalingInfo
         .utbetalinger(utbetalingstidslinjeBuilders, utbetalingberegninger)
-        .mapNotNull { sykdomshistorikkElementBuilders.build(it.key, it.value) }
+        .mapNotNull { sykdomshistorikkElementBuilders.build(it.first, it.second) }
         .reversed()
 
     private data class UtbetalingInfo(
@@ -51,12 +51,11 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
             fun utbetalinger(
                 liste: List<UtbetalingInfo>,
                 utbetalingberegninger: Utbetalingberegninger
-            ): Map<UUID, UtbetalingshistorikkElementDTO.UtbetalingDTO> {
-                val resultat = mutableMapOf<UUID, UtbetalingshistorikkElementDTO.UtbetalingDTO>()
-
+            ): List<Pair<UUID, UtbetalingshistorikkElementDTO.UtbetalingDTO>> {
                 // Vi bruker en random UUID fordi en annullering ikke selv sitter på en beregningsId
-                liste.forEach { resultat.getOrPut(utbetalingberegninger.sykdomshistorikkelementId(it.beregningId) ?: UUID.randomUUID()) { it.utbetaling() } }
-                return resultat
+                return liste.map {
+                    (utbetalingberegninger.sykdomshistorikkelementId(it.beregningId) ?: UUID.randomUUID()) to it.utbetaling()
+                }
             }
         }
     }
