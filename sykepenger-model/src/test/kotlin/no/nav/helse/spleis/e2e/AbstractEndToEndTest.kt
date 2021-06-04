@@ -41,6 +41,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
 
     protected companion object {
         val INNTEKT = 31000.00.månedlig
+        val DAGSINNTEKT = INNTEKT.reflection { _, _, _, dagligInt -> dagligInt }
     }
 
     fun speilApi() = serializePersonForSpeil(person)

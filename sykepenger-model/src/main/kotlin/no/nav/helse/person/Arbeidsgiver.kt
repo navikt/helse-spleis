@@ -234,10 +234,6 @@ internal class Arbeidsgiver private constructor(
         utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger
     ) {
         utbetalingshistorikkForFeriepenger.kontekst(this)
-        if (feriepengeutbetalinger.isNotEmpty()) {
-            sikkerLogg.info("Feriepengeutbetalinger finnes fra før for aktørId $aktørId, støtter ikke rekjøring")
-            return
-        }
 
         val feriepengeutbetaling = Feriepengeutbetaling.Builder(
             aktørId,

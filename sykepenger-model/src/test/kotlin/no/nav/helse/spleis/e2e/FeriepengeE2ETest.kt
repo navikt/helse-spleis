@@ -17,9 +17,11 @@ import no.nav.helse.utbetalingslinjer.Satstype
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 import java.time.Year
+import kotlin.math.roundToInt
 
 internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     private val logCollector = ListAppender<ILoggingEvent>()
@@ -209,8 +211,9 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         assertTrue(inspektør.personLogg.toString().contains("Person er markert for manuell beregning av feriepenger"))
     }
 
+    @Disabled("Ikke implementert")
     @Test
-    fun `Beregner ikke feriepenger to ganger siden vi ikke støtter rekjøring`() {
+    fun `Sender ikke to utbetalingsbehov om feriepengereberegningen er lik den forrige`() {
         håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 30.juni(2020), 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.juni(2020), 30.juni(2020), 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
@@ -586,4 +589,86 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             assertEquals(1460, linje["totalbeløp"])
         }
     }
+
+    @Disabled("Ikke implementert")
+    @Test
+    fun `reberegning av feriepenger med endringer`() {
+        håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 30.juni(2020), 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.juni(2020), 30.juni(2020), 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.juni(2019) til 1.mai(2020) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        håndterUtbetalingshistorikkForFeriepenger(
+            opptjeningsår = Year.of(2020)
+        )
+        håndterUtbetalingshistorikkForFeriepenger(
+            utbetalinger = listOf(UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(ORGNUMMER, 20.januar(2020), 31.januar(2020), 690, 30.juni(2020))),
+            feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(ORGNUMMER, (10*690*0.102).roundToInt(), 1.mai, 31.mai)),
+            opptjeningsår = Year.of(2020)
+        )
+
+        assertEquals(1, engangsutbetalinger().size)
+    }
+
+    @Disabled("Ikke implementert")
+    @Test
+    fun `reberegning av feriepenger med endringer hvor totalt utbetalte dager går over 48`() {
+        håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 14.august(2020), 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.juni(2020), 14.august(2020), 100.prosent)) // 43 dager
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.juni(2019) til 1.mai(2020) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        håndterUtbetalingshistorikkForFeriepenger(
+            opptjeningsår = Year.of(2020)
+        )
+        val førsteUtbetaling = engangsutbetalinger().last()
+        val fagsystemId = førsteUtbetaling.detaljer()["fagsystemId"]
+        håndterUtbetalingshistorikkForFeriepenger(
+            utbetalinger = listOf(UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(ORGNUMMER, 20.januar(2020), 31.januar(2020), 690, 30.juni(2020))), // 10 dager
+            feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(ORGNUMMER, (10*690*0.102).roundToInt(), 1.mai, 31.mai)),
+            opptjeningsår = Year.of(2020)
+        )
+
+        assertEquals(2, engangsutbetalinger().size)
+        val utbetaling = engangsutbetalinger().last()
+        assertEquals((38 * DAGSINNTEKT * 0.102).roundToInt(), utbetaling.linje()["sats"])
+        assertEquals(fagsystemId, utbetaling.detaljer()["fagsystemId"])
+        assertEquals("ENDR", utbetaling.detaljer()["endringskode"])
+        assertEquals("NY", utbetaling.linje()["endringskode"])
+        assertEquals(førsteUtbetaling.linje()["delytelseId"], utbetaling.linje()["refDelytelseId"])
+    }
+
+    private fun engangsutbetalinger() = inspektør.personLogg.behov()
+        .filter { it.type == Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling }
+        .filter { utbetaling -> utbetaling.detaljer()["linjer"].castAsList<Map<String, Any>>().any { linje -> linje["satstype"] == "ENG" }}
+
+    private fun Aktivitetslogg.Aktivitet.Behov.linje() = this
+        .detaljer()["linjer"].castAsList<Map<String, Any?>>()
+        .single()
 }
