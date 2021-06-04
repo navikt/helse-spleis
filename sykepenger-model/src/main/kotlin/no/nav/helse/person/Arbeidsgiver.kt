@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
-import kotlin.math.roundToInt
 
 internal class Arbeidsgiver private constructor(
     private val person: Person,
@@ -239,12 +238,13 @@ internal class Arbeidsgiver private constructor(
             aktørId,
             organisasjonsnummer,
             feriepengeberegner,
-            utbetalingshistorikkForFeriepenger
+            utbetalingshistorikkForFeriepenger,
+            feriepengeutbetalinger
         ).build()
         feriepengeutbetalinger.add(feriepengeutbetaling)
         feriepengeutbetaling.registrer(this)
 
-        if (Toggles.SendFeriepengeOppdrag.enabled && feriepengeberegner.beregnFeriepengedifferansenForArbeidsgiver(organisasjonsnummer).roundToInt() != 0) {
+        if (Toggles.SendFeriepengeOppdrag.enabled && feriepengeutbetaling.sendTilOppdrag) {
             feriepengeutbetaling.overfør(utbetalingshistorikkForFeriepenger)
         }
     }

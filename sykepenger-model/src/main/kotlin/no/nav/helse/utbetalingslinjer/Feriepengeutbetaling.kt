@@ -6,9 +6,11 @@ import no.nav.helse.person.*
 import no.nav.helse.serde.reflection.OppdragReflect
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
+import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.time.Month
+import java.time.Year
 import java.util.*
 import kotlin.math.roundToInt
 
@@ -18,7 +20,8 @@ internal class Feriepengeutbetaling private constructor(
     private val infotrygdFeriepengebeløpArbeidsgiver: Double,
     private val spleisFeriepengebeløpArbeidsgiver: Double,
     private val oppdrag: Oppdrag,
-    private val utbetalingId: UUID
+    private val utbetalingId: UUID,
+    internal val sendTilOppdrag: Boolean
 ) : Aktivitetskontekst {
     var overføringstidspunkt: LocalDateTime? = null
     var avstemmingsnøkkel: Long? = null
@@ -101,11 +104,14 @@ internal class Feriepengeutbetaling private constructor(
         oppdrag.overfør(hendelse, null, "SPLEIS")
     }
 
+    internal fun gjelderForÅr(år: Year) = feriepengeberegner.gjelderForÅr(år)
+
     internal class Builder(
         private val aktørId: String,
         private val orgnummer: String,
         private val feriepengeberegner: Feriepengeberegner,
-        private val utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger
+        private val utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger,
+        private val tidligereFeriepengeutbetalinger: List<Feriepengeutbetaling>
     ) {
         internal fun build(): Feriepengeutbetaling {
             val infotrygdHarUtbetaltTilArbeidsgiver = utbetalingshistorikkForFeriepenger.utbetalteFeriepengerTilArbeidsgiver(orgnummer)
@@ -146,6 +152,16 @@ internal class Feriepengeutbetaling private constructor(
             val totaltFeriepengebeløpArbeidsgiver: Double = feriepengeberegner.beregnFeriepengerForArbeidsgiver(orgnummer)
             val differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd: Double = feriepengeberegner.beregnFeriepengedifferansenForArbeidsgiver(orgnummer)
 
+            val forrigeSendteOppdrag =
+                tidligereFeriepengeutbetalinger.lastOrNull { it.gjelderForÅr(utbetalingshistorikkForFeriepenger.opptjeningsår) && it.sendTilOppdrag }?.oppdrag
+
+            val fagsystemId =
+                tidligereFeriepengeutbetalinger
+                    .firstOrNull { it.gjelderForÅr(utbetalingshistorikkForFeriepenger.opptjeningsår) && it.sendTilOppdrag }
+                    ?.oppdrag
+                    ?.fagsystemId()
+                    ?: genererUtbetalingsreferanse(UUID.randomUUID())
+
             val oppdrag = Oppdrag(
                 mottaker = orgnummer,
                 fagområde = Fagområde.SykepengerRefusjon,
@@ -160,8 +176,11 @@ internal class Feriepengeutbetaling private constructor(
                         klassekode = Klassekode.RefusjonFeriepengerIkkeOpplysningspliktig
                     )
                 ),
+                fagsystemId = fagsystemId,
                 sisteArbeidsgiverdag = null
             )
+
+            if (forrigeSendteOppdrag != null) oppdrag.minus(forrigeSendteOppdrag, utbetalingshistorikkForFeriepenger)
 
             sikkerLogg.info(
                 """
@@ -186,7 +205,8 @@ internal class Feriepengeutbetaling private constructor(
                 infotrygdFeriepengebeløpArbeidsgiver = infotrygdFeriepengebeløpArbeidsgiver,
                 spleisFeriepengebeløpArbeidsgiver = spleisFeriepengebeløpArbeidsgiver,
                 oppdrag = oppdrag,
-                utbetalingId = UUID.randomUUID()
+                utbetalingId = UUID.randomUUID(),
+                sendTilOppdrag = if (forrigeSendteOppdrag == null) oppdrag.totalbeløp() != 0 else oppdrag.totalbeløp() != forrigeSendteOppdrag.totalbeløp()
             )
         }
     }

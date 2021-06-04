@@ -50,7 +50,7 @@ internal class Feriepengeberegner(
         visitor.postVisitFeriepengedager()
         visitor.postVisitFeriepengeberegner(this)
     }
-
+    internal fun gjelderForÅr(år: Year) = opptjeningsår == år
     internal fun feriepengedatoer() = feriepengedager().tilDato()
     internal fun beregnFeriepengerForInfotrygdPerson() = beregnForFilter(INFOTRYGD_PERSON)
     internal fun beregnFeriepengerForInfotrygdPerson(orgnummer: String) = beregnForFilter(INFOTRYGD_PERSON and orgnummerFilter(orgnummer))
