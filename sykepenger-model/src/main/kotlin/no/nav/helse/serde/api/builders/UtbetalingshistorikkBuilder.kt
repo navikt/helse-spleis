@@ -28,6 +28,7 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
         private val gjenståendeSykedager: Int?,
         private val forbrukteSykedager: Int?,
         private val arbeidsgiverNettoBeløp: Int,
+        private val tidsstempel: LocalDateTime,
         private val vurderingBuilder: VurderingBuilder,
         private val oppdragBuilder: OppdragBuilder,
         private val utbetalingstidslinjeBuilder: UtbetalingstidslinjeBuilder
@@ -38,6 +39,7 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
             type = type,
             maksdato = maksdato,
             status = status,
+            tidsstempel = tidsstempel,
             gjenståendeSykedager = gjenståendeSykedager,
             forbrukteSykedager = forbrukteSykedager,
             arbeidsgiverNettoBeløp = arbeidsgiverNettoBeløp,
@@ -68,8 +70,7 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
 
     private class BeregningInfo(
         private val beregningId: UUID,
-        private val sykdomshistorikkElementId: UUID,
-        private val tidsstempel: LocalDateTime
+        private val sykdomshistorikkElementId: UUID
     ) {
         companion object {
             fun sykdomshistorikkelementId(beregningInfo: List<BeregningInfo>, beregningId: UUID) =
@@ -105,6 +106,7 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
                 type = type.name,
                 maksdato = maksdato,
                 status = Utbetalingstatus.fraTilstand(tilstand).name,
+                tidsstempel = tidsstempel,
                 gjenståendeSykedager = gjenståendeSykedager,
                 forbrukteSykedager = forbrukteSykedager,
                 arbeidsgiverNettoBeløp = arbeidsgiverNettoBeløp,
@@ -125,16 +127,16 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
     }
 
     override fun visitUtbetalingstidslinjeberegning(id: UUID, tidsstempel: LocalDateTime, sykdomshistorikkElementId: UUID) {
-        utbetalingberegninger.add(BeregningInfo(id, sykdomshistorikkElementId, tidsstempel))
+        utbetalingberegninger.add(BeregningInfo(id, sykdomshistorikkElementId))
     }
 
     override fun preVisitSykdomshistorikkElement(element: Sykdomshistorikk.Element, id: UUID, hendelseId: UUID?, tidsstempel: LocalDateTime) {
-        val elementBuilder = SykdomshistorikkElementBuilder(id, tidsstempel)
+        val elementBuilder = SykdomshistorikkElementBuilder(id)
         sykdomshistorikkElementBuilders.add(elementBuilder)
         pushState(elementBuilder)
     }
 
-    private class SykdomshistorikkElementBuilder(private val id: UUID, private val tidsstempel: LocalDateTime) : BuilderState() { //ID er sykdomshistorikkId
+    private class SykdomshistorikkElementBuilder(private val id: UUID) : BuilderState() { //ID er sykdomshistorikkId
         private lateinit var hendelsetidslinje: SykdomstidslinjeBuilder
         private lateinit var beregnettidslinje: SykdomstidslinjeBuilder
 
@@ -147,14 +149,14 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
                     UtbetalingshistorikkElementDTO(
                         hendelsetidslinje = it.hendelsetidslinje.build(),
                         beregnettidslinje = it.beregnettidslinje.build(),
-                        tidsstempel = it.tidsstempel,
+                        tidsstempel = utbetaling.tidsstempel,
                         utbetaling = utbetaling
                     )
                 } ?: if (utbetaling.erAnnullering()) {
                     UtbetalingshistorikkElementDTO(
                         hendelsetidslinje = emptyList(),
                         beregnettidslinje = emptyList(),
-                        tidsstempel = LocalDateTime.now(),
+                        tidsstempel = utbetaling.tidsstempel,
                         utbetaling = utbetaling
                     )
                 } else null

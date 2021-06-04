@@ -24,6 +24,7 @@ data class UtbetalingshistorikkElementDTO(
         val forbrukteSykedager: Int?,
         val arbeidsgiverNettoBeløp: Int,
         val arbeidsgiverFagsystemId: String,
+        val tidsstempel: LocalDateTime,
         val vurdering: VurderingDTO?
     ) {
         fun erAnnullering() = type == "ANNULLERING"
