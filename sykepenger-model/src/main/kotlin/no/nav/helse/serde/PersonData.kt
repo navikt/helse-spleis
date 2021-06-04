@@ -649,9 +649,8 @@ internal data class PersonData(
             private val utbetalteDager: List<UtbetaltDagData>,
             private val feriepengedager: List<UtbetaltDagData>,
             val utbetalingId: UUID,
-
-            ) {
-
+            private val sendTilOppdrag: Boolean
+        ) {
             internal fun createFeriepengeutbetaling(fødselsnummer: String): Feriepengeutbetaling {
                 val feriepengeberegner = createFeriepengeberegner(fødselsnummer)
                 return Feriepengeutbetaling::class.primaryConstructor!!
@@ -662,7 +661,8 @@ internal data class PersonData(
                         infotrygdFeriepengebeløpArbeidsgiver,
                         spleisFeriepengebeløpArbeidsgiver,
                         oppdrag.konverterTilOppdrag(),
-                        utbetalingId
+                        utbetalingId,
+                        sendTilOppdrag
                     )
             }
 

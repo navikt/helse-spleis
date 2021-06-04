@@ -240,7 +240,8 @@ internal class JsonBuilder : AbstractBuilder() {
                 "infotrygdFeriepengebeløpPerson" to infotrygdFeriepengebeløpPerson,
                 "infotrygdFeriepengebeløpArbeidsgiver" to infotrygdFeriepengebeløpArbeidsgiver,
                 "spleisFeriepengebeløpArbeidsgiver" to spleisFeriepengebeløpArbeidsgiver,
-                "utbetalingId" to utbetalingId
+                "utbetalingId" to utbetalingId,
+                "sendTilOppdrag" to feriepengeutbetaling.sendTilOppdrag
             )
             pushState(OppdragState(feriepengeutbetalingMap))
             pushState(FeriepengeberegnerState(feriepengeutbetalingMap))
