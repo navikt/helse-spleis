@@ -1,6 +1,5 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -284,7 +283,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Finner datoer for feriepengeberegning med to helt overlappende Oppdrag`() = Toggles.FlereArbeidsgivereFørstegangsbehandling.enable {
+    fun `Finner datoer for feriepengeberegning med to helt overlappende Oppdrag`() {
         byggPersonToParallelle(
             arbeidsgiverperiode = 23.april(2018) til 8.mai(2018),
             syktil = 13.juli(2018)
@@ -296,7 +295,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Finner datoer for feriepengeberegning med to ikke-overlappende utbetalingstidslinjer`() = Toggles.FlereArbeidsgivereFørstegangsbehandling.enable {
+    fun `Finner datoer for feriepengeberegning med to ikke-overlappende utbetalingstidslinjer`() {
         byggPerson(
             arbeidsgiverperiode = 1.januar(2018) til 16.januar(2018),
             syktil = 15.februar(2018),

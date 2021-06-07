@@ -1,6 +1,5 @@
 package no.nav.helse.serde.api
 
-import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Dagtype.Feriedag
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
@@ -462,7 +461,7 @@ class SpeilBuilderTest {
                 håndter(
                     utbetalingshistorikk(
                         vedtaksperiodeId = sisteVedtaksperiodeId,
-                        utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(orgnummer, skjæringstidspunktFraInfotrygd,  4.januar, 100.prosent, 31000.månedlig))
+                        utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(orgnummer, skjæringstidspunktFraInfotrygd, 4.januar, 100.prosent, 31000.månedlig))
                     )
                 )
 
@@ -480,7 +479,15 @@ class SpeilBuilderTest {
                 håndter(
                     utbetalingshistorikk(
                         vedtaksperiodeId = sisteVedtaksperiodeId,
-                        utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(orgnummer, skjæringstidspunktFraInfotrygd,  tom1Periode, 100.prosent, 31000.månedlig)),
+                        utbetalinger = listOf(
+                            ArbeidsgiverUtbetalingsperiode(
+                                orgnummer,
+                                skjæringstidspunktFraInfotrygd,
+                                tom1Periode,
+                                100.prosent,
+                                31000.månedlig
+                            )
+                        ),
                         inntektshistorikk = inntektshistorikk
                     )
                 )
@@ -488,7 +495,15 @@ class SpeilBuilderTest {
                 håndter(
                     ytelser(
                         vedtaksperiodeId = sisteVedtaksperiodeId,
-                        utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(orgnummer, skjæringstidspunktFraInfotrygd,  tom1Periode, 100.prosent, 31000.månedlig)),
+                        utbetalinger = listOf(
+                            ArbeidsgiverUtbetalingsperiode(
+                                orgnummer,
+                                skjæringstidspunktFraInfotrygd,
+                                tom1Periode,
+                                100.prosent,
+                                31000.månedlig
+                            )
+                        ),
                         inntektshistorikk = inntektshistorikk
                     )
                 )
@@ -816,8 +831,14 @@ class SpeilBuilderTest {
         val personDTO = serializePersonForSpeil(person, hendelser)
         val vedtaksperiode = personDTO.arbeidsgivere.first().vedtaksperioder.last() as VedtaksperiodeDTO
         assertEquals(2, vedtaksperiode.aktivitetslogg.size)
-        assertEquals("Utdanning oppgitt i perioden i søknaden. Vurder rett til sykepenger og korriger sykmeldingsperioden", vedtaksperiode.aktivitetslogg[0].melding)
-        assertEquals("Utenlandsopphold oppgitt i perioden i søknaden. Vurder rett til sykepenger og korriger sykmeldingperioden", vedtaksperiode.aktivitetslogg[1].melding)
+        assertEquals(
+            "Utdanning oppgitt i perioden i søknaden. Vurder rett til sykepenger og korriger sykmeldingsperioden",
+            vedtaksperiode.aktivitetslogg[0].melding
+        )
+        assertEquals(
+            "Utenlandsopphold oppgitt i perioden i søknaden. Vurder rett til sykepenger og korriger sykmeldingperioden",
+            vedtaksperiode.aktivitetslogg[1].melding
+        )
         assertNotEquals(vedtaksperiode.id, vedtaksperiode.aktivitetslogg[0].vedtaksperiodeId)
         assertNotEquals(vedtaksperiode.id, vedtaksperiode.aktivitetslogg[1].vedtaksperiodeId)
     }
@@ -958,8 +979,8 @@ class SpeilBuilderTest {
         )
 
         val utbetalinger = listOf(
-            ArbeidsgiverUtbetalingsperiode(orgnr1, 20.januar(2021),  26.januar(2021), 100.prosent, inntekt),
-            ArbeidsgiverUtbetalingsperiode(orgnr2, 20.januar(2021),  26.januar(2021), 100.prosent, inntekt)
+            ArbeidsgiverUtbetalingsperiode(orgnr1, 20.januar(2021), 26.januar(2021), 100.prosent, inntekt),
+            ArbeidsgiverUtbetalingsperiode(orgnr2, 20.januar(2021), 26.januar(2021), 100.prosent, inntekt)
         )
 
         person.håndter(utbetalingshistorikk(vedtaksperiodeId = vedtaksperiodeId1, utbetalinger = utbetalinger, orgnummer = orgnr1))
@@ -1022,8 +1043,8 @@ class SpeilBuilderTest {
         )
 
         val utbetalinger = listOf(
-            ArbeidsgiverUtbetalingsperiode(orgnr1, 20.januar(2021),  26.januar(2021), 100.prosent, inntekt),
-            ArbeidsgiverUtbetalingsperiode(orgnr2, 20.januar(2021),  26.januar(2021), 100.prosent, inntekt)
+            ArbeidsgiverUtbetalingsperiode(orgnr1, 20.januar(2021), 26.januar(2021), 100.prosent, inntekt),
+            ArbeidsgiverUtbetalingsperiode(orgnr2, 20.januar(2021), 26.januar(2021), 100.prosent, inntekt)
         )
 
         person.håndter(utbetalingshistorikk(vedtaksperiodeId = vedtaksperiodeId1, utbetalinger = utbetalinger, orgnummer = orgnr1))
@@ -1165,41 +1186,41 @@ class SpeilBuilderTest {
 
     @Test
     fun `Vedtaksperioder fra flere arbeidsgivere får samme vilkårsgrunnlag-warnings`() {
-        Toggles.FlereArbeidsgivereFørstegangsbehandling.enable {
-            val fom = 1.januar
-            val tom = 31.januar
-            val person = Person(aktørId, fnr)
-            person.håndter(sykmelding(orgnummer = orgnummer, fom = fom, tom = tom).first)
-            person.håndter(sykmelding(orgnummer = orgnummer2, fom = fom, tom = tom, grad = 100.prosent).first)
-            val vedtaksperiodeId1 = person.collectVedtaksperiodeIder(orgnummer).last()
-            val vedtaksperiodeId2 = person.collectVedtaksperiodeIder(orgnummer2).last()
-            person.håndter(
-                søknad(
-                    hendelseId = UUID.randomUUID(),
-                    fom = fom,
-                    tom = tom,
-                    sendtSøknad = fom.plusDays(1).atStartOfDay()
-                ).first
-            )
-            person.håndter(
-                inntektsmelding(
-                    organisasjonsnummer = orgnummer,
-                    fom = fom,
-                    refusjon = Inntektsmelding.Refusjon(opphørsdato = null, inntekt = 1000.månedlig, endringerIRefusjon = emptyList()),
-                    beregnetInntekt = 1000.månedlig
-                ).first
-            )
-            person.håndter(
-                inntektsmelding(
-                    organisasjonsnummer = orgnummer2,
-                    fom = fom,
-                    refusjon = Inntektsmelding.Refusjon(opphørsdato = null, inntekt = 1000.månedlig, endringerIRefusjon = emptyList()),
-                    beregnetInntekt = 1000.månedlig
-                ).first
-            )
-            person.håndter(søknad(orgnummer = orgnummer2, fom = fom, tom = tom, grad = 100.prosent).first)
-            person.håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId2, orgnummer = orgnummer2))
-            person.håndter(vilkårsgrunnlag(
+        val fom = 1.januar
+        val tom = 31.januar
+        val person = Person(aktørId, fnr)
+        person.håndter(sykmelding(orgnummer = orgnummer, fom = fom, tom = tom).first)
+        person.håndter(sykmelding(orgnummer = orgnummer2, fom = fom, tom = tom, grad = 100.prosent).first)
+        val vedtaksperiodeId1 = person.collectVedtaksperiodeIder(orgnummer).last()
+        val vedtaksperiodeId2 = person.collectVedtaksperiodeIder(orgnummer2).last()
+        person.håndter(
+            søknad(
+                hendelseId = UUID.randomUUID(),
+                fom = fom,
+                tom = tom,
+                sendtSøknad = fom.plusDays(1).atStartOfDay()
+            ).first
+        )
+        person.håndter(
+            inntektsmelding(
+                organisasjonsnummer = orgnummer,
+                fom = fom,
+                refusjon = Inntektsmelding.Refusjon(opphørsdato = null, inntekt = 1000.månedlig, endringerIRefusjon = emptyList()),
+                beregnetInntekt = 1000.månedlig
+            ).first
+        )
+        person.håndter(
+            inntektsmelding(
+                organisasjonsnummer = orgnummer2,
+                fom = fom,
+                refusjon = Inntektsmelding.Refusjon(opphørsdato = null, inntekt = 1000.månedlig, endringerIRefusjon = emptyList()),
+                beregnetInntekt = 1000.månedlig
+            ).first
+        )
+        person.håndter(søknad(orgnummer = orgnummer2, fom = fom, tom = tom, grad = 100.prosent).first)
+        person.håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId2, orgnummer = orgnummer2))
+        person.håndter(
+            vilkårsgrunnlag(
                 vedtaksperiodeId = vedtaksperiodeId2,
                 inntektsvurdering = Inntektsvurdering(inntektperioder {
                     inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
@@ -1209,42 +1230,43 @@ class SpeilBuilderTest {
                     }
                 }),
                 organisasjonsnummer = orgnummer2
-            ))
+            )
+        )
 
-            person.håndter(
-                ytelser(
-                    vedtaksperiodeId = vedtaksperiodeId1,
-                    orgnummer = orgnummer
-                )
+        person.håndter(
+            ytelser(
+                vedtaksperiodeId = vedtaksperiodeId1,
+                orgnummer = orgnummer
             )
-            person.håndter(
-                utbetalingsgodkjenning(
-                    vedtaksperiodeId = vedtaksperiodeId1,
-                    automatiskBehandling = false,
-                    aktivitetslogg = person.aktivitetslogg
-                )
+        )
+        person.håndter(
+            utbetalingsgodkjenning(
+                vedtaksperiodeId = vedtaksperiodeId1,
+                automatiskBehandling = false,
+                aktivitetslogg = person.aktivitetslogg
             )
-            person.håndter(
-                ytelser(
-                    vedtaksperiodeId = vedtaksperiodeId2,
-                    orgnummer = orgnummer2
-                )
+        )
+        person.håndter(
+            ytelser(
+                vedtaksperiodeId = vedtaksperiodeId2,
+                orgnummer = orgnummer2
             )
-            person.håndter(
-                utbetalingsgodkjenning(
-                    vedtaksperiodeId = vedtaksperiodeId2,
-                    automatiskBehandling = false,
-                    aktivitetslogg = person.aktivitetslogg
-                )
+        )
+        person.håndter(
+            utbetalingsgodkjenning(
+                vedtaksperiodeId = vedtaksperiodeId2,
+                automatiskBehandling = false,
+                aktivitetslogg = person.aktivitetslogg
             )
+        )
 
-            val vedtaksperioder = serializePersonForSpeil(person)
-                .arbeidsgivere.flatMap { it.vedtaksperioder }
+        val vedtaksperioder = serializePersonForSpeil(person)
+            .arbeidsgivere.flatMap { it.vedtaksperioder }
 
-            assertEquals(2, vedtaksperioder.size)
-            assertTrue((vedtaksperioder.first() as VedtaksperiodeDTO).aktivitetslogg.any { it.melding == "Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag" })
-            assertTrue((vedtaksperioder.last() as VedtaksperiodeDTO).aktivitetslogg.any { it.melding == "Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag" })
-        }
+        assertEquals(2, vedtaksperioder.size)
+        assertTrue((vedtaksperioder.first() as VedtaksperiodeDTO).aktivitetslogg.any { it.melding == "Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag" })
+        assertTrue((vedtaksperioder.last() as VedtaksperiodeDTO).aktivitetslogg.any { it.melding == "Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag" })
+
     }
 
     @Test
@@ -1254,7 +1276,8 @@ class SpeilBuilderTest {
         val utbetalingshistorikk = personDto.arbeidsgivere.first().utbetalingshistorikk
         assertEquals(3, utbetalingshistorikk.size)
         val annulleringElement = utbetalingshistorikk.first { it.utbetaling.erAnnullering() }
-        assertFalse(personDto.arbeidsgivere.flatMap { it.vedtaksperioder.flatMap { vedtaksperiode -> (vedtaksperiode as VedtaksperiodeDTO).beregningIder } }.contains(annulleringElement.beregningId))
+        assertFalse(personDto.arbeidsgivere.flatMap { it.vedtaksperioder.flatMap { vedtaksperiode -> (vedtaksperiode as VedtaksperiodeDTO).beregningIder } }
+            .contains(annulleringElement.beregningId))
     }
 
     private fun <T> Collection<T>.assertOnNonEmptyCollection(func: (T) -> Unit) {

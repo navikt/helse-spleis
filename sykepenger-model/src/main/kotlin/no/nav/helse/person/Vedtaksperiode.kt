@@ -459,7 +459,7 @@ internal class Vedtaksperiode private constructor(
     private fun trengerVilkårsgrunnlag(hendelse: IAktivitetslogg) {
         val beregningSlutt = YearMonth.from(skjæringstidspunkt).minusMonths(1)
         inntektsberegning(hendelse, beregningSlutt.minusMonths(11), beregningSlutt)
-        if(Toggles.FlereArbeidsgivereUlikFom.enabled) {
+        if (Toggles.FlereArbeidsgivereUlikFom.enabled) {
             inntekterForSykepengegrunnlag(hendelse, beregningSlutt.minusMonths(2), beregningSlutt)
         }
         opptjening(hendelse)
@@ -1090,13 +1090,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: SøknadArbeidsgiver) {
-            if (!Toggles.FlereArbeidsgivereFørstegangsbehandling.enabled) {
-                if (vedtaksperiode.person.harOverlappendePeriodeHosAnnenArbeidsgiver(vedtaksperiode))
-                    return vedtaksperiode.person.invaliderAllePerioder(
-                        søknad,
-                        "Invaliderer alle perioder for flere arbeidsgivere fordi førstegangsbehandling ikke støttes"
-                    )
-            }
             vedtaksperiode.håndterSøknad(søknad, AvsluttetUtenUtbetaling)
             søknad.info("Fullført behandling av søknad til arbeidsgiver")
         }
@@ -1127,13 +1120,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: SøknadArbeidsgiver) {
-            if (!Toggles.FlereArbeidsgivereFørstegangsbehandling.enabled) {
-                if (vedtaksperiode.person.harOverlappendePeriodeHosAnnenArbeidsgiver(vedtaksperiode))
-                    return vedtaksperiode.person.invaliderAllePerioder(
-                        søknad,
-                        "Invaliderer alle perioder for flere arbeidsgivere fordi førstegangsbehandling ikke støttes"
-                    )
-            }
             vedtaksperiode.håndterSøknad(søknad, AvsluttetUtenUtbetaling)
             søknad.info("Fullført behandling av søknad til arbeidsgiver")
         }
@@ -1536,9 +1522,6 @@ internal class Vedtaksperiode private constructor(
                     )
                 }
                 onError { person.invaliderAllePerioder(hendelse, null) }
-                validerHvis("Er ikke overgang fra IT og har flere arbeidsgivere", !Toggles.FlereArbeidsgivereFørstegangsbehandling.enabled) {
-                    arbeidsgiver.forlengerInfotrygd(vedtaksperiode.periode) || !person.harFlereArbeidsgivereMedSykdom()
-                }
                 onSuccess {
                     if (arbeidsgiver.erForlengelse(vedtaksperiode.periode)) {
                         info("Oppdaget at perioden er en forlengelse")
