@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
-import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -460,136 +459,131 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `Utbetaling av feriepenger sender behov til oppdrag`() {
-        Toggles.SendFeriepengeOppdrag.enable {
-            håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 30.juni(2020), 100.prosent))
-            håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.juni(2020), 30.juni(2020), 100.prosent))
-            håndterUtbetalingshistorikk(1.vedtaksperiode)
-            håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
-            håndterYtelser(1.vedtaksperiode)
-            håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-                inntekter = inntektperioder {
-                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
-                    1.juni(2019) til 1.mai(2020) inntekter {
-                        ORGNUMMER inntekt INNTEKT
-                    }
+        håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 30.juni(2020), 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.juni(2020), 30.juni(2020), 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.juni(2019) til 1.mai(2020) inntekter {
+                    ORGNUMMER inntekt INNTEKT
                 }
-            ))
-            håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            håndterUtbetalt(1.vedtaksperiode)
+            }
+        ))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
 
-            håndterUtbetalingshistorikkForFeriepenger(
-                opptjeningsår = Year.of(2020)
-            )
+        håndterUtbetalingshistorikkForFeriepenger(
+            opptjeningsår = Year.of(2020)
+        )
 
-            assertTrue(inspektør.personLogg.toString().contains("Trenger å sende utbetaling til Oppdrag"))
-            assertEquals(inspektør.personLogg.behov().last().detaljer()["saksbehandler"], "SPLEIS")
+        assertTrue(inspektør.personLogg.toString().contains("Trenger å sende utbetaling til Oppdrag"))
+        assertEquals(inspektør.personLogg.behov().last().detaljer()["saksbehandler"], "SPLEIS")
 
-            val linje = (inspektør.personLogg.behov().last().detaljer()["linjer"] as ArrayList<LinkedHashMap<String, String>>).first()
-            assertEquals(linje["satstype"], "ENG")
-            assertEquals(linje["klassekode"], "SPREFAGFER-IOP")
-            assertEquals(linje["grad"], null)
-        }
+        val linje = (inspektør.personLogg.behov().last().detaljer()["linjer"] as ArrayList<LinkedHashMap<String, String>>).first()
+        assertEquals(linje["satstype"], "ENG")
+        assertEquals(linje["klassekode"], "SPREFAGFER-IOP")
+        assertEquals(linje["grad"], null)
     }
 
     @Test
     fun `Sender ut events etter mottak av kvittering fra oppdrag`() {
-        Toggles.SendFeriepengeOppdrag.enable {
-            håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 30.juni(2020), 100.prosent))
-            håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.juni(2020), 30.juni(2020), 100.prosent))
-            håndterUtbetalingshistorikk(1.vedtaksperiode)
-            håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
-            håndterYtelser(1.vedtaksperiode)
-            håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-                inntekter = inntektperioder {
-                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
-                    1.juni(2019) til 1.mai(2020) inntekter {
-                        ORGNUMMER inntekt INNTEKT
-                    }
+        håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 30.juni(2020), 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.juni(2020), 30.juni(2020), 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.juni(2019) til 1.mai(2020) inntekter {
+                    ORGNUMMER inntekt INNTEKT
                 }
-            ))
-            håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            håndterUtbetalt(1.vedtaksperiode)
-
-            håndterUtbetalingshistorikkForFeriepenger(
-                opptjeningsår = Year.of(2020)
-            )
-
-            val fagsystemIdFeriepenger = inspektør.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling).detaljer().get("fagsystemId") as String
-            håndterFeriepengerUtbetalt(fagsystemId = fagsystemIdFeriepenger)
-
-            assertTrue(inspektør.personLogg.toString().contains("Data for feriepenger fra Oppdrag/UR"))
-            assertTrue(inspektør.personLogg.toString().contains("utbetalt ok: ja"))
-            observatør.feriepengerUtbetaltEventer.first().let { event ->
-                println(serdeObjectMapper.writeValueAsString(event))
-                assertEquals(fagsystemIdFeriepenger, event.arbeidsgiverOppdrag["fagsystemId"])
-                val linje = (event.arbeidsgiverOppdrag["linjer"] as ArrayList<LinkedHashMap<String, String>>).first()
-                assertEquals("2021-05-01", linje["fom"])
-                assertEquals("2021-05-31", linje["tom"])
-                assertEquals(1460, linje["totalbeløp"])
             }
-            assertTrue(observatør.feriepengerUtbetaltEndretEventer.any { it.arbeidsgiverOppdrag["linjer"].castAsList<Map<String, Any>>().single()["satstype"] == "ENG" })
+        ))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        håndterUtbetalingshistorikkForFeriepenger(
+            opptjeningsår = Year.of(2020)
+        )
+
+        val fagsystemIdFeriepenger = inspektør.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling).detaljer().get("fagsystemId") as String
+        håndterFeriepengerUtbetalt(fagsystemId = fagsystemIdFeriepenger)
+
+        assertTrue(inspektør.personLogg.toString().contains("Data for feriepenger fra Oppdrag/UR"))
+        assertTrue(inspektør.personLogg.toString().contains("utbetalt ok: ja"))
+        observatør.feriepengerUtbetaltEventer.first().let { event ->
+            println(serdeObjectMapper.writeValueAsString(event))
+            assertEquals(fagsystemIdFeriepenger, event.arbeidsgiverOppdrag["fagsystemId"])
+            val linje = (event.arbeidsgiverOppdrag["linjer"] as ArrayList<LinkedHashMap<String, String>>).first()
+            assertEquals("2021-05-01", linje["fom"])
+            assertEquals("2021-05-31", linje["tom"])
+            assertEquals(1460, linje["totalbeløp"])
         }
+        assertTrue(observatør.feriepengerUtbetaltEndretEventer.any {
+            it.arbeidsgiverOppdrag["linjer"].castAsList<Map<String, Any>>().single()["satstype"] == "ENG"
+        })
+
     }
 
     @Test
     fun `Sender ikke behov når det ikke er noen diff i IT og spleis sine beregninger av feriepenger`() {
-        Toggles.SendFeriepengeOppdrag.enable {
-            håndterSykmelding(Sykmeldingsperiode(6.juni(2020), 7.juni(2020), 100.prosent))
-            håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(6.juni(2020), 7.juni(2020), 100.prosent))
-            håndterUtbetalingshistorikk(1.vedtaksperiode)
-            håndterInntektsmelding(listOf(6.juni(2020) til 7.juni(2020)))
-            håndterYtelser(1.vedtaksperiode)
-            håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-                inntekter = inntektperioder {
-                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
-                    1.juni(2019) til 1.mai(2020) inntekter {
-                        ORGNUMMER inntekt INNTEKT
-                    }
+        håndterSykmelding(Sykmeldingsperiode(6.juni(2020), 7.juni(2020), 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(6.juni(2020), 7.juni(2020), 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterInntektsmelding(listOf(6.juni(2020) til 7.juni(2020)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.juni(2019) til 1.mai(2020) inntekter {
+                    ORGNUMMER inntekt INNTEKT
                 }
-            ))
-            håndterYtelser(1.vedtaksperiode)
+            }
+        ))
+        håndterYtelser(1.vedtaksperiode)
 
-            håndterUtbetalingshistorikkForFeriepenger(
-                opptjeningsår = Year.of(2020)
-            )
-            assertFalse(inspektør.personLogg.toString().contains("Trenger å sende utbetaling til Oppdrag"))
-        }
+        håndterUtbetalingshistorikkForFeriepenger(
+            opptjeningsår = Year.of(2020)
+        )
+        assertFalse(inspektør.personLogg.toString().contains("Trenger å sende utbetaling til Oppdrag"))
     }
 
     @Test
     fun `Totalbeløp settes til sats for utbetaling av feriepenger`() {
-        Toggles.SendFeriepengeOppdrag.enable {
-            håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 30.juni(2020), 100.prosent))
-            håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.juni(2020), 30.juni(2020), 100.prosent))
-            håndterUtbetalingshistorikk(1.vedtaksperiode)
-            håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
-            håndterYtelser(1.vedtaksperiode)
-            håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-                inntekter = inntektperioder {
-                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
-                    1.juni(2019) til 1.mai(2020) inntekter {
-                        ORGNUMMER inntekt INNTEKT
-                    }
+        håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 30.juni(2020), 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.juni(2020), 30.juni(2020), 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.juni(2019) til 1.mai(2020) inntekter {
+                    ORGNUMMER inntekt INNTEKT
                 }
-            ))
-            håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            håndterUtbetalt(1.vedtaksperiode)
+            }
+        ))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
 
-            håndterUtbetalingshistorikkForFeriepenger(
-                opptjeningsår = Year.of(2020)
-            )
+        håndterUtbetalingshistorikkForFeriepenger(
+            opptjeningsår = Year.of(2020)
+        )
 
-            val linje = (inspektør.personLogg.behov().last().detaljer()["linjer"] as ArrayList<LinkedHashMap<String, String>>).first()
+        val linje = (inspektør.personLogg.behov().last().detaljer()["linjer"] as ArrayList<LinkedHashMap<String, String>>).first()
 
-            assertEquals(1460, linje["sats"])
-            assertEquals(1460, linje["totalbeløp"])
-        }
+        assertEquals(1460, linje["sats"])
+        assertEquals(1460, linje["totalbeløp"])
     }
 
     @Test
@@ -616,8 +610,12 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             opptjeningsår = Year.of(2020)
         )
         håndterUtbetalingshistorikkForFeriepenger(
-            utbetalinger = listOf(UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(ORGNUMMER, 20.januar(2020), 31.januar(2020), 690, 30.juni(2020))),
-            feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(ORGNUMMER, (10*690*0.102).roundToInt(), 1.mai, 31.mai)),
+            utbetalinger = listOf(
+                UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(
+                    ORGNUMMER, 20.januar(2020), 31.januar(2020), 690, 30.juni(2020)
+                )
+            ),
+            feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(ORGNUMMER, (10 * 690 * 0.102).roundToInt(), 1.mai, 31.mai)),
             opptjeningsår = Year.of(2020)
         )
 
@@ -650,8 +648,12 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         val førsteUtbetaling = engangsutbetalinger().last()
         val fagsystemId = førsteUtbetaling.detaljer()["fagsystemId"]
         håndterUtbetalingshistorikkForFeriepenger(
-            utbetalinger = listOf(UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(ORGNUMMER, 20.januar(2020), 31.januar(2020), 690, 30.juni(2020))), // 10 dager
-            feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(ORGNUMMER, (10*690*0.102).roundToInt(), 1.mai, 31.mai)),
+            utbetalinger = listOf(
+                UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(
+                    ORGNUMMER, 20.januar(2020), 31.januar(2020), 690, 30.juni(2020)
+                )
+            ), // 10 dager
+            feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(ORGNUMMER, (10 * 690 * 0.102).roundToInt(), 1.mai, 31.mai)),
             opptjeningsår = Year.of(2020)
         )
 
@@ -685,13 +687,21 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode)
 
         håndterUtbetalingshistorikkForFeriepenger(
-            utbetalinger = listOf(UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(ORGNUMMER, 1.januar(2020), 8.mars(2020), 690, 30.juni(2020))), // 10 dager
-            feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(ORGNUMMER, (10*690*0.102).roundToInt(), 1.mai, 31.mai)),
+            utbetalinger = listOf(
+                UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(
+                    ORGNUMMER, 1.januar(2020), 8.mars(2020), 690, 30.juni(2020)
+                )
+            ), // 10 dager
+            feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(ORGNUMMER, (10 * 690 * 0.102).roundToInt(), 1.mai, 31.mai)),
             opptjeningsår = Year.of(2020)
         )
         håndterUtbetalingshistorikkForFeriepenger(
-            utbetalinger = listOf(UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(ORGNUMMER, 20.januar(2020), 31.januar(2020), 690, 30.juni(2020))), // 10 dager
-            feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(ORGNUMMER, (10*690*0.102).roundToInt(), 1.mai, 31.mai)),
+            utbetalinger = listOf(
+                UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(
+                    ORGNUMMER, 20.januar(2020), 31.januar(2020), 690, 30.juni(2020)
+                )
+            ), // 10 dager
+            feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(ORGNUMMER, (10 * 690 * 0.102).roundToInt(), 1.mai, 31.mai)),
             opptjeningsår = Year.of(2020)
         )
 
@@ -736,8 +746,12 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         assertEquals(1, engangsutbetalinger().size)
 
         håndterUtbetalingshistorikkForFeriepenger(
-            utbetalinger = listOf(UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(ORGNUMMER, 20.januar(2020), 31.januar(2020), 690, 30.juni(2020))), // 10 dager
-            feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(ORGNUMMER, (10*690*0.102).roundToInt(), 1.mai, 31.mai)),
+            utbetalinger = listOf(
+                UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(
+                    ORGNUMMER, 20.januar(2020), 31.januar(2020), 690, 30.juni(2020)
+                )
+            ), // 10 dager
+            feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(ORGNUMMER, (10 * 690 * 0.102).roundToInt(), 1.mai, 31.mai)),
             opptjeningsår = Year.of(2020)
         )
 
@@ -753,7 +767,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
 
     private fun engangsutbetalinger() = inspektør.personLogg.behov()
         .filter { it.type == Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling }
-        .filter { utbetaling -> utbetaling.detaljer()["linjer"].castAsList<Map<String, Any>>().any { linje -> linje["satstype"] == "ENG" }}
+        .filter { utbetaling -> utbetaling.detaljer()["linjer"].castAsList<Map<String, Any>>().any { linje -> linje["satstype"] == "ENG" } }
 
     private fun Aktivitetslogg.Aktivitet.Behov.linje() = this
         .detaljer()["linjer"].castAsList<Map<String, Any?>>()
