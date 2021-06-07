@@ -182,6 +182,7 @@ internal class Feriepengeutbetaling private constructor(
                 Differanse: $differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd
                 Oppdrag: ${OppdragReflect(oppdrag).toMap()}
                 Datoer: ${feriepengeberegner.feriepengedatoer()}
+                Differanse fra forrige sendte oppdrag: ${forrigeSendteOppdrag?.totalbeløp()?.minus(oppdrag.totalbeløp())}
                 """.trimIndent()
             )
 
