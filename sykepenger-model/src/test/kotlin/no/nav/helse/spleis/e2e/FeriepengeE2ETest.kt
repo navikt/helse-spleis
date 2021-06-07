@@ -15,6 +15,7 @@ import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.utbetalingslinjer.Satstype
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -33,6 +34,12 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     @BeforeEach
     fun setUp() {
         logCollector.list.clear()
+        Toggles.SendFeriepengeOppdrag.enable()
+    }
+
+    @AfterEach
+    fun tearDown() {
+        Toggles.SendFeriepengeOppdrag.pop()
     }
 
     @Test
@@ -728,7 +735,6 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         val førsteUtbetaling = engangsutbetalinger().last()
         val fagsystemId = førsteUtbetaling.detaljer()["fagsystemId"]
 
-
         håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020)
         )
@@ -749,6 +755,54 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         assertEquals("ENDR", utbetaling.detaljer()["endringskode"])
         assertEquals("NY", utbetaling.linje()["endringskode"])
         assertEquals(førsteUtbetaling.linje()["delytelseId"], utbetaling.linje()["refDelytelseId"])
+    }
+
+    @Test
+    fun `toggle av føkekr ikke shit`() {
+        Toggles.SendFeriepengeOppdrag.enable {
+            håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 14.august(2020), 100.prosent))
+            håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.juni(2020), 14.august(2020), 100.prosent)) // 43 dager
+            håndterUtbetalingshistorikk(1.vedtaksperiode)
+            håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+            håndterYtelser(1.vedtaksperiode)
+            håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+                inntekter = inntektperioder {
+                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                    1.juni(2019) til 1.mai(2020) inntekter {
+                        ORGNUMMER inntekt INNTEKT
+                    }
+                }
+            ))
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt(1.vedtaksperiode)
+
+            håndterUtbetalingshistorikkForFeriepenger(
+                opptjeningsår = Year.of(2020)
+            )
+            val førsteUtbetaling = engangsutbetalinger()
+
+            Toggles.SendFeriepengeOppdrag.disable {
+                håndterUtbetalingshistorikkForFeriepenger(
+                    utbetalinger = listOf(
+                        UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(
+                            ORGNUMMER,
+                            20.januar(2020),
+                            31.januar(2020),
+                            690,
+                            30.juni(2020)
+                        )
+                    ), // 10 dager
+                    feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(ORGNUMMER, (10 * 690 * 0.102).roundToInt(), 1.mai, 31.mai)),
+                    opptjeningsår = Year.of(2020)
+                )
+            }
+
+            assertEquals(1, engangsutbetalinger().size)
+            val utbetaling = engangsutbetalinger()
+            assertEquals(førsteUtbetaling, utbetaling)
+        }
     }
 
     private fun engangsutbetalinger() = inspektør.personLogg.behov()

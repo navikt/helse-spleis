@@ -1,7 +1,6 @@
 package no.nav.helse.serde
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.Toggles
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.*
@@ -222,9 +221,7 @@ internal class JsonBuilder : AbstractBuilder() {
         }
 
         override fun postVisitFeriepengeutbetalinger(feriepengeutbetalinger: List<Feriepengeutbetaling>) {
-            if(Toggles.SendFeriepengeOppdrag.enabled) {
-                arbeidsgiverMap["feriepengeutbetalinger"] = feriepengeutbetalingListe.toList()
-            }
+            arbeidsgiverMap["feriepengeutbetalinger"] = feriepengeutbetalingListe.toList()
         }
 
         override fun preVisitFeriepengeutbetaling(

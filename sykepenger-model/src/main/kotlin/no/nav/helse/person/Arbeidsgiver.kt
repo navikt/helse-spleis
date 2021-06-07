@@ -241,7 +241,11 @@ internal class Arbeidsgiver private constructor(
             utbetalingshistorikkForFeriepenger,
             feriepengeutbetalinger
         ).build()
-        feriepengeutbetalinger.add(feriepengeutbetaling)
+
+        if (Toggles.SendFeriepengeOppdrag.enabled) {
+            feriepengeutbetalinger.add(feriepengeutbetaling)
+        }
+
         feriepengeutbetaling.registrer(this)
 
         if (Toggles.SendFeriepengeOppdrag.enabled && feriepengeutbetaling.sendTilOppdrag) {
