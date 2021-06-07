@@ -648,7 +648,7 @@ internal data class PersonData(
             private val opptjeningsår: Year,
             private val utbetalteDager: List<UtbetaltDagData>,
             private val feriepengedager: List<UtbetaltDagData>,
-            val utbetalingId: UUID,
+            private val utbetalingId: UUID,
             private val sendTilOppdrag: Boolean
         ) {
             internal fun createFeriepengeutbetaling(fødselsnummer: String): Feriepengeutbetaling {
