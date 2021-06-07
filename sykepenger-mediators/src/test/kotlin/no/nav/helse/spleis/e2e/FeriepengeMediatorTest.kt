@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggles
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.spleis.TestMessageFactory
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
@@ -13,7 +14,7 @@ import java.time.YearMonth
 internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
 
     @Test
-    fun `Beregner feriepenger korrekt for enkel spleisperiode med en utbetaling i infotrygd`() {
+    fun `Beregner feriepenger korrekt for enkel spleisperiode med en utbetaling i infotrygd`() = Toggles.SendFeriepengeOppdrag.enable {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 1.juni(2020), tom = 16.juni(2020))), førsteFraværsdag = 1.juni(2020))
@@ -72,7 +73,7 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun `Ser bort fra perioder med arbeidskategori som ikke gir rett til feriepenger`() {
+    fun `Ser bort fra perioder med arbeidskategori som ikke gir rett til feriepenger`() = Toggles.SendFeriepengeOppdrag.enable {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 1.juni(2020), tom = 16.juni(2020))), førsteFraværsdag = 1.juni(2020))
@@ -145,7 +146,7 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun `Ukjent arbeidskategorikode tolkes som tom`() {
+    fun `Ukjent arbeidskategorikode tolkes som tom`() = Toggles.SendFeriepengeOppdrag.enable {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 1.juni(2020), tom = 16.juni(2020))), førsteFraværsdag = 1.juni(2020))
@@ -218,7 +219,7 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun `Sjekker at orgnummer på utbetalingsbehov blir riktig med flere arbeidsgivere`() {
+    fun `Sjekker at orgnummer på utbetalingsbehov blir riktig med flere arbeidsgivere`() = Toggles.SendFeriepengeOppdrag.enable {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 1.juni(2020), tom = 16.juni(2020))), førsteFraværsdag = 1.juni(2020))

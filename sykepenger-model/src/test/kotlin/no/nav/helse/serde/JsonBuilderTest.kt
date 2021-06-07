@@ -164,28 +164,32 @@ class JsonBuilderTest {
 
     @Test
     fun `Serialisering av feriepenger`() {
-        testSerialiseringAvPerson(personMedFeriepenger())
+        Toggles.SendFeriepengeOppdrag.enable {
+            testSerialiseringAvPerson(personMedFeriepenger())
+        }
     }
 
     @Test
     fun `Skal ikke serialisere feriepenger når toggle er disabled`() {
-        val søknadhendelseId = UUID.randomUUID()
+        Toggles.SendFeriepengeOppdrag.disable {
+            val søknadhendelseId = UUID.randomUUID()
 
-        val personMedFeriepenger = personMedFeriepenger(søknadhendelseId = søknadhendelseId)
+            val personMedFeriepenger = personMedFeriepenger(søknadhendelseId = søknadhendelseId)
 
-        val jsonBuilder = JsonBuilder()
-        personMedFeriepenger.accept(jsonBuilder)
-        val json = jsonBuilder.toString()
+            val jsonBuilder = JsonBuilder()
+            personMedFeriepenger.accept(jsonBuilder)
+            val json = jsonBuilder.toString()
 
-        val result = SerialisertPerson(json).deserialize()
-        val jsonBuilder2 = JsonBuilder()
-        result.accept(jsonBuilder2)
-        val json2 = jsonBuilder2.toString()
+            val result = SerialisertPerson(json).deserialize()
+            val jsonBuilder2 = JsonBuilder()
+            result.accept(jsonBuilder2)
+            val json2 = jsonBuilder2.toString()
 
-        objectMapper.readTree(json).also {
-            assertFalse(it.path("arbeidsgivere").first().hasNonNull("ferieutbetalinger"))
+            objectMapper.readTree(json).also {
+                assertFalse(it.path("arbeidsgivere").first().hasNonNull("ferieutbetalinger"))
+            }
+            assertEquals(json, json2)
         }
-        assertEquals(json, json2)
     }
 
     private fun testSerialiseringAvPerson(person: Person) {

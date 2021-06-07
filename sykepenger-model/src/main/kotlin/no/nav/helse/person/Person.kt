@@ -1,6 +1,7 @@
 package no.nav.helse.person
 
 import no.nav.helse.Grunnbeløp
+import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.Arbeidsgiver.Companion.antallArbeidsgivereMedOverlappendeVedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeidsgivere
@@ -115,7 +116,9 @@ class Person private constructor(
         }
         arbeidsgivere.beregnFeriepengerForAlleArbeidsgivere(aktørId, feriepengeberegner, utbetalingshistorikk)
 
-        aktivitetslogg.info("Feriepenger er utbetalt")
+        if (Toggles.SendFeriepengeOppdrag.enabled) {
+            aktivitetslogg.info("Feriepenger er utbetalt")
+        }
     }
 
     fun håndter(ytelser: Ytelser) {

@@ -46,4 +46,5 @@ abstract class Toggles internal constructor(enabled: Boolean = false, private va
     object PraksisendringEnabled : Toggles()
     object RevurderUtbetaltPeriode : Toggles("REVURDER_UTBETALT_PERIODE_TOGGLE")
     object FlereArbeidsgivereUlikFom : Toggles()
+    object SendFeriepengeOppdrag: Toggles(false)
 }
