@@ -2,6 +2,7 @@ package no.nav.helse.serde.api
 
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Dagtype.Feriedag
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
 import no.nav.helse.person.*
@@ -712,6 +713,50 @@ class SpeilBuilderTest {
         val personDTO = serializePersonForSpeil(person, hendelser)
         assertEquals(1, personDTO.arbeidsgivere.first().vedtaksperioder.size)
         assertEquals(TilstandstypeDTO.TilAnnullering, personDTO.arbeidsgivere[0].vedtaksperioder[0].tilstand)
+    }
+
+    @Test
+    fun `lager ikke utbetalingshistorikkelement av forkastet utbetaling`() {
+        val (person, hendelser) = Person(aktørId, fnr).run {
+            this to mutableListOf<HendelseDTO>().apply {
+                sykmelding(fom = 1.januar, tom = 31.januar).also { (sykmelding, sykmeldingDTO) ->
+                    håndter(sykmelding)
+                    add(sykmeldingDTO)
+                }
+                fangeVedtaksperiodeId()
+                søknad(
+                    fom = 1.januar,
+                    tom = 31.januar,
+                    sendtSøknad = 1.april.atStartOfDay()
+                ).also { (søknad, søknadDTO) ->
+                    håndter(søknad)
+                    add(søknadDTO)
+                }
+                inntektsmelding(fom = 1.januar).also { (inntektsmelding, inntektsmeldingDTO) ->
+                    håndter(inntektsmelding)
+                    add(inntektsmeldingDTO)
+                }
+                håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(overstyring())
+                håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
+                fangeUtbetalinger()
+
+            }
+        }
+        val personDTO = serializePersonForSpeil(person, hendelser)
+        val vedtaksperiode = personDTO.arbeidsgivere.first().vedtaksperioder.last() as VedtaksperiodeDTO
+        val utbetalingshistorikk = personDTO.arbeidsgivere.first().utbetalingshistorikk
+
+        assertEquals(1, vedtaksperiode.beregningIder.size)
+        assertEquals(1, utbetalingshistorikk.size)
+        assertEquals(vedtaksperiode.beregningIder.first(), utbetalingshistorikk.first().beregningId)
+        assertEquals("IKKE_UTBETALT", utbetalingshistorikk.first().utbetaling.status)
     }
 
     @Test
@@ -2267,6 +2312,15 @@ class SpeilBuilderTest {
             fagsystemId = fagsystemId,
             saksbehandlerIdent = "en_saksbehandler_ident",
             saksbehandlerEpost = "saksbehandler@nav.no",
+            opprettet = LocalDateTime.now()
+        )
+
+        private fun overstyring(dager: List<ManuellOverskrivingDag> = listOf(ManuellOverskrivingDag(17.januar, Feriedag, 100))) = OverstyrTidslinje(
+            meldingsreferanseId = UUID.randomUUID(),
+            fødselsnummer = fnr,
+            aktørId = aktørId,
+            organisasjonsnummer = orgnummer,
+            dager = dager,
             opprettet = LocalDateTime.now()
         )
     }

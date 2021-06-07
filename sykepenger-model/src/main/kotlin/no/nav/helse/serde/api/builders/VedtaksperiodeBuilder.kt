@@ -367,6 +367,8 @@ internal class VedtaksperiodeBuilder(
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?
     ) {
+        if (tilstand is Utbetaling.Forkastet) return
+
         inUtbetaling = true
         utbetalingGodkjent = tilstand !in listOf(Utbetaling.IkkeGodkjent, Utbetaling.Ubetalt)
         this.maksdato = maksdato

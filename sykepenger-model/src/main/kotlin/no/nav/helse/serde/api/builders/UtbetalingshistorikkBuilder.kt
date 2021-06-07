@@ -91,6 +91,8 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?
     ) {
+        if (tilstand is Utbetaling.Forkastet) return
+
         val vurderingBuilder = VurderingBuilder()
         pushState(vurderingBuilder)
 
