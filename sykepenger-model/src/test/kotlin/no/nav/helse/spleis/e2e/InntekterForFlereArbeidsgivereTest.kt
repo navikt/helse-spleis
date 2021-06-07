@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsvurdering.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.Inntektsvurdering.Inntektsgrunnlag
@@ -132,6 +133,72 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
     }
 
+    @Test
+    fun `Skatteinntekter for sykepengegrunnlag legges i inntektshistorikken`() {
+        Toggles.FlereArbeidsgivereUlikFom.enable {
+            nyPeriode(1.januar til 31.januar, a1, 25000.månedlig)
+            vilkårsgrunnlag(
+                a1.id(0),
+                orgnummer = a1,
+                inntekter = inntektperioder {
+                    inntektsgrunnlag = Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                    1.januar(2017) til 1.desember(2017) inntekter {
+                        a1 inntekt 24000
+                    }
+                },
+                inntekterSykepengegrunnlag = inntektperioder {
+                    inntektsgrunnlag = Inntektsgrunnlag.SYKEPENGEGRUNNLAG
+                    1.oktober(2017) til 1.desember(2017) inntekter {
+                        a1 inntekt 15000
+                    }
+                }
+            ).håndter(Person::håndter)
+
+            assertEquals(3, a1Inspektør.inntektInspektør.sisteInnslag?.size)
+            assertEquals(3, a1Inspektør.inntektInspektør.antallInnslag)
+            assertEquals(
+                25000.månedlig,
+                a1Inspektør.inntektInspektør.sisteInnslag?.get(0)?.sykepengegrunnlag
+            )
+            assertEquals(
+                24000.månedlig,
+                a1Inspektør.inntektInspektør.sisteInnslag?.get(1)?.sammenligningsgrunnlag
+            )
+            assertEquals(
+                15000.månedlig,
+                a1Inspektør.inntektInspektør.sisteInnslag?.get(2)?.sykepengegrunnlag
+            )
+        }
+    }
+
+    @Test
+    fun `Skatteinntekter og inntektsmelding for en arbeidsgiver og kun skatt for andre arbeidsgiver - gir korrekt sykepenge- og sammenligningsgrunnlag`() {
+        Toggles.FlereArbeidsgivereUlikFom.enable {
+            nyPeriode(1.januar til 31.januar, a1, 25000.månedlig)
+            vilkårsgrunnlag(
+                a1.id(0),
+                orgnummer = a1,
+                inntekter = inntektperioder {
+                    inntektsgrunnlag = Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                    1.januar(2017) til 1.desember(2017) inntekter {
+                        a1 inntekt 24000
+                        a2 inntekt 20000
+                    }
+                },
+                inntekterSykepengegrunnlag = inntektperioder {
+                    inntektsgrunnlag = Inntektsgrunnlag.SYKEPENGEGRUNNLAG
+                    1.oktober(2017) til 1.desember(2017) inntekter {
+                        a1 inntekt 15000
+                        a2 inntekt 21000
+                    }
+                }
+            ).håndter(Person::håndter)
+
+            assertEquals(552000.årlig, person.sykepengegrunnlag(1.januar, 1.januar))
+            assertEquals(528000.årlig, person.sammenligningsgrunnlag(1.januar))
+        }
+    }
+
     private fun nyPeriode(periode: Periode, orgnummer: String, inntekt: Inntekt = INNTEKT) {
         sykmelding(
             UUID.randomUUID(),
@@ -164,7 +231,14 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold> = emptyList(),
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
         orgnummer: String = ORGNUMMER,
-        inntekter: List<ArbeidsgiverInntekt>
+        inntekter: List<ArbeidsgiverInntekt>,
+        inntekterSykepengegrunnlag: List<ArbeidsgiverInntekt> = inntektperioder {
+            inntektsgrunnlag = Inntektsgrunnlag.SYKEPENGEGRUNNLAG
+            1.oktober(2017) til 1.desember(2017) inntekter {
+                a1 inntekt 15000
+            }
+        }
+
     ): Vilkårsgrunnlag {
         return Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
@@ -174,6 +248,9 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             orgnummer = orgnummer,
             inntektsvurdering = Inntektsvurdering(
                 inntekter = inntekter
+            ),
+            inntektsvurderingSykepengegrunnlag = Inntektsvurdering(
+                inntekter = inntekterSykepengegrunnlag
             ),
             medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
             opptjeningvurdering = Opptjeningvurdering(

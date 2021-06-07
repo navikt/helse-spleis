@@ -169,6 +169,12 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
                     ORGNUMMER inntekt 31000.månedlig
                 }
             }),
+            inntektsvurderingSykepengegrunnlag = Inntektsvurdering(inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SYKEPENGEGRUNNLAG
+                1.oktober(2017) til 1.desember(2017) inntekter {
+                    ORGNUMMER inntekt 31000.månedlig
+                }
+            }),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             opptjeningvurdering = Opptjeningvurdering(
                 listOf(

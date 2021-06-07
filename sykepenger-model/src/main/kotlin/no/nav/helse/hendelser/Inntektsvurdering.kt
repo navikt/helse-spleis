@@ -138,7 +138,7 @@ class Inntektsvurdering(
                         .map { (_, månedsinntekter) -> summer(månedsinntekter) }
                         .årligGjennomsnitt()
 
-                internal fun summer(inntekter: List<MånedligInntekt>) = inntekter.map { it.inntekt }.summer()
+                private fun summer(inntekter: List<MånedligInntekt>) = inntekter.map { it.inntekt }.summer()
 
                 internal fun antallMåneder(inntekter: List<MånedligInntekt>): Long {
                     if (inntekter.isEmpty()) return 0

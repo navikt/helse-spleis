@@ -2091,6 +2091,12 @@ class SpeilBuilderTest {
                     orgnummer inntekt 31000.månedlig
                 }
             }),
+            inntektsvurderingSykepengegrunnlag: Inntektsvurdering = Inntektsvurdering(inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SYKEPENGEGRUNNLAG
+                1.oktober(2017) til 1.desember(2017) inntekter {
+                    AbstractPersonTest.ORGNUMMER inntekt 31000.månedlig
+                }
+            }),
             organisasjonsnummer: String = orgnummer
         ) = Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
@@ -2099,6 +2105,7 @@ class SpeilBuilderTest {
             fødselsnummer = fnr,
             orgnummer = organisasjonsnummer,
             inntektsvurdering = inntektsvurdering,
+            inntektsvurderingSykepengegrunnlag = inntektsvurderingSykepengegrunnlag,
             opptjeningvurdering = Opptjeningvurdering(
                 listOf(
                     Opptjeningvurdering.Arbeidsforhold(
@@ -2123,6 +2130,12 @@ class SpeilBuilderTest {
                 }
                 1.januar(2017) til 1.januar(2017) inntekter {
                     orgnummer2 inntekt 1
+                }
+            }),
+            inntektsvurderingSykepengegrunnlag = Inntektsvurdering(inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SYKEPENGEGRUNNLAG
+                1.oktober(2017) til 1.desember(2017) inntekter {
+                    AbstractPersonTest.ORGNUMMER inntekt 31000.månedlig
                 }
             }),
             opptjeningvurdering = Opptjeningvurdering(

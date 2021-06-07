@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.Toggles
 import no.nav.helse.person.*
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.økonomi.Inntekt
@@ -13,6 +14,7 @@ class Vilkårsgrunnlag(
     private val fødselsnummer: String,
     private val orgnummer: String,
     private val inntektsvurdering: Inntektsvurdering,
+    private val inntektsvurderingSykepengegrunnlag: Inntektsvurdering?, // TODO: skal ikke være nullable når FlereAGUlikFom er klar
     private val opptjeningvurdering: Opptjeningvurdering,
     private val medlemskapsvurdering: Medlemskapsvurdering
     ) : ArbeidstakerHendelse(meldingsreferanseId) {
@@ -55,6 +57,9 @@ class Vilkårsgrunnlag(
 
     internal fun lagreInntekter(person: Person, skjæringstidspunkt: LocalDate) {
         inntektsvurdering.lagreInntekter(person, skjæringstidspunkt, this)
+        if(Toggles.FlereArbeidsgivereUlikFom.enabled) {
+            inntektsvurderingSykepengegrunnlag?.lagreInntekter(person, skjæringstidspunkt, this)
+        }
     }
 
     internal fun grunnlagsdata() = requireNotNull(grunnlagsdata) { "Må kalle valider() først" }

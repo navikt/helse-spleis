@@ -52,19 +52,30 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             )
         )
         person.håndter(ytelser(1.vedtaksperiode(a1), orgnummer = a1, inntektshistorikk = emptyList()))
-        person.håndter(vilkårsgrunnlag(a1.id(0), orgnummer = a1, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
-                1.januar(2017) til 1.juni(2017) inntekter {
-                    a1 inntekt INNTEKT
-                    a2 inntekt 5000.månedlig
+        person.håndter(vilkårsgrunnlag(
+            a1.id(0),
+            orgnummer = a1,
+            inntektsvurdering = Inntektsvurdering(
+                inntekter = inntektperioder {
+                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                    1.januar(2017) til 1.juni(2017) inntekter {
+                        a1 inntekt INNTEKT
+                        a2 inntekt 5000.månedlig
+                    }
+                    1.august(2017) til 1.desember(2017) inntekter {
+                        a1 inntekt 17000.månedlig
+                        a2 inntekt 3500.månedlig
+                    }
                 }
-                1.august(2017) til 1.desember(2017) inntekter {
-                    a1 inntekt 17000.månedlig
-                    a2 inntekt 3500.månedlig
+            ),
+            inntektsvurderingSykepengegrunnlag = Inntektsvurdering(inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SYKEPENGEGRUNNLAG
+                1.oktober(2017) til 1.desember(2017) inntekter {
+                    ORGNUMMER inntekt 31000.månedlig
                 }
-            }
-        )))
+            })
+        )
+        )
 
         val periodeA2 = 15.januar til 15.februar
         nyPeriode(periodeA2, a2)
@@ -96,19 +107,30 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             )
         )
         person.håndter(ytelser(1.vedtaksperiode(a1), orgnummer = a1, inntektshistorikk = emptyList()))
-        person.håndter(vilkårsgrunnlag(a1.id(0), orgnummer = a1, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
-                1.januar(2017) til 1.juni(2017) inntekter {
-                    a1 inntekt INNTEKT
-                    a2 inntekt 5000.månedlig
+        person.håndter(vilkårsgrunnlag(
+            a1.id(0),
+            orgnummer = a1,
+            inntektsvurdering = Inntektsvurdering(
+                inntekter = inntektperioder {
+                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                    1.januar(2017) til 1.juni(2017) inntekter {
+                        a1 inntekt INNTEKT
+                        a2 inntekt 5000.månedlig
+                    }
+                    1.august(2017) til 1.desember(2017) inntekter {
+                        a1 inntekt 17000.månedlig
+                        a2 inntekt 3500.månedlig
+                    }
                 }
-                1.august(2017) til 1.desember(2017) inntekter {
-                    a1 inntekt 17000.månedlig
-                    a2 inntekt 3500.månedlig
+            ),
+            inntektsvurderingSykepengegrunnlag = Inntektsvurdering(inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SYKEPENGEGRUNNLAG
+                1.oktober(2017) til 1.desember(2017) inntekter {
+                    ORGNUMMER inntekt 31000.månedlig
                 }
-            }
-        )))
+            })
+        )
+        )
 
         val periodeA2 = 2.februar til 20.februar
         nyPeriode(periodeA2, a2)
@@ -143,19 +165,29 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         val periodeA2 = 15.januar til 15.februar
         nyPeriode(periodeA2, a2)
 
-        person.håndter(vilkårsgrunnlag(a1.id(0), orgnummer = a1, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
-                1.januar(2017) til 1.juni(2017) inntekter {
-                    a1 inntekt INNTEKT
-                    a2 inntekt 5000.månedlig
+        person.håndter(vilkårsgrunnlag(
+            a1.id(0), orgnummer = a1,
+            inntektsvurdering = Inntektsvurdering(
+                inntekter = inntektperioder {
+                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                    1.januar(2017) til 1.juni(2017) inntekter {
+                        a1 inntekt INNTEKT
+                        a2 inntekt 5000.månedlig
+                    }
+                    1.august(2017) til 1.desember(2017) inntekter {
+                        a1 inntekt 17000.månedlig
+                        a2 inntekt 3500.månedlig
+                    }
                 }
-                1.august(2017) til 1.desember(2017) inntekter {
-                    a1 inntekt 17000.månedlig
-                    a2 inntekt 3500.månedlig
+            ),
+            inntektsvurderingSykepengegrunnlag = Inntektsvurdering(inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SYKEPENGEGRUNNLAG
+                1.oktober(2017) til 1.desember(2017) inntekter {
+                    ORGNUMMER inntekt 31000.månedlig
                 }
-            }
-        )))
+            })
+        )
+        )
 
         person.håndter(
             inntektsmelding(
@@ -2072,7 +2104,9 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         historikk(a1)
         person.håndter(
             vilkårsgrunnlag(
-                a1.id(0), orgnummer = a1, inntektsvurdering = Inntektsvurdering(
+                a1.id(0),
+                orgnummer = a1,
+                inntektsvurdering = Inntektsvurdering(
                     inntekter = inntektperioder {
                         inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
                         1.januar(2017) til 1.desember(2017) inntekter {
@@ -2082,7 +2116,14 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
                             a2 inntekt INNTEKT
                         }
                     },
-                ), medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Nei
+                ),
+                inntektsvurderingSykepengegrunnlag = Inntektsvurdering(inntektperioder {
+                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SYKEPENGEGRUNNLAG
+                    1.oktober(2017) til 1.desember(2017) inntekter {
+                        ORGNUMMER inntekt 31000.månedlig
+                    }
+                }),
+                medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Nei
             )
         )
         historikk(a1)
@@ -2282,14 +2323,24 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             )
         )
         historikk(orgnummer, sykedagstelling)
-        person.håndter(vilkårsgrunnlag(orgnummer.id(0), orgnummer = orgnummer, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
-                1.januar(2017) til 1.desember(2017) inntekter {
-                    orgnummer inntekt INNTEKT
+        person.håndter(vilkårsgrunnlag(
+            orgnummer.id(0), orgnummer = orgnummer,
+            inntektsvurdering = Inntektsvurdering(
+                inntekter = inntektperioder {
+                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                    1.januar(2017) til 1.desember(2017) inntekter {
+                        orgnummer inntekt INNTEKT
+                    }
                 }
-            }
-        )))
+            ),
+            inntektsvurderingSykepengegrunnlag = Inntektsvurdering(inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SYKEPENGEGRUNNLAG
+                1.oktober(2017) til 1.desember(2017) inntekter {
+                    ORGNUMMER inntekt 31000.månedlig
+                }
+            })
+        )
+        )
     }
 
     private fun nyPeriode(periode: Periode, orgnummer: String) {

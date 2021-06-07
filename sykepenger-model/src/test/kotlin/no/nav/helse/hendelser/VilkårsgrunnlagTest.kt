@@ -191,6 +191,12 @@ internal class VilkårsgrunnlagTest {
                 orgnummer inntekt INNTEKT
             }
         },
+        inntektsmånederSykepengegrunnlag: List<Inntektsvurdering.ArbeidsgiverInntekt> = inntektperioder {
+            inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SYKEPENGEGRUNNLAG
+            1.oktober(2017) til 1.desember(2017) inntekter {
+                orgnummer inntekt INNTEKT
+            }
+        },
         arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold> = listOf(
             Opptjeningvurdering.Arbeidsforhold(
                 orgnummer,
@@ -204,6 +210,7 @@ internal class VilkårsgrunnlagTest {
         fødselsnummer = UNG_PERSON_FNR_2018,
         orgnummer = orgnummer,
         inntektsvurdering = Inntektsvurdering(inntektsmåneder),
+        inntektsvurderingSykepengegrunnlag = Inntektsvurdering(inntektsmånederSykepengegrunnlag),
         opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
         medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja)
     )

@@ -1,11 +1,14 @@
 package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.Toggles
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+import no.nav.helse.hendelser.Inntektsvurdering.Inntektsgrunnlag.SYKEPENGEGRUNNLAG
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Opptjeningvurdering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
@@ -21,24 +24,10 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packe
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
     private val aktørId = packet["aktørId"].asText()
 
-    private val inntekter = packet["@løsning.${InntekterForSammenligningsgrunnlag.name}"]
-        .flatMap { måned ->
-            måned["inntektsliste"]
-                .groupBy({ inntekt -> inntekt.arbeidsgiver() }) { inntekt ->
-                    Inntektsvurdering.ArbeidsgiverInntekt.MånedligInntekt(
-                        yearMonth = måned["årMåned"].asYearMonth(),
-                        inntekt = inntekt["beløp"].asDouble().månedlig,
-                        type = inntekt["inntektstype"].asInntekttype(),
-                        inntektsgrunnlag = SAMMENLIGNINGSGRUNNLAG,
-                        fordel = if (inntekt.path("fordel").isTextual) inntekt["fordel"].asText() else "",
-                        beskrivelse = if (inntekt.path("beskrivelse").isTextual) inntekt["beskrivelse"].asText() else ""
-                    )
-                }.toList()
-        }
-        .groupBy({ (arbeidsgiver, _) -> arbeidsgiver }) { (_, inntekter) -> inntekter }
-        .map { (arbeidsgiver, inntekter) ->
-            Inntektsvurdering.ArbeidsgiverInntekt(arbeidsgiver, inntekter.flatten())
-        }
+    private val inntekterForSammenligningsgrunnlag = inntekter(InntekterForSammenligningsgrunnlag, packet)
+    private val inntekterForSykepengegrunnlag =
+        if (Toggles.FlereArbeidsgivereUlikFom.enabled) inntekter(InntekterForSykepengegrunnlag, packet)
+        else null
 
     private fun JsonNode.asInntekttype() = when (this.asText()) {
         "LOENNSINNTEKT" -> Inntektsvurdering.Inntekttype.LØNNSINNTEKT
@@ -77,8 +66,9 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packe
             fødselsnummer = fødselsnummer,
             orgnummer = organisasjonsnummer,
             inntektsvurdering = Inntektsvurdering(
-                inntekter = inntekter
+                inntekter = inntekterForSammenligningsgrunnlag
             ),
+            inntektsvurderingSykepengegrunnlag = if (Toggles.FlereArbeidsgivereUlikFom.enabled) Inntektsvurdering(inntekter = inntekterForSykepengegrunnlag!!) else null,
             opptjeningvurdering = Opptjeningvurdering(
                 arbeidsforhold = arbeidsforhold
             ),
@@ -91,4 +81,22 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packe
         mediator.behandle(this, vilkårsgrunnlag)
     }
 
+    private fun inntekter(behovtype: Behov.Behovtype, packet: JsonMessage) = packet["@løsning.${behovtype.name}"]
+        .flatMap { måned ->
+            måned["inntektsliste"]
+                .groupBy({ inntekt -> inntekt.arbeidsgiver() }) { inntekt ->
+                    Inntektsvurdering.ArbeidsgiverInntekt.MånedligInntekt(
+                        yearMonth = måned["årMåned"].asYearMonth(),
+                        inntekt = inntekt["beløp"].asDouble().månedlig,
+                        type = inntekt["inntektstype"].asInntekttype(),
+                        inntektsgrunnlag = if (behovtype == InntekterForSykepengegrunnlag) SYKEPENGEGRUNNLAG else SAMMENLIGNINGSGRUNNLAG,
+                        fordel = if (inntekt.path("fordel").isTextual) inntekt["fordel"].asText() else "",
+                        beskrivelse = if (inntekt.path("beskrivelse").isTextual) inntekt["beskrivelse"].asText() else ""
+                    )
+                }.toList()
+        }
+        .groupBy({ (arbeidsgiver, _) -> arbeidsgiver }) { (_, inntekter) -> inntekter }
+        .map { (arbeidsgiver, inntekter) ->
+            Inntektsvurdering.ArbeidsgiverInntekt(arbeidsgiver, inntekter.flatten())
+        }
 }

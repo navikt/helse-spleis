@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
@@ -24,6 +25,7 @@ import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.inntektperioder
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.oktober
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel
@@ -247,20 +249,31 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
                     orgnummer inntekt inntekt
                 }
             }
+        ),
+        inntektsvurderingSykepengegrunnlag: Inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SYKEPENGEGRUNNLAG
+                1.oktober(2017) til 1.desember(2017) inntekter {
+                    orgnummer inntekt inntekt
+                }
+            }
         )
     ) {
         fun assertEtterspurt(behovtype: Behovtype) =
             assertEtterspurt(Vilkårsgrunnlag::class, behovtype, vedtaksperiodeId, orgnummer)
 
         assertEtterspurt(InntekterForSammenligningsgrunnlag)
-        assertEtterspurt(InntekterForSykepengegrunnlag)
+        if(Toggles.FlereArbeidsgivereUlikFom.enabled) {
+            assertEtterspurt(InntekterForSykepengegrunnlag)
+        }
         assertEtterspurt(Medlemskap)
         vilkårsgrunnlag(
             vedtaksperiodeId,
             arbeidsforhold,
             medlemskapstatus,
             orgnummer,
-            inntektsvurdering
+            inntektsvurdering,
+            inntektsvurderingSykepengegrunnlag
         ).håndter(Person::håndter)
     }
 
@@ -678,7 +691,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold> = emptyList(),
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
         orgnummer: String = ORGNUMMER,
-        inntektsvurdering: Inntektsvurdering
+        inntektsvurdering: Inntektsvurdering,
+        inntektsvurderingSykepengegrunnlag: Inntektsvurdering
     ): Vilkårsgrunnlag {
         return Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
@@ -687,6 +701,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = orgnummer,
             inntektsvurdering = inntektsvurdering,
+            inntektsvurderingSykepengegrunnlag = inntektsvurderingSykepengegrunnlag,
             medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
             opptjeningvurdering = Opptjeningvurdering(
                 if (arbeidsforhold.isEmpty()) listOf(
