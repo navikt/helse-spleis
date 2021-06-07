@@ -46,7 +46,7 @@ internal class Feriepengeberegner(
         utbetalteDager.forEach { it.accept(visitor) }
         visitor.postVisitUtbetaleDager()
         visitor.preVisitFeriepengedager()
-        feriepengedager().forEach{ it.accept(visitor) }
+        feriepengedager().forEach { it.accept(visitor) }
         visitor.postVisitFeriepengedager()
         visitor.postVisitFeriepengeberegner(this)
     }
@@ -54,8 +54,6 @@ internal class Feriepengeberegner(
     internal fun feriepengedatoer() = feriepengedager().tilDato()
     internal fun beregnFeriepengerForInfotrygdPerson() = beregnForFilter(INFOTRYGD_PERSON)
     internal fun beregnFeriepengerForInfotrygdPerson(orgnummer: String) = beregnForFilter(INFOTRYGD_PERSON and orgnummerFilter(orgnummer))
-    internal fun beregnFeriepengerForInfotrygdPersonUtenPersonhack(orgnummer: String) =
-        beregnForFilterUtenPersonhack(INFOTRYGD_PERSON and orgnummerFilter(orgnummer))
 
     internal fun beregnFeriepengerForInfotrygdArbeidsgiver() = beregnForFilter(INFOTRYGD_ARBEIDSGIVER)
     internal fun beregnFeriepengerForInfotrygdArbeidsgiver(orgnummer: String) = beregnForFilter(INFOTRYGD_ARBEIDSGIVER and orgnummerFilter(orgnummer))
@@ -85,23 +83,7 @@ internal class Feriepengeberegner(
         return alder.beregnFeriepenger(opptjeningsår, grunnlag)
     }
 
-    private fun beregnForFilterUtenPersonhack(filter: UtbetaltDagSelector): Double {
-        val grunnlag = feriepengedagerUtenPersonhack().filter(filter).summer()
-        return alder.beregnFeriepenger(opptjeningsår, grunnlag)
-    }
-
-    private fun feriepengedager(): List<UtbetaltDag> {
-        val itFeriepenger = utbetalteDager.filter(INFOTRYGD).feriepengedager()
-        val personreserverteDatoer = itFeriepenger.filter { (_, dager) -> dager.any(INFOTRYGD_PERSON) }.map { (dato, _) -> dato }
-
-        return utbetalteDager
-            .feriepengedager(personreserverteDatoer)
-            .flatMap { (_, dagListe) -> dagListe }
-    }
-
-    private fun feriepengedagerUtenPersonhack() = utbetalteDager
-        .feriepengedager()
-        .flatMap { (_, dagListe) -> dagListe }
+    private fun feriepengedager() = utbetalteDager.feriepengedager().flatMap { (_, dagListe) -> dagListe }
 
     internal sealed class UtbetaltDag(
         protected val orgnummer: String,
@@ -110,19 +92,11 @@ internal class Feriepengeberegner(
     ) {
         internal companion object {
             internal fun List<UtbetaltDag>.tilDato() = map { it.dato }.distinct()
-            private fun List<LocalDate>.inneholderBeggeEllerIngen(dato1: LocalDate, dato2: LocalDate) = (dato1 !in this).xor(dato2 in this)
-            internal fun List<UtbetaltDag>.feriepengedager(personreserverteDatoer: List<LocalDate> = emptyList()) = this
-                .sortedWith { utbetaltDag1, utbetaltDag2 ->
-                    when {
-                        personreserverteDatoer.inneholderBeggeEllerIngen(utbetaltDag1.dato, utbetaltDag2.dato) -> utbetaltDag1.dato.compareTo(utbetaltDag2.dato)
-                        utbetaltDag1.dato in personreserverteDatoer -> -1
-                        else -> 1
-                    }
-                }
+            internal fun List<UtbetaltDag>.feriepengedager() = this
+                .sortedBy { it.dato }
                 .groupBy { it.dato }
                 .entries
                 .take(MAGIC_NUMBER)
-                .sortedBy { (dato, _) -> dato }
 
             internal fun List<UtbetaltDag>.summer() = sumBy { it.beløp }
 

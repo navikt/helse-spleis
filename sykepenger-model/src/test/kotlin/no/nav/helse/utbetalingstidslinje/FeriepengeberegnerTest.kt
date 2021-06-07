@@ -38,13 +38,13 @@ internal class FeriepengeberegnerTest {
     }
 
     @Test
-    fun `feriepengedager utbetalt til person i infotrygd skal alltid være med`() {
+    fun `feriepengedager utbetalt til person i infotrygd skal helst ikke være med`() {
         val feriepengeberegner = feriepengeberegner(
             infotrygdPerson = itPerson(1.mars til 10.mars),
             spleisArbeidsgiver = spleisArbeidsgiver(1.januar til 17.februar)
         )
 
-        assertEquals((1.januar til 7.februar).toList() + (1.mars til 10.mars).toList(), feriepengeberegner.feriepengedatoer())
+        assertEquals((1.januar til 17.februar).toList(), feriepengeberegner.feriepengedatoer())
     }
 
     @Test
@@ -75,7 +75,7 @@ internal class FeriepengeberegnerTest {
             spleisArbeidsgiver = spleisArbeidsgiver(1.januar til 10.februar)
         )
 
-        assertEquals(12 * 1000 * UNG_SATS, feriepengeberegner.beregnFeriepengerForInfotrygdPerson())
+        assertEquals(0.0, feriepengeberegner.beregnFeriepengerForInfotrygdPerson())
     }
 
     @Test

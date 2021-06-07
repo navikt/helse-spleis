@@ -135,20 +135,6 @@ internal class Feriepengeutbetaling private constructor(
             val infotrygdFeriepengebeløpArbeidsgiver = feriepengeberegner.beregnFeriepengerForInfotrygdArbeidsgiver(orgnummer)
             val spleisFeriepengebeløpArbeidsgiver = feriepengeberegner.beregnFeriepengerForSpleis(orgnummer)
 
-            val infotrygdFeriepengebeløpPersonUtenPersonhack = feriepengeberegner.beregnFeriepengerForInfotrygdPersonUtenPersonhack(orgnummer)
-
-            if (infotrygdFeriepengebeløpPerson != infotrygdFeriepengebeløpPersonUtenPersonhack) {
-                sikkerLogg.info(
-                    """
-                    Feriepengebeløp utbetalt til person er forskjellig fra beløpet som skulle vært utbetalt til person etter ordinære regler
-                    AktørId: $aktørId
-                    Arbeidsgiver: $orgnummer
-                    Faktisk utbetalt til person: $infotrygdFeriepengebeløpPerson
-                    Burde egentlig vært utbetalt: $infotrygdFeriepengebeløpPersonUtenPersonhack
-                    """.trimIndent()
-                )
-            }
-
             val totaltFeriepengebeløpArbeidsgiver: Double = feriepengeberegner.beregnFeriepengerForArbeidsgiver(orgnummer)
             val differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd: Double = feriepengeberegner.beregnFeriepengedifferansenForArbeidsgiver(orgnummer)
 
