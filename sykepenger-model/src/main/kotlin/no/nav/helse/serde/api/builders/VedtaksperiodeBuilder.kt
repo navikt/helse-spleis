@@ -367,9 +367,9 @@ internal class VedtaksperiodeBuilder(
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?
     ) {
+        inUtbetaling = true
         if (tilstand is Utbetaling.Forkastet) return
 
-        inUtbetaling = true
         utbetalingGodkjent = tilstand !in listOf(Utbetaling.IkkeGodkjent, Utbetaling.Ubetalt)
         this.maksdato = maksdato
         this.gjenståendeSykedager = gjenståendeSykedager
@@ -415,6 +415,7 @@ internal class VedtaksperiodeBuilder(
         gjenståendeSykedager: Int?
     ) {
         inUtbetaling = false
+        if (tilstand is Utbetaling.Forkastet) return
         totalbeløpArbeidstaker = arbeidsgiverNettoBeløp + personNettoBeløp
     }
 

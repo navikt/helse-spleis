@@ -753,6 +753,7 @@ class SpeilBuilderTest {
         val vedtaksperiode = personDTO.arbeidsgivere.first().vedtaksperioder.last() as VedtaksperiodeDTO
         val utbetalingshistorikk = personDTO.arbeidsgivere.first().utbetalingshistorikk
 
+        assertEquals(31, vedtaksperiode.utbetalingstidslinje.size)
         assertEquals(1, vedtaksperiode.beregningIder.size)
         assertEquals(1, utbetalingshistorikk.size)
         assertEquals(vedtaksperiode.beregningIder.first(), utbetalingshistorikk.first().beregningId)
