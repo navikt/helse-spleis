@@ -2979,4 +2979,54 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         val godkjenningsbehov = inspektør.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning)
         assertEquals(1.januar.toString(), godkjenningsbehov.detaljer()["skjæringstidspunkt"])
     }
+
+    @Test
+    fun `Tar hensyn til forkastede perioder ved beregning av maks dato`() {
+        val inntektshistorikkA1 = listOf(
+            Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true),
+        )
+        val inntektshistorikkA2 = listOf(
+            Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true),
+            Inntektsopplysning(ORGNUMMER, 1.juli, INNTEKT, true),
+        )
+        val ITPeriode1 = 1.januar til 31.januar
+        val ITPeriode2 = 1.juli til 31.juli
+
+        val spleisPeriode1 = 1.februar til 28.februar
+        val spleisPeriode2 = 1.august til 31.august
+        val utbetalinger1 = arrayOf(
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, ITPeriode1.start, ITPeriode1.endInclusive, 100.prosent, INNTEKT),
+        )
+        val utbetalinger2 = arrayOf(
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, ITPeriode1.start, ITPeriode1.endInclusive, 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, ITPeriode2.start, ITPeriode2.endInclusive, 100.prosent, INNTEKT),
+        )
+
+
+
+
+        håndterSykmelding(Sykmeldingsperiode(spleisPeriode1.start, spleisPeriode1.endInclusive, 100.prosent), orgnummer = ORGNUMMER)
+        håndterSøknad(Sykdom(spleisPeriode1.start, spleisPeriode1.endInclusive, 100.prosent), orgnummer = ORGNUMMER)
+
+        håndterUtbetalingshistorikk(1.vedtaksperiode(ORGNUMMER), *utbetalinger1, inntektshistorikk = inntektshistorikkA1, orgnummer = ORGNUMMER, besvart = LocalDateTime.MIN)
+        håndterYtelser(1.vedtaksperiode(ORGNUMMER), *utbetalinger1, inntektshistorikk = inntektshistorikkA1, orgnummer = ORGNUMMER, besvart = LocalDateTime.MIN)
+
+        håndterSimulering(1.vedtaksperiode(ORGNUMMER), orgnummer = ORGNUMMER)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode(ORGNUMMER), orgnummer = ORGNUMMER)
+        håndterUtbetalt(1.vedtaksperiode(ORGNUMMER), orgnummer = ORGNUMMER)
+
+        person.invaliderAllePerioder(inspektør.personLogg, feilmelding = "Feil med vilje")
+
+        håndterSykmelding(Sykmeldingsperiode(spleisPeriode2.start, spleisPeriode2.endInclusive, 100.prosent), orgnummer = ORGNUMMER)
+        håndterSøknad(Sykdom(spleisPeriode2.start, spleisPeriode2.endInclusive, 100.prosent), orgnummer = ORGNUMMER)
+
+        håndterUtbetalingshistorikk(2.vedtaksperiode(ORGNUMMER), *utbetalinger2, inntektshistorikk = inntektshistorikkA2, orgnummer = ORGNUMMER, besvart = LocalDateTime.MIN)
+        håndterYtelser(2.vedtaksperiode(ORGNUMMER), *utbetalinger2, inntektshistorikk = inntektshistorikkA2, orgnummer = ORGNUMMER, besvart = LocalDateTime.MIN)
+
+        håndterSimulering(2.vedtaksperiode(ORGNUMMER), orgnummer = ORGNUMMER)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode(ORGNUMMER), orgnummer = ORGNUMMER)
+        håndterUtbetalt(2.vedtaksperiode(ORGNUMMER), orgnummer = ORGNUMMER)
+
+        assertEquals(88, inspektør(ORGNUMMER).forbrukteSykedager(1))
+    }
 }
