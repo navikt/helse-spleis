@@ -241,11 +241,11 @@ internal class VedtaksperiodeBuilder(
             TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
             TilstandType.AVVENTER_ARBEIDSGIVERE -> TilstandstypeDTO.VenterPåKiling
             TilstandType.TIL_INFOTRYGD -> TilstandstypeDTO.TilInfotrygd
-            TilstandType.UTBETALING_FEILET -> TilstandstypeDTO.Feilet
+            TilstandType.UTBETALING_FEILET,
+            TilstandType.REVURDERING_FEILET -> TilstandstypeDTO.Feilet
             TilstandType.TIL_UTBETALING -> TilstandstypeDTO.TilUtbetaling
             TilstandType.AVVENTER_GODKJENNING_REVURDERING,
             TilstandType.AVVENTER_GODKJENNING -> TilstandstypeDTO.Oppgaver
-            TilstandType.AVSLUTTET_INGEN_ENDRING,
             TilstandType.AVSLUTTET -> when {
                 utbetaling == null -> TilstandstypeDTO.IngenUtbetaling
                 utbetaling.erAnnullering() && utbetaling.erUtbetalt() -> TilstandstypeDTO.Annullert

@@ -1234,7 +1234,10 @@ internal class Vedtaksperiode private constructor(
             arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger
         ) {
             validation(ytelser) {
-                onError { vedtaksperiode.tilstand(ytelser, AvsluttetIngenEndring) }
+                onError {
+                    ytelser.warn("Validering av ytelser ved revurdering feilet. Utbetalingen må annulleres")
+                    vedtaksperiode.tilstand(ytelser, RevurderingFeilet)
+                }
                 valider { infotrygdhistorikk.valider(this, arbeidsgiver, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt) }
                 valider { ytelser.valider(vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt) }
                 valider("Feil ved kalkulering av utbetalingstidslinjer") {
@@ -1753,8 +1756,10 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
-            if (vedtaksperiode.utbetaling().valider(simulering).hasErrorsOrWorse())
-                return vedtaksperiode.tilstand(simulering, AvsluttetIngenEndring)
+            if (vedtaksperiode.utbetaling().valider(simulering).hasErrorsOrWorse()) {
+                simulering.warn("Simulering av revurdert utbetaling feilet. Utbetalingen må annulleres")
+                return vedtaksperiode.tilstand(simulering, RevurderingFeilet)
+            }
             vedtaksperiode.dataForSimulering = simulering.simuleringResultat
             vedtaksperiode.tilstand(simulering, AvventerGodkjenningRevurdering)
         }
@@ -1844,7 +1849,7 @@ internal class Vedtaksperiode private constructor(
             AVVENTER_SIMULERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVSLUTTET,
-            AVSLUTTET_INGEN_ENDRING,
+            REVURDERING_FEILET,
             AVSLUTTET_UTEN_UTBETALING
         ).contains(tilstand.type)
 
@@ -1873,7 +1878,7 @@ internal class Vedtaksperiode private constructor(
                 utbetalingsgodkjenning,
                 when {
                     vedtaksperiode.utbetaling()
-                        .erAvvist() -> AvsluttetIngenEndring.also { utbetalingsgodkjenning.warn("Revurdering er avvist av saksbehandler") }
+                        .erAvvist() -> RevurderingFeilet.also { utbetalingsgodkjenning.warn("Utbetaling av revurdert periode ble avvist av saksbehandler. Utbetalingen må annulleres") }
                     vedtaksperiode.utbetaling().harUtbetalinger() -> TilUtbetaling
                     vedtaksperiode.utbetalingstidslinje.kunArbeidsgiverdager() -> AvsluttetUtenUtbetaling
                     else -> Avsluttet
@@ -2049,13 +2054,9 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
     }
 
-    internal object AvsluttetIngenEndring : Vedtaksperiodetilstand {
-        override val type: TilstandType = AVSLUTTET_INGEN_ENDRING
+    internal object RevurderingFeilet: Vedtaksperiodetilstand {
+        override val type: TilstandType = REVURDERING_FEILET
         override val erFerdigbehandlet = true
-
-        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.arbeidsgiver.gjenopptaBehandling()
-        }
     }
 
     internal object TilInfotrygd : Vedtaksperiodetilstand {

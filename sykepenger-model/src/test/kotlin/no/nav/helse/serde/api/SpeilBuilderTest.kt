@@ -45,6 +45,25 @@ class SpeilBuilderTest {
     }
 
     @Test
+    fun `hal0`() {
+        val (person, hendelser) = person()
+        person.run {
+            håndter(overstyring())
+            håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
+            håndter(simulering(vedtaksperiodeIder.last(), simuleringOk = false))
+            val utbetalteUtbetalinger = utbetalingsliste.getValue(orgnummer).filter { it.erUtbetalt() }
+            håndter(annullering(fagsystemId = utbetalteUtbetalinger.last().arbeidsgiverOppdrag().fagsystemId()))
+        }
+        val personDTO = serializePersonForSpeil(person, hendelser)
+        val vedtaksperiode = personDTO.arbeidsgivere.first().vedtaksperioder.first() as VedtaksperiodeDTO
+        val beregningIdVedtaksperiode = vedtaksperiode.beregningIder.last()
+        val beregningIderUtbetalingshistorikk = personDTO.arbeidsgivere.first().utbetalingshistorikk.map { it.beregningId }
+        assertEquals(1, vedtaksperiode.beregningIder.size)
+        assertEquals(2, beregningIderUtbetalingshistorikk.size)
+        assertTrue(beregningIderUtbetalingshistorikk.contains(beregningIdVedtaksperiode))
+    }
+
+    @Test
     fun `mapping av utbetalingshistorikk`() {
         val (person, hendelser) = person()
         val personDTO = serializePersonForSpeil(person, hendelser)
@@ -2270,13 +2289,13 @@ class SpeilBuilderTest {
                 automatiskBehandling = automatiskBehandling,
             )
 
-        private fun simulering(vedtaksperiodeId: String, orgnummer: String = SpeilBuilderTest.orgnummer) = Simulering(
+        private fun simulering(vedtaksperiodeId: String, orgnummer: String = Companion.orgnummer, simuleringOk: Boolean = true) = Simulering(
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeId,
             aktørId = aktørId,
             fødselsnummer = fnr,
             orgnummer = orgnummer,
-            simuleringOK = true,
+            simuleringOK = simuleringOk,
             melding = "Hei Aron",
             simuleringResultat = simuleringResultat()
         )

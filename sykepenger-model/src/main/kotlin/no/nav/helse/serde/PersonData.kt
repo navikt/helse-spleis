@@ -758,6 +758,7 @@ internal data class PersonData(
                 TilstandType.UTEN_UTBETALING_MED_INNTEKTSMELDING_UFERDIG_GAP -> Vedtaksperiode.UtenUtbetalingMedInntektsmeldingUferdigGap
                 TilstandType.UTEN_UTBETALING_MED_INNTEKTSMELDING_UFERDIG_FORLENGELSE -> Vedtaksperiode.UtenUtbetalingMedInntektsmeldingUferdigForlengelse
                 TilstandType.UTBETALING_FEILET -> Vedtaksperiode.UtbetalingFeilet
+                TilstandType.REVURDERING_FEILET -> Vedtaksperiode.RevurderingFeilet
                 TilstandType.TIL_INFOTRYGD -> Vedtaksperiode.TilInfotrygd
                 TilstandType.START -> Vedtaksperiode.Start
                 TilstandType.MOTTATT_SYKMELDING_FERDIG_FORLENGELSE -> Vedtaksperiode.MottattSykmeldingFerdigForlengelse
@@ -780,7 +781,6 @@ internal data class PersonData(
                 TilstandType.AVVENTER_ARBEIDSGIVERE -> Vedtaksperiode.AvventerArbeidsgivere
                 TilstandType.AVVENTER_REVURDERING -> Vedtaksperiode.AvventerRevurdering
                 TilstandType.AVVENTER_HISTORIKK_REVURDERING -> Vedtaksperiode.AvventerHistorikkRevurdering
-                TilstandType.AVSLUTTET_INGEN_ENDRING -> Vedtaksperiode.AvsluttetIngenEndring
                 TilstandType.AVVENTER_SIMULERING_REVURDERING -> Vedtaksperiode.AvventerSimuleringRevurdering
                 TilstandType.AVVENTER_GODKJENNING_REVURDERING -> Vedtaksperiode.AvventerGodkjenningRevurdering
                 TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING -> Vedtaksperiode.AvventerArbeidsgivereRevurdering
