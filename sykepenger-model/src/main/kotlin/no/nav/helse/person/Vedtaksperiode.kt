@@ -520,13 +520,13 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun tickleForArbeidsgiveravhengighet(påminnelse: Påminnelse) {
-        gjentaHistorikk(påminnelse, person)
+        gjentaHistorikk(påminnelse, person, AvventerArbeidsgivere, AvventerHistorikk)
     }
 
-    private fun gjentaHistorikk(hendelse: ArbeidstakerHendelse) {
+    private fun gjentaHistorikk(hendelse: ArbeidstakerHendelse, nesteTilstand: Vedtaksperiodetilstand) {
         hendelse.kontekst(arbeidsgiver)
         kontekst(hendelse)
-        tilstand(hendelse, AvventerHistorikk)
+        tilstand(hendelse, nesteTilstand)
     }
 
     private fun overlappendeVedtaksperioder() = person.nåværendeVedtaksperioder().filter { periode.overlapperMed(it.periode) }
@@ -558,7 +558,7 @@ internal class Vedtaksperiode private constructor(
         if (tilstand == AvventerArbeidsgivere) {
             overlappendeVedtaksperioder.forEach { it.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE }
         }
-        gjentaHistorikk(arbeidstakerHendelse, person)
+        gjentaHistorikk(arbeidstakerHendelse, person, AvventerArbeidsgivere, AvventerHistorikk)
     }
 
     /**
@@ -568,64 +568,22 @@ internal class Vedtaksperiode private constructor(
         engineForTimeline: MaksimumSykepengedagerfilter,
         hendelse: ArbeidstakerHendelse
     ) {
+        engineForTimeline.beregnGrenser(periode.endInclusive)
+
         val vedtaksperioder = person.nåværendeVedtaksperioder()
+        vedtaksperioder.forEach { it.lagUtbetaling(engineForTimeline, hendelse) }
         val første = vedtaksperioder.first()
-        if (første == this) return første.forsøkUtbetalingSteg2(vedtaksperioder.drop(1), engineForTimeline, hendelse)
+        if (første == this) return første.forsøkUtbetalingSteg2(vedtaksperioder.drop(1), hendelse)
 
         vedtaksperioder
             .filter { this.periode.overlapperMed(it.periode) }
             .forEach { it.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE }
 
         this.tilstand(hendelse, AvventerArbeidsgivere)
-        gjentaHistorikk(hendelse, person)
+        gjentaHistorikk(hendelse, person, AvventerArbeidsgivere, AvventerHistorikk)
     }
 
-    private fun forsøkRevurdering(
-        engineForTimeline: MaksimumSykepengedagerfilter,
-        hendelse: ArbeidstakerHendelse
-    ) {
-        val vedtaksperioder = person.nåværendeVedtaksperioder()
-        val første = vedtaksperioder.first()
-        if (første == this) return første.forsøkRevurderingSteg2(vedtaksperioder.drop(1), engineForTimeline, hendelse)
-
-        this.tilstand(hendelse, AvventerArbeidsgivereRevurdering)
-        if (første.tilstand == AvventerArbeidsgivere) {
-            første.tilstand(hendelse, AvventerHistorikkRevurdering)
-        }
-    }
-
-    private fun forsøkRevurderingSteg2(
-        andreVedtaksperioder: List<Vedtaksperiode>,
-        engineForTimeline: MaksimumSykepengedagerfilter,
-        hendelse: ArbeidstakerHendelse
-    ) {
-        if (andreVedtaksperioder
-                .filter { this.periode.overlapperMed(it.periode) }
-                .all { it.tilstand == AvventerArbeidsgivereRevurdering }
-        )
-            høstingsresultaterRevurdering(engineForTimeline, hendelse)
-        else tilstand(hendelse, AvventerArbeidsgivereRevurdering)
-    }
-
-    private fun forsøkUtbetalingSteg2(
-        andreVedtaksperioder: List<Vedtaksperiode>,
-        engineForTimeline: MaksimumSykepengedagerfilter,
-        hendelse: ArbeidstakerHendelse
-    ) {
-        if (andreVedtaksperioder
-                .filter { this.periode.overlapperMed(it.periode) }
-                .all { it.tilstand == AvventerArbeidsgivere }
-        )
-            høstingsresultater(engineForTimeline, hendelse, andreVedtaksperioder)
-        else tilstand(hendelse, AvventerArbeidsgivere)
-    }
-
-    private fun høstingsresultater(
-        engineForTimeline: MaksimumSykepengedagerfilter,
-        hendelse: ArbeidstakerHendelse,
-        andreVedtaksperioder: List<Vedtaksperiode>
-    ) {
-        engineForTimeline.beregnGrenser(periode.endInclusive)
+    private fun lagUtbetaling(engineForTimeline: MaksimumSykepengedagerfilter, hendelse: ArbeidstakerHendelse) {
         val utbetaling = arbeidsgiver.lagUtbetaling(
             aktivitetslogg = hendelse,
             fødselsnummer = fødselsnummer,
@@ -638,8 +596,21 @@ internal class Vedtaksperiode private constructor(
             utbetalinger.add(it)
         }
         utbetalingstidslinje = utbetaling.utbetalingstidslinje(periode)
-        andreVedtaksperioder.forEach { it.utbetalingstidslinje = it.arbeidsgiver.nåværendeTidslinje().subset(it.periode) }
+    }
 
+    private fun forsøkUtbetalingSteg2(
+        andreVedtaksperioder: List<Vedtaksperiode>,
+        hendelse: ArbeidstakerHendelse
+    ) {
+        if (andreVedtaksperioder
+                .filter { this.periode.overlapperMed(it.periode) }
+                .all { it.tilstand == AvventerArbeidsgivere }
+        )
+            høstingsresultater(hendelse)
+        else tilstand(hendelse, AvventerArbeidsgivere)
+    }
+
+    private fun høstingsresultater(hendelse: ArbeidstakerHendelse) {
         val ingenUtbetaling = !utbetaling().harUtbetalinger()
         val kunArbeidsgiverdager = utbetalingstidslinje.kunArbeidsgiverdager()
         val ingenWarnings = !person.aktivitetslogg.logg(this).hasWarningsOrWorse()
@@ -668,11 +639,26 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    private fun høstingsresultaterRevurdering(
+    private fun forsøkRevurdering(
         engineForTimeline: MaksimumSykepengedagerfilter,
         hendelse: ArbeidstakerHendelse
     ) {
         engineForTimeline.beregnGrenser(periode.endInclusive)
+
+        val vedtaksperioder = person.nåværendeVedtaksperioder()
+        vedtaksperioder.forEach { it.lagRevurdering(engineForTimeline, hendelse) }
+        val første = vedtaksperioder.first()
+        if (første == this) return første.forsøkRevurderingSteg2(vedtaksperioder.drop(1), hendelse)
+
+        vedtaksperioder
+            .filter { this.periode.overlapperMed(it.periode) }
+            .forEach { it.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE }
+
+        this.tilstand(hendelse, AvventerArbeidsgivereRevurdering)
+        gjentaHistorikk(hendelse, person, AvventerArbeidsgivereRevurdering, AvventerHistorikkRevurdering)
+    }
+
+    private fun lagRevurdering(engineForTimeline: MaksimumSykepengedagerfilter, hendelse: ArbeidstakerHendelse) {
         val utbetaling = arbeidsgiver.lagRevurdering(
             aktivitetslogg = hendelse,
             fødselsnummer = fødselsnummer,
@@ -685,7 +671,23 @@ internal class Vedtaksperiode private constructor(
             utbetalinger.add(it)
         }
         utbetalingstidslinje = utbetaling.utbetalingstidslinje(periode)
+    }
 
+    private fun forsøkRevurderingSteg2(
+        andreVedtaksperioder: List<Vedtaksperiode>,
+        hendelse: ArbeidstakerHendelse
+    ) {
+        if (andreVedtaksperioder
+                .filter { this.periode.overlapperMed(it.periode) }
+                .all { it.tilstand == AvventerArbeidsgivereRevurdering }
+        )
+            høstingsresultaterRevurdering(hendelse)
+        else tilstand(hendelse, AvventerArbeidsgivereRevurdering)
+    }
+
+    private fun høstingsresultaterRevurdering(
+        hendelse: ArbeidstakerHendelse
+    ) {
         when {
             !utbetaling().harUtbetalinger() && utbetalingstidslinje.kunArbeidsgiverdager() && !person.aktivitetslogg.logg(this).hasWarningsOrWorse() -> {
                 tilstand(hendelse, AvsluttetUtenUtbetaling) {
@@ -2142,14 +2144,14 @@ internal class Vedtaksperiode private constructor(
                 .forEach { inntektsmelding.trimLeft(it.endInclusive) }
         }
 
-        internal fun gjentaHistorikk(hendelse: ArbeidstakerHendelse, person: Person) {
+        internal fun gjentaHistorikk(hendelse: ArbeidstakerHendelse, person: Person, nåværendeTilstand: Vedtaksperiodetilstand, nesteTilstand: Vedtaksperiodetilstand) {
             val nåværende = person.nåværendeVedtaksperioder()
             val første = nåværende.firstOrNull() ?: return
             if (nåværende
                     .filter { første.periode.overlapperMed(it.periode) }
-                    .all { it.tilstand == AvventerArbeidsgivere }
+                    .all { it.tilstand == nåværendeTilstand }
             ) {
-                første.gjentaHistorikk(hendelse)
+                første.gjentaHistorikk(hendelse, nesteTilstand)
             }
         }
 
