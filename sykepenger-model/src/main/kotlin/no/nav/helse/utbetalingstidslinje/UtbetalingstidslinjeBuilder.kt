@@ -93,6 +93,9 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     override fun visitDag(dag: Dag.FriskHelgedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
         arbeidsdag(dato)
 
+    override fun visitDag(dag: Dag.AvslåttDag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
+        fridag(dato)
+
     override fun visitDag(
         dag: Dag.ArbeidsgiverHelgedag,
         dato: LocalDate,

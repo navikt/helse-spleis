@@ -245,19 +245,19 @@ internal class Sykdomstidslinje private constructor(
     internal fun toShortString(): String {
         return periode?.joinToString(separator = "") {
             (if (it.dayOfWeek == DayOfWeek.MONDAY) " " else "") +
-                when (this[it]::class) {
-                    Sykedag::class -> "S"
-                    Arbeidsdag::class -> "A"
-                    UkjentDag::class -> "?"
-                    ProblemDag::class -> "X"
-                    SykHelgedag::class -> "H"
-                    Arbeidsgiverdag::class -> "U"
-                    ArbeidsgiverHelgedag::class -> "G"
-                    Feriedag::class -> "F"
-                    Permisjonsdag::class -> "P"
-                    FriskHelgedag::class -> "R"
-                    ForeldetSykedag::class -> "K"
-                    else -> "*"
+                when (this[it]) {
+                    is Sykedag -> "S"
+                    is Arbeidsdag -> "A"
+                    is UkjentDag -> "?"
+                    is ProblemDag -> "X"
+                    is SykHelgedag -> "H"
+                    is Arbeidsgiverdag -> "U"
+                    is ArbeidsgiverHelgedag -> "G"
+                    is Feriedag -> "F"
+                    is Permisjonsdag -> "P"
+                    is FriskHelgedag -> "R"
+                    is ForeldetSykedag -> "K"
+                    is AvslåttDag -> "☠"
                 }
         } ?: "Tom tidslinje"
     }
@@ -417,6 +417,15 @@ internal class Sykdomstidslinje private constructor(
                 førsteDato.datesUntil(sisteDato.plusDays(1))
                     .collect(toMap<LocalDate, LocalDate, Dag>({ it }, { ProblemDag(it, kilde, melding) }))
             )
+
+        internal fun avslåttdager(
+            førsteDato: LocalDate,
+            sisteDato: LocalDate,
+            kilde: Hendelseskilde
+        ) = Sykdomstidslinje(
+            førsteDato.datesUntil(sisteDato.plusDays(1))
+                .collect(toMap<LocalDate, LocalDate, Dag>({ it }, { AvslåttDag(it, kilde) }))
+        )
     }
 }
 

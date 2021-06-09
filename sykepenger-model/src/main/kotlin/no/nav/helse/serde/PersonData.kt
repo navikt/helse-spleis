@@ -623,6 +623,7 @@ internal data class PersonData(
                 SYKEDAG,
                 SYK_HELGEDAG,
                 UKJENT_DAG,
+                AVSLÅTT_DAG
             }
 
             data class KildeData(

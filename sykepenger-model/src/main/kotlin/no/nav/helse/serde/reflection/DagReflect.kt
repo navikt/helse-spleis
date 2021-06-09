@@ -40,4 +40,5 @@ private fun Dag.toJsonType() = when (this) {
     is Dag.SykHelgedag -> JsonDagType.SYK_HELGEDAG
     is Dag.Permisjonsdag -> JsonDagType.PERMISJONSDAG
     is Dag.ProblemDag -> JsonDagType.PROBLEMDAG
+    is Dag.AvslåttDag -> JsonDagType.AVSLÅTT_DAG
 }

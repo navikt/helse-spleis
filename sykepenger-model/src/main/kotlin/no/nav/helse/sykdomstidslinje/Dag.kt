@@ -177,6 +177,16 @@ internal sealed class Dag(
         }
     }
 
+    internal class AvslåttDag(
+        dato: LocalDate,
+        kilde: SykdomstidslinjeHendelse.Hendelseskilde
+    ) : Dag(dato, kilde) {
+        override fun accept(visitor: SykdomstidslinjeVisitor) {
+            visitor.visitDag(this, dato, kilde)
+        }
+
+        override fun toString() = "AvslåttDag(${kilde.meldingsreferanseId()})"
+    }
 }
 
 private val helgedager = listOf(SATURDAY, SUNDAY)

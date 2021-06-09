@@ -27,6 +27,7 @@ enum class SpeilDagtype {
     SYKEDAG,
     SYK_HELGEDAG,
     UBESTEMTDAG,
+    AVSLÅTT
 }
 
 enum class SpeilKildetype {

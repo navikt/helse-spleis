@@ -102,6 +102,7 @@ internal class SykdomstidslinjeBuilder(private val sykdomstidslinjeListe: Mutabl
         is Dag.SykHelgedag -> SpeilDagtype.SYK_HELGEDAG
         is Dag.Permisjonsdag -> SpeilDagtype.PERMISJONSDAG
         is Dag.ProblemDag -> SpeilDagtype.UBESTEMTDAG
+        is Dag.AvslåttDag -> SpeilDagtype.AVSLÅTT
     }
 
     override fun postVisitSykdomstidslinje(tidslinje: Sykdomstidslinje) {
