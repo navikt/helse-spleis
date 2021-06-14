@@ -137,6 +137,7 @@ internal class Feriepengeutbetaling private constructor(
 
             val totaltFeriepengebeløpArbeidsgiver: Double = feriepengeberegner.beregnFeriepengerForArbeidsgiver(orgnummer)
             val differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd: Double = feriepengeberegner.beregnFeriepengedifferansenForArbeidsgiver(orgnummer)
+            val beløp = differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd.roundToInt()
 
             val forrigeSendteOppdrag =
                 tidligereFeriepengeutbetalinger.lastOrNull { it.gjelderForÅr(utbetalingshistorikkForFeriepenger.opptjeningsår) && it.sendTilOppdrag }?.oppdrag
@@ -148,7 +149,7 @@ internal class Feriepengeutbetaling private constructor(
                     ?.fagsystemId()
                     ?: genererUtbetalingsreferanse(UUID.randomUUID())
 
-            val oppdrag = Oppdrag(
+            var oppdrag = Oppdrag(
                 mottaker = orgnummer,
                 fagområde = Fagområde.SykepengerRefusjon,
                 linjer = listOf(
@@ -156,7 +157,7 @@ internal class Feriepengeutbetaling private constructor(
                         fom = utbetalingshistorikkForFeriepenger.opptjeningsår.plusYears(1).atMonth(Month.MAY).atDay(1),
                         tom = utbetalingshistorikkForFeriepenger.opptjeningsår.plusYears(1).atMonth(Month.MAY).atEndOfMonth(),
                         satstype = Satstype.ENG,
-                        beløp = differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd.roundToInt(),
+                        beløp = beløp,
                         aktuellDagsinntekt = null,
                         grad = null,
                         klassekode = Klassekode.RefusjonFeriepengerIkkeOpplysningspliktig
@@ -166,7 +167,15 @@ internal class Feriepengeutbetaling private constructor(
                 sisteArbeidsgiverdag = null
             )
 
-            if (forrigeSendteOppdrag != null) oppdrag.minus(forrigeSendteOppdrag, utbetalingshistorikkForFeriepenger)
+            val sendTilOppdrag = if (forrigeSendteOppdrag == null) { beløp != 0 } else { beløp != forrigeSendteOppdrag.totalbeløp() || beløp == 0 }
+
+            if (forrigeSendteOppdrag != null) {
+                oppdrag = if (beløp == 0) {
+                    forrigeSendteOppdrag.annuller(utbetalingshistorikkForFeriepenger)
+                } else {
+                    oppdrag.minus(forrigeSendteOppdrag, utbetalingshistorikkForFeriepenger)
+                }
+            }
 
             sikkerLogg.info(
                 """
@@ -193,7 +202,7 @@ internal class Feriepengeutbetaling private constructor(
                 spleisFeriepengebeløpArbeidsgiver = spleisFeriepengebeløpArbeidsgiver,
                 oppdrag = oppdrag,
                 utbetalingId = UUID.randomUUID(),
-                sendTilOppdrag = if (forrigeSendteOppdrag == null) oppdrag.totalbeløp() != 0 else oppdrag.totalbeløp() != forrigeSendteOppdrag.totalbeløp()
+                sendTilOppdrag = sendTilOppdrag
             )
         }
     }

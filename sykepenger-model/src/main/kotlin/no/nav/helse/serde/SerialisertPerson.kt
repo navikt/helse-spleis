@@ -118,7 +118,8 @@ class SerialisertPerson(val json: String) {
             V99LeggerTilSatstypePåUtbetalingslinjene(),
             V100SlettEnkeltFeriepengeutbetaling(),
             V101SlettEnkeltFeriepengeutbetaling(),
-            V102LeggerFeriepengerSendTilOppdragFelt()
+            V102LeggerFeriepengerSendTilOppdragFelt(),
+            V103FjernerFeriepengeUtbetalingerMedTalletNullSomBeløp()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)

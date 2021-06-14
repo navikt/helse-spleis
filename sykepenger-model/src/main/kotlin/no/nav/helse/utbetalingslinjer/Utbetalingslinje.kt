@@ -114,7 +114,8 @@ internal class Utbetalingslinje internal constructor(
             delytelseId = delytelseId,
             refDelytelseId = null,
             endringskode = ENDR,
-            datoStatusFom = datoStatusFom
+            datoStatusFom = datoStatusFom,
+            satstype = satstype
         )
 
     internal fun erOpphør() = datoStatusFom != null

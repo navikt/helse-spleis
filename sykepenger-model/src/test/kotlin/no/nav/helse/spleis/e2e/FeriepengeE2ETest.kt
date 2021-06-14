@@ -805,6 +805,44 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         }
     }
 
+    @Test
+    fun `Reberegning som ender med 0 i totalsum sender opphør`() {
+        håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 14.august(2020), 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.juni(2020), 14.august(2020), 100.prosent)) // 43 dager
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.juni(2019) til 1.mai(2020) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        håndterUtbetalingshistorikkForFeriepenger(opptjeningsår = Year.of(2020))
+
+        val førsteUtbetaling = engangsutbetalinger().last()
+        val fagsystemId = førsteUtbetaling.detaljer()["fagsystemId"]
+
+        håndterAnnullerUtbetaling()
+        håndterUtbetalt()
+
+        håndterUtbetalingshistorikkForFeriepenger(opptjeningsår = Year.of(2020))
+
+        assertEquals(2, inspektør.feriepengeutbetalingslinjer.size)
+        assertEquals(2, engangsutbetalinger().size)
+        val utbetaling = engangsutbetalinger().last()
+        assertEquals((43 * DAGSINNTEKT * 0.102).roundToInt(), utbetaling.linje()["sats"])
+        assertEquals(1.mai(2021).toString(), utbetaling.linje()["datoStatusFom"])
+        assertEquals(fagsystemId, utbetaling.detaljer()["fagsystemId"])
+    }
+
     private fun engangsutbetalinger() = inspektør.personLogg.behov()
         .filter { it.type == Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling }
         .filter { utbetaling -> utbetaling.detaljer()["linjer"].castAsList<Map<String, Any>>().any { linje -> linje["satstype"] == "ENG" }}
