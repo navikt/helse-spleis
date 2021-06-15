@@ -268,7 +268,7 @@ internal class Vedtaksperiode private constructor(
     internal fun ferdig(hendelse: IAktivitetslogg, årsak: ForkastetÅrsak) {
         kontekst(hendelse)
         hendelse.info("Forkaster vedtaksperiode: %s", this.id.toString())
-        if (årsak !== ERSTATTES && !erAvsluttet()) tilstand(hendelse, TilInfotrygd)
+        if (årsak !== ERSTATTES && !erAvsluttet() && this.tilstand !is RevurderingFeilet) tilstand(hendelse, TilInfotrygd)
         utbetaling?.forkast(hendelse)
         person.vedtaksperiodeAvbrutt(
             PersonObserver.VedtaksperiodeAvbruttEvent(
@@ -2046,7 +2046,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
-            if (!Toggles.RevurderUtbetaltPeriode.enabled) return
             vedtaksperiode.arbeidsgiver.revurderSisteUtbetalte(hendelse, vedtaksperiode)
         }
 
