@@ -54,3 +54,5 @@ spec:
     value: postgresql/preprod-fss/
   - name: REVURDER_UTBETALT_PERIODE_TOGGLE
     value: "true"
+  - name: KAST_ALLE_REVURDERINGER
+    value: "true"

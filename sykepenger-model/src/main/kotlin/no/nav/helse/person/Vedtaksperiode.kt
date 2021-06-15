@@ -1224,6 +1224,11 @@ internal class Vedtaksperiode private constructor(
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             hendelse.info("Forespør sykdoms- og inntektshistorikk")
             hendelse.warn("Revurdering er igangsatt og må fullføres")
+            if(Toggles.KastAlleRevurderinger.enabled){
+                hendelse.warn("Feiler revurdering for test.")
+                vedtaksperiode.tilstand(hendelse, RevurderingFeilet)
+                return
+            }
             vedtaksperiode.trengerYtelser(hendelse)
         }
 
