@@ -20,16 +20,6 @@ import java.time.LocalDateTime
 
 internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
 
-    @BeforeEach
-    fun tearup() {
-        Toggles.RevurderUtbetaltPeriode.enable()
-    }
-
-    @AfterEach
-    fun setdown() {
-        Toggles.RevurderUtbetaltPeriode.pop()
-    }
-
     @Test
     fun `to perioder - overstyr dager i eldste`() {
         nyttVedtak(3.januar, 26.januar)

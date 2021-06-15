@@ -45,7 +45,7 @@ class SpeilBuilderTest {
     }
 
     @Test
-    fun `hal0`() {
+    fun `annullerer feilet revurdering`() {
         val (person, hendelser) = person()
         person.run {
             håndter(overstyring())
@@ -59,6 +59,7 @@ class SpeilBuilderTest {
         val beregningIdVedtaksperiode = vedtaksperiode.beregningIder.last()
         val beregningIderUtbetalingshistorikk = personDTO.arbeidsgivere.first().utbetalingshistorikk.map { it.beregningId }
         assertEquals(1, vedtaksperiode.beregningIder.size)
+        assertTrue(vedtaksperiode.fullstendig)
         assertEquals(2, beregningIderUtbetalingshistorikk.size)
         assertTrue(beregningIderUtbetalingshistorikk.contains(beregningIdVedtaksperiode))
     }
