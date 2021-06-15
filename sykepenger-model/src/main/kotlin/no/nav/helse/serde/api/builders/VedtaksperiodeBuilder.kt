@@ -40,6 +40,7 @@ internal class VedtaksperiodeBuilder(
         TilstandType.AVVENTER_GODKJENNING,
         TilstandType.AVVENTER_GODKJENNING_REVURDERING,
         TilstandType.UTBETALING_FEILET,
+        TilstandType.REVURDERING_FEILET,
         TilstandType.TIL_UTBETALING,
         TilstandType.AVVENTER_ARBEIDSGIVERE
     )
