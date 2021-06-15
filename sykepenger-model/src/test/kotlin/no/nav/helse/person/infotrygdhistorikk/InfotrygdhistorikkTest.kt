@@ -117,7 +117,7 @@ internal class InfotrygdhistorikkTest {
 
     @Test
     fun `tømme historikk - med lagret vilkårsgrunnlag`() {
-        val tidsstempel = LocalDateTime.now()
+        val tidsstempel = LocalDateTime.now().also { Thread.sleep(100) }
         historikk.oppdaterHistorikk(historikkelement(
             oppdatert = tidsstempel,
             perioder = listOf(Friperiode(1.januar,  10.januar))
@@ -136,7 +136,7 @@ internal class InfotrygdhistorikkTest {
     @Test
     fun `tømme historikk - med og ulagret lagret data`() {
         val tidsstempel1 = LocalDateTime.now().minusDays(1)
-        val tidsstempel2 = LocalDateTime.now()
+        val tidsstempel2 = LocalDateTime.now().also { Thread.sleep(100) }
         historikk.oppdaterHistorikk(historikkelement(
             oppdatert = tidsstempel1,
             perioder = listOf(Friperiode(1.januar,  10.januar))
@@ -185,7 +185,7 @@ internal class InfotrygdhistorikkTest {
         val perioder = listOf(
             ArbeidsgiverUtbetalingsperiode("orgnr", 1.januar,  31.januar, 100.prosent, 25000.månedlig)
         )
-        val nå = LocalDateTime.now()
+        val nå = LocalDateTime.now().also { Thread.sleep(100) }
         val gammel = nå.minusHours(24)
         assertTrue(historikk.oppdaterHistorikk(historikkelement(perioder, oppdatert = gammel)))
         assertFalse(historikk.oppdaterHistorikk(historikkelement(perioder, oppdatert = nå)))
@@ -414,7 +414,7 @@ internal class InfotrygdhistorikkTest {
 
     @Test
     internal fun `har endret historikk dersom utbetaling er eldre enn siste element`() {
-        val utbetaling = utbetaling()
+        val utbetaling = utbetaling().also { Thread.sleep(100) }
         historikk.oppdaterHistorikk(historikkelement())
         assertTrue(historikk.harEndretHistorikk(utbetaling))
     }
