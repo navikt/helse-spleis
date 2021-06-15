@@ -669,6 +669,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         assertEquals("ENDR", utbetaling.detaljer()["endringskode"])
         assertEquals("NY", utbetaling.linje()["endringskode"])
         assertEquals(førsteUtbetaling.linje()["delytelseId"], utbetaling.linje()["refDelytelseId"])
+        assertEquals(førsteUtbetaling.linje()["klassekode"], utbetaling.linje()["klassekode"])
     }
 
     @Test
@@ -841,6 +842,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         assertEquals((43 * DAGSINNTEKT * 0.102).roundToInt(), utbetaling.linje()["sats"])
         assertEquals(1.mai(2021).toString(), utbetaling.linje()["datoStatusFom"])
         assertEquals(fagsystemId, utbetaling.detaljer()["fagsystemId"])
+        assertEquals(førsteUtbetaling.linje()["klassekode"], utbetaling.linje()["klassekode"])
     }
 
     private fun engangsutbetalinger() = inspektør.personLogg.behov()
