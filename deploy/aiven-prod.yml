@@ -14,7 +14,7 @@ spec:
         partitions: 24
         replication: 3  # see min/max requirements
         retentionBytes: -1  # -1 means unlimited
-        retentionHours: 2160  # -1 means unlimited
+        retentionHours: 3160  # -1 means unlimited
     acl:
         - team: tbd
           application: behovsakkumulator
