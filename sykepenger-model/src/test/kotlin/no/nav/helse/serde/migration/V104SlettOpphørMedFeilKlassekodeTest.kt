@@ -41,6 +41,11 @@ private val original = """
                   }
                 ]
               }
+            },
+            {
+              "oppdrag": {
+                "linjer": []
+              }
             }
           ]
         }

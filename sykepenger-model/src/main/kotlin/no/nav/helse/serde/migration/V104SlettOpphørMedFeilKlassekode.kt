@@ -12,8 +12,9 @@ internal class V104SlettOpphørMedFeilKlassekode : JsonMigration(version = 104) 
             .filterIsInstance<ArrayNode>()
             .forEach { feriepengeutbetalinger ->
                 feriepengeutbetalinger.removeAll {
-                    it["oppdrag"]["linjer"].single()["statuskode"].asText() == "OPPH" &&
-                    it["oppdrag"]["linjer"].single()["klassekode"].asText() == "SPREFAG-IOP"
+                    it["oppdrag"]["linjer"].isEmpty ||
+                        (it["oppdrag"]["linjer"].single()["statuskode"].asText() == "OPPH" &&
+                            it["oppdrag"]["linjer"].single()["klassekode"].asText() == "SPREFAG-IOP")
                 }
             }
     }
