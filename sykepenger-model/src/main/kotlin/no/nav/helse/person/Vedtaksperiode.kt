@@ -1223,7 +1223,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             hendelse.info("Forespør sykdoms- og inntektshistorikk")
-            hendelse.warn("Revurdering er igangsatt og må fullføres")
             vedtaksperiode.trengerYtelser(hendelse)
         }
 

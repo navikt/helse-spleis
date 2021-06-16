@@ -18,19 +18,6 @@ import java.time.LocalDateTime
 internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
 
     @Test
-    fun `revurdering fører til warning`() {
-        nyttVedtak(3.januar, 26.januar)
-
-        håndterOverstyring((20.januar til 22.januar).map { manuellFeriedag(it) })
-        håndterYtelser(1.vedtaksperiode)   // No history
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode)
-
-        assertWarnings(inspektør)
-    }
-
-    @Test
     fun `to perioder - overstyr dager i eldste`() {
         nyttVedtak(3.januar, 26.januar)
         forlengVedtak(27.januar, 14.februar)
@@ -76,7 +63,6 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
         assertEquals(19, inspektør.forbrukteSykedager(1))
         assertEquals(18, inspektør.forbrukteSykedager(2))
     }
-
 
     @Test
     fun `overstyring blør ikke ned i sykdomstidslinja på vedtaksperiodenivå`() {
