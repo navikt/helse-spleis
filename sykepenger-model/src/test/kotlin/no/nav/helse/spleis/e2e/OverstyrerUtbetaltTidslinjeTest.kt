@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -824,6 +825,27 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
         assertEquals(6, inspektør.forbrukteSykedager(0))
         assertEquals(5, inspektør.forbrukteSykedager(1))
         assertEquals(4, inspektør.forbrukteSykedager(2))
+    }
+
+    @Test
+    fun `revurder et utkast til revurdering`() {
+        Toggles.RevurderUtkastTilRevurdering.enable {
+            nyttVedtak(3.januar, 26.januar)
+
+            håndterOverstyring((20.januar til 22.januar).map { manuellFeriedag(it) })
+            håndterYtelser(1.vedtaksperiode)   // No history
+            håndterSimulering(1.vedtaksperiode)
+
+            håndterOverstyring((23.januar til 23.januar).map { manuellFeriedag(it) })
+            håndterYtelser(1.vedtaksperiode)   // No history
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+            håndterUtbetalt(1.vedtaksperiode)
+
+            assertEquals(3, inspektør.utbetalinger.size)
+            assertEquals(2, inspektør.utbetalinger.filter { it.erUtbetalt() }.size)
+            assertEquals(1, inspektør.utbetalinger.filter { it.erUbetalt() }.size)
+        }
     }
 
     private fun manuellPermisjonsdag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Permisjonsdag)

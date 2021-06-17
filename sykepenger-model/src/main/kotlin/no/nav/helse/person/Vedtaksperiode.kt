@@ -1892,6 +1892,16 @@ internal class Vedtaksperiode private constructor(
                 }
             )
         }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
+            if (Toggles.RevurderUtkastTilRevurdering.enabled) {
+                hendelse.info("Oppdaterer tidslinjen til den overstyre perioden")
+                vedtaksperiode.arbeidsgiver.låsOpp(vedtaksperiode.periode)
+                vedtaksperiode.oppdaterHistorikkRevurdering(hendelse)
+                vedtaksperiode.arbeidsgiver.lås(vedtaksperiode.periode)
+                vedtaksperiode.tilstand(hendelse, AvventerHistorikkRevurdering)
+            }
+        }
     }
 
     internal object AvventerArbeidsgivereRevurdering : Vedtaksperiodetilstand {
