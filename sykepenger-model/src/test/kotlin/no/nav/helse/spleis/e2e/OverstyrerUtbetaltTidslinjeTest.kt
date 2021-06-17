@@ -844,7 +844,9 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
 
             assertEquals(3, inspektør.utbetalinger.size)
             assertEquals(2, inspektør.utbetalinger.filter { it.erUtbetalt() }.size)
-            assertEquals(1, inspektør.utbetalinger.filter { it.erUbetalt() }.size)
+            assertTrue(inspektør.utbetalingtilstand(0) is Utbetaling.Utbetalt)
+            assertTrue(inspektør.utbetalingtilstand(1) is Utbetaling.Forkastet)
+            assertTrue(inspektør.utbetalingtilstand(2) is Utbetaling.Utbetalt)
         }
     }
 

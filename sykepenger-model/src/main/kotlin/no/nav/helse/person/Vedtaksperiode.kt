@@ -1225,6 +1225,7 @@ internal class Vedtaksperiode private constructor(
             hendelse.info("Forespør sykdoms- og inntektshistorikk")
             hendelse.warn("Revurdering er igangsatt og må fullføres")
             vedtaksperiode.trengerYtelser(hendelse)
+            vedtaksperiode.utbetaling?.forkast(hendelse)
         }
 
         override fun håndter(
