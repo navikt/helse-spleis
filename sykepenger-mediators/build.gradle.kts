@@ -6,7 +6,7 @@ val wireMockVersion = "2.27.1"
 val mainClass = "no.nav.helse.AppKt"
 
 dependencies {
-    implementation("com.github.navikt:rapids-and-rivers:20210327065224-8e5ea01")
+    implementation("com.github.navikt:rapids-and-rivers:20210617121814-3e67e4d")
     implementation(project(":sykepenger-model"))
 
     testImplementation("com.github.navikt:inntektsmelding-kontrakt:2020.04.06-ab8f786")
