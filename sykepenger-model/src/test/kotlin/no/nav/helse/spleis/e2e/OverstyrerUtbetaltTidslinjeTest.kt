@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -10,15 +9,26 @@ import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `revurdering fører til warning`() {
+        nyttVedtak(3.januar, 26.januar)
+
+        håndterOverstyring((20.januar til 22.januar).map { manuellFeriedag(it) })
+        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        assertWarnings(inspektør)
+    }
 
     @Test
     fun `to perioder - overstyr dager i eldste`() {
@@ -67,18 +77,6 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
         assertEquals(18, inspektør.forbrukteSykedager(2))
     }
 
-    @Test
-    fun `revurdering fører til warning`() {
-        nyttVedtak(3.januar, 26.januar)
-
-        håndterOverstyring((20.januar til 22.januar).map { manuellFeriedag(it) })
-        håndterYtelser(1.vedtaksperiode)   // No history
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode)
-
-        assertWarnings(inspektør)
-    }
 
     @Test
     fun `overstyring blør ikke ned i sykdomstidslinja på vedtaksperiodenivå`() {
@@ -240,7 +238,8 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `to perioder - hele den eldste perioden blir sykedager`() { } //???? Skal hele den først perioden være en søknad med bare ferie..?
+    fun `to perioder - hele den eldste perioden blir sykedager`() {
+    } //???? Skal hele den først perioden være en søknad med bare ferie..?
 
     @Test
     fun `kan ikke utvide perioden med sykedager`() {
@@ -249,7 +248,8 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)   // No history
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
 
-        assertTilstander(0,
+        assertTilstander(
+            0,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_SØKNAD_FERDIG_GAP,
@@ -270,11 +270,14 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
 
     @Test
     @Disabled
-    fun `forsøk på å flytte arbeidsgiverperioden`() { } // Hvordan gjør man det?
+    fun `forsøk på å flytte arbeidsgiverperioden`() {
+    } // Hvordan gjør man det?
 
     @Test
     @Disabled
-    fun `flere arbeidsgivere`() { assertTrue(false) } //idk
+    fun `flere arbeidsgivere`() {
+        assertTrue(false)
+    } //idk
 
     @Test
     fun `overstyring fører ikke til endringer`() {
@@ -321,7 +324,7 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
         )
         assertEquals(3, inspektør.utbetalinger.size)
-        assertFalse( inspektør.utbetaling(2).harUtbetalinger())
+        assertFalse(inspektør.utbetaling(2).harUtbetalinger())
 
     }
 
@@ -616,10 +619,13 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode)
 
         håndterOverstyring(listOf(manuellFeriedag(18.januar)))
-        håndterYtelser(1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar,  20.januar, 100.prosent, 15000.daglig),
+        håndterYtelser(
+            1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 20.januar, 100.prosent, 15000.daglig),
             inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, 15000.daglig, true)),
-                besvart = LocalDateTime.now())
-        assertTilstander(1.vedtaksperiode,
+            besvart = LocalDateTime.now()
+        )
+        assertTilstander(
+            1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_SØKNAD_FERDIG_GAP,
@@ -653,7 +659,8 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
 
-        assertTilstander(1.vedtaksperiode,
+        assertTilstander(
+            1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_SØKNAD_FERDIG_GAP,
@@ -688,7 +695,8 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode, simuleringOK = false)
 
-        assertTilstander(1.vedtaksperiode,
+        assertTilstander(
+            1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_SØKNAD_FERDIG_GAP,
@@ -719,13 +727,16 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode)
 
         håndterOverstyring(listOf(manuellFeriedag(18.januar)))
-        håndterYtelser(1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar,  20.januar, 100.prosent, 15000.daglig),
+        håndterYtelser(
+            1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 20.januar, 100.prosent, 15000.daglig),
             inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, 15000.daglig, true)),
-            besvart = LocalDateTime.now())
+            besvart = LocalDateTime.now()
+        )
 
         håndterAnnullerUtbetaling()
 
-        assertForkastetPeriodeTilstander(1.vedtaksperiode,
+        assertForkastetPeriodeTilstander(
+            1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_SØKNAD_FERDIG_GAP,
@@ -739,6 +750,80 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK_REVURDERING,
             REVURDERING_FEILET
         )
+    }
+
+    @Test
+    fun `revurder med kun ferie`() {
+        nyttVedtak(3.januar, 26.januar)
+        forlengVedtak(27.januar, 13.februar)
+        forlengPeriode(14.februar, 15.februar)
+
+        håndterOverstyring((27.januar til 13.februar).map { manuellFeriedag(it) })
+        håndterYtelser(2.vedtaksperiode)   // No history
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
+        håndterUtbetalt(2.vedtaksperiode)
+
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING,
+            TIL_UTBETALING,
+            AVSLUTTET
+        )
+    }
+
+    @Test
+    fun `revurder en revurdering`() {
+        nyttVedtak(3.januar, 26.januar)
+
+        håndterOverstyring((20.januar til 22.januar).map { manuellFeriedag(it) })
+        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        håndterOverstyring((23.januar til 23.januar).map { manuellFeriedag(it) })
+        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING,
+            TIL_UTBETALING,
+            AVSLUTTET
+        )
+
+        assertEquals(6, inspektør.forbrukteSykedager(0))
+        assertEquals(5, inspektør.forbrukteSykedager(1))
+        assertEquals(4, inspektør.forbrukteSykedager(2))
     }
 
     private fun manuellPermisjonsdag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Permisjonsdag)
