@@ -21,7 +21,7 @@ internal class SimuleringerRiver(
                 SimuleringMessage.Simuleringstatus.valueOf(it.asText())
             }
             if (løsning["status"].asText() == "OK") {
-                message.requireKey("@løsning.${Simulering.name}.simulering")
+                message.interestedIn("@løsning.${Simulering.name}.simulering")
                 message.forbid("@løsning.${Simulering.name}.feilmelding")
             } else {
                 message.forbid("@løsning.${Simulering.name}.simulering")
