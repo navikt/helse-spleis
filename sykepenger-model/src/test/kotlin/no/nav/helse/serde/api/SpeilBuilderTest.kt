@@ -65,6 +65,25 @@ class SpeilBuilderTest {
     }
 
     @Test
+    fun `kan mappe perioder som har beregning men står i avsluttet uten utbetaling`() {
+        val (person, hendelser) = personTilGodkjenning(1.januar, 19.januar)
+        person.run {
+            håndter(overstyring(
+                listOf(
+                    ManuellOverskrivingDag(17.januar, Feriedag),
+                    ManuellOverskrivingDag(18.januar, Feriedag),
+                    ManuellOverskrivingDag(19.januar, Feriedag)
+                )
+            ))
+            håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
+        }
+
+        val personDTO = serializePersonForSpeil(person, hendelser)
+        val vedtaksperiode = personDTO.arbeidsgivere.first().vedtaksperioder.first()
+        assertTrue(vedtaksperiode.fullstendig)
+    }
+
+    @Test
     fun `mapping av utbetalingshistorikk`() {
         val (person, hendelser) = person()
         val personDTO = serializePersonForSpeil(person, hendelser)
@@ -185,7 +204,8 @@ class SpeilBuilderTest {
             (personDTO.arbeidsgivere.first().vedtaksperioder.first()).tilstand
         )
 
-        val vedtaksperiode: UfullstendigVedtaksperiodeDTO = personDTO.arbeidsgivere.first().vedtaksperioder.first() as UfullstendigVedtaksperiodeDTO
+        val vedtaksperiode = personDTO.arbeidsgivere.first().vedtaksperioder.first() as VedtaksperiodeDTO
+        assertTrue(vedtaksperiode.fullstendig)
         assertEquals(9, vedtaksperiode.utbetalingstidslinje.size)
     }
 
@@ -875,7 +895,8 @@ class SpeilBuilderTest {
     fun `egen tilstandstype for perioder med kun fravær - feriedager`() {
         val (person, hendelser) = andrePeriodeKunFerie()
         val personDTO = serializePersonForSpeil(person, hendelser)
-        val vedtaksperiode = personDTO.arbeidsgivere[0].vedtaksperioder[1] as UfullstendigVedtaksperiodeDTO
+        val vedtaksperiode = personDTO.arbeidsgivere[0].vedtaksperioder[1] as VedtaksperiodeDTO
+        assertTrue(vedtaksperiode.fullstendig)
         assertEquals(TilstandstypeDTO.KunFerie, vedtaksperiode.tilstand)
     }
 
@@ -883,8 +904,18 @@ class SpeilBuilderTest {
     fun `egen tilstandstype for perioder med kun fravær - permisjonsdager (gir warning) `() {
         val (person, hendelser) = andrePeriodeKunPermisjon()
         val personDTO = serializePersonForSpeil(person, hendelser)
-        val vedtaksperiode = personDTO.arbeidsgivere[0].vedtaksperioder[1] as UfullstendigVedtaksperiodeDTO
+        val vedtaksperiode = personDTO.arbeidsgivere[0].vedtaksperioder[1] as VedtaksperiodeDTO
+        assertTrue(vedtaksperiode.fullstendig)
         assertEquals(TilstandstypeDTO.KunFerie, vedtaksperiode.tilstand)
+    }
+
+    @Test
+    fun `perioder med søknad arbeidsgiver blir ufullstendig`() {
+        val (person, hendelser) = kunSøknadArbeidsgiver()
+        val personDTO = serializePersonForSpeil(person, hendelser)
+        val vedtaksperiode = personDTO.arbeidsgivere[0].vedtaksperioder[0] as UfullstendigVedtaksperiodeDTO
+        assertFalse(vedtaksperiode.fullstendig)
+        assertEquals(TilstandstypeDTO.IngenUtbetaling, vedtaksperiode.tilstand)
     }
 
     @Test
@@ -1693,6 +1724,40 @@ class SpeilBuilderTest {
                 }
             }
 
+        private fun personTilGodkjenning(
+            fom: LocalDate = 1.januar,
+            tom: LocalDate = 31.januar,
+            sendtSøknad: LocalDate = 1.april,
+            søknadhendelseId: UUID = UUID.randomUUID()
+        ): Pair<Person, List<HendelseDTO>> =
+            Person(aktørId, fnr).run {
+                this to mutableListOf<HendelseDTO>().apply {
+                    sykmelding(fom = fom, tom = tom).also { (sykmelding, sykmeldingDTO) ->
+                        håndter(sykmelding)
+                        add(sykmeldingDTO)
+                    }
+                    fangeVedtaksperiodeId()
+                    søknad(
+                        hendelseId = søknadhendelseId,
+                        fom = fom,
+                        tom = tom,
+                        sendtSøknad = sendtSøknad.atStartOfDay()
+                    ).also { (søknad, søknadDTO) ->
+                        håndter(søknad)
+                        add(søknadDTO)
+                    }
+                    inntektsmelding(fom = fom).also { (inntektsmelding, inntektsmeldingDTO) ->
+                        håndter(inntektsmelding)
+                        add(inntektsmeldingDTO)
+                    }
+                    håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+                    håndter(vilkårsgrunnlagMedFlerInntekter(vedtaksperiodeId = vedtaksperiodeId))
+                    håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+                    fangeUtbetalinger()
+                    håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
+                }
+            }
+
         private fun tilbakerulletPerson(): Pair<Person, List<HendelseDTO>> = Person(aktørId, fnr).run {
             this to mutableListOf<HendelseDTO>().apply {
                 sykmelding(fom = 1.januar, tom = 31.januar).also { (sykmelding, sykmeldingDTO) ->
@@ -2037,18 +2102,18 @@ class SpeilBuilderTest {
         ): Pair<Person, List<HendelseDTO>> =
             Person(aktørId, fnr).run {
                 this to mutableListOf<HendelseDTO>().apply {
-                    sykmelding(fom = 1.januar, tom = 24.januar).also { (sykmelding, sykmeldingDto) ->
+                    sykmelding(fom = 1.januar, tom = 24.januar).also { (sykmelding, sykmeldingDTO) ->
                         håndter(sykmelding)
-                        add(sykmeldingDto)
+                        add(sykmeldingDTO)
                     }
                     fangeVedtaksperiodeId()
                     søknad(
                         hendelseId = søknadhendelseId,
                         fom = 1.januar,
                         tom = 24.januar
-                    ).also { (sykmelding, sykmeldingDTO) ->
-                        håndter(sykmelding)
-                        add(sykmeldingDTO)
+                    ).also { (søknad, søknadNavDTO) ->
+                        håndter(søknad)
+                        add(søknadNavDTO)
                     }
                     inntektsmelding(fom = 1.januar).also { (inntektsmelding, inntektsmeldingDTO) ->
                         håndter(inntektsmelding)
@@ -2078,6 +2143,27 @@ class SpeilBuilderTest {
                     }
                     håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                     håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId, aktivitetslogg = this@run.aktivitetslogg))
+                }
+            }
+
+        private fun kunSøknadArbeidsgiver(
+            søknadhendelseId: UUID = UUID.randomUUID()
+        ): Pair<Person, List<HendelseDTO>> =
+            Person(aktørId, fnr).run {
+                this to mutableListOf<HendelseDTO>().apply {
+                    sykmelding(fom = 1.januar, tom = 16.januar).also { (sykmelding, sykmeldingDTO) ->
+                        håndter(sykmelding)
+                        add(sykmeldingDTO)
+                    }
+                    fangeVedtaksperiodeId()
+                    søknadSendtTilArbeidsgiver(
+                        hendelseId = søknadhendelseId,
+                        fom = 1.januar,
+                        tom = 16.januar
+                    ).also { (søknadArbeidsgiver, søknadArbeidsgiverDTO) ->
+                        håndter(søknadArbeidsgiver)
+                        add(søknadArbeidsgiverDTO)
+                    }
                 }
             }
 

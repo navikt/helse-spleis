@@ -35,7 +35,7 @@ internal class VedtaksperiodeBuilder(
 ) : BuilderState() {
 
     private val beregningIder = mutableListOf<UUID>()
-    private val fullstendig = tilstand.type in listOf(
+    private val fullstendig get() = tilstand.type in listOf(
         TilstandType.AVSLUTTET,
         TilstandType.AVVENTER_GODKJENNING,
         TilstandType.AVVENTER_GODKJENNING_REVURDERING,
@@ -43,7 +43,7 @@ internal class VedtaksperiodeBuilder(
         TilstandType.REVURDERING_FEILET,
         TilstandType.TIL_UTBETALING,
         TilstandType.AVVENTER_ARBEIDSGIVERE
-    )
+    ) || (tilstand.type == TilstandType.AVSLUTTET_UTEN_UTBETALING && beregningIder.isNotEmpty())
     private val warnings = (hentWarnings(vedtaksperiode) + (dataForVilkårsvurdering?.meldingsreferanseId?.let { hentVilkårsgrunnlagWarnings(vedtaksperiode, id, it) } ?: emptyList())).distinctBy { it.melding }
     private val beregnetSykdomstidslinje = mutableListOf<SykdomstidslinjedagDTO>()
 
