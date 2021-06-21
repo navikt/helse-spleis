@@ -29,7 +29,7 @@ class Simulering(
         }
         when {
             simuleringResultat == null -> {
-                warn("Ingenting ble simulert")
+                info("Ingenting ble simulert")
             }
             oppdrag.totalbeløp() != simuleringResultat.totalbeløp -> {
                 info("Simulering kom frem til et annet totalbeløp. Kontroller beløpet til utbetaling")

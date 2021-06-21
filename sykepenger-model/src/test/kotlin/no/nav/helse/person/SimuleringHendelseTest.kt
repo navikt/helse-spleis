@@ -42,7 +42,6 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
         person.håndter(simulering(false))
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
         assertEquals(TIL_INFOTRYGD, inspektør.sisteTilstand(1.vedtaksperiode))
-        assertTrue(inspektør.personLogg.warn().toString().contains("Simulering"))
     }
 
     private fun håndterYtelser() {
