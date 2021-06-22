@@ -61,21 +61,17 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
 
     @Test
     fun `kan mappe perioder som har beregning men står i avsluttet uten utbetaling`() {
-        val (person, hendelser) = personTilGodkjenning(1.januar, 19.januar)
-        person.run {
-            håndter(
-                overstyring(
-                    listOf(
-                        ManuellOverskrivingDag(17.januar, Feriedag),
-                        ManuellOverskrivingDag(18.januar, Feriedag),
-                        ManuellOverskrivingDag(19.januar, Feriedag)
-                    )
-                )
+        tilGodkjenning(1.januar, 19.januar, 100.prosent, 1.januar)
+        håndterOverstyring(
+            listOf(
+                ManuellOverskrivingDag(17.januar, Feriedag),
+                ManuellOverskrivingDag(18.januar, Feriedag),
+                ManuellOverskrivingDag(19.januar, Feriedag)
             )
-            håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
-        }
+        )
+        håndterYtelser()
 
-        val personDTO = serializePersonForSpeil(person, hendelser)
+        val personDTO = speilApi()
         val vedtaksperiode = personDTO.arbeidsgivere.first().vedtaksperioder.first()
         assertTrue(vedtaksperiode.fullstendig)
     }

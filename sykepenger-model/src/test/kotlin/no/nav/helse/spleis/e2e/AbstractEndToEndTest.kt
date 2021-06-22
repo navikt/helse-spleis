@@ -909,12 +909,12 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         grad: Prosentdel,
         førsteFraværsdag: LocalDate
     ): UUID {
-        val id = tilSimulert(fom, tom, grad, førsteFraværsdag)
+        val id = tilGodkjenning(fom, tom, grad, førsteFraværsdag)
         håndterUtbetalingsgodkjenning(id, true)
         return id
     }
 
-    protected fun tilSimulert(
+    protected fun tilGodkjenning(
         fom: LocalDate,
         tom: LocalDate,
         grad: Prosentdel,

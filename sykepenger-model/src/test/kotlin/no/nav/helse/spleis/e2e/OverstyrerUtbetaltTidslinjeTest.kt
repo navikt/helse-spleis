@@ -442,7 +442,7 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
     @Test
     fun `forsøk på å overstyre eldre fagsystemId med nyere periode til godkjenning`() {
         nyttVedtak(3.januar, 26.januar)
-        tilSimulert(3.mars, 26.mars, 100.prosent, 3.mars)
+        tilGodkjenning(3.mars, 26.mars, 100.prosent, 3.mars)
         håndterOverstyring((4.januar til 20.januar).map { manuellFeriedag(it) })
         SykdomstidslinjeInspektør(inspektør.sykdomstidslinje).also { sykdomstidslinjeInspektør ->
             assertTrue((4.januar til 20.januar).none { sykdomstidslinjeInspektør.dager[it] == Dag.Feriedag::class })
@@ -466,7 +466,7 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
     @Test
     fun `forsøk på å overstyre eldre fagsystemId med nyere perioder uten utbetaling, og periode med utbetaling etterpå`() {
         nyttVedtak(3.januar, 26.januar)
-        tilSimulert(1.mai, 31.mai, 100.prosent, 1.mai)
+        tilGodkjenning(1.mai, 31.mai, 100.prosent, 1.mai)
         håndterSykmelding(Sykmeldingsperiode(3.mars, 15.mars, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(16.mars, 26.mars, 100.prosent))
 
