@@ -1144,7 +1144,7 @@ class SpeilBuilderTest {
                 fom = 1.februar,
                 tom = 28.februar,
                 grad = 100.prosent,
-                andrePerioder = listOf(Permisjon(1.januar, 31.januar))
+                andreInntektskilder = listOf(Søknad.Inntektskilde(true, "ANNET"))
             ).first
         )
         assertTrue(serializePersonForSpeil(person).arbeidsgivere.isEmpty())
@@ -2244,14 +2244,15 @@ class SpeilBuilderTest {
             sendtSøknad: LocalDateTime = tom.plusDays(5).atTime(LocalTime.NOON),
             andrePerioder: List<Søknad.Søknadsperiode> = emptyList(),
             orgnummer: String = SpeilBuilderTest.orgnummer,
-            grad: Prosentdel = 100.prosent
+            grad: Prosentdel = 100.prosent,
+            andreInntektskilder: List<Søknad.Inntektskilde> = emptyList()
         ) = Søknad(
             meldingsreferanseId = hendelseId,
             fnr = fnr,
             aktørId = aktørId,
             orgnummer = orgnummer,
             perioder = listOf(Søknad.Søknadsperiode.Sykdom(fom, tom, grad)) + andrePerioder,
-            andreInntektskilder = emptyList(),
+            andreInntektskilder = andreInntektskilder,
             sendtTilNAV = sendtSøknad,
             permittert = false,
             merknaderFraSykmelding = emptyList(),

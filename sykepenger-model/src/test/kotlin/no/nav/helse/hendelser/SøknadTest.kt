@@ -88,7 +88,7 @@ internal class SøknadTest {
     @Test
     fun `ferie ligger utenfor sykdomsvindu`() {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent), Ferie(2.januar, 16.januar))
-        assertTrue(søknad.valider(EN_PERIODE).hasErrorsOrWorse())
+        assertTrue(søknad.valider(EN_PERIODE).hasWarningsOrWorse())
     }
 
     @Test
@@ -100,13 +100,13 @@ internal class SøknadTest {
     @Test
     fun `permisjon ligger utenfor sykdomsvindu`() {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent), Permisjon(2.januar, 16.januar))
-        assertTrue(søknad.valider(EN_PERIODE).hasErrorsOrWorse())
+        assertTrue(søknad.valider(EN_PERIODE).hasWarningsOrWorse())
     }
 
     @Test
     fun `arbeidag ligger utenfor sykdomsvindu`() {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent), Arbeid(2.januar, 16.januar))
-        assertTrue(søknad.valider(EN_PERIODE).hasErrorsOrWorse())
+        assertTrue(søknad.valider(EN_PERIODE).hasWarningsOrWorse())
     }
 
     @Test

@@ -108,7 +108,7 @@ class Søknad(
         internal open fun valider(søknad: Søknad) {}
 
         internal fun valider(søknad: Søknad, beskjed: String) {
-            if (periode.utenfor(søknad.sykdomsperiode)) søknad.error(beskjed)
+            if (periode.utenfor(søknad.sykdomsperiode)) søknad.warn(beskjed)
         }
 
         class Sykdom(
@@ -130,7 +130,7 @@ class Søknad(
 
         class Ferie(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom) {
             override fun valider(søknad: Søknad) =
-                valider(søknad, "Søknaden inneholder Feriedager utenfor sykdomsvindu")
+                valider(søknad, "Søknaden inneholder Feriedager utenfor perioden søknaden gjelder for")
 
             override fun sykdomstidslinje(avskjæringsdato: LocalDate, kilde: Hendelseskilde) =
                 Sykdomstidslinje.feriedager(periode.start, periode.endInclusive, kilde)
