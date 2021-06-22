@@ -44,6 +44,7 @@ data class VedtaksperiodeDTO(
     override val fullstendig: Boolean = true,
     override val utbetalingstidslinje: List<UtbetalingstidslinjedagDTO>,
     override val inntektskilde: Inntektskilde,
+    override val erForkastet: Boolean = false,
     val utbetalingsreferanse: String?,
     val utbetalinger: UtbetalingerDTO,
     val utbetalteUtbetalinger: UtbetalingerDTO,
@@ -89,7 +90,8 @@ data class UfullstendigVedtaksperiodeDTO(
     override val tilstand: TilstandstypeDTO,
     override val fullstendig: Boolean = false,
     override val utbetalingstidslinje: List<UtbetalingstidslinjedagDTO>,
-    override val inntektskilde: Inntektskilde
+    override val inntektskilde: Inntektskilde,
+    override val erForkastet: Boolean = false
 ) : VedtaksperiodeDTOBase
 
 interface VedtaksperiodeDTOBase {
@@ -101,6 +103,7 @@ interface VedtaksperiodeDTOBase {
     val fullstendig: Boolean
     val utbetalingstidslinje: List<UtbetalingstidslinjedagDTO>
     val inntektskilde: Inntektskilde
+    val erForkastet: Boolean
 }
 
 data class SykdomstidslinjedagDTO(

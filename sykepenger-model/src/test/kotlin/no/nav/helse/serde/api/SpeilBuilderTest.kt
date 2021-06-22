@@ -1074,7 +1074,7 @@ class SpeilBuilderTest {
     }
 
     @Test
-    fun `markerer forkastede vedtaksperioder`() {
+    fun `markerer forkastede vedtaksperioder som forkastet`() {
         val person = Person(aktørId, fnr)
 
         person.håndter(sykmelding(fom = 1.januar).first)
@@ -1085,11 +1085,39 @@ class SpeilBuilderTest {
         person.håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
         person.håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
         person.håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
-        val utbetalingFagsystemIDer = person.collectUtbetalingFagsystemIDer()
-        person.håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId, utbetalingID = utbetalingFagsystemIDer.first().utbetalingId))
-        person.håndter(overføring(utbetalingFagsystemID = utbetalingFagsystemIDer.first()))
-        person.håndter(utbetalt(utbetalingFagsystemID = utbetalingFagsystemIDer.first()))
-        assertEquals(aktørId, serializePersonForSpeil(person).aktørId)
+        val utbetalingFagsystemId = person.collectUtbetalingFagsystemIDer().first()
+        person.håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId, utbetalingID = utbetalingFagsystemId.utbetalingId))
+        person.håndter(overføring(utbetalingFagsystemID = utbetalingFagsystemId))
+        person.håndter(utbetalt(utbetalingFagsystemID = utbetalingFagsystemId))
+
+        // forkast periode
+        person.håndter(annullering(utbetalingFagsystemId.arbeidsgiversFagsystemId))
+
+        val serialisertPerson = serializePersonForSpeil(person)
+        val vedtaksperiode = serialisertPerson.arbeidsgivere.first().vedtaksperioder.first()
+        assertTrue(vedtaksperiode.erForkastet)
+    }
+
+    @Test
+    fun `markerer vedtaksperioder som ikke forkastet`() {
+        val person = Person(aktørId, fnr)
+
+        person.håndter(sykmelding(fom = 1.januar).first)
+        person.håndter(søknad(fom = 1.januar).first)
+        person.håndter(inntektsmelding(fom = 1.januar).first)
+        val vedtaksperiodeId = person.collectVedtaksperiodeIder(orgnummer).last()
+        person.håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+        person.håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
+        person.håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+        person.håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
+        val utbetalingFagsystemId = person.collectUtbetalingFagsystemIDer().first()
+        person.håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId, utbetalingID = utbetalingFagsystemId.utbetalingId))
+        person.håndter(overføring(utbetalingFagsystemID = utbetalingFagsystemId))
+        person.håndter(utbetalt(utbetalingFagsystemID = utbetalingFagsystemId))
+
+        val serialisertPerson = serializePersonForSpeil(person)
+        val vedtaksperiode = serialisertPerson.arbeidsgivere.first().vedtaksperioder.first()
+        assertFalse(vedtaksperiode.erForkastet)
     }
 
     @Test
