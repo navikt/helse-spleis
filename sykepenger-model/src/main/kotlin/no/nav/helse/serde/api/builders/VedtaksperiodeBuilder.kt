@@ -31,7 +31,8 @@ internal class VedtaksperiodeBuilder(
     private val fødselsnummer: String,
     private val hendelseIder: List<UUID>,
     private val inntektsmeldingId: UUID?,
-    private val inntektshistorikkBuilder: InntektshistorikkBuilder
+    private val inntektshistorikkBuilder: InntektshistorikkBuilder,
+    private val forkastet: Boolean
 ) : BuilderState() {
 
     private val beregningIder = mutableListOf<UUID>()
@@ -93,10 +94,10 @@ internal class VedtaksperiodeBuilder(
 
         val tilstandstypeDTO = buildTilstandtypeDto(finnRiktigUtbetaling(utbetalinger))
 
-        if (!fullstendig) return buildUfullstendig(utbetalinger, tilstandstypeDTO)
+        if (!fullstendig) return buildUfullstendig(utbetalinger, tilstandstypeDTO, forkastet)
 
         val utbetalteUtbetalinger = byggUtbetalteUtbetalingerForPeriode(utbetalinger)
-        return buildFullstendig(relevanteHendelser, tilstandstypeDTO, totalbeløpArbeidstaker, utbetalteUtbetalinger)
+        return buildFullstendig(relevanteHendelser, tilstandstypeDTO, totalbeløpArbeidstaker, utbetalteUtbetalinger, forkastet)
     }
 
     private fun finnRiktigUtbetaling(utbetalinger: List<Utbetaling>) = arbeidsgiverFagsystemId?.let {
@@ -110,7 +111,8 @@ internal class VedtaksperiodeBuilder(
         relevanteHendelser: List<HendelseDTO>,
         tilstandstypeDTO: TilstandstypeDTO,
         totalbeløpArbeidstaker: Int,
-        utbetalteUtbetalinger: UtbetalingerDTO
+        utbetalteUtbetalinger: UtbetalingerDTO,
+        forkastet: Boolean
     ): VedtaksperiodeDTO {
         inntektshistorikkBuilder.nøkkeldataOmInntekt(InntektshistorikkBuilder.NøkkeldataOmInntekt(periode.endInclusive, skjæringstidspunkt, avviksprosent))
 
@@ -142,11 +144,12 @@ internal class VedtaksperiodeBuilder(
             forlengelseFraInfotrygd = forlengelseFraInfotrygd,
             periodetype = periodetype,
             inntektskilde = inntektskilde,
-            beregningIder = beregningIder
+            beregningIder = beregningIder,
+            erForkastet = forkastet
         )
     }
 
-    private fun buildUfullstendig(utbetalinger: List<Utbetaling>, tilstandstypeDTO: TilstandstypeDTO): UfullstendigVedtaksperiodeDTO {
+    private fun buildUfullstendig(utbetalinger: List<Utbetaling>, tilstandstypeDTO: TilstandstypeDTO, forkastet: Boolean): UfullstendigVedtaksperiodeDTO {
         val ufullstendingUtbetalingstidslinje = buildUfullstendigUtbetalingstidslinje(utbetalinger)
         return UfullstendigVedtaksperiodeDTO(
             id = id,
@@ -156,7 +159,8 @@ internal class VedtaksperiodeBuilder(
             tilstand = tilstandstypeDTO,
             fullstendig = false,
             utbetalingstidslinje = ufullstendingUtbetalingstidslinje,
-            inntektskilde = inntektskilde
+            inntektskilde = inntektskilde,
+            erForkastet = forkastet
         )
     }
 

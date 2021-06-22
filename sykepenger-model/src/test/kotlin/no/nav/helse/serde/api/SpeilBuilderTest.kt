@@ -68,13 +68,15 @@ class SpeilBuilderTest {
     fun `kan mappe perioder som har beregning men står i avsluttet uten utbetaling`() {
         val (person, hendelser) = personTilGodkjenning(1.januar, 19.januar)
         person.run {
-            håndter(overstyring(
-                listOf(
-                    ManuellOverskrivingDag(17.januar, Feriedag),
-                    ManuellOverskrivingDag(18.januar, Feriedag),
-                    ManuellOverskrivingDag(19.januar, Feriedag)
+            håndter(
+                overstyring(
+                    listOf(
+                        ManuellOverskrivingDag(17.januar, Feriedag),
+                        ManuellOverskrivingDag(18.januar, Feriedag),
+                        ManuellOverskrivingDag(19.januar, Feriedag)
+                    )
                 )
-            ))
+            )
             håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
         }
 
@@ -1072,6 +1074,53 @@ class SpeilBuilderTest {
     }
 
     @Test
+    fun `markerer forkastede vedtaksperioder som forkastet`() {
+        val person = Person(aktørId, fnr)
+
+        person.håndter(sykmelding(fom = 1.januar).first)
+        person.håndter(søknad(fom = 1.januar).first)
+        person.håndter(inntektsmelding(fom = 1.januar).first)
+        val vedtaksperiodeId = person.collectVedtaksperiodeIder(orgnummer).last()
+        person.håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+        person.håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
+        person.håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+        person.håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
+        val utbetalingFagsystemId = person.collectUtbetalingFagsystemIDer().first()
+        person.håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId, utbetalingID = utbetalingFagsystemId.utbetalingId))
+        person.håndter(overføring(utbetalingFagsystemID = utbetalingFagsystemId))
+        person.håndter(utbetalt(utbetalingFagsystemID = utbetalingFagsystemId))
+
+        // forkast periode
+        person.håndter(annullering(utbetalingFagsystemId.arbeidsgiversFagsystemId))
+
+        val serialisertPerson = serializePersonForSpeil(person)
+        val vedtaksperiode = serialisertPerson.arbeidsgivere.first().vedtaksperioder.first()
+        assertTrue(vedtaksperiode.erForkastet)
+    }
+
+    @Test
+    fun `markerer vedtaksperioder som ikke forkastet`() {
+        val person = Person(aktørId, fnr)
+
+        person.håndter(sykmelding(fom = 1.januar).first)
+        person.håndter(søknad(fom = 1.januar).first)
+        person.håndter(inntektsmelding(fom = 1.januar).first)
+        val vedtaksperiodeId = person.collectVedtaksperiodeIder(orgnummer).last()
+        person.håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+        person.håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
+        person.håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+        person.håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
+        val utbetalingFagsystemId = person.collectUtbetalingFagsystemIDer().first()
+        person.håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId, utbetalingID = utbetalingFagsystemId.utbetalingId))
+        person.håndter(overføring(utbetalingFagsystemID = utbetalingFagsystemId))
+        person.håndter(utbetalt(utbetalingFagsystemID = utbetalingFagsystemId))
+
+        val serialisertPerson = serializePersonForSpeil(person)
+        val vedtaksperiode = serialisertPerson.arbeidsgivere.first().vedtaksperioder.first()
+        assertFalse(vedtaksperiode.erForkastet)
+    }
+
+    @Test
     fun `Inntektskilde ved flere arbeidsgivere`() {
         val periode = 27.januar(2021) til 31.januar(2021)
         val inntekt = 30000.månedlig
@@ -1418,6 +1467,7 @@ class SpeilBuilderTest {
             .contains(annulleringElement.beregningId))
     }
 
+
     private fun <T> Collection<T>.assertOnNonEmptyCollection(func: (T) -> Unit) {
         assertTrue(isNotEmpty())
         forEach(func)
@@ -1522,6 +1572,42 @@ class SpeilBuilderTest {
             håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder[1]))
             håndter(simulering(vedtaksperiodeId = vedtaksperiodeIder[1]))
         }
+    }
+
+    private data class UtbetalingFagsystemID(val utbetalingId: UUID, val arbeidsgiversFagsystemId: String)
+
+    private fun Person.collectUtbetalingFagsystemIDer(): MutableList<UtbetalingFagsystemID> {
+        val utbetalingerIder = mutableListOf<UtbetalingFagsystemID>()
+        accept(object : PersonVisitor {
+            override fun preVisitUtbetalinger(utbetalinger: List<Utbetaling>) {
+                utbetalinger.forEach {
+                    it.accept(object : UtbetalingVisitor {
+                        override fun preVisitUtbetaling(
+                            utbetaling: Utbetaling,
+                            id: UUID,
+                            beregningId: UUID,
+                            type: Utbetaling.Utbetalingtype,
+                            tilstand: Utbetaling.Tilstand,
+                            tidsstempel: LocalDateTime,
+                            oppdatert: LocalDateTime,
+                            arbeidsgiverNettoBeløp: Int,
+                            personNettoBeløp: Int,
+                            maksdato: LocalDate,
+                            forbrukteSykedager: Int?,
+                            gjenståendeSykedager: Int?
+                        ) {
+                            utbetalingerIder.add(
+                                UtbetalingFagsystemID(
+                                    utbetalingId = id,
+                                    arbeidsgiversFagsystemId = utbetaling.arbeidsgiverOppdrag().fagsystemId()
+                                )
+                            )
+                        }
+                    })
+                }
+            }
+        })
+        return utbetalingerIder
     }
 
     private fun Person.collectVedtaksperiodeIder(orgnummer: String = SpeilBuilderTest.orgnummer) = mutableMapOf<String, List<String>>().apply {
@@ -2462,14 +2548,14 @@ class SpeilBuilderTest {
             vedtaksperiodeId: String,
             utbetalingGodkjent: Boolean = true,
             automatiskBehandling: Boolean = false,
-            aktivitetslogg: IAktivitetslogg
+            utbetalingID: UUID
         ) =
             Utbetalingsgodkjenning(
                 meldingsreferanseId = UUID.randomUUID(),
                 aktørId = aktørId,
                 fødselsnummer = fnr,
                 organisasjonsnummer = orgnummer,
-                utbetalingId = UUID.fromString(aktivitetslogg.behov().last { it.type == Behovtype.Godkjenning }.kontekst().getValue("utbetalingId")),
+                utbetalingId = utbetalingID,
                 vedtaksperiodeId = vedtaksperiodeId,
                 saksbehandler = if (automatiskBehandling) "Automatisk behandlet" else "en_saksbehandler_ident",
                 saksbehandlerEpost = "mille.mellomleder@nav.no",
@@ -2477,6 +2563,19 @@ class SpeilBuilderTest {
                 godkjenttidspunkt = LocalDateTime.now(),
                 automatiskBehandling = automatiskBehandling,
             )
+
+        private fun utbetalingsgodkjenning(
+            vedtaksperiodeId: String,
+            utbetalingGodkjent: Boolean = true,
+            automatiskBehandling: Boolean = false,
+            aktivitetslogg: IAktivitetslogg
+        ) = utbetalingsgodkjenning(
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingGodkjent = utbetalingGodkjent,
+            automatiskBehandling = automatiskBehandling,
+            utbetalingID = UUID.fromString(aktivitetslogg.behov().last { it.type == Behovtype.Godkjenning }.kontekst().getValue("utbetalingId"))
+        )
+
 
         private fun simulering(vedtaksperiodeId: String, orgnummer: String = Companion.orgnummer, simuleringOk: Boolean = true) = Simulering(
             meldingsreferanseId = UUID.randomUUID(),
@@ -2525,29 +2624,46 @@ class SpeilBuilderTest {
             )
         )
 
-        private fun overføring(aktivitetslogg: IAktivitetslogg) = UtbetalingOverført(
+        private fun overføring(utbetalingFagsystemID: UtbetalingFagsystemID) = UtbetalingOverført(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = aktørId,
             fødselsnummer = fnr,
             orgnummer = orgnummer,
-            fagsystemId = utbetalingsliste.getValue(orgnummer).last().arbeidsgiverOppdrag().fagsystemId(),
-            utbetalingId = aktivitetslogg.behov().last { it.type == Behovtype.Utbetaling }.kontekst().getValue("utbetalingId"),
+            fagsystemId = utbetalingFagsystemID.arbeidsgiversFagsystemId,
+            utbetalingId = utbetalingFagsystemID.utbetalingId.toString(),
             avstemmingsnøkkel = 123456L,
             overføringstidspunkt = LocalDateTime.now()
         )
 
-        private fun utbetalt(aktivitetslogg: IAktivitetslogg) = UtbetalingHendelse(
+        private fun overføring(aktivitetslogg: IAktivitetslogg) =
+            overføring(
+                UtbetalingFagsystemID(
+                    UUID.fromString(aktivitetslogg.behov().last { it.type == Behovtype.Utbetaling }.kontekst().getValue("utbetalingId")),
+                    utbetalingsliste.getValue(orgnummer).last().arbeidsgiverOppdrag().fagsystemId()
+                )
+            )
+
+
+        private fun utbetalt(utbetalingFagsystemID: UtbetalingFagsystemID) = UtbetalingHendelse(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = aktørId,
             fødselsnummer = fnr,
             orgnummer = orgnummer,
-            fagsystemId = utbetalingsliste.getValue(orgnummer).last().arbeidsgiverOppdrag().fagsystemId(),
-            utbetalingId = aktivitetslogg.behov().last { it.type == Behovtype.Utbetaling }.kontekst().getValue("utbetalingId"),
+            fagsystemId = utbetalingFagsystemID.arbeidsgiversFagsystemId,
+            utbetalingId = utbetalingFagsystemID.utbetalingId.toString(),
             status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT,
             melding = "hei",
             avstemmingsnøkkel = 123456L,
             overføringstidspunkt = LocalDateTime.now()
         )
+
+        private fun utbetalt(aktivitetslogg: IAktivitetslogg) =
+            utbetalt(
+                UtbetalingFagsystemID(
+                    UUID.fromString(aktivitetslogg.behov().last { it.type == Behovtype.Utbetaling }.kontekst().getValue("utbetalingId")),
+                    utbetalingsliste.getValue(orgnummer).last().arbeidsgiverOppdrag().fagsystemId()
+                )
+            )
 
         private fun annullering(fagsystemId: String) = AnnullerUtbetaling(
             meldingsreferanseId = UUID.randomUUID(),

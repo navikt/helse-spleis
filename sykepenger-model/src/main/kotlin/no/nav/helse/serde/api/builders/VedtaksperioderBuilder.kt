@@ -13,7 +13,8 @@ internal class VedtaksperioderBuilder(
     private val fødselsnummer: String,
     private val inntektshistorikkBuilder: InntektshistorikkBuilder,
     private val gruppeIder: MutableMap<Vedtaksperiode, UUID>,
-    private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
+    private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
+    private val byggerForkastedePerioder: Boolean = false
 ) : BuilderState() {
     private val perioder = mutableListOf<VedtaksperiodeBuilder>()
 
@@ -58,7 +59,8 @@ internal class VedtaksperioderBuilder(
             hendelseIder = hendelseIder,
             inntektsmeldingId = inntektsmeldingInfo?.id,
             inntektshistorikkBuilder = inntektshistorikkBuilder,
-            dataForVilkårsvurdering = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) as? VilkårsgrunnlagHistorikk.Grunnlagsdata
+            dataForVilkårsvurdering = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) as? VilkårsgrunnlagHistorikk.Grunnlagsdata,
+            forkastet = byggerForkastedePerioder
         )
         perioder.add(vedtaksperiodeBuilder)
         pushState(vedtaksperiodeBuilder)
