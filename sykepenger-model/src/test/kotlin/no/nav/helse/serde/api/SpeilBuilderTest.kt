@@ -30,17 +30,30 @@ class SpeilBuilderTest {
 
     @Test
     fun `happy case`() {
-        val (person, hendelser) = person()
-        val personDTO = serializePersonForSpeil(person, hendelser)
+        val person = Person(aktørId, fnr)
+
+        val (sykmelding, sykmeldingHendelseDTO) = sykmelding(fom = 1.januar)
+        val (søknad, søknadHendelseDTO) = søknad(fom = 1.januar)
+        val (inntektsmelding, inntektsmeldingHendelseDTO) = inntektsmelding(fom = 1.januar)
+        person.håndter(sykmelding)
+        person.håndter(søknad)
+        person.håndter(inntektsmelding)
+        val vedtaksperiodeId = person.collectVedtaksperiodeIder(orgnummer).last()
+
+        person.håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+        person.håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
+        person.håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+        person.håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
+
+        val utbetalingFagsystemId = person.collectUtbetalingFagsystemIDer().first()
+        person.håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId, utbetalingID = utbetalingFagsystemId.utbetalingId))
+        person.håndter(overføring(utbetalingFagsystemID = utbetalingFagsystemId))
+        person.håndter(utbetalt(utbetalingFagsystemID = utbetalingFagsystemId))
+
+        val personDTO = serializePersonForSpeil(person, listOf(sykmeldingHendelseDTO, søknadHendelseDTO, inntektsmeldingHendelseDTO))
 
         assertEquals("12020052345", personDTO.fødselsnummer)
         assertEquals(1, personDTO.arbeidsgivere.size)
-    }
-
-    @Test
-    fun `versjonsnummer på snapshot`() {
-        val (person, hendelser) = person()
-        val personDTO = serializePersonForSpeil(person, hendelser)
         assertNotNull(personDTO.versjon)
     }
 
