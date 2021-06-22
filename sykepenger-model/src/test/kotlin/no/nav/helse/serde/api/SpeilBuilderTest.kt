@@ -1476,7 +1476,6 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
             .contains(annulleringElement.beregningId))
     }
 
-
     private fun <T> Collection<T>.assertOnNonEmptyCollection(func: (T) -> Unit) {
         assertTrue(isNotEmpty())
         forEach(func)
@@ -1768,40 +1767,6 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
                         håndter(overføring(this@run.aktivitetslogg))
                         håndter(utbetalt(this@run.aktivitetslogg))
                     }
-                }
-            }
-
-        private fun personTilGodkjenning(
-            fom: LocalDate = 1.januar,
-            tom: LocalDate = 31.januar,
-            sendtSøknad: LocalDate = 1.april,
-            søknadhendelseId: UUID = UUID.randomUUID()
-        ): Pair<Person, List<HendelseDTO>> =
-            Person(aktørId, fnr).run {
-                this to mutableListOf<HendelseDTO>().apply {
-                    sykmelding(fom = fom, tom = tom).also { (sykmelding, sykmeldingDTO) ->
-                        håndter(sykmelding)
-                        add(sykmeldingDTO)
-                    }
-                    fangeVedtaksperiodeId()
-                    søknad(
-                        hendelseId = søknadhendelseId,
-                        fom = fom,
-                        tom = tom,
-                        sendtSøknad = sendtSøknad.atStartOfDay()
-                    ).also { (søknad, søknadDTO) ->
-                        håndter(søknad)
-                        add(søknadDTO)
-                    }
-                    inntektsmelding(fom = fom).also { (inntektsmelding, inntektsmeldingDTO) ->
-                        håndter(inntektsmelding)
-                        add(inntektsmeldingDTO)
-                    }
-                    håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
-                    håndter(vilkårsgrunnlagMedFlerInntekter(vedtaksperiodeId = vedtaksperiodeId))
-                    håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
-                    fangeUtbetalinger()
-                    håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
                 }
             }
 
