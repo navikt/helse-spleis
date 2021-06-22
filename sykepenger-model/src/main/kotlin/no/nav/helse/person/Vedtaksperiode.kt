@@ -197,6 +197,12 @@ internal class Vedtaksperiode private constructor(
         tilstand.håndter(this, vilkårsgrunnlag)
     }
 
+    internal fun håndter(utbetalingsgrunnlag: Utbetalingsgrunnlag) {
+        if (!utbetalingsgrunnlag.erRelevant(id)) return
+        kontekst(utbetalingsgrunnlag)
+        tilstand.håndter(this, utbetalingsgrunnlag)
+    }
+
     internal fun håndter(simulering: Simulering) {
         if (!simulering.erRelevant(id)) return
         kontekst(simulering)
@@ -262,7 +268,7 @@ internal class Vedtaksperiode private constructor(
     private fun harInntekt() = inntekt() != null
     private fun avgjørTilstandForInntekt(): Vedtaksperiodetilstand {
         if (!harInntekt()) return AvventerInntektsmeldingFerdigForlengelse
-        return AvventerHistorikk
+        return AvventerUtbetalingsgrunnlag
     }
 
     internal fun ferdig(hendelse: IAktivitetslogg, årsak: ForkastetÅrsak) {
@@ -459,9 +465,6 @@ internal class Vedtaksperiode private constructor(
     private fun trengerVilkårsgrunnlag(hendelse: IAktivitetslogg) {
         val beregningSlutt = YearMonth.from(skjæringstidspunkt).minusMonths(1)
         inntektsberegning(hendelse, beregningSlutt.minusMonths(11), beregningSlutt)
-        if (Toggles.FlereArbeidsgivereUlikFom.enabled) {
-            inntekterForSykepengegrunnlag(hendelse, beregningSlutt.minusMonths(2), beregningSlutt)
-        }
         opptjening(hendelse)
         medlemskap(hendelse, periode.start, periode.endInclusive)
     }
@@ -520,7 +523,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun tickleForArbeidsgiveravhengighet(påminnelse: Påminnelse) {
-        gjentaHistorikk(påminnelse, person, AvventerArbeidsgivere, AvventerHistorikk)
+        gjentaHistorikk(påminnelse, person, AvventerArbeidsgivere, AvventerUtbetalingsgrunnlag)
     }
 
     private fun gjentaHistorikk(hendelse: ArbeidstakerHendelse, nesteTilstand: Vedtaksperiodetilstand) {
@@ -534,31 +537,32 @@ internal class Vedtaksperiode private constructor(
         first() == this@Vedtaksperiode && drop(1).all { it.tilstand == AvventerArbeidsgivere }
 
     private fun forberedMuligUtbetaling(vilkårsgrunnlag: Vilkårsgrunnlag) {
-        forberedMuligUtbetaling(vilkårsgrunnlag) { nesteTilstand ->
-            håndter(vilkårsgrunnlag, nesteTilstand)
-        }
-    }
-
-    private fun forberedMuligUtbetaling(inntektsmelding: Inntektsmelding) {
-        forberedMuligUtbetaling(inntektsmelding) { nesteTilstandVedUtbetaling ->
-            håndterInntektsmelding(inntektsmelding, nesteTilstandVedUtbetaling, AvsluttetUtenUtbetaling)
-        }
-    }
-
-    private fun forberedMuligUtbetaling(arbeidstakerHendelse: ArbeidstakerHendelse, håndter: (Vedtaksperiodetilstand) -> Unit) {
         val overlappendeVedtaksperioder = overlappendeVedtaksperioder()
-
         håndter(
-            when {
+            vilkårsgrunnlag, when {
                 overlappendeVedtaksperioder.alleAndreAvventerArbeidsgivere() -> AvventerHistorikk
                 else -> AvventerArbeidsgivere
             }
         )
-
         if (tilstand == AvventerArbeidsgivere) {
             overlappendeVedtaksperioder.forEach { it.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE }
         }
-        gjentaHistorikk(arbeidstakerHendelse, person, AvventerArbeidsgivere, AvventerHistorikk)
+        gjentaHistorikk(vilkårsgrunnlag, person, AvventerArbeidsgivere, AvventerHistorikk)
+    }
+
+    private fun forberedMuligUtbetaling(inntektsmelding: Inntektsmelding) {
+        val overlappendeVedtaksperioder = overlappendeVedtaksperioder()
+        håndterInntektsmelding(
+            inntektsmelding, when {
+                overlappendeVedtaksperioder.alleAndreAvventerArbeidsgivere() -> AvventerUtbetalingsgrunnlag
+                else -> AvventerArbeidsgivere
+            },
+            AvsluttetUtenUtbetaling
+        )
+        if (tilstand == AvventerArbeidsgivere) {
+            overlappendeVedtaksperioder.forEach { it.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE }
+        }
+        gjentaHistorikk(inntektsmelding, person, AvventerArbeidsgivere, AvventerUtbetalingsgrunnlag)
     }
 
     /**
@@ -894,6 +898,10 @@ internal class Vedtaksperiode private constructor(
             hendelse.error("Forventet ikke overstyring fra saksbehandler i %s", type.name)
         }
 
+        fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: Utbetalingsgrunnlag) {
+            hendelse.error("Forventet ikke utbetalingsgrunnlag i %s", type.name)
+        }
+
         fun revurder(
             vedtaksperiode: Vedtaksperiode,
             hendelse: OverstyrTidslinje,
@@ -901,7 +909,6 @@ internal class Vedtaksperiode private constructor(
         ) {
             hendelse.error("Forventet ikke overstyring fra saksbehandler i %s", type.name)
         }
-
         fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {}
     }
 
@@ -1152,7 +1159,7 @@ internal class Vedtaksperiode private constructor(
                 søknad.warn("Søknaden inneholder egenmeldingsdager som ikke er oppgitt i inntektsmeldingen. Vurder om arbeidsgiverperioden beregnes riktig")
                 søknad.trimLeft(vedtaksperiode.sykdomstidslinje.førsteDag())
             }
-            vedtaksperiode.håndterSøknad(søknad, AvventerHistorikk)
+            vedtaksperiode.håndterSøknad(søknad, AvventerUtbetalingsgrunnlag)
             søknad.info("Fullført behandling av søknad")
         }
 
@@ -1306,7 +1313,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
-            vedtaksperiode.tilstand(gjenopptaBehandling, AvventerHistorikk)
+            vedtaksperiode.tilstand(gjenopptaBehandling, AvventerUtbetalingsgrunnlag)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
@@ -1370,7 +1377,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
-            vedtaksperiode.tilstand(gjenopptaBehandling, AvventerHistorikk)
+            vedtaksperiode.tilstand(gjenopptaBehandling, AvventerUtbetalingsgrunnlag)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
@@ -1414,7 +1421,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
-            return vedtaksperiode.tilstand(gjenopptaBehandling, AvventerHistorikk)
+            return vedtaksperiode.tilstand(gjenopptaBehandling, AvventerUtbetalingsgrunnlag)
         }
     }
 
@@ -1452,7 +1459,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            vedtaksperiode.håndterSøknad(søknad, AvventerHistorikk)
+            vedtaksperiode.håndterSøknad(søknad, AvventerUtbetalingsgrunnlag)
             søknad.info("Fullført behandling av søknad")
         }
 
@@ -1530,7 +1537,7 @@ internal class Vedtaksperiode private constructor(
                 onSuccess {
                     if (arbeidsgiver.erForlengelse(vedtaksperiode.periode)) {
                         info("Oppdaget at perioden er en forlengelse")
-                        return@onSuccess vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
+                        return@onSuccess vedtaksperiode.tilstand(hendelse, AvventerUtbetalingsgrunnlag)
                     }
                     if (!Toggles.PraksisendringEnabled.enabled) return@onSuccess
 
@@ -1543,7 +1550,7 @@ internal class Vedtaksperiode private constructor(
                     infotrygdhistorikk.addInntekter(person, this)
                     if (!arbeidsgiver.opprettReferanseTilInntekt(forrigeSkjæringstidspunkt, førsteSykedag)) return@onSuccess
 
-                    vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
+                    vedtaksperiode.tilstand(hendelse, AvventerUtbetalingsgrunnlag)
                 }
             }
         }
@@ -1586,6 +1593,24 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
             vedtaksperiode.forberedMuligUtbetaling(vilkårsgrunnlag)
+        }
+    }
+
+    internal object AvventerUtbetalingsgrunnlag : Vedtaksperiodetilstand {
+        override val type = AVVENTER_UTBETALINGSGRUNNLAG
+
+        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            hendelse.behov()
+            vedtaksperiode.trengerSkatteinntekter(hendelse)
+            vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
+        }
+
+    }
+
+    private fun trengerSkatteinntekter(hendelse: IAktivitetslogg) {
+        val beregningSlutt = YearMonth.from(skjæringstidspunkt).minusMonths(1)
+        if (Toggles.FlereArbeidsgivereUlikFom.enabled) {
+            inntekterForSykepengegrunnlag(hendelse, beregningSlutt.minusMonths(2), beregningSlutt)
         }
     }
 
@@ -1749,7 +1774,7 @@ internal class Vedtaksperiode private constructor(
         ): LocalDateTime = tilstandsendringstidspunkt.plusDays(4)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            if(Toggles.KastAlleRevurderinger.enabled){
+            if (Toggles.KastAlleRevurderinger.enabled) {
                 hendelse.warn("Feiler revurdering for test.")
                 vedtaksperiode.tilstand(hendelse, RevurderingFeilet)
                 return
@@ -2059,7 +2084,7 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
     }
 
-    internal object RevurderingFeilet: Vedtaksperiodetilstand {
+    internal object RevurderingFeilet : Vedtaksperiodetilstand {
         override val type: TilstandType = REVURDERING_FEILET
         override val erFerdigbehandlet = true
     }
@@ -2147,7 +2172,13 @@ internal class Vedtaksperiode private constructor(
                 .forEach { inntektsmelding.trimLeft(it.endInclusive) }
         }
 
-        internal fun gjentaHistorikk(hendelse: ArbeidstakerHendelse, person: Person, nåværendeTilstand: Vedtaksperiodetilstand, nesteTilstand: Vedtaksperiodetilstand) {
+        // TODO: rename
+        internal fun gjentaHistorikk(
+            hendelse: ArbeidstakerHendelse,
+            person: Person,
+            nåværendeTilstand: Vedtaksperiodetilstand,
+            nesteTilstand: Vedtaksperiodetilstand
+        ) {
             val nåværende = person.nåværendeVedtaksperioder()
             val første = nåværende.firstOrNull() ?: return
             if (nåværende

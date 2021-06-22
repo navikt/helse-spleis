@@ -68,10 +68,10 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             Inntektsopplysning(ORGNUMMER, 13.november(2017), INNTEKT, true)
         )
         val utbetalinger = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 3.april(2019),  30.april(2019), 100.prosent, 100.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 18.mars(2018),  2.april(2018), 100.prosent, 100.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 29.november(2017),  3.desember(2017), 100.prosent, 100.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 13.november(2017),  28.november(2017), 100.prosent, 100.daglig)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 3.april(2019), 30.april(2019), 100.prosent, 100.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 18.mars(2018), 2.april(2018), 100.prosent, 100.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 29.november(2017), 3.desember(2017), 100.prosent, 100.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 13.november(2017), 28.november(2017), 100.prosent, 100.daglig)
         )
         håndterYtelser(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
@@ -90,6 +90,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_UTBETALINGSGRUNNLAG,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -177,6 +178,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             MOTTATT_SYKMELDING_UFERDIG_GAP,
             AVVENTER_SØKNAD_UFERDIG_GAP,
             AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_UTBETALINGSGRUNNLAG,
             AVVENTER_HISTORIKK
         )
     }
@@ -211,6 +213,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             MOTTATT_SYKMELDING_UFERDIG_GAP,
             AVVENTER_SØKNAD_UFERDIG_GAP,
             AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_UTBETALINGSGRUNNLAG,
             AVVENTER_HISTORIKK
         )
     }
@@ -235,6 +238,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_UTBETALINGSGRUNNLAG,
             AVVENTER_HISTORIKK
         )
 
@@ -268,6 +272,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_UTBETALINGSGRUNNLAG,
             AVVENTER_HISTORIKK
         )
 
@@ -324,6 +329,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             MOTTATT_SYKMELDING_UFERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_UFERDIG_GAP,
             AVVENTER_UFERDIG_GAP,
+            AVVENTER_UTBETALINGSGRUNNLAG,
             AVVENTER_HISTORIKK
         )
     }
@@ -369,6 +375,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             MOTTATT_SYKMELDING_UFERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_UFERDIG_GAP,
             AVVENTER_UFERDIG_GAP,
+            AVVENTER_UTBETALINGSGRUNNLAG,
             AVVENTER_HISTORIKK
         )
     }
@@ -410,6 +417,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_UTBETALINGSGRUNNLAG,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -567,6 +575,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_UTBETALINGSGRUNNLAG,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -578,6 +587,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_UFERDIG_FORLENGELSE,
+            AVVENTER_UTBETALINGSGRUNNLAG,
             AVVENTER_HISTORIKK
         )
         assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE)
@@ -623,6 +633,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_UTBETALINGSGRUNNLAG,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -691,7 +702,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.februar(2020), 28.februar(2020), 100.prosent))
         håndterSøknad(Sykdom(1.februar(2020), 28.februar(2020), 100.prosent))
-        håndterYtelser(2.vedtaksperiode)   // No history
+        håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt(2.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
@@ -701,13 +712,14 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         assertTilstander(
             1.vedtaksperiode,
-            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING,
+            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_UTBETALINGSGRUNNLAG, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
         )
         assertTilstander(
             2.vedtaksperiode,
             START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-            AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+            AVVENTER_UTBETALINGSGRUNNLAG, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
         )
 
         inspektør.also {
@@ -754,6 +766,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
             AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_UTBETALINGSGRUNNLAG,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -791,6 +804,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_UTBETALINGSGRUNNLAG,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -804,6 +818,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
+            AVVENTER_UTBETALINGSGRUNNLAG,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING
         )
@@ -833,17 +848,18 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.februar(2020), 28.februar(2020), 100.prosent))
         håndterSøknad(Sykdom(1.februar(2020), 28.februar(2020), 100.prosent))
-        håndterYtelser(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar(2020),  31.januar(2020), 100.prosent, 1400.daglig))
+        håndterYtelser(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar(2020), 31.januar(2020), 100.prosent, 1400.daglig))
 
         assertTilstander(
             1.vedtaksperiode,
-            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING,
+            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_UTBETALINGSGRUNNLAG, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
         )
         assertTilstander(
             2.vedtaksperiode,
             START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-            AVVENTER_HISTORIKK, AVVENTER_SIMULERING
+            AVVENTER_UTBETALINGSGRUNNLAG, AVVENTER_HISTORIKK, AVVENTER_SIMULERING
         )
     }
 
@@ -866,6 +882,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_UTBETALINGSGRUNNLAG,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -940,6 +957,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_UTBETALINGSGRUNNLAG,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -987,6 +1005,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_UTBETALINGSGRUNNLAG,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -1111,6 +1130,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
             AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_UTBETALINGSGRUNNLAG,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             TIL_INFOTRYGD
@@ -1140,6 +1160,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_UTBETALINGSGRUNNLAG,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -1183,6 +1204,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_UTBETALINGSGRUNNLAG,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -1230,6 +1252,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_UTBETALINGSGRUNNLAG,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -1278,6 +1301,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_UTBETALINGSGRUNNLAG,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -1323,6 +1347,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_UTBETALINGSGRUNNLAG,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -1379,6 +1404,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_UTBETALINGSGRUNNLAG,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -1425,6 +1451,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_UTBETALINGSGRUNNLAG,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -1476,6 +1503,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_UTBETALINGSGRUNNLAG,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -1494,7 +1522,11 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.januar(2019), 31.januar(2019), 100.prosent))
         håndterSøknad(Sykdom(1.januar(2019), 31.januar(2019), 100.prosent))
-        håndterUtbetalingshistorikk(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.desember, 31.desember, 100.prosent, INNTEKT), inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.desember, INNTEKT, true)))
+        håndterUtbetalingshistorikk(
+            2.vedtaksperiode,
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.desember, 31.desember, 100.prosent, INNTEKT),
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.desember, INNTEKT, true))
+        )
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -1505,6 +1537,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_UTBETALINGSGRUNNLAG,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -1542,6 +1575,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_UTBETALINGSGRUNNLAG,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -1596,6 +1630,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_UTBETALINGSGRUNNLAG,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -1671,7 +1706,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         assertTilstander(4.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE)
         håndterUtbetalingshistorikk(
             3.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 24.juni(2020),  11.juli(2020), 100.prosent, 1814.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 24.juni(2020), 11.juli(2020), 100.prosent, 1814.daglig),
             inntektshistorikk = listOf(
                 Inntektsopplysning(ORGNUMMER, 24.juni(2020), INNTEKT, true)
             )
@@ -1724,7 +1759,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         håndterUtbetalingshistorikk(
             2.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 27.juli(2020),  13.september(2020), 100.prosent, 1000.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 27.juli(2020), 13.september(2020), 100.prosent, 1000.daglig),
             inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 27.juli(2020), INNTEKT, true))
         )
         assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
@@ -1748,7 +1783,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         person = SerialisertPerson(person.serialize().json).deserialize()
 
-        val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.august(2020),  22.august(2020), 100.prosent, 1000.daglig)
+        val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.august(2020), 22.august(2020), 100.prosent, 1000.daglig)
         håndterUtbetalingshistorikk(2.vedtaksperiode, historikk)
         håndterYtelser(2.vedtaksperiode)
 
@@ -1783,8 +1818,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar,  31.januar, 100.prosent, 1000.daglig),
-            Friperiode(1.februar,  28.februar)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, 1000.daglig),
+            Friperiode(1.februar, 28.februar)
         )
 
         inspektør.also {

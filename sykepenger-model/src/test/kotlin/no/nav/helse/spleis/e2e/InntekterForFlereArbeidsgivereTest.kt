@@ -199,6 +199,37 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         }
     }
 
+    @Test
+    fun `Skatteinntekter og inntektsmelding for en arbeidsgiver og kun skatt (i to måneder) for andre arbeidsgiver - gir korrekt sykepenge- og sammenligningsgrunnlag`() {
+        Toggles.FlereArbeidsgivereUlikFom.enable {
+            nyPeriode(1.januar til 31.januar, a1, 25000.månedlig)
+            vilkårsgrunnlag(
+                a1.id(0),
+                orgnummer = a1,
+                inntekter = inntektperioder {
+                    inntektsgrunnlag = Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                    1.januar(2017) til 1.desember(2017) inntekter {
+                        a1 inntekt 24000
+                        a2 inntekt 20000
+                    }
+                },
+                inntekterSykepengegrunnlag = inntektperioder {
+                    inntektsgrunnlag = Inntektsgrunnlag.SYKEPENGEGRUNNLAG
+                    1.oktober(2017) til 1.november(2017) inntekter {
+                        a1 inntekt 15000
+                    }
+                    1.november(2017) til 1.desember(2017) inntekter {
+                        a1 inntekt 15000
+                        a2 inntekt 21000
+                    }
+                }
+            ).håndter(Person::håndter)
+
+            assertEquals(552000.årlig, person.sykepengegrunnlag(1.januar, 1.januar))
+            assertEquals(528000.årlig, person.sammenligningsgrunnlag(1.januar))
+        }
+    }
+
     private fun nyPeriode(periode: Periode, orgnummer: String, inntekt: Inntekt = INNTEKT) {
         sykmelding(
             UUID.randomUUID(),

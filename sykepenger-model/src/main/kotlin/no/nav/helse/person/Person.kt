@@ -156,6 +156,11 @@ class Person private constructor(
         finnArbeidsgiver(vilkårsgrunnlag).håndter(vilkårsgrunnlag)
     }
 
+    fun håndter(utbetalingsgrunnlag: Utbetalingsgrunnlag) {
+        registrer(utbetalingsgrunnlag, "Behandler utbetalingsgrunnlag")
+        finnArbeidsgiver(utbetalingsgrunnlag).håndter(utbetalingsgrunnlag)
+    }
+
     fun håndter(simulering: Simulering) {
         registrer(simulering, "Behandler simulering")
         finnArbeidsgiver(simulering).håndter(simulering)
@@ -335,7 +340,7 @@ class Person private constructor(
         return SpesifikkKontekst("Person", mapOf("fødselsnummer" to fødselsnummer, "aktørId" to aktørId))
     }
 
-    private fun registrer(hendelse: ArbeidstakerHendelse, melding: String) {
+    private fun registrer(hendelse: PersonHendelse, melding: String) {
         hendelse.kontekst(this)
         hendelse.info(melding)
     }
@@ -390,14 +395,14 @@ class Person private constructor(
 
     internal fun lagreInntekter(
         orgnummer: String,
-        arbeidsgiverInntekt: Inntektsvurdering.ArbeidsgiverInntekt,
+        arbeidsgiverInntekt: ArbeidsgiverInntekt,
         skjæringstidspunkt: LocalDate,
-        vilkårsgrunnlag: Vilkårsgrunnlag
+        hendelse: PersonHendelse
     ) {
-        finnArbeidsgiverForInntekter(orgnummer, vilkårsgrunnlag).lagreInntekter(
+        finnArbeidsgiverForInntekter(orgnummer, hendelse).lagreInntekter(
             arbeidsgiverInntekt,
             skjæringstidspunkt,
-            vilkårsgrunnlag
+            hendelse
         )
     }
 

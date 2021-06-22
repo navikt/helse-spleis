@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.SøknadArbeidsgiver.Søknadsperiode
 import no.nav.helse.hendelser.UtbetalingHendelse.Oppdragstatus.AKSEPTERT
@@ -1429,6 +1430,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_UTBETALINGSGRUNNLAG,
             AVVENTER_HISTORIKK,
             TIL_INFOTRYGD
         )
@@ -2320,9 +2322,6 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             ArbeidsgiverUtbetalingsperiode(a2, ITPeriodeA2.start, ITPeriodeA2.endInclusive, 100.prosent, INNTEKT),
         )
 
-
-
-
         håndterSykmelding(Sykmeldingsperiode(spleisPeriodeA1.start, spleisPeriodeA1.endInclusive, 100.prosent), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(spleisPeriodeA1.start, spleisPeriodeA1.endInclusive, 100.prosent), orgnummer = a1)
 
@@ -2346,6 +2345,71 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode(a2), orgnummer = a2)
 
         assertEquals(88, inspektør(a2).forbrukteSykedager(0))
+    }
+
+    @Test
+    fun `To førstegangsbehandlinger med ulik fom - skal bruke skatteinntekter for arbeidsgiver med senest fom`() {
+        Toggles.FlereArbeidsgivereUlikFom.enable {
+            håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+            håndterSykmelding(Sykmeldingsperiode(5.mars, 31.mars, 100.prosent), orgnummer = a2)
+
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(5.mars, 31.mars, 100.prosent), orgnummer = a2)
+
+            håndterInntektsmelding(listOf(1.mars til 16.mars), førsteFraværsdag = 1.mars, orgnummer = a1)
+            håndterInntektsmelding(listOf(5.mars til 20.mars), førsteFraværsdag = 5.mars, orgnummer = a2, beregnetInntekt = INNTEKT)
+
+            håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterVilkårsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
+
+            håndterYtelser(1.vedtaksperiode(a2), inntektshistorikk = emptyList(), orgnummer = a2)
+            håndterVilkårsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2, inntektsvurderingSykepengegrunnlag = Inntektsvurdering(inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SYKEPENGEGRUNNLAG
+                1.desember(2017) til 1.februar inntekter {
+                    a2 inntekt 20000.månedlig
+                }
+            }))
+
+            assertEquals(31000.månedlig, inspektør(a1).inntektInspektør.grunnlagForSykepengegrunnlag(1.mars))
+            assertEquals(20000.månedlig, inspektør(a2).inntektInspektør.grunnlagForSykepengegrunnlag(5.mars))
+
+        }
+    }
+
+    @Test
+    fun `To førstegangsbehandlinger med ulik fom - skal få warning om at saksbehandler må sjekke varig lønnsendring`() {
+        Toggles.FlereArbeidsgivereUlikFom.enable {
+            håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+            håndterSykmelding(Sykmeldingsperiode(5.mars, 31.mars, 100.prosent), orgnummer = a2)
+
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(5.mars, 31.mars, 100.prosent), orgnummer = a2)
+
+            håndterInntektsmelding(listOf(1.mars til 16.mars), førsteFraværsdag = 1.mars, orgnummer = a1)
+            håndterInntektsmelding(listOf(5.mars til 20.mars), førsteFraværsdag = 5.mars, orgnummer = a2, beregnetInntekt = INNTEKT)
+
+            håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterVilkårsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
+
+            håndterYtelser(1.vedtaksperiode(a2), inntektshistorikk = emptyList(), orgnummer = a2)
+            håndterVilkårsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2, inntektsvurderingSykepengegrunnlag = Inntektsvurdering(inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SYKEPENGEGRUNNLAG
+                1.desember(2017) til 1.februar inntekter {
+                    a2 inntekt 20000.månedlig
+                }
+            }))
+
+            // TODO: check warning
+
+        }
     }
 
     private fun assertTilstand(

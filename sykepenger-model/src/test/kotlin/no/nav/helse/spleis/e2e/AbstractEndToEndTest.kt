@@ -957,7 +957,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         håndterSykmelding(Sykmeldingsperiode(fom, tom, grad))
         val id = observatør.sisteVedtaksperiode()
         håndterSøknadMedValidering(id, Søknad.Søknadsperiode.Sykdom(fom, tom, grad))
-        håndterYtelser(id)   // No history
+        håndterYtelser(id)
         håndterSimulering(id)
         håndterUtbetalingsgodkjenning(id, true)
         håndterUtbetalt(id, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT)

@@ -57,7 +57,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
 
-        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
                 inntekter = inntektperioder {
@@ -68,7 +68,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
                 })
         )
 
-        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterYtelser(1.vedtaksperiode)
 
         builder.nøkkeldataOmInntekt(1.januar og 31.januar avvik 0.0)
         val inntektsgrunnlag = builder.build()

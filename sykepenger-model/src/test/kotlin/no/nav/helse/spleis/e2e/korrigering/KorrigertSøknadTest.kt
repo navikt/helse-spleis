@@ -27,7 +27,13 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 30.januar, 100.prosent), Arbeid(31.januar, 31.januar))
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            TIL_INFOTRYGD
+        )
     }
 
     @Test
@@ -35,7 +41,13 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(3.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            TIL_INFOTRYGD
+        )
     }
 
     @Test
@@ -43,7 +55,13 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(3.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 1.februar, 100.prosent))
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            TIL_INFOTRYGD
+        )
     }
 
     @Test
@@ -107,7 +125,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
             ) {
                 this.grad = grad
             }
-        }.also{
+        }.also {
             inspektør.arbeidsgiverOppdrag.first().accept(it)
             assertEquals(50.0, it.grad)
         }
@@ -124,7 +142,10 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
             assertTrue(it[28.februar] is Sykedag)
         }
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK)
+        assertTilstander(
+            2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_UTBETALINGSGRUNNLAG, AVVENTER_HISTORIKK
+        )
         assertEquals(1, inspektør.personLogg.warn().size)
     }
 
@@ -191,7 +212,10 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         SykdomstidslinjeInspektør(inspektør.sykdomstidslinje).also {
             assertTrue(it[31.januar] is Feriedag)
         }
-        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_HISTORIKK)
+        assertTilstander(
+            1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_UTBETALINGSGRUNNLAG, AVVENTER_HISTORIKK
+        )
         assertTilstander(
             2.vedtaksperiode,
             START,
@@ -227,7 +251,10 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         SykdomstidslinjeInspektør(inspektør.sykdomstidslinje).also {
             assertTrue(it[31.januar] is Feriedag)
         }
-        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING)
+        assertTilstander(
+            1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_UTBETALINGSGRUNNLAG, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING
+        )
         assertEquals(1, inspektør.personLogg.warn().size)
     }
 
@@ -243,7 +270,16 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         SykdomstidslinjeInspektør(inspektør.sykdomstidslinje).also {
             assertTrue(it[31.januar] is Feriedag)
         }
-        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK)
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_UTBETALINGSGRUNNLAG,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK
+        )
         assertEquals(1, inspektør.personLogg.warn().size)
     }
 
@@ -265,6 +301,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_UTBETALINGSGRUNNLAG,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -293,6 +330,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_UTBETALINGSGRUNNLAG,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,

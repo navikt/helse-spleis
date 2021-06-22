@@ -85,6 +85,7 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_UTBETALINGSGRUNNLAG,
             AVVENTER_HISTORIKK
         )
 
@@ -128,6 +129,7 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
+            AVVENTER_UTBETALINGSGRUNNLAG,
             AVVENTER_HISTORIKK
         )
 

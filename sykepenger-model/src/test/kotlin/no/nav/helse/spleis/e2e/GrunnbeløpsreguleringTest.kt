@@ -332,7 +332,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
     ) {
         håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent), sendtTilNav = tom)
-        håndterYtelser(vedtaksperiodeIndeks.vedtaksperiode) // No history
+        håndterYtelser(vedtaksperiodeIndeks.vedtaksperiode)
         håndterSimulering(vedtaksperiodeIndeks.vedtaksperiode)
         håndterUtbetalingsgodkjenning(vedtaksperiodeIndeks.vedtaksperiode, true)
         håndterUtbetalt(vedtaksperiodeIndeks.vedtaksperiode, AKSEPTERT)

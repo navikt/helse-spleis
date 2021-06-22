@@ -44,6 +44,10 @@ object HendelseProbe {
         tell("Vilkårsgrunnlag")
     }
 
+    internal fun onUtbetalingsgrunnlag() {
+        tell("Utbetalingsgrunnlag")
+    }
+
     fun onSimulering() {
         tell("Simulering")
     }

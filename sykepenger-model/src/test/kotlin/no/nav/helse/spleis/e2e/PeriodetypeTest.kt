@@ -50,6 +50,7 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
             TilstandType.MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             TilstandType.MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
             TilstandType.AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE,
+            TilstandType.AVVENTER_UTBETALINGSGRUNNLAG,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_VILKÅRSPRØVING,
             TilstandType.AVVENTER_HISTORIKK,
@@ -91,6 +92,7 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
             TilstandType.START,
             TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
             TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            TilstandType.AVVENTER_UTBETALINGSGRUNNLAG,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_VILKÅRSPRØVING,
             TilstandType.AVVENTER_HISTORIKK,
@@ -102,6 +104,7 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
             TilstandType.MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
             TilstandType.AVVENTER_UFERDIG_FORLENGELSE,
+            TilstandType.AVVENTER_UTBETALINGSGRUNNLAG,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_SIMULERING,
             TilstandType.AVVENTER_GODKJENNING
@@ -128,6 +131,7 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
             TilstandType.START,
             TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
             TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            TilstandType.AVVENTER_UTBETALINGSGRUNNLAG,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_SIMULERING,
             TilstandType.AVVENTER_GODKJENNING
@@ -196,6 +200,7 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
             TilstandType.START,
             TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
             TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            TilstandType.AVVENTER_UTBETALINGSGRUNNLAG,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_VILKÅRSPRØVING,
             TilstandType.AVVENTER_HISTORIKK,
@@ -207,6 +212,7 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
             TilstandType.START,
             TilstandType.MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
+            TilstandType.AVVENTER_UTBETALINGSGRUNNLAG,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_SIMULERING,
             TilstandType.AVVENTER_GODKJENNING
