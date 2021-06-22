@@ -106,8 +106,26 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
 
     @Test
     fun `generer ett utbetalingshistorikkelement per utbetaling, selv om utbetalingene peker på samme sykdomshistorikk`() {
-        val (person, hendelser) = personToPerioderIAvventerHistorikk()
-        val personDTO = serializePersonForSpeil(person, hendelser)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent))
+
+        //Spill igjennom første
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+
+        //Spill igjennom andre
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+
+        val personDTO = speilApi()
         assertEquals(2, personDTO.arbeidsgivere.first().utbetalingshistorikk.size)
         val arbeidsgiver = personDTO.arbeidsgivere.first()
         val førsteElement = arbeidsgiver.utbetalingshistorikk.first()
@@ -1514,54 +1532,6 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
             håndter(utbetalt(this@run.aktivitetslogg))
             val utbetalteUtbetalinger = utbetalingsliste.getValue(orgnummer).filter { it.erUtbetalt() }
             håndter(annullering(fagsystemId = utbetalteUtbetalinger.last().arbeidsgiverOppdrag().fagsystemId()))
-        }
-    }
-
-    private fun personToPerioderIAvventerHistorikk(): Pair<Person, List<HendelseDTO>> = Person(aktørId, fnr).run {
-        this to mutableListOf<HendelseDTO>().apply {
-            sykmelding(fom = 1.januar, tom = 31.januar).also { (sykmelding, sykmeldingDTO) ->
-                håndter(sykmelding)
-                add(sykmeldingDTO)
-            }
-            søknad(
-                fom = 1.januar,
-                tom = 31.januar,
-                sendtSøknad = 1.april.atStartOfDay()
-            ).also { (søknad, søknadDTO) ->
-                håndter(søknad)
-                add(søknadDTO)
-            }
-            inntektsmelding(fom = 1.januar).also { (inntektsmelding, inntektsmeldingDTO) ->
-                håndter(inntektsmelding)
-                add(inntektsmeldingDTO)
-            }
-            sykmelding(fom = 1.februar, tom = 28.februar).also { (sykmelding, sykmeldingDTO) ->
-                håndter(sykmelding)
-                add(sykmeldingDTO)
-            }
-            søknad(
-                fom = 1.februar,
-                tom = 28.februar,
-                sendtSøknad = 2.april.atStartOfDay()
-            ).also { (søknad, søknadDTO) ->
-                håndter(søknad)
-                add(søknadDTO)
-            }
-            fangeVedtaksperiodeId()
-            håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder[0]))
-            håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeIder[0]))
-            håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder[0]))
-
-            fangeUtbetalinger()
-            håndter(simulering(vedtaksperiodeId = vedtaksperiodeIder[0]))
-            håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeIder[0], aktivitetslogg = this@run.aktivitetslogg))
-            håndter(overføring(this@run.aktivitetslogg))
-            håndter(utbetalt(this@run.aktivitetslogg))
-            fangeUtbetalinger()
-            håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder[1]))
-            håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeIder[1]))
-            håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder[1]))
-            håndter(simulering(vedtaksperiodeId = vedtaksperiodeIder[1]))
         }
     }
 
