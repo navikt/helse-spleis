@@ -11,6 +11,7 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.api.InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO
 import no.nav.helse.serde.mapping.SpeilDagtype
+import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Inntekt
@@ -26,51 +27,32 @@ import java.time.LocalTime
 import java.time.YearMonth
 import java.util.*
 
-class SpeilBuilderTest {
+internal class SpeilBuilderTest: AbstractEndToEndTest() {
 
     @Test
     fun `happy case`() {
-        val person = Person(aktørId, fnr)
+        nyttVedtak(1.januar, 31.januar)
+        val personDTO = speilApi()
 
-        val (sykmelding, sykmeldingHendelseDTO) = sykmelding(fom = 1.januar)
-        val (søknad, søknadHendelseDTO) = søknad(fom = 1.januar)
-        val (inntektsmelding, inntektsmeldingHendelseDTO) = inntektsmelding(fom = 1.januar)
-        person.håndter(sykmelding)
-        person.håndter(søknad)
-        person.håndter(inntektsmelding)
-        val vedtaksperiodeId = person.collectVedtaksperiodeIder(orgnummer).last()
-
-        person.håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
-        person.håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
-        person.håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
-        person.håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
-
-        val utbetalingFagsystemId = person.collectUtbetalingFagsystemIDer().first()
-        person.håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId, utbetalingID = utbetalingFagsystemId.utbetalingId))
-        person.håndter(overføring(utbetalingFagsystemID = utbetalingFagsystemId))
-        person.håndter(utbetalt(utbetalingFagsystemID = utbetalingFagsystemId))
-
-        val personDTO = serializePersonForSpeil(person, listOf(sykmeldingHendelseDTO, søknadHendelseDTO, inntektsmeldingHendelseDTO))
-
-        assertEquals("12020052345", personDTO.fødselsnummer)
+        assertEquals(UNG_PERSON_FNR_2018, personDTO.fødselsnummer)
         assertEquals(1, personDTO.arbeidsgivere.size)
         assertNotNull(personDTO.versjon)
     }
 
     @Test
     fun `annullerer feilet revurdering`() {
-        val (person, hendelser) = person()
-        person.run {
-            håndter(overstyring())
-            håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
-            håndter(simulering(vedtaksperiodeIder.last(), simuleringOk = false))
-            val utbetalteUtbetalinger = utbetalingsliste.getValue(orgnummer).filter { it.erUtbetalt() }
-            håndter(annullering(fagsystemId = utbetalteUtbetalinger.last().arbeidsgiverOppdrag().fagsystemId()))
-        }
-        val personDTO = serializePersonForSpeil(person, hendelser)
+        nyttVedtak(1.januar, 31.januar)
+
+        håndterOverstyring()
+        håndterYtelser()
+        håndterSimulering(simuleringOK = false)
+        håndterAnnullerUtbetaling()
+
+        val personDTO = speilApi()
         val vedtaksperiode = personDTO.arbeidsgivere.first().vedtaksperioder.first() as VedtaksperiodeDTO
         val beregningIdVedtaksperiode = vedtaksperiode.beregningIder.last()
         val beregningIderUtbetalingshistorikk = personDTO.arbeidsgivere.first().utbetalingshistorikk.map { it.beregningId }
+
         assertEquals(1, vedtaksperiode.beregningIder.size)
         assertTrue(vedtaksperiode.fullstendig)
         assertEquals(2, beregningIderUtbetalingshistorikk.size)

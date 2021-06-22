@@ -503,7 +503,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         ).håndter(Person::håndter)
     }
 
-    protected fun håndterOverstyring(overstyringsdager: List<ManuellOverskrivingDag>) {
+    protected fun håndterOverstyring(overstyringsdager: List<ManuellOverskrivingDag> = listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag, 100))) {
         OverstyrTidslinje(
             meldingsreferanseId = UUID.randomUUID(),
             fødselsnummer = UNG_PERSON_FNR_2018,
