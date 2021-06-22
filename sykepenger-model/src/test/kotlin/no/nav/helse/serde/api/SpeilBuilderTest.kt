@@ -78,14 +78,14 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
 
     @Test
     fun `mapping av utbetalingshistorikk`() {
-        val (person, hendelser) = person()
-        val personDTO = serializePersonForSpeil(person, hendelser)
+        nyttVedtak(1.januar, 31.januar)
+        val personDTO = speilApi()
         val tidslinje = personDTO.arbeidsgivere.first().utbetalingshistorikk.first()
-        val utbetaling = utbetalingsliste.getValue(personDTO.arbeidsgivere.first().organisasjonsnummer).first()
+        val utbetaling = inspektør.utbetalinger.first()
 
         assertEquals(1, personDTO.arbeidsgivere.first().utbetalingshistorikk.size)
         assertEquals(31, tidslinje.beregnettidslinje.size)
-        assertEquals(16, tidslinje.hendelsetidslinje.size)
+        assertEquals(31, tidslinje.hendelsetidslinje.size)
         assertEquals(31, tidslinje.utbetaling.utbetalingstidslinje.size)
 
         assertEquals("UTBETALT", tidslinje.utbetaling.status)
@@ -97,7 +97,7 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
         assertNotNull(tidslinje.utbetaling.vurdering)
         assertNotNull(tidslinje.tidsstempel)
         tidslinje.utbetaling.vurdering?.also {
-            assertEquals("en_saksbehandler_ident", it.ident)
+            assertEquals("Ola Nordmann", it.ident)
             assertEquals(true, it.godkjent)
             assertEquals(false, it.automatisk)
             assertNotNull(it.tidsstempel)
