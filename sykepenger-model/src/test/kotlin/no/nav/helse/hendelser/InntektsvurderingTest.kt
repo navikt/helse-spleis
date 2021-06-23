@@ -1,6 +1,5 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.hendelser.Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Periodetype
 import no.nav.helse.testhelpers.desember
@@ -29,8 +28,7 @@ internal class InntektsvurderingTest {
         assertFalse(
             validererOk(
                 inntektsvurdering(
-                    inntektperioder {
-                        inntektsgrunnlag = SAMMENLIGNINGSGRUNNLAG
+                    inntektperioder(ArbeidsgiverInntekt.MånedligInntekt::Sammenligningsgrunnlag) {
                         LocalDate.now() til LocalDate.now() inntekter {
                             ORGNR inntekt INGEN
                         }
@@ -82,7 +80,12 @@ internal class InntektsvurderingTest {
             }
         }
 
-    private fun validererOk(inntektsvurdering: Inntektsvurdering, grunnlagForSykepengegrunnlag: Inntekt, sammenligningsgrunnlag: Inntekt, antallArbeidsgivereMedOverlappendeVedtaksperioder: Int = 1): Boolean {
+    private fun validererOk(
+        inntektsvurdering: Inntektsvurdering,
+        grunnlagForSykepengegrunnlag: Inntekt,
+        sammenligningsgrunnlag: Inntekt,
+        antallArbeidsgivereMedOverlappendeVedtaksperioder: Int = 1
+    ): Boolean {
         aktivitetslogg = Aktivitetslogg()
         return inntektsvurdering.valider(
             aktivitetslogg,
@@ -95,7 +98,7 @@ internal class InntektsvurderingTest {
     }
 
     private fun inntektsvurdering(
-        inntektsmåneder: List<Inntektsvurdering.ArbeidsgiverInntekt> = inntektperioder {
+        inntektsmåneder: List<ArbeidsgiverInntekt> = inntektperioder {
             1.januar(2017) til 1.desember(2017) inntekter {
                 ORGNR inntekt INNTEKT
             }

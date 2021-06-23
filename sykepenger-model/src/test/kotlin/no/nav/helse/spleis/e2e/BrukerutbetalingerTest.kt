@@ -32,8 +32,7 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.juni)
         håndterYtelser(1.vedtaksperiode, *historikk.toTypedArray(), inntektshistorikk = inntektsopplysning)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2017) til 1.mai(2018) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
@@ -65,8 +64,7 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.juni)
         håndterYtelser(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(24))
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2017) til 1.mai(2018) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }

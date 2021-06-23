@@ -553,16 +553,9 @@ class JsonBuilderTest {
             aktørId = aktørId,
             fødselsnummer = fnr,
             orgnummer = orgnummer,
-            inntektsvurdering = Inntektsvurdering(inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
                 1.januar(2017) til 1.desember(2017) inntekter {
                     orgnummer inntekt 31000.månedlig
-                }
-            }),
-            inntektsvurderingSykepengegrunnlag = Inntektsvurdering(inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SYKEPENGEGRUNNLAG
-                1.oktober(2017) til 1.desember(2017) inntekter {
-                    AbstractPersonTest.ORGNUMMER inntekt 31000.månedlig
                 }
             }),
             opptjeningvurdering = Opptjeningvurdering(

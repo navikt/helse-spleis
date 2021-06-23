@@ -11,6 +11,14 @@ import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 import java.util.*
 
+typealias InntektCreator = (
+    yearMonth: YearMonth,
+    inntekt: Inntekt,
+    type: ArbeidsgiverInntekt.MånedligInntekt.Inntekttype,
+    fordel: String,
+    beskrivelse: String
+) -> ArbeidsgiverInntekt.MånedligInntekt
+
 class ArbeidsgiverInntekt(
     private val arbeidsgiver: String,
     private val inntekter: List<MånedligInntekt>
@@ -18,15 +26,15 @@ class ArbeidsgiverInntekt(
     internal fun lagreInntekter(
         inntektshistorikk: Inntektshistorikk,
         skjæringstidspunkt: LocalDate,
-        meldingsreferanseId: UUID
+        meldingsreferanseId: UUID,
     ) {
-        MånedligInntekt.lagreInntekterForSammeligningsgrunnlag(inntekter, inntektshistorikk, skjæringstidspunkt, meldingsreferanseId)
+        MånedligInntekt.lagreInntekter(inntekter, inntektshistorikk, skjæringstidspunkt, meldingsreferanseId)
     }
 
     private fun harInntekter() = inntekter.isNotEmpty()
 
     companion object {
-        fun lagreInntekterForSammeligningsgrunnlag(
+        fun lagreInntekter(
             inntekter: List<ArbeidsgiverInntekt>,
             person: Person,
             skjæringstidspunkt: LocalDate,
@@ -35,17 +43,13 @@ class ArbeidsgiverInntekt(
             inntekter.forEach { person.lagreInntekter(it.arbeidsgiver, it, skjæringstidspunkt, hendelse) }
         }
 
-        fun lagreInntekterForSykepengegrunnlag(inntekter: List<ArbeidsgiverInntekt>, person: Person, skjæringstidspunkt: LocalDate, hendelse: PersonHendelse) {
-            inntekter.forEach { person.lagreInntekter(it.arbeidsgiver, it, skjæringstidspunkt, hendelse) }
-        }
-
         internal fun List<ArbeidsgiverInntekt>.kilder(antallMåneder: Int) =
             map {
-                    ArbeidsgiverInntekt(
-                        it.arbeidsgiver,
-                        it.inntekter.nylig(månedFørSlutt(this, antallMåneder))
-                    )
-                }
+                ArbeidsgiverInntekt(
+                    it.arbeidsgiver,
+                    it.inntekter.nylig(månedFørSlutt(this, antallMåneder))
+                )
+            }
                 .filter { it.harInntekter() }
                 .size
 
@@ -54,18 +58,71 @@ class ArbeidsgiverInntekt(
 
         internal fun List<ArbeidsgiverInntekt>.antallMåneder() =
             MånedligInntekt.antallMåneder(flatMap { it.inntekter })
-
-
-
     }
 
-    class MånedligInntekt(
+    sealed class MånedligInntekt(
         private val yearMonth: YearMonth,
         private val inntekt: Inntekt,
         private val type: Inntekttype,
         private val fordel: String,
         private val beskrivelse: String
     ) {
+
+        internal abstract fun lagreInntekter(
+            inntektshistorikk: Inntektshistorikk.AppendMode,
+            skjæringstidspunkt: LocalDate,
+            meldingsreferanseId: UUID
+        )
+
+        class Sammenligningsgrunnlag(
+            yearMonth: YearMonth,
+            inntekt: Inntekt,
+            type: Inntekttype,
+            fordel: String,
+            beskrivelse: String
+        ) : MånedligInntekt(yearMonth, inntekt, type, fordel, beskrivelse) {
+
+            override fun lagreInntekter(
+                inntektshistorikk: Inntektshistorikk.AppendMode,
+                skjæringstidspunkt: LocalDate,
+                meldingsreferanseId: UUID,
+            ) {
+                inntektshistorikk.addSkattSammenligningsgrunnlag(
+                    dato = skjæringstidspunkt,
+                    hendelseId = meldingsreferanseId,
+                    beløp = super.inntekt,
+                    måned = super.yearMonth,
+                    type = enumValueOf(super.type.name),
+                    fordel = super.fordel,
+                    beskrivelse = super.beskrivelse
+                )
+            }
+        }
+
+        class Sykepengegrunnlag(
+            yearMonth: YearMonth,
+            inntekt: Inntekt,
+            type: Inntekttype,
+            fordel: String,
+            beskrivelse: String
+        ) : MånedligInntekt(yearMonth, inntekt, type, fordel, beskrivelse) {
+
+            override fun lagreInntekter(
+                inntektshistorikk: Inntektshistorikk.AppendMode,
+                skjæringstidspunkt: LocalDate,
+                meldingsreferanseId: UUID,
+            ) {
+                inntektshistorikk.addSkattSykepengegrunnlag(
+                    dato = skjæringstidspunkt,
+                    hendelseId = meldingsreferanseId,
+                    beløp = super.inntekt,
+                    måned = super.yearMonth,
+                    type = enumValueOf(super.type.name),
+                    fordel = super.fordel,
+                    beskrivelse = super.beskrivelse
+                )
+            }
+        }
 
         companion object {
             internal fun List<MånedligInntekt>.nylig(månedFørSlutt: YearMonth?): List<MånedligInntekt> {
@@ -87,7 +144,8 @@ class ArbeidsgiverInntekt(
             private fun List<MånedligInntekt>.minMonth() = minOfOrNull { it.yearMonth }
             private fun List<MånedligInntekt>.maxMonth() = maxOfOrNull { it.yearMonth }
 
-            internal fun lagreInntekterForSammeligningsgrunnlag(
+
+            internal fun lagreInntekter(
                 inntekter: List<MånedligInntekt>,
                 inntektshistorikk: Inntektshistorikk,
                 skjæringstidspunkt: LocalDate,
@@ -95,37 +153,7 @@ class ArbeidsgiverInntekt(
             ) {
                 inntektshistorikk {
                     inntekter.forEach {
-                        addSkattSammenligningsgrunnlag(
-                            dato = skjæringstidspunkt,
-                            hendelseId = meldingsreferanseId,
-                            beløp = it.inntekt,
-                            måned = it.yearMonth,
-                            type = enumValueOf(it.type.name),
-                            fordel = it.fordel,
-                            beskrivelse = it.beskrivelse
-                        )
-                    }
-                }
-            }
-
-            internal fun lagreInntekterForSykepengegrunnlag(
-                inntekter: List<MånedligInntekt>,
-                inntektshistorikk: Inntektshistorikk,
-                skjæringstidspunkt: LocalDate,
-                meldingsreferanseId: UUID
-            ) {
-                inntektshistorikk {
-                    inntekter.forEach {
-                        addSkattSykepengegrunnlag(
-                            dato = skjæringstidspunkt,
-                            hendelseId = meldingsreferanseId,
-                            beløp = it.inntekt,
-                            måned = it.yearMonth,
-                            type = enumValueOf(it.type.name),
-                            fordel = it.fordel,
-                            beskrivelse = it.beskrivelse
-                        )
-
+                        it.lagreInntekter(this, skjæringstidspunkt, meldingsreferanseId)
                     }
                 }
             }
@@ -136,10 +164,6 @@ class ArbeidsgiverInntekt(
             NÆRINGSINNTEKT,
             PENSJON_ELLER_TRYGD,
             YTELSE_FRA_OFFENTLIGE
-        }
-
-        enum class Inntektsgrunnlag {
-            SAMMENLIGNINGSGRUNNLAG, SYKEPENGEGRUNNLAG
         }
     }
 }

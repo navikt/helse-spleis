@@ -48,8 +48,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterUtbetalt(3.vedtaksperiode)
         håndterYtelser(4.vedtaksperiode)
         håndterVilkårsgrunnlag(4.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.april(2017) til 1.mars(2018) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }

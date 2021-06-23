@@ -48,7 +48,6 @@ internal class VilkårsgrunnlagTest {
     fun `verdiene fra vurderingen blir lagret i vedtaksperioden`() {
         val vilkårsgrunnlag = vilkårsgrunnlag(
                 inntektperioder {
-                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
                     1.januar(2017) til 1.desember(2017) inntekter {
                     orgnummer inntekt 37500.månedlig
                 }}
@@ -185,15 +184,8 @@ internal class VilkårsgrunnlagTest {
     }
 
     private fun vilkårsgrunnlag(
-        inntektsmåneder: List<Inntektsvurdering.ArbeidsgiverInntekt> = inntektperioder {
-            inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+        inntektsmåneder: List<ArbeidsgiverInntekt> = inntektperioder {
             1.januar(2017) til 1.desember(2017) inntekter {
-                orgnummer inntekt INNTEKT
-            }
-        },
-        inntektsmånederSykepengegrunnlag: List<Inntektsvurdering.ArbeidsgiverInntekt> = inntektperioder {
-            inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SYKEPENGEGRUNNLAG
-            1.oktober(2017) til 1.desember(2017) inntekter {
                 orgnummer inntekt INNTEKT
             }
         },
@@ -210,7 +202,6 @@ internal class VilkårsgrunnlagTest {
         fødselsnummer = UNG_PERSON_FNR_2018,
         orgnummer = orgnummer,
         inntektsvurdering = Inntektsvurdering(inntektsmåneder),
-        inntektsvurderingSykepengegrunnlag = Inntektsvurdering(inntektsmånederSykepengegrunnlag),
         opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
         medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja)
     )

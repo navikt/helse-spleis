@@ -60,9 +60,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-                inntekter = inntektperioder {
-                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
-                    1.januar(2017) til 1.desember(2017) inntekter {
+                inntekter = inntektperioderForSammenligningsgrunnlag{ 1.januar(2017) til 1.desember(2017) inntekter {
                         ORGNUMMER inntekt INNTEKT
                     }
                 })
@@ -99,9 +97,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
 
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-                inntekter = inntektperioder {
-                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
-                    1.januar(2017) til 1.desember(2017) inntekter {
+                inntekter = inntektperioderForSammenligningsgrunnlag{ 1.januar(2017) til 1.desember(2017) inntekter {
                         ORGNUMMER inntekt INNTEKT
                     }
                     1.desember(2017) til 1.desember(2017) inntekter {
@@ -222,8 +218,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
 
         val builder = InntektshistorikkBuilder(person)
         FinnInntektshistorikk(person, builder).also {
-            inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SYKEPENGEGRUNNLAG
+            inntektperioderForSykepengegrunnlag {
                 1.juli(2017) til 1.september(2017) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
@@ -272,9 +267,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
 
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-                inntekter = inntektperioder {
-                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
-                    1.januar(2017) til 1.desember(2017) inntekter {
+                inntekter = inntektperioderForSammenligningsgrunnlag{ 1.januar(2017) til 1.desember(2017) inntekter {
                         ORGNUMMER inntekt INNTEKT
                     }
                 })
@@ -293,9 +286,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(
             2.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-                inntekter = inntektperioder {
-                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
-
+                inntekter = inntektperioderForSammenligningsgrunnlag {
                     1.februar(2017) til 1.januar(2018) inntekter {
                         ORGNUMMER inntekt nyttSammenlingningsGrunnlag
                     }
@@ -337,8 +328,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         val builder = InntektshistorikkBuilder(person)
         FinnInntektshistorikk(person, builder).also {
-            inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SYKEPENGEGRUNNLAG
+            inntektperioderForSykepengegrunnlag {
                 1.april til 1.juni inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }

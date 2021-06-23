@@ -5,9 +5,8 @@ import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.testhelpers.desember
-import no.nav.helse.testhelpers.inntektperioder
+import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.oktober
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -84,9 +83,15 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
         aktørId = "aktørId",
         fødselsnummer = UNG_PERSON_FNR_2018,
         organisasjonsnummer = ORGNUMMER,
-        utbetalingId = UUID.fromString(inspektør.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning).kontekst()["utbetalingId"] ?: throw IllegalStateException("Finner ikke utbetalingId i: ${inspektør.sisteBehov(
-            Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning
-        ).kontekst()}")),
+        utbetalingId = UUID.fromString(
+            inspektør.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning).kontekst()["utbetalingId"] ?: throw IllegalStateException(
+                "Finner ikke utbetalingId i: ${
+                    inspektør.sisteBehov(
+                        Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning
+                    ).kontekst()
+                }"
+            )
+        ),
         vedtaksperiodeId = "${1.vedtaksperiode}",
         saksbehandler = "Ola Nordmann",
         saksbehandlerEpost = "ola@nordmann.ss",
@@ -207,16 +212,8 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = ORGNUMMER,
             inntektsvurdering = Inntektsvurdering(
-                inntektperioder {
-                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                inntektperioderForSammenligningsgrunnlag {
                     1.januar(2017) til 1.desember(2017) inntekter {
-                        ORGNUMMER inntekt 31000.månedlig
-                    }
-                }),
-            inntektsvurderingSykepengegrunnlag = Inntektsvurdering(
-                inntektperioder {
-                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SYKEPENGEGRUNNLAG
-                    1.oktober(2017) til 1.desember(2017) inntekter {
                         ORGNUMMER inntekt 31000.månedlig
                     }
                 }),

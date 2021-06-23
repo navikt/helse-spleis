@@ -2,7 +2,6 @@ package no.nav.helse.person
 
 import no.nav.helse.etterspurtBehov
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.Inntektsvurdering.ArbeidsgiverInntekt
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
@@ -22,7 +21,7 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
 
     @Test
     fun `ingen inntekt`() {
-        håndterVilkårsgrunnlag(inntekter = emptyList(), arbeidsforhold = ansattSidenStart2017(), inntekterSykepengegrunnlag = emptyList())
+        håndterVilkårsgrunnlag(inntekter = emptyList(), arbeidsforhold = ansattSidenStart2017())
         assertTrue(person.aktivitetslogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TIL_INFOTRYGD, inspektør.sisteTilstand(1.vedtaksperiode))
@@ -33,7 +32,6 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
     fun `avvik i inntekt`() {
         håndterVilkårsgrunnlag(
             inntekter = tolvMånederMedInntekt(799.månedlig),
-            inntekterSykepengegrunnlag = treMånederMedInntektSykepengegrunnlag(799.månedlig),
             arbeidsforhold = ansattSidenStart2017()
         )
 
@@ -46,7 +44,6 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
     fun `latterlig avvik i inntekt`() {
         håndterVilkårsgrunnlag(
             inntekter = tolvMånederMedInntekt(1.månedlig),
-            inntekterSykepengegrunnlag = treMånederMedInntektSykepengegrunnlag(1.månedlig),
             arbeidsforhold = ansattSidenStart2017()
         )
 
@@ -58,19 +55,12 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
     @Test
     fun `9 måneder med inntekt gir riktig sammenligningsgrunnlag`() {
         håndterVilkårsgrunnlag(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2017) til 1.april(2017) inntekter {
                     ORGNUMMER inntekt 12000.månedlig
                 }
                 1.mai(2017) til 1.september(2017) inntekter {
                     ORGNUMMER inntekt 20000.månedlig
-                }
-            },
-            inntekterSykepengegrunnlag = inntektperioder { // TODO:
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SYKEPENGEGRUNNLAG
-                1.januar(2017) til 1.april(2017) inntekter {
-                    ORGNUMMER inntekt 12000.månedlig
                 }
             },
             arbeidsforhold = ansattSidenStart2017()
@@ -87,7 +77,6 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
             beregnetInntekt = månedslønn,
             inntekter = tolvMånederMedInntekt(månedslønn),
             arbeidsforhold = ansattSidenStart2017(),
-            inntekterSykepengegrunnlag = treMånederMedInntektSykepengegrunnlag(månedslønn)
         )
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
@@ -130,7 +119,6 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
             beregnetInntekt = `mer enn 25 prosent`,
             inntekter = tolvMånederMedInntekt(månedslønn),
             arbeidsforhold = ansattSidenStart2017(),
-            inntekterSykepengegrunnlag = treMånederMedInntektSykepengegrunnlag(månedslønn)
         )
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
@@ -146,7 +134,6 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
             beregnetInntekt = `mindre enn 25 prosent`,
             inntekter = tolvMånederMedInntekt(månedslønn),
             arbeidsforhold = ansattSidenStart2017(),
-            inntekterSykepengegrunnlag = treMånederMedInntektSykepengegrunnlag(månedslønn)
         )
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
@@ -158,16 +145,8 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
         listOf(Opptjeningvurdering.Arbeidsforhold(ORGNUMMER, 1.januar(2017)))
 
 
-    private fun tolvMånederMedInntekt(beregnetInntekt: Inntekt) = inntektperioder {
-        inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+    private fun tolvMånederMedInntekt(beregnetInntekt: Inntekt) = inntektperioderForSammenligningsgrunnlag {
         1.januar(2017) til 1.desember(2017) inntekter {
-            ORGNUMMER inntekt beregnetInntekt
-        }
-    }
-
-    private fun treMånederMedInntektSykepengegrunnlag(beregnetInntekt: Inntekt) = inntektperioder {
-        inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SYKEPENGEGRUNNLAG
-        1.oktober(2017) til 1.desember(2017) inntekter {
             ORGNUMMER inntekt beregnetInntekt
         }
     }
@@ -175,14 +154,13 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
     private fun håndterVilkårsgrunnlag(
         beregnetInntekt: Inntekt = 1000.månedlig,
         inntekter: List<ArbeidsgiverInntekt>,
-        inntekterSykepengegrunnlag: List<ArbeidsgiverInntekt>,
         arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold>
     ) {
         person.håndter(sykmelding())
         person.håndter(søknad())
         person.håndter(inntektsmelding(beregnetInntekt = beregnetInntekt))
         person.håndter(ytelser())
-        person.håndter(vilkårsgrunnlag(inntekter = inntekter, inntekterSykepengegrunnlag = inntekterSykepengegrunnlag, arbeidsforhold = arbeidsforhold))
+        person.håndter(vilkårsgrunnlag(inntekter = inntekter, arbeidsforhold = arbeidsforhold))
     }
 
     private fun sykmelding(
@@ -238,7 +216,6 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
 
     private fun vilkårsgrunnlag(
         inntekter: List<ArbeidsgiverInntekt>,
-        inntekterSykepengegrunnlag: List<ArbeidsgiverInntekt>,
         arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold>
     ) =
         Vilkårsgrunnlag(
@@ -248,7 +225,6 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = ORGNUMMER,
             inntektsvurdering = Inntektsvurdering(inntekter),
-            inntektsvurderingSykepengegrunnlag = Inntektsvurdering(inntekterSykepengegrunnlag),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             opptjeningvurdering = Opptjeningvurdering(arbeidsforhold)
         ).apply {

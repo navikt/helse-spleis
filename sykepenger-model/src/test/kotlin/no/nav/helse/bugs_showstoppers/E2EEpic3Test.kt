@@ -75,8 +75,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         )
         håndterYtelser(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2019) til 1.desember(2019) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
@@ -559,8 +558,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2019) til 1.desember(2019) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
@@ -615,8 +613,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         )
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.desember(2018) til 1.november(2019) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
@@ -688,8 +685,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         )
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2019) til 1.desember(2019) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
@@ -745,8 +741,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2019) til 1.desember(2019) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
@@ -786,8 +781,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         )
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2019) til 1.desember(2019) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
@@ -834,8 +828,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         )
         håndterYtelser(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(24))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2019) til 1.desember(2019) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
@@ -928,8 +921,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent), Ferie(3.januar(2020), 10.januar(2020)), sendtTilNav = 1.februar(2020))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2019) til 1.desember(2019) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
@@ -978,8 +970,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent), sendtTilNav = 1.februar(2020))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2019) til 1.desember(2019) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
@@ -1024,8 +1015,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
@@ -1060,8 +1050,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
@@ -1236,8 +1225,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             INNTEKT,
             arbeidsforhold = arbeidsforhold,
             inntektsvurdering = Inntektsvurdering(
-                inntekter = inntektperioder {
-                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                inntekter = inntektperioderForSammenligningsgrunnlag {
                     1.januar(2019) til 1.desember(2019) inntekter {
                         ORGNUMMER inntekt INNTEKT
                     }
@@ -1331,8 +1319,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             INNTEKT,
             arbeidsforhold = arbeidsforhold,
             inntektsvurdering = Inntektsvurdering(
-                inntekter = inntektperioder {
-                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                inntekter = inntektperioderForSammenligningsgrunnlag {
                     1.januar(2019) til 1.desember(2019) inntekter {
                         ORGNUMMER inntekt INNTEKT
                     }
@@ -1387,8 +1374,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             1.vedtaksperiode,
             lavInntekt,
             inntektsvurdering = Inntektsvurdering(
-                inntekter = inntektperioder {
-                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                inntekter = inntektperioderForSammenligningsgrunnlag {
                     1.januar(2017) til 1.desember(2017) inntekter {
                         ORGNUMMER inntekt lavInntekt
                     }
@@ -1433,8 +1419,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             2.vedtaksperiode,
             INNTEKT,
             inntektsvurdering = Inntektsvurdering(
-                inntekter = inntektperioder {
-                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                inntekter = inntektperioderForSammenligningsgrunnlag {
                     1.januar(2019) til 1.desember(2019) inntekter {
                         ORGNUMMER inntekt INNTEKT
                     }
@@ -1557,8 +1542,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             3.vedtaksperiode,
             INNTEKT,
             inntektsvurdering = Inntektsvurdering(
-                inntekter = inntektperioder {
-                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                inntekter = inntektperioderForSammenligningsgrunnlag {
                     1.januar(2019) til 1.desember(2019) inntekter {
                         ORGNUMMER inntekt INNTEKT
                     }
@@ -1615,8 +1599,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(15.mars(2020), 8.april(2020), 100.prosent))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.mars(2019) til 1.februar(2020) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
@@ -1722,8 +1705,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.juni, 30.juni, 100.prosent))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2017) til 1.mai(2018) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }

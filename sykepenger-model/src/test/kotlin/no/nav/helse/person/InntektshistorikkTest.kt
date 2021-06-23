@@ -66,8 +66,7 @@ internal class InntektshistorikkTest {
 
     @Test
     fun `intrikat test for sammenligningsgrunnlag der første fraværsdag er 31 desember`() {
-        inntektperioder {
-            inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+        inntektperioderForSammenligningsgrunnlag {
             1.desember(2016) til 1.desember(2016) inntekter {
                 ORGNUMMER inntekt 10000
             }
@@ -82,8 +81,7 @@ internal class InntektshistorikkTest {
                 ORGNUMMER inntekt 22000
             }
         }.forEach { it.lagreInntekter(historikk, 31.desember(2017), UUID.randomUUID()) }
-        inntektperioder {
-            inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SYKEPENGEGRUNNLAG
+        inntektperioderForSykepengegrunnlag {
             1.desember(2016) til 1.desember(2017) inntekter {
                 ORGNUMMER inntekt 15000
 
@@ -97,8 +95,7 @@ internal class InntektshistorikkTest {
 
     @Test
     fun `intrikat test for sammenligningsgrunnlag der første fraværsdag er 1 januar`() {
-        inntektperioder {
-            inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+        inntektperioderForSammenligningsgrunnlag {
             1.desember(2016) til 1.desember(2016) inntekter {
                 ORGNUMMER inntekt 10000
             }
@@ -113,8 +110,7 @@ internal class InntektshistorikkTest {
                 ORGNUMMER inntekt 22000
             }
         }.forEach { it.lagreInntekter(historikk, 1.januar, UUID.randomUUID()) }
-        inntektperioder {
-            inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SYKEPENGEGRUNNLAG
+        inntektperioderForSykepengegrunnlag {
             1.desember(2016) til 1.desember(2017) inntekter {
                 ORGNUMMER inntekt 15000
 
@@ -128,8 +124,7 @@ internal class InntektshistorikkTest {
 
     @Test
     fun `intrikat test for sykepengegrunnlag der første fraværsdag er 31 desember`() {
-        inntektperioder {
-            inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SYKEPENGEGRUNNLAG
+        inntektperioderForSykepengegrunnlag {
             1.desember(2016) til 1.desember(2016) inntekter {
                 ORGNUMMER inntekt 10000
             }
@@ -144,8 +139,7 @@ internal class InntektshistorikkTest {
                 ORGNUMMER inntekt 22000
             }
         }.forEach { it.lagreInntekter(historikk, 31.desember(2017), UUID.randomUUID()) }
-        inntektperioder {
-            inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+        inntektperioderForSammenligningsgrunnlag {
             1.desember(2016) til 1.desember(2017) inntekter {
                 ORGNUMMER inntekt 15000
 
@@ -159,8 +153,7 @@ internal class InntektshistorikkTest {
 
     @Test
     fun `intrikat test for sykepengegrunnlag der første fraværsdag er 1 januar`() {
-        inntektperioder {
-            inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SYKEPENGEGRUNNLAG
+        inntektperioderForSykepengegrunnlag {
             1.desember(2016) til 1.desember(2016) inntekter {
                 ORGNUMMER inntekt 10000
             }
@@ -175,8 +168,7 @@ internal class InntektshistorikkTest {
                 ORGNUMMER inntekt 22000
             }
         }.forEach { it.lagreInntekter(historikk, 1.januar, UUID.randomUUID()) }
-        inntektperioder {
-            inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+        inntektperioderForSammenligningsgrunnlag {
             1.desember(2016) til 1.desember(2017) inntekter {
                 ORGNUMMER inntekt 15000
 
@@ -190,7 +182,7 @@ internal class InntektshistorikkTest {
 
     @Test
     fun `Inntekt fra skatt siste tre måneder brukes til å beregne sykepengegrunnlaget`() {
-        inntektperioder {
+        inntektperioderForSykepengegrunnlag {
             1.desember(2016) til 1.desember(2017) inntekter {
                 ORGNUMMER inntekt INNTEKT
             }
@@ -205,12 +197,12 @@ internal class InntektshistorikkTest {
 
     @Test
     fun `Inntekter med forskjellig dato konflikterer ikke`() {
-        inntektperioder {
+        inntektperioderForSykepengegrunnlag {
             1.desember(2016) til 1.desember(2017) inntekter {
                 ORGNUMMER inntekt INNTEKT
             }
         }.forEach { it.lagreInntekter(historikk, 1.januar(2018), UUID.randomUUID()) }
-        inntektperioder {
+        inntektperioderForSykepengegrunnlag {
             1.desember(2016) til 1.august(2017) inntekter {
                 ORGNUMMER inntekt INNTEKT
             }
@@ -224,13 +216,13 @@ internal class InntektshistorikkTest {
 
     @Test
     fun `Senere inntekter for samme dato overskriver eksisterende inntekter`() {
-        inntektperioder {
+        inntektperioderForSykepengegrunnlag {
             1.desember(2016) til 1.desember(2017) inntekter {
                 ORGNUMMER inntekt INNTEKT
             }
         }.forEach { it.lagreInntekter(historikk, 1.januar(2018), UUID.randomUUID()) }
         Thread.sleep(10) // Nødvendig for konsistent resultat på windows
-        inntektperioder {
+        inntektperioderForSykepengegrunnlag {
             1.desember(2016) til 1.august(2017) inntekter {
                 ORGNUMMER inntekt INNTEKT
             }
@@ -245,7 +237,7 @@ internal class InntektshistorikkTest {
     fun `Inntekt fra skatt skal bare brukes en gang`() {
         repeat(3) { _ ->
             val meldingsreferanseId = UUID.randomUUID()
-            inntektperioder {
+            inntektperioderForSykepengegrunnlag {
                 (1.desember(2016) til 1.desember(2017)) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
@@ -267,8 +259,7 @@ internal class InntektshistorikkTest {
     fun `Inntekt fra skatt skal bare brukes én gang i beregning av sammenligningsgrunnlag`() {
         repeat(3) { _ ->
             val meldingsreferanseId = UUID.randomUUID()
-            inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntektperioderForSammenligningsgrunnlag {
                 1.desember(2016) til 1.desember(2017) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
@@ -397,8 +388,7 @@ internal class InntektshistorikkTest {
 
     @Test
     fun `Kopierer ikke skatteopplysninger`() {
-        inntektperioder {
-            inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SYKEPENGEGRUNNLAG
+        inntektperioderForSykepengegrunnlag {
             1.oktober(2017) til 1.desember(2017) inntekter {
                 ORGNUMMER inntekt INNTEKT
             }
