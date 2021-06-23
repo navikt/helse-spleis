@@ -20,6 +20,7 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.serde.api.HendelseDTO
 import no.nav.helse.serde.api.serializePersonForSpeil
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.testhelpers.desember
@@ -47,7 +48,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         val MÅNEDLIG_INNTEKT = INNTEKT.reflection { _, månedlig, _, _ -> månedlig.toInt() }
     }
 
-    fun speilApi() = serializePersonForSpeil(person)
+    fun speilApi(hendelser: List<HendelseDTO> = emptyList()) = serializePersonForSpeil(person, hendelser)
     protected lateinit var hendelselogg: IAktivitetslogg
     protected var forventetEndringTeller = 0
     private val sykmeldinger = mutableMapOf<UUID, Array<out Sykmeldingsperiode>>()
@@ -503,7 +504,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         ).håndter(Person::håndter)
     }
 
-    protected fun håndterOverstyring(overstyringsdager: List<ManuellOverskrivingDag>) {
+    protected fun håndterOverstyring(overstyringsdager: List<ManuellOverskrivingDag> = listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag, 100))) {
         OverstyrTidslinje(
             meldingsreferanseId = UUID.randomUUID(),
             fødselsnummer = UNG_PERSON_FNR_2018,
@@ -909,12 +910,12 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         grad: Prosentdel,
         førsteFraværsdag: LocalDate
     ): UUID {
-        val id = tilSimulert(fom, tom, grad, førsteFraværsdag)
+        val id = tilGodkjenning(fom, tom, grad, førsteFraværsdag)
         håndterUtbetalingsgodkjenning(id, true)
         return id
     }
 
-    protected fun tilSimulert(
+    protected fun tilGodkjenning(
         fom: LocalDate,
         tom: LocalDate,
         grad: Prosentdel,
