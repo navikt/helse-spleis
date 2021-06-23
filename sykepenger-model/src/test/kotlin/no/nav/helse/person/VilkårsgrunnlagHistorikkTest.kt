@@ -26,7 +26,6 @@ internal class VilkårsgrunnlagHistorikkTest {
             fødselsnummer = "20043769969",
             orgnummer = "ORGNUMMER",
             inntektsvurdering = Inntektsvurdering(emptyList()),
-            inntektsvurderingSykepengegrunnlag = Inntektsvurdering(emptyList()),
             opptjeningvurdering = Opptjeningvurdering(listOf(Opptjeningvurdering.Arbeidsforhold("123456789", 1.desember(2017)))),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja)
         )
@@ -46,7 +45,6 @@ internal class VilkårsgrunnlagHistorikkTest {
             fødselsnummer = "20043769969",
             orgnummer = "ORGNUMMER",
             inntektsvurdering = Inntektsvurdering(emptyList()),
-            inntektsvurderingSykepengegrunnlag = Inntektsvurdering(emptyList()),
             opptjeningvurdering = Opptjeningvurdering(listOf(Opptjeningvurdering.Arbeidsforhold("123456789", 1.desember(2017)))),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei)
         )
@@ -142,7 +140,6 @@ internal class VilkårsgrunnlagHistorikkTest {
             fødselsnummer = "20043769969",
             orgnummer = "ORGNUMMER",
             inntektsvurdering = Inntektsvurdering(emptyList()),
-            inntektsvurderingSykepengegrunnlag = Inntektsvurdering(emptyList()),
             opptjeningvurdering = Opptjeningvurdering(listOf(Opptjeningvurdering.Arbeidsforhold("123456789", 1.desember(2017)))),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei)
         )
@@ -154,7 +151,6 @@ internal class VilkårsgrunnlagHistorikkTest {
             fødselsnummer = "20043769969",
             orgnummer = "ORGNUMMER",
             inntektsvurdering = Inntektsvurdering(emptyList()),
-            inntektsvurderingSykepengegrunnlag = Inntektsvurdering(emptyList()),
             opptjeningvurdering = Opptjeningvurdering(listOf(Opptjeningvurdering.Arbeidsforhold("123456789", 1.desember(2017)))),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja)
         )
@@ -176,7 +172,6 @@ internal class VilkårsgrunnlagHistorikkTest {
             fødselsnummer = "20043769969",
             orgnummer = "ORGNUMMER",
             inntektsvurdering = Inntektsvurdering(emptyList()),
-            inntektsvurderingSykepengegrunnlag = Inntektsvurdering(emptyList()),
             opptjeningvurdering = Opptjeningvurdering(listOf(Opptjeningvurdering.Arbeidsforhold("123456789", 1.desember(2017)))),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei)
         )
@@ -188,7 +183,6 @@ internal class VilkårsgrunnlagHistorikkTest {
             fødselsnummer = "20043769969",
             orgnummer = "ORGNUMMER",
             inntektsvurdering = Inntektsvurdering(emptyList()),
-            inntektsvurderingSykepengegrunnlag = Inntektsvurdering(emptyList()),
             opptjeningvurdering = Opptjeningvurdering(listOf(Opptjeningvurdering.Arbeidsforhold("123456789", 1.desember(2017)))),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja)
         )

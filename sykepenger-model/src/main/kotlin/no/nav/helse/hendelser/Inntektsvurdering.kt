@@ -1,21 +1,17 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.hendelser.Inntektsvurdering.ArbeidsgiverInntekt.MånedligInntekt.Companion.nylig
+import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.antallMåneder
+import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.kilder
 import no.nav.helse.person.IAktivitetslogg
-import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Periodetype.FORLENGELSE
 import no.nav.helse.person.Periodetype.INFOTRYGDFORLENGELSE
 import no.nav.helse.person.Person
+import no.nav.helse.person.PersonHendelse
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Inntekt.Companion.summer
-import no.nav.helse.økonomi.Inntekt.Companion.årligGjennomsnitt
 import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Prosent.Companion.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT
 import java.time.LocalDate
-import java.time.YearMonth
-import java.time.temporal.ChronoUnit
-import java.util.*
 
 class Inntektsvurdering(
     private val inntekter: List<ArbeidsgiverInntekt>
@@ -31,7 +27,7 @@ class Inntektsvurdering(
         sammenligningsgrunnlag: Inntekt,
         periodetype: Periodetype,
         antallArbeidsgivereMedOverlappendeVedtaksperioder: Int
-    ): Boolean  {
+    ): Boolean {
 
         if (inntekter.antallMåneder() > 12) aktivitetslogg.error("Forventer 12 eller færre inntektsmåneder")
         if (inntekter.kilder(3) > antallArbeidsgivereMedOverlappendeVedtaksperioder) {
@@ -55,8 +51,7 @@ class Inntektsvurdering(
                     MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT.prosent()
                 )
                 return false
-            }
-            else aktivitetslogg.info(
+            } else aktivitetslogg.info(
                 "Har %.0f %% eller mindre avvik i inntekt (%.2f %%)",
                 MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT.prosent(),
                 avvik.prosent()
@@ -65,139 +60,6 @@ class Inntektsvurdering(
         return true
     }
 
-    internal fun lagreInntekter(person: Person, skjæringstidspunkt: LocalDate, vilkårsgrunnlag: Vilkårsgrunnlag) =
-        ArbeidsgiverInntekt.lagreInntekter(inntekter, person, skjæringstidspunkt, vilkårsgrunnlag)
-
-    class ArbeidsgiverInntekt(
-        private val arbeidsgiver: String,
-        private val inntekter: List<MånedligInntekt>
-    ) {
-        internal fun lagreInntekter(
-            inntektshistorikk: Inntektshistorikk,
-            skjæringstidspunkt: LocalDate,
-            meldingsreferanseId: UUID
-        ) {
-            MånedligInntekt.lagreInntekter(inntekter, inntektshistorikk, skjæringstidspunkt, meldingsreferanseId)
-        }
-
-        private fun harInntekter() = inntekter.isNotEmpty()
-
-        companion object {
-            fun lagreInntekter(
-                inntekter: List<ArbeidsgiverInntekt>,
-                person: Person,
-                skjæringstidspunkt: LocalDate,
-                vilkårsgrunnlag: Vilkårsgrunnlag
-            ) {
-                inntekter.forEach { person.lagreInntekter(it.arbeidsgiver, it, skjæringstidspunkt, vilkårsgrunnlag) }
-            }
-
-            internal fun kilder(inntekter: List<ArbeidsgiverInntekt>, antallMåneder: Int) =
-                inntekter
-                    .map {
-                        ArbeidsgiverInntekt(
-                            it.arbeidsgiver,
-                            it.inntekter.nylig(månedFørSlutt(inntekter, antallMåneder))
-                        )
-                    }
-                    .filter { it.harInntekter() }
-                    .size
-
-            private fun månedFørSlutt(inntekter: List<ArbeidsgiverInntekt>, antallMåneder: Int) =
-                MånedligInntekt.månedFørSlutt(inntekter.flatMap { it.inntekter }, antallMåneder)
-
-            internal fun antallMåneder(inntekter: List<ArbeidsgiverInntekt>) =
-                MånedligInntekt.antallMåneder(inntekter.flatMap { it.inntekter })
-
-            internal fun årligGjennomsnitt(inntekter: List<ArbeidsgiverInntekt>) =
-                MånedligInntekt.årligGjennomsnitt(inntekter.flatMap { it.inntekter })
-        }
-
-        class MånedligInntekt(
-            private val yearMonth: YearMonth,
-            private val inntekt: Inntekt,
-            private val type: Inntekttype,
-            private val inntektsgrunnlag: Inntektsgrunnlag,
-            private val fordel: String,
-            private val beskrivelse: String
-        ) {
-
-            companion object {
-                internal fun List<MånedligInntekt>.nylig(månedFørSlutt: YearMonth?): List<MånedligInntekt> {
-                    return månedFørSlutt
-                        ?.let { førsteMåned -> this@nylig.filter { it.yearMonth >= førsteMåned } }
-                        ?: emptyList()
-                }
-
-                internal fun månedFørSlutt(inntekter: List<MånedligInntekt>, antallMåneder: Int) =
-                    inntekter.maxOfOrNull { it.yearMonth }?.minusMonths(antallMåneder.toLong() - 1)
-
-                internal fun årligGjennomsnitt(inntekter: List<MånedligInntekt>): Inntekt =
-                    inntekter
-                        .groupBy { it.yearMonth }
-                        .map { (_, månedsinntekter) -> summer(månedsinntekter) }
-                        .årligGjennomsnitt()
-
-                private fun summer(inntekter: List<MånedligInntekt>) = inntekter.map { it.inntekt }.summer()
-
-                internal fun antallMåneder(inntekter: List<MånedligInntekt>): Long {
-                    if (inntekter.isEmpty()) return 0
-                    return ChronoUnit.MONTHS.between(inntekter.maxMonth(), inntekter.minMonth())
-                }
-
-                private fun List<MånedligInntekt>.minMonth() = minOfOrNull { it.yearMonth }
-                private fun List<MånedligInntekt>.maxMonth() = maxOfOrNull { it.yearMonth }
-
-                internal fun lagreInntekter(
-                    inntekter: List<MånedligInntekt>,
-                    inntektshistorikk: Inntektshistorikk,
-                    skjæringstidspunkt: LocalDate,
-                    meldingsreferanseId: UUID
-                ) {
-                    inntektshistorikk {
-                        inntekter.forEach {
-                            when (it.inntektsgrunnlag) {
-                                Inntektsgrunnlag.SYKEPENGEGRUNNLAG -> addSkattSykepengegrunnlag(
-                                    dato = skjæringstidspunkt,
-                                    hendelseId = meldingsreferanseId,
-                                    beløp = it.inntekt,
-                                    måned = it.yearMonth,
-                                    type = enumValueOf(it.type.name),
-                                    fordel = it.fordel,
-                                    beskrivelse = it.beskrivelse
-                                )
-                                Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG ->
-                                    addSkattSammenligningsgrunnlag(
-                                        dato = skjæringstidspunkt,
-                                        hendelseId = meldingsreferanseId,
-                                        beløp = it.inntekt,
-                                        måned = it.yearMonth,
-                                        type = enumValueOf(it.type.name),
-                                        fordel = it.fordel,
-                                        beskrivelse = it.beskrivelse
-                                    )
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    enum class Inntekttype {
-        LØNNSINNTEKT,
-        NÆRINGSINNTEKT,
-        PENSJON_ELLER_TRYGD,
-        YTELSE_FRA_OFFENTLIGE
-    }
-
-    enum class Inntektsgrunnlag {
-        SAMMENLIGNINGSGRUNNLAG, SYKEPENGEGRUNNLAG
-    }
-
-    private fun List<ArbeidsgiverInntekt>.kilder(antallMåneder: Int) =
-        ArbeidsgiverInntekt.kilder(this, antallMåneder)
-
-    private fun List<ArbeidsgiverInntekt>.årligGjennomsnitt() = ArbeidsgiverInntekt.årligGjennomsnitt(this)
-    private fun List<ArbeidsgiverInntekt>.antallMåneder() = ArbeidsgiverInntekt.antallMåneder(this)
+    internal fun lagreInntekter(person: Person, skjæringstidspunkt: LocalDate, hendelse: PersonHendelse) =
+        ArbeidsgiverInntekt.lagreInntekter(inntekter, person, skjæringstidspunkt, hendelse)
 }

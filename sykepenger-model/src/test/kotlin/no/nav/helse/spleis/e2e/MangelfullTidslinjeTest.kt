@@ -19,7 +19,7 @@ internal class MangelfullTidslinjeTest : AbstractEndToEndTest() {
 
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_HISTORIKK, TIL_INFOTRYGD
+            AVVENTER_UTBETALINGSGRUNNLAG, AVVENTER_HISTORIKK, TIL_INFOTRYGD
         )
     }
 }

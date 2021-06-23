@@ -1,19 +1,17 @@
 package no.nav.helse.testhelpers
 
-import no.nav.helse.hendelser.Inntektsvurdering
-import no.nav.helse.hendelser.Inntektsvurdering.ArbeidsgiverInntekt
-import no.nav.helse.hendelser.Inntektsvurdering.Inntektsgrunnlag.SYKEPENGEGRUNNLAG
-import no.nav.helse.hendelser.Inntektsvurdering.Inntekttype.LØNNSINNTEKT
+import no.nav.helse.hendelser.ArbeidsgiverInntekt
+import no.nav.helse.hendelser.InntektCreator
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import java.time.YearMonth
 
-internal fun inntektperioder(block: Inntektperioder.() -> Unit) = Inntektperioder(block).inntekter()
+internal fun inntektperioderForSammenligningsgrunnlag(block: Inntektperioder.() -> Unit) = Inntektperioder(ArbeidsgiverInntekt.MånedligInntekt::Sammenligningsgrunnlag, block).inntekter()
+internal fun inntektperioderForSykepengegrunnlag(block: Inntektperioder.() -> Unit) = Inntektperioder(ArbeidsgiverInntekt.MånedligInntekt::Sykepengegrunnlag, block).inntekter()
 
-internal class Inntektperioder(block: Inntektperioder.() -> Unit) {
+internal class Inntektperioder(private val inntektCreator: InntektCreator, block: Inntektperioder.() -> Unit) {
     private val liste = mutableListOf<Pair<String, List<ArbeidsgiverInntekt.MånedligInntekt>>>()
-    internal var inntektsgrunnlag: Inntektsvurdering.Inntektsgrunnlag = SYKEPENGEGRUNNLAG
 
     init {
         block()
@@ -30,11 +28,10 @@ internal class Inntektperioder(block: Inntektperioder.() -> Unit) {
             .distinct()
             .flatMap { yearMonth ->
                 Inntekter(block).toList().groupBy({ (arbeidsgiver, _) -> arbeidsgiver }) { (_, inntekt) ->
-                    ArbeidsgiverInntekt.MånedligInntekt(
+                    inntektCreator(
                         yearMonth,
                         inntekt,
-                        LØNNSINNTEKT,
-                        inntektsgrunnlag,
+                        ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
                         "kontantytelse",
                         "fastloenn"
                     )

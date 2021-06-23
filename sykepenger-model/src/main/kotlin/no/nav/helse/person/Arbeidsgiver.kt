@@ -346,6 +346,12 @@ internal class Arbeidsgiver private constructor(
         finalize(vilkårsgrunnlag)
     }
 
+    internal fun håndter(utbetalingsgrunnlag: Utbetalingsgrunnlag) {
+        utbetalingsgrunnlag.kontekst(this)
+        håndter(utbetalingsgrunnlag, Vedtaksperiode::håndter)
+        finalize(utbetalingsgrunnlag)
+    }
+
     internal fun håndter(simulering: Simulering) {
         simulering.kontekst(this)
         håndter(simulering, Vedtaksperiode::håndter)
@@ -589,14 +595,14 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun lagreInntekter(
-        arbeidsgiverInntekt: Inntektsvurdering.ArbeidsgiverInntekt,
+        arbeidsgiverInntekt: ArbeidsgiverInntekt,
         skjæringstidspunkt: LocalDate,
-        vilkårsgrunnlag: Vilkårsgrunnlag
+        hendelse: PersonHendelse
     ) {
         arbeidsgiverInntekt.lagreInntekter(
             inntektshistorikk,
             skjæringstidspunkt,
-            vilkårsgrunnlag.meldingsreferanseId()
+            hendelse.meldingsreferanseId()
         )
     }
 

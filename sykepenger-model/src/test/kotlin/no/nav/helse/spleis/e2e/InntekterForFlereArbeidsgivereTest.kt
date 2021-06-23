@@ -2,8 +2,6 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.Inntektsvurdering.ArbeidsgiverInntekt
-import no.nav.helse.hendelser.Inntektsvurdering.Inntektsgrunnlag
 import no.nav.helse.person.Person
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -42,8 +40,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         vilkårsgrunnlag(
             a1.id(0),
             orgnummer = a1,
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2017) til 1.desember(2017) inntekter {
                     a1 inntekt 15000
                 }
@@ -81,8 +78,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             vilkårsgrunnlag(
                 a1.id(0),
                 orgnummer = a1,
-                inntekter = inntektperioder {
-                    inntektsgrunnlag = Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                inntekter = inntektperioderForSammenligningsgrunnlag {
                     1.januar(2017) til 1.desember(2017) inntekter {
                         a1 inntekt 15000
                     }
@@ -105,8 +101,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
     fun `Inntekter fra flere arbeidsgivere fra infotrygd`() {
         nyPeriode(1.januar til 31.januar, a1, 25000.månedlig)
 
-        vilkårsgrunnlag(a1.id(0), orgnummer = a1, inntekter = inntektperioder {
-            inntektsgrunnlag = Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+        vilkårsgrunnlag(a1.id(0), orgnummer = a1, inntekter = inntektperioderForSammenligningsgrunnlag {
             1.januar(2017) til 1.desember(2017) inntekter {
                 a1 inntekt 24000
             }
@@ -140,14 +135,11 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             vilkårsgrunnlag(
                 a1.id(0),
                 orgnummer = a1,
-                inntekter = inntektperioder {
-                    inntektsgrunnlag = Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                inntekter = inntektperioderForSammenligningsgrunnlag {
                     1.januar(2017) til 1.desember(2017) inntekter {
                         a1 inntekt 24000
                     }
-                },
-                inntekterSykepengegrunnlag = inntektperioder {
-                    inntektsgrunnlag = Inntektsgrunnlag.SYKEPENGEGRUNNLAG
+                } + inntektperioderForSykepengegrunnlag {
                     1.oktober(2017) til 1.desember(2017) inntekter {
                         a1 inntekt 15000
                     }
@@ -178,15 +170,12 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             vilkårsgrunnlag(
                 a1.id(0),
                 orgnummer = a1,
-                inntekter = inntektperioder {
-                    inntektsgrunnlag = Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                inntekter = inntektperioderForSammenligningsgrunnlag {
                     1.januar(2017) til 1.desember(2017) inntekter {
                         a1 inntekt 24000
                         a2 inntekt 20000
                     }
-                },
-                inntekterSykepengegrunnlag = inntektperioder {
-                    inntektsgrunnlag = Inntektsgrunnlag.SYKEPENGEGRUNNLAG
+                } + inntektperioderForSykepengegrunnlag {
                     1.oktober(2017) til 1.desember(2017) inntekter {
                         a1 inntekt 15000
                         a2 inntekt 21000
@@ -199,33 +188,25 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         }
     }
 
-    @Disabled
+    @Disabled("Sykepengegrunnlag is red like basilikum")
     @Test
-    fun `Skatteinntekter og inntektsmelding for en arbeidsgiver og kun skatt for andre arbeidsgiver(ansatt i mindre enn 2 mnd) - gir korrekt sykepenge- og sammenligningsgrunnlag`() {
+    fun `Skatteinntekter og inntektsmelding for en arbeidsgiver og kun skatt (i to måneder) for andre arbeidsgiver - gir korrekt sykepenge- og sammenligningsgrunnlag`() {
         Toggles.FlereArbeidsgivereUlikFom.enable {
             nyPeriode(1.januar til 31.januar, a1, 25000.månedlig)
             vilkårsgrunnlag(
                 a1.id(0),
-                arbeidsforhold = listOf(
-                    Opptjeningvurdering.Arbeidsforhold(a1, 1.januar(2017)),
-                    Opptjeningvurdering.Arbeidsforhold(a2, 1.november(2017))
-                ),
                 orgnummer = a1,
-                inntekter = inntektperioder {
-                    inntektsgrunnlag = Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                inntekter = inntektperioderForSammenligningsgrunnlag {
                     1.januar(2017) til 1.desember(2017) inntekter {
                         a1 inntekt 24000
-                    }
-                    1.november(2017) til 1.desember(2017) inntekter {
                         a2 inntekt 20000
                     }
-                },
-                inntekterSykepengegrunnlag = inntektperioder {
-                    inntektsgrunnlag = Inntektsgrunnlag.SYKEPENGEGRUNNLAG
-                    1.oktober(2017) til 1.desember(2017) inntekter {
+                } + inntektperioderForSykepengegrunnlag {
+                    1.oktober(2017) til 1.november(2017) inntekter {
                         a1 inntekt 15000
                     }
                     1.november(2017) til 1.desember(2017) inntekter {
+                        a1 inntekt 15000
                         a2 inntekt 21000
                     }
                 }
@@ -233,86 +214,6 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
 
             assertEquals(552000.årlig, person.sykepengegrunnlag(1.januar, 1.januar))
             assertEquals(528000.årlig, person.sammenligningsgrunnlag(1.januar))
-        }
-    }
-
-    @Disabled
-    @Test
-    fun `Skatteinntekter og inntektsmelding for en arbeidsgiver og kun skatt for andre arbeidsgiver(ansatt i mer enn 2 mnd, ingen inntekt) - gir korrekt sykepenge- og sammenligningsgrunnlag`() {
-        Toggles.FlereArbeidsgivereUlikFom.enable {
-            nyPeriode(1.januar til 31.januar, a1, 25000.månedlig)
-            vilkårsgrunnlag(
-                a1.id(0),
-                arbeidsforhold = listOf(
-                    Opptjeningvurdering.Arbeidsforhold(a1, 1.januar(2017)),
-                    Opptjeningvurdering.Arbeidsforhold(a2, 1.oktober(2017))
-                ),
-                orgnummer = a1,
-                inntekter = inntektperioder {
-                    inntektsgrunnlag = Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
-                    1.januar(2017) til 1.desember(2017) inntekter {
-                        a1 inntekt 24000
-                    }
-                    1.november(2017) til 1.desember(2017) inntekter {
-                        a2 inntekt 20000
-                    }
-                },
-                inntekterSykepengegrunnlag = inntektperioder {
-                    inntektsgrunnlag = Inntektsgrunnlag.SYKEPENGEGRUNNLAG
-                    1.oktober(2017) til 1.desember(2017) inntekter {
-                        a1 inntekt 15000
-                    }
-                    1.november(2017) til 1.desember(2017) inntekter {
-                        a2 inntekt 21000
-                    }
-                }
-            ).håndter(Person::håndter)
-
-            assertEquals(468000.årlig, person.sykepengegrunnlag(1.januar, 1.januar))
-            assertEquals(328000.årlig, person.sammenligningsgrunnlag(1.januar))
-        }
-    }
-
-    @Disabled
-    @Test
-    fun `Skatteinntekter og inntektsmelding for en arbeidsgiver og kun skatt for andre arbeidsgiver(ansatt i 2 og en halv mnd) - gir korrekt sykepenge- og sammenligningsgrunnlag`() {
-        Toggles.FlereArbeidsgivereUlikFom.enable {
-            nyPeriode(1.januar til 31.januar, a1, 25000.månedlig)
-            vilkårsgrunnlag(
-                a1.id(0),
-                arbeidsforhold = listOf(
-                    Opptjeningvurdering.Arbeidsforhold(a1, 1.januar(2017)),
-                    Opptjeningvurdering.Arbeidsforhold(a2, 1.oktober(2017))
-                ),
-                orgnummer = a1,
-                inntekter = inntektperioder {
-                    inntektsgrunnlag = Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
-                    1.januar(2017) til 1.desember(2017) inntekter {
-                        a1 inntekt 24000
-                    }
-                    15.oktober(2017) til 31.oktober(2017) inntekter {
-                        a2 inntekt 10000
-                    }
-                    1.oktober(2017) til 1.desember(2017) inntekter {
-                        a2 inntekt 20000
-                    }
-                },
-                inntekterSykepengegrunnlag = inntektperioder {
-                    inntektsgrunnlag = Inntektsgrunnlag.SYKEPENGEGRUNNLAG
-                    1.november(2017) til 1.desember(2017) inntekter {
-                        a1 inntekt 15000
-                    }
-                    15.oktober(2017) til 31.oktober(2017) inntekter {
-                        a2 inntekt 10000
-                    }
-                    1.oktober(2017) til 1.desember(2017) inntekter {
-                        a2 inntekt 21000
-                    }
-                }
-            ).håndter(Person::håndter)
-
-            assertEquals(TODO("CECILIE").årlig, person.sykepengegrunnlag(1.januar, 1.januar))
-            assertEquals(TODO("CECILIE").årlig, person.sammenligningsgrunnlag(1.januar))
         }
     }
 
@@ -348,13 +249,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold>? = null,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
         orgnummer: String = ORGNUMMER,
-        inntekter: List<ArbeidsgiverInntekt>,
-        inntekterSykepengegrunnlag: List<ArbeidsgiverInntekt> = inntektperioder {
-            inntektsgrunnlag = Inntektsgrunnlag.SYKEPENGEGRUNNLAG
-            1.oktober(2017) til 1.desember(2017) inntekter {
-                a1 inntekt 15000
-            }
-        }
+        inntekter: List<ArbeidsgiverInntekt>
 
     ): Vilkårsgrunnlag {
         return Vilkårsgrunnlag(
@@ -365,9 +260,6 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             orgnummer = orgnummer,
             inntektsvurdering = Inntektsvurdering(
                 inntekter = inntekter
-            ),
-            inntektsvurderingSykepengegrunnlag = Inntektsvurdering(
-                inntekter = inntekterSykepengegrunnlag
             ),
             medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
             opptjeningvurdering = Opptjeningvurdering(arbeidsforhold ?: listOf(

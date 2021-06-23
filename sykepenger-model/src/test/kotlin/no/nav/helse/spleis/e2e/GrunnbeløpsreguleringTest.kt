@@ -62,8 +62,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
     @Test
     fun `ignorerer flere arbeidsgivere uten utbetalinger`() {
         utbetaltVedtaksperiodeBegrensetAv6G(1, 10.juni(2020), 30.juni(2020), inntekter = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {
                     ORGNUMMER inntekt INNTEKT
                     ORGNUMMER_AG2 inntekt INNTEKT
@@ -118,8 +117,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
 
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, HØY_INNTEKT, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {
                     ORGNUMMER inntekt HØY_INNTEKT
                 }
@@ -280,8 +278,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
         arbeidsgiverperiode: List<Periode> = listOf(Periode(fom, fom.plusDays(15))),
         førsteFraværsdag: LocalDate = fom,
         inntekter: Inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntekter = inntektperioderForSammenligningsgrunnlag {
                 fom.minusYears(1) til fom.minusMonths(1) inntekter {
                     ORGNUMMER inntekt HØY_INNTEKT
                 }
@@ -313,8 +310,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
         )),
         førsteFraværsdag: LocalDate = fom,
         inntekter: Inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntekter = inntektperioderForSammenligningsgrunnlag {
                 fom.minusYears(1) til fom.minusMonths(1) inntekter {
                     ORGNUMMER inntekt HØY_INNTEKT
                 }
@@ -332,7 +328,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
     ) {
         håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent), sendtTilNav = tom)
-        håndterYtelser(vedtaksperiodeIndeks.vedtaksperiode) // No history
+        håndterYtelser(vedtaksperiodeIndeks.vedtaksperiode)
         håndterSimulering(vedtaksperiodeIndeks.vedtaksperiode)
         håndterUtbetalingsgodkjenning(vedtaksperiodeIndeks.vedtaksperiode, true)
         håndterUtbetalt(vedtaksperiodeIndeks.vedtaksperiode, AKSEPTERT)

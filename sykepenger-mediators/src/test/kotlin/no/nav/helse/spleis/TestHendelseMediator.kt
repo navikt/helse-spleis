@@ -29,6 +29,8 @@ internal class TestHendelseMediator : IHendelseMediator {
         private set
     internal var lestVilkårsgrunnlag = false
         private set
+    internal var lestUtbetalingsgrunnlag = false
+        private set
     internal var lestSimulering = false
         private set
     internal var lestUtbetalingsgodkjenning = false
@@ -59,6 +61,7 @@ internal class TestHendelseMediator : IHendelseMediator {
         lestUtbetalingshistorikk = false
         lestYtelser = false
         lestVilkårsgrunnlag = false
+        lestUtbetalingsgrunnlag = false
         lestSimulering = false
         lestUtbetalingsgodkjenning = false
         lestUtbetalingOverført = false
@@ -119,6 +122,10 @@ internal class TestHendelseMediator : IHendelseMediator {
 
     override fun behandle(message: VilkårsgrunnlagMessage, vilkårsgrunnlag: Vilkårsgrunnlag) {
         lestVilkårsgrunnlag = true
+    }
+
+    override fun behandle(message: UtbetalingsgrunnlagMessage, utbetalingsgrunnlag: Utbetalingsgrunnlag) {
+        lestUtbetalingshistorikk = true
     }
 
     override fun behandle(message: UtbetalingsgodkjenningMessage, utbetalingsgodkjenning: Utbetalingsgodkjenning) {

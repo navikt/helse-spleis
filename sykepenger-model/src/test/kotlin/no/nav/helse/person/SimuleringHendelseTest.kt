@@ -162,15 +162,8 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = ORGNUMMER,
-            inntektsvurdering = Inntektsvurdering(inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
                 1.januar(2017) til 1.desember(2017) inntekter {
-                    ORGNUMMER inntekt 31000.månedlig
-                }
-            }),
-            inntektsvurderingSykepengegrunnlag = Inntektsvurdering(inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SYKEPENGEGRUNNLAG
-                1.oktober(2017) til 1.desember(2017) inntekter {
                     ORGNUMMER inntekt 31000.månedlig
                 }
             }),

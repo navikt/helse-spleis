@@ -1088,8 +1088,7 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
             beregnetInntekt = 1000.månedlig
         ).also { (inntektsmelding, _) -> person.håndter(inntektsmelding) }
         person.håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
-        person.håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId, inntektsvurdering = Inntektsvurdering(inntektperioder {
-            inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+        person.håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId, inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
             1.januar(2017) til 1.desember(2017) inntekter {
                 orgnummer inntekt 1000.månedlig
             }
@@ -1165,8 +1164,7 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
         person.håndter(
             vilkårsgrunnlag(
                 vedtaksperiodeId = vedtaksperiodeId2,
-                inntektsvurdering = Inntektsvurdering(inntektperioder {
-                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
                     1.januar(2017) til 1.desember(2017) inntekter {
                         orgnummer inntekt 1000.månedlig
                         orgnummer2 inntekt 1000.månedlig
@@ -1251,8 +1249,7 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
         person.håndter(
             vilkårsgrunnlag(
                 vedtaksperiodeId = vedtaksperiodeId2,
-                inntektsvurdering = Inntektsvurdering(inntektperioder {
-                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
                     1.januar(2017) til 1.desember(2017) inntekter {
                         orgnummer inntekt 31000.månedlig
                         orgnummer2 inntekt 31000.månedlig
@@ -2132,16 +2129,9 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
         private fun vilkårsgrunnlag(
             vedtaksperiodeId: String,
             medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-            inntektsvurdering: Inntektsvurdering = Inntektsvurdering(inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntektsvurdering: Inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
                 1.januar(2017) til 1.desember(2017) inntekter {
                     orgnummer inntekt 31000.månedlig
-                }
-            }),
-            inntektsvurderingSykepengegrunnlag: Inntektsvurdering = Inntektsvurdering(inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SYKEPENGEGRUNNLAG
-                1.oktober(2017) til 1.desember(2017) inntekter {
-                    ORGNUMMER inntekt 31000.månedlig
                 }
             }),
             organisasjonsnummer: String = orgnummer
@@ -2152,7 +2142,6 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
             fødselsnummer = fnr,
             orgnummer = organisasjonsnummer,
             inntektsvurdering = inntektsvurdering,
-            inntektsvurderingSykepengegrunnlag = inntektsvurderingSykepengegrunnlag,
             opptjeningvurdering = Opptjeningvurdering(
                 listOf(
                     Opptjeningvurdering.Arbeidsforhold(
@@ -2170,19 +2159,12 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
             aktørId = aktørId,
             fødselsnummer = fnr,
             orgnummer = orgnummer,
-            inntektsvurdering = Inntektsvurdering(inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
                 1.januar(2017) til 1.desember(2017) inntekter {
                     orgnummer inntekt 31000.månedlig
                 }
                 1.januar(2017) til 1.januar(2017) inntekter {
                     orgnummer2 inntekt 1
-                }
-            }),
-            inntektsvurderingSykepengegrunnlag = Inntektsvurdering(inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SYKEPENGEGRUNNLAG
-                1.oktober(2017) til 1.desember(2017) inntekter {
-                    ORGNUMMER inntekt 31000.månedlig
                 }
             }),
             opptjeningvurdering = Opptjeningvurdering(

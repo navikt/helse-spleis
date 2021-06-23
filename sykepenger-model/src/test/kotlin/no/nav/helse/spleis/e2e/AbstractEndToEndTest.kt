@@ -24,9 +24,8 @@ import no.nav.helse.serde.api.HendelseDTO
 import no.nav.helse.serde.api.serializePersonForSpeil
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.testhelpers.desember
-import no.nav.helse.testhelpers.inntektperioder
+import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.oktober
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel
@@ -245,17 +244,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
         orgnummer: String = ORGNUMMER,
         inntektsvurdering: Inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2017) til 1.desember(2017) inntekter {
-                    orgnummer inntekt inntekt
-                }
-            }
-        ),
-        inntektsvurderingSykepengegrunnlag: Inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SYKEPENGEGRUNNLAG
-                1.oktober(2017) til 1.desember(2017) inntekter {
                     orgnummer inntekt inntekt
                 }
             }
@@ -265,7 +255,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             assertEtterspurt(Vilkårsgrunnlag::class, behovtype, vedtaksperiodeId, orgnummer)
 
         assertEtterspurt(InntekterForSammenligningsgrunnlag)
-        if(Toggles.FlereArbeidsgivereUlikFom.enabled) {
+        if (Toggles.FlereArbeidsgivereUlikFom.enabled) {
             assertEtterspurt(InntekterForSykepengegrunnlag)
         }
         assertEtterspurt(Medlemskap)
@@ -275,7 +265,6 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             medlemskapstatus,
             orgnummer,
             inntektsvurdering,
-            inntektsvurderingSykepengegrunnlag
         ).håndter(Person::håndter)
     }
 
@@ -694,7 +683,6 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
         orgnummer: String = ORGNUMMER,
         inntektsvurdering: Inntektsvurdering,
-        inntektsvurderingSykepengegrunnlag: Inntektsvurdering
     ): Vilkårsgrunnlag {
         return Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
@@ -703,7 +691,6 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = orgnummer,
             inntektsvurdering = inntektsvurdering,
-            inntektsvurderingSykepengegrunnlag = inntektsvurderingSykepengegrunnlag,
             medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
             opptjeningvurdering = Opptjeningvurdering(
                 if (arbeidsforhold.isEmpty()) listOf(
@@ -942,8 +929,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         håndterSøknadMedValidering(id, Søknad.Søknadsperiode.Sykdom(fom, tom, grad))
         håndterYtelser(id)
         håndterVilkårsgrunnlag(id, INNTEKT, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntekter = inntektperioderForSammenligningsgrunnlag {
                 fom.minusYears(1) til fom.minusMonths(1) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
@@ -958,7 +944,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         håndterSykmelding(Sykmeldingsperiode(fom, tom, grad))
         val id = observatør.sisteVedtaksperiode()
         håndterSøknadMedValidering(id, Søknad.Søknadsperiode.Sykdom(fom, tom, grad))
-        håndterYtelser(id)   // No history
+        håndterYtelser(id)
         håndterSimulering(id)
         håndterUtbetalingsgodkjenning(id, true)
         håndterUtbetalt(id, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT)

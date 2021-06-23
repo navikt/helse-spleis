@@ -3,7 +3,7 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.ArbeidsgiverVisitor
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.testhelpers.inntektperioder
+import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -104,8 +104,7 @@ internal class FeriepengeArbeidsgiverTest() : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(arbeidsgiverperiode), orgnummer = orgnummer)
         håndterYtelser(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
         håndterVilkårsgrunnlag(observatør.sisteVedtaksperiode(), inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntekter = inntektperioderForSammenligningsgrunnlag {
                 arbeidsgiverperiode.start.minusYears(1) til arbeidsgiverperiode.start.withDayOfMonth(1).minusMonths(1) inntekter {
                     orgnummer inntekt INNTEKT
                 }

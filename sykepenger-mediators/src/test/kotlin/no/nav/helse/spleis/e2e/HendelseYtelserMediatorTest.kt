@@ -20,6 +20,7 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
             0,
             "MOTTATT_SYKMELDING_FERDIG_GAP",
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVVENTER_UTBETALINGSGRUNNLAG",
             "AVVENTER_HISTORIKK",
             "TIL_INFOTRYGD"
         )
@@ -39,6 +40,7 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
             0,
             "MOTTATT_SYKMELDING_FERDIG_GAP",
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVVENTER_UTBETALINGSGRUNNLAG",
             "AVVENTER_HISTORIKK",
             "TIL_INFOTRYGD"
         )
@@ -55,6 +57,7 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
             0,
             "MOTTATT_SYKMELDING_FERDIG_GAP",
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVVENTER_UTBETALINGSGRUNNLAG",
             "AVVENTER_HISTORIKK",
             "TIL_INFOTRYGD"
         )
@@ -81,6 +84,7 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
             0,
             "MOTTATT_SYKMELDING_FERDIG_GAP",
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVVENTER_UTBETALINGSGRUNNLAG",
             "AVVENTER_HISTORIKK",
             "TIL_INFOTRYGD"
         )
@@ -122,6 +126,7 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
             0,
             "MOTTATT_SYKMELDING_FERDIG_GAP",
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVVENTER_UTBETALINGSGRUNNLAG",
             "AVVENTER_HISTORIKK",
             "TIL_INFOTRYGD"
         )
@@ -162,6 +167,7 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
             0,
             "MOTTATT_SYKMELDING_FERDIG_GAP",
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVVENTER_UTBETALINGSGRUNNLAG",
             "AVVENTER_HISTORIKK",
             "AVVENTER_SIMULERING"
         )
@@ -188,6 +194,7 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
             0,
             "MOTTATT_SYKMELDING_FERDIG_GAP",
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVVENTER_UTBETALINGSGRUNNLAG",
             "AVVENTER_HISTORIKK",
             "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",

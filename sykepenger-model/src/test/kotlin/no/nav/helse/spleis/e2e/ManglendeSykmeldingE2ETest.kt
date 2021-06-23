@@ -53,9 +53,11 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
     fun `overlapper med forkastet periode`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 2.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(3.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 2.januar, 100.prosent), andreInntektskilder = listOf(
-            Søknad.Inntektskilde(false, "SELVSTENDIG_NÆRINGSDRIVENDE") // <-- TIL_INFOTRYGD
-        ))
+        håndterSøknad(
+            Sykdom(1.januar, 2.januar, 100.prosent), andreInntektskilder = listOf(
+                Søknad.Inntektskilde(false, "SELVSTENDIG_NÆRINGSDRIVENDE") // <-- TIL_INFOTRYGD
+            )
+        )
         håndterSøknad(Sykdom(3.januar, 31.januar, 100.prosent))
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
         assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
@@ -98,12 +100,14 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
     fun `søknad etter forkastet med inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 2.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(8.februar, 28.februar, 100.prosent))
-        håndterSøknad(Sykdom(8.februar, 28.februar, 100.prosent), andreInntektskilder = listOf(
-            Søknad.Inntektskilde(false, "SELVSTENDIG_NÆRINGSDRIVENDE") // <-- TIL_INFOTRYGD
-        ))
+        håndterSøknad(
+            Sykdom(8.februar, 28.februar, 100.prosent), andreInntektskilder = listOf(
+                Søknad.Inntektskilde(false, "SELVSTENDIG_NÆRINGSDRIVENDE") // <-- TIL_INFOTRYGD
+            )
+        )
         håndterSøknad(Sykdom(8.februar, 28.februar, 100.prosent))
         håndterInntektsmelding(listOf(8.februar til 23.februar))
-        assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_HISTORIKK)
+        assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_UTBETALINGSGRUNNLAG, AVVENTER_HISTORIKK)
     }
 
     @Test
@@ -111,12 +115,14 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 2.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(8.februar, 13.februar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(14.februar, 28.februar, 100.prosent))
-        håndterSøknad(Sykdom(14.februar, 28.februar, 100.prosent), andreInntektskilder = listOf(
-            Søknad.Inntektskilde(false, "SELVSTENDIG_NÆRINGSDRIVENDE") // <-- TIL_INFOTRYGD
-        ))
+        håndterSøknad(
+            Sykdom(14.februar, 28.februar, 100.prosent), andreInntektskilder = listOf(
+                Søknad.Inntektskilde(false, "SELVSTENDIG_NÆRINGSDRIVENDE") // <-- TIL_INFOTRYGD
+            )
+        )
         håndterSøknad(Sykdom(14.februar, 28.februar, 100.prosent))
         håndterInntektsmelding(listOf(8.februar til 22.februar))
-        assertTilstander(4.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_HISTORIKK)
+        assertTilstander(4.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_UTBETALINGSGRUNNLAG, AVVENTER_HISTORIKK)
         assertEquals(14.februar til 28.februar, inspektør.periode(4.vedtaksperiode))
     }
 
@@ -125,12 +131,14 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 2.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(8.februar, 12.februar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(14.februar, 28.februar, 100.prosent))
-        håndterSøknad(Sykdom(14.februar, 28.februar, 100.prosent), andreInntektskilder = listOf(
-            Søknad.Inntektskilde(false, "SELVSTENDIG_NÆRINGSDRIVENDE") // <-- TIL_INFOTRYGD
-        ))
+        håndterSøknad(
+            Sykdom(14.februar, 28.februar, 100.prosent), andreInntektskilder = listOf(
+                Søknad.Inntektskilde(false, "SELVSTENDIG_NÆRINGSDRIVENDE") // <-- TIL_INFOTRYGD
+            )
+        )
         håndterSøknad(Sykdom(14.februar, 28.februar, 100.prosent))
         håndterInntektsmelding(listOf(8.februar til 12.februar, 14.februar til 23.februar), 14.februar)
-        assertTilstander(4.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_HISTORIKK)
+        assertTilstander(4.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_UTBETALINGSGRUNNLAG, AVVENTER_HISTORIKK)
         assertEquals(14.februar til 28.februar, inspektør.periode(4.vedtaksperiode))
     }
 
@@ -184,7 +192,7 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
         val inntektsmeldingId = håndterInntektsmelding(listOf(3.januar til 18.januar))
         håndterSøknad(Sykdom(3.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingReplay(inntektsmeldingId, 1.vedtaksperiode)
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_HISTORIKK)
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_UTBETALINGSGRUNNLAG, AVVENTER_HISTORIKK)
     }
 
     @Test
@@ -236,7 +244,7 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(18.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingReplay(inntektsmeldingId, 2.vedtaksperiode)
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_HISTORIKK)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_UTBETALINGSGRUNNLAG, AVVENTER_HISTORIKK)
     }
 
     @Test
@@ -329,7 +337,7 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
             )
         )
         håndterSøknad(Sykdom(11.januar, 31.januar, 100.prosent))
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_HISTORIKK)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_UTBETALINGSGRUNNLAG, AVVENTER_HISTORIKK)
     }
 
     @Test
@@ -443,7 +451,7 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(25.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(21.januar, 24.januar, 100.prosent))
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE)
-        assertTilstander(3.vedtaksperiode, START, AVVENTER_HISTORIKK)
+        assertTilstander(3.vedtaksperiode, START, AVVENTER_UTBETALINGSGRUNNLAG, AVVENTER_HISTORIKK)
     }
 
     @Test
@@ -453,7 +461,13 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(10.februar, 15.februar, 100.prosent))
         håndterSøknad(Sykdom(3.januar, 9.januar, 100.prosent))
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE)
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
+            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE
+        )
         assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
     }
 
@@ -464,7 +478,14 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(10.februar, 15.februar, 100.prosent))
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(3.januar, 9.januar, 100.prosent))
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE)
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
+            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
+            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE
+        )
         assertTilstander(3.vedtaksperiode, START, AVSLUTTET_UTEN_UTBETALING)
     }
 }

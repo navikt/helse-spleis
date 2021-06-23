@@ -50,8 +50,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
@@ -90,8 +89,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
@@ -146,8 +144,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
@@ -196,8 +193,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
@@ -225,8 +221,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
@@ -280,8 +275,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
@@ -334,8 +328,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
@@ -360,8 +353,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
@@ -401,8 +393,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
@@ -442,8 +433,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
@@ -474,8 +464,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
             håndterYtelser(1.vedtaksperiode)
             håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-                inntekter = inntektperioder {
-                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                inntekter = inntektperioderForSammenligningsgrunnlag {
                     1.juni(2019) til 1.mai(2020) inntekter {
                         ORGNUMMER inntekt INNTEKT
                     }
@@ -509,8 +498,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
             håndterYtelser(1.vedtaksperiode)
             håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-                inntekter = inntektperioder {
-                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                inntekter = inntektperioderForSammenligningsgrunnlag {
                     1.juni(2019) til 1.mai(2020) inntekter {
                         ORGNUMMER inntekt INNTEKT
                     }
@@ -551,8 +539,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             håndterInntektsmelding(listOf(6.juni(2020) til 7.juni(2020)))
             håndterYtelser(1.vedtaksperiode)
             håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-                inntekter = inntektperioder {
-                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                inntekter = inntektperioderForSammenligningsgrunnlag {
                     1.juni(2019) til 1.mai(2020) inntekter {
                         ORGNUMMER inntekt INNTEKT
                     }
@@ -576,8 +563,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
             håndterYtelser(1.vedtaksperiode)
             håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-                inntekter = inntektperioder {
-                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                inntekter = inntektperioderForSammenligningsgrunnlag {
                     1.juni(2019) til 1.mai(2020) inntekter {
                         ORGNUMMER inntekt INNTEKT
                     }
@@ -607,8 +593,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
@@ -639,8 +624,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
@@ -680,8 +664,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
@@ -718,8 +701,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
@@ -767,8 +749,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
             håndterYtelser(1.vedtaksperiode)
             håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-                inntekter = inntektperioder {
-                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                inntekter = inntektperioderForSammenligningsgrunnlag {
                     1.juni(2019) til 1.mai(2020) inntekter {
                         ORGNUMMER inntekt INNTEKT
                     }
@@ -814,8 +795,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }

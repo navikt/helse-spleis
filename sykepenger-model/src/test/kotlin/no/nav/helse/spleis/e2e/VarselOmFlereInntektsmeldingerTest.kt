@@ -1,8 +1,10 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.*
-import no.nav.helse.testhelpers.*
-import no.nav.helse.testhelpers.inntektperioder
+import no.nav.helse.testhelpers.april
+import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
+import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.mars
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Disabled
@@ -25,18 +27,19 @@ internal class VarselOmFlereInntektsmeldingerTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(6.april(2021), 16.april(2021), 50.prosent))
 
         håndterYtelser(3.vedtaksperiode)
-        håndterVilkårsgrunnlag(vedtaksperiodeId = 3.vedtaksperiode, inntekt = INNTEKT, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
-                1.januar(2020) til 1.april(2021) inntekter {
-                    ORGNUMMER inntekt INNTEKT
-                }
-            }))
+        håndterVilkårsgrunnlag(
+            vedtaksperiodeId = 3.vedtaksperiode, inntekt = INNTEKT, inntektsvurdering = Inntektsvurdering(
+                inntekter = inntektperioderForSammenligningsgrunnlag {
+                    1.januar(2020) til 1.april(2021) inntekter {
+                        ORGNUMMER inntekt INNTEKT
+                    }
+                })
+        )
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(17.april(2021), 30.april(2021), 20.prosent))
-        assertTrue(inspektør.personLogg.warn().none{ w ->
+        assertTrue(inspektør.personLogg.warn().none { w ->
             w.toString().contains("Mottatt flere inntektsmeldinger")
         })
     }

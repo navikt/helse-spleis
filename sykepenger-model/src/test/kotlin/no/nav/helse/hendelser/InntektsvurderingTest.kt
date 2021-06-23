@@ -1,10 +1,10 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.hendelser.Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Periodetype
 import no.nav.helse.testhelpers.desember
-import no.nav.helse.testhelpers.inntektperioder
+import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
+import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -29,8 +29,7 @@ internal class InntektsvurderingTest {
         assertFalse(
             validererOk(
                 inntektsvurdering(
-                    inntektperioder {
-                        inntektsgrunnlag = SAMMENLIGNINGSGRUNNLAG
+                    inntektperioderForSammenligningsgrunnlag {
                         LocalDate.now() til LocalDate.now() inntekter {
                             ORGNR inntekt INGEN
                         }
@@ -73,7 +72,7 @@ internal class InntektsvurderingTest {
     }
 
     private fun inntekter(periode: YearMonth, inntekt: Pair<String, Inntekt>) =
-        inntektperioder {
+        inntektperioderForSykepengegrunnlag {
             1.januar(2017) til 1.desember(2017) inntekter {
                 ORGNR inntekt INNTEKT
             }
@@ -82,7 +81,12 @@ internal class InntektsvurderingTest {
             }
         }
 
-    private fun validererOk(inntektsvurdering: Inntektsvurdering, grunnlagForSykepengegrunnlag: Inntekt, sammenligningsgrunnlag: Inntekt, antallArbeidsgivereMedOverlappendeVedtaksperioder: Int = 1): Boolean {
+    private fun validererOk(
+        inntektsvurdering: Inntektsvurdering,
+        grunnlagForSykepengegrunnlag: Inntekt,
+        sammenligningsgrunnlag: Inntekt,
+        antallArbeidsgivereMedOverlappendeVedtaksperioder: Int = 1
+    ): Boolean {
         aktivitetslogg = Aktivitetslogg()
         return inntektsvurdering.valider(
             aktivitetslogg,
@@ -95,7 +99,7 @@ internal class InntektsvurderingTest {
     }
 
     private fun inntektsvurdering(
-        inntektsmåneder: List<Inntektsvurdering.ArbeidsgiverInntekt> = inntektperioder {
+        inntektsmåneder: List<ArbeidsgiverInntekt> = inntektperioderForSykepengegrunnlag {
             1.januar(2017) til 1.desember(2017) inntekter {
                 ORGNR inntekt INNTEKT
             }

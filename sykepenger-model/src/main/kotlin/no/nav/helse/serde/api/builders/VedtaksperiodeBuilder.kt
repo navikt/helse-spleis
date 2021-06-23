@@ -242,6 +242,7 @@ internal class VedtaksperiodeBuilder(
             TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING,
             TilstandType.AVVENTER_HISTORIKK_REVURDERING,
             TilstandType.AVVENTER_REVURDERING,
+            TilstandType.AVVENTER_UTBETALINGSGRUNNLAG,
             TilstandType.AVVENTER_HISTORIKK -> TilstandstypeDTO.Venter
             TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
             TilstandType.AVVENTER_ARBEIDSGIVERE -> TilstandstypeDTO.VenterPåKiling
