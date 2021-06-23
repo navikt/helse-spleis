@@ -3,7 +3,8 @@ package no.nav.helse.hendelser
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Periodetype
 import no.nav.helse.testhelpers.desember
-import no.nav.helse.testhelpers.inntektperioder
+import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
+import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -28,7 +29,7 @@ internal class InntektsvurderingTest {
         assertFalse(
             validererOk(
                 inntektsvurdering(
-                    inntektperioder(ArbeidsgiverInntekt.MånedligInntekt::Sammenligningsgrunnlag) {
+                    inntektperioderForSammenligningsgrunnlag {
                         LocalDate.now() til LocalDate.now() inntekter {
                             ORGNR inntekt INGEN
                         }
@@ -71,7 +72,7 @@ internal class InntektsvurderingTest {
     }
 
     private fun inntekter(periode: YearMonth, inntekt: Pair<String, Inntekt>) =
-        inntektperioder {
+        inntektperioderForSykepengegrunnlag {
             1.januar(2017) til 1.desember(2017) inntekter {
                 ORGNR inntekt INNTEKT
             }
@@ -98,7 +99,7 @@ internal class InntektsvurderingTest {
     }
 
     private fun inntektsvurdering(
-        inntektsmåneder: List<ArbeidsgiverInntekt> = inntektperioder {
+        inntektsmåneder: List<ArbeidsgiverInntekt> = inntektperioderForSykepengegrunnlag {
             1.januar(2017) til 1.desember(2017) inntekter {
                 ORGNR inntekt INNTEKT
             }

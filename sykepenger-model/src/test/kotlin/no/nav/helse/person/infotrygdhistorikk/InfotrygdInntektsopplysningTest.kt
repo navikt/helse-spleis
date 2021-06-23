@@ -94,7 +94,7 @@ internal class InfotrygdInntektsopplysningTest {
 
     @Test
     fun `Bruker inntekt fra infotrygd fremfor inntekt fra skatt for å beregne sykepengegrunnlaget - skatt kommer først`() {
-        inntektperioder {
+        inntektperioderForSykepengegrunnlag {
             1.desember(2016) til 1.desember(2017) inntekter {
                 ORGNR inntekt INNTEKT
             }
@@ -120,7 +120,7 @@ internal class InfotrygdInntektsopplysningTest {
             historikk,
             UUID.randomUUID()
         )
-        inntektperioder {
+        inntektperioderForSykepengegrunnlag {
             1.desember(2016) til 1.desember(2017) inntekter {
                 ORGNR inntekt INNTEKT
             }

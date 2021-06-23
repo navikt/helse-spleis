@@ -23,7 +23,7 @@ import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.api.serializePersonForSpeil
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.testhelpers.desember
-import no.nav.helse.testhelpers.inntektperioder
+import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -243,7 +243,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
         orgnummer: String = ORGNUMMER,
         inntektsvurdering: Inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder(ArbeidsgiverInntekt.MånedligInntekt::Sammenligningsgrunnlag) {
+            inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2017) til 1.desember(2017) inntekter {
                     orgnummer inntekt inntekt
                 }
@@ -928,7 +928,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         håndterSøknadMedValidering(id, Søknad.Søknadsperiode.Sykdom(fom, tom, grad))
         håndterYtelser(id)
         håndterVilkårsgrunnlag(id, INNTEKT, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder(ArbeidsgiverInntekt.MånedligInntekt::Sammenligningsgrunnlag) {
+            inntekter = inntektperioderForSammenligningsgrunnlag {
                 fom.minusYears(1) til fom.minusMonths(1) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }

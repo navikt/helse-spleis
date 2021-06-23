@@ -47,7 +47,7 @@ internal class VilkårsgrunnlagTest {
     @Test
     fun `verdiene fra vurderingen blir lagret i vedtaksperioden`() {
         val vilkårsgrunnlag = vilkårsgrunnlag(
-                inntektperioder {
+                inntektperioderForSammenligningsgrunnlag {
                     1.januar(2017) til 1.desember(2017) inntekter {
                     orgnummer inntekt 37500.månedlig
                 }}
@@ -184,7 +184,7 @@ internal class VilkårsgrunnlagTest {
     }
 
     private fun vilkårsgrunnlag(
-        inntektsmåneder: List<ArbeidsgiverInntekt> = inntektperioder {
+        inntektsmåneder: List<ArbeidsgiverInntekt> = inntektperioderForSammenligningsgrunnlag {
             1.januar(2017) til 1.desember(2017) inntekter {
                 orgnummer inntekt INNTEKT
             }
