@@ -899,7 +899,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: Utbetalingsgrunnlag) {
-            hendelse.error("Forventet ikke utbetalingsgrunnlag i %s", type.name)
+            //hendelse.error("Forventet ikke utbetalingsgrunnlag i %s", type.name)
         }
 
         fun revurder(
