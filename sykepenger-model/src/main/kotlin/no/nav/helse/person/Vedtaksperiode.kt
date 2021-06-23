@@ -1609,9 +1609,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun trengerSkatteinntekter(hendelse: IAktivitetslogg) {
         val beregningSlutt = YearMonth.from(skjæringstidspunkt).minusMonths(1)
-        if (Toggles.FlereArbeidsgivereUlikFom.enabled) {
-            inntekterForSykepengegrunnlag(hendelse, beregningSlutt.minusMonths(2), beregningSlutt)
-        }
+        inntekterForSykepengegrunnlag(hendelse, beregningSlutt.minusMonths(2), beregningSlutt)
     }
 
     internal object AvventerHistorikk : Vedtaksperiodetilstand {
