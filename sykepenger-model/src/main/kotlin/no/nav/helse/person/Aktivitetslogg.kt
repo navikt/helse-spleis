@@ -294,7 +294,11 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                     aktivitetslogg.behov(Behovtype.Opptjening, "Trenger informasjon om sykepengeopptjening")
                 }
 
-                internal fun dagpenger(aktivitetslogg: IAktivitetslogg, fom: LocalDate, tom: LocalDate) {
+                internal fun arbeidsforhold(aktivitetslogg: IAktivitetslogg) {
+                    aktivitetslogg.behov(Behovtype.Arbeidsforhold, "Trenger informasjon om arbeidsforhold")
+                }
+
+                internal fun dagpenger(aktivitetslogg: IAktivitetslogg, fom : LocalDate, tom: LocalDate) {
                     aktivitetslogg.behov(
                         Behovtype.Dagpenger, "Trenger informasjon om dagpenger", mapOf(
                             "periodeFom" to fom.toString(),
@@ -409,7 +413,8 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                 Dagpenger,
                 Arbeidsavklaringspenger,
                 Medlemskap,
-                Dødsinfo
+                Dødsinfo,
+                Arbeidsforhold
             }
         }
 

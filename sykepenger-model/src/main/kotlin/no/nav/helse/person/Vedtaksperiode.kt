@@ -1601,15 +1601,24 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             hendelse.behov()
-            vedtaksperiode.trengerSkatteinntekter(hendelse)
+            vedtaksperiode.trengerUtbetalingsgrunnlag(hendelse)
             vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, utbetalingsgrunnlag: Utbetalingsgrunnlag) {
+            utbetalingsgrunnlag.lagreInntekter(vedtaksperiode.person, vedtaksperiode.skjæringstidspunkt)
         }
 
     }
 
-    private fun trengerSkatteinntekter(hendelse: IAktivitetslogg) {
+    private fun trengerUtbetalingsgrunnlag(hendelse: IAktivitetslogg) {
         val beregningSlutt = YearMonth.from(skjæringstidspunkt).minusMonths(1)
         inntekterForSykepengegrunnlag(hendelse, beregningSlutt.minusMonths(2), beregningSlutt)
+        arbeidsforhold(hendelse)
+    }
+
+    private fun arbeidsforhold(hendelse: IAktivitetslogg) {
+        hendelse.behov()
     }
 
     internal object AvventerHistorikk : Vedtaksperiodetilstand {
