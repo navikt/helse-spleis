@@ -295,7 +295,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                 }
 
                 internal fun arbeidsforhold(aktivitetslogg: IAktivitetslogg) {
-                    aktivitetslogg.behov(Behovtype.Arbeidsforhold, "Trenger informasjon om arbeidsforhold")
+                    aktivitetslogg.behov(Behovtype.ArbeidsforholdV2, "Trenger informasjon om arbeidsforhold")
                 }
 
                 internal fun dagpenger(aktivitetslogg: IAktivitetslogg, fom : LocalDate, tom: LocalDate) {
@@ -414,7 +414,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                 Arbeidsavklaringspenger,
                 Medlemskap,
                 Dødsinfo,
-                Arbeidsforhold
+                ArbeidsforholdV2
             }
         }
 

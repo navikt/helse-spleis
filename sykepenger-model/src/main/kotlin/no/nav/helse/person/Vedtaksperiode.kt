@@ -4,6 +4,7 @@ import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Validation.Companion.validation
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.arbeidsforhold
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.dagpenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.dødsinformasjon
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.foreldrepenger
@@ -1615,10 +1616,6 @@ internal class Vedtaksperiode private constructor(
         val beregningSlutt = YearMonth.from(skjæringstidspunkt).minusMonths(1)
         inntekterForSykepengegrunnlag(hendelse, beregningSlutt.minusMonths(2), beregningSlutt)
         arbeidsforhold(hendelse)
-    }
-
-    private fun arbeidsforhold(hendelse: IAktivitetslogg) {
-        hendelse.behov()
     }
 
     internal object AvventerHistorikk : Vedtaksperiodetilstand {
