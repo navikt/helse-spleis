@@ -447,6 +447,12 @@ internal class Vedtaksperiode private constructor(
         arbeidsgiver.finnSykeperiodeRettEtter(this)?.mottaVilkårsvurdering(grunnlagsdata)
     }
 
+    private fun trengerUtbetalingsgrunnlag(hendelse: IAktivitetslogg) {
+        val beregningSlutt = YearMonth.from(skjæringstidspunkt).minusMonths(1)
+        inntekterForSykepengegrunnlag(hendelse, beregningSlutt.minusMonths(2), beregningSlutt)
+        arbeidsforhold(hendelse)
+    }
+
     private fun trengerYtelser(hendelse: IAktivitetslogg) {
         person.trengerHistorikkFraInfotrygd(hendelse)
         foreldrepenger(hendelse)
@@ -1610,12 +1616,6 @@ internal class Vedtaksperiode private constructor(
             utbetalingsgrunnlag.lagreInntekter(vedtaksperiode.person, vedtaksperiode.skjæringstidspunkt)
         }
 
-    }
-
-    private fun trengerUtbetalingsgrunnlag(hendelse: IAktivitetslogg) {
-        val beregningSlutt = YearMonth.from(skjæringstidspunkt).minusMonths(1)
-        inntekterForSykepengegrunnlag(hendelse, beregningSlutt.minusMonths(2), beregningSlutt)
-        arbeidsforhold(hendelse)
     }
 
     internal object AvventerHistorikk : Vedtaksperiodetilstand {

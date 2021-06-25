@@ -2321,6 +2321,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             håndterInntektsmelding(listOf(1.mars til 16.mars), førsteFraværsdag = 1.mars, orgnummer = a1)
             håndterInntektsmelding(listOf(5.mars til 20.mars), førsteFraværsdag = 5.mars, orgnummer = a2, beregnetInntekt = INNTEKT)
 
+            håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1)
             håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
             håndterVilkårsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1)
             håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
@@ -2340,29 +2341,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     @Disabled
     @Test
     fun `To førstegangsbehandlinger med ulik fom - skal få warning om at saksbehandler må sjekke varig lønnsendring`() {
-        Toggles.FlereArbeidsgivereUlikFom.enable {
-            håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a1)
-            håndterSykmelding(Sykmeldingsperiode(5.mars, 31.mars, 100.prosent), orgnummer = a2)
-
-            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
-            håndterSøknad(Søknad.Søknadsperiode.Sykdom(5.mars, 31.mars, 100.prosent), orgnummer = a2)
-
-            håndterInntektsmelding(listOf(1.mars til 16.mars), førsteFraværsdag = 1.mars, orgnummer = a1)
-            håndterInntektsmelding(listOf(5.mars til 20.mars), førsteFraværsdag = 5.mars, orgnummer = a2, beregnetInntekt = INNTEKT)
-
-            håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
-            håndterVilkårsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1)
-            håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
-            håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), orgnummer = a1)
-            håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
-
-            håndterYtelser(1.vedtaksperiode(a2), inntektshistorikk = emptyList(), orgnummer = a2)
-            håndterVilkårsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
-
             // TODO: check warning
-
-        }
     }
 
     private fun assertTilstand(

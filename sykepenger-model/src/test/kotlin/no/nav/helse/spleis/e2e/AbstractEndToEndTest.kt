@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
@@ -36,6 +35,7 @@ import org.junit.jupiter.api.fail
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
+import java.time.YearMonth
 import java.util.*
 import kotlin.reflect.KClass
 
@@ -255,9 +255,6 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             assertEtterspurt(Vilkårsgrunnlag::class, behovtype, vedtaksperiodeId, orgnummer)
 
         assertEtterspurt(InntekterForSammenligningsgrunnlag)
-        if (Toggles.FlereArbeidsgivereUlikFom.enabled) {
-            assertEtterspurt(InntekterForSykepengegrunnlag)
-        }
         assertEtterspurt(Medlemskap)
         vilkårsgrunnlag(
             vedtaksperiodeId,
@@ -312,39 +309,32 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         ).håndter(Person::håndter)
     }
 
-    protected fun håndterYtelser(
-        vedtaksperiodeId: UUID = 1.vedtaksperiode,
-        vararg utbetalinger: Infotrygdperiode,
-        inntektshistorikk: List<Inntektsopplysning>? = null,
-        foreldrepenger: Periode? = null,
-        pleiepenger: List<Periode> = emptyList(),
-        omsorgspenger: List<Periode> = emptyList(),
-        opplæringspenger: List<Periode> = emptyList(),
-        institusjonsoppholdsperioder: List<Institusjonsoppholdsperiode> = emptyList(),
+    protected fun håndterUtbetalingsgrunnlag(
+        vedtaksperiodeId: UUID = UUID.randomUUID(),
         orgnummer: String = ORGNUMMER,
-        dødsdato: LocalDate? = null,
-        statslønn: Boolean = false,
-        arbeidskategorikoder: Map<String, LocalDate> = emptyMap(),
-        arbeidsavklaringspenger: List<Periode> = emptyList(),
-        dagpenger: List<Periode> = emptyList()
-    ) {
-        håndterYtelser(
-            vedtaksperiodeId,
-            *utbetalinger,
-            inntektshistorikk = inntektshistorikk,
-            foreldrepenger = foreldrepenger,
-            pleiepenger = pleiepenger,
-            omsorgspenger = omsorgspenger,
-            opplæringspenger = opplæringspenger,
-            institusjonsoppholdsperioder = institusjonsoppholdsperioder,
-            orgnummer = orgnummer,
-            dødsdato = dødsdato,
-            statslønn = statslønn,
-            arbeidskategorikoder = arbeidskategorikoder,
-            arbeidsavklaringspenger = arbeidsavklaringspenger,
-            dagpenger = dagpenger,
-            besvart = LocalDateTime.now()
+        inntekter: List<ArbeidsgiverInntekt> = listOf(
+            ArbeidsgiverInntekt(orgnummer, (0..3).map {
+                val yearMonth = YearMonth.from(inspektør.skjæringstidspunkt(vedtaksperiodeId)).minusMonths(3L - it)
+                ArbeidsgiverInntekt.MånedligInntekt.Sykepengegrunnlag(
+                    yearMonth = yearMonth,
+                    type = ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
+                    inntekt = INNTEKT,
+                    fordel = "juidy fordel",
+                    beskrivelse = "juicy beskrivelse"
+                )
+            })
         )
+    ) {
+        assertEtterspurt(Utbetalingsgrunnlag::class, InntekterForSykepengegrunnlag, vedtaksperiodeId, orgnummer)
+        assertEtterspurt(Utbetalingsgrunnlag::class, ArbeidsforholdV2, vedtaksperiodeId, orgnummer)
+
+        Utbetalingsgrunnlag(
+            UUID.randomUUID(),
+            AKTØRID, UNG_PERSON_FNR_2018,
+            orgnummer,
+            vedtaksperiodeId,
+            InntektForSykepengegrunnlag(inntekter)
+        ).håndter(Person::håndter)
     }
 
     protected fun håndterYtelser(
@@ -362,7 +352,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         arbeidskategorikoder: Map<String, LocalDate> = emptyMap(),
         arbeidsavklaringspenger: List<Periode> = emptyList(),
         dagpenger: List<Periode> = emptyList(),
-        besvart: LocalDateTime
+        besvart: LocalDateTime = LocalDateTime.now()
     ) {
         fun assertEtterspurt(behovtype: Behovtype) =
             assertEtterspurt(Ytelser::class, behovtype, vedtaksperiodeId, orgnummer)
