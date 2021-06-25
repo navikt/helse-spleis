@@ -138,24 +138,28 @@ internal class Vedtaksperiode private constructor(
     internal fun håndter(sykmelding: Sykmelding) = overlapperMed(sykmelding).also {
         if (!it) return it
         kontekst(sykmelding)
+        hendelseIder.add(sykmelding.meldingsreferanseId())
         tilstand.håndter(this, sykmelding)
     }
 
     internal fun håndter(søknad: SøknadArbeidsgiver) = overlapperMed(søknad).also {
         if (!it) return it
         kontekst(søknad)
+        hendelseIder.add(søknad.meldingsreferanseId())
         tilstand.håndter(this, søknad)
     }
 
     internal fun håndter(søknad: Søknad) = overlapperMed(søknad).also {
         if (!it) return it
         kontekst(søknad)
+        hendelseIder.add(søknad.meldingsreferanseId())
         tilstand.håndter(this, søknad)
     }
 
     internal fun håndter(inntektsmelding: Inntektsmelding, other: UUID? = null): Boolean {
         val overlapper = overlapperMed(inntektsmelding) && (other == null || other == id)
         return overlapper.also {
+            if (it) hendelseIder.add(inntektsmelding.meldingsreferanseId())
             if (arbeidsgiver.harRefusjonOpphørt(periode.endInclusive) && !erAvsluttet()) {
                 kontekst(inntektsmelding)
                 inntektsmelding.error("Refusjon opphører i perioden")
@@ -233,6 +237,7 @@ internal class Vedtaksperiode private constructor(
     internal fun håndter(hendelse: OverstyrTidslinje) = hendelse.erRelevant(periode).also { erRelevant ->
         if (!erRelevant) return IKKE_HÅNDTERT
         kontekst(hendelse)
+        hendelseIder.add(hendelse.meldingsreferanseId())
         tilstand.håndter(this, hendelse)
     }
 
@@ -368,14 +373,12 @@ internal class Vedtaksperiode private constructor(
         hendelse.padLeft(periode.start)
         hendelse.trimLeft(periode.endInclusive)
         sykdomstidslinje = arbeidsgiver.oppdaterSykdom(hendelse).subset(periode)
-        hendelseIder.add(hendelse.meldingsreferanseId())
     }
 
     private fun oppdaterHistorikkRevurdering(hendelse: SykdomstidslinjeHendelse) {
         hendelse.padLeft(periode.start)
         hendelse.trimLeft(periode.endInclusive)
         arbeidsgiver.oppdaterSykdom(hendelse).subset(periode)
-        hendelseIder.add(hendelse.meldingsreferanseId())
     }
 
     private fun håndterSøknad(hendelse: SykdomstidslinjeHendelse, nesteTilstand: Vedtaksperiodetilstand?) {

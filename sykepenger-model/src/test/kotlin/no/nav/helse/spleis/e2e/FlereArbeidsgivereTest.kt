@@ -1734,9 +1734,16 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
 
         //Forlengelsen starter her
         val forlengelseperiode = 1.februar(2021) til 28.februar(2021)
-        håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
+        val sykmeldingHendelseId = UUID.randomUUID()
+        val søknadHendelseId = UUID.randomUUID()
+        håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a1, id = sykmeldingHendelseId)
+        håndterSøknad(
+            Søknad.Søknadsperiode.Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent),
+            orgnummer = a1,
+            id = søknadHendelseId
+        )
         assertTilstand(a1, TIL_INFOTRYGD, 2)
+        assertHendelseIder(sykmeldingHendelseId, søknadHendelseId)
     }
 
     @Test
@@ -2342,6 +2349,17 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     @Test
     fun `To førstegangsbehandlinger med ulik fom - skal få warning om at saksbehandler må sjekke varig lønnsendring`() {
             // TODO: check warning
+    }
+
+    private fun assertHendelseIder(
+        vararg hendelseIder: UUID,
+        orgnummer: String = a1,
+        vedtaksperiodeIndeks: Int = 2,
+    ) {
+        assertEquals(
+            hendelseIder.toSet(),
+            inspektør(orgnummer).hendelseIder(vedtaksperiodeIndeks.vedtaksperiode(orgnummer))
+        )
     }
 
     private fun assertTilstand(
