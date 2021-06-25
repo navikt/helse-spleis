@@ -32,6 +32,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100.prosent))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -105,6 +106,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(11.januar, 22.januar, 100.prosent))
 
         håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(3.januar, 18.januar)), førsteFraværsdag = 3.januar)
+        håndterUtbetalingsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
         håndterVilkårsgrunnlag(3.vedtaksperiode, INNTEKT)
 
@@ -181,8 +183,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
             AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE,
-            AVVENTER_UTBETALINGSGRUNNLAG,
-            AVVENTER_HISTORIKK
+            AVVENTER_UTBETALINGSGRUNNLAG
         )
     }
 
@@ -214,6 +215,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -272,6 +274,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent), sendtTilNav = 1.mai)
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -308,6 +311,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.desember(2017), 15.desember(2017), 100.prosent, 15000.daglig)
         )
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -383,6 +387,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
                 Inntektsopplysning("12345789", 21.august(2019), 22600.månedlig, true)
             )
         )
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
 
         inspektør.also {
@@ -416,6 +421,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             ),
             førsteFraværsdag = 21.september(2020)
         ) // 20. september er en søndag
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -444,6 +450,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(Periode(4.januar, 19.januar)),
             førsteFraværsdag = 4.januar
         )
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -457,6 +464,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(Periode(4.januar, 19.januar)),
             førsteFraværsdag = 24.januar
         )
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode)
@@ -489,6 +497,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertFalse(hendelselogg.hasErrorsOrWorse())
 
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)), 3.januar)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -519,6 +528,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertFalse(hendelselogg.hasErrorsOrWorse())
 
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)), 3.januar)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, arbeidsavklaringspenger = listOf(3.januar.minusDays(60) til 5.januar.minusDays(60)))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode, arbeidsavklaringspenger = listOf(3.januar.minusDays(60) til 5.januar.minusDays(60)))
@@ -543,6 +553,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 23.februar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100.prosent))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -553,6 +564,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertActivities(inspektør)
         håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(1.februar, 16.februar)))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(1.februar, 23.februar, 100.prosent))
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode)
@@ -604,6 +616,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(1.februar, 23.februar, 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100.prosent))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -613,6 +626,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         assertActivities(inspektør)
         håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(1.februar, 16.februar)))
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode)
@@ -665,6 +679,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(1.februar, 23.februar, 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(1.februar, 16.februar)))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -673,6 +688,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         assertActivities(inspektør)
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode)
@@ -725,6 +741,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(1.februar, 16.februar)))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100.prosent))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(1.februar, 23.februar, 100.prosent))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -733,6 +750,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         assertActivities(inspektør)
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode)
@@ -784,6 +802,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
         håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(1.februar, 16.februar)))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100.prosent))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -793,6 +812,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         assertActivities(inspektør)
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(1.februar, 23.februar, 100.prosent))
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode)
@@ -844,6 +864,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, INNTEKT)
         val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.januar(2018), INNTEKT, true))
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk, inntektshistorikk = inntekter)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
@@ -919,6 +940,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(1.februar, 16.februar)))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100.prosent))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -927,6 +949,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
         assertActivities(inspektør)
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode)
@@ -981,6 +1004,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         val historie = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 2.januar, 100.prosent, INNTEKT)
         val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.januar(2018), INNTEKT, true))
         håndterUtbetalingshistorikk(1.vedtaksperiode, historie, inntektshistorikk = inntekter)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         forventetEndringTeller++
@@ -989,6 +1013,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 23.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 23.februar, 100.prosent))
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
@@ -1004,6 +1029,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         val historie = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 2.januar, 100.prosent, INNTEKT)
         val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
         håndterUtbetalingshistorikk(1.vedtaksperiode, historie, inntektshistorikk = inntekter)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
 
         inspektør.also {
@@ -1018,6 +1044,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(29.januar, 23.februar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100.prosent))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -1025,6 +1052,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
@@ -1072,10 +1100,12 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 7.januar, 100.prosent))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(8.januar, 23.februar, 100.prosent))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
 
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
@@ -1116,6 +1146,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(22.januar, 22.februar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 21.januar, 100.prosent), Arbeid(18.januar, 21.januar))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -1159,6 +1190,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 21.januar, 100.prosent), Arbeid(18.januar, 21.januar))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(22.januar, 22.februar, 100.prosent))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -1201,6 +1233,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 21.januar, 100.prosent), Arbeid(18.januar, 21.januar))
         håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(1.januar, 16.januar)), 22.januar)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -1244,6 +1277,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 21.januar, 100.prosent), Arbeid(18.januar, 21.januar))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(22.januar, 22.februar, 100.prosent))
         håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(1.januar, 16.januar)), 22.januar)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -1276,8 +1310,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_UFERDIG_FORLENGELSE,
-            AVVENTER_UTBETALINGSGRUNNLAG,
-            AVVENTER_HISTORIKK
+            AVVENTER_UTBETALINGSGRUNNLAG
         )
     }
 
@@ -1286,6 +1319,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 21.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 21.januar, 100.prosent))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -1323,6 +1357,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 21.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 21.januar, 100.prosent))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -1389,11 +1424,13 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(8.januar, 23.februar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 7.januar, 100.prosent))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
 
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(8.januar, 23.februar, 100.prosent))
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
@@ -1437,6 +1474,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             førsteFraværsdag = 3.januar
         )
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100.prosent))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -1445,6 +1483,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(29.januar, 23.februar, 100.prosent))
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
@@ -1477,6 +1516,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -1486,6 +1526,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100.prosent))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(29.januar, 23.februar, 100.prosent))
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
@@ -1527,10 +1568,12 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(8.januar, 23.februar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 7.januar, 100.prosent))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
 
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
@@ -1605,6 +1648,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -1641,6 +1685,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -1651,6 +1696,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100.prosent))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(29.januar, 23.februar, 100.prosent))
         håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
@@ -1698,6 +1744,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(1.februar, 23.februar, 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100.prosent))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -1744,6 +1791,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 50.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 50.prosent, 50.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -1779,6 +1827,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNoWarnings(it)
         }
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100.prosent))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -1796,6 +1845,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertNoErrors(inspektør)
 
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(1.februar, 23.februar, 100.prosent))
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode)
@@ -1864,6 +1914,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
                 Inntektsopplysning(ORGNUMMER, 7.august(2019), 50005.månedlig, true)
             )
         )
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         assertEquals(10, inspektør.gjenståendeSykedager(1.vedtaksperiode))
@@ -1971,6 +2022,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 3.juni, 8.juni, 100.prosent, 15000.daglig)
         val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 3.juni(2018), 15000.daglig, true))
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk, inntektshistorikk = inntekter)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(1.juli, 31.juli, 100.prosent))
@@ -2004,6 +2056,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 3.juni, 8.juni, 100.prosent, 15000.daglig)
         val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 3.juni(2018), 15000.daglig, true))
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk, inntektshistorikk = inntekter)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(1.juli, 31.juli, 100.prosent))
@@ -2088,7 +2141,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(8.juni(2020), 21.juni(2020), 100.prosent))
         håndterSøknad(Sykdom(8.juni(2020), 21.juni(2020), 100.prosent))
         håndterInntektsmelding(listOf(Periode(8.juni(2020), 23.juni(2020))), førsteFraværsdag = 8.juni(2020))
-
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterPåminnelse(1.vedtaksperiode, AVVENTER_HISTORIKK, LocalDateTime.now().minusDays(200))
         assertEquals(0, inspektør.sykdomshistorikk.sykdomstidslinje().length())
     }
@@ -2098,6 +2151,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100.prosent))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -2123,6 +2177,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100.prosent), Arbeid(23.januar, 26.januar))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -2141,6 +2196,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -2171,6 +2227,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -2211,6 +2268,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2018), 31.januar(2018), 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar(2018), 16.januar(2018))))
         håndterSøknad(Sykdom(1.januar(2018), 31.januar(2018), 100.prosent), sendtTilNav = 1.januar(2018))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -2224,6 +2282,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
             håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
             håndterSøknad(Sykdom(fom, tom, 100.prosent), sendtTilNav = tom)
+
+            håndterUtbetalingsgrunnlag((it + 2).vedtaksperiode)
             håndterYtelser((it + 2).vedtaksperiode)
             håndterSimulering((it + 2).vedtaksperiode)
             håndterUtbetalingsgodkjenning((it + 2).vedtaksperiode, true)
@@ -2232,6 +2292,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.januar(2019), 31.januar(2019), 100.prosent))
         håndterSøknad(Sykdom(1.januar(2019), 31.januar(2019), 100.prosent), sendtTilNav = 31.januar(2019))
+        håndterUtbetalingsgrunnlag(13.vedtaksperiode)
         håndterYtelser(13.vedtaksperiode)
         håndterUtbetalingsgodkjenning(13.vedtaksperiode, true)
 
@@ -2247,6 +2308,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020), 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar(2020), 16.januar(2020))))
         håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent), sendtTilNav = 1.januar(2020))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -2357,8 +2419,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
-            AVVENTER_UTBETALINGSGRUNNLAG,
-            AVVENTER_HISTORIKK
+            AVVENTER_UTBETALINGSGRUNNLAG
         )
     }
 
@@ -2383,8 +2444,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_UTBETALINGSGRUNNLAG,
-            AVVENTER_HISTORIKK
+            AVVENTER_UTBETALINGSGRUNNLAG
         )
         assertInntektForDato(INNTEKT, 1.februar, inspektør)
     }
@@ -2424,6 +2484,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         val historikk = arrayOf(ArbeidsgiverUtbetalingsperiode(UNG_PERSON_FNR_2018, 9.mai(2018), 31.mai(2018), 100.prosent, 1621.daglig))
         val inntekter = listOf(Inntektsopplysning("0", 9.mai(2018), 40000.månedlig, true))
+        håndterUtbetalingsgrunnlag(5.vedtaksperiode)
         håndterYtelser(5.vedtaksperiode, *historikk, inntektshistorikk = inntekter)
         håndterVilkårsgrunnlag(5.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -2470,6 +2531,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(28.september(2020), 14.oktober(2020), 30.prosent))
         håndterSøknad(Sykdom(28.september(2020), 14.oktober(2020), 30.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -2477,6 +2539,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(15.oktober(2020), 30.oktober(2020), 30.prosent))
         håndterSøknad(Sykdom(15.oktober(2020), 30.oktober(2020), 30.prosent))
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
@@ -2485,6 +2548,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(11.november(2020), 11.november(2020), 100.prosent))
         håndterSøknad(Sykdom(11.november(2020), 11.november(2020), 100.prosent))
         håndterInntektsmelding(listOf(Periode(18.august(2020), 2.september(2020))), 11.november(2020))
+        håndterUtbetalingsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
         håndterVilkårsgrunnlag(3.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -2515,8 +2579,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_UTBETALINGSGRUNNLAG,
-            AVVENTER_HISTORIKK
+            AVVENTER_UTBETALINGSGRUNNLAG
         )
     }
 
@@ -2536,6 +2599,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
                 Inntektsopplysning("123455433", 5.desember(2018), 18000.månedlig, true)
             )
         )
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         assertDoesNotThrow { håndterYtelser(1.vedtaksperiode) }
     }
 
@@ -2550,6 +2614,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
                 Inntektsopplysning(ORGNUMMER, 20.oktober(2020), 22000.månedlig, true)
             )
         )
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -2575,8 +2640,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
             AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE,
-            AVVENTER_UTBETALINGSGRUNNLAG,
-            AVVENTER_HISTORIKK
+            AVVENTER_UTBETALINGSGRUNNLAG
         )
         assertTrue(inspektør.sykdomstidslinje[27.oktober(2020)] is Dag.Arbeidsgiverdag)
     }
@@ -2608,6 +2672,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertFalse(hendelselogg.hasErrorsOrWorse())
         assertFalse(person.aktivitetslogg.logg(inspektør.vedtaksperioder(1.vedtaksperiode)).hasWarningsOrWorse())
 
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, arbeidsavklaringspenger = listOf(3.januar.minusDays(60) til 5.januar.minusDays(60)))
 
         assertTrue(person.aktivitetslogg.logg(inspektør.vedtaksperioder(1.vedtaksperiode)).hasWarningsOrWorse())
@@ -2642,6 +2707,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertFalse(hendelselogg.hasErrorsOrWorse())
         assertFalse(person.aktivitetslogg.logg(inspektør.vedtaksperioder(1.vedtaksperiode)).hasWarningsOrWorse())
 
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, dagpenger = listOf(3.januar.minusDays(14) til 5.januar.minusDays(15)))
 
         assertTrue(person.aktivitetslogg.logg(inspektør.vedtaksperioder(1.vedtaksperiode)).hasWarningsOrWorse())
@@ -2700,7 +2766,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         )
         assertTilstander(
             1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_UTBETALINGSGRUNNLAG, AVVENTER_HISTORIKK
+            AVVENTER_UTBETALINGSGRUNNLAG
         )
     }
 
@@ -2710,6 +2776,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), id = inntektsmeldingId)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -2743,6 +2810,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.desember(2020), 31.desember(2020), 100.prosent))
         håndterSøknad(Sykdom(1.desember(2020), 31.desember(2020), 100.prosent))
         håndterInntektsmelding(listOf(1.desember(2020) til 16.desember(2020)), id = inntektsmeldingId)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -2762,6 +2830,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(29.januar(2021), 29.januar(2021), 100.prosent))
         håndterSøknad(Sykdom(1.januar(2021), 29.januar(2021), 20.prosent)) // Her strekkes vedtaksperioden tilbake til 1. januar, pga historikken.
         håndterUtbetalingshistorikk(3.vedtaksperiode)
+        håndterUtbetalingsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
 
@@ -2777,6 +2846,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.desember(2020), 31.desember(2020), 100.prosent))
         håndterSøknad(Sykdom(1.desember(2020), 31.desember(2020), 100.prosent))
         håndterInntektsmelding(listOf(1.desember(2020) til 16.desember(2020)))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -2810,6 +2880,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             ), førsteFraværsdag = 27.januar(2021)
         )
 
+        håndterUtbetalingsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
         håndterVilkårsgrunnlag(3.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -2847,6 +2918,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             ), førsteFraværsdag = 27.januar(2021)
         )
 
+        håndterUtbetalingsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
         håndterVilkårsgrunnlag(3.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -2883,6 +2955,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             ), førsteFraværsdag = 5.februar(2021)
         )
 
+        håndterUtbetalingsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
 
         håndterVilkårsgrunnlag(3.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
@@ -2914,6 +2987,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             arbeidsgiverperioder, førsteFraværsdag = 1.januar(2021)
         )
 
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
 
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
@@ -2929,6 +3003,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         håndterInntektsmeldingReplay(inntektsmeldingId, 2.vedtaksperiode)
 
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
 
         assertForkastetPeriodeTilstander(
@@ -2988,6 +3063,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             beregnetInntekt = 1000.månedlig
         )
 
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
 
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
@@ -3027,6 +3103,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)), arbeidsforholdId = arbeidsforholdId)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -3041,6 +3118,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -3055,6 +3133,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -3099,6 +3178,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             orgnummer = ORGNUMMER,
             besvart = LocalDateTime.MIN
         )
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode(ORGNUMMER), *utbetalinger1, inntektshistorikk = inntektshistorikkA1, orgnummer = ORGNUMMER, besvart = LocalDateTime.MIN)
 
         håndterSimulering(1.vedtaksperiode(ORGNUMMER), orgnummer = ORGNUMMER)
@@ -3117,6 +3197,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             orgnummer = ORGNUMMER,
             besvart = LocalDateTime.MIN
         )
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode(ORGNUMMER), *utbetalinger2, inntektshistorikk = inntektshistorikkA2, orgnummer = ORGNUMMER, besvart = LocalDateTime.MIN)
 
         håndterSimulering(2.vedtaksperiode(ORGNUMMER), orgnummer = ORGNUMMER)

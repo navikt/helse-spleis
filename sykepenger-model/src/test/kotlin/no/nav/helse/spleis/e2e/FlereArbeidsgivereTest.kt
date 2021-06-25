@@ -371,6 +371,10 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
 
         håndterUtbetalingshistorikk(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+        assertTilstand(a1, AVVENTER_UTBETALINGSGRUNNLAG)
+        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
+
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1)
         assertTilstand(a1, AVVENTER_HISTORIKK)
         assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
 
@@ -380,9 +384,13 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
 
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
         assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
-        assertTilstand(a2, AVVENTER_HISTORIKK)
+        assertTilstand(a2, AVVENTER_UTBETALINGSGRUNNLAG)
         assertInntektskilde(a1, EN_ARBEIDSGIVER)
         assertInntektskilde(a2, EN_ARBEIDSGIVER)
+
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
+        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
+        assertTilstand(a2, AVVENTER_HISTORIKK)
 
         håndterYtelser(1.vedtaksperiode(a2), orgnummer = a2)
         assertTilstand(a1, AVVENTER_HISTORIKK)
@@ -453,9 +461,13 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
 
         håndterUtbetalingshistorikk(1.vedtaksperiode(a2), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
         assertTilstand(a1, MOTTATT_SYKMELDING_FERDIG_GAP)
-        assertTilstand(a2, AVVENTER_HISTORIKK)
+        assertTilstand(a2, AVVENTER_UTBETALINGSGRUNNLAG)
         assertInntektskilde(a1, EN_ARBEIDSGIVER)
         assertInntektskilde(a2, EN_ARBEIDSGIVER)
+
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
+        assertTilstand(a1, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertTilstand(a2, AVVENTER_HISTORIKK)
 
         håndterYtelser(1.vedtaksperiode(a2), orgnummer = a2)
         assertTilstand(a1, MOTTATT_SYKMELDING_FERDIG_GAP)
@@ -464,6 +476,10 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertInntektskilde(a2, FLERE_ARBEIDSGIVERE)
 
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+        assertTilstand(a1, AVVENTER_UTBETALINGSGRUNNLAG)
+        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1)
         assertTilstand(a1, AVVENTER_HISTORIKK)
         assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
 
@@ -527,9 +543,13 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
 
         håndterUtbetalingshistorikk(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
-        assertTilstand(a1, AVVENTER_HISTORIKK)
+
+        assertTilstand(a1, AVVENTER_UTBETALINGSGRUNNLAG)
         assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
 
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1)
+        assertTilstand(a1, AVVENTER_HISTORIKK)
+        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
         håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
         assertTilstand(a1, TIL_INFOTRYGD)
         assertTilstand(a2, TIL_INFOTRYGD)
@@ -562,6 +582,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(a1, AVVENTER_HISTORIKK)
         assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
 
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1)
         håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
         assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
         assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
@@ -592,6 +613,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(a1, AVSLUTTET)
         assertTilstand(a2, AVVENTER_HISTORIKK)
 
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode(a2), orgnummer = a2)
         assertTilstand(a1, AVSLUTTET)
         assertTilstand(a2, AVVENTER_SIMULERING)
@@ -629,8 +651,10 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
 
         håndterUtbetalingshistorikk(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1)
         håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
         håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
@@ -649,24 +673,32 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, 2)
 
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
-        assertTilstand(a1, AVVENTER_HISTORIKK, 2)
+        assertTilstand(a1, AVVENTER_UTBETALINGSGRUNNLAG, 2)
         assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, 2)
 
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode(a1), orgnummer = a1)
+        assertTilstand(a1, AVVENTER_HISTORIKK, 2)
+        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, 2)
         håndterYtelser(2.vedtaksperiode(a1), orgnummer = a1)
         assertTilstand(a1, AVVENTER_ARBEIDSGIVERE, 2)
         assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, 2)
 
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a2)
         assertTilstand(a1, AVVENTER_ARBEIDSGIVERE, 2)
-        assertTilstand(a2, AVVENTER_HISTORIKK, 2)
+        assertTilstand(a2, AVVENTER_UTBETALINGSGRUNNLAG, 2)
         assertInntektskilde(a1, EN_ARBEIDSGIVER, 2)
         assertInntektskilde(a2, EN_ARBEIDSGIVER, 2)
 
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode(a2), orgnummer = a2)
+        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE, 2)
+        assertTilstand(a2, AVVENTER_HISTORIKK, 2)
+
         håndterYtelser(2.vedtaksperiode(a2), orgnummer = a2)
-        assertTilstand(a1, AVVENTER_HISTORIKK, 2)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE, 2)
+
         assertInntektskilde(a1, FLERE_ARBEIDSGIVERE, 2)
         assertInntektskilde(a2, FLERE_ARBEIDSGIVERE, 2)
+        assertTilstand(a1, AVVENTER_HISTORIKK, 2)
+        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE, 2)
 
         håndterYtelser(2.vedtaksperiode(a1), orgnummer = a1)
         assertTilstand(a1, AVVENTER_SIMULERING, 2)
@@ -723,8 +755,10 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
 
         håndterUtbetalingshistorikk(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1)
         håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
         håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
@@ -770,8 +804,10 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
 
         håndterUtbetalingshistorikk(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1)
         håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
         håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
@@ -806,8 +842,10 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
 
         håndterUtbetalingshistorikk(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1)
         håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
         håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
@@ -823,8 +861,10 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a2)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode(a1), orgnummer = a1)
         håndterYtelser(2.vedtaksperiode(a1), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a2)
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(2.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(2.vedtaksperiode(a1), orgnummer = a1)
         håndterSimulering(2.vedtaksperiode(a1), orgnummer = a1)
@@ -876,8 +916,10 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
 
         håndterUtbetalingshistorikk(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1)
         håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
         håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
@@ -893,8 +935,10 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a2)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode(a1), orgnummer = a1)
         håndterYtelser(2.vedtaksperiode(a1), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a2)
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(2.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(2.vedtaksperiode(a1), orgnummer = a1)
         håndterSimulering(2.vedtaksperiode(a1), orgnummer = a1)
@@ -948,8 +992,10 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
 
         håndterUtbetalingshistorikk(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1)
         håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
         håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
@@ -965,8 +1011,10 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a2)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode(a1), orgnummer = a1)
         håndterYtelser(2.vedtaksperiode(a1), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a2)
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(2.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(2.vedtaksperiode(a1), orgnummer = a1)
         håndterSimulering(2.vedtaksperiode(a1), orgnummer = a1)
@@ -1026,8 +1074,10 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
 
         håndterUtbetalingshistorikk(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1)
         håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
         håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
@@ -1043,8 +1093,10 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a2)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode, orgnummer = a1)
         håndterYtelser(2.vedtaksperiode(a1), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a2)
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(2.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(2.vedtaksperiode(a1), orgnummer = a1)
         håndterSimulering(2.vedtaksperiode(a1), orgnummer = a1)
@@ -1119,8 +1171,10 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
 
         håndterUtbetalingshistorikk(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1)
         håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
         håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
@@ -1136,8 +1190,10 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a2)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode(a1), orgnummer = a1)
         håndterYtelser(2.vedtaksperiode(a1), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a2)
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(2.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(2.vedtaksperiode(a1), orgnummer = a1)
         håndterSimulering(2.vedtaksperiode(a1), orgnummer = a1)
@@ -1221,14 +1277,22 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
 
         håndterUtbetalingshistorikk(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1)
         håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
 
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
         håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), orgnummer = a1)
         håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
+        assertTilstand(a1, AVSLUTTET, 1)
+        assertTilstand(a1, AVVENTER_UTBETALINGSGRUNNLAG, 2)
+        assertTilstand(a2, AVVENTER_HISTORIKK, 1)
+        assertTilstand(a2, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, 2)
+
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode(a1), orgnummer = a1)
         assertTilstand(a1, AVSLUTTET, 1)
         assertTilstand(a1, AVVENTER_HISTORIKK, 2)
         assertTilstand(a2, AVVENTER_HISTORIKK, 1)
@@ -1249,6 +1313,12 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode(a2), orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(a2), orgnummer = a2)
         håndterUtbetalt(1.vedtaksperiode(a2), orgnummer = a2)
+        assertTilstand(a1, AVSLUTTET, 1)
+        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE, 2)
+        assertTilstand(a2, AVSLUTTET, 1)
+        assertTilstand(a2, AVVENTER_UTBETALINGSGRUNNLAG, 2)
+
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode(a2), orgnummer = a2)
         assertTilstand(a1, AVSLUTTET, 1)
         assertTilstand(a1, AVVENTER_ARBEIDSGIVERE, 2)
         assertTilstand(a2, AVSLUTTET, 1)
@@ -1360,6 +1430,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             orgnummer = a1,
             besvart = LocalDateTime.now().minusHours(24)
         )
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1)
         håndterYtelser(
             1.vedtaksperiode(a1),
             *infotrygdPerioder,
@@ -1402,6 +1473,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             ),
             orgnummer = a1
         )
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1)
         håndterYtelser(1.vedtaksperiode(orgnummer = a1), orgnummer = a1)
 
         assertForkastetPeriodeTilstander(
@@ -1434,9 +1506,11 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
 
         håndterUtbetalingshistorikk(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1)
         håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
 
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode(a2), orgnummer = a2)
 
         håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
@@ -1472,9 +1546,11 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
 
         håndterUtbetalingshistorikk(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1)
         håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
 
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode(a2), orgnummer = a2)
 
         håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
@@ -1506,9 +1582,11 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
 
         håndterUtbetalingshistorikk(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1)
         håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
 
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode(a2), orgnummer = a2)
 
         håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
@@ -1563,6 +1641,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
 
         håndterUtbetalingshistorikk(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
         håndterInntektsmelding(listOf(1.februar(2021) til 16.februar(2021)), førsteFraværsdag = 1.februar(2021), orgnummer = a1)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1)
         håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
         håndterVilkårsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -1601,6 +1680,10 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(a2, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
 
         håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021)), førsteFraværsdag = 1.januar(2021), orgnummer = a2)
+        assertTilstand(a1, AVVENTER_UTBETALINGSGRUNNLAG)
+        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1)
         assertTilstand(a1, AVVENTER_HISTORIKK)
         assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
 
@@ -1631,6 +1714,9 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
         assertTilstand(a1, AVSLUTTET)
         assertTilstand(a2, AVVENTER_HISTORIKK)
+
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a1)
+
 
         håndterYtelser(1.vedtaksperiode(a2), inntektshistorikk = emptyList(), orgnummer = a2)
         assertTilstand(a1, AVSLUTTET)
@@ -1680,6 +1766,9 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             refusjon = Triple(null, 1000.månedlig, emptyList()),
             orgnummer = a2
         )
+        assertTilstand(a1, AVVENTER_UTBETALINGSGRUNNLAG)
+        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1)
         assertTilstand(a1, AVVENTER_HISTORIKK)
         assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
         håndterYtelser(1.vedtaksperiode(a1), inntektshistorikk = emptyList(), orgnummer = a1)
@@ -1714,6 +1803,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             førsteFraværsdag = 1.januar(2021),
             orgnummer = a2
         )
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1)
         håndterYtelser(1.vedtaksperiode(a1), inntektshistorikk = emptyList(), orgnummer = a1)
         håndterVilkårsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -1727,6 +1817,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), true, a1)
         håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode(a2), inntektshistorikk = emptyList(), orgnummer = a2)
         håndterSimulering(1.vedtaksperiode(a2), orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(a2), true, a2)
@@ -1839,6 +1930,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             ArbeidsgiverUtbetalingsperiode(a1, 1.januar(2021), 31.januar(2021), 100.prosent, INNTEKT)
         )
         håndterUtbetalingshistorikk(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1)
         håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
         håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), true, a1)
@@ -1862,6 +1954,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             ArbeidsgiverUtbetalingsperiode(a1, 1.januar(2021), 31.januar(2021), 100.prosent, INNTEKT)
         )
         håndterUtbetalingshistorikk(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1)
         håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
         håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), true, a1)
@@ -1874,6 +1967,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP, 1)
 
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode2.start, periode2.endInclusive, 100.prosent), orgnummer = a1)
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode(a1), orgnummer = a1)
         håndterYtelser(2.vedtaksperiode(a1), orgnummer = a1)
         håndterSimulering(2.vedtaksperiode(a1), orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode(a1), true, a1)
@@ -1886,6 +1980,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             orgnummer = a2
         )
 
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode(a2), orgnummer = a2)
         håndterVilkårsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -1930,6 +2025,11 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             førsteFraværsdag = 1.januar(2021),
             orgnummer = a2
         )
+
+        assertTilstand(a1, AVVENTER_UTBETALINGSGRUNNLAG, 2)
+        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE, 2)
+
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode(a1), orgnummer = a1)
 
         assertTilstand(a1, AVVENTER_HISTORIKK, 2)
         assertTilstand(a2, AVVENTER_ARBEIDSGIVERE, 2)
@@ -1984,6 +2084,10 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
 
         håndterUtbetalingshistorikk(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+        assertTilstand(a1, AVVENTER_UTBETALINGSGRUNNLAG)
+        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
+
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1)
         assertTilstand(a1, AVVENTER_HISTORIKK)
         assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
 
@@ -2001,6 +2105,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertInntektskilde(a1, EN_ARBEIDSGIVER)
         assertInntektskilde(a2, EN_ARBEIDSGIVER)
 
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode(a2), orgnummer = a2)
         assertTilstand(a1, AVVENTER_HISTORIKK)
         assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
@@ -2030,6 +2135,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(a1, AVSLUTTET)
         assertTilstand(a2, AVVENTER_HISTORIKK)
 
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode(a2), orgnummer = a2)
         assertTilstand(a1, AVSLUTTET)
         assertTilstand(a2, AVVENTER_SIMULERING)
@@ -2156,6 +2262,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterUtbetalingshistorikk(1.vedtaksperiode(a1), inntektshistorikk = emptyList(), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021)), førsteFraværsdag = 1.januar(2021), orgnummer = a1)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1)
         håndterYtelser(1.vedtaksperiode(a1), inntektshistorikk = emptyList(), orgnummer = a1)
         håndterVilkårsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -2184,6 +2291,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterUtbetalingshistorikk(1.vedtaksperiode(a1), inntektshistorikk = emptyList(), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021)), førsteFraværsdag = 1.januar(2021), orgnummer = a1)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1)
         håndterYtelser(1.vedtaksperiode(a1), inntektshistorikk = emptyList(), orgnummer = a1)
         håndterVilkårsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -2202,6 +2310,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
         håndterUtbetalingshistorikk(1.vedtaksperiode(a2), inntektshistorikk = emptyList(), orgnummer = a2)
         håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021)), førsteFraværsdag = 1.januar(2021), orgnummer = a2)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode(a2), inntektshistorikk = emptyList(), orgnummer = a2)
         håndterSimulering(1.vedtaksperiode(a2), orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(a2), true, a2)
@@ -2224,6 +2333,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterUtbetalingshistorikk(1.vedtaksperiode(a1), inntektshistorikk = emptyList(), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021)), førsteFraværsdag = 1.januar(2021), orgnummer = a1)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1)
         håndterYtelser(1.vedtaksperiode(a1), inntektshistorikk = emptyList(), orgnummer = a1)
         håndterVilkårsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
