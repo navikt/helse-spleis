@@ -650,8 +650,12 @@ internal class Arbeidsgiver private constructor(
             hendelse.info("Revurdering blokkeres, gjenopptar behandling")
             return gjenopptaBehandling()
         }
-        vedtaksperioder.sisteSammenhengedeUtbetaling(vedtaksperiode)
-            ?.revurder(hendelse, vedtaksperiode)
+
+        if (Toggles.RevurderTidligerePeriode.enabled) {
+            vedtaksperiode.revurder(hendelse, vedtaksperiode)
+        } else {
+            vedtaksperioder.sisteSammenhengedeUtbetaling(vedtaksperiode)?.revurder(hendelse, vedtaksperiode)
+        }
     }
 
     private fun List<Vedtaksperiode>.sisteSammenhengedeUtbetaling(vedtaksperiode: Vedtaksperiode) =

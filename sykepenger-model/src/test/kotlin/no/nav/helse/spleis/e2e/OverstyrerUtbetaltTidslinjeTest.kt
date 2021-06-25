@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -19,51 +20,50 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
 
     @Test
     fun `to perioder - overstyr dager i eldste`() {
-        nyttVedtak(3.januar, 26.januar)
-        forlengVedtak(27.januar, 14.februar)
+        Toggles.RevurderTidligerePeriode.enable {
+            nyttVedtak(3.januar, 26.januar)
+            forlengVedtak(27.januar, 14.februar)
 
-        håndterOverstyring((20.januar til 22.januar).map { manuellFeriedag(it) })
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt(2.vedtaksperiode)
+            håndterOverstyring((20.januar til 22.januar).map { manuellFeriedag(it) })
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+            håndterUtbetalt(1.vedtaksperiode)
 
-        assertTilstander(
-            0,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_SØKNAD_FERDIG_GAP,
-            AVVENTER_UTBETALINGSGRUNNLAG,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET,
-        )
+            assertTilstander(
+                0,
+                START,
+                MOTTATT_SYKMELDING_FERDIG_GAP,
+                AVVENTER_SØKNAD_FERDIG_GAP,
+                AVVENTER_UTBETALINGSGRUNNLAG,
+                AVVENTER_HISTORIKK,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_GODKJENNING,
+                TIL_UTBETALING,
+                AVSLUTTET,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
+                AVSLUTTET
+            )
 
-        assertTilstander(
-            1,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-            AVVENTER_UTBETALINGSGRUNNLAG,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET,
-            AVVENTER_HISTORIKK_REVURDERING,
-            AVVENTER_SIMULERING_REVURDERING,
-            AVVENTER_GODKJENNING_REVURDERING,
-            TIL_UTBETALING,
-            AVSLUTTET,
-        )
-
-        assertEquals(3, inspektør.utbetalinger.size)
-        assertEquals(6, inspektør.forbrukteSykedager(0))
-        assertEquals(19, inspektør.forbrukteSykedager(1))
-        assertEquals(18, inspektør.forbrukteSykedager(2))
+            assertTilstander(
+                1,
+                START,
+                MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+                AVVENTER_UTBETALINGSGRUNNLAG,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_GODKJENNING,
+                TIL_UTBETALING,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING
+            )
+        }
     }
 
     @Test

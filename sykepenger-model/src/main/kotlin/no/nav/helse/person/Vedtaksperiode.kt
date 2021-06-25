@@ -230,8 +230,8 @@ internal class Vedtaksperiode private constructor(
         return true
     }
 
-    internal fun håndter(hendelse: OverstyrTidslinje) = hendelse.erRelevant(periode).also {
-        if (!it) return it
+    internal fun håndter(hendelse: OverstyrTidslinje) = hendelse.erRelevant(periode).also { erRelevant ->
+        if (!erRelevant) return IKKE_HÅNDTERT
         kontekst(hendelse)
         tilstand.håndter(this, hendelse)
     }
@@ -241,8 +241,8 @@ internal class Vedtaksperiode private constructor(
         kontekst(hendelse)
         tilstand.nyPeriodeFør(this, ny, hendelse)
         if (hendelse.hasErrorsOrWorse()) return
-        if (ny.erSykeperiodeRettFør(this)) return tilstand.uferdigPeriodeRettFør(this, ny, hendelse)
-        tilstand.uferdigPeriodeFør(this, ny, hendelse)
+        if (ny.erSykeperiodeRettFør(this)) return tilstand.håndterTidligereTilstøtendeUferdigPeriode(this, ny, hendelse)
+        tilstand.håndterTidligereUferdigPeriode(this, ny, hendelse)
     }
 
     internal fun nyRevurderingFør(revurdert: Vedtaksperiode, hendelse: IAktivitetslogg) {
@@ -250,8 +250,8 @@ internal class Vedtaksperiode private constructor(
         kontekst(hendelse)
         if (utbetaling?.hørerSammen(revurdert.utbetaling()) == false) return hendelse.error("Senere periode blokkerer revurdering av tidligere periode")
         if (hendelse.hasErrorsOrWorse()) return
-        if (revurdert.erSykeperiodeRettFør(this)) return tilstand.uferdigPeriodeRettFør(this, revurdert, hendelse)
-        tilstand.uferdigPeriodeFør(this, revurdert, hendelse)
+        if (revurdert.erSykeperiodeRettFør(this)) return tilstand.håndterTidligereTilstøtendeUferdigPeriode(this, revurdert, hendelse)
+        tilstand.håndterTidligereUferdigPeriode(this, revurdert, hendelse)
     }
 
     override fun compareTo(other: Vedtaksperiode) = this.periode.endInclusive.compareTo(other.periode.endInclusive)
@@ -810,8 +810,8 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.arbeidsgiver.søppelbøtte(hendelse, SENERE_INCLUSIVE(ny), IKKE_STØTTET)
         }
 
-        fun uferdigPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {}
-        fun uferdigPeriodeRettFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {}
+        fun håndterTidligereUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {}
+        fun håndterTidligereTilstøtendeUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {}
 
         fun håndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
             sykmelding.overlappIkkeStøttet(vedtaksperiode.periode)
@@ -1011,11 +1011,11 @@ internal class Vedtaksperiode private constructor(
 
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {}
 
-        override fun uferdigPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {
+        override fun håndterTidligereUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, MottattSykmeldingUferdigForlengelse)
         }
 
-        override fun uferdigPeriodeRettFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {
+        override fun håndterTidligereTilstøtendeUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, MottattSykmeldingUferdigForlengelse)
         }
 
@@ -1040,8 +1040,8 @@ internal class Vedtaksperiode private constructor(
             tilstandsendringstidspunkt.plusMonths(12)
 
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {}
-        override fun uferdigPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {}
-        override fun uferdigPeriodeRettFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {}
+        override fun håndterTidligereUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {}
+        override fun håndterTidligereTilstøtendeUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {}
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             if (!vedtaksperiode.person.forlengerAlleArbeidsgivereSammePeriode(vedtaksperiode)) return vedtaksperiode.person.invaliderAllePerioder(
@@ -1081,11 +1081,11 @@ internal class Vedtaksperiode private constructor(
 
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {}
 
-        override fun uferdigPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {
+        override fun håndterTidligereUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, MottattSykmeldingUferdigGap)
         }
 
-        override fun uferdigPeriodeRettFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {
+        override fun håndterTidligereTilstøtendeUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, MottattSykmeldingUferdigForlengelse)
         }
 
@@ -1119,7 +1119,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {}
 
-        override fun uferdigPeriodeRettFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {
+        override fun håndterTidligereTilstøtendeUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, MottattSykmeldingUferdigForlengelse)
         }
 
@@ -1153,11 +1153,11 @@ internal class Vedtaksperiode private constructor(
 
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {}
 
-        override fun uferdigPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {
+        override fun håndterTidligereUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, AvventerSøknadUferdigGap)
         }
 
-        override fun uferdigPeriodeRettFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {
+        override fun håndterTidligereTilstøtendeUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, AvventerSøknadUferdigForlengelse)
         }
 
@@ -1181,11 +1181,11 @@ internal class Vedtaksperiode private constructor(
 
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {}
 
-        override fun uferdigPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {
+        override fun håndterTidligereUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, AvventerArbeidsgiversøknadUferdigGap)
         }
 
-        override fun uferdigPeriodeRettFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {
+        override fun håndterTidligereTilstøtendeUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, AvventerArbeidsgiversøknadUferdigGap)
         }
 
@@ -1206,8 +1206,8 @@ internal class Vedtaksperiode private constructor(
 
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {}
 
-        override fun uferdigPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {}
-        override fun uferdigPeriodeRettFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {}
+        override fun håndterTidligereUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {}
+        override fun håndterTidligereTilstøtendeUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {}
 
         override fun håndter(
             vedtaksperiode: Vedtaksperiode,
@@ -1228,8 +1228,11 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal object AvventerRevurdering : Vedtaksperiodetilstand {
-        // Reserverer denne tilstanden til vi skal sjonglere out-of-order revurdering
         override val type = AVVENTER_REVURDERING
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
+            if (vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode)) vedtaksperiode.tilstand(gjenopptaBehandling, AvventerHistorikkRevurdering)
+        }
     }
 
     internal object AvventerHistorikkRevurdering : Vedtaksperiodetilstand {
@@ -1284,7 +1287,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {}
 
-        override fun uferdigPeriodeRettFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {
+        override fun håndterTidligereTilstøtendeUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingUferdigForlengelse)
         }
 
@@ -1314,8 +1317,8 @@ internal class Vedtaksperiode private constructor(
 
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {}
 
-        override fun uferdigPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {}
-        override fun uferdigPeriodeRettFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {
+        override fun håndterTidligereUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {}
+        override fun håndterTidligereTilstøtendeUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, AvventerUferdigForlengelse)
         }
 
@@ -1333,8 +1336,8 @@ internal class Vedtaksperiode private constructor(
 
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {}
 
-        override fun uferdigPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {}
-        override fun uferdigPeriodeRettFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {
+        override fun håndterTidligereUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {}
+        override fun håndterTidligereTilstøtendeUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, UtenUtbetalingMedInntektsmeldingUferdigForlengelse)
         }
 
@@ -1353,8 +1356,8 @@ internal class Vedtaksperiode private constructor(
 
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {}
 
-        override fun uferdigPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {}
-        override fun uferdigPeriodeRettFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {}
+        override fun håndterTidligereUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {}
+        override fun håndterTidligereTilstøtendeUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {}
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
             vedtaksperiode.tilstand(gjenopptaBehandling, AvsluttetUtenUtbetaling)
@@ -1375,11 +1378,11 @@ internal class Vedtaksperiode private constructor(
 
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {}
 
-        override fun uferdigPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {
+        override fun håndterTidligereUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingUferdigForlengelse)
         }
 
-        override fun uferdigPeriodeRettFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {
+        override fun håndterTidligereTilstøtendeUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingUferdigForlengelse)
         }
 
@@ -1457,11 +1460,11 @@ internal class Vedtaksperiode private constructor(
 
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {}
 
-        override fun uferdigPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {
+        override fun håndterTidligereUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, AvventerSøknadUferdigForlengelse)
         }
 
-        override fun uferdigPeriodeRettFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {
+        override fun håndterTidligereTilstøtendeUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, AvventerSøknadUferdigForlengelse)
         }
 
@@ -1481,7 +1484,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {}
 
-        override fun uferdigPeriodeRettFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {
+        override fun håndterTidligereTilstøtendeUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, AvventerSøknadUferdigForlengelse)
         }
 
@@ -1508,11 +1511,11 @@ internal class Vedtaksperiode private constructor(
 
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {}
 
-        override fun uferdigPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {
+        override fun håndterTidligereUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingUferdigGap)
         }
 
-        override fun uferdigPeriodeRettFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {
+        override fun håndterTidligereTilstøtendeUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingUferdigForlengelse)
         }
 
@@ -1582,11 +1585,11 @@ internal class Vedtaksperiode private constructor(
 
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {}
 
-        override fun uferdigPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {
+        override fun håndterTidligereUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, AvventerUferdigGap)
         }
 
-        override fun uferdigPeriodeRettFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {
+        override fun håndterTidligereTilstøtendeUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, AvventerUferdigForlengelse)
         }
 
@@ -1639,11 +1642,11 @@ internal class Vedtaksperiode private constructor(
 
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {}
 
-        override fun uferdigPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {
+        override fun håndterTidligereUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, AvventerUferdigGap)
         }
 
-        override fun uferdigPeriodeRettFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {
+        override fun håndterTidligereTilstøtendeUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, AvventerUferdigForlengelse)
         }
 
@@ -1741,11 +1744,11 @@ internal class Vedtaksperiode private constructor(
 
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {}
 
-        override fun uferdigPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {
+        override fun håndterTidligereUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, AvventerUferdigGap)
         }
 
-        override fun uferdigPeriodeRettFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {
+        override fun håndterTidligereTilstøtendeUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, AvventerUferdigForlengelse)
         }
 
@@ -1809,11 +1812,11 @@ internal class Vedtaksperiode private constructor(
 
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {}
 
-        override fun uferdigPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {
+        override fun håndterTidligereUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, AvventerUferdigGap)
         }
 
-        override fun uferdigPeriodeRettFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {
+        override fun håndterTidligereTilstøtendeUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, AvventerUferdigForlengelse)
         }
 
@@ -2023,8 +2026,8 @@ internal class Vedtaksperiode private constructor(
 
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {}
 
-        override fun uferdigPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {}
-        override fun uferdigPeriodeRettFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {}
+        override fun håndterTidligereUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {}
+        override fun håndterTidligereTilstøtendeUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {}
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             vedtaksperiode.håndterInntektsmelding(inntektsmelding) {
                 vedtaksperiode.emitVedtaksperiodeEndret(inntektsmelding)
@@ -2085,6 +2088,16 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.tilstand(hendelse, AvventerHistorikkRevurdering)
         }
 
+        override fun håndterTidligereUferdigPeriode(vedtaksperiode: Vedtaksperiode, underRevurdering: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            if (Toggles.RevurderTidligerePeriode.enabled) vedtaksperiode.tilstand(hendelse, AvventerRevurdering)
+            else super.håndterTidligereUferdigPeriode(vedtaksperiode, underRevurdering, hendelse)
+        }
+
+        override fun håndterTidligereTilstøtendeUferdigPeriode(vedtaksperiode: Vedtaksperiode, underRevurdering: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            if (Toggles.RevurderTidligerePeriode.enabled) vedtaksperiode.tilstand(hendelse, AvventerRevurdering)
+            else super.håndterTidligereUferdigPeriode(vedtaksperiode, underRevurdering, hendelse)
+        }
+
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
     }
 
@@ -2125,6 +2138,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal companion object {
+        private const val IKKE_HÅNDTERT: Boolean = false
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
         internal fun finnForrigeAvsluttaPeriode(

@@ -48,4 +48,5 @@ abstract class Toggles internal constructor(enabled: Boolean = false, private va
     object FlereArbeidsgivereUlikFom : Toggles()
     object SendFeriepengeOppdrag: Toggles(true)
     object KastAlleRevurderinger: Toggles("KAST_ALLE_REVURDERINGER")
+    object RevurderTidligerePeriode: Toggles("REVURDER_TIDLIGERE_PERIODE")
 }
