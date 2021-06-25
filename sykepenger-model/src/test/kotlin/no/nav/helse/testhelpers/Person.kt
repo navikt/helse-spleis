@@ -20,7 +20,7 @@ internal fun fangeSkjæringstidspunkt(person: Person): LocalDate {
             skjæringstidspunkt: LocalDate,
             periodetype: Periodetype,
             forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-            hendelseIder: List<UUID>,
+            hendelseIder: Set<UUID>,
             inntektsmeldingInfo: InntektsmeldingInfo?,
             inntektskilde: Inntektskilde
         ) {
@@ -44,7 +44,7 @@ internal fun fangeSkjæringstidspunkt(targetVedtaksperiode: Vedtaksperiode): Loc
             skjæringstidspunkt: LocalDate,
             periodetype: Periodetype,
             forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-            hendelseIder: List<UUID>,
+            hendelseIder: Set<UUID>,
             inntektsmeldingInfo: InntektsmeldingInfo?,
             inntektskilde: Inntektskilde
         ) {

@@ -1421,7 +1421,7 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
                 skjæringstidspunkt: LocalDate,
                 periodetype: Periodetype,
                 forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-                hendelseIder: List<UUID>,
+                hendelseIder: Set<UUID>,
                 inntektsmeldingInfo: InntektsmeldingInfo?,
                 inntektskilde: Inntektskilde
             ) {
@@ -2004,7 +2004,7 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
                     skjæringstidspunkt: LocalDate,
                     periodetype: Periodetype,
                     forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-                    hendelseIder: List<UUID>,
+                    hendelseIder: Set<UUID>,
                     inntektsmeldingInfo: InntektsmeldingInfo?,
                     inntektskilde: Inntektskilde
                 ) {

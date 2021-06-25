@@ -1056,7 +1056,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             skjæringstidspunkt: LocalDate,
             periodetype: Periodetype,
             forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-            hendelseIder: List<UUID>,
+            hendelseIder: Set<UUID>,
             inntektsmeldingInfo: InntektsmeldingInfo?,
             inntektskilde: Inntektskilde
         ) {

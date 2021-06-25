@@ -700,7 +700,7 @@ internal data class PersonData(
             private val skjæringstidspunktFraInfotrygd: LocalDate?,
             private val dataForSimulering: DataForSimuleringData?,
             private val sykdomstidslinje: SykdomstidslinjeData,
-            private val hendelseIder: MutableList<UUID>,
+            private val hendelseIder: MutableSet<UUID>,
             private val inntektsmeldingInfo: InntektsmeldingInfoData?,
             private val fom: LocalDate,
             private val tom: LocalDate,

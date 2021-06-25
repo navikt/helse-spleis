@@ -62,7 +62,7 @@ internal class TestArbeidsgiverInspektør(
     private var inUtbetaling = false
     private var inFeriepengeutbetaling = false
     private val forlengelserFraInfotrygd = mutableMapOf<Int, ForlengelseFraInfotrygd>()
-    private val hendelseIder = mutableMapOf<Int, List<UUID>>()
+    private val hendelseIder = mutableMapOf<Int, Set<UUID>>()
     private val inntektskilder = mutableMapOf<Int, Inntektskilde>()
 
     init {
@@ -118,7 +118,7 @@ internal class TestArbeidsgiverInspektør(
         skjæringstidspunkt: LocalDate,
         periodetype: Periodetype,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-        hendelseIder: List<UUID>,
+        hendelseIder: Set<UUID>,
         inntektsmeldingInfo: InntektsmeldingInfo?,
         inntektskilde: Inntektskilde
     ) {
@@ -152,7 +152,7 @@ internal class TestArbeidsgiverInspektør(
         skjæringstidspunkt: LocalDate,
         periodetype: Periodetype,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-        hendelseIder: List<UUID>,
+        hendelseIder: Set<UUID>,
         inntektsmeldingInfo: InntektsmeldingInfo?,
         inntektskilde: Inntektskilde
     ) {
@@ -317,7 +317,7 @@ internal class TestArbeidsgiverInspektør(
             skjæringstidspunkt: LocalDate,
             periodetype: Periodetype,
             forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-            hendelseIder: List<UUID>,
+            hendelseIder: Set<UUID>,
             inntektsmeldingInfo: InntektsmeldingInfo?,
             inntektskilde: Inntektskilde
         ) {
@@ -335,7 +335,7 @@ internal class TestArbeidsgiverInspektør(
             skjæringstidspunkt: LocalDate,
             periodetype: Periodetype,
             forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-            hendelseIder: List<UUID>,
+            hendelseIder: Set<UUID>,
             inntektsmeldingInfo: InntektsmeldingInfo?,
             inntektskilde: Inntektskilde
         ) {

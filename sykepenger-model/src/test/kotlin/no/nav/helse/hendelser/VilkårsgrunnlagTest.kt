@@ -149,7 +149,7 @@ internal class VilkårsgrunnlagTest {
                 skjæringstidspunkt: LocalDate,
                 periodetype: Periodetype,
                 forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-                hendelseIder: List<UUID>,
+                hendelseIder: Set<UUID>,
                 inntektsmeldingInfo: InntektsmeldingInfo?,
                 inntektskilde: Inntektskilde
             ) {
@@ -173,7 +173,7 @@ internal class VilkårsgrunnlagTest {
                 skjæringstidspunkt: LocalDate,
                 periodetype: Periodetype,
                 forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-                hendelseIder: List<UUID>,
+                hendelseIder: Set<UUID>,
                 inntektsmeldingInfo: InntektsmeldingInfo?,
                 inntektskilde: Inntektskilde
             ) {

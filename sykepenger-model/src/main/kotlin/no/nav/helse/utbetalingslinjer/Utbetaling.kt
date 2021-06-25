@@ -185,7 +185,7 @@ internal class Utbetaling private constructor(
         person: Person,
         vedtaksperiodeId: UUID,
         periode: Periode,
-        hendelseIder: List<UUID>,
+        hendelseIder: Set<UUID>,
         skjæringstidspunkt: LocalDate,
         sykepengegrunnlag: Inntekt,
         inntekt: Inntekt
@@ -201,7 +201,7 @@ internal class Utbetaling private constructor(
         periode: Periode,
         sykepengegrunnlag: Inntekt,
         inntekt: Inntekt,
-        hendelseIder: List<UUID>
+        hendelseIder: Set<UUID>
     ) {
         tilstand.avslutt(this, hendelse, person, periode, sykepengegrunnlag, inntekt, hendelseIder)
     }
@@ -261,7 +261,7 @@ internal class Utbetaling private constructor(
             person: Person,
             vedtaksperiodeId: UUID,
             periode: Periode,
-            hendelseIder: List<UUID>,
+            hendelseIder: Set<UUID>,
             skjæringstidspunkt: LocalDate,
             sykepengegrunnlag: Inntekt,
             inntekt: Inntekt
@@ -275,7 +275,7 @@ internal class Utbetaling private constructor(
             person: Person,
             vedtaksperiodeId: UUID,
             periode: Periode,
-            hendelseIder: List<UUID>,
+            hendelseIder: Set<UUID>,
             skjæringstidspunkt: LocalDate,
             sykepengegrunnlag: Inntekt,
             inntekt: Inntekt
@@ -496,7 +496,7 @@ internal class Utbetaling private constructor(
         periode: Periode,
         sykepengegrunnlag: Inntekt,
         inntekt: Inntekt,
-        hendelseIder: List<UUID>
+        hendelseIder: Set<UUID>
     ) {
         val vurdering = checkNotNull(vurdering) { "Mangler vurdering" }
         vurdering.ferdigstill(this, person, periode, sykepengegrunnlag, inntekt, hendelseIder)
@@ -574,7 +574,7 @@ internal class Utbetaling private constructor(
             person: Person,
             vedtaksperiodeId: UUID,
             periode: Periode,
-            hendelseIder: List<UUID>,
+            hendelseIder: Set<UUID>,
             skjæringstidspunkt: LocalDate,
             sykepengegrunnlag: Inntekt,
             inntekt: Inntekt
@@ -587,7 +587,7 @@ internal class Utbetaling private constructor(
             periode: Periode,
             sykepengegrunnlag: Inntekt,
             inntekt: Inntekt,
-            hendelseIder: List<UUID>
+            hendelseIder: Set<UUID>
         ) {
             hendelse.error("Forventet ikke avslutte på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
         }
@@ -607,7 +607,7 @@ internal class Utbetaling private constructor(
             person: Person,
             vedtaksperiodeId: UUID,
             periode: Periode,
-            hendelseIder: List<UUID>,
+            hendelseIder: Set<UUID>,
             skjæringstidspunkt: LocalDate,
             sykepengegrunnlag: Inntekt,
             inntekt: Inntekt
@@ -663,7 +663,7 @@ internal class Utbetaling private constructor(
             person: Person,
             vedtaksperiodeId: UUID,
             periode: Periode,
-            hendelseIder: List<UUID>,
+            hendelseIder: Set<UUID>,
             skjæringstidspunkt: LocalDate,
             sykepengegrunnlag: Inntekt,
             inntekt: Inntekt
@@ -678,7 +678,7 @@ internal class Utbetaling private constructor(
             periode: Periode,
             sykepengegrunnlag: Inntekt,
             inntekt: Inntekt,
-            hendelseIder: List<UUID>
+            hendelseIder: Set<UUID>
         ) {
             utbetaling.avslutt(person, periode, sykepengegrunnlag, inntekt, hendelseIder)
         }
@@ -791,7 +791,7 @@ internal class Utbetaling private constructor(
             person: Person,
             vedtaksperiodeId: UUID,
             periode: Periode,
-            hendelseIder: List<UUID>,
+            hendelseIder: Set<UUID>,
             skjæringstidspunkt: LocalDate,
             sykepengegrunnlag: Inntekt,
             inntekt: Inntekt
@@ -806,7 +806,7 @@ internal class Utbetaling private constructor(
             periode: Periode,
             sykepengegrunnlag: Inntekt,
             inntekt: Inntekt,
-            hendelseIder: List<UUID>
+            hendelseIder: Set<UUID>
         ) {
             utbetaling.avslutt(person, periode, sykepengegrunnlag, inntekt, hendelseIder)
         }
@@ -901,7 +901,7 @@ internal class Utbetaling private constructor(
             periode: Periode,
             sykepengegrunnlag: Inntekt,
             inntekt: Inntekt,
-            hendelseIder: List<UUID>
+            hendelseIder: Set<UUID>
         ) {
             person.vedtaksperiodeUtbetalt(
                 tilUtbetaltEvent(

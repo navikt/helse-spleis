@@ -66,7 +66,7 @@ internal class JsonBuilder : AbstractBuilder() {
         private val arbeidsgivere = mutableListOf<MutableMap<String, Any?>>()
 
         fun build() =
-            SerialisertPerson.medSkjemaversjon(serdeObjectMapper.valueToTree<JsonNode>(personMap))
+            SerialisertPerson.medSkjemaversjon(serdeObjectMapper.valueToTree(personMap))
 
         override fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) {
             personMap["aktivitetslogg"] = AktivitetsloggReflect(aktivitetslogg).toMap()
@@ -114,7 +114,7 @@ internal class JsonBuilder : AbstractBuilder() {
             vedtaksperiodeMap: MutableMap<String, Any?>,
             periode: Periode,
             opprinneligPeriode: Periode,
-            hendelseIder: List<UUID>,
+            hendelseIder: Set<UUID>,
             inntektskilde: Inntektskilde
         ) {
             vedtaksperiodeMap["fom"] = periode.start
@@ -204,7 +204,7 @@ internal class JsonBuilder : AbstractBuilder() {
             skjæringstidspunkt: LocalDate,
             periodetype: Periodetype,
             forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-            hendelseIder: List<UUID>,
+            hendelseIder: Set<UUID>,
             inntektsmeldingInfo: InntektsmeldingInfo?,
             inntektskilde: Inntektskilde
         ) {
@@ -529,7 +529,7 @@ internal class JsonBuilder : AbstractBuilder() {
             skjæringstidspunkt: LocalDate,
             periodetype: Periodetype,
             forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-            hendelseIder: List<UUID>,
+            hendelseIder: Set<UUID>,
             inntektsmeldingInfo: InntektsmeldingInfo?,
             inntektskilde: Inntektskilde
         ) {
@@ -828,7 +828,7 @@ internal class JsonBuilder : AbstractBuilder() {
             skjæringstidspunkt: LocalDate,
             periodetype: Periodetype,
             forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-            hendelseIder: List<UUID>,
+            hendelseIder: Set<UUID>,
             inntektsmeldingInfo: InntektsmeldingInfo?,
             inntektskilde: Inntektskilde
         ) {

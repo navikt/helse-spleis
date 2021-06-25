@@ -29,7 +29,7 @@ internal class VedtaksperiodeBuilder(
     private val sykepengegrunnlag: Inntekt?,
     private val gruppeId: UUID,
     private val fødselsnummer: String,
-    private val hendelseIder: List<UUID>,
+    private val hendelseIder: Set<UUID>,
     private val inntektsmeldingId: UUID?,
     private val inntektshistorikkBuilder: InntektshistorikkBuilder,
     private val forkastet: Boolean
@@ -436,7 +436,7 @@ internal class VedtaksperiodeBuilder(
         skjæringstidspunkt: LocalDate,
         periodetype: Periodetype,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-        hendelseIder: List<UUID>,
+        hendelseIder: Set<UUID>,
         inntektsmeldingInfo: InntektsmeldingInfo?,
         inntektskilde: Inntektskilde
     ) {

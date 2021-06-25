@@ -14,7 +14,7 @@ import java.util.*
 internal fun tilUtbetaltEvent(
     sykepengegrunnlag: Inntekt,
     inntekt: Inntekt,
-    hendelseIder: List<UUID>,
+    hendelseIder: Set<UUID>,
     utbetaling: Utbetaling,
     utbetalingstidslinje: Utbetalingstidslinje,
     periode: Periode,
@@ -38,7 +38,7 @@ internal fun tilUtbetaltEvent(
 ).result()
 
 private class UtbetaltEventBuilder(
-    private val hendelseIder: List<UUID>,
+    private val hendelseIder: Set<UUID>,
     private val sykepengegrunnlag: Inntekt,
     private val inntekt: Inntekt,
     utbetaling: Utbetaling,

@@ -101,7 +101,7 @@ internal class Avstemmer(person: Person) {
             skjæringstidspunkt: LocalDate,
             periodetype: Periodetype,
             forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-            hendelseIder: List<UUID>,
+            hendelseIder: Set<UUID>,
             inntektsmeldingInfo: InntektsmeldingInfo?,
             inntektskilde: Inntektskilde
         ) {

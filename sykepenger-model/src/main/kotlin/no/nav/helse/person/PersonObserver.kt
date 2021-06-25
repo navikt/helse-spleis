@@ -42,7 +42,7 @@ interface PersonObserver {
         val forrigeTilstand: TilstandType,
         val aktivitetslogg: Map<String, List<Map<String, Any>>>,
         val harVedtaksperiodeWarnings: Boolean,
-        val hendelser: List<UUID>,
+        val hendelser: Set<UUID>,
         val makstid: LocalDateTime
     )
 
@@ -192,7 +192,7 @@ interface PersonObserver {
     data class VedtakFattetEvent(
         val vedtaksperiodeId: UUID,
         val periode: Periode,
-        val hendelseIder: List<UUID>,
+        val hendelseIder: Set<UUID>,
         val skjæringstidspunkt: LocalDate,
         val sykepengegrunnlag: Double,
         val inntekt: Double,

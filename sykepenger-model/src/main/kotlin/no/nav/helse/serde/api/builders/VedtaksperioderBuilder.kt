@@ -38,7 +38,7 @@ internal class VedtaksperioderBuilder(
         skjæringstidspunkt: LocalDate,
         periodetype: Periodetype,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-        hendelseIder: List<UUID>,
+        hendelseIder: Set<UUID>,
         inntektsmeldingInfo: InntektsmeldingInfo?,
         inntektskilde: Inntektskilde
     ) {
