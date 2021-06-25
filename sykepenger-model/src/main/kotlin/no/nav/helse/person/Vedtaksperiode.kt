@@ -1238,6 +1238,7 @@ internal class Vedtaksperiode private constructor(
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             hendelse.info("Forespør sykdoms- og inntektshistorikk")
             vedtaksperiode.trengerYtelser(hendelse)
+            vedtaksperiode.utbetaling?.forkast(hendelse)
         }
 
         override fun håndter(
@@ -1919,6 +1920,16 @@ internal class Vedtaksperiode private constructor(
                     else -> Avsluttet
                 }
             )
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
+            if (Toggles.RevurderUtkastTilRevurdering.enabled) {
+                hendelse.info("Oppdaterer tidslinjen til den overstyre perioden")
+                vedtaksperiode.arbeidsgiver.låsOpp(vedtaksperiode.periode)
+                vedtaksperiode.oppdaterHistorikkRevurdering(hendelse)
+                vedtaksperiode.arbeidsgiver.lås(vedtaksperiode.periode)
+                vedtaksperiode.tilstand(hendelse, AvventerHistorikkRevurdering)
+            }
         }
     }
 
