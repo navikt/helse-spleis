@@ -42,16 +42,14 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     fun `Sammenligningsgrunnlag for flere arbeidsgivere`() {
         val periodeA1 = 1.januar til 31.januar
         nyPeriode(1.januar til 31.januar, a1)
-        person.håndter(
-            inntektsmelding(
-                UUID.randomUUID(),
-                arbeidsgiverperioder = listOf(Periode(periodeA1.start, periodeA1.start.plusDays(15))),
-                beregnetInntekt = 30000.månedlig,
-                førsteFraværsdag = periodeA1.start,
-                refusjon = Triple(null, 30000.månedlig, emptyList()),
-                orgnummer = a1
-            )
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(Periode(periodeA1.start, periodeA1.start.plusDays(15))),
+            beregnetInntekt = 30000.månedlig,
+            førsteFraværsdag = periodeA1.start,
+            refusjon = Triple(null, 30000.månedlig, emptyList()),
+            orgnummer = a1
         )
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1)
         person.håndter(ytelser(1.vedtaksperiode(a1), orgnummer = a1, inntektshistorikk = emptyList()))
         person.håndter(vilkårsgrunnlag(
             a1.id(0),
@@ -73,15 +71,13 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
 
         val periodeA2 = 15.januar til 15.februar
         nyPeriode(periodeA2, a2)
-        person.håndter(
-            inntektsmelding(
-                UUID.randomUUID(),
-                arbeidsgiverperioder = listOf(Periode(periodeA2.start, periodeA2.start.plusDays(15))),
-                beregnetInntekt = 10000.månedlig,
-                førsteFraværsdag = periodeA2.start,
-                refusjon = Triple(null, 10000.månedlig, emptyList()),
-                orgnummer = a2
-            )
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(Periode(periodeA2.start, periodeA2.start.plusDays(15))),
+            beregnetInntekt = 10000.månedlig,
+            førsteFraværsdag = periodeA2.start,
+            refusjon = Triple(null, 10000.månedlig, emptyList()),
+            orgnummer = a2
+
         )
 
         assertEquals(318500.årlig, person.sammenligningsgrunnlag(1.januar))
@@ -90,16 +86,14 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     @Test
     fun `Sammenligningsgrunnlag for flere arbeidsgivere med flere sykeperioder`() {
         nyPeriode(15.januar til 5.februar, a1)
-        person.håndter(
-            inntektsmelding(
-                UUID.randomUUID(),
-                arbeidsgiverperioder = listOf(15.januar til 28.januar, 2.februar til 3.februar),
-                beregnetInntekt = 30000.månedlig,
-                førsteFraværsdag = 2.februar,
-                refusjon = Triple(null, 30000.månedlig, emptyList()),
-                orgnummer = a1
-            )
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(15.januar til 28.januar, 2.februar til 3.februar),
+            førsteFraværsdag = 2.februar,
+            refusjon = Triple(null, 30000.månedlig, emptyList()),
+            orgnummer = a1,
+            beregnetInntekt = 30000.månedlig
         )
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1)
         person.håndter(ytelser(1.vedtaksperiode(a1), orgnummer = a1, inntektshistorikk = emptyList()))
         person.håndter(vilkårsgrunnlag(
             a1.id(0),
@@ -2173,23 +2167,19 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         nyPeriode(periode, a1)
         nyPeriode(periode, a2)
 
-        person.håndter(
-            inntektsmelding(
-                UUID.randomUUID(),
-                arbeidsgiverperioder = listOf(Periode(periode.start, periode.start.plusDays(15))),
-                førsteFraværsdag = periode.start,
-                orgnummer = a1
-            )
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(Periode(periode.start, periode.start.plusDays(15))),
+            førsteFraværsdag = periode.start,
+            orgnummer = a1
         )
 
-        person.håndter(
-            inntektsmelding(
-                UUID.randomUUID(),
-                arbeidsgiverperioder = listOf(Periode(periode.start, periode.start.plusDays(15))),
-                førsteFraværsdag = periode.start,
-                orgnummer = a2
-            )
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(Periode(periode.start, periode.start.plusDays(15))),
+            førsteFraværsdag = periode.start,
+            orgnummer = a2
         )
+
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1)
 
         historikk(a1)
         person.håndter(
@@ -2465,7 +2455,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     @Disabled
     @Test
     fun `To førstegangsbehandlinger med ulik fom - skal få warning om at saksbehandler må sjekke varig lønnsendring`() {
-            // TODO: check warning
+        // TODO: check warning
     }
 
     private fun assertTilstand(
@@ -2494,14 +2484,13 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
 
     private fun gapPeriode(periode: Periode, orgnummer: String, sykedagstelling: Int = 0) {
         nyPeriode(periode, orgnummer)
-        person.håndter(
-            inntektsmelding(
-                UUID.randomUUID(),
-                arbeidsgiverperioder = listOf(Periode(periode.start, periode.start.plusDays(15))),
-                førsteFraværsdag = periode.start,
-                orgnummer = orgnummer
-            )
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(Periode(periode.start, periode.start.plusDays(15))),
+            førsteFraværsdag = periode.start,
+            orgnummer = orgnummer
+
         )
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(orgnummer), orgnummer = orgnummer)
         historikk(orgnummer, sykedagstelling)
         person.håndter(vilkårsgrunnlag(
             orgnummer.id(0), orgnummer = orgnummer,

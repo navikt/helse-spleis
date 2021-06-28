@@ -236,6 +236,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             førsteFraværsdag = periode.start,
             orgnummer = orgnummer
         ).håndter(Person::håndter)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(orgnummer), orgnummer)
         ytelser(
             vedtaksperiodeId = 1.vedtaksperiode(orgnummer),
             orgnummer = orgnummer,

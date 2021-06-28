@@ -434,7 +434,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), orgnummer = a1)
         håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
 
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
+        //håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2) TODO
         håndterYtelser(1.vedtaksperiode(a2), orgnummer = a2)
         håndterSimulering(1.vedtaksperiode(a2), orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(a2), orgnummer = a2)

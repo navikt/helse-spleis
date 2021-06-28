@@ -137,6 +137,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(28.februar, 28.februar))
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
 
         SykdomstidslinjeInspektør(inspektør.sykdomstidslinje).also {

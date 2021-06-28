@@ -194,9 +194,9 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
                 }
             }
         ))
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
 
