@@ -74,6 +74,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         person.håndter(sykmelding())
         person.håndter(søknad())
         person.håndter(inntektsmelding())
+        person.håndter(utbetalingsgrunnlag())
         person.håndter(ytelser())
         val antallBehovFør = hendelse.behov().size
         person.håndter(påminnelse(AVVENTER_VILKÅRSPRØVING, 1.vedtaksperiode))
@@ -351,6 +352,17 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         ).apply {
             hendelse = this
         }
+
+    private fun utbetalingsgrunnlag() = Utbetalingsgrunnlag(
+        meldingsreferanseId = UUID.randomUUID(),
+        aktørId = "aktørId",
+        fødselsnummer = UNG_PERSON_FNR_2018,
+        orgnummer = ORGNUMMER,
+        vedtaksperiodeId = 1.vedtaksperiode,
+        inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList())
+    ).apply {
+        hendelse = this
+    }
 
     private fun ytelser(besvart: LocalDateTime = LocalDateTime.now()): Ytelser {
         val meldingsreferanseId = UUID.randomUUID()
