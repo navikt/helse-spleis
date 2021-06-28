@@ -41,6 +41,7 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
         forlengVedtak(1.februar, 28.februar)
         forlengVedtak(1.mars, 31.mars)
         forlengPeriode(1.april, 30.april)
+        håndterUtbetalingsgrunnlag(4.vedtaksperiode)
         håndterYtelser(4.vedtaksperiode)
         håndterSimulering(4.vedtaksperiode)
         håndterUtbetalingsgodkjenning(4.vedtaksperiode, false) // <- TIL_INFOTRYGD
@@ -107,7 +108,7 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
         )
         håndterSøknad(Sykdom(8.februar, 28.februar, 100.prosent))
         håndterInntektsmelding(listOf(8.februar til 23.februar))
-        assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_UTBETALINGSGRUNNLAG, AVVENTER_HISTORIKK)
+        assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_UTBETALINGSGRUNNLAG)
     }
 
     @Test
@@ -122,7 +123,7 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
         )
         håndterSøknad(Sykdom(14.februar, 28.februar, 100.prosent))
         håndterInntektsmelding(listOf(8.februar til 22.februar))
-        assertTilstander(4.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_UTBETALINGSGRUNNLAG, AVVENTER_HISTORIKK)
+        assertTilstander(4.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_UTBETALINGSGRUNNLAG)
         assertEquals(14.februar til 28.februar, inspektør.periode(4.vedtaksperiode))
     }
 
@@ -138,7 +139,7 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
         )
         håndterSøknad(Sykdom(14.februar, 28.februar, 100.prosent))
         håndterInntektsmelding(listOf(8.februar til 12.februar, 14.februar til 23.februar), 14.februar)
-        assertTilstander(4.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_UTBETALINGSGRUNNLAG, AVVENTER_HISTORIKK)
+        assertTilstander(4.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_UTBETALINGSGRUNNLAG)
         assertEquals(14.februar til 28.februar, inspektør.periode(4.vedtaksperiode))
     }
 
@@ -192,7 +193,7 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
         val inntektsmeldingId = håndterInntektsmelding(listOf(3.januar til 18.januar))
         håndterSøknad(Sykdom(3.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingReplay(inntektsmeldingId, 1.vedtaksperiode)
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_UTBETALINGSGRUNNLAG, AVVENTER_HISTORIKK)
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_UTBETALINGSGRUNNLAG)
     }
 
     @Test
@@ -244,7 +245,7 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(18.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingReplay(inntektsmeldingId, 2.vedtaksperiode)
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_UTBETALINGSGRUNNLAG, AVVENTER_HISTORIKK)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_UTBETALINGSGRUNNLAG)
     }
 
     @Test
@@ -337,7 +338,7 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
             )
         )
         håndterSøknad(Sykdom(11.januar, 31.januar, 100.prosent))
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_UTBETALINGSGRUNNLAG, AVVENTER_HISTORIKK)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_UTBETALINGSGRUNNLAG)
     }
 
     @Test
@@ -451,7 +452,7 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(25.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(21.januar, 24.januar, 100.prosent))
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE)
-        assertTilstander(3.vedtaksperiode, START, AVVENTER_UTBETALINGSGRUNNLAG, AVVENTER_HISTORIKK)
+        assertTilstander(3.vedtaksperiode, START, AVVENTER_UTBETALINGSGRUNNLAG)
     }
 
     @Test
