@@ -116,6 +116,21 @@ internal class OppdragBuilderTest {
     }
 
     @Test
+    fun `feriedager dyttet inn mellom oppdragene blir ikke `() {
+        opprett(18.NAV, 1.FRI)
+        val oppdrag1 = oppdrag
+        opprett(18.NAV, 1.FRI, 2.HELG, 5.NAV)
+        val oppdrag2 = oppdrag
+        opprett(18.NAV, 1.FRI, 2.HELG, 2.FRI, 5.NAV)
+        val oppdrag3 = oppdrag
+
+        val diff1 = oppdrag2.minus(oppdrag1, Aktivitetslogg())
+        val diff2 = oppdrag3.minus(diff1, Aktivitetslogg())
+        //Linje 2 manger med OPPHØØØØR
+        println("Hvor er 22 og 23 januar!!?!?")
+    }
+
+    @Test
     fun `Endring i utbetaling pga grad`() {
         opprett(3.NAV(1500, 100.0), 2.NAV(1500, 60.0), 2.HELG(1500, 60.0), 2.NAV(1500, 60.0))
 
@@ -190,7 +205,7 @@ internal class OppdragBuilderTest {
         assertEquals(10.januar, oppdrag.last().tom)
     }
 
-    private fun opprett(vararg dager: Utbetalingsdager, sisteDato: LocalDate? = null) {
+    private fun opprett(vararg dager: Utbetalingsdager, sisteDato: LocalDate? = null, fagsystemId: String? = null) {
         val tidslinje = tidslinjeOf(*dager)
         MaksimumUtbetaling(
             listOf(tidslinje),
