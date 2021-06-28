@@ -1212,6 +1212,7 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
                 aktivitetslogg = person.aktivitetslogg
             )
         )
+        person.håndter(utbetalingsgrunnlag(vedtaksperiodeId2, person.fangSkjæringstidspunkt(UUID.fromString(vedtaksperiodeId2)), orgnummer = orgnummer2))
         person.håndter(
             ytelser(
                 vedtaksperiodeId = vedtaksperiodeId2,

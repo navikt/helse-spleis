@@ -408,14 +408,19 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
 
         håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
+
+        assertTilstand(a1, AVSLUTTET)
+        assertTilstand(a2, AVVENTER_UTBETALINGSGRUNNLAG)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
+
         assertTilstand(a1, AVSLUTTET)
         assertTilstand(a2, AVVENTER_HISTORIKK)
-
         håndterYtelser(1.vedtaksperiode(a2), orgnummer = a2)
+
         assertTilstand(a1, AVSLUTTET)
         assertTilstand(a2, AVVENTER_SIMULERING)
-
         håndterSimulering(1.vedtaksperiode(a2), orgnummer = a2)
+
         assertTilstand(a1, AVSLUTTET)
         assertTilstand(a2, AVVENTER_GODKJENNING)
         assertInntektskilde(a1, FLERE_ARBEIDSGIVERE)
@@ -492,6 +497,10 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
 
         håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
+        assertTilstand(a1, AVSLUTTET)
+        assertTilstand(a2, AVVENTER_UTBETALINGSGRUNNLAG)
+
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
         assertTilstand(a1, AVSLUTTET)
         assertTilstand(a2, AVVENTER_HISTORIKK)
 
@@ -654,6 +663,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), orgnummer = a1)
         håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode(a2), orgnummer = a2)
         håndterSimulering(1.vedtaksperiode(a2), orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(a2), orgnummer = a2)
@@ -710,6 +720,11 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
 
         håndterUtbetalt(2.vedtaksperiode(a1), orgnummer = a1)
         assertTilstand(a1, AVSLUTTET, 2)
+        assertTilstand(a2, AVVENTER_UTBETALINGSGRUNNLAG, 2)
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode(a2), orgnummer = a2)
+
+        håndterUtbetalt(2.vedtaksperiode(a1), orgnummer = a1)
+        assertTilstand(a1, AVSLUTTET, 2)
         assertTilstand(a2, AVVENTER_HISTORIKK, 2)
 
         håndterYtelser(2.vedtaksperiode(a2), orgnummer = a2)
@@ -758,6 +773,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), orgnummer = a1)
         håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode(a2), orgnummer = a2)
         håndterSimulering(1.vedtaksperiode(a2), orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(a2), orgnummer = a2)
@@ -845,6 +861,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), orgnummer = a1)
         håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode(a2), orgnummer = a2)
         håndterSimulering(1.vedtaksperiode(a2), orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(a2), orgnummer = a2)
@@ -864,6 +881,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode(a1), orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode(a1), orgnummer = a1)
         håndterUtbetalt(2.vedtaksperiode(a1), orgnummer = a1)
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(2.vedtaksperiode(a2), orgnummer = a2)
         håndterSimulering(2.vedtaksperiode(a2), orgnummer = a2)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode(a2), orgnummer = a2)
@@ -919,6 +937,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), orgnummer = a1)
         håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode(a2), orgnummer = a2)
         håndterSimulering(1.vedtaksperiode(a2), orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(a2), orgnummer = a2)
@@ -938,6 +957,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode(a1), orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode(a1), orgnummer = a1)
         håndterUtbetalt(2.vedtaksperiode(a1), orgnummer = a1)
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(2.vedtaksperiode(a2), orgnummer = a2)
         håndterSimulering(2.vedtaksperiode(a2), orgnummer = a2)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode(a2), orgnummer = a2)
@@ -995,6 +1015,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), orgnummer = a1)
         håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode(a2), orgnummer = a2)
         håndterSimulering(1.vedtaksperiode(a2), orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(a2), orgnummer = a2)
@@ -1014,6 +1035,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode(a1), orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode(a1), orgnummer = a1)
         håndterUtbetalt(2.vedtaksperiode(a1), orgnummer = a1)
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(2.vedtaksperiode(a2), orgnummer = a2)
         håndterSimulering(2.vedtaksperiode(a2), orgnummer = a2)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode(a2), orgnummer = a2)
@@ -1077,6 +1099,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), orgnummer = a1)
         håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode(a2), orgnummer = a2)
         håndterSimulering(1.vedtaksperiode(a2), orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(a2), orgnummer = a2)
@@ -1096,6 +1119,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode(a1), orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode(a1), orgnummer = a1)
         håndterUtbetalt(2.vedtaksperiode(a1), orgnummer = a1)
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(2.vedtaksperiode(a2), orgnummer = a2)
         håndterSimulering(2.vedtaksperiode(a2), orgnummer = a2)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode(a2), orgnummer = a2)
@@ -1174,6 +1198,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), orgnummer = a1)
         håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode(a2), orgnummer = a2)
         håndterSimulering(1.vedtaksperiode(a2), orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(a2), orgnummer = a2)
@@ -1193,6 +1218,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode(a1), orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode(a1), orgnummer = a1)
         håndterUtbetalt(2.vedtaksperiode(a1), orgnummer = a1)
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(2.vedtaksperiode(a2), orgnummer = a2)
         håndterSimulering(2.vedtaksperiode(a2), orgnummer = a2)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode(a2), orgnummer = a2)
@@ -1283,6 +1309,12 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
         assertTilstand(a1, AVSLUTTET, 1)
         assertTilstand(a1, AVVENTER_UTBETALINGSGRUNNLAG, 2)
+        assertTilstand(a2, AVVENTER_UTBETALINGSGRUNNLAG, 1)
+        assertTilstand(a2, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, 2)
+
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
+        assertTilstand(a1, AVSLUTTET, 1)
+        assertTilstand(a1, AVVENTER_UTBETALINGSGRUNNLAG, 2)
         assertTilstand(a2, AVVENTER_HISTORIKK, 1)
         assertTilstand(a2, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, 2)
 
@@ -1336,8 +1368,9 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(a1, AVSLUTTET, 1)
         assertTilstand(a1, AVSLUTTET, 2)
         assertTilstand(a2, AVSLUTTET, 1)
-        assertTilstand(a2, AVVENTER_HISTORIKK, 2)
+        assertTilstand(a2, AVVENTER_UTBETALINGSGRUNNLAG, 2)
 
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(2.vedtaksperiode(a2), orgnummer = a2)
         håndterSimulering(2.vedtaksperiode(a2), orgnummer = a2)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode(a2), orgnummer = a2)
@@ -1590,6 +1623,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), true, a1)
         håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
 
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode(a2), orgnummer = a2)
         håndterSimulering(1.vedtaksperiode(a2), orgnummer = a2)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 15.februar, 100.prosent), orgnummer = a1)
@@ -1811,7 +1845,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), true, a1)
         håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
-        //håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2) TODO
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode(a2), inntektshistorikk = emptyList(), orgnummer = a2)
         håndterSimulering(1.vedtaksperiode(a2), orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(a2), true, a2)
@@ -1856,7 +1890,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), true, a1)
         håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
-        //håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2) TODO: hvorfor trenger vi ikke denne?
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode(a2), inntektshistorikk = emptyList(), orgnummer = a2)
         håndterSimulering(1.vedtaksperiode(a2), orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(a2), true, a2)
@@ -1905,10 +1939,15 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(a1, TIL_UTBETALING, 2)
         assertTilstand(a2, AVVENTER_ARBEIDSGIVERE, 2)
         håndterUtbetalt(2.vedtaksperiode(a1), orgnummer = a1)
+
+        assertTilstand(a1, AVSLUTTET, 2)
+        assertTilstand(a2, AVVENTER_UTBETALINGSGRUNNLAG, 2)
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode(a2), orgnummer = a2)
+
         assertTilstand(a1, AVSLUTTET, 2)
         assertTilstand(a2, AVVENTER_HISTORIKK, 2)
-
         håndterYtelser(2.vedtaksperiode(a2), inntektshistorikk = emptyList(), orgnummer = a2)
+
         assertTilstand(a1, AVSLUTTET, 2)
         assertTilstand(a2, AVVENTER_SIMULERING, 2)
         håndterSimulering(2.vedtaksperiode(a2), orgnummer = a2)
@@ -2052,7 +2091,10 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode(a1), orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode(a1), true, a1)
         håndterUtbetalt(2.vedtaksperiode(a1), orgnummer = a1)
+        assertTilstand(a1, AVSLUTTET, 2)
+        assertTilstand(a2, AVVENTER_UTBETALINGSGRUNNLAG, 2)
 
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode(a2), orgnummer = a2)
         assertTilstand(a1, AVSLUTTET, 2)
         assertTilstand(a2, AVVENTER_HISTORIKK, 2)
 
@@ -2137,10 +2179,12 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
 
         håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
         assertTilstand(a1, AVSLUTTET)
-        assertTilstand(a2, AVVENTER_HISTORIKK)
-        //assertTilstand(a2, AVVENTER_UTBETALINGSGRUNNLAG) TODO
+        assertTilstand(a2, AVVENTER_UTBETALINGSGRUNNLAG)
 
-        //håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
+        assertTilstand(a1, AVSLUTTET)
+        assertTilstand(a2, AVVENTER_HISTORIKK)
+
         håndterYtelser(1.vedtaksperiode(a2), orgnummer = a2)
         assertTilstand(a1, AVSLUTTET)
         assertTilstand(a2, AVVENTER_SIMULERING)
@@ -2248,7 +2292,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), true, a1)
         håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
-        //håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2) TODO
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode(a2), inntektshistorikk = emptyList(), orgnummer = a2)
         håndterSimulering(1.vedtaksperiode(a2), orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(a2), true, a2)
