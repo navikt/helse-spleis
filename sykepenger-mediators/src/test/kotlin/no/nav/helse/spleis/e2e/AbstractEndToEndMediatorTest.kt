@@ -199,6 +199,27 @@ internal abstract class AbstractEndToEndMediatorTest {
         )
     }
 
+    protected fun sendUtbetalingsgrunnlag(
+        vedtaksperiodeIndeks: Int,
+        inntekter: List<Pair<YearMonth, Double>> = 1.rangeTo(12).map { YearMonth.of(2017, it) to INNTEKT },
+        arbeidsforhold: List<TestMessageFactory.Arbeidsforhold> = listOf(
+            TestMessageFactory.Arbeidsforhold(
+                orgnummer = ORGNUMMER,
+                ansattSiden = 1.januar(2010),
+                ansattTil = null
+            )
+        )
+    ) {
+        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, ArbeidsforholdV2))
+        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, InntekterForSykepengegrunnlag))
+
+        testRapid.sendTestMessage(meldingsfabrikk.lagUtbetalingsgrunnlag(
+            vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
+            tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, ArbeidsforholdV2),
+            inntekter = inntekter,
+            arbeidsforhold = arbeidsforhold
+        ))
+    }
 
     protected fun sendYtelser(
         vedtaksperiodeIndeks: Int,

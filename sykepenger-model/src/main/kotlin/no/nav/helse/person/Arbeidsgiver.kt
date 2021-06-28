@@ -714,7 +714,7 @@ internal class Arbeidsgiver private constructor(
             skalGjenopptaBehandling = false
             val gjenopptaBehandling = GjenopptaBehandling(hendelse)
             énHarHåndtert(gjenopptaBehandling, Vedtaksperiode::håndter)
-            Vedtaksperiode.gjentaHistorikk(hendelse, person, Vedtaksperiode.AvventerArbeidsgivere, Vedtaksperiode.AvventerHistorikk)
+            Vedtaksperiode.gjentaHistorikk(hendelse, person, Vedtaksperiode.AvventerArbeidsgivere, Vedtaksperiode.AvventerUtbetalingsgrunnlag)
         }
     }
 

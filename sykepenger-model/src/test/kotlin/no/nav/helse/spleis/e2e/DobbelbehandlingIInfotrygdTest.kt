@@ -64,6 +64,7 @@ internal class DobbelbehandlingIInfotrygdTest : AbstractEndToEndTest() {
         val inntektshistorikk = listOf(
             Inntektsopplysning("456789123", 1.desember(2020), 1000.daglig, true)
         )
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, *historikk, inntektshistorikk = inntektshistorikk)
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
     }

@@ -24,10 +24,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
-import java.time.Year
+import java.time.*
 import java.util.*
 
 class JsonBuilderTest {
@@ -238,6 +235,7 @@ class JsonBuilderTest {
                 )
                 fangeSykdomstidslinje()
                 håndter(inntektsmelding(fom = fom))
+                håndter(utbetalingsgrunnlag(vedtaksperiodeId = UUID.fromString(vedtaksperiodeId), skjæringstidspunkt = fom.plusDays(15)))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
@@ -254,6 +252,7 @@ class JsonBuilderTest {
             fangeVedtaksperiode()
             håndter(søknad(fom = 1.februar, tom = 10.februar))
             håndter(utbetalingshistorikk())
+            håndter(utbetalingsgrunnlag(vedtaksperiodeId = UUID.fromString(vedtaksperiodeId), skjæringstidspunkt = 16.januar))
         }
 
         fun ingenBetalingsperson(
@@ -320,6 +319,7 @@ class JsonBuilderTest {
                         perioder = listOf(Periode(fom, 4.januar), Periode(8.januar, 16.januar))
                     )
                 )
+                håndter(utbetalingsgrunnlag(vedtaksperiodeId = UUID.fromString(vedtaksperiodeId), skjæringstidspunkt = fom.plusDays(15)))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
@@ -353,6 +353,7 @@ class JsonBuilderTest {
                 fangeVedtaksperiode()
                 håndter(søknad(fom = 1.januar, tom = 31.januar, hendelseId = søknadhendelseId))
                 håndter(utbetalingshistorikk(refusjoner))
+                håndter(utbetalingsgrunnlag(vedtaksperiodeId = UUID.fromString(vedtaksperiodeId), skjæringstidspunkt = 1.desember))
                 håndter(
                     ytelser(
                         hendelseId = søknadhendelseId,
@@ -388,6 +389,7 @@ class JsonBuilderTest {
                 )
                 fangeSykdomstidslinje()
                 håndter(inntektsmelding(fom = fom))
+                håndter(utbetalingsgrunnlag(vedtaksperiodeId = UUID.fromString(vedtaksperiodeId), skjæringstidspunkt = fom.plusDays(15)))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
@@ -585,6 +587,30 @@ class JsonBuilderTest {
             ugyldigePerioder = emptyList(),
             besvart = LocalDateTime.now()
         )
+
+        private fun utbetalingsgrunnlag(
+            vedtaksperiodeId: UUID = UUID.randomUUID(),
+            skjæringstidspunkt: LocalDate,
+            inntekter: List<ArbeidsgiverInntekt> = listOf(
+                ArbeidsgiverInntekt(orgnummer, (0..3).map {
+                    val yearMonth = YearMonth.from(skjæringstidspunkt).minusMonths(3L - it)
+                    ArbeidsgiverInntekt.MånedligInntekt.Sykepengegrunnlag(
+                        yearMonth = yearMonth,
+                        type = ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
+                        inntekt = 31000.månedlig,
+                        fordel = "juicy fordel",
+                        beskrivelse = "juicy beskrivelse"
+                    )
+                })
+            )
+        ) = Utbetalingsgrunnlag(
+                UUID.randomUUID(),
+                AbstractPersonTest.AKTØRID, AbstractPersonTest.UNG_PERSON_FNR_2018,
+                orgnummer,
+                vedtaksperiodeId,
+                InntektForSykepengegrunnlag(inntekter)
+            )
+
 
         fun ytelser(
             hendelseId: UUID = UUID.randomUUID(),

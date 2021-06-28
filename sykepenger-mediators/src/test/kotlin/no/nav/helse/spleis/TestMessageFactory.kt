@@ -290,6 +290,48 @@ internal class TestMessageFactory(
         val tom: LocalDate
     )
 
+    fun lagUtbetalingsgrunnlag(
+        vedtaksperiodeId: UUID,
+        tilstand: TilstandType,
+        inntekter: List<Pair<YearMonth, Double>>,
+        arbeidsforhold: List<Arbeidsforhold>,
+    ) = lagBehovMedLøsning(
+        behov = listOf(InntekterForSykepengegrunnlag.name, ArbeidsforholdV2.name),
+        vedtaksperiodeId = vedtaksperiodeId,
+        tilstand = tilstand,
+        løsninger = mapOf(
+            InntekterForSykepengegrunnlag.name to inntekter
+                .groupBy { it.first }
+                .map {
+                    mapOf(
+                        "årMåned" to it.key,
+                        "inntektsliste" to it.value.map {
+                            mapOf(
+                                "beløp" to it.second,
+                                "inntektstype" to "LOENNSINNTEKT",
+                                "orgnummer" to organisasjonsnummer,
+                                "fordel" to "kontantytelse",
+                                "beskrivelse" to "fastloenn"
+                            )
+                        }
+                    )
+                },
+            ArbeidsforholdV2.name to arbeidsforhold.map {
+                mapOf(
+                    "orgnummer" to it.orgnummer,
+                    "ansattSiden" to it.ansattSiden,
+                    "ansattTil" to it.ansattTil
+                )
+            }
+        )
+    )
+
+    data class Arbeidsforhold(
+        val orgnummer: String,
+        val ansattSiden: LocalDate,
+        val ansattTil: LocalDate?
+    )
+
     fun lagYtelser(
         vedtaksperiodeId: UUID,
         tilstand: TilstandType,

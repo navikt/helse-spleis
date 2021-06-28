@@ -74,6 +74,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         person.håndter(sykmelding())
         person.håndter(søknad())
         person.håndter(inntektsmelding())
+        person.håndter(utbetalingsgrunnlag())
         person.håndter(ytelser())
         val antallBehovFør = hendelse.behov().size
         person.håndter(påminnelse(AVVENTER_VILKÅRSPRØVING, 1.vedtaksperiode))
@@ -88,6 +89,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         person.håndter(sykmelding())
         person.håndter(søknad())
         person.håndter(inntektsmelding())
+        person.håndter(utbetalingsgrunnlag())
         person.håndter(ytelser())
         person.håndter(vilkårsgrunnlag())
         assertEquals(8, hendelse.behov().size)
@@ -110,6 +112,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         person.håndter(sykmelding())
         person.håndter(søknad())
         person.håndter(inntektsmelding())
+        person.håndter(utbetalingsgrunnlag())
         person.håndter(ytelser(besvart = LocalDateTime.now().minusHours(24)))
         person.håndter(vilkårsgrunnlag())
         assertEquals(9, hendelse.behov().size)
@@ -132,6 +135,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         person.håndter(sykmelding())
         person.håndter(søknad())
         person.håndter(inntektsmelding())
+        person.håndter(utbetalingsgrunnlag())
         person.håndter(ytelser())
         person.håndter(vilkårsgrunnlag())
         person.håndter(ytelser())
@@ -148,6 +152,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         person.håndter(sykmelding())
         person.håndter(søknad())
         person.håndter(inntektsmelding())
+        person.håndter(utbetalingsgrunnlag())
         person.håndter(ytelser())
         person.håndter(vilkårsgrunnlag())
         person.håndter(ytelser())
@@ -165,6 +170,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         person.håndter(sykmelding())
         person.håndter(søknad())
         person.håndter(inntektsmelding())
+        person.håndter(utbetalingsgrunnlag())
         person.håndter(ytelser())
         person.håndter(vilkårsgrunnlag())
         person.håndter(ytelser())
@@ -188,6 +194,9 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
 
         person.håndter(inntektsmelding())
         person.håndter(påminnelse(AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, 1.vedtaksperiode))
+        assertEquals(AVVENTER_UTBETALINGSGRUNNLAG, inspektør.sisteTilstand(1.vedtaksperiode))
+
+        person.håndter(utbetalingsgrunnlag())
         assertEquals(AVVENTER_HISTORIKK, inspektør.sisteTilstand(1.vedtaksperiode))
 
         person.håndter(ytelser())
@@ -351,6 +360,17 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         ).apply {
             hendelse = this
         }
+
+    private fun utbetalingsgrunnlag() = Utbetalingsgrunnlag(
+        meldingsreferanseId = UUID.randomUUID(),
+        aktørId = "aktørId",
+        fødselsnummer = UNG_PERSON_FNR_2018,
+        orgnummer = ORGNUMMER,
+        vedtaksperiodeId = 1.vedtaksperiode,
+        inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList())
+    ).apply {
+        hendelse = this
+    }
 
     private fun ytelser(besvart: LocalDateTime = LocalDateTime.now()): Ytelser {
         val meldingsreferanseId = UUID.randomUUID()

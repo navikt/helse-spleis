@@ -283,6 +283,7 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
         nyttVedtak(3.januar, 26.januar)
         håndterSykmelding(Sykmeldingsperiode(27.januar, 14.februar, 100.prosent))
         håndterSøknadMedValidering(2.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(27.januar, 14.februar, 100.prosent))
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
 
@@ -318,7 +319,7 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             AVVENTER_UFERDIG_FORLENGELSE,
             AVVENTER_UTBETALINGSGRUNNLAG,
-            AVVENTER_HISTORIKK,
+            // AVVENTER_HISTORIKK,
         )
         assertEquals(3, inspektør.utbetalinger.size)
         assertFalse(inspektør.utbetaling(2).harUtbetalinger())
@@ -330,6 +331,7 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
         nyttVedtak(3.januar, 26.januar)
         håndterSykmelding(Sykmeldingsperiode(27.januar, 14.februar, 100.prosent))
         håndterSøknadMedValidering(2.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(27.januar, 14.februar, 100.prosent))
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
 
@@ -368,8 +370,7 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             AVVENTER_UFERDIG_FORLENGELSE,
-            AVVENTER_UTBETALINGSGRUNNLAG,
-            AVVENTER_HISTORIKK,
+            AVVENTER_UTBETALINGSGRUNNLAG
         )
         val revurdering = inspektør.utbetaling(2)
         assertEquals(2, revurdering.arbeidsgiverOppdrag().size)
@@ -619,6 +620,7 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 17.januar)), førsteFraværsdag = 1.januar)
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(24))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(24))
@@ -656,6 +658,7 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 17.januar)), førsteFraværsdag = 1.januar)
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(24))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(24))
@@ -694,6 +697,7 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 17.januar)), førsteFraværsdag = 1.januar)
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(24))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(24))
@@ -730,6 +734,7 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 17.januar)), førsteFraværsdag = 1.januar)
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(24))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(24))
@@ -895,6 +900,7 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
             Søknad.Søknadsperiode.Sykdom(1.april(2021), 23.april(2021), 100.prosent)
         )
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.april(2021), 16.april(2021))), førsteFraværsdag = 1.april(2021))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(
             1.vedtaksperiode,
         )

@@ -76,7 +76,6 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
             AVVENTER_UTBETALINGSGRUNNLAG,
-            AVVENTER_HISTORIKK
         )
     }
 
@@ -134,7 +133,6 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
             AVVENTER_UTBETALINGSGRUNNLAG,
-            AVVENTER_HISTORIKK
         )
     }
 }

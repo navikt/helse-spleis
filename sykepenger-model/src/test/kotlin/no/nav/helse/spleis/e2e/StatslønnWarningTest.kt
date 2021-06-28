@@ -20,6 +20,7 @@ internal class StatslønnWarningTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNav = 18.februar)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(vedtaksperiodeId = 1.vedtaksperiode, statslønn = true)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(vedtaksperiodeId = 1.vedtaksperiode)
@@ -36,6 +37,7 @@ internal class StatslønnWarningTest : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNav = 18.februar)
         val historikk = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.desember(2017),  31.desember(2017), 100.prosent, 15000.daglig))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, *historikk, statslønn = true)
 
         assertTrue(inspektør.personLogg.hasErrorsOrWorse())

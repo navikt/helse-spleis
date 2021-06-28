@@ -14,6 +14,7 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendUtbetalingsgrunnlag(0)
         sendYtelser(vedtaksperiodeIndeks = 0, pleiepenger = listOf(PleiepengerTestdata(3.januar, 26.januar, 100)))
 
         assertTilstander(
@@ -31,6 +32,7 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendUtbetalingsgrunnlag(0)
         sendYtelser(
             vedtaksperiodeIndeks = 0,
             omsorgspenger = listOf(OmsorgspengerTestdata(3.januar, 26.januar, 100))
@@ -51,6 +53,7 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendUtbetalingsgrunnlag(0)
         sendYtelser(vedtaksperiodeIndeks = 0, opplæringspenger = listOf(OpplæringspengerTestdata(3.januar, 26.januar, 100)))
 
         assertTilstander(
@@ -68,6 +71,7 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendUtbetalingsgrunnlag(0)
         sendYtelser(
             vedtaksperiodeIndeks = 0,
             institusjonsoppholdsperioder = listOf(
@@ -95,6 +99,7 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendUtbetalingsgrunnlag(0)
         sendYtelser(
             vedtaksperiodeIndeks = 0,
             sykepengehistorikk = listOf(UtbetalingshistorikkTestdata(
@@ -161,6 +166,7 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
                 )
             )
         ))
+        sendUtbetalingsgrunnlag(0)
         sendYtelser(vedtaksperiodeIndeks = 0, sykepengehistorikk = historikk)
 
         assertTilstander(
@@ -186,6 +192,7 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
             utbetalteSykeperioder = emptyList(),
             inntektsopplysninger = emptyList()
         ))
+        sendUtbetalingsgrunnlag(0)
         sendYtelser(vedtaksperiodeIndeks = 0, sykepengehistorikk = historikk)
         sendVilkårsgrunnlag(0)
         sendYtelser(vedtaksperiodeIndeks = 0, sykepengehistorikk = historikk)

@@ -48,6 +48,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.juni(2020), 30.juni(2020), 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -87,6 +88,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.juni(2020), 30.juni(2020), 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -142,6 +144,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             )
         )
         håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -191,6 +194,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.juni(2020), 30.juni(2020), 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -219,6 +223,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.juni(2020), 30.juni(2020), 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -273,6 +278,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.juni(2020), 30.august(2020), 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -326,6 +332,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.juni(2020), 30.august(2020), 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -351,6 +358,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.juni(2020), 30.juni(2020), 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -391,6 +399,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.juni(2020), 30.juni(2020), 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -431,6 +440,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.juni(2020), 30.juni(2020), 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -462,6 +472,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.juni(2020), 30.juni(2020), 100.prosent))
             håndterUtbetalingshistorikk(1.vedtaksperiode)
             håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+            håndterUtbetalingsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
                 inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -496,6 +507,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.juni(2020), 30.juni(2020), 100.prosent))
             håndterUtbetalingshistorikk(1.vedtaksperiode)
             håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+            håndterUtbetalingsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
                 inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -537,6 +549,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(6.juni(2020), 7.juni(2020), 100.prosent))
             håndterUtbetalingshistorikk(1.vedtaksperiode)
             håndterInntektsmelding(listOf(6.juni(2020) til 7.juni(2020)))
+            håndterUtbetalingsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
                 inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -561,6 +574,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.juni(2020), 30.juni(2020), 100.prosent))
             håndterUtbetalingshistorikk(1.vedtaksperiode)
             håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+            håndterUtbetalingsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
                 inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -591,6 +605,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.juni(2020), 30.juni(2020), 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -622,6 +637,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.juni(2020), 14.august(2020), 100.prosent)) // 43 dager
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -662,6 +678,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.juni(2020), 14.august(2020), 100.prosent)) // 43 dager
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -699,6 +716,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.juni(2020), 14.august(2020), 100.prosent)) // 43 dager
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -747,6 +765,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.juni(2020), 14.august(2020), 100.prosent)) // 43 dager
             håndterUtbetalingshistorikk(1.vedtaksperiode)
             håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+            håndterUtbetalingsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
                 inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -793,6 +812,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.juni(2020), 14.august(2020), 100.prosent)) // 43 dager
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {

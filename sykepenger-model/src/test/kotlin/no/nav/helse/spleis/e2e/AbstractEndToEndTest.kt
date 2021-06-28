@@ -314,7 +314,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         orgnummer: String = ORGNUMMER,
         inntekter: List<ArbeidsgiverInntekt> = listOf(
             ArbeidsgiverInntekt(orgnummer, (0..3).map {
-                val yearMonth = YearMonth.from(inspektør.skjæringstidspunkt(vedtaksperiodeId)).minusMonths(3L - it)
+                val yearMonth = YearMonth.from(inspektør(orgnummer).skjæringstidspunkt(vedtaksperiodeId)).minusMonths(3L - it)
                 ArbeidsgiverInntekt.MånedligInntekt.Sykepengegrunnlag(
                     yearMonth = yearMonth,
                     type = ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
@@ -917,6 +917,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             førsteFraværsdag = førsteFraværsdag
         )
         håndterSøknadMedValidering(id, Søknad.Søknadsperiode.Sykdom(fom, tom, grad))
+        håndterUtbetalingsgrunnlag(id)
         håndterYtelser(id)
         håndterVilkårsgrunnlag(id, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -934,6 +935,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         håndterSykmelding(Sykmeldingsperiode(fom, tom, grad))
         val id = observatør.sisteVedtaksperiode()
         håndterSøknadMedValidering(id, Søknad.Søknadsperiode.Sykdom(fom, tom, grad))
+        håndterUtbetalingsgrunnlag(id)
         håndterYtelser(id)
         håndterSimulering(id)
         håndterUtbetalingsgodkjenning(id, true)

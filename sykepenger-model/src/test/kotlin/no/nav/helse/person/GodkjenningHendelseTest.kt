@@ -73,6 +73,7 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
         person.håndter(sykmelding())
         person.håndter(søknad())
         person.håndter(inntektsmelding())
+        person.håndter(utbetalingsgrunnlag())
         person.håndter(ytelser())
         person.håndter(vilkårsgrunnlag())
         person.håndter(ytelser())
@@ -98,6 +99,17 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
         utbetalingGodkjent = godkjent,
         godkjenttidspunkt = LocalDateTime.now(),
         automatiskBehandling = false,
+    ).apply {
+        hendelse = this
+    }
+
+    private fun utbetalingsgrunnlag() = Utbetalingsgrunnlag(
+        meldingsreferanseId = UUID.randomUUID(),
+        aktørId = "aktørId",
+        fødselsnummer = UNG_PERSON_FNR_2018,
+        orgnummer = ORGNUMMER,
+        vedtaksperiodeId = 1.vedtaksperiode,
+        inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList())
     ).apply {
         hendelse = this
     }

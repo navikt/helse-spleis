@@ -1613,13 +1613,16 @@ internal class Vedtaksperiode private constructor(
         override val type = AVVENTER_UTBETALINGSGRUNNLAG
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            hendelse.behov()
             vedtaksperiode.trengerUtbetalingsgrunnlag(hendelse)
-            vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            vedtaksperiode.trengerUtbetalingsgrunnlag(påminnelse)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, utbetalingsgrunnlag: Utbetalingsgrunnlag) {
-            utbetalingsgrunnlag.lagreInntekter(vedtaksperiode.person, vedtaksperiode.skjæringstidspunkt)
+            vedtaksperiode.tilstand(utbetalingsgrunnlag, AvventerHistorikk)
+            //utbetalingsgrunnlag.lagreInntekter(vedtaksperiode.person, vedtaksperiode.skjæringstidspunkt)
         }
 
     }

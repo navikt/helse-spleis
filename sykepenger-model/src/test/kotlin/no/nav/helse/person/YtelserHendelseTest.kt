@@ -5,8 +5,7 @@ import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.testhelpers.desember
-import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
+import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -19,7 +18,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-internal class YtelserHendelseTest : AbstractPersonTest() {
+internal class YtelserHendelseTest : AbstractEndToEndTest() {
     private companion object {
         private val førsteSykedag = 1.januar
         private val sisteSykedag = 31.januar
@@ -29,17 +28,18 @@ internal class YtelserHendelseTest : AbstractPersonTest() {
     fun `ytelser på feil tidspunkt`() {
         assertThrows<Aktivitetslogg.AktivitetException> { person.håndter(ytelser(vedtaksperiodeId = UUID.randomUUID())) }
 
-        person.håndter(sykmelding())
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         person.håndter(ytelser(1.vedtaksperiode))
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
 
-        person.håndter(søknad())
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         person.håndter(ytelser(1.vedtaksperiode))
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
 
-        person.håndter(inntektsmelding())
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         person.håndter(ytelser(1.vedtaksperiode))
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(AVVENTER_VILKÅRSPRØVING, inspektør.sisteTilstand(1.vedtaksperiode))
@@ -79,8 +79,8 @@ internal class YtelserHendelseTest : AbstractPersonTest() {
 
     @Test
     fun `fordrepengeytelse før periode`() {
-        håndterYtelser(foreldrepengeytelse = Periode(førsteSykedag.minusDays(10), førsteSykedag.minusDays(1)))
-        person.håndter(simulering())
+        ferdigstill(håndterYtelser(foreldrepengeytelse = Periode(førsteSykedag.minusDays(10), førsteSykedag.minusDays(1))))
+
         assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
     }
 
@@ -93,15 +93,15 @@ internal class YtelserHendelseTest : AbstractPersonTest() {
 
     @Test
     fun `fordrepengeytelse etter periode`() {
-        håndterYtelser(foreldrepengeytelse = Periode(sisteSykedag.plusDays(1), sisteSykedag.plusDays(10)))
-        person.håndter(simulering())
+        ferdigstill(håndterYtelser(foreldrepengeytelse = Periode(sisteSykedag.plusDays(1), sisteSykedag.plusDays(10))))
+
         assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
     }
 
     @Test
     fun `svangerskapsytelse før periode`() {
-        håndterYtelser(svangerskapsytelse = Periode(førsteSykedag.minusDays(10), førsteSykedag.minusDays(1)))
-        person.håndter(simulering())
+        ferdigstill(håndterYtelser(svangerskapsytelse = Periode(førsteSykedag.minusDays(10), førsteSykedag.minusDays(1))))
+
         assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
     }
 
@@ -114,8 +114,8 @@ internal class YtelserHendelseTest : AbstractPersonTest() {
 
     @Test
     fun `svangerskapsytelse etter periode`() {
-        håndterYtelser(svangerskapsytelse = Periode(sisteSykedag.plusDays(1), sisteSykedag.plusDays(10)))
-        person.håndter(simulering())
+        ferdigstill(håndterYtelser(svangerskapsytelse = Periode(sisteSykedag.plusDays(1), sisteSykedag.plusDays(10))))
+
         assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
     }
 
@@ -125,10 +125,10 @@ internal class YtelserHendelseTest : AbstractPersonTest() {
         foreldrepengeytelse: Periode? = null,
         svangerskapsytelse: Periode? = null,
         ugyldigePerioder: List<Pair<LocalDate?, LocalDate?>> = emptyList()
-    ) {
-        person.håndter(sykmelding())
-        person.håndter(søknad())
-        person.håndter(inntektsmelding())
+    ) : Ytelser {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)))
         val ytelser = ytelser(
             vedtaksperiodeId = 1.vedtaksperiode,
             utbetalinger = utbetalinger,
@@ -137,16 +137,23 @@ internal class YtelserHendelseTest : AbstractPersonTest() {
             svangerskapYtelse = svangerskapsytelse,
             ugyldigePerioder = ugyldigePerioder
         )
-        person.håndter(ytelser)
-        person.håndter(vilkårsgrunnlag())
-        person.håndter(ytelser)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
+
+        ytelser.håndter(Person::håndter)
+        return ytelser
+    }
+
+    private fun ferdigstill(ytelser: Ytelser) {
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        ytelser.håndter(Person::håndter)
+        håndterSimulering(1.vedtaksperiode)
     }
 
     private fun håndterUgyldigYtelser() {
-        person.håndter(sykmelding())
-        person.håndter(søknad())
-        person.håndter(inntektsmelding())
-        person.håndter(vilkårsgrunnlag())
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         person.håndter(
             ytelser(
                 vedtaksperiodeId = 1.vedtaksperiode,
@@ -213,83 +220,5 @@ internal class YtelserHendelseTest : AbstractPersonTest() {
             aktivitetslogg = it
         )
     }
-
-    private fun sykmelding() =
-        Sykmelding(
-            meldingsreferanseId = UUID.randomUUID(),
-            fnr = UNG_PERSON_FNR_2018,
-            aktørId = "aktørId",
-            orgnummer = ORGNUMMER,
-            sykeperioder = listOf(Sykmeldingsperiode(førsteSykedag, sisteSykedag, 100.prosent)),
-            sykmeldingSkrevet = førsteSykedag.atStartOfDay(),
-            mottatt = sisteSykedag.atStartOfDay()
-        )
-
-    private fun søknad() =
-        Søknad(
-            meldingsreferanseId = UUID.randomUUID(),
-            fnr = UNG_PERSON_FNR_2018,
-            aktørId = "aktørId",
-            orgnummer = ORGNUMMER,
-            perioder = listOf(Søknad.Søknadsperiode.Sykdom(førsteSykedag, sisteSykedag, 100.prosent)),
-            andreInntektskilder = emptyList(),
-            sendtTilNAV = sisteSykedag.atStartOfDay(),
-            permittert = false,
-            merknaderFraSykmelding = emptyList(),
-            sykmeldingSkrevet = LocalDateTime.now()
-        )
-
-    private fun inntektsmelding(
-        refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(
-            null,
-            31000.månedlig,
-            emptyList()
-        )
-    ) =
-        Inntektsmelding(
-            meldingsreferanseId = UUID.randomUUID(),
-            refusjon = refusjon,
-            orgnummer = ORGNUMMER,
-            fødselsnummer = UNG_PERSON_FNR_2018,
-            aktørId = "aktørId",
-            førsteFraværsdag = førsteSykedag,
-            beregnetInntekt = 31000.månedlig,
-            arbeidsgiverperioder = listOf(Periode(førsteSykedag, førsteSykedag.plusDays(16))),
-            arbeidsforholdId = null,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = null,
-            mottatt = LocalDateTime.now()
-        )
-
-    private fun vilkårsgrunnlag() =
-        Vilkårsgrunnlag(
-            meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = "${1.vedtaksperiode}",
-            aktørId = "aktørId",
-            fødselsnummer = UNG_PERSON_FNR_2018,
-            orgnummer = ORGNUMMER,
-            inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
-                1.januar(2017) til 1.desember(2017) inntekter {
-                    ORGNUMMER inntekt 31000.månedlig
-                }
-            }),
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            opptjeningvurdering = Opptjeningvurdering(
-                listOf(
-                    Opptjeningvurdering.Arbeidsforhold(ORGNUMMER, 1.januar(2017))
-                )
-            )
-        )
-
-    private fun simulering() =
-        Simulering(
-            meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = "${1.vedtaksperiode}",
-            aktørId = "aktørId",
-            fødselsnummer = UNG_PERSON_FNR_2018,
-            orgnummer = ORGNUMMER,
-            simuleringOK = true,
-            melding = "",
-            simuleringResultat = null
-        )
 
 }
