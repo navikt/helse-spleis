@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -837,6 +838,92 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
         assertEquals(6, inspektør.forbrukteSykedager(0))
         assertEquals(5, inspektør.forbrukteSykedager(1))
         assertEquals(4, inspektør.forbrukteSykedager(2))
+    }
+
+    @Test
+    @Disabled("Feilende test fra prod")
+    @Suppress("UNCHECKED_CAST")
+    fun `overstyre inn ferie med forgående periode med avsluttende ferie`() {
+        /* Hvis forgående periode avsluttes med ferie og vi revurderer starten av etterfølgende periode med ferie blir det feil i utgående behov.
+           Da får vi ikke med oss at feriedagene skal trekkes tilbake */
+        håndterSykmelding(Sykmeldingsperiode(1.april(2021), 23.april(2021), 100.prosent))
+        håndterSøknadMedValidering(
+            1.vedtaksperiode,
+            Søknad.Søknadsperiode.Sykdom(1.april(2021), 23.april(2021), 100.prosent),
+            Søknad.Søknadsperiode.Ferie(23.april(2021), 23.april(2021))
+        )
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.april(2021), 16.april(2021))), førsteFraværsdag = 1.april(2021))
+        håndterYtelser(
+            1.vedtaksperiode,
+        )
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioderForSammenligningsgrunnlag {
+                1.januar(2020) til 1.mars(2021) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
+        håndterYtelser(
+            1.vedtaksperiode,
+        )
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode)
+        forlengVedtak(24.april(2021), 7.mai(2021))
+
+        håndterOverstyring((26.april(2021) til 27.april(2021)).map { manuellFeriedag(it) })
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
+        val behov = inspektør.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling)
+        assertEquals(2, (behov.detaljer()["linjer"] as List<*>).size)
+
+        assertEquals("2021-04-17", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["fom"])
+        assertEquals("2021-04-22", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["tom"])
+        assertEquals("2021-04-28", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[1]["fom"])
+        assertEquals("2021-05-07", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[1]["tom"])
+    }
+
+    @Test
+    @Suppress("UNCHECKED_CAST")
+    fun `overstyre inn ferie med forgående periode uten avsluttende ferie`() {
+        /* Hvis forgående periode avsluttes med ferie og vi revurderer starten av etterfølgende periode med ferie blir det feil i utgående behov.
+           Da får vi ikke med oss at feriedagene skal trekkes tilbake */
+        håndterSykmelding(Sykmeldingsperiode(1.april(2021), 23.april(2021), 100.prosent))
+        håndterSøknadMedValidering(
+            1.vedtaksperiode,
+            Søknad.Søknadsperiode.Sykdom(1.april(2021), 23.april(2021), 100.prosent)
+        )
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.april(2021), 16.april(2021))), førsteFraværsdag = 1.april(2021))
+        håndterYtelser(
+            1.vedtaksperiode,
+        )
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioderForSammenligningsgrunnlag {
+                1.januar(2020) til 1.mars(2021) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
+        håndterYtelser(
+            1.vedtaksperiode,
+        )
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode)
+        forlengVedtak(24.april(2021), 7.mai(2021))
+
+        håndterOverstyring((26.april(2021) til 27.april(2021)).map { manuellFeriedag(it) })
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
+        val behov = inspektør.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling)
+        assertEquals(2, (behov.detaljer()["linjer"] as List<*>).size)
+
+        assertEquals("2021-04-17", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["fom"])
+        assertEquals("2021-04-25", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["tom"])
+        assertEquals("2021-04-28", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[1]["fom"])
+        assertEquals("2021-05-07", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[1]["tom"])
     }
 
     private fun manuellPermisjonsdag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Permisjonsdag)
