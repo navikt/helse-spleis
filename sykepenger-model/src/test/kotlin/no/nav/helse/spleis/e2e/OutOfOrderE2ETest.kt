@@ -389,6 +389,7 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
         håndterInntektsmelding(listOf(1.mars til 16.mars))
         håndterSykmelding(Sykmeldingsperiode(11.januar, 20.januar, 100.prosent))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         assertTilstander(
             1.vedtaksperiode,
             START,

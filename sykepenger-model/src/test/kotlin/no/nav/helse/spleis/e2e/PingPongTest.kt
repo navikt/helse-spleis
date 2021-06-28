@@ -24,6 +24,7 @@ internal class PingPongTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(30.mai(2020), 19.juni(2020), 100.prosent))
         håndterSøknad(Sykdom(30.mai(2020), 19.juni(2020), 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk1, inntektshistorikk = inntekter)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -34,6 +35,7 @@ internal class PingPongTest : AbstractEndToEndTest() {
         håndterSøknad(
             Sykdom(22.juni(2020), 9.juli(2020), 100.prosent)
         )
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterPåminnelse(2.vedtaksperiode, AVVENTER_GODKJENNING, LocalDateTime.now().minusDays(110))
@@ -46,6 +48,7 @@ internal class PingPongTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(18.august(2020), 2.september(2020), 100.prosent))
         håndterSøknad(Sykdom(18.august(2020), 2.september(2020), 100.prosent))
         håndterUtbetalingshistorikk(3.vedtaksperiode, historikk1, historikk2, inntektshistorikk = inntekter2)
+        håndterUtbetalingsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode, true)
@@ -64,6 +67,7 @@ internal class PingPongTest : AbstractEndToEndTest() {
         val historie = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar,  28.februar, 100.prosent, 1000.daglig)
         val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.februar, INNTEKT, true))
         håndterUtbetalingshistorikk(2.vedtaksperiode, historie, inntektshistorikk = inntekter)
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
     }
