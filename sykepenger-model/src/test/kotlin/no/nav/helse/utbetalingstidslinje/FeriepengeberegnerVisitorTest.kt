@@ -390,6 +390,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
         )
         håndterUtbetalingshistorikk(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
         håndterInntektsmelding(listOf(arbeidsgiverperiode), orgnummer = orgnummer)
+        håndterUtbetalingsgrunnlag(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
         håndterYtelser(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
         håndterVilkårsgrunnlag(observatør.sisteVedtaksperiode(), inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -458,6 +459,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
             besvart = LocalDateTime.now().minusMonths(1),
             utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(orgnummer, 1.desember(2017), 31.desember(2017), 100.prosent, INNTEKT))
         )
+        håndterUtbetalingsgrunnlag(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
         håndterYtelser(
             observatør.sisteVedtaksperiode(),
             orgnummer = orgnummer,
@@ -476,6 +478,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
             Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 60.prosent),
             orgnummer = orgnummer
         )
+        håndterUtbetalingsgrunnlag(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
         håndterYtelser(
             observatør.sisteVedtaksperiode(),
             orgnummer = orgnummer,
