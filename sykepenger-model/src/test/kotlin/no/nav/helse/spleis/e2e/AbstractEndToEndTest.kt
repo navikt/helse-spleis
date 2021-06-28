@@ -495,12 +495,15 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         ).håndter(Person::håndter)
     }
 
-    protected fun håndterOverstyring(overstyringsdager: List<ManuellOverskrivingDag> = listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag, 100))) {
+    protected fun håndterOverstyring(
+        overstyringsdager: List<ManuellOverskrivingDag> = listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag, 100)),
+        orgnummer: String = ORGNUMMER
+    ) {
         OverstyrTidslinje(
             meldingsreferanseId = UUID.randomUUID(),
             fødselsnummer = UNG_PERSON_FNR_2018,
             aktørId = AKTØRID,
-            organisasjonsnummer = ORGNUMMER,
+            organisasjonsnummer = orgnummer,
             dager = overstyringsdager,
             opprettet = LocalDateTime.now()
         ).håndter(Person::håndter)

@@ -238,6 +238,7 @@ internal class VedtaksperiodeBuilder(
             TilstandType.AVVENTER_SØKNAD_FERDIG_FORLENGELSE,
             TilstandType.AVVENTER_UFERDIG_FORLENGELSE,
             TilstandType.AVVENTER_SIMULERING,
+            TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING,
             TilstandType.AVVENTER_SIMULERING_REVURDERING,
             TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING,
             TilstandType.AVVENTER_HISTORIKK_REVURDERING,

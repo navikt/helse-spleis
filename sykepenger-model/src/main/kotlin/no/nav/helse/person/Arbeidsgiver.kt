@@ -2,6 +2,8 @@ package no.nav.helse.person
 
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
+import no.nav.helse.person.Vedtaksperiode.Companion.ALLE
+import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_REVURDERT
 import no.nav.helse.person.Vedtaksperiode.Companion.harInntekt
 import no.nav.helse.person.Vedtaksperiode.Companion.harOverlappendeUtbetaltePerioder
 import no.nav.helse.person.Vedtaksperiode.Companion.medSkjæringstidspunkt
@@ -61,15 +63,7 @@ internal class Arbeidsgiver private constructor(
     internal companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
-        internal val SENERE_EXCLUSIVE = fun(senereEnnDenne: Vedtaksperiode): VedtaksperioderFilter {
-            return fun(vedtaksperiode: Vedtaksperiode) = vedtaksperiode > senereEnnDenne
-        }
-        internal val SENERE_INCLUSIVE = fun(senereEnnDenne: Vedtaksperiode): VedtaksperioderFilter {
-            return fun(vedtaksperiode: Vedtaksperiode) = vedtaksperiode >= senereEnnDenne
-        }
-        internal val ALLE: VedtaksperioderFilter = { true }
-
-        internal fun Iterable<Arbeidsgiver>.nåværendeVedtaksperioder() = mapNotNull { it.vedtaksperioder.nåværendeVedtaksperiode() }
+        internal fun Iterable<Arbeidsgiver>.nåværendeVedtaksperioder(filter: VedtaksperiodeFilter) = mapNotNull { it.vedtaksperioder.nåværendeVedtaksperiode(filter) }
 
         internal fun List<Arbeidsgiver>.grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, periodeStart: LocalDate) =
             this.mapNotNull { it.inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt, maxOf(skjæringstidspunkt, periodeStart)) }
@@ -608,7 +602,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun søppelbøtte(
         hendelse: IAktivitetslogg,
-        filter: VedtaksperioderFilter,
+        filter: VedtaksperiodeFilter,
         årsak: ForkastetÅrsak
     ): List<Vedtaksperiode> {
         return forkast(filter, årsak)
@@ -625,7 +619,7 @@ internal class Arbeidsgiver private constructor(
             ?: listOf()
     }
 
-    private fun forkast(filter: VedtaksperioderFilter, årsak: ForkastetÅrsak) = vedtaksperioder
+    private fun forkast(filter: VedtaksperiodeFilter, årsak: ForkastetÅrsak) = vedtaksperioder
         .filter(filter)
         .also { perioder ->
             vedtaksperioder.removeAll(perioder)
@@ -644,16 +638,14 @@ internal class Arbeidsgiver private constructor(
         return results
     }
 
-    internal fun revurderSisteUtbetalte(hendelse: OverstyrTidslinje, vedtaksperiode: Vedtaksperiode) {
+    internal fun startRevurderingForAlleBerørtePerioder(hendelse: OverstyrTidslinje, vedtaksperiode: Vedtaksperiode) {
         håndter(hendelse) { nyRevurderingFør(vedtaksperiode, hendelse) }
         if (hendelse.hasErrorsOrWorse()) {
             hendelse.info("Revurdering blokkeres, gjenopptar behandling")
             return gjenopptaBehandling()
         }
 
-        if (Toggles.RevurderTidligerePeriode.enabled) {
-            vedtaksperiode.revurder(hendelse, vedtaksperiode)
-        } else {
+        if (!Toggles.RevurderTidligerePeriode.enabled) {
             vedtaksperioder.sisteSammenhengedeUtbetaling(vedtaksperiode)?.revurder(hendelse, vedtaksperiode)
         }
     }
@@ -661,7 +653,7 @@ internal class Arbeidsgiver private constructor(
     private fun List<Vedtaksperiode>.sisteSammenhengedeUtbetaling(vedtaksperiode: Vedtaksperiode) =
         this.filter { it.sammeArbeidsgiverPeriodeOgUtbetalt(vedtaksperiode) }.maxOrNull()
 
-    internal fun tidligereOgEttergølgende(segSelv: Periode): VedtaksperioderFilter {
+    internal fun tidligereOgEttergølgende(segSelv: Periode): VedtaksperiodeFilter {
         val tidligereOgEttergølgende1 = vedtaksperioder.sorted().firstOrNull { it.periode().overlapperMed(segSelv) }?.let(::tidligereOgEttergølgende)
         return fun(vedtaksperiode: Vedtaksperiode) = tidligereOgEttergølgende1 != null && vedtaksperiode in tidligereOgEttergølgende1
     }
@@ -698,15 +690,23 @@ internal class Arbeidsgiver private constructor(
     internal fun finnForkastetSykeperiodeRettFør(vedtaksperiode: Vedtaksperiode) =
         ForkastetVedtaksperiode.finnForkastetSykeperiodeRettFør(forkastede, vedtaksperiode)
 
-    internal fun finnSykeperiodeRettEtter(vedtaksperiode: Vedtaksperiode) =
-        vedtaksperioder.firstOrNull { other -> vedtaksperiode.erSykeperiodeRettFør(other) }
-
     internal fun tidligerePerioderFerdigBehandlet(vedtaksperiode: Vedtaksperiode) =
         Vedtaksperiode.tidligerePerioderFerdigBehandlet(vedtaksperioder, vedtaksperiode)
+
+    internal fun alleAndrePerioderErKlare(vedtaksperiode: Vedtaksperiode) = vedtaksperioder.filterNot { it == vedtaksperiode }.none(IKKE_FERDIG_REVURDERT)
+
+    internal fun fordelRevurdertUtbetaling(hendelse: ArbeidstakerHendelse, utbetaling: Utbetaling) {
+        fordelRevurdertUtbetaling(hendelse) { håndterRevurdertUtbetaling(utbetaling, hendelse) }
+    }
 
     private var skalGjenopptaBehandling = false
     internal fun gjenopptaBehandling() {
         skalGjenopptaBehandling = true
+    }
+
+    private var skalGjenopptaRevurdering = false
+    internal fun gjenopptaRevurdering() {
+        skalGjenopptaRevurdering = true
     }
 
     private fun finalize(hendelse: ArbeidstakerHendelse) {
@@ -715,6 +715,18 @@ internal class Arbeidsgiver private constructor(
             val gjenopptaBehandling = GjenopptaBehandling(hendelse)
             énHarHåndtert(gjenopptaBehandling, Vedtaksperiode::håndter)
             Vedtaksperiode.gjentaHistorikk(hendelse, person, Vedtaksperiode.AvventerArbeidsgivere, Vedtaksperiode.AvventerUtbetalingsgrunnlag)
+            Vedtaksperiode.gjentaHistorikk(hendelse, person, Vedtaksperiode.AvventerArbeidsgivereRevurdering, Vedtaksperiode.AvventerHistorikkRevurdering, IKKE_FERDIG_REVURDERT)
+        }
+
+        while (skalGjenopptaRevurdering) {
+            skalGjenopptaRevurdering = false
+            Vedtaksperiode.gjentaHistorikk(
+                hendelse = hendelse,
+                person = person,
+                nåværendeTilstand = Vedtaksperiode.AvventerArbeidsgivereRevurdering,
+                nesteTilstand = Vedtaksperiode.AvventerHistorikkRevurdering,
+                filter = IKKE_FERDIG_REVURDERT
+            )
         }
     }
 
@@ -816,6 +828,10 @@ internal class Arbeidsgiver private constructor(
         looper { håndterer(it, hendelse) }
     }
 
+    private fun <Hendelse : IAktivitetslogg> fordelRevurdertUtbetaling(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Unit) {
+        looper { håndterer(it, hendelse) }
+    }
+
     private fun <Hendelse : IAktivitetslogg> énHarHåndtert(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean): Boolean {
         var håndtert = false
         looper { håndtert = håndtert || håndterer(it, hendelse) }
@@ -876,5 +892,3 @@ internal enum class ForkastetÅrsak {
     ERSTATTES,
     ANNULLERING
 }
-
-internal typealias VedtaksperioderFilter = (Vedtaksperiode) -> Boolean

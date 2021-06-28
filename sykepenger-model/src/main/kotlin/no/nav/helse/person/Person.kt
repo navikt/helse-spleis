@@ -12,6 +12,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.harArbeidsgivereMedOverlappendeUtbetaltePerioder
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntekt
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
+import no.nav.helse.person.Vedtaksperiode.Companion.ALLE
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -212,6 +213,17 @@ class Person private constructor(
         observers.forEach { it.annullering(event) }
     }
 
+    internal fun igangsettRevurdering(hendelse: OverstyrTidslinje, vedtaksperiode: Vedtaksperiode) {
+        arbeidsgivere.forEach {
+            it.startRevurderingForAlleBerørtePerioder(hendelse, vedtaksperiode)
+        }
+
+        if (Toggles.RevurderTidligerePeriode.enabled) {
+            if (hendelse.hasErrorsOrWorse()) return
+            vedtaksperiode.revurder(hendelse, vedtaksperiode)
+        }
+    }
+
     fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, påminnelse: Påminnelse) {
         observers.forEach { it.vedtaksperiodePåminnet(vedtaksperiodeId, påminnelse) }
     }
@@ -347,7 +359,7 @@ class Person private constructor(
 
     internal fun invaliderAllePerioder(hendelse: IAktivitetslogg, feilmelding: String?) {
         feilmelding?.also(hendelse::error)
-        arbeidsgivere.forEach { it.søppelbøtte(hendelse, Arbeidsgiver.ALLE, ForkastetÅrsak.IKKE_STØTTET) }
+        arbeidsgivere.forEach { it.søppelbøtte(hendelse, ALLE, ForkastetÅrsak.IKKE_STØTTET) }
     }
 
     private fun finnEllerOpprettArbeidsgiver(hendelse: ArbeidstakerHendelse) =
@@ -372,7 +384,7 @@ class Person private constructor(
             newValue
         }
 
-    internal fun nåværendeVedtaksperioder() = arbeidsgivere.nåværendeVedtaksperioder().sorted()
+    internal fun nåværendeVedtaksperioder(filter: VedtaksperiodeFilter) = arbeidsgivere.nåværendeVedtaksperioder(filter).sorted()
 
     /**
      * Brukes i MVP for flere arbeidsgivere. Alle forlengelser hos alle arbeidsgivere må gjelde samme periode
