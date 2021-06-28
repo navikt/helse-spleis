@@ -1708,9 +1708,10 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
         håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
         assertTilstand(a1, AVSLUTTET)
+        assertTilstand(a2, AVVENTER_UTBETALINGSGRUNNLAG)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
+        assertTilstand(a1, AVSLUTTET)
         assertTilstand(a2, AVVENTER_HISTORIKK)
-        //håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2) TODO
-
         håndterYtelser(1.vedtaksperiode(a2), inntektshistorikk = emptyList(), orgnummer = a2)
         assertTilstand(a1, AVSLUTTET)
         assertTilstand(a2, AVVENTER_SIMULERING)
