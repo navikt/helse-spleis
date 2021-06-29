@@ -309,6 +309,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         ).håndter(Person::håndter)
     }
 
+    protected fun Inntekt.repeat(antall: Int) = (0..antall).map { this }
+
     protected fun håndterUtbetalingsgrunnlag(
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         orgnummer: String = ORGNUMMER,
