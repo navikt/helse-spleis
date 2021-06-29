@@ -46,7 +46,7 @@ internal class Utbetalingslinje internal constructor(
         )
     }
 
-    internal fun linkTo(other: Utbetalingslinje) {
+    internal fun kobleTil(other: Utbetalingslinje) {
         this.delytelseId = other.delytelseId + 1
         this.refDelytelseId = other.delytelseId
     }
@@ -69,11 +69,16 @@ internal class Utbetalingslinje internal constructor(
             this.grad == other.grad &&
             this.datoStatusFom == other.datoStatusFom
 
-    internal fun kunTomForskjelligFra(other: Utbetalingslinje) =
+    internal fun skalUtvide(other: Utbetalingslinje, sisteLinjeITidligereOppdrag: Utbetalingslinje) =
+        other == sisteLinjeITidligereOppdrag &&
         this.fom == other.fom &&
             this.beløp == other.beløp &&
             this.grad == other.grad &&
             this.datoStatusFom == other.datoStatusFom
+
+    internal fun skalOpphøreOgErstatte(other: Utbetalingslinje, sisteLinjeITidligereOppdrag: Utbetalingslinje) =
+        other == sisteLinjeITidligereOppdrag &&
+        (this.fom != other.fom || this.tom != other.tom) && this.datoStatusFom == other.datoStatusFom
 
     override fun hashCode(): Int {
         return fom.hashCode() * 37 +
@@ -84,7 +89,7 @@ internal class Utbetalingslinje internal constructor(
             datoStatusFom.hashCode() * 23
     }
 
-    internal fun ghostFrom(tidligere: Utbetalingslinje) = copyWith(UEND, tidligere)
+    internal fun markerUendret(tidligere: Utbetalingslinje) = copyWith(UEND, tidligere)
 
     internal fun utvidTom(tidligere: Utbetalingslinje) = copyWith(ENDR, tidligere)
         .also {
@@ -103,7 +108,7 @@ internal class Utbetalingslinje internal constructor(
 
     internal fun erForskjell() = endringskode != UEND
 
-    internal fun deletion(datoStatusFom: LocalDate) =
+    internal fun opphørslinje(datoStatusFom: LocalDate) =
         Utbetalingslinje(
             fom = fom,
             tom = tom,

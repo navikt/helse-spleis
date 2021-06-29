@@ -152,4 +152,12 @@ internal data class Utbetalingsdager(
     val addHelgFun: (Utbetalingstidslinje.(LocalDate, Økonomi) -> Unit)? = null,
     val dekningsgrunnlag: Number = 1200,
     val grad: Number = 0.0
-)
+) {
+    internal fun copyWith(beløp: Number? = null, grad: Number? = null) = Utbetalingsdager(
+        antallDager = this.antallDager,
+        addDagFun = this.addDagFun,
+        addHelgFun = this.addHelgFun,
+        dekningsgrunnlag = beløp.takeIf { it != null } ?: this.dekningsgrunnlag,
+        grad = grad.takeIf { it != null } ?: this.grad
+    )
+}
