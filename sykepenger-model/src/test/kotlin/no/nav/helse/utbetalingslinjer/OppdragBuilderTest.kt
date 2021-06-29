@@ -140,8 +140,15 @@ internal class OppdragBuilderTest {
 
     @Test
     fun `dager som ikke lenger skal utbetales skal opphøres 2`() {
-        val oppdragTilUtbetaling1 = opprett(18.NAV, 1.FRI)
-        val oppdragskladd2 = opprett(18.NAV, 1.FRI, 2.HELG, 5.NAV)
+        val oppdragTilUtbetaling1 = opprett(
+            1.januar til 18.januar er NAVDAGER,
+            19.januar er FRI
+        )
+        val oppdragskladd2 = opprett(
+            1.januar til 18.januar er NAVDAGER,
+            19.januar er FRI,
+            20.januar til 26.januar er NAVDAGER
+        )
         val oppdragskladd3 = opprett(18.NAV, 1.FRI, 2.HELG, 2.FRI, 5.NAV(1100), 5.NAV(1300, 40.0))
 
         val oppdragTilUtbetaling2 = oppdragskladd2.minus(oppdragTilUtbetaling1, Aktivitetslogg())
@@ -151,6 +158,23 @@ internal class OppdragBuilderTest {
         oppdragTilUtbetaling3.assertLinje(1, 20.januar, 26.januar, delytelseId = 2, refDelytelseId = null, endringskode = ENDR, datoStatusFom = 20.januar, refFagsystemId = null)
         oppdragTilUtbetaling3.assertLinje(2, 24.januar, 28.januar, delytelseId = 3, refDelytelseId = 2, endringskode = NY)
         oppdragTilUtbetaling3.assertLinje(3, 29.januar, 2.februar, delytelseId = 4, refDelytelseId = 3, endringskode = NY)
+    }
+
+    @Test
+    fun `flytter fom-dato og innfører fridager i midten`() {
+        val oppdragTilUtbetaling1 = opprett(
+            10.januar til 31.januar er NAVDAGER,
+            1.februar til 5.februar er NAVDAGER medBeløp 1400,
+            startdato = 10.januar
+        )
+        val oppdragskladd1 = opprett(
+            5.januar til 31.januar er NAVDAGER,
+            1.februar til 2.februar er FRI,
+            3.februar til 5.februar er NAVDAGER medBeløp 1400,
+            startdato = 5.januar
+            )
+
+        val oppdragTilUtbetaling2 = oppdragskladd1.minus(oppdragTilUtbetaling1, Aktivitetslogg())
     }
 
     @Test
@@ -277,12 +301,12 @@ internal class OppdragBuilderTest {
         assertEquals(10.januar, oppdrag.last().tom)
     }
 
-    private fun opprett(vararg dager: Utbetalingsdager, sisteDato: LocalDate? = null): Oppdrag {
-        val tidslinje = tidslinjeOf(*dager)
+    private fun opprett(vararg dager: Utbetalingsdager, sisteDato: LocalDate? = null, startdato: LocalDate = 1.januar): Oppdrag {
+        val tidslinje = tidslinjeOf(*dager, startDato = startdato)
         MaksimumUtbetaling(
             listOf(tidslinje),
             Aktivitetslogg(),
-            1.januar
+            startdato
         ).betal()
         return OppdragBuilder(
             tidslinje,
@@ -295,6 +319,7 @@ internal class OppdragBuilderTest {
     private val Oppdrag.antallDager get() = this.sumBy { it.dager().size }
 
     private infix fun Periode.er(dagtype: Dagtype) = dagtype.dager(this)
+    private infix fun LocalDate.er(dagtype: Dagtype) = dagtype.dager(this til this)
     private infix fun Utbetalingsdager.medBeløp(beløp: Int) = this.copyWith(beløp = beløp)
     private infix fun Utbetalingsdager.medGrad(grad: Double) = this.copyWith(grad = grad)
 
