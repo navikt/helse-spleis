@@ -28,7 +28,7 @@ internal class OppdragBuilder(
 
     internal fun result(): Oppdrag {
         arbeisdsgiverLinjer.removeAll { it.beløp == null }
-        arbeisdsgiverLinjer.zipWithNext { a, b -> b.linkTo(a) }
+        arbeisdsgiverLinjer.zipWithNext { a, b -> b.kobleTil(a) }
         arbeisdsgiverLinjer.firstOrNull()?.refFagsystemId = null
         return Oppdrag(mottaker, fagområde, arbeisdsgiverLinjer, fagsystemId, sisteArbeidsgiverdag)
     }

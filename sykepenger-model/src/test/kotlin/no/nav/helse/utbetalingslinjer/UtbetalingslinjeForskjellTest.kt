@@ -64,7 +64,7 @@ internal class UtbetalingslinjeForskjellTest {
             assertEquals(6, it.stønadsdager())
             assertEquals(3000, it.totalbeløp())
         }
-        (1.januar to 5.januar dagsats 500).asUtbetalingslinje().deletion(1.januar).also {
+        (1.januar to 5.januar dagsats 500).asUtbetalingslinje().opphørslinje(1.januar).also {
             assertEquals(0, it.stønadsdager())
             assertEquals(0, it.totalbeløp())
         }
@@ -832,13 +832,13 @@ internal class UtbetalingslinjeForskjellTest {
 
     private fun linjer(vararg linjer: TestUtbetalingslinje, other: Oppdrag? = null) =
         Oppdrag(ORGNUMMER, SykepengerRefusjon, linjer.map { it.asUtbetalingslinje() }, fagsystemId = other?.fagsystemId() ?: genererUtbetalingsreferanse(UUID.randomUUID()), sisteArbeidsgiverdag = 31.desember(2017)).also { oppdrag ->
-            oppdrag.zipWithNext { a, b -> b.linkTo(a) }
+            oppdrag.zipWithNext { a, b -> b.kobleTil(a) }
             oppdrag.forEach { if(it.refId != null) it.refFagsystemId = oppdrag.fagsystemId() }
         }
 
     private fun linjer(vararg linjer: Utbetalingslinje) =
         Oppdrag(ORGNUMMER, SykepengerRefusjon, linjer.toList(), sisteArbeidsgiverdag = 31.desember(2017)).also { oppdrag ->
-            oppdrag.zipWithNext { a, b -> b.linkTo(a) }
+            oppdrag.zipWithNext { a, b -> b.kobleTil(a) }
             oppdrag.forEach { if(it.refId != null) it.refFagsystemId = oppdrag.fagsystemId() }
         }
 

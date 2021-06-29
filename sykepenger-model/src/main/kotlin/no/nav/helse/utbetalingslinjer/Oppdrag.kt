@@ -170,19 +170,20 @@ internal class Oppdrag private constructor(
 
     private fun deleteAll(tidligere: Oppdrag) = this.also { nåværende ->
         nåværende.kobleTil(tidligere)
-        linjer.add(tidligere.last().deletion(tidligere.first().fom))
+        linjer.add(tidligere.last().opphørslinje(tidligere.first().fom))
     }
 
     private fun appended(tidligere: Oppdrag) = this.also { nåværende ->
         nåværende.kobleTil(tidligere)
-        nåværende.first().linkTo(tidligere.last())
-        nåværende.zipWithNext { a, b -> b.linkTo(a) }
+        nåværende.first().kobleTil(tidligere.last())
+        nåværende.zipWithNext { a, b -> b.kobleTil(a) }
     }
 
     private lateinit var tilstand: Tilstand
     private lateinit var sisteLinjeITidligereOppdrag: Utbetalingslinje
     private lateinit var linkTo: Utbetalingslinje
 
+    //
     private fun ghosted(tidligere: Oppdrag, linkTo: Utbetalingslinje = tidligere.last()) =
         this.also { nåværende ->
             this.linkTo = linkTo
@@ -197,8 +198,15 @@ internal class Oppdrag private constructor(
         nåværende.add(0, deletion)
     }
 
+    private fun opphørTidligereLinjeOgOpprettNy(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje) {
+        linkTo = tidligere
+        add(this.indexOf(nåværende), tidligere.opphørslinje(tidligere.fom))
+        nåværende.kobleTil(linkTo)
+        tilstand = Ny()
+    }
+
     private fun deletionLinje(tidligere: Oppdrag) =
-        tidligere.last().deletion(tidligere.førstedato)
+        tidligere.last().opphørslinje(tidligere.førstedato)
 
     private fun kopierMed(linjer: List<Utbetalingslinje>) = Oppdrag(
         mottaker,
@@ -213,15 +221,15 @@ internal class Oppdrag private constructor(
     private fun kopierLikeLinjer(tidligere: Oppdrag) {
         tilstand = if (tidligere.sistedato > this.sistedato) Slett() else Identisk()
         sisteLinjeITidligereOppdrag = tidligere.last()
-        this.zip(tidligere).forEach { (a, b) -> tilstand.forskjell(a, b) }
+        this.zip(tidligere).forEach { (a, b) -> tilstand.håndterForskjell(a, b) }
     }
 
     private fun håndterLengreNåværende(tidligere: Oppdrag) {
         if (this.size <= tidligere.size) return
-        this[tidligere.size].linkTo(linkTo)
+        this[tidligere.size].kobleTil(linkTo)
         this
             .subList(tidligere.size, this.size)
-            .zipWithNext { a, b -> b.linkTo(a) }
+            .zipWithNext { a, b -> b.kobleTil(a) }
     }
 
     private fun kobleTil(tidligere: Oppdrag) {
@@ -230,50 +238,44 @@ internal class Oppdrag private constructor(
         this.endringskode = Endringskode.ENDR
     }
 
-    private interface Tilstand {
-        fun forskjell(
-            nåværende: Utbetalingslinje,
-            tidligere: Utbetalingslinje
-        )
-    }
-
     private fun håndterUlikhet(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje) {
-        if (nåværende.kunTomForskjelligFra(tidligere) && tidligere == sisteLinjeITidligereOppdrag)
-            return nåværende.utvidTom(tidligere)
-        nåværende.linkTo(linkTo)
-        linkTo = nåværende
-        tilstand = Ny()
-    }
-
-    private inner class Identisk() : Tilstand {
-        override fun forskjell(
-            nåværende: Utbetalingslinje,
-            tidligere: Utbetalingslinje
-        ) {
-            if (nåværende == tidligere) return nåværende.ghostFrom(tidligere)
-            håndterUlikhet(nåværende, tidligere)
+        when {
+            nåværende.skalUtvide(tidligere, sisteLinjeITidligereOppdrag) -> nåværende.utvidTom(tidligere)
+            nåværende.skalOpphøreOgErstatte(tidligere, sisteLinjeITidligereOppdrag) -> opphørTidligereLinjeOgOpprettNy(nåværende, tidligere)
+            else -> {
+                nåværende.kobleTil(linkTo)
+                linkTo = nåværende
+                tilstand = Ny()
+            }
         }
     }
 
-    private inner class Slett() : Tilstand {
-        override fun forskjell(
-            nåværende: Utbetalingslinje,
-            tidligere: Utbetalingslinje
-        ) {
+    private interface Tilstand {
+        fun håndterForskjell(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje)
+    }
+
+    private inner class Identisk : Tilstand {
+        override fun håndterForskjell(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje) {
+            when (nåværende == tidligere) {
+                true -> nåværende.markerUendret(tidligere)
+                false -> håndterUlikhet(nåværende, tidligere)
+            }
+        }
+    }
+
+    private inner class Slett : Tilstand {
+        override fun håndterForskjell(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje) {
             if (nåværende == tidligere) {
-                if (nåværende == last()) return nåværende.linkTo(linkTo)
-                return nåværende.ghostFrom(tidligere)
+                if (nåværende == last()) return nåværende.kobleTil(linkTo)
+                return nåværende.markerUendret(tidligere)
             }
             håndterUlikhet(nåværende, tidligere)
         }
     }
 
     private inner class Ny : Tilstand {
-        override fun forskjell(
-            nåværende: Utbetalingslinje,
-            tidligere: Utbetalingslinje
-        ) {
-            nåværende.linkTo(linkTo)
+        override fun håndterForskjell(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje) {
+            nåværende.kobleTil(linkTo)
             linkTo = nåværende
         }
     }
