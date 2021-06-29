@@ -118,24 +118,32 @@ internal class OppdragBuilderTest {
 
     @Test
     fun `dager som ikke lenger skal utbetales skal opphøres`() {
-        val oppdragTilUtbetaling1 = opprett(18.NAV, 1.FRI)
-        val oppdragskladd2 = opprett(18.NAV, 1.FRI, 2.HELG, 5.NAV)
-        val oppdragskladd3 = opprett(18.NAV, 1.FRI, 2.HELG, 2.FRI, 5.NAV)
+        val oppdragTilUtbetaling1 = opprett(
+            1.januar til 18.januar er NAVDAGER,
+            19.januar er FRI
+        )
+        val oppdragskladd2 = opprett(
+            1.januar til 18.januar er NAVDAGER,
+            19.januar er FRI,
+            20.januar til 27.januar er NAVDAGER
+        )
+        val oppdragskladd3 = opprett(
+            1.januar til 18.januar er NAVDAGER,
+            19.januar til 23.januar er FRI,
+            24.januar til 28.januar er NAVDAGER
+        )
 
         val oppdragTilUtbetaling2 = oppdragskladd2.minus(oppdragTilUtbetaling1, Aktivitetslogg())
         val oppdragTilUtbetaling3 = oppdragskladd3.minus(oppdragTilUtbetaling2, Aktivitetslogg())
 
-        oppdragTilUtbetaling3.assertLinje(0, 1.januar, 18.januar, delytelseId = 1, refDelytelseId = null, refFagsystemId = null)
-        oppdragTilUtbetaling3.assertLinje(
-            1,
-            20.januar,
-            26.januar,
-            delytelseId = 2,
-            refDelytelseId = null,
-            endringskode = ENDR,
-            datoStatusFom = 20.januar,
-            refFagsystemId = null
-        )
+        assertEquals(1, oppdragTilUtbetaling1.size)
+        assertEquals(2, oppdragTilUtbetaling2.size)
+        assertEquals(3, oppdragTilUtbetaling3.size)
+        oppdragTilUtbetaling3.apply {
+            assertLinje(0, 1.januar, 18.januar, delytelseId = 1, refDelytelseId = null, refFagsystemId = null)
+            assertLinje(1, 20.januar, 27.januar, delytelseId = 2, refDelytelseId = null, endringskode = ENDR, datoStatusFom = 20.januar, refFagsystemId = null)
+            assertLinje(2, 24.januar, 28.januar, delytelseId = 3, refDelytelseId = 2, endringskode = NY, refFagsystemId = oppdragTilUtbetaling3.fagsystemId())
+        }
     }
 
     @Test
