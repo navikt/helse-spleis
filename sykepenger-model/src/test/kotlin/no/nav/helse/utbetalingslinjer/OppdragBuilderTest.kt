@@ -250,7 +250,10 @@ internal class OppdragBuilderTest {
 
     @Test
     fun `Endring i utbetaling pga grad`() {
-        val oppdrag = opprett(3.NAV(1500, 100.0), 2.NAV(1500, 60.0), 2.HELG(1500, 60.0), 2.NAV(1500, 60.0))
+        val oppdrag = opprett(
+            1.januar til 3.januar er NAVDAGER medBeløp 1500 medGrad 100.0,
+            4.januar til 9.januar er NAVDAGER medBeløp 1500 medGrad 60.0
+        )
 
         assertEquals(2, oppdrag.size)
         oppdrag.assertLinje(0, 1.januar, 3.januar, null, sats = 1500, grad = 100.0)
@@ -259,7 +262,11 @@ internal class OppdragBuilderTest {
 
     @Test
     fun `Endring i utbetaling pga grad og inntekt, der utbetalingsbeløpet blir likt`() {
-        val oppdrag = opprett(3.NAV(1500, 100.0), 2.NAV(1875, 80.0), 2.HELG(1500, 80.0), 2.NAV(1500, 80.0))
+        val oppdrag = opprett(
+            1.januar til 3.januar er NAVDAGER medBeløp 1500 medGrad 100.0,
+            4.januar til 5.januar er NAVDAGER medBeløp 1875 medGrad 80.0,
+            6.januar til 9.januar er NAVDAGER medBeløp 1500 medGrad 80.0
+        )
 
         assertEquals(3, oppdrag.size)
         oppdrag.assertLinje(0, 1.januar, 3.januar, null, sats = 1500, grad = 100.0, delytelseId = 1)
@@ -277,7 +284,10 @@ internal class OppdragBuilderTest {
 
     @Test
     fun `Endring i sykdomsgrad`() {
-        val oppdrag = opprett(3.NAV(1500, 100.0), 2.NAV(1500, 80.0), 2.HELG(1500, 80.0), 2.NAV(1500, 80.0))
+        val oppdrag = opprett(
+            1.januar til 3.januar er NAVDAGER medGrad 100.0 medBeløp 1500,
+            4.januar til 9.januar er NAVDAGER medGrad 80.0 medBeløp 1500,
+        )
 
         assertEquals(2, oppdrag.size)
         oppdrag.assertLinje(0, 1.januar, 3.januar, null, sats = 1500, grad = 100.0)
