@@ -161,20 +161,38 @@ internal class OppdragBuilderTest {
     }
 
     @Test
-    fun `flytter fom-dato og innfører fridager i midten`() {
-        val oppdragTilUtbetaling1 = opprett(
+    fun `implisitt opphør av dager som ikke lenger er med i oppdrag når tidligere dager sendes på nytt`() {
+        /*
+         * Når et oppdrag endres slik at
+         *  - dager før dato X endrer karakter; dvs blir sendt på nytt til oppdragssystemet
+         *  - dager etter dato X lenger finnes i oppdraget
+         * Så blir dagene etter X implisitt opphørt av oppdragssystemet
+         */
+
+        val originaltOppdrag = opprett(
             10.januar til 31.januar er NAVDAGER,
             1.februar til 5.februar er NAVDAGER medBeløp 1400,
             startdato = 10.januar
         )
-        val oppdragskladd1 = opprett(
+        val oppdragUtenStartenAvFebruar = opprett(
             5.januar til 31.januar er NAVDAGER,
             1.februar til 2.februar er FRI,
             3.februar til 5.februar er NAVDAGER medBeløp 1400,
             startdato = 5.januar
             )
 
-        val oppdragTilUtbetaling2 = oppdragskladd1.minus(oppdragTilUtbetaling1, Aktivitetslogg())
+        val oppdragTilUtbetaling = oppdragUtenStartenAvFebruar.minus(originaltOppdrag, Aktivitetslogg())
+        assertEquals(2, originaltOppdrag.size)
+        assertEquals(2, oppdragTilUtbetaling.size)
+
+        originaltOppdrag.apply {
+            assertLinje(0, 10.januar, 31.januar, delytelseId = 1, refDelytelseId = null, endringskode = NY, refFagsystemId = null)
+            assertLinje(1, 1.februar, 5.februar, delytelseId = 2, refDelytelseId = 1, endringskode = NY, refFagsystemId = fagsystemId()) //Opphører linje som har blitt overskrevet av nytt oppdrag
+        }
+        oppdragTilUtbetaling.apply {
+            assertLinje(0, 5.januar, 31.januar, delytelseId = 3, refDelytelseId = 2, endringskode = NY, refFagsystemId = fagsystemId())
+            assertLinje(1, 3.februar, 5.februar, delytelseId = 4, refDelytelseId = 3, endringskode = NY, refFagsystemId = fagsystemId()) //Opphører linje som har blitt overskrevet av nytt oppdrag
+        }
     }
 
     @Test
