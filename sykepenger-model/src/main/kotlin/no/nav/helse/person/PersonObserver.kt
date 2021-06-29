@@ -181,10 +181,6 @@ interface PersonObserver {
         val personOppdrag: Map<String, Any> = mapOf("linjer" to emptyList<String>())
     )
 
-    data class InntektsmeldingLagtPåKjølEvent(
-        val hendelseId: UUID,
-    )
-
     data class HendelseIkkeHåndtertEvent(
         val hendelseId: UUID
     )
