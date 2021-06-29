@@ -46,16 +46,20 @@ class Inntektsvurdering(
         grunnlagForSykepengegrunnlag.avviksprosent(sammenligningsgrunnlag).also { avvik ->
             avviksprosent = avvik
             if (avvik > MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT) {
+                aktivitetslogg.lovtrace.`§8-30 ledd 2`(false)
                 aktivitetslogg.error(
                     "Har mer enn %.0f %% avvik",
                     MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT.prosent()
                 )
                 return false
-            } else aktivitetslogg.info(
-                "Har %.0f %% eller mindre avvik i inntekt (%.2f %%)",
-                MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT.prosent(),
-                avvik.prosent()
-            )
+            } else {
+                aktivitetslogg.lovtrace.`§8-30 ledd 2`(true)
+                aktivitetslogg.info(
+                    "Har %.0f %% eller mindre avvik i inntekt (%.2f %%)",
+                    MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT.prosent(),
+                    avvik.prosent()
+                )
+            }
         }
         return true
     }

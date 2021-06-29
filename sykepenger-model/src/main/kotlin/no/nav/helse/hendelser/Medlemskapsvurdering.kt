@@ -11,11 +11,13 @@ class Medlemskapsvurdering(
     internal fun valider(aktivitetslogg: IAktivitetslogg, periodetype: Periodetype): Boolean {
         return when (medlemskapstatus) {
             Medlemskapstatus.Ja -> {
+                aktivitetslogg.lovtrace.`§2`(true)
                 aktivitetslogg.info("Bruker er medlem av Folketrygden")
                 true
             }
             Medlemskapstatus.VetIkke -> {
                 val melding = "Vurder lovvalg og medlemskap"
+                aktivitetslogg.lovtrace.`§2`(false)
                 if (periodetype in listOf(INFOTRYGDFORLENGELSE, FORLENGELSE)) {
                     aktivitetslogg.info(melding)
                 }
@@ -23,6 +25,7 @@ class Medlemskapsvurdering(
                 true
             }
             Medlemskapstatus.Nei -> {
+                aktivitetslogg.lovtrace.`§2`(false)
                 aktivitetslogg.warn("Perioden er avslått på grunn av at den sykmeldte ikke er medlem av Folketrygden")
                 false
             }

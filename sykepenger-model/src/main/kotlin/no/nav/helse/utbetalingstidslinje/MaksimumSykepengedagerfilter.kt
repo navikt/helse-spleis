@@ -43,17 +43,14 @@ internal class MaksimumSykepengedagerfilter(
         tidslinje = tidslinjer
             .reduce(Utbetalingstidslinje::plus)
             .plus(personTidslinje)
-        teller = UtbetalingTeller(alder, arbeidsgiverRegler)
+        teller = UtbetalingTeller(alder, arbeidsgiverRegler, aktivitetslogg)
         state = State.Initiell
         tidslinje.accept(this)
+        aktivitetslogg.lovtrace.`§8-12 ledd 1`(avvisteDatoer in periode, "Vanskelig å komme på noe spennende der")
         Utbetalingstidslinje.avvis(tidslinjer, avvisteDatoer.merge(), periode, listOf(SykepengedagerOppbrukt))
     }
 
-    internal fun beregnGrenser(sisteDato: LocalDate) {
-        teller = UtbetalingTeller(alder, arbeidsgiverRegler)
-        state = State.Initiell
-        tidslinje.kutt(sisteDato).accept(this)
-
+    internal fun beregnGrenser() {
         if (avvisteDatoer in periode)
             aktivitetslogg.warn("Maks antall sykepengedager er nådd i perioden. Vurder å sende brev")
         else
@@ -135,9 +132,11 @@ internal class MaksimumSykepengedagerfilter(
 
     private fun nextState(dagen: LocalDate): State? {
         if (opphold >= TILSTREKKELIG_OPPHOLD_I_SYKEDAGER) {
+            aktivitetslogg.lovtrace.`§8-12 ledd 2`()
             teller.resett(dagen.plusDays(1))
             return State.Initiell
         }
+        if (state == State.Karantene) return null
         return if (teller.påGrensen(dagen)) State.Karantene else null
     }
 

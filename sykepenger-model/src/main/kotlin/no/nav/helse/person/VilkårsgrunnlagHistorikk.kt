@@ -87,15 +87,14 @@ internal class VilkårsgrunnlagHistorikk private constructor(
 
     private fun finnBegrunnelser(): Map<LocalDate, List<Begrunnelse>> {
         val begrunnelserForSkjæringstidspunkt = mutableMapOf<LocalDate, List<Begrunnelse>>()
-        historikk.forEach { historikk ->
-            val vilkårsgrunnlagElement = historikk.value
+        historikk.forEach { (skjæringstidspunkt, vilkårsgrunnlagElement) ->
             if (vilkårsgrunnlagElement is Grunnlagsdata && !vilkårsgrunnlagElement.isOk()) {
                 val begrunnelser = mutableListOf<Begrunnelse>()
 
                 if (vilkårsgrunnlagElement.medlemskapstatus == Medlemskapsvurdering.Medlemskapstatus.Nei) begrunnelser.add(Begrunnelse.ManglerMedlemskap)
                 if (vilkårsgrunnlagElement.harMinimumInntekt == false) begrunnelser.add(Begrunnelse.ManglerMedlemskap)
                 if (!vilkårsgrunnlagElement.harOpptjening) begrunnelser.add(Begrunnelse.ManglerOpptjening)
-                begrunnelserForSkjæringstidspunkt[historikk.key] = begrunnelser
+                begrunnelserForSkjæringstidspunkt[skjæringstidspunkt] = begrunnelser
             }
         }
         return begrunnelserForSkjæringstidspunkt

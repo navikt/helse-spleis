@@ -153,7 +153,7 @@ internal class MaksimumSykepengedagerfilterTest {
 
     @Test fun `sjekk at sykdom i arbgiver periode ikke ødelegger oppholdsperioden`() {
         val tidslinje = tidslinjeOf(50.NAV, (25 * 7).ARB, 7.AP, 248.NAV)
-        assertEquals(emptyList<LocalDate>(), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
+        assertEquals(emptyList<LocalDate>(), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018, 1.april(2019) til 30.april(2019)))
     }
 
     @Test fun `helgedager innimellom utbetalingsdager betales ikke`() {
@@ -286,7 +286,7 @@ internal class MaksimumSykepengedagerfilterTest {
             aktivitetslogg
         ).also {
             it.filter(listOf(this), personTidslinje)
-            it.beregnGrenser(periode.endInclusive)
+            it.beregnGrenser()
         }
         return AvvisteDager(this).datoer
     }

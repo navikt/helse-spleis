@@ -19,12 +19,14 @@ class Opptjeningvurdering(
     internal fun valider(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate): Boolean {
         antallOpptjeningsdager = Arbeidsforhold.opptjeningsdager(arbeidsforhold, aktivitetslogg, skjæringstidspunkt)
         if (harOpptjening()) {
+            aktivitetslogg.lovtrace.`§8-2 ledd 1`(true)
             aktivitetslogg.info(
                 "Har minst %d dager opptjening",
                 TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER
             )
             return true
         }
+        aktivitetslogg.lovtrace.`§8-2 ledd 1`(false)
         aktivitetslogg.warn("Perioden er avslått på grunn av manglende opptjening")
         return false
     }
@@ -43,7 +45,7 @@ class Opptjeningvurdering(
 
         private fun periode(skjæringstidspunkt: LocalDate): Periode? {
             if (!erGyldig(skjæringstidspunkt)) return null
-            return fom til(tom ?: skjæringstidspunkt)
+            return fom til (tom ?: skjæringstidspunkt)
         }
 
         internal companion object {
@@ -55,7 +57,7 @@ class Opptjeningvurdering(
                 arbeidsforhold: List<Arbeidsforhold>,
                 aktivitetslogg: IAktivitetslogg,
                 skjæringstidspunkt: LocalDate
-            ) : Int {
+            ): Int {
                 if (arbeidsforhold.any(Arbeidsforhold::erSøppel))
                     aktivitetslogg.warn("Opptjeningsvurdering må gjøres manuelt fordi opplysningene fra AA-registeret er ufullstendige")
 

@@ -35,10 +35,14 @@ class Vilkårsgrunnlag(
         val opptjeningvurderingOk = opptjeningvurdering.valider(this, skjæringstidspunkt)
         val medlemskapsvurderingOk = medlemskapsvurdering.valider(this, periodetype)
         val harMinimumInntekt = grunnlagForSykepengegrunnlag > Alder(fødselsnummer).minimumInntekt(skjæringstidspunkt)
-        if(!harMinimumInntekt)
+        if(!harMinimumInntekt) {
+            lovtrace.`§8-3 ledd 2`(false)
             warn("Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag")
-        else
+        }
+        else {
+            lovtrace.`§8-3 ledd 2`(true)
             info("Krav til minste sykepengegrunnlag er oppfylt")
+        }
 
         grunnlagsdata = VilkårsgrunnlagHistorikk.Grunnlagsdata(
             sammenligningsgrunnlag = sammenligningsgrunnlag,

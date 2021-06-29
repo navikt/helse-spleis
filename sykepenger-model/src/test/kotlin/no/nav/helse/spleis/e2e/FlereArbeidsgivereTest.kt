@@ -113,18 +113,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
         )
 
-        val periodeA2 = 2.februar til 20.februar
-        nyPeriode(periodeA2, a2)
-        person.håndter(
-            inntektsmelding(
-                UUID.randomUUID(),
-                arbeidsgiverperioder = listOf(Periode(periodeA2.start, periodeA2.start.plusDays(15))),
-                beregnetInntekt = 10000.månedlig,
-                førsteFraværsdag = periodeA2.start,
-                refusjon = Triple(null, 10000.månedlig, emptyList()),
-                orgnummer = a2
-            )
-        )
+
 
         assertEquals(282500.årlig, person.sammenligningsgrunnlag(2.februar))
     }

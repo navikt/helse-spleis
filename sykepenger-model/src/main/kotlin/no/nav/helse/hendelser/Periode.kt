@@ -19,12 +19,10 @@ open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Ite
 
         fun List<Periode>.slutterEtter(grense: LocalDate) = any { it.slutterEtter(grense) }
 
-        internal fun List<LocalDate>.merge() = sorted().fold(mutableListOf(), ::utvidForrigeEllerNy)
-        private fun utvidForrigeEllerNy(perioder: MutableList<Periode>, dato: LocalDate): MutableList<Periode> {
+        internal fun List<LocalDate>.merge() = sorted().fold(listOf<Periode>()) { perioder, dato ->
             val siste = perioder.lastOrNull()
-            if (siste == null || (dato !in siste && siste.endInclusive.plusDays(1) != dato)) perioder.add(dato til dato)
-            else perioder[perioder.size - 1] = siste.oppdaterTom(dato)
-            return perioder
+            if (siste == null || (dato !in siste && siste.endInclusive.plusDays(1) != dato)) perioder.plus<Periode>(dato til dato)
+            else perioder.dropLast(1).plus<Periode>(siste.oppdaterTom(dato))
         }
     }
 

@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov
+import no.nav.helse.person.vilkår.Lovtrace
 import no.nav.helse.serde.reflection.AktivitetsloggReflect
 import no.nav.helse.serde.reflection.OppdragReflect
 import no.nav.helse.utbetalingslinjer.Oppdrag
@@ -15,7 +16,10 @@ import java.util.*
 // Understands issues that arose when analyzing a JSON message
 // Implements Collecting Parameter in Refactoring by Martin Fowler
 // Implements Visitor pattern to traverse the messages
-class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitetslogg {
+class Aktivitetslogg(
+    private var forelder: Aktivitetslogg? = null,
+    override val lovtrace: Lovtrace = Lovtrace()
+) : IAktivitetslogg {
     private val aktiviteter = mutableListOf<Aktivitet>()
     private val kontekster = mutableListOf<Aktivitetskontekst>()  // Doesn't need serialization
 
@@ -482,6 +486,7 @@ interface IAktivitetslogg {
     fun kontekst(person: Person)
     fun kontekster(): List<IAktivitetslogg>
     fun toMap(): Map<String, List<Map<String, Any>>>
+    val lovtrace: Lovtrace
 }
 
 internal interface AktivitetsloggVisitor {

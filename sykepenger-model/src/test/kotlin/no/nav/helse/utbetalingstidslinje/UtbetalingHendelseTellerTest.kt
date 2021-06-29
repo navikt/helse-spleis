@@ -1,5 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
@@ -87,7 +88,7 @@ internal class UtbetalingHendelseTellerTest {
     }
 
     private fun grense(alder: Alder, dager: Int, dato: LocalDate = 1.januar) {
-        grense = UtbetalingTeller(alder, ArbeidsgiverRegler.Companion.NormalArbeidstaker).apply {
+        grense = UtbetalingTeller(alder, ArbeidsgiverRegler.Companion.NormalArbeidstaker, Aktivitetslogg()).apply {
             this.resett(dato)
             (0 until dager).forEach { this.inkrementer(dato.plusDays(it.toLong())) }
         }

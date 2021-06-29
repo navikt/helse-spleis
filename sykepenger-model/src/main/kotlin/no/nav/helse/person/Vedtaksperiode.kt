@@ -427,27 +427,19 @@ internal class Vedtaksperiode private constructor(
             "Har ikke inntekt på skjæringstidspunkt ved vilkårsvurdering"
         )
 
-        if (vilkårsgrunnlag.valider(
-                grunnlagForSykepengegrunnlag,
-                sammenligningsgrunnlag ?: Inntekt.INGEN,
-                skjæringstidspunkt,
-                periodetype(),
-                person.antallArbeidsgivereMedOverlappendeVedtaksperioder(this)
-            ).hasErrorsOrWorse()
-                .also {
-                    mottaVilkårsvurdering(vilkårsgrunnlag.grunnlagsdata())
-                    person.vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag, skjæringstidspunkt)
-                }
-        ) {
+        vilkårsgrunnlag.valider(
+            grunnlagForSykepengegrunnlag,
+            sammenligningsgrunnlag ?: Inntekt.INGEN,
+            skjæringstidspunkt,
+            periodetype(),
+            person.antallArbeidsgivereMedOverlappendeVedtaksperioder(this)
+        )
+        person.vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag, skjæringstidspunkt)
+        if (vilkårsgrunnlag.hasErrorsOrWorse()) {
             return person.invaliderAllePerioder(vilkårsgrunnlag, "Feil i vilkårsgrunnlag")
         }
-
         vilkårsgrunnlag.info("Vilkårsgrunnlag vurdert")
         tilstand(vilkårsgrunnlag, nesteTilstand)
-    }
-
-    private fun mottaVilkårsvurdering(grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata) {
-        arbeidsgiver.finnSykeperiodeRettEtter(this)?.mottaVilkårsvurdering(grunnlagsdata)
     }
 
     private fun trengerUtbetalingsgrunnlag(hendelse: IAktivitetslogg) {
@@ -582,7 +574,7 @@ internal class Vedtaksperiode private constructor(
         engineForTimeline: MaksimumSykepengedagerfilter,
         hendelse: ArbeidstakerHendelse
     ) {
-        engineForTimeline.beregnGrenser(periode.endInclusive)
+        engineForTimeline.beregnGrenser()
 
         val vedtaksperioder = person.nåværendeVedtaksperioder()
         vedtaksperioder.forEach { it.lagUtbetaling(engineForTimeline, hendelse) }
@@ -657,7 +649,7 @@ internal class Vedtaksperiode private constructor(
         engineForTimeline: MaksimumSykepengedagerfilter,
         hendelse: ArbeidstakerHendelse
     ) {
-        engineForTimeline.beregnGrenser(periode.endInclusive)
+        engineForTimeline.beregnGrenser()
 
         val vedtaksperioder = person.nåværendeVedtaksperioder()
         vedtaksperioder.forEach { it.lagRevurdering(engineForTimeline, hendelse) }
@@ -919,6 +911,7 @@ internal class Vedtaksperiode private constructor(
         ) {
             hendelse.error("Forventet ikke overstyring fra saksbehandler i %s", type.name)
         }
+
         fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {}
     }
 
@@ -1234,7 +1227,10 @@ internal class Vedtaksperiode private constructor(
         override val type = AVVENTER_REVURDERING
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
-            if (vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode)) vedtaksperiode.tilstand(gjenopptaBehandling, AvventerHistorikkRevurdering)
+            if (vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode)) vedtaksperiode.tilstand(
+                gjenopptaBehandling,
+                AvventerHistorikkRevurdering
+            )
         }
     }
 

@@ -386,7 +386,7 @@ internal class ArbeidsgiverUtbetalingerTest {
             vilkårsgrunnlagHistorikk
         ).also {
             it.beregn(aktivitetslogg, "88888888", Periode(1.januar, 31.desember(2019)),)
-            it.tidslinjeEngine.beregnGrenser(31.desember(2019))
+            it.tidslinjeEngine.beregnGrenser()
             maksdato = it.tidslinjeEngine.maksdato()
             gjenståendeSykedager = it.tidslinjeEngine.gjenståendeSykedager()
             forbrukteSykedager = it.tidslinjeEngine.forbrukteSykedager()

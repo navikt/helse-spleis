@@ -1,5 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.person.IAktivitetslogg
 import java.time.DayOfWeek
 import java.time.LocalDate
 import kotlin.math.max
@@ -9,13 +10,15 @@ internal class UtbetalingTeller private constructor(
     private val alder: Alder,
     private val arbeidsgiverRegler: ArbeidsgiverRegler,
     private var betalteDager: Int,
-    private var gammelpersonDager: Int
+    private var gammelpersonDager: Int,
+    private val aktivitetslogg: IAktivitetslogg
 ) {
     internal constructor(
         alder: Alder,
-        arbeidsgiverRegler: ArbeidsgiverRegler
+        arbeidsgiverRegler: ArbeidsgiverRegler,
+        aktivitetslogg: IAktivitetslogg
     ) :
-        this(LocalDate.MIN, alder, arbeidsgiverRegler, 0, 0)
+        this(LocalDate.MIN, alder, arbeidsgiverRegler, 0, 0, aktivitetslogg)
 
     internal fun inkrementer(dato: LocalDate) {
         betalteDager += 1
@@ -34,8 +37,12 @@ internal class UtbetalingTeller private constructor(
         gammelpersonDager = 0
     }
 
-    internal fun påGrensen(dato: LocalDate): Boolean {
-        return betalteDager >= arbeidsgiverRegler.maksSykepengedager()
+    internal fun påGrensen(dato: LocalDate, erIkkeIGjenståendeSykedagerberegning: Boolean = true): Boolean {
+        val harNåddMaksSykepengedager = betalteDager >= arbeidsgiverRegler.maksSykepengedager()
+        if (harNåddMaksSykepengedager && erIkkeIGjenståendeSykedagerberegning) {
+            aktivitetslogg.lovtrace.`§8-12 ledd 1`(false, "Allsang på Grensen - $dato")
+        }
+        return harNåddMaksSykepengedager
             || gammelpersonDager >= arbeidsgiverRegler.maksSykepengedagerOver67()
             || dato.plusDays(1) >= alder.øvreAldersgrense
     }
@@ -49,10 +56,10 @@ internal class UtbetalingTeller private constructor(
         beregnGjenståendeSykedager(sisteUtbetalingsdag).let { (gjenståendeSykedager, _) -> gjenståendeSykedager }
 
     private fun beregnGjenståendeSykedager(sisteUtbetalingsdag: LocalDate): Pair<Int, LocalDate> {
-        val clone = UtbetalingTeller(fom, alder, arbeidsgiverRegler, betalteDager, gammelpersonDager)
+        val clone = UtbetalingTeller(fom, alder, arbeidsgiverRegler, betalteDager, gammelpersonDager, aktivitetslogg)
         var result = sisteUtbetalingsdag
         var teller = 0
-        while (!clone.påGrensen(result)) {
+        while (!clone.påGrensen(result, false)) {
             result = result.plusDays(
                 when (result.dayOfWeek) {
                     DayOfWeek.FRIDAY -> 3
