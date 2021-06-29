@@ -210,7 +210,7 @@ internal class OppdragBuilderTest {
             assertLinje(0, 1.januar, 18.januar, delytelseId = 1, refDelytelseId = null, refFagsystemId = null)
             assertLinje(1, 20.januar, 26.januar, delytelseId = 2, refDelytelseId = null, endringskode = ENDR, datoStatusFom = 20.januar, refFagsystemId = null) //Opphører linje som har blitt overskrevet av nytt oppdrag
             assertLinje(2, 24.januar, 29.januar, delytelseId = 3, refDelytelseId = 2, endringskode = NY)
-            assertLinje(3, 30.januar, 3.februar, delytelseId = 4, refDelytelseId = 3, endringskode = NY, sats = 1300, grad = 40.0)
+            assertLinje(3, 30.januar, 3.februar, delytelseId = 4, refDelytelseId = 3, endringskode = NY, sats = 520, grad = 40.0)
         }
 
         oppdragTilUtbetaling4.apply {
@@ -218,7 +218,7 @@ internal class OppdragBuilderTest {
             assertLinje(0, 1.januar, 18.januar, delytelseId = 1, refDelytelseId = null, refFagsystemId = null)
             assertLinje(1, 24.januar, 29.januar, delytelseId = 3, refDelytelseId = 2, endringskode = UEND, datoStatusFom = null, sats = 1100)
             assertLinje(2, 30.januar, 3.februar, delytelseId = 4, refDelytelseId = null, endringskode = ENDR, datoStatusFom = 30.januar, refFagsystemId = null) //Opphører linje som har blitt overskrevet av nytt oppdrag
-            assertLinje(3, 1.februar, 3.februar, delytelseId = 5, refDelytelseId = 4, endringskode = NY, sats = 1300, grad = 40.0)
+            assertLinje(3, 1.februar, 3.februar, delytelseId = 5, refDelytelseId = 4, endringskode = NY, sats = 520, grad = 40.0)
         }
     }
 
