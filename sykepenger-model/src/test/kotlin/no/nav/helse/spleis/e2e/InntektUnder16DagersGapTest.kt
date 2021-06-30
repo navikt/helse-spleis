@@ -481,7 +481,7 @@ internal class InntektUnder16DagersGapTest : AbstractEndToEndTest() {
         )
 
         håndterSykmelding(Sykmeldingsperiode(6.februar, 16.februar, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), 6.februar, refusjon = Triple(null, 32000.månedlig, emptyList()))
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), 6.februar, refusjon = Refusjon(null, 32000.månedlig, emptyList()))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(6.februar, 16.februar, 100.prosent))
 
         håndterUtbetalingsgrunnlag(2.vedtaksperiode)

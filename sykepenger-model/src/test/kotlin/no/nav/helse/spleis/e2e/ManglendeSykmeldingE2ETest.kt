@@ -198,7 +198,7 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `uten perioder fra før med refusjon opphørt`() {
-        val inntektsmeldingId = håndterInntektsmelding(listOf(3.januar til 18.januar), refusjon = Triple(18.januar, INNTEKT, emptyList()))
+        val inntektsmeldingId = håndterInntektsmelding(listOf(3.januar til 18.januar), refusjon = Refusjon(18.januar, INNTEKT, emptyList()))
         håndterSøknad(Sykdom(3.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingReplay(inntektsmeldingId, 1.vedtaksperiode)
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, TIL_INFOTRYGD)
@@ -294,7 +294,7 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
     @Test
     fun `forkastet uferdig forlengelse foran med refusjon opphørt`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 24.januar, 100.prosent))
-        val inntektsmeldingId = håndterInntektsmelding(listOf(3.januar til 18.januar), refusjon = Triple(25.januar, INNTEKT, emptyList()))
+        val inntektsmeldingId = håndterInntektsmelding(listOf(3.januar til 18.januar), refusjon = Refusjon(25.januar, INNTEKT, emptyList()))
         håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingReplay(inntektsmeldingId, 2.vedtaksperiode)
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
@@ -305,7 +305,7 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
     fun `uferdig forlengelse foran med refusjon opphørt`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 24.januar, 100.prosent))
         håndterInntektsmelding(listOf(3.januar til 18.januar))
-        håndterInntektsmelding(listOf(3.januar til 18.januar), refusjon = Triple(25.januar, INNTEKT, emptyList()))
+        håndterInntektsmelding(listOf(3.januar til 18.januar), refusjon = Refusjon(25.januar, INNTEKT, emptyList()))
         håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent))
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
@@ -344,7 +344,7 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
     @Test
     fun `ferdig forlengelse foran med refusjon opphørt`() {
         nyttVedtak(3.januar, 20.januar)
-        håndterInntektsmelding(listOf(3.januar til 18.januar), refusjon = Triple(21.januar, INNTEKT, emptyList()))
+        håndterInntektsmelding(listOf(3.januar til 18.januar), refusjon = Refusjon(21.januar, INNTEKT, emptyList()))
         håndterSøknad(Sykdom(21.januar, 31.januar, 100.prosent))
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
     }
@@ -353,7 +353,7 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
     fun `ferdig gap foran med refusjon opphørt`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(3.januar, 20.januar, 100.prosent))
-        håndterInntektsmelding(listOf(3.januar til 18.januar), refusjon = Triple(21.januar, INNTEKT, emptyList()))
+        håndterInntektsmelding(listOf(3.januar til 18.januar), refusjon = Refusjon(21.januar, INNTEKT, emptyList()))
         håndterSykmelding(Sykmeldingsperiode(21.januar, 24.januar, 100.prosent))
         håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent))
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)

@@ -142,7 +142,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             listOf(Periode(13.mars(2020), 28.mars(2020))),
             førsteFraværsdag = 13.mars(2020),
-            refusjon = Triple(31.mars(2020), INNTEKT, emptyList())
+            refusjon = Refusjon(31.mars(2020), INNTEKT, emptyList())
         )
         håndterSykmelding(Sykmeldingsperiode(30.mars(2020), 14.april(2020), 100.prosent))
         håndterSøknad(Sykdom(13.mars(2020), 29.mars(2020), 100.prosent))
@@ -176,7 +176,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             listOf(Periode(13.mars(2020), 28.mars(2020))),
             førsteFraværsdag = 13.mars(2020),
-            refusjon = Triple(31.mars(2020), INNTEKT, emptyList())
+            refusjon = Refusjon(31.mars(2020), INNTEKT, emptyList())
         )
         håndterSykmelding(Sykmeldingsperiode(30.mars(2020), 14.april(2020), 100.prosent))
         håndterSøknad(Sykdom(30.mars(2020), 14.april(2020), 100.prosent))

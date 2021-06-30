@@ -108,7 +108,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
                 1.vedtaksperiode,
                 listOf(fom til fom.plusDays(15)),
                 førsteFraværsdag = fom,
-                refusjon = Triple(null, HØY_INNTEKT, emptyList())
+                refusjon = Refusjon(null, HØY_INNTEKT, emptyList())
             )
         }
         (1.juli(2020) to 30.juli(2020)).also { (fom, tom) ->
@@ -292,7 +292,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
             vedtaksperiodeIndeks.vedtaksperiode,
             arbeidsgiverperiode,
             førsteFraværsdag = førsteFraværsdag,
-            refusjon = Triple(null, HØY_INNTEKT, emptyList())
+            refusjon = Refusjon(null, HØY_INNTEKT, emptyList())
         )
         håndterUtbetalingsgrunnlag(vedtaksperiodeIndeks.vedtaksperiode)
         håndterYtelser(vedtaksperiodeIndeks.vedtaksperiode)
