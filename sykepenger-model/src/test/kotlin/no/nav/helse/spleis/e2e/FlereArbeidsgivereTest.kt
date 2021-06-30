@@ -1,24 +1,18 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.SøknadArbeidsgiver.Søknadsperiode
-import no.nav.helse.hendelser.UtbetalingHendelse.Oppdragstatus.AKSEPTERT
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
-import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Inntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.person.Inntektskilde.FLERE_ARBEIDSGIVERE
 import no.nav.helse.person.Periodetype
-import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.reflection.castAsList
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
-import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -27,7 +21,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
-import java.time.YearMonth
 import java.util.*
 
 internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
@@ -1853,7 +1846,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             id = søknadHendelseId
         )
         assertTilstand(a1, TIL_INFOTRYGD, 2)
-        assertHendelseIder(sykmeldingHendelseId, søknadHendelseId)
+        assertHendelseIder(sykmeldingHendelseId, søknadHendelseId, orgnummer = a1)
     }
 
     @Test
@@ -2463,279 +2456,5 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode(a2), orgnummer = a2)
 
         assertEquals(88, inspektør(a2).forbrukteSykedager(0))
-    }
-
-    @Test
-    fun `To førstegangsbehandlinger med ulik fom - skal bruke skatteinntekter for arbeidsgiver med senest fom`() {
-        Toggles.FlereArbeidsgivereUlikFom.enable {
-            håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a1)
-            håndterSykmelding(Sykmeldingsperiode(5.mars, 31.mars, 100.prosent), orgnummer = a2)
-
-            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
-            håndterSøknad(Søknad.Søknadsperiode.Sykdom(5.mars, 31.mars, 100.prosent), orgnummer = a2)
-
-            håndterInntektsmelding(listOf(1.mars til 16.mars), førsteFraværsdag = 1.mars, orgnummer = a1)
-            håndterInntektsmelding(listOf(5.mars til 20.mars), førsteFraværsdag = 5.mars, orgnummer = a2, beregnetInntekt = INNTEKT)
-
-            val inntekter = listOf(
-                grunnlag(1.vedtaksperiode(a1), a1, 31000.månedlig.repeat(3)),
-                grunnlag(1.vedtaksperiode(a2), a2, 20000.månedlig.repeat(3))
-            )
-            håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), inntekter = inntekter, orgnummer = a1)
-            håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
-
-            håndterVilkårsgrunnlag(1.vedtaksperiode(a1), inntektsvurdering = Inntektsvurdering(listOf(
-                sammenligningsgrunnlag(1.vedtaksperiode(a1), a1, 31000.månedlig.repeat(12)),
-                sammenligningsgrunnlag(1.vedtaksperiode(a2), a2, 20000.månedlig.repeat(12))
-            )), orgnummer = a1)
-
-            håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
-            håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), orgnummer = a1)
-            håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
-
-            håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), inntekter = inntekter, orgnummer = a2)
-            håndterYtelser(1.vedtaksperiode(a2), inntektshistorikk = emptyList(), orgnummer = a2)
-
-            assertEquals(31000.månedlig, inspektør(a1).inntektInspektør.grunnlagForSykepengegrunnlag(1.mars))
-            assertEquals(20000.månedlig, inspektør(a2).inntektInspektør.grunnlagForSykepengegrunnlag(1.mars))
-        }
-    }
-
-    @Test
-    fun `To førstegangsbehandlinger med lik fom - skal bruke inntektsmelding for begge arbeidsgivere`() {
-        Toggles.FlereArbeidsgivereUlikFom.enable {
-            håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a1)
-            håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a2)
-
-            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
-            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a2)
-
-            håndterInntektsmelding(listOf(1.mars til 16.mars), førsteFraværsdag = 1.mars, orgnummer = a1, refusjon = Refusjon(null, 30000.månedlig, emptyList()))
-            håndterInntektsmelding(listOf(1.mars til 16.mars), førsteFraværsdag = 1.mars, orgnummer = a2, refusjon = Refusjon(null, 18000.månedlig, emptyList()))
-
-            val inntekter = listOf(
-                grunnlag(1.vedtaksperiode(a1), a1, 31000.månedlig.repeat(3)),
-                grunnlag(1.vedtaksperiode(a2), a2, 20000.månedlig.repeat(3))
-            )
-            håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), inntekter = inntekter, orgnummer = a1)
-            håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
-
-            håndterVilkårsgrunnlag(1.vedtaksperiode(a1), inntektsvurdering = Inntektsvurdering(listOf(
-                sammenligningsgrunnlag(1.vedtaksperiode(a1), a1, 31000.månedlig.repeat(12)),
-                sammenligningsgrunnlag(1.vedtaksperiode(a2), a2, 20000.månedlig.repeat(12))
-            )), orgnummer = a1)
-
-            håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
-            håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), orgnummer = a1)
-            håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
-
-            håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), inntekter = inntekter, orgnummer = a2)
-            håndterYtelser(1.vedtaksperiode(a2), inntektshistorikk = emptyList(), orgnummer = a2)
-
-            assertEquals(30000.månedlig, inspektør(a1).inntektInspektør.grunnlagForSykepengegrunnlag(1.mars))
-            assertEquals(18000.månedlig, inspektør(a2).inntektInspektør.grunnlagForSykepengegrunnlag(1.mars))
-
-        }
-    }
-
-    @Test
-    fun `bruker gjennomsnitt av skatteinntekter ved ulik fom`() {
-        Toggles.FlereArbeidsgivereUlikFom.enable {
-            håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a1)
-            håndterSykmelding(Sykmeldingsperiode(5.mars, 31.mars, 100.prosent), orgnummer = a2)
-
-            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
-            håndterSøknad(Søknad.Søknadsperiode.Sykdom(5.mars, 31.mars, 100.prosent), orgnummer = a2)
-
-            håndterInntektsmelding(listOf(1.mars til 16.mars), førsteFraværsdag = 1.mars, orgnummer = a1)
-            håndterInntektsmelding(listOf(5.mars til 20.mars), førsteFraværsdag = 5.mars, orgnummer = a2, beregnetInntekt = INNTEKT)
-
-            val inntekter = listOf(
-                grunnlag(1.vedtaksperiode(a1), a1, 31000.månedlig.repeat(3)),
-                grunnlag(1.vedtaksperiode(a2), a2, 20000.månedlig.repeat(2) + 23000.månedlig)
-            )
-            håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), inntekter = inntekter, orgnummer = a1)
-            håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
-
-            håndterVilkårsgrunnlag(1.vedtaksperiode(a1), inntektsvurdering = Inntektsvurdering(listOf(
-                sammenligningsgrunnlag(1.vedtaksperiode(a1), a1, 31000.månedlig.repeat(12)),
-                sammenligningsgrunnlag(1.vedtaksperiode(a2), a2, 20000.månedlig.repeat(11) + 23000.månedlig)
-            )), orgnummer = a1)
-
-            håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
-            håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), orgnummer = a1)
-            håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
-
-            håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), inntekter = inntekter, orgnummer = a2)
-            håndterYtelser(1.vedtaksperiode(a2), inntektshistorikk = emptyList(), orgnummer = a2)
-
-            assertEquals(31000.månedlig, inspektør(a1).inntektInspektør.grunnlagForSykepengegrunnlag(1.mars))
-            assertEquals(21000.månedlig, inspektør(a2).inntektInspektør.grunnlagForSykepengegrunnlag(1.mars))
-        }
-    }
-
-    private fun grunnlag(
-        vedtaksperiodeId: UUID,
-        orgnummer: String,
-        inntekter: List<Inntekt>
-    ) = lagMånedsinntekter(vedtaksperiodeId, orgnummer, inntekter, creator = ArbeidsgiverInntekt.MånedligInntekt::Sykepengegrunnlag)
-
-    private fun sammenligningsgrunnlag(
-        vedtaksperiodeId: UUID,
-        orgnummer: String,
-        inntekter: List<Inntekt>
-    ) = lagMånedsinntekter(vedtaksperiodeId, orgnummer, inntekter, creator = ArbeidsgiverInntekt.MånedligInntekt::Sammenligningsgrunnlag)
-
-    private fun lagMånedsinntekter(
-        vedtaksperiodeId: UUID,
-        orgnummer: String,
-        inntekter: List<Inntekt>,
-        sluttMnd: YearMonth = YearMonth.from(inspektør(orgnummer).skjæringstidspunkt(vedtaksperiodeId)).minusMonths(1),
-        creator: InntektCreator
-    ) = ArbeidsgiverInntekt(
-        orgnummer, inntekter.mapIndexed { index, inntekt ->
-            creator(
-                sluttMnd.minusMonths((inntekter.size - index - 1).toLong()),
-                inntekt,
-                ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
-                "Juidy inntekt",
-                "Juidy fordel"
-            )
-        }
-    )
-
-    @Disabled
-    @Test
-    fun `To førstegangsbehandlinger med ulik fom - skal få warning om at saksbehandler må sjekke varig lønnsendring`() {
-        // TODO: check warning
-    }
-
-    private fun assertHendelseIder(
-        vararg hendelseIder: UUID,
-        orgnummer: String = a1,
-        vedtaksperiodeIndeks: Int = 2,
-    ) {
-        assertEquals(
-            hendelseIder.toSet(),
-            inspektør(orgnummer).hendelseIder(vedtaksperiodeIndeks.vedtaksperiode(orgnummer))
-        )
-    }
-
-    private fun assertTilstand(
-        orgnummer: String,
-        tilstand: TilstandType,
-        vedtaksperiodeIndeks: Int = 1
-    ) {
-        assertEquals(tilstand, inspektør(orgnummer).sisteTilstand(vedtaksperiodeIndeks.vedtaksperiode(orgnummer))) {
-            inspektør.personLogg.toString()
-        }
-    }
-
-    private fun assertInntektskilde(
-        orgnummer: String,
-        inntektskilde: Inntektskilde,
-        vedtaksperiodeIndeks: Int = 1
-    ) {
-        assertEquals(inntektskilde, orgnummer.inspektør.inntektskilde(vedtaksperiodeIndeks.vedtaksperiode(orgnummer)))
-    }
-
-    private fun prosessperiode(periode: Periode, orgnummer: String, sykedagstelling: Int = 0) {
-        gapPeriode(periode, orgnummer, sykedagstelling)
-        historikk(orgnummer, sykedagstelling)
-        betale(orgnummer)
-    }
-
-    private fun gapPeriode(periode: Periode, orgnummer: String, sykedagstelling: Int = 0) {
-        nyPeriode(periode, orgnummer)
-        håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(Periode(periode.start, periode.start.plusDays(15))),
-            førsteFraværsdag = periode.start,
-            orgnummer = orgnummer
-
-        )
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode(orgnummer), orgnummer = orgnummer)
-        historikk(orgnummer, sykedagstelling)
-        person.håndter(vilkårsgrunnlag(
-            orgnummer.id(0), orgnummer = orgnummer,
-            inntektsvurdering = Inntektsvurdering(
-                inntekter = inntektperioderForSammenligningsgrunnlag {
-                    1.januar(2017) til 1.desember(2017) inntekter {
-                        orgnummer inntekt INNTEKT
-                    }
-                }
-            ),
-        )
-        )
-    }
-
-    private fun nyPeriode(periode: Periode, orgnummer: String) {
-        person.håndter(
-            sykmelding(
-                UUID.randomUUID(),
-                Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent),
-                orgnummer = orgnummer
-            )
-        )
-        person.håndter(
-            søknad(
-                UUID.randomUUID(),
-                Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent),
-                orgnummer = orgnummer
-            )
-        )
-    }
-
-    private fun historikk(orgnummer: String, sykedagstelling: Int = 0) {
-        person.håndter(
-            ytelser(
-                orgnummer.id(0),
-                utbetalinger = utbetalinger(sykedagstelling, orgnummer),
-                orgnummer = orgnummer
-            )
-        )
-    }
-
-    private fun betale(orgnummer: String) {
-        person.håndter(simulering(orgnummer.id(0), orgnummer = orgnummer))
-        person.håndter(
-            utbetalingsgodkjenning(
-                orgnummer.id(0),
-                true,
-                orgnummer = orgnummer,
-                automatiskBehandling = false
-            )
-        )
-        person.håndter(
-            UtbetalingOverført(
-                meldingsreferanseId = UUID.randomUUID(),
-                aktørId = AKTØRID,
-                fødselsnummer = UNG_PERSON_FNR_2018,
-                orgnummer = orgnummer,
-                fagsystemId = orgnummer.inspektør.fagsystemId(orgnummer.id(0)),
-                utbetalingId = hendelselogg.behov().first { it.type == Behovtype.Utbetaling }.kontekst().getValue("utbetalingId"),
-                avstemmingsnøkkel = 123456L,
-                overføringstidspunkt = LocalDateTime.now()
-            )
-        )
-        person.håndter(
-            utbetaling(
-                orgnummer.inspektør.fagsystemId(orgnummer.id(0)),
-                status = AKSEPTERT,
-                orgnummer = orgnummer
-            )
-        )
-    }
-
-    private fun utbetalinger(dagTeller: Int, orgnummer: String): List<ArbeidsgiverUtbetalingsperiode> {
-        if (dagTeller == 0) return emptyList()
-        val førsteDato = 2.desember(2017).minusDays(
-            (
-                (dagTeller / 5 * 7) + dagTeller % 5
-                ).toLong()
-        )
-        return listOf(ArbeidsgiverUtbetalingsperiode(orgnummer, førsteDato, 1.desember(2017), 100.prosent, 100.daglig))
     }
 }

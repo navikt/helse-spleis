@@ -17,6 +17,7 @@ import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.api.HendelseDTO
@@ -26,6 +27,7 @@ import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -315,7 +317,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         ).håndter(Person::håndter)
     }
 
-    protected fun Inntekt.repeat(antall: Int) = (0..antall).map { this }
+    protected fun Inntekt.repeat(antall: Int) = (0.until(antall)).map { this }
 
     protected fun håndterUtbetalingsgrunnlag(
         vedtaksperiodeId: UUID = UUID.randomUUID(),
@@ -938,7 +940,6 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         return id
     }
 
-
     protected fun forlengVedtak(fom: LocalDate, tom: LocalDate, grad: Prosentdel = 100.prosent) {
         håndterSykmelding(Sykmeldingsperiode(fom, tom, grad))
         val id = observatør.sisteVedtaksperiode()
@@ -1113,6 +1114,161 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         assertTrue(ikkeBesvarteBehov.isEmpty()) {
             "Ikke alle behov er besvart. Mangler fortsatt svar på behovene $ikkeBesvarteBehov"
         }
+    }
+
+    protected fun grunnlag(
+        vedtaksperiodeId: UUID,
+        orgnummer: String,
+        inntekter: List<Inntekt>
+    ) = lagMånedsinntekter(vedtaksperiodeId, orgnummer, inntekter, creator = ArbeidsgiverInntekt.MånedligInntekt::Sykepengegrunnlag)
+
+    protected fun sammenligningsgrunnlag(
+        vedtaksperiodeId: UUID,
+        orgnummer: String,
+        inntekter: List<Inntekt>
+    ) = lagMånedsinntekter(vedtaksperiodeId, orgnummer, inntekter, creator = ArbeidsgiverInntekt.MånedligInntekt::Sammenligningsgrunnlag)
+
+    private fun lagMånedsinntekter(
+        vedtaksperiodeId: UUID,
+        orgnummer: String,
+        inntekter: List<Inntekt>,
+        sluttMnd: YearMonth = YearMonth.from(inspektør(orgnummer).skjæringstidspunkt(vedtaksperiodeId)).minusMonths(1),
+        creator: InntektCreator
+    ) = ArbeidsgiverInntekt(
+        orgnummer, inntekter.mapIndexed { index, inntekt ->
+            creator(
+                sluttMnd.minusMonths((inntekter.size - index - 1).toLong()),
+                inntekt,
+                ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
+                "Juidy inntekt",
+                "Juidy fordel"
+            )
+        }
+    )
+
+    protected fun assertHendelseIder(
+        vararg hendelseIder: UUID,
+        orgnummer: String,
+        vedtaksperiodeIndeks: Int = 2,
+    ) {
+        assertEquals(
+            hendelseIder.toSet(),
+            inspektør(orgnummer).hendelseIder(vedtaksperiodeIndeks.vedtaksperiode(orgnummer))
+        )
+    }
+
+    protected fun assertTilstand(
+        orgnummer: String,
+        tilstand: TilstandType,
+        vedtaksperiodeIndeks: Int = 1
+    ) {
+        assertEquals(tilstand, inspektør(orgnummer).sisteTilstand(vedtaksperiodeIndeks.vedtaksperiode(orgnummer))) {
+            inspektør.personLogg.toString()
+        }
+    }
+
+    protected fun assertInntektskilde(
+        orgnummer: String,
+        inntektskilde: Inntektskilde,
+        vedtaksperiodeIndeks: Int = 1
+    ) {
+        assertEquals(inntektskilde, inspektør(orgnummer).inntektskilde(vedtaksperiodeIndeks.vedtaksperiode(orgnummer)))
+    }
+
+    protected fun prosessperiode(periode: Periode, orgnummer: String, sykedagstelling: Int = 0) {
+        gapPeriode(periode, orgnummer, sykedagstelling)
+        historikk(orgnummer, sykedagstelling)
+        betale(orgnummer)
+    }
+
+    protected fun gapPeriode(periode: Periode, orgnummer: String, sykedagstelling: Int = 0) {
+        nyPeriode(periode, orgnummer)
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(Periode(periode.start, periode.start.plusDays(15))),
+            førsteFraværsdag = periode.start,
+            orgnummer = orgnummer
+        )
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(orgnummer), orgnummer = orgnummer)
+        historikk(orgnummer, sykedagstelling)
+        person.håndter(vilkårsgrunnlag(
+            orgnummer.id(0), orgnummer = orgnummer,
+            inntektsvurdering = Inntektsvurdering(
+                inntekter = inntektperioderForSammenligningsgrunnlag {
+                    1.januar(2017) til 1.desember(2017) inntekter {
+                        orgnummer inntekt INNTEKT
+                    }
+                }
+            ),
+        )
+        )
+    }
+
+    protected fun nyPeriode(periode: Periode, orgnummer: String) {
+        person.håndter(
+            sykmelding(
+                UUID.randomUUID(),
+                Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent),
+                orgnummer = orgnummer
+            )
+        )
+        person.håndter(
+            søknad(
+                UUID.randomUUID(),
+                Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent),
+                orgnummer = orgnummer
+            )
+        )
+    }
+
+    protected fun historikk(orgnummer: String, sykedagstelling: Int = 0) {
+        person.håndter(
+            ytelser(
+                orgnummer.id(0),
+                utbetalinger = utbetalinger(sykedagstelling, orgnummer),
+                orgnummer = orgnummer
+            )
+        )
+    }
+
+    protected fun betale(orgnummer: String) {
+        person.håndter(simulering(orgnummer.id(0), orgnummer = orgnummer))
+        person.håndter(
+            utbetalingsgodkjenning(
+                orgnummer.id(0),
+                true,
+                orgnummer = orgnummer,
+                automatiskBehandling = false
+            )
+        )
+        person.håndter(
+            UtbetalingOverført(
+                meldingsreferanseId = UUID.randomUUID(),
+                aktørId = AKTØRID,
+                fødselsnummer = UNG_PERSON_FNR_2018,
+                orgnummer = orgnummer,
+                fagsystemId = inspektør(orgnummer).fagsystemId(orgnummer.id(0)),
+                utbetalingId = hendelselogg.behov().first { it.type == Behovtype.Utbetaling }.kontekst().getValue("utbetalingId"),
+                avstemmingsnøkkel = 123456L,
+                overføringstidspunkt = LocalDateTime.now()
+            )
+        )
+        person.håndter(
+            utbetaling(
+                inspektør(orgnummer).fagsystemId(orgnummer.id(0)),
+                status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT,
+                orgnummer = orgnummer
+            )
+        )
+    }
+
+    private fun utbetalinger(dagTeller: Int, orgnummer: String): List<ArbeidsgiverUtbetalingsperiode> {
+        if (dagTeller == 0) return emptyList()
+        val førsteDato = 2.desember(2017).minusDays(
+            (
+                (dagTeller / 5 * 7) + dagTeller % 5
+                ).toLong()
+        )
+        return listOf(ArbeidsgiverUtbetalingsperiode(orgnummer, førsteDato, 1.desember(2017), 100.prosent, 100.daglig))
     }
 
     private val ikkeBesvarteBehov = mutableListOf<EtterspurtBehov>()
