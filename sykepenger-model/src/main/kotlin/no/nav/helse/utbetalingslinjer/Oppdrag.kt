@@ -241,14 +241,16 @@ internal class Oppdrag private constructor(
 
     private fun håndterUlikhet(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje, aktivitetslogg: IAktivitetslogg) {
         when {
-            nåværende.skalUtvide(tidligere, sisteLinjeITidligereOppdrag) -> nåværende.utvidTom(tidligere)
+            nåværende.kanEndreEksisterendeLinje(tidligere, sisteLinjeITidligereOppdrag) -> nåværende.endreEksisterendeLinje(tidligere)
             nåværende.skalOpphøreOgErstatte(tidligere, sisteLinjeITidligereOppdrag) -> opphørTidligereLinjeOgOpprettNy(nåværende, tidligere, aktivitetslogg)
-            else -> {
-                nåværende.kobleTil(linkTo)
-                linkTo = nåværende
-                tilstand = Ny()
-            }
+            else -> opprettNyLinje(nåværende)
         }
+    }
+
+    private fun opprettNyLinje(nåværende: Utbetalingslinje) {
+        nåværende.kobleTil(linkTo)
+        linkTo = nåværende
+        tilstand = Ny()
     }
 
     private interface Tilstand {

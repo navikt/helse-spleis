@@ -69,7 +69,7 @@ internal class Utbetalingslinje internal constructor(
             this.grad == other.grad &&
             this.datoStatusFom == other.datoStatusFom
 
-    internal fun skalUtvide(other: Utbetalingslinje, sisteLinjeITidligereOppdrag: Utbetalingslinje) =
+    internal fun kanEndreEksisterendeLinje(other: Utbetalingslinje, sisteLinjeITidligereOppdrag: Utbetalingslinje) =
         other == sisteLinjeITidligereOppdrag &&
         this.fom == other.fom &&
             this.beløp == other.beløp &&
@@ -91,7 +91,7 @@ internal class Utbetalingslinje internal constructor(
 
     internal fun markerUendret(tidligere: Utbetalingslinje) = copyWith(UEND, tidligere)
 
-    internal fun utvidTom(tidligere: Utbetalingslinje) = copyWith(ENDR, tidligere)
+    internal fun endreEksisterendeLinje(tidligere: Utbetalingslinje) = copyWith(ENDR, tidligere)
         .also {
             this.refDelytelseId = null
             this.refFagsystemId = null
