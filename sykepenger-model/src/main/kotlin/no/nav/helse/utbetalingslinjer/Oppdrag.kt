@@ -163,7 +163,7 @@ internal class Oppdrag private constructor(
                 appended(tidligere)
             }
             this.førstedato == tidligere.førstedato ->
-                ghosted(tidligere)
+                ghosted(tidligere, aktivitetslogg = aktivitetslogg)
             else -> throw IllegalArgumentException("uventet utbetalingslinje forhold")
         }
     }
@@ -184,11 +184,11 @@ internal class Oppdrag private constructor(
     private lateinit var linkTo: Utbetalingslinje
 
     //
-    private fun ghosted(tidligere: Oppdrag, linkTo: Utbetalingslinje = tidligere.last()) =
+    private fun ghosted(tidligere: Oppdrag, linkTo: Utbetalingslinje = tidligere.last(), aktivitetslogg: IAktivitetslogg) =
         this.also { nåværende ->
             this.linkTo = linkTo
             nåværende.kobleTil(tidligere)
-            nåværende.kopierLikeLinjer(tidligere)
+            nåværende.kopierLikeLinjer(tidligere, aktivitetslogg)
             nåværende.håndterLengreNåværende(tidligere)
         }
 
@@ -198,11 +198,12 @@ internal class Oppdrag private constructor(
         nåværende.add(0, deletion)
     }
 
-    private fun opphørTidligereLinjeOgOpprettNy(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje) {
+    private fun opphørTidligereLinjeOgOpprettNy(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje, aktivitetslogg: IAktivitetslogg) {
         linkTo = tidligere
         add(this.indexOf(nåværende), tidligere.opphørslinje(tidligere.fom))
         nåværende.kobleTil(linkTo)
         tilstand = Ny()
+        aktivitetslogg.warn("Endrer tidligere oppdrag. Kontroller simuleringen.")
     }
 
     private fun deletionLinje(tidligere: Oppdrag) =
@@ -218,10 +219,10 @@ internal class Oppdrag private constructor(
         tidsstempel = tidsstempel
     )
 
-    private fun kopierLikeLinjer(tidligere: Oppdrag) {
+    private fun kopierLikeLinjer(tidligere: Oppdrag, aktivitetslogg: IAktivitetslogg) {
         tilstand = if (tidligere.sistedato > this.sistedato) Slett() else Identisk()
         sisteLinjeITidligereOppdrag = tidligere.last()
-        this.zip(tidligere).forEach { (a, b) -> tilstand.håndterForskjell(a, b) }
+        this.zip(tidligere).forEach { (a, b) -> tilstand.håndterForskjell(a, b, aktivitetslogg) }
     }
 
     private fun håndterLengreNåværende(tidligere: Oppdrag) {
@@ -238,10 +239,10 @@ internal class Oppdrag private constructor(
         this.endringskode = Endringskode.ENDR
     }
 
-    private fun håndterUlikhet(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje) {
+    private fun håndterUlikhet(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje, aktivitetslogg: IAktivitetslogg) {
         when {
             nåværende.skalUtvide(tidligere, sisteLinjeITidligereOppdrag) -> nåværende.utvidTom(tidligere)
-            nåværende.skalOpphøreOgErstatte(tidligere, sisteLinjeITidligereOppdrag) -> opphørTidligereLinjeOgOpprettNy(nåværende, tidligere)
+            nåværende.skalOpphøreOgErstatte(tidligere, sisteLinjeITidligereOppdrag) -> opphørTidligereLinjeOgOpprettNy(nåværende, tidligere, aktivitetslogg)
             else -> {
                 nåværende.kobleTil(linkTo)
                 linkTo = nåværende
@@ -251,30 +252,30 @@ internal class Oppdrag private constructor(
     }
 
     private interface Tilstand {
-        fun håndterForskjell(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje)
+        fun håndterForskjell(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje, aktivitetslogg: IAktivitetslogg)
     }
 
     private inner class Identisk : Tilstand {
-        override fun håndterForskjell(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje) {
+        override fun håndterForskjell(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje, aktivitetslogg: IAktivitetslogg) {
             when (nåværende == tidligere) {
                 true -> nåværende.markerUendret(tidligere)
-                false -> håndterUlikhet(nåværende, tidligere)
+                false -> håndterUlikhet(nåværende, tidligere, aktivitetslogg)
             }
         }
     }
 
     private inner class Slett : Tilstand {
-        override fun håndterForskjell(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje) {
+        override fun håndterForskjell(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje, aktivitetslogg: IAktivitetslogg) {
             if (nåværende == tidligere) {
                 if (nåværende == last()) return nåværende.kobleTil(linkTo)
                 return nåværende.markerUendret(tidligere)
             }
-            håndterUlikhet(nåværende, tidligere)
+            håndterUlikhet(nåværende, tidligere, aktivitetslogg)
         }
     }
 
     private inner class Ny : Tilstand {
-        override fun håndterForskjell(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje) {
+        override fun håndterForskjell(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje, aktivitetslogg: IAktivitetslogg) {
             nåværende.kobleTil(linkTo)
             linkTo = nåværende
         }
