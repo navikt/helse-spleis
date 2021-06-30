@@ -28,6 +28,7 @@ internal abstract class AbstractPersonTest {
     protected fun Int.vedtaksperiode(orgnummer: String) = vedtaksperiodeId(this - 1, orgnummer)
     protected fun Int.utbetaling(orgnummer: String) = utbetalingId(this - 1, orgnummer)
     protected fun inspektør(orgnummer: String) = TestArbeidsgiverInspektør(person, orgnummer)
+    protected fun inspektør(orgnummer: String, block: TestArbeidsgiverInspektør.() -> Unit) = inspektør(orgnummer).run(block)
     protected fun vedtaksperiodeId(indeks: Int, orgnummer: String = ORGNUMMER) = observatør.vedtaksperiode(orgnummer, indeks)
     protected fun utbetalingId(indeks: Int, orgnummer: String = ORGNUMMER) = inspektør(orgnummer).utbetalingId(indeks)
 }

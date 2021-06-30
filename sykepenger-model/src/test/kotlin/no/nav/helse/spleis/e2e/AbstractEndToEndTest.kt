@@ -76,10 +76,14 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         assertTilstander(vedtaksperiodeId(indeks), *tilstander)
     }
 
-    protected fun assertTilstander(id: UUID, vararg tilstander: TilstandType) {
+    protected fun assertTilstander(id: UUID, vararg tilstander: TilstandType, inspektør: TestArbeidsgiverInspektør = this.inspektør) {
         assertFalse(inspektør.periodeErForkastet(id)) { "Perioden er forkastet med tilstander: ${observatør.tilstandsendringer[id]}" }
         assertTrue(inspektør.periodeErIkkeForkastet(id)) { "Perioden er forkastet med tilstander: ${observatør.tilstandsendringer[id]}" }
         assertEquals(tilstander.asList(), observatør.tilstandsendringer[id])
+    }
+
+    protected fun TestArbeidsgiverInspektør.assertTilstander(id: UUID, vararg tilstander: TilstandType) {
+        assertTilstander(id = id, inspektør = this, tilstander = tilstander)
     }
 
     protected fun assertForkastetPeriodeTilstander(indeks: Int, vararg tilstander: TilstandType) {
@@ -105,14 +109,11 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
 
     }
 
-    private fun vedtaksperiodeIndeks(id: UUID): String {
-        val index = observatør.vedtaksperiodeIndeks(ORGNUMMER, id)
-        return "${index + 1}.vedtaksperiode"
-    }
-
     protected fun assertNoErrors(inspektør: TestArbeidsgiverInspektør) {
         assertFalse(inspektør.personLogg.hasErrorsOrWorse(), inspektør.personLogg.toString())
     }
+
+    protected fun TestArbeidsgiverInspektør.assertHasNoErrors() = assertNoErrors(this)
 
     protected fun assertNoWarnings(inspektør: TestArbeidsgiverInspektør) {
         assertFalse(inspektør.personLogg.hasWarningsOrWorse(), inspektør.personLogg.toString())
