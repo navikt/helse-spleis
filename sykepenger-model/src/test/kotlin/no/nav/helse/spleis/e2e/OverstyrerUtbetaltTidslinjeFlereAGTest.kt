@@ -10,6 +10,7 @@ import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -83,41 +84,52 @@ internal class OverstyrerUtbetaltTidslinjeFlereAGTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode(AG2), orgnummer = AG2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(AG2), orgnummer = AG2)
 
-        assertNoErrors(inspektør)
+        inspektør(AG1) {
+            assertTilstander(
+                1.vedtaksperiode(AG1),
+                START,
+                MOTTATT_SYKMELDING_FERDIG_GAP,
+                AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+                AVVENTER_ARBEIDSGIVERE,
+                AVVENTER_UTBETALINGSGRUNNLAG,
+                AVVENTER_HISTORIKK,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_GODKJENNING,
+                TIL_UTBETALING,
+                AVSLUTTET,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
+                AVSLUTTET
+            )
+            assertHasNoErrors()
+            assertEquals(2, utbetalinger.filter { it.erAvsluttet() }.size)
+        }
 
-        assertTilstander(
-            1.vedtaksperiode(AG1),
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_ARBEIDSGIVERE,
-            AVVENTER_UTBETALINGSGRUNNLAG,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET,
-            AVVENTER_HISTORIKK_REVURDERING,
-            AVVENTER_SIMULERING_REVURDERING,
-            AVVENTER_GODKJENNING_REVURDERING,
-            TIL_UTBETALING,
-            AVSLUTTET
-        )
-//        assertTilstander(
-//            1.vedtaksperiode(AG2),
-//            START,
-//            MOTTATT_SYKMELDING_FERDIG_GAP,
-//            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-//            AVVENTER_ARBEIDSGIVERE,
-//            AVVENTER_UTBETALINGSGRUNNLAG,
-//            AVVENTER_HISTORIKK,
-//            AVVENTER_SIMULERING,
-//            AVVENTER_GODKJENNING,
-//            TIL_UTBETALING,
-//            AVSLUTTET
-//        )
+        inspektør(AG2) {
+            assertTilstander(
+                1.vedtaksperiode(AG2),
+                START,
+                MOTTATT_SYKMELDING_FERDIG_GAP,
+                AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+                AVVENTER_ARBEIDSGIVERE,
+                AVVENTER_UTBETALINGSGRUNNLAG,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_GODKJENNING,
+                TIL_UTBETALING,
+                AVSLUTTET,
+                AVVENTER_ARBEIDSGIVERE_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                AVSLUTTET
+            )
+            assertHasNoErrors()
+            assertEquals(2, utbetalinger.filter { it.erAvsluttet() }.size)
+        }
     }
 
     private fun manuellPermisjonsdag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Permisjonsdag)
