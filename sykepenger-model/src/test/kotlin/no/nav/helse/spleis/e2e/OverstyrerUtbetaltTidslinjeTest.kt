@@ -885,7 +885,6 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    @Disabled("Feilende test fra prod")
     @Suppress("UNCHECKED_CAST")
     fun `overstyre inn ferie med forgående periode med avsluttende ferie`() {
         /* Hvis forgående periode avsluttes med ferie og vi revurderer starten av etterfølgende periode med ferie blir det feil i utgående behov.
@@ -897,6 +896,7 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
             Ferie(23.april(2021), 23.april(2021))
         )
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.april(2021), 16.april(2021))), førsteFraværsdag = 1.april(2021))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(
             1.vedtaksperiode,
         )
@@ -922,10 +922,13 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
         val behov = inspektør.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling)
         assertEquals(2, (behov.detaljer()["linjer"] as List<*>).size)
 
-        assertEquals("2021-04-17", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["fom"])
-        assertEquals("2021-04-22", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["tom"])
+        assertEquals("2021-04-24", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["fom"])
+        assertEquals("2021-05-07", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["tom"])
+        assertEquals("2021-04-24", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["datoStatusFom"])
+        assertEquals("OPPH", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["statuskode"])
         assertEquals("2021-04-28", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[1]["fom"])
         assertEquals("2021-05-07", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[1]["tom"])
+        assertWarnings(inspektør)
     }
 
     @Test
