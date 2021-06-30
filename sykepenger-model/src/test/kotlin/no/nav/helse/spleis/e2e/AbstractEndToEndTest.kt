@@ -201,10 +201,11 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         arbeidsgiverperioder: List<Periode>,
         førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOfOrNull { it.start } ?: 1.januar,
         refusjon: Refusjon = Refusjon(null, INNTEKT, emptyList()),
-        beregnetInntekt: Inntekt = refusjon.inntekt
+        beregnetInntekt: Inntekt = refusjon.inntekt,
+        orgnummer: String = ORGNUMMER
     ): UUID {
-        assertIkkeEtterspurt(Inntektsmelding::class, InntekterForSammenligningsgrunnlag, vedtaksperiodeId, ORGNUMMER)
-        return håndterInntektsmelding(arbeidsgiverperioder, førsteFraværsdag, refusjon, beregnetInntekt = beregnetInntekt)
+        assertIkkeEtterspurt(Inntektsmelding::class, InntekterForSammenligningsgrunnlag, vedtaksperiodeId, orgnummer)
+        return håndterInntektsmelding(arbeidsgiverperioder, førsteFraværsdag, refusjon, beregnetInntekt = beregnetInntekt, orgnummer = orgnummer)
     }
 
     protected fun håndterInntektsmelding(
@@ -887,19 +888,20 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         ?: listOf(Inntektsopplysning(orgnummer, 1.desember(2017), INNTEKT, true))
 
 
-    protected fun nyttVedtak(fom: LocalDate, tom: LocalDate, grad: Prosentdel = 100.prosent, førsteFraværsdag: LocalDate = fom) {
-        val id = tilGodkjent(fom, tom, grad, førsteFraværsdag)
-        håndterUtbetalt(id, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+    protected fun nyttVedtak(fom: LocalDate, tom: LocalDate, grad: Prosentdel = 100.prosent, førsteFraværsdag: LocalDate = fom, orgnummer: String = ORGNUMMER) {
+        val id = tilGodkjent(fom, tom, grad, førsteFraværsdag, orgnummer = orgnummer)
+        håndterUtbetalt(id, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT, orgnummer = orgnummer)
     }
 
     protected fun tilGodkjent(
         fom: LocalDate,
         tom: LocalDate,
         grad: Prosentdel,
-        førsteFraværsdag: LocalDate
+        førsteFraværsdag: LocalDate,
+        orgnummer: String = ORGNUMMER
     ): UUID {
-        val id = tilGodkjenning(fom, tom, grad, førsteFraværsdag)
-        håndterUtbetalingsgodkjenning(id, true)
+        val id = tilGodkjenning(fom, tom, grad, førsteFraværsdag, orgnummer = orgnummer)
+        håndterUtbetalingsgodkjenning(id, true, orgnummer = orgnummer)
         return id
     }
 
@@ -907,10 +909,11 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         fom: LocalDate,
         tom: LocalDate,
         grad: Prosentdel,
-        førsteFraværsdag: LocalDate
+        førsteFraværsdag: LocalDate,
+        orgnummer: String = ORGNUMMER
     ): UUID {
-        val id = tilYtelser(fom, tom, grad, førsteFraværsdag)
-        håndterSimulering(id)
+        val id = tilYtelser(fom, tom, grad, førsteFraværsdag, orgnummer = orgnummer)
+        håndterSimulering(id, orgnummer = orgnummer)
         return id
     }
 
@@ -918,44 +921,46 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         fom: LocalDate,
         tom: LocalDate,
         grad: Prosentdel,
-        førsteFraværsdag: LocalDate
+        førsteFraværsdag: LocalDate,
+        orgnummer: String = ORGNUMMER
     ): UUID {
-        håndterSykmelding(Sykmeldingsperiode(fom, tom, grad))
+        håndterSykmelding(Sykmeldingsperiode(fom, tom, grad), orgnummer = orgnummer)
         val id = observatør.sisteVedtaksperiode()
         håndterInntektsmeldingMedValidering(
             id,
             listOf(Periode(fom, fom.plusDays(15))),
-            førsteFraværsdag = førsteFraværsdag
+            førsteFraværsdag = førsteFraværsdag,
+            orgnummer = orgnummer
         )
-        håndterSøknadMedValidering(id, Søknad.Søknadsperiode.Sykdom(fom, tom, grad))
-        håndterUtbetalingsgrunnlag(id)
-        håndterYtelser(id)
-        håndterVilkårsgrunnlag(id, INNTEKT, inntektsvurdering = Inntektsvurdering(
+        håndterSøknadMedValidering(id, Søknad.Søknadsperiode.Sykdom(fom, tom, grad), orgnummer = orgnummer)
+        håndterUtbetalingsgrunnlag(id, orgnummer = orgnummer)
+        håndterYtelser(id, orgnummer = orgnummer)
+        håndterVilkårsgrunnlag(id, INNTEKT, orgnummer = orgnummer, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 fom.minusYears(1) til fom.minusMonths(1) inntekter {
-                    ORGNUMMER inntekt INNTEKT
+                    orgnummer inntekt INNTEKT
                 }
             }
         ))
-        håndterYtelser(id)
+        håndterYtelser(id, orgnummer = orgnummer)
         return id
     }
 
-    protected fun forlengVedtak(fom: LocalDate, tom: LocalDate, grad: Prosentdel = 100.prosent) {
-        håndterSykmelding(Sykmeldingsperiode(fom, tom, grad))
+    protected fun forlengVedtak(fom: LocalDate, tom: LocalDate, grad: Prosentdel = 100.prosent, orgnummer: String = ORGNUMMER) {
+        håndterSykmelding(Sykmeldingsperiode(fom, tom, grad), orgnummer = orgnummer)
         val id = observatør.sisteVedtaksperiode()
-        håndterSøknadMedValidering(id, Søknad.Søknadsperiode.Sykdom(fom, tom, grad))
-        håndterUtbetalingsgrunnlag(id)
-        håndterYtelser(id)
-        håndterSimulering(id)
-        håndterUtbetalingsgodkjenning(id, true)
-        håndterUtbetalt(id, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterSøknadMedValidering(id, Søknad.Søknadsperiode.Sykdom(fom, tom, grad), orgnummer = orgnummer)
+        håndterUtbetalingsgrunnlag(id, orgnummer = orgnummer)
+        håndterYtelser(id, orgnummer = orgnummer)
+        håndterSimulering(id, orgnummer = orgnummer)
+        håndterUtbetalingsgodkjenning(id, true, orgnummer = orgnummer)
+        håndterUtbetalt(id, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT, orgnummer = orgnummer)
     }
 
-    protected fun forlengPeriode(fom: LocalDate, tom: LocalDate, grad: Prosentdel = 100.prosent) {
-        håndterSykmelding(Sykmeldingsperiode(fom, tom, grad))
+    protected fun forlengPeriode(fom: LocalDate, tom: LocalDate, grad: Prosentdel = 100.prosent, orgnummer: String = ORGNUMMER) {
+        håndterSykmelding(Sykmeldingsperiode(fom, tom, grad), orgnummer = orgnummer)
         val id = observatør.sisteVedtaksperiode()
-        håndterSøknadMedValidering(id, Søknad.Søknadsperiode.Sykdom(fom, tom, grad))
+        håndterSøknadMedValidering(id, Søknad.Søknadsperiode.Sykdom(fom, tom, grad), orgnummer = orgnummer)
     }
 
     protected fun simulering(
