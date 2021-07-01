@@ -183,7 +183,6 @@ internal class Oppdrag private constructor(
     private lateinit var sisteLinjeITidligereOppdrag: Utbetalingslinje
     private lateinit var linkTo: Utbetalingslinje
 
-    //
     private fun ghosted(tidligere: Oppdrag, linkTo: Utbetalingslinje = tidligere.last(), aktivitetslogg: IAktivitetslogg) =
         this.also { nåværende ->
             this.linkTo = linkTo
