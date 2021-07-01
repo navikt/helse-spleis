@@ -190,6 +190,15 @@ internal class UtbetalingslinjeForskjellTest {
     }
 
     @Test
+    fun `flytter FOM til en senere dag `() {
+        val original = linjer(1.januar to 2.januar, 4.januar to 5.januar)
+        val recalculated = linjer(2.januar to 5.januar)
+        val actual = recalculated - original
+        assertOpphør(actual[0], 1.januar, original.last())
+        assertNyLinje(actual[1], original.last())
+    }
+
+    @Test
     fun `slå sammen til én linje - og trekke tilbake`() {
         val original = linjer(1.januar to 2.januar, 4.januar to 5.januar)
         val recalculated = linjer(1.januar to 4.januar)
