@@ -184,10 +184,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         val behov = inspektør.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling)
         assertEquals(1, (behov.detaljer()["linjer"] as List<*>).size)
 
-        assertEquals(
-            "2021-04-17",
-            (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["fom"]
-        ) // Spiller det noen rolle at FOM er feil i et ENDR, OPPH oppdrag?
+        assertEquals("2021-04-17", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["fom"])
         assertEquals("2021-04-23", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["tom"])
         assertEquals("NY", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["endringskode"])
     }
