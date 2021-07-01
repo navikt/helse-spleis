@@ -572,6 +572,41 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         }
     }
 
+    @Test
+    fun `ghost n stuff`(){
+            Toggles.FlereArbeidsgivereUlikFom.enable {
+
+                håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars, 100.prosent), orgnummer = a1)
+                håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 15.mars, 100.prosent), orgnummer = a1)
+                håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, orgnummer = a1, refusjon = Refusjon(null, 31000.månedlig, emptyList()))
+
+                val inntekter = listOf(
+                    grunnlag(1.vedtaksperiode(a1), a1, 31000.månedlig.repeat(3)),
+                    //grunnlag(1.vedtaksperiode(a2), a2, 32000.månedlig.repeat(3))
+                )
+
+                håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), inntekter = inntekter, orgnummer = a1)
+                håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
+                håndterVilkårsgrunnlag(
+                    1.vedtaksperiode(a1), inntektsvurdering = Inntektsvurdering(
+                        listOf(
+                            sammenligningsgrunnlag(1.vedtaksperiode(a1), a1, 31000.månedlig.repeat(12)),
+                            sammenligningsgrunnlag(1.vedtaksperiode(a2), a2, 32000.månedlig.repeat(12))
+                        )
+                    ), orgnummer = a1
+                )
+                håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
+                håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
+                håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), orgnummer = a1)
+                håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
+
+                val a1Linje = inspektør(a1).utbetalinger.last().arbeidsgiverOppdrag().single()
+                assertEquals(17.januar, a1Linje.fom)
+                assertEquals(15.mars, a1Linje.tom)
+                assertEquals(1063, a1Linje.beløp)
+            }
+    }
+
     @Disabled("Ulik fom med to dager uten sykdom fra ghost")
     @Test
     fun `Ulik fom og 6G-begrenset, to dager med utbetaling hos første arbeidsgiver før andre arbeidsgiver blir syk skal fortsatt 6G-cappe mht begge AG`() {
