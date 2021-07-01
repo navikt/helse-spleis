@@ -43,7 +43,9 @@ internal class VedtaksperiodeBuilder(
         TilstandType.UTBETALING_FEILET,
         TilstandType.REVURDERING_FEILET,
         TilstandType.TIL_UTBETALING,
-        TilstandType.AVVENTER_ARBEIDSGIVERE
+        TilstandType.AVVENTER_ARBEIDSGIVERE,
+        TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING,
+        TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
     ) || (tilstand.type == TilstandType.AVSLUTTET_UTEN_UTBETALING && beregningIder.isNotEmpty())
     private val warnings = (hentWarnings(vedtaksperiode) + (dataForVilkårsvurdering?.meldingsreferanseId?.let { hentVilkårsgrunnlagWarnings(vedtaksperiode, id, it) } ?: emptyList())).distinctBy { it.melding }
     private val beregnetSykdomstidslinje = mutableListOf<SykdomstidslinjedagDTO>()
