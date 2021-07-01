@@ -84,7 +84,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         ))
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -564,7 +564,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
 
         assertEquals(5, inspektør.vedtaksperiodeTeller)
-        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -620,7 +620,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         assertEquals(31.desember(2019), inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
         assertTrue(inspektør.utbetalingslinjer(0).isEmpty())
         assertTilstander(
             1.vedtaksperiode,
@@ -702,8 +702,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt(2.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
-        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
-        assertNotNull(inspektør.maksdato(2.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(2.vedtaksperiode))
 
         assertTilstander(
             1.vedtaksperiode,

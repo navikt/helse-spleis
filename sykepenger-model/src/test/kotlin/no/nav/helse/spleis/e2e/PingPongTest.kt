@@ -55,7 +55,7 @@ internal class PingPongTest : AbstractEndToEndTest() {
         håndterUtbetalt(3.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
-        assertEquals(30.oktober(2020), inspektør.maksdato(3.vedtaksperiode))
+        assertEquals(30.oktober(2020), inspektør.sisteMaksdato(3.vedtaksperiode))
     }
 
     @Test

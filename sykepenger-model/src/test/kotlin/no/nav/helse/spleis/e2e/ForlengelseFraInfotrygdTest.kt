@@ -340,8 +340,8 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             AVSLUTTET
         )
 
-        assertEquals(28.desember, inspektør.maksdato(1.vedtaksperiode))
-        assertEquals(inspektør.maksdato(3.vedtaksperiode), inspektør.maksdato(1.vedtaksperiode))
+        assertEquals(28.desember, inspektør.sisteMaksdato(1.vedtaksperiode))
+        assertEquals(inspektør.sisteMaksdato(3.vedtaksperiode), inspektør.sisteMaksdato(1.vedtaksperiode))
     }
 
     @Test
@@ -736,9 +736,9 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(3.vedtaksperiode, true)
         håndterUtbetalt(3.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
-        assertEquals(30.oktober(2020), inspektør.maksdato(1.vedtaksperiode))
-        assertEquals(30.oktober(2020), inspektør.maksdato(2.vedtaksperiode))
-        assertEquals(30.oktober(2020), inspektør.maksdato(3.vedtaksperiode))
+        assertEquals(30.oktober(2020), inspektør.sisteMaksdato(1.vedtaksperiode))
+        assertEquals(30.oktober(2020), inspektør.sisteMaksdato(2.vedtaksperiode))
+        assertEquals(30.oktober(2020), inspektør.sisteMaksdato(3.vedtaksperiode))
         assertEquals(20.november(2019), inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(20.november(2019), inspektør.skjæringstidspunkt(2.vedtaksperiode))
         assertEquals(20.november(2019), inspektør.skjæringstidspunkt(3.vedtaksperiode))

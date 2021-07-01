@@ -23,6 +23,7 @@ import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.api.HendelseDTO
 import no.nav.helse.serde.api.serializePersonForSpeil
 import no.nav.helse.serde.reflection.Utbetalingstatus
+import no.nav.helse.testhelpers.Inntektperioder
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.januar
@@ -891,8 +892,15 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         ?: listOf(Inntektsopplysning(orgnummer, 1.desember(2017), INNTEKT, true))
 
 
-    protected fun nyttVedtak(fom: LocalDate, tom: LocalDate, grad: Prosentdel = 100.prosent, førsteFraværsdag: LocalDate = fom, orgnummer: String = ORGNUMMER) {
-        val id = tilGodkjent(fom, tom, grad, førsteFraværsdag, orgnummer = orgnummer)
+    protected fun nyttVedtak(
+        fom: LocalDate,
+        tom: LocalDate,
+        grad: Prosentdel = 100.prosent,
+        førsteFraværsdag: LocalDate = fom,
+        orgnummer: String = ORGNUMMER,
+        inntekterBlock: Inntektperioder.() -> Unit = { defaultInntekter(orgnummer, fom) }
+    ) {
+        val id = tilGodkjent(fom, tom, grad, førsteFraværsdag, orgnummer = orgnummer, inntekterBlock = inntekterBlock)
         håndterUtbetalt(id, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT, orgnummer = orgnummer)
     }
 
@@ -901,9 +909,10 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         tom: LocalDate,
         grad: Prosentdel,
         førsteFraværsdag: LocalDate,
-        orgnummer: String = ORGNUMMER
+        orgnummer: String = ORGNUMMER,
+        inntekterBlock: Inntektperioder.() -> Unit = { defaultInntekter(orgnummer, fom) }
     ): UUID {
-        val id = tilGodkjenning(fom, tom, grad, førsteFraværsdag, orgnummer = orgnummer)
+        val id = tilGodkjenning(fom, tom, grad, førsteFraværsdag, orgnummer = orgnummer, inntekterBlock = inntekterBlock)
         håndterUtbetalingsgodkjenning(id, true, orgnummer = orgnummer)
         return id
     }
@@ -913,19 +922,26 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         tom: LocalDate,
         grad: Prosentdel,
         førsteFraværsdag: LocalDate,
-        orgnummer: String = ORGNUMMER
+        orgnummer: String = ORGNUMMER,
+        inntekterBlock: Inntektperioder.() -> Unit = { defaultInntekter(orgnummer, fom) }
     ): UUID {
-        val id = tilYtelser(fom, tom, grad, førsteFraværsdag, orgnummer = orgnummer)
+        val id = tilYtelser(fom, tom, grad, førsteFraværsdag, orgnummer = orgnummer, inntekterBlock = inntekterBlock)
         håndterSimulering(id, orgnummer = orgnummer)
         return id
     }
+
+    private fun Inntektperioder.defaultInntekter(orgnummer: String, fom: LocalDate) =
+        fom.minusYears(1) til fom.minusMonths(1) inntekter {
+            orgnummer inntekt INNTEKT
+        }
 
     protected fun tilYtelser(
         fom: LocalDate,
         tom: LocalDate,
         grad: Prosentdel,
         førsteFraværsdag: LocalDate,
-        orgnummer: String = ORGNUMMER
+        orgnummer: String = ORGNUMMER,
+        inntekterBlock: Inntektperioder.() -> Unit = { defaultInntekter(orgnummer, fom) }
     ): UUID {
         håndterSykmelding(Sykmeldingsperiode(fom, tom, grad), orgnummer = orgnummer)
         val id = observatør.sisteVedtaksperiode()
@@ -938,13 +954,11 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         håndterSøknadMedValidering(id, Søknad.Søknadsperiode.Sykdom(fom, tom, grad), orgnummer = orgnummer)
         håndterUtbetalingsgrunnlag(id, orgnummer = orgnummer)
         håndterYtelser(id, orgnummer = orgnummer)
-        håndterVilkårsgrunnlag(id, INNTEKT, orgnummer = orgnummer, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioderForSammenligningsgrunnlag {
-                fom.minusYears(1) til fom.minusMonths(1) inntekter {
-                    orgnummer inntekt INNTEKT
-                }
-            }
-        ))
+        håndterVilkårsgrunnlag(
+            id, INNTEKT, orgnummer = orgnummer, inntektsvurdering = Inntektsvurdering(
+                inntekter = inntektperioderForSammenligningsgrunnlag(inntekterBlock)
+            )
+        )
         håndterYtelser(id, orgnummer = orgnummer)
         return id
     }

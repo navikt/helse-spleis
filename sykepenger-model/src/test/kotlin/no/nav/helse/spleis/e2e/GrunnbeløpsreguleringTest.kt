@@ -51,7 +51,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
         utbetaltForlengetVedtaksperiodeBegrensetAv6G(12, 1.juli(2020), 31.juli(2020))
         utbetaltForlengetVedtaksperiodeBegrensetAv6G(13, 1.august(2020), 31.august(2020))
 
-        assertEquals(11.august(2020), inspektør.maksdato(13.vedtaksperiode))
+        assertEquals(11.august(2020), inspektør.sisteMaksdato(13.vedtaksperiode))
         håndterGrunnbeløpsregulering(gyldighetsdato = GYLDIGHETSDATO_2020_GRUNNBELØP)
         assertEquals(14, inspektør.utbetalinger.size)
         val etterutbetaling = inspektør.utbetalinger.last()
@@ -181,9 +181,9 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
         utbetaltForlengetVedtaksperiodeBegrensetAv6G(3, 1.august(2020), 31.august(2020))
         inspektør.utbetalinger.also { utbetalinger ->
             assertEquals(4, utbetalinger.size)
-            assertEquals(inspektør.vedtaksperiodeutbetaling(1.vedtaksperiode), utbetalinger[0])
-            assertEquals(inspektør.vedtaksperiodeutbetaling(2.vedtaksperiode), utbetalinger[1])
-            assertEquals(inspektør.vedtaksperiodeutbetaling(3.vedtaksperiode), utbetalinger[3])
+            assertEquals(inspektør.gjeldendeUtbetalingForVedtaksperiode(1.vedtaksperiode), utbetalinger[0])
+            assertEquals(inspektør.gjeldendeUtbetalingForVedtaksperiode(2.vedtaksperiode), utbetalinger[1])
+            assertEquals(inspektør.gjeldendeUtbetalingForVedtaksperiode(3.vedtaksperiode), utbetalinger[3])
 
             assertEquals(utbetalinger[0].arbeidsgiverOppdrag().fagsystemId(), utbetalinger[2].arbeidsgiverOppdrag().fagsystemId())
             assertTrue(utbetalinger[2].erEtterutbetaling())

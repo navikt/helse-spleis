@@ -48,7 +48,7 @@ internal class TestArbeidsgiverInspektør(
     internal val infotrygdFeriepengebeløpPerson = mutableListOf<Double>()
     internal val infotrygdFeriepengebeløpArbeidsgiver = mutableListOf<Double>()
     internal val spleisFeriepengebeløpArbeidsgiver = mutableListOf<Double>()
-    private val vedtaksperiodeutbetalinger = mutableMapOf<Int, Int>()
+    private val vedtaksperiodeutbetalinger = mutableMapOf<Int, MutableList<Int>>()
     private val utbetalingstilstander = mutableListOf<Utbetaling.Tilstand>()
     private val utbetalingIder = mutableListOf<UUID>()
     private val utbetalingutbetalingstidslinjer = mutableListOf<Utbetalingstidslinje>()
@@ -230,7 +230,7 @@ internal class TestArbeidsgiverInspektør(
             forbrukteSykedagerer.add(forbrukteSykedager)
             gjenståendeSykedagerer.add(gjenståendeSykedager)
         } else {
-            vedtaksperiodeutbetalinger[vedtaksperiodeindeks] = utbetalinger.indexOf(utbetaling)
+            vedtaksperiodeutbetalinger.getOrPut(vedtaksperiodeindeks) { mutableListOf() }.add(utbetalinger.indexOf(utbetaling))
         }
     }
 
@@ -401,7 +401,8 @@ internal class TestArbeidsgiverInspektør(
     private val UUID.indeks get() = vedtaksperiodeindekser[this] ?: fail { "Vedtaksperiode $this finnes ikke" }
     private val UUID.utbetalingsindeks get() = this.finn(vedtaksperiodeutbetalinger)
 
-    internal fun vedtaksperiodeutbetaling(id: UUID) = utbetalinger[id.utbetalingsindeks]
+    internal fun gjeldendeUtbetalingForVedtaksperiode(id: UUID) = avsluttedeUtbetalingerForVedtaksperiode(id).last()
+    internal fun avsluttedeUtbetalingerForVedtaksperiode(id: UUID) = utbetalinger.filterIndexed { index, _ -> index in id.utbetalingsindeks }.filter { it.erAvsluttet() }
     internal fun utbetalingtilstand(indeks: Int) = utbetalingstilstander[indeks]
     internal fun utbetaling(indeks: Int) = utbetalinger[indeks]
     internal fun utbetalingId(indeks: Int) = utbetalingIder[indeks]
@@ -428,12 +429,12 @@ internal class TestArbeidsgiverInspektør(
         personLogg.behov().last { it.type == type }
 
     internal fun maksdato(indeks: Int) = maksdatoer[indeks]
-    internal fun maksdato(id: UUID) = maksdatoer[id.utbetalingsindeks]
+    internal fun sisteMaksdato(id: UUID) = maksdatoer.filterIndexed { index, _ -> index in id.utbetalingsindeks }.last()
 
     internal fun forbrukteSykedager(indeks: Int) = forbrukteSykedagerer[indeks]
     internal fun gjenståendeSykedager(indeks: Int) = gjenståendeSykedagerer[indeks]
 
-    internal fun gjenståendeSykedager(id: UUID) = gjenståendeSykedagerer[id.utbetalingsindeks] ?: fail {
+    internal fun gjenståendeSykedager(id: UUID) = gjenståendeSykedagerer.filterIndexed { index, _ -> index in id.utbetalingsindeks }.last() ?: fail {
         "Vedtaksperiode $id har ikke oppgitt gjenstående sykedager"
     }
 

@@ -44,7 +44,7 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
-        assertEquals(31.desember, inspektør.maksdato(1.vedtaksperiode))
+        assertEquals(31.desember, inspektør.sisteMaksdato(1.vedtaksperiode))
     }
 
     @Test
@@ -77,6 +77,6 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
-        assertEquals(17.desember, inspektør.maksdato(1.vedtaksperiode))
+        assertEquals(17.desember, inspektør.sisteMaksdato(1.vedtaksperiode))
     }
 }

@@ -50,7 +50,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertEquals(18, it.sykdomshistorikkDagTeller[Sykedag::class])
             assertEquals(6, it.sykdomshistorikkDagTeller[SykHelgedag::class])
         }
-        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -230,7 +230,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertEquals(18, it.sykdomshistorikkDagTeller[Sykedag::class])
             assertEquals(6, it.sykdomshistorikkDagTeller[SykHelgedag::class])
         }
-        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -294,7 +294,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
                 assertEquals(16, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
             }
         }
-        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
         assertTilstander(
             1.vedtaksperiode,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
@@ -576,8 +576,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNoErrors(it)
             assertActivities(it)
         }
-        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
-        assertNotNull(inspektør.maksdato(2.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(2.vedtaksperiode))
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -638,8 +638,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNoErrors(it)
             assertActivities(it)
         }
-        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
-        assertNotNull(inspektør.maksdato(2.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(2.vedtaksperiode))
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -700,8 +700,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNoErrors(it)
             assertActivities(it)
         }
-        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
-        assertNotNull(inspektør.maksdato(2.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(2.vedtaksperiode))
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -762,8 +762,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNoErrors(it)
             assertActivities(it)
         }
-        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
-        assertNotNull(inspektør.maksdato(2.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(2.vedtaksperiode))
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -824,8 +824,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNoErrors(it)
             assertActivities(it)
         }
-        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
-        assertNotNull(inspektør.maksdato(2.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(2.vedtaksperiode))
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -959,8 +959,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertActivities(it)
-            assertNotNull(it.maksdato(1.vedtaksperiode))
-            assertNotNull(it.maksdato(2.vedtaksperiode))
+            assertNotNull(it.sisteMaksdato(1.vedtaksperiode))
+            assertNotNull(it.sisteMaksdato(2.vedtaksperiode))
             assertEquals(8586, it.totalBeløp[0])
             assertEquals(8586, it.nettoBeløp[0])
             assertEquals(32913, it.totalBeløp[1])
@@ -1019,7 +1019,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt(2.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
-        assertEquals(inspektør.maksdato(1.vedtaksperiode), inspektør.maksdato(2.vedtaksperiode))
+        assertEquals(inspektør.sisteMaksdato(1.vedtaksperiode), inspektør.sisteMaksdato(2.vedtaksperiode))
     }
 
     @Test
@@ -1062,8 +1062,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNoErrors(it)
             assertActivities(it)
         }
-        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
-        assertNotNull(inspektør.maksdato(2.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(2.vedtaksperiode))
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -1115,8 +1115,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNoErrors(it)
             assertActivities(it)
         }
-        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
-        assertNotNull(inspektør.maksdato(2.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(2.vedtaksperiode))
         assertTilstander(
             1.vedtaksperiode,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP,
@@ -1158,7 +1158,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNoErrors(it)
             assertActivities(it)
         }
-        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -1202,7 +1202,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNoErrors(it)
             assertActivities(it)
         }
-        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -1245,7 +1245,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNoErrors(it)
             assertActivities(it)
         }
-        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -1289,7 +1289,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNoErrors(it)
             assertActivities(it)
         }
-        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -1331,7 +1331,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNoErrors(it)
             assertActivities(it)
         }
-        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
         assertTilstander(
             1.vedtaksperiode,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP,
@@ -1369,7 +1369,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNoErrors(it)
             assertActivities(it)
         }
-        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
         assertTilstander(
             1.vedtaksperiode,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP,
@@ -1440,8 +1440,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNoErrors(it)
             assertActivities(it)
         }
-        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
-        assertNotNull(inspektør.maksdato(2.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(2.vedtaksperiode))
         assertTilstander(
             1.vedtaksperiode,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP,
@@ -1495,8 +1495,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertEquals(3.januar, it.skjæringstidspunkt(1.vedtaksperiode))
             assertEquals(3.januar, it.skjæringstidspunkt(2.vedtaksperiode))
         }
-        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
-        assertNotNull(inspektør.maksdato(2.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(2.vedtaksperiode))
         assertTilstander(
             1.vedtaksperiode,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP,
@@ -1532,8 +1532,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt(2.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
-        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
-        assertNotNull(inspektør.maksdato(2.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(2.vedtaksperiode))
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -1583,8 +1583,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNoErrors(it)
             assertActivities(it)
         }
-        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
-        assertNotNull(inspektør.maksdato(2.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(2.vedtaksperiode))
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -1659,7 +1659,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100.prosent))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(29.januar, 23.februar, 100.prosent))
 
-        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -1707,8 +1707,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNoErrors(it)
             assertActivities(it)
         }
-        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
-        assertNotNull(inspektør.maksdato(2.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(2.vedtaksperiode))
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -1756,7 +1756,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNoErrors(it)
             assertActivities(it)
         }
-        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -1802,7 +1802,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNoErrors(it)
             assertActivities(it)
         }
-        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -1854,8 +1854,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterUtbetalt(2.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
         assertNoErrors(inspektør)
 
-        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
-        assertNotNull(inspektør.maksdato(2.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(2.vedtaksperiode))
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -1918,7 +1918,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         assertEquals(10, inspektør.gjenståendeSykedager(1.vedtaksperiode))
-        assertEquals(24.juli(2020), inspektør.maksdato(1.vedtaksperiode))
+        assertEquals(24.juli(2020), inspektør.sisteMaksdato(1.vedtaksperiode))
     }
 
     @Disabled
