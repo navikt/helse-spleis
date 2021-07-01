@@ -78,7 +78,7 @@ internal class Utbetalingslinje internal constructor(
 
     internal fun skalOpphøreOgErstatte(other: Utbetalingslinje, sisteLinjeITidligereOppdrag: Utbetalingslinje) =
         other == sisteLinjeITidligereOppdrag &&
-        (this.fom != other.fom || this.tom != other.tom) && this.datoStatusFom == other.datoStatusFom
+        (this.fom > other.fom)
 
     override fun hashCode(): Int {
         return fom.hashCode() * 37 +
