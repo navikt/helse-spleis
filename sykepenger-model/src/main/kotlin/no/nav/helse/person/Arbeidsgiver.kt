@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
+import no.nav.helse.person.Vedtaksperiode.*
 import no.nav.helse.person.Vedtaksperiode.Companion.ALLE
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_REVURDERT
 import no.nav.helse.person.Vedtaksperiode.Companion.harInntekt
@@ -714,19 +715,13 @@ internal class Arbeidsgiver private constructor(
             skalGjenopptaBehandling = false
             val gjenopptaBehandling = GjenopptaBehandling(hendelse)
             énHarHåndtert(gjenopptaBehandling, Vedtaksperiode::håndter)
-            Vedtaksperiode.gjentaHistorikk(hendelse, person, Vedtaksperiode.AvventerArbeidsgivere, Vedtaksperiode.AvventerUtbetalingsgrunnlag)
-            Vedtaksperiode.gjentaHistorikk(hendelse, person, Vedtaksperiode.AvventerArbeidsgivereRevurdering, Vedtaksperiode.AvventerHistorikkRevurdering, IKKE_FERDIG_REVURDERT)
+            Vedtaksperiode.gjenopptaBehandling(hendelse, person, AvventerArbeidsgivere, AvventerUtbetalingsgrunnlag)
+            Vedtaksperiode.gjenopptaBehandling(hendelse, person, AvventerArbeidsgivereRevurdering, AvventerHistorikkRevurdering, IKKE_FERDIG_REVURDERT)
         }
 
         while (skalGjenopptaRevurdering) {
             skalGjenopptaRevurdering = false
-            Vedtaksperiode.gjentaHistorikk(
-                hendelse = hendelse,
-                person = person,
-                nåværendeTilstand = Vedtaksperiode.AvventerArbeidsgivereRevurdering,
-                nesteTilstand = Vedtaksperiode.AvventerHistorikkRevurdering,
-                filter = IKKE_FERDIG_REVURDERT
-            )
+            Vedtaksperiode.gjenopptaBehandling(hendelse, person, AvventerArbeidsgivereRevurdering, AvventerHistorikkRevurdering, IKKE_FERDIG_REVURDERT)
         }
     }
 

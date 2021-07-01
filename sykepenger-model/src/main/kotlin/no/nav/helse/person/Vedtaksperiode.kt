@@ -538,10 +538,10 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun tickleForArbeidsgiveravhengighet(påminnelse: Påminnelse) {
-        gjentaHistorikk(påminnelse, person, AvventerArbeidsgivere, AvventerUtbetalingsgrunnlag)
+        Companion.gjenopptaBehandling(påminnelse, person, AvventerArbeidsgivere, AvventerUtbetalingsgrunnlag)
     }
 
-    private fun gjentaHistorikk(hendelse: ArbeidstakerHendelse, nesteTilstand: Vedtaksperiodetilstand) {
+    private fun gjenopptaBehandling(hendelse: ArbeidstakerHendelse, nesteTilstand: Vedtaksperiodetilstand) {
         hendelse.kontekst(arbeidsgiver)
         kontekst(hendelse)
         tilstand(hendelse, nesteTilstand)
@@ -562,7 +562,7 @@ internal class Vedtaksperiode private constructor(
         if (tilstand == AvventerArbeidsgivere) {
             overlappendeVedtaksperioder.forEach { it.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE }
         }
-        gjentaHistorikk(vilkårsgrunnlag, person, AvventerArbeidsgivere, AvventerHistorikk)
+        Companion.gjenopptaBehandling(vilkårsgrunnlag, person, AvventerArbeidsgivere, AvventerHistorikk)
     }
 
     private fun forberedMuligUtbetaling(inntektsmelding: Inntektsmelding) {
@@ -577,7 +577,7 @@ internal class Vedtaksperiode private constructor(
         if (tilstand == AvventerArbeidsgivere) {
             overlappendeVedtaksperioder.forEach { it.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE }
         }
-        gjentaHistorikk(inntektsmelding, person, AvventerArbeidsgivere, AvventerUtbetalingsgrunnlag)
+        Companion.gjenopptaBehandling(inntektsmelding, person, AvventerArbeidsgivere, AvventerUtbetalingsgrunnlag)
     }
 
     /**
@@ -599,7 +599,7 @@ internal class Vedtaksperiode private constructor(
             .forEach { it.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE }
 
         this.tilstand(hendelse, AvventerArbeidsgivere)
-        gjentaHistorikk(hendelse, person, AvventerArbeidsgivere, AvventerHistorikk)
+        Companion.gjenopptaBehandling(hendelse, person, AvventerArbeidsgivere, AvventerHistorikk)
     }
 
     private fun lagUtbetaling(engineForTimeline: MaksimumSykepengedagerfilter, hendelse: ArbeidstakerHendelse) {
@@ -642,7 +642,7 @@ internal class Vedtaksperiode private constructor(
             .forEach { it.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE }
 
         this.tilstand(hendelse, AvventerArbeidsgivereRevurdering)
-        gjentaHistorikk(hendelse, person, AvventerArbeidsgivereRevurdering, AvventerHistorikkRevurdering, IKKE_FERDIG_REVURDERT)
+        Companion.gjenopptaBehandling(hendelse, person, AvventerArbeidsgivereRevurdering, AvventerHistorikkRevurdering, IKKE_FERDIG_REVURDERT)
     }
 
     private fun lagRevurdering(engineForTimeline: MaksimumSykepengedagerfilter, hendelse: ArbeidstakerHendelse) {
@@ -2260,8 +2260,13 @@ internal class Vedtaksperiode private constructor(
                 .forEach { inntektsmelding.trimLeft(it.endInclusive) }
         }
 
-        // TODO: rename
-        internal fun gjentaHistorikk(
+        private fun List<Vedtaksperiode>.alleNåværendeErKlare(første: Vedtaksperiode, klarTilstand: Vedtaksperiodetilstand) =
+            this
+                .filter { første.periode.overlapperMed(it.periode) }
+                .all { it.tilstand == klarTilstand }
+
+
+        internal fun gjenopptaBehandling(
             hendelse: ArbeidstakerHendelse,
             person: Person,
             nåværendeTilstand: Vedtaksperiodetilstand,
@@ -2270,11 +2275,8 @@ internal class Vedtaksperiode private constructor(
         ) {
             val nåværende = person.nåværendeVedtaksperioder(filter)
             val første = nåværende.firstOrNull() ?: return
-            if (nåværende
-                    .filter { første.periode.overlapperMed(it.periode) }
-                    .all { it.tilstand == nåværendeTilstand }
-            ) {
-                første.gjentaHistorikk(hendelse, nesteTilstand)
+            if (nåværende.alleNåværendeErKlare(første, nåværendeTilstand)) {
+                første.gjenopptaBehandling(hendelse, nesteTilstand)
             }
         }
 
