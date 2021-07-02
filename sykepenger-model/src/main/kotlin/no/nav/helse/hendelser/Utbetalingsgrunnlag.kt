@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.hendelser.Arbeidsforhold.Companion.grupperArbeidsforholdPerOrgnummer
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.Person
 import java.time.LocalDate
@@ -11,7 +12,8 @@ class Utbetalingsgrunnlag(
     private val fødselsnummer: String,
     private val orgnummer: String,
     private val vedtaksperiodeId: UUID,
-    private val inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag
+    private val inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
+    private val arbeidsforhold: List<Arbeidsforhold>
 ) : ArbeidstakerHendelse(meldingsreferanseId) {
 
     override fun organisasjonsnummer() = orgnummer
@@ -25,4 +27,12 @@ class Utbetalingsgrunnlag(
     }
 
     internal fun erRelevant(other: UUID) = other == vedtaksperiodeId
+    internal fun lagreArbeidsforhold(person: Person) {
+        arbeidsforhold.grupperArbeidsforholdPerOrgnummer().forEach { orgnummer, arbeidsforhold ->
+            if(arbeidsforhold.any { it.erSøppel() }) {
+                // warn("Vi fant ugyldige arbeidsforhold i Aareg, burde sjekkes opp nærmere") // TODO: må ses på av en voksen
+            }
+            person.lagreArbeidsforhold(orgnummer, arbeidsforhold, this)
+        }
+    }
 }

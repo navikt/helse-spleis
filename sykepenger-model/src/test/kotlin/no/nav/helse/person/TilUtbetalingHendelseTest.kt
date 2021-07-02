@@ -220,7 +220,8 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
         fødselsnummer = UNG_PERSON_FNR_2018,
         orgnummer = ORGNUMMER,
         vedtaksperiodeId = vedtaksperiodeId,
-        inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList())
+        inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),
+        arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER, 1.januar, null))
     ).apply {
         hendelse = this
     }
@@ -343,7 +344,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             opptjeningvurdering = Opptjeningvurdering(
                 listOf(
-                    Opptjeningvurdering.Arbeidsforhold(
+                    Arbeidsforhold(
                         ORGNUMMER,
                         1.januar(2017)
                     )

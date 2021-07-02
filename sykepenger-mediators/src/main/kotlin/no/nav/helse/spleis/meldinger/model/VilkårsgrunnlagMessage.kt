@@ -37,7 +37,7 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packe
         }
 
     private val arbeidsforhold = packet["@løsning.${Opptjening.name}"].map {
-        Opptjeningvurdering.Arbeidsforhold(
+        Arbeidsforhold(
             orgnummer = it["orgnummer"].asText(),
             fom = it["ansattSiden"].asLocalDate(),
             tom = it["ansattTil"].asOptionalLocalDate()

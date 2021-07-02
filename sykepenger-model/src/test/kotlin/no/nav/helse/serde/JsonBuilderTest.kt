@@ -562,7 +562,7 @@ class JsonBuilderTest {
             }),
             opptjeningvurdering = Opptjeningvurdering(
                 listOf(
-                    Opptjeningvurdering.Arbeidsforhold(
+                    Arbeidsforhold(
                         orgnummer,
                         1.januar(2017)
                     )
@@ -602,14 +602,16 @@ class JsonBuilderTest {
                         beskrivelse = "juicy beskrivelse"
                     )
                 })
-            )
+            ),
+            arbeidsforhold: List<Arbeidsforhold> = listOf(Arbeidsforhold(orgnummer, 1.januar, null))
         ) = Utbetalingsgrunnlag(
-                UUID.randomUUID(),
-                AbstractPersonTest.AKTØRID, AbstractPersonTest.UNG_PERSON_FNR_2018,
-                orgnummer,
-                vedtaksperiodeId,
-                InntektForSykepengegrunnlag(inntekter)
-            )
+            UUID.randomUUID(),
+            AbstractPersonTest.AKTØRID, AbstractPersonTest.UNG_PERSON_FNR_2018,
+            orgnummer,
+            vedtaksperiodeId,
+            InntektForSykepengegrunnlag(inntekter),
+            arbeidsforhold
+        )
 
 
         fun ytelser(

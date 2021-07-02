@@ -572,6 +572,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         }
     }
 
+    @Disabled("Ghost")
     @Test
     fun `ghost n stuff`(){
             Toggles.FlereArbeidsgivereUlikFom.enable {
@@ -591,7 +592,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
                     1.vedtaksperiode(a1), inntektsvurdering = Inntektsvurdering(
                         listOf(
                             sammenligningsgrunnlag(1.vedtaksperiode(a1), a1, 31000.månedlig.repeat(12)),
-                            sammenligningsgrunnlag(1.vedtaksperiode(a2), a2, 32000.månedlig.repeat(12))
+                            //sammenligningsgrunnlag(1.vedtaksperiode(a2), a2, 32000.månedlig.repeat(12))
                         )
                     ), orgnummer = a1
                 )
