@@ -1315,6 +1315,10 @@ internal class Vedtaksperiode private constructor(
     internal object AvventerArbeidsgivere : Vedtaksperiodetilstand {
         override val type = AVVENTER_ARBEIDSGIVERE
 
+        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            vedtaksperiode.forkastUgyldigeUtbetalinger(hendelse)
+        }
+
         override fun makstid(
             vedtaksperiode: Vedtaksperiode,
             tilstandsendringstidspunkt: LocalDateTime

@@ -2457,4 +2457,121 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
 
         assertEquals(88, inspektør(a2).forbrukteSykedager(0))
     }
+
+    @Test
+    fun `to AG - to perioder på hver - siste periode på første AG til godkjenning, siste periode på andre AG avventer første AG`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
+            refusjon = Refusjon(null, 20000.månedlig, emptyList()),
+            orgnummer = a1
+        )
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
+            refusjon = Refusjon(null, 20000.månedlig, emptyList()),
+            orgnummer = a2
+        )
+
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1)
+        håndterYtelser(vedtaksperiodeId = 1.vedtaksperiode(a1), orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            vedtaksperiodeId = 1.vedtaksperiode(a1),
+            orgnummer = a1,
+            inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt 20000.månedlig
+                    a2 inntekt 20000.månedlig
+                }
+            })
+        )
+        håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), orgnummer = a1)
+        håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
+
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode(a2), orgnummer = a2)
+        håndterSimulering(1.vedtaksperiode(a2), orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode(a2), orgnummer = a2)
+        håndterUtbetalt(1.vedtaksperiode(a2), orgnummer = a2)
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
+
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode(a1), orgnummer = a1)
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode(a2), orgnummer = a2)
+        håndterYtelser(vedtaksperiodeId = 2.vedtaksperiode(a1), orgnummer = a1)
+        håndterYtelser(vedtaksperiodeId = 2.vedtaksperiode(a2), orgnummer = a2)
+        håndterYtelser(vedtaksperiodeId = 2.vedtaksperiode(a1), orgnummer = a1)
+
+        håndterSimulering(2.vedtaksperiode(a1), orgnummer = a1)
+
+        inspektør(a1) {
+            assertTilstander(
+                1.vedtaksperiode(a1),
+                START,
+                MOTTATT_SYKMELDING_FERDIG_GAP,
+                AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+                AVVENTER_ARBEIDSGIVERE,
+                AVVENTER_UTBETALINGSGRUNNLAG,
+                AVVENTER_HISTORIKK,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_GODKJENNING,
+                TIL_UTBETALING,
+                AVSLUTTET
+            )
+            assertTilstander(
+                2.vedtaksperiode(a1),
+                START,
+                MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+                AVVENTER_UTBETALINGSGRUNNLAG,
+                AVVENTER_HISTORIKK,
+                AVVENTER_ARBEIDSGIVERE,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_GODKJENNING
+            )
+            assertHasNoErrors()
+            assertEquals(1, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode(a1)).size)
+            assertEquals(0, ikkeUtbetalteUtbetalingerForVedtaksperiode(1.vedtaksperiode(a1)).size)
+            assertEquals(0, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode(a1)).size)
+            assertEquals(1, ikkeUtbetalteUtbetalingerForVedtaksperiode(2.vedtaksperiode(a1)).size)
+        }
+
+        inspektør(a2) {
+            assertTilstander(
+                1.vedtaksperiode(a2),
+                START,
+                MOTTATT_SYKMELDING_FERDIG_GAP,
+                AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+                AVVENTER_ARBEIDSGIVERE,
+                AVVENTER_UTBETALINGSGRUNNLAG,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_GODKJENNING,
+                TIL_UTBETALING,
+                AVSLUTTET
+            )
+            assertTilstander(
+                2.vedtaksperiode(a2),
+                START,
+                MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+                AVVENTER_UTBETALINGSGRUNNLAG,
+                AVVENTER_HISTORIKK,
+                AVVENTER_ARBEIDSGIVERE
+            )
+            assertHasNoErrors()
+            assertEquals(1, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode(a2)).size)
+            assertEquals(0, ikkeUtbetalteUtbetalingerForVedtaksperiode(1.vedtaksperiode(a2)).size)
+            assertEquals(0, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode(a2)).size)
+            assertEquals(1, ikkeUtbetalteUtbetalingerForVedtaksperiode(2.vedtaksperiode(a2)).size)
+        }
+    }
 }
