@@ -9,7 +9,7 @@ class Arbeidsforhold(
     private val fom: LocalDate,
     private val tom: LocalDate? = null
 ) {
-    private fun erSøppel() =
+    fun erSøppel() =
         tom != null && tom < fom
 
     private fun erGyldig(skjæringstidspunkt: LocalDate) =
@@ -18,6 +18,10 @@ class Arbeidsforhold(
     private fun periode(skjæringstidspunkt: LocalDate): Periode? {
         if (!erGyldig(skjæringstidspunkt)) return null
         return fom til (tom ?: skjæringstidspunkt)
+    }
+
+    internal fun accept(visitor: ArbeidsforholdhistorikkVisitor) {
+        visitor.visitArbeidsforhold(orgnummer, fom, tom)
     }
 
     internal companion object {
@@ -52,5 +56,7 @@ class Arbeidsforhold(
                 .takeWhile { cursor -> ranges.any { periode -> cursor in periode } }
                 .count()
         }
+
+        internal fun List<Arbeidsforhold>.grupperArbeidsforholdPerOrgnummer() = groupBy { it.orgnummer }
     }
 }

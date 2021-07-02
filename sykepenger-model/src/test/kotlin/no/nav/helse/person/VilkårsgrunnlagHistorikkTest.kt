@@ -32,7 +32,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             fødselsnummer = "20043769969",
             orgnummer = "ORGNUMMER",
             inntektsvurdering = Inntektsvurdering(emptyList()),
-            opptjeningvurdering = Opptjeningvurdering(listOf(Opptjeningvurdering.Arbeidsforhold("123456789", 1.desember(2017)))),
+            opptjeningvurdering = Opptjeningvurdering(listOf(Arbeidsforhold("123456789", 1.desember(2017)))),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja)
         )
         vilkårsgrunnlag.valider(10000.månedlig, 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)
@@ -51,7 +51,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             fødselsnummer = "20043769969",
             orgnummer = "ORGNUMMER",
             inntektsvurdering = Inntektsvurdering(emptyList()),
-            opptjeningvurdering = Opptjeningvurdering(listOf(Opptjeningvurdering.Arbeidsforhold("123456789", 1.desember(2017)))),
+            opptjeningvurdering = Opptjeningvurdering(listOf(Arbeidsforhold("123456789", 1.desember(2017)))),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja)
         )
         val vilkårsgrunnlag2 = Vilkårsgrunnlag(
@@ -61,7 +61,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             fødselsnummer = "20043769969",
             orgnummer = "ORGNUMMER",
             inntektsvurdering = Inntektsvurdering(emptyList()),
-            opptjeningvurdering = Opptjeningvurdering(listOf(Opptjeningvurdering.Arbeidsforhold("123456789", 1.desember(2017)))),
+            opptjeningvurdering = Opptjeningvurdering(listOf(Arbeidsforhold("123456789", 1.desember(2017)))),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei)
         )
         vilkårsgrunnlag1.valider(10000.månedlig, 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)
@@ -88,7 +88,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             fødselsnummer = "20043769969",
             orgnummer = "ORGNUMMER",
             inntektsvurdering = Inntektsvurdering(emptyList()),
-            opptjeningvurdering = Opptjeningvurdering(listOf(Opptjeningvurdering.Arbeidsforhold("123456789", 1.desember(2017)))),
+            opptjeningvurdering = Opptjeningvurdering(listOf(Arbeidsforhold("123456789", 1.desember(2017)))),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja)
         )
         vilkårsgrunnlag.valider(10000.månedlig, 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)
@@ -107,7 +107,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             fødselsnummer = "20043769969",
             orgnummer = "ORGNUMMER",
             inntektsvurdering = Inntektsvurdering(emptyList()),
-            opptjeningvurdering = Opptjeningvurdering(listOf(Opptjeningvurdering.Arbeidsforhold("123456789", 1.desember(2017)))),
+            opptjeningvurdering = Opptjeningvurdering(listOf(Arbeidsforhold("123456789", 1.desember(2017)))),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja)
         )
         val infotrygdhistorikk = Infotrygdhistorikk().apply {
@@ -322,7 +322,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             fødselsnummer = "20043769969",
             orgnummer = "ORGNUMMER",
             inntektsvurdering = Inntektsvurdering(emptyList()),
-            opptjeningvurdering = Opptjeningvurdering(listOf(Opptjeningvurdering.Arbeidsforhold("123456789", 1.desember(2017)))),
+            opptjeningvurdering = Opptjeningvurdering(listOf(Arbeidsforhold("123456789", 1.desember(2017)))),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja)
         )
         vilkårsgrunnlag.valider(10.månedlig, 10.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)
