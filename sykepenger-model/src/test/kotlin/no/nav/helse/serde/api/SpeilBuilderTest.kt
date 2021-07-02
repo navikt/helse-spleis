@@ -1619,41 +1619,6 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
                 }
             }
 
-        private fun annullertPersonIkkeUtbetalt(): Pair<Person, List<HendelseDTO>> = Person(aktørId, fnr).run {
-            this to mutableListOf<HendelseDTO>().apply {
-                sykmelding(fom = 1.januar, tom = 31.januar).also { (sykmelding, sykmeldingDTO) ->
-                    håndter(sykmelding)
-                    add(sykmeldingDTO)
-                }
-                fangeVedtaksperiodeId()
-                søknad(
-                    fom = 1.januar,
-                    tom = 31.januar,
-                    sendtSøknad = 1.april.atStartOfDay()
-                ).also { (søknad, søknadDTO) ->
-                    håndter(søknad)
-                    add(søknadDTO)
-                }
-                inntektsmelding(fom = 1.januar).also { (inntektsmelding, inntektsmeldingDTO) ->
-                    håndter(inntektsmelding)
-                    add(inntektsmeldingDTO)
-                }
-                håndter(utbetalingsgrunnlag(vedtaksperiodeId, fangSkjæringstidspunkt(UUID.fromString(vedtaksperiodeId))))
-                håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
-                håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
-                håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
-                fangeUtbetalinger()
-                håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
-                håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId, aktivitetslogg = this@run.aktivitetslogg))
-                håndter(overføring(this@run.aktivitetslogg))
-                håndter(utbetalt(this@run.aktivitetslogg))
-
-
-                val utbetalteUtbetalinger = utbetalingsliste.getValue(orgnummer).filter { it.erUtbetalt() }
-                håndter(annullering(fagsystemId = utbetalteUtbetalinger.last().arbeidsgiverOppdrag().fagsystemId()))
-            }
-        }
-
         private fun personMedToAdvarsler(
             fom: LocalDate = 1.januar,
             tom: LocalDate = 31.januar
@@ -2386,15 +2351,6 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
             fagsystemId = fagsystemId,
             saksbehandlerIdent = "en_saksbehandler_ident",
             saksbehandlerEpost = "saksbehandler@nav.no",
-            opprettet = LocalDateTime.now()
-        )
-
-        private fun overstyring(dager: List<ManuellOverskrivingDag> = listOf(ManuellOverskrivingDag(17.januar, Feriedag, 100))) = OverstyrTidslinje(
-            meldingsreferanseId = UUID.randomUUID(),
-            fødselsnummer = fnr,
-            aktørId = aktørId,
-            organisasjonsnummer = orgnummer,
-            dager = dager,
             opprettet = LocalDateTime.now()
         )
     }
