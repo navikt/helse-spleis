@@ -629,45 +629,6 @@ internal class Vedtaksperiode private constructor(
         else tilstand(hendelse, AvventerArbeidsgivere)
     }
 
-    private fun forsøkRevurdering(engineForTimeline: MaksimumSykepengedagerfilter, hendelse: ArbeidstakerHendelse) {
-        engineForTimeline.beregnGrenser()
-
-        val vedtaksperioder = person.nåværendeVedtaksperioder(IKKE_FERDIG_REVURDERT)
-        vedtaksperioder.forEach { it.lagRevurdering(engineForTimeline, hendelse) }
-        val første = vedtaksperioder.first()
-        if (første == this) return første.forsøkRevurderingSteg2(vedtaksperioder.drop(1), hendelse)
-
-        vedtaksperioder
-            .filter { this.periode.overlapperMed(it.periode) }
-            .forEach { it.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE }
-
-        this.tilstand(hendelse, AvventerArbeidsgivereRevurdering)
-        Companion.gjenopptaBehandling(hendelse, person, AvventerArbeidsgivereRevurdering, AvventerHistorikkRevurdering, IKKE_FERDIG_REVURDERT)
-    }
-
-    private fun lagRevurdering(engineForTimeline: MaksimumSykepengedagerfilter, hendelse: ArbeidstakerHendelse) {
-        val utbetaling = arbeidsgiver.lagRevurdering(
-            aktivitetslogg = hendelse,
-            fødselsnummer = fødselsnummer,
-            maksdato = engineForTimeline.maksdato(),
-            forbrukteSykedager = engineForTimeline.forbrukteSykedager(),
-            gjenståendeSykedager = engineForTimeline.gjenståendeSykedager(),
-            periode = periode,
-            forrige = utbetaling
-        ).also {
-            utbetalinger.add(it)
-        }
-        utbetalingstidslinje = utbetaling.utbetalingstidslinje(periode)
-    }
-
-    private fun forsøkRevurderingSteg2(andreVedtaksperioder: List<Vedtaksperiode>, hendelse: ArbeidstakerHendelse) {
-        when {
-            !andreVedtaksperioder.erKlareTilGodkjenning() -> tilstand(hendelse, AvventerArbeidsgivereRevurdering)
-            !arbeidsgiver.alleAndrePerioderErKlare(this) -> tilstand(hendelse, AvventerGjennomførtRevurdering)
-            else -> høstingsresultaterRevurdering(hendelse)
-        }
-    }
-
     private fun høstingsresultater(hendelse: ArbeidstakerHendelse) {
         val ingenUtbetaling = !utbetaling().harUtbetalinger()
         val kunArbeidsgiverdager = utbetalingstidslinje.kunArbeidsgiverdager()
@@ -697,20 +658,48 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    private fun forkastUgyldigeUtbetalinger(hendelse: IAktivitetslogg) = utbetalinger.forEach { it.forkast(hendelse) }
+    private fun forsøkRevurdering(engineForTimeline: MaksimumSykepengedagerfilter, hendelse: ArbeidstakerHendelse) {
+        engineForTimeline.beregnGrenser()
 
-    private fun mottaUtbetalingTilRevurdering(utbetaling: Utbetaling) {
-        utbetalinger.add(utbetaling)
+        val vedtaksperioder = person.nåværendeVedtaksperioder(IKKE_FERDIG_REVURDERT)
+        vedtaksperioder.forEach { it.lagRevurdering(engineForTimeline, hendelse) }
+        val første = vedtaksperioder.first()
+        if (første == this) return første.forsøkRevurderingSteg2(vedtaksperioder.drop(1), hendelse)
+
+        vedtaksperioder
+            .filter { this.periode.overlapperMed(it.periode) }
+            .forEach { it.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE }
+
+        this.tilstand(hendelse, AvventerArbeidsgivereRevurdering)
+        Companion.gjenopptaBehandling(hendelse, person, AvventerArbeidsgivereRevurdering, AvventerHistorikkRevurdering, IKKE_FERDIG_REVURDERT)
+    }
+
+    private fun lagRevurdering(engineForTimeline: MaksimumSykepengedagerfilter, hendelse: ArbeidstakerHendelse) {
+        val utbetaling = arbeidsgiver.lagRevurdering(
+            aktivitetslogg = hendelse,
+            fødselsnummer = fødselsnummer,
+            maksdato = engineForTimeline.maksdato(),
+            forbrukteSykedager = engineForTimeline.forbrukteSykedager(),
+            gjenståendeSykedager = engineForTimeline.gjenståendeSykedager(),
+            periode = periode,
+            forrige = utbetaling
+        ).also {
+            utbetalinger.add(it)
+            arbeidsgiver.fordelRevurdertUtbetaling(hendelse, utbetaling())
+        }
         utbetalingstidslinje = utbetaling.utbetalingstidslinje(periode)
     }
 
-    private fun List<Vedtaksperiode>.erKlareTilGodkjenning() = this
-        .filter { this@Vedtaksperiode.periode.overlapperMed(it.periode) }
-        .all { it.tilstand == AvventerArbeidsgivereRevurdering }
+    private fun forsøkRevurderingSteg2(andreVedtaksperioder: List<Vedtaksperiode>, hendelse: ArbeidstakerHendelse) {
+        when {
+            !andreVedtaksperioder.erKlareTilGodkjenning() -> tilstand(hendelse, AvventerArbeidsgivereRevurdering)
+            !arbeidsgiver.alleAndrePerioderErKlare(this) -> tilstand(hendelse, AvventerGjennomførtRevurdering)
+            else -> høstingsresultaterRevurdering(hendelse)
+        }
+    }
 
     private fun høstingsresultaterRevurdering(hendelse: ArbeidstakerHendelse) {
         hendelse.info("Videresender utbetaling til alle vedtaksperioder innenfor samme fagsystemid som er til revurdering")
-        arbeidsgiver.fordelRevurdertUtbetaling(hendelse, utbetaling())
         when {
             !utbetaling().harUtbetalinger() && utbetalingstidslinje.kunArbeidsgiverdager() && !person.aktivitetslogg.logg(this).hasWarningsOrWorse() -> {
                 tilstand(hendelse, AvsluttetUtenUtbetaling) {
@@ -731,6 +720,17 @@ internal class Vedtaksperiode private constructor(
             }
         }
     }
+
+    private fun forkastUgyldigeUtbetalinger(hendelse: IAktivitetslogg) = utbetalinger.forEach { it.forkast(hendelse) }
+
+    private fun mottaUtbetalingTilRevurdering(utbetaling: Utbetaling) {
+        utbetalinger.add(utbetaling)
+        utbetalingstidslinje = utbetaling.utbetalingstidslinje(periode)
+    }
+
+    private fun List<Vedtaksperiode>.erKlareTilGodkjenning() = this
+        .filter { this@Vedtaksperiode.periode.overlapperMed(it.periode) }
+        .all { it.tilstand == AvventerArbeidsgivereRevurdering }
 
     private fun loggHvisForlengelse(logg: IAktivitetslogg) {
         periodetype().also { periodetype ->
@@ -1257,12 +1257,12 @@ internal class Vedtaksperiode private constructor(
         override val type = AVVENTER_GJENNOMFØRT_REVURDERING
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.forkastUgyldigeUtbetalinger(hendelse)
             vedtaksperiode.arbeidsgiver.gjenopptaRevurdering()
         }
 
         override fun håndterRevurdertUtbetaling(vedtaksperiode: Vedtaksperiode, utbetaling: Utbetaling, hendelse: ArbeidstakerHendelse) {
             hendelse.info("Mottatt revurdert utbetaling fra en annen vedtaksperiode")
+            vedtaksperiode.forkastUgyldigeUtbetalinger(hendelse)
             vedtaksperiode.mottaUtbetalingTilRevurdering(utbetaling)
         }
 

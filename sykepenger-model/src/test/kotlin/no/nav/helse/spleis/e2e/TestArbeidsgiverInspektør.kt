@@ -402,6 +402,7 @@ internal class TestArbeidsgiverInspektør(
     private val UUID.utbetalingsindeks get() = this.finn(vedtaksperiodeutbetalinger)
 
     internal fun gjeldendeUtbetalingForVedtaksperiode(id: UUID) = avsluttedeUtbetalingerForVedtaksperiode(id).last()
+    internal fun ikkeUtbetalteUtbetalingerForVedtaksperiode(id: UUID) = utbetalinger.filterIndexed { index, _ -> index in id.utbetalingsindeks }.filter { it.erUbetalt() }
     internal fun avsluttedeUtbetalingerForVedtaksperiode(id: UUID) = utbetalinger.filterIndexed { index, _ -> index in id.utbetalingsindeks }.filter { it.erAvsluttet() }
     internal fun utbetalingtilstand(indeks: Int) = utbetalingstilstander[indeks]
     internal fun utbetaling(indeks: Int) = utbetalinger[indeks]
