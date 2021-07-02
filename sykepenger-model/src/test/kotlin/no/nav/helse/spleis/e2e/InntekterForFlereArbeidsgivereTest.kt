@@ -270,7 +270,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
 
     private fun vilkårsgrunnlag(
         vedtaksperiodeId: UUID,
-        arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold>? = null,
+        arbeidsforhold: List<Arbeidsforhold>? = null,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
         orgnummer: String = ORGNUMMER,
         inntekter: List<ArbeidsgiverInntekt>
@@ -287,7 +287,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             ),
             medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
             opptjeningvurdering = Opptjeningvurdering(arbeidsforhold ?: listOf(
-                Opptjeningvurdering.Arbeidsforhold(orgnummer, 1.januar(2017))
+                Arbeidsforhold(orgnummer, 1.januar(2017))
             ))
         ).apply {
             hendelselogg = this

@@ -2,11 +2,13 @@ package no.nav.helse.serde
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped
 import no.nav.helse.appender
+import no.nav.helse.hendelser.Arbeidsforhold
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.*
 import no.nav.helse.person.infotrygdhistorikk.*
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.ArbeidsforholdhistorikkInnslagData.Companion.tilArbeidsforholdhistorikk
 import no.nav.helse.serde.PersonData.InfotrygdhistorikkElementData.Companion.tilModellObjekt
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagInnslagData.Companion.tilModellObjekt
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
@@ -322,7 +324,8 @@ internal data class PersonData(
         private val utbetalinger: List<UtbetalingData>,
         private val beregnetUtbetalingstidslinjer: List<BeregnetUtbetalingstidslinjeData>,
         private val feriepengeutbetalinger: List<FeriepengeutbetalingData> = emptyList(),
-        private val refusjonOpphører: List<LocalDate?> = emptyList()
+        private val refusjonOpphører: List<LocalDate?> = emptyList(),
+        private val arbeidsforholdhistorikk: List<ArbeidsforholdhistorikkInnslagData> = listOf()
     ) {
         private val modelInntekthistorikk = Inntektshistorikk().apply {
             InntektshistorikkInnslagData.parseInntekter(inntektshistorikk, this)
@@ -349,7 +352,9 @@ internal data class PersonData(
                 modelUtbetalinger,
                 beregnetUtbetalingstidslinjer.map { it.tilBeregnetUtbetalingstidslinje() },
                 feriepengeutbetalinger.map { it.createFeriepengeutbetaling(fødselsnummer) },
-                refusjonOpphører
+                refusjonOpphører,
+                arbeidsforholdhistorikk.tilArbeidsforholdhistorikk()
+
             )
 
             vedtaksperiodeliste.addAll(this.vedtaksperioder.map {
@@ -899,6 +904,29 @@ internal data class PersonData(
                     val id: String,
                     val navn: String
                 )
+            }
+        }
+
+        data class ArbeidsforholdhistorikkInnslagData(
+            val id: UUID,
+            val arbeidsforhold: List<ArbeidsforholdData>
+        ) {
+
+            internal companion object {
+                internal fun List<ArbeidsforholdhistorikkInnslagData>.tilArbeidsforholdhistorikk() =
+                    Arbeidsforholdhistorikk::class.primaryConstructor!!
+                        .apply { isAccessible = true }
+                        .call(map { it.tilInnslag() })
+            }
+
+            internal fun tilInnslag() = Arbeidsforholdhistorikk.Innslag(id, arbeidsforhold.map { it.tilArbeidsforhold() })
+
+            data class ArbeidsforholdData(
+                val orgnummer: String,
+                val fom: LocalDate,
+                val tom: LocalDate?
+            ) {
+                internal fun tilArbeidsforhold() = Arbeidsforhold(orgnummer, fom, tom)
             }
         }
     }

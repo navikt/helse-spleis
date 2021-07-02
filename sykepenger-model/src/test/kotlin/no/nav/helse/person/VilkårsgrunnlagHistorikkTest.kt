@@ -1,9 +1,6 @@
 package no.nav.helse.person
 
-import no.nav.helse.hendelser.Inntektsvurdering
-import no.nav.helse.hendelser.Medlemskapsvurdering
-import no.nav.helse.hendelser.Opptjeningvurdering
-import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.*
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.testhelpers.*
@@ -143,7 +140,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             fødselsnummer = "20043769969",
             orgnummer = "ORGNUMMER",
             inntektsvurdering = Inntektsvurdering(emptyList()),
-            opptjeningvurdering = Opptjeningvurdering(listOf(Opptjeningvurdering.Arbeidsforhold("123456789", 1.desember(2017)))),
+            opptjeningvurdering = Opptjeningvurdering(listOf(Arbeidsforhold("123456789", 1.desember(2017)))),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja)
         )
         vilkårsgrunnlag.valider(10000.månedlig, 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)
@@ -162,7 +159,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             fødselsnummer = "20043769969",
             orgnummer = "ORGNUMMER",
             inntektsvurdering = Inntektsvurdering(emptyList()),
-            opptjeningvurdering = Opptjeningvurdering(listOf(Opptjeningvurdering.Arbeidsforhold("123456789", 1.desember(2017)))),
+            opptjeningvurdering = Opptjeningvurdering(listOf(Arbeidsforhold("123456789", 1.desember(2017)))),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei)
         )
         vilkårsgrunnlag.valider(10000.månedlig, 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)
@@ -261,7 +258,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             fødselsnummer = "20043769969",
             orgnummer = "ORGNUMMER",
             inntektsvurdering = Inntektsvurdering(emptyList()),
-            opptjeningvurdering = Opptjeningvurdering(listOf(Opptjeningvurdering.Arbeidsforhold("123456789", 1.desember(2017)))),
+            opptjeningvurdering = Opptjeningvurdering(listOf(Arbeidsforhold("123456789", 1.desember(2017)))),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei)
         )
         vilkårsgrunnlag1.valider(10000.månedlig, 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)
@@ -272,7 +269,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             fødselsnummer = "20043769969",
             orgnummer = "ORGNUMMER",
             inntektsvurdering = Inntektsvurdering(emptyList()),
-            opptjeningvurdering = Opptjeningvurdering(listOf(Opptjeningvurdering.Arbeidsforhold("123456789", 1.desember(2017)))),
+            opptjeningvurdering = Opptjeningvurdering(listOf(Arbeidsforhold("123456789", 1.desember(2017)))),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja)
         )
         vilkårsgrunnlag2.valider(10000.månedlig, 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)
@@ -293,7 +290,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             fødselsnummer = "20043769969",
             orgnummer = "ORGNUMMER",
             inntektsvurdering = Inntektsvurdering(emptyList()),
-            opptjeningvurdering = Opptjeningvurdering(listOf(Opptjeningvurdering.Arbeidsforhold("123456789", 1.desember(2017)))),
+            opptjeningvurdering = Opptjeningvurdering(listOf(Arbeidsforhold("123456789", 1.desember(2017)))),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei)
         )
         vilkårsgrunnlag1.valider(10000.månedlig, 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)
@@ -304,7 +301,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             fødselsnummer = "20043769969",
             orgnummer = "ORGNUMMER",
             inntektsvurdering = Inntektsvurdering(emptyList()),
-            opptjeningvurdering = Opptjeningvurdering(listOf(Opptjeningvurdering.Arbeidsforhold("123456789", 1.desember(2017)))),
+            opptjeningvurdering = Opptjeningvurdering(listOf(Arbeidsforhold("123456789", 1.desember(2017)))),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja)
         )
         vilkårsgrunnlag2.valider(10000.månedlig, 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)

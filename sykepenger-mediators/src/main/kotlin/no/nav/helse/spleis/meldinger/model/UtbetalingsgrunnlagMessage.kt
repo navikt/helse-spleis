@@ -1,10 +1,14 @@
 package no.nav.helse.spleis.meldinger.model
 
+import no.nav.helse.hendelser.Arbeidsforhold
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Utbetalingsgrunnlag
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsforholdV2
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlag
 import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.asLocalDate
+import no.nav.helse.rapids_rivers.asOptionalLocalDate
 import no.nav.helse.rapids_rivers.asYearMonth
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.meldinger.model.VilkårsgrunnlagMessage.Companion.arbeidsgiver
@@ -35,6 +39,15 @@ internal class UtbetalingsgrunnlagMessage(packet: JsonMessage) : BehovMessage(pa
             ArbeidsgiverInntekt(arbeidsgiver, inntekter.flatten())
         }
 
+    private val arbeidsforhold = packet["@løsning.${ArbeidsforholdV2.name}"]
+        .map {
+            Arbeidsforhold(
+                orgnummer = it["orgnummer"].asText(),
+                fom = it["ansattSiden"].asLocalDate(),
+                tom = it["ansattTil"].asOptionalLocalDate()
+            )
+         }
+
     override fun behandle(mediator: IHendelseMediator) {
         mediator.behandle(this, utbetalingsgrunnlag)
     }
@@ -46,6 +59,7 @@ internal class UtbetalingsgrunnlagMessage(packet: JsonMessage) : BehovMessage(pa
             orgnummer = orgnummer,
             fødselsnummer = fødselsnummer,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekterForSykepengegrunnlag),
-            vedtaksperiodeId = vedtaksperiodeId
+            vedtaksperiodeId = vedtaksperiodeId,
+            arbeidsforhold = arbeidsforhold
         )
 }

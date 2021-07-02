@@ -1668,6 +1668,7 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, utbetalingsgrunnlag: Utbetalingsgrunnlag) {
             vedtaksperiode.tilstand(utbetalingsgrunnlag, AvventerHistorikk)
             if (Toggles.FlereArbeidsgivereUlikFom.enabled) {
+                utbetalingsgrunnlag.lagreArbeidsforhold(vedtaksperiode.person)
                 utbetalingsgrunnlag.lagreInntekter(vedtaksperiode.person, vedtaksperiode.skjæringstidspunkt)
             }
         }

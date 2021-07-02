@@ -251,7 +251,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     protected fun håndterVilkårsgrunnlag(
         vedtaksperiodeId: UUID,
         inntekt: Inntekt = INNTEKT,
-        arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold> = emptyList(),
+        arbeidsforhold: List<Arbeidsforhold> = emptyList(),
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
         orgnummer: String = ORGNUMMER,
         inntektsvurdering: Inntektsvurdering = Inntektsvurdering(
@@ -336,7 +336,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
                     beskrivelse = "juicy beskrivelse"
                 )
             })
-        )
+        ),
+        arbeidsforhold: List<Arbeidsforhold> = listOf(Arbeidsforhold(orgnummer, 1.januar, null))
     ) {
         assertEtterspurt(Utbetalingsgrunnlag::class, InntekterForSykepengegrunnlag, vedtaksperiodeId, orgnummer)
         assertEtterspurt(Utbetalingsgrunnlag::class, ArbeidsforholdV2, vedtaksperiodeId, orgnummer)
@@ -346,7 +347,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             AKTØRID, UNG_PERSON_FNR_2018,
             orgnummer,
             vedtaksperiodeId,
-            InntektForSykepengegrunnlag(inntekter)
+            InntektForSykepengegrunnlag(inntekter),
+            arbeidsforhold
         ).håndter(Person::håndter)
     }
 
@@ -685,7 +687,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
 
     protected fun vilkårsgrunnlag(
         vedtaksperiodeId: UUID,
-        arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold> = emptyList(),
+        arbeidsforhold: List<Arbeidsforhold> = emptyList(),
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
         orgnummer: String = ORGNUMMER,
         inntektsvurdering: Inntektsvurdering,
@@ -700,7 +702,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
             opptjeningvurdering = Opptjeningvurdering(
                 if (arbeidsforhold.isEmpty()) listOf(
-                    Opptjeningvurdering.Arbeidsforhold(orgnummer, 1.januar(2017))
+                    Arbeidsforhold(orgnummer, 1.januar(2017))
                 )
                 else arbeidsforhold
             )

@@ -109,7 +109,8 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
         fødselsnummer = UNG_PERSON_FNR_2018,
         orgnummer = ORGNUMMER,
         vedtaksperiodeId = 1.vedtaksperiode,
-        inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList())
+        inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),
+        arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER, 1.januar, null))
     ).apply {
         hendelse = this
     }
@@ -232,7 +233,7 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             opptjeningvurdering = Opptjeningvurdering(
                 listOf(
-                    Opptjeningvurdering.Arbeidsforhold(
+                    Arbeidsforhold(
                         ORGNUMMER,
                         1.januar(2017)
                     )

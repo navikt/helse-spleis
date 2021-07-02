@@ -2085,7 +2085,7 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
             inntektsvurdering = inntektsvurdering,
             opptjeningvurdering = Opptjeningvurdering(
                 listOf(
-                    Opptjeningvurdering.Arbeidsforhold(
+                    Arbeidsforhold(
                         orgnummer,
                         1.januar(2017)
                     )
@@ -2110,7 +2110,7 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
             }),
             opptjeningvurdering = Opptjeningvurdering(
                 listOf(
-                    Opptjeningvurdering.Arbeidsforhold(
+                    Arbeidsforhold(
                         orgnummer,
                         1.januar(2017)
                     )
@@ -2141,7 +2141,8 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
             fnr,
             orgnummer,
             UUID.fromString(vedtaksperiodeId),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter)
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter),
+            arbeidsforhold = listOf(Arbeidsforhold(orgnummer, 1.januar, null))
         )
 
         private fun ytelser(

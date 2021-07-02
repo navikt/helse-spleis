@@ -93,7 +93,7 @@ internal interface VilkårsgrunnlagHistorikkVisitor {
 }
 
 internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, SykdomshistorikkVisitor, VedtaksperiodeVisitor, UtbetalingVisitor,
-    UtbetalingstidslinjeberegningVisitor, FeriepengeutbetalingVisitor {
+    UtbetalingstidslinjeberegningVisitor, FeriepengeutbetalingVisitor, ArbeidsforholdhistorikkVisitor {
     fun preVisitArbeidsgiver(
         arbeidsgiver: Arbeidsgiver,
         id: UUID,
@@ -359,6 +359,16 @@ internal interface SykdomstidslinjeVisitor {
     fun visitDag(dag: ProblemDag, dato: LocalDate, kilde: Hendelseskilde, melding: String) {}
     fun visitDag(dag: AvslåttDag, dato: LocalDate, kilde: Hendelseskilde) {}
     fun postVisitSykdomstidslinje(tidslinje: Sykdomstidslinje) {}
+}
+
+internal interface ArbeidsforholdhistorikkVisitor {
+    fun preVisitArbeidsforholdhistorikk(arbeidsforholdhistorikk: Arbeidsforholdhistorikk) {}
+    fun postVisitArbeidsforholdhistorikk(arbeidsforholdhistorikk: Arbeidsforholdhistorikk) {}
+
+    fun visitArbeidsforhold(orgnummer: String, fom: LocalDate, tom: LocalDate?) {}
+
+    fun preVisitArbeidsforholdinnslag(arbeidsforholdinnslag: Arbeidsforholdhistorikk.Innslag, id: UUID) {}
+    fun postVisitArbeidsforholdinnslag(arbeidsforholdinnslag: Arbeidsforholdhistorikk.Innslag, id: UUID) {}
 }
 
 internal interface InntekthistorikkVisitor {

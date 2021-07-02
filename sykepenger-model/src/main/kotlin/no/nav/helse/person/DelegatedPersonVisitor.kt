@@ -780,4 +780,24 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             klassekode
         )
     }
+
+    override fun preVisitArbeidsforholdhistorikk(arbeidsforholdhistorikk: Arbeidsforholdhistorikk) {
+        delegatee.preVisitArbeidsforholdhistorikk(arbeidsforholdhistorikk)
+    }
+
+    override fun postVisitArbeidsforholdhistorikk(arbeidsforholdhistorikk: Arbeidsforholdhistorikk) {
+        delegatee.postVisitArbeidsforholdhistorikk(arbeidsforholdhistorikk)
+    }
+
+    override fun preVisitArbeidsforholdinnslag(arbeidsforholdinnslag: Arbeidsforholdhistorikk.Innslag, id: UUID) {
+        delegatee.preVisitArbeidsforholdinnslag(arbeidsforholdinnslag, id)
+    }
+
+    override fun visitArbeidsforhold(orgnummer: String, fom: LocalDate, tom: LocalDate?) {
+        delegatee.visitArbeidsforhold(orgnummer, fom, tom)
+    }
+
+    override fun postVisitArbeidsforholdinnslag(arbeidsforholdinnslag: Arbeidsforholdhistorikk.Innslag, id: UUID) {
+        delegatee.postVisitArbeidsforholdinnslag(arbeidsforholdinnslag, id)
+    }
 }

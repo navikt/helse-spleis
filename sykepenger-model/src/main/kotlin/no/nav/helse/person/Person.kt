@@ -363,11 +363,12 @@ class Person private constructor(
     }
 
     private fun finnEllerOpprettArbeidsgiver(hendelse: ArbeidstakerHendelse) =
-        hendelse.organisasjonsnummer().let { orgnr ->
-            arbeidsgivere.finnEllerOpprett(orgnr) {
-                hendelse.info("Ny arbeidsgiver med organisasjonsnummer %s for denne personen", orgnr)
-                Arbeidsgiver(this, orgnr)
-            }
+        finnEllerOpprettArbeidsgiver(hendelse.organisasjonsnummer(), hendelse)
+
+    private fun finnEllerOpprettArbeidsgiver(orgnummer: String, aktivitetslogg: IAktivitetslogg) =
+        arbeidsgivere.finnEllerOpprett(orgnummer) {
+            aktivitetslogg.info("Ny arbeidsgiver med organisasjonsnummer %s for denne personen", orgnummer)
+            Arbeidsgiver(this, orgnummer)
         }
 
     private fun finnArbeidsgiver(hendelse: ArbeidstakerHendelse) =
@@ -499,4 +500,8 @@ class Person private constructor(
 
     internal fun harArbeidsgivereMedOverlappendeUtbetaltePerioder(organisasjonsnummer: String, periode: Periode) =
         arbeidsgivere.harArbeidsgivereMedOverlappendeUtbetaltePerioder(organisasjonsnummer, periode)
+
+    fun lagreArbeidsforhold(orgnummer: String, arbeidsforhold: List<Arbeidsforhold>, aktivitetslogg: IAktivitetslogg) {
+        finnEllerOpprettArbeidsgiver(orgnummer, aktivitetslogg).lagreArbeidsforhold(arbeidsforhold)
+    }
 }

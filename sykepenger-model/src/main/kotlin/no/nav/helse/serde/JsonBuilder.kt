@@ -243,11 +243,39 @@ internal class JsonBuilder : AbstractBuilder() {
             feriepengeutbetalingListe.add(feriepengeutbetalingMap)
         }
 
+
+
+        override fun preVisitArbeidsforholdhistorikk(arbeidsforholdhistorikk: Arbeidsforholdhistorikk) {
+            val historikk = mutableListOf<Map<String, Any?>>()
+            arbeidsgiverMap["arbeidsforholdhistorikk"] = historikk
+            pushState(ArbeidsforholdhistorikkState(historikk))
+        }
+
         override fun postVisitArbeidsgiver(
             arbeidsgiver: Arbeidsgiver,
             id: UUID,
             organisasjonsnummer: String
         ) {
+            popState()
+        }
+    }
+
+    private class ArbeidsforholdhistorikkState(private val historikk: MutableList<Map<String, Any?>>) : BuilderState() {
+        private var arbeidsforholMap: MutableList<Map<String, Any?>> = mutableListOf()
+
+        override fun visitArbeidsforhold(orgnummer: String, fom: LocalDate, tom: LocalDate?) {
+            arbeidsforholMap.add(mapOf(
+                "orgnummer" to orgnummer,
+                "fom" to fom,
+                "tom" to tom
+            ))
+        }
+        override fun postVisitArbeidsforholdinnslag(arbeidsforholdinnslag: Arbeidsforholdhistorikk.Innslag, id: UUID) {
+            historikk.add(mapOf("id" to id, "arbeidsforhold" to arbeidsforholMap))
+            arbeidsforholMap = mutableListOf()
+        }
+
+        override fun postVisitArbeidsforholdhistorikk(arbeidsforholdhistorikk: Arbeidsforholdhistorikk) {
             popState()
         }
     }
