@@ -41,6 +41,140 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
         assertEquals(1, førsteVedtaksperiode.beregningIder.size)
     }
 
+    /**
+     * Test for å verifisere at kontrakten mellom Spleis og Speil opprettholdes.
+     * Hvis du trenger å gjøre endringer i denne testen må du sannsynligvis også gjøre endringer i Speil.
+     */
+    @Test
+    fun `personDTO-en inneholder de feltene Speil forventer`() {
+        val fom = 1.januar
+        val tom = 31.januar
+
+        val sykmeldingId = UUID.randomUUID()
+        val sykmelding = SykmeldingDTO(sykmeldingId.toString(), 1.januar, 31.januar, 1.januar.atStartOfDay())
+        val søknadId = UUID.randomUUID()
+        val søknad = SøknadNavDTO(søknadId.toString(), 1.januar, 31.januar, 1.januar.atStartOfDay(), sendtNav = 1.februar.atStartOfDay())
+        val inntektsmeldingId = UUID.randomUUID()
+        val inntektsmelding = InntektsmeldingDTO(inntektsmeldingId.toString(), mottattDato = 2.januar.atStartOfDay(), INNTEKT.reflection { _, månedlig, _, _ -> månedlig })
+
+        val hendelser = listOf(sykmelding, søknad, inntektsmelding)
+
+        håndterSykmelding(Sykmeldingsperiode(sykmelding.fom, sykmelding.tom, 100.prosent), id = sykmeldingId)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(søknad.fom, søknad.tom, 100.prosent), id = søknadId, sendtTilNav = 1.februar)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), id = inntektsmeldingId)
+
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        val personDTO = serializePersonForSpeil(person, hendelser)
+
+        assertEquals(UNG_PERSON_FNR_2018, personDTO.fødselsnummer)
+        assertEquals(AKTØRID, personDTO.aktørId)
+        assertEquals(1, personDTO.arbeidsgivere.size)
+
+        val arbeidsgiver = personDTO.arbeidsgivere.first()
+        assertEquals(ORGNUMMER, arbeidsgiver.organisasjonsnummer)
+        assertEquals(1, arbeidsgiver.vedtaksperioder.size)
+
+        val vedtaksperiode = arbeidsgiver.vedtaksperioder.first() as VedtaksperiodeDTO
+        assertEquals(1.januar, vedtaksperiode.fom)
+        assertEquals(31.januar, vedtaksperiode.tom)
+        assertEquals(TilstandstypeDTO.Utbetalt, vedtaksperiode.tilstand)
+        assertTrue(vedtaksperiode.fullstendig)
+
+        val modellUtbetaling = inspektør.utbetalinger.first()
+        val apiUtbetalinger = vedtaksperiode.utbetalinger
+        assertEquals(
+            modellUtbetaling.arbeidsgiverOppdrag().fagsystemId(),
+            apiUtbetalinger.arbeidsgiverUtbetaling!!.fagsystemId
+        )
+        assertEquals(
+            modellUtbetaling.personOppdrag().fagsystemId(),
+            apiUtbetalinger.personUtbetaling!!.fagsystemId
+        )
+        assertEquals(
+            modellUtbetaling.arbeidsgiverOppdrag().førstedato,
+            apiUtbetalinger.arbeidsgiverUtbetaling!!.linjer.first().fom
+        )
+        assertEquals(
+            modellUtbetaling.arbeidsgiverOppdrag().sistedato,
+            apiUtbetalinger.arbeidsgiverUtbetaling!!.linjer.first().tom
+        )
+
+        val utbetalingstidslinje = vedtaksperiode.utbetalingstidslinje
+        assertEquals(31, utbetalingstidslinje.size)
+        assertEquals(TypeDataDTO.ArbeidsgiverperiodeDag, utbetalingstidslinje.first().type)
+        assertEquals(TypeDataDTO.NavDag, utbetalingstidslinje.last().type)
+        assertEquals(100.0, (utbetalingstidslinje.last() as NavDagDTO).grad)
+
+        assertEquals(15741, vedtaksperiode.totalbeløpArbeidstaker)
+
+        val sykdomstidslinje = vedtaksperiode.sykdomstidslinje
+        assertEquals(31, sykdomstidslinje.size)
+        assertEquals(SpeilDagtype.SYKEDAG, sykdomstidslinje.first().type)
+        assertEquals(100.0, (sykdomstidslinje.last()).grad)
+        assertEquals("Søknad", sykdomstidslinje.first().kilde.type.toString())
+        assertEquals(1.januar, sykdomstidslinje.first().dagen)
+
+        assertEquals("Ola Nordmann", vedtaksperiode.godkjentAv)
+
+        val vilkår = vedtaksperiode.vilkår
+
+        val sykepengedager = vilkår.sykepengedager
+        assertEquals(11, sykepengedager.forbrukteSykedager)
+        assertEquals(fom, sykepengedager.skjæringstidspunkt)
+        assertEquals(fom.plusDays(16), sykepengedager.førsteSykepengedag)
+        assertEquals(28.desember, sykepengedager.maksdato)
+        assertEquals(237, sykepengedager.gjenståendeDager)
+        assertTrue(sykepengedager.oppfylt)
+
+        val alder = vilkår.alder
+        assertEquals(17, alder.alderSisteSykedag)
+        assertTrue(alder.oppfylt!!)
+
+        val opptjening = vilkår.opptjening
+        assertEquals(365, opptjening?.antallKjenteOpptjeningsdager)
+        assertEquals(1.januar(2017), opptjening?.fom)
+        assertTrue(opptjening?.oppfylt!!)
+
+        val søknadsfrist = vilkår.søknadsfrist
+        assertEquals(1.februar.atStartOfDay(), søknadsfrist?.sendtNav)
+        assertEquals(fom, søknadsfrist?.søknadFom)
+        assertEquals(tom, søknadsfrist?.søknadTom)
+        assertTrue(søknadsfrist!!.oppfylt)
+
+        val medlemskapstatus = vilkår.medlemskapstatus
+        assertEquals(MedlemskapstatusDTO.JA, medlemskapstatus)
+
+        assertEquals(31000.0, vedtaksperiode.inntektFraInntektsmelding)
+        assertEquals(3, vedtaksperiode.hendelser.size)
+
+        assertEquals(372000.0, vedtaksperiode.dataForVilkårsvurdering?.beregnetÅrsinntektFraInntektskomponenten)
+        assertEquals(0.0, vedtaksperiode.dataForVilkårsvurdering?.avviksprosent)
+
+        vedtaksperiode.simuleringsdata?.let { simulering ->
+            assertNotNull(simulering.totalbeløp)
+            simulering.perioder.assertOnNonEmptyCollection { periode ->
+                assertNotNull(periode.fom)
+                assertNotNull(periode.tom)
+                periode.utbetalinger.assertOnNonEmptyCollection { utbetaling ->
+                    assertNotNull(utbetaling.utbetalesTilNavn)
+                    utbetaling.detaljer.assertOnNonEmptyCollection { detalj ->
+                        assertNotNull(detalj.beløp)
+                        assertNotNull(detalj.konto)
+                        assertNotNull(detalj.sats)
+                        assertTrue(detalj.klassekodeBeskrivelse.isNotEmpty())
+                    }
+                }
+            }
+        }
+    }
+
     @Test
     fun `dager før skjæringstidspunkt og etter sisteSykedag skal kuttes vekk fra utbetalingstidslinje`() {
         nyttVedtak(1.januar, 31.januar)
@@ -436,149 +570,53 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
 
     @Test
     fun `perioder uten utbetaling får utbetalingstidslinje`() {
-        val (person, hendelser) = ingenutbetalingPåfølgendeBetaling()
-        val personDTO = serializePersonForSpeil(person, hendelser)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 9.januar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 9.januar, 100.prosent))
 
+        håndterSykmelding(Sykmeldingsperiode(10.januar, 25.januar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(10.januar, 25.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt(2.vedtaksperiode)
+
+        val personDTO = speilApi()
         assertEquals(9, personDTO.arbeidsgivere.first().vedtaksperioder.first().utbetalingstidslinje.size)
     }
 
-    /**
-     * Test for å verifisere at kontrakten mellom Spleis og Speil opprettholdes.
-     * Hvis du trenger å gjøre endringer i denne testen må du sannsynligvis også gjøre endringer i Speil.
-     */
-    @Test
-    fun `personDTO-en inneholder de feltene Speil forventer`() {
-        val fom = 1.januar
-        val tom = 31.januar
 
-        val (person, hendelser) = person(fom = fom, tom = tom, sendtSøknad = 1.februar)
-        val personDTO = serializePersonForSpeil(person, hendelser)
-
-        assertEquals(fnr, personDTO.fødselsnummer)
-        assertEquals(aktørId, personDTO.aktørId)
-        assertEquals(1, personDTO.arbeidsgivere.size)
-
-        val arbeidsgiver = personDTO.arbeidsgivere.first()
-        assertEquals(orgnummer, arbeidsgiver.organisasjonsnummer)
-        assertEquals(1, arbeidsgiver.vedtaksperioder.size)
-
-        val vedtaksperiode = arbeidsgiver.vedtaksperioder.first() as VedtaksperiodeDTO
-        assertEquals(1.januar, vedtaksperiode.fom)
-        assertEquals(31.januar, vedtaksperiode.tom)
-        assertEquals(TilstandstypeDTO.Utbetalt, vedtaksperiode.tilstand)
-        assertTrue(vedtaksperiode.fullstendig)
-
-        val utbetalinger = vedtaksperiode.utbetalinger
-        assertEquals(
-            utbetalingsliste.getValue(orgnummer).first().arbeidsgiverOppdrag().fagsystemId(),
-            utbetalinger.arbeidsgiverUtbetaling!!.fagsystemId
-        )
-        assertEquals(
-            utbetalingsliste.getValue(orgnummer).first().personOppdrag().fagsystemId(),
-            utbetalinger.personUtbetaling!!.fagsystemId
-        )
-        assertEquals(
-            utbetalingsliste.getValue(orgnummer).first().arbeidsgiverOppdrag().førstedato,
-            utbetalinger.arbeidsgiverUtbetaling!!.linjer.first().fom
-        )
-        assertEquals(
-            utbetalingsliste.getValue(orgnummer).first().arbeidsgiverOppdrag().sistedato,
-            utbetalinger.arbeidsgiverUtbetaling!!.linjer.first().tom
-        )
-
-        val utbetalingstidslinje = vedtaksperiode.utbetalingstidslinje
-        assertEquals(31, utbetalingstidslinje.size)
-        assertEquals(TypeDataDTO.ArbeidsgiverperiodeDag, utbetalingstidslinje.first().type)
-        assertEquals(TypeDataDTO.NavDag, utbetalingstidslinje.last().type)
-        assertEquals(100.0, (utbetalingstidslinje.last() as NavDagDTO).grad)
-
-        assertEquals(15741, vedtaksperiode.totalbeløpArbeidstaker)
-
-        val sykdomstidslinje = vedtaksperiode.sykdomstidslinje
-        assertEquals(31, sykdomstidslinje.size)
-        assertEquals(SpeilDagtype.SYKEDAG, sykdomstidslinje.first().type)
-        assertEquals(100.0, (sykdomstidslinje.last()).grad)
-        assertEquals("Søknad", sykdomstidslinje.first().kilde.type.toString())
-        assertEquals(1.januar, sykdomstidslinje.first().dagen)
-
-        assertEquals("en_saksbehandler_ident", vedtaksperiode.godkjentAv)
-
-        val vilkår = vedtaksperiode.vilkår
-
-        val sykepengedager = vilkår.sykepengedager
-        assertEquals(11, sykepengedager.forbrukteSykedager)
-        assertEquals(fom, sykepengedager.skjæringstidspunkt)
-        assertEquals(fom.plusDays(16), sykepengedager.førsteSykepengedag)
-        assertEquals(28.desember, sykepengedager.maksdato)
-        assertEquals(237, sykepengedager.gjenståendeDager)
-        assertTrue(sykepengedager.oppfylt)
-
-        val alder = vilkår.alder
-        assertEquals(17, alder.alderSisteSykedag)
-        assertTrue(alder.oppfylt!!)
-
-        val opptjening = vilkår.opptjening
-        assertEquals(365, opptjening?.antallKjenteOpptjeningsdager)
-        assertEquals(1.januar(2017), opptjening?.fom)
-        assertTrue(opptjening?.oppfylt!!)
-
-        val søknadsfrist = vilkår.søknadsfrist
-        assertEquals(tom.plusDays(1).atStartOfDay(), søknadsfrist?.sendtNav)
-        assertEquals(fom, søknadsfrist?.søknadFom)
-        assertEquals(tom, søknadsfrist?.søknadTom)
-        assertTrue(søknadsfrist!!.oppfylt)
-
-        val medlemskapstatus = vilkår.medlemskapstatus
-        assertEquals(MedlemskapstatusDTO.JA, medlemskapstatus)
-
-        assertEquals(31000.0, vedtaksperiode.inntektFraInntektsmelding)
-        assertEquals(3, vedtaksperiode.hendelser.size)
-
-        assertEquals(372000.0, vedtaksperiode.dataForVilkårsvurdering?.beregnetÅrsinntektFraInntektskomponenten)
-        assertEquals(0.0, vedtaksperiode.dataForVilkårsvurdering?.avviksprosent)
-
-        vedtaksperiode.simuleringsdata?.let { simulering ->
-            assertNotNull(simulering.totalbeløp)
-            simulering.perioder.assertOnNonEmptyCollection { periode ->
-                assertNotNull(periode.fom)
-                assertNotNull(periode.tom)
-                periode.utbetalinger.assertOnNonEmptyCollection { utbetaling ->
-                    assertNotNull(utbetaling.utbetalesTilNavn)
-                    utbetaling.detaljer.assertOnNonEmptyCollection { detalj ->
-                        assertNotNull(detalj.beløp)
-                        assertNotNull(detalj.konto)
-                        assertNotNull(detalj.sats)
-                        assertTrue(detalj.klassekodeBeskrivelse.isNotEmpty())
-                    }
-                }
-            }
-        }
-    }
 
     @Test
-    fun `Yes hello does this work‽`() {
-        val fom = 1.januar(2018)
-        val tom = 31.januar(2018)
+    fun `null gjenstående dager ved oppnådd maksdato`() {
+        nyttVedtak(1.januar, 31.januar)
+        forlengVedtak(1.februar, 28.februar)
+        forlengVedtak(1.mars, 31.mars)
+        forlengVedtak(1.april, 30.april)
+        forlengVedtak(1.mai, 31.mai)
+        forlengVedtak(1.juni, 30.juni)
+        forlengVedtak(1.juli, 31.juli)
+        forlengVedtak(1.august, 31.august)
+        forlengVedtak(1.september, 30.september)
+        forlengVedtak(1.oktober, 31.oktober)
+        forlengVedtak(1.november, 30.november)
+        forlengVedtak(1.desember, 31.desember) //Maksdato nådd
 
-        val (person, hendelser) = person(
-            fom = fom, tom = tom,
-            påfølgendePerioder = listOf(
-                1.februar(2018).rangeTo(28.februar(2018)),
-                1.mars(2018).rangeTo(31.mars(2018)),
-                1.april(2018).rangeTo(30.april(2018)),
-                1.mai(2018).rangeTo(31.mai(2018)),
-                1.juni(2018).rangeTo(30.juni(2018)),
-                1.juli(2018).rangeTo(31.juli(2018)),
-                1.august(2018).rangeTo(31.august(2018)),
-                1.september(2018).rangeTo(30.september(2018)),
-                1.oktober(2018).rangeTo(31.oktober(2018)),
-                1.november(2018).rangeTo(30.november(2018)),
-                1.desember(2018).rangeTo(31.desember(2018)),
-                1.januar(2019).rangeTo(31.januar(2019))
-            )
-        )
+        håndterSykmelding(Sykmeldingsperiode(1.januar(2019), 31.januar(2019), 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar(2019), 31.januar(2019), 100.prosent))
+        håndterUtbetalingsgrunnlag(13.vedtaksperiode)
+        håndterYtelser(13.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(13.vedtaksperiode)
+        håndterUtbetalt(13.vedtaksperiode)
 
-        val personDTO = serializePersonForSpeil(person, hendelser)
+        val personDTO = speilApi()
         val vedtaksperiode = personDTO.arbeidsgivere.first().vedtaksperioder.last() as VedtaksperiodeDTO
         assertEquals(0, vedtaksperiode.vilkår.sykepengedager.gjenståendeDager)
     }
@@ -680,7 +718,7 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
             sykmelding(
                 fom = 1.februar,
                 tom = 10.februar
-            ).also { (sykmelding, sykmeldingDTO) ->
+            ).also { (sykmelding) ->
                 håndter(sykmelding)
             }
             fangeVedtaksperiodeId()
@@ -690,7 +728,7 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
                 tom = 10.februar,
                 sendtSøknad = 1.april.atStartOfDay(),
                 andrePerioder = listOf(Søknad.Søknadsperiode.Arbeid(1.februar, 10.februar))
-            ).also { (søknad, søknadDTO) ->
+            ).also { (søknad) ->
                 håndter(søknad)
             }
             håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
@@ -1092,7 +1130,7 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
         val forlengelseFom = 1.februar
         val forlengelseTom = 28.februar
         val person = Person(aktørId, fnr)
-        sykmelding(fom = fom, tom = tom).also { (sykmelding, sykmeldingDTO) ->
+        sykmelding(fom = fom, tom = tom).also { (sykmelding) ->
             person.håndter(sykmelding)
         }
         person.fangeVedtaksperiodeId()
