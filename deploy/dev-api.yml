@@ -9,12 +9,12 @@ spec:
   image: {{image}}
   port: 8080
   liveness:
-    path: isalive
+    path: /isalive
     initialDelay: 5
   readiness:
-    path: isready
+    path: /isready
     initialDelay: 5
-  preStopHookPath: "/stop"
+  preStopHookPath: /stop
   resources:
     limits:
       cpu: 500m
