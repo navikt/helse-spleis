@@ -43,16 +43,6 @@ sealed class DateRange {
     }
 }
 
-data class DataHolder(
-    var range: DateRange,
-    val extraData: Map<String, Any?>
-) {
-    fun toMap() = extraData + range.toMap()
-
-    fun canBeJoinedBy(date: LocalDate, data: Map<String, Any?>) =
-        range.canBeJoinedBy(date) && extraData == data
-}
-
 class DateRanges {
     private val ranges = mutableListOf<DataHolder>()
     fun plus(date: LocalDate, data: Map<String, Any?>) = apply {
@@ -65,4 +55,14 @@ class DateRanges {
     }
 
     fun toList() = ranges.map { it.toMap() }
+
+    private class DataHolder(
+        var range: DateRange,
+        val extraData: Map<String, Any?>
+    ) {
+        fun toMap() = extraData + range.toMap()
+
+        fun canBeJoinedBy(date: LocalDate, data: Map<String, Any?>) =
+            range.canBeJoinedBy(date) && extraData == data
+    }
 }
