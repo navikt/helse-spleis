@@ -1,5 +1,6 @@
 package no.nav.helse.serde
 
+import com.fasterxml.jackson.annotation.JsonUnwrapped
 import no.nav.helse.appender
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
@@ -25,10 +26,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosent.Companion.ratio
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.Year
-import java.time.YearMonth
+import java.time.*
 import java.util.*
 import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.isAccessible
@@ -523,7 +521,6 @@ internal data class PersonData(
                     )
 
             data class DagData(
-                private val dato: LocalDate,
                 private val type: JsonDagType,
                 private val kilde: KildeData,
                 private val grad: Double,
@@ -537,9 +534,15 @@ internal data class PersonData(
                 private val er6GBegrenset: Boolean?,
                 private val melding: String?
             ) {
+                @JsonUnwrapped
+                private lateinit var datoer: DateRange
+
                 internal companion object {
                     internal fun parseDager(dager: List<DagData>): Map<LocalDate, Dag> =
-                        dager.filterNot { it.type == JsonDagType.UKJENT_DAG }.associate { it.dato to it.parseDag() }.toSortedMap()
+                        dager.filterNot { it.type == JsonDagType.UKJENT_DAG }
+                            .flatMap { it.datoer.dates().map { dato -> dato to it.parseDag(dato) } }
+                            .toMap()
+                            .toSortedMap()
                 }
 
                 private val økonomi
@@ -560,21 +563,19 @@ internal data class PersonData(
 
                 private val hendelseskilde get() = kilde.parseKilde()
 
-                internal fun parseDag(): Dag = when (type) {
+                private fun LocalDate.erHelg() = dayOfWeek in arrayOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)
+
+                internal fun parseDag(dato: LocalDate): Dag = when (type) {
                     JsonDagType.ARBEIDSDAG -> Dag.Arbeidsdag(
                         dato,
                         hendelseskilde
                     )
-                    JsonDagType.ARBEIDSGIVERDAG -> Dag.Arbeidsgiverdag(
-                        dato,
-                        økonomi,
-                        hendelseskilde
-                    )
-                    JsonDagType.ARBEIDSGIVER_HELGEDAG -> Dag.ArbeidsgiverHelgedag(
-                        dato,
-                        økonomi,
-                        hendelseskilde
-                    )
+                    JsonDagType.ARBEIDSGIVER_HELGEDAG,
+                    JsonDagType.ARBEIDSGIVERDAG -> if (dato.erHelg()) {
+                        Dag.ArbeidsgiverHelgedag(dato, økonomi, hendelseskilde)
+                    } else {
+                        Dag.Arbeidsgiverdag(dato, økonomi, hendelseskilde)
+                    }
                     JsonDagType.FERIEDAG -> Dag.Feriedag(
                         dato,
                         hendelseskilde
@@ -597,16 +598,12 @@ internal data class PersonData(
                         hendelseskilde,
                         melding!!
                     )
-                    JsonDagType.SYKEDAG -> Dag.Sykedag(
-                        dato,
-                        økonomi,
-                        hendelseskilde
-                    )
-                    JsonDagType.SYK_HELGEDAG -> Dag.SykHelgedag(
-                        dato,
-                        økonomi,
-                        hendelseskilde
-                    )
+                    JsonDagType.SYK_HELGEDAG,
+                    JsonDagType.SYKEDAG -> if (dato.erHelg()) {
+                        Dag.SykHelgedag(dato, økonomi, hendelseskilde)
+                    } else {
+                        Dag.Sykedag(dato, økonomi, hendelseskilde)
+                    }
                     else -> throw IllegalStateException("Deserialisering av $type er ikke støttet")
                 }
             }
@@ -614,6 +611,7 @@ internal data class PersonData(
             enum class JsonDagType {
                 ARBEIDSDAG,
                 ARBEIDSGIVERDAG,
+                @Deprecated("Trengs for å slippe migrering")
                 ARBEIDSGIVER_HELGEDAG,
                 FERIEDAG,
                 FRISK_HELGEDAG,
@@ -621,6 +619,7 @@ internal data class PersonData(
                 PERMISJONSDAG,
                 PROBLEMDAG,
                 SYKEDAG,
+                @Deprecated("Trengs for å slippe migrering")
                 SYK_HELGEDAG,
                 UKJENT_DAG,
                 AVSLÅTT_DAG
@@ -1043,7 +1042,7 @@ internal data class PersonData(
         internal fun konverterTilUtbetalingstidslinje(): Utbetalingstidslinje {
             return Utbetalingstidslinje::class.primaryConstructor!!
                 .apply { isAccessible = true }
-                .call(dager.map { it.parseDag() }.toMutableList())
+                .call(dager.flatMap { it.parseDager() }.toMutableList())
         }
 
         enum class BegrunnelseData {
@@ -1091,7 +1090,6 @@ internal data class PersonData(
 
         data class UtbetalingsdagData(
             private val type: TypeData,
-            private val dato: LocalDate,
             private val aktuellDagsinntekt: Double,
             private val dekningsgrunnlag: Double,
             private val skjæringstidspunkt: LocalDate?,
@@ -1104,6 +1102,9 @@ internal data class PersonData(
             private val personbeløp: Double?,
             private val er6GBegrenset: Boolean?
         ) {
+            @JsonUnwrapped
+            private lateinit var datoer: DateRange
+
             private val økonomi
                 get() = Økonomi::class.primaryConstructor!!
                     .apply { isAccessible = true }
@@ -1125,7 +1126,9 @@ internal data class PersonData(
                         }
                     )
 
-            internal fun parseDag() =
+            internal fun parseDager() = datoer.dates().map(::parseDag)
+
+            internal fun parseDag(dato: LocalDate) =
                 when (type) {
                     TypeData.ArbeidsgiverperiodeDag -> {
                         Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag(dato = dato, økonomi = økonomi)

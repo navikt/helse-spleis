@@ -155,7 +155,6 @@ internal class JsonBuilder : AbstractBuilder() {
         override fun preVisit(tidslinje: Utbetalingstidslinje) {
             val utbetalingstidslinjeMap = mutableMapOf<String, Any?>()
             utbetalingstidslinjer.add(utbetalingstidslinjeMap)
-            pushState(UtbetalingstidslinjeState(utbetalingstidslinjeMap))
         }
 
         override fun preVisitUtbetalinger(utbetalinger: List<Utbetaling>) {
@@ -682,88 +681,6 @@ internal class JsonBuilder : AbstractBuilder() {
         ) = popState()
     }
 
-    private class UtbetalingstidslinjeState(utbetalingstidslinjeMap: MutableMap<String, Any?>) :
-        BuilderState() {
-
-        private val dager = mutableListOf<MutableMap<String, Any?>>()
-
-        init {
-            utbetalingstidslinjeMap["dager"] = dager
-        }
-
-        override fun visit(
-            dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag,
-            dato: LocalDate,
-            økonomi: Økonomi
-        ) {
-            dager.add(UtbetalingsdagReflect(dag, TypeData.Arbeidsdag).toMap())
-        }
-
-        override fun visit(
-            dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag,
-            dato: LocalDate,
-            økonomi: Økonomi
-        ) {
-            dager.add(UtbetalingsdagReflect(dag, TypeData.ArbeidsgiverperiodeDag).toMap())
-        }
-
-        override fun visit(
-            dag: Utbetalingstidslinje.Utbetalingsdag.NavDag,
-            dato: LocalDate,
-            økonomi: Økonomi
-        ) {
-            dager.add(UtbetalingsdagReflect(dag, TypeData.NavDag).toMap())
-        }
-
-        override fun visit(
-            dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag,
-            dato: LocalDate,
-            økonomi: Økonomi
-        ) {
-            dager.add(UtbetalingsdagReflect(dag, TypeData.NavHelgDag).toMap())
-        }
-
-        override fun visit(
-            dag: Utbetalingstidslinje.Utbetalingsdag.Fridag,
-            dato: LocalDate,
-            økonomi: Økonomi
-        ) {
-            dager.add(UtbetalingsdagReflect(dag, TypeData.Fridag).toMap())
-        }
-
-        override fun visit(
-            dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag,
-            dato: LocalDate,
-            økonomi: Økonomi
-        ) {
-            dager.add(UtbetalingsdagReflect(dag, TypeData.UkjentDag).toMap())
-        }
-
-        override fun visit(
-            dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag,
-            dato: LocalDate,
-            økonomi: Økonomi
-        ) {
-            val avvistDagMap = mutableMapOf<String, Any?>()
-            dager.add(avvistDagMap)
-
-            avvistDagMap.putAll(AvvistdagReflect(dag).toMap())
-        }
-
-        override fun visit(
-            dag: Utbetalingstidslinje.Utbetalingsdag.ForeldetDag,
-            dato: LocalDate,
-            økonomi: Økonomi
-        ) {
-            val foreldetDagMap = mutableMapOf<String, Any?>()
-            dager.add(foreldetDagMap)
-
-            foreldetDagMap.putAll(UtbetalingsdagReflect(dag, TypeData.ForeldetDag).toMap())
-        }
-
-        override fun postVisit(tidslinje: Utbetalingstidslinje) = popState()
-    }
-
     private class VedtaksperiodeState(
         vedtaksperiode: Vedtaksperiode,
         private val vedtaksperiodeMap: MutableMap<String, Any?>
@@ -895,8 +812,7 @@ internal class JsonBuilder : AbstractBuilder() {
     }
 
     private class SykdomstidslinjeState(private val sykdomstidslinje: MutableMap<String, Any>) : BuilderState() {
-
-        private val dager: MutableList<MutableMap<String, Any>> = mutableListOf()
+        private val dateRanges = DateRanges()
 
         override fun preVisitSykdomstidslinje(
             tidslinje: Sykdomstidslinje,
@@ -908,66 +824,67 @@ internal class JsonBuilder : AbstractBuilder() {
         }
 
         override fun postVisitSykdomstidslinje(tidslinje: Sykdomstidslinje) {
-            sykdomstidslinje["dager"] = dager
+            sykdomstidslinje["dager"] = dateRanges.toList()
             popState()
         }
 
-        override fun visitDag(dag: Arbeidsdag, dato: LocalDate, kilde: Hendelseskilde) = leggTilDag(dag, kilde)
+        override fun visitDag(dag: Arbeidsdag, dato: LocalDate, kilde: Hendelseskilde) = leggTilDag(dato, dag, kilde)
 
         override fun visitDag(
             dag: Arbeidsgiverdag,
             dato: LocalDate,
             økonomi: Økonomi,
             kilde: Hendelseskilde
-        ) = leggTilDag(dag, kilde)
+        ) = leggTilDag(dato, dag, kilde)
 
-        override fun visitDag(dag: Feriedag, dato: LocalDate, kilde: Hendelseskilde) = leggTilDag(dag, kilde)
+        override fun visitDag(dag: Feriedag, dato: LocalDate, kilde: Hendelseskilde) = leggTilDag(dato, dag, kilde)
 
-        override fun visitDag(dag: Permisjonsdag, dato: LocalDate, kilde: Hendelseskilde) = leggTilDag(dag, kilde)
+        override fun visitDag(dag: Permisjonsdag, dato: LocalDate, kilde: Hendelseskilde) = leggTilDag(dato, dag, kilde)
 
-        override fun visitDag(dag: FriskHelgedag, dato: LocalDate, kilde: Hendelseskilde) = leggTilDag(dag, kilde)
+        override fun visitDag(dag: FriskHelgedag, dato: LocalDate, kilde: Hendelseskilde) = leggTilDag(dato, dag, kilde)
 
         override fun visitDag(
             dag: ArbeidsgiverHelgedag,
             dato: LocalDate,
             økonomi: Økonomi,
             kilde: Hendelseskilde
-        ) = leggTilDag(dag, kilde)
+        ) = leggTilDag(dato, dag, kilde)
 
         override fun visitDag(
             dag: Sykedag,
             dato: LocalDate,
             økonomi: Økonomi,
             kilde: Hendelseskilde
-        ) = leggTilDag(dag, kilde)
+        ) = leggTilDag(dato, dag, kilde)
 
         override fun visitDag(
             dag: ForeldetSykedag,
             dato: LocalDate,
             økonomi: Økonomi,
             kilde: Hendelseskilde
-        ) = leggTilDag(dag, kilde)
+        ) = leggTilDag(dato, dag, kilde)
 
         override fun visitDag(
             dag: SykHelgedag,
             dato: LocalDate,
             økonomi: Økonomi,
             kilde: Hendelseskilde
-        ) = leggTilDag(dag, kilde)
+        ) = leggTilDag(dato, dag, kilde)
 
         override fun visitDag(
             dag: ProblemDag,
             dato: LocalDate,
             kilde: Hendelseskilde,
             melding: String
-        ) = leggTilDag(dag, kilde, melding)
+        ) = leggTilDag(dato, dag, kilde, melding)
 
         private fun leggTilDag(
+            dato: LocalDate,
             dag: Dag,
             kilde: Hendelseskilde,
             melding: String? = null
         ) {
-            dager.add(serialisertSykdomstidslinjedag(dag, kilde, melding))
+            dateRanges.plus(dato, serialisertSykdomstidslinjedag(dag, kilde, melding))
         }
     }
 }

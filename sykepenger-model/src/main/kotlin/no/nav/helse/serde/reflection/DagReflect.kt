@@ -13,7 +13,6 @@ internal fun serialisertSykdomstidslinjedag(
     melding: String? = null
 ) =
     mutableMapOf<String, Any>().also { map ->
-        map["dato"] = dag["dato"]
         map["type"] = dag.toJsonType()
         map["kilde"] = kilde.toJson()
         dag.maybe<Økonomi?>("økonomi")?.let { økonomi ->
@@ -35,9 +34,9 @@ private fun Dag.toJsonType() = when (this) {
     is Dag.Arbeidsgiverdag -> JsonDagType.ARBEIDSGIVERDAG
     is Dag.Feriedag -> JsonDagType.FERIEDAG
     is Dag.FriskHelgedag -> JsonDagType.FRISK_HELGEDAG
-    is Dag.ArbeidsgiverHelgedag -> JsonDagType.ARBEIDSGIVER_HELGEDAG
+    is Dag.ArbeidsgiverHelgedag -> JsonDagType.ARBEIDSGIVERDAG
     is Dag.ForeldetSykedag -> JsonDagType.FORELDET_SYKEDAG
-    is Dag.SykHelgedag -> JsonDagType.SYK_HELGEDAG
+    is Dag.SykHelgedag -> JsonDagType.SYKEDAG
     is Dag.Permisjonsdag -> JsonDagType.PERMISJONSDAG
     is Dag.ProblemDag -> JsonDagType.PROBLEMDAG
     is Dag.AvslåttDag -> JsonDagType.AVSLÅTT_DAG
