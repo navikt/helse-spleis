@@ -11,11 +11,127 @@ import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*
 
 internal class VilkårsgrunnlagHistorikkTest {
+
+    private lateinit var historikk: VilkårsgrunnlagHistorikk
+    private val inspektør get() = Vilkårgrunnlagsinspektør(historikk)
+
+    @BeforeEach
+    fun beforEach() {
+        historikk = VilkårsgrunnlagHistorikk()
+    }
+
+    @Test
+    fun `korrekt antall innslag i vilkårsgrunnlagshistorikken ved én vilkårsprøving`() {
+        val vilkårsgrunnlag = Vilkårsgrunnlag(
+            meldingsreferanseId = UUID.randomUUID(),
+            vedtaksperiodeId = UUID.randomUUID().toString(),
+            aktørId = "AKTØR_ID",
+            fødselsnummer = "20043769969",
+            orgnummer = "ORGNUMMER",
+            inntektsvurdering = Inntektsvurdering(emptyList()),
+            opptjeningvurdering = Opptjeningvurdering(listOf(Opptjeningvurdering.Arbeidsforhold("123456789", 1.desember(2017)))),
+            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja)
+        )
+        vilkårsgrunnlag.valider(10000.månedlig, 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)
+        historikk.lagre(vilkårsgrunnlag, 1.januar)
+        assertNotNull(historikk.vilkårsgrunnlagFor(1.januar))
+        assertTrue(historikk.vilkårsgrunnlagFor(1.januar)!!.isOk())
+        assertEquals(1, inspektør.vilkårsgrunnlagTeller[0])
+    }
+
+    @Test
+    fun `ny vilkårsprøving på samme skjæringstidspunkt overskriver gammel vilkårsprøving - medfører nytt innslag`() {
+        val vilkårsgrunnlag1 = Vilkårsgrunnlag(
+            meldingsreferanseId = UUID.randomUUID(),
+            vedtaksperiodeId = UUID.randomUUID().toString(),
+            aktørId = "AKTØR_ID",
+            fødselsnummer = "20043769969",
+            orgnummer = "ORGNUMMER",
+            inntektsvurdering = Inntektsvurdering(emptyList()),
+            opptjeningvurdering = Opptjeningvurdering(listOf(Opptjeningvurdering.Arbeidsforhold("123456789", 1.desember(2017)))),
+            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja)
+        )
+        val vilkårsgrunnlag2 = Vilkårsgrunnlag(
+            meldingsreferanseId = UUID.randomUUID(),
+            vedtaksperiodeId = UUID.randomUUID().toString(),
+            aktørId = "AKTØR_ID",
+            fødselsnummer = "20043769969",
+            orgnummer = "ORGNUMMER",
+            inntektsvurdering = Inntektsvurdering(emptyList()),
+            opptjeningvurdering = Opptjeningvurdering(listOf(Opptjeningvurdering.Arbeidsforhold("123456789", 1.desember(2017)))),
+            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei)
+        )
+        vilkårsgrunnlag1.valider(10000.månedlig, 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)
+        vilkårsgrunnlag2.valider(10000.månedlig, 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)
+
+        historikk.lagre(vilkårsgrunnlag1, 1.januar)
+        assertNotNull(historikk.vilkårsgrunnlagFor(1.januar))
+        assertTrue(historikk.vilkårsgrunnlagFor(1.januar)!!.isOk())
+
+        historikk.lagre(vilkårsgrunnlag2, 1.januar)
+        assertNotNull(historikk.vilkårsgrunnlagFor(1.januar))
+        assertFalse(historikk.vilkårsgrunnlagFor(1.januar)!!.isOk())
+
+        assertEquals(1, inspektør.vilkårsgrunnlagTeller[0])
+        assertEquals(1, inspektør.vilkårsgrunnlagTeller[1])
+    }
+
+    @Test
+    fun `vilkårsprøving på to ulike skjæringstidspunkt medfører to innslag der siste innslag har vilkårsprøving for begge skjæringstidspunktene`() {
+        val vilkårsgrunnlag = Vilkårsgrunnlag(
+            meldingsreferanseId = UUID.randomUUID(),
+            vedtaksperiodeId = UUID.randomUUID().toString(),
+            aktørId = "AKTØR_ID",
+            fødselsnummer = "20043769969",
+            orgnummer = "ORGNUMMER",
+            inntektsvurdering = Inntektsvurdering(emptyList()),
+            opptjeningvurdering = Opptjeningvurdering(listOf(Opptjeningvurdering.Arbeidsforhold("123456789", 1.desember(2017)))),
+            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja)
+        )
+        vilkårsgrunnlag.valider(10000.månedlig, 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)
+        historikk.lagre(vilkårsgrunnlag, 1.januar)
+        historikk.lagre(vilkårsgrunnlag, 4.januar)
+        assertEquals(1, inspektør.vilkårsgrunnlagTeller[1])
+        assertEquals(2, inspektør.vilkårsgrunnlagTeller[0])
+    }
+
+    @Test
+    fun `to ulike skjæringstidspunker, der det ene er i infotrygd medfører to innslag der siste innslag har vilkårsprøving for begge skjæringstidspunktene`() {
+        val vilkårsgrunnlag = Vilkårsgrunnlag(
+            meldingsreferanseId = UUID.randomUUID(),
+            vedtaksperiodeId = UUID.randomUUID().toString(),
+            aktørId = "AKTØR_ID",
+            fødselsnummer = "20043769969",
+            orgnummer = "ORGNUMMER",
+            inntektsvurdering = Inntektsvurdering(emptyList()),
+            opptjeningvurdering = Opptjeningvurdering(listOf(Opptjeningvurdering.Arbeidsforhold("123456789", 1.desember(2017)))),
+            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja)
+        )
+        val infotrygdhistorikk = Infotrygdhistorikk().apply {
+            oppdaterHistorikk(
+                InfotrygdhistorikkElement.opprett(
+                    oppdatert = LocalDateTime.now(),
+                    hendelseId = UUID.randomUUID(),
+                    perioder = emptyList(),
+                    inntekter = emptyList(),
+                    arbeidskategorikoder = emptyMap(),
+                    ugyldigePerioder = emptyList(),
+                    harStatslønn = false
+                ))
+        }
+        vilkårsgrunnlag.valider(10000.månedlig, 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)
+
+        historikk.lagre(vilkårsgrunnlag, 1.januar)
+        infotrygdhistorikk.lagreVilkårsgrunnlag(4.januar, Periodetype.OVERGANG_FRA_IT, historikk)
+        assertEquals(1, inspektør.vilkårsgrunnlagTeller[1])
+        assertEquals(2, inspektør.vilkårsgrunnlagTeller[0])
+    }
 
     @Test
     fun `Finner vilkårsgrunnlag for skjæringstidspunkt - ok`() {
