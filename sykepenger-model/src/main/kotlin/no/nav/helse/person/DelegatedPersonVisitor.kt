@@ -92,12 +92,20 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.preVisitVilkårsgrunnlagHistorikk()
     }
 
+    override fun preVisitInnslag(innslag: VilkårsgrunnlagHistorikk.Innslag, id: UUID, opprettet: LocalDateTime) {
+        delegatee.preVisitInnslag(innslag, id, opprettet)
+    }
+
     override fun visitGrunnlagsdata(skjæringstidspunkt: LocalDate, grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata) {
         delegatee.visitGrunnlagsdata(skjæringstidspunkt, grunnlagsdata)
     }
 
     override fun visitInfotrygdVilkårsgrunnlag(skjæringstidspunkt: LocalDate, infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag) {
         delegatee.visitInfotrygdVilkårsgrunnlag(skjæringstidspunkt, infotrygdVilkårsgrunnlag)
+    }
+
+    override fun postVisitInnslag(innslag: VilkårsgrunnlagHistorikk.Innslag, id: UUID, opprettet: LocalDateTime) {
+        delegatee.postVisitInnslag(innslag, id, opprettet)
     }
 
     override fun postVisitVilkårsgrunnlagHistorikk() {

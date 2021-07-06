@@ -1,6 +1,5 @@
 package no.nav.helse.serde
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.*
@@ -335,12 +334,14 @@ internal class JsonBuilder : AbstractBuilder() {
             dato: LocalDate,
             beløp: Int
         ) {
-            dager.add(mapOf(
-                "dato" to dato,
-                "type" to type,
-                "orgnummer" to orgnummer,
-                "beløp" to beløp
-            ))
+            dager.add(
+                mapOf(
+                    "dato" to dato,
+                    "type" to type,
+                    "orgnummer" to orgnummer,
+                    "beløp" to beløp
+                )
+            )
         }
     }
 
@@ -480,8 +481,31 @@ internal class JsonBuilder : AbstractBuilder() {
 
 
     private class VilkårsgrunnlagHistorikkState(private val historikk: MutableList<Map<String, Any?>>) : BuilderState() {
+
+        override fun preVisitInnslag(
+            innslag: VilkårsgrunnlagHistorikk.Innslag,
+            id: UUID,
+            opprettet: LocalDateTime
+        ) {
+            val vilkårsgrunnlag = mutableListOf<Map<String, Any?>>()
+            this.historikk.add(
+                mutableMapOf(
+                    "id" to id,
+                    "opprettet" to opprettet,
+                    "vilkårsgrunnlag" to vilkårsgrunnlag
+                    )
+            )
+            pushState(VilkårsgrunnlagElementState(vilkårsgrunnlag))
+        }
+
+        override fun postVisitVilkårsgrunnlagHistorikk() {
+            popState()
+        }
+    }
+
+    private class VilkårsgrunnlagElementState(private val vilkårsgrunnlagElement: MutableList<Map<String, Any?>>) : BuilderState() {
         override fun visitGrunnlagsdata(skjæringstidspunkt: LocalDate, grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata) {
-            historikk.add(
+            vilkårsgrunnlagElement.add(
                 mapOf(
                     "skjæringstidspunkt" to skjæringstidspunkt,
                     "type" to "Vilkårsprøving",
@@ -502,7 +526,7 @@ internal class JsonBuilder : AbstractBuilder() {
         }
 
         override fun visitInfotrygdVilkårsgrunnlag(skjæringstidspunkt: LocalDate, infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag) {
-            historikk.add(
+            vilkårsgrunnlagElement.add(
                 mapOf(
                     "skjæringstidspunkt" to skjæringstidspunkt,
                     "type" to "Infotrygd"
@@ -510,7 +534,7 @@ internal class JsonBuilder : AbstractBuilder() {
             )
         }
 
-        override fun postVisitVilkårsgrunnlagHistorikk() {
+        override fun postVisitInnslag(innslag: VilkårsgrunnlagHistorikk.Innslag, id: UUID, opprettet: LocalDateTime) {
             popState()
         }
     }

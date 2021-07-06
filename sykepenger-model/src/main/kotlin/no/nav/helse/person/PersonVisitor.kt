@@ -85,6 +85,8 @@ internal interface FeriepengeutbetalingsperiodeVisitor{
 
 internal interface VilkårsgrunnlagHistorikkVisitor {
     fun preVisitVilkårsgrunnlagHistorikk() {}
+    fun preVisitInnslag(innslag: VilkårsgrunnlagHistorikk.Innslag, id: UUID, opprettet: LocalDateTime) {}
+    fun postVisitInnslag(innslag: VilkårsgrunnlagHistorikk.Innslag, id: UUID, opprettet: LocalDateTime) {}
     fun postVisitVilkårsgrunnlagHistorikk() {}
     fun visitGrunnlagsdata(skjæringstidspunkt: LocalDate, grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata) {}
     fun visitInfotrygdVilkårsgrunnlag(skjæringstidspunkt: LocalDate, infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag) {}

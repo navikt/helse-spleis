@@ -8,7 +8,7 @@ import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.*
 import no.nav.helse.person.infotrygdhistorikk.*
 import no.nav.helse.serde.PersonData.InfotrygdhistorikkElementData.Companion.tilModellObjekt
-import no.nav.helse.serde.PersonData.VilkårsgrunnlagElement.Companion.tilModellObjekt
+import no.nav.helse.serde.PersonData.VilkårsgrunnlagInnslagData.Companion.tilModellObjekt
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
 import no.nav.helse.serde.reflection.Kilde
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
@@ -38,7 +38,7 @@ internal data class PersonData(
     private val aktivitetslogg: AktivitetsloggData?,
     private val opprettet: LocalDateTime,
     private val infotrygdhistorikk: List<InfotrygdhistorikkElementData>,
-    private val vilkårsgrunnlagHistorikk: List<VilkårsgrunnlagElement>,
+    private val vilkårsgrunnlagHistorikk: List<VilkårsgrunnlagInnslagData>,
     private val dødsdato: LocalDate?
 ) {
     private val arbeidsgivereliste = mutableListOf<Arbeidsgiver>()
@@ -177,7 +177,29 @@ internal data class PersonData(
         }
     }
 
-    data class VilkårsgrunnlagElement(
+    data class VilkårsgrunnlagInnslagData(
+        val id: UUID,
+        val opprettet: LocalDateTime,
+        val vilkårsgrunnlag: List<VilkårsgrunnlagElementData>
+    ) {
+        internal companion object {
+            private fun List<VilkårsgrunnlagInnslagData>.parseVilkårsgrunnlag() =
+                this.map { innslagData ->
+                    val innslag = VilkårsgrunnlagHistorikk.Innslag(innslagData.id, innslagData.opprettet)
+                    innslagData.vilkårsgrunnlag.forEach {
+                        val (skjæringstidspunkt, vilkårsgrunnlagElement) = it.parseDataForVilkårsvurdering()
+                        innslag.add(skjæringstidspunkt, vilkårsgrunnlagElement)
+                    }
+                    innslag
+                }
+
+            internal fun List<VilkårsgrunnlagInnslagData>.tilModellObjekt() = VilkårsgrunnlagHistorikk::class.primaryConstructor!!
+                .apply { isAccessible = true }
+                .call(parseVilkårsgrunnlag())
+        }
+    }
+
+    data class VilkårsgrunnlagElementData(
         private val skjæringstidspunkt: LocalDate,
         private val type: GrunnlagsdataType,
         private val sammenligningsgrunnlag: Double?,
@@ -210,16 +232,6 @@ internal data class PersonData(
         enum class GrunnlagsdataType {
             Infotrygd,
             Vilkårsprøving
-        }
-
-        companion object {
-            private fun List<VilkårsgrunnlagElement>.toMap() =
-                map(VilkårsgrunnlagElement::parseDataForVilkårsvurdering)
-                    .toMap(mutableMapOf())
-
-            internal fun List<VilkårsgrunnlagElement>.tilModellObjekt() = VilkårsgrunnlagHistorikk::class.primaryConstructor!!
-                .apply { isAccessible = true }
-                .call(toMap())
         }
     }
 

@@ -7,33 +7,74 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
-internal class VilkårsgrunnlagHistorikk private constructor(
-    private val historikk: MutableMap<LocalDate, VilkårsgrunnlagElement>
-) {
-    internal constructor() : this(mutableMapOf())
+internal class VilkårsgrunnlagHistorikk(private val historikk: MutableList<Innslag>) {
 
-    internal fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {
-        vilkårsgrunnlagHistorikkVisitor.preVisitVilkårsgrunnlagHistorikk()
-        historikk.forEach { (skjæringstidspunkt, element) ->
-            element.accept(skjæringstidspunkt, vilkårsgrunnlagHistorikkVisitor)
-        }
-        vilkårsgrunnlagHistorikkVisitor.postVisitVilkårsgrunnlagHistorikk()
+    internal constructor() : this(mutableListOf())
+
+    private val innslag
+        get() = (historikk.firstOrNull()?.clone() ?: Innslag(UUID.randomUUID(), LocalDateTime.now()))
+            .also { historikk.add(0, it) }
+
+    internal fun accept(visitor: VilkårsgrunnlagHistorikkVisitor) {
+        visitor.preVisitVilkårsgrunnlagHistorikk()
+        historikk.forEach { it.accept(visitor) }
+        visitor.postVisitVilkårsgrunnlagHistorikk()
     }
 
     internal fun lagre(vilkårsgrunnlag: Vilkårsgrunnlag, skjæringstidspunkt: LocalDate) {
-        historikk[skjæringstidspunkt] = vilkårsgrunnlag.grunnlagsdata()
+        innslag.add(skjæringstidspunkt, vilkårsgrunnlag.grunnlagsdata())
     }
 
     internal fun lagre(skjæringstidspunkt: LocalDate, grunnlagselement: VilkårsgrunnlagElement) {
-        historikk[skjæringstidspunkt] = grunnlagselement
+        innslag.add(skjæringstidspunkt, grunnlagselement)
     }
 
-    internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) = historikk[skjæringstidspunkt]
+    internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) = historikk.firstOrNull()?.vilkårsgrunnlagFor(skjæringstidspunkt)
 
     internal fun avvisUtbetalingsdagerMedBegrunnelse(tidslinjer: List<Utbetalingstidslinje>) {
         Utbetalingstidslinje.avvis(tidslinjer, finnBegrunnelser())
+    }
+
+    private fun finnBegrunnelser(): Map<LocalDate, List<Begrunnelse>> = historikk.firstOrNull()?.finnBegrunnelser() ?: emptyMap()
+
+    internal class Innslag(private val id: UUID, private val opprettet: LocalDateTime) {
+        private val vilkårsgrunnlag = mutableMapOf<LocalDate, VilkårsgrunnlagElement>()
+
+        internal fun accept(visitor: VilkårsgrunnlagHistorikkVisitor) {
+            visitor.preVisitInnslag(this, id, opprettet)
+            vilkårsgrunnlag.forEach { (skjæringstidspunkt, element) ->
+                element.accept(skjæringstidspunkt, visitor)
+            }
+            visitor.postVisitInnslag(this, id, opprettet)
+        }
+
+        internal fun clone() = Innslag(UUID.randomUUID(), LocalDateTime.now()).also {
+            it.vilkårsgrunnlag.putAll(this.vilkårsgrunnlag)
+        }
+
+        internal fun add(skjæringstidspunkt: LocalDate, vilkårsgrunnlagElement: VilkårsgrunnlagElement) {
+            vilkårsgrunnlag[skjæringstidspunkt] = vilkårsgrunnlagElement
+        }
+
+        internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) = vilkårsgrunnlag[skjæringstidspunkt]
+
+        internal fun finnBegrunnelser(): Map<LocalDate, List<Begrunnelse>> {
+            val begrunnelserForSkjæringstidspunkt = mutableMapOf<LocalDate, List<Begrunnelse>>()
+            vilkårsgrunnlag.forEach { (skjæringstidspunkt, vilkårsgrunnlagElement) ->
+                if (vilkårsgrunnlagElement is Grunnlagsdata && !vilkårsgrunnlagElement.isOk()) {
+                    val begrunnelser = mutableListOf<Begrunnelse>()
+
+                    if (vilkårsgrunnlagElement.medlemskapstatus == Medlemskapsvurdering.Medlemskapstatus.Nei) begrunnelser.add(Begrunnelse.ManglerMedlemskap)
+                    if (vilkårsgrunnlagElement.harMinimumInntekt == false) begrunnelser.add(Begrunnelse.MinimumInntekt)
+                    if (!vilkårsgrunnlagElement.harOpptjening) begrunnelser.add(Begrunnelse.ManglerOpptjening)
+                    begrunnelserForSkjæringstidspunkt[skjæringstidspunkt] = begrunnelser
+                }
+            }
+            return begrunnelserForSkjæringstidspunkt
+        }
     }
 
     internal interface VilkårsgrunnlagElement {
@@ -83,20 +124,5 @@ internal class VilkårsgrunnlagHistorikk private constructor(
         override fun accept(skjæringstidspunkt: LocalDate, vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {
             vilkårsgrunnlagHistorikkVisitor.visitInfotrygdVilkårsgrunnlag(skjæringstidspunkt, this)
         }
-    }
-
-    private fun finnBegrunnelser(): Map<LocalDate, List<Begrunnelse>> {
-        val begrunnelserForSkjæringstidspunkt = mutableMapOf<LocalDate, List<Begrunnelse>>()
-        historikk.forEach { (skjæringstidspunkt, vilkårsgrunnlagElement) ->
-            if (vilkårsgrunnlagElement is Grunnlagsdata && !vilkårsgrunnlagElement.isOk()) {
-                val begrunnelser = mutableListOf<Begrunnelse>()
-
-                if (vilkårsgrunnlagElement.medlemskapstatus == Medlemskapsvurdering.Medlemskapstatus.Nei) begrunnelser.add(Begrunnelse.ManglerMedlemskap)
-                if (vilkårsgrunnlagElement.harMinimumInntekt == false) begrunnelser.add(Begrunnelse.MinimumInntekt)
-                if (!vilkårsgrunnlagElement.harOpptjening) begrunnelser.add(Begrunnelse.ManglerOpptjening)
-                begrunnelserForSkjæringstidspunkt[skjæringstidspunkt] = begrunnelser
-            }
-        }
-        return begrunnelserForSkjæringstidspunkt
     }
 }
