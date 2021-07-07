@@ -29,6 +29,8 @@ sealed class DateRange {
     }
 
     companion object {
+        // Siden jackson ikke støtter custom deserializer for @JsonUnwrapped og vi ikke kan ha to JsonCreators per klasse må de dele en creator og finne ut
+        // hvilke type det er ut i fra hvilke dataer som mangler
         @JvmStatic
         @JsonCreator
         private fun create(

@@ -534,6 +534,7 @@ internal data class PersonData(
                 private val er6GBegrenset: Boolean?,
                 private val melding: String?
             ) {
+                // Gjør så vi kan ha dato/fom og tom på samme nivå som resten av verdiene i dag
                 @JsonUnwrapped
                 private lateinit var datoer: DateRange
 
@@ -1102,6 +1103,7 @@ internal data class PersonData(
             private val personbeløp: Double?,
             private val er6GBegrenset: Boolean?
         ) {
+            // Gjør så vi kan ha dato/fom og tom på samme nivå som resten av verdiene i utbetalingsdata
             @JsonUnwrapped
             private lateinit var datoer: DateRange
 
