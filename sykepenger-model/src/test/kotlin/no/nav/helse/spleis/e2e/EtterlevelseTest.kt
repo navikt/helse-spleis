@@ -37,15 +37,17 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
 
         val etterlevelseInspektør = EtterlevelseInspektør(inspektør.personLogg.etterlevelse)
-        assertEquals(3, etterlevelseInspektør.resultater.size)
+        assertEquals(4, etterlevelseInspektør.size)
         assertTrue(etterlevelseInspektør.resultat("8-2", "1").single().oppfylt)
         assertTrue(etterlevelseInspektør.resultat("8-3", "2").single().oppfylt)
         assertTrue(etterlevelseInspektør.resultat("8-12", "1").single().oppfylt)
+        assertTrue(etterlevelseInspektør.resultat("8-30", "2").single().oppfylt)
     }
 
     private class EtterlevelseInspektør(etterlevelse: Etterlevelse) : Etterlevelse.EtterlevelseVisitor {
-        val resultater = mutableListOf<Resultat>()
+        private val resultater = mutableListOf<Resultat>()
 
+        val size get() = resultater.size
         fun resultat(paragraf: String, ledd: String) = resultater.filter { it.paragraf == paragraf && it.ledd == ledd }
 
         init {

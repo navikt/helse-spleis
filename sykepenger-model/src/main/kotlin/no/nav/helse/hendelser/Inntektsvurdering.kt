@@ -45,23 +45,21 @@ class Inntektsvurdering(
         }
         grunnlagForSykepengegrunnlag.avviksprosent(sammenligningsgrunnlag).also { avvik ->
             avviksprosent = avvik
-            if (avvik > MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT) {
-                aktivitetslogg.etterlevelse.`§8-30 ledd 2`(false)
-                aktivitetslogg.error(
-                    "Har mer enn %.0f %% avvik",
-                    MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT.prosent()
-                )
-                return false
+            val akseptabeltAvvik = avvik <= MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT
+            aktivitetslogg.etterlevelse.`§8-30 ledd 2`(
+                akseptabeltAvvik,
+                MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT,
+                grunnlagForSykepengegrunnlag,
+                sammenligningsgrunnlag,
+                avvik
+            )
+            if (akseptabeltAvvik) {
+                aktivitetslogg.info("Har %.0f %% eller mindre avvik i inntekt (%.2f %%)", MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT.prosent(), avvik.prosent())
             } else {
-                aktivitetslogg.etterlevelse.`§8-30 ledd 2`(true)
-                aktivitetslogg.info(
-                    "Har %.0f %% eller mindre avvik i inntekt (%.2f %%)",
-                    MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT.prosent(),
-                    avvik.prosent()
-                )
+                aktivitetslogg.error("Har mer enn %.0f %% avvik", MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT.prosent())
             }
+            return akseptabeltAvvik
         }
-        return true
     }
 
     internal fun lagreInntekter(person: Person, skjæringstidspunkt: LocalDate, hendelse: PersonHendelse) =

@@ -6,6 +6,7 @@ import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.person.vilkår.Etterlevelse.TidslinjegrunnlagVisitor.Periode.Companion.dager
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Økonomi
 import org.intellij.lang.annotations.Language
 import java.time.LocalDate
@@ -120,7 +121,29 @@ class Etterlevelse {
         )
     }
 
-    fun `§8-30 ledd 2`(oppfylt: Boolean) {
+    fun `§8-30 ledd 2`(
+        oppfylt: Boolean,
+        maksimaltTillattAvvikPåÅrsinntekt: Prosent,
+        grunnlagForSykepengegrunnlag: Inntekt,
+        sammenligningsgrunnlag: Inntekt,
+        avvik: Prosent
+    ) {
+        resultater.add(
+            Vurderingsresultat(
+                oppfylt = oppfylt,
+                versjon = LocalDate.of(2017, 4, 5),
+                paragraf = "8-30",
+                ledd = "2",
+                inputdata = mapOf(
+                    "maksimaltTillattAvvikPåÅrsinntekt" to maksimaltTillattAvvikPåÅrsinntekt.prosent(),
+                    "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
+                    "sammenligningsgrunnlag" to sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig }
+                ),
+                outputdata = mapOf(
+                    "avvik" to avvik.prosent()
+                )
+            )
+        )
     }
 
     internal interface EtterlevelseVisitor : AktivitetsloggVisitor {
