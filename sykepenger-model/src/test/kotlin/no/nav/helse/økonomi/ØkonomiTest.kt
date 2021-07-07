@@ -26,12 +26,35 @@ internal class ØkonomiTest {
     }
 
     @Test
+    fun singelsykegradUtenInntekt() {
+        assertEquals(
+            75.prosent,
+            listOf(
+                75.prosent.sykdomsgrad.inntekt(0.daglig, skjæringstidspunkt = 1.januar)
+            ).totalSykdomsgrad()
+        )
+    }
+
+    @Test
     fun `to arbeidsgivere`() {
         assertEquals(
             38.prosent,
             listOf(
                 50.prosent.sykdomsgrad.inntekt(1200.daglig, skjæringstidspunkt = 1.januar),
                 20.prosent.sykdomsgrad.inntekt(800.daglig, skjæringstidspunkt = 1.januar)
+            ).totalSykdomsgrad().also {
+                assertFalse(it.erUnderGrensen())
+            }
+        )
+    }
+
+    @Test
+    fun `to arbeidsgivereUtenInntekt`() {
+        assertEquals(
+            35.prosent,
+            listOf(
+                50.prosent.sykdomsgrad.inntekt(0.daglig, skjæringstidspunkt = 1.januar),
+                20.prosent.sykdomsgrad.inntekt(0.daglig, skjæringstidspunkt = 1.januar)
             ).totalSykdomsgrad().also {
                 assertFalse(it.erUnderGrensen())
             }

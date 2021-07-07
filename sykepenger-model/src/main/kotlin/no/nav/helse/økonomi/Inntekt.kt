@@ -22,7 +22,7 @@ class Inntekt private constructor(private val årlig: Double) : Comparable<Innte
 
         internal fun vektlagtGjennomsnitt(parene: List<Pair<Prosentdel, Inntekt>>): Prosentdel {
             val total = parene.sumByDouble { it.second.årlig }
-            if (total <= 0.0) return Prosentdel.fraRatio(0.0)
+            if (total <= 0.0) return Prosentdel.fraRatio(parene.map { it.first.ratio() }.average())
             return Prosentdel.fraRatio(parene.sumByDouble { (it.first.ratio() * it.second.årlig) } / total)
         }
 
