@@ -590,9 +590,10 @@ internal class Vedtaksperiode private constructor(
         engineForTimeline.beregnGrenser()
 
         val vedtaksperioder = person.nåværendeVedtaksperioder(IKKE_FERDIG_BEHANDLET)
-        vedtaksperioder.forEach { it.lagUtbetaling(engineForTimeline, hendelse) }
         val første = vedtaksperioder.first()
-        if (første == this) return første.forsøkUtbetalingSteg2(vedtaksperioder.drop(1), hendelse)
+        if (første == this) {
+            return første.forsøkUtbetalingSteg2(vedtaksperioder.drop(1), engineForTimeline, hendelse)
+        }
 
         vedtaksperioder
             .filter { this.periode.overlapperMed(it.periode) }
@@ -619,13 +620,19 @@ internal class Vedtaksperiode private constructor(
 
     private fun forsøkUtbetalingSteg2(
         andreVedtaksperioder: List<Vedtaksperiode>,
+        engineForTimeline: MaksimumSykepengedagerfilter,
         hendelse: ArbeidstakerHendelse
     ) {
         if (andreVedtaksperioder
                 .filter { this.periode.overlapperMed(it.periode) }
                 .all { it.tilstand == AvventerArbeidsgivere }
-        )
+        ) {
+            (andreVedtaksperioder + this)
+                .filter { this.periode.overlapperMed(it.periode) }
+                .forEach { it.lagUtbetaling(engineForTimeline, hendelse) }
             høstingsresultater(hendelse)
+        }
+
         else tilstand(hendelse, AvventerArbeidsgivere)
     }
 
