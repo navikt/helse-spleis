@@ -169,7 +169,13 @@ internal interface FeriepengeutbetalingVisitor : OppdragVisitor {
 }
 
 internal interface UtbetalingstidslinjeberegningVisitor {
-    fun visitUtbetalingstidslinjeberegning(id: UUID, tidsstempel: LocalDateTime, sykdomshistorikkElementId: UUID) {}
+    fun visitUtbetalingstidslinjeberegning(
+        id: UUID,
+        tidsstempel: LocalDateTime,
+        sykdomshistorikkElementId: UUID,
+        inntektshistorikkInnslagId: UUID,
+        vilkårsgrunnlagHistorikkInnslagId: UUID
+    ) {}
 }
 
 internal interface VedtaksperiodeVisitor : UtbetalingVisitor, SykdomstidslinjeVisitor, UtbetalingsdagVisitor {

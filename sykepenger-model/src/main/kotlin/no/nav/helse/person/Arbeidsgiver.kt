@@ -256,7 +256,12 @@ internal class Arbeidsgiver private constructor(
         beregnetUtbetalingstidslinjer.lastOrNull()?.utbetalingstidslinje() ?: throw IllegalStateException("mangler utbetalinger")
 
     internal fun lagreUtbetalingstidslinjeberegning(organisasjonsnummer: String, utbetalingstidslinje: Utbetalingstidslinje) {
-        beregnetUtbetalingstidslinjer.add(sykdomshistorikk.lagUtbetalingstidslinjeberegning(organisasjonsnummer, utbetalingstidslinje))
+        val sykdomshistorikkId = sykdomshistorikk.nyesteId()
+        val inntektshistorikkId = inntektshistorikk.nyesteId()
+        val vilkårsgrunnlagHistorikkId = person.nyesteIdForVilkårsgrunnlagHistorikk()
+        beregnetUtbetalingstidslinjer.add(
+            Utbetalingstidslinjeberegning(sykdomshistorikkId, inntektshistorikkId, vilkårsgrunnlagHistorikkId, organisasjonsnummer, utbetalingstidslinje)
+        )
     }
 
     internal fun håndter(sykmelding: Sykmelding) {

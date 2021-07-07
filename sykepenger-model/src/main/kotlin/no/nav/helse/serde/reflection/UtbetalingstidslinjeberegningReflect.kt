@@ -8,6 +8,8 @@ import java.util.*
 internal class UtbetalingstidslinjeberegningReflect(utbetalingstidslinjeberegning: Utbetalingstidslinjeberegning) {
     private val id: UUID = utbetalingstidslinjeberegning["id"]
     private val sykdomshistorikkElementId: UUID = utbetalingstidslinjeberegning["sykdomshistorikkElementId"]
+    private val inntektshistorikkInnslagId: UUID = utbetalingstidslinjeberegning["inntektshistorikkInnslagId"]
+    private val vilkårsgrunnlagHistorikkInnslagId: UUID = utbetalingstidslinjeberegning["vilkårsgrunnlagHistorikkInnslagId"]
     private val tidsstempel: LocalDateTime = utbetalingstidslinjeberegning["tidsstempel"]
     private val organisasjonsnummer: String = utbetalingstidslinjeberegning["organisasjonsnummer"]
     private val utbetalingstidslinje = UtbetalingstidslinjeReflect(utbetalingstidslinjeberegning["utbetalingstidslinje"]).toMap()
@@ -15,6 +17,8 @@ internal class UtbetalingstidslinjeberegningReflect(utbetalingstidslinjeberegnin
     internal fun toMap(): Map<String, Any?> = mapOf(
         "id" to id,
         "sykdomshistorikkElementId" to sykdomshistorikkElementId,
+        "vilkårsgrunnlagHistorikkInnslagId" to vilkårsgrunnlagHistorikkInnslagId,
+        "inntektshistorikkInnslagId" to inntektshistorikkInnslagId,
         "tidsstempel" to tidsstempel,
         "organisasjonsnummer" to organisasjonsnummer,
         "utbetalingstidslinje" to utbetalingstidslinje

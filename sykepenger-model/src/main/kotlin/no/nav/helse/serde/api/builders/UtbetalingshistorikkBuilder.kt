@@ -127,7 +127,13 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
         popState()
     }
 
-    override fun visitUtbetalingstidslinjeberegning(id: UUID, tidsstempel: LocalDateTime, sykdomshistorikkElementId: UUID) {
+    override fun visitUtbetalingstidslinjeberegning(
+        id: UUID,
+        tidsstempel: LocalDateTime,
+        sykdomshistorikkElementId: UUID,
+        inntektshistorikkInnslagId: UUID,
+        vilkårsgrunnlagHistorikkInnslagId: UUID
+    ) {
         utbetalingberegninger.add(BeregningInfo(id, sykdomshistorikkElementId))
     }
 

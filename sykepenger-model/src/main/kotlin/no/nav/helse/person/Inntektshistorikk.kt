@@ -6,6 +6,7 @@ import no.nav.helse.AppenderFeature
 import no.nav.helse.appender
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
+import no.nav.helse.person.Inntektshistorikk.Innslag.Companion.nyesteId
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import java.time.LocalDate
@@ -30,6 +31,8 @@ internal class Inntektshistorikk {
         historikk.forEach { it.accept(visitor) }
         visitor.postVisitInntekthistorikk(this)
     }
+
+    internal fun nyesteId() = historikk.nyesteId()
 
     internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, dato: LocalDate): Inntekt? =
         grunnlagForSykepengegrunnlagMedMetadata(skjæringstidspunkt, dato)?.second
@@ -116,6 +119,10 @@ internal class Inntektshistorikk {
                     return true
                 }
             return false
+        }
+
+        internal companion object {
+            internal fun List<Innslag>.nyesteId() = this.first().id
         }
     }
 

@@ -64,8 +64,14 @@ internal class ArbeidsgiverBuilder(
         pushState(utbetalingshistorikkBuilder)
     }
 
-    override fun visitUtbetalingstidslinjeberegning(id: UUID, tidsstempel: LocalDateTime, sykdomshistorikkElementId: UUID) {
-        utbetalingshistorikkBuilder.visitUtbetalingstidslinjeberegning(id, tidsstempel, sykdomshistorikkElementId)
+    override fun visitUtbetalingstidslinjeberegning(
+        id: UUID,
+        tidsstempel: LocalDateTime,
+        sykdomshistorikkElementId: UUID,
+        inntektshistorikkInnslagId: UUID,
+        vilkårsgrunnlagHistorikkInnslagId: UUID
+    ) {
+        utbetalingshistorikkBuilder.visitUtbetalingstidslinjeberegning(id, tidsstempel, sykdomshistorikkElementId, inntektshistorikkInnslagId, vilkårsgrunnlagHistorikkInnslagId)
     }
 
     override fun postVisitArbeidsgiver(

@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.person.VilkårsgrunnlagHistorikk.Innslag.Companion.sisteId
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
@@ -31,6 +32,8 @@ internal class VilkårsgrunnlagHistorikk(private val historikk: MutableList<Inns
     internal fun lagre(skjæringstidspunkt: LocalDate, grunnlagselement: VilkårsgrunnlagElement) {
         innslag.add(skjæringstidspunkt, grunnlagselement)
     }
+
+    internal fun sisteId() = historikk.sisteId()
 
     internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) = historikk.firstOrNull()?.vilkårsgrunnlagFor(skjæringstidspunkt)
 
@@ -74,6 +77,10 @@ internal class VilkårsgrunnlagHistorikk(private val historikk: MutableList<Inns
                 }
             }
             return begrunnelserForSkjæringstidspunkt
+        }
+
+        internal companion object {
+            internal fun List<Innslag>.sisteId() = this.first().id
         }
     }
 
