@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.hendelser.Opptjeningvurdering.Arbeidsforhold.Companion.toEtterlevelseMap
 import no.nav.helse.person.IAktivitetslogg
 import java.time.LocalDate
 
@@ -18,17 +19,11 @@ class Opptjeningvurdering(
 
     internal fun valider(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate): Boolean {
         antallOpptjeningsdager = Arbeidsforhold.opptjeningsdager(arbeidsforhold, aktivitetslogg, skjæringstidspunkt)
-        if (harOpptjening()) {
-            aktivitetslogg.lovtrace.`§8-2 ledd 1`(true)
-            aktivitetslogg.info(
-                "Har minst %d dager opptjening",
-                TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER
-            )
-            return true
-        }
-        aktivitetslogg.lovtrace.`§8-2 ledd 1`(false)
-        aktivitetslogg.warn("Perioden er avslått på grunn av manglende opptjening")
-        return false
+        val harOpptjening = harOpptjening()
+        aktivitetslogg.etterlevelse.`§8-2 ledd 1`(harOpptjening, skjæringstidspunkt, TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER, arbeidsforhold.toEtterlevelseMap())
+        if (harOpptjening) aktivitetslogg.info("Har minst %d dager opptjening", TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER)
+        else aktivitetslogg.warn("Perioden er avslått på grunn av manglende opptjening")
+        return harOpptjening
     }
 
     class Arbeidsforhold(
@@ -36,7 +31,6 @@ class Opptjeningvurdering(
         private val fom: LocalDate,
         private val tom: LocalDate? = null
     ) {
-
         private fun erSøppel() =
             tom != null && tom < fom
 
@@ -49,6 +43,14 @@ class Opptjeningvurdering(
         }
 
         internal companion object {
+            internal fun List<Arbeidsforhold>.toEtterlevelseMap() = map {
+                mapOf(
+                    "orgnummer" to it.orgnummer,
+                    "fom" to it.fom,
+                    "tom" to it.tom
+                )
+            }
+
             private fun LocalDate.datesUntilReversed(tom: LocalDate) = tom.toEpochDay().downTo(this.toEpochDay())
                 .asSequence()
                 .map(LocalDate::ofEpochDay)

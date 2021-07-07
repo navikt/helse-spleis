@@ -37,11 +37,10 @@ internal class UtbetalingTeller private constructor(
         gammelpersonDager = 0
     }
 
-    internal fun påGrensen(dato: LocalDate, erIkkeIGjenståendeSykedagerberegning: Boolean = true): Boolean {
+    internal fun påGrensen(dato: LocalDate, doStuff: () -> Unit = {}): Boolean {
         val harNåddMaksSykepengedager = betalteDager >= arbeidsgiverRegler.maksSykepengedager()
-        if (harNåddMaksSykepengedager && erIkkeIGjenståendeSykedagerberegning) {
-            aktivitetslogg.lovtrace.`§8-12 ledd 1`(false, "Allsang på Grensen - $dato")
-        }
+        if (harNåddMaksSykepengedager) doStuff()
+
         return harNåddMaksSykepengedager
             || gammelpersonDager >= arbeidsgiverRegler.maksSykepengedagerOver67()
             || dato.plusDays(1) >= alder.øvreAldersgrense
@@ -59,7 +58,7 @@ internal class UtbetalingTeller private constructor(
         val clone = UtbetalingTeller(fom, alder, arbeidsgiverRegler, betalteDager, gammelpersonDager, aktivitetslogg)
         var result = sisteUtbetalingsdag
         var teller = 0
-        while (!clone.påGrensen(result, false)) {
+        while (!clone.påGrensen(result)) {
             result = result.plusDays(
                 when (result.dayOfWeek) {
                     DayOfWeek.FRIDAY -> 3

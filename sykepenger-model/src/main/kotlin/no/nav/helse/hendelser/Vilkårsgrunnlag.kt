@@ -15,7 +15,7 @@ class Vilkårsgrunnlag(
     private val inntektsvurdering: Inntektsvurdering,
     private val opptjeningvurdering: Opptjeningvurdering,
     private val medlemskapsvurdering: Medlemskapsvurdering
-    ) : ArbeidstakerHendelse(meldingsreferanseId) {
+) : ArbeidstakerHendelse(meldingsreferanseId) {
     private var grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata? = null
 
     internal fun erRelevant(other: UUID) = other.toString() == vedtaksperiodeId
@@ -31,18 +31,21 @@ class Vilkårsgrunnlag(
         periodetype: Periodetype,
         antallArbeidsgivereMedOverlappendeVedtaksperioder: Int
     ): IAktivitetslogg {
-        val inntektsvurderingOk = inntektsvurdering.valider(this, grunnlagForSykepengegrunnlag, sammenligningsgrunnlag, periodetype, antallArbeidsgivereMedOverlappendeVedtaksperioder)
+        val inntektsvurderingOk = inntektsvurdering.valider(
+            this,
+            grunnlagForSykepengegrunnlag,
+            sammenligningsgrunnlag,
+            periodetype,
+            antallArbeidsgivereMedOverlappendeVedtaksperioder
+        )
         val opptjeningvurderingOk = opptjeningvurdering.valider(this, skjæringstidspunkt)
         val medlemskapsvurderingOk = medlemskapsvurdering.valider(this, periodetype)
-        val harMinimumInntekt = grunnlagForSykepengegrunnlag > Alder(fødselsnummer).minimumInntekt(skjæringstidspunkt)
-        if(!harMinimumInntekt) {
-            lovtrace.`§8-3 ledd 2`(false)
-            warn("Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag")
-        }
-        else {
-            lovtrace.`§8-3 ledd 2`(true)
-            info("Krav til minste sykepengegrunnlag er oppfylt")
-        }
+        val minimumInntekt = Alder(fødselsnummer).minimumInntekt(skjæringstidspunkt)
+        val harMinimumInntekt = grunnlagForSykepengegrunnlag > minimumInntekt
+
+        etterlevelse.`§8-3 ledd 2`(harMinimumInntekt, skjæringstidspunkt, grunnlagForSykepengegrunnlag, minimumInntekt)
+        if (harMinimumInntekt) info("Krav til minste sykepengegrunnlag er oppfylt")
+        else warn("Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag")
 
         grunnlagsdata = VilkårsgrunnlagHistorikk.Grunnlagsdata(
             sammenligningsgrunnlag = sammenligningsgrunnlag,

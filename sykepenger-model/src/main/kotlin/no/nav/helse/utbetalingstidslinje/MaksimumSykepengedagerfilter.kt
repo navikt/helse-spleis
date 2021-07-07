@@ -31,7 +31,8 @@ internal class MaksimumSykepengedagerfilter(
     private lateinit var dekrementerfom: LocalDate  // Three year boundary from first sick day after a work day
     private val avvisteDatoer = mutableListOf<LocalDate>()
     private val betalbarDager = mutableMapOf<LocalDate, NavDag>()
-    private lateinit var tidslinje: Utbetalingstidslinje
+    private lateinit var beregnetTidslinje: Utbetalingstidslinje
+    private lateinit var tidslinjegrunnlag: List<Utbetalingstidslinje>
 
     internal fun maksdato() =
         if (gjenståendeSykedager() == 0) teller.maksdato(sisteBetalteDag) else teller.maksdato(sisteUkedag)
@@ -40,13 +41,25 @@ internal class MaksimumSykepengedagerfilter(
     internal fun forbrukteSykedager() = teller.forbrukteDager()
 
     internal fun filter(tidslinjer: List<Utbetalingstidslinje>, personTidslinje: Utbetalingstidslinje) {
-        tidslinje = tidslinjer
+        beregnetTidslinje = tidslinjer
             .reduce(Utbetalingstidslinje::plus)
             .plus(personTidslinje)
+        tidslinjegrunnlag = tidslinjer + listOf(personTidslinje)
         teller = UtbetalingTeller(alder, arbeidsgiverRegler, aktivitetslogg)
         state = State.Initiell
-        tidslinje.accept(this)
-        aktivitetslogg.lovtrace.`§8-12 ledd 1`(avvisteDatoer in periode, "Vanskelig å komme på noe spennende der")
+        beregnetTidslinje.accept(this)
+        if (::sakensStartdato.isInitialized)
+            aktivitetslogg.etterlevelse.`§8-12 ledd 1`(
+                avvisteDatoer.filter { sakensStartdato <= it } !in periode,
+                avvisteDatoer.firstOrNull() ?: sakensStartdato,
+                avvisteDatoer.lastOrNull() ?: sisteBetalteDag,
+                tidslinjegrunnlag,
+                beregnetTidslinje,
+                gjenståendeSykedager(),
+                forbrukteSykedager(),
+                maksdato(),
+                avvisteDatoer.filter { sakensStartdato <= it }
+            )
         Utbetalingstidslinje.avvis(tidslinjer, avvisteDatoer.merge(), periode, listOf(SykepengedagerOppbrukt))
     }
 
@@ -73,7 +86,7 @@ internal class MaksimumSykepengedagerfilter(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        if (dato >= alder.øvreAldersgrense) state(State.Karantene) else betalbarDager[dato] = dag
+        if (dato >= alder.øvreAldersgrense) state(State.ØvreAldersgrense) else betalbarDager[dato] = dag
         state.betalbarDag(this, dato)
     }
 
@@ -132,12 +145,40 @@ internal class MaksimumSykepengedagerfilter(
 
     private fun nextState(dagen: LocalDate): State? {
         if (opphold >= TILSTREKKELIG_OPPHOLD_I_SYKEDAGER) {
-            aktivitetslogg.lovtrace.`§8-12 ledd 2`()
+            aktivitetslogg.etterlevelse.`§8-12 ledd 1`(
+                avvisteDatoer.filter { sakensStartdato <= it } !in periode,
+                avvisteDatoer.firstOrNull() ?: sakensStartdato,
+                avvisteDatoer.lastOrNull() ?: sisteBetalteDag,
+                tidslinjegrunnlag,
+                beregnetTidslinje,
+                gjenståendeSykedager(),
+                forbrukteSykedager(),
+                maksdato(),
+                avvisteDatoer.filter { sakensStartdato <= it }
+            )
+            aktivitetslogg.etterlevelse.`§8-12 ledd 2`(
+                dagen,
+                TILSTREKKELIG_OPPHOLD_I_SYKEDAGER,
+                tidslinjegrunnlag,
+                beregnetTidslinje
+            )
             teller.resett(dagen.plusDays(1))
             return State.Initiell
         }
         if (state == State.Karantene) return null
-        return if (teller.påGrensen(dagen)) State.Karantene else null
+        return if (teller.påGrensen(dagen) {
+                aktivitetslogg.etterlevelse.`§8-12 ledd 1`(
+                    true,
+                    sakensStartdato,
+                    sisteBetalteDag,
+                    tidslinjegrunnlag,
+                    beregnetTidslinje,
+                    gjenståendeSykedager(),
+                    forbrukteSykedager(),
+                    maksdato(),
+                    avvisteDatoer.filter { sakensStartdato <= it }
+                )
+            }) State.Karantene else null
     }
 
     private fun dekrementer(tom: LocalDate) {
@@ -156,7 +197,7 @@ internal class MaksimumSykepengedagerfilter(
         open fun entering(avgrenser: MaksimumSykepengedagerfilter) {}
         open fun leaving(avgrenser: MaksimumSykepengedagerfilter) {}
 
-        internal object Initiell : State() {
+        object Initiell : State() {
             override fun entering(avgrenser: MaksimumSykepengedagerfilter) {
                 avgrenser.opphold = 0
             }
@@ -170,7 +211,7 @@ internal class MaksimumSykepengedagerfilter(
             }
         }
 
-        internal object Syk : State() {
+        object Syk : State() {
             override fun entering(avgrenser: MaksimumSykepengedagerfilter) {
                 avgrenser.opphold = 0
             }
@@ -186,7 +227,7 @@ internal class MaksimumSykepengedagerfilter(
             }
         }
 
-        internal object Opphold : State() {
+        object Opphold : State() {
 
             override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
                 avgrenser.teller.inkrementer(dagen)
@@ -200,7 +241,7 @@ internal class MaksimumSykepengedagerfilter(
             }
         }
 
-        internal object Karantene : State() {
+        object Karantene : State() {
             override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
                 avgrenser.opphold += 1
                 avgrenser.avvisteDatoer.add(dagen)
@@ -211,5 +252,10 @@ internal class MaksimumSykepengedagerfilter(
             }
         }
 
+        object ØvreAldersgrense : State() {
+            override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
+                avgrenser.avvisteDatoer.add(dagen)
+            }
+        }
     }
 }

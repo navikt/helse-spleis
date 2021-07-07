@@ -1,8 +1,9 @@
 package no.nav.helse.person
 
+import no.nav.helse.Toggles
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov
-import no.nav.helse.person.vilkår.Lovtrace
+import no.nav.helse.person.vilkår.Etterlevelse
 import no.nav.helse.serde.reflection.AktivitetsloggReflect
 import no.nav.helse.serde.reflection.OppdragReflect
 import no.nav.helse.utbetalingslinjer.Oppdrag
@@ -17,11 +18,13 @@ import java.util.*
 // Implements Collecting Parameter in Refactoring by Martin Fowler
 // Implements Visitor pattern to traverse the messages
 class Aktivitetslogg(
-    private var forelder: Aktivitetslogg? = null,
-    override val lovtrace: Lovtrace = Lovtrace()
+    private var forelder: Aktivitetslogg? = null
 ) : IAktivitetslogg {
     private val aktiviteter = mutableListOf<Aktivitet>()
     private val kontekster = mutableListOf<Aktivitetskontekst>()  // Doesn't need serialization
+
+    override val etterlevelse: Etterlevelse = forelder?.etterlevelse ?: Etterlevelse()
+        get() = if (Toggles.Etterlevelse.enabled) forelder?.etterlevelse ?: field else Etterlevelse()
 
     internal fun accept(visitor: AktivitetsloggVisitor) {
         visitor.preVisitAktivitetslogg(this)
@@ -53,7 +56,7 @@ class Aktivitetslogg(
 
     private fun add(aktivitet: Aktivitet) {
         this.aktiviteter.add(aktivitet)
-        forelder?.let { forelder?.add(aktivitet) }
+        forelder?.add(aktivitet)
     }
 
     private fun MutableList<Aktivitetskontekst>.toSpesifikk() = this.map { it.toSpesifikkKontekst() }
@@ -302,7 +305,7 @@ class Aktivitetslogg(
                     aktivitetslogg.behov(Behovtype.ArbeidsforholdV2, "Trenger informasjon om arbeidsforhold")
                 }
 
-                internal fun dagpenger(aktivitetslogg: IAktivitetslogg, fom : LocalDate, tom: LocalDate) {
+                internal fun dagpenger(aktivitetslogg: IAktivitetslogg, fom: LocalDate, tom: LocalDate) {
                     aktivitetslogg.behov(
                         Behovtype.Dagpenger, "Trenger informasjon om dagpenger", mapOf(
                             "periodeFom" to fom.toString(),
@@ -458,7 +461,7 @@ class Aktivitetslogg(
             val orgnummer: String,
             val vedtaksperiodeId: UUID,
             val periodetype: Periodetype
-        ){
+        ) {
             fun toMap() = mapOf<String, Any>(
                 "orgnummer" to orgnummer,
                 "vedtaksperiodeId" to vedtaksperiodeId.toString(),
@@ -486,7 +489,7 @@ interface IAktivitetslogg {
     fun kontekst(person: Person)
     fun kontekster(): List<IAktivitetslogg>
     fun toMap(): Map<String, List<Map<String, Any>>>
-    val lovtrace: Lovtrace
+    val etterlevelse: Etterlevelse
 }
 
 internal interface AktivitetsloggVisitor {

@@ -49,4 +49,5 @@ abstract class Toggles internal constructor(enabled: Boolean = false, private va
     object KastAlleRevurderinger: Toggles("KAST_ALLE_REVURDERINGER")
     object RevurderTidligerePeriode: Toggles("REVURDER_TIDLIGERE_PERIODE")
     object DatoRangeJson : Toggles(true)
+    object Etterlevelse: Toggles()
 }
