@@ -101,7 +101,6 @@ internal class CreateØkonomiTest {
         er6GBegrenset: Boolean = false
     ) = UtbetalingstidslinjeData.UtbetalingsdagData(
         UtbetalingstidslinjeData.TypeData.NavDag,
-        1.januar,
         aktuellDagsinntekt,
         dekningsgrunnlag,
         1.januar,
@@ -125,7 +124,6 @@ internal class CreateØkonomiTest {
         er6GBegrenset: Boolean = false,
         totalGrad: Double? = null
     ) = PersonData.ArbeidsgiverData.SykdomstidslinjeData.DagData(
-        1.januar,
         PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG,
         PersonData.ArbeidsgiverData.SykdomstidslinjeData.KildeData("type", UUID.randomUUID(), LocalDateTime.now()),
         grad,
@@ -142,7 +140,7 @@ internal class CreateØkonomiTest {
 
     private fun createØkonomi(dagData: UtbetalingstidslinjeData.UtbetalingsdagData): Økonomi {
         lateinit var fangetØkonomi: Økonomi
-        dagData.parseDag().accept(object : UtbetalingsdagVisitor {
+        dagData.parseDag(1.januar).accept(object : UtbetalingsdagVisitor {
             override fun visit(
                 dag: Utbetalingstidslinje.Utbetalingsdag.NavDag,
                 dato: LocalDate,
@@ -156,7 +154,7 @@ internal class CreateØkonomiTest {
 
     private fun createØkonomi(dagData: PersonData.ArbeidsgiverData.SykdomstidslinjeData.DagData): Økonomi {
         lateinit var fangetØkonomi: Økonomi
-        dagData.parseDag().accept(object : SykdomstidslinjeVisitor {
+        dagData.parseDag(LocalDate.now()).accept(object : SykdomstidslinjeVisitor {
             override fun visitDag(
                 dag: Dag.Sykedag,
                 dato: LocalDate,

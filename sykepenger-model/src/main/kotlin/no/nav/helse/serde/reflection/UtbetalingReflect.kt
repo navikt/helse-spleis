@@ -1,5 +1,6 @@
 package no.nav.helse.serde.reflection
 
+import no.nav.helse.serde.DateRanges
 import no.nav.helse.serde.PersonData.UtbetalingstidslinjeData.TypeData
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.maybe
@@ -53,11 +54,6 @@ internal class UtbetalingReflect(private val utbetaling: Utbetaling) {
         "avstemmingsnøkkel" to utbetaling.maybe<Long>("avstemmingsnøkkel"),
         "avsluttet" to utbetaling.maybe<LocalDateTime>("avsluttet"),
         "oppdatert" to utbetaling.maybe<LocalDateTime>("oppdatert")
-    )
-
-    fun toSpeilMap() = mapOf(
-        "utbetalingstidslinje" to UtbetalingstidslinjeReflect(utbetaling["utbetalingstidslinje"]).toMap(),
-        "arbeidsgiverOppdrag" to OppdragReflect(arbeidsgiverOppdrag).toMap(),
     )
 }
 
@@ -120,18 +116,23 @@ internal class UtbetalingslinjeReflect(private val utbetalingslinje: Utbetalings
 
 internal class UtbetalingstidslinjeReflect(private val utbetalingstidslinje: Utbetalingstidslinje) {
     fun toMap() = mutableMapOf<String, Any?>(
-        "dager" to utbetalingstidslinje.map {
-            when (it::class) {
-                Arbeidsdag::class -> UtbetalingsdagReflect(it, TypeData.Arbeidsdag).toMap()
-                ArbeidsgiverperiodeDag::class -> UtbetalingsdagReflect(it, TypeData.ArbeidsgiverperiodeDag).toMap()
-                NavDag::class -> UtbetalingsdagReflect(it, TypeData.NavDag).toMap()
-                NavHelgDag::class -> UtbetalingsdagReflect(it, TypeData.NavHelgDag).toMap()
-                Fridag::class -> UtbetalingsdagReflect(it, TypeData.Fridag).toMap()
-                UkjentDag::class -> UtbetalingsdagReflect(it, TypeData.UkjentDag).toMap()
-                AvvistDag::class -> AvvistdagReflect(it as AvvistDag).toMap()
-                ForeldetDag::class -> UtbetalingsdagReflect(it, TypeData.ForeldetDag).toMap()
-                else -> throw IllegalStateException("Uventet utbetalingsdag")
-            }
-        }
+        "dager" to
+            DateRanges().apply {
+                utbetalingstidslinje.forEach {
+                    plus(
+                        it.dato, when (it::class) {
+                            Arbeidsdag::class -> UtbetalingsdagReflect(it, TypeData.Arbeidsdag).toMap()
+                            ArbeidsgiverperiodeDag::class -> UtbetalingsdagReflect(it, TypeData.ArbeidsgiverperiodeDag).toMap()
+                            NavDag::class-> UtbetalingsdagReflect(it, TypeData.NavDag).toMap()
+                            NavHelgDag::class -> UtbetalingsdagReflect(it, TypeData.NavHelgDag).toMap()
+                            Fridag::class -> UtbetalingsdagReflect(it, TypeData.Fridag).toMap()
+                            UkjentDag::class -> UtbetalingsdagReflect(it, TypeData.UkjentDag).toMap()
+                            AvvistDag::class -> AvvistdagReflect(it as AvvistDag).toMap()
+                            ForeldetDag::class -> UtbetalingsdagReflect(it, TypeData.ForeldetDag).toMap()
+                            else -> throw IllegalStateException("Uventet utbetalingsdag")
+                        }
+                    )
+                }
+            }.toList()
     )
 }
