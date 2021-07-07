@@ -310,6 +310,9 @@ class Person private constructor(
         observers.add(observer)
     }
 
+    internal fun nyesteIdForVilkårsgrunnlagHistorikk() =
+        vilkårsgrunnlagHistorikk.sisteId()
+
     internal fun skjæringstidspunkt(orgnummer: String, sykdomstidslinje: Sykdomstidslinje, periode: Periode) =
         infotrygdhistorikk.skjæringstidspunkt(orgnummer, periode, sykdomstidslinje)
 

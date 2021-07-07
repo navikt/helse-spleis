@@ -13,20 +13,32 @@ internal class Utbetalingstidslinjeberegning private constructor(
     private val id: UUID,
     private val tidsstempel: LocalDateTime,
     private val sykdomshistorikkElementId: UUID,
+    private val inntektshistorikkInnslagId: UUID,
+    private val vilkårsgrunnlagHistorikkInnslagId: UUID,
     private val organisasjonsnummer: String,
     private val utbetalingstidslinje: Utbetalingstidslinje
 ) {
 
     internal constructor(
         sykdomshistorikkElementId: UUID,
+        inntektshistorikkInnslagId: UUID,
+        vilkårsgrunnlagHistorikkInnslagId: UUID,
         organisasjonsnummer: String,
         utbetalingstidslinje: Utbetalingstidslinje
-    ) : this(UUID.randomUUID(), LocalDateTime.now(), sykdomshistorikkElementId, organisasjonsnummer, utbetalingstidslinje)
+    ) : this(
+        id = UUID.randomUUID(),
+        tidsstempel = LocalDateTime.now(),
+        sykdomshistorikkElementId = sykdomshistorikkElementId,
+        inntektshistorikkInnslagId = inntektshistorikkInnslagId,
+        vilkårsgrunnlagHistorikkInnslagId = vilkårsgrunnlagHistorikkInnslagId,
+        organisasjonsnummer = organisasjonsnummer,
+        utbetalingstidslinje = utbetalingstidslinje
+    )
 
     internal fun utbetalingstidslinje() = utbetalingstidslinje
 
     internal fun accept(visitor: UtbetalingstidslinjeberegningVisitor) {
-        visitor.visitUtbetalingstidslinjeberegning(id, tidsstempel, sykdomshistorikkElementId)
+        visitor.visitUtbetalingstidslinjeberegning(id, tidsstempel, sykdomshistorikkElementId, inntektshistorikkInnslagId, vilkårsgrunnlagHistorikkInnslagId)
     }
 
     internal companion object {
@@ -84,10 +96,23 @@ internal class Utbetalingstidslinjeberegning private constructor(
             )
         }
 
-        internal fun restore(id: UUID, tidsstempel: LocalDateTime, sykdomshistorikkElementId: UUID, organisasjonsnummer: String, utbetalingstidslinje: Utbetalingstidslinje) =
-            Utbetalingstidslinjeberegning(
-                id, tidsstempel, sykdomshistorikkElementId, organisasjonsnummer, utbetalingstidslinje
-            )
+        internal fun restore(
+            id: UUID,
+            tidsstempel: LocalDateTime,
+            sykdomshistorikkElementId: UUID,
+            inntektshistorikkInnslagId: UUID,
+            vilkårsgrunnlagHistorikkInnslagId: UUID,
+            organisasjonsnummer: String,
+            utbetalingstidslinje: Utbetalingstidslinje
+        ) = Utbetalingstidslinjeberegning(
+            id = id,
+            tidsstempel = tidsstempel,
+            sykdomshistorikkElementId = sykdomshistorikkElementId,
+            inntektshistorikkInnslagId = inntektshistorikkInnslagId,
+            vilkårsgrunnlagHistorikkInnslagId = vilkårsgrunnlagHistorikkInnslagId,
+            organisasjonsnummer = organisasjonsnummer,
+            utbetalingstidslinje = utbetalingstidslinje
+        )
 
         internal fun save(utbetalingstidslinjeberegning: Utbetalingstidslinjeberegning) =
             UtbetalingstidslinjeberegningReflect(utbetalingstidslinjeberegning).toMap()

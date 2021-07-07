@@ -388,16 +388,20 @@ internal data class PersonData(
             private val id: UUID,
             private val tidsstempel: LocalDateTime,
             private val sykdomshistorikkElementId: UUID,
+            private val inntektshistorikkInnslagId: UUID,
+            private val vilkårsgrunnlagHistorikkInnslagId: UUID,
             private val organisasjonsnummer: String,
             private val utbetalingstidslinje: UtbetalingstidslinjeData
         ) {
             internal fun tilBeregnetUtbetalingstidslinje() =
                 Utbetalingstidslinjeberegning.restore(
-                    id,
-                    tidsstempel,
-                    sykdomshistorikkElementId,
-                    organisasjonsnummer,
-                    utbetalingstidslinje.konverterTilUtbetalingstidslinje()
+                    id = id,
+                    tidsstempel = tidsstempel,
+                    sykdomshistorikkElementId = sykdomshistorikkElementId,
+                    inntektshistorikkInnslagId = inntektshistorikkInnslagId,
+                    vilkårsgrunnlagHistorikkInnslagId = vilkårsgrunnlagHistorikkInnslagId,
+                    organisasjonsnummer = organisasjonsnummer,
+                    utbetalingstidslinje = utbetalingstidslinje.konverterTilUtbetalingstidslinje()
                 )
         }
 

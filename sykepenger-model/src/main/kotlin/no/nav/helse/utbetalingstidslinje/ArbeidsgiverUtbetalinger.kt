@@ -19,7 +19,7 @@ internal class ArbeidsgiverUtbetalinger(
     internal fun beregn(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String, periode: Periode, virkningsdato: LocalDate = periode.endInclusive) {
         val tidslinjer = arbeidsgivere.mapValues { (arbeidsgiver, builder) ->
             arbeidsgiver.build(builder, periode)
-        }
+        }.filterValues { it.isNotEmpty() }
         filtrer(aktivitetslogg, tidslinjer, periode, virkningsdato)
         tidslinjer.forEach { (arbeidsgiver, utbetalingstidslinje) ->
             arbeidsgiver.lagreUtbetalingstidslinjeberegning(organisasjonsnummer, utbetalingstidslinje)

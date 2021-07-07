@@ -12,6 +12,8 @@ import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
@@ -44,106 +46,6 @@ internal class HistoriePeriodetypeTest {
             sykmeldingSkrevet = 1.februar.atStartOfDay(),
             mottatt = 1.februar.atStartOfDay()
         ))
-    }
-
-    private fun utbetaling(fom: LocalDate, tom: LocalDate, inntekt: Inntekt = 1000.daglig, grad: Prosentdel = 100.prosent, orgnr: String = AG1) =
-        ArbeidsgiverUtbetalingsperiode(orgnr, fom,  tom, grad, inntekt)
-
-    private fun ferie(fom: LocalDate, tom: LocalDate) =
-        Friperiode(fom,  tom)
-
-    private fun historie(vararg perioder: Infotrygdperiode) {
-        person.håndter(Utbetalingshistorikk(
-            meldingsreferanseId = UUID.randomUUID(),
-            aktørId = aktørId,
-            fødselsnummer = UNG_PERSON_FNR_2018,
-            organisasjonsnummer = AG1,
-            vedtaksperiodeId = UUID.randomUUID().toString(),
-            arbeidskategorikoder = emptyMap(),
-            harStatslønn = false,
-            perioder = perioder.toList(),
-            inntektshistorikk = emptyList(),
-            ugyldigePerioder = emptyList(),
-            besvart = LocalDateTime.now()
-        ))
-    }
-
-    private fun navdager(fom: LocalDate, tom: LocalDate) =
-        tidslinjeOf(fom.dagerMellom(tom).NAV, startDato = fom)
-
-    private fun arbeidsdager(fom: LocalDate, tom: LocalDate) =
-        tidslinjeOf(fom.dagerMellom(tom).ARB, startDato = fom)
-
-    private fun feriedager(fom: LocalDate, tom: LocalDate) =
-        tidslinjeOf(fom.dagerMellom(tom).FRI, startDato = fom)
-
-    private fun LocalDate.dagerMellom(tom: LocalDate) =
-        ChronoUnit.DAYS.between(this, tom).toInt() + 1
-
-    private fun sykedager(fom: LocalDate, tom: LocalDate, grad: Prosentdel = 100.prosent, kilde: SykdomstidslinjeHendelse.Hendelseskilde = SykdomstidslinjeHendelse.Hendelseskilde.INGEN) =
-        Sykdomstidslinje.sykedager(fom, tom, grad, kilde)
-
-    private fun addTidligereUtbetalinger(utbetalingstidslinje: Utbetalingstidslinje) {
-        arbeidsgiver.oppdaterSykdom(object : SykdomstidslinjeHendelse(UUID.randomUUID(), LocalDateTime.now()) {
-            override fun organisasjonsnummer() = AG1
-            override fun aktørId() = aktørId
-            override fun fødselsnummer() = UNG_PERSON_FNR_2018
-            override fun sykdomstidslinje() = Utbetalingstidslinje.konverter(utbetalingstidslinje)
-            override fun valider(periode: Periode): IAktivitetslogg { return this }
-            override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) {}
-        })
-
-        MaksimumUtbetaling(listOf(utbetalingstidslinje), Aktivitetslogg(), 1.januar).betal()
-        arbeidsgiver.lagreUtbetalingstidslinjeberegning(AG1, utbetalingstidslinje)
-        val utbetaling = arbeidsgiver.lagUtbetaling(Aktivitetslogg(), UNG_PERSON_FNR_2018, LocalDate.MAX, 0, 0, utbetalingstidslinje.periode(), null)
-        utbetaling.håndter(
-            Utbetalingsgodkjenning(
-                meldingsreferanseId = UUID.randomUUID(),
-                aktørId = aktørId,
-                fødselsnummer = UNG_PERSON_FNR_2018,
-                organisasjonsnummer = AG1,
-                utbetalingId = utbetaling.id,
-                vedtaksperiodeId = UUID.randomUUID().toString(),
-                saksbehandler = "Z999999",
-                saksbehandlerEpost = "z999999@nav.no",
-                utbetalingGodkjent = true,
-                godkjenttidspunkt = LocalDateTime.now(),
-                automatiskBehandling = true
-        ))
-    }
-
-    private val Utbetaling.id: UUID get() {
-        var _id = UUID.randomUUID()
-        accept(object : UtbetalingVisitor {
-            override fun preVisitUtbetaling(
-                utbetaling: Utbetaling,
-                id: UUID,
-                beregningId: UUID,
-                type: Utbetaling.Utbetalingtype,
-                tilstand: Utbetaling.Tilstand,
-                tidsstempel: LocalDateTime,
-                oppdatert: LocalDateTime,
-                arbeidsgiverNettoBeløp: Int,
-                personNettoBeløp: Int,
-                maksdato: LocalDate,
-                forbrukteSykedager: Int?,
-                gjenståendeSykedager: Int?
-            ) {
-                _id = id
-            }
-        })
-        return _id
-    }
-
-    private fun addSykdomshistorikk(sykdomstidslinje: Sykdomstidslinje) {
-        arbeidsgiver.oppdaterSykdom(object : SykdomstidslinjeHendelse(UUID.randomUUID(), LocalDateTime.now()) {
-            override fun organisasjonsnummer() = AG1
-            override fun aktørId() = aktørId
-            override fun fødselsnummer() = UNG_PERSON_FNR_2018
-            override fun sykdomstidslinje() = sykdomstidslinje
-            override fun valider(periode: Periode): IAktivitetslogg { return this }
-            override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) {}
-        })
     }
 
     @Test
@@ -242,5 +144,131 @@ internal class HistoriePeriodetypeTest {
         assertEquals(FORLENGELSE, arbeidsgiver.periodetype(1.februar til 28.februar))
         assertFalse(arbeidsgiver.forlengerInfotrygd(1.mars til 31.mars))
         assertEquals(FORLENGELSE, arbeidsgiver.periodetype(1.mars til 31.mars))
+    }
+
+    private fun utbetaling(fom: LocalDate, tom: LocalDate, inntekt: Inntekt = 1000.daglig, grad: Prosentdel = 100.prosent, orgnr: String = AG1) =
+        ArbeidsgiverUtbetalingsperiode(orgnr, fom,  tom, grad, inntekt)
+
+    private fun ferie(fom: LocalDate, tom: LocalDate) =
+        Friperiode(fom,  tom)
+
+    private fun historie(vararg perioder: Infotrygdperiode) {
+        person.håndter(Utbetalingshistorikk(
+            meldingsreferanseId = UUID.randomUUID(),
+            aktørId = aktørId,
+            fødselsnummer = UNG_PERSON_FNR_2018,
+            organisasjonsnummer = AG1,
+            vedtaksperiodeId = UUID.randomUUID().toString(),
+            arbeidskategorikoder = emptyMap(),
+            harStatslønn = false,
+            perioder = perioder.toList(),
+            inntektshistorikk = emptyList(),
+            ugyldigePerioder = emptyList(),
+            besvart = LocalDateTime.now()
+        ))
+    }
+
+    private fun navdager(fom: LocalDate, tom: LocalDate) =
+        tidslinjeOf(fom.dagerMellom(tom).NAV, startDato = fom)
+
+    private fun arbeidsdager(fom: LocalDate, tom: LocalDate) =
+        tidslinjeOf(fom.dagerMellom(tom).ARB, startDato = fom)
+
+    private fun feriedager(fom: LocalDate, tom: LocalDate) =
+        tidslinjeOf(fom.dagerMellom(tom).FRI, startDato = fom)
+
+    private fun LocalDate.dagerMellom(tom: LocalDate) =
+        ChronoUnit.DAYS.between(this, tom).toInt() + 1
+
+    private fun sykedager(fom: LocalDate, tom: LocalDate, grad: Prosentdel = 100.prosent, kilde: SykdomstidslinjeHendelse.Hendelseskilde = SykdomstidslinjeHendelse.Hendelseskilde.INGEN) =
+        Sykdomstidslinje.sykedager(fom, tom, grad, kilde)
+
+    private fun addTidligereUtbetalinger(utbetalingstidslinje: Utbetalingstidslinje) {
+        arbeidsgiver.oppdaterSykdom(object : SykdomstidslinjeHendelse(UUID.randomUUID(), LocalDateTime.now()) {
+            override fun organisasjonsnummer() = AG1
+            override fun aktørId() = aktørId
+            override fun fødselsnummer() = UNG_PERSON_FNR_2018
+            override fun sykdomstidslinje() = Utbetalingstidslinje.konverter(utbetalingstidslinje)
+            override fun valider(periode: Periode): IAktivitetslogg { return this }
+            override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) {}
+        })
+        person.vilkårsgrunnlagHistorikk.lagre(1.januar, VilkårsgrunnlagHistorikk.Grunnlagsdata(
+            sammenligningsgrunnlag = 30000.månedlig,
+            avviksprosent = Prosent.prosent(0.0),
+            antallOpptjeningsdagerErMinst = 28,
+            harOpptjening = true,
+            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+            harMinimumInntekt = true,
+            vurdertOk = true,
+            meldingsreferanseId = UUID.randomUUID()
+        ))
+        arbeidsgiver.addInntekt(
+            inntektsmelding = Inntektsmelding(
+                meldingsreferanseId = UUID.randomUUID(),
+                refusjon = Inntektsmelding.Refusjon(null, 30000.månedlig),
+                orgnummer = arbeidsgiver.organisasjonsnummer(),
+                fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018,
+                aktørId = AbstractPersonTest.AKTØRID,
+                førsteFraværsdag = 1.januar,
+                beregnetInntekt = 30000.månedlig,
+                arbeidsgiverperioder = listOf(),
+                arbeidsforholdId = null,
+                begrunnelseForReduksjonEllerIkkeUtbetalt = null,
+                harOpphørAvNaturalytelser = false,
+                mottatt = LocalDateTime.now()
+            ),
+            skjæringstidspunkt = 1.januar
+        )
+        MaksimumUtbetaling(listOf(utbetalingstidslinje), Aktivitetslogg(), 1.januar).betal()
+        arbeidsgiver.lagreUtbetalingstidslinjeberegning(arbeidsgiver.organisasjonsnummer(), utbetalingstidslinje)
+        val utbetaling = arbeidsgiver.lagUtbetaling(Aktivitetslogg(), UNG_PERSON_FNR_2018, LocalDate.MAX, 0, 0, utbetalingstidslinje.periode(), null)
+        utbetaling.håndter(
+            Utbetalingsgodkjenning(
+                meldingsreferanseId = UUID.randomUUID(),
+                aktørId = aktørId,
+                fødselsnummer = UNG_PERSON_FNR_2018,
+                organisasjonsnummer = arbeidsgiver.organisasjonsnummer(),
+                utbetalingId = utbetaling.id,
+                vedtaksperiodeId = UUID.randomUUID().toString(),
+                saksbehandler = "Z999999",
+                saksbehandlerEpost = "z999999@nav.no",
+                utbetalingGodkjent = true,
+                godkjenttidspunkt = LocalDateTime.now(),
+                automatiskBehandling = true
+            ))
+    }
+
+    private val Utbetaling.id: UUID get() {
+        var _id = UUID.randomUUID()
+        accept(object : UtbetalingVisitor {
+            override fun preVisitUtbetaling(
+                utbetaling: Utbetaling,
+                id: UUID,
+                beregningId: UUID,
+                type: Utbetaling.Utbetalingtype,
+                tilstand: Utbetaling.Tilstand,
+                tidsstempel: LocalDateTime,
+                oppdatert: LocalDateTime,
+                arbeidsgiverNettoBeløp: Int,
+                personNettoBeløp: Int,
+                maksdato: LocalDate,
+                forbrukteSykedager: Int?,
+                gjenståendeSykedager: Int?
+            ) {
+                _id = id
+            }
+        })
+        return _id
+    }
+
+    private fun addSykdomshistorikk(sykdomstidslinje: Sykdomstidslinje) {
+        arbeidsgiver.oppdaterSykdom(object : SykdomstidslinjeHendelse(UUID.randomUUID(), LocalDateTime.now()) {
+            override fun organisasjonsnummer() = AG1
+            override fun aktørId() = aktørId
+            override fun fødselsnummer() = UNG_PERSON_FNR_2018
+            override fun sykdomstidslinje() = sykdomstidslinje
+            override fun valider(periode: Periode): IAktivitetslogg { return this }
+            override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) {}
+        })
     }
 }

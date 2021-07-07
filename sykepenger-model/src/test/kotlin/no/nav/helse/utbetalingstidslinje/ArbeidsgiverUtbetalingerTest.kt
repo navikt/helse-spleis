@@ -1,13 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.hendelser.Medlemskapsvurdering
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Sykmelding
-import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Person
-import no.nav.helse.person.VilkårsgrunnlagHistorikk
-import no.nav.helse.person.arbeidsgiver
+import no.nav.helse.hendelser.*
+import no.nav.helse.person.*
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -16,6 +10,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 internal class ArbeidsgiverUtbetalingerTest {
@@ -365,8 +360,7 @@ internal class ArbeidsgiverUtbetalingerTest {
             sykmeldingSkrevet = 1.januar.atStartOfDay(),
             mottatt = 1.januar.atStartOfDay()
         ))
-        val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
-        vilkårsgrunnlagHistorikk.lagre(1.januar, vilkårsgrunnlagElement ?: VilkårsgrunnlagHistorikk.Grunnlagsdata(
+        person.vilkårsgrunnlagHistorikk.lagre(1.januar, vilkårsgrunnlagElement ?: VilkårsgrunnlagHistorikk.Grunnlagsdata(
             sammenligningsgrunnlag = 30000.månedlig,
             avviksprosent = Prosent.prosent(0.0),
             antallOpptjeningsdagerErMinst = 28,
@@ -376,6 +370,23 @@ internal class ArbeidsgiverUtbetalingerTest {
             vurdertOk = true,
             meldingsreferanseId = UUID.randomUUID()
         ))
+        person.arbeidsgiver(ORGNUMMER).addInntekt(
+            inntektsmelding = Inntektsmelding(
+                meldingsreferanseId = UUID.randomUUID(),
+                refusjon = Inntektsmelding.Refusjon(null, 30000.månedlig),
+                orgnummer = ORGNUMMER,
+                fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018,
+                aktørId = AbstractPersonTest.AKTØRID,
+                førsteFraværsdag = 1.januar,
+                beregnetInntekt = 30000.månedlig,
+                arbeidsgiverperioder = listOf(),
+                arbeidsforholdId = null,
+                begrunnelseForReduksjonEllerIkkeUtbetalt = null,
+                harOpphørAvNaturalytelser = false,
+                mottatt = LocalDateTime.now()
+            ),
+            skjæringstidspunkt = 1.januar
+        )
         aktivitetslogg = Aktivitetslogg()
         ArbeidsgiverUtbetalinger(
             NormalArbeidstaker,
@@ -383,7 +394,7 @@ internal class ArbeidsgiverUtbetalingerTest {
             historiskTidslinje,
             Alder(fnr),
             null,
-            vilkårsgrunnlagHistorikk
+            person.vilkårsgrunnlagHistorikk
         ).also {
             it.beregn(aktivitetslogg, "88888888", Periode(1.januar, 31.desember(2019)),)
             it.tidslinjeEngine.beregnGrenser()

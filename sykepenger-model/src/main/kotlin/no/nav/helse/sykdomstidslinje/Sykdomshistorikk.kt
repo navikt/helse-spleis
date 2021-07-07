@@ -2,6 +2,7 @@ package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.SykdomshistorikkVisitor
+import no.nav.helse.sykdomstidslinje.Sykdomshistorikk.Element.Companion.nyesteId
 import no.nav.helse.tournament.Dagturnering
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
@@ -20,6 +21,8 @@ internal class Sykdomshistorikk private constructor(
     internal fun harSykdom() = !isEmpty() && !elementer.first().isEmpty()
 
     internal fun sykdomstidslinje() = Element.sykdomstidslinje(elementer)
+
+    internal fun nyesteId(): UUID = elementer.nyesteId()
 
     internal fun håndter(hendelse: SykdomstidslinjeHendelse): Sykdomstidslinje {
         if (isEmpty() || !elementer.first().harHåndtert(hendelse)) {
@@ -58,10 +61,6 @@ internal class Sykdomshistorikk private constructor(
         return tidslinje.also { it.valider(hendelse) }
     }
 
-    internal fun lagUtbetalingstidslinjeberegning(organisasjonsnummer: String, utbetalingstidslinje: Utbetalingstidslinje) =
-        Element.lagUtbetalingstidslinjeberegning(elementer, organisasjonsnummer, utbetalingstidslinje)
-
-
     internal class Element private constructor(
         private val id: UUID = UUID.randomUUID(),
         private val hendelseId: UUID? = null,
@@ -88,23 +87,15 @@ internal class Sykdomshistorikk private constructor(
 
         internal fun harHåndtert(hendelse: SykdomstidslinjeHendelse) = hendelseId == hendelse.meldingsreferanseId()
 
-        internal fun lagUtbetalingstidslinjeberegning(organisasjonsnummer: String, utbetalingstidslinje: Utbetalingstidslinje) =
-            Utbetalingstidslinjeberegning(id, organisasjonsnummer, utbetalingstidslinje)
-
         internal fun isEmpty(): Boolean = !beregnetSykdomstidslinje.iterator().hasNext()
-
 
         companion object {
 
             internal val empty get() = Element()
 
-            internal fun sykdomstidslinje(elementer: List<Element>) = elementer.first().beregnetSykdomstidslinje
+            internal fun List<Element>.nyesteId() = this.first().id
 
-            internal fun lagUtbetalingstidslinjeberegning(
-                elementer: List<Element>,
-                organisasjonsnummer: String,
-                utbetalingstidslinje: Utbetalingstidslinje
-            ) = elementer.first().lagUtbetalingstidslinjeberegning(organisasjonsnummer, utbetalingstidslinje)
+            internal fun sykdomstidslinje(elementer: List<Element>) = elementer.first().beregnetSykdomstidslinje
 
             internal fun opprett(
                 historikk: Sykdomshistorikk,
