@@ -92,7 +92,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(
                 val begrunnelser = mutableListOf<Begrunnelse>()
 
                 if (vilkårsgrunnlagElement.medlemskapstatus == Medlemskapsvurdering.Medlemskapstatus.Nei) begrunnelser.add(Begrunnelse.ManglerMedlemskap)
-                if (vilkårsgrunnlagElement.harMinimumInntekt == false) begrunnelser.add(Begrunnelse.ManglerMedlemskap)
+                if (vilkårsgrunnlagElement.harMinimumInntekt == false) begrunnelser.add(Begrunnelse.MinimumInntekt)
                 if (!vilkårsgrunnlagElement.harOpptjening) begrunnelser.add(Begrunnelse.ManglerOpptjening)
                 begrunnelserForSkjæringstidspunkt[skjæringstidspunkt] = begrunnelser
             }
