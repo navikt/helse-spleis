@@ -8,11 +8,8 @@ import java.time.LocalDate.EPOCH
 import java.time.LocalDateTime
 import java.util.*
 
-internal class V105VilkårsgrunnlagMedGenerasjoner(
-    private val uuid: UUID = UUID.randomUUID(),
-    private val opprettet: LocalDateTime = EPOCH.atStartOfDay()
-) : JsonMigration(version = 105) {
-    override val description: String = "VilkårsgrunnlagHistorikk skal være generasjonsbasert"
+internal class V106UtvidetUtbetalingstidslinjeBeregning : JsonMigration(version = 106) {
+    override val description: String = "UtbetalingstidslinjeBeregning peker på inntektshistorikk og vilkårsgrunnlag-historikk"
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         if (jsonNode["vilkårsgrunnlagHistorikk"] == null) return
@@ -22,8 +19,6 @@ internal class V105VilkårsgrunnlagMedGenerasjoner(
     private fun konverterTilInnslag(vilkårgrunnlag: ArrayNode): JsonNode {
         val innslagliste = serdeObjectMapper.createArrayNode()
         val innslag = serdeObjectMapper.createObjectNode()
-        innslag.put("id", uuid.toString())
-        innslag.put("opprettet", opprettet.toString())
         innslag.putArray("vilkårsgrunnlag").addAll(vilkårgrunnlag)
         return innslagliste.add(innslag)
     }
