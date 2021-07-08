@@ -26,6 +26,7 @@ internal class VarselOmFlereInntektsmeldingerTest : AbstractEndToEndTest() {
         håndterInntektsmelding(arbeidsgiverperioder = listOf(22.mars(2021) til 6.april(2021)), førsteFraværsdag = 22.mars(2021))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(6.april(2021), 16.april(2021), 50.prosent))
 
+        håndterUtbetalingsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
         håndterVilkårsgrunnlag(
             vedtaksperiodeId = 3.vedtaksperiode, inntekt = INNTEKT, inntektsvurdering = Inntektsvurdering(
