@@ -1838,4 +1838,46 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             assertEquals(28, it.sykdomshistorikkDagTeller[Feriedag::class])
         }
     }
+
+    // Skjedd som følge av at vi ikke har greid å deserialisere infotrygdhistorikken riktig,
+    // slik at vi plutselig mangler historikken der vi tidligere hadde den. Dette medfører at vi tror vi har et annet skjæringstidspunkt
+    // enn det vi egentlig har, som igjen gjør at vi ikke finner noen inntekt
+    @Test
+    fun `perioder som feilaktig er stuck i AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE blir unstuck når vi får oppdatert historikk`() {
+        val inntektshistorikk = listOf(
+            Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true),
+        )
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterUtbetalingshistorikk(
+            1.vedtaksperiode,
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, INNTEKT),
+            inntektshistorikk = inntektshistorikk
+        )
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        // skal ikke kunne skje i virkeligheten, brukes for å reprodusere bug der vi ikke lenger
+        // greier å deserialisere eksisterende infotrygdhistorikk riktig
+        håndterUtbetalingshistorikkUtenValidering()
+
+        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+        håndterPåminnelse(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE) // trigger henting av infotrygdhistorikk
+        håndterUtbetalingshistorikk(
+            2.vedtaksperiode,
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, INNTEKT),
+            inntektshistorikk = inntektshistorikk
+        )
+
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_UTBETALINGSGRUNNLAG
+        )
+    }
 }

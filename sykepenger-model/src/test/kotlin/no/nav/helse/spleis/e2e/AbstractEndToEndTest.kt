@@ -306,6 +306,24 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         ).håndter(Person::håndter)
     }
 
+    protected fun håndterUtbetalingshistorikkUtenValidering(
+        vararg utbetalinger: Infotrygdperiode,
+        inntektshistorikk: List<Inntektsopplysning>? = null,
+        orgnummer: String = ORGNUMMER,
+        besvart: LocalDateTime = LocalDateTime.now()
+    ) {
+        utbetalingshistorikk(
+            vedtaksperiodeId = UUID.randomUUID(),
+            utbetalinger = utbetalinger.toList(),
+            inntektshistorikk = inntektshistorikk(
+                inntektshistorikk = inntektshistorikk,
+                orgnummer = orgnummer
+            ),
+            orgnummer = orgnummer,
+            besvart = besvart
+        ).håndter(Person::håndter)
+    }
+
     protected fun håndterUtbetalingshistorikkForFeriepenger(
         opptjeningsår: Year,
         utbetalinger: List<UtbetalingshistorikkForFeriepenger.Utbetalingsperiode> = listOf(),

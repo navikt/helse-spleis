@@ -1445,6 +1445,19 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             vedtaksperiode.forberedMuligUtbetaling(inntektsmelding)
         }
+
+        override fun håndter(
+            person: Person,
+            arbeidsgiver: Arbeidsgiver,
+            vedtaksperiode: Vedtaksperiode,
+            hendelse: IAktivitetslogg,
+            infotrygdhistorikk: Infotrygdhistorikk
+        ) {
+            val nesteTilstand = vedtaksperiode.avgjørTilstandForInntekt()
+            if (nesteTilstand == this) return super.håndter(person, arbeidsgiver, vedtaksperiode, hendelse, infotrygdhistorikk)
+            hendelse.info("Oppfrisking av infotrygdhistorikk medførte at vi har inntekt og kan gå videre.")
+            vedtaksperiode.tilstand(hendelse, nesteTilstand)
+        }
     }
 
     internal object AvventerInntektsmeldingUferdigForlengelse : Vedtaksperiodetilstand {
