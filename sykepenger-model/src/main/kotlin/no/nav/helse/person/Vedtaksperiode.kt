@@ -1054,6 +1054,11 @@ internal class Vedtaksperiode private constructor(
             søknad.info("Fullført behandling av søknad til arbeidsgiver")
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
+            inntektsmelding.trimLeft(vedtaksperiode.periode.endInclusive)
+            if (vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)?.inntektsmeldingInfo?.id == inntektsmelding.meldingsreferanseId()) return
+            inntektsmelding.warn("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
+        }
     }
 
     internal object MottattSykmeldingUferdigForlengelse : Vedtaksperiodetilstand {
@@ -1260,7 +1265,7 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    internal object AvventerGjennomførtRevurdering: Vedtaksperiodetilstand {
+    internal object AvventerGjennomførtRevurdering : Vedtaksperiodetilstand {
         override val type = AVVENTER_GJENNOMFØRT_REVURDERING
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
