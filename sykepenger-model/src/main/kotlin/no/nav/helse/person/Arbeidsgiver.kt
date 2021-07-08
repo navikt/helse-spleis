@@ -792,7 +792,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun lagreArbeidsforhold(arbeidsforhold: List<Arbeidsforhold>) {
-        arbeidsforholdhistorikk.lagre(arbeidsforhold)
+        arbeidsforholdhistorikk.lagre(arbeidsforhold.filter { it.erRelevant(this) })
     }
 
     internal fun build(builder: IUtbetalingstidslinjeBuilder, periode: Periode) =

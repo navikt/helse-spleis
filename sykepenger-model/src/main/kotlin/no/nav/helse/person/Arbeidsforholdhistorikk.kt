@@ -10,7 +10,9 @@ internal class Arbeidsforholdhistorikk private constructor(
     internal constructor() : this(mutableListOf())
 
     internal fun lagre(arbeidsforhold: List<Arbeidsforhold>) {
-        historikk.add(Innslag(UUID.randomUUID(), arbeidsforhold))
+        if(historikk.isEmpty() || !historikk.last().erDuplikat(arbeidsforhold)) {
+            historikk.add(Innslag(UUID.randomUUID(), arbeidsforhold))
+        }
     }
 
     internal fun accept(visitor: ArbeidsforholdhistorikkVisitor) {
@@ -25,5 +27,7 @@ internal class Arbeidsforholdhistorikk private constructor(
             arbeidsforhold.forEach { it.accept(visitor) }
             visitor.postVisitArbeidsforholdinnslag(this, id)
         }
+
+        internal fun erDuplikat(other: List<Arbeidsforhold>) = arbeidsforhold.size == other.size && arbeidsforhold.containsAll(other)
     }
 }

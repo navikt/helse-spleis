@@ -1,6 +1,7 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.ArbeidsforholdhistorikkVisitor
+import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.IAktivitetslogg
 import java.time.LocalDate
 
@@ -23,6 +24,13 @@ class Arbeidsforhold(
     internal fun accept(visitor: ArbeidsforholdhistorikkVisitor) {
         visitor.visitArbeidsforhold(orgnummer, fom, tom)
     }
+
+    override fun equals(other: Any?) = other is Arbeidsforhold
+        && orgnummer == other.orgnummer
+        && fom == other.fom
+        && tom == other.tom
+
+    internal fun erRelevant(arbeidsgiver: Arbeidsgiver) = orgnummer == arbeidsgiver.organisasjonsnummer()
 
     internal companion object {
         internal fun List<Arbeidsforhold>.toEtterlevelseMap() = map {

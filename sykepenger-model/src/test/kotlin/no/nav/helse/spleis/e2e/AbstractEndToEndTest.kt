@@ -1142,27 +1142,27 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     }
 
     protected fun grunnlag(
-        vedtaksperiodeId: UUID,
         orgnummer: String,
+        skjæringstidspunkt: LocalDate,
         inntekter: List<Inntekt>
-    ) = lagMånedsinntekter(vedtaksperiodeId, orgnummer, inntekter, creator = ArbeidsgiverInntekt.MånedligInntekt::Sykepengegrunnlag)
+    ) = lagMånedsinntekter(orgnummer, skjæringstidspunkt, inntekter,  creator = ArbeidsgiverInntekt.MånedligInntekt::Sykepengegrunnlag)
 
     protected fun sammenligningsgrunnlag(
-        vedtaksperiodeId: UUID,
         orgnummer: String,
+        skjæringstidspunkt: LocalDate,
         inntekter: List<Inntekt>
-    ) = lagMånedsinntekter(vedtaksperiodeId, orgnummer, inntekter, creator = ArbeidsgiverInntekt.MånedligInntekt::Sammenligningsgrunnlag)
+    ) = lagMånedsinntekter(orgnummer, skjæringstidspunkt, inntekter,  creator = ArbeidsgiverInntekt.MånedligInntekt::Sammenligningsgrunnlag)
 
     private fun lagMånedsinntekter(
-        vedtaksperiodeId: UUID,
         orgnummer: String,
+        skjæringstidspunkt: LocalDate,
         inntekter: List<Inntekt>,
-        sluttMnd: YearMonth = YearMonth.from(inspektør(orgnummer).skjæringstidspunkt(vedtaksperiodeId)).minusMonths(1),
         creator: InntektCreator
     ) = ArbeidsgiverInntekt(
         orgnummer, inntekter.mapIndexed { index, inntekt ->
+            val sluttMnd = YearMonth.from(skjæringstidspunkt)
             creator(
-                sluttMnd.minusMonths((inntekter.size - index - 1).toLong()),
+                sluttMnd.minusMonths((inntekter.size - index).toLong()),
                 inntekt,
                 ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
                 "Juidy inntekt",
@@ -1170,6 +1170,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             )
         }
     )
+
+    protected fun finnSkjæringstidspunkt(orgnummer: String, vedtaksperiodeId: UUID) = inspektør(orgnummer).skjæringstidspunkt(vedtaksperiodeId)
 
     protected fun assertHendelseIder(
         vararg hendelseIder: UUID,
