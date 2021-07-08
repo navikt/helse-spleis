@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.PersonVisitor
+import no.nav.helse.serde.JsonBuilder
 import no.nav.helse.testhelpers.april
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
@@ -745,6 +746,10 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             )
             håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), inntekter = inntekter, orgnummer = a1, arbeidsforhold = arbeidsforhold)
 
+            val jsonBuilder = JsonBuilder()
+            person.accept(jsonBuilder)
+
+            val json = jsonBuilder.toJson()
             assertEquals(1, tellArbeidsforholdhistorikkinnslag(a1).size)
             assertEquals(1, tellArbeidsforholdhistorikkinnslag(a2).size)
         }
