@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*
-import kotlin.math.exp
 
 internal class V105VilkårsgrunnlagMedGenerasjonerTest {
     private val ID = UUID.randomUUID()
@@ -41,6 +40,11 @@ internal class V105VilkårsgrunnlagMedGenerasjonerTest {
         }"""
 
         assertEquals(toNode(expectedJson), migrer(originalJson))
+    }
+
+    @Test
+    fun `Lager ikke nytt innslag for tom vilkårsgrunnlagHistorikk`() {
+        assertEquals(toNode(expectedMedTomVilkårsgrunnlagHistorikk), migrer(originalMedTomVilkårsgrunnlagHistorikk))
     }
 
     private fun toNode(json: String) = serdeObjectMapper.readTree(json)
@@ -98,6 +102,13 @@ internal class V105VilkårsgrunnlagMedGenerasjonerTest {
       "meldingsreferanseId": "67fffaa8-fbd6-412f-81bc-7613cd44ff46"
     }
   ],
+  "skjemaVersjon": 104
+}
+"""
+
+    @Language("JSON")
+    private val originalMedTomVilkårsgrunnlagHistorikk = """{
+  "vilkårsgrunnlagHistorikk": [],
   "skjemaVersjon": 104
 }
 """
@@ -178,4 +189,12 @@ internal class V105VilkårsgrunnlagMedGenerasjonerTest {
   "skjemaVersjon": 105
 }
 """
+
+    @Language("JSON")
+    private val expectedMedTomVilkårsgrunnlagHistorikk = """{
+  "vilkårsgrunnlagHistorikk": [],
+  "skjemaVersjon": 105
+}
+"""
+
 }

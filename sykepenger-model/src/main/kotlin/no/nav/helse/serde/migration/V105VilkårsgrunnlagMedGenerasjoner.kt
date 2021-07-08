@@ -15,7 +15,7 @@ internal class V105VilkårsgrunnlagMedGenerasjoner(
     override val description: String = "VilkårsgrunnlagHistorikk skal være generasjonsbasert"
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
-        if (jsonNode["vilkårsgrunnlagHistorikk"] == null) return
+        if (jsonNode["vilkårsgrunnlagHistorikk"] == null || jsonNode["vilkårsgrunnlagHistorikk"].isEmpty) return
         jsonNode.replace("vilkårsgrunnlagHistorikk", konverterTilInnslag(jsonNode.withArray("vilkårsgrunnlagHistorikk")))
     }
 
