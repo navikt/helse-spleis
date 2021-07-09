@@ -32,12 +32,18 @@ internal class V109UtvidetUtbetalingstidslinjeBeregningTest {
         assertEquals(toNode(expectedAlleredeMigrert), migrer(originalAlleredeMigrert))
     }
 
+    @Test
+    fun `manglende vilkårsgrunnlag medfører nullobject-uuid`() {
+        assertEquals(toNode(expectedMedManglendeVilkårsgrunnlag), migrer(originalMedManglendeVilkårsgrunnlag))
+    }
+
     private fun toNode(json: String) = serdeObjectMapper.readTree(json)
 
     private fun migrer(json: String) = listOf(V109UtvidetUtbetalingstidslinjeBeregning()).migrate(toNode(json))
 
     @Language("JSON")
     private val original = """{
+    "aktørId": "1",
     "arbeidsgivere": [
         {
             "beregnetUtbetalingstidslinjer": [
@@ -68,6 +74,7 @@ internal class V109UtvidetUtbetalingstidslinjeBeregningTest {
 
     @Language("JSON")
     private val expected = """{
+    "aktørId": "1",
     "arbeidsgivere": [
         {
             "beregnetUtbetalingstidslinjer": [
@@ -100,6 +107,7 @@ internal class V109UtvidetUtbetalingstidslinjeBeregningTest {
 
     @Language("JSON")
     private val originalMedFlereArbeidsgivereOgFlereBeregninger = """{
+    "aktørId": "1",
     "arbeidsgivere": [
         {
             "beregnetUtbetalingstidslinjer": [
@@ -146,6 +154,7 @@ internal class V109UtvidetUtbetalingstidslinjeBeregningTest {
 
     @Language("JSON")
     private val expectedMedFlereArbeidsgivereOgFlereBeregninger = """{
+    "aktørId": "1",
     "arbeidsgivere": [
         {
             "beregnetUtbetalingstidslinjer": [
@@ -197,6 +206,7 @@ internal class V109UtvidetUtbetalingstidslinjeBeregningTest {
 
     @Language("JSON")
     private val originalUtenVilkårsgrunnlagHistorikk = """{
+    "aktørId": "1",
     "arbeidsgivere": [
         {
             "beregnetUtbetalingstidslinjer": [],
@@ -213,6 +223,7 @@ internal class V109UtvidetUtbetalingstidslinjeBeregningTest {
 
     @Language("JSON")
     private val expectedUtenVilkårsgrunnlagHistorikk = """{
+    "aktørId": "1",
     "arbeidsgivere": [
         {
             "beregnetUtbetalingstidslinjer": [],
@@ -229,6 +240,7 @@ internal class V109UtvidetUtbetalingstidslinjeBeregningTest {
 
     @Language("JSON")
     private val originalMedFlereArbeidsgivereOgEnHarTomBeregning = """{
+    "aktørId": "1",
     "arbeidsgivere": [
         {
             "beregnetUtbetalingstidslinjer": [],
@@ -262,6 +274,7 @@ internal class V109UtvidetUtbetalingstidslinjeBeregningTest {
 
     @Language("JSON")
     private val expectedMedFlereArbeidsgivereEnHarTomBeregning = """{
+    "aktørId": "1",
     "arbeidsgivere": [
         {
             "beregnetUtbetalingstidslinjer": [],
@@ -296,6 +309,7 @@ internal class V109UtvidetUtbetalingstidslinjeBeregningTest {
 
     @Language("JSON")
     private val originalAlleredeMigrert = """{
+    "aktørId": "1",
     "arbeidsgivere": [
         {
             "beregnetUtbetalingstidslinjer": [
@@ -322,6 +336,7 @@ internal class V109UtvidetUtbetalingstidslinjeBeregningTest {
 
     @Language("JSON")
     private val expectedAlleredeMigrert = """{
+    "aktørId": "1",
     "arbeidsgivere": [
         {
             "beregnetUtbetalingstidslinjer": [
@@ -343,6 +358,52 @@ internal class V109UtvidetUtbetalingstidslinjeBeregningTest {
             "id": "bb85447d-83c2-460a-a646-ffb85b58b7c4"
         }
     ],
+    "skjemaVersjon": 109
+}"""
+
+    @Language("JSON")
+    private val originalMedManglendeVilkårsgrunnlag = """{
+    "aktørId": "1",
+    "arbeidsgivere": [
+        {
+            "beregnetUtbetalingstidslinjer": [
+                {
+                    "sykdomshistorikkElementId": "9b644781-162e-4a9d-a9c3-1a95aa802a9f"
+                }
+            ],
+            "inntektshistorikk": [
+                {
+                    "id": "54b4eb3c-dad8-40a0-8017-b95af43a293e"
+                }
+            ]
+        }
+    ],
+    "vilkårsgrunnlagHistorikk": [],
+    "skjemaVersjon": 108
+}"""
+
+
+
+    @Language("JSON")
+    private val expectedMedManglendeVilkårsgrunnlag = """{
+    "aktørId": "1",
+    "arbeidsgivere": [
+        {
+            "beregnetUtbetalingstidslinjer": [
+                {
+                    "sykdomshistorikkElementId": "9b644781-162e-4a9d-a9c3-1a95aa802a9f",
+                    "vilkårsgrunnlagHistorikkInnslagId": "00000000-0000-0000-0000-000000000000",
+                    "inntektshistorikkInnslagId": "54b4eb3c-dad8-40a0-8017-b95af43a293e"
+                }
+            ],
+            "inntektshistorikk": [
+                {
+                    "id": "54b4eb3c-dad8-40a0-8017-b95af43a293e"
+                }
+            ]
+        }
+    ],
+    "vilkårsgrunnlagHistorikk": [],
     "skjemaVersjon": 109
 }"""
 
