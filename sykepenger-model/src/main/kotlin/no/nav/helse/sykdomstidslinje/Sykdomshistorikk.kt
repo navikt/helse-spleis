@@ -1,6 +1,7 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.person.PersonHendelse
 import no.nav.helse.person.SykdomshistorikkVisitor
 import no.nav.helse.tournament.Dagturnering
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -28,11 +29,20 @@ internal class Sykdomshistorikk private constructor(
         return sykdomstidslinje()
     }
 
+    internal fun fyllUtPeriodeMedForventedeDager(hendelse: PersonHendelse, periode: Periode) {
+        val sykdomstidslinje = if (isEmpty()) Sykdomstidslinje() else this.sykdomstidslinje()
+
+        val utvidetTidslinje = sykdomstidslinje.forsøkUtvidelse(periode)
+        if (utvidetTidslinje != null) {
+            val arbeidsdager = Sykdomstidslinje.ukjent(periode.start, periode.endInclusive, SykdomstidslinjeHendelse.Hendelseskilde.INGEN)
+            elementer.add(0, Element.opprett(hendelse, arbeidsdager, utvidetTidslinje))
+        }
+    }
+
     internal fun tøm() {
         if (!harSykdom()) return
         elementer.add(0, Element.empty)
     }
-
     internal fun fjernDager(periode: Periode): Sykdomstidslinje {
         // TODO: Remove size == 0 whenever migration is done
         if (size == 0 || sykdomstidslinje().length() == 0) return sykdomstidslinje()
@@ -60,7 +70,6 @@ internal class Sykdomshistorikk private constructor(
 
     internal fun lagUtbetalingstidslinjeberegning(organisasjonsnummer: String, utbetalingstidslinje: Utbetalingstidslinje) =
         Element.lagUtbetalingstidslinjeberegning(elementer, organisasjonsnummer, utbetalingstidslinje)
-
 
     internal class Element private constructor(
         private val id: UUID = UUID.randomUUID(),
@@ -120,6 +129,12 @@ internal class Sykdomshistorikk private constructor(
                     )
                 )
             }
+
+            internal fun opprett(hendelse: PersonHendelse, hendelseSykdomstidslinje: Sykdomstidslinje, sykdomstidslinje: Sykdomstidslinje) = Element(
+                hendelseId = hendelse.meldingsreferanseId(),
+                hendelseSykdomstidslinje = hendelseSykdomstidslinje,
+                beregnetSykdomstidslinje = sykdomstidslinje
+            )
 
             internal fun opprettReset(
                 historikk: Sykdomshistorikk,

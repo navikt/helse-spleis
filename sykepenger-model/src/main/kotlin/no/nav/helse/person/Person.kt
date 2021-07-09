@@ -134,7 +134,7 @@ class Person private constructor(
         val skjæringstidspunkter = skjæringstidspunkter()
         return ArbeidsgiverUtbetalinger(
             regler = regler,
-            arbeidsgivere = arbeidsgivereMedSykdom().associateWith {
+            arbeidsgivere = arbeidsgivere.associateWith {
                 infotrygdhistorikk.builder(
                     organisasjonsnummer = it.organisasjonsnummer(),
                     builder = it.builder(regler, skjæringstidspunkter)
@@ -503,5 +503,9 @@ class Person private constructor(
 
     fun lagreArbeidsforhold(orgnummer: String, arbeidsforhold: List<Arbeidsforhold>, aktivitetslogg: IAktivitetslogg) {
         finnEllerOpprettArbeidsgiver(orgnummer, aktivitetslogg).lagreArbeidsforhold(arbeidsforhold)
+    }
+
+    internal fun fyllUtPeriodeMedForventedeDager(hendelse: PersonHendelse, periode: Periode) {
+        arbeidsgivere.forEach { it.fyllUtPeriodeMedForventedeDager(hendelse, periode) }
     }
 }
