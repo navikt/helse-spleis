@@ -37,6 +37,11 @@ internal class V109UtvidetUtbetalingstidslinjeBeregningTest {
         assertEquals(toNode(expectedMedManglendeVilkårsgrunnlag), migrer(originalMedManglendeVilkårsgrunnlag))
     }
 
+    @Test
+    fun `manglende inntektshistorikk medfører nullobject-uuid`() {
+        assertEquals(toNode(expectedMedManglendeInntektshistorikk), migrer(originalMedManglendeInntektshistorikk))
+    }
+
     private fun toNode(json: String) = serdeObjectMapper.readTree(json)
 
     private fun migrer(json: String) = listOf(V109UtvidetUtbetalingstidslinjeBeregning()).migrate(toNode(json))
@@ -401,6 +406,44 @@ internal class V109UtvidetUtbetalingstidslinjeBeregningTest {
                     "id": "54b4eb3c-dad8-40a0-8017-b95af43a293e"
                 }
             ]
+        }
+    ],
+    "vilkårsgrunnlagHistorikk": [],
+    "skjemaVersjon": 109
+}"""
+
+    @Language("JSON")
+    private val originalMedManglendeInntektshistorikk = """{
+    "aktørId": "1",
+    "arbeidsgivere": [
+        {
+            "beregnetUtbetalingstidslinjer": [
+                {
+                    "sykdomshistorikkElementId": "9b644781-162e-4a9d-a9c3-1a95aa802a9f"
+                }
+            ],
+            "inntektshistorikk": []
+        }
+    ],
+    "vilkårsgrunnlagHistorikk": [],
+    "skjemaVersjon": 108
+}"""
+
+
+
+    @Language("JSON")
+    private val expectedMedManglendeInntektshistorikk = """{
+    "aktørId": "1",
+    "arbeidsgivere": [
+        {
+            "beregnetUtbetalingstidslinjer": [
+                {
+                    "sykdomshistorikkElementId": "9b644781-162e-4a9d-a9c3-1a95aa802a9f",
+                    "vilkårsgrunnlagHistorikkInnslagId": "00000000-0000-0000-0000-000000000000",
+                    "inntektshistorikkInnslagId": "00000000-0000-0000-0000-000000000000"
+                }
+            ],
+            "inntektshistorikk": []
         }
     ],
     "vilkårsgrunnlagHistorikk": [],

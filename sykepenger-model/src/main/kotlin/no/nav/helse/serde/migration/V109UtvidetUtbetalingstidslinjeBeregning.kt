@@ -26,14 +26,14 @@ internal class V109UtvidetUtbetalingstidslinjeBeregning : JsonMigration(version 
                         sikkerlogg.info("Person med {} har utbetalingstidslinjeberegning men mangler vilkårsgrunnlag.", keyValue("aktørId", aktørId))
                         NULLUUID.toString()
                     }
-                beregning.put(
-                    "vilkårsgrunnlagHistorikkInnslagId",
-                    faktiskVilkårsgrunnlagHistorikkInnslagId
-                )
-                beregning.put(
-                    "inntektshistorikkInnslagId",
-                    requireNotNull(inntektshistorikkInnslagId) { "Mangler inntektshistorikk, men har beregnetUtbetalingstidslinje" }
-                )
+                val faktiskInntektshistorikkInnslagId =
+                    if (inntektshistorikkInnslagId != null) inntektshistorikkInnslagId
+                    else {
+                        sikkerlogg.info("Person med {} har utbetalingstidslinjeberegning men mangler inntektshistorikk.", keyValue("aktørId", aktørId))
+                        NULLUUID.toString()
+                    }
+                beregning.put("vilkårsgrunnlagHistorikkInnslagId", faktiskVilkårsgrunnlagHistorikkInnslagId)
+                beregning.put("inntektshistorikkInnslagId", faktiskInntektshistorikkInnslagId)
             }
         }
     }
