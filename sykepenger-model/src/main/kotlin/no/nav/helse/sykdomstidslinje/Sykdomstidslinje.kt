@@ -100,11 +100,16 @@ internal class Sykdomstidslinje private constructor(
     internal fun fremTilOgMed(dato: LocalDate) =
         Sykdomstidslinje(dager.headMap(dato.plusDays(1)).toMap())
 
+    internal fun fremTilOgMed2(dato: LocalDate) = subset(førsteDag() til dato)
+
     internal fun fraOgMed(dato: LocalDate) =
         Sykdomstidslinje(dager.tailMap(dato).toMap())
 
     internal fun trim(periode: Periode) =
         Sykdomstidslinje(dager.filterNot { it.key in periode })
+
+    internal fun forsøkUtvidelse(periode: Periode) =
+        Sykdomstidslinje(dager.toSortedMap(), periode.merge(this.periode), låstePerioder.toMutableList()).takeIf { it.periode != this.periode }
 
     internal fun lås(periode: Periode) = this.also {
         requireNotNull(this.periode)

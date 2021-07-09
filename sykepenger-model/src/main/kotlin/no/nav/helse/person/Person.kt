@@ -519,4 +519,8 @@ class Person private constructor(
             sikkerLogg.info("AAReg kjenner til alle arbeidsgivere i spleis, opprettet (${nyeOrgnummer}) for $fødselsnummer")
         }
     }
+
+    internal fun fyllUtPeriodeMedForventedeDager(hendelse: PersonHendelse, periode: Periode) {
+        arbeidsgivere.forEach { it.fyllUtPeriodeMedForventedeDager(hendelse, periode) }
+    }
 }

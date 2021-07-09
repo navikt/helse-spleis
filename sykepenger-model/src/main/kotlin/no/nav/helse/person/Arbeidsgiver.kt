@@ -865,6 +865,10 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
+    internal fun fyllUtPeriodeMedForventedeDager(hendelse: PersonHendelse, periode: Periode) {
+        sykdomshistorikk.fyllUtPeriodeMedForventedeDager(hendelse, periode)
+    }
+
     internal class JsonRestorer private constructor() {
         internal companion object {
             internal fun restore(

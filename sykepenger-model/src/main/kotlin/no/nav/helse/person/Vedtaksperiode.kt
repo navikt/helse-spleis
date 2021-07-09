@@ -1684,13 +1684,12 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, utbetalingsgrunnlag: Utbetalingsgrunnlag) {
-            vedtaksperiode.tilstand(utbetalingsgrunnlag, AvventerHistorikk)
             utbetalingsgrunnlag.lagreArbeidsforhold(vedtaksperiode.person)
             if (Toggles.FlereArbeidsgivereUlikFom.enabled) {
                 utbetalingsgrunnlag.lagreInntekter(vedtaksperiode.person, vedtaksperiode.skjæringstidspunkt)
             }
+            vedtaksperiode.tilstand(utbetalingsgrunnlag, AvventerHistorikk)
         }
-
     }
 
     internal object AvventerHistorikk : Vedtaksperiodetilstand {
@@ -1787,6 +1786,7 @@ internal class Vedtaksperiode private constructor(
                 }
                 harNødvendigInntekt(person, vedtaksperiode.skjæringstidspunkt)
                 valider("Feil ved kalkulering av utbetalingstidslinjer") {
+                    person.fyllUtPeriodeMedForventedeDager(ytelser, vedtaksperiode.periode)
                     arbeidsgiver.beregn(this, arbeidsgiverUtbetalinger, vedtaksperiode.periode)
                 }
                 onSuccess {

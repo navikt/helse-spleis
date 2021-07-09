@@ -184,7 +184,7 @@ internal class HistorieEnArbeidsgiverTest : HistorieTest() {
             utbetaling(8.januar, 12.januar)
         )
         addSykdomshistorikk(AG1, 12.F)
-        val utbetalingstidslinje = beregn(AG1, 1.januar til 21.januar, 8.januar)
+        val utbetalingstidslinje = beregn(AG1, 1.januar til 12.januar, 8.januar)
         assertEquals(7, utbetalingstidslinje.size)
         assertAlleDager(utbetalingstidslinje, 1.januar til 7.januar, Fridag::class)
         assertEquals(1.januar til 7.januar, utbetalingstidslinje.periode())
@@ -198,7 +198,7 @@ internal class HistorieEnArbeidsgiverTest : HistorieTest() {
         )
         resetSeed(8.januar)
         addSykdomshistorikk(AG1, 5.S)
-        val utbetalingstidslinje = beregn(AG1, 8.januar til 21.januar, 8.januar)
+        val utbetalingstidslinje = beregn(AG1, 8.januar til 12.januar, 8.januar)
         assertEquals(0, utbetalingstidslinje.size)
     }
 
@@ -272,7 +272,7 @@ internal class HistorieEnArbeidsgiverTest : HistorieTest() {
             ferie(8.januar, 9.januar)
         )
         addSykdomshistorikk(AG1, sykedager(1.januar, 14.januar))
-        val utbetalingstidslinje = beregn(AG1, 1.januar til 17.januar, 1.januar)
+        val utbetalingstidslinje = beregn(AG1, 1.januar til 14.januar, 1.januar)
         assertEquals(1.januar til 14.januar, utbetalingstidslinje.periode())
         assertEquals(14, utbetalingstidslinje.size)
     }

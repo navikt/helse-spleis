@@ -48,6 +48,10 @@ internal sealed class Dag(
             )
         }
 
+        internal val fyll: BesteStrategy = { venstre: Dag, _: Dag ->
+            venstre
+        }
+
         internal val replace: BesteStrategy = { venstre: Dag, høyre: Dag ->
             if (høyre is UkjentDag) venstre
             else høyre
