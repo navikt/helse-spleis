@@ -134,16 +134,14 @@ class Person private constructor(
         val skjæringstidspunkter = skjæringstidspunkter()
         return ArbeidsgiverUtbetalinger(
             regler = regler,
-            arbeidsgivere = arbeidsgivereMedSykdom().associateWith {
-                infotrygdhistorikk.builder(
-                    organisasjonsnummer = it.organisasjonsnummer(),
-                    builder = it.builder(regler, skjæringstidspunkter)
-                )
+            arbeidsgivere = arbeidsgivere.associateWith {
+                it.builder(regler, skjæringstidspunkter)
             },
             infotrygdtidslinje = infotrygdhistorikk.utbetalingstidslinje(),
             alder = Alder(fødselsnummer),
             dødsdato = dødsdato,
-            vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk
+            vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
+            skjæringstidspunkter = skjæringstidspunkter
         )
     }
 
@@ -302,7 +300,7 @@ class Person private constructor(
 
     fun håndter(hendelse: Grunnbeløpsregulering) {
         hendelse.kontekst(this)
-        arbeidsgivere.finn(hendelse.organisasjonsnummer())?.håndter(arbeidsgivere, hendelse)
+        arbeidsgivere.finn(hendelse.organisasjonsnummer())?.håndter(arbeidsgivere, hendelse, skjæringstidspunkter())
             ?: hendelse.error("Finner ikke arbeidsgiver")
     }
 

@@ -1,21 +1,25 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.økonomi.betal
 import no.nav.helse.økonomi.er6GBegrenset
 import java.time.LocalDate
 
 internal class MaksimumUtbetaling(
-    private val tidslinjer: List<Utbetalingstidslinje>,
+    private val arbeidsgivere: Map<Arbeidsgiver, Utbetalingstidslinje>,
     private val aktivitetslogg: IAktivitetslogg,
-    private val virkningsdato: LocalDate
+    private val virkningsdato: LocalDate,
+    private val skjæringstidspunkter: List<LocalDate>,
 ) {
 
     private var harRedusertUtbetaling = false
 
+
     internal fun betal() {
+        val tidslinjer = arbeidsgivere.values.toList()
         Utbetalingstidslinje.periode(tidslinjer).forEach { dato ->
-            tidslinjer.map { it[dato].økonomi }.also { økonomiList ->
+            arbeidsgivere.map { (arbeidsgiver, tidslinje) -> tidslinje.get2(dato, skjæringstidspunkter, arbeidsgiver).økonomi }.also { økonomiList ->
                 try {
                     økonomiList.betal(virkningsdato)
                     harRedusertUtbetaling = harRedusertUtbetaling || økonomiList.er6GBegrenset()

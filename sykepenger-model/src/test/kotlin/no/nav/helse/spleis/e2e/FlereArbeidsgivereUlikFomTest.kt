@@ -13,6 +13,7 @@ import no.nav.helse.testhelpers.mars
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -656,7 +657,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         }
     }
 
-    @Disabled("Ulik fom med to dager uten sykdom fra ghost")
     @Test
     fun `Ulik fom og 6G-begrenset, to dager med utbetaling hos første arbeidsgiver før andre arbeidsgiver blir syk skal fortsatt 6G-cappe mht begge AG`() {
         Toggles.FlereArbeidsgivereUlikFom.enable {
@@ -713,8 +713,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             håndterUtbetalt(1.vedtaksperiode(a2), orgnummer = a2)
 
             val a2Linje = inspektør(a2).utbetalinger.last().arbeidsgiverOppdrag().last()
-            assertEquals(21.mars, a2Linje.fom)
-            assertEquals(31.mars, a2Linje.tom)
+            assertEquals(5.april, a2Linje.fom)
+            assertEquals(25.april, a2Linje.tom)
             assertEquals(1164, a2Linje.beløp)
         }
     }
@@ -746,12 +746,58 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             )
             håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), inntekter = inntekter, orgnummer = a1, arbeidsforhold = arbeidsforhold)
 
-            val jsonBuilder = JsonBuilder()
-            person.accept(jsonBuilder)
-
-            val json = jsonBuilder.toJson()
             assertEquals(1, tellArbeidsforholdhistorikkinnslag(a1).size)
             assertEquals(1, tellArbeidsforholdhistorikkinnslag(a2).size)
+        }
+    }
+
+    @Test
+    fun `Ghosts har ikke ubetalinger, men er med i beregningen for utbetaling av arbeidsgiver med sykdom`() {
+        Toggles.FlereArbeidsgivereUlikFom.enable {
+            håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+
+            håndterInntektsmelding(
+                listOf(1.mars til 16.mars),
+                førsteFraværsdag = 1.mars,
+                orgnummer = a1,
+                refusjon = Refusjon(null, 30000.månedlig, emptyList())
+            )
+
+            val inntekter = listOf(
+                grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 30000.månedlig.repeat(3)),
+                grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 35000.månedlig.repeat(3))
+            )
+
+            val arbeidsforhold = listOf(
+                Arbeidsforhold(orgnummer = a1, fom = LocalDate.EPOCH, tom = null),
+                Arbeidsforhold(orgnummer = a2, fom = LocalDate.EPOCH, tom = null)
+            )
+
+            håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), inntekter = inntekter, orgnummer = a1, arbeidsforhold = arbeidsforhold)
+            håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
+
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode(a1), inntektsvurdering = Inntektsvurdering(
+                    listOf(
+                        sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 30000.månedlig.repeat(12)),
+                        sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 35000.månedlig.repeat(12))
+                    )
+                ), orgnummer = a1
+            )
+
+            håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
+
+            val a1Linje = inspektør(a1).utbetalinger.last().arbeidsgiverOppdrag().last()
+            assertEquals(17.mars, a1Linje.fom)
+            assertEquals(31.mars, a1Linje.tom)
+            assertEquals(997, a1Linje.beløp)
+
+            assertTrue(inspektør(a2).utbetalinger.isEmpty())
+
         }
     }
 

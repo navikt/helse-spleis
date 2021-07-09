@@ -104,7 +104,7 @@ internal class Sykdomshistorikk private constructor(
                 elementer: List<Element>,
                 organisasjonsnummer: String,
                 utbetalingstidslinje: Utbetalingstidslinje
-            ) = elementer.first().lagUtbetalingstidslinjeberegning(organisasjonsnummer, utbetalingstidslinje)
+            ) = elementer.firstOrNull()?.lagUtbetalingstidslinjeberegning(organisasjonsnummer, utbetalingstidslinje)
 
             internal fun opprett(
                 historikk: Sykdomshistorikk,

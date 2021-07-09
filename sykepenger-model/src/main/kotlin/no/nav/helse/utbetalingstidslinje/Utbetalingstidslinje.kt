@@ -3,6 +3,8 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.contains
 import no.nav.helse.hendelser.til
+import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -165,7 +167,7 @@ internal class Utbetalingstidslinje private constructor(
 
     internal fun kunFridager() =
         this.utbetalingsdager.all {
-                it is NavHelgDag ||
+            it is NavHelgDag ||
                 it is Fridag
         }
 
@@ -224,10 +226,28 @@ internal class Utbetalingstidslinje private constructor(
         if (periode == periode()) return this
         return Utbetalingstidslinje(utbetalingsdager.filter { it.dato in periode }.toMutableList())
     }
+
     internal fun kutt(sisteDato: LocalDate) = subset(LocalDate.MIN til sisteDato)
 
     internal operator fun get(dato: LocalDate) =
         if (isEmpty() || dato !in periode()) UkjentDag(dato, Økonomi.ikkeBetalt().inntekt(Inntekt.INGEN, skjæringstidspunkt = dato))
+        else utbetalingsdager.first { it.dato == dato }
+
+    private fun inntektForDatoOrNull(dato: LocalDate, skjæringstidspunkter: List<LocalDate>, inntektshistorikk: Inntektshistorikk) =
+        skjæringstidspunkter
+            .sorted()
+            .lastOrNull { it <= dato }
+            ?.let { skjæringstidspunkt ->
+                inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt, dato)
+                    .let { inntekt -> skjæringstidspunkt to (inntekt ?: Inntekt.INGEN) }
+            } ?: dato to Inntekt.INGEN
+
+
+    internal fun get2(dato: LocalDate, skjæringstidspunkter: List<LocalDate>, arbeidsgiver: Arbeidsgiver) =
+        if (isEmpty() || dato !in periode()) {
+            val (skjæringstidspunkt, inntekt) = inntektForDatoOrNull(dato, skjæringstidspunkter, arbeidsgiver.inntektshistorikk)
+            UkjentDag(dato, Økonomi.ikkeBetalt().inntekt(aktuellDagsinntekt = inntekt, skjæringstidspunkt = skjæringstidspunkt))
+        }
         else utbetalingsdager.first { it.dato == dato }
 
     override fun toString(): String {

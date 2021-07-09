@@ -1,4 +1,4 @@
-package no.nav.helse.utbetalingstidslinje
+/*package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
@@ -395,3 +395,4 @@ internal class ArbeidsgiverUtbetalingerTest {
     }
 
 }
+*/

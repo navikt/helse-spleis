@@ -12,7 +12,8 @@ internal class ArbeidsgiverUtbetalinger(
     private val infotrygdtidslinje: Utbetalingstidslinje,
     private val alder: Alder,
     private val dødsdato: LocalDate?,
-    private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
+    private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
+    private val skjæringstidspunkter: List<LocalDate>,
 ) {
     internal lateinit var tidslinjeEngine: MaksimumSykepengedagerfilter
 
@@ -34,6 +35,6 @@ internal class ArbeidsgiverUtbetalinger(
         tidslinjeEngine = MaksimumSykepengedagerfilter(alder, regler, periode, aktivitetslogg).also {
             it.filter(tidslinjer, infotrygdtidslinje.kutt(periode.endInclusive))
         }
-        MaksimumUtbetaling(tidslinjer, aktivitetslogg, virkningsdato).betal()
+        MaksimumUtbetaling(arbeidsgivere, aktivitetslogg, virkningsdato, skjæringstidspunkter).betal()
     }
 }

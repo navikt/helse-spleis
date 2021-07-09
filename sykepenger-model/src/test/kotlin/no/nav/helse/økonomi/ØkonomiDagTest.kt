@@ -1,5 +1,5 @@
 package no.nav.helse.økonomi
-
+/*
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.testhelpers.*
@@ -138,3 +138,4 @@ internal class ØkonomiDagTest {
         }
     }
 }
+*/

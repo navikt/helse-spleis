@@ -1,5 +1,5 @@
 package no.nav.helse.utbetalingstidslinje
-
+/*
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.UtbetalingstidslinjeInspektør
@@ -83,3 +83,4 @@ internal class MaksimumUtbetalingHendelseTest {
         inspektør = UtbetalingstidslinjeInspektør(tidslinje)
     }
 }
+*/

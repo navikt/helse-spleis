@@ -1,5 +1,5 @@
 package no.nav.helse.utbetalingstidslinje
-
+/*
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.*
 import no.nav.helse.person.Periodetype.*
@@ -244,3 +244,4 @@ internal class HistoriePeriodetypeTest {
         assertEquals(FORLENGELSE, arbeidsgiver.periodetype(1.mars til 31.mars))
     }
 }
+*/

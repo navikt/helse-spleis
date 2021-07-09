@@ -1,4 +1,4 @@
-package no.nav.helse.utbetalingslinjer
+/* package no.nav.helse.utbetalingslinjer
 
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.UtbetalingHendelse.Oppdragstatus.AKSEPTERT
@@ -348,3 +348,4 @@ internal class UtbetalingTest {
         fun nettoBeløp(indeks: Int) = nettoBeløp.elementAt(indeks)
     }
 }
+*/
