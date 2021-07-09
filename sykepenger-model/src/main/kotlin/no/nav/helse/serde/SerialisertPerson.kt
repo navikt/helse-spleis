@@ -127,7 +127,8 @@ class SerialisertPerson(val json: String) {
             V105VilkårsgrunnlagMedGenerasjoner(),
             V106FjernerTommeInnslagIVilkårsgrunnlagHistorikken(),
             V107SletteArbeidsforhold(),
-            V108UtvidetUtbetalingstidslinjeBeregning()
+            V108None(),
+            V109UtvidetUtbetalingstidslinjeBeregning()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)

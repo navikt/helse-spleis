@@ -5,7 +5,7 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class V108UtvidetUtbetalingstidslinjeBeregningTest {
+internal class V109UtvidetUtbetalingstidslinjeBeregningTest {
 
     @Test
     fun `Utbetalingstidslinjeberegning peker på nyeste innslag i inntektshistorikken og nyeste innslag i vilkårsgrunnlaghistorikken`() {
@@ -22,9 +22,19 @@ internal class V108UtvidetUtbetalingstidslinjeBeregningTest {
         assertEquals(toNode(expectedUtenVilkårsgrunnlagHistorikk), migrer(originalUtenVilkårsgrunnlagHistorikk))
     }
 
+    @Test
+    fun `Første arbeidsgiver har ikke utbetalingstidslinjeberegning`() {
+        assertEquals(toNode(expectedMedFlereArbeidsgivereEnHarTomBeregning), migrer(originalMedFlereArbeidsgivereOgEnHarTomBeregning))
+    }
+
+    @Test
+    fun `ingen endring på allerede migrert person`() {
+        assertEquals(toNode(expectedAlleredeMigrert), migrer(originalAlleredeMigrert))
+    }
+
     private fun toNode(json: String) = serdeObjectMapper.readTree(json)
 
-    private fun migrer(json: String) = listOf(V108UtvidetUtbetalingstidslinjeBeregning()).migrate(toNode(json))
+    private fun migrer(json: String) = listOf(V109UtvidetUtbetalingstidslinjeBeregning()).migrate(toNode(json))
 
     @Language("JSON")
     private val original = """{
@@ -85,7 +95,7 @@ internal class V108UtvidetUtbetalingstidslinjeBeregningTest {
             "id": "d487600d-b752-4d7c-8184-759bf7425631"
         }
     ],
-    "skjemaVersjon": 108
+    "skjemaVersjon": 109
 }"""
 
     @Language("JSON")
@@ -182,20 +192,20 @@ internal class V108UtvidetUtbetalingstidslinjeBeregningTest {
             "id": "6a0dd169-3c8b-4b77-9e16-acb1983364d0"
         }
     ],
-    "skjemaVersjon": 108
+    "skjemaVersjon": 109
 }"""
 
     @Language("JSON")
     private val originalUtenVilkårsgrunnlagHistorikk = """{
     "arbeidsgivere": [
-      {
-        "beregnetUtbetalingstidslinjer": [],
-        "inntektshistorikk": [
-          {
-            "id": "472a1c71-df9e-488b-8aa8-f98ac97c5702"
-          }
-        ]
-      }
+        {
+            "beregnetUtbetalingstidslinjer": [],
+            "inntektshistorikk": [
+                {
+                    "id": "472a1c71-df9e-488b-8aa8-f98ac97c5702"
+                }
+            ]
+        }
     ],
     "vilkårsgrunnlagHistorikk": [],
     "skjemaVersjon": 107
@@ -204,16 +214,137 @@ internal class V108UtvidetUtbetalingstidslinjeBeregningTest {
     @Language("JSON")
     private val expectedUtenVilkårsgrunnlagHistorikk = """{
     "arbeidsgivere": [
-      {
-        "beregnetUtbetalingstidslinjer": [],
-        "inntektshistorikk": [
-          {
-            "id": "472a1c71-df9e-488b-8aa8-f98ac97c5702"
-          }
-        ]
-      }
+        {
+            "beregnetUtbetalingstidslinjer": [],
+            "inntektshistorikk": [
+                {
+                    "id": "472a1c71-df9e-488b-8aa8-f98ac97c5702"
+                }
+            ]
+        }
     ],
     "vilkårsgrunnlagHistorikk": [],
+    "skjemaVersjon": 109
+}"""
+
+    @Language("JSON")
+    private val originalMedFlereArbeidsgivereOgEnHarTomBeregning = """{
+    "arbeidsgivere": [
+        {
+            "beregnetUtbetalingstidslinjer": [],
+            "inntektshistorikk": [
+                {
+                    "id": "472a1c71-df9e-488b-8aa8-f98ac97c5702"
+                }
+            ]
+        },
+        {
+            "beregnetUtbetalingstidslinjer": [
+                {
+                    "sykdomshistorikkElementId": "9b644781-162e-4a9d-a9c3-1a95aa802a9f"
+                }
+            ],
+            "inntektshistorikk": [
+                {
+                    "id": "54b4eb3c-dad8-40a0-8017-b95af43a293e"
+                }
+            ]
+        }
+    ],
+    "vilkårsgrunnlagHistorikk": [
+        {
+            "id": "bb85447d-83c2-460a-a646-ffb85b58b7c4"
+        }
+    ],
+    "skjemaVersjon": 107
+}"""
+
+
+    @Language("JSON")
+    private val expectedMedFlereArbeidsgivereEnHarTomBeregning = """{
+    "arbeidsgivere": [
+        {
+            "beregnetUtbetalingstidslinjer": [],
+            "inntektshistorikk": [
+                {
+                    "id": "472a1c71-df9e-488b-8aa8-f98ac97c5702"
+                }
+            ]
+        },
+        {
+            "beregnetUtbetalingstidslinjer": [
+                {
+                    "sykdomshistorikkElementId": "9b644781-162e-4a9d-a9c3-1a95aa802a9f",
+                    "vilkårsgrunnlagHistorikkInnslagId": "bb85447d-83c2-460a-a646-ffb85b58b7c4",
+                    "inntektshistorikkInnslagId": "54b4eb3c-dad8-40a0-8017-b95af43a293e"
+                }
+            ],
+            "inntektshistorikk": [
+                {
+                    "id": "54b4eb3c-dad8-40a0-8017-b95af43a293e"
+                }
+            ]
+        }
+    ],
+    "vilkårsgrunnlagHistorikk": [
+        {
+            "id": "bb85447d-83c2-460a-a646-ffb85b58b7c4"
+        }
+    ],
+    "skjemaVersjon": 109
+}"""
+
+    @Language("JSON")
+    private val originalAlleredeMigrert = """{
+    "arbeidsgivere": [
+        {
+            "beregnetUtbetalingstidslinjer": [
+                {
+                    "sykdomshistorikkElementId": "9b644781-162e-4a9d-a9c3-1a95aa802a9f",
+                    "vilkårsgrunnlagHistorikkInnslagId": "bb85447d-83c2-460a-a646-ffb85b58b7c4",
+                    "inntektshistorikkInnslagId": "54b4eb3c-dad8-40a0-8017-b95af43a293e"
+                }
+            ],
+            "inntektshistorikk": [
+                {
+                    "id": "54b4eb3c-dad8-40a0-8017-b95af43a293e"
+                }
+            ]
+        }
+    ],
+    "vilkårsgrunnlagHistorikk": [
+        {
+            "id": "bb85447d-83c2-460a-a646-ffb85b58b7c4"
+        }
+    ],
     "skjemaVersjon": 108
 }"""
+
+    @Language("JSON")
+    private val expectedAlleredeMigrert = """{
+    "arbeidsgivere": [
+        {
+            "beregnetUtbetalingstidslinjer": [
+                {
+                    "sykdomshistorikkElementId": "9b644781-162e-4a9d-a9c3-1a95aa802a9f",
+                    "vilkårsgrunnlagHistorikkInnslagId": "bb85447d-83c2-460a-a646-ffb85b58b7c4",
+                    "inntektshistorikkInnslagId": "54b4eb3c-dad8-40a0-8017-b95af43a293e"
+                }
+            ],
+            "inntektshistorikk": [
+                {
+                    "id": "54b4eb3c-dad8-40a0-8017-b95af43a293e"
+                }
+            ]
+        }
+    ],
+    "vilkårsgrunnlagHistorikk": [
+        {
+            "id": "bb85447d-83c2-460a-a646-ffb85b58b7c4"
+        }
+    ],
+    "skjemaVersjon": 109
+}"""
+
+
 }
