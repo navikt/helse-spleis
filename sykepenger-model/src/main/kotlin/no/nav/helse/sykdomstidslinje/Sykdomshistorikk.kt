@@ -21,6 +21,8 @@ internal class Sykdomshistorikk private constructor(
 
     internal fun harSykdom() = !isEmpty() && !elementer.first().isEmpty()
 
+    internal fun harDager() = elementer.isNotEmpty() && !elementer.first().isEmpty()
+
     internal fun sykdomstidslinje() = Element.sykdomstidslinje(elementer)
 
     internal fun nyesteId(): UUID = elementer.nyesteId()

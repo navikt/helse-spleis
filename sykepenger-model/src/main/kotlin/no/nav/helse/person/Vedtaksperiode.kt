@@ -1687,7 +1687,7 @@ internal class Vedtaksperiode private constructor(
             utbetalingsgrunnlag.lagreArbeidsforhold(vedtaksperiode.person)
             if (Toggles.FlereArbeidsgivereUlikFom.enabled) {
                 utbetalingsgrunnlag.lagreInntekter(vedtaksperiode.person, vedtaksperiode.skjæringstidspunkt)
-                if (vedtaksperiode.person.harFlereArbeidsgivereUtenSykdomVedSkjæringstidspunkt(vedtaksperiode.skjæringstidspunkt)) {
+                if (vedtaksperiode.person.harFlereArbeidsgivereUtenSykdomVedSkjæringstidspunkt(vedtaksperiode.skjæringstidspunkt, utbetalingsgrunnlag)) {
                     utbetalingsgrunnlag.warn("Flere arbeidsgivere og ulikt starttidspunkt for sykefraværet")
                 }
             }
@@ -1788,12 +1788,14 @@ internal class Vedtaksperiode private constructor(
                     }
                 }
                 harNødvendigInntekt(person, vedtaksperiode.skjæringstidspunkt)
+                lateinit var arbeidsgiverUtbetalinger2: ArbeidsgiverUtbetalinger
                 valider("Feil ved kalkulering av utbetalingstidslinjer") {
-                    person.fyllUtPeriodeMedForventedeDager(ytelser, vedtaksperiode.periode)
-                    arbeidsgiver.beregn(this, arbeidsgiverUtbetalinger, vedtaksperiode.periode)
+                    person.fyllUtPeriodeMedForventedeDager(ytelser, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt)
+                    arbeidsgiverUtbetalinger2 = vedtaksperiode.person.arbeidsgiverUtbetalinger()
+                    arbeidsgiver.beregn(this, arbeidsgiverUtbetalinger2, vedtaksperiode.periode)
                 }
                 onSuccess {
-                    vedtaksperiode.forsøkUtbetaling(arbeidsgiverUtbetalinger.tidslinjeEngine, ytelser)
+                    vedtaksperiode.forsøkUtbetaling(arbeidsgiverUtbetalinger2.tidslinjeEngine, ytelser)
                 }
             }
         }
