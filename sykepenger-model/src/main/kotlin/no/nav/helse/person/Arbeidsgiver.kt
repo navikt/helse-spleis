@@ -869,6 +869,10 @@ internal class Arbeidsgiver private constructor(
         sykdomshistorikk.fyllUtPeriodeMedForventedeDager(hendelse, periode)
     }
 
+    internal fun harAktivtArbeidsforhold(skjæringstidspunkt: LocalDate) = arbeidsforholdhistorikk.harAktivtArbeidsforhold(skjæringstidspunkt)
+
+    internal fun manglerInntektsmeldingVedSkjæringstidspunktet(skjæringstidspunkt: LocalDate) = !inntektshistorikk.harInntektsmeldingFor(skjæringstidspunkt)
+
     internal class JsonRestorer private constructor() {
         internal companion object {
             internal fun restore(

@@ -1687,6 +1687,9 @@ internal class Vedtaksperiode private constructor(
             utbetalingsgrunnlag.lagreArbeidsforhold(vedtaksperiode.person)
             if (Toggles.FlereArbeidsgivereUlikFom.enabled) {
                 utbetalingsgrunnlag.lagreInntekter(vedtaksperiode.person, vedtaksperiode.skjæringstidspunkt)
+                if (vedtaksperiode.person.harFlereArbeidsgivereUtenSykdomVedSkjæringstidspunkt(vedtaksperiode.skjæringstidspunkt)) {
+                    utbetalingsgrunnlag.warn("Flere arbeidsgivere og ulikt starttidspunkt for sykefraværet")
+                }
             }
             vedtaksperiode.tilstand(utbetalingsgrunnlag, AvventerHistorikk)
         }

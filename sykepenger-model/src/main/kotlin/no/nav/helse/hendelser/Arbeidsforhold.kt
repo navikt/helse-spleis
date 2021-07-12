@@ -32,6 +32,8 @@ class Arbeidsforhold(
 
     internal fun erRelevant(arbeidsgiver: Arbeidsgiver) = orgnummer == arbeidsgiver.organisasjonsnummer()
 
+    internal fun gjelderPeriode(skjæringstidspunkt: LocalDate) = fom < skjæringstidspunkt && (tom == null || tom > skjæringstidspunkt)
+
     internal companion object {
         internal fun List<Arbeidsforhold>.toEtterlevelseMap() = map {
             mapOf(

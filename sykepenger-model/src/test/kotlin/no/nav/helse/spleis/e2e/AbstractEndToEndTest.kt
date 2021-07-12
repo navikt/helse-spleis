@@ -341,6 +341,17 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
 
     protected fun Inntekt.repeat(antall: Int) = (0.until(antall)).map { this }
 
+    private fun finnArbeidsgivere(): List<String> {
+        val arbeidsgivere = mutableListOf<String>()
+        person.accept(object : PersonVisitor {
+            override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
+                arbeidsgivere.add(organisasjonsnummer)
+            }
+        })
+
+        return arbeidsgivere
+    }
+
     protected fun håndterUtbetalingsgrunnlag(
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         orgnummer: String = ORGNUMMER,
@@ -356,7 +367,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
                 )
             })
         ),
-        arbeidsforhold: List<Arbeidsforhold> = listOf(Arbeidsforhold(orgnummer, 1.januar, null))
+        arbeidsforhold: List<Arbeidsforhold> = finnArbeidsgivere().map { Arbeidsforhold(it, LocalDate.EPOCH, null) }
     ) {
         assertEtterspurt(Utbetalingsgrunnlag::class, InntekterForSykepengegrunnlag, vedtaksperiodeId, orgnummer)
         assertEtterspurt(Utbetalingsgrunnlag::class, ArbeidsforholdV2, vedtaksperiodeId, orgnummer)
