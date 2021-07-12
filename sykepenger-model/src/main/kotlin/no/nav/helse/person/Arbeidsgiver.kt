@@ -750,6 +750,8 @@ internal class Arbeidsgiver private constructor(
 
     internal fun harSykdom() = sykdomshistorikk.harSykdom() || sykdomstidslinje().harSykedager()
 
+    internal fun harSykdomstidslinje() = sykdomshistorikk.harDager()
+
     internal fun periodetype(periode: Periode): Periodetype {
         val skjæringstidspunkt = skjæringstidspunkt(periode)
         return when {
@@ -862,7 +864,7 @@ internal class Arbeidsgiver private constructor(
         sykdomshistorikk.fyllUtPeriodeMedForventedeDager(hendelse, periode)
     }
 
-    internal fun harAktivtArbeidsforhold(skjæringstidspunkt: LocalDate) = arbeidsforholdhistorikk.harAktivtArbeidsforhold(skjæringstidspunkt)
+    internal fun harAktivtArbeidsforhold(skjæringstidspunkt: LocalDate, aktivitetslogg: IAktivitetslogg) = arbeidsforholdhistorikk.harAktivtArbeidsforhold(skjæringstidspunkt, aktivitetslogg)
 
     internal fun manglerInntektsmeldingVedSkjæringstidspunktet(skjæringstidspunkt: LocalDate) = !inntektshistorikk.harInntektsmeldingFor(skjæringstidspunkt)
 

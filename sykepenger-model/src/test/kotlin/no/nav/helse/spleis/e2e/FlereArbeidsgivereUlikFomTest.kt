@@ -5,10 +5,7 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.PersonVisitor
-import no.nav.helse.testhelpers.april
-import no.nav.helse.testhelpers.februar
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.mars
+import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -828,7 +825,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
     @Test
     fun `ghost n stuff`() {
         Toggles.FlereArbeidsgivereUlikFom.enable {
-
             håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars, 100.prosent), orgnummer = a1)
             håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 15.mars, 100.prosent), orgnummer = a1)
             håndterInntektsmelding(
@@ -867,6 +863,94 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             assertEquals(17.januar, a1Linje.fom)
             assertEquals(15.mars, a1Linje.tom)
             assertEquals(1063, a1Linje.beløp)
+        }
+    }
+
+    @Test
+    fun `En førstegangsbehandling og et arbeidsforhold som starter etter skjæringstidspunktet - ghostn't (inaktive arbeidsforholdet) skal ikke påvirke beregningen`() {
+        Toggles.FlereArbeidsgivereUlikFom.enable {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars, 100.prosent), orgnummer = a1)
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 15.mars, 100.prosent), orgnummer = a1)
+            håndterInntektsmelding(
+                listOf(1.januar til 16.januar),
+                førsteFraværsdag = 1.januar,
+                orgnummer = a1,
+                refusjon = Refusjon(null, 31000.månedlig, emptyList())
+            )
+
+            val inntekter = listOf(
+                grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 31000.månedlig.repeat(3)),
+                grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 32000.månedlig.repeat(3))
+            )
+
+            val arbeidsforhold = listOf(
+                Arbeidsforhold(a1, LocalDate.EPOCH, null),
+                Arbeidsforhold(a2, 2.januar, null)
+            )
+
+            håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), inntekter = inntekter, orgnummer = a1, arbeidsforhold = arbeidsforhold)
+            håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode(a1), inntektsvurdering = Inntektsvurdering(
+                    listOf(
+                        sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 31000.månedlig.repeat(12)),
+                        sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 32000.månedlig.repeat(12))
+                    )
+                ), orgnummer = a1
+            )
+            håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
+
+            val a1Linje = inspektør(a1).utbetalinger.last().arbeidsgiverOppdrag().single()
+            assertEquals(17.januar, a1Linje.fom)
+            assertEquals(15.mars, a1Linje.tom)
+            assertEquals(1431, a1Linje.beløp)
+        }
+    }
+
+    @Test
+    fun `En førstegangsbehandling og et arbeidsforhold som slutter før skjæringstidspunktet - ghostn't (inaktive arbeidsforholdet) skal ikke påvirke beregningen`() {
+        Toggles.FlereArbeidsgivereUlikFom.enable {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars, 100.prosent), orgnummer = a1)
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 15.mars, 100.prosent), orgnummer = a1)
+            håndterInntektsmelding(
+                listOf(1.januar til 16.januar),
+                førsteFraværsdag = 1.januar,
+                orgnummer = a1,
+                refusjon = Refusjon(null, 31000.månedlig, emptyList())
+            )
+
+            val inntekter = listOf(
+                grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 31000.månedlig.repeat(3)),
+                grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 32000.månedlig.repeat(3))
+            )
+
+            val arbeidsforhold = listOf(
+                Arbeidsforhold(a1, LocalDate.EPOCH, null),
+                Arbeidsforhold(a2, 1.desember(2017), 31.desember(2017))
+            )
+
+            håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), inntekter = inntekter, orgnummer = a1, arbeidsforhold = arbeidsforhold)
+            håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode(a1), inntektsvurdering = Inntektsvurdering(
+                    listOf(
+                        sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 31000.månedlig.repeat(12)),
+                        sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 32000.månedlig.repeat(12))
+                    )
+                ), orgnummer = a1
+            )
+            håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
+
+            val a1Linje = inspektør(a1).utbetalinger.last().arbeidsgiverOppdrag().single()
+            assertEquals(17.januar, a1Linje.fom)
+            assertEquals(15.mars, a1Linje.tom)
+            assertEquals(1431, a1Linje.beløp)
         }
     }
 

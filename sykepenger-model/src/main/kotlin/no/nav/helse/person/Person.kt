@@ -130,11 +130,11 @@ class Person private constructor(
         finnArbeidsgiver(ytelser).håndter(ytelser, arbeidsgiverUtbetalinger(), infotrygdhistorikk)
     }
 
-    private fun arbeidsgiverUtbetalinger(regler: ArbeidsgiverRegler = NormalArbeidstaker): ArbeidsgiverUtbetalinger {
+    internal fun arbeidsgiverUtbetalinger(regler: ArbeidsgiverRegler = NormalArbeidstaker): ArbeidsgiverUtbetalinger {
         val skjæringstidspunkter = skjæringstidspunkter()
         return ArbeidsgiverUtbetalinger(
             regler = regler,
-            arbeidsgivere = arbeidsgivere.associateWith {
+            arbeidsgivere = arbeidsgivereMedSykdomstidslinje().associateWith {
                 infotrygdhistorikk.builder(
                     organisasjonsnummer = it.organisasjonsnummer(),
                     builder = it.builder(regler, skjæringstidspunkter)
@@ -146,6 +146,8 @@ class Person private constructor(
             vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk
         )
     }
+
+    private fun arbeidsgivereMedSykdomstidslinje() = arbeidsgivere.filter { it.harSykdomstidslinje() }
 
     fun håndter(utbetalingsgodkjenning: Utbetalingsgodkjenning) {
         registrer(utbetalingsgodkjenning, "Behandler utbetalingsgodkjenning")
@@ -505,11 +507,11 @@ class Person private constructor(
         finnEllerOpprettArbeidsgiver(orgnummer, aktivitetslogg).lagreArbeidsforhold(arbeidsforhold)
     }
 
-    internal fun fyllUtPeriodeMedForventedeDager(hendelse: PersonHendelse, periode: Periode) {
-        arbeidsgivere.forEach { it.fyllUtPeriodeMedForventedeDager(hendelse, periode) }
+    internal fun fyllUtPeriodeMedForventedeDager(hendelse: PersonHendelse, periode: Periode, skjæringstidspunkt: LocalDate) {
+        arbeidsgivereMedAktiveArbeidsforhold(skjæringstidspunkt, hendelse).forEach { it.fyllUtPeriodeMedForventedeDager(hendelse, periode) }
     }
 
-    internal fun harFlereArbeidsgivereUtenSykdomVedSkjæringstidspunkt(skjæringstidspunkt: LocalDate) = arbeidsgivereMedAktiveArbeidsforhold(skjæringstidspunkt).any { it.manglerInntektsmeldingVedSkjæringstidspunktet(skjæringstidspunkt) }
+    internal fun harFlereArbeidsgivereUtenSykdomVedSkjæringstidspunkt(skjæringstidspunkt: LocalDate, aktivitetslogg: IAktivitetslogg) = arbeidsgivereMedAktiveArbeidsforhold(skjæringstidspunkt, aktivitetslogg).any { it.manglerInntektsmeldingVedSkjæringstidspunktet(skjæringstidspunkt) }
 
-    private fun arbeidsgivereMedAktiveArbeidsforhold(skjæringstidspunkt: LocalDate): List<Arbeidsgiver> = arbeidsgivere.filter { it.harAktivtArbeidsforhold(skjæringstidspunkt) }
+    private fun arbeidsgivereMedAktiveArbeidsforhold(skjæringstidspunkt: LocalDate, aktivitetslogg: IAktivitetslogg): List<Arbeidsgiver> = arbeidsgivere.filter { it.harAktivtArbeidsforhold(skjæringstidspunkt, aktivitetslogg) }
 }

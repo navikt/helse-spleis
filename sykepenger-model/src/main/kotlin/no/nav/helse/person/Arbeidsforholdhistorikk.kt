@@ -6,12 +6,12 @@ import java.util.*
 
 internal class Arbeidsforholdhistorikk private constructor(
     private val historikk: MutableList<Innslag>
-)  {
+) {
 
     internal constructor() : this(mutableListOf())
 
     internal fun lagre(arbeidsforhold: List<Arbeidsforhold>) {
-        if(historikk.isEmpty() || !historikk.last().erDuplikat(arbeidsforhold)) {
+        if (historikk.isEmpty() || !historikk.last().erDuplikat(arbeidsforhold)) {
             historikk.add(Innslag(UUID.randomUUID(), arbeidsforhold))
         }
     }
@@ -22,7 +22,13 @@ internal class Arbeidsforholdhistorikk private constructor(
         visitor.postVisitArbeidsforholdhistorikk(this)
     }
 
-    internal fun harAktivtArbeidsforhold(skjæringstidspunkt: LocalDate) = historikk.last().harAktivtArbeidsforhold(skjæringstidspunkt)
+    internal fun harAktivtArbeidsforhold(skjæringstidspunkt: LocalDate, aktivitetslogg: IAktivitetslogg): Boolean {
+        if (historikk.isEmpty()) {
+            aktivitetslogg.error("Finner ikke arbeidsforhold for arbeidsgiver") // TODO: må ses på av voksne (kan drepe volum om data fra aareg ikke er bra nok)
+            return false
+        }
+        return historikk.last().harAktivtArbeidsforhold(skjæringstidspunkt)
+    }
 
     internal class Innslag(private val id: UUID, private val arbeidsforhold: List<Arbeidsforhold>) {
         internal fun accept(visitor: ArbeidsforholdhistorikkVisitor) {

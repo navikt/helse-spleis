@@ -100,7 +100,7 @@ internal class Sykdomstidslinje private constructor(
     internal fun fremTilOgMed(dato: LocalDate) =
         Sykdomstidslinje(dager.headMap(dato.plusDays(1)).toMap())
 
-    internal fun fremTilOgMed2(dato: LocalDate) = subset(førsteDag() til dato)
+    internal fun fremTilOgMed2(dato: LocalDate) = if(periode == null) this else subset(førsteDag() til dato)
 
     internal fun fraOgMed(dato: LocalDate) =
         Sykdomstidslinje(dager.tailMap(dato).toMap())
