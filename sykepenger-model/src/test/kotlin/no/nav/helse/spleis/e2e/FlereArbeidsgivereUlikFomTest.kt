@@ -5,7 +5,6 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.PersonVisitor
-import no.nav.helse.serde.JsonBuilder
 import no.nav.helse.testhelpers.april
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
@@ -14,7 +13,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
@@ -723,7 +721,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
     }
 
 
-
     @Test
     fun `Wow! Her var det mye greier!!`() {
         Toggles.FlereArbeidsgivereUlikFom.enable {
@@ -846,7 +843,12 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
                 grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 32000.månedlig.repeat(3))
             )
 
-            håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), inntekter = inntekter, orgnummer = a1)
+            val arbeidsforhold = listOf(
+                Arbeidsforhold(a1, LocalDate.EPOCH, null),
+                Arbeidsforhold(a2, LocalDate.EPOCH, null)
+            )
+
+            håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), inntekter = inntekter, orgnummer = a1, arbeidsforhold = arbeidsforhold)
             håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode(a1), inntektsvurdering = Inntektsvurdering(
@@ -930,10 +932,134 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         }
     }
 
-    @Disabled
     @Test
-    fun `To førstegangsbehandlinger med ulik fom - skal få warning om at saksbehandler må sjekke varig lønnsendring`() {
-        // TODO: check warning
+    fun `Flere arbeidsgivere med ulik fom - skal få warning om flere arbeidsforhold med ulikt sykefravær`() {
+        Toggles.FlereArbeidsgivereUlikFom.enable {
+            håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+
+            håndterSykmelding(Sykmeldingsperiode(4.mars, 31.mars, 100.prosent), orgnummer = a2)
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(4.mars, 31.mars, 100.prosent), orgnummer = a2)
+
+            håndterInntektsmelding(
+                listOf(1.mars til 16.mars),
+                førsteFraværsdag = 1.mars,
+                orgnummer = a1,
+                refusjon = Refusjon(null, 10000.månedlig, emptyList())
+            )
+
+            håndterInntektsmelding(
+                listOf(4.mars til 19.mars),
+                førsteFraværsdag = 4.mars,
+                orgnummer = a2,
+                refusjon = Refusjon(null, 19000.månedlig, emptyList())
+            )
+            val inntekter = listOf(
+                grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 10000.månedlig.repeat(3)),
+                grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 20000.månedlig.repeat(3))
+            )
+            val arbeidsforhold = listOf(
+                Arbeidsforhold(orgnummer = a1, fom = LocalDate.EPOCH, tom = null),
+                Arbeidsforhold(orgnummer = a2, fom = LocalDate.EPOCH, tom = null)
+            )
+            håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), inntekter = inntekter, orgnummer = a1, arbeidsforhold = arbeidsforhold)
+
+            assertWarnings(inspektør(a1))
+            assertTrue(
+                inspektør(a1).personLogg.toString()
+                    .contains("Flere arbeidsgivere og ulikt starttidspunkt for sykefraværet")
+            )
+        }
+    }
+
+    @Test
+    fun `Flere arbeidsgivere med lik fom - skal ikke få warning om flere arbeidsforhold med ulikt sykefravær`() {
+        Toggles.FlereArbeidsgivereUlikFom.enable {
+            håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+
+            håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a2)
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a2)
+
+            håndterInntektsmelding(
+                listOf(1.mars til 16.mars),
+                førsteFraværsdag = 1.mars,
+                orgnummer = a1,
+                refusjon = Refusjon(null, 10000.månedlig, emptyList())
+            )
+
+            håndterInntektsmelding(
+                listOf(1.mars til 19.mars),
+                førsteFraværsdag = 1.mars,
+                orgnummer = a2,
+                refusjon = Refusjon(null, 19000.månedlig, emptyList())
+            )
+            val inntekter = listOf(
+                grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 10000.månedlig.repeat(3)),
+                grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 20000.månedlig.repeat(3))
+            )
+            val arbeidsforhold = listOf(
+                Arbeidsforhold(orgnummer = a1, fom = LocalDate.EPOCH, tom = null),
+                Arbeidsforhold(orgnummer = a2, fom = LocalDate.EPOCH, tom = null)
+            )
+            håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), inntekter = inntekter, orgnummer = a1, arbeidsforhold = arbeidsforhold)
+
+            assertNoWarnings(inspektør(a1))
+        }
+    }
+
+    @Test
+    fun `Førstegangsbehandling med ghost - skal få warning om flere arbeidsforhold med ulikt sykefravær`() {
+        Toggles.FlereArbeidsgivereUlikFom.enable {
+            håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+            håndterInntektsmelding(
+                listOf(1.mars til 16.mars),
+                førsteFraværsdag = 1.mars,
+                orgnummer = a1,
+                refusjon = Refusjon(null, 10000.månedlig, emptyList())
+            )
+            val inntekter = listOf(
+                grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 10000.månedlig.repeat(3)),
+                grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 20000.månedlig.repeat(3))
+            )
+            val arbeidsforhold = listOf(
+                Arbeidsforhold(orgnummer = a1, fom = LocalDate.EPOCH, tom = null),
+                Arbeidsforhold(orgnummer = a2, fom = LocalDate.EPOCH, tom = null)
+            )
+            håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), inntekter = inntekter, orgnummer = a1, arbeidsforhold = arbeidsforhold)
+
+            assertWarnings(inspektør(a1))
+            assertTrue(
+                inspektør(a1).personLogg.toString()
+                    .contains("Flere arbeidsgivere og ulikt starttidspunkt for sykefraværet")
+            )
+        }
+    }
+
+    @Test
+    fun `Førstegangsbehandling med ekstra arbeidsforhold som ikke er aktivt - skal ikke få warning hvis det er flere arbeidsforhold`() {
+        Toggles.FlereArbeidsgivereUlikFom.enable {
+            håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+            håndterInntektsmelding(
+                listOf(1.mars til 16.mars),
+                førsteFraværsdag = 1.mars,
+                orgnummer = a1,
+                refusjon = Refusjon(null, 10000.månedlig, emptyList())
+            )
+            val inntekter = listOf(
+                grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 10000.månedlig.repeat(3)),
+                grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 20000.månedlig.repeat(3))
+            )
+            val arbeidsforhold = listOf(
+                Arbeidsforhold(orgnummer = a1, fom = LocalDate.EPOCH, tom = null),
+                Arbeidsforhold(orgnummer = a2, fom = LocalDate.EPOCH, tom = 1.februar)
+            )
+            håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), inntekter = inntekter, orgnummer = a1, arbeidsforhold = arbeidsforhold)
+
+            assertNoWarnings(inspektør(a1))
+        }
     }
 
     @Test
@@ -957,10 +1083,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             )
             håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), inntekter = inntekter, orgnummer = a1, arbeidsforhold = arbeidsforhold)
 
-            val jsonBuilder = JsonBuilder()
-            person.accept(jsonBuilder)
-
-            val json = jsonBuilder.toJson()
             assertEquals(1, tellArbeidsforholdhistorikkinnslag(a1).size)
             assertEquals(1, tellArbeidsforholdhistorikkinnslag(a2).size)
         }
@@ -1063,7 +1185,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
     }
 
     @Test
-fun `Ulik fom og 6G-begrenset, to dager med utbetaling hos første arbeidsgiver før andre arbeidsgiver blir syk skal fortsatt 6G-cappe mht begge AG, nå med gradert sykmelding!`() {
+    fun `Ulik fom og 6G-begrenset, to dager med utbetaling hos første arbeidsgiver før andre arbeidsgiver blir syk skal fortsatt 6G-cappe mht begge AG, nå med gradert sykmelding!`() {
         Toggles.FlereArbeidsgivereUlikFom.enable {
             håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 50.prosent), orgnummer = a1)
             håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 50.prosent), orgnummer = a1)

@@ -1,6 +1,7 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.Arbeidsforhold
+import java.time.LocalDate
 import java.util.*
 
 internal class Arbeidsforholdhistorikk private constructor(
@@ -21,6 +22,8 @@ internal class Arbeidsforholdhistorikk private constructor(
         visitor.postVisitArbeidsforholdhistorikk(this)
     }
 
+    internal fun harAktivtArbeidsforhold(skjæringstidspunkt: LocalDate) = historikk.last().harAktivtArbeidsforhold(skjæringstidspunkt)
+
     internal class Innslag(private val id: UUID, private val arbeidsforhold: List<Arbeidsforhold>) {
         internal fun accept(visitor: ArbeidsforholdhistorikkVisitor) {
             visitor.preVisitArbeidsforholdinnslag(this, id)
@@ -29,5 +32,7 @@ internal class Arbeidsforholdhistorikk private constructor(
         }
 
         internal fun erDuplikat(other: List<Arbeidsforhold>) = arbeidsforhold.size == other.size && arbeidsforhold.containsAll(other)
+
+        internal fun harAktivtArbeidsforhold(skjæringstidspunkt: LocalDate) = arbeidsforhold.any { it.gjelderPeriode(skjæringstidspunkt) }
     }
 }

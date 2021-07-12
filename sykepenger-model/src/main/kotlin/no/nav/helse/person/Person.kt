@@ -501,11 +501,15 @@ class Person private constructor(
     internal fun harArbeidsgivereMedOverlappendeUtbetaltePerioder(organisasjonsnummer: String, periode: Periode) =
         arbeidsgivere.harArbeidsgivereMedOverlappendeUtbetaltePerioder(organisasjonsnummer, periode)
 
-    fun lagreArbeidsforhold(orgnummer: String, arbeidsforhold: List<Arbeidsforhold>, aktivitetslogg: IAktivitetslogg) {
+    internal fun lagreArbeidsforhold(orgnummer: String, arbeidsforhold: List<Arbeidsforhold>, aktivitetslogg: IAktivitetslogg) {
         finnEllerOpprettArbeidsgiver(orgnummer, aktivitetslogg).lagreArbeidsforhold(arbeidsforhold)
     }
 
     internal fun fyllUtPeriodeMedForventedeDager(hendelse: PersonHendelse, periode: Periode) {
         arbeidsgivere.forEach { it.fyllUtPeriodeMedForventedeDager(hendelse, periode) }
     }
+
+    internal fun harFlereArbeidsgivereUtenSykdomVedSkjæringstidspunkt(skjæringstidspunkt: LocalDate) = arbeidsgivereMedAktiveArbeidsforhold(skjæringstidspunkt).any { it.manglerInntektsmeldingVedSkjæringstidspunktet(skjæringstidspunkt) }
+
+    private fun arbeidsgivereMedAktiveArbeidsforhold(skjæringstidspunkt: LocalDate): List<Arbeidsgiver> = arbeidsgivere.filter { it.harAktivtArbeidsforhold(skjæringstidspunkt) }
 }

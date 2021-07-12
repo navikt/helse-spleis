@@ -67,6 +67,8 @@ internal class Inntektshistorikk {
         return false
     }
 
+    internal fun harInntektsmeldingFor(skjæringstidspunkt: LocalDate) = historikk.last().harInntektsmeldingFor(skjæringstidspunkt)
+
     internal class Innslag(private val id: UUID) {
         private val inntekter = mutableListOf<Inntektsopplysning>()
 
@@ -117,6 +119,8 @@ internal class Inntektshistorikk {
                 }
             return false
         }
+
+        internal fun harInntektsmeldingFor(skjæringstidspunkt: LocalDate) = inntekter.filterIsInstance<Inntektsmelding>().any { it.dato == skjæringstidspunkt }
     }
 
     internal interface Inntektsopplysning : Comparable<Inntektsopplysning> {
