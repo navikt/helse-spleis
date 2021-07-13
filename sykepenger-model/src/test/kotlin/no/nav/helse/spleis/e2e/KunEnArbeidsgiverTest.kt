@@ -3209,7 +3209,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertEquals(88, inspektør(ORGNUMMER).forbrukteSykedager(1))
     }
 
-    @Disabled
     @Test
     fun `forlengelse av vedtaksperiode hvor utbetalinger tidligere har nådd makstid, men ikke har mottatt ytelser i 26 uker - skal få warning om at vilkårsgrunnlag må etterspørres` () {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
@@ -3251,5 +3250,26 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         assertWarnings(inspektør)
         assertTrue(inspektør.personLogg.toString().contains("26 uker siden forrige utbetaling av sykepenger, vurder om vilkårene for sykepenger er oppfylt"))
+    }
+
+    @Disabled
+    @Test
+    fun `Skal ikke få warning for opptjening av sykedager etter nådd maksdato for irrelevante perioder`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020), 100.prosent))
+        håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent))
+        håndterInntektsmelding(listOf(1.januar(2020) til 16.januar(2020)))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
+
+        val utbetalinger = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 28.desember, 100.prosent, INNTEKT)
+        val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
+
+        håndterYtelser(1.vedtaksperiode, utbetalinger, inntektshistorikk = inntektshistorikk)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        assertNoWarnings(inspektør)
     }
 }

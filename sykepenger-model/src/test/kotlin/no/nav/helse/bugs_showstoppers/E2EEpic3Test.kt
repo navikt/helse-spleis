@@ -16,6 +16,7 @@ import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -1116,8 +1117,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(
             vedtaksperiodeId = 2.vedtaksperiode,
-            inntekt = INNTEKT,
-            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Nei
+            inntekt = INGEN
         ) // make sure Vilkårsgrunnlag fails
 
         assertForkastetPeriodeTilstander(
