@@ -6,7 +6,7 @@ import no.nav.helse.person.IAktivitetslogg
 import java.time.LocalDate
 
 class Arbeidsforhold(
-    private val orgnummer: String,
+    internal val orgnummer: String,
     private val fom: LocalDate,
     private val tom: LocalDate? = null
 ) {

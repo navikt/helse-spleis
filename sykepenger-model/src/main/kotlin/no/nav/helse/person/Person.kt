@@ -507,4 +507,16 @@ class Person private constructor(
     fun lagreArbeidsforhold(orgnummer: String, arbeidsforhold: List<Arbeidsforhold>, aktivitetslogg: IAktivitetslogg) {
         finnEllerOpprettArbeidsgiver(orgnummer, aktivitetslogg).lagreArbeidsforhold(arbeidsforhold)
     }
+
+    internal fun loggUkjenteOrgnummere(orgnummerFraAAreg: List<String>) {
+        val kjenteOrgnummer = arbeidsgivere.map { it.organisasjonsnummer() }
+
+        val manglerIAAReg = kjenteOrgnummer.filter { !orgnummerFraAAreg.contains(it) }
+        val nyeOrgnummer = orgnummerFraAAreg.filter { !kjenteOrgnummer.contains(it) }
+        if (manglerIAAReg.isNotEmpty()) {
+            sikkerLogg.info("Fant arbeidsgivere som ikke er i AAReg(${manglerIAAReg}), opprettet(${nyeOrgnummer}) for $fødselsnummer")
+        } else {
+            sikkerLogg.info("AAReg kjenner til alle arbeidsgivere i spleis, opprettet (${nyeOrgnummer}) for $fødselsnummer")
+        }
+    }
 }
