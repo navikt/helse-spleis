@@ -20,7 +20,9 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.time.temporal.TemporalAdjusters.firstDayOfMonth
 import java.time.temporal.TemporalAdjusters.lastDayOfMonth
 import java.util.*
@@ -3205,5 +3207,49 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterUtbetalt(2.vedtaksperiode(ORGNUMMER), orgnummer = ORGNUMMER)
 
         assertEquals(88, inspektør(ORGNUMMER).forbrukteSykedager(1))
+    }
+
+    @Disabled
+    @Test
+    fun `forlengelse av vedtaksperiode hvor utbetalinger tidligere har nådd makstid, men ikke har mottatt ytelser i 26 uker - skal få warning om at vilkårsgrunnlag må etterspørres` () {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        val months2018 = (2..12).map {
+            YearMonth.of(2018, it)
+        }
+        val months2019 = (1..6).map {
+            YearMonth.of(2019, it)
+        }
+
+        (months2018 + months2019).forEachIndexed { index, yearMonth ->
+            val vedtaksperiodeIndex = index + 2
+            håndterSykmelding(Sykmeldingsperiode(LocalDate.of(yearMonth.year, yearMonth.month, 1), LocalDate.of(yearMonth.year, yearMonth.month, yearMonth.lengthOfMonth()), 100.prosent))
+            håndterSøknad(Sykdom(LocalDate.of(yearMonth.year, yearMonth.month, 1), LocalDate.of(yearMonth.year, yearMonth.month, yearMonth.lengthOfMonth()), 100.prosent))
+            håndterUtbetalingsgrunnlag(vedtaksperiodeIndex.vedtaksperiode)
+            håndterYtelser(vedtaksperiodeIndex.vedtaksperiode)
+            if (inspektør.etterspurteBehov(vedtaksperiodeIndex.vedtaksperiode, Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering)) {
+                håndterSimulering(vedtaksperiodeIndex.vedtaksperiode)
+            }
+            håndterUtbetalingsgodkjenning(vedtaksperiodeIndex.vedtaksperiode)
+            håndterUtbetalt(vedtaksperiodeIndex.vedtaksperiode)
+        }
+
+        // Denne perioden skal egentlig ha nytt skjæringstidspunkt, få ny inntektsmelding og gå gjennom ny vilkårsprøving
+        håndterSykmelding(Sykmeldingsperiode(1.juli(2019), 31.juli(2019), 100.prosent))
+        håndterSøknad(Sykdom(1.juli(2019), 31.juli(2019), 100.prosent))
+        håndterUtbetalingsgrunnlag(19.vedtaksperiode)
+        håndterYtelser(19.vedtaksperiode)
+
+        assertWarnings(inspektør)
+        assertTrue(inspektør.personLogg.toString().contains("26 uker siden forrige utbetaling av sykepenger, vurder om vilkårene for sykepenger er oppfylt"));
     }
 }
