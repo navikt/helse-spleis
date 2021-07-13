@@ -913,7 +913,8 @@ internal data class PersonData(
 
         data class ArbeidsforholdhistorikkInnslagData(
             val id: UUID,
-            val arbeidsforhold: List<ArbeidsforholdData>
+            val arbeidsforhold: List<ArbeidsforholdData>,
+            val skjæringstidspunkt: LocalDate
         ) {
 
             internal companion object {
@@ -923,7 +924,7 @@ internal data class PersonData(
                         .call(map { it.tilInnslag() })
             }
 
-            internal fun tilInnslag() = Arbeidsforholdhistorikk.Innslag(id, arbeidsforhold.map { it.tilArbeidsforhold() })
+            internal fun tilInnslag() = Arbeidsforholdhistorikk.Innslag(id, arbeidsforhold.map { it.tilArbeidsforhold() }, skjæringstidspunkt)
 
             data class ArbeidsforholdData(
                 val orgnummer: String,

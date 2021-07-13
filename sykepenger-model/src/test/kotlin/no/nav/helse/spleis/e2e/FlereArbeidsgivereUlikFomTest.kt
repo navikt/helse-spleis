@@ -1388,6 +1388,80 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         }
     }
 
+    @Test
+    fun `syk for a1, finnes ikke i aareg, syk for a2, - dksl ha warning på manglende arbeidsforhold`() { }
+
+    @Test
+    fun `syk for a1, slutter i a1, finnes ikke i aareg, syk for a2, - ingen warning på manglende arbeidsforhold`() {
+        Toggles.FlereArbeidsgivereUlikFom.enable {
+            håndterSykmelding(Sykmeldingsperiode(1.mars(2017), 31.mars(2017), 50.prosent), orgnummer = a1)
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars(2017), 31.mars(2017), 50.prosent), orgnummer = a1)
+            håndterInntektsmelding(
+                listOf(1.mars(2017) til 16.mars(2017)),
+                førsteFraværsdag = 1.mars(2017),
+                orgnummer = a1,
+                refusjon = Refusjon(null, 30000.månedlig, emptyList())
+            )
+            val inntekterA1 = listOf(
+                grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 35000.månedlig.repeat(3))
+            )
+            val arbeidsforholdA1 = listOf(
+                Arbeidsforhold(orgnummer = a1, fom = LocalDate.EPOCH, tom = null)
+            )
+            håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), inntekter = inntekterA1, orgnummer = a1, arbeidsforhold = arbeidsforholdA1)
+            håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode(a1), inntektsvurdering = Inntektsvurdering(
+                    listOf(
+                        sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 35000.månedlig.repeat(12))
+                    )
+                ), orgnummer = a1
+            )
+            håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
+
+            håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 50.prosent), orgnummer = a2)
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 50.prosent), orgnummer = a2)
+            håndterInntektsmelding(
+                listOf(1.mars til 16.mars),
+                førsteFraværsdag = 1.mars,
+                orgnummer = a2,
+                refusjon = Refusjon(null, 30000.månedlig, emptyList())
+            )
+            val inntekterA2 = listOf(
+                grunnlag(a2, finnSkjæringstidspunkt(a2, 1.vedtaksperiode(a2)), 30000.månedlig.repeat(3)),
+                grunnlag(a2, finnSkjæringstidspunkt(a2, 1.vedtaksperiode(a2)), 35000.månedlig.repeat(3))
+            )
+
+            val arbeidsforholdA2 = listOf(
+                Arbeidsforhold(orgnummer = a2, fom = LocalDate.EPOCH, tom = null)
+            )
+
+            håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), inntekter = inntekterA2, orgnummer = a2, arbeidsforhold = arbeidsforholdA2)
+            håndterYtelser(1.vedtaksperiode(a2), orgnummer = a2)
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode(a2), inntektsvurdering = Inntektsvurdering(
+                    listOf(
+                        sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a2, 1.vedtaksperiode(a2)), 35000.månedlig.repeat(12))
+                    )
+                ), orgnummer = a2
+            )
+            håndterYtelser(1.vedtaksperiode(a2), orgnummer = a2)
+            håndterSimulering(1.vedtaksperiode(a2), orgnummer = a2)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode(a2), orgnummer = a2)
+            håndterUtbetalt(1.vedtaksperiode(a2), orgnummer = a2)
+
+            val a2Linje = inspektør(a2).utbetalinger.last().arbeidsgiverOppdrag().last()
+            assertEquals(17.mars, a2Linje.fom)
+            assertEquals(31.mars, a2Linje.tom)
+            assertEquals(692, a2Linje.beløp)
+
+            assertNoWarnings(inspektør(a2))
+        }
+    }
+
     private fun tellArbeidsforholdhistorikkinnslag(orgnummer: String? = null): MutableList<UUID> {
         val arbeidsforholdIder = mutableListOf<UUID>()
         var erIRiktigArbeidsgiver = true

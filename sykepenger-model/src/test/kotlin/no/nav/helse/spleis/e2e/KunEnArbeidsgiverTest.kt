@@ -389,7 +389,12 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
                 Inntektsopplysning("12345789", 21.august(2019), 22600.månedlig, true)
             )
         )
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
+        håndterUtbetalingsgrunnlag(
+            vedtaksperiodeId = 1.vedtaksperiode,
+            arbeidsforhold = listOf(
+                Arbeidsforhold(ORGNUMMER, 1.januar, null),
+                Arbeidsforhold("12345789", 1.januar, null)
+        ))
         håndterYtelser(1.vedtaksperiode)
 
         inspektør.also {

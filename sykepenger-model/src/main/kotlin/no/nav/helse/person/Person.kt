@@ -506,8 +506,8 @@ class Person private constructor(
     internal fun harArbeidsgivereMedOverlappendeUtbetaltePerioder(organisasjonsnummer: String, periode: Periode) =
         arbeidsgivere.harArbeidsgivereMedOverlappendeUtbetaltePerioder(organisasjonsnummer, periode)
 
-    internal fun lagreArbeidsforhold(orgnummer: String, arbeidsforhold: List<Arbeidsforhold>, aktivitetslogg: IAktivitetslogg) {
-        finnEllerOpprettArbeidsgiver(orgnummer, aktivitetslogg).lagreArbeidsforhold(arbeidsforhold)
+    internal fun lagreArbeidsforhold(orgnummer: String, arbeidsforhold: List<Arbeidsforhold>, aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate) {
+        finnEllerOpprettArbeidsgiver(orgnummer, aktivitetslogg).lagreArbeidsforhold(arbeidsforhold, skjæringstidspunkt)
     }
 
     internal fun loggUkjenteOrgnummere(orgnummerFraAAreg: List<String>) {
@@ -528,5 +528,5 @@ class Person private constructor(
 
     internal fun harFlereArbeidsgivereUtenSykdomVedSkjæringstidspunkt(skjæringstidspunkt: LocalDate, aktivitetslogg: IAktivitetslogg) = arbeidsgivereMedAktiveArbeidsforhold(skjæringstidspunkt, aktivitetslogg).any { it.manglerInntektsmeldingVedSkjæringstidspunktet(skjæringstidspunkt) }
 
-    private fun arbeidsgivereMedAktiveArbeidsforhold(skjæringstidspunkt: LocalDate, aktivitetslogg: IAktivitetslogg): List<Arbeidsgiver> = arbeidsgivere.filter { it.harAktivtArbeidsforhold(skjæringstidspunkt, aktivitetslogg) }
+    private fun arbeidsgivereMedAktiveArbeidsforhold(skjæringstidspunkt: LocalDate, aktivitetslogg: IAktivitetslogg): List<Arbeidsgiver> = arbeidsgivere.filter { it.harAktivtArbeidsforhold(skjæringstidspunkt, aktivitetslogg)}
 }

@@ -800,8 +800,8 @@ internal class Arbeidsgiver private constructor(
         )
     }
 
-    internal fun lagreArbeidsforhold(arbeidsforhold: List<Arbeidsforhold>) {
-        arbeidsforholdhistorikk.lagre(arbeidsforhold.filter { it.erRelevant(this) })
+    internal fun lagreArbeidsforhold(arbeidsforhold: List<Arbeidsforhold>, skjæringstidspunkt: LocalDate) {
+        arbeidsforholdhistorikk.lagre(arbeidsforhold.filter { it.erRelevant(this) }, skjæringstidspunkt)
     }
 
     internal fun build(builder: IUtbetalingstidslinjeBuilder, periode: Periode) =
@@ -870,6 +870,8 @@ internal class Arbeidsgiver private constructor(
     internal fun fyllUtPeriodeMedForventedeDager(hendelse: PersonHendelse, periode: Periode) {
         sykdomshistorikk.fyllUtPeriodeMedForventedeDager(hendelse, periode)
     }
+
+    private fun harTidligereUtbetalingINyLøsning() = beregnetUtbetalingstidslinjer.isNotEmpty() // TODO()
 
     internal fun harAktivtArbeidsforhold(skjæringstidspunkt: LocalDate, aktivitetslogg: IAktivitetslogg) = arbeidsforholdhistorikk.harAktivtArbeidsforhold(skjæringstidspunkt, aktivitetslogg)
 
