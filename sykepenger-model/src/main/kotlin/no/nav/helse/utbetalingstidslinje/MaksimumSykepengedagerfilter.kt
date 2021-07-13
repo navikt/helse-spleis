@@ -162,7 +162,7 @@ internal class MaksimumSykepengedagerfilter(
                 tidslinjegrunnlag,
                 beregnetTidslinje
             )
-            if (gjenståendeSykedager() <= 0) {
+            if (gjenståendeSykedager() <= 0 && dagen in periode) {
                 aktivitetslogg.warn("26 uker siden forrige utbetaling av sykepenger, vurder om vilkårene for sykepenger er oppfylt")
             }
             teller.resett(dagen.plusDays(1))

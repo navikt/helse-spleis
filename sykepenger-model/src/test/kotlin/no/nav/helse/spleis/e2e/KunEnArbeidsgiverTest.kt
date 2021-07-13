@@ -3252,7 +3252,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertTrue(inspektør.personLogg.toString().contains("26 uker siden forrige utbetaling av sykepenger, vurder om vilkårene for sykepenger er oppfylt"))
     }
 
-    @Disabled
     @Test
     fun `Skal ikke få warning for opptjening av sykedager etter nådd maksdato for irrelevante perioder`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020), 100.prosent))
