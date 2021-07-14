@@ -7,6 +7,7 @@ import no.nav.helse.person.Inntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.person.Inntektskilde.FLERE_ARBEIDSGIVERE
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.reflection.castAsList
@@ -2604,6 +2605,44 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             assertEquals(0, ikkeUtbetalteUtbetalingerForVedtaksperiode(1.vedtaksperiode(a2)).size)
             assertEquals(0, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode(a2)).size)
             assertEquals(1, ikkeUtbetalteUtbetalingerForVedtaksperiode(2.vedtaksperiode(a2)).size)
+        }
+    }
+
+    @Test
+    fun testyMc() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
+
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
+        håndterVilkårsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioderForSammenligningsgrunnlag {
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt INNTEKT
+                    a2 inntekt INNTEKT
+                }
+            }
+        ))
+        håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), orgnummer = a1)
+        håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
+
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode(a2), orgnummer = a2)
+        håndterSimulering(1.vedtaksperiode(a2), orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode(a2), orgnummer = a2)
+        håndterUtbetalt(1.vedtaksperiode(a2), orgnummer = a2)
+
+        inspektør(a1).utbetalinger.forEach {
+            assertEquals(a1, it.arbeidsgiverOppdrag().mottaker())
+        }
+        inspektør(a2).utbetalinger.forEach {
+            assertEquals(a2, it.arbeidsgiverOppdrag().mottaker())
         }
     }
 }

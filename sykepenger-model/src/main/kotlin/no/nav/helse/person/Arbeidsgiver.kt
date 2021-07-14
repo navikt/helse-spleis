@@ -195,7 +195,8 @@ internal class Arbeidsgiver private constructor(
             maksdato,
             forbrukteSykedager,
             gjenståendeSykedager,
-            forrige
+            forrige,
+            organisasjonsnummer
         ).also { nyUtbetaling(it) }
     }
 
@@ -217,7 +218,8 @@ internal class Arbeidsgiver private constructor(
             maksdato,
             forbrukteSykedager,
             gjenståendeSykedager,
-            forrige
+            forrige,
+            organisasjonsnummer
         ).also { nyUtbetaling(it) }
     }
 

@@ -51,14 +51,15 @@ internal class Utbetalingstidslinjeberegning private constructor(
             maksdato: LocalDate,
             forbrukteSykedager: Int,
             gjenståendeSykedager: Int,
-            forrige: Utbetaling?
+            forrige: Utbetaling?,
+            organisasjonsnummer: String
         ): Utbetaling {
             val beregning = beregnetUtbetalingstidslinjer.last()
             return Utbetaling.lagUtbetaling(
                 utbetalinger,
                 fødselsnummer,
                 beregning.id,
-                beregning.organisasjonsnummer,
+                organisasjonsnummer,
                 beregning.utbetalingstidslinje,
                 periode.endInclusive,
                 aktivitetslogg,
@@ -78,14 +79,15 @@ internal class Utbetalingstidslinjeberegning private constructor(
             maksdato: LocalDate,
             forbrukteSykedager: Int,
             gjenståendeSykedager: Int,
-            forrige: Utbetaling?
+            forrige: Utbetaling?,
+            organisasjonsnummer: String
         ): Utbetaling {
             val beregning = beregnetUtbetalingstidslinjer.last()
             return Utbetaling.lagRevurdering(
                 utbetalinger,
                 fødselsnummer,
                 beregning.id,
-                beregning.organisasjonsnummer,
+                organisasjonsnummer,
                 beregning.utbetalingstidslinje,
                 periode.endInclusive,
                 aktivitetslogg,
