@@ -358,15 +358,10 @@ internal class Vedtaksperiode private constructor(
         oppdaterHistorikk(hendelse)
         inntektsmeldingInfo = InntektsmeldingInfo(id = hendelse.meldingsreferanseId(), arbeidsforholdId = hendelse.arbeidsforholdId)
 
-        val tilstøtende = arbeidsgiver.finnSykeperiodeRettFør(this)
-        hendelse.førsteFraværsdag?.also {
-            when {
-                tilstøtende == null -> if (it != skjæringstidspunkt)
-                    hendelse.warn("Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.")
-                tilstøtende.skjæringstidspunkt == skjæringstidspunkt && skjæringstidspunkt != hendelse.førsteFraværsdag ->
-                    hendelse.warn("Første fraværsdag i inntektsmeldingen er forskjellig fra foregående tilstøtende periode")
-            }
+        if (hendelse.førsteFraværsdag != null && hendelse.førsteFraværsdag != skjæringstidspunkt) {
+            hendelse.warn("Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.")
         }
+
         hendelse.valider(periode)
         if (hendelse.hasErrorsOrWorse()) {
             arbeidsgiver.søppelbøtte(hendelse, SENERE_INCLUSIVE(this), IKKE_STØTTET)
@@ -631,9 +626,7 @@ internal class Vedtaksperiode private constructor(
                 .filter { this.periode.overlapperMed(it.periode) }
                 .forEach { it.lagUtbetaling(engineForTimeline, hendelse) }
             høstingsresultater(hendelse)
-        }
-
-        else tilstand(hendelse, AvventerArbeidsgivere)
+        } else tilstand(hendelse, AvventerArbeidsgivere)
     }
 
     private fun høstingsresultater(hendelse: ArbeidstakerHendelse) {
