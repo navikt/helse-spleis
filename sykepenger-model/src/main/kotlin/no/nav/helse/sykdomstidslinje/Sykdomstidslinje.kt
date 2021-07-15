@@ -100,7 +100,9 @@ internal class Sykdomstidslinje private constructor(
     internal fun fremTilOgMed(dato: LocalDate) =
         Sykdomstidslinje(dager.headMap(dato.plusDays(1)).toMap())
 
-    internal fun fremTilOgMed2(dato: LocalDate) = if(periode == null) this else subset(førsteDag() til dato)
+    internal fun fremTilOgMed2(dato: LocalDate) =
+        if (periode == null || dato < førsteDag()) Sykdomstidslinje() else subset(førsteDag() til dato)
+
 
     internal fun fraOgMed(dato: LocalDate) =
         Sykdomstidslinje(dager.tailMap(dato).toMap())
@@ -236,7 +238,7 @@ internal class Sykdomstidslinje private constructor(
     internal fun accept(visitor: SykdomstidslinjeVisitor) {
         visitor.preVisitSykdomstidslinje(this, låstePerioder)
         periode?.forEach { this[it].accept(visitor) }
-        visitor.postVisitSykdomstidslinje(this)
+        visitor.postVisitSykdomstidslinje(this, låstePerioder)
     }
 
     override fun equals(other: Any?): Boolean {

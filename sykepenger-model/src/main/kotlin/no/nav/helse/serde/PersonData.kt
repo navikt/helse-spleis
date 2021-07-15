@@ -537,7 +537,7 @@ internal data class PersonData(
                     .apply { isAccessible = true }
                     .call(
                         dagerMap,
-                        null,
+                        periode,
                         låstePerioder ?: mutableListOf<Periode>()
                     )
 

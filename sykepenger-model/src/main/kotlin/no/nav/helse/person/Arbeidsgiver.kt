@@ -871,11 +871,11 @@ internal class Arbeidsgiver private constructor(
         sykdomshistorikk.fyllUtPeriodeMedForventedeDager(hendelse, periode)
     }
 
-    private fun harTidligereUtbetalingINyLøsning() = beregnetUtbetalingstidslinjer.isNotEmpty() // TODO()
-
-    internal fun harAktivtArbeidsforhold(skjæringstidspunkt: LocalDate, aktivitetslogg: IAktivitetslogg) = arbeidsforholdhistorikk.harAktivtArbeidsforhold(skjæringstidspunkt, aktivitetslogg)
+    internal fun harAktivtArbeidsforhold(skjæringstidspunkt: LocalDate) = arbeidsforholdhistorikk.harAktivtArbeidsforhold(skjæringstidspunkt)
 
     internal fun manglerInntektsmeldingVedSkjæringstidspunktet(skjæringstidspunkt: LocalDate) = !inntektshistorikk.harInntektsmeldingFor(skjæringstidspunkt)
+    internal fun harVedtaksperiodeMedUkjentArbeidsforhold(skjæringstidspunkt: LocalDate) =
+        !harAktivtArbeidsforhold(skjæringstidspunkt) && vedtaksperioder.any { it.harUferdigFørstegangsbehandling(skjæringstidspunkt) }
 
     internal class JsonRestorer private constructor() {
         internal companion object {

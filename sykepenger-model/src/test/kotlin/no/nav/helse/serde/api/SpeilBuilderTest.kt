@@ -2142,7 +2142,7 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
             orgnummer,
             UUID.fromString(vedtaksperiodeId),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter),
-            arbeidsforhold = listOf(Arbeidsforhold(orgnummer, 1.januar, null))
+            arbeidsforhold = listOf(Arbeidsforhold(orgnummer, LocalDate.EPOCH, null))
         )
 
         private fun ytelser(

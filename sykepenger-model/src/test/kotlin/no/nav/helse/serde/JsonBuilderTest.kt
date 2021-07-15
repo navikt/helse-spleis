@@ -189,6 +189,12 @@ class JsonBuilderTest {
         }
     }
 
+    @Test
+    fun `Skal serialisere ukjentdager på sykdomstidslinjen til ghost`() =
+        Toggles.FlereArbeidsgivereUlikFom.enable {
+            testSerialiseringAvPerson(personMedGhost())
+        }
+
     private fun testSerialiseringAvPerson(person: Person) {
         val jsonBuilder = JsonBuilder()
         person.accept(jsonBuilder)
@@ -438,6 +444,59 @@ class JsonBuilderTest {
                 )
             }
 
+        fun personMedGhost(
+            fom: LocalDate = 1.januar,
+            tom: LocalDate = 31.januar,
+            sendtSøknad: LocalDate = 1.april,
+            søknadhendelseId: UUID = UUID.randomUUID()
+        ): Person =
+            Person(aktørId, fnr).apply {
+                håndter(sykmelding(fom = fom, tom = tom))
+                fangeVedtaksperiode()
+                håndter(
+                    søknad(
+                        hendelseId = søknadhendelseId,
+                        fom = fom,
+                        tom = tom,
+                        sendtSøknad = sendtSøknad.atStartOfDay()
+                    )
+                )
+                fangeSykdomstidslinje()
+                håndter(inntektsmelding(fom = fom))
+                håndter(utbetalingsgrunnlag(
+                    vedtaksperiodeId = UUID.fromString(vedtaksperiodeId),
+                    skjæringstidspunkt = fom.plusDays(15),
+                    arbeidsforhold = listOf(
+                        Arbeidsforhold(orgnummer, LocalDate.EPOCH, null),
+                        Arbeidsforhold("04201337", LocalDate.EPOCH, null)
+                    ),
+                    inntekter = inntektperioderForSykepengegrunnlag {
+                        1.oktober(2017) til 1.desember(2017) inntekter {
+                            orgnummer inntekt 31000.månedlig
+                            "04201337" inntekt 32000.månedlig
+                        }
+                    }
+                ))
+                håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(vilkårsgrunnlag(
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    inntektperioderForSammenligningsgrunnlag {
+                        1.januar(2017) til 1.desember(2017) inntekter {
+                            orgnummer inntekt 31000.månedlig
+                            "04201337" inntekt 32000.månedlig
+                        }
+                    }
+                ))
+                håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
+                fangeUtbetalinger()
+                håndter(overføring())
+                håndter(utbetalt())
+                fangeVedtaksperiode()
+            }
+
+
         private fun Person.fangeUtbetalinger() {
             utbetalingsliste.clear()
             accept(object : PersonVisitor {
@@ -549,17 +608,20 @@ class JsonBuilderTest {
             mottatt = LocalDateTime.now()
         )
 
-        fun vilkårsgrunnlag(vedtaksperiodeId: String) = Vilkårsgrunnlag(
+        fun vilkårsgrunnlag(
+            vedtaksperiodeId: String,
+            inntektsvurdering: List<ArbeidsgiverInntekt> = inntektperioderForSammenligningsgrunnlag {
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    orgnummer inntekt 31000.månedlig
+                }
+            }
+        ) = Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeId,
             aktørId = aktørId,
             fødselsnummer = fnr,
             orgnummer = orgnummer,
-            inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
-                1.januar(2017) til 1.desember(2017) inntekter {
-                    orgnummer inntekt 31000.månedlig
-                }
-            }),
+            inntektsvurdering = Inntektsvurdering(inntektsvurdering),
             opptjeningvurdering = Opptjeningvurdering(
                 listOf(
                     Arbeidsforhold(

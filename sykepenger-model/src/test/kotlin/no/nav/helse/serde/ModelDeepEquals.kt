@@ -12,8 +12,8 @@ private class ModelDeepEquals {
     val checkLog = mutableListOf<Pair<Any, Any>>()
     fun assertDeepEquals(one: Any?, other: Any?, path: List<String>) {
         if (one == null && other == null) return
-        assertFalse(one == null || other == null, "For field $path: $one or $other is null")
         requireNotNull(one)
+        assertFalse(other == null, "For field $path: ${one::class} is null")
         if (one::class.qualifiedName == null) return
         checkLog.forEach {
             if (it.first == one && it.second == other) return // vil ev. feile hos den som la i checkLog

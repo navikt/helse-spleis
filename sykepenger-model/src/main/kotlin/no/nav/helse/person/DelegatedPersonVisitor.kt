@@ -534,8 +534,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.visitDag(dag, dato, kilde, melding)
     }
 
-    override fun postVisitSykdomstidslinje(tidslinje: Sykdomstidslinje) {
-        delegatee.postVisitSykdomstidslinje(tidslinje)
+    override fun postVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: MutableList<Periode>) {
+        delegatee.postVisitSykdomstidslinje(tidslinje, låstePerioder)
     }
 
     override fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {
@@ -795,15 +795,15 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.postVisitArbeidsforholdhistorikk(arbeidsforholdhistorikk)
     }
 
-    override fun preVisitArbeidsforholdinnslag(arbeidsforholdinnslag: Arbeidsforholdhistorikk.Innslag, id: UUID) {
-        delegatee.preVisitArbeidsforholdinnslag(arbeidsforholdinnslag, id)
+    override fun preVisitArbeidsforholdinnslag(arbeidsforholdinnslag: Arbeidsforholdhistorikk.Innslag, id: UUID, skjæringstidspunkt: LocalDate) {
+        delegatee.preVisitArbeidsforholdinnslag(arbeidsforholdinnslag, id, skjæringstidspunkt)
     }
 
     override fun visitArbeidsforhold(orgnummer: String, fom: LocalDate, tom: LocalDate?) {
         delegatee.visitArbeidsforhold(orgnummer, fom, tom)
     }
 
-    override fun postVisitArbeidsforholdinnslag(arbeidsforholdinnslag: Arbeidsforholdhistorikk.Innslag, id: UUID) {
-        delegatee.postVisitArbeidsforholdinnslag(arbeidsforholdinnslag, id)
+    override fun postVisitArbeidsforholdinnslag(arbeidsforholdinnslag: Arbeidsforholdhistorikk.Innslag, id: UUID, skjæringstidspunkt: LocalDate) {
+        delegatee.postVisitArbeidsforholdinnslag(arbeidsforholdinnslag, id, skjæringstidspunkt)
     }
 }

@@ -364,7 +364,7 @@ internal interface SykdomstidslinjeVisitor {
     fun visitDag(dag: Permisjonsdag, dato: LocalDate, kilde: Hendelseskilde) {}
     fun visitDag(dag: ProblemDag, dato: LocalDate, kilde: Hendelseskilde, melding: String) {}
     fun visitDag(dag: AvslåttDag, dato: LocalDate, kilde: Hendelseskilde) {}
-    fun postVisitSykdomstidslinje(tidslinje: Sykdomstidslinje) {}
+    fun postVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: MutableList<Periode>) {}
 }
 
 internal interface ArbeidsforholdhistorikkVisitor {
@@ -373,8 +373,8 @@ internal interface ArbeidsforholdhistorikkVisitor {
 
     fun visitArbeidsforhold(orgnummer: String, fom: LocalDate, tom: LocalDate?) {}
 
-    fun preVisitArbeidsforholdinnslag(arbeidsforholdinnslag: Arbeidsforholdhistorikk.Innslag, id: UUID) {}
-    fun postVisitArbeidsforholdinnslag(arbeidsforholdinnslag: Arbeidsforholdhistorikk.Innslag, id: UUID) {}
+    fun preVisitArbeidsforholdinnslag(arbeidsforholdinnslag: Arbeidsforholdhistorikk.Innslag, id: UUID, skjæringstidspunkt: LocalDate) {}
+    fun postVisitArbeidsforholdinnslag(arbeidsforholdinnslag: Arbeidsforholdhistorikk.Innslag, id: UUID, skjæringstidspunkt: LocalDate) {}
 }
 
 internal interface InntekthistorikkVisitor {

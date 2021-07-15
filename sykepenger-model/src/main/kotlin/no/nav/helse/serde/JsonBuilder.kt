@@ -6,7 +6,6 @@ import no.nav.helse.person.*
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.UkjentInfotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
-import no.nav.helse.serde.PersonData.UtbetalingstidslinjeData.TypeData
 import no.nav.helse.serde.api.builders.BuilderState
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
 import no.nav.helse.serde.reflection.*
@@ -270,8 +269,8 @@ internal class JsonBuilder : AbstractBuilder() {
                 "tom" to tom
             ))
         }
-        override fun postVisitArbeidsforholdinnslag(arbeidsforholdinnslag: Arbeidsforholdhistorikk.Innslag, id: UUID) {
-            historikk.add(mapOf("id" to id, "arbeidsforhold" to arbeidsforholMap))
+        override fun postVisitArbeidsforholdinnslag(arbeidsforholdinnslag: Arbeidsforholdhistorikk.Innslag, id: UUID, skjæringstidspunkt: LocalDate) {
+            historikk.add(mapOf("id" to id, "skjæringstidspunkt" to skjæringstidspunkt, "arbeidsforhold" to arbeidsforholMap))
             arbeidsforholMap = mutableListOf()
         }
 
@@ -744,10 +743,8 @@ internal class JsonBuilder : AbstractBuilder() {
         private var inUtbetaling = false
 
         override fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: List<Periode>) {
-            val sykdomstidslinje = mutableMapOf<String, Any>()
-            sykdomstidslinje["låstePerioder"] = låstePerioder.map {
-                mapOf("fom" to it.start, "tom" to it.endInclusive)
-            }
+            val sykdomstidslinje = mutableMapOf<String, Any?>()
+
             vedtaksperiodeMap["sykdomstidslinje"] = sykdomstidslinje
             pushState(SykdomstidslinjeState(sykdomstidslinje))
         }
@@ -842,13 +839,13 @@ internal class JsonBuilder : AbstractBuilder() {
             hendelseId: UUID?,
             tidsstempel: LocalDateTime
         ) {
-            val sykdomstidslinje = mutableMapOf<String, Any>()
+            val sykdomstidslinje = mutableMapOf<String, Any?>()
             elementMap["hendelseSykdomstidslinje"] = sykdomstidslinje
             pushState(SykdomstidslinjeState(sykdomstidslinje))
         }
 
         override fun preVisitBeregnetSykdomstidslinje(tidslinje: Sykdomstidslinje) {
-            val sykdomstidslinje = mutableMapOf<String, Any>()
+            val sykdomstidslinje = mutableMapOf<String, Any?>()
             elementMap["beregnetSykdomstidslinje"] = sykdomstidslinje
             pushState(SykdomstidslinjeState(sykdomstidslinje))
         }
@@ -863,19 +860,15 @@ internal class JsonBuilder : AbstractBuilder() {
         }
     }
 
-    private class SykdomstidslinjeState(private val sykdomstidslinje: MutableMap<String, Any>) : BuilderState() {
+    private class SykdomstidslinjeState(private val sykdomstidslinje: MutableMap<String, Any?>) : BuilderState() {
         private val dateRanges = DateRanges()
 
-        override fun preVisitSykdomstidslinje(
-            tidslinje: Sykdomstidslinje,
-            låstePerioder: List<Periode>
-        ) {
+        override fun postVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: MutableList<Periode>) {
             sykdomstidslinje["låstePerioder"] = låstePerioder.map {
                 mapOf("fom" to it.start, "tom" to it.endInclusive)
             }
-        }
+            sykdomstidslinje["periode"] = tidslinje.periode()?.let { mapOf("fom" to it.start, "tom" to it.endInclusive) }
 
-        override fun postVisitSykdomstidslinje(tidslinje: Sykdomstidslinje) {
             sykdomstidslinje["dager"] = dateRanges.toList()
             popState()
         }

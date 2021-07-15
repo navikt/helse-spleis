@@ -39,8 +39,8 @@ internal class Sykdomshistorikk private constructor(
 
         val utvidetTidslinje = sykdomstidslinje.forsøkUtvidelse(periode)
         if (utvidetTidslinje != null) {
-            val arbeidsdager = Sykdomstidslinje.ukjent(periode.start, periode.endInclusive, SykdomstidslinjeHendelse.Hendelseskilde.INGEN)
-            elementer.add(0, Element.opprett(hendelse, arbeidsdager, utvidetTidslinje))
+            val arbeidsdager = Sykdomstidslinje().forsøkUtvidelse(periode)
+            elementer.add(0, Element.opprett(hendelse, arbeidsdager!!, utvidetTidslinje))
         }
     }
 

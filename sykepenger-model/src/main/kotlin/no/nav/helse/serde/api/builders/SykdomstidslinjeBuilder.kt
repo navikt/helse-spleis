@@ -1,9 +1,6 @@
 package no.nav.helse.serde.api.builders
 
-import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.OverstyrTidslinje
-import no.nav.helse.hendelser.Sykmelding
-import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.*
 import no.nav.helse.serde.api.SykdomstidslinjedagDTO
 import no.nav.helse.serde.mapping.SpeilDagtype
 import no.nav.helse.serde.mapping.SpeilKildetype
@@ -105,7 +102,7 @@ internal class SykdomstidslinjeBuilder(private val sykdomstidslinjeListe: Mutabl
         is Dag.AvslåttDag -> SpeilDagtype.AVSLÅTT
     }
 
-    override fun postVisitSykdomstidslinje(tidslinje: Sykdomstidslinje) {
+    override fun postVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: MutableList<Periode>) {
         popState()
     }
 }

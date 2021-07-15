@@ -1387,6 +1387,25 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         })
         assertTrue(fant)
     }
+
+    protected fun tellArbeidsforholdhistorikkinnslag(orgnummer: String? = null): MutableList<UUID> {
+        val arbeidsforholdIder = mutableListOf<UUID>()
+        var erIRiktigArbeidsgiver = true
+        person.accept(object : PersonVisitor {
+
+            override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
+                erIRiktigArbeidsgiver = orgnummer == null || orgnummer == organisasjonsnummer
+            }
+
+            override fun preVisitArbeidsforholdinnslag(arbeidsforholdinnslag: Arbeidsforholdhistorikk.Innslag, id: UUID, skjæringstidspunkt: LocalDate) {
+                if (erIRiktigArbeidsgiver) {
+                    arbeidsforholdIder.add(id)
+                }
+            }
+        })
+
+        return arbeidsforholdIder
+    }
 }
 
 infix fun <T> T?.er(expected: T?) =

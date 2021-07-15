@@ -5,6 +5,7 @@ import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.util.*
 
 internal class ArbeidsforholdhistorikkTest {
@@ -47,7 +48,7 @@ internal class ArbeidsforholdhistorikkTest {
         val arbeidsforholdIder = mutableListOf<UUID>()
         accept(object : ArbeidsforholdhistorikkVisitor {
 
-            override fun preVisitArbeidsforholdinnslag(arbeidsforholdinnslag: Arbeidsforholdhistorikk.Innslag, id: UUID) {
+            override fun preVisitArbeidsforholdinnslag(arbeidsforholdinnslag: Arbeidsforholdhistorikk.Innslag, id: UUID, skjæringstidspunkt: LocalDate) {
                 arbeidsforholdIder.add(id)
             }
         })

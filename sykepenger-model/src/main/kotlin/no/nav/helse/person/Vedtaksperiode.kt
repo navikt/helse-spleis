@@ -1687,7 +1687,7 @@ internal class Vedtaksperiode private constructor(
             utbetalingsgrunnlag.lagreArbeidsforhold(vedtaksperiode.person, vedtaksperiode.skjæringstidspunkt)
             if (Toggles.FlereArbeidsgivereUlikFom.enabled) {
                 utbetalingsgrunnlag.lagreInntekter(vedtaksperiode.person, vedtaksperiode.skjæringstidspunkt)
-                if (vedtaksperiode.person.harFlereArbeidsgivereUtenSykdomVedSkjæringstidspunkt(vedtaksperiode.skjæringstidspunkt, utbetalingsgrunnlag)) {
+                if (vedtaksperiode.person.harFlereArbeidsgivereUtenSykdomVedSkjæringstidspunkt(vedtaksperiode.skjæringstidspunkt)) {
                     utbetalingsgrunnlag.warn("Flere arbeidsgivere og ulikt starttidspunkt for sykefraværet")
                 }
             }
@@ -1790,11 +1790,16 @@ internal class Vedtaksperiode private constructor(
                 harNødvendigInntekt(person, vedtaksperiode.skjæringstidspunkt)
                 lateinit var arbeidsgiverUtbetalinger2: ArbeidsgiverUtbetalinger
                 valider("Feil ved kalkulering av utbetalingstidslinjer") {
-                    person.fyllUtPeriodeMedForventedeDager(ytelser, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt)
+                    if (Toggles.FlereArbeidsgivereUlikFom.enabled) {
+                        person.fyllUtPeriodeMedForventedeDager(ytelser, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt)
+                    }
                     arbeidsgiverUtbetalinger2 = vedtaksperiode.person.arbeidsgiverUtbetalinger()
                     arbeidsgiver.beregn(this, arbeidsgiverUtbetalinger2, vedtaksperiode.periode)
                 }
                 onSuccess {
+                    if (Toggles.FlereArbeidsgivereUlikFom.enabled && person.harVedtaksperiodeForArbeidsgiverMedUkjentArbeidsforhold(vedtaksperiode.skjæringstidspunkt)) {
+                        ytelser.warn("Finner ikke arbeidsforhold for arbeidsgiver") // TODO: må ses på av voksne (kan drepe volum om data fra aareg ikke er bra nok)
+                    }
                     vedtaksperiode.forsøkUtbetaling(arbeidsgiverUtbetalinger2.tidslinjeEngine, ytelser)
                 }
             }
@@ -1969,6 +1974,9 @@ internal class Vedtaksperiode private constructor(
         ).contains(tilstand.type)
 
     internal fun ikkeFerdigRevurdert() = tilstand in listOf(AvventerArbeidsgivereRevurdering, AvventerHistorikkRevurdering)
+
+    internal fun harUferdigFørstegangsbehandling(skjæringstidspunkt: LocalDate) =
+        this.skjæringstidspunkt == skjæringstidspunkt && !this.erUtbetalt() && this.periodetype() == FØRSTEGANGSBEHANDLING
 
     internal object AvventerGodkjenningRevurdering : Vedtaksperiodetilstand {
         override val type = AVVENTER_GODKJENNING_REVURDERING

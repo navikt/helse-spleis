@@ -22,9 +22,8 @@ internal class Arbeidsforholdhistorikk private constructor(
         visitor.postVisitArbeidsforholdhistorikk(this)
     }
 
-    internal fun harAktivtArbeidsforhold(skjæringstidspunkt: LocalDate, aktivitetslogg: IAktivitetslogg): Boolean {
+    internal fun harAktivtArbeidsforhold(skjæringstidspunkt: LocalDate): Boolean {
         if (historikk.isEmpty()) {
-            aktivitetslogg.warn("'Finner ikke arbeidsforhold for arbeidsgiver") // TODO: må ses på av voksne (kan drepe volum om data fra aareg ikke er bra nok)
             return false
         }
         return historikk.last().harAktivtArbeidsforhold(skjæringstidspunkt)
@@ -32,9 +31,9 @@ internal class Arbeidsforholdhistorikk private constructor(
 
     internal class Innslag(private val id: UUID, private val arbeidsforhold: List<Arbeidsforhold>, private val skjæringstidspunkt: LocalDate) {
         internal fun accept(visitor: ArbeidsforholdhistorikkVisitor) {
-            visitor.preVisitArbeidsforholdinnslag(this, id)
+            visitor.preVisitArbeidsforholdinnslag(this, id, skjæringstidspunkt)
             arbeidsforhold.forEach { it.accept(visitor) }
-            visitor.postVisitArbeidsforholdinnslag(this, id)
+            visitor.postVisitArbeidsforholdinnslag(this, id, skjæringstidspunkt)
         }
 
         internal fun erDuplikat(other: List<Arbeidsforhold>, skjæringstidspunkt: LocalDate) =

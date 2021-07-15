@@ -523,10 +523,13 @@ class Person private constructor(
     }
 
     internal fun fyllUtPeriodeMedForventedeDager(hendelse: PersonHendelse, periode: Periode, skjæringstidspunkt: LocalDate) {
-        arbeidsgivereMedAktiveArbeidsforhold(skjæringstidspunkt, hendelse).forEach { it.fyllUtPeriodeMedForventedeDager(hendelse, periode) }
+        arbeidsgivereMedAktiveArbeidsforhold(skjæringstidspunkt).forEach { it.fyllUtPeriodeMedForventedeDager(hendelse, periode) }
     }
 
-    internal fun harFlereArbeidsgivereUtenSykdomVedSkjæringstidspunkt(skjæringstidspunkt: LocalDate, aktivitetslogg: IAktivitetslogg) = arbeidsgivereMedAktiveArbeidsforhold(skjæringstidspunkt, aktivitetslogg).any { it.manglerInntektsmeldingVedSkjæringstidspunktet(skjæringstidspunkt) }
+    internal fun harFlereArbeidsgivereUtenSykdomVedSkjæringstidspunkt(skjæringstidspunkt: LocalDate) =
+        arbeidsgivereMedAktiveArbeidsforhold(skjæringstidspunkt).any { it.manglerInntektsmeldingVedSkjæringstidspunktet(skjæringstidspunkt) }
 
-    private fun arbeidsgivereMedAktiveArbeidsforhold(skjæringstidspunkt: LocalDate, aktivitetslogg: IAktivitetslogg): List<Arbeidsgiver> = arbeidsgivere.filter { it.harAktivtArbeidsforhold(skjæringstidspunkt, aktivitetslogg)}
+    private fun arbeidsgivereMedAktiveArbeidsforhold(skjæringstidspunkt: LocalDate): List<Arbeidsgiver> = arbeidsgivere.filter { it.harAktivtArbeidsforhold(skjæringstidspunkt)}
+    internal fun harVedtaksperiodeForArbeidsgiverMedUkjentArbeidsforhold(skjæringstidspunkt: LocalDate) =
+        arbeidsgivere.any { it.harVedtaksperiodeMedUkjentArbeidsforhold(skjæringstidspunkt) }
 }
