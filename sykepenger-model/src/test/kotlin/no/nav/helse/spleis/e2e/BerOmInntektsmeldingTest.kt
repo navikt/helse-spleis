@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test
 
 internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
 
-
     @Test
     fun `Ber om inntektsmelding når vi ankommer AVVENTER_INNTEKTSMELDING_FERDIG_GAP`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
@@ -108,33 +107,6 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
 
         assertEquals(1, observatør.trengerIkkeInntektsmeldingVedtaksperioder.size)
     }
-
-    @Test
-    fun `Sender ikke ut event om at vi ikke trenger inntektsmelding når vi forlater`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), 1.januar)
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
-
-        assertTilstander(
-            2.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
-            AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
-            AVVENTER_UTBETALINGSGRUNNLAG
-        )
-
-        assertEquals(1, observatør.trengerIkkeInntektsmeldingVedtaksperioder.size)
-    }
-
 
     @Test
     fun `Sender ikke ut ManglendeInntektsmeldingEvent hvis vi har en tilstøtende forkastet sykeperiode - AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP`() {
