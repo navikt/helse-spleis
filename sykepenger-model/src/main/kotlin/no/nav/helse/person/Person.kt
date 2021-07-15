@@ -147,7 +147,6 @@ class Person private constructor(
         )
     }
 
-    private fun arbeidsgivereMedSykdomstidslinje() = arbeidsgivere.filter { it.harSykdomstidslinje() }
 
     fun håndter(utbetalingsgodkjenning: Utbetalingsgodkjenning) {
         registrer(utbetalingsgodkjenning, "Behandler utbetalingsgodkjenning")
