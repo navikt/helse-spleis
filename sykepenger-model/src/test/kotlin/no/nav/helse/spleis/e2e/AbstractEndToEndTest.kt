@@ -995,13 +995,13 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         return id
     }
 
-    protected fun forlengVedtak(fom: LocalDate, tom: LocalDate, grad: Prosentdel = 100.prosent, orgnummer: String = ORGNUMMER) {
+    protected fun forlengVedtak(fom: LocalDate, tom: LocalDate, grad: Prosentdel = 100.prosent, orgnummer: String = ORGNUMMER, skalSimuleres: Boolean = true) {
         håndterSykmelding(Sykmeldingsperiode(fom, tom, grad), orgnummer = orgnummer)
         val id = observatør.sisteVedtaksperiode()
         håndterSøknadMedValidering(id, Søknad.Søknadsperiode.Sykdom(fom, tom, grad), orgnummer = orgnummer)
         håndterUtbetalingsgrunnlag(id, orgnummer = orgnummer)
         håndterYtelser(id, orgnummer = orgnummer)
-        håndterSimulering(id, orgnummer = orgnummer)
+        if (skalSimuleres) håndterSimulering(id, orgnummer = orgnummer)
         håndterUtbetalingsgodkjenning(id, true, orgnummer = orgnummer)
         håndterUtbetalt(id, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT, orgnummer = orgnummer)
     }

@@ -309,7 +309,7 @@ internal class Vedtaksperiode private constructor(
     private fun erAvsluttet() =
         utbetaling?.erAvsluttet() == true || tilstand == AvsluttetUtenUtbetaling
 
-    private fun erUtbetalt() = tilstand == Avsluttet && utbetalingstidslinje.harUtbetalinger()
+    private fun erUtbetalt() = tilstand == Avsluttet && utbetaling?.erAvsluttet() == true
 
     private fun sammeArbeidsgiverperiode(other: Vedtaksperiode): Boolean {
         val fagsystemId = utbetaling?.arbeidsgiverOppdrag()?.fagsystemId()
