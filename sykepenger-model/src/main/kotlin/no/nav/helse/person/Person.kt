@@ -510,12 +510,17 @@ class Person private constructor(
     }
 
     internal fun loggUkjenteOrgnummere(orgnummerFraAAreg: List<String>) {
-        val kjenteOrgnummer = arbeidsgivere.map { it.organisasjonsnummer() }
+        val kjenteOrgnummer = arbeidsgivereMedSykdom().map { it.organisasjonsnummer() }
+            .filter { it != "0" }
+        val orgnummerMedSpleisSykdom = arbeidsgivere.filter { it.harSpleisSykdom() }.map { it.organisasjonsnummer() }
 
         val manglerIAAReg = kjenteOrgnummer.filter { !orgnummerFraAAreg.contains(it) }
+        val spleisOrgnummerManglerIAAreg = kjenteOrgnummer.filter { !orgnummerMedSpleisSykdom.contains(it) }
         val nyeOrgnummer = orgnummerFraAAreg.filter { !kjenteOrgnummer.contains(it) }
-        if (manglerIAAReg.isNotEmpty()) {
-            sikkerLogg.info("Fant arbeidsgivere som ikke er i AAReg(${manglerIAAReg}), opprettet(${nyeOrgnummer}) for $fødselsnummer")
+        if (spleisOrgnummerManglerIAAreg.isNotEmpty()) {
+            sikkerLogg.info("Fant arbeidsgivere i spleis som ikke er i AAReg(${manglerIAAReg}), opprettet(${nyeOrgnummer}) for $fødselsnummer")
+        } else if (manglerIAAReg.isNotEmpty()) {
+            sikkerLogg.info("Fant arbeidsgivere i IT som ikke er i AAReg(${manglerIAAReg}), opprettet(${nyeOrgnummer}) for $fødselsnummer")
         } else {
             sikkerLogg.info("AAReg kjenner til alle arbeidsgivere i spleis, opprettet (${nyeOrgnummer}) for $fødselsnummer")
         }

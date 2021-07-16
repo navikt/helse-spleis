@@ -757,6 +757,8 @@ internal class Arbeidsgiver private constructor(
 
     internal fun harSykdom() = sykdomshistorikk.harSykdom() || sykdomstidslinje().harSykedager()
 
+    internal fun harSpleisSykdom() = !sykdomshistorikk.isEmpty()
+
     internal fun periodetype(periode: Periode): Periodetype {
         val skjæringstidspunkt = skjæringstidspunkt(periode)
         return when {
