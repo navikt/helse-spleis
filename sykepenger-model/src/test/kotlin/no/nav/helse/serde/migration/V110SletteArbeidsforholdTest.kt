@@ -5,7 +5,7 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class V107SletteArbeidsforholdTest {
+internal class V110SletteArbeidsforholdTest {
 
     @Test
     fun `Sletter arbeidsforhold`() {
@@ -14,7 +14,7 @@ internal class V107SletteArbeidsforholdTest {
 
     private fun toNode(json: String) = serdeObjectMapper.readTree(json)
 
-    private fun migrer(json: String) = listOf(V107SletteArbeidsforhold()).migrate(toNode(json))
+    private fun migrer(json: String) = listOf(V110SletteArbeidsforhold()).migrate(toNode(json))
 
     @Language("JSON")
     private val original = """
@@ -49,7 +49,7 @@ internal class V107SletteArbeidsforholdTest {
           ]
         }
       ],
-      "skjemaVersjon": 106
+      "skjemaVersjon": 109
     }
     """
 
@@ -64,7 +64,7 @@ internal class V107SletteArbeidsforholdTest {
           "arbeidsforholdhistorikk": []
         }
       ],
-      "skjemaVersjon": 107
+      "skjemaVersjon": 110
     }
     """
 }
