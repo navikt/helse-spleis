@@ -1798,7 +1798,7 @@ internal class Vedtaksperiode private constructor(
                 }
                 onSuccess {
                     if (Toggles.FlereArbeidsgivereUlikFom.enabled && person.harVedtaksperiodeForArbeidsgiverMedUkjentArbeidsforhold(vedtaksperiode.skjæringstidspunkt)) {
-                        ytelser.warn("Finner ikke arbeidsforhold for arbeidsgiver") // TODO: må ses på av voksne (kan drepe volum om data fra aareg ikke er bra nok)
+                        ytelser.warn("Arbeidsgiver er ikke registrert i Aa-registeret.")
                     }
                     vedtaksperiode.forsøkUtbetaling(arbeidsgiverUtbetalinger2.tidslinjeEngine, ytelser)
                 }
