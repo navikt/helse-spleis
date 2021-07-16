@@ -622,7 +622,7 @@ internal class Arbeidsgiver private constructor(
             ?.also { perioder ->
                 perioder
                     .forEach {
-                        it.ferdig(hendelse, årsak)
+                        it.forkast(hendelse, årsak)
                         fjernDager(it.periode())
                     }
                 if (vedtaksperioder.isEmpty()) sykdomshistorikk.tøm()
