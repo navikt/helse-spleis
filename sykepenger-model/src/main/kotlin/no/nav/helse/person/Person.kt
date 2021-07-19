@@ -509,6 +509,15 @@ class Person private constructor(
         finnEllerOpprettArbeidsgiver(orgnummer, aktivitetslogg).lagreArbeidsforhold(arbeidsforhold, skjæringstidspunkt)
     }
 
+    internal fun brukOuijaBrettForÅKommunisereMedPotensielleSpøkelser(orgnummerFraAAreg: List<String>, skjæringstidspunkt: LocalDate) {
+        val arbeidsgivereMedSykdom = arbeidsgivere.filter { it.harSykdomFor(skjæringstidspunkt) }.map(Arbeidsgiver::organisasjonsnummer)
+        if (arbeidsgivereMedSykdom.containsAll(orgnummerFraAAreg)) {
+            sikkerLogg.info("Ingen spøkelser, har sykdom hos alle kjente arbeidsgivere")
+        } else {
+            sikkerLogg.info("Vi har kontakt med spøkelser")
+        }
+    }
+
     internal fun loggUkjenteOrgnummere(orgnummerFraAAreg: List<String>) {
         val kjenteOrgnummer = arbeidsgivereMedSykdom().map { it.organisasjonsnummer() }
             .filter { it != "0" }

@@ -26,7 +26,10 @@ class Utbetalingsgrunnlag(
         inntektsvurderingForSykepengegrunnlag.lagreInntekter(person, skjæringstidspunkt, this)
     }
 
-    internal fun loggUkjenteArbeidsforhold(person: Person) {
+    internal fun loggUkjenteArbeidsforhold(person: Person, skjæringstidspunkt: LocalDate) {
+        person.brukOuijaBrettForÅKommunisereMedPotensielleSpøkelser(arbeidsforhold
+            .filter { it.gjelder(skjæringstidspunkt) }
+            .map(Arbeidsforhold::orgnummer), skjæringstidspunkt)
         person.loggUkjenteOrgnummere(arbeidsforhold.map { it.orgnummer })
     }
 

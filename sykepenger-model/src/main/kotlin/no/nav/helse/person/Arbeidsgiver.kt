@@ -759,6 +759,8 @@ internal class Arbeidsgiver private constructor(
 
     internal fun harSpleisSykdom() = !sykdomshistorikk.isEmpty()
 
+    internal fun harSykdomFor(skjæringstidspunkt: LocalDate) = vedtaksperioder.any { it.gjelder(skjæringstidspunkt) }
+
     internal fun periodetype(periode: Periode): Periodetype {
         val skjæringstidspunkt = skjæringstidspunkt(periode)
         return when {

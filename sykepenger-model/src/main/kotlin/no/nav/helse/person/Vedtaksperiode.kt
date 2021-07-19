@@ -280,6 +280,8 @@ internal class Vedtaksperiode private constructor(
 
     private fun harSykeperiodeRettFør() = arbeidsgiver.finnSykeperiodeRettFør(this) != null
 
+    internal fun gjelder(skjæringstidspunkt: LocalDate) = this.skjæringstidspunkt == skjæringstidspunkt
+
     internal fun periodetype() = arbeidsgiver.periodetype(periode)
 
     internal fun inntektskilde() = inntektskilde
@@ -1684,7 +1686,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, utbetalingsgrunnlag: Utbetalingsgrunnlag) {
-            utbetalingsgrunnlag.loggUkjenteArbeidsforhold(vedtaksperiode.person)
+            utbetalingsgrunnlag.loggUkjenteArbeidsforhold(vedtaksperiode.person, vedtaksperiode.skjæringstidspunkt)
             if (Toggles.FlereArbeidsgivereUlikFom.enabled) {
                 utbetalingsgrunnlag.lagreArbeidsforhold(vedtaksperiode.person, vedtaksperiode.skjæringstidspunkt)
                 utbetalingsgrunnlag.lagreInntekter(vedtaksperiode.person, vedtaksperiode.skjæringstidspunkt)
