@@ -430,10 +430,7 @@ internal class TestArbeidsgiverInspektør(
         personLogg.behov().last { it.type == type }
 
     internal fun maksdato(indeks: Int) = maksdatoer[indeks]
-    internal fun maksdatoVedSisteVedtak() =
-        utbetalinger.lastOrNull { utbetaling -> utbetaling.erAvsluttet() }
-            ?.let { utbetalinger.indexOf(it) }
-            ?.let { maksdato(it) } ?: LocalDate.MAX
+    internal fun maksdatoVedSisteVedtak() = utbetalinger.indexOfLast(Utbetaling::erAvsluttet).takeIf { it > -1 }?.let { index -> maksdato(index) }
     internal fun sisteMaksdato(id: UUID) = maksdatoer.filterIndexed { index, _ -> index in id.utbetalingsindeks }.last()
 
     internal fun forbrukteSykedager(indeks: Int) = forbrukteSykedagerer[indeks]
