@@ -552,5 +552,3 @@ class SpesifikkKontekst(internal val kontekstType: String, internal val kontekst
 
     override fun hashCode() = kontekstMap.hashCode()
 }
-
-fun Aktivitetslogg.toMap() = AktivitetsloggReflect(this).toMap()

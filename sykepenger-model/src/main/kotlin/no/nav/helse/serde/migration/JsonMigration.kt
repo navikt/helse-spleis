@@ -16,11 +16,9 @@ internal fun List<JsonMigration>.migrate(jsonNode: JsonNode, meldingerSupplier: 
     JsonMigration.migrate(this, jsonNode, MemoizedMeldingerSupplier(meldingerSupplier))
 
 private class MemoizedMeldingerSupplier(private val supplier: MeldingerSupplier): MeldingerSupplier {
-    private lateinit var meldinger: Map<UUID, String>
-    override fun hentMeldinger(): Map<UUID, String> {
-        if (!this::meldinger.isInitialized) meldinger = supplier.hentMeldinger()
-        return meldinger
-    }
+    private val meldinger: Map<UUID, String> by lazy { supplier.hentMeldinger() }
+
+    override fun hentMeldinger(): Map<UUID, String> = meldinger
 }
 
 // Implements GoF Command Pattern to perform migration
