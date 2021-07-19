@@ -512,9 +512,9 @@ class Person private constructor(
     internal fun brukOuijaBrettForÅKommunisereMedPotensielleSpøkelser(orgnummerFraAAreg: List<String>, skjæringstidspunkt: LocalDate) {
         val arbeidsgivereMedSykdom = arbeidsgivere.filter { it.harSykdomFor(skjæringstidspunkt) }.map(Arbeidsgiver::organisasjonsnummer)
         if (arbeidsgivereMedSykdom.containsAll(orgnummerFraAAreg)) {
-            sikkerLogg.info("Ingen spøkelser, har sykdom hos alle kjente arbeidsgivere antall=${arbeidsgivereMedSykdom}")
+            sikkerLogg.info("Ingen spøkelser, har sykdom hos alle kjente arbeidsgivere antall=${arbeidsgivereMedSykdom.size}")
         } else {
-            sikkerLogg.info("Vi har kontakt med spøkelser, fnr=$fødselsnummer, antall=${arbeidsgivereMedSykdom.size}")
+            sikkerLogg.info("Vi har kontakt med spøkelser, fnr=$fødselsnummer, antall=${orgnummerFraAAreg.size}")
         }
     }
 
