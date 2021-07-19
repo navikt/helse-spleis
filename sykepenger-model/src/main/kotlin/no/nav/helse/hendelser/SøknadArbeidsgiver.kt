@@ -16,7 +16,7 @@ class SøknadArbeidsgiver(
     private val fnr: String,
     private val aktørId: String,
     private val orgnummer: String,
-    private val perioder: List<Søknadsperiode>,
+    private val sykdomsperioder: List<Sykdom>,
     sykmeldingSkrevet: LocalDateTime
 ) : SykdomstidslinjeHendelse(meldingsreferanseId, sykmeldingSkrevet, Søknad::class) {
 
@@ -25,11 +25,11 @@ class SøknadArbeidsgiver(
     private val sykdomstidslinje: Sykdomstidslinje
 
     init {
-        if (perioder.isEmpty()) severe("Søknad må inneholde perioder")
-        fom = perioder.minOfOrNull { it.fom } ?: severe("Søknad mangler fradato")
-        tom = perioder.maxOfOrNull { it.tom } ?: severe("Søknad mangler tildato")
+        if (sykdomsperioder.isEmpty()) severe("Søknad må inneholde perioder")
+        fom = sykdomsperioder.minOfOrNull { it.fom } ?: severe("Søknad mangler fradato")
+        tom = sykdomsperioder.maxOfOrNull { it.tom } ?: severe("Søknad mangler tildato")
 
-        sykdomstidslinje = perioder.map { it.sykdomstidslinje(kilde) }.merge(noOverlap)
+        sykdomstidslinje = sykdomsperioder.map { it.sykdomstidslinje(kilde) }.merge(noOverlap)
     }
 
     override fun sykdomstidslinje() = sykdomstidslinje
@@ -41,7 +41,7 @@ class SøknadArbeidsgiver(
     override fun aktørId() = aktørId
 
     override fun valider(periode: Periode): IAktivitetslogg {
-        perioder.forEach { it.valider(this) }
+        sykdomsperioder.forEach { it.valider(this) }
         return this
     }
 
@@ -51,7 +51,7 @@ class SøknadArbeidsgiver(
 
     override fun melding(klassName: String) = "SøknadArbeidsgiver"
 
-    class Søknadsperiode(
+    class Sykdom(
         internal val fom: LocalDate,
         internal val tom: LocalDate,
         private val sykmeldingsgrad: Prosentdel,
@@ -59,10 +59,6 @@ class SøknadArbeidsgiver(
     ) {
         private val søknadsgrad = arbeidshelse?.not()
         private val grad = søknadsgrad ?: sykmeldingsgrad
-
-        internal fun valider(søknad: SøknadArbeidsgiver, beskjed: String) {
-            if (fom < søknad.fom || tom > søknad.tom) søknad.error(beskjed)
-        }
 
         internal fun valider(søknad: SøknadArbeidsgiver) {
             if (søknadsgrad != null && søknadsgrad > sykmeldingsgrad) søknad.error("Bruker har oppgitt at de har jobbet mindre enn sykmelding tilsier")

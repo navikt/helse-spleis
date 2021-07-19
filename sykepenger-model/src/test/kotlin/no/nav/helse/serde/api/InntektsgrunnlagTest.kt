@@ -175,7 +175,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
     @Test
     fun `Finner inntektsgrunnlag for en arbeidsgiver med inntekt fra Infotrygd på senere dato enn skjærinstidspunkt`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(1.januar, 16.januar, 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(1.januar, 16.januar, 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(25.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 25.januar)

@@ -732,7 +732,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     fun `simulering av periode der tilstøtende ikke ble utbetalt`() {
         håndterSykmelding(Sykmeldingsperiode(28.januar(2020), 10.februar(2020), 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(11.februar(2020), 21.februar(2020), 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(28.januar(2020), 10.februar(2020), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(28.januar(2020), 10.februar(2020), 100.prosent))
         håndterSøknad(Sykdom(11.februar(2020), 21.februar(2020), 100.prosent))
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(28.januar(2020), 12.februar(2020))),
@@ -1093,7 +1093,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     @Test
     fun `vilkårsgrunnlagfeil forkaster også tidligere AVSLUTTET_UTEN_UTBETALING`() {
         håndterSykmelding(Sykmeldingsperiode(2.mars(2020), 29.mars(2020), 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(2.mars(2020), 29.mars(2020), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(2.mars(2020), 29.mars(2020), 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(30.mars(2020), 15.april(2020), 100.prosent))
 
@@ -1659,8 +1659,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(23.mars(2020), 29.mars(2020), 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(30.mars(2020), 12.april(2020), 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(19.mars(2020), 22.mars(2020), 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(23.mars(2020), 29.mars(2020), 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(19.mars(2020), 22.mars(2020), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(23.mars(2020), 29.mars(2020), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(19.mars(2020), 22.mars(2020), 100.prosent))
         håndterSøknad(Sykdom(30.mars(2020), 12.april(2020), 100.prosent))
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(17.mars(2020), 1.april(2020))),
@@ -1671,9 +1671,9 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     @Test
     fun `Forkasting skal ikke påvirke tilstanden til AVSLUTTET_UTEN_UTBETALING`() {
         håndterSykmelding(Sykmeldingsperiode(31.mars(2020), 13.april(2020), 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(31.mars(2020), 13.april(2020), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(31.mars(2020), 13.april(2020), 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(4.juni(2020), 11.juni(2020), 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(4.juni(2020), 11.juni(2020), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(4.juni(2020), 11.juni(2020), 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(12.juni(2020), 25.juni(2020), 100.prosent))
         håndterSøknad(Sykdom(12.juni(2020), 25.juni(2020), 100.prosent))
         håndterInntektsmelding(
@@ -1696,7 +1696,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     fun `sykdomstidslinje tømmes helt når perioder blir forkastet, dersom det ikke finnes noen perioder igjen`() {
         //(prod-case der to dager ble igjen etter forkastelse, som medførte wonky sykdomstidslinje senere i behandlingen)
         håndterSykmelding(Sykmeldingsperiode(27.april(2020), 30.april(2020), 100.prosent)) // (1.vedtaksperiode)
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(27.april(2020), 30.april(2020), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(27.april(2020), 30.april(2020), 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(8.juni(2020), 21.juni(2020), 100.prosent)) // (2.vedtaksperiode)
         håndterSøknad(Sykdom(8.juni(2020), 21.juni(2020), 100.prosent))
@@ -1778,7 +1778,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     @Test
     fun `skal ikke lage ny arbeidsgiverperiode ved forkasting`() {
         håndterSykmelding(Sykmeldingsperiode(30.juni(2020), 14.august(2020), 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(30.juni(2020), 14.august(2020), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(30.juni(2020), 14.august(2020), 100.prosent))
         håndterSøknad(Sykdom(30.juni(2020), 14.august(2020), 100.prosent))
 
         håndterInntektsmelding(listOf(Periode(30.juni(2020), 14.august(2020))), førsteFraværsdag = 30.juni(2020))

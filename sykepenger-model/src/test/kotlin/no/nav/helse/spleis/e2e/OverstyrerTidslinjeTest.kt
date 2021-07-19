@@ -250,7 +250,7 @@ internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
     fun `Overstyring av sykHelgDag`() {
         håndterSykmelding(Sykmeldingsperiode(17.desember(2017), 31.desember(2017), 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(17.desember(2017), 1.januar)), førsteFraværsdag = 17.desember(2017))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(17.desember(2017), 31.desember(2017), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(17.desember(2017), 31.desember(2017), 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(10.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(17.desember(2017), 1.januar)), førsteFraværsdag = 10.januar)

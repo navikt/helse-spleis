@@ -4,7 +4,7 @@ import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.SøknadArbeidsgiver
-import no.nav.helse.hendelser.SøknadArbeidsgiver.Søknadsperiode
+import no.nav.helse.hendelser.SøknadArbeidsgiver.Sykdom
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -18,7 +18,7 @@ internal class SøknadArbeidsgiverHendelseTest : AbstractPersonTest() {
     @Test
     fun `søknad matcher sykmelding`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent)))
-        person.håndter(søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 100.prosent)))
+        person.håndter(søknadArbeidsgiver(Sykdom(1.januar, 5.januar, 100.prosent)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(1.vedtaksperiode))
@@ -28,7 +28,7 @@ internal class SøknadArbeidsgiverHendelseTest : AbstractPersonTest() {
     @Test
     fun `sykdomsgrad ikke 100`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent)))
-        person.håndter(søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 50.prosent)))
+        person.håndter(søknadArbeidsgiver(Sykdom(1.januar, 5.januar, 50.prosent)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(1.vedtaksperiode))
@@ -37,9 +37,9 @@ internal class SøknadArbeidsgiverHendelseTest : AbstractPersonTest() {
     @Test
     fun `andre søknad ignoreres`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent)))
-        person.håndter(søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 100.prosent)))
+        person.håndter(søknadArbeidsgiver(Sykdom(1.januar, 5.januar, 100.prosent)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
-        person.håndter(søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 100.prosent)))
+        person.håndter(søknadArbeidsgiver(Sykdom(1.januar, 5.januar, 100.prosent)))
         assertTrue(inspektør.personLogg.hasErrorsOrWorse(), inspektør.personLogg.toString())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(1.vedtaksperiode))
@@ -48,7 +48,7 @@ internal class SøknadArbeidsgiverHendelseTest : AbstractPersonTest() {
     @Test
     fun `logger error ved overlappende søknad`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent)))
-        person.håndter(søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 100.prosent)))
+        person.håndter(søknadArbeidsgiver(Sykdom(1.januar, 5.januar, 100.prosent)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         person.håndter(søknad(Søknad.Søknadsperiode.Sykdom(1.januar, 5.januar, 100.prosent, 0.prosent)))
         assertTrue(inspektør.personLogg.hasErrorsOrWorse(), inspektør.personLogg.toString())
@@ -61,7 +61,7 @@ internal class SøknadArbeidsgiverHendelseTest : AbstractPersonTest() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent)))
         person.håndter(søknad(Søknad.Søknadsperiode.Sykdom(1.januar, 5.januar, 100.prosent, 0.prosent)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
-        person.håndter(søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 100.prosent)))
+        person.håndter(søknadArbeidsgiver(Sykdom(1.januar, 5.januar, 100.prosent)))
         assertTrue(inspektør.personLogg.hasErrorsOrWorse(), inspektør.personLogg.toString())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TIL_INFOTRYGD, inspektør.sisteTilstand(1.vedtaksperiode))
@@ -73,8 +73,8 @@ internal class SøknadArbeidsgiverHendelseTest : AbstractPersonTest() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent)))
         assertEquals(5, inspektør.sykdomstidslinje.count())
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 10.januar, 100.prosent)))
-        person.håndter(søknadArbeidsgiver(Søknadsperiode(6.januar, 10.januar, 100.prosent)))
-        person.håndter(søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 100.prosent)))
+        person.håndter(søknadArbeidsgiver(Sykdom(6.januar, 10.januar, 100.prosent)))
+        person.håndter(søknadArbeidsgiver(Sykdom(1.januar, 5.januar, 100.prosent)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(2, inspektør.vedtaksperiodeTeller)
         assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(1.vedtaksperiode))
@@ -87,8 +87,8 @@ internal class SøknadArbeidsgiverHendelseTest : AbstractPersonTest() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent)))
         assertEquals(5, inspektør.sykdomstidslinje.count())
         person.håndter(sykmelding(Sykmeldingsperiode(15.januar, 19.januar, 100.prosent)))
-        person.håndter(søknadArbeidsgiver(Søknadsperiode(15.januar, 19.januar, 100.prosent)))
-        person.håndter(søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 100.prosent)))
+        person.håndter(søknadArbeidsgiver(Sykdom(15.januar, 19.januar, 100.prosent)))
+        person.håndter(søknadArbeidsgiver(Sykdom(1.januar, 5.januar, 100.prosent)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(2, inspektør.vedtaksperiodeTeller)
         assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(1.vedtaksperiode))
@@ -99,9 +99,9 @@ internal class SøknadArbeidsgiverHendelseTest : AbstractPersonTest() {
     @Test
     fun `forlengelse etter avsluttet periode`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent)))
-        person.håndter(søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 100.prosent)))
+        person.håndter(søknadArbeidsgiver(Sykdom(1.januar, 5.januar, 100.prosent)))
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 10.januar, 100.prosent)))
-        person.håndter(søknadArbeidsgiver(Søknadsperiode(6.januar, 10.januar, 100.prosent)))
+        person.håndter(søknadArbeidsgiver(Sykdom(6.januar, 10.januar, 100.prosent)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(2, inspektør.vedtaksperiodeTeller)
         assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(1.vedtaksperiode))
@@ -114,7 +114,7 @@ internal class SøknadArbeidsgiverHendelseTest : AbstractPersonTest() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent)))
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 10.januar, 100.prosent)))
         assertEquals(MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, inspektør.sisteTilstand(2.vedtaksperiode))
-        person.håndter(søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 100.prosent)))
+        person.håndter(søknadArbeidsgiver(Sykdom(1.januar, 5.januar, 100.prosent)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(2, inspektør.vedtaksperiodeTeller)
         assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(1.vedtaksperiode))
@@ -126,7 +126,7 @@ internal class SøknadArbeidsgiverHendelseTest : AbstractPersonTest() {
     fun `avslutter andre periode før første periode behandles`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent)))
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 10.januar, 100.prosent)))
-        person.håndter(søknadArbeidsgiver(Søknadsperiode(6.januar, 10.januar, 100.prosent)))
+        person.håndter(søknadArbeidsgiver(Sykdom(6.januar, 10.januar, 100.prosent)))
         person.håndter(søknad(Søknad.Søknadsperiode.Sykdom(1.januar, 5.januar, 100.prosent, 0.prosent)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(2, inspektør.vedtaksperiodeTeller)
@@ -138,7 +138,7 @@ internal class SøknadArbeidsgiverHendelseTest : AbstractPersonTest() {
     @Test
     fun `Sykmelding med overlapp på en periode`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent)))
-        person.håndter(søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 100.prosent)))
+        person.håndter(søknadArbeidsgiver(Sykdom(1.januar, 5.januar, 100.prosent)))
         person.håndter(sykmelding(Sykmeldingsperiode(4.januar, 10.januar, 100.prosent)))
         assertTrue(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
@@ -160,7 +160,7 @@ internal class SøknadArbeidsgiverHendelseTest : AbstractPersonTest() {
         )
 
     private fun søknadArbeidsgiver(
-        vararg perioder: Søknadsperiode,
+        vararg perioder: Sykdom,
         orgnummer: String = "987654321"
     ) =
         SøknadArbeidsgiver(
@@ -168,7 +168,7 @@ internal class SøknadArbeidsgiverHendelseTest : AbstractPersonTest() {
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "12345",
             orgnummer = orgnummer,
-            perioder = listOf(*perioder),
+            sykdomsperioder = listOf(*perioder),
             sykmeldingSkrevet = LocalDateTime.now()
         )
 

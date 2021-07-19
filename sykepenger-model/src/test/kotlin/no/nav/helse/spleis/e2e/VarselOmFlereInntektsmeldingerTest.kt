@@ -13,10 +13,10 @@ internal class VarselOmFlereInntektsmeldingerTest : AbstractEndToEndTest() {
     @Test
     fun `Prodbug - Feilaktig varsel om flere inntektsmeldinger`() {
         håndterSykmelding(Sykmeldingsperiode(22.mars(2021), 28.mars(2021), 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(22.mars(2021), 28.mars(2021), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(22.mars(2021), 28.mars(2021), 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(29.mars(2021), 5.april(2021), 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(29.mars(2021), 5.april(2021), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(29.mars(2021), 5.april(2021), 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(29.mars(2021), 5.april(2021), 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(6.april(2021), 16.april(2021), 50.prosent))

@@ -15,7 +15,7 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
     @Test
     fun `kort periode blokkerer neste periode i ny arbeidsgiverperiode`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 10.januar, 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(3.januar, 10.januar, 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(3.januar, 10.januar, 100.prosent))
         assertTilstander(
             0,
             TilstandType.START,
@@ -57,7 +57,7 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
     @Test
     fun `kort periode setter senere periode fast i AVVENTER_HISTORIKK`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 10.januar, 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(3.januar, 10.januar, 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(3.januar, 10.januar, 100.prosent))
         assertTilstander(
             1.vedtaksperiode,
             TilstandType.START,
@@ -66,7 +66,7 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
         )
 
         håndterSykmelding(Sykmeldingsperiode(3.mars, 7.mars, 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(3.mars, 7.mars, 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(3.mars, 7.mars, 100.prosent))
         assertTilstander(
             2.vedtaksperiode,
             TilstandType.START,

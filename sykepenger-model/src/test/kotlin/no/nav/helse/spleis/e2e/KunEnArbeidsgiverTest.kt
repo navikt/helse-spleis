@@ -77,7 +77,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `ingen historie med søknad til arbeidsgiver først`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 8.januar, 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(3.januar, 8.januar, 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(3.januar, 8.januar, 100.prosent))
         assertNoWarnings(inspektør)
         håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(3.januar, 18.januar)), førsteFraværsdag = 3.januar)
         inspektør.also {
@@ -99,10 +99,10 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `ingen historie med to søknader til arbeidsgiver før inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 5.januar, 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(3.januar, 5.januar, 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(3.januar, 5.januar, 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(8.januar, 10.januar, 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(8.januar, 10.januar, 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(8.januar, 10.januar, 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(11.januar, 22.januar, 100.prosent))
         håndterSøknad(Sykdom(11.januar, 22.januar, 100.prosent))
@@ -147,10 +147,10 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `ingen historie med to søknader (med gap mellom) til arbeidsgiver først`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 4.januar, 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(3.januar, 4.januar, 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(3.januar, 4.januar, 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(8.januar, 10.januar, 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(8.januar, 10.januar, 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(8.januar, 10.januar, 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(11.januar, 22.januar, 100.prosent))
         håndterSøknad(Sykdom(11.januar, 22.januar, 100.prosent))
@@ -194,7 +194,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 8.januar, 100.prosent))
         håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(3.januar, 18.januar)), førsteFraværsdag = 3.januar)
         assertNoWarnings(inspektør)
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(3.januar, 8.januar, 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(3.januar, 8.januar, 100.prosent))
         inspektør.also {
             assertNoErrors(it)
             assertActivities(it)
@@ -1402,7 +1402,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 7.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(8.januar, 23.februar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(8.januar, 23.februar, 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(8.januar, 23.februar, 100.prosent))
 
         inspektør.also {
             assertNoErrors(it)
@@ -2367,7 +2367,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(20.februar, 28.februar, 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(20.februar, 28.februar, 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(20.februar, 28.februar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
 
@@ -2396,10 +2396,10 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(20.november(2017), 12.desember(2017), 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 12.januar, 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(1.januar, 12.januar, 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(1.januar, 12.januar, 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(20.februar, 28.februar, 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(20.februar, 28.februar, 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(20.februar, 28.februar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(20.februar, 8.mars)), 20.februar)
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
@@ -2433,7 +2433,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `Når inntektsmeldingens første fraværsdag er midt i en vedtaksperiode lagres inntekten på vedtaksperiodens skjæringstidspunkt`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(1.januar, 12.januar, 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(1.januar, 12.januar, 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 12.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 12.februar, 100.prosent))
@@ -2474,16 +2474,16 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `Historisk utbetaling til bruker skal ikke bli med i utbetalingstidslinje for arbeidsgiver`() {
         håndterSykmelding(Sykmeldingsperiode(24.juni(2020), 30.juni(2020), 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(24.juni(2020), 30.juni(2020), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(24.juni(2020), 30.juni(2020), 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(1.juli(2020), 9.juli(2020), 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(1.juli(2020), 9.juli(2020), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(1.juli(2020), 9.juli(2020), 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(16.oktober(2020), 23.oktober(2020), 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(16.oktober(2020), 23.oktober(2020), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(16.oktober(2020), 23.oktober(2020), 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(28.oktober(2020), 3.november(2020), 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(28.oktober(2020), 3.november(2020), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(28.oktober(2020), 3.november(2020), 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(4.november(2020), 13.november(2020), 100.prosent))
         håndterSøknad(Sykdom(4.november(2020), 13.november(2020), 100.prosent))
@@ -2570,10 +2570,10 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `inntektsmelding uten relevant inntekt (fordi perioden er i agp) flytter perioden til ferdig-tilstand`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(1.januar, 5.januar, 100.prosent), orgnummer = ORGNUMMER)
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(1.januar, 5.januar, 100.prosent), orgnummer = ORGNUMMER)
 
         håndterSykmelding(Sykmeldingsperiode(9.januar, 10.januar, 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(9.januar, 10.januar, 100.prosent), orgnummer = ORGNUMMER)
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(9.januar, 10.januar, 100.prosent), orgnummer = ORGNUMMER)
 
         håndterSykmelding(Sykmeldingsperiode(12.januar, 24.januar, 100.prosent))
         håndterSøknad(Sykdom(12.januar, 24.januar, 100.prosent))
@@ -2635,7 +2635,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `Inntektsmelding er gyldig dersom den utvider perioden`() {
         håndterSykmelding(Sykmeldingsperiode(28.oktober(2020), 8.november(2020), 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(28.oktober(2020), 8.november(2020), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(28.oktober(2020), 8.november(2020), 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(9.november(2020), 22.november(2020), 100.prosent))
         håndterSøknad(Sykdom(9.november(2020), 22.november(2020), 100.prosent))
 
@@ -2803,7 +2803,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         val inntektsmeldingId = UUID.randomUUID()
         håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(11.januar, 31.januar, 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(1.januar, 10.januar, 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(1.januar, 10.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), id = inntektsmeldingId)
         håndterSøknad(Sykdom(11.januar, 31.januar, 100.prosent))
 
@@ -2871,10 +2871,10 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `Starter ikke ny arbeidsgiverperiode dersom flere opphold til sammen utgjør over 16 dager når hvert opphold er under 16 dager - opphold starter på helg`() {
         håndterSykmelding(Sykmeldingsperiode(27.januar(2021), 2.februar(2021), 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(27.januar(2021), 2.februar(2021), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(27.januar(2021), 2.februar(2021), 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(3.februar(2021), 7.februar(2021), 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(3.februar(2021), 7.februar(2021), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(3.februar(2021), 7.februar(2021), 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(8.februar(2021), 12.februar(2021), 100.prosent))
         håndterSøknad(Sykdom(8.februar(2021), 12.februar(2021), 100.prosent))
@@ -2909,10 +2909,10 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `Starter ikke ny arbeidsgiverperiode dersom flere opphold til sammen utgjør over 16 dager når hvert opphold er under 16 dager`() {
         håndterSykmelding(Sykmeldingsperiode(27.januar(2021), 2.februar(2021), 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(27.januar(2021), 2.februar(2021), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(27.januar(2021), 2.februar(2021), 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(3.februar(2021), 7.februar(2021), 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(3.februar(2021), 7.februar(2021), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(3.februar(2021), 7.februar(2021), 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(8.februar(2021), 12.februar(2021), 100.prosent))
         håndterSøknad(Sykdom(8.februar(2021), 12.februar(2021), 100.prosent))
@@ -2947,10 +2947,10 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `Starter ikke ny arbeidsgiverperiode dersom flere opphold til sammen utgjør over 16 dager når hvert opphold er under 16 dager - opphold etter arbeidsgiverperioden`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2021), 10.januar(2021), 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(1.januar(2021), 10.januar(2021), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(1.januar(2021), 10.januar(2021), 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(20.januar(2021), 25.januar(2021), 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(20.januar(2021), 25.januar(2021), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(20.januar(2021), 25.januar(2021), 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(5.februar(2021), 12.februar(2021), 100.prosent))
         håndterSøknad(Sykdom(5.februar(2021), 12.februar(2021), 100.prosent))
@@ -3038,7 +3038,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `Sender vedtaksperiode_endret når inntektsmelidng kommer i AVSLUTTET_UTEN_UTBETALING`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2021), 1.januar(2021), 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(1.januar(2021), 1.januar(2021), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(1.januar(2021), 1.januar(2021), 100.prosent))
 
         assertEquals(2, observatør.hendelseider(1.vedtaksperiode).size)
 

@@ -193,9 +193,9 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     }
 
     protected fun håndterSøknadArbeidsgiver(
-        vararg perioder: SøknadArbeidsgiver.Søknadsperiode,
+        vararg sykdomsperioder: SøknadArbeidsgiver.Sykdom,
         orgnummer: String = ORGNUMMER
-    ) = søknadArbeidsgiver(*perioder, orgnummer = orgnummer).håndter(Person::håndter)
+    ) = søknadArbeidsgiver(*sykdomsperioder, orgnummer = orgnummer).håndter(Person::håndter)
 
     protected fun håndterInntektsmeldingMedValidering(
         vedtaksperiodeId: UUID,
@@ -657,7 +657,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     }
 
     private fun søknadArbeidsgiver(
-        vararg perioder: SøknadArbeidsgiver.Søknadsperiode,
+        vararg perioder: SøknadArbeidsgiver.Sykdom,
         orgnummer: String
     ): SøknadArbeidsgiver {
         return SøknadArbeidsgiver(
@@ -665,7 +665,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             fnr = UNG_PERSON_FNR_2018,
             aktørId = AKTØRID,
             orgnummer = orgnummer,
-            perioder = listOf(*perioder),
+            sykdomsperioder = listOf(*perioder),
             sykmeldingSkrevet = LocalDateTime.now()
         ).apply {
             hendelselogg = this

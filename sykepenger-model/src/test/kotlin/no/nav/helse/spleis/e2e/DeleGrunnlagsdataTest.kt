@@ -230,7 +230,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
     @Test
     fun `setter ikke inntektsmeldingId flere ganger`() {
         håndterSykmelding(Sykmeldingsperiode(20.februar, 28.februar, 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(20.februar, 28.februar, 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(20.februar, 28.februar, 100.prosent))
 
         val sykmeldingId = håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
         val søknadId = håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
@@ -312,7 +312,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
     @Test
     fun `når vilkårsgrunnlag mangler sjekk på minimum inntekt gjøres denne sjekken - søknad arbeidsgiver`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(1.januar, 16.januar, 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(1.januar, 16.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)), refusjon = Refusjon(null, 1000.månedlig, emptyList()))
 
         val vilkårsgrunnlagElement = VilkårsgrunnlagHistorikk.Grunnlagsdata(

@@ -412,10 +412,10 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     @Test
     fun `En periode som opprinnelig var en forlengelse oppdager at den er en gap periode uten utbetaling ved inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(25.november(2020), 30.november(2020), 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(25.november(2020), 30.november(2020), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(25.november(2020), 30.november(2020), 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(1.desember(2020), 7.desember(2020), 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(1.desember(2020), 7.desember(2020), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(1.desember(2020), 7.desember(2020), 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(8.desember(2020), 14.desember(2020), 100.prosent))
         håndterSøknad(Sykdom(8.desember(2020), 14.desember(2020), 100.prosent))
@@ -468,10 +468,10 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     @Test
     fun `En periode som opprinnelig var en forlengelse oppdager at den er fortsatt en en forlengelse uten utbetaling ved inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(25.november(2020), 30.november(2020), 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(25.november(2020), 30.november(2020), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(25.november(2020), 30.november(2020), 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(1.desember(2020), 7.desember(2020), 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(1.desember(2020), 7.desember(2020), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(1.desember(2020), 7.desember(2020), 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(8.desember(2020), 14.desember(2020), 100.prosent))
         håndterSøknad(Sykdom(8.desember(2020), 14.desember(2020), 100.prosent))
@@ -524,10 +524,10 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     @Test
     fun `En periode som opprinnelig var en forlengelse oppdager at den er en gap periode med utbetaling ved inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(25.november(2020), 30.november(2020), 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(25.november(2020), 30.november(2020), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(25.november(2020), 30.november(2020), 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(1.desember(2020), 7.desember(2020), 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(1.desember(2020), 7.desember(2020), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(1.desember(2020), 7.desember(2020), 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(8.desember(2020), 3.januar(2021), 100.prosent))
         håndterSøknad(Sykdom(8.desember(2020), 3.januar(2021), 100.prosent))
@@ -802,9 +802,9 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     @Test
     fun `trimmer inntektsmelding etter tom`() {
         håndterSykmelding(Sykmeldingsperiode(6.januar, 14.januar, 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(6.januar, 14.januar, 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(6.januar, 14.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(15.januar, 21.januar, 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(15.januar, 21.januar, 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(15.januar, 21.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(22.januar, 7.februar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(22.januar, 7.februar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(8.februar, 21.februar, 100.prosent))
@@ -875,9 +875,9 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     fun `Inntektsmelding med error som treffer flere perioder`() {
         håndterSykmelding(Sykmeldingsperiode(29.mars(2021), 31.mars(2021), 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(6.april(2021), 17.april(2021), 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(29.mars(2021), 31.mars(2021), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(29.mars(2021), 31.mars(2021), 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(18.april(2021), 2.mai(2021), 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(6.april(2021), 17.april(2021), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(6.april(2021), 17.april(2021), 100.prosent))
         håndterSøknad(Sykdom(18.april(2021), 2.mai(2021), 100.prosent))
 
         håndterInntektsmeldingMedValidering(
@@ -916,9 +916,9 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     fun `Inntektsmelding med error som treffer flere perioder uten gap`() {
         håndterSykmelding(Sykmeldingsperiode(29.mars(2021), 31.mars(2021), 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(1.april(2021), 17.april(2021), 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(29.mars(2021), 31.mars(2021), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(29.mars(2021), 31.mars(2021), 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(18.april(2021), 2.mai(2021), 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(1.april(2021), 17.april(2021), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(1.april(2021), 17.april(2021), 100.prosent))
         håndterSøknad(Sykdom(18.april(2021), 2.mai(2021), 100.prosent))
 
         håndterInntektsmeldingMedValidering(

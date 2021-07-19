@@ -2029,7 +2029,7 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
             fnr = fnr,
             aktørId = aktørId,
             orgnummer = orgnummer,
-            perioder = listOf(SøknadArbeidsgiver.Søknadsperiode(fom, tom, 100.prosent, 0.prosent)),
+            sykdomsperioder = listOf(SøknadArbeidsgiver.Sykdom(fom, tom, 100.prosent, 0.prosent)),
             sykmeldingSkrevet = LocalDateTime.now()
         ) to SøknadArbeidsgiverDTO(
             id = hendelseId.toString(),

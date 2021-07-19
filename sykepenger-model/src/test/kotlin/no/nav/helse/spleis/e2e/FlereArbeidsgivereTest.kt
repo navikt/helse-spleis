@@ -1,13 +1,12 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.SøknadArbeidsgiver.Søknadsperiode
+import no.nav.helse.hendelser.SøknadArbeidsgiver.Sykdom
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.Inntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.person.Inntektskilde.FLERE_ARBEIDSGIVERE
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.TilstandType.*
-import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.reflection.castAsList
@@ -2070,8 +2069,8 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         val periode = 1.januar(2021) til 14.januar(2021)
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        håndterSøknadArbeidsgiver(Søknadsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        håndterSøknadArbeidsgiver(Søknadsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+        håndterSøknadArbeidsgiver(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+        håndterSøknadArbeidsgiver(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
 
         val forlengelseperiode = 15.januar(2021) til 31.januar(2021)
         håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
