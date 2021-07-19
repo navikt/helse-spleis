@@ -29,23 +29,17 @@ internal abstract class JsonMigration(private val version: Int) {
         private const val InitialVersion = 0
 
         internal fun migrate(migrations: List<JsonMigration>, jsonNode: JsonNode, supplier: MeldingerSupplier) = jsonNode.apply {
-            migrations.sortedBy { it.version }.also {
-                require(it.groupBy { it.version }.filterValues { it.size > 1 }.isEmpty()) { "Versjoner må være unike" }
-                it.forEach { it.migrate(this, supplier) }
-            }
+            require(this is ObjectNode) { "Kan kun migrere ObjectNodes" }
+            val sortedMigrations = migrations.sortedBy { it.version }
+            require(sortedMigrations.windowed(2).none { (a, b) -> a.version == b.version }) { "Versjoner må være unike" }
+            sortedMigrations.forEach { it.migrate(this, supplier) }
         }
 
-        internal fun medSkjemaversjon(migrations: List<JsonMigration>, jsonNode: JsonNode) = jsonNode.apply {
-            (jsonNode as ObjectNode).put(
-                SkjemaversjonKey,
-                gjeldendeVersjon(migrations)
-            )
-        }
+        internal fun medSkjemaversjon(migrations: List<JsonMigration>, jsonNode: JsonNode) =
+            (jsonNode as ObjectNode).put(SkjemaversjonKey, gjeldendeVersjon(migrations))
 
         internal fun skjemaVersjon(jsonNode: JsonNode) =
-            jsonNode.path(SkjemaversjonKey).asInt(
-                InitialVersion
-            )
+            jsonNode.path(SkjemaversjonKey).asInt(InitialVersion)
 
         internal fun gjeldendeVersjon(migrations: List<JsonMigration>) =
             migrations.maxOfOrNull { it.version } ?: InitialVersion
@@ -57,8 +51,7 @@ internal abstract class JsonMigration(private val version: Int) {
 
     protected abstract val description: String
 
-    private fun migrate(jsonNode: JsonNode, meldingerSupplier: MeldingerSupplier) {
-        if (jsonNode !is ObjectNode) return
+    private fun migrate(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         if (!shouldMigrate(jsonNode)) return
         doMigration(jsonNode, meldingerSupplier)
         after(jsonNode)
