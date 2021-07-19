@@ -19,6 +19,7 @@ internal class SendtArbeidsgiverSøknaderRiver(
         message.requireValue("status", "SENDT")
         message.require("sendtArbeidsgiver", JsonNode::asLocalDateTime)
         message.forbid("sendtNav")
+        message.interestedIn("arbeidGjenopptatt")
     }
 
     override fun createMessage(packet: JsonMessage) = SendtSøknadArbeidsgiverMessage(packet)

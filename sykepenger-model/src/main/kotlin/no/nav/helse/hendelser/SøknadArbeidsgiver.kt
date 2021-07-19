@@ -2,7 +2,7 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.IAktivitetslogg
-import no.nav.helse.sykdomstidslinje.Dag.Companion.noOverlap
+import no.nav.helse.sykdomstidslinje.Dag.Companion.arbeidsdagerVinner
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.merge
@@ -17,6 +17,7 @@ class SøknadArbeidsgiver(
     private val aktørId: String,
     private val orgnummer: String,
     private val sykdomsperioder: List<Sykdom>,
+    private val arbeidsperiode: List<Arbeid> = emptyList(),
     sykmeldingSkrevet: LocalDateTime
 ) : SykdomstidslinjeHendelse(meldingsreferanseId, sykmeldingSkrevet, Søknad::class) {
 
@@ -29,7 +30,9 @@ class SøknadArbeidsgiver(
         fom = sykdomsperioder.minOfOrNull { it.fom } ?: severe("Søknad mangler fradato")
         tom = sykdomsperioder.maxOfOrNull { it.tom } ?: severe("Søknad mangler tildato")
 
-        sykdomstidslinje = sykdomsperioder.map { it.sykdomstidslinje(kilde) }.merge(noOverlap)
+        val tidslinjeSydom = sykdomsperioder.map { it.sykdomstidslinje(kilde) }
+        val tidslinjeArbeid = arbeidsperiode.map { it.sykdomstidslinje(kilde) }
+        sykdomstidslinje = (tidslinjeSydom + tidslinjeArbeid).merge(arbeidsdagerVinner)
     }
 
     override fun sykdomstidslinje() = sykdomstidslinje
@@ -42,6 +45,7 @@ class SøknadArbeidsgiver(
 
     override fun valider(periode: Periode): IAktivitetslogg {
         sykdomsperioder.forEach { it.valider(this) }
+        arbeidsperiode.forEach { it.valider(this) }
         return this
     }
 
@@ -65,5 +69,18 @@ class SøknadArbeidsgiver(
         }
 
         internal fun sykdomstidslinje(kilde: Hendelseskilde) = Sykdomstidslinje.sykedager(fom, tom, grad, kilde)
+    }
+
+    class Arbeid(
+        internal val fom: LocalDate,
+        internal val tom: LocalDate,
+    ) {
+        internal fun valider(søknad: SøknadArbeidsgiver) {
+            val arbeidGjenopptatt = fom
+            if (arbeidGjenopptatt < søknad.fom || arbeidGjenopptatt > søknad.tom) søknad.error("Ugyldig input: arbeidGjenopptatt utenfor søknadsperioden")
+        }
+
+        internal fun sykdomstidslinje(kilde: Hendelseskilde) =
+            Sykdomstidslinje.arbeidsdager(fom, tom, kilde)
     }
 }

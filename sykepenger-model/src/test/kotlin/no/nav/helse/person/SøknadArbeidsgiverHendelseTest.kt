@@ -4,8 +4,10 @@ import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.SøknadArbeidsgiver
+import no.nav.helse.hendelser.SøknadArbeidsgiver.Arbeid
 import no.nav.helse.hendelser.SøknadArbeidsgiver.Sykdom
 import no.nav.helse.person.TilstandType.*
+import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
@@ -31,6 +33,17 @@ internal class SøknadArbeidsgiverHendelseTest : AbstractPersonTest() {
         person.håndter(søknadArbeidsgiver(Sykdom(1.januar, 5.januar, 50.prosent)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
+        assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(1.vedtaksperiode))
+    }
+
+    @Test
+    fun `arbeid gjenopptatt`() {
+        person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent)))
+        person.håndter(søknadArbeidsgiver(Sykdom(1.januar, 5.januar, 50.prosent), arbeidsperiode = Arbeid(4.januar, 5.januar)))
+        assertFalse(inspektør.personLogg.hasErrorsOrWorse())
+        assertEquals(1, inspektør.vedtaksperiodeTeller)
+        assertEquals(3, inspektør.sykdomstidslinje.filterIsInstance<Dag.Sykedag>().count())
+        assertEquals(2, inspektør.sykdomstidslinje.filterIsInstance<Dag.Arbeidsdag>().count())
         assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(1.vedtaksperiode))
     }
 
@@ -161,6 +174,7 @@ internal class SøknadArbeidsgiverHendelseTest : AbstractPersonTest() {
 
     private fun søknadArbeidsgiver(
         vararg perioder: Sykdom,
+        arbeidsperiode: Arbeid? = null,
         orgnummer: String = "987654321"
     ) =
         SøknadArbeidsgiver(
@@ -169,6 +183,7 @@ internal class SøknadArbeidsgiverHendelseTest : AbstractPersonTest() {
             aktørId = "12345",
             orgnummer = orgnummer,
             sykdomsperioder = listOf(*perioder),
+            arbeidsperiode = arbeidsperiode?.let(::listOf) ?: emptyList(),
             sykmeldingSkrevet = LocalDateTime.now()
         )
 

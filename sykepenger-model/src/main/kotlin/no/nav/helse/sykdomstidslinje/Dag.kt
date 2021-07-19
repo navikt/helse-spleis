@@ -56,6 +56,16 @@ internal sealed class Dag(
             if (høyre is UkjentDag) venstre
             else høyre
         }
+
+        /**
+         * Fordi vi ikke har (eller trenger) turnering for arbeidsgiversøknader trenger vi en strategi for å
+         * sørge for at arbeidsdager vinner over sykedager
+         */
+        internal val arbeidsdagerVinner: BesteStrategy = { venstre: Dag, høyre: Dag ->
+            require(venstre.dato == høyre.dato) { "Støtter kun sammenlikning av dager med samme dato" }
+            if (høyre is Arbeidsdag || høyre is FriskHelgedag) høyre
+            else venstre
+        }
     }
 
     internal fun kommerFra(hendelse: Melding) = kilde.erAvType(hendelse)

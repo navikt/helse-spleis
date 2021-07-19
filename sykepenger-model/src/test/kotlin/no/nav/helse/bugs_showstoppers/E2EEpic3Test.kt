@@ -23,6 +23,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 internal class E2EEpic3Test : AbstractEndToEndTest() {
@@ -1879,5 +1880,56 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE,
             AVVENTER_UTBETALINGSGRUNNLAG
         )
+    }
+
+    @Test
+    fun `'arbeidGjenopptatt' i løpet av arbeidsgiverperioden i arbeidsgiversøknad medfører ikke NavDager og påvirker derfor ikke telling av 26 uker opphold`() {
+        nyttVedtak(1.januar, 31.januar)
+
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 21.mars, 100.prosent))
+        håndterSøknadArbeidsgiver(
+            SøknadArbeidsgiver.Sykdom(1.mars, 21.mars, 100.prosent),
+            arbeidsperiode = SøknadArbeidsgiver.Arbeid(12.mars, 21.mars)
+        )
+        håndterInntektsmelding(listOf(1.mars til 16.mars))
+
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
+        val sykdomstidslinjedagerForAndrePeriode = inspektør.vedtaksperiodeDagTeller[2.vedtaksperiode]!!
+        assertEquals(21, sykdomstidslinjedagerForAndrePeriode.values.reduce { acc, i -> acc + i })
+        assertEquals(7, sykdomstidslinjedagerForAndrePeriode[Sykedag::class])
+        assertEquals(4, sykdomstidslinjedagerForAndrePeriode[SykHelgedag::class])
+        assertEquals(2, sykdomstidslinjedagerForAndrePeriode[FriskHelgedag::class])
+        assertEquals(3, sykdomstidslinjedagerForAndrePeriode[Dag.Arbeidsdag::class])
+        assertEquals(5, sykdomstidslinjedagerForAndrePeriode[Arbeidsgiverdag::class])
+
+        val maksdatoFør26UkerOpphold = LocalDate.of(2018, 12, 28)
+        assertEquals(maksdatoFør26UkerOpphold, inspektør.maksdatoVedSisteVedtak())
+
+        nyttVedtak(1.august, 21.august)
+
+        val maksdatoEtter26UkerOpphold = LocalDate.of(2019, 7, 30)
+        assertEquals(maksdatoEtter26UkerOpphold, inspektør.maksdatoVedSisteVedtak())
+        assertEquals(3, inspektør.forbrukteSykedager(1))
+        assertEquals(245, inspektør.gjenståendeSykedager(3.vedtaksperiode))
+    }
+
+    @Test
+    fun `'arbeidGjenopptatt' i løpet av arbeidsgiverperioden i arbeidsgiversøknad medfører ikke forbrukte sykedager`() {
+        nyttVedtak(1.januar, 31.januar)
+
+        assertEquals(LocalDate.of(2018, 12, 28), inspektør.maksdatoVedSisteVedtak())
+
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 21.mars, 100.prosent))
+        håndterSøknadArbeidsgiver(
+            SøknadArbeidsgiver.Sykdom(1.mars, 21.mars, 100.prosent),
+            arbeidsperiode = SøknadArbeidsgiver.Arbeid(12.mars, 21.mars)
+        )
+        håndterInntektsmelding(listOf(1.mars til 16.mars))
+
+        assertEquals(LocalDate.of(2018, 12, 28), inspektør.maksdatoVedSisteVedtak())
+
+        nyttVedtak(1.mai, 21.mai)
+
+        assertEquals(LocalDate.of(2019, 4, 12), inspektør.maksdatoVedSisteVedtak())
     }
 }
