@@ -292,7 +292,7 @@ internal class Vedtaksperiode private constructor(
         return AvventerUtbetalingsgrunnlag
     }
 
-    internal fun ferdig(hendelse: IAktivitetslogg, årsak: ForkastetÅrsak) {
+    internal fun forkast(hendelse: IAktivitetslogg, årsak: ForkastetÅrsak) {
         kontekst(hendelse)
         hendelse.info("Forkaster vedtaksperiode: %s", this.id.toString())
         if (årsak !== ERSTATTES && !erAvsluttet() && this.tilstand !is RevurderingFeilet) tilstand(hendelse, TilInfotrygd)
