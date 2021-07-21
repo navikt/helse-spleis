@@ -54,14 +54,6 @@ internal class SimpleMergeTest {
         Periode(6.januar, 14.januar).also {
             assertEquals(it, original.subset(it).periode())
         }
-
-        Periode(1.februar, 14.februar).also {
-            original.subset(it).also { tidslinje ->
-                assertEquals(it, tidslinje.periode())
-                assertSize(14, tidslinje)
-                assertEquals(14, tidslinje.filterIsInstance<UkjentDag>().size)
-            }
-        }
     }
 
     @Test
@@ -84,8 +76,8 @@ internal class SimpleMergeTest {
         }
 
         original.fremTilOgMed(10.januar).also {
-            assertEquals(Periode(1.januar, 5.januar), it.periode())
-            assertSize(5, it)
+            assertEquals(Periode(1.januar, 10.januar), it.periode())
+            assertSize(10, it)
         }
 
         original.fremTilOgMed(1.februar).also {

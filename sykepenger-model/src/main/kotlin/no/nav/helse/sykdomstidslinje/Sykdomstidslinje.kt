@@ -92,15 +92,12 @@ internal class Sykdomstidslinje private constructor(
     internal operator fun plus(other: Sykdomstidslinje) = this.merge(other)
     internal operator fun get(dato: LocalDate): Dag = dager[dato] ?: UkjentDag(dato, INGEN)
     internal fun subset(periode: Periode) =
-        Sykdomstidslinje(dager.filter { it.key in periode }.toSortedMap(), periode)
+        Sykdomstidslinje(dager.filter { it.key in periode }.toSortedMap(), this.periode?.subset(periode))
 
     /**
-     * Without padding of days
+     * Uten å utvide tidslinjen
      */
     internal fun fremTilOgMed(dato: LocalDate) =
-        Sykdomstidslinje(dager.headMap(dato.plusDays(1)).toMap())
-
-    internal fun fremTilOgMed2(dato: LocalDate) =
         if (periode == null || dato < førsteDag()) Sykdomstidslinje() else subset(førsteDag() til dato)
 
 

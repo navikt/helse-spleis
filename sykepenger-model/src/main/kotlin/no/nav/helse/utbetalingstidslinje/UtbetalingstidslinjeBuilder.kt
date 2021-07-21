@@ -66,7 +66,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
             ?: inntekt(INGEN, skjæringstidspunkt = dato)
 
     override fun result(sykdomstidslinje: Sykdomstidslinje, periode: Periode): Utbetalingstidslinje {
-        sykdomstidslinje.fremTilOgMed2(periode.endInclusive).accept(this)
+        sykdomstidslinje.fremTilOgMed(periode.endInclusive).accept(this)
         hengendeFridager()
         return tidslinje
     }
