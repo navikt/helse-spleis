@@ -79,6 +79,8 @@ open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Ite
         override fun next() =
             currentDate.also { currentDate = it.plusDays(1) }
     }
+
+    fun subset(periode: Periode) = Periode(start.coerceAtLeast(periode.start), endInclusive.coerceAtMost(periode.endInclusive))
 }
 
 internal operator fun List<Periode>.contains(dato: LocalDate) = this.any { dato in it }

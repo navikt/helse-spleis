@@ -8,7 +8,9 @@ import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.*
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -70,5 +72,23 @@ internal class PingPongTest : AbstractEndToEndTest() {
         håndterUtbetalingsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+    }
+
+    @Test
+    fun `periode utebetales på nytt orgnummer i IT`() {
+        val a2 = "yep"
+        nyttVedtak(1.januar, 31.januar, 25.prosent)
+
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 25.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(1.mars, 31.mars, 25.prosent), orgnummer = a2)
+
+        val historikk = ArbeidsgiverUtbetalingsperiode(a2, 1.februar, 28.februar, 25.prosent, INNTEKT)
+        val inntekter = listOf(Inntektsopplysning(a2, 1.februar, 25000.månedlig, true))
+        håndterUtbetalingshistorikk(1.vedtaksperiode(a2), historikk, inntektshistorikk = inntekter, orgnummer = a2)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode(a2), orgnummer = a2)
+
+        assertEquals(31, inspektør(ORGNUMMER).utbetalingstidslinjeBeregninger.last().utbetalingstidslinje().size)
+        assertTrue(inspektør(a2).utbetalingstidslinjer(1.vedtaksperiode(a2)).none { it is Utbetalingstidslinje.Utbetalingsdag.AvvistDag })
     }
 }

@@ -186,6 +186,12 @@ internal class PeriodeTest {
         assertEquals("01-01-2018 til 02-01-2018", Periode(1.januar, 2.januar).toString())
     }
 
+    @Test
+    fun subset() {
+        assertEquals(10.januar til 15.januar, (10.januar til 15.januar).subset(1.januar til 31.januar))
+        assertEquals(11.januar til 12.januar, (10.januar til 15.januar).subset(11.januar til 12.januar))
+    }
+
     private fun assertSize(expected: Int, periode: Periode) {
         var count = 0
         periode.forEach { _ -> count++ }

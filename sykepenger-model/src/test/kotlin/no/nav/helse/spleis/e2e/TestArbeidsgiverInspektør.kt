@@ -11,6 +11,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.fail
 import java.time.LocalDate
@@ -55,6 +56,7 @@ internal class TestArbeidsgiverInspektør(
     internal val arbeidsgiverOppdrag = mutableListOf<Oppdrag>()
     internal val totalBeløp = mutableListOf<Int>()
     internal val nettoBeløp = mutableListOf<Int>()
+    internal lateinit var utbetalingstidslinjeBeregninger: List<Utbetalingstidslinjeberegning>
     private val utbetalingstidslinjer = mutableMapOf<Int, Utbetalingstidslinje>()
     private val vedtaksperioder = mutableMapOf<Int, Vedtaksperiode>()
     private var forkastetPeriode = false
@@ -89,6 +91,10 @@ internal class TestArbeidsgiverInspektør(
             if (this::arbeidsgiver.isInitialized) return
             this.arbeidsgiver = arbeidsgiver
         }
+    }
+
+    override fun preVisitUtbetalingstidslinjeberegninger(beregninger: List<Utbetalingstidslinjeberegning>) {
+        utbetalingstidslinjeBeregninger = beregninger
     }
 
     override fun preVisitArbeidsgiver(
