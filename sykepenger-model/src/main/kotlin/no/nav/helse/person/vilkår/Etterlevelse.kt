@@ -146,6 +146,28 @@ class Etterlevelse {
         )
     }
 
+    fun `§8-51 ledd 2`(
+        oppfylt: Boolean,
+        skjæringstidspunkt: LocalDate,
+        grunnlagForSykepengegrunnlag: Inntekt,
+        minimumInntekt: Inntekt
+    ) {
+        resultater.add(
+            Vurderingsresultat(
+                oppfylt = oppfylt,
+                versjon = LocalDate.of(2011, 12, 16),
+                paragraf = "8-51",
+                ledd = "2",
+                inputdata = mapOf(
+                    "skjæringstidspunkt" to skjæringstidspunkt,
+                    "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
+                    "minimumInntekt" to minimumInntekt.reflection { årlig, _, _, _ -> årlig }
+                ),
+                outputdata = null
+            )
+        )
+    }
+
     internal interface EtterlevelseVisitor : AktivitetsloggVisitor {
         fun visitVurderingsresultat(oppfylt: Boolean, versjon: LocalDate, paragraf: String, ledd: String, inputdata: Any?, outputdata: Any?) {}
     }

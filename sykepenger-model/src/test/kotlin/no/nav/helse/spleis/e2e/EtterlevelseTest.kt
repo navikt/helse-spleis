@@ -4,6 +4,7 @@ import no.nav.helse.Toggles
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.person.Person
 import no.nav.helse.person.vilkår.Etterlevelse
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -40,6 +41,25 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         assertEquals(4, etterlevelseInspektør.size)
         assertTrue(etterlevelseInspektør.resultat("8-2", "1").single().oppfylt)
         assertTrue(etterlevelseInspektør.resultat("8-3", "2").single().oppfylt)
+        assertTrue(etterlevelseInspektør.resultat("8-12", "1").single().oppfylt)
+        assertTrue(etterlevelseInspektør.resultat("8-30", "2").single().oppfylt)
+    }
+
+    @Test
+    fun `Sykmelding med gradering over 67`() {
+        val eldrePersonFnr = "21023701901"
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 50.prosent), fnr = eldrePersonFnr)
+        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 50.prosent, 50.prosent), fnr = eldrePersonFnr)
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode, fnr = eldrePersonFnr)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, fnr = eldrePersonFnr)
+        håndterYtelser(1.vedtaksperiode, fnr = eldrePersonFnr)
+
+        val etterlevelseInspektør = EtterlevelseInspektør(inspektør.personLogg.etterlevelse)
+        assertEquals(4, etterlevelseInspektør.size)
+        assertTrue(etterlevelseInspektør.resultat("8-2", "1").single().oppfylt)
+        assertTrue(etterlevelseInspektør.resultat("8-51", "2").single().oppfylt)
         assertTrue(etterlevelseInspektør.resultat("8-12", "1").single().oppfylt)
         assertTrue(etterlevelseInspektør.resultat("8-30", "2").single().oppfylt)
     }

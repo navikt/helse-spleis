@@ -15,6 +15,7 @@ internal class Alder(fødselsnummer: String) {
     )
     internal val øvreAldersgrense = fødselsdag.plusYears(70).øvreAldersgrense()
     internal val redusertYtelseAlder = fødselsdag.plusYears(67)
+    private val forhøyetInntektskravAlder = fødselsdag.plusYears(67)
 
     private fun Int.toDay() = if (this > 40) this - 40 else this
 
@@ -38,8 +39,9 @@ internal class Alder(fødselsnummer: String) {
     internal fun alderPåDato(dato: LocalDate) = YEARS.between(fødselsdag, dato).toInt()
     private fun alderVedSluttenAvÅret(year: Year) = YEARS.between(Year.from(fødselsdag), year).toInt()
 
-    internal fun minimumInntekt(dato: LocalDate) =
-        (if (dato <= redusertYtelseAlder) Grunnbeløp.halvG else Grunnbeløp.`2G`).dagsats(dato)
+    internal fun minimumInntekt(dato: LocalDate) = (if (forhøyetInntektskrav(dato)) Grunnbeløp.`2G` else Grunnbeløp.halvG).dagsats(dato)
+
+    internal fun forhøyetInntektskrav(dato: LocalDate) = dato > forhøyetInntektskravAlder
 
     internal fun beregnFeriepenger(opptjeningsår: Year, beløp: Int) =
         beløp * if (alderVedSluttenAvÅret(opptjeningsår) < 59) 0.102 else 0.125

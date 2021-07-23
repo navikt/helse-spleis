@@ -1,7 +1,6 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.*
-import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
 import java.util.*
@@ -40,12 +39,7 @@ class Vilkårsgrunnlag(
         )
         val opptjeningvurderingOk = opptjeningvurdering.valider(this, skjæringstidspunkt)
         val medlemskapsvurderingOk = medlemskapsvurdering.valider(this, periodetype)
-        val minimumInntekt = Alder(fødselsnummer).minimumInntekt(skjæringstidspunkt)
-        val harMinimumInntekt = grunnlagForSykepengegrunnlag > minimumInntekt
-
-        etterlevelse.`§8-3 ledd 2`(harMinimumInntekt, skjæringstidspunkt, grunnlagForSykepengegrunnlag, minimumInntekt)
-        if (harMinimumInntekt) info("Krav til minste sykepengegrunnlag er oppfylt")
-        else warn("Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag")
+        val minimumInntektvurderingOk = validerMinimumInntekt(this, fødselsnummer, skjæringstidspunkt, grunnlagForSykepengegrunnlag)
 
         grunnlagsdata = VilkårsgrunnlagHistorikk.Grunnlagsdata(
             sammenligningsgrunnlag = sammenligningsgrunnlag,
@@ -53,12 +47,13 @@ class Vilkårsgrunnlag(
             antallOpptjeningsdagerErMinst = opptjeningvurdering.antallOpptjeningsdager,
             harOpptjening = opptjeningvurdering.harOpptjening(),
             medlemskapstatus = medlemskapsvurdering.medlemskapstatus,
-            harMinimumInntekt = harMinimumInntekt,
-            vurdertOk = inntektsvurderingOk && opptjeningvurderingOk && medlemskapsvurderingOk && harMinimumInntekt,
+            harMinimumInntekt = minimumInntektvurderingOk,
+            vurdertOk = inntektsvurderingOk && opptjeningvurderingOk && medlemskapsvurderingOk && minimumInntektvurderingOk,
             meldingsreferanseId = meldingsreferanseId()
         )
         return this
     }
+
 
     internal fun lagreInntekter(person: Person, skjæringstidspunkt: LocalDate) {
         inntektsvurdering.lagreInntekter(person, skjæringstidspunkt, this)
