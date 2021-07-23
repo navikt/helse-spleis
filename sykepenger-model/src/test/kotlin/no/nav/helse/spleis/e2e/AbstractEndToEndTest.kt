@@ -149,14 +149,16 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         sykmeldingSkrevet: LocalDateTime? = null,
         mottatt: LocalDateTime? = null,
         id: UUID = UUID.randomUUID(),
-        orgnummer: String = ORGNUMMER
+        orgnummer: String = ORGNUMMER,
+        fnr: String = UNG_PERSON_FNR_2018,
     ): UUID {
         sykmelding(
             id,
             *sykeperioder,
             sykmeldingSkrevet = sykmeldingSkrevet,
             mottatt = mottatt,
-            orgnummer = orgnummer
+            orgnummer = orgnummer,
+            fnr = fnr
         ).håndter(Person::håndter)
         sykmeldinger[id] = sykeperioder
         return id
@@ -166,10 +168,11 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         vedtaksperiodeId: UUID,
         vararg perioder: Søknad.Søknadsperiode,
         andreInntektskilder: List<Søknad.Inntektskilde> = emptyList(),
-        orgnummer: String = ORGNUMMER
+        orgnummer: String = ORGNUMMER,
+        fnr: String = UNG_PERSON_FNR_2018,
     ) {
         assertIkkeEtterspurt(Søknad::class, InntekterForSammenligningsgrunnlag, vedtaksperiodeId, ORGNUMMER)
-        håndterSøknad(*perioder, andreInntektskilder = andreInntektskilder, orgnummer = orgnummer)
+        håndterSøknad(*perioder, andreInntektskilder = andreInntektskilder, orgnummer = orgnummer, fnr = fnr)
     }
 
     protected fun håndterSøknad(
@@ -178,7 +181,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         sendtTilNav: LocalDate = Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive,
         id: UUID = UUID.randomUUID(),
         orgnummer: String = ORGNUMMER,
-        sykmeldingSkrevet: LocalDateTime? = null
+        sykmeldingSkrevet: LocalDateTime? = null,
+        fnr: String = UNG_PERSON_FNR_2018,
     ): UUID {
         søknad(
             id,
@@ -186,7 +190,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             andreInntektskilder = andreInntektskilder,
             sendtTilNav = sendtTilNav,
             orgnummer = orgnummer,
-            sykmeldingSkrevet = sykmeldingSkrevet
+            sykmeldingSkrevet = sykmeldingSkrevet,
+            fnr = fnr,
         ).håndter(Person::håndter)
         søknader[id] = Triple(sendtTilNav, andreInntektskilder, perioder)
         return id
@@ -204,10 +209,11 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOfOrNull { it.start } ?: 1.januar,
         refusjon: Refusjon = Refusjon(null, INNTEKT, emptyList()),
         beregnetInntekt: Inntekt = refusjon.inntekt,
-        orgnummer: String = ORGNUMMER
+        orgnummer: String = ORGNUMMER,
+        fnr: String = UNG_PERSON_FNR_2018,
     ): UUID {
         assertIkkeEtterspurt(Inntektsmelding::class, InntekterForSammenligningsgrunnlag, vedtaksperiodeId, orgnummer)
-        return håndterInntektsmelding(arbeidsgiverperioder, førsteFraværsdag, refusjon, beregnetInntekt = beregnetInntekt, orgnummer = orgnummer)
+        return håndterInntektsmelding(arbeidsgiverperioder, førsteFraværsdag, refusjon, beregnetInntekt = beregnetInntekt, orgnummer = orgnummer, fnr = fnr)
     }
 
     protected fun håndterInntektsmelding(
@@ -219,6 +225,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         beregnetInntekt: Inntekt = refusjon.inntekt,
         harOpphørAvNaturalytelser: Boolean = false,
         arbeidsforholdId: String? = null,
+        fnr: String = UNG_PERSON_FNR_2018,
     ): UUID {
         inntektsmelding(
             id,
@@ -228,7 +235,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             refusjon = refusjon,
             orgnummer = orgnummer,
             harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
-            arbeidsforholdId = arbeidsforholdId
+            arbeidsforholdId = arbeidsforholdId,
+            fnr = fnr
         ).håndter(Person::håndter)
         return id
     }
@@ -262,7 +270,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
                     orgnummer inntekt inntekt
                 }
             }
-        )
+        ),
+        fnr: String = UNG_PERSON_FNR_2018
     ) {
         fun assertEtterspurt(behovtype: Behovtype) =
             assertEtterspurt(Vilkårsgrunnlag::class, behovtype, vedtaksperiodeId, orgnummer)
@@ -275,6 +284,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             medlemskapstatus,
             orgnummer,
             inntektsvurdering,
+            fnr = fnr
         ).håndter(Person::håndter)
     }
 
@@ -398,7 +408,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         arbeidskategorikoder: Map<String, LocalDate> = emptyMap(),
         arbeidsavklaringspenger: List<Periode> = emptyList(),
         dagpenger: List<Periode> = emptyList(),
-        besvart: LocalDateTime = LocalDateTime.now()
+        besvart: LocalDateTime = LocalDateTime.now(),
+        fnr: String = UNG_PERSON_FNR_2018
     ) {
         fun assertEtterspurt(behovtype: Behovtype) =
             assertEtterspurt(Ytelser::class, behovtype, vedtaksperiodeId, orgnummer)
@@ -427,7 +438,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             arbeidskategorikoder = arbeidskategorikoder,
             arbeidsavklaringspenger = arbeidsavklaringspenger,
             dagpenger = dagpenger,
-            besvart = besvart
+            besvart = besvart,
+            fnr = fnr
         ).håndter(Person::håndter)
     }
 
@@ -604,11 +616,12 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         vararg sykeperioder: Sykmeldingsperiode,
         orgnummer: String = ORGNUMMER,
         sykmeldingSkrevet: LocalDateTime? = null,
-        mottatt: LocalDateTime? = null
+        mottatt: LocalDateTime? = null,
+        fnr: String = UNG_PERSON_FNR_2018,
     ): Sykmelding {
         return Sykmelding(
             meldingsreferanseId = id,
-            fnr = UNG_PERSON_FNR_2018,
+            fnr = fnr,
             aktørId = AKTØRID,
             orgnummer = orgnummer,
             sykeperioder = listOf(*sykeperioder),
@@ -639,11 +652,12 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         andreInntektskilder: List<Søknad.Inntektskilde> = emptyList(),
         sendtTilNav: LocalDate = Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive,
         orgnummer: String = ORGNUMMER,
-        sykmeldingSkrevet: LocalDateTime? = null
+        sykmeldingSkrevet: LocalDateTime? = null,
+        fnr: String = UNG_PERSON_FNR_2018,
     ): Søknad {
         return Søknad(
             meldingsreferanseId = id,
-            fnr = UNG_PERSON_FNR_2018,
+            fnr = fnr,
             aktørId = AKTØRID,
             orgnummer = orgnummer,
             perioder = listOf(*perioder),
@@ -695,14 +709,15 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         refusjon: Refusjon = Refusjon(null, beregnetInntekt, emptyList()),
         orgnummer: String = ORGNUMMER,
         harOpphørAvNaturalytelser: Boolean = false,
-        arbeidsforholdId: String? = null
+        arbeidsforholdId: String? = null,
+        fnr: String = UNG_PERSON_FNR_2018,
     ): Inntektsmelding {
         val inntektsmeldinggenerator = {
             Inntektsmelding(
                 meldingsreferanseId = id,
                 refusjon = Inntektsmelding.Refusjon(refusjon.opphørsdato, refusjon.inntekt, refusjon.endringerIRefusjon),
                 orgnummer = orgnummer,
-                fødselsnummer = UNG_PERSON_FNR_2018,
+                fødselsnummer = fnr,
                 aktørId = AKTØRID,
                 førsteFraværsdag = førsteFraværsdag,
                 beregnetInntekt = beregnetInntekt,
@@ -724,12 +739,13 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
         orgnummer: String = ORGNUMMER,
         inntektsvurdering: Inntektsvurdering,
+        fnr: String = UNG_PERSON_FNR_2018
     ): Vilkårsgrunnlag {
         return Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeId.toString(),
             aktørId = AKTØRID,
-            fødselsnummer = UNG_PERSON_FNR_2018,
+            fødselsnummer = fnr,
             orgnummer = orgnummer,
             inntektsvurdering = inntektsvurdering,
             medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
@@ -846,7 +862,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         arbeidskategorikoder: Map<String, LocalDate> = emptyMap(),
         arbeidsavklaringspenger: List<Periode> = emptyList(),
         dagpenger: List<Periode> = emptyList(),
-        besvart: LocalDateTime = LocalDateTime.now()
+        besvart: LocalDateTime = LocalDateTime.now(),
+        fnr: String = UNG_PERSON_FNR_2018
     ): Ytelser {
         val aktivitetslogg = Aktivitetslogg()
         val meldingsreferanseId = UUID.randomUUID()
@@ -873,7 +890,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             Utbetalingshistorikk(
                 meldingsreferanseId = meldingsreferanseId,
                 aktørId = AKTØRID,
-                fødselsnummer = UNG_PERSON_FNR_2018,
+                fødselsnummer = fnr,
                 organisasjonsnummer = orgnummer,
                 vedtaksperiodeId = vedtaksperiodeId.toString(),
                 arbeidskategorikoder = arbeidskategorikoder,
@@ -886,7 +903,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         return Ytelser(
             meldingsreferanseId = meldingsreferanseId,
             aktørId = AKTØRID,
-            fødselsnummer = UNG_PERSON_FNR_2018,
+            fødselsnummer = fnr,
             organisasjonsnummer = orgnummer,
             vedtaksperiodeId = vedtaksperiodeId.toString(),
             utbetalingshistorikk = utbetalingshistorikk,
