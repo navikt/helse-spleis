@@ -35,7 +35,9 @@ class Utbetalingsgrunnlag(
 
     internal fun erRelevant(other: UUID) = other == vedtaksperiodeId
     internal fun lagreArbeidsforhold(person: Person, skjæringstidspunkt: LocalDate) {
-        arbeidsforhold.grupperArbeidsforholdPerOrgnummer().forEach { (orgnummer, arbeidsforhold) ->
+        arbeidsforhold
+            .filter { it.gjelder(skjæringstidspunkt) }
+            .grupperArbeidsforholdPerOrgnummer().forEach { (orgnummer, arbeidsforhold) ->
             if (arbeidsforhold.any { it.erSøppel() }) {
                 // warn("Vi fant ugyldige arbeidsforhold i Aareg, burde sjekkes opp nærmere") // TODO: må ses på av en voksen
             }

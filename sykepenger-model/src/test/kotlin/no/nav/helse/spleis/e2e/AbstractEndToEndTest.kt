@@ -1426,6 +1426,29 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
 
         return arbeidsforholdIder
     }
+
+    protected fun tellArbeidsforholdINyesteHistorikkInnslag(orgnummer: String): Int {
+        var antall = 0
+        var erIRiktigArbeidsgiver = true
+        var erIFørsteHistorikkinnslag = true
+
+        person.accept(object : PersonVisitor {
+
+            override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
+                erIRiktigArbeidsgiver = orgnummer == organisasjonsnummer
+            }
+
+            override fun visitArbeidsforhold(orgnummer: String, fom: LocalDate, tom: LocalDate?) {
+                if (erIRiktigArbeidsgiver && erIFørsteHistorikkinnslag) antall += 1
+            }
+
+            override fun postVisitArbeidsforholdinnslag(arbeidsforholdinnslag: Arbeidsforholdhistorikk.Innslag, id: UUID, skjæringstidspunkt: LocalDate) {
+                if (erIRiktigArbeidsgiver) erIFørsteHistorikkinnslag = false
+            }
+        })
+
+        return antall
+    }
 }
 
 infix fun <T> T?.er(expected: T?) =

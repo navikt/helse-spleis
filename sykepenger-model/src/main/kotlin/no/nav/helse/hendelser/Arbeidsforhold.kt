@@ -21,7 +21,7 @@ class Arbeidsforhold(
         return fom til (tom ?: skjæringstidspunkt)
     }
 
-    internal fun gjelder(skjæringstidspunkt: LocalDate) = fom < skjæringstidspunkt && (tom == null || tom >= skjæringstidspunkt)
+    internal fun gjelder(skjæringstidspunkt: LocalDate) = fom <= skjæringstidspunkt && (tom == null || tom >= skjæringstidspunkt)
 
     internal fun accept(visitor: ArbeidsforholdhistorikkVisitor) {
         visitor.visitArbeidsforhold(orgnummer, fom, tom)

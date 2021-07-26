@@ -10,6 +10,7 @@ import no.nav.helse.serde.reflection.castAsList
 import no.nav.helse.serde.reflection.castAsMap
 import no.nav.helse.testhelpers.april
 import no.nav.helse.testhelpers.februar
+import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -243,5 +244,29 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
 
             assertNoWarnings(inspektør(a1))
         }
+    }
+
+    @Test
+    fun `lagrer kun arbeidsforhold som gjelder under skjæringstidspunkt`() = Toggles.FlereArbeidsgivereUlikFom.enable {
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.mars til 16.mars),
+            førsteFraværsdag = 1.mars,
+            orgnummer = a1,
+            refusjon = Refusjon(null, 10000.månedlig, emptyList())
+        )
+        val inntekter1 = listOf(grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 10000.månedlig.repeat(3)))
+        val arbeidsforhold1 = listOf(
+            Arbeidsforhold(a1, LocalDate.EPOCH, 1.januar),
+            Arbeidsforhold(a1, 1.januar, null), // Skal gjelde
+            Arbeidsforhold(a1, 28.februar, 1.mars), // Skal gjelde
+            Arbeidsforhold(a1, 1.mars, 31.mars), // Skal gjelde
+            Arbeidsforhold(a1, 1.februar, 28.februar),
+            Arbeidsforhold(a1, 2.mars, 31.mars)
+        )
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), a1, inntekter1, arbeidsforhold1)
+
+        assertEquals(3, tellArbeidsforholdINyesteHistorikkInnslag(a1))
     }
 }
