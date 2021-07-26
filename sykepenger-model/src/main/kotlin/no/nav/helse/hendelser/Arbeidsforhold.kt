@@ -36,6 +36,8 @@ class Arbeidsforhold(
 
     internal fun gjelderPeriode(skjæringstidspunkt: LocalDate) = fom < skjæringstidspunkt && (tom == null || tom > skjæringstidspunkt)
 
+    internal fun harArbeidetMerEnnTreMåneder(skjæringstidspunkt: LocalDate) = fom <= skjæringstidspunkt.withDayOfMonth(1).minusMonths(3)
+
     internal companion object {
         internal fun List<Arbeidsforhold>.toEtterlevelseMap() = map {
             mapOf(

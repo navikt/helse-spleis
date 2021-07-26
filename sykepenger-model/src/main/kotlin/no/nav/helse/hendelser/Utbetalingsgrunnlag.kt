@@ -3,6 +3,7 @@ package no.nav.helse.hendelser
 import no.nav.helse.hendelser.Arbeidsforhold.Companion.grupperArbeidsforholdPerOrgnummer
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.Person
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.*
 
@@ -15,6 +16,7 @@ class Utbetalingsgrunnlag(
     private val inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
     private val arbeidsforhold: List<Arbeidsforhold>
 ) : ArbeidstakerHendelse(meldingsreferanseId) {
+    private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
     override fun organisasjonsnummer() = orgnummer
 
@@ -27,9 +29,11 @@ class Utbetalingsgrunnlag(
     }
 
     internal fun loggUkjenteArbeidsforhold(person: Person, skjæringstidspunkt: LocalDate) {
-        person.brukOuijaBrettForÅKommunisereMedPotensielleSpøkelser(arbeidsforhold
-            .filter { it.gjelder(skjæringstidspunkt) }
-            .map(Arbeidsforhold::orgnummer), skjæringstidspunkt)
+        val arbeidsforholdForSkjæringstidspunkt = arbeidsforhold.filter { it.gjelder(skjæringstidspunkt) }
+        if (arbeidsforholdForSkjæringstidspunkt.any { !it.harArbeidetMerEnnTreMåneder(skjæringstidspunkt) }) {
+            sikkerlogg.info("Person har et relevant arbeidsforhold som har vart mindre enn 3 måneder (8-28b) - fødselsnummer: $fødselsnummer")
+        }
+        person.brukOuijaBrettForÅKommunisereMedPotensielleSpøkelser(arbeidsforholdForSkjæringstidspunkt.map(Arbeidsforhold::orgnummer), skjæringstidspunkt)
         person.loggUkjenteOrgnummere(arbeidsforhold.map { it.orgnummer })
     }
 
@@ -44,4 +48,6 @@ class Utbetalingsgrunnlag(
             person.lagreArbeidsforhold(orgnummer, arbeidsforhold, this, skjæringstidspunkt)
         }
     }
+
+
 }
