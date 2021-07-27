@@ -15,6 +15,7 @@ import no.nav.helse.testhelpers.mars
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -268,5 +269,93 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), a1, inntekter1, arbeidsforhold1)
 
         assertEquals(3, tellArbeidsforholdINyesteHistorikkInnslag(a1))
+    }
+
+    @Disabled
+    @Test
+    fun `opphold i arbeidsforhold skal ikke behandles som ghost`() = Toggles.FlereArbeidsgivereUlikFom.enable {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 1.januar,
+            orgnummer = a1
+        )
+
+        val arbeidsforhold1 = listOf(
+            Arbeidsforhold(a1, LocalDate.EPOCH),
+            Arbeidsforhold(a2, LocalDate.EPOCH)
+        )
+        val inntekter1 = listOf(
+            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), INNTEKT.repeat(3)),
+            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), INNTEKT.repeat(3))
+        )
+        val sammenligningsgrunnlag1 = listOf(
+            sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), INNTEKT.repeat(12)),
+            sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), INNTEKT.repeat(12))
+        )
+
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1, inntekter = inntekter1, arbeidsforhold = arbeidsforhold1)
+        håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
+        håndterVilkårsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1, inntektsvurdering = Inntektsvurdering(sammenligningsgrunnlag1))
+        håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), orgnummer = a1)
+        håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.mars til 16.mars),
+            førsteFraværsdag = 1.mars,
+            orgnummer = a1
+        )
+
+
+
+        val arbeidsforhold2 = listOf(
+            Arbeidsforhold(a1, LocalDate.EPOCH, 31.januar),
+            Arbeidsforhold(a1, 1.mars, null),
+            Arbeidsforhold(a2, LocalDate.EPOCH, null)
+
+        )
+        val inntekter2 = listOf(
+            grunnlag(a1, finnSkjæringstidspunkt(a1, 2.vedtaksperiode(a1)), INNTEKT.repeat(3)),
+            grunnlag(a2, finnSkjæringstidspunkt(a1, 2.vedtaksperiode(a1)), INNTEKT.repeat(3))
+        )
+        val sammenligningsgrunnlag2 = listOf(
+            sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 2.vedtaksperiode(a1)), INNTEKT.repeat(12)),
+            sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 2.vedtaksperiode(a1)), INNTEKT.repeat(12))
+        )
+
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode(a1), orgnummer = a1, inntekter = inntekter2, arbeidsforhold = arbeidsforhold2)
+        håndterYtelser(2.vedtaksperiode(a1), orgnummer = a1)
+        håndterVilkårsgrunnlag(2.vedtaksperiode(a1), orgnummer = a1, inntektsvurdering = Inntektsvurdering(sammenligningsgrunnlag2))
+        håndterYtelser(2.vedtaksperiode(a1), orgnummer = a1)
+        håndterSimulering(2.vedtaksperiode(a1), orgnummer = a1)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode(a1), orgnummer = a1)
+        håndterUtbetalt(2.vedtaksperiode(a1), orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(2.februar, 20.februar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(2.februar, 20.februar, 100.prosent), orgnummer = a2)
+        håndterInntektsmelding(
+            listOf(2.februar til 17.februar),
+            førsteFraværsdag = 2.februar,
+            orgnummer = a2
+        )
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2, inntekter = inntekter2, arbeidsforhold = arbeidsforhold2)
+        håndterYtelser(1.vedtaksperiode(a2), orgnummer = a2)
+        håndterVilkårsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2, inntektsvurdering = Inntektsvurdering(sammenligningsgrunnlag2))
+        håndterYtelser(1.vedtaksperiode(a2), orgnummer = a2)
+        håndterSimulering(1.vedtaksperiode(a2), orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode(a2), orgnummer = a2)
+        håndterUtbetalt(1.vedtaksperiode(a2), orgnummer = a2)
+
+        val utbetaling = inspektør(a2).utbetalinger.single()
+        val linje = utbetaling.arbeidsgiverOppdrag().linjerUtenOpphør().single()
+        //assertEquals(100.0, utbetaling.utbetalingstidslinje()[20.februar].økonomi.reflection { _, _, _, _, totalGrad, _, _, _, _ -> totalGrad })
+        assertEquals(1431, linje.beløp) // Ikke cappet på 6G, siden personen ikke jobber hos a1 ved dette skjæringstidspunktet
+        assertEquals(18.februar, linje.fom)
+        assertEquals(20.februar, linje.tom)
     }
 }
