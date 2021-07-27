@@ -410,7 +410,12 @@ class Person private constructor(
         this.dødsdato = dødsdato
     }
 
-    internal fun lagreSykepengegrunnlagFraInfotrygd(orgnummer: String, arbeidsgiverInntekt: ArbeidsgiverInntekt, skjæringstidspunkt: LocalDate, hendelse: PersonHendelse) {
+    internal fun lagreSykepengegrunnlagFraInfotrygd(
+        orgnummer: String,
+        arbeidsgiverInntekt: ArbeidsgiverInntekt,
+        skjæringstidspunkt: LocalDate,
+        hendelse: PersonHendelse
+    ) {
         finnArbeidsgiverForInntekter(orgnummer, hendelse).lagreSykepengegrunnlag(arbeidsgiverInntekt, skjæringstidspunkt, hendelse)
     }
 
@@ -542,7 +547,11 @@ class Person private constructor(
     internal fun harFlereArbeidsgivereUtenSykdomVedSkjæringstidspunkt(skjæringstidspunkt: LocalDate) =
         arbeidsgivereMedAktiveArbeidsforhold(skjæringstidspunkt).any { it.manglerInntektsmeldingVedSkjæringstidspunktet(skjæringstidspunkt) }
 
-    private fun arbeidsgivereMedAktiveArbeidsforhold(skjæringstidspunkt: LocalDate): List<Arbeidsgiver> = arbeidsgivere.filter { it.harAktivtArbeidsforhold(skjæringstidspunkt)}
+    private fun arbeidsgivereMedAktiveArbeidsforhold(skjæringstidspunkt: LocalDate): List<Arbeidsgiver> =
+        arbeidsgivere.filter { it.harAktivtArbeidsforhold(skjæringstidspunkt) }
+
     internal fun harVedtaksperiodeForArbeidsgiverMedUkjentArbeidsforhold(skjæringstidspunkt: LocalDate) =
         arbeidsgivere.any { it.harVedtaksperiodeMedUkjentArbeidsforhold(skjæringstidspunkt) }
+
+    internal fun harArbeidsforholdForFlereArbeidsgivere(skjæringstidspunkt: LocalDate) = arbeidsgivereMedAktiveArbeidsforhold(skjæringstidspunkt).size > 1
 }
