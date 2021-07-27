@@ -1985,8 +1985,7 @@ internal class Vedtaksperiode private constructor(
         override val type = AVVENTER_GODKJENNING_REVURDERING
 
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
-            tilstandsendringstidspunkt
-                .plusDays(4)
+            tilstandsendringstidspunkt.plusDays(14)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.trengerGodkjenning(hendelse)
