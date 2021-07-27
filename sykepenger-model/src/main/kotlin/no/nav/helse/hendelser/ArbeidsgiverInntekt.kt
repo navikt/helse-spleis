@@ -23,35 +23,24 @@ class ArbeidsgiverInntekt(
     private val arbeidsgiver: String,
     private val inntekter: List<MånedligInntekt>
 ) {
-    internal fun lagreInntekter(
-        inntektshistorikk: Inntektshistorikk,
-        skjæringstidspunkt: LocalDate,
-        meldingsreferanseId: UUID,
-    ) {
+    internal fun lagreInntekter(inntektshistorikk: Inntektshistorikk, skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID) {
         MånedligInntekt.lagreInntekter(inntekter, inntektshistorikk, skjæringstidspunkt, meldingsreferanseId)
     }
 
     private fun harInntekter() = inntekter.isNotEmpty()
 
     companion object {
-        fun lagreInntekter(
-            inntekter: List<ArbeidsgiverInntekt>,
-            person: Person,
-            skjæringstidspunkt: LocalDate,
-            hendelse: PersonHendelse
-        ) {
-            inntekter.forEach { person.lagreInntekter(it.arbeidsgiver, it, skjæringstidspunkt, hendelse) }
+        fun lagreSykepengegrunnlag(inntekter: List<ArbeidsgiverInntekt>, person: Person, skjæringstidspunkt: LocalDate, hendelse: PersonHendelse) {
+            inntekter.forEach { person.lagreSykepengegrunnlagFraInfotrygd(it.arbeidsgiver, it, skjæringstidspunkt, hendelse) }
         }
 
-        internal fun List<ArbeidsgiverInntekt>.kilder(antallMåneder: Int) =
-            map {
-                ArbeidsgiverInntekt(
-                    it.arbeidsgiver,
-                    it.inntekter.nylig(månedFørSlutt(this, antallMåneder))
-                )
-            }
-                .filter { it.harInntekter() }
-                .size
+        fun lagreSammenligningsgrunnlag(inntekter: List<ArbeidsgiverInntekt>, person: Person, skjæringstidspunkt: LocalDate, hendelse: PersonHendelse) {
+            inntekter.forEach { person.lagreSammenligningsgrunnlag(it.arbeidsgiver, it, skjæringstidspunkt, hendelse) }
+        }
+
+        internal fun List<ArbeidsgiverInntekt>.kilder(antallMåneder: Int) = this
+            .map { ArbeidsgiverInntekt(it.arbeidsgiver, it.inntekter.nylig(månedFørSlutt(this, antallMåneder))) }
+            .count { it.harInntekter() }
 
         private fun månedFørSlutt(inntekter: List<ArbeidsgiverInntekt>, antallMåneder: Int) =
             MånedligInntekt.månedFørSlutt(inntekter.flatMap { it.inntekter }, antallMåneder)

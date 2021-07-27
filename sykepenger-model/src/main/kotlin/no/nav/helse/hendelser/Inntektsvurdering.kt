@@ -63,5 +63,5 @@ class Inntektsvurdering(
     }
 
     internal fun lagreInntekter(person: Person, skjæringstidspunkt: LocalDate, hendelse: PersonHendelse) =
-        ArbeidsgiverInntekt.lagreInntekter(inntekter, person, skjæringstidspunkt, hendelse)
+        ArbeidsgiverInntekt.lagreSammenligningsgrunnlag(inntekter, person, skjæringstidspunkt, hendelse)
 }

@@ -19,7 +19,7 @@ class InntektForSykepengegrunnlag(
     }
 
     internal fun lagreInntekter(person: Person, skjæringstidspunkt: LocalDate, hendelse: PersonHendelse) =
-        ArbeidsgiverInntekt.lagreInntekter(inntekter, person, skjæringstidspunkt, hendelse)
+        ArbeidsgiverInntekt.lagreSykepengegrunnlag(inntekter, person, skjæringstidspunkt, hendelse)
 }
 
 

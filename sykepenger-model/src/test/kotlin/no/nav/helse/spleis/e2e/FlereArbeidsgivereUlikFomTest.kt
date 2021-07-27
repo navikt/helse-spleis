@@ -1050,16 +1050,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             )
 
             val inntekter = listOf(
-                grunnlag(
-                    a1, finnSkjæringstidspunkt(
-                        a1, 1.vedtaksperiode(a1)
-                    ), 31000.månedlig.repeat(3)
-                ),
-                grunnlag(
-                    a2, finnSkjæringstidspunkt(
-                        a1, 1.vedtaksperiode(a1)
-                    ), 32000.månedlig.repeat(3)
-                )
+                grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 31000.månedlig.repeat(3))
             )
 
             val arbeidsforhold = listOf(
@@ -1072,20 +1063,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode(a1), inntektsvurdering = Inntektsvurdering(
                     listOf(
-                        sammenligningsgrunnlag(
-                            a1, finnSkjæringstidspunkt(
-                                a1, 1.vedtaksperiode(
-                                    a1
-                                )
-                            ), 31000.månedlig.repeat(12)
-                        ),
-                        sammenligningsgrunnlag(
-                            a2, finnSkjæringstidspunkt(
-                                a1, 1.vedtaksperiode(
-                                    a1
-                                )
-                            ), 32000.månedlig.repeat(12)
-                        )
+                        sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 31000.månedlig.repeat(12))
                     )
                 ), orgnummer = a1
             )
@@ -1114,16 +1092,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             )
 
             val inntekter = listOf(
-                grunnlag(
-                    a1, finnSkjæringstidspunkt(
-                        a1, 1.vedtaksperiode(a1)
-                    ), 31000.månedlig.repeat(3)
-                ),
-                grunnlag(
-                    a2, finnSkjæringstidspunkt(
-                        a1, 1.vedtaksperiode(a1)
-                    ), 32000.månedlig.repeat(3)
-                )
+                grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 31000.månedlig.repeat(3)),
+                grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 32000.månedlig.repeat(1))
             )
 
             val arbeidsforhold = listOf(
@@ -1136,20 +1106,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode(a1), inntektsvurdering = Inntektsvurdering(
                     listOf(
-                        sammenligningsgrunnlag(
-                            a1, finnSkjæringstidspunkt(
-                                a1, 1.vedtaksperiode(
-                                    a1
-                                )
-                            ), 31000.månedlig.repeat(12)
-                        ),
-                        sammenligningsgrunnlag(
-                            a2, finnSkjæringstidspunkt(
-                                a1, 1.vedtaksperiode(
-                                    a1
-                                )
-                            ), 32000.månedlig.repeat(12)
-                        )
+                        sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 31000.månedlig.repeat(12)),
+                        sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 32000.månedlig.repeat(1))
                     )
                 ), orgnummer = a1
             )

@@ -65,9 +65,7 @@ class Inntektsopplysning private constructor(
     internal companion object {
         internal fun addInntekter(liste: List<Inntektsopplysning>, person: Person, aktivitetslogg: IAktivitetslogg, hendelseId: UUID) {
             liste.groupBy { it.orgnummer }
-                .forEach { (orgnummer, opplysninger) ->
-                    person.lagreInntekter(orgnummer, opplysninger, aktivitetslogg, hendelseId)
-                }
+                .forEach { (orgnummer, opplysninger) -> person.lagreSykepengegrunnlagFraInfotrygd(orgnummer, opplysninger, aktivitetslogg, hendelseId) }
         }
 
         fun lagreInntekter(list: List<Inntektsopplysning>, inntektshistorikk: Inntektshistorikk, hendelseId: UUID) {

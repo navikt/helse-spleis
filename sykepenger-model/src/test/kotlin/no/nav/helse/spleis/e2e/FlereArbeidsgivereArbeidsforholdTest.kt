@@ -15,7 +15,6 @@ import no.nav.helse.testhelpers.mars
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -271,7 +270,6 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         assertEquals(3, tellArbeidsforholdINyesteHistorikkInnslag(a1))
     }
 
-    @Disabled
     @Test
     fun `opphold i arbeidsforhold skal ikke behandles som ghost`() = Toggles.FlereArbeidsgivereUlikFom.enable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
@@ -279,7 +277,8 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             førsteFraværsdag = 1.januar,
-            orgnummer = a1
+            orgnummer = a1,
+            refusjon = Refusjon(null, 11400.månedlig)
         )
 
         val arbeidsforhold1 = listOf(
@@ -287,12 +286,12 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             Arbeidsforhold(a2, LocalDate.EPOCH)
         )
         val inntekter1 = listOf(
-            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), INNTEKT.repeat(3)),
-            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), INNTEKT.repeat(3))
+            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 11400.månedlig.repeat(3)),
+            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 45000.månedlig.repeat(3))
         )
         val sammenligningsgrunnlag1 = listOf(
-            sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), INNTEKT.repeat(12)),
-            sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), INNTEKT.repeat(12))
+            sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 11400.månedlig.repeat(12)),
+            sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 45000.månedlig.repeat(12))
         )
 
         håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1, inntekter = inntekter1, arbeidsforhold = arbeidsforhold1)
@@ -308,10 +307,9 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.mars til 16.mars),
             førsteFraværsdag = 1.mars,
-            orgnummer = a1
+            orgnummer = a1,
+            refusjon = Refusjon(null, 11400.månedlig)
         )
-
-
 
         val arbeidsforhold2 = listOf(
             Arbeidsforhold(a1, LocalDate.EPOCH, 31.januar),
@@ -320,12 +318,12 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
 
         )
         val inntekter2 = listOf(
-            grunnlag(a1, finnSkjæringstidspunkt(a1, 2.vedtaksperiode(a1)), INNTEKT.repeat(3)),
-            grunnlag(a2, finnSkjæringstidspunkt(a1, 2.vedtaksperiode(a1)), INNTEKT.repeat(3))
+            grunnlag(a1, finnSkjæringstidspunkt(a1, 2.vedtaksperiode(a1)), 11400.månedlig.repeat(2)),
+            grunnlag(a2, finnSkjæringstidspunkt(a1, 2.vedtaksperiode(a1)), 45000.månedlig.repeat(3))
         )
         val sammenligningsgrunnlag2 = listOf(
-            sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 2.vedtaksperiode(a1)), INNTEKT.repeat(12)),
-            sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 2.vedtaksperiode(a1)), INNTEKT.repeat(12))
+            sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 2.vedtaksperiode(a1)), 11400.månedlig.repeat(11)),
+            sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 2.vedtaksperiode(a1)), 47000.månedlig.repeat(12))
         )
 
         håndterUtbetalingsgrunnlag(2.vedtaksperiode(a1), orgnummer = a1, inntekter = inntekter2, arbeidsforhold = arbeidsforhold2)
@@ -341,11 +339,23 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(2.februar til 17.februar),
             førsteFraværsdag = 2.februar,
-            orgnummer = a2
+            orgnummer = a2,
+            refusjon = Refusjon(null, 45000.månedlig)
         )
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2, inntekter = inntekter2, arbeidsforhold = arbeidsforhold2)
+
+
+        val inntekter3 = listOf(
+            grunnlag(a1, finnSkjæringstidspunkt(a2, 1.vedtaksperiode(a2)), 11400.månedlig.repeat(3)),
+            grunnlag(a2, finnSkjæringstidspunkt(a2, 1.vedtaksperiode(a2)), 45000.månedlig.repeat(3))
+        )
+        val sammenligningsgrunnlag3 = listOf(
+            sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a2, 1.vedtaksperiode(a2)), 11400.månedlig.repeat(12)),
+            sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a2, 1.vedtaksperiode(a2)), 45000.månedlig.repeat(12))
+        )
+
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2, inntekter = inntekter3, arbeidsforhold = arbeidsforhold2)
         håndterYtelser(1.vedtaksperiode(a2), orgnummer = a2)
-        håndterVilkårsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2, inntektsvurdering = Inntektsvurdering(sammenligningsgrunnlag2))
+        håndterVilkårsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2, inntektsvurdering = Inntektsvurdering(sammenligningsgrunnlag3))
         håndterYtelser(1.vedtaksperiode(a2), orgnummer = a2)
         håndterSimulering(1.vedtaksperiode(a2), orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(a2), orgnummer = a2)
@@ -353,8 +363,8 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
 
         val utbetaling = inspektør(a2).utbetalinger.single()
         val linje = utbetaling.arbeidsgiverOppdrag().linjerUtenOpphør().single()
-        //assertEquals(100.0, utbetaling.utbetalingstidslinje()[20.februar].økonomi.reflection { _, _, _, _, totalGrad, _, _, _, _ -> totalGrad })
-        assertEquals(1431, linje.beløp) // Ikke cappet på 6G, siden personen ikke jobber hos a1 ved dette skjæringstidspunktet
+        assertEquals(100.0, utbetaling.utbetalingstidslinje()[20.februar].økonomi.reflection { _, _, _, _, totalGrad, _, _, _, _ -> totalGrad })
+        assertEquals(2077, linje.beløp) // Ikke cappet på 6G, siden personen ikke jobber hos a1 ved dette skjæringstidspunktet
         assertEquals(18.februar, linje.fom)
         assertEquals(20.februar, linje.tom)
     }

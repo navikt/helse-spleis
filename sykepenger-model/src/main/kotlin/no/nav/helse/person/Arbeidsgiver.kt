@@ -596,20 +596,18 @@ internal class Arbeidsgiver private constructor(
         inntektsmelding.addInntekt(inntektshistorikk, skjæringstidspunkt)
     }
 
-    internal fun lagreInntekter(inntektsopplysninger: List<Inntektsopplysning>, hendelseId: UUID) {
+    internal fun lagreSykepengegrunnlagFraInfotrygd(inntektsopplysninger: List<Inntektsopplysning>, hendelseId: UUID) {
         Inntektsopplysning.lagreInntekter(inntektsopplysninger, inntektshistorikk, hendelseId)
     }
 
-    internal fun lagreInntekter(
-        arbeidsgiverInntekt: ArbeidsgiverInntekt,
-        skjæringstidspunkt: LocalDate,
-        hendelse: PersonHendelse
-    ) {
-        arbeidsgiverInntekt.lagreInntekter(
-            inntektshistorikk,
-            skjæringstidspunkt,
-            hendelse.meldingsreferanseId()
-        )
+    internal fun lagreSykepengegrunnlag(arbeidsgiverInntekt: ArbeidsgiverInntekt, skjæringstidspunkt: LocalDate, hendelse: PersonHendelse) {
+        if (harAktivtArbeidsforhold(skjæringstidspunkt)) {
+            arbeidsgiverInntekt.lagreInntekter(inntektshistorikk, skjæringstidspunkt, hendelse.meldingsreferanseId())
+        }
+    }
+
+    internal fun lagreSammenligningsgrunnlag(arbeidsgiverInntekt: ArbeidsgiverInntekt, skjæringstidspunkt: LocalDate, hendelse: PersonHendelse) {
+        arbeidsgiverInntekt.lagreInntekter(inntektshistorikk, skjæringstidspunkt, hendelse.meldingsreferanseId())
     }
 
     internal fun søppelbøtte(
