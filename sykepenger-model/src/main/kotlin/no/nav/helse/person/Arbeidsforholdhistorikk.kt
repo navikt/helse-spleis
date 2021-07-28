@@ -40,6 +40,6 @@ internal class Arbeidsforholdhistorikk private constructor(
             skjæringstidspunkt == this.skjæringstidspunkt && arbeidsforhold.size == other.size && arbeidsforhold.containsAll(other)
 
         internal fun harAktivtArbeidsforhold(skjæringstidspunkt: LocalDate) =
-            this.skjæringstidspunkt == skjæringstidspunkt && arbeidsforhold.any { it.gjelderPeriode(skjæringstidspunkt) }
+            this.skjæringstidspunkt == skjæringstidspunkt
     }
 }

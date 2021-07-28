@@ -14,6 +14,7 @@ import no.nav.helse.testhelpers.mars
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
@@ -416,6 +417,23 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
 
         håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1, inntekter = inntekter, arbeidsforhold = arbeidsforhold)
         assertEquals(listOf(a1, a2), arbeidsgivere())
+    }
+
+    @Test
+    fun `arbeidsforhold fom skjæringstidspunkt`() = Toggles.FlereArbeidsgivereUlikFom.enable {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 1.januar,
+            orgnummer = a1,
+        )
+
+        val arbeidsforhold = listOf(Arbeidsforhold(a1, 1.januar))
+        val inntekter = listOf(grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), INNTEKT.repeat(3)))
+
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1, inntekter = inntekter, arbeidsforhold = arbeidsforhold)
+        assertFalse(person.harVedtaksperiodeForArbeidsgiverMedUkjentArbeidsforhold(1.januar))
     }
 
     fun arbeidsgivere(): List<String> {

@@ -66,10 +66,13 @@ internal class TestArbeidsgiverInspektør(
     private val forlengelserFraInfotrygd = mutableMapOf<Int, ForlengelseFraInfotrygd>()
     private val hendelseIder = mutableMapOf<Int, Set<UUID>>()
     private val inntektskilder = mutableMapOf<Int, Inntektskilde>()
+    private val periodetyper = mutableMapOf<Int, Periodetype>()
+    internal var warnings: List<String>
 
     init {
         HentAktivitetslogg(person, orgnummer).also { results ->
             personLogg = results.aktivitetslogg
+            warnings = results.warnings
             results.arbeidsgiver.accept(this)
         }
     }
@@ -77,6 +80,7 @@ internal class TestArbeidsgiverInspektør(
     private class HentAktivitetslogg(person: Person, private val valgfriOrgnummer: String?) : PersonVisitor {
         lateinit var aktivitetslogg: Aktivitetslogg
         lateinit var arbeidsgiver: Arbeidsgiver
+        val warnings = mutableListOf<String>()
 
         init {
             person.accept(this)
@@ -90,6 +94,10 @@ internal class TestArbeidsgiverInspektør(
             if (organisasjonsnummer == valgfriOrgnummer) this.arbeidsgiver = arbeidsgiver
             if (this::arbeidsgiver.isInitialized) return
             this.arbeidsgiver = arbeidsgiver
+        }
+
+        override fun visitWarn(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Warn, melding: String, tidsstempel: String) {
+            warnings.add(melding)
         }
     }
 
@@ -139,6 +147,7 @@ internal class TestArbeidsgiverInspektør(
         inntektskilder[vedtaksperiodeindeks] = inntektskilde
         skjæringstidspunkter[vedtaksperiodeindeks] = skjæringstidspunkt
         forlengelserFraInfotrygd[vedtaksperiodeindeks] = forlengelseFraInfotrygd
+        periodetyper[vedtaksperiodeindeks] = periodetype
         vedtaksperiode.accept(VedtaksperiodeDagTeller())
     }
 
@@ -465,4 +474,6 @@ internal class TestArbeidsgiverInspektør(
     internal fun fagsystemId(id: UUID) = id.finn(fagsystemIder)
 
     internal fun inntektskilde(id: UUID) = id.finn(inntektskilder)
+
+    internal fun periodetype(id: UUID) = id.finn(periodetyper)
 }

@@ -83,8 +83,12 @@ internal class Arbeidsgiver private constructor(
                 .takeIf { it.isNotEmpty() }
                 ?.summer()
 
+        internal fun List<Arbeidsgiver>.harInntekt(skjæringstidspunkt: LocalDate) =
+            filter { it.inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt) != null }
+
         internal fun List<Arbeidsgiver>.harNødvendigInntekt(skjæringstidspunkt: LocalDate) =
             this.all { it.vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt).harInntekt() }
+                && any { !it.grunnlagForSykepengegrunnlagKommerFraSkatt(skjæringstidspunkt) }
 
         /**
          * Brukes i MVP for flere arbeidsgivere. Alle forlengelser hos alle arbeidsgivere må gjelde samme periode
@@ -873,7 +877,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun harAktivtArbeidsforhold(skjæringstidspunkt: LocalDate) = arbeidsforholdhistorikk.harAktivtArbeidsforhold(skjæringstidspunkt)
 
-    internal fun manglerInntektsmeldingVedSkjæringstidspunktet(skjæringstidspunkt: LocalDate) = !inntektshistorikk.harInntektsmeldingFor(skjæringstidspunkt)
+    internal fun grunnlagForSykepengegrunnlagKommerFraSkatt(skjæringstidspunkt: LocalDate) = inntektshistorikk.sykepengegrunnlagKommerFraSkatt(skjæringstidspunkt)
     internal fun harVedtaksperiodeMedUkjentArbeidsforhold(skjæringstidspunkt: LocalDate) =
         !harAktivtArbeidsforhold(skjæringstidspunkt) && vedtaksperioder.any { it.harUferdigFørstegangsbehandling(skjæringstidspunkt) }
 

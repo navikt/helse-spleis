@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.SøknadArbeidsgiver.Sykdom
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
@@ -363,8 +364,6 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
         assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
         assertTilstand(a2, AVVENTER_UTBETALINGSGRUNNLAG)
-        assertInntektskilde(a1, EN_ARBEIDSGIVER)
-        assertInntektskilde(a2, EN_ARBEIDSGIVER)
 
         håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
         assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
@@ -674,8 +673,6 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a2)
         assertTilstand(a1, AVVENTER_ARBEIDSGIVERE, 2)
         assertTilstand(a2, AVVENTER_UTBETALINGSGRUNNLAG, 2)
-        assertInntektskilde(a1, EN_ARBEIDSGIVER, 2)
-        assertInntektskilde(a2, EN_ARBEIDSGIVER, 2)
 
         håndterUtbetalingsgrunnlag(2.vedtaksperiode(a2), orgnummer = a2)
         assertTilstand(a1, AVVENTER_ARBEIDSGIVERE, 2)
@@ -1639,7 +1636,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Sykefravær rett etter periode i infotrygd på annen arbeidsgiver forkastes`() {
+    fun `Sykefravær rett etter periode i infotrygd på annen arbeidsgiver forkastes`() = Toggles.FlereArbeidsgivereUlikFom.disable {
         val periode = 1.februar(2021) til 28.februar(2021)
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
@@ -2171,8 +2168,6 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
         assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
         assertTilstand(a2, AVVENTER_UTBETALINGSGRUNNLAG)
-        assertInntektskilde(a1, EN_ARBEIDSGIVER)
-        assertInntektskilde(a2, EN_ARBEIDSGIVER)
 
         håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode(a2), orgnummer = a2)

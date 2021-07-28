@@ -11,7 +11,6 @@ import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.api.builders.InntektshistorikkBuilder
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.testhelpers.*
-import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -207,56 +206,6 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
             }
         }
         assertNull(inntektsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.inntekter.single { it.arbeidsgiver == ORGNUMMER }.sammenligningsgrunnlag)
-    }
-
-    @Test
-    fun `Finner inntektsgrunnlag for en arbeidsgiver med inntekt fra Skatt`() {
-        // Hacker til både infotrygd- og skatteinntekter fordi vi ikke har fler arbeidsgivere eller henter sykepengegrunnlag fra inntektskompontenten enda
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
-
-        val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.oktober(2017),  31.desember(2017), 100.prosent, 1000.daglig)
-        val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.november(2017), Inntekt.INGEN, true))
-        håndterUtbetalingshistorikk(1.vedtaksperiode, historikk, inntektshistorikk = inntekter)
-
-        val builder = InntektshistorikkBuilder(person)
-        FinnInntektshistorikk(person, builder).also {
-            inntektperioderForSykepengegrunnlag {
-                1.juli(2017) til 1.september(2017) inntekter {
-                    ORGNUMMER inntekt INNTEKT
-                }
-            }.forEach { inntekt ->
-                inntekt.lagreInntekter(it.inntektshistorikk.getValue(ORGNUMMER), 1.oktober(2017), UUID.randomUUID())
-            }
-        }
-
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-
-        builder.nøkkeldataOmInntekt(1.oktober(2017) og 31.januar)
-
-        val inntektsgrunnlag = builder.build()
-
-        assertTrue(inntektsgrunnlag.isNotEmpty())
-        inntektsgrunnlag.single { it.skjæringstidspunkt == 1.oktober(2017) }.also { inntektsgrunnlaget ->
-            assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, inntektsgrunnlaget.sykepengegrunnlag)
-            assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, inntektsgrunnlaget.omregnetÅrsinntekt)
-            assertNull(inntektsgrunnlaget.sammenligningsgrunnlag)
-            assertNull(inntektsgrunnlaget.avviksprosent)
-            assertEquals(1430.7692307692307, inntektsgrunnlaget.maksUtbetalingPerDag)
-            requireNotNull(inntektsgrunnlaget.inntekter.single { it.arbeidsgiver == ORGNUMMER }.omregnetÅrsinntekt).also { omregnetÅrsinntekt ->
-                assertEquals(InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.AOrdningen, omregnetÅrsinntekt.kilde)
-                assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, omregnetÅrsinntekt.beløp)
-                assertEquals(INNTEKT.reflection { _, mnd, _, _ -> mnd }, omregnetÅrsinntekt.månedsbeløp)
-                omregnetÅrsinntekt.inntekterFraAOrdningen.also {
-                    requireNotNull(it)
-                    assertEquals(3, it.size)
-                    repeat(3) { index ->
-                        assertEquals(INNTEKT.reflection { _, mnd, _, _ -> mnd }, it[index].sum)
-                    }
-                }
-            }
-        }
     }
 
     @Test

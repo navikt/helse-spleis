@@ -10,6 +10,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.forlengerSammePeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSammenligningsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.harArbeidsgivereMedOverlappendeUtbetaltePerioder
+import no.nav.helse.person.Arbeidsgiver.Companion.harInntekt
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntekt
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
 import no.nav.helse.person.Vedtaksperiode.Companion.ALLE
@@ -541,11 +542,13 @@ class Person private constructor(
     }
 
     internal fun fyllUtPeriodeMedForventedeDager(hendelse: PersonHendelse, periode: Periode, skjæringstidspunkt: LocalDate) {
-        arbeidsgivereMedAktiveArbeidsforhold(skjæringstidspunkt).forEach { it.fyllUtPeriodeMedForventedeDager(hendelse, periode) }
+        arbeidsgivereMedAktiveArbeidsforhold(skjæringstidspunkt)
+            .harInntekt(skjæringstidspunkt)
+            .forEach { it.fyllUtPeriodeMedForventedeDager(hendelse, periode) }
     }
 
     internal fun harFlereArbeidsgivereUtenSykdomVedSkjæringstidspunkt(skjæringstidspunkt: LocalDate) =
-        arbeidsgivereMedAktiveArbeidsforhold(skjæringstidspunkt).any { it.manglerInntektsmeldingVedSkjæringstidspunktet(skjæringstidspunkt) }
+        arbeidsgivereMedAktiveArbeidsforhold(skjæringstidspunkt).any { it.grunnlagForSykepengegrunnlagKommerFraSkatt(skjæringstidspunkt) }
 
     private fun arbeidsgivereMedAktiveArbeidsforhold(skjæringstidspunkt: LocalDate): List<Arbeidsgiver> =
         arbeidsgivere.filter { it.harAktivtArbeidsforhold(skjæringstidspunkt) }

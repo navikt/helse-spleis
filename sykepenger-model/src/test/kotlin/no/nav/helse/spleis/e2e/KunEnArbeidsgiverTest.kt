@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.person.Aktivitetslogg
@@ -399,7 +400,11 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         inspektør.also {
             assertNoErrors(it)
-            assertFalse(it.personLogg.hasWarningsOrWorse())
+            if (Toggles.FlereArbeidsgivereUlikFom.enabled) {
+                assertEquals(listOf("Flere arbeidsgivere og ulikt starttidspunkt for sykefraværet"), it.warnings)
+            } else {
+                assertFalse(it.personLogg.hasWarningsOrWorse())
+            }
             assertActivities(it)
             assertInntektForDato(45000.månedlig, 27.juli(2020), it)
             assertEquals(2, it.sykdomshistorikk.size)

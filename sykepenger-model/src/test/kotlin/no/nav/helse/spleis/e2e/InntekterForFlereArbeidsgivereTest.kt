@@ -147,14 +147,27 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             )
         ).håndter(Person::håndter)
 
-        assertEquals(3, a1Inspektør.inntektInspektør.antallInnslag)
-        assertEquals(1, a2Inspektør.inntektInspektør.antallInnslag)
-        assertEquals(5000.månedlig, a2Inspektør.inntektInspektør.sisteInnslag?.first()?.sykepengegrunnlag)
+        if (Toggles.FlereArbeidsgivereUlikFom.enabled) {
+            assertEquals(4, a1Inspektør.inntektInspektør.antallInnslag)
+            assertEquals(2, a2Inspektør.inntektInspektør.antallInnslag)
+        } else {
+            assertEquals(3, a1Inspektør.inntektInspektør.antallInnslag)
+            assertEquals(1, a2Inspektør.inntektInspektør.antallInnslag)
+        }
+        assertEquals(5000.månedlig, a2Inspektør.inntektInspektør.sisteInnslag?.first { it.kilde == Kilde.INFOTRYGD }?.sykepengegrunnlag)
         assertEquals(24500.månedlig, a1Inspektør.inntektInspektør.sisteInnslag?.first { it.kilde == Kilde.INFOTRYGD }?.sykepengegrunnlag)
         assertEquals(
             24000.månedlig,
-            a1Inspektør.inntektInspektør.sisteInnslag?.first { it.kilde == Kilde.SKATT }?.sammenligningsgrunnlag
+            a1Inspektør.inntektInspektør.sisteInnslag?.first { it.kilde == Kilde.SKATT && it.sammenligningsgrunnlag != null }?.sammenligningsgrunnlag
         )
+
+        if (Toggles.FlereArbeidsgivereUlikFom.enabled) {
+            assertEquals(
+                23500.månedlig,
+                a1Inspektør.inntektInspektør.sisteInnslag?.first { it.kilde == Kilde.SKATT && it.sykepengegrunnlag != null }?.sykepengegrunnlag
+            )
+        }
+
         assertEquals(
             25000.månedlig,
             a1Inspektør.inntektInspektør.sisteInnslag?.first { it.kilde == Kilde.INNTEKTSMELDING }?.sykepengegrunnlag

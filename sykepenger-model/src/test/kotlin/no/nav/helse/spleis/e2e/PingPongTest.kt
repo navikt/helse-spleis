@@ -1,5 +1,7 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggles
+import no.nav.helse.hendelser.Arbeidsforhold
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.UtbetalingHendelse
@@ -15,6 +17,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 internal class PingPongTest : AbstractEndToEndTest() {
@@ -75,7 +78,7 @@ internal class PingPongTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `periode utebetales på nytt orgnummer i IT`() {
+    fun `periode utebetales på nytt orgnummer i IT`() = Toggles.FlereArbeidsgivereUlikFom.disable {
         val a2 = "yep"
         nyttVedtak(1.januar, 31.januar, 25.prosent)
 
@@ -85,7 +88,7 @@ internal class PingPongTest : AbstractEndToEndTest() {
         val historikk = ArbeidsgiverUtbetalingsperiode(a2, 1.februar, 28.februar, 25.prosent, INNTEKT)
         val inntekter = listOf(Inntektsopplysning(a2, 1.februar, 25000.månedlig, true))
         håndterUtbetalingshistorikk(1.vedtaksperiode(a2), historikk, inntektshistorikk = inntekter, orgnummer = a2)
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER, LocalDate.EPOCH, 1.februar)), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode(a2), orgnummer = a2)
 
         assertEquals(31, inspektør(ORGNUMMER).utbetalingstidslinjeBeregninger.last().utbetalingstidslinje().size)
