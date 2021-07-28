@@ -44,7 +44,7 @@ abstract class Toggles internal constructor(enabled: Boolean = false, private va
     object RebregnUtbetalingVedHistorikkendring : Toggles()
     object OverlappendeSykmelding : Toggles()
     object PraksisendringEnabled : Toggles()
-    object FlereArbeidsgivereUlikFom : Toggles()
+    object FlereArbeidsgivereUlikFom : Toggles(true)
     object SendFeriepengeOppdrag: Toggles(true)
     object KastAlleRevurderinger: Toggles("KAST_ALLE_REVURDERINGER")
     object RevurderTidligerePeriode: Toggles("REVURDER_TIDLIGERE_PERIODE")
