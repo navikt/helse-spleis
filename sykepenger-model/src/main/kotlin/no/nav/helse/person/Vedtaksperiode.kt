@@ -1694,10 +1694,6 @@ internal class Vedtaksperiode private constructor(
                 if (vedtaksperiode.person.harArbeidsforholdForFlereArbeidsgivere(vedtaksperiode.skjæringstidspunkt)) {
                     vedtaksperiode.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE
                 }
-
-                if (vedtaksperiode.person.harFlereArbeidsgivereUtenSykdomVedSkjæringstidspunkt(vedtaksperiode.skjæringstidspunkt)) {
-                    utbetalingsgrunnlag.warn("Flere arbeidsgivere og ulikt starttidspunkt for sykefraværet")
-                }
             }
             vedtaksperiode.tilstand(utbetalingsgrunnlag, AvventerHistorikk)
         }
@@ -1805,8 +1801,13 @@ internal class Vedtaksperiode private constructor(
                     arbeidsgiver.beregn(this, arbeidsgiverUtbetalinger2, vedtaksperiode.periode)
                 }
                 onSuccess {
-                    if (Toggles.FlereArbeidsgivereUlikFom.enabled && person.harVedtaksperiodeForArbeidsgiverMedUkjentArbeidsforhold(vedtaksperiode.skjæringstidspunkt)) {
-                        ytelser.warn("Arbeidsgiver er ikke registrert i Aa-registeret.")
+                    if(Toggles.FlereArbeidsgivereUlikFom.enabled) {
+                        if (person.harVedtaksperiodeForArbeidsgiverMedUkjentArbeidsforhold(vedtaksperiode.skjæringstidspunkt)) {
+                            ytelser.warn("Arbeidsgiver er ikke registrert i Aa-registeret.")
+                        }
+                        if (vedtaksperiode.person.harFlereArbeidsgivereUtenSykdomVedSkjæringstidspunkt(vedtaksperiode.skjæringstidspunkt)) {
+                            ytelser.warn("Flere arbeidsgivere og ulikt starttidspunkt for sykefraværet")
+                        }
                     }
                     vedtaksperiode.forsøkUtbetaling(arbeidsgiverUtbetalinger2.tidslinjeEngine, ytelser)
                 }

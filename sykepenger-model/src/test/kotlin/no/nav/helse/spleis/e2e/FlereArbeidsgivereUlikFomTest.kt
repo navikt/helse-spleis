@@ -2,6 +2,8 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
+import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
+import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -947,12 +949,19 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
                 Arbeidsforhold(orgnummer = a2, fom = LocalDate.EPOCH, tom = null)
             )
             håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), inntekter = inntekter, orgnummer = a1, arbeidsforhold = arbeidsforhold)
+            håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode(a1), inntektsvurdering = Inntektsvurdering(
+                    listOf(
+                        sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 10000.månedlig.repeat(12)),
+                        sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 20000.månedlig.repeat(12))
+                    )
+                ), orgnummer = a1
+            )
+            håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
 
             assertWarnings(inspektør(a1))
-            assertTrue(
-                inspektør(a1).personLogg.toString()
-                    .contains("Flere arbeidsgivere og ulikt starttidspunkt for sykefraværet")
-            )
+            assertTrue(inspektør(a1).warnings.contains("Flere arbeidsgivere og ulikt starttidspunkt for sykefraværet"))
         }
     }
 
@@ -1028,12 +1037,19 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
                 Arbeidsforhold(orgnummer = a2, fom = LocalDate.EPOCH, tom = null)
             )
             håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), inntekter = inntekter, orgnummer = a1, arbeidsforhold = arbeidsforhold)
+            håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode(a1), inntektsvurdering = Inntektsvurdering(
+                    listOf(
+                        sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 10000.månedlig.repeat(12)),
+                        sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 20000.månedlig.repeat(12))
+                    )
+                ), orgnummer = a1
+            )
+            håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
 
             assertWarnings(inspektør(a1))
-            assertTrue(
-                inspektør(a1).personLogg.toString()
-                    .contains("Flere arbeidsgivere og ulikt starttidspunkt for sykefraværet")
-            )
+            assertTrue(inspektør(a1).warnings.contains("Flere arbeidsgivere og ulikt starttidspunkt for sykefraværet"))
         }
     }
 
@@ -1121,6 +1137,30 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             assertEquals(15.mars, a1Linje.tom)
             assertEquals(1431, a1Linje.beløp)
         }
+    }
+
+    @Test
+    fun `Infotrygdforlengelse skal ikke kjennes igjen som flere arbeidsgivere med ulik fom`() = Toggles.FlereArbeidsgivereUlikFom.enable {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 1.januar,
+            orgnummer = a1,
+        )
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+
+        val historikk = ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar, 100.prosent, INNTEKT)
+        val inntekter = listOf(Inntektsopplysning(a1, 17.januar, INNTEKT, true))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
+        håndterUtbetalingshistorikk(2.vedtaksperiode(a1), historikk, inntektshistorikk = inntekter, orgnummer = a1)
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode(a1), orgnummer = a1)
+        håndterYtelser(2.vedtaksperiode(a1), orgnummer = a1)
+        håndterSimulering(2.vedtaksperiode(a1), orgnummer = a1)
+
+        assertFalse(inspektør(a1).warnings.contains("Flere arbeidsgivere og ulikt starttidspunkt for sykefraværet"))
+
     }
 
 
