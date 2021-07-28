@@ -14,9 +14,10 @@ class Utbetalingsgrunnlag(
     private val orgnummer: String,
     private val vedtaksperiodeId: UUID,
     private val inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
-    private val arbeidsforhold: List<Arbeidsforhold>
+    arbeidsforhold: List<Arbeidsforhold>
 ) : ArbeidstakerHendelse(meldingsreferanseId) {
     private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
+    private val arbeidsforhold = arbeidsforhold.filter { it.orgnummer.isNotBlank() }
 
     override fun organisasjonsnummer() = orgnummer
 
@@ -43,7 +44,7 @@ class Utbetalingsgrunnlag(
             .filter { it.gjelder(skjæringstidspunkt) }
             .grupperArbeidsforholdPerOrgnummer().forEach { (orgnummer, arbeidsforhold) ->
             if (arbeidsforhold.any { it.erSøppel() }) {
-                // warn("Vi fant ugyldige arbeidsforhold i Aareg, burde sjekkes opp nærmere") // TODO: må ses på av en voksen
+                warn("Vi fant ugyldige arbeidsforhold i Aareg, burde sjekkes opp nærmere") // TODO: må ses på av en voksen
             }
             person.lagreArbeidsforhold(orgnummer, arbeidsforhold, this, skjæringstidspunkt)
         }

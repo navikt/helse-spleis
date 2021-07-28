@@ -70,7 +70,7 @@ internal class Inntektshistorikk {
         return false
     }
 
-    internal fun harInntektsmeldingFor(skjæringstidspunkt: LocalDate) = historikk.last().harInntektsmeldingFor(skjæringstidspunkt)
+    internal fun harInntektsmeldingFor(skjæringstidspunkt: LocalDate) = historikk.lastOrNull()?.harInntektsmeldingFor(skjæringstidspunkt) ?: false
 
     internal class Innslag(private val id: UUID) {
         private val inntekter = mutableListOf<Inntektsopplysning>()

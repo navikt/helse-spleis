@@ -2,9 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
-import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Inntektskilde
-import no.nav.helse.person.TilstandType
+import no.nav.helse.person.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.reflection.castAsList
@@ -18,6 +16,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.util.*
 
 internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
     private companion object {
@@ -392,5 +391,40 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1, inntekter = inntekter, arbeidsforhold = arbeidsforhold)
 
         assertEquals(Inntektskilde.FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode(a1)))
+    }
+
+    @Test
+    fun `ignorerer arbeidsforhold med blanke orgnumre`() = Toggles.FlereArbeidsgivereUlikFom.enable {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 1.januar,
+            orgnummer = a1,
+        )
+
+        val arbeidsforhold = listOf(
+            Arbeidsforhold(a1, LocalDate.EPOCH),
+            Arbeidsforhold("", LocalDate.EPOCH, 31.januar),
+            Arbeidsforhold("", LocalDate.EPOCH),
+            Arbeidsforhold(a2, LocalDate.EPOCH)
+        )
+        val inntekter = listOf(
+            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), INNTEKT.repeat(3)),
+            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), INNTEKT.repeat(3))
+        )
+
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1, inntekter = inntekter, arbeidsforhold = arbeidsforhold)
+        assertEquals(listOf(a1, a2), arbeidsgivere())
+    }
+
+    fun arbeidsgivere(): List<String> {
+        val arbeidsforhold = mutableListOf<String>()
+        person.accept(object : PersonVisitor {
+            override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
+                arbeidsforhold.add(organisasjonsnummer)
+            }
+        })
+        return arbeidsforhold
     }
 }
