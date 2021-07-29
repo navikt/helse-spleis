@@ -277,33 +277,4 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
         }
         Toggles.PraksisendringEnabled.pop()
     }
-
-    @Test
-    fun `omregnet årsinntekt kan være null`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        val builder = InntektshistorikkBuilder(person)
-        FinnInntektshistorikk(person, builder).also {
-            inntektperioderForSykepengegrunnlag {
-                1.april til 1.juni inntekter {
-                    ORGNUMMER inntekt INNTEKT
-                }
-            }.forEach { inntekt ->
-                inntekt.lagreInntekter(it.inntektshistorikk.getValue(ORGNUMMER), 1.juni, UUID.randomUUID())
-            }
-        }
-
-        builder.nøkkeldataOmInntekt(1.oktober og 31.desember)
-
-        val inntektsgrunnlag = builder.build()
-
-        assertTrue(inntektsgrunnlag.isNotEmpty())
-        inntektsgrunnlag.single { it.skjæringstidspunkt == 1.oktober }.also { inntektsgrunnlaget ->
-            assertNull(inntektsgrunnlaget.sykepengegrunnlag)
-            assertNull(inntektsgrunnlaget.omregnetÅrsinntekt)
-            assertNull(inntektsgrunnlaget.sammenligningsgrunnlag)
-            assertNull(inntektsgrunnlaget.avviksprosent)
-            assertNull(inntektsgrunnlaget.maksUtbetalingPerDag)
-            assertNull(inntektsgrunnlaget.inntekter.single { it.arbeidsgiver == ORGNUMMER }.omregnetÅrsinntekt)
-        }
-    }
 }

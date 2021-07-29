@@ -38,14 +38,15 @@ internal class InntektshistorikkBuilder(private val person: Person) {
             val sammenligningsgrunnlag = person.sammenligningsgrunnlag(nøkkeldata.skjæringstidspunkt)
 
             val arbeidsgiverinntekt: List<InntektsgrunnlagDTO.ArbeidsgiverinntektDTO> =
-                inntektshistorikk.map { (orgnummer, inntekthist) ->
-                    arbeidsgiverinntekt(
-                        nøkkeldata.skjæringstidspunkt,
-                        nøkkeldata.sisteDagISammenhengendePeriode,
-                        orgnummer,
-                        inntekthist
-                    )
-                }
+                inntektshistorikk
+                    .map { (orgnummer, inntekthist) ->
+                        arbeidsgiverinntekt(nøkkeldata.skjæringstidspunkt, nøkkeldata.sisteDagISammenhengendePeriode, orgnummer, inntekthist)
+                    }
+                    .filter {
+                        it.omregnetÅrsinntekt != null
+                            || it.sammenligningsgrunnlag != null
+                            || person.harAktivtArbeidsforholdFor(it.arbeidsgiver, nøkkeldata.skjæringstidspunkt)
+                    }
 
             InntektsgrunnlagDTO(
                 skjæringstidspunkt = nøkkeldata.skjæringstidspunkt,

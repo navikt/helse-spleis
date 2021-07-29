@@ -1,5 +1,6 @@
 package no.nav.helse.serde.api
 
+import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Dagtype.Feriedag
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
@@ -11,6 +12,7 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.api.InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO
 import no.nav.helse.serde.mapping.SpeilDagtype
+import no.nav.helse.serde.serdeObjectMapper
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -1153,7 +1155,7 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
         )
         person.håndter(
             inntektsmelding(
-                organisasjonsnummer = orgnummer,
+                orgnummer = orgnummer,
                 fom = fom,
                 refusjon = Inntektsmelding.Refusjon(opphørsdato = null, inntekt = 1000.månedlig, endringerIRefusjon = emptyList()),
                 beregnetInntekt = 1000.månedlig
@@ -1161,7 +1163,7 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
         )
         person.håndter(
             inntektsmelding(
-                organisasjonsnummer = orgnummer2,
+                orgnummer = orgnummer2,
                 fom = fom,
                 refusjon = Inntektsmelding.Refusjon(opphørsdato = null, inntekt = 1000.månedlig, endringerIRefusjon = emptyList()),
                 beregnetInntekt = 1000.månedlig
@@ -1179,7 +1181,7 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
                         orgnummer2 inntekt 1000.månedlig
                     }
                 }),
-                organisasjonsnummer = orgnummer2
+                orgnummer = orgnummer2
             )
         )
 
@@ -1241,7 +1243,7 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
         )
         person.håndter(
             inntektsmelding(
-                organisasjonsnummer = orgnummer,
+                orgnummer = orgnummer,
                 fom = fom,
                 refusjon = Inntektsmelding.Refusjon(opphørsdato = null, inntekt = 31000.månedlig, endringerIRefusjon = emptyList()),
                 beregnetInntekt = 31000.månedlig
@@ -1249,7 +1251,7 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
         )
         person.håndter(
             inntektsmelding(
-                organisasjonsnummer = orgnummer2,
+                orgnummer = orgnummer2,
                 fom = fom,
                 refusjon = Inntektsmelding.Refusjon(opphørsdato = null, inntekt = 31000.månedlig, endringerIRefusjon = emptyList()),
                 beregnetInntekt = 31000.månedlig
@@ -1267,7 +1269,7 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
                         orgnummer2 inntekt 31000.månedlig
                     }
                 }),
-                organisasjonsnummer = orgnummer2
+                orgnummer = orgnummer2
             )
         )
         person.håndter(utbetalingsgrunnlag(vedtaksperiodeId1, person.fangSkjæringstidspunkt(UUID.fromString(vedtaksperiodeId1)), orgnummer = orgnummer))
@@ -1318,6 +1320,62 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
         val annulleringElement = utbetalingshistorikk.first { it.utbetaling.erAnnullering() }
         assertFalse(personDto.arbeidsgivere.flatMap { it.vedtaksperioder.flatMap { vedtaksperiode -> (vedtaksperiode as VedtaksperiodeDTO).beregningIder } }
             .contains(annulleringElement.beregningId))
+    }
+
+    private fun <P: PersonHendelse, H: HendelseDTO> Pair<P, H>.unwrap(list: MutableList<HendelseDTO>): P {
+        list.add(second)
+        return first
+    }
+
+    @Test
+    fun `Flere arbeidsgivere med ghosts`() = Toggles.FlereArbeidsgivereUlikFom.enable {
+        val a1 = "orgnummer1"
+        val a2 = "orgnummer2"
+        val a3 = "orgnummer3"
+        val a4 = "orgnummer4"
+        val a5 = "gammmeltorgnummer:)"
+        val hendelser = mutableListOf<HendelseDTO>()
+        person.håndter(sykmelding(fom = 1.januar, tom = 15.mars, grad = 100.prosent, orgnummer = a1).unwrap(hendelser))
+        person.håndter(søknad(fom = 1.januar, tom = 15.mars, grad = 100.prosent, orgnummer = a1).unwrap(hendelser))
+        person.håndter(inntektsmelding(fom = 1.januar, orgnummer = a1, beregnetInntekt = 31000.månedlig).unwrap(hendelser))
+
+        val inntekter = listOf(
+            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 31000.månedlig.repeat(3)),
+            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 32000.månedlig.repeat(3))
+        )
+
+        val arbeidsforhold = listOf(
+            Arbeidsforhold(a1, LocalDate.EPOCH, null),
+            Arbeidsforhold(a2, LocalDate.EPOCH, null),
+            Arbeidsforhold(a3, LocalDate.EPOCH, null),
+            Arbeidsforhold(a4, LocalDate.EPOCH, 1.desember(2017))
+        )
+
+        val gamleITPerioder = listOf(
+            ArbeidsgiverUtbetalingsperiode(a5, 1.januar(2009), 31.januar(2009), 100.prosent, 20000.månedlig)
+        )
+        val gamleITInntekter = listOf(Inntektsopplysning(a5, 1.januar(2009), 20000.månedlig, true))
+        person.håndter(utbetalingsgrunnlag(1.vedtaksperiode(a1).toString(), 1.januar, a1, inntekter, arbeidsforhold))
+        person.håndter(ytelser(vedtaksperiodeId = 1.vedtaksperiode(a1).toString(), orgnummer = a1, utbetalinger = gamleITPerioder, inntektshistorikk = gamleITInntekter))
+        person.håndter(vilkårsgrunnlag(1.vedtaksperiode(a1).toString(), inntektsvurdering = Inntektsvurdering(
+            listOf(
+                sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 31000.månedlig.repeat(12)),
+                sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 32000.månedlig.repeat(12)),
+                sammenligningsgrunnlag(a4, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 1000.månedlig.repeat(2))
+            )
+        ), orgnummer = a1))
+        person.håndter(ytelser(vedtaksperiodeId = 1.vedtaksperiode(a1).toString(), orgnummer = a1))
+        person.håndter(simulering(1.vedtaksperiode(a1).toString(), orgnummer = a1))
+        person.håndter(utbetalingsgodkjenning(1.vedtaksperiode(a1).toString(), orgnummer = a1, aktivitetslogg = person.aktivitetslogg))
+        person.fangeUtbetalinger()
+        person.håndter(utbetalt(person.aktivitetslogg, orgnummer = a1))
+
+        val personDto = serializePersonForSpeil(person, hendelser)
+
+        assertEquals(listOf(a1, a2, a3, a4), personDto.inntektsgrunnlag.single().inntekter.map { it.arbeidsgiver })
+
+        val json = serdeObjectMapper.writeValueAsString(personDto)
+        println(json)
     }
 
     private fun <T> Collection<T>.assertOnNonEmptyCollection(func: (T) -> Unit) {
@@ -2048,11 +2106,11 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
                 endringerIRefusjon = emptyList()
             ),
             beregnetInntekt: Inntekt = 31000.månedlig,
-            organisasjonsnummer: String = orgnummer
+            orgnummer: String = this.orgnummer
         ) = Inntektsmelding(
             meldingsreferanseId = hendelseId,
             refusjon = refusjon,
-            orgnummer = organisasjonsnummer,
+            orgnummer = orgnummer,
             fødselsnummer = fnr,
             aktørId = aktørId,
             førsteFraværsdag = fom,
@@ -2070,18 +2128,18 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
         private fun vilkårsgrunnlag(
             vedtaksperiodeId: String,
             medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+            orgnummer: String = this.orgnummer,
             inntektsvurdering: Inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
                 1.januar(2017) til 1.desember(2017) inntekter {
                     orgnummer inntekt 31000.månedlig
                 }
-            }),
-            organisasjonsnummer: String = orgnummer
+            })
         ) = Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeId,
             aktørId = aktørId,
             fødselsnummer = fnr,
-            orgnummer = organisasjonsnummer,
+            orgnummer = orgnummer,
             inntektsvurdering = inntektsvurdering,
             opptjeningvurdering = Opptjeningvurdering(
                 listOf(
@@ -2134,7 +2192,8 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
                         beskrivelse = "juicy beskrivelse"
                     )
                 })
-            )
+            ),
+            arbeidsforhold: List<Arbeidsforhold> = listOf(Arbeidsforhold(orgnummer, LocalDate.EPOCH, null))
         ) = Utbetalingsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId,
@@ -2142,7 +2201,7 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
             orgnummer,
             UUID.fromString(vedtaksperiodeId),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter),
-            arbeidsforhold = listOf(Arbeidsforhold(orgnummer, LocalDate.EPOCH, null))
+            arbeidsforhold = arbeidsforhold
         )
 
         private fun ytelser(
@@ -2227,6 +2286,7 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
             vedtaksperiodeId: String,
             utbetalingGodkjent: Boolean = true,
             automatiskBehandling: Boolean = false,
+            orgnummer: String = this.orgnummer,
             utbetalingID: UUID
         ) =
             Utbetalingsgodkjenning(
@@ -2247,11 +2307,13 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
             vedtaksperiodeId: String,
             utbetalingGodkjent: Boolean = true,
             automatiskBehandling: Boolean = false,
+            orgnummer: String = this.orgnummer,
             aktivitetslogg: IAktivitetslogg
         ) = utbetalingsgodkjenning(
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingGodkjent = utbetalingGodkjent,
             automatiskBehandling = automatiskBehandling,
+            orgnummer = orgnummer,
             utbetalingID = UUID.fromString(aktivitetslogg.behov().last { it.type == Behovtype.Godkjenning }.kontekst().getValue("utbetalingId"))
         )
 
@@ -2323,7 +2385,7 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
             )
 
 
-        private fun utbetalt(utbetalingFagsystemID: UtbetalingFagsystemID) = UtbetalingHendelse(
+        private fun utbetalt(utbetalingFagsystemID: UtbetalingFagsystemID, orgnummer: String = this.orgnummer) = UtbetalingHendelse(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = aktørId,
             fødselsnummer = fnr,
@@ -2336,12 +2398,13 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
             overføringstidspunkt = LocalDateTime.now()
         )
 
-        private fun utbetalt(aktivitetslogg: IAktivitetslogg) =
+        private fun utbetalt(aktivitetslogg: IAktivitetslogg, orgnummer: String = this.orgnummer) =
             utbetalt(
                 UtbetalingFagsystemID(
                     UUID.fromString(aktivitetslogg.behov().last { it.type == Behovtype.Utbetaling }.kontekst().getValue("utbetalingId")),
                     utbetalingsliste.getValue(orgnummer).last().arbeidsgiverOppdrag().fagsystemId()
-                )
+                ),
+                orgnummer = orgnummer
             )
 
         private fun annullering(fagsystemId: String) = AnnullerUtbetaling(
