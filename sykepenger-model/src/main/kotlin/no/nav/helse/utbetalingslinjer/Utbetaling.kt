@@ -156,11 +156,12 @@ internal class Utbetaling private constructor(
         vedtaksperiode: Vedtaksperiode,
         skjæringstidspunkt: LocalDate,
         aktiveVedtaksperioder: List<Aktivitetslogg.Aktivitet.AktivVedtaksperiode>,
+        orgnummereMedAktiveArbeidsforhold: List<String>,
         arbeidsforholdId: String?,
         aktivitetslogg: Aktivitetslogg
     ) {
         hendelse.kontekst(this)
-        tilstand.godkjenning(this, vedtaksperiode, skjæringstidspunkt, aktiveVedtaksperioder, arbeidsforholdId, aktivitetslogg, hendelse)
+        tilstand.godkjenning(this, vedtaksperiode, skjæringstidspunkt, aktiveVedtaksperioder, orgnummereMedAktiveArbeidsforhold, arbeidsforholdId, aktivitetslogg, hendelse)
     }
 
     internal fun håndter(påminnelse: Utbetalingpåminnelse) {
@@ -561,6 +562,7 @@ internal class Utbetaling private constructor(
             vedtaksperiode: Vedtaksperiode,
             skjæringstidspunkt: LocalDate,
             aktiveVedtaksperioder: List<Aktivitetslogg.Aktivitet.AktivVedtaksperiode>,
+            orgnummereMedAktiveArbeidsforhold: List<String>,
             arbeidsforholdId: String?,
             aktivitetslogg: Aktivitetslogg,
             hendelse: IAktivitetslogg
@@ -631,6 +633,7 @@ internal class Utbetaling private constructor(
             vedtaksperiode: Vedtaksperiode,
             skjæringstidspunkt: LocalDate,
             aktiveVedtaksperioder: List<Aktivitetslogg.Aktivitet.AktivVedtaksperiode>,
+            orgnummereMedAktiveArbeidsforhold: List<String>,
             arbeidsforholdId: String?,
             aktivitetslogg: Aktivitetslogg,
             hendelse: IAktivitetslogg
@@ -645,6 +648,7 @@ internal class Utbetaling private constructor(
                 utbetalingtype = utbetaling.type,
                 inntektskilde = vedtaksperiode.inntektskilde(),
                 aktiveVedtaksperioder =  aktiveVedtaksperioder,
+                orgnummereMedAktiveArbeidsforhold = orgnummereMedAktiveArbeidsforhold,
                 arbeidsforholdId = arbeidsforholdId
             )
         }

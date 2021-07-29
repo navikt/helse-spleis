@@ -560,4 +560,8 @@ class Person private constructor(
     internal fun harAktivtArbeidsforholdFor(orgnummer: String, skjæringstidspunkt: LocalDate) =
         arbeidsgivere.firstOrNull { it.organisasjonsnummer() == orgnummer}
             ?.harAktivtArbeidsforhold(skjæringstidspunkt) ?: false
+
+    internal fun orgnummereMedAktiveArbeidsforhold(skjæringstidspunkt: LocalDate) = arbeidsgivere
+        .filter { it.harAktivtArbeidsforhold(skjæringstidspunkt) }
+        .map { it.organisasjonsnummer() }
 }

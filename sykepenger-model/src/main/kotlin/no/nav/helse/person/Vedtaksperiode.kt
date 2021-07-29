@@ -1968,7 +1968,15 @@ internal class Vedtaksperiode private constructor(
                 it.periodetype()
             )
         }
-        utbetaling().godkjenning(hendelse, this, skjæringstidspunkt, aktiveVedtaksperioder, inntektsmeldingInfo?.arbeidsforholdId, person.aktivitetslogg)
+        utbetaling().godkjenning(
+            hendelse = hendelse,
+            vedtaksperiode = this,
+            skjæringstidspunkt = skjæringstidspunkt,
+            aktiveVedtaksperioder = aktiveVedtaksperioder,
+            arbeidsforholdId = inntektsmeldingInfo?.arbeidsforholdId,
+            orgnummereMedAktiveArbeidsforhold = person.orgnummereMedAktiveArbeidsforhold(skjæringstidspunkt),
+            aktivitetslogg = person.aktivitetslogg
+        )
     }
 
     internal fun harPassertPunktetHvorViOppdagerFlereArbeidsgivere(): Boolean =
