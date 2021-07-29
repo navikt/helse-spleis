@@ -70,7 +70,7 @@ internal class Inntektshistorikk {
         return false
     }
 
-    internal fun sykepengegrunnlagKommerFraSkatt(skjæringstidspunkt: LocalDate) = grunnlagForSykepengegrunnlagMedMetadata(skjæringstidspunkt)?.first is SkattComposite
+    internal fun sykepengegrunnlagKommerFraSkatt(skjæringstidspunkt: LocalDate) = grunnlagForSykepengegrunnlagMedMetadata(skjæringstidspunkt)?.first.let { it == null || it is SkattComposite }
 
     internal class Innslag(private val id: UUID) {
         private val inntekter = mutableListOf<Inntektsopplysning>()
