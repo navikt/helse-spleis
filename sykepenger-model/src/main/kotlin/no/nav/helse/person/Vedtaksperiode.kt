@@ -2291,9 +2291,11 @@ internal class Vedtaksperiode private constructor(
         internal fun List<Vedtaksperiode>.medSkjæringstidspunkt(skjæringstidspunkt: LocalDate) =
             this.filter { it.skjæringstidspunkt == skjæringstidspunkt }
 
-        internal fun List<Vedtaksperiode>.harInntekt() =
+        internal fun List<Vedtaksperiode>.harNødvendigInntekt() =
             this.takeIf { it.isNotEmpty() }
                 ?.any { it.harInntekt() } ?: true
+
+        internal fun List<Vedtaksperiode>.harInntekt() = any { it.harInntekt() }
 
         internal fun overlapperMedForkastet(forkastede: Iterable<Vedtaksperiode>, hendelse: SykdomstidslinjeHendelse) {
             forkastede

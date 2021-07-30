@@ -6,6 +6,7 @@ import no.nav.helse.person.Vedtaksperiode.*
 import no.nav.helse.person.Vedtaksperiode.Companion.ALLE
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_REVURDERT
 import no.nav.helse.person.Vedtaksperiode.Companion.harInntekt
+import no.nav.helse.person.Vedtaksperiode.Companion.harNødvendigInntekt
 import no.nav.helse.person.Vedtaksperiode.Companion.harOverlappendeUtbetaltePerioder
 import no.nav.helse.person.Vedtaksperiode.Companion.medSkjæringstidspunkt
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
@@ -66,7 +67,8 @@ internal class Arbeidsgiver private constructor(
     internal companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
-        internal fun Iterable<Arbeidsgiver>.nåværendeVedtaksperioder(filter: VedtaksperiodeFilter) = mapNotNull { it.vedtaksperioder.nåværendeVedtaksperiode(filter) }
+        internal fun Iterable<Arbeidsgiver>.nåværendeVedtaksperioder(filter: VedtaksperiodeFilter) =
+            mapNotNull { it.vedtaksperioder.nåværendeVedtaksperiode(filter) }
 
         internal fun List<Arbeidsgiver>.grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, periodeStart: LocalDate) =
             this.mapNotNull { it.inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt, maxOf(skjæringstidspunkt, periodeStart)) }
@@ -87,7 +89,7 @@ internal class Arbeidsgiver private constructor(
             filter { it.inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt) != null }
 
         internal fun List<Arbeidsgiver>.harNødvendigInntekt(skjæringstidspunkt: LocalDate) =
-            this.all { it.vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt).harInntekt() }
+            this.all { it.vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt).harNødvendigInntekt() }
                 && any { !it.grunnlagForSykepengegrunnlagKommerFraSkatt(skjæringstidspunkt) }
 
         /**
@@ -877,9 +879,13 @@ internal class Arbeidsgiver private constructor(
 
     internal fun harAktivtArbeidsforhold(skjæringstidspunkt: LocalDate) = arbeidsforholdhistorikk.harAktivtArbeidsforhold(skjæringstidspunkt)
 
-    internal fun grunnlagForSykepengegrunnlagKommerFraSkatt(skjæringstidspunkt: LocalDate) = inntektshistorikk.sykepengegrunnlagKommerFraSkatt(skjæringstidspunkt)
+    internal fun grunnlagForSykepengegrunnlagKommerFraSkatt(skjæringstidspunkt: LocalDate) =
+        inntektshistorikk.sykepengegrunnlagKommerFraSkatt(skjæringstidspunkt)
+
     internal fun harVedtaksperiodeMedUkjentArbeidsforhold(skjæringstidspunkt: LocalDate) =
         !harAktivtArbeidsforhold(skjæringstidspunkt) && vedtaksperioder.any { it.harUferdigFørstegangsbehandling(skjæringstidspunkt) }
+
+    internal fun harInntekt(skjæringstidspunkt: LocalDate) = inntektshistorikk.harInntekt(skjæringstidspunkt) || vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt).harInntekt()
 
     internal class JsonRestorer private constructor() {
         internal companion object {

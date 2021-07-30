@@ -71,6 +71,7 @@ internal class Inntektshistorikk {
     }
 
     internal fun sykepengegrunnlagKommerFraSkatt(skjæringstidspunkt: LocalDate) = grunnlagForSykepengegrunnlagMedMetadata(skjæringstidspunkt)?.first.let { it == null || it is SkattComposite }
+    internal fun harInntekt(dato: LocalDate) = grunnlagForSammenligningsgrunnlag(dato) != null || grunnlagForSykepengegrunnlag(dato) != null
 
     internal class Innslag(private val id: UUID) {
         private val inntekter = mutableListOf<Inntektsopplysning>()
@@ -122,9 +123,7 @@ internal class Inntektshistorikk {
                 }
             return false
         }
-
-        internal fun harInntektsmeldingFor(skjæringstidspunkt: LocalDate) = inntekter.filterIsInstance<Inntektsmelding>().any { it.dato == skjæringstidspunkt }
-
+        
         internal companion object {
             internal fun List<Innslag>.nyesteId() = this.first().id
         }

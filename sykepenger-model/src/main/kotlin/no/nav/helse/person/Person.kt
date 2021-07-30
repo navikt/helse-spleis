@@ -557,11 +557,12 @@ class Person private constructor(
         arbeidsgivere.any { it.harVedtaksperiodeMedUkjentArbeidsforhold(skjæringstidspunkt) }
 
     internal fun harArbeidsforholdForFlereArbeidsgivere(skjæringstidspunkt: LocalDate) = arbeidsgivereMedAktiveArbeidsforhold(skjæringstidspunkt).size > 1
-    internal fun harAktivtArbeidsforholdFor(orgnummer: String, skjæringstidspunkt: LocalDate) =
-        arbeidsgivere.firstOrNull { it.organisasjonsnummer() == orgnummer}
-            ?.harAktivtArbeidsforhold(skjæringstidspunkt) ?: false
 
     internal fun orgnummereMedAktiveArbeidsforhold(skjæringstidspunkt: LocalDate) = arbeidsgivere
         .filter { it.harAktivtArbeidsforhold(skjæringstidspunkt) }
         .map { it.organisasjonsnummer() }
+
+    fun harAktivtArbeidsforholdEllerInntekt(skjæringstidspunkt: LocalDate, orgnummer: String) = arbeidsgivere
+        .firstOrNull { it.organisasjonsnummer() == orgnummer }
+        ?.let { it.harAktivtArbeidsforhold(skjæringstidspunkt) || it.harInntekt(skjæringstidspunkt) } ?: false
 }

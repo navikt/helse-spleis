@@ -21,10 +21,15 @@ internal class PersonBuilder(
     private val inntektshistorikkBuilder = InntektshistorikkBuilder(person)
 
     internal fun build(hendelser: List<HendelseDTO>): PersonDTO {
+
+        fun skalVises(orgnummer: String) = person.skjæringstidspunkter().any { person.harAktivtArbeidsforholdEllerInntekt(it, orgnummer) }
+
         return PersonDTO(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
-            arbeidsgivere = arbeidsgivere.map { it.build(hendelser) }.filter { it.vedtaksperioder.isNotEmpty() },
+            arbeidsgivere = arbeidsgivere.map { it.build(hendelser) }.filter {
+                it.vedtaksperioder.isNotEmpty() || skalVises(it.organisasjonsnummer)
+            },
             inntektsgrunnlag = inntektshistorikkBuilder.build(),
             dødsdato = dødsdato,
             versjon = versjon
@@ -36,7 +41,8 @@ internal class PersonBuilder(
         id: UUID,
         organisasjonsnummer: String
     ) {
-        val arbeidsgiverBuilder = ArbeidsgiverBuilder(arbeidsgiver, person.vilkårsgrunnlagHistorikk, id, organisasjonsnummer, fødselsnummer, inntektshistorikkBuilder)
+        val arbeidsgiverBuilder =
+            ArbeidsgiverBuilder(arbeidsgiver, person.vilkårsgrunnlagHistorikk, id, organisasjonsnummer, fødselsnummer, inntektshistorikkBuilder)
         arbeidsgivere.add(arbeidsgiverBuilder)
         pushState(arbeidsgiverBuilder)
     }

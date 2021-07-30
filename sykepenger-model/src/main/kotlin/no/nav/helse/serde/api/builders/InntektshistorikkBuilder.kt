@@ -43,9 +43,7 @@ internal class InntektshistorikkBuilder(private val person: Person) {
                         arbeidsgiverinntekt(nøkkeldata.skjæringstidspunkt, nøkkeldata.sisteDagISammenhengendePeriode, orgnummer, inntekthist)
                     }
                     .filter {
-                        it.omregnetÅrsinntekt != null
-                            || it.sammenligningsgrunnlag != null
-                            || person.harAktivtArbeidsforholdFor(it.arbeidsgiver, nøkkeldata.skjæringstidspunkt)
+                            person.harAktivtArbeidsforholdEllerInntekt(nøkkeldata.skjæringstidspunkt, it.arbeidsgiver)
                     }
 
             InntektsgrunnlagDTO(

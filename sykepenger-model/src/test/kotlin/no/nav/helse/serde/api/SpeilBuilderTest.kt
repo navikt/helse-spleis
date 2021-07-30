@@ -775,14 +775,6 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `inkluderer ikke arbeidsgivere uten sykdomshistorikk`() {
-        val (person, hendelser) = personMedEkstraArbeidsgiverUtenSykdomshistorikk()
-        val personDTO = serializePersonForSpeil(person, hendelser)
-        assertEquals(1, personDTO.arbeidsgivere.size)
-        assertEquals(1, personDTO.arbeidsgivere[0].vedtaksperioder.size)
-    }
-
-    @Test
     fun `ny inntekt inkluderes`() {
         val (person, hendelser) = person()
         val personDTO = serializePersonForSpeil(person, hendelser)
@@ -1397,6 +1389,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             .single().inntekter
             .single { it.arbeidsgiver == a2 }.omregnetÅrsinntekt!!.inntekterFraAOrdningen!!
 
+        assertEquals(listOf(a1, a2, a3, a4), personDto.arbeidsgivere.map { it.organisasjonsnummer })
         assertEquals(listOf(a1, a2, a3, a4), personDto.inntektsgrunnlag.single().inntekter.map { it.arbeidsgiver })
         assertEquals(3, inntekterFraAordningen.size)
         assertEquals(listOf(31000.0, 32000.0, 33000.0), inntekterFraAordningen.map { it.sum })
@@ -1631,72 +1624,6 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
                                 håndter(utbetalt(it))
                             }
                         }
-                    }
-                }
-            }
-
-        private fun personMedEkstraArbeidsgiverUtenSykdomshistorikk(
-            fom: LocalDate = 1.januar,
-            tom: LocalDate = 31.januar,
-            sendtSøknad: LocalDate = 1.april,
-            søknadhendelseId: UUID = UUID.randomUUID(),
-            påfølgendePerioder: List<ClosedRange<LocalDate>> = emptyList()
-        ): Pair<Person, List<HendelseDTO>> =
-            Person(aktørId, fnr).run {
-                this to mutableListOf<HendelseDTO>().apply {
-                    sykmelding(fom = fom, tom = tom).also { (sykmelding, sykmeldingDTO) ->
-                        håndter(sykmelding)
-                        add(sykmeldingDTO)
-                    }
-                    fangeVedtaksperiodeId()
-                    søknad(
-                        hendelseId = søknadhendelseId,
-                        fom = fom,
-                        tom = tom,
-                        sendtSøknad = sendtSøknad.atStartOfDay()
-                    ).also { (søknad, søknadDTO) ->
-                        håndter(søknad)
-                        add(søknadDTO)
-                    }
-                    inntektsmelding(fom = fom).also { (inntektsmelding, inntektsmeldingDTO) ->
-                        håndter(inntektsmelding)
-                        add(inntektsmeldingDTO)
-                    }
-                    håndter(utbetalingsgrunnlag(vedtaksperiodeId, fangSkjæringstidspunkt(UUID.fromString(vedtaksperiodeId))))
-                    håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
-                    håndter(vilkårsgrunnlagMedFlerInntekter(vedtaksperiodeId = vedtaksperiodeId))
-                    håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
-                    fangeUtbetalinger()
-                    håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
-                    håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId, aktivitetslogg = this@run.aktivitetslogg))
-                    håndter(overføring(this@run.aktivitetslogg))
-                    håndter(utbetalt(this@run.aktivitetslogg))
-
-                    påfølgendePerioder.forEach { periode ->
-                        sykmelding(
-                            fom = periode.start,
-                            tom = periode.endInclusive
-                        ).also { (sykmelding, sykmeldingDTO) ->
-                            håndter(sykmelding)
-                            add(sykmeldingDTO)
-                        }
-                        fangeVedtaksperiodeId()
-                        søknad(
-                            hendelseId = søknadhendelseId,
-                            fom = periode.start,
-                            tom = periode.endInclusive,
-                            sendtSøknad = periode.endInclusive.atStartOfDay()
-                        ).also { (søknad, søknadDTO) ->
-                            håndter(søknad)
-                            add(søknadDTO)
-                        }
-                        håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
-                        håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
-                        fangeUtbetalinger()
-                        håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
-                        håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId, aktivitetslogg = this@run.aktivitetslogg))
-                        håndter(overføring(this@run.aktivitetslogg))
-                        håndter(utbetalt(this@run.aktivitetslogg))
                     }
                 }
             }
@@ -2175,31 +2102,6 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
                 )
             ),
             medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus)
-        )
-
-        private fun vilkårsgrunnlagMedFlerInntekter(vedtaksperiodeId: String) = Vilkårsgrunnlag(
-            meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = vedtaksperiodeId,
-            aktørId = aktørId,
-            fødselsnummer = fnr,
-            orgnummer = orgnummer,
-            inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
-                1.januar(2017) til 1.desember(2017) inntekter {
-                    orgnummer inntekt 31000.månedlig
-                }
-                1.januar(2017) til 1.januar(2017) inntekter {
-                    orgnummer2 inntekt 1
-                }
-            }),
-            opptjeningvurdering = Opptjeningvurdering(
-                listOf(
-                    Arbeidsforhold(
-                        orgnummer,
-                        1.januar(2017)
-                    )
-                )
-            ),
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja)
         )
 
         private fun utbetalingsgrunnlag(
