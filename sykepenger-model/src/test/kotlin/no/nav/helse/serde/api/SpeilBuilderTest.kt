@@ -12,7 +12,6 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.api.InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO
 import no.nav.helse.serde.mapping.SpeilDagtype
-import no.nav.helse.serde.serdeObjectMapper
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -29,7 +28,7 @@ import java.time.LocalTime
 import java.time.YearMonth
 import java.util.*
 
-internal class SpeilBuilderTest: AbstractEndToEndTest() {
+internal class SpeilBuilderTest : AbstractEndToEndTest() {
 
     @Test
     fun `happy case`() {
@@ -57,7 +56,8 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
         val søknadId = UUID.randomUUID()
         val søknad = SøknadNavDTO(søknadId.toString(), 1.januar, 31.januar, 1.januar.atStartOfDay(), sendtNav = 1.februar.atStartOfDay())
         val inntektsmeldingId = UUID.randomUUID()
-        val inntektsmelding = InntektsmeldingDTO(inntektsmeldingId.toString(), mottattDato = 2.januar.atStartOfDay(), INNTEKT.reflection { _, månedlig, _, _ -> månedlig })
+        val inntektsmelding =
+            InntektsmeldingDTO(inntektsmeldingId.toString(), mottattDato = 2.januar.atStartOfDay(), INNTEKT.reflection { _, månedlig, _, _ -> månedlig })
 
         val hendelser = listOf(sykmelding, søknad, inntektsmelding)
 
@@ -401,7 +401,8 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
         val søknad1Id = UUID.randomUUID()
         val søknad1 = SøknadNavDTO(søknad1Id.toString(), 1.januar, 31.januar, 1.januar.atStartOfDay(), 31.januar.atStartOfDay())
         val inntektsmeldingId = UUID.randomUUID()
-        val inntektsmelding = InntektsmeldingDTO(inntektsmeldingId.toString(), mottattDato = 2.januar.atStartOfDay(), INNTEKT.reflection { _, månedlig, _, _ -> månedlig })
+        val inntektsmelding =
+            InntektsmeldingDTO(inntektsmeldingId.toString(), mottattDato = 2.januar.atStartOfDay(), INNTEKT.reflection { _, månedlig, _, _ -> månedlig })
 
         val sykmelding2Id = UUID.randomUUID()
         val sykmelding2 = SykmeldingDTO(sykmelding2Id.toString(), 1.februar, 14.februar, 1.februar.atStartOfDay())
@@ -507,25 +508,36 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(fom1Periode, tom1Periode, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom1Periode, tom1Periode, 100.prosent))
         // Til infotrygd pga overlapp
-        håndterUtbetalingshistorikk(1.vedtaksperiode, utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, skjæringstidspunktFraInfotrygd, 4.januar, 100.prosent, 31000.månedlig)))
+        håndterUtbetalingshistorikk(
+            1.vedtaksperiode,
+            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, skjæringstidspunktFraInfotrygd, 4.januar, 100.prosent, 31000.månedlig))
+        )
 
         håndterSykmelding(Sykmeldingsperiode(fom2Periode, tom2Periode, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom2Periode, tom2Periode, 100.prosent))
-        håndterUtbetalingshistorikk(2.vedtaksperiode, besvart = 16.februar.atStartOfDay(), inntektshistorikk = inntektshistorikk, utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(
-            ORGNUMMER,
-            skjæringstidspunktFraInfotrygd,
-            tom1Periode,
-            100.prosent,
-            31000.månedlig
-        )))
+        håndterUtbetalingshistorikk(
+            2.vedtaksperiode, besvart = 16.februar.atStartOfDay(), inntektshistorikk = inntektshistorikk, utbetalinger = arrayOf(
+                ArbeidsgiverUtbetalingsperiode(
+                    ORGNUMMER,
+                    skjæringstidspunktFraInfotrygd,
+                    tom1Periode,
+                    100.prosent,
+                    31000.månedlig
+                )
+            )
+        )
         håndterUtbetalingsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode, besvart = 17.februar.atStartOfDay(), inntektshistorikk = inntektshistorikk, utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(
-            ORGNUMMER,
-            skjæringstidspunktFraInfotrygd,
-            tom1Periode,
-            100.prosent,
-            31000.månedlig
-        )))
+        håndterYtelser(
+            2.vedtaksperiode, besvart = 17.februar.atStartOfDay(), inntektshistorikk = inntektshistorikk, utbetalinger = arrayOf(
+                ArbeidsgiverUtbetalingsperiode(
+                    ORGNUMMER,
+                    skjæringstidspunktFraInfotrygd,
+                    tom1Periode,
+                    100.prosent,
+                    31000.månedlig
+                )
+            )
+        )
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
@@ -593,7 +605,6 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
         val personDTO = speilApi()
         assertEquals(9, personDTO.arbeidsgivere.first().vedtaksperioder.first().utbetalingstidslinje.size)
     }
-
 
 
     @Test
@@ -1322,7 +1333,7 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
             .contains(annulleringElement.beregningId))
     }
 
-    private fun <P: PersonHendelse, H: HendelseDTO> Pair<P, H>.unwrap(list: MutableList<HendelseDTO>): P {
+    private fun <P : PersonHendelse, H : HendelseDTO> Pair<P, H>.unwrap(list: MutableList<HendelseDTO>): P {
         list.add(second)
         return first
     }
@@ -1341,7 +1352,7 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
 
         val inntekter = listOf(
             grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 31000.månedlig.repeat(3)),
-            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 32000.månedlig.repeat(3))
+            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), listOf(31000.månedlig, 32000.månedlig, 33000.månedlig))
         )
 
         val arbeidsforhold = listOf(
@@ -1356,14 +1367,25 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
         )
         val gamleITInntekter = listOf(Inntektsopplysning(a5, 1.januar(2009), 20000.månedlig, true))
         person.håndter(utbetalingsgrunnlag(1.vedtaksperiode(a1).toString(), 1.januar, a1, inntekter, arbeidsforhold))
-        person.håndter(ytelser(vedtaksperiodeId = 1.vedtaksperiode(a1).toString(), orgnummer = a1, utbetalinger = gamleITPerioder, inntektshistorikk = gamleITInntekter))
-        person.håndter(vilkårsgrunnlag(1.vedtaksperiode(a1).toString(), inntektsvurdering = Inntektsvurdering(
-            listOf(
-                sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 31000.månedlig.repeat(12)),
-                sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 32000.månedlig.repeat(12)),
-                sammenligningsgrunnlag(a4, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 1000.månedlig.repeat(2))
+        person.håndter(
+            ytelser(
+                vedtaksperiodeId = 1.vedtaksperiode(a1).toString(),
+                orgnummer = a1,
+                utbetalinger = gamleITPerioder,
+                inntektshistorikk = gamleITInntekter
             )
-        ), orgnummer = a1))
+        )
+        person.håndter(
+            vilkårsgrunnlag(
+                1.vedtaksperiode(a1).toString(), inntektsvurdering = Inntektsvurdering(
+                    listOf(
+                        sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 31000.månedlig.repeat(12)),
+                        sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 32000.månedlig.repeat(12)),
+                        sammenligningsgrunnlag(a4, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 1000.månedlig.repeat(2))
+                    )
+                ), orgnummer = a1
+            )
+        )
         person.håndter(ytelser(vedtaksperiodeId = 1.vedtaksperiode(a1).toString(), orgnummer = a1))
         person.håndter(simulering(1.vedtaksperiode(a1).toString(), orgnummer = a1))
         person.håndter(utbetalingsgodkjenning(1.vedtaksperiode(a1).toString(), orgnummer = a1, aktivitetslogg = person.aktivitetslogg))
@@ -1371,11 +1393,13 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
         person.håndter(utbetalt(person.aktivitetslogg, orgnummer = a1))
 
         val personDto = serializePersonForSpeil(person, hendelser)
+        val inntekterFraAordningen = personDto.inntektsgrunnlag
+            .single().inntekter
+            .single { it.arbeidsgiver == a2 }.omregnetÅrsinntekt!!.inntekterFraAOrdningen!!
 
         assertEquals(listOf(a1, a2, a3, a4), personDto.inntektsgrunnlag.single().inntekter.map { it.arbeidsgiver })
-
-        val json = serdeObjectMapper.writeValueAsString(personDto)
-        println(json)
+        assertEquals(3, inntekterFraAordningen.size)
+        assertEquals(listOf(31000.0, 32000.0, 33000.0), inntekterFraAordningen.map { it.sum })
     }
 
     private fun <T> Collection<T>.assertOnNonEmptyCollection(func: (T) -> Unit) {
@@ -2002,6 +2026,7 @@ internal class SpeilBuilderTest: AbstractEndToEndTest() {
                 }
             })
         }
+
         private fun Person.fangSkjæringstidspunkt(vedtaksperiodeId: UUID): LocalDate {
             lateinit var skjæringstidpunkt: LocalDate
             accept(object : PersonVisitor {
