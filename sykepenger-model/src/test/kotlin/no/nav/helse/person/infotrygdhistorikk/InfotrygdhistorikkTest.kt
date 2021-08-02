@@ -8,6 +8,8 @@ import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -122,7 +124,7 @@ internal class InfotrygdhistorikkTest {
             oppdatert = tidsstempel,
             perioder = listOf(Friperiode(1.januar,  10.januar))
         ))
-        historikk.lagreVilkårsgrunnlag(1.januar, Periodetype.OVERGANG_FRA_IT, VilkårsgrunnlagHistorikk())
+        historikk.lagreVilkårsgrunnlag(1.januar, Periodetype.OVERGANG_FRA_IT, VilkårsgrunnlagHistorikk(), sykepengegrunnlagFor(INGEN))
         historikk.tøm()
         assertTrue(historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato))
         assertTrue(aktivitetslogg.behov().isNotEmpty()) { aktivitetslogg.toString() }
@@ -141,7 +143,7 @@ internal class InfotrygdhistorikkTest {
             oppdatert = tidsstempel1,
             perioder = listOf(Friperiode(1.januar,  10.januar))
         ))
-        historikk.lagreVilkårsgrunnlag(1.januar, Periodetype.OVERGANG_FRA_IT, VilkårsgrunnlagHistorikk())
+        historikk.lagreVilkårsgrunnlag(1.januar, Periodetype.OVERGANG_FRA_IT, VilkårsgrunnlagHistorikk(), sykepengegrunnlagFor(INGEN))
         historikk.oppdaterHistorikk(historikkelement(
             oppdatert = tidsstempel2,
             perioder = listOf(ArbeidsgiverUtbetalingsperiode("orgnr", 1.januar,  10.januar, 100.prosent, 1000.daglig))
@@ -481,5 +483,13 @@ internal class InfotrygdhistorikkTest {
         ) {
             elementer.add(Triple(id, tidsstempel, oppdatert))
         }
+    }
+
+    private fun sykepengegrunnlagFor(inntekt: Inntekt): (LocalDate) -> Sykepengegrunnlag = {
+        Sykepengegrunnlag(
+            arbeidsgiverInntektsopplysning = listOf(),
+            sykepengegrunnlag = inntekt,
+            grunnlagForSykepengegrunnlag = inntekt
+        )
     }
 }

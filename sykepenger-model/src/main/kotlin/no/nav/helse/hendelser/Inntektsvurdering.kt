@@ -2,12 +2,9 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.antallMåneder
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.kilder
-import no.nav.helse.person.IAktivitetslogg
-import no.nav.helse.person.Periodetype
+import no.nav.helse.person.*
 import no.nav.helse.person.Periodetype.FORLENGELSE
 import no.nav.helse.person.Periodetype.INFOTRYGDFORLENGELSE
-import no.nav.helse.person.Person
-import no.nav.helse.person.PersonHendelse
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Prosent.Companion.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT
@@ -23,7 +20,7 @@ class Inntektsvurdering(
 
     internal fun valider(
         aktivitetslogg: IAktivitetslogg,
-        grunnlagForSykepengegrunnlag: Inntekt,
+        grunnlagForSykepengegrunnlag: Sykepengegrunnlag,
         sammenligningsgrunnlag: Inntekt,
         periodetype: Periodetype,
         antallArbeidsgivereMedOverlappendeVedtaksperioder: Int
@@ -49,7 +46,7 @@ class Inntektsvurdering(
             aktivitetslogg.etterlevelse.`§8-30 ledd 2`(
                 akseptabeltAvvik,
                 MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT,
-                grunnlagForSykepengegrunnlag,
+                grunnlagForSykepengegrunnlag.grunnlagForSykepengegrunnlag,
                 sammenligningsgrunnlag,
                 avvik
             )

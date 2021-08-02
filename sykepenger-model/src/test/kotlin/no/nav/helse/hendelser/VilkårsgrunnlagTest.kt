@@ -5,6 +5,7 @@ import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
 import no.nav.helse.spleis.e2e.TestArbeidsgiverInspektør
 import no.nav.helse.spleis.e2e.TestObservatør
 import no.nav.helse.testhelpers.*
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -126,7 +127,7 @@ internal class VilkårsgrunnlagTest {
             Arbeidsforhold("ORGNR1", 1.januar, 14.januar),
             Arbeidsforhold("ORGNR2", 15.januar, null)
         ))
-        vilkårsgrunnlag.valider(INNTEKT, INNTEKT, 31.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)
+        vilkårsgrunnlag.valider(sykepengegrunnlag(), INNTEKT, 31.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)
 
         assertFalse(vilkårsgrunnlag.hasWarningsOrWorse())
     }
@@ -283,5 +284,11 @@ internal class VilkårsgrunnlagTest {
         arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList()),
         dagpenger = Dagpenger(emptyList()),
         aktivitetslogg = Aktivitetslogg()
+    )
+
+    private fun sykepengegrunnlag(inntekt: Inntekt = INNTEKT) = Sykepengegrunnlag(
+        arbeidsgiverInntektsopplysning = listOf(),
+        sykepengegrunnlag = inntekt,
+        grunnlagForSykepengegrunnlag = inntekt
     )
 }

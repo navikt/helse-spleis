@@ -26,13 +26,14 @@ internal fun interface Forlengelsestrategi {
         val Ingen = Forlengelsestrategi { false }
     }
 }
+
 /**
  *  Forstår opprettelsen av en Utbetalingstidslinje
  */
 
 internal class UtbetalingstidslinjeBuilder internal constructor(
     private val skjæringstidspunkter: List<LocalDate>,
-    private val inntektshistorikk: Inntektshistorikk,
+    private val inntektPerSkjæringstidspunkt: Map<LocalDate, Inntektshistorikk.Inntektsopplysning?>?,
     private val arbeidsgiverRegler: ArbeidsgiverRegler = NormalArbeidstaker
 ) : SykdomstidslinjeVisitor, IUtbetalingstidslinjeBuilder {
     private var forlengelseStrategy: Forlengelsestrategi = Forlengelsestrategi.Ingen
@@ -53,8 +54,9 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
             .sorted()
             .lastOrNull { it <= dato }
             ?.let { skjæringstidspunkt ->
-                inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt, dato)
-                    ?.let { inntekt -> skjæringstidspunkt to inntekt }
+                inntektPerSkjæringstidspunkt?.get(skjæringstidspunkt)?.let { inntektsopplysning ->
+                    skjæringstidspunkt to inntektsopplysning.grunnlagForSykepengegrunnlag()
+                }
             }
 
     private fun inntektForDato(dato: LocalDate) =
@@ -250,12 +252,13 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     }
 
     internal interface UtbetalingState {
-        fun justerSykedagtelling(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate) { }
+        fun justerSykedagtelling(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate) {}
         fun sykedag(
             splitter: UtbetalingstidslinjeBuilder,
             dagen: LocalDate,
             økonomi: Økonomi
         )
+
         fun foreldetSykedag(
             splitter: UtbetalingstidslinjeBuilder,
             dagen: LocalDate,
@@ -530,6 +533,7 @@ internal sealed class UtbetalingstidslinjeBuilderException(private val kort: Str
         "Mangler inntekt for dag",
         "Fant ikke inntekt for $dagen med skjæringstidspunkter $skjæringstidspunkter"
     )
+
     internal class UforventetDagException(dag: Dag, melding: String) : UtbetalingstidslinjeBuilderException(
         "Forventet ikke ${dag::class.simpleName}",
         "Forventet ikke ${dag::class.simpleName} i utbetalingstidslinjen. Melding: $melding"

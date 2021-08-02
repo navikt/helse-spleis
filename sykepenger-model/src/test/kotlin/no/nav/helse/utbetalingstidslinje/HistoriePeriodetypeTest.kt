@@ -193,6 +193,7 @@ internal class HistoriePeriodetypeTest {
             override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) {}
         })
         person.vilkårsgrunnlagHistorikk.lagre(1.januar, VilkårsgrunnlagHistorikk.Grunnlagsdata(
+            sykepengegrunnlag = sykepengegrunnlag(30000.månedlig),
             sammenligningsgrunnlag = 30000.månedlig,
             avviksprosent = Prosent.prosent(0.0),
             antallOpptjeningsdagerErMinst = 28,
@@ -271,4 +272,10 @@ internal class HistoriePeriodetypeTest {
             override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) {}
         })
     }
+
+    private fun sykepengegrunnlag(inntekt: Inntekt) = Sykepengegrunnlag(
+        arbeidsgiverInntektsopplysning = listOf(),
+        sykepengegrunnlag = inntekt,
+        grunnlagForSykepengegrunnlag = inntekt
+    )
 }

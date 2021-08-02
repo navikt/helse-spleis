@@ -31,8 +31,6 @@ internal class InntektshistorikkBuilder(private val person: Person) {
         .groupBy { it.skjæringstidspunkt }
         .mapNotNull { (_, value) -> value.maxByOrNull { it.sisteDagISammenhengendePeriode } }
         .map { nøkkeldata ->
-            val sykepengegrunnlag =
-                person.sykepengegrunnlag(nøkkeldata.skjæringstidspunkt, nøkkeldata.sisteDagISammenhengendePeriode)
             val grunnlagForSykepengegrunnlag =
                 person.grunnlagForSykepengegrunnlag(nøkkeldata.skjæringstidspunkt, nøkkeldata.sisteDagISammenhengendePeriode)
             val sammenligningsgrunnlag = person.sammenligningsgrunnlag(nøkkeldata.skjæringstidspunkt)
@@ -48,13 +46,13 @@ internal class InntektshistorikkBuilder(private val person: Person) {
 
             InntektsgrunnlagDTO(
                 skjæringstidspunkt = nøkkeldata.skjæringstidspunkt,
-                sykepengegrunnlag = sykepengegrunnlag?.reflection { årlig, _, _, _ -> årlig },
-                omregnetÅrsinntekt = grunnlagForSykepengegrunnlag?.reflection { årlig, _, _, _ -> årlig },
+                sykepengegrunnlag = grunnlagForSykepengegrunnlag.sykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
+                omregnetÅrsinntekt = grunnlagForSykepengegrunnlag.grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
                 sammenligningsgrunnlag = sammenligningsgrunnlag?.reflection { årlig, _, _, _ -> årlig },
                 avviksprosent = nøkkeldata.avviksprosent,
-                maksUtbetalingPerDag = sykepengegrunnlag?.reflection { _, _, daglig, _ -> daglig },
+                maksUtbetalingPerDag = grunnlagForSykepengegrunnlag.sykepengegrunnlag.reflection { _, _, daglig, _ -> daglig },
                 inntekter = arbeidsgiverinntekt,
-                oppfyllerKravOmMinstelønn = sykepengegrunnlag?.let { it > person.minimumInntekt(nøkkeldata.skjæringstidspunkt) },
+                oppfyllerKravOmMinstelønn = grunnlagForSykepengegrunnlag.sykepengegrunnlag > person.minimumInntekt(nøkkeldata.skjæringstidspunkt),
                 grunnbeløp = (Grunnbeløp.`1G`
                     .beløp(nøkkeldata.skjæringstidspunkt, nøkkeldata.sisteDagISammenhengendePeriode)
                     .reflection { årlig, _, _, _ -> årlig })

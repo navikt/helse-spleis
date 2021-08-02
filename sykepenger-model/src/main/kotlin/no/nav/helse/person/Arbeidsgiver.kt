@@ -69,9 +69,12 @@ internal class Arbeidsgiver private constructor(
             mapNotNull { it.vedtaksperioder.nåværendeVedtaksperiode(filter) }
 
         internal fun List<Arbeidsgiver>.grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, periodeStart: LocalDate) =
-            this.mapNotNull { it.inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt, maxOf(skjæringstidspunkt, periodeStart)) }
-                .takeIf { it.isNotEmpty() }
-                ?.summer()
+            this.mapNotNull { arbeidsgiver ->
+                arbeidsgiver.inntektshistorikk.grunnlagForSykepengegrunnlagDings(
+                    skjæringstidspunkt,
+                    maxOf(skjæringstidspunkt, periodeStart)
+                )?.let { ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, it) }
+            }
 
         internal fun List<Arbeidsgiver>.grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
             this.mapNotNull { it.inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt) }
@@ -823,10 +826,12 @@ internal class Arbeidsgiver private constructor(
     internal fun avgrensetPeriode(periode: Periode) =
         Periode(maxOf(periode.start, skjæringstidspunkt(periode)), periode.endInclusive)
 
-    internal fun builder(regler: ArbeidsgiverRegler, skjæringstidspunkter: List<LocalDate>): UtbetalingstidslinjeBuilder {
+    internal fun builder(regler: ArbeidsgiverRegler, skjæringstidspunkter: List<LocalDate>, inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver: Map<LocalDate, Map<String, Inntektshistorikk.Inntektsopplysning>>?): UtbetalingstidslinjeBuilder {
         return UtbetalingstidslinjeBuilder(
             skjæringstidspunkter = skjæringstidspunkter,
-            inntektshistorikk = inntektshistorikk,
+            inntektPerSkjæringstidspunkt = inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver?.mapValues {
+                (_, inntektsopplysningPerArbeidsgiver) -> inntektsopplysningPerArbeidsgiver[organisasjonsnummer]
+            },
             arbeidsgiverRegler = regler
         )
     }

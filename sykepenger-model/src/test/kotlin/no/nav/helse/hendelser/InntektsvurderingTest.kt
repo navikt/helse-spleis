@@ -2,6 +2,8 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Periodetype
+import no.nav.helse.person.Sykepengegrunnlag
+import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
@@ -25,7 +27,7 @@ internal class InntektsvurderingTest {
 
     @Test
     fun `ugyldige verdier`() {
-        assertFalse(validererOk(inntektsvurdering(emptyList()), INGEN, INGEN))
+        assertFalse(validererOk(inntektsvurdering(emptyList()), sykepengegrunnlag(INGEN), INGEN))
         assertFalse(
             validererOk(
                 inntektsvurdering(
@@ -34,7 +36,7 @@ internal class InntektsvurderingTest {
                             ORGNR inntekt INGEN
                         }
                     }
-                ), INGEN, INGEN
+                ), sykepengegrunnlag(INGEN), INGEN
             )
         )
     }
@@ -42,32 +44,32 @@ internal class InntektsvurderingTest {
     @Test
     fun `skal kunne beregne avvik mellom innmeldt lønn fra inntektsmelding og lønn fra inntektskomponenten`() {
         val inntektsvurdering = inntektsvurdering()
-        assertFalse(validererOk(inntektsvurdering, 1250.01.månedlig, INNTEKT))
-        assertFalse(validererOk(inntektsvurdering, 749.99.månedlig, INNTEKT))
-        assertTrue(validererOk(inntektsvurdering, 1000.00.månedlig, INNTEKT))
-        assertTrue(validererOk(inntektsvurdering, 1250.00.månedlig, INNTEKT))
-        assertTrue(validererOk(inntektsvurdering, 750.00.månedlig, INNTEKT))
+        assertFalse(validererOk(inntektsvurdering, sykepengegrunnlag(1250.01.månedlig), INNTEKT))
+        assertFalse(validererOk(inntektsvurdering, sykepengegrunnlag(749.99.månedlig), INNTEKT))
+        assertTrue(validererOk(inntektsvurdering, sykepengegrunnlag(1000.00.månedlig), INNTEKT))
+        assertTrue(validererOk(inntektsvurdering, sykepengegrunnlag(1250.00.månedlig), INNTEKT))
+        assertTrue(validererOk(inntektsvurdering, sykepengegrunnlag(750.00.månedlig), INNTEKT))
     }
 
     @Test
     fun `flere organisasjoner siste 3 måneder gir warning`() {
         val annenInntekt = "etAnnetOrgnr" to INNTEKT
-        assertTrue(validererOk(inntektsvurdering(inntekter(YearMonth.of(2017, 12), annenInntekt)), INNTEKT, INNTEKT, 1))
+        assertTrue(validererOk(inntektsvurdering(inntekter(YearMonth.of(2017, 12), annenInntekt)), sykepengegrunnlag(), INNTEKT, 1))
         assertTrue(aktivitetslogg.hasWarningsOrWorse())
-        assertTrue(validererOk(inntektsvurdering(inntekter(YearMonth.of(2017, 11), annenInntekt)), INNTEKT, INNTEKT))
+        assertTrue(validererOk(inntektsvurdering(inntekter(YearMonth.of(2017, 11), annenInntekt)), sykepengegrunnlag(), INNTEKT))
         assertTrue(aktivitetslogg.hasWarningsOrWorse())
-        assertTrue(validererOk(inntektsvurdering(inntekter(YearMonth.of(2017, 10), annenInntekt)), INNTEKT, INNTEKT))
+        assertTrue(validererOk(inntektsvurdering(inntekter(YearMonth.of(2017, 10), annenInntekt)), sykepengegrunnlag(), INNTEKT))
         assertTrue(aktivitetslogg.hasWarningsOrWorse())
-        assertTrue(validererOk(inntektsvurdering(inntekter(YearMonth.of(2017, 9), annenInntekt)), INNTEKT, INNTEKT))
+        assertTrue(validererOk(inntektsvurdering(inntekter(YearMonth.of(2017, 9), annenInntekt)), sykepengegrunnlag(), INNTEKT))
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
-        assertTrue(validererOk(inntektsvurdering(inntekter(YearMonth.of(2017, 12), annenInntekt)), INNTEKT, INNTEKT, 2))
+        assertTrue(validererOk(inntektsvurdering(inntekter(YearMonth.of(2017, 12), annenInntekt)), sykepengegrunnlag(), INNTEKT, 2))
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test
     fun `Inntekter for flere arbeidsgivere enn arbeidsgivere med overlappende sykdom gir warning`() {
         val annenInntekt = "etAnnetOrgnr" to INNTEKT
-        assertTrue(validererOk(inntektsvurdering(inntekter(YearMonth.of(2017, 12), annenInntekt)), INNTEKT, INNTEKT))
+        assertTrue(validererOk(inntektsvurdering(inntekter(YearMonth.of(2017, 12), annenInntekt)), sykepengegrunnlag(), INNTEKT))
         assertTrue(aktivitetslogg.hasWarningsOrWorse())
     }
 
@@ -83,7 +85,7 @@ internal class InntektsvurderingTest {
 
     private fun validererOk(
         inntektsvurdering: Inntektsvurdering,
-        grunnlagForSykepengegrunnlag: Inntekt,
+        grunnlagForSykepengegrunnlag: Sykepengegrunnlag,
         sammenligningsgrunnlag: Inntekt,
         antallArbeidsgivereMedOverlappendeVedtaksperioder: Int = 1
     ): Boolean {
@@ -97,6 +99,12 @@ internal class InntektsvurderingTest {
         )
 
     }
+
+    private fun sykepengegrunnlag(inntekt: Inntekt = INNTEKT) = Sykepengegrunnlag(
+        arbeidsgiverInntektsopplysning = listOf(),
+        sykepengegrunnlag = inntekt,
+        grunnlagForSykepengegrunnlag = inntekt
+    )
 
     private fun inntektsvurdering(
         inntektsmåneder: List<ArbeidsgiverInntekt> = inntektperioderForSykepengegrunnlag {

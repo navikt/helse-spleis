@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.person.*
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -43,6 +44,7 @@ internal class ArbeidsgiverUtbetalingerTest {
     @Test
     fun `avgrenset betaling pga minimum inntekt`() {
         val vilkårsgrunnlagElement = VilkårsgrunnlagHistorikk.Grunnlagsdata(
+            sykepengegrunnlag = sykepengegrunnlag(1000.månedlig),
             sammenligningsgrunnlag = 1000.månedlig,
             avviksprosent = Prosent.prosent(0.0),
             antallOpptjeningsdagerErMinst = 28,
@@ -361,6 +363,7 @@ internal class ArbeidsgiverUtbetalingerTest {
             mottatt = 1.januar.atStartOfDay()
         ))
         person.vilkårsgrunnlagHistorikk.lagre(1.januar, vilkårsgrunnlagElement ?: VilkårsgrunnlagHistorikk.Grunnlagsdata(
+            sykepengegrunnlag = sykepengegrunnlag(30000.månedlig),
             sammenligningsgrunnlag = 30000.månedlig,
             avviksprosent = Prosent.prosent(0.0),
             antallOpptjeningsdagerErMinst = 28,
@@ -404,5 +407,11 @@ internal class ArbeidsgiverUtbetalingerTest {
         }
         inspektør = UtbetalingstidslinjeInspektør(person.arbeidsgiver(ORGNUMMER).nåværendeTidslinje())
     }
+
+    private fun sykepengegrunnlag(inntekt: Inntekt) = Sykepengegrunnlag(
+        arbeidsgiverInntektsopplysning = listOf(),
+        sykepengegrunnlag = inntekt,
+        grunnlagForSykepengegrunnlag = inntekt
+    )
 
 }

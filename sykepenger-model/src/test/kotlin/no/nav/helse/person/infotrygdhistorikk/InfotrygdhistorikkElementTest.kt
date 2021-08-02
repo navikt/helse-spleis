@@ -8,6 +8,8 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
+import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -640,7 +642,7 @@ internal class InfotrygdhistorikkElementTest {
     @Test
     fun `lagring av vilkårsgrunnlag låser elementet`() {
         val element = historikkelement()
-        element.lagreVilkårsgrunnlag(1.januar, VilkårsgrunnlagHistorikk())
+        element.lagreVilkårsgrunnlag(1.januar, VilkårsgrunnlagHistorikk(), Periodetype.FØRSTEGANGSBEHANDLING, sykepengegrunnlagFor(INGEN))
         assertFalse(element.kanSlettes())
     }
 
@@ -692,6 +694,14 @@ internal class InfotrygdhistorikkElementTest {
             ugyldigePerioder = ugyldigePerioder,
             harStatslønn = harStatslønn
         )
+
+    private fun sykepengegrunnlagFor(inntekt: Inntekt): (LocalDate) -> Sykepengegrunnlag = {
+        Sykepengegrunnlag(
+            arbeidsgiverInntektsopplysning = listOf(),
+            sykepengegrunnlag = inntekt,
+            grunnlagForSykepengegrunnlag = inntekt
+        )
+    }
 
     private class Inspektør : UtbetalingsdagVisitor {
         var førsteDag: LocalDate? = null

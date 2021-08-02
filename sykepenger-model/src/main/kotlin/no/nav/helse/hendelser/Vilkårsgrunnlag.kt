@@ -24,7 +24,7 @@ class Vilkårsgrunnlag(
     override fun organisasjonsnummer() = orgnummer
 
     internal fun valider(
-        grunnlagForSykepengegrunnlag: Inntekt,
+        grunnlagForSykepengegrunnlag: Sykepengegrunnlag,
         sammenligningsgrunnlag: Inntekt,
         skjæringstidspunkt: LocalDate,
         periodetype: Periodetype,
@@ -42,6 +42,7 @@ class Vilkårsgrunnlag(
         val minimumInntektvurderingOk = validerMinimumInntekt(this, fødselsnummer, skjæringstidspunkt, grunnlagForSykepengegrunnlag)
 
         grunnlagsdata = VilkårsgrunnlagHistorikk.Grunnlagsdata(
+            sykepengegrunnlag = grunnlagForSykepengegrunnlag,
             sammenligningsgrunnlag = sammenligningsgrunnlag,
             avviksprosent = inntektsvurdering.avviksprosent(),
             antallOpptjeningsdagerErMinst = opptjeningvurdering.antallOpptjeningsdager,

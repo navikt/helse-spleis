@@ -552,7 +552,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun vedtakFattet(hendelse: IAktivitetslogg) {
-        val sykepengegrunnlag = person.sykepengegrunnlag(skjæringstidspunkt, periode.start) ?: Inntekt.INGEN
+        val sykepengegrunnlag = person.sykepengegrunnlag(skjæringstidspunkt) ?: Inntekt.INGEN
         Utbetaling.vedtakFattet(utbetaling, hendelse, person, id, periode, hendelseIder, skjæringstidspunkt, sykepengegrunnlag, inntekt() ?: Inntekt.INGEN)
     }
 
@@ -767,7 +767,7 @@ internal class Vedtaksperiode private constructor(
     private fun utbetaling() = checkNotNull(utbetaling) { "mangler utbetalinger" }
 
     private fun sendUtbetaltEvent(hendelse: IAktivitetslogg) {
-        val sykepengegrunnlag = requireNotNull(person.sykepengegrunnlag(skjæringstidspunkt, periode.start)) {
+        val sykepengegrunnlag = requireNotNull(person.sykepengegrunnlag(skjæringstidspunkt)) {
             "Forventet sykepengegrunnlag ved opprettelse av utbetalt-event"
         }
         val inntekt = requireNotNull(inntekt()) {
@@ -1809,7 +1809,13 @@ internal class Vedtaksperiode private constructor(
                     person.ingenUkjenteArbeidsgivere(vedtaksperiode, vedtaksperiode.skjæringstidspunkt)
                 }
                 onSuccess { infotrygdhistorikk.addInntekter(person, this) }
-                onSuccess { infotrygdhistorikk.lagreVilkårsgrunnlag(vedtaksperiode.skjæringstidspunkt, periodetype, person.vilkårsgrunnlagHistorikk) }
+                onSuccess {
+                    infotrygdhistorikk.lagreVilkårsgrunnlag(
+                        vedtaksperiode.skjæringstidspunkt,
+                        periodetype,
+                        person.vilkårsgrunnlagHistorikk
+                    ) { person.grunnlagForSykepengegrunnlag(it, vedtaksperiode.periode.start) }
+                }
 
                 onSuccess {
                     val vilkårsgrunnlag = person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt)

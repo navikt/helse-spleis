@@ -43,6 +43,9 @@ internal class VilkårsgrunnlagHistorikk(private val historikk: MutableList<Inns
 
     private fun finnBegrunnelser(): Map<LocalDate, List<Begrunnelse>> = historikk.firstOrNull()?.finnBegrunnelser() ?: emptyMap()
 
+    internal fun inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver() = historikk.firstOrNull()?.inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver()
+
+
     internal class Innslag(private val id: UUID, private val opprettet: LocalDateTime) {
         private val vilkårsgrunnlag = mutableMapOf<LocalDate, VilkårsgrunnlagElement>()
 
@@ -79,6 +82,11 @@ internal class VilkårsgrunnlagHistorikk(private val historikk: MutableList<Inns
             return begrunnelserForSkjæringstidspunkt
         }
 
+        internal fun inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver() =
+            vilkårsgrunnlag.mapValues { (_, vilkårsgrunnlagElement) ->
+                vilkårsgrunnlagElement.inntektsopplysningPerArbeidsgiver()
+            }
+
         internal companion object {
             internal fun List<Innslag>.sisteId() = this.first().id
         }
@@ -88,9 +96,12 @@ internal class VilkårsgrunnlagHistorikk(private val historikk: MutableList<Inns
         fun valider(aktivitetslogg: Aktivitetslogg)
         fun isOk(): Boolean
         fun accept(skjæringstidspunkt: LocalDate, vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor)
+        fun sykepengegrunnlag(): Inntekt
+        fun inntektsopplysningPerArbeidsgiver(): Map<String, Inntektshistorikk.Inntektsopplysning>
     }
 
     internal class Grunnlagsdata(
+        internal val sykepengegrunnlag: Sykepengegrunnlag,
         internal val sammenligningsgrunnlag: Inntekt,
         internal val avviksprosent: Prosent?,
         internal val antallOpptjeningsdagerErMinst: Int,
@@ -110,7 +121,11 @@ internal class VilkårsgrunnlagHistorikk(private val historikk: MutableList<Inns
             vilkårsgrunnlagHistorikkVisitor.visitGrunnlagsdata(skjæringstidspunkt, this)
         }
 
+        override fun sykepengegrunnlag() = sykepengegrunnlag.sykepengegrunnlag
+        override fun inntektsopplysningPerArbeidsgiver() = sykepengegrunnlag.inntektsopplysningPerArbeidsgiver()
+
         internal fun grunnlagsdataMedMinimumInntektsvurdering(minimumInntektVurdering: Boolean) = Grunnlagsdata(
+            sykepengegrunnlag = sykepengegrunnlag,
             sammenligningsgrunnlag = sammenligningsgrunnlag,
             avviksprosent = avviksprosent,
             antallOpptjeningsdagerErMinst = antallOpptjeningsdagerErMinst,
@@ -139,7 +154,7 @@ internal class VilkårsgrunnlagHistorikk(private val historikk: MutableList<Inns
         )
     }
 
-    internal class InfotrygdVilkårsgrunnlag : VilkårsgrunnlagElement {
+    internal class InfotrygdVilkårsgrunnlag(private val grunnlagForSykepengegrunnlag: Sykepengegrunnlag) : VilkårsgrunnlagElement {
         override fun valider(aktivitetslogg: Aktivitetslogg) {
         }
 
@@ -148,5 +163,9 @@ internal class VilkårsgrunnlagHistorikk(private val historikk: MutableList<Inns
         override fun accept(skjæringstidspunkt: LocalDate, vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {
             vilkårsgrunnlagHistorikkVisitor.visitInfotrygdVilkårsgrunnlag(skjæringstidspunkt, this)
         }
+
+        override fun sykepengegrunnlag() = grunnlagForSykepengegrunnlag.sykepengegrunnlag // TODO: 6g grejer
+        override fun inntektsopplysningPerArbeidsgiver() = grunnlagForSykepengegrunnlag.inntektsopplysningPerArbeidsgiver()
+
     }
 }

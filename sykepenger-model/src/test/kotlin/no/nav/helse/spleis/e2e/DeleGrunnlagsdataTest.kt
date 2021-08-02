@@ -5,11 +5,13 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.ForlengelseFraInfotrygd.JA
 import no.nav.helse.person.ForlengelseFraInfotrygd.NEI
+import no.nav.helse.person.Sykepengegrunnlag
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.*
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosent
@@ -316,6 +318,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)), refusjon = Refusjon(null, 1000.månedlig, emptyList()))
 
         val vilkårsgrunnlagElement = VilkårsgrunnlagHistorikk.Grunnlagsdata(
+            sykepengegrunnlag = sykepengegrunnlag(1000.månedlig),
             sammenligningsgrunnlag = 1000.månedlig,
             avviksprosent = Prosent.prosent(0.0),
             antallOpptjeningsdagerErMinst = 29,
@@ -357,6 +360,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, 1000.månedlig)
         val vilkårsgrunnlagElement = VilkårsgrunnlagHistorikk.Grunnlagsdata(
+            sykepengegrunnlag = sykepengegrunnlag(1000.månedlig),
             sammenligningsgrunnlag = 1000.månedlig,
             avviksprosent = Prosent.prosent(0.0),
             antallOpptjeningsdagerErMinst = 29,
@@ -444,4 +448,10 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
             assertEquals(0, it.avvistDagTeller)
         }
     }
+
+    private fun sykepengegrunnlag(inntekt: Inntekt) = Sykepengegrunnlag(
+        arbeidsgiverInntektsopplysning = listOf(),
+        sykepengegrunnlag = inntekt,
+        grunnlagForSykepengegrunnlag = inntekt
+    )
 }
