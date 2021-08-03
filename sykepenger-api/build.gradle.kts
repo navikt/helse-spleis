@@ -1,6 +1,6 @@
 val micrometerRegistryPrometheusVersion = "1.6.2"
 val ktorVersion = "1.5.0"
-val wireMockVersion = "2.27.1"
+val wireMockVersion = "2.29.1"
 
 val mainClass = "no.nav.helse.spleis.AppKt"
 
@@ -21,7 +21,7 @@ dependencies {
 
     testImplementation("io.ktor:ktor-client-cio:$ktorVersion")
     testImplementation("org.awaitility:awaitility:4.0.3")
-    testImplementation("com.github.tomakehurst:wiremock:$wireMockVersion") {
+    testImplementation("com.github.tomakehurst:wiremock-jre8:$wireMockVersion") {
         exclude(group = "junit")
     }
 }
