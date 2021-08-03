@@ -1184,10 +1184,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            if (søknad.sykdomstidslinje().starterFør(vedtaksperiode.sykdomstidslinje)) {
-                søknad.warn("Søknaden inneholder egenmeldingsdager som ikke er oppgitt i inntektsmeldingen. Vurder om arbeidsgiverperioden beregnes riktig")
-                søknad.trimLeft(vedtaksperiode.sykdomstidslinje.førsteDag())
-            }
             vedtaksperiode.håndterSøknad(søknad, AvventerUtbetalingsgrunnlag)
             søknad.info("Fullført behandling av søknad")
         }
