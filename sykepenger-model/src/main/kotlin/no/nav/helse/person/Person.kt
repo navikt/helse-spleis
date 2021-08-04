@@ -562,7 +562,12 @@ class Person private constructor(
         .filter { it.harAktivtArbeidsforhold(skjæringstidspunkt) }
         .map { it.organisasjonsnummer() }
 
-    fun harAktivtArbeidsforholdEllerInntekt(skjæringstidspunkt: LocalDate, orgnummer: String) = arbeidsgivere
+    internal fun harAktivtArbeidsforholdEllerInntekt(skjæringstidspunkt: LocalDate, orgnummer: String) = arbeidsgivere
         .firstOrNull { it.organisasjonsnummer() == orgnummer }
         ?.let { it.harAktivtArbeidsforhold(skjæringstidspunkt) || it.harInntekt(skjæringstidspunkt) } ?: false
+
+    internal fun harKunEtAnnetAktivtArbeidsforholdEnn(skjæringstidspunkt: LocalDate, orgnummer: String): Boolean {
+        val aktiveArbeidsforhold = arbeidsgivereMedAktiveArbeidsforhold(skjæringstidspunkt)
+        return aktiveArbeidsforhold.size == 1 && aktiveArbeidsforhold.single().organisasjonsnummer() != orgnummer
+    }
 }

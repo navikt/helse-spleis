@@ -7,14 +7,10 @@ import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.reflection.castAsList
 import no.nav.helse.serde.reflection.castAsMap
-import no.nav.helse.testhelpers.april
-import no.nav.helse.testhelpers.februar
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.mars
+import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
@@ -434,6 +430,47 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
 
         håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1, inntekter = inntekter, arbeidsforhold = arbeidsforhold)
         assertFalse(person.harVedtaksperiodeForArbeidsgiverMedUkjentArbeidsforhold(1.januar))
+    }
+
+    @Test
+    fun `Person som bytter jobb i løpet av behandlingen skal blir markert med riktig warning`() = Toggles.FlereArbeidsgivereUlikFom.enable {
+        val inntektshistorikk = listOf(Inntektsopplysning(a1, 9.september(2020), INNTEKT, true))
+        val utbetalinger = ArbeidsgiverUtbetalingsperiode(a1, 9.september(2020), 30.september(2020), 100.prosent, INNTEKT)
+
+        håndterSykmelding(Sykmeldingsperiode(1.oktober(2020), 31.oktober(2020), 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.oktober(2020), 31.oktober(2020), 100.prosent), orgnummer = a1)
+        håndterUtbetalingshistorikk(
+            1.vedtaksperiode(a1),
+            utbetalinger,
+            inntektshistorikk = inntektshistorikk,
+            orgnummer = a1,
+            besvart = LocalDate.EPOCH.atStartOfDay()
+        )
+        håndterUtbetalingsgrunnlag(
+            1.vedtaksperiode(a1),
+            a1,
+            listOf(grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), INNTEKT.repeat(3))),
+            listOf(Arbeidsforhold(a1, 16.september(2020), null), Arbeidsforhold(a2, LocalDate.EPOCH, 15.september(2020)))
+        )
+        håndterYtelser(1.vedtaksperiode(a1), utbetalinger, orgnummer = a1, inntektshistorikk = inntektshistorikk, besvart = LocalDate.EPOCH.atStartOfDay())
+        håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), orgnummer = a1)
+        håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(1.november(2020), 30.november(2020), 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.november(2020), 30.november(2020), 100.prosent), orgnummer = a1)
+        håndterUtbetalingsgrunnlag(
+            2.vedtaksperiode(a1),
+            a1,
+            listOf(grunnlag(a1, finnSkjæringstidspunkt(a1, 2.vedtaksperiode(a1)), INNTEKT.repeat(3))),
+            listOf(Arbeidsforhold(a1, 16.september(2020), null), Arbeidsforhold(a2, LocalDate.EPOCH, 15.september(2020)))
+        )
+        håndterYtelser(2.vedtaksperiode(a1), utbetalinger, orgnummer = a1, inntektshistorikk = inntektshistorikk, besvart = LocalDate.EPOCH.atStartOfDay())
+        håndterSimulering(2.vedtaksperiode(a1), orgnummer = a1)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode(a1), orgnummer = a1)
+        håndterUtbetalt(2.vedtaksperiode(a1), orgnummer = a1)
+        assertEquals(Inntektskilde.EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(2.vedtaksperiode(a1)))
+        assertTrue(inspektør(a1).warnings.contains("Den sykmeldte har skiftet arbeidsgiver, og det er beregnet at den nye arbeidsgiveren mottar refusjon lik forrige. Kontroller at dagsatsen blir riktig."))
     }
 
     fun arbeidsgivere(): List<String> {

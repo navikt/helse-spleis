@@ -714,7 +714,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         }
     }
 
-
     @Test
     fun `Wow! Her var det mye greier!!`() {
         Toggles.FlereArbeidsgivereUlikFom.enable {
@@ -905,7 +904,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             assertEquals(15.mars, a1Linje.tom)
             assertEquals(2161, a1Linje.beløp)
 
-            assertFalse(inspektør(a1).personLogg.toString().contains("Flere arbeidsgivere og ulikt starttidspunkt for sykefraværet"))
+            assertFalse(inspektør(a1).warnings.contains("Flere arbeidsgivere og ulikt starttidspunkt for sykefraværet"))
+            assertFalse(inspektør(a1).warnings.contains("Den sykmeldte har skiftet arbeidsgiver, og det er beregnet at den nye arbeidsgiveren mottar refusjon lik forrige. Kontroller at dagsatsen blir riktig."))
             assertEquals(0, inspektør(a2).sykdomshistorikk.size)
         }
     }
@@ -962,6 +962,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
             assertWarnings(inspektør(a1))
             assertTrue(inspektør(a1).warnings.contains("Flere arbeidsgivere og ulikt starttidspunkt for sykefraværet"))
+            assertFalse(inspektør(a1).warnings.contains("Den sykmeldte har skiftet arbeidsgiver, og det er beregnet at den nye arbeidsgiveren mottar refusjon lik forrige. Kontroller at dagsatsen blir riktig."))
         }
     }
 
@@ -1050,6 +1051,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
             assertWarnings(inspektør(a1))
             assertTrue(inspektør(a1).warnings.contains("Flere arbeidsgivere og ulikt starttidspunkt for sykefraværet"))
+            assertFalse(inspektør(a1).warnings.contains("Den sykmeldte har skiftet arbeidsgiver, og det er beregnet at den nye arbeidsgiveren mottar refusjon lik forrige. Kontroller at dagsatsen blir riktig."))
         }
     }
 
@@ -1160,6 +1162,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode(a1), orgnummer = a1)
 
         assertFalse(inspektør(a1).warnings.contains("Flere arbeidsgivere og ulikt starttidspunkt for sykefraværet"))
+        assertFalse(inspektør(a1).warnings.contains("Den sykmeldte har skiftet arbeidsgiver, og det er beregnet at den nye arbeidsgiveren mottar refusjon lik forrige. Kontroller at dagsatsen blir riktig."))
 
     }
 
