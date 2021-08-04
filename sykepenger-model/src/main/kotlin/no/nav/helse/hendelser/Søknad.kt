@@ -29,7 +29,7 @@ class Søknad(
     private val sykdomstidslinje: Sykdomstidslinje
 
     private companion object {
-        private const val tidslinjegrense = 16L
+        private const val tidslinjegrense = 40L
     }
 
     init {
