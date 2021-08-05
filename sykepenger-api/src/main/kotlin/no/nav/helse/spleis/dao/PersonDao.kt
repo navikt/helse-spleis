@@ -8,8 +8,11 @@ import no.nav.helse.serde.SerialisertPerson
 import javax.sql.DataSource
 
 internal class PersonDao(private val dataSource: DataSource) {
-    fun hentPerson(fødselsnummer: String) =
+    fun hentPersonFraFnr(fødselsnummer: String) =
         hentPerson(queryOf("SELECT data FROM person WHERE fnr = ? ORDER BY id DESC LIMIT 1", fødselsnummer.toLong()))
+
+    fun hentPersonFraAktørId(aktørId: String) =
+        hentPerson(queryOf("SELECT data FROM person WHERE aktor_id = ? ORDER BY id DESC LIMIT 1", aktørId.toLong()))
 
     private fun hentPerson(query: Query) =
         using(sessionOf(dataSource)) { session ->

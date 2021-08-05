@@ -60,6 +60,7 @@ internal fun createApp(ktorConfig: KtorConfig, azureConfig: AzureAdAppConfig, da
             azureAdAppAuthentication(azureConfig)
             val dataSource = dataSourceConfiguration.getDataSource(DataSourceConfiguration.Role.ReadOnly)
             spesialistApi(dataSource, API_SERVICE)
+            spannerApi(dataSource, API_SERVICE)
         }
     })
 

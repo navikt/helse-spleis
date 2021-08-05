@@ -31,11 +31,33 @@ internal fun Application.spesialistApi(dataSource: DataSource, authProviderName:
         authenticate(authProviderName) {
             get("/api/person-snapshot") {
                 val fnr = call.request.header("fnr")!!
-                personDao.hentPerson(fnr)
+                personDao.hentPersonFraFnr(fnr)
                     ?.deserialize { hendelseDao.hentAlleHendelser(fnr) }
                     ?.let { håndterPerson(it, hendelseDao) }
                     ?.let { call.respond(it) }
                     ?: call.respond(HttpStatusCode.NotFound, "Resource not found")
+            }
+        }
+    }
+}
+
+internal fun Application.spannerApi(dataSource: DataSource, authProviderName: String) {
+    val personDao = PersonDao(dataSource)
+
+    routing {
+        authenticate(authProviderName) {
+            get("/api/person-json") {
+                val fnr = call.request.header("fnr")
+                val aktørId = call.request.header("aktorId")
+
+                if (fnr == null && aktørId == null) {
+                    call.respond(HttpStatusCode.BadRequest)
+                    return@get
+                }
+
+                val person = if (fnr != null) personDao.hentPersonFraFnr(fnr) else personDao.hentPersonFraAktørId(aktørId!!)
+
+                person?.let { call.respond(it) } ?: call.respond(HttpStatusCode.NotFound, "Resource not found")
             }
         }
     }

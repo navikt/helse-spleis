@@ -136,6 +136,16 @@ internal class RestApiTest {
         await().atMost(5, SECONDS).untilAsserted { "/api/person-snapshot".httpGet(HttpStatusCode.OK, mapOf("fnr" to UNG_PERSON_FNR_2018)) }
     }
 
+    @Test
+    fun `hent personJson med fnr`() {
+        await().atMost(5, SECONDS).untilAsserted { "/api/person-json".httpGet(HttpStatusCode.OK, mapOf("fnr" to UNG_PERSON_FNR_2018)) }
+    }
+
+    @Test
+    fun `hent personJson med aktørId`() {
+        await().atMost(5, SECONDS).untilAsserted { "/api/person-json".httpGet(HttpStatusCode.OK, mapOf("aktorId" to AKTØRID)) }
+    }
+
     @Disabled("Tester bruk av preStopHook")
     @Test
     fun `preStop`() {
