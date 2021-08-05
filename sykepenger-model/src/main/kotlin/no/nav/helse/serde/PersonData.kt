@@ -9,6 +9,7 @@ import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.*
 import no.nav.helse.person.infotrygdhistorikk.*
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.ArbeidsforholdhistorikkInnslagData.Companion.tilArbeidsforholdhistorikk
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.InntektshistorikkInnslagData.Companion.parseInntekter
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.InntektsopplysningData.Companion.parseInntektsopplysningData
 import no.nav.helse.serde.PersonData.InfotrygdhistorikkElementData.Companion.tilModellObjekt
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.SykepengegrunnlagData.ArbeidsgiverInntektsopplysningData.Companion.parseArbeidsgiverInntektsopplysning
@@ -245,15 +246,19 @@ internal data class PersonData(
             private val grunnlagForSykepengegrunnlag: Double
         ) {
 
-            internal fun parseSykepengegrunnlag(): Sykepengegrunnlag = Sykepengegrunnlag(sykepengegrunnlag.årlig, arbeidsgiverInntektsopplysning.parseArbeidsgiverInntektsopplysning(), grunnlagForSykepengegrunnlag.årlig)
+            internal fun parseSykepengegrunnlag(): Sykepengegrunnlag = Sykepengegrunnlag(
+                sykepengegrunnlag.årlig,
+                arbeidsgiverInntektsopplysning.parseArbeidsgiverInntektsopplysning(),
+                grunnlagForSykepengegrunnlag.årlig
+            )
 
             class ArbeidsgiverInntektsopplysningData(
                 private val orgnummer: String,
-                private val inntektsopplysning: ArbeidsgiverData.InntektsopplysningData
+                private val inntektsopplysning: List<ArbeidsgiverData.InntektsopplysningData>
             ) {
                 companion object {
-                    internal fun List<ArbeidsgiverInntektsopplysningData>.parseArbeidsgiverInntektsopplysning(): List<ArbeidsgiverInntektsopplysning> = map { ArbeidsgiverInntektsopplysning(it.orgnummer, parseInntektsopplysningData(it.inntektsopplysning, mutableMapOf())) }
-
+                    internal fun List<ArbeidsgiverInntektsopplysningData>.parseArbeidsgiverInntektsopplysning(): List<ArbeidsgiverInntektsopplysning> =
+                        map { ArbeidsgiverInntektsopplysning(it.orgnummer, ArbeidsgiverData.InntektsopplysningData.parseInntekter(it.inntektsopplysning)) }
                 }
             }
 
@@ -475,6 +480,10 @@ internal data class PersonData(
                     }
                 }
 
+                internal fun parseInntekter(inntektsopplysning: InntektsopplysningData): Inntektshistorikk.Inntektsopplysning {
+                    return  parseInntektsopplysningData(inntektsopplysning)
+                } // TODO: trenger ikke egen funksjon for dette
+
                 internal fun parseInntektsopplysningData(inntektData: InntektsopplysningData) =
                     when (inntektData.kilde?.let(Inntektsopplysningskilde::valueOf)) {
                         Inntektsopplysningskilde.INFOTRYGD ->
@@ -645,6 +654,7 @@ internal data class PersonData(
             enum class JsonDagType {
                 ARBEIDSDAG,
                 ARBEIDSGIVERDAG,
+
                 @Deprecated("Trengs for å slippe migrering")
                 ARBEIDSGIVER_HELGEDAG,
                 FERIEDAG,
@@ -653,6 +663,7 @@ internal data class PersonData(
                 PERMISJONSDAG,
                 PROBLEMDAG,
                 SYKEDAG,
+
                 @Deprecated("Trengs for å slippe migrering")
                 SYK_HELGEDAG,
                 UKJENT_DAG,

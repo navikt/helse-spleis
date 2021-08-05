@@ -17,11 +17,68 @@ internal class Grunnbeløp private constructor(private val multiplier: Double) {
         85245.årlig.gyldigFra(1.mai(2013)),
         82122.årlig.gyldigFra(1.mai(2012)),
         79216.årlig.gyldigFra(1.mai(2011)),
-        75641.årlig.gyldigFra(1.mai(2010))
+        75641.årlig.gyldigFra(1.mai(2010)),
+        72881.årlig.gyldigFra(1.mai(2009)),
+        70256.årlig.gyldigFra(1.mai(2008)),
+        66812.årlig.gyldigFra(1.mai(2007)),
+        62892.årlig.gyldigFra(1.mai(2006)),
+        60699.årlig.gyldigFra(1.mai(2005)),
+        58778.årlig.gyldigFra(1.mai(2004)),
+        56861.årlig.gyldigFra(1.mai(2003)),
+        54170.årlig.gyldigFra(1.mai(2002)),
+        51360.årlig.gyldigFra(1.mai(2001)),
+        49090.årlig.gyldigFra(1.mai(2000)),
+        46950.årlig.gyldigFra(1.mai(1999)),
+        45370.årlig.gyldigFra(1.mai(1998)),
+        42500.årlig.gyldigFra(1.mai(1997)),
+        41000.årlig.gyldigFra(1.mai(1996)),
+        39230.årlig.gyldigFra(1.mai(1995)),
+        38080.årlig.gyldigFra(1.mai(1994)),
+        37300.årlig.gyldigFra(1.mai(1993)),
+        36500.årlig.gyldigFra(1.mai(1992)),
+        35500.årlig.gyldigFra(1.mai(1991)),
+        34100.årlig.gyldigFra(1.desember(1990)),
+        34000.årlig.gyldigFra(1.mai(1990)),
+        32700.årlig.gyldigFra(1.april(1989)),
+        31000.årlig.gyldigFra(1.april(1988)),
+        30400.årlig.gyldigFra(1.januar(1988)),
+        29900.årlig.gyldigFra(1.mai(1987)),
+        28000.årlig.gyldigFra(1.mai(1986)),
+        26300.årlig.gyldigFra(1.januar(1986)),
+        25900.årlig.gyldigFra(1.mai(1985)),
+        24200.årlig.gyldigFra(1.mai(1984)),
+        22600.årlig.gyldigFra(1.mai(1983)),
+        21800.årlig.gyldigFra(1.januar(1983)),
+        21200.årlig.gyldigFra(1.mai(1982)),
+        19600.årlig.gyldigFra(1.oktober(1981)),
+        19100.årlig.gyldigFra(1.mai(1981)),
+        17400.årlig.gyldigFra(1.januar(1981)),
+        16900.årlig.gyldigFra(1.mai(1980)),
+        16100.årlig.gyldigFra(1.januar(1980)),
+        15200.årlig.gyldigFra(1.januar(1979)),
+        14700.årlig.gyldigFra(1.juli(1978)),
+        14400.årlig.gyldigFra(1.desember(1977)),
+        13400.årlig.gyldigFra(1.mai(1977)),
+        13100.årlig.gyldigFra(1.januar(1977)),
+        12100.årlig.gyldigFra(1.mai(1976)),
+        11800.årlig.gyldigFra(1.januar(1976)),
+        11000.årlig.gyldigFra(1.mai(1975)),
+        10400.årlig.gyldigFra(1.januar(1975)),
+        9700.årlig.gyldigFra(1.mai(1974)),
+        9200.årlig.gyldigFra(1.januar(1974)),
+        8500.årlig.gyldigFra(1.januar(1973)),
+        7900.årlig.gyldigFra(1.januar(1972)),
+        7500.årlig.gyldigFra(1.mai(1971)),
+        7200.årlig.gyldigFra(1.januar(1971)),
+        6800.årlig.gyldigFra(1.januar(1970)),
+        6400.årlig.gyldigFra(1.januar(1969)),
+        5900.årlig.gyldigFra(1.januar(1968)),
+        5400.årlig.gyldigFra(1.januar(1967)),
     )
 
     internal fun beløp(dato: LocalDate) =
         gjeldende(dato).beløp(multiplier)
+
     internal fun beløp(dato: LocalDate, virkningFra: LocalDate) =
         gjeldende(dato, virkningFra).beløp(multiplier)
 
@@ -38,8 +95,13 @@ internal class Grunnbeløp private constructor(private val multiplier: Double) {
         val `1G` = Grunnbeløp(1.0)
 
         private fun Inntekt.gyldigFra(gyldigFra: LocalDate, virkningsdato: LocalDate = gyldigFra) = HistoriskGrunnbeløp(this, gyldigFra, virkningsdato)
+        private fun Int.januar(år: Int) = LocalDate.of(år, 1, this)
+        private fun Int.april(år: Int) = LocalDate.of(år, 4, this)
         private fun Int.mai(år: Int) = LocalDate.of(år, 5, this)
+        private fun Int.juli(år: Int) = LocalDate.of(år, 7, this)
         private fun Int.september(år: Int) = LocalDate.of(år, 9, this)
+        private fun Int.oktober(år: Int) = LocalDate.of(år, 10, this)
+        private fun Int.desember(år: Int) = LocalDate.of(år, 12, this)
     }
 
     private class HistoriskGrunnbeløp(private val beløp: Inntekt, private val gyldigFra: LocalDate, private val virkningsdato: LocalDate = gyldigFra) {

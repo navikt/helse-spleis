@@ -22,6 +22,12 @@ internal class Sykepengegrunnlag(
         arbeidsgiverInntektsopplysning.inntekt()
     )
 
+    internal fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {
+        vilkårsgrunnlagHistorikkVisitor.preVisitSykepengegrunnlag(this, sykepengegrunnlag, grunnlagForSykepengegrunnlag)
+        arbeidsgiverInntektsopplysning.forEach { it.accept(vilkårsgrunnlagHistorikkVisitor) }
+        vilkårsgrunnlagHistorikkVisitor.postVisitSykepengegrunnlag(this, sykepengegrunnlag, grunnlagForSykepengegrunnlag)
+    }
+
     internal fun avviksprosent(sammenligningsgrunnlag: Inntekt) = grunnlagForSykepengegrunnlag.avviksprosent(sammenligningsgrunnlag)
     internal fun inntektsopplysningPerArbeidsgiver(): Map<String, Inntektshistorikk.Inntektsopplysning> = arbeidsgiverInntektsopplysning.inntektsopplysningPerArbeidsgiver()
 

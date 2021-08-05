@@ -118,7 +118,10 @@ internal class VilkårsgrunnlagHistorikk(private val historikk: MutableList<Inns
         override fun isOk() = vurdertOk
 
         override fun accept(skjæringstidspunkt: LocalDate, vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {
-            vilkårsgrunnlagHistorikkVisitor.visitGrunnlagsdata(skjæringstidspunkt, this)
+            vilkårsgrunnlagHistorikkVisitor.preVisitGrunnlagsdata(skjæringstidspunkt, this)
+            sykepengegrunnlag.accept(vilkårsgrunnlagHistorikkVisitor)
+            vilkårsgrunnlagHistorikkVisitor.postVisitGrunnlagsdata(skjæringstidspunkt, this)
+
         }
 
         override fun sykepengegrunnlag() = sykepengegrunnlag.sykepengegrunnlag
@@ -161,7 +164,9 @@ internal class VilkårsgrunnlagHistorikk(private val historikk: MutableList<Inns
         override fun isOk() = true
 
         override fun accept(skjæringstidspunkt: LocalDate, vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {
-            vilkårsgrunnlagHistorikkVisitor.visitInfotrygdVilkårsgrunnlag(skjæringstidspunkt, this)
+            vilkårsgrunnlagHistorikkVisitor.preVisitInfotrygdVilkårsgrunnlag(skjæringstidspunkt, this)
+            grunnlagForSykepengegrunnlag.accept(vilkårsgrunnlagHistorikkVisitor)
+            vilkårsgrunnlagHistorikkVisitor.postVisitInfotrygdVilkårsgrunnlag(skjæringstidspunkt, this)
         }
 
         override fun sykepengegrunnlag() = grunnlagForSykepengegrunnlag.sykepengegrunnlag // TODO: 6g grejer

@@ -3,6 +3,7 @@ package no.nav.helse.person
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
+import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -181,14 +182,14 @@ internal class VilkårsgrunnlagHistorikkTest {
                     oppdatert = LocalDateTime.now(),
                     hendelseId = UUID.randomUUID(),
                     perioder = emptyList(),
-                    inntekter = emptyList(),
+                    inntekter = listOf(Inntektsopplysning("987654321", 1.januar, 31000.månedlig, true)),
                     arbeidskategorikoder = emptyMap(),
                     ugyldigePerioder = emptyList(),
                     harStatslønn = false
                 )
             )
         }
-        historikk.lagreVilkårsgrunnlag(1.januar, Periodetype.OVERGANG_FRA_IT, vilkårsgrunnlagHistorikk, sykepengegrunnlagFor(INGEN))
+        historikk.lagreVilkårsgrunnlag(1.januar, Periodetype.OVERGANG_FRA_IT, vilkårsgrunnlagHistorikk, sykepengegrunnlagFor(31000.månedlig))
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
     }
 
@@ -201,14 +202,14 @@ internal class VilkårsgrunnlagHistorikkTest {
                     oppdatert = LocalDateTime.now(),
                     hendelseId = UUID.randomUUID(),
                     perioder = emptyList(),
-                    inntekter = emptyList(),
+                    inntekter = listOf(Inntektsopplysning("987654321", 1.januar, 31000.månedlig, true)),
                     arbeidskategorikoder = emptyMap(),
                     ugyldigePerioder = emptyList(),
                     harStatslønn = false
                 )
             )
         }
-        historikk.lagreVilkårsgrunnlag(1.januar, Periodetype.INFOTRYGDFORLENGELSE, vilkårsgrunnlagHistorikk, sykepengegrunnlagFor(INGEN))
+        historikk.lagreVilkårsgrunnlag(1.januar, Periodetype.INFOTRYGDFORLENGELSE, vilkårsgrunnlagHistorikk, sykepengegrunnlagFor(31000.månedlig))
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
     }
 
