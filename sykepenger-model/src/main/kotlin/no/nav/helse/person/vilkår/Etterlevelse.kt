@@ -38,7 +38,7 @@ class Etterlevelse {
                     "tilstrekkeligAntallOpptjeningsdager" to tilstrekkeligAntallOpptjeningsdager,
                     "arbeidsforhold" to arbeidsforhold
                 ),
-                outputdata = null
+                outputdata = null //TODO: Ta med antall dager
             )
         )
     }
