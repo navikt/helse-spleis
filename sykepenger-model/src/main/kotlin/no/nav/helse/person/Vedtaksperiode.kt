@@ -1848,7 +1848,7 @@ internal class Vedtaksperiode private constructor(
                         }
                     }
                 }
-                harNødvendigInntekt(person, vedtaksperiode.skjæringstidspunkt)
+                harNødvendigInntekt(person, vedtaksperiode.skjæringstidspunkt) // TODO: ikke relevant lenger eller skrives om til å sjekke at vilkårsvurderingen er riktig
                 lateinit var arbeidsgiverUtbetalinger2: ArbeidsgiverUtbetalinger
                 valider("Feil ved kalkulering av utbetalingstidslinjer") {
                     if (Toggles.FlereArbeidsgivereUlikFom.enabled) {

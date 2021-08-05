@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -1653,17 +1654,9 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.februar(2021) til 16.februar(2021)), førsteFraværsdag = 1.februar(2021), orgnummer = a1)
         håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1)
         håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
-        håndterVilkårsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.februar(2020) til 1.januar(2021) inntekter {
-                    a1 inntekt INNTEKT
-                }
-            }
-        ))
-        håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
 
         assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode(a1), TIL_INFOTRYGD)
-    }
+    } // TODO: på en måte fikset, se på den etter prat med legalcec
 
     @Test
     fun `Tillater førstegangsbehandling av flere arbeidsgivere der inntekt i inntektsmelding er på samme dato`() {
@@ -2350,13 +2343,21 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Første arbeidsgiver blir ferdig behandlet før vi mottar sykemelding på neste arbeidsgiver`() {
+    fun `Første arbeidsgiver blir ferdig behandlet før vi mottar sykmelding på neste arbeidsgiver`() {
         val periode = 1.januar(2021) til 31.januar(2021)
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterUtbetalingshistorikk(1.vedtaksperiode(a1), inntektshistorikk = emptyList(), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021)), førsteFraværsdag = 1.januar(2021), orgnummer = a1)
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1)
+        håndterUtbetalingsgrunnlag(
+            1.vedtaksperiode(a1),
+            orgnummer = a1,
+            inntekter = listOf(
+                grunnlag(a1, 1.januar(2021), INNTEKT.repeat(3)),
+                grunnlag(a2, 1.januar(2021), 1000.månedlig.repeat(3))
+            ),
+            arbeidsforhold = listOf(Arbeidsforhold(a1, LocalDate.EPOCH, null), Arbeidsforhold(a2, LocalDate.EPOCH, null))
+        )
         håndterYtelser(1.vedtaksperiode(a1), inntektshistorikk = emptyList(), orgnummer = a1)
         håndterVilkårsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -2375,7 +2376,15 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
         håndterUtbetalingshistorikk(1.vedtaksperiode(a2), inntektshistorikk = emptyList(), orgnummer = a2)
         håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021)), førsteFraværsdag = 1.januar(2021), orgnummer = a2)
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2)
+        håndterUtbetalingsgrunnlag(
+            1.vedtaksperiode(a2),
+            orgnummer = a2,
+            inntekter = listOf(
+                grunnlag(a1, 1.januar(2021), INNTEKT.repeat(3)),
+                grunnlag(a2, 1.januar(2021), 1000.månedlig.repeat(3))
+            ),
+            arbeidsforhold = listOf(Arbeidsforhold(a1, LocalDate.EPOCH, null), Arbeidsforhold(a2, LocalDate.EPOCH, null))
+        )
         håndterYtelser(1.vedtaksperiode(a2), inntektshistorikk = emptyList(), orgnummer = a2)
         håndterSimulering(1.vedtaksperiode(a2), orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(a2), true, a2)
@@ -2392,7 +2401,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Første arbeidsgiver har blitt sendt til simulering før vi mottar sykemelding på neste arbeidsgiver`() {
+    fun `Første arbeidsgiver har blitt sendt til simulering før vi mottar sykmelding på neste arbeidsgiver`() {
         val periode = 1.januar(2021) til 31.januar(2021)
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)

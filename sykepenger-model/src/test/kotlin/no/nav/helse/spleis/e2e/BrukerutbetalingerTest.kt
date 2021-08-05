@@ -64,7 +64,7 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.juni, 30.juni, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.juni)
         håndterUtbetalingsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(24))
+        håndterYtelser(1.vedtaksperiode,  *historikk.toTypedArray(), inntektshistorikk = inntektsopplysning, besvart = LocalDateTime.now().minusHours(24))
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2017) til 1.mai(2018) inntekter {

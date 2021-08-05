@@ -3,8 +3,10 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.person.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.ForlengelseFraInfotrygd.JA
 import no.nav.helse.person.ForlengelseFraInfotrygd.NEI
+import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Sykepengegrunnlag
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
@@ -318,7 +320,12 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)), refusjon = Refusjon(null, 1000.månedlig, emptyList()))
 
         val vilkårsgrunnlagElement = VilkårsgrunnlagHistorikk.Grunnlagsdata(
-            sykepengegrunnlag = sykepengegrunnlag(1000.månedlig),
+            sykepengegrunnlag = sykepengegrunnlag(1000.månedlig, listOf(
+                ArbeidsgiverInntektsopplysning(
+                    ORGNUMMER,
+                    Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 1000.månedlig)
+                )
+            )),
             sammenligningsgrunnlag = 1000.månedlig,
             avviksprosent = Prosent.prosent(0.0),
             antallOpptjeningsdagerErMinst = 29,
@@ -360,7 +367,15 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, 1000.månedlig)
         val vilkårsgrunnlagElement = VilkårsgrunnlagHistorikk.Grunnlagsdata(
-            sykepengegrunnlag = sykepengegrunnlag(1000.månedlig),
+            sykepengegrunnlag = sykepengegrunnlag(
+                1000.månedlig,
+                listOf(
+                    ArbeidsgiverInntektsopplysning(
+                        ORGNUMMER,
+                        Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 1000.månedlig)
+                    )
+                )
+            ),
             sammenligningsgrunnlag = 1000.månedlig,
             avviksprosent = Prosent.prosent(0.0),
             antallOpptjeningsdagerErMinst = 29,
@@ -449,8 +464,8 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         }
     }
 
-    private fun sykepengegrunnlag(inntekt: Inntekt) = Sykepengegrunnlag(
-        arbeidsgiverInntektsopplysning = listOf(),
+    private fun sykepengegrunnlag(inntekt: Inntekt, arbeidsgiverInntektsopplysning: List<ArbeidsgiverInntektsopplysning> = listOf()) = Sykepengegrunnlag(
+        arbeidsgiverInntektsopplysning = arbeidsgiverInntektsopplysning,
         sykepengegrunnlag = inntekt,
         grunnlagForSykepengegrunnlag = inntekt
     )

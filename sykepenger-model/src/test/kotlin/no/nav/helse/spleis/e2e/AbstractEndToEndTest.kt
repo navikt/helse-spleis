@@ -387,7 +387,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         orgnummer: String = ORGNUMMER,
         inntekter: List<ArbeidsgiverInntekt> = listOf(
-            ArbeidsgiverInntekt(orgnummer, (0..3).map {
+            ArbeidsgiverInntekt(orgnummer, (0..2).map {
                 val yearMonth = YearMonth.from(inspektør(orgnummer).skjæringstidspunkt(vedtaksperiodeId)).minusMonths(3L - it)
                 ArbeidsgiverInntekt.MånedligInntekt.Sykepengegrunnlag(
                     yearMonth = yearMonth,

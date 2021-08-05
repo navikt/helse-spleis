@@ -664,7 +664,7 @@ internal class UtbetalingstidslinjeBuilderTest {
         resetSeed(1.januar(2020))
         (20.S + 1.A + 3.F + 3.S).utbetalingslinjer(
             inntektsopplysningPerSkjæringstidspunkt = mapOf(
-                    1.januar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar(2020), hendelseId, 30000.månedlig),
+                    1.januar(2020) to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar(2020), hendelseId, 30000.månedlig),
                     25.januar(2020) to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 25.januar(2020), hendelseId, 31000.månedlig)
             ),
             skjæringstidspunkter = listOf(1.januar(2020), 25.januar(2020))
@@ -683,7 +683,7 @@ internal class UtbetalingstidslinjeBuilderTest {
         resetSeed(1.januar(2020))
         (16.S + 2.A + 3.S).utbetalingslinjer(
             inntektsopplysningPerSkjæringstidspunkt = mapOf(
-                    19.januar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 19.januar(2020), hendelseId, 30000.månedlig)
+                    19.januar(2020) to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 19.januar(2020), hendelseId, 30000.månedlig)
             ),
             skjæringstidspunkter = listOf(19.januar(2020))
         )
@@ -699,7 +699,7 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertDoesNotThrow {
             (1.S + 11.A + 21.S).utbetalingslinjer(
                 inntektsopplysningPerSkjæringstidspunkt = mapOf(
-                        13.januar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 13.januar(2020), hendelseId, 30000.månedlig)
+                        13.januar(2020) to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 13.januar(2020), hendelseId, 30000.månedlig)
                 ),
                 skjæringstidspunkter = listOf(13.januar(2020), 1.januar(2020))
             )
@@ -722,7 +722,7 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertDoesNotThrow {
             (16.U + 1.R + 2.S).utbetalingslinjer(
                 inntektsopplysningPerSkjæringstidspunkt = mapOf(
-                        20.januar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 20.januar(2020), hendelseId, 30000.månedlig)
+                        20.januar(2020) to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 20.januar(2020), hendelseId, 30000.månedlig)
                 ),
                 skjæringstidspunkter = listOf(20.januar(2020), 3.januar(2020))
             )
@@ -742,7 +742,7 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertDoesNotThrow {
             (16.U + 2.A + 2.S).utbetalingslinjer(
                 inntektsopplysningPerSkjæringstidspunkt = mapOf(
-                        22.januar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 22.januar(2020), hendelseId, 30000.månedlig)
+                        22.januar(2020) to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 22.januar(2020), hendelseId, 30000.månedlig)
                 ),
                 skjæringstidspunkter = listOf(22.januar(2020), 4.januar(2020))
             )

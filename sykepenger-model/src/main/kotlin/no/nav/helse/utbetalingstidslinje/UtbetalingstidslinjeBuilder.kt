@@ -54,10 +54,15 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
             .sorted()
             .lastOrNull { it <= dato }
             ?.let { skjæringstidspunkt ->
-                inntektPerSkjæringstidspunkt?.get(skjæringstidspunkt)?.let { inntektsopplysning ->
+                finnInntekt(skjæringstidspunkt, dato)?.let { inntektsopplysning ->
                     skjæringstidspunkt to inntektsopplysning.grunnlagForSykepengegrunnlag()
                 }
             }
+
+    private fun finnInntekt(skjæringstidspunkt: LocalDate, dato: LocalDate): Inntektshistorikk.Inntektsopplysning?{
+        return inntektPerSkjæringstidspunkt?.get(skjæringstidspunkt)
+            ?: inntektPerSkjæringstidspunkt?.entries?.firstOrNull { (key) -> key in skjæringstidspunkt..dato }?.value
+    }
 
     private fun inntektForDato(dato: LocalDate) =
         inntektForDatoOrNull(dato) ?: throw ManglerInntektException(dato, skjæringstidspunkter)

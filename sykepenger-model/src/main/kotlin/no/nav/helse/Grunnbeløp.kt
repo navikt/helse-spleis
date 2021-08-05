@@ -20,8 +20,10 @@ internal class Grunnbeløp private constructor(private val multiplier: Double) {
         75641.årlig.gyldigFra(1.mai(2010))
     )
 
-    internal fun beløp(dato: LocalDate) = gjeldende(dato).beløp(multiplier)
-    internal fun beløp(dato: LocalDate, virkningFra: LocalDate) = gjeldende(dato, virkningFra).beløp(multiplier)
+    internal fun beløp(dato: LocalDate) =
+        gjeldende(dato).beløp(multiplier)
+    internal fun beløp(dato: LocalDate, virkningFra: LocalDate) =
+        gjeldende(dato, virkningFra).beløp(multiplier)
 
     internal fun dagsats(dato: LocalDate) = beløp(dato).rundTilDaglig()
     internal fun dagsats(dato: LocalDate, virkningFra: LocalDate) = beløp(dato, virkningFra).rundTilDaglig()
