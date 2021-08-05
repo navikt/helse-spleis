@@ -11,6 +11,7 @@ import no.nav.helse.testhelpers.mars
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
 
@@ -51,7 +52,26 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP
         )
-        assertWarnings(inspektør)
+        assertWarningTekst(inspektør, "Søknaden inneholder Feriedager utenfor perioden søknaden gjelder for")
+    }
+
+    @Test
+    fun `eldgammel ferieperiode før sykdomsperioden klippes bort`() {
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 28.mars, 100.prosent))
+        håndterSøknad(
+            Søknad.Søknadsperiode.Sykdom(1.mars, 28.mars, 100.prosent),
+            Søknad.Søknadsperiode.Ferie(LocalDate.of(2014, 7, 1), LocalDate.of(2015, 7, 10))
+        )
+        assertWarningTekst(inspektør, "Søknaden inneholder Feriedager utenfor perioden søknaden gjelder for")
+        assertEquals(null, inspektør.vedtaksperiodeDagTeller[1.vedtaksperiode]?.get(Feriedag::class))
+    }
+
+    @Test
+    fun `ferieperiode som begynte for mindre enn 40 dager før sykdomsperioden blir tatt hensyn til`() {
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 28.mars, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 28.mars, 100.prosent), Søknad.Søknadsperiode.Ferie(21.januar, 30.januar))
+        assertWarningTekst(inspektør, "Søknaden inneholder Feriedager utenfor perioden søknaden gjelder for")
+        assertEquals(10, inspektør.vedtaksperiodeDagTeller[1.vedtaksperiode]?.get(Feriedag::class))
     }
 
     @Test
