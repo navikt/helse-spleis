@@ -552,6 +552,23 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     }
 
     protected fun håndterOverstyring(
+        inntekt: Inntekt = 31000.månedlig,
+        orgnummer: String = ORGNUMMER,
+        skjæringstidspunkt: LocalDate,
+        ident: String
+    ) {
+        OverstyrInntekt(
+            meldingsreferanseId = UUID.randomUUID(),
+            fødselsnummer = UNG_PERSON_FNR_2018,
+            aktørId = AKTØRID,
+            organisasjonsnummer = orgnummer,
+            inntekt = inntekt,
+            skjæringstidspunkt = skjæringstidspunkt,
+            ident = ident
+        ).håndter(Person::håndter)
+    }
+
+    protected fun håndterOverstyring(
         overstyringsdager: List<ManuellOverskrivingDag> = listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag, 100)),
         orgnummer: String = ORGNUMMER
     ) {

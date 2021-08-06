@@ -120,6 +120,23 @@ internal class VilkårsgrunnlagHistorikk(private val historikk: MutableList<Inns
             vurdertOk = vurdertOk && minimumInntektVurdering,
             meldingsreferanseId = meldingsreferanseId
         )
+
+        internal fun kopierGrunnlagsdataMed(
+            minimumInntektVurdering: Boolean,
+            sammenligningsgrunnlagVurdering: Boolean,
+            sammenligningsgrunnlag: Inntekt,
+            avviksprosent: Prosent,
+            meldingsreferanseId: UUID
+        ) = Grunnlagsdata(
+            sammenligningsgrunnlag = sammenligningsgrunnlag,
+            avviksprosent = avviksprosent,
+            antallOpptjeningsdagerErMinst = antallOpptjeningsdagerErMinst,
+            harOpptjening = harOpptjening,
+            medlemskapstatus = medlemskapstatus,
+            harMinimumInntekt = minimumInntektVurdering,
+            vurdertOk = minimumInntektVurdering && sammenligningsgrunnlagVurdering,
+            meldingsreferanseId = meldingsreferanseId
+        )
     }
 
     internal class InfotrygdVilkårsgrunnlag : VilkårsgrunnlagElement {

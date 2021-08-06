@@ -25,6 +25,7 @@ import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbe
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Prosent
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -212,11 +213,27 @@ class Person private constructor(
         finnArbeidsgiver(hendelse).håndter(hendelse)
     }
 
+    fun håndter(hendelse: OverstyrInntekt) {
+        hendelse.kontekst(this)
+        finnArbeidsgiver(hendelse).håndter(hendelse)
+    }
+
     fun annullert(event: PersonObserver.UtbetalingAnnullertEvent) {
         observers.forEach { it.annullering(event) }
     }
 
     internal fun igangsettRevurdering(hendelse: OverstyrTidslinje, vedtaksperiode: Vedtaksperiode) {
+        arbeidsgivere.forEach {
+            it.startRevurderingForAlleBerørtePerioder(hendelse, vedtaksperiode)
+        }
+
+        if (Toggles.RevurderTidligerePeriode.enabled) {
+            if (hendelse.hasErrorsOrWorse()) return
+            vedtaksperiode.revurder(hendelse, vedtaksperiode)
+        }
+    }
+
+    internal fun igangsettRevurdering(hendelse: OverstyrInntekt, vedtaksperiode: Vedtaksperiode) {
         arbeidsgivere.forEach {
             it.startRevurderingForAlleBerørtePerioder(hendelse, vedtaksperiode)
         }
@@ -461,6 +478,9 @@ class Person private constructor(
         }
     }
 
+    internal fun kanRevurdereInntekt(skjæringstidspunkt: LocalDate) =
+        sammenligningsgrunnlag(skjæringstidspunkt) != null && grunnlagForSykepengegrunnlag(skjæringstidspunkt) != null && vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) != null
+
     internal fun harNødvendigInntekt(skjæringstidspunkt: LocalDate) = arbeidsgivere.harNødvendigInntekt(skjæringstidspunkt)
 
     internal fun harFlereArbeidsgivereMedSykdom() = arbeidsgivereMedSykdom().count() > 1
@@ -568,6 +588,52 @@ class Person private constructor(
     internal fun harKunEtAnnetAktivtArbeidsforholdEnn(skjæringstidspunkt: LocalDate, orgnummer: String): Boolean {
         val aktiveArbeidsforhold = arbeidsgivereMedAktiveArbeidsforhold(skjæringstidspunkt)
         return aktiveArbeidsforhold.size == 1 && aktiveArbeidsforhold.single().organisasjonsnummer() != orgnummer
+    }
+
+    internal fun vilkårsprøvEtterNyInntekt(hendelse: OverstyrInntekt) {
+        val skjæringstidspunkt = hendelse.skjæringstidspunkt
+        val grunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag(skjæringstidspunkt)
+            ?: hendelse.severe("Fant ikke grunnlag for sykepengegrunnlag for skjæringstidspunkt: ${skjæringstidspunkt}. Kan ikke revurdere inntekt.")
+        val sammenligningsgrunnlag = sammenligningsgrunnlag(skjæringstidspunkt)
+            ?: hendelse.severe("Fant ikke sammenligningsgrunnlag for skjæringstidspunkt: ${skjæringstidspunkt}. Kan ikke revurdere inntekt.")
+        val avviksprosent = grunnlagForSykepengegrunnlag.avviksprosent(sammenligningsgrunnlag)
+        val akseptabeltAvvik = avviksprosent <= Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT
+
+        hendelse.etterlevelse.`§8-30 ledd 2`(
+            akseptabeltAvvik,
+            Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT,
+            grunnlagForSykepengegrunnlag,
+            sammenligningsgrunnlag,
+            avviksprosent
+        )
+
+        if (akseptabeltAvvik) {
+            hendelse.info(
+                "Har %.0f %% eller mindre avvik i inntekt (%.2f %%)",
+                Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT.prosent(),
+                avviksprosent.prosent()
+            )
+        } else {
+            hendelse.warn("Har mer enn %.0f %% avvik", Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT.prosent())
+        }
+
+        when (val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)) {
+            is VilkårsgrunnlagHistorikk.Grunnlagsdata -> {
+                val harMinimumInntekt =
+                    validerMinimumInntekt(hendelse, fødselsnummer, hendelse.skjæringstidspunkt, grunnlagForSykepengegrunnlag)
+                vilkårsgrunnlagHistorikk.lagre( //TODO: Se i debugger
+                    skjæringstidspunkt, grunnlag.kopierGrunnlagsdataMed(
+                        minimumInntektVurdering = harMinimumInntekt,
+                        sammenligningsgrunnlagVurdering = akseptabeltAvvik,
+                        sammenligningsgrunnlag = sammenligningsgrunnlag,
+                        avviksprosent = avviksprosent,
+                        meldingsreferanseId = hendelse.meldingsreferanseId()
+                    )
+                )
+            }
+            is VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag -> hendelse.error("Vilkårsgrunnlaget ligger i infotrygd. Det er ikke støttet i revurdering.")
+            else -> hendelse.error("Fant ikke vilkårsgrunnlag. Kan ikke revurdere inntekt.")
+        }
     }
 
     internal fun harRelevanteArbeidsforholdForFlereArbeidsgivere(skjæringstidspunkt: LocalDate) =

@@ -803,6 +803,7 @@ internal data class PersonData(
                 TilstandType.AVVENTER_ARBEIDSGIVERE -> Vedtaksperiode.AvventerArbeidsgivere
                 TilstandType.AVVENTER_REVURDERING -> Vedtaksperiode.AvventerRevurdering
                 TilstandType.AVVENTER_HISTORIKK_REVURDERING -> Vedtaksperiode.AvventerHistorikkRevurdering
+                TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING -> Vedtaksperiode.AvventerVilkårsprøvingRevurdering
                 TilstandType.AVVENTER_SIMULERING_REVURDERING -> Vedtaksperiode.AvventerSimuleringRevurdering
                 TilstandType.AVVENTER_GODKJENNING_REVURDERING -> Vedtaksperiode.AvventerGodkjenningRevurdering
                 TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING -> Vedtaksperiode.AvventerArbeidsgivereRevurdering

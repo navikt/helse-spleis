@@ -585,6 +585,13 @@ internal class Arbeidsgiver private constructor(
         finalize(hendelse)
     }
 
+    internal fun håndter(hendelse: OverstyrInntekt) {
+        hendelse.kontekst(this)
+        vedtaksperioder.firstOrNull { it.gjelder(hendelse.skjæringstidspunkt) }
+            ?.håndter(hendelse)
+        finalize(hendelse)
+    }
+
     internal fun oppdaterSykdom(hendelse: SykdomstidslinjeHendelse) = sykdomshistorikk.håndter(hendelse)
 
     private fun sykdomstidslinje(): Sykdomstidslinje {
@@ -666,6 +673,20 @@ internal class Arbeidsgiver private constructor(
 
         if (!Toggles.RevurderTidligerePeriode.enabled) {
             vedtaksperioder.sisteSammenhengedeUtbetaling(vedtaksperiode)?.revurder(hendelse, vedtaksperiode)
+        }
+    }
+
+    internal fun startRevurderingForAlleBerørtePerioder(hendelse: OverstyrInntekt, vedtaksperiode: Vedtaksperiode) {
+        håndter(hendelse) { nyRevurderingFør(vedtaksperiode, hendelse) }
+        if (hendelse.hasErrorsOrWorse()) {
+            hendelse.info("Revurdering blokkeres, gjenopptar behandling")
+            return gjenopptaBehandling()
+        }
+
+        if(Toggles.RevurderTidligerePeriode.enabled) {
+            inntektshistorikk {
+                addSaksbehandler(hendelse.skjæringstidspunkt, hendelse.meldingsreferanseId(), hendelse.inntekt)
+            }
         }
     }
 

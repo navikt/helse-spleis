@@ -35,7 +35,7 @@ internal class TestArbeidsgiverInspektør(
     private val vedtaksperiodeindekser = mutableMapOf<UUID, Int>()
     private val fagsystemIder = mutableMapOf<Int, String>()
     private val vedtaksperiodeForkastet = mutableMapOf<Int, Boolean>()
-    private val vilkårsgrunnlag = mutableMapOf<Int, VilkårsgrunnlagHistorikk.Grunnlagsdata?>()
+    val utbetalingstidslinjeberegningData = mutableListOf<UtbetalingstidslinjeberegningData>()
     internal val personLogg: Aktivitetslogg
     internal lateinit var arbeidsgiver: Arbeidsgiver
     internal val inntektInspektør get() = InntektshistorikkInspektør(arbeidsgiver)
@@ -67,12 +67,15 @@ internal class TestArbeidsgiverInspektør(
     private val hendelseIder = mutableMapOf<Int, Set<UUID>>()
     private val inntektskilder = mutableMapOf<Int, Inntektskilde>()
     private val periodetyper = mutableMapOf<Int, Periodetype>()
+    internal val vilkårsgrunnlagHistorikk: MutableList<Pair<LocalDate, VilkårsgrunnlagHistorikk.Grunnlagsdata>>
     internal var warnings: List<String>
+    private var personInspektør: HentAktivitetslogg
 
     init {
-        HentAktivitetslogg(person, orgnummer).also { results ->
+        personInspektør = HentAktivitetslogg(person, orgnummer).also { results ->
             personLogg = results.aktivitetslogg
             warnings = results.warnings
+            vilkårsgrunnlagHistorikk = results.vilkårsgrunnlagHistorikk
             results.arbeidsgiver.accept(this)
         }
     }
@@ -80,6 +83,7 @@ internal class TestArbeidsgiverInspektør(
     private class HentAktivitetslogg(person: Person, private val valgfriOrgnummer: String?) : PersonVisitor {
         lateinit var aktivitetslogg: Aktivitetslogg
         lateinit var arbeidsgiver: Arbeidsgiver
+        val vilkårsgrunnlagHistorikk = mutableListOf<Pair<LocalDate,VilkårsgrunnlagHistorikk.Grunnlagsdata>>()
         val warnings = mutableListOf<String>()
 
         init {
@@ -94,6 +98,10 @@ internal class TestArbeidsgiverInspektør(
             if (organisasjonsnummer == valgfriOrgnummer) this.arbeidsgiver = arbeidsgiver
             if (this::arbeidsgiver.isInitialized) return
             this.arbeidsgiver = arbeidsgiver
+        }
+
+        override fun visitGrunnlagsdata(skjæringstidspunkt: LocalDate, grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata) {
+            vilkårsgrunnlagHistorikk.add(skjæringstidspunkt to grunnlagsdata)
         }
 
         override fun visitWarn(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Warn, melding: String, tidsstempel: String) {
@@ -119,6 +127,22 @@ internal class TestArbeidsgiverInspektør(
 
     override fun postVisitForkastedePerioder(vedtaksperioder: List<ForkastetVedtaksperiode>) {
         forkastetPeriode = false
+    }
+
+    override fun visitUtbetalingstidslinjeberegning(
+        id: UUID,
+        tidsstempel: LocalDateTime,
+        sykdomshistorikkElementId: UUID,
+        inntektshistorikkInnslagId: UUID,
+        vilkårsgrunnlagHistorikkInnslagId: UUID
+    ) {
+        utbetalingstidslinjeberegningData.add(UtbetalingstidslinjeberegningData(
+            id = id,
+            tidsstempel = tidsstempel,
+            sykdomshistorikkElementId = sykdomshistorikkElementId,
+            inntektshistorikkInnslagId = inntektshistorikkInnslagId,
+            vilkårsgrunnlagHistorikkInnslagId = vilkårsgrunnlagHistorikkInnslagId
+        ))
     }
 
     override fun preVisitVedtaksperiode(
@@ -312,12 +336,6 @@ internal class TestArbeidsgiverInspektør(
         if (!sykdomshistorikk.isEmpty()) sykdomshistorikk.sykdomstidslinje().accept(LåsInspektør())
     }
 
-    override fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: VilkårsgrunnlagHistorikk.Grunnlagsdata?) {
-        vilkårsgrunnlag[vedtaksperiodeindeks] = dataForVilkårsvurdering
-    }
-
-
-
     private inner class VedtaksperiodeDagTeller: VedtaksperiodeVisitor {
         private lateinit var vedtaksperiodeId: UUID
         private val telling = mutableMapOf<KClass<out Dag>, Int>()
@@ -476,4 +494,12 @@ internal class TestArbeidsgiverInspektør(
     internal fun inntektskilde(id: UUID) = id.finn(inntektskilder)
 
     internal fun periodetype(id: UUID) = id.finn(periodetyper)
+
+    internal data class UtbetalingstidslinjeberegningData(
+        val id: UUID,
+        val tidsstempel: LocalDateTime,
+        val sykdomshistorikkElementId: UUID,
+        val inntektshistorikkInnslagId: UUID,
+        val vilkårsgrunnlagHistorikkInnslagId: UUID
+    )
 }

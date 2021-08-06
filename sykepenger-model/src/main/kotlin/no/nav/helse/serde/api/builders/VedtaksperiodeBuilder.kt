@@ -36,18 +36,21 @@ internal class VedtaksperiodeBuilder(
 ) : BuilderState() {
 
     private val beregningIder = mutableListOf<UUID>()
-    private val fullstendig get() = tilstand.type in listOf(
-        TilstandType.AVSLUTTET,
-        TilstandType.AVVENTER_GODKJENNING,
-        TilstandType.AVVENTER_GODKJENNING_REVURDERING,
-        TilstandType.UTBETALING_FEILET,
-        TilstandType.REVURDERING_FEILET,
-        TilstandType.TIL_UTBETALING,
-        TilstandType.AVVENTER_ARBEIDSGIVERE,
-        TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING,
-        TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
-    ) || (tilstand.type == TilstandType.AVSLUTTET_UTEN_UTBETALING && beregningIder.isNotEmpty())
-    private val warnings = (hentWarnings(vedtaksperiode) + (dataForVilkårsvurdering?.meldingsreferanseId?.let { hentVilkårsgrunnlagWarnings(vedtaksperiode, id, it) } ?: emptyList())).distinctBy { it.melding }
+    private val fullstendig
+        get() = tilstand.type in listOf(
+            TilstandType.AVSLUTTET,
+            TilstandType.AVVENTER_GODKJENNING,
+            TilstandType.AVVENTER_GODKJENNING_REVURDERING,
+            TilstandType.UTBETALING_FEILET,
+            TilstandType.REVURDERING_FEILET,
+            TilstandType.TIL_UTBETALING,
+            TilstandType.AVVENTER_ARBEIDSGIVERE,
+            TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING,
+            TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
+        ) || (tilstand.type == TilstandType.AVSLUTTET_UTEN_UTBETALING && beregningIder.isNotEmpty())
+    private val warnings =
+        (hentWarnings(vedtaksperiode) + (dataForVilkårsvurdering?.meldingsreferanseId?.let { hentVilkårsgrunnlagWarnings(vedtaksperiode, id, it) }
+            ?: emptyList())).distinctBy { it.melding }
     private val beregnetSykdomstidslinje = mutableListOf<SykdomstidslinjedagDTO>()
 
     private val medlemskapstatusDTO: MedlemskapstatusDTO? = dataForVilkårsvurdering?.let { grunnlagsdata ->
@@ -243,6 +246,7 @@ internal class VedtaksperiodeBuilder(
             TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING,
             TilstandType.AVVENTER_SIMULERING_REVURDERING,
             TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING,
+            TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING,
             TilstandType.AVVENTER_HISTORIKK_REVURDERING,
             TilstandType.AVVENTER_REVURDERING,
             TilstandType.AVVENTER_UTBETALINGSGRUNNLAG,
@@ -267,7 +271,9 @@ internal class VedtaksperiodeBuilder(
             TilstandType.AVSLUTTET_UTEN_UTBETALING,
             TilstandType.UTEN_UTBETALING_MED_INNTEKTSMELDING_UFERDIG_GAP,
             TilstandType.UTEN_UTBETALING_MED_INNTEKTSMELDING_UFERDIG_FORLENGELSE ->
-                if (utbetaling != null && utbetaling.utbetalingstidslinje(periode).kunFridager()) TilstandstypeDTO.KunFerie else TilstandstypeDTO.IngenUtbetaling
+                if (utbetaling != null && utbetaling.utbetalingstidslinje(periode)
+                        .kunFridager()
+                ) TilstandstypeDTO.KunFerie else TilstandstypeDTO.IngenUtbetaling
         }
     }
 
@@ -302,10 +308,10 @@ internal class VedtaksperiodeBuilder(
                 tidsstempel: String
             ) {
                 if (kontekster.filter { it.kontekstType == "Vilkårsgrunnlag" }
-                    .mapNotNull { it.kontekstMap["meldingsreferanseId"] }
-                    .map(UUID::fromString)
-                    .any { it == vilkårsgrunnlagId } ) {
-                        aktiviteter.add(AktivitetDTO(vedtaksperiodeId, "W", melding, tidsstempel))
+                        .mapNotNull { it.kontekstMap["meldingsreferanseId"] }
+                        .map(UUID::fromString)
+                        .any { it == vilkårsgrunnlagId }) {
+                    aktiviteter.add(AktivitetDTO(vedtaksperiodeId, "W", melding, tidsstempel))
                 }
             }
         })
