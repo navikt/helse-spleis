@@ -6,6 +6,7 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.vault.jdbc.hikaricp.HikariCPVaultUtil
 import org.slf4j.LoggerFactory
+import java.util.concurrent.TimeUnit
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
 
@@ -17,7 +18,7 @@ fun main(args: Array<String>) {
 
     if (args.isEmpty()) return log.error("Provide a task name as CLI argument")
 
-    when (val task = args[0].trim().toLowerCase()) {
+    when (val task = args[0].trim().lowercase()) {
         "vacuum" -> vacuumTask()
         else -> log.error("Unknown task $task")
     }
@@ -32,7 +33,7 @@ private fun vacuumTask() {
             session.run(queryOf(("VACUUM FULL person")).asExecute)
         }
     }
-    log.info("VACUUM FULL completed after {} hour(s), {} minute(s) and {} second(s)", duration.inHours.toInt(), duration.inMinutes.toInt() % 60, duration.inSeconds.toInt() % 60)
+    log.info("VACUUM FULL completed after {} hour(s), {} minute(s) and {} second(s)", duration.toInt(TimeUnit.HOURS), duration.toInt(TimeUnit.MINUTES) % 60, duration.toInt(TimeUnit.SECONDS) % 60)
 }
 
 private val hikariConfig get() = HikariConfig().apply {

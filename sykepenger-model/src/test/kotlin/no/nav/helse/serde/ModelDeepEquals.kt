@@ -62,7 +62,7 @@ private class ModelDeepEquals {
 
     private fun assertHelseObjectEquals(one: Any, other: Any, path: List<String>) {
         one::class.java.declaredFields.map { it.apply { isAccessible = true } }.forEach { prop ->
-            if (!prop.name.toLowerCase().endsWith("observers") && prop.name.toLowerCase() != "forrigehendelse") {
+            if (!prop.name.lowercase().endsWith("observers") && prop.name.lowercase() != "forrigehendelse") {
                 assertDeepEquals(prop[one], prop[other], path + prop.name)
             }
         }

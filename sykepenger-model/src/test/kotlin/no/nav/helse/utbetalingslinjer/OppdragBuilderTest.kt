@@ -7,6 +7,7 @@ import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Endringskode.*
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
+import no.nav.helse.utbetalingslinjer.OppdragBuilderTest.Dagtype
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -352,7 +353,7 @@ internal class OppdragBuilderTest {
         ).result()
     }
 
-    private val Oppdrag.antallDager get() = this.sumBy { it.dager().size }
+    private val Oppdrag.antallDager get() = this.sumOf { it.dager().size }
 
     private infix fun Periode.er(dagtype: Dagtype) = dagtype.dager(this)
     private infix fun LocalDate.er(dagtype: Dagtype) = dagtype.dager(this til this)

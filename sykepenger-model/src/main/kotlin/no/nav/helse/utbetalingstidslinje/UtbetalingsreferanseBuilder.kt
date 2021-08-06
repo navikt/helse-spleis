@@ -10,7 +10,7 @@ internal fun genererUtbetalingsreferanse(uuid: UUID): String {
 
 private fun UUID.base32Encode(): String {
     val pad = '='
-    return Base32(pad.toByte())
+    return Base32(pad.code)
         .encodeAsString(this.byteArray())
         .replace(pad.toString(), "")
 }

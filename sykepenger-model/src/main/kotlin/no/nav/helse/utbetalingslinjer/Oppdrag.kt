@@ -11,7 +11,6 @@ import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
-import kotlin.streams.toList
 
 internal class Oppdrag private constructor(
     private val mottaker: String,
@@ -20,7 +19,7 @@ internal class Oppdrag private constructor(
     private var fagsystemId: String,
     private var endringskode: Endringskode,
     private val sisteArbeidsgiverdag: LocalDate?,
-    private var nettoBeløp: Int = linjer.sumBy { it.totalbeløp() },
+    private var nettoBeløp: Int = linjer.sumOf { it.totalbeløp() },
     private val tidsstempel: LocalDateTime
 ) : MutableList<Utbetalingslinje> by linjer {
     internal companion object {
@@ -94,8 +93,8 @@ internal class Oppdrag private constructor(
         )
     }
 
-    internal fun totalbeløp() = linjerUtenOpphør().sumBy { it.totalbeløp() }
-    internal fun stønadsdager() = sumBy { it.stønadsdager() }
+    internal fun totalbeløp() = linjerUtenOpphør().sumOf { it.totalbeløp() }
+    internal fun stønadsdager() = sumOf { it.stønadsdager() }
 
     internal fun nettoBeløp() = nettoBeløp
 

@@ -49,13 +49,10 @@ class ModelDeepEqualsTest {
     }
 
     class TestDataWithInnerClass(
-        @JvmField
         val innerValue: InnerClass
     ) {
         class InnerClass(
-            @JvmField
             val value: String,
-            @JvmField
             private val myValue: String
         )
 

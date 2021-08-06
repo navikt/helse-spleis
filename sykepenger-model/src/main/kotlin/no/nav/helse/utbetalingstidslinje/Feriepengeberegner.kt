@@ -98,7 +98,7 @@ internal class Feriepengeberegner(
                 .entries
                 .take(MAGIC_NUMBER)
 
-            internal fun List<UtbetaltDag>.summer() = sumBy { it.beløp }
+            internal fun List<UtbetaltDag>.summer() = sumOf { it.beløp }
 
             internal val INFOTRYGD_PERSON: UtbetaltDagSelector = { it is InfotrygdPerson }
             internal val INFOTRYGD_ARBEIDSGIVER: UtbetaltDagSelector = { it is InfotrygdArbeidsgiver }
