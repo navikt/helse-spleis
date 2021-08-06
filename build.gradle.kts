@@ -1,15 +1,15 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.4.32"
+    kotlin("jvm") version "1.5.21"
 }
 
-val flywayVersion = "6.5.0"
-val hikariVersion = "3.4.5"
-val jacksonVersion = "2.12.0"
-val junitJupiterVersion = "5.6.2"
+val flywayVersion = "7.12.0"
+val hikariVersion = "5.0.0"
+val jacksonVersion = "2.12.4"
+val junitJupiterVersion = "5.7.2"
 val kotliqueryVersion = "1.3.1"
-val vaultJdbcVersion = "1.3.1"
+val vaultJdbcVersion = "1.3.7"
 
 allprojects {
     group = "no.nav.helse"
@@ -22,8 +22,8 @@ allprojects {
     }
 
     dependencies {
-        implementation("org.jetbrains.kotlin:kotlin-reflect:1.4.0")
-        implementation("ch.qos.logback:logback-classic:1.2.3")
+        implementation("org.jetbrains.kotlin:kotlin-reflect:1.5.21")
+        implementation("ch.qos.logback:logback-classic:1.2.5")
         implementation("net.logstash.logback:logstash-logback-encoder:6.6") {
             exclude("com.fasterxml.jackson.core")
             exclude("com.fasterxml.jackson.dataformat")
@@ -42,20 +42,20 @@ allprojects {
         testImplementation("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")
         testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
 
-        testImplementation("com.opentable.components:otj-pg-embedded:0.13.3")
+        testImplementation("com.opentable.components:otj-pg-embedded:0.13.4")
     }
 
     tasks {
         withType<KotlinCompile> {
-            kotlinOptions.jvmTarget = "15"
+            kotlinOptions.jvmTarget = "16"
         }
 
         named<KotlinCompile>("compileTestKotlin") {
-            kotlinOptions.jvmTarget = "15"
+            kotlinOptions.jvmTarget = "16"
         }
 
         withType<Wrapper> {
-            gradleVersion = "7.0"
+            gradleVersion = "7.1.1"
         }
     }
 }

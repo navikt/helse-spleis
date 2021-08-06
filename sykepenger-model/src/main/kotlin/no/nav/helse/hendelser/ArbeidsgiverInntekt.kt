@@ -50,11 +50,11 @@ class ArbeidsgiverInntekt(
     }
 
     sealed class MånedligInntekt(
-        private val yearMonth: YearMonth,
-        private val inntekt: Inntekt,
-        private val type: Inntekttype,
-        private val fordel: String,
-        private val beskrivelse: String
+        protected val yearMonth: YearMonth,
+        protected val inntekt: Inntekt,
+        protected val type: Inntekttype,
+        protected val fordel: String,
+        protected val beskrivelse: String
     ) {
 
         internal abstract fun lagreInntekter(
@@ -79,11 +79,11 @@ class ArbeidsgiverInntekt(
                 inntektshistorikk.addSkattSammenligningsgrunnlag(
                     dato = skjæringstidspunkt,
                     hendelseId = meldingsreferanseId,
-                    beløp = super.inntekt,
-                    måned = super.yearMonth,
-                    type = enumValueOf(super.type.name),
-                    fordel = super.fordel,
-                    beskrivelse = super.beskrivelse
+                    beløp = inntekt,
+                    måned = yearMonth,
+                    type = enumValueOf(type.name),
+                    fordel = fordel,
+                    beskrivelse = beskrivelse
                 )
             }
         }
@@ -104,11 +104,11 @@ class ArbeidsgiverInntekt(
                 inntektshistorikk.addSkattSykepengegrunnlag(
                     dato = skjæringstidspunkt,
                     hendelseId = meldingsreferanseId,
-                    beløp = super.inntekt,
-                    måned = super.yearMonth,
-                    type = enumValueOf(super.type.name),
-                    fordel = super.fordel,
-                    beskrivelse = super.beskrivelse
+                    beløp = inntekt,
+                    måned = yearMonth,
+                    type = enumValueOf(type.name),
+                    fordel = fordel,
+                    beskrivelse = beskrivelse
                 )
             }
         }

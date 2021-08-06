@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.helse.Toggles
 import java.time.LocalDate
-import kotlin.streams.toList
 
 sealed class DateRange {
     abstract fun dates(): List<LocalDate>
@@ -33,7 +32,7 @@ sealed class DateRange {
         // hvilke type det er ut i fra hvilke dataer som mangler
         @JvmStatic
         @JsonCreator
-        private fun create(
+        internal fun create(
             @JsonProperty("dato") dato: LocalDate?,
             @JsonProperty("fom") fom: LocalDate?,
             @JsonProperty("tom") tom: LocalDate?

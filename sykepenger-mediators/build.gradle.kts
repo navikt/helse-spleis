@@ -1,8 +1,3 @@
-val flywayVersion = "6.5.0"
-val hikariVersion = "3.4.5"
-val vaultJdbcVersion = "1.3.1"
-val kotliqueryVersion = "1.3.1"
-val wireMockVersion = "2.27.1"
 val mainClass = "no.nav.helse.AppKt"
 
 dependencies {
@@ -11,7 +6,7 @@ dependencies {
 
     testImplementation("com.github.navikt:inntektsmelding-kontrakt:2020.04.06-ab8f786")
     testImplementation("com.github.navikt:syfokafka:2021.02.15-14.09-103a1544")
-    testImplementation("io.mockk:mockk:1.10.0")
+    testImplementation("io.mockk:mockk:1.12.0")
 }
 
 repositories {
