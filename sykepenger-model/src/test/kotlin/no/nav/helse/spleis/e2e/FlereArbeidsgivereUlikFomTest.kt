@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
+import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.*
@@ -859,6 +860,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             assertEquals(17.januar, a1Linje.fom)
             assertEquals(15.mars, a1Linje.tom)
             assertEquals(1063, a1Linje.beløp)
+            assertEquals(Inntektskilde.FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode(a1)))
         }
     }
 
@@ -1052,6 +1054,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             assertWarnings(inspektør(a1))
             assertTrue(inspektør(a1).warnings.contains("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold"))
             assertFalse(inspektør(a1).warnings.contains("Den sykmeldte har skiftet arbeidsgiver, og det er beregnet at den nye arbeidsgiveren mottar refusjon lik forrige. Kontroller at dagsatsen blir riktig."))
+            assertEquals(Inntektskilde.FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode(a1)))
         }
     }
 
@@ -1094,6 +1097,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             assertEquals(17.januar, a1Linje.fom)
             assertEquals(15.mars, a1Linje.tom)
             assertEquals(1431, a1Linje.beløp)
+            assertEquals(Inntektskilde.EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(1.vedtaksperiode(a1)))
+
         }
     }
 
@@ -1138,6 +1143,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             assertEquals(17.januar, a1Linje.fom)
             assertEquals(15.mars, a1Linje.tom)
             assertEquals(1431, a1Linje.beløp)
+            assertEquals(Inntektskilde.FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode(a1)))
+
         }
     }
 
@@ -1165,7 +1172,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertFalse(inspektør(a1).warnings.contains("Den sykmeldte har skiftet arbeidsgiver, og det er beregnet at den nye arbeidsgiveren mottar refusjon lik forrige. Kontroller at dagsatsen blir riktig."))
 
     }
-
 
     @Test
     fun `Ulik fom og 6G-begrenset, to dager med utbetaling hos første arbeidsgiver før andre arbeidsgiver blir syk skal fortsatt 6G-cappe mht begge AG`() {
@@ -1275,6 +1281,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             assertEquals(997, a1Linje.beløp)
 
             assertTrue(inspektør(a2).utbetalinger.isEmpty())
+            assertEquals(Inntektskilde.FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode(a1)))
+
         }
     }
 
@@ -1442,6 +1450,36 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             assertEquals(997, a1Linje.beløp)
 
             assertTrue(inspektør(a2).utbetalinger.isEmpty())
+            assertEquals(Inntektskilde.FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode(a1)))
+        }
+    }
+
+    @Test
+    fun `En ghost som er registrert i Aa-reg mer enn 3 måneder før skjæringstidspunkt og ikke har hatt inntekt de siste 3 månedene før skjæringstidspunktet skal ikke markeres som FLERE_ARBEIDSGIVERE`() {
+        Toggles.FlereArbeidsgivereUlikFom.enable {
+            håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+            håndterInntektsmelding(
+                listOf(1.mars til 16.mars),
+                førsteFraværsdag = 1.mars,
+                orgnummer = a1,
+                refusjon = Refusjon(null, 10000.månedlig, emptyList())
+            )
+            val inntekter = listOf(grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 10000.månedlig.repeat(3)))
+            val arbeidsforhold = listOf(
+                Arbeidsforhold(orgnummer = a1, fom = LocalDate.EPOCH, tom = null),
+                Arbeidsforhold(orgnummer = a2, fom = LocalDate.EPOCH, tom = null)
+            )
+            håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), inntekter = inntekter, orgnummer = a1, arbeidsforhold = arbeidsforhold)
+            håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode(a1),
+                inntektsvurdering = Inntektsvurdering(listOf(sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 10000.månedlig.repeat(12)))),
+                orgnummer = a1
+            )
+            håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
+
+            assertEquals(Inntektskilde.EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(1.vedtaksperiode(a1)))
         }
     }
 }

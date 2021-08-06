@@ -1,6 +1,7 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.Arbeidsforhold
+import no.nav.helse.hendelser.Arbeidsforhold.Companion.harJobbetDeTreSisteMånedeneFørSkjæringstidspunkt
 import java.time.LocalDate
 import java.util.*
 
@@ -29,6 +30,14 @@ internal class Arbeidsforholdhistorikk private constructor(
         return historikk.last().harAktivtArbeidsforhold(skjæringstidspunkt)
     }
 
+    internal fun arbeidsforholdErEldreEnnTreMåneder(skjæringstidspunkt: LocalDate): Boolean {
+        if (historikk.isEmpty()) {
+            return false
+        }
+        return historikk.last().harRelevantArbeidsforhold(skjæringstidspunkt)
+    }
+
+
     internal class Innslag(private val id: UUID, private val arbeidsforhold: List<Arbeidsforhold>, private val skjæringstidspunkt: LocalDate) {
         internal fun accept(visitor: ArbeidsforholdhistorikkVisitor) {
             visitor.preVisitArbeidsforholdinnslag(this, id, skjæringstidspunkt)
@@ -41,5 +50,8 @@ internal class Arbeidsforholdhistorikk private constructor(
 
         internal fun harAktivtArbeidsforhold(skjæringstidspunkt: LocalDate) =
             this.skjæringstidspunkt == skjæringstidspunkt
+
+        internal fun harRelevantArbeidsforhold(skjæringstidspunkt: LocalDate) =
+            this.skjæringstidspunkt == skjæringstidspunkt && arbeidsforhold.harJobbetDeTreSisteMånedeneFørSkjæringstidspunkt(skjæringstidspunkt)
     }
 }

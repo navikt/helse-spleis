@@ -12,6 +12,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.harArbeidsgivereMedOverlappendeUtbetaltePerioder
 import no.nav.helse.person.Arbeidsgiver.Companion.harInntekt
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntekt
+import no.nav.helse.person.Arbeidsgiver.Companion.harRelevanteArbeidsforholdForFlereArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
 import no.nav.helse.person.Vedtaksperiode.Companion.ALLE
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
@@ -556,8 +557,6 @@ class Person private constructor(
     internal fun harVedtaksperiodeForArbeidsgiverMedUkjentArbeidsforhold(skjæringstidspunkt: LocalDate) =
         arbeidsgivere.any { it.harVedtaksperiodeMedUkjentArbeidsforhold(skjæringstidspunkt) }
 
-    internal fun harArbeidsforholdForFlereArbeidsgivere(skjæringstidspunkt: LocalDate) = arbeidsgivereMedAktiveArbeidsforhold(skjæringstidspunkt).size > 1
-
     internal fun orgnummereMedAktiveArbeidsforhold(skjæringstidspunkt: LocalDate) = arbeidsgivere
         .filter { it.harAktivtArbeidsforhold(skjæringstidspunkt) }
         .map { it.organisasjonsnummer() }
@@ -570,4 +569,7 @@ class Person private constructor(
         val aktiveArbeidsforhold = arbeidsgivereMedAktiveArbeidsforhold(skjæringstidspunkt)
         return aktiveArbeidsforhold.size == 1 && aktiveArbeidsforhold.single().organisasjonsnummer() != orgnummer
     }
+
+    internal fun harRelevanteArbeidsforholdForFlereArbeidsgivere(skjæringstidspunkt: LocalDate) =
+        arbeidsgivere.harRelevanteArbeidsforholdForFlereArbeidsgivere(skjæringstidspunkt)
 }

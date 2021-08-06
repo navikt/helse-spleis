@@ -153,6 +153,9 @@ internal class Arbeidsgiver private constructor(
         ) {
             filter { it.organisasjonsnummer != "0" }.forEach { it.utbetalFeriepenger(aktørId, feriepengeberegner, utbetalingshistorikkForFeriepenger) }
         }
+
+        internal fun Iterable<Arbeidsgiver>.harRelevanteArbeidsforholdForFlereArbeidsgivere(skjæringstidspunkt: LocalDate) =
+            count { !it.arbeidsforholdhistorikk.arbeidsforholdErEldreEnnTreMåneder(skjæringstidspunkt) || it.harInntekt(skjæringstidspunkt)} > 1
     }
 
     internal fun accept(visitor: ArbeidsgiverVisitor) {
@@ -885,7 +888,8 @@ internal class Arbeidsgiver private constructor(
     internal fun harVedtaksperiodeMedUkjentArbeidsforhold(skjæringstidspunkt: LocalDate) =
         !harAktivtArbeidsforhold(skjæringstidspunkt) && vedtaksperioder.any { it.harUferdigFørstegangsbehandling(skjæringstidspunkt) }
 
-    internal fun harInntekt(skjæringstidspunkt: LocalDate) = inntektshistorikk.harInntekt(skjæringstidspunkt) || vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt).harInntekt()
+    internal fun harInntekt(skjæringstidspunkt: LocalDate) =
+        inntektshistorikk.harInntekt(skjæringstidspunkt) || vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt).harInntekt()
 
     internal class JsonRestorer private constructor() {
         internal companion object {

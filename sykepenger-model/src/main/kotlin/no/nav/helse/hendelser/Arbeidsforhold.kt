@@ -70,5 +70,8 @@ class Arbeidsforhold(
         }
 
         internal fun List<Arbeidsforhold>.grupperArbeidsforholdPerOrgnummer() = groupBy { it.orgnummer }
+
+        internal fun List<Arbeidsforhold>.harJobbetDeTreSisteMånedeneFørSkjæringstidspunkt(skjæringstidspunkt: LocalDate) =
+            any { it.gjelder(skjæringstidspunkt.minusMonths(3).withDayOfMonth(1)) }
     }
 }

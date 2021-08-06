@@ -1687,7 +1687,7 @@ internal class Vedtaksperiode private constructor(
                 utbetalingsgrunnlag.lagreArbeidsforhold(vedtaksperiode.person, vedtaksperiode.skjæringstidspunkt)
                 utbetalingsgrunnlag.lagreInntekter(vedtaksperiode.person, vedtaksperiode.skjæringstidspunkt)
 
-                if (vedtaksperiode.person.harArbeidsforholdForFlereArbeidsgivere(vedtaksperiode.skjæringstidspunkt)) {
+                if (vedtaksperiode.person.harRelevanteArbeidsforholdForFlereArbeidsgivere(vedtaksperiode.skjæringstidspunkt)) {
                     vedtaksperiode.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE
                 }
             }
