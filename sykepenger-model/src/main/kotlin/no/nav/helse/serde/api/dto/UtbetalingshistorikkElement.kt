@@ -23,7 +23,9 @@ data class UtbetalingshistorikkElementDTO(
         val gjenståendeSykedager: Int?,
         val forbrukteSykedager: Int?,
         val arbeidsgiverNettoBeløp: Int,
+        val personNettoBeløp: Int,
         val arbeidsgiverFagsystemId: String,
+        val personFagsystemId: String,
         val tidsstempel: LocalDateTime,
         val vurdering: VurderingDTO?
     ) {

@@ -28,6 +28,7 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
         private val gjenståendeSykedager: Int?,
         private val forbrukteSykedager: Int?,
         private val arbeidsgiverNettoBeløp: Int,
+        private val personNettoBeløp: Int,
         private val tidsstempel: LocalDateTime,
         private val vurderingBuilder: VurderingBuilder,
         private val oppdragBuilder: OppdragBuilder,
@@ -43,7 +44,9 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
             gjenståendeSykedager = gjenståendeSykedager,
             forbrukteSykedager = forbrukteSykedager,
             arbeidsgiverNettoBeløp = arbeidsgiverNettoBeløp,
-            arbeidsgiverFagsystemId = oppdragBuilder.build(),
+            personNettoBeløp = personNettoBeløp,
+            arbeidsgiverFagsystemId = oppdragBuilder.arbeidsgiverFagsystemId(),
+            personFagsystemId = oppdragBuilder.personFagsystemId(),
             vurdering = vurderingBuilder.build()
         )
 
@@ -111,6 +114,7 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
                 gjenståendeSykedager = gjenståendeSykedager,
                 forbrukteSykedager = forbrukteSykedager,
                 arbeidsgiverNettoBeløp = arbeidsgiverNettoBeløp,
+                personNettoBeløp = personNettoBeløp,
                 vurderingBuilder = vurderingBuilder,
                 oppdragBuilder = oppdragBuilder,
                 utbetalingstidslinjeBuilder = utbetalingstidslinjeBuilder
