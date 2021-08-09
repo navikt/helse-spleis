@@ -13,9 +13,14 @@ internal enum class Kilde {
     SKATT, INFOTRYGD, INNTEKTSMELDING, SAKSBEHANDLER
 }
 
+internal data class Innslag(
+    val innslagId: UUID,
+    val opplysninger: List<InntektshistorikkInspektør.Opplysning>
+)
+
 internal class InntektshistorikkInspektør(arbeidsgiver: Arbeidsgiver) : ArbeidsgiverVisitor {
 
-    private val innslag = mutableListOf<List<Opplysning>>()
+    private val innslag = mutableListOf<Innslag>()
     private val inntektsopplysninger = mutableListOf<Opplysning>()
     private lateinit var inntektshistorikk: Inntektshistorikk
 
@@ -46,7 +51,7 @@ internal class InntektshistorikkInspektør(arbeidsgiver: Arbeidsgiver) : Arbeids
     }
 
     override fun postVisitInnslag(innslag: Inntektshistorikk.Innslag, id: UUID) {
-        this.innslag.add(inntektsopplysninger.toList())
+        this.innslag.add(Innslag(id, inntektsopplysninger.toList()))
     }
 
     override fun visitInntektsmelding(
@@ -120,6 +125,23 @@ internal class InntektshistorikkInspektør(arbeidsgiver: Arbeidsgiver) : Arbeids
                 skattComposite.grunnlagForSykepengegrunnlag(skattedato)?.second,
                 skattComposite.grunnlagForSammenligningsgrunnlag(skattedato)?.second,
                 Kilde.SKATT
+            )
+        )
+    }
+
+    override fun visitSaksbehandler(
+        saksbehandler: Inntektshistorikk.Saksbehandler,
+        dato: LocalDate,
+        hendelseId: UUID,
+        beløp: Inntekt,
+        tidsstempel: LocalDateTime
+    ) {
+        inntektsopplysninger.add(
+            Opplysning(
+                skattedato,
+                saksbehandler.grunnlagForSykepengegrunnlag(skattedato)?.second,
+                saksbehandler.grunnlagForSammenligningsgrunnlag(skattedato)?.second,
+                Kilde.SAKSBEHANDLER
             )
         )
     }

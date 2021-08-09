@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -30,8 +31,10 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
     @Test
     fun `overstyr inntekt happy case`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
-        håndterOverstyring(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar, ident = "N123456")
 
+        val tidligereInntektInnslagId = inspektør.inntektInspektør.sisteInnslag?.innslagId
+
+        håndterOverstyring(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar, ident = "N123456")
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -64,8 +67,15 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         assertEquals(2, inspektør.vilkårsgrunnlagHistorikk.size)
         assertEquals(3, inspektør.vilkårsgrunnlagHistorikk[0].second.avviksprosent?.roundToInt())
 
+        val tidligereBeregning = inspektør.utbetalingstidslinjeberegningData.first()
+        assertEquals(tidligereBeregning.inntektshistorikkInnslagId, tidligereInntektInnslagId)
+
         val beregning = inspektør.utbetalingstidslinjeberegningData.last()
+        assertEquals(beregning.inntektshistorikkInnslagId, inspektør.inntektInspektør.sisteInnslag?.innslagId)
+
         assertTrue(beregning.vilkårsgrunnlagHistorikkInnslagId == person.vilkårsgrunnlagHistorikk.sisteId())
+
+        assertTrue(inspektør.inntektInspektør.sisteInnslag?.opplysninger?.any { it.kilde == Kilde.SAKSBEHANDLER } ?: false)
     }
 
     @Test
@@ -87,6 +97,10 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         assertEquals(15741, inspektør.utbetalinger[0].arbeidsgiverOppdrag().nettoBeløp())
         assertEquals(506, inspektør.utbetalinger[1].arbeidsgiverOppdrag().nettoBeløp())
         assertEquals(-506, inspektør.utbetalinger[2].arbeidsgiverOppdrag().nettoBeløp())
+
+        val inntektFraSaksbehandler = inspektør.inntektInspektør.sisteInnslag?.opplysninger?.filter { it.kilde == Kilde.SAKSBEHANDLER }!!
+        assertEquals(1, inntektFraSaksbehandler.size)
+        assertEquals(31000.månedlig, inntektFraSaksbehandler.first().sykepengegrunnlag)
     }
 
     @Test
@@ -153,7 +167,74 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `overstyr inntekt avvik over 25% reduksjon`() {
+    fun `overstyr inntekt to vedtak med kort opphold`() {
+        nyttVedtak(1.januar, 26.januar, 100.prosent)
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 14.februar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 14.februar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.februar)
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt(2.vedtaksperiode)
+
+        håndterOverstyring(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar, ident = "N123456")
+
+        håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
+        håndterUtbetalt(2.vedtaksperiode)
+
+        assertTilstander(
+            0,
+            TilstandType.START,
+            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
+            TilstandType.AVVENTER_SØKNAD_FERDIG_GAP,
+            TilstandType.AVVENTER_UTBETALINGSGRUNNLAG,
+            TilstandType.AVVENTER_HISTORIKK,
+            TilstandType.AVVENTER_VILKÅRSPRØVING,
+            TilstandType.AVVENTER_HISTORIKK,
+            TilstandType.AVVENTER_SIMULERING,
+            TilstandType.AVVENTER_GODKJENNING,
+            TilstandType.TIL_UTBETALING,
+            TilstandType.AVSLUTTET,
+            TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING,
+            TilstandType.AVVENTER_HISTORIKK_REVURDERING,
+            TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING,
+            TilstandType.AVSLUTTET,
+
+        )
+
+        assertTilstander(
+            1,
+            TilstandType.START,
+            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
+            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            TilstandType.AVVENTER_UTBETALINGSGRUNNLAG,
+            TilstandType.AVVENTER_HISTORIKK,
+            TilstandType.AVVENTER_VILKÅRSPRØVING,
+            TilstandType.AVVENTER_HISTORIKK,
+            TilstandType.AVVENTER_SIMULERING,
+            TilstandType.AVVENTER_GODKJENNING,
+            TilstandType.TIL_UTBETALING,
+            TilstandType.AVSLUTTET,
+            TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING,
+            TilstandType.AVVENTER_HISTORIKK_REVURDERING,
+            TilstandType.AVVENTER_SIMULERING_REVURDERING,
+            TilstandType.AVVENTER_GODKJENNING_REVURDERING,
+            TilstandType.TIL_UTBETALING,
+            TilstandType.AVSLUTTET,
+        )
+
+        assertEquals(3, inspektør.utbetalinger.filter { it.erUtbetalt() }.size)
+    }
+
+    @Test
+    fun `overstyr inntekt avvik over 25 prosent reduksjon`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
         håndterOverstyring(inntekt = 7000.månedlig, skjæringstidspunkt = 1.januar, ident = "N123456")
 
@@ -179,7 +260,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `overstyr inntekt avvik over 25% økning`() {
+    fun `overstyr inntekt avvik over 25 prosent økning`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
         håndterOverstyring(inntekt = 70000.månedlig, skjæringstidspunkt = 1.januar, ident = "N123456")
 
@@ -292,16 +373,6 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
             TilstandType.TIL_UTBETALING,
             TilstandType.AVSLUTTET,
         )
-        //Assert error hendelse
+        assertErrors(inspektør)
     }
-
-    @Test
-    fun `påfølgende periode nytt skjæringstidspunkt`() {}
-
-    @Test
-    fun `påfølde periode med med samme skjæringstidspunkt`() {}
-
-    @Test
-    fun `mangler vilkårsgrunnlag`() {}
-
 }
