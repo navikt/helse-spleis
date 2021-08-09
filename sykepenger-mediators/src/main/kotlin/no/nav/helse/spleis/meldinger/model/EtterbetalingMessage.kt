@@ -12,7 +12,7 @@ internal class EtterbetalingMessage(val packet: JsonMessage) : HendelseMessage(p
     private val aktørId = packet["aktørId"].asText()
     override val fødselsnummer: String = packet["fødselsnummer"].asText()
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
-    private val fagsystemId = packet["fagsystemId"].asText()
+    private val fagsystemId = packet["fagsystemId"].asText().trim()
     private val gyldighetsdato = packet["gyldighetsdato"].asLocalDate()
     private val utbetalingshistorikkMessage: UtbetalingshistorikkMessage? = packet["@løsning.${Sykepengehistorikk.name}"].takeIf { it.isArray }?.let {
         UtbetalingshistorikkMessage(packet)

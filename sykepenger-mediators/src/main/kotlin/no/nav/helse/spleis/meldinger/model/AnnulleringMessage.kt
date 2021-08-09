@@ -10,7 +10,7 @@ internal class AnnulleringMessage(packet: JsonMessage) : HendelseMessage(packet)
     private val aktørId = packet["aktørId"].asText()
     override val fødselsnummer: String = packet["fødselsnummer"].asText()
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
-    private val fagsystemId = packet["fagsystemId"].asText()
+    private val fagsystemId = packet["fagsystemId"].asText().trim()
     private val saksbehandler = Saksbehandler.fraJson(packet["saksbehandler"])
     private val annullerUtbetaling
         get() = AnnullerUtbetaling(

@@ -10,7 +10,7 @@ import no.nav.helse.spleis.IHendelseMediator
 internal class UtbetalingMessage(packet: JsonMessage) : BehovMessage(packet) {
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
     private val aktørId = packet["aktørId"].asText()
-    private val fagsystemId = packet["${Utbetaling.name}.fagsystemId"].asText()
+    private val fagsystemId = packet["${Utbetaling.name}.fagsystemId"].asText().trim()
     private val utbetalingId = packet["utbetalingId"].asText()
     private val status: Oppdragstatus = enumValueOf(packet["@løsning.${Utbetaling.name}.status"].asText())
     private val beskrivelse = packet["@løsning.${Utbetaling.name}.beskrivelse"].asText()
