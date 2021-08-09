@@ -52,15 +52,15 @@ jobs:
                 RESOURCE: deploy/dev-gc-job.yml
                 IMAGE: ${{ needs.set_version.outputs.image }}
 
-  deployProd:
-      name: deploy to prod
-      needs: [set_version, deployDev]
-      runs-on: ubuntu-latest
-      steps:
-          - uses: actions/checkout@v1
-          - uses: nais/deploy/actions/deploy@v1
-            env:
-                APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-                CLUSTER: prod-fss
-                RESOURCE: deploy/prod-gc-job.yml
-                IMAGE: ${{ needs.set_version.outputs.image }}
+#  deployProd:
+#      name: deploy to prod
+#      needs: [set_version, deployDev]
+#      runs-on: ubuntu-latest
+#      steps:
+#          - uses: actions/checkout@v1
+#          - uses: nais/deploy/actions/deploy@v1
+#            env:
+#                APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+#                CLUSTER: prod-fss
+#                RESOURCE: deploy/prod-gc-job.yml
+#                IMAGE: ${{ needs.set_version.outputs.image }}
