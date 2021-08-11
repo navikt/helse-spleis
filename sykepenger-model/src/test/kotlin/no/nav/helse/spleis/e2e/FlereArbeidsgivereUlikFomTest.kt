@@ -1143,8 +1143,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             assertEquals(17.januar, a1Linje.fom)
             assertEquals(15.mars, a1Linje.tom)
             assertEquals(1431, a1Linje.beløp)
-            assertEquals(Inntektskilde.FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode(a1)))
-
+            assertEquals(Inntektskilde.EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(1.vedtaksperiode(a1)))
         }
     }
 

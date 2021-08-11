@@ -32,7 +32,7 @@ internal class Arbeidsforholdhistorikk private constructor(
 
     internal fun arbeidsforholdErEldreEnnTreMåneder(skjæringstidspunkt: LocalDate): Boolean {
         if (historikk.isEmpty()) {
-            return false
+            return true
         }
         return historikk.last().harRelevantArbeidsforhold(skjæringstidspunkt)
     }
