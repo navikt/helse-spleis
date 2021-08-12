@@ -3,12 +3,14 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.Inntektskilde
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -1479,6 +1481,54 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
 
             assertEquals(Inntektskilde.EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(1.vedtaksperiode(a1)))
+        }
+    }
+
+    @Disabled("Tror ikke vi trenger denne")
+    @Test
+    fun `sdfsdf`() {
+        Toggles.FlereArbeidsgivereUlikFom.enable {
+            håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+            håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a2)
+
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a2)
+
+            håndterInntektsmelding(listOf(1.mars til 16.mars), førsteFraværsdag = 1.mars, orgnummer = a1)
+            håndterInntektsmelding(listOf(1.mars til 16.mars), førsteFraværsdag = 1.mars, orgnummer = a2)
+
+            val inntekter = listOf(
+                grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 31000.månedlig.repeat(3)),
+                grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 31000.månedlig.repeat(3))
+            )
+            håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), inntekter = inntekter, orgnummer = a1)
+            håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
+
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode(a1), inntektsvurdering = Inntektsvurdering(
+                    listOf(
+                        sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 31000.månedlig.repeat(12)),
+                        sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), 31000.månedlig.repeat(12))
+                    )
+                ), orgnummer = a1
+            )
+
+            håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
+
+            håndterPåminnelse(1.vedtaksperiode(a1), AVVENTER_GODKJENNING, orgnummer = a1)
+
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
+
+            håndterUtbetalingsgrunnlag(1.vedtaksperiode(a2), inntekter = inntekter, orgnummer = a2)
+            håndterYtelser(1.vedtaksperiode(a2), inntektshistorikk = emptyList(), orgnummer = a2)
+
+            assertEquals(31000.månedlig, inspektør(a1).inntektInspektør.grunnlagForSykepengegrunnlag(1.mars))
+            assertEquals(31000.månedlig, inspektør(a2).inntektInspektør.grunnlagForSykepengegrunnlag(1.mars))
+
+            assertEquals(Inntektskilde.FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode(a1)))
+            assertEquals(Inntektskilde.FLERE_ARBEIDSGIVERE, inspektør(a2).inntektskilde(1.vedtaksperiode(a2)))
         }
     }
 }

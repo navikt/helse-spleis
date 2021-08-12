@@ -32,6 +32,7 @@ import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerfilter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -1841,8 +1842,7 @@ internal class Vedtaksperiode private constructor(
                         }
                         if (vedtaksperiode.person.harKunEtAnnetAktivtArbeidsforholdEnn(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer)) {
                             ytelser.warn("Den sykmeldte har skiftet arbeidsgiver, og det er beregnet at den nye arbeidsgiveren mottar refusjon lik forrige. Kontroller at dagsatsen blir riktig.")
-                        }
-                        else if (vedtaksperiode.person.harFlereArbeidsgivereUtenSykdomVedSkjæringstidspunkt(vedtaksperiode.skjæringstidspunkt)) {
+                        } else if (vedtaksperiode.person.harFlereArbeidsgivereUtenSykdomVedSkjæringstidspunkt(vedtaksperiode.skjæringstidspunkt)) {
                             ytelser.warn("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold")
                         }
                     }
@@ -1993,6 +1993,16 @@ internal class Vedtaksperiode private constructor(
             ) {
                 hendelse.info("Infotrygdhistorikken har endret seg, reberegner periode")
             }
+
+            if (vedtaksperiode.inntektskilde == Inntektskilde.FLERE_ARBEIDSGIVERE
+                && !person.harFlereArbeidsgivereMedSykdom()
+                && !person.harRelevanteArbeidsforholdForFlereArbeidsgivere(vedtaksperiode.skjæringstidspunkt)
+            ) {
+                hendelse.info("${vedtaksperiode.fødselsnummer} sin vedtaksperiode ${vedtaksperiode.id} er identifisert som feilmerket FLERE_ARBEIDSGIVERE. Setter inntektskilde til EN_ARBEIDSGIVER")
+                sikkerLogg.info("${vedtaksperiode.fødselsnummer} sin vedtaksperiode ${vedtaksperiode.id} er identifisert som feilmerket FLERE_ARBEIDSGIVERE. Setter inntektskilde til EN_ARBEIDSGIVER")
+                vedtaksperiode.inntektskilde = Inntektskilde.EN_ARBEIDSGIVER
+            }
+
             vedtaksperiode.trengerGodkjenning(hendelse)
         }
     }
@@ -2231,8 +2241,8 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
-            if(Toggles.RevurderInntekt.enabled) {
-                if(vedtaksperiode.person.kanRevurdereInntekt(hendelse.skjæringstidspunkt)) {
+            if (Toggles.RevurderInntekt.enabled) {
+                if (vedtaksperiode.person.kanRevurdereInntekt(hendelse.skjæringstidspunkt)) {
                     vedtaksperiode.person.igangsettRevurdering(hendelse, vedtaksperiode)
                 } else {
                     hendelse.error("Kan ikke revurdere inntekt, da vi mangler datagrunnlag på skjæringstidspunktet")
@@ -2303,6 +2313,8 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal companion object {
+        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
+
         private const val IKKE_HÅNDTERT: Boolean = false
 
         internal val SENERE_INCLUSIVE = fun(senereEnnDenne: Vedtaksperiode): VedtaksperiodeFilter {
