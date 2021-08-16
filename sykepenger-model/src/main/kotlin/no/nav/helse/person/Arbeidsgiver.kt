@@ -155,7 +155,10 @@ internal class Arbeidsgiver private constructor(
         }
 
         internal fun Iterable<Arbeidsgiver>.harRelevanteArbeidsforholdForFlereArbeidsgivere(skjæringstidspunkt: LocalDate) =
-            count { !it.arbeidsforholdhistorikk.arbeidsforholdErEldreEnnTreMåneder(skjæringstidspunkt) || it.harInntekt(skjæringstidspunkt)} > 1
+            this.relevanteArbeidsforhold(skjæringstidspunkt).size > 1
+
+        internal fun Iterable<Arbeidsgiver>.relevanteArbeidsforhold(skjæringstidspunkt: LocalDate) =
+            filter {(it.arbeidsforholdhistorikk.harAktivtArbeidsforhold(skjæringstidspunkt) && !it.arbeidsforholdhistorikk.arbeidsforholdErEldreEnnTreMåneder(skjæringstidspunkt)) || it.harInntekt(skjæringstidspunkt)}
     }
 
     internal fun accept(visitor: ArbeidsgiverVisitor) {

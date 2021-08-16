@@ -400,11 +400,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         inspektør.also {
             assertNoErrors(it)
-            if (Toggles.FlereArbeidsgivereUlikFom.enabled) {
-                assertEquals(listOf("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold"), it.warnings)
-            } else {
-                assertFalse(it.personLogg.hasWarningsOrWorse())
-            }
+            assertFalse(it.personLogg.hasWarningsOrWorse())
             assertActivities(it)
             assertInntektForDato(45000.månedlig, 27.juli(2020), it)
             assertEquals(2, it.sykdomshistorikk.size)

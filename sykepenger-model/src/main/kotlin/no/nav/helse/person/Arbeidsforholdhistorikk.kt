@@ -34,7 +34,7 @@ internal class Arbeidsforholdhistorikk private constructor(
         if (historikk.isEmpty()) {
             return true
         }
-        return historikk.last().harRelevantArbeidsforhold(skjæringstidspunkt)
+        return historikk.last().harJobbetDeTreSisteMånedeneFørSkjæringstidspunkt(skjæringstidspunkt)
     }
 
 
@@ -51,7 +51,7 @@ internal class Arbeidsforholdhistorikk private constructor(
         internal fun harAktivtArbeidsforhold(skjæringstidspunkt: LocalDate) =
             this.skjæringstidspunkt == skjæringstidspunkt
 
-        internal fun harRelevantArbeidsforhold(skjæringstidspunkt: LocalDate) =
-            this.skjæringstidspunkt == skjæringstidspunkt && arbeidsforhold.harJobbetDeTreSisteMånedeneFørSkjæringstidspunkt(skjæringstidspunkt)
+        internal fun harJobbetDeTreSisteMånedeneFørSkjæringstidspunkt(skjæringstidspunkt: LocalDate) =
+            arbeidsforhold.harJobbetDeTreSisteMånedeneFørSkjæringstidspunkt(skjæringstidspunkt)
     }
 }
