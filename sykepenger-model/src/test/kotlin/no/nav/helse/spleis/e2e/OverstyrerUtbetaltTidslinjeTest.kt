@@ -796,6 +796,35 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `påminnet revurdering timer ikke ut`() {
+        nyttVedtak(3.januar, 26.januar)
+
+        håndterOverstyring((16.januar til 26.januar).map { manuellFeriedag(it) })
+
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterPåminnelse(1.vedtaksperiode,AVVENTER_GODKJENNING_REVURDERING, LocalDateTime.now().minusDays(14))
+
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_UTBETALINGSGRUNNLAG,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING
+        )
+    }
+
+    @Test
     fun `revurder med kun ferie`() {
         nyttVedtak(3.januar, 26.januar)
         forlengVedtak(27.januar, 13.februar)
