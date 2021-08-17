@@ -85,7 +85,7 @@ internal class Arbeidsgiver private constructor(
                 .takeIf { it.isNotEmpty() }
                 ?.summer()
 
-        internal fun List<Arbeidsgiver>.harInntekt(skjæringstidspunkt: LocalDate) =
+        internal fun List<Arbeidsgiver>.harGrunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
             filter { it.inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt) != null }
 
         internal fun List<Arbeidsgiver>.harNødvendigInntekt(skjæringstidspunkt: LocalDate) =
@@ -158,7 +158,7 @@ internal class Arbeidsgiver private constructor(
             this.relevanteArbeidsforhold(skjæringstidspunkt).size > 1
 
         internal fun Iterable<Arbeidsgiver>.relevanteArbeidsforhold(skjæringstidspunkt: LocalDate) =
-            filter {(it.arbeidsforholdhistorikk.harAktivtArbeidsforhold(skjæringstidspunkt) && !it.arbeidsforholdhistorikk.arbeidsforholdErEldreEnnTreMåneder(skjæringstidspunkt)) || it.harInntekt(skjæringstidspunkt)}
+            filter {(it.arbeidsforholdhistorikk.harAktivtArbeidsforhold(skjæringstidspunkt) && !it.arbeidsforholdhistorikk.arbeidsforholdErEldreEnnTreMåneder(skjæringstidspunkt)) || it.harGrunnlagForSykepengegrunnlag(skjæringstidspunkt)}
     }
 
     internal fun accept(visitor: ArbeidsgiverVisitor) {
@@ -912,8 +912,11 @@ internal class Arbeidsgiver private constructor(
     internal fun harVedtaksperiodeMedUkjentArbeidsforhold(skjæringstidspunkt: LocalDate) =
         !harAktivtArbeidsforhold(skjæringstidspunkt) && vedtaksperioder.any { it.harUferdigFørstegangsbehandling(skjæringstidspunkt) }
 
-    internal fun harInntekt(skjæringstidspunkt: LocalDate) =
-        inntektshistorikk.harInntekt(skjæringstidspunkt) || vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt).harInntekt()
+    internal fun harGrunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
+        inntektshistorikk.harGrunnlagForSykepengegrunnlag(skjæringstidspunkt) || vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt).harInntekt()
+
+    internal fun harGrunnlagForSykepengegrunnlagEllerSammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =
+        inntektshistorikk.harGrunnlagForSykepengegrunnlagEllerSammenligningsgrunnlag(skjæringstidspunkt) || vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt).harInntekt()
 
     internal class JsonRestorer private constructor() {
         internal companion object {

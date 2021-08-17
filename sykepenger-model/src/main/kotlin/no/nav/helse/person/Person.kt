@@ -10,7 +10,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.forlengerSammePeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSammenligningsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.harArbeidsgivereMedOverlappendeUtbetaltePerioder
-import no.nav.helse.person.Arbeidsgiver.Companion.harInntekt
+import no.nav.helse.person.Arbeidsgiver.Companion.harGrunnlagForSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntekt
 import no.nav.helse.person.Arbeidsgiver.Companion.harRelevanteArbeidsforholdForFlereArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
@@ -565,7 +565,7 @@ class Person private constructor(
 
     internal fun fyllUtPeriodeMedForventedeDager(hendelse: PersonHendelse, periode: Periode, skjæringstidspunkt: LocalDate) {
         arbeidsgivereMedAktiveArbeidsforhold(skjæringstidspunkt)
-            .harInntekt(skjæringstidspunkt)
+            .harGrunnlagForSykepengegrunnlag(skjæringstidspunkt)
             .forEach { it.fyllUtPeriodeMedForventedeDager(hendelse, periode) }
     }
 
@@ -584,7 +584,7 @@ class Person private constructor(
 
     internal fun harAktivtArbeidsforholdEllerInntekt(skjæringstidspunkt: LocalDate, orgnummer: String) = arbeidsgivere
         .firstOrNull { it.organisasjonsnummer() == orgnummer }
-        ?.let { it.harAktivtArbeidsforhold(skjæringstidspunkt) || it.harInntekt(skjæringstidspunkt) } ?: false
+        ?.let { it.harAktivtArbeidsforhold(skjæringstidspunkt) || it.harGrunnlagForSykepengegrunnlagEllerSammenligningsgrunnlag(skjæringstidspunkt) } ?: false
 
     internal fun harKunEtAnnetAktivtArbeidsforholdEnn(skjæringstidspunkt: LocalDate, orgnummer: String): Boolean {
         val aktiveArbeidsforhold = arbeidsgivereMedAktiveArbeidsforhold(skjæringstidspunkt)

@@ -175,6 +175,43 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `arbeidsgivere med sammenligningsgrunnlag, men uten inntekt, skal ikke anses som ekstra arbeidsgiver`() = Toggles.FlereArbeidsgivereUlikFom.enable {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, orgnummer = a1)
+
+        val arbeidsforhold = listOf(Arbeidsforhold(a1, LocalDate.EPOCH))
+        val inntekter = listOf(grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), INNTEKT.repeat(3)))
+
+        val sammenligningsgrunnlag = inntektperioderForSammenligningsgrunnlag {
+            1.januar(2017) til 1.desember(2017) inntekter {
+                a1 inntekt INNTEKT
+            }
+            1.januar(2017) til 1.januar(2017) inntekter {
+                a2 inntekt 10000
+            }
+        }
+
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1, inntekter = inntekter, arbeidsforhold = arbeidsforhold)
+        håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
+        håndterVilkårsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1, inntektsvurdering = Inntektsvurdering(sammenligningsgrunnlag))
+        håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), orgnummer = a1)
+        håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
+
+        assertEquals(Inntektskilde.EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(1.vedtaksperiode(a1)))
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
+
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode(a1), orgnummer = a1, inntekter = inntekter, arbeidsforhold = arbeidsforhold)
+
+        assertFalse(inspektør(a1).warnings.contains("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold"))
+        assertEquals(Inntektskilde.EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(2.vedtaksperiode(a1)))
+    }
+
+    @Test
     fun `Syk for a1, slutter i a1, syk for a2, a1 finnes ikke i Aa-reg lenger - ingen warning for manglende arbeidsforhold`() {
         /*
         * Siden vi ikke vet om arbeidsforhold for tidligere utbetalte perioder må vi passe på at ikke lar de periodene føre til advarsel på nye helt uavhengie vedtaksperioder
