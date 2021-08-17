@@ -293,17 +293,17 @@ internal class Utbetaling private constructor(
         }
 
         internal fun lagRevurdering(
-                                    utbetalinger: List<Utbetaling>,
-                                    fødselsnummer: String,
-                                    beregningId: UUID,
-                                    organisasjonsnummer: String,
-                                    utbetalingstidslinje: Utbetalingstidslinje,
-                                    sisteDato: LocalDate,
-                                    aktivitetslogg: IAktivitetslogg,
-                                    maksdato: LocalDate,
-                                    forbrukteSykedager: Int,
-                                    gjenståendeSykedager: Int,
-                                    forrige: Utbetaling? = null
+            utbetalinger: List<Utbetaling>,
+            fødselsnummer: String,
+            beregningId: UUID,
+            organisasjonsnummer: String,
+            utbetalingstidslinje: Utbetalingstidslinje,
+            sisteDato: LocalDate,
+            aktivitetslogg: IAktivitetslogg,
+            maksdato: LocalDate,
+            forbrukteSykedager: Int,
+            gjenståendeSykedager: Int,
+            forrige: Utbetaling? = null
         ): Utbetaling {
             return Utbetaling(
                 utbetalinger.aktive().lastOrNull(),
@@ -459,6 +459,8 @@ internal class Utbetaling private constructor(
             aktive()
                 .map { it.utbetalingstidslinje }
                 .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
+
+        internal fun List<Utbetaling>.harId(id: UUID) = any { it.id == id }
     }
 
     internal fun accept(visitor: UtbetalingVisitor) {

@@ -1,7 +1,9 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import java.util.*
 
 internal class ForkastetVedtaksperiode(
     private val vedtaksperiode: Vedtaksperiode,
@@ -31,5 +33,9 @@ internal class ForkastetVedtaksperiode(
             forkastede: Iterable<ForkastetVedtaksperiode>,
             vedtaksperiode: Vedtaksperiode
         ) = Vedtaksperiode.finnForrigeAvsluttaPeriode(forkastede.perioder(), vedtaksperiode)
+
+        internal fun List<ForkastetVedtaksperiode>.iderMedUtbetaling(utbetalingId: UUID) =
+            map { it.vedtaksperiode }.iderMedUtbetaling(utbetalingId)
+
     }
 }

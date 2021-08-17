@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
+import no.nav.helse.person.ForkastetVedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.Vedtaksperiode.*
 import no.nav.helse.person.Vedtaksperiode.Companion.ALLE
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_REVURDERT
@@ -10,6 +11,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.harNødvendigInntekt
 import no.nav.helse.person.Vedtaksperiode.Companion.harOverlappendeUtbetaltePerioder
 import no.nav.helse.person.Vedtaksperiode.Companion.medSkjæringstidspunkt
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
+import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.reflection.OppdragReflect
@@ -492,7 +494,8 @@ internal class Arbeidsgiver private constructor(
                 automatiskBehandling = automatiskBehandling,
                 arbeidsgiverOppdrag = OppdragReflect(arbeidsgiverOppdrag).toMap(),
                 personOppdrag = OppdragReflect(personOppdrag).toMap(),
-                utbetalingsdager = UtbetalingsdagerReflect(utbetalingstidslinje).toList()
+                utbetalingsdager = UtbetalingsdagerReflect(utbetalingstidslinje).toList(),
+                vedtaksperiodeIder = vedtaksperioder.iderMedUtbetaling(id) + forkastede.iderMedUtbetaling(id)
             )
         )
     }
@@ -527,7 +530,8 @@ internal class Arbeidsgiver private constructor(
                 automatiskBehandling = automatiskBehandling,
                 arbeidsgiverOppdrag = OppdragReflect(arbeidsgiverOppdrag).toMap(),
                 personOppdrag = OppdragReflect(personOppdrag).toMap(),
-                utbetalingsdager = UtbetalingsdagerReflect(utbetalingstidslinje).toList()
+                utbetalingsdager = UtbetalingsdagerReflect(utbetalingstidslinje).toList(),
+                vedtaksperiodeIder = vedtaksperioder.iderMedUtbetaling(id) + forkastede.iderMedUtbetaling(id)
             )
         )
     }

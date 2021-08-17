@@ -143,7 +143,8 @@ internal class PersonMediator(
             "automatiskBehandling" to event.automatiskBehandling,
             "arbeidsgiverOppdrag" to event.arbeidsgiverOppdrag,
             "personOppdrag" to event.personOppdrag,
-            "utbetalingsdager" to event.utbetalingsdager
+            "utbetalingsdager" to event.utbetalingsdager,
+            "vedtaksperiodeIder" to event.vedtaksperiodeIder
         ))
 
     override fun feriepengerUtbetalt(event: PersonObserver.FeriepengerUtbetaltEvent) =

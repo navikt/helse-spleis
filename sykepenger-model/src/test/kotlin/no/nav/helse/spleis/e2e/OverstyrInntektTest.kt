@@ -375,4 +375,60 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         )
         assertErrors(inspektør)
     }
+
+    @Test
+    fun `utbetaling_utbetalt tar med vedtaksperiode-ider for ett enkelt vedtak`() {
+        nyttVedtak(1.januar, 31.januar, 100.prosent)
+
+        val utbetalingEvent = observatør.utbetalingMedUtbetalingEventer.first()
+
+        assertEquals(1, utbetalingEvent.vedtaksperiodeIder.size)
+        assertEquals(1.vedtaksperiode, utbetalingEvent.vedtaksperiodeIder.first())
+    }
+
+    @Test
+    fun `utbetaling_utbetalt tar med vedtaksperiode-ider for flere vedtak`() {
+        nyttVedtak(1.januar, 31.januar, 100.prosent)
+        forlengVedtak(1.februar, 28.februar)
+
+        val førsteEvent = observatør.utbetalingMedUtbetalingEventer.first()
+        val andreEvent = observatør.utbetalingMedUtbetalingEventer.last()
+
+        assertEquals(1, førsteEvent.vedtaksperiodeIder.size)
+        assertEquals(1.vedtaksperiode, førsteEvent.vedtaksperiodeIder.first())
+        assertEquals(1, andreEvent.vedtaksperiodeIder.size)
+        assertEquals(2.vedtaksperiode, andreEvent.vedtaksperiodeIder.first())
+    }
+
+    @Test
+    fun `utbetaling_utbetalt tar med vedtaksperiode-ider for revurdering over flere perioder`() {
+        nyttVedtak(1.januar, 31.januar, 100.prosent)
+        forlengVedtak(1.februar, 28.februar)
+
+        håndterOverstyring(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar, ident = "N123456")
+
+        håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
+        håndterUtbetalt(2.vedtaksperiode)
+
+        val utbetalingsevent = observatør.utbetalingMedUtbetalingEventer.last()
+
+        assertEquals(2, utbetalingsevent.vedtaksperiodeIder.size)
+        assertTrue(utbetalingsevent.vedtaksperiodeIder.contains(1.vedtaksperiode))
+        assertTrue(utbetalingsevent.vedtaksperiodeIder.contains(2.vedtaksperiode))
+    }
+
+    @Test
+    fun `utbetaling_utbetalt tar med vedtaksperiode-ider for forkastede perioder`() {
+        tilGodkjent(1.januar, 31.januar, 100.prosent, 1.januar)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), andreInntektskilder = listOf(Søknad.Inntektskilde(true, "FRILANSER")))
+        håndterUtbetalt(1.vedtaksperiode)
+
+        val utbetalingEvent = observatør.utbetalingMedUtbetalingEventer.first()
+
+        assertEquals(1, utbetalingEvent.vedtaksperiodeIder.size)
+        assertEquals(1.vedtaksperiode, utbetalingEvent.vedtaksperiodeIder.first())
+    }
 }

@@ -168,6 +168,7 @@ interface PersonObserver {
         val arbeidsgiverOppdrag: Map<String, Any>,
         val personOppdrag: Map<String, Any>,
         val utbetalingsdager: List<Utbetalingsdag>,
+        val vedtaksperiodeIder: List<UUID>
     )
 
     data class Utbetalingsdag(
