@@ -1,5 +1,6 @@
 package no.nav.helse.person.infotrygdhistorikk
 
+import no.nav.helse.Toggles
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.InfotrygdhistorikkVisitor
@@ -90,10 +91,12 @@ class Inntektsopplysning private constructor(
             aktivitetslogg: IAktivitetslogg,
             periode: Periode
         ) {
-            val relevanteInntektsopplysninger = filter { it.erRelevant(periode, skjæringstidspunkt) }
-            val harFlereArbeidsgivere = relevanteInntektsopplysninger.distinctBy { it.orgnummer }.size > 1
-            val harFlereSkjæringstidspunkt = relevanteInntektsopplysninger.distinctBy { it.sykepengerFom }.size > 1
-            if (harFlereArbeidsgivere && harFlereSkjæringstidspunkt) aktivitetslogg.error("Har inntekt på flere arbeidsgivere med forskjellig fom dato")
+            if (!Toggles.FlereArbeidsgivereUlikFom.enabled) {
+                val relevanteInntektsopplysninger = filter { it.erRelevant(periode, skjæringstidspunkt) }
+                val harFlereArbeidsgivere = relevanteInntektsopplysninger.distinctBy { it.orgnummer }.size > 1
+                val harFlereSkjæringstidspunkt = relevanteInntektsopplysninger.distinctBy { it.sykepengerFom }.size > 1
+                if (harFlereArbeidsgivere && harFlereSkjæringstidspunkt) aktivitetslogg.error("Har inntekt på flere arbeidsgivere med forskjellig fom dato")
+            }
             if (this.isNotEmpty() && skjæringstidspunkt == null) aktivitetslogg.info("Har inntekt i Infotrygd og skjæringstidspunkt er null")
         }
 

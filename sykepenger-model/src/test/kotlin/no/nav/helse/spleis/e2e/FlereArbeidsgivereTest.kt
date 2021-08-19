@@ -1425,7 +1425,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `flere arbeidsgivere med inntekter på forskjellige skjæringstidspunkt skal til infotrygd`() {
+    fun `flere arbeidsgivere med inntekter på forskjellige skjæringstidspunkt skal til infotrygd`() = Toggles.FlereArbeidsgivereUlikFom.disable {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
         var infotrygdPerioder = arrayOf(
