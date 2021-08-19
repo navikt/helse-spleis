@@ -3,10 +3,12 @@ package no.nav.helse.person.infotrygdhistorikk
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.InfotrygdhistorikkVisitor
+import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning.Companion.harInntekterFor
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.util.*
 
@@ -31,5 +33,28 @@ abstract class Infotrygdperiode(fom: LocalDate, tom: LocalDate) : Periode(fom, t
         if (other !is Infotrygdperiode) return false
         if (this::class != other::class) return false
         return super.equals(other)
+    }
+
+    companion object {
+        internal fun Iterable<Infotrygdperiode>.validerInntektForPerioder(aktivitetslogg: IAktivitetslogg, inntekter: List<Inntektsopplysning>) {
+            // Liste med første utbetalingsdag i hver periode etter:
+            // filtrering av irrellevante perioder, padding av helgedager og sammenslåing av perioder som henger sammen
+            val førsteUtbetalingsdager = this
+                .filter { it is Utbetalingsperiode || it is Friperiode }
+                .flatten()
+                .fold(emptyList<LocalDate>()) { acc, nesteDag ->
+                    if (nesteDag.dayOfWeek == DayOfWeek.FRIDAY) acc + (0..2L).map { nesteDag.plusDays(it) }
+                    else acc + nesteDag
+                }
+                .merge()
+                .mapNotNull { periode ->
+                    periode.firstOrNull {
+                        it in this.filterIsInstance<Utbetalingsperiode>().flatten()
+                    }
+                }
+
+            if (!inntekter.harInntekterFor(førsteUtbetalingsdager)) aktivitetslogg.error("Mangler inntekt for første utbetalingsdag i en av infotrygdperiodene: $førsteUtbetalingsdager")
+        }
+
     }
 }

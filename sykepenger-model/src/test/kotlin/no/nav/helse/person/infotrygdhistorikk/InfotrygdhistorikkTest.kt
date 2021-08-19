@@ -259,9 +259,10 @@ internal class InfotrygdhistorikkTest {
 
     @Test
     fun `overlappende utbetalinger`() {
-        historikk.oppdaterHistorikk(historikkelement(listOf(
-            ArbeidsgiverUtbetalingsperiode("orgnr", 5.januar,  10.januar, 100.prosent, 25000.månedlig)
-        )))
+        historikk.oppdaterHistorikk(historikkelement(
+            perioder = listOf(ArbeidsgiverUtbetalingsperiode("orgnr", 5.januar,  10.januar, 100.prosent, 25000.månedlig)),
+            inntekter = listOf(Inntektsopplysning("orgnr", 5.januar, 25000.månedlig, true))
+        ))
         aktivitetslogg.barn().also {
             assertFalse(historikk.validerOverlappende(it, 10.januar til 31.januar, 10.januar))
             assertTrue(it.hasErrorsOrWorse())

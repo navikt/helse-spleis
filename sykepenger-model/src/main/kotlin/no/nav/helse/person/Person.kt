@@ -588,10 +588,9 @@ class Person private constructor(
         return aktiveArbeidsforhold.size == 1 && aktiveArbeidsforhold.single().organisasjonsnummer() != orgnummer
     }
 
-    internal fun vilkårsprøvEtterNyInntekt(hendelse: OverstyrInntekt) {
+    internal fun vilkårsprøvEtterNyInntekt(hendelse: OverstyrInntekt, kompenseringsdatoForManglendeSkjæringstidspunktIInfotrygd: LocalDate) {
         val skjæringstidspunkt = hendelse.skjæringstidspunkt
-        val grunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag(skjæringstidspunkt)
-            ?: hendelse.severe("Fant ikke grunnlag for sykepengegrunnlag for skjæringstidspunkt: ${skjæringstidspunkt}. Kan ikke revurdere inntekt.")
+        val grunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag(skjæringstidspunkt, kompenseringsdatoForManglendeSkjæringstidspunktIInfotrygd) // TODO: om vi ikke har sykepengegrunnlag blir den satt som INGEN, dumt å ikke ha: hendelse.severe("Fant ikke grunnlag for sykepengegrunnlag for skjæringstidspunkt: ${skjæringstidspunkt}. Kan ikke revurdere inntekt.")
         val sammenligningsgrunnlag = sammenligningsgrunnlag(skjæringstidspunkt)
             ?: hendelse.severe("Fant ikke sammenligningsgrunnlag for skjæringstidspunkt: ${skjæringstidspunkt}. Kan ikke revurdere inntekt.")
         val avviksprosent = grunnlagForSykepengegrunnlag.avviksprosent(sammenligningsgrunnlag)
@@ -600,7 +599,7 @@ class Person private constructor(
         hendelse.etterlevelse.`§8-30 ledd 2`(
             akseptabeltAvvik,
             Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT,
-            grunnlagForSykepengegrunnlag,
+            grunnlagForSykepengegrunnlag.grunnlagForSykepengegrunnlag,
             sammenligningsgrunnlag,
             avviksprosent
         )
@@ -621,10 +620,11 @@ class Person private constructor(
                     validerMinimumInntekt(hendelse, fødselsnummer, hendelse.skjæringstidspunkt, grunnlagForSykepengegrunnlag)
                 vilkårsgrunnlagHistorikk.lagre( //TODO: Se i debugger
                     skjæringstidspunkt, grunnlag.kopierGrunnlagsdataMed(
-                        minimumInntektVurdering = harMinimumInntekt,
-                        sammenligningsgrunnlagVurdering = akseptabeltAvvik,
+                        sykepengegrunnlag = grunnlagForSykepengegrunnlag,
                         sammenligningsgrunnlag = sammenligningsgrunnlag,
+                        sammenligningsgrunnlagVurdering = akseptabeltAvvik,
                         avviksprosent = avviksprosent,
+                        minimumInntektVurdering = harMinimumInntekt,
                         meldingsreferanseId = hendelse.meldingsreferanseId()
                     )
                 )

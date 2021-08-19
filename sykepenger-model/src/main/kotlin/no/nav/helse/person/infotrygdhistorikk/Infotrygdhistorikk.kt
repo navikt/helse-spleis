@@ -97,7 +97,7 @@ internal class Infotrygdhistorikk private constructor(
     internal fun lagreVilkårsgrunnlag(skjæringstidspunkt: LocalDate, periodetype: Periodetype, vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk, sykepengegrunnlagFor: (skjæringstidspunkt: LocalDate) -> Sykepengegrunnlag) {
         if (!harHistorikk()) return
         if (vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) != null) return
-        siste.lagreVilkårsgrunnlag(skjæringstidspunkt, vilkårsgrunnlagHistorikk, periodetype, sykepengegrunnlagFor)
+        siste.lagreVilkårsgrunnlag(vilkårsgrunnlagHistorikk, sykepengegrunnlagFor)
     }
 
     internal fun oppdaterHistorikk(element: InfotrygdhistorikkElement): Boolean {

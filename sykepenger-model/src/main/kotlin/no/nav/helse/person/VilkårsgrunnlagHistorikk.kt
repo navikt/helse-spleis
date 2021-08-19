@@ -140,12 +140,14 @@ internal class VilkårsgrunnlagHistorikk(private val historikk: MutableList<Inns
         )
 
         internal fun kopierGrunnlagsdataMed(
-            minimumInntektVurdering: Boolean,
-            sammenligningsgrunnlagVurdering: Boolean,
+            sykepengegrunnlag: Sykepengegrunnlag,
             sammenligningsgrunnlag: Inntekt,
+            sammenligningsgrunnlagVurdering: Boolean,
             avviksprosent: Prosent,
+            minimumInntektVurdering: Boolean,
             meldingsreferanseId: UUID
         ) = Grunnlagsdata(
+            sykepengegrunnlag = sykepengegrunnlag,
             sammenligningsgrunnlag = sammenligningsgrunnlag,
             avviksprosent = avviksprosent,
             antallOpptjeningsdagerErMinst = antallOpptjeningsdagerErMinst,
@@ -169,7 +171,7 @@ internal class VilkårsgrunnlagHistorikk(private val historikk: MutableList<Inns
             vilkårsgrunnlagHistorikkVisitor.postVisitInfotrygdVilkårsgrunnlag(skjæringstidspunkt, this)
         }
 
-        override fun sykepengegrunnlag() = grunnlagForSykepengegrunnlag.sykepengegrunnlag // TODO: 6g grejer
+        override fun sykepengegrunnlag() = grunnlagForSykepengegrunnlag.sykepengegrunnlag // TODO: 6g grejer (IT 6g capper, det blir ikke riktig at vi 6g-capper her)
         override fun inntektsopplysningPerArbeidsgiver() = grunnlagForSykepengegrunnlag.inntektsopplysningPerArbeidsgiver()
 
     }

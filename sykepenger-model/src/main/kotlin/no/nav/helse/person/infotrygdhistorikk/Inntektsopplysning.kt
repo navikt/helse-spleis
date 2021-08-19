@@ -3,10 +3,6 @@ package no.nav.helse.person.infotrygdhistorikk
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.*
-import no.nav.helse.person.InfotrygdhistorikkVisitor
-import no.nav.helse.person.Inntektshistorikk
-import no.nav.helse.person.VilkårsgrunnlagHistorikk
-import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
 import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -87,6 +83,8 @@ class Inntektsopplysning private constructor(
             liste.validerAntallInntekterPerArbeidsgiverPerDato(skjæringstidspunkt, aktivitetslogg, periode)
         }
 
+        internal fun Iterable<Inntektsopplysning>.harInntekterFor(datoer: List<LocalDate>) = map { it.sykepengerFom }.containsAll(datoer)
+
         private fun List<Inntektsopplysning>.validerAlleInntekterForSammenhengendePeriode(
             skjæringstidspunkt: LocalDate?,
             aktivitetslogg: IAktivitetslogg,
@@ -113,8 +111,16 @@ class Inntektsopplysning private constructor(
                 aktivitetslogg.warn("Det er lagt inn flere inntekter i Infotrygd med samme fom-dato, den seneste er lagt til grunn. Kontroller sykepengegrunnlaget.")
         }
 
-        internal fun List<Inntektsopplysning>.lagreVilkårsgrunnlag(vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk, sykepengegrunnlagFor: (skjæringstidspunkt: LocalDate) -> Sykepengegrunnlag) {
-            forEach { vilkårsgrunnlagHistorikk.lagre(it.sykepengerFom, VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(sykepengegrunnlagFor(it.sykepengerFom))) }
+        internal fun List<Inntektsopplysning>.lagreVilkårsgrunnlag(
+            vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
+            sykepengegrunnlagFor: (skjæringstidspunkt: LocalDate) -> Sykepengegrunnlag
+        ) {
+            forEach {
+                vilkårsgrunnlagHistorikk.lagre(
+                    it.sykepengerFom,
+                    VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(sykepengegrunnlagFor(it.sykepengerFom))
+                )
+            }
         }
     }
 }

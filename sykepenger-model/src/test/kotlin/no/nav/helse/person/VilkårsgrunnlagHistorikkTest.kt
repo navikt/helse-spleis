@@ -103,7 +103,7 @@ internal class VilkårsgrunnlagHistorikkTest {
     }
 
     @Test
-    fun `to ulike skjæringstidspunker, der det ene er i infotrygd medfører to innslag der siste innslag har vilkårsprøving for begge skjæringstidspunktene`() {
+    fun `to ulike skjæringstidspunker, der det ene er i infotrygd, medfører to innslag der siste innslag har vilkårsprøving for begge skjæringstidspunktene`() {
         val vilkårsgrunnlag = Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = UUID.randomUUID().toString(),
@@ -120,7 +120,9 @@ internal class VilkårsgrunnlagHistorikkTest {
                     oppdatert = LocalDateTime.now(),
                     hendelseId = UUID.randomUUID(),
                     perioder = emptyList(),
-                    inntekter = emptyList(),
+                    inntekter = listOf(
+                        Inntektsopplysning("ORGNUMMER", 4.januar, 31000.månedlig, true)
+                    ),
                     arbeidskategorikoder = emptyMap(),
                     ugyldigePerioder = emptyList(),
                     harStatslønn = false

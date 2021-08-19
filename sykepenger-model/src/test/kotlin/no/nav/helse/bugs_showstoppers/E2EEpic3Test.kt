@@ -847,7 +847,11 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar(2020), 28.februar(2020), 100.prosent))
         håndterSøknad(Sykdom(1.februar(2020), 28.februar(2020), 100.prosent))
         håndterUtbetalingsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar(2020), 31.januar(2020), 100.prosent, 1400.daglig))
+        håndterYtelser(
+            vedtaksperiodeId = 2.vedtaksperiode,
+            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar(2020), 31.januar(2020), 100.prosent, 1400.daglig)),
+            inntektshistorikk =  listOf(Inntektsopplysning(ORGNUMMER, 17.januar(2020), 1400.daglig, true))
+        )
 
         assertTilstander(
             1.vedtaksperiode,
@@ -855,6 +859,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVVENTER_UTBETALINGSGRUNNLAG, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
         )
+
         assertTilstander(
             2.vedtaksperiode,
             START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
@@ -1793,7 +1798,9 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         person = SerialisertPerson(person.serialize().json).deserialize()
 
         val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.august(2020), 22.august(2020), 100.prosent, 1000.daglig)
-        håndterUtbetalingshistorikk(2.vedtaksperiode, historikk)
+        val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 17.august(2020), INNTEKT, true))
+
+        håndterUtbetalingshistorikk(2.vedtaksperiode, historikk, inntektshistorikk = inntekter)
         håndterUtbetalingsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
 
@@ -1830,7 +1837,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, 1000.daglig),
-            Friperiode(1.februar, 28.februar)
+            Friperiode(1.februar, 28.februar),
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
         )
 
         inspektør.also {

@@ -40,11 +40,13 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         val historie2 = historie1 + listOf(
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 24.juni,  12.juli, 100.prosent, 1000.daglig),
         )
+
+        val inntekter2 = inntekter1 + listOf(
+            Inntektsopplysning(ORGNUMMER, 24.juni(2018), 1000.daglig, true)
+        )
         håndterSykmelding(Sykmeldingsperiode(13.juli, 31.juli, 100.prosent))
         håndterSøknad(Sykdom(13.juli, 31.juli, 100.prosent))
-        håndterUtbetalingshistorikk(2.vedtaksperiode, *historie2.toTypedArray(), inntektshistorikk = listOf(
-            Inntektsopplysning(ORGNUMMER, 24.juni(2018), 1000.daglig, true)
-        ))
+        håndterUtbetalingshistorikk(2.vedtaksperiode, *historie2.toTypedArray(), inntektshistorikk = inntekter2)
         håndterUtbetalingsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -256,7 +258,11 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(30.mai, 30.juni, 100.prosent))
         håndterSøknad(Sykdom(30.mai, 30.juni, 100.prosent))
-        håndterUtbetalingshistorikk(2.vedtaksperiode, *historie1.toTypedArray())
+        håndterUtbetalingshistorikk(
+            2.vedtaksperiode,
+            *historie1.toTypedArray(),
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.mai, INNTEKT, true))
+        )
         håndterUtbetalingsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -308,7 +314,11 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         )
         håndterSykmelding(Sykmeldingsperiode(30.mai, 30.juni, 100.prosent))
         håndterSøknad(Sykdom(30.mai, 30.juni, 100.prosent))
-        håndterUtbetalingshistorikk(2.vedtaksperiode, *historie1.toTypedArray())
+        håndterUtbetalingshistorikk(
+            2.vedtaksperiode,
+            *historie1.toTypedArray(),
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.mai, INNTEKT, true))
+        )
         håndterUtbetalingsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)

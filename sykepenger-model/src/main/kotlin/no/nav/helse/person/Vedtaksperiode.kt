@@ -1373,7 +1373,7 @@ internal class Vedtaksperiode private constructor(
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime = LocalDateTime.MAX
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
-            vedtaksperiode.person.vilkårsprøvEtterNyInntekt(hendelse)
+            vedtaksperiode.person.vilkårsprøvEtterNyInntekt(hendelse, vedtaksperiode.periode.start)
             if (!hendelse.hasErrorsOrWorse()) {
                 vedtaksperiode.tilstand(hendelse, AvventerHistorikkRevurdering)
             } else {
@@ -1816,7 +1816,6 @@ internal class Vedtaksperiode private constructor(
                         person.vilkårsgrunnlagHistorikk
                     ) { person.grunnlagForSykepengegrunnlag(it, vedtaksperiode.periode.start) }
                 }
-
                 onSuccess {
                     val vilkårsgrunnlag = person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt)
                         ?: return@håndter info("Mangler vilkårsgrunnlag for $vedtaksperiode.skjæringstidspunkt").also {
@@ -1836,7 +1835,6 @@ internal class Vedtaksperiode private constructor(
                         true
                     }
                 }
-
                 onSuccess {
                     when (periodetype) {
                         in listOf(OVERGANG_FRA_IT, INFOTRYGDFORLENGELSE) -> {
@@ -1848,7 +1846,7 @@ internal class Vedtaksperiode private constructor(
                         }
                     }
                 }
-                harNødvendigInntekt(person, vedtaksperiode.skjæringstidspunkt) // TODO: ikke relevant lenger eller skrives om til å sjekke at vilkårsvurderingen er riktig
+                harNødvendigInntekt(person, vedtaksperiode.skjæringstidspunkt) // TODO: forventer at denne ikke trengs lenger, sjekk om dette stemmer når lagring av sykepengegrunnlaget er stabilt
                 lateinit var arbeidsgiverUtbetalinger2: ArbeidsgiverUtbetalinger
                 valider("Feil ved kalkulering av utbetalingstidslinjer") {
                     if (Toggles.FlereArbeidsgivereUlikFom.enabled) {

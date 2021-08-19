@@ -326,11 +326,12 @@ class JsonBuilderTest {
 
         fun personMedInfotrygdForlengelse(søknadhendelseId: UUID = UUID.randomUUID()): Person {
             val refusjoner = listOf(ArbeidsgiverUtbetalingsperiode(orgnummer, 1.desember(2017), 31.desember(2017), 100.prosent, 31000.månedlig))
+            val inntektshistorikk = listOf(Inntektsopplysning(orgnummer, 1.desember(2017), 31000.månedlig, true))
             return Person(aktørId, fnr).apply {
                 håndter(sykmelding(fom = 1.januar, tom = 31.januar))
                 fangeVedtaksperiode()
                 håndter(søknad(fom = 1.januar, tom = 31.januar, hendelseId = søknadhendelseId))
-                håndter(utbetalingshistorikk(refusjoner))
+                håndter(utbetalingshistorikk(refusjoner, inntektshistorikk))
                 håndter(utbetalingsgrunnlag(vedtaksperiodeId = UUID.fromString(vedtaksperiodeId), skjæringstidspunkt = 1.desember))
                 håndter(
                     ytelser(

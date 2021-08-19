@@ -22,16 +22,12 @@ internal class ForkastingTest : AbstractEndToEndTest() {
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar,  31.januar, 100.prosent, INNTEKT),
             inntektshistorikk = emptyList()
         )
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
         assertTrue(inspektør.utbetalinger.isEmpty())
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_UTBETALINGSGRUNNLAG,
-            AVVENTER_HISTORIKK,
             TIL_INFOTRYGD
         )
     }

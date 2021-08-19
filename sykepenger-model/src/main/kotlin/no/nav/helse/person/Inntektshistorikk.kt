@@ -349,7 +349,8 @@ internal class Inntektshistorikk {
 
             override fun grunnlagForSammenligningsgrunnlag(dato: LocalDate) =
                 takeIf { this.dato == dato && måned.isWithinRangeOf(dato, 12) }?.let { it to it.beløp }
-            override fun grunnlagForSykepengegrunnlag(): Inntekt = error("da fuck") // TODO
+
+            override fun grunnlagForSykepengegrunnlag(): Inntekt = error("Sammenligningsgrunnlag har ikke grunnlag for sykepengegrunnlag")
 
             override fun skalErstattesAv(other: Inntektsopplysning) =
                 other is Sammenligningsgrunnlag && this.dato == other.dato

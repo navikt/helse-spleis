@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
+import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -405,7 +406,8 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
             håndterSøknad(Sykdom(fom, tom, 100.prosent))
         }
         val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.juli, 31.juli, 100.prosent, 1000.daglig)
-        håndterUtbetalingshistorikk(3.vedtaksperiode, historikk)
+        val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.juli, INNTEKT, true))
+        håndterUtbetalingshistorikk(3.vedtaksperiode, historikk, inntektshistorikk = inntekter)
         håndterUtbetalingsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)

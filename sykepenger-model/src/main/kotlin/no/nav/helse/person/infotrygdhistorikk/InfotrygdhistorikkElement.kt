@@ -2,6 +2,7 @@ package no.nav.helse.person.infotrygdhistorikk
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.*
+import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.validerInntektForPerioder
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning.Companion.lagreVilkårsgrunnlag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -105,11 +106,12 @@ internal class InfotrygdhistorikkElement private constructor(
         Inntektsopplysning.addInntekter(inntekter, person, aktivitetslogg, id)
     }
 
-    internal fun lagreVilkårsgrunnlag(skjæringstidspunkt: LocalDate, vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk, periodetype: Periodetype, sykepengegrunnlagFor: (skjæringstidspunkt: LocalDate) -> Sykepengegrunnlag) {
+    internal fun lagreVilkårsgrunnlag(
+        vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
+        sykepengegrunnlagFor: (skjæringstidspunkt: LocalDate) -> Sykepengegrunnlag
+    ) {
         lagretVilkårsgrunnlag = true
         inntekter.lagreVilkårsgrunnlag(vilkårsgrunnlagHistorikk, sykepengegrunnlagFor)
-        if (periodetype !in listOf(Periodetype.OVERGANG_FRA_IT, Periodetype.INFOTRYGDFORLENGELSE)) return
-        //vilkårsgrunnlagHistorikk.lagre(skjæringstidspunkt, VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(sykepengegrunnlagFor(skjæringstidspunkt))) // TODO: trenger vi denne også?
     }
 
     internal fun valider(aktivitetslogg: IAktivitetslogg, periodetype: Periodetype, periode: Periode, skjæringstidspunkt: LocalDate?): Boolean {
@@ -120,7 +122,7 @@ internal class InfotrygdhistorikkElement private constructor(
 
     internal fun validerOverlappende(aktivitetslogg: IAktivitetslogg, periode: Periode, skjæringstidspunkt: LocalDate?): Boolean {
         aktivitetslogg.info("Sjekker utbetalte perioder for overlapp mot %s", periode)
-        return valider(aktivitetslogg, perioder.filterIsInstance<Utbetalingsperiode>(), periode, skjæringstidspunkt)
+        return valider(aktivitetslogg, perioder, periode, skjæringstidspunkt)
     }
 
     private fun validerUgyldigePerioder(aktivitetslogg: IAktivitetslogg) {
@@ -143,10 +145,13 @@ internal class InfotrygdhistorikkElement private constructor(
 
     private fun valider(aktivitetslogg: IAktivitetslogg, perioder: List<Infotrygdperiode>, periode: Periode, skjæringstidspunkt: LocalDate?): Boolean {
         aktivitetslogg.info("Sjekker utbetalte perioder")
-        perioder.forEach { it.valider(aktivitetslogg, periode) }
+        perioder.filterIsInstance<Utbetalingsperiode>().forEach { it.valider(aktivitetslogg, periode) }
 
         aktivitetslogg.info("Sjekker inntektsopplysninger")
         Inntektsopplysning.valider(inntekter, aktivitetslogg, periode, skjæringstidspunkt)
+
+        aktivitetslogg.info("Sjekker at alle utbetalte perioder har inntektsopplysninger")
+        perioder.validerInntektForPerioder(aktivitetslogg, inntekter)
 
         aktivitetslogg.info("Sjekker arbeidskategorikoder")
         if (!erNormalArbeidstaker(skjæringstidspunkt)) aktivitetslogg.error("Personen er ikke registrert som normal arbeidstaker i Infotrygd")
