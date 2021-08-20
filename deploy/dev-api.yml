@@ -44,6 +44,7 @@ spec:
     inbound:
       rules:
         - application: spesialist
+        - application: spanner
   vault:
     enabled: true
   secureLogs:
