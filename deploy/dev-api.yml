@@ -45,6 +45,8 @@ spec:
       rules:
         - application: spesialist
         - application: spanner
+          namespace: tbd
+          cluster: dev-gcp
   vault:
     enabled: true
   secureLogs:
