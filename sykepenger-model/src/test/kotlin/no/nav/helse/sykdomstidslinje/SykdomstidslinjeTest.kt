@@ -107,6 +107,13 @@ internal class SykdomstidslinjeTest {
         assertFalse(tidslinje.harDagUtenSøknad(4.januar til 5.januar))
     }
 
+    @Test
+    fun `ferie + ukjente dager i tidslinje skaper rare skjæringstidspunkt`() {
+        val tidslinje = 24.S + 2.F + 5.n_ + 16.F + 5.S
+        val skjæringstidspunkter = tidslinje.skjæringstidspunkter()
+        assertEquals(2, skjæringstidspunkter.size)
+    }
+
     private val konfliktsky = { venstre: Dag, høyre: Dag ->
         when {
             venstre is Dag.UkjentDag -> høyre
