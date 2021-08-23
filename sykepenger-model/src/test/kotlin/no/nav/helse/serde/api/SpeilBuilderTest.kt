@@ -21,6 +21,7 @@ import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -550,6 +551,44 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
 
         // Denne periode er forlengelse av Infotrygd-periode.
         assertEquals(ForlengelseFraInfotrygd.JA, vedtaksperioder.first().forlengelseFraInfotrygd)
+        assertEquals(Periodetype.OVERGANG_FRA_IT, vedtaksperioder.first().periodetype)
+    }
+
+    @Disabled
+    @Test
+    fun `overgang fra infotrygd får ikke riktig periodetype ved forkasting`() {
+        val fom1Periode = 1.januar
+        val tom1Periode = 31.januar
+        val skjæringstidspunktFraInfotrygd = 1.desember(2017)
+        val fom2Periode = 1.februar
+        val tom2Periode = 14.februar
+
+        håndterSykmelding(Sykmeldingsperiode(fom1Periode, tom1Periode, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom1Periode, tom1Periode, 100.prosent))
+
+        håndterUtbetalingshistorikk(
+            1.vedtaksperiode,
+            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, skjæringstidspunktFraInfotrygd, 31.desember(2017), 100.prosent, 31000.månedlig))
+        )
+        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        håndterSykmelding(Sykmeldingsperiode(fom2Periode, tom2Periode, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom2Periode, tom2Periode, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom2Periode, tom2Periode, 100.prosent))
+
+        val personDTO = speilApi()
+
+        val vedtaksperioder = personDTO.arbeidsgivere.first().vedtaksperioder.filterIsInstance<VedtaksperiodeDTO>()
+            .also {
+                assertEquals(1, it.size)
+            }
+
+        assertEquals(ForlengelseFraInfotrygd.JA, vedtaksperioder.first().forlengelseFraInfotrygd)
+        assertEquals(true, vedtaksperioder.first().erForkastet)
         assertEquals(Periodetype.OVERGANG_FRA_IT, vedtaksperioder.first().periodetype)
     }
 
