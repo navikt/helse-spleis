@@ -803,7 +803,7 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
 
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterPåminnelse(1.vedtaksperiode,AVVENTER_GODKJENNING_REVURDERING, LocalDateTime.now().minusDays(14))
+        håndterPåminnelse(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, LocalDateTime.now().minusDays(14))
 
         assertTilstander(
             1.vedtaksperiode,
@@ -1157,7 +1157,7 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `feilet revurdering blokkerer videre behandling`(){
+    fun `feilet revurdering blokkerer videre behandling`() {
         nyttVedtak(3.januar, 26.januar)
 
         håndterOverstyring((16.januar til 26.januar).map { manuellFeriedag(it) })
@@ -1174,6 +1174,38 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE
+        )
+    }
+
+    @Test
+    @Disabled("Feilende test fra prodsak hvor periode havner i revurdering feilet")
+    fun `feilet revurdering prodsak`() {
+        /* Vi ser flere innslag hvor revurdering har feilet og havnet i REVURDERING_FEILET. Det ser ut som ferie i etterfølgende periode er årsaken.
+        * Her er en feilende test. Værsågod :)
+        * */
+        nyttVedtak(3.januar, 26.januar)
+
+        håndterSykmelding(Sykmeldingsperiode(2.februar, 27.februar, 100.prosent))
+        håndterSøknad(Sykdom(2.februar, 27.februar, 100.prosent), Søknad.Søknadsperiode.Ferie(2.februar, 20.februar))
+
+        håndterOverstyring((25.januar til 26.januar).map { manuellFeriedag(it) })
+        håndterYtelser(1.vedtaksperiode)
+
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_UTBETALINGSGRUNNLAG,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
         )
     }
 
