@@ -7,6 +7,7 @@ import no.nav.helse.appender
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Inntektshistorikk.Innslag.Companion.nyesteId
+import no.nav.helse.serde.reflection.Inntektsopplysningskilde
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import java.time.LocalDate
@@ -136,6 +137,15 @@ internal class Inntektshistorikk {
 
         override fun skalErstattesAv(other: Inntektsopplysning) =
             other is Saksbehandler && this.dato == other.dato
+
+        internal fun toMap(): Map<String, Any?> = mapOf(
+            "id" to id,
+            "dato" to dato,
+            "hendelseId" to hendelseId,
+            "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
+            "kilde" to Inntektsopplysningskilde.SAKSBEHANDLER,
+            "tidsstempel" to tidsstempel
+        )
     }
 
     internal class Infotrygd(
@@ -156,6 +166,15 @@ internal class Inntektshistorikk {
 
         override fun skalErstattesAv(other: Inntektsopplysning) =
             other is Infotrygd && this.dato == other.dato
+
+        internal fun toMap(): Map<String, Any?> = mapOf(
+            "id" to id,
+            "dato" to dato,
+            "hendelseId" to hendelseId,
+            "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
+            "kilde" to Inntektsopplysningskilde.INFOTRYGD,
+            "tidsstempel" to tidsstempel
+        )
     }
 
     internal class Inntektsmelding(
@@ -178,6 +197,15 @@ internal class Inntektshistorikk {
 
         override fun kanLagres(other: Inntektsopplysning) =
             other !is Inntektsmelding || this.dato != other.dato
+
+        internal fun toMap(): Map<String, Any?> = mapOf(
+            "id" to id,
+            "dato" to dato,
+            "hendelseId" to hendelseId,
+            "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
+            "kilde" to  Inntektsopplysningskilde.INNTEKTSMELDING,
+            "tidsstempel" to tidsstempel
+        )
     }
 
     internal class SkattComposite(
@@ -309,6 +337,18 @@ internal class Inntektshistorikk {
             override fun skalErstattesAv(other: Inntektsopplysning) =
                 other is Sammenligningsgrunnlag && this.dato == other.dato
         }
+        internal fun toMap(kilde: Inntektsopplysningskilde): Map<String, Any?> =mapOf(
+            "dato" to dato,
+            "hendelseId" to hendelseId,
+            "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
+            "kilde" to kilde,
+            "tidsstempel" to tidsstempel,
+
+            "måned" to måned,
+            "type" to type,
+            "fordel" to fordel,
+            "beskrivelse" to beskrivelse
+        )
     }
 
     internal class AppendMode private constructor(private val innslag: Innslag) : Appender {

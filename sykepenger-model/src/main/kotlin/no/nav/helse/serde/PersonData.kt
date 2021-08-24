@@ -12,8 +12,7 @@ import no.nav.helse.serde.PersonData.ArbeidsgiverData.ArbeidsforholdhistorikkInn
 import no.nav.helse.serde.PersonData.InfotrygdhistorikkElementData.Companion.tilModellObjekt
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagInnslagData.Companion.tilModellObjekt
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
-import no.nav.helse.serde.reflection.Kilde
-import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
+import no.nav.helse.serde.reflection.Inntektsopplysningskilde
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
@@ -244,7 +243,7 @@ internal data class PersonData(
         internal fun konverterTilAktivitetslogg(): Aktivitetslogg {
             val aktivitetslogg = Aktivitetslogg()
             val modellkontekst = kontekster.map { it.parseKontekst() }
-            aktivitetslogg.get<MutableList<Any>>("aktiviteter").apply {
+            aktivitetslogg.aktiviteter.apply {
                 addAll(aktiviteter.map {
                     it.parseAktivitet(modellkontekst)
                 })
@@ -447,8 +446,8 @@ internal data class PersonData(
                     innslag: Inntektshistorikk.RestoreJsonMode.InnslagAppender
                 ) {
                     inntektsopplysninger.forEach { inntektData ->
-                        when (inntektData.kilde?.let(Kilde::valueOf)) {
-                            Kilde.INFOTRYGD ->
+                        when (inntektData.kilde?.let(Inntektsopplysningskilde::valueOf)) {
+                            Inntektsopplysningskilde.INFOTRYGD ->
                                 Inntektshistorikk.Infotrygd(
                                     id = requireNotNull(inntektData.id),
                                     dato = requireNotNull(inntektData.dato),
@@ -456,7 +455,7 @@ internal data class PersonData(
                                     beløp = requireNotNull(inntektData.beløp).månedlig,
                                     tidsstempel = requireNotNull(inntektData.tidsstempel)
                                 )
-                            Kilde.INNTEKTSMELDING ->
+                            Inntektsopplysningskilde.INNTEKTSMELDING ->
                                 Inntektshistorikk.Inntektsmelding(
                                     id = requireNotNull(inntektData.id),
                                     dato = requireNotNull(inntektData.dato),
@@ -464,7 +463,7 @@ internal data class PersonData(
                                     beløp = requireNotNull(inntektData.beløp).månedlig,
                                     tidsstempel = requireNotNull(inntektData.tidsstempel)
                                 )
-                            Kilde.SAKSBEHANDLER ->
+                            Inntektsopplysningskilde.SAKSBEHANDLER ->
                                 Inntektshistorikk.Saksbehandler(
                                     id = requireNotNull(inntektData.id),
                                     dato = requireNotNull(inntektData.dato),
@@ -475,8 +474,8 @@ internal data class PersonData(
                             null -> Inntektshistorikk.SkattComposite(
                                 id = requireNotNull(inntektData.id),
                                 inntektsopplysninger = requireNotNull(inntektData.skatteopplysninger).map { skatteData ->
-                                    when (skatteData.kilde?.let(Kilde::valueOf)) {
-                                        Kilde.SKATT_SAMMENLIGNINGSGRUNNLAG ->
+                                    when (skatteData.kilde?.let(Inntektsopplysningskilde::valueOf)) {
+                                        Inntektsopplysningskilde.SKATT_SAMMENLIGNINGSGRUNNLAG ->
                                             Inntektshistorikk.Skatt.Sammenligningsgrunnlag(
                                                 dato = requireNotNull(skatteData.dato),
                                                 hendelseId = requireNotNull(skatteData.hendelseId),
@@ -487,7 +486,7 @@ internal data class PersonData(
                                                 beskrivelse = requireNotNull(skatteData.beskrivelse),
                                                 tidsstempel = requireNotNull(skatteData.tidsstempel)
                                             )
-                                        Kilde.SKATT_SYKEPENGEGRUNNLAG ->
+                                        Inntektsopplysningskilde.SKATT_SYKEPENGEGRUNNLAG ->
                                             Inntektshistorikk.Skatt.Sykepengegrunnlag(
                                                 dato = requireNotNull(skatteData.dato),
                                                 hendelseId = requireNotNull(skatteData.hendelseId),
@@ -502,8 +501,8 @@ internal data class PersonData(
                                     }
                                 }
                             )
-                            Kilde.SKATT_SAMMENLIGNINGSGRUNNLAG,
-                            Kilde.SKATT_SYKEPENGEGRUNNLAG -> error("Fant ${inntektData.kilde}. Kan kun være i SkattComposite")
+                            Inntektsopplysningskilde.SKATT_SAMMENLIGNINGSGRUNNLAG,
+                            Inntektsopplysningskilde.SKATT_SYKEPENGEGRUNNLAG -> error("Fant ${inntektData.kilde}. Kan kun være i SkattComposite")
                         }
                             .also(innslag::add)
                     }

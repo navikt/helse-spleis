@@ -4,8 +4,7 @@ import no.nav.helse.Toggles
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov
 import no.nav.helse.person.vilkår.Etterlevelse
-import no.nav.helse.serde.reflection.AktivitetsloggReflect
-import no.nav.helse.serde.reflection.OppdragReflect
+import no.nav.helse.serde.reflection.AktivitetsloggMap
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import java.time.LocalDate
@@ -20,7 +19,7 @@ import java.util.*
 class Aktivitetslogg(
     private var forelder: Aktivitetslogg? = null
 ) : IAktivitetslogg {
-    private val aktiviteter = mutableListOf<Aktivitet>()
+    internal val aktiviteter = mutableListOf<Aktivitet>()
     private val kontekster = mutableListOf<Aktivitetskontekst>()  // Doesn't need serialization
 
     override val etterlevelse: Etterlevelse = forelder?.etterlevelse ?: Etterlevelse()
@@ -82,7 +81,7 @@ class Aktivitetslogg(
         kontekst(person as Aktivitetskontekst)
     }
 
-    override fun toMap(): Map<String, List<Map<String, Any>>> = AktivitetsloggReflect(this).toMap()
+    override fun toMap(): Map<String, List<Map<String, Any>>> = AktivitetsloggMap(this).toMap()
 
     internal fun logg(vararg kontekst: Aktivitetskontekst): Aktivitetslogg {
         return Aktivitetslogg(this).also {
@@ -344,7 +343,7 @@ class Aktivitetslogg(
                         mutableMapOf(
                             "maksdato" to maksdato.toString(),
                             "saksbehandler" to saksbehandler
-                        ) + OppdragReflect(oppdrag).toBehovMap()
+                        ) + oppdrag.toBehovMap()
                     )
                 }
 
@@ -389,7 +388,7 @@ class Aktivitetslogg(
                     aktivitetslogg.behov(
                         Behovtype.Utbetaling,
                         "Trenger å sende utbetaling til Oppdrag",
-                        OppdragReflect(oppdrag).toBehovMap().apply {
+                        oppdrag.toBehovMap().apply {
                             put("saksbehandler", saksbehandler)
                             maksdato?.let {
                                 put("maksdato", maksdato.toString())

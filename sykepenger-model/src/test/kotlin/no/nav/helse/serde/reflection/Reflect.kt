@@ -5,7 +5,6 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KVisibility
 import kotlin.reflect.full.allSuperclasses
 import kotlin.reflect.full.memberProperties
-import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.isAccessible
 
 @Suppress("UNCHECKED_CAST")
@@ -19,20 +18,11 @@ internal class ReflectClass private constructor(
                 it.isAccessible = true
             }.call(instance) as R
 
-    internal fun has(property: String): Boolean = props().filter { it.name == property }.size == 1
-
     private fun props() =
         kClass.memberProperties +
             kClass.allSuperclasses
                 .flatMap { it.memberProperties }
                 .filter { it.visibility == KVisibility.PRIVATE }
-
-    internal fun getEnumValue(property: String): Enum<*> =
-        (kClass as KClass<Enum<*>>).java.enumConstants.single { it.name == property }
-
-    internal fun getInstance(vararg args: Any?) =
-        kClass.primaryConstructor?.also { it.isAccessible = true }?.call(*args)
-            ?: throw RuntimeException("No primary constructor")
 
     internal fun getNestedClass(nestedClassName: String) =
         getNestedClasses().single { it.simpleName == nestedClassName }.let(::ReflectClass)
@@ -58,9 +48,6 @@ internal class ReflectInstance private constructor(
     internal operator fun <R> get(property: String): R =
         reflectClass[instance, property]
 
-    internal fun has(property: String): Boolean =
-        reflectClass.has(property)
-
     private operator fun get(nestedClassName: String, property: String): List<ReflectInstance> {
         val nestedClass = reflectClass.getNestedClass(nestedClassName)
         return get<List<Any>>(property).map { ReflectInstance(nestedClass, it) }
@@ -72,10 +59,6 @@ internal class ReflectInstance private constructor(
 
         internal operator fun <R> Any.get(property: String): R =
             getReflectInstance(this)[property]
-
-        internal fun <R> Any.maybe(property: String): R? =
-            if (getReflectInstance(this).has(property)) getReflectInstance(this)[property]
-            else null
 
         internal operator fun Any.get(nestedClassName: String, property: String) =
             getReflectInstance(this)[nestedClassName, property]

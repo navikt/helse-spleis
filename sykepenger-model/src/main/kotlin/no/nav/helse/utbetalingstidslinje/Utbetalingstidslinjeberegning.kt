@@ -3,7 +3,6 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.UtbetalingstidslinjeberegningVisitor
-import no.nav.helse.serde.reflection.UtbetalingstidslinjeberegningReflect
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -40,6 +39,16 @@ internal class Utbetalingstidslinjeberegning private constructor(
     internal fun accept(visitor: UtbetalingstidslinjeberegningVisitor) {
         visitor.visitUtbetalingstidslinjeberegning(id, tidsstempel, sykdomshistorikkElementId, inntektshistorikkInnslagId, vilkårsgrunnlagHistorikkInnslagId)
     }
+
+    internal fun toMap(): Map<String, Any?> = mapOf(
+        "id" to id,
+        "sykdomshistorikkElementId" to sykdomshistorikkElementId,
+        "vilkårsgrunnlagHistorikkInnslagId" to vilkårsgrunnlagHistorikkInnslagId,
+        "inntektshistorikkInnslagId" to inntektshistorikkInnslagId,
+        "tidsstempel" to tidsstempel,
+        "organisasjonsnummer" to organisasjonsnummer,
+        "utbetalingstidslinje" to utbetalingstidslinje.toMap()
+    )
 
     internal companion object {
         internal fun lagUtbetaling(
@@ -116,7 +125,6 @@ internal class Utbetalingstidslinjeberegning private constructor(
             utbetalingstidslinje = utbetalingstidslinje
         )
 
-        internal fun save(utbetalingstidslinjeberegning: Utbetalingstidslinjeberegning) =
-            UtbetalingstidslinjeberegningReflect(utbetalingstidslinjeberegning).toMap()
+        internal fun save(utbetalingstidslinjeberegning: Utbetalingstidslinjeberegning) = utbetalingstidslinjeberegning.toMap()
     }
 }

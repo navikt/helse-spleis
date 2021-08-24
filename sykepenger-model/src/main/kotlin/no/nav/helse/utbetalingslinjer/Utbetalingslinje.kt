@@ -125,5 +125,25 @@ internal class Utbetalingslinje internal constructor(
         )
 
     internal fun erOpphør() = datoStatusFom != null
+
+    internal fun toMap() = mutableMapOf<String, Any?>(
+        "fom" to fom.toString(),
+        "tom" to tom.toString(),
+        "satstype" to satstype.name,
+        "sats" to beløp,
+        // TODO: Skal bort etter apper er migrert over til sats
+        "dagsats" to beløp,
+        "lønn" to aktuellDagsinntekt,
+        "grad" to grad,
+        "stønadsdager" to stønadsdager(),
+        "totalbeløp" to totalbeløp(),
+        "endringskode" to endringskode.toString(),
+        "delytelseId" to delytelseId,
+        "refDelytelseId" to refDelytelseId,
+        "refFagsystemId" to refFagsystemId,
+        "statuskode" to datoStatusFom?.let { "OPPH" },
+        "datoStatusFom" to datoStatusFom?.toString(),
+        "klassekode" to klassekode.verdi
+    )
 }
 

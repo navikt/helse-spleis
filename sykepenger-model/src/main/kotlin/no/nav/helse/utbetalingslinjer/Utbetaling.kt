@@ -520,6 +520,28 @@ internal class Utbetaling private constructor(
         return other > tidsstempel
     }
 
+    internal fun toMap(): MutableMap<String, Any?> = mutableMapOf(
+        "id" to id,
+        "beregningId" to beregningId,
+        "utbetalingstidslinje" to utbetalingstidslinje.toMap(),
+        "arbeidsgiverOppdrag" to arbeidsgiverOppdrag.toMap(),
+        "personOppdrag" to personOppdrag.toMap(),
+        "fom" to periode.start,
+        "tom" to periode.endInclusive,
+        "stønadsdager" to (arbeidsgiverOppdrag.stønadsdager() + personOppdrag.stønadsdager()),
+        "tidsstempel" to tidsstempel,
+        "status" to Utbetalingstatus.fraTilstand(tilstand),
+        "type" to type,
+        "maksdato" to maksdato,
+        "forbrukteSykedager" to forbrukteSykedager,
+        "gjenståendeSykedager" to gjenståendeSykedager,
+        "vurdering" to vurdering?.let { vurdering!!.toMap_plz_noMoreReflection() },
+        "overføringstidspunkt" to overføringstidspunkt,
+        "avstemmingsnøkkel" to avstemmingsnøkkel,
+        "avsluttet" to avsluttet,
+        "oppdatert" to oppdatert
+    )
+
     internal interface Tilstand {
         fun forkast(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
             hendelse.info("Forkaster ikke utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
@@ -925,5 +947,13 @@ internal class Utbetaling private constructor(
                 )
             )
         }
+
+        internal fun toMap_plz_noMoreReflection() = mapOf(
+            "godkjent" to godkjent,
+            "ident" to ident,
+            "epost" to epost,
+            "tidspunkt" to tidspunkt,
+            "automatiskBehandling" to automatiskBehandling
+        )
     }
 }

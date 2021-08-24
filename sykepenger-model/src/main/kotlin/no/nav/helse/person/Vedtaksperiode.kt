@@ -813,6 +813,20 @@ internal class Vedtaksperiode private constructor(
 
     override fun toString() = "${this.periode.start} - ${this.periode.endInclusive}"
 
+    internal fun toMap() = mutableMapOf(
+        "id" to id,
+        "tilstand" to tilstand.type.name,
+        "skjæringstidspunktFraInfotrygd" to skjæringstidspunktFraInfotrygd,
+        "inntektsmeldingInfo" to inntektsmeldingInfo?.toMap(),
+        "skjæringstidspunkt" to skjæringstidspunkt,
+        "dataForSimulering" to dataForSimulering?.toMap(),
+        "utbetalinger" to utbetalinger.map { it.toMap().getValue("id") as UUID },
+        "utbetalingstidslinje" to utbetalingstidslinje.toMap(),
+        "forlengelseFraInfotrygd" to forlengelseFraInfotrygd,
+        "opprettet" to opprettet,
+        "oppdatert" to oppdatert
+    )
+
     // Gang of four State pattern
     internal interface Vedtaksperiodetilstand : Aktivitetskontekst {
         val type: TilstandType
@@ -2428,6 +2442,8 @@ enum class Inntektskilde {
 data class InntektsmeldingInfo(
     internal val id: UUID,
     internal val arbeidsforholdId: String?
-)
+) {
+    fun toMap() = mapOf( "id" to id, "arbeidsforholdId" to arbeidsforholdId )
+}
 
 internal typealias VedtaksperiodeFilter = (Vedtaksperiode) -> Boolean

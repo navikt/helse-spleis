@@ -3,7 +3,6 @@ package no.nav.helse.utbetalingslinjer
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.person.*
-import no.nav.helse.serde.reflection.OppdragReflect
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
@@ -74,7 +73,7 @@ internal class Feriepengeutbetaling private constructor(
 
         person.feriepengerUtbetalt(
             PersonObserver.FeriepengerUtbetaltEvent(
-                arbeidsgiverOppdrag = OppdragReflect(oppdrag).toMap(),
+                arbeidsgiverOppdrag = oppdrag.toMap(),
             )
         )
 
@@ -82,8 +81,8 @@ internal class Feriepengeutbetaling private constructor(
             PersonObserver.UtbetalingEndretEvent(
                 utbetalingId = utbetalingId,
                 type = Utbetaling.Utbetalingtype.FERIEPENGER.name,
-                arbeidsgiverOppdrag = OppdragReflect(oppdrag).toBehovMap(),
-                personOppdrag = OppdragReflect(Oppdrag(utbetalingHendelse.fødselsnummer(), Fagområde.SykepengerRefusjon)).toBehovMap(),
+                arbeidsgiverOppdrag = oppdrag.toBehovMap(),
+                personOppdrag = Oppdrag(utbetalingHendelse.fødselsnummer(), Fagområde.SykepengerRefusjon).toBehovMap(),
                 forrigeStatus = Utbetalingstatus.fraTilstand(Utbetaling.Ubetalt).name,
                 gjeldendeStatus = Utbetalingstatus.fraTilstand(Utbetaling.Utbetalt).name
             )
@@ -189,7 +188,7 @@ internal class Feriepengeutbetaling private constructor(
                 Spleis sin arbeidsgiverandel: $spleisFeriepengebeløpArbeidsgiver
                 Totalt feriepengebeløp: $totaltFeriepengebeløpArbeidsgiver
                 Differanse: $differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd
-                Oppdrag: ${OppdragReflect(oppdrag).toMap()}
+                Oppdrag: ${oppdrag.toMap()}
                 Datoer: ${feriepengeberegner.feriepengedatoer()}
                 Differanse fra forrige sendte oppdrag: ${forrigeSendteOppdrag?.totalbeløp()?.minus(oppdrag.totalbeløp())}
                 """.trimIndent()
