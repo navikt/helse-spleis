@@ -8,27 +8,26 @@ import java.time.LocalDate
 
 internal class Sykepengegrunnlag(
     internal val sykepengegrunnlag: Inntekt,
-    private val arbeidsgiverInntektsopplysning: List<ArbeidsgiverInntektsopplysning>,
+    private val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
     internal val grunnlagForSykepengegrunnlag: Inntekt
 ) {
 
     constructor(
-        arbeidsgiverInntektsopplysning: List<ArbeidsgiverInntektsopplysning>,
+        arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
         skjæringstidspunkt: LocalDate,
-        personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden: LocalDate
     ) : this(
-        minOf(arbeidsgiverInntektsopplysning.inntekt(), Grunnbeløp.`6G`.beløp(skjæringstidspunkt, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden)),
-        arbeidsgiverInntektsopplysning,
-        arbeidsgiverInntektsopplysning.inntekt()
+        minOf(arbeidsgiverInntektsopplysninger.inntekt(), Grunnbeløp.`6G`.beløp(skjæringstidspunkt)), // TODO: skal ikke 6G-cappe sykepengegrunnlag fra infotrygd
+        arbeidsgiverInntektsopplysninger,
+        arbeidsgiverInntektsopplysninger.inntekt()
     )
 
     internal fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {
         vilkårsgrunnlagHistorikkVisitor.preVisitSykepengegrunnlag(this, sykepengegrunnlag, grunnlagForSykepengegrunnlag)
-        arbeidsgiverInntektsopplysning.forEach { it.accept(vilkårsgrunnlagHistorikkVisitor) }
+        arbeidsgiverInntektsopplysninger.forEach { it.accept(vilkårsgrunnlagHistorikkVisitor) }
         vilkårsgrunnlagHistorikkVisitor.postVisitSykepengegrunnlag(this, sykepengegrunnlag, grunnlagForSykepengegrunnlag)
     }
 
     internal fun avviksprosent(sammenligningsgrunnlag: Inntekt) = grunnlagForSykepengegrunnlag.avviksprosent(sammenligningsgrunnlag)
-    internal fun inntektsopplysningPerArbeidsgiver(): Map<String, Inntektshistorikk.Inntektsopplysning> = arbeidsgiverInntektsopplysning.inntektsopplysningPerArbeidsgiver()
+    internal fun inntektsopplysningPerArbeidsgiver(): Map<String, Inntektshistorikk.Inntektsopplysning> = arbeidsgiverInntektsopplysninger.inntektsopplysningPerArbeidsgiver()
 
 }

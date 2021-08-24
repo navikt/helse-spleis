@@ -9,10 +9,8 @@ import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.*
 import no.nav.helse.person.infotrygdhistorikk.*
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.ArbeidsforholdhistorikkInnslagData.Companion.tilArbeidsforholdhistorikk
-import no.nav.helse.serde.PersonData.ArbeidsgiverData.InntektshistorikkInnslagData.Companion.parseInntekter
-import no.nav.helse.serde.PersonData.ArbeidsgiverData.InntektsopplysningData.Companion.parseInntektsopplysningData
 import no.nav.helse.serde.PersonData.InfotrygdhistorikkElementData.Companion.tilModellObjekt
-import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.SykepengegrunnlagData.ArbeidsgiverInntektsopplysningData.Companion.parseArbeidsgiverInntektsopplysning
+import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.SykepengegrunnlagData.ArbeidsgiverInntektsopplysningData.Companion.parseArbeidsgiverInntektsopplysninger
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagInnslagData.Companion.tilModellObjekt
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
 import no.nav.helse.serde.reflection.Inntektsopplysningskilde
@@ -242,13 +240,13 @@ internal data class PersonData(
 
         class SykepengegrunnlagData(
             private val sykepengegrunnlag: Double,
-            private val arbeidsgiverInntektsopplysning: List<ArbeidsgiverInntektsopplysningData>,
+            private val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningData>,
             private val grunnlagForSykepengegrunnlag: Double
         ) {
 
             internal fun parseSykepengegrunnlag(): Sykepengegrunnlag = Sykepengegrunnlag(
                 sykepengegrunnlag.årlig,
-                arbeidsgiverInntektsopplysning.parseArbeidsgiverInntektsopplysning(),
+                arbeidsgiverInntektsopplysninger.parseArbeidsgiverInntektsopplysninger(),
                 grunnlagForSykepengegrunnlag.årlig
             )
 
@@ -257,7 +255,7 @@ internal data class PersonData(
                 private val inntektsopplysning: List<ArbeidsgiverData.InntektsopplysningData>
             ) {
                 companion object {
-                    internal fun List<ArbeidsgiverInntektsopplysningData>.parseArbeidsgiverInntektsopplysning(): List<ArbeidsgiverInntektsopplysning> =
+                    internal fun List<ArbeidsgiverInntektsopplysningData>.parseArbeidsgiverInntektsopplysninger(): List<ArbeidsgiverInntektsopplysning> =
                         map { ArbeidsgiverInntektsopplysning(it.orgnummer, ArbeidsgiverData.InntektsopplysningData.parseInntekter(it.inntektsopplysning)) }
                 }
             }

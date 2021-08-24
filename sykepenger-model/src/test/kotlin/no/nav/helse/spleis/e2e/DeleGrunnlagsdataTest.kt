@@ -465,7 +465,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
     }
 
     private fun sykepengegrunnlag(inntekt: Inntekt, arbeidsgiverInntektsopplysning: List<ArbeidsgiverInntektsopplysning> = listOf()) = Sykepengegrunnlag(
-        arbeidsgiverInntektsopplysning = arbeidsgiverInntektsopplysning,
+        arbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysning,
         sykepengegrunnlag = inntekt,
         grunnlagForSykepengegrunnlag = inntekt
     )

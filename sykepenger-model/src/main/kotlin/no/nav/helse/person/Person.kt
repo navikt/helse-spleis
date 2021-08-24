@@ -459,7 +459,7 @@ class Person private constructor(
 
 
     internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden: LocalDate) =
-        Sykepengegrunnlag(arbeidsgivere.grunnlagForSykepengegrunnlag(skjæringstidspunkt, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden), skjæringstidspunkt, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden)
+        Sykepengegrunnlag(arbeidsgivere.grunnlagForSykepengegrunnlag(skjæringstidspunkt, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden), skjæringstidspunkt)
 
     internal fun sammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =
         arbeidsgivere.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt)

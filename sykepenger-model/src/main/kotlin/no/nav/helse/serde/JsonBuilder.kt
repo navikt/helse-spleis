@@ -583,16 +583,16 @@ internal class JsonBuilder : AbstractBuilder() {
 
     class SykepengegrunnlagState(private val sykepengegrunnlag: MutableMap<String, Any>) : BuilderState() {
         override fun preVisitSykepengegrunnlag(sykepengegrunnlag1: Sykepengegrunnlag, sykepengegrunnlag: Inntekt, grunnlagForSykepengegrunnlag: Inntekt) {
-            val arbeidsgiverInntektsopplysning = mutableListOf<Map<String, Any>>()
+            val arbeidsgiverInntektsopplysninger = mutableListOf<Map<String, Any>>()
             this.sykepengegrunnlag.putAll(
                 mapOf(
                     "sykepengegrunnlag" to sykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
                     "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
-                    "arbeidsgiverInntektsopplysning" to arbeidsgiverInntektsopplysning
+                    "arbeidsgiverInntektsopplysninger" to arbeidsgiverInntektsopplysninger
                 )
             )
 
-            pushState(ArbeidsgiverInntektsopplysningState(arbeidsgiverInntektsopplysning))
+            pushState(ArbeidsgiverInntektsopplysningerState(arbeidsgiverInntektsopplysninger))
         }
 
         override fun postVisitGrunnlagsdata(skjæringstidspunkt: LocalDate, grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata) {
@@ -607,11 +607,11 @@ internal class JsonBuilder : AbstractBuilder() {
         }
     }
 
-    class ArbeidsgiverInntektsopplysningState(private val arbeidsgiverInntektsopplysning: MutableList<Map<String, Any>>) : BuilderState() {
+    class ArbeidsgiverInntektsopplysningerState(private val arbeidsgiverInntektsopplysninger: MutableList<Map<String, Any>>) : BuilderState() {
 
         override fun preVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {
             val inntektsopplysninger = mutableListOf<Map<String, Any?>>()
-            this.arbeidsgiverInntektsopplysning.add(
+            this.arbeidsgiverInntektsopplysninger.add(
                 mapOf(
                     "orgnummer" to orgnummer,
                     "inntektsopplysning" to inntektsopplysninger

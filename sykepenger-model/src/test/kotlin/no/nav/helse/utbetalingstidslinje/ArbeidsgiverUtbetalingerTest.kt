@@ -409,7 +409,7 @@ internal class ArbeidsgiverUtbetalingerTest {
     }
 
     private fun sykepengegrunnlag(inntekt: Inntekt) = Sykepengegrunnlag(
-        arbeidsgiverInntektsopplysning = listOf(),
+        arbeidsgiverInntektsopplysninger = listOf(),
         sykepengegrunnlag = inntekt,
         grunnlagForSykepengegrunnlag = inntekt
     )

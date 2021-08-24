@@ -38,7 +38,7 @@ internal class Inntektshistorikk {
     internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, dato: LocalDate): Inntekt? =
         grunnlagForSykepengegrunnlagMedMetadata(skjæringstidspunkt, dato)?.second
 
-    internal fun grunnlagForSykepengegrunnlagDings(skjæringstidspunkt: LocalDate, dato: LocalDate): Inntektsopplysning? =
+    internal fun grunnlagForSykepengegrunnlagDings(skjæringstidspunkt: LocalDate, dato: LocalDate): Inntektsopplysning? = // TODO
         grunnlagForSykepengegrunnlagMedMetadata(skjæringstidspunkt, dato)?.first
 
     internal fun grunnlagForSykepengegrunnlag(dato: LocalDate): Inntekt? =

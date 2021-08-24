@@ -347,14 +347,14 @@ internal class VilkårsgrunnlagHistorikkTest {
 
     private fun sykepengegrunnlag(inntekt: Inntekt) =
         Sykepengegrunnlag(
-            arbeidsgiverInntektsopplysning = listOf(),
+            arbeidsgiverInntektsopplysninger = listOf(),
             sykepengegrunnlag = inntekt,
             grunnlagForSykepengegrunnlag = inntekt
         )
 
     private fun sykepengegrunnlagFor(inntekt: Inntekt): (LocalDate) -> Sykepengegrunnlag = {
         Sykepengegrunnlag(
-            arbeidsgiverInntektsopplysning = listOf(),
+            arbeidsgiverInntektsopplysninger = listOf(),
             sykepengegrunnlag = inntekt,
             grunnlagForSykepengegrunnlag = inntekt
         )

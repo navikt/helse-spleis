@@ -132,7 +132,8 @@ class SerialisertPerson(val json: String) {
             V110SletteArbeidsforhold(),
             V111RiktigStatusAnnullerteUtbetalinger(),
             V112FjernTrailingCarriageReturnFraFagsystemId(),
-            V113MigrerVekkFraFjernetTilstandTilAnnullering()
+            V113MigrerVekkFraFjernetTilstandTilAnnullering(),
+            V114LagreSykepengegrunnlag()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)

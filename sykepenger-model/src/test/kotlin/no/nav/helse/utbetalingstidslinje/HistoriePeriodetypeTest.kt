@@ -274,7 +274,7 @@ internal class HistoriePeriodetypeTest {
     }
 
     private fun sykepengegrunnlag(inntekt: Inntekt) = Sykepengegrunnlag(
-        arbeidsgiverInntektsopplysning = listOf(),
+        arbeidsgiverInntektsopplysninger = listOf(),
         sykepengegrunnlag = inntekt,
         grunnlagForSykepengegrunnlag = inntekt
     )

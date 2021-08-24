@@ -101,7 +101,7 @@ internal class InntektsvurderingTest {
     }
 
     private fun sykepengegrunnlag(inntekt: Inntekt = INNTEKT) = Sykepengegrunnlag(
-        arbeidsgiverInntektsopplysning = listOf(),
+        arbeidsgiverInntektsopplysninger = listOf(),
         sykepengegrunnlag = inntekt,
         grunnlagForSykepengegrunnlag = inntekt
     )

@@ -488,7 +488,7 @@ internal class InfotrygdhistorikkTest {
 
     private fun sykepengegrunnlagFor(inntekt: Inntekt): (LocalDate) -> Sykepengegrunnlag = {
         Sykepengegrunnlag(
-            arbeidsgiverInntektsopplysning = listOf(),
+            arbeidsgiverInntektsopplysninger = listOf(),
             sykepengegrunnlag = inntekt,
             grunnlagForSykepengegrunnlag = inntekt
         )
