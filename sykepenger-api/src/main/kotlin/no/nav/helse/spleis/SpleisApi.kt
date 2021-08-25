@@ -3,6 +3,7 @@ package no.nav.helse.spleis
 import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.application.*
 import io.ktor.auth.*
+import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
@@ -11,6 +12,7 @@ import no.nav.helse.person.Person
 import no.nav.helse.serde.api.PersonDTO
 import no.nav.helse.serde.api.hendelseReferanserForPerson
 import no.nav.helse.serde.api.serializePersonForSpeil
+import no.nav.helse.serde.serialize
 import no.nav.helse.spleis.HendelseDTO.*
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.dao.HendelseDao.Meldingstype.*
@@ -30,7 +32,7 @@ internal fun Application.spesialistApi(dataSource: DataSource, authProviderName:
     routing {
         authenticate(authProviderName) {
             get("/api/person-snapshot") {
-                val fnr = call.request.header("fnr")!!
+                val fnr = call.request.header("fnr")!!.toLong()
                 personDao.hentPersonFraFnr(fnr)
                     ?.deserialize { hendelseDao.hentAlleHendelser(fnr) }
                     ?.let { håndterPerson(it, hendelseDao) }
@@ -42,22 +44,19 @@ internal fun Application.spesialistApi(dataSource: DataSource, authProviderName:
 }
 
 internal fun Application.spannerApi(dataSource: DataSource, authProviderName: String) {
+    val hendelseDao = HendelseDao(dataSource)
     val personDao = PersonDao(dataSource)
 
     routing {
         authenticate(authProviderName) {
             get("/api/person-json") {
-                val fnr = call.request.header("fnr")
-                val aktørId = call.request.header("aktorId")
+                val fnr = call.request.header("fnr")?.toLong()
+                    ?: call.request.header("aktorId")?.toLong()?.let(personDao::hentFødselsnummer)
+                    ?: throw BadRequestException("Mangler fnr eller aktorId i headers")
 
-                if (fnr == null && aktørId == null) {
-                    call.respond(HttpStatusCode.BadRequest)
-                    return@get
-                }
+                val person = personDao.hentPersonFraFnr(fnr) ?: throw NotFoundException("Kunne ikke finne person")
 
-                val person = if (fnr != null) personDao.hentPersonFraFnr(fnr) else personDao.hentPersonFraAktørId(aktørId!!)
-
-                person?.let { call.respond(it) } ?: call.respond(HttpStatusCode.NotFound, "Resource not found")
+                call.respond(person.deserialize { hendelseDao.hentAlleHendelser(fnr) }.serialize().json)
             }
         }
     }
