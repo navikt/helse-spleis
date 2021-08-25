@@ -9,7 +9,7 @@ spec:
   image: {{image}}
   port: 8080
   ingresses:
-   - spleis-api.dev-fss-pub.nais.io 
+   - https://spleis-api.dev-fss-pub.nais.io
   liveness:
     path: /isalive
     initialDelay: 5
