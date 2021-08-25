@@ -131,7 +131,7 @@ class Inntektsmelding(
     override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = arbeidsgiver.håndter(this)
 
     internal fun addInntekt(inntektshistorikk: Inntektshistorikk, skjæringstidspunktVedtaksperiode: LocalDate) {
-        val skjæringstidspunkt = (sykdomstidslinje.skjæringstidspunkt() ?: return).takeUnless {
+        val skjæringstidspunkt = (sykdomstidslinje.sisteSkjæringstidspunkt() ?: return).takeUnless {
             førsteFraværsdagErEtterArbeidsgiverperioden() && it > skjæringstidspunktVedtaksperiode
         } ?: skjæringstidspunktVedtaksperiode
 
@@ -148,7 +148,7 @@ class Inntektsmelding(
         }
     }
 
-    internal fun inntektenGjelderFor(periode: Periode) = sykdomstidslinje.skjæringstidspunkt() in periode
+    internal fun inntektenGjelderFor(periode: Periode) = sykdomstidslinje.sisteSkjæringstidspunkt() in periode
 
     internal fun cacheRefusjon(arbeidsgiver: Arbeidsgiver){
         refusjon.cacheRefusjon(arbeidsgiver, beregnetInntekt, sykdomstidslinje.førsteDag())

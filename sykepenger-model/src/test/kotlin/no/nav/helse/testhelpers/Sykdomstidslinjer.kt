@@ -51,7 +51,7 @@ internal val Int.A
         TestHendelse.kilde
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
-internal val Int.n_
+internal val Int.opphold
     get() = Sykdomstidslinje(
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 

@@ -23,10 +23,10 @@ internal class SkjæringstidspunktTest {
 
     @Test
     fun `skjæringstidspunkt er null for ugyldige situasjoner`() {
-        assertNull(1.F.skjæringstidspunkt())
-        assertNull(1.P.skjæringstidspunkt())
-        assertNull(1.n_.skjæringstidspunkt())
-        assertNull(1.A.skjæringstidspunkt())
+        assertNull(1.F.sisteSkjæringstidspunkt())
+        assertNull(1.P.sisteSkjæringstidspunkt())
+        assertNull(1.opphold.sisteSkjæringstidspunkt())
+        assertNull(1.A.sisteSkjæringstidspunkt())
     }
 
     @Test
@@ -38,12 +38,12 @@ internal class SkjæringstidspunktTest {
 
     @Test
     fun `syk-ferie-helg-syk regnes ikke som gap`() {
-        assertFørsteDagErSkjæringstidspunkt(15.S + 4.F + 2.n_ + 1.S)
+        assertFørsteDagErSkjæringstidspunkt(15.S + 4.F + 2.opphold + 1.S)
     }
 
     @Test
     fun `syk-helg-ferie-syk regnes ikke som gap`() {
-        assertFørsteDagErSkjæringstidspunkt(12.S + 2.n_ + 2.F + 1.S)
+        assertFørsteDagErSkjæringstidspunkt(12.S + 2.opphold + 2.F + 1.S)
     }
 
     @Test
@@ -52,7 +52,7 @@ internal class SkjæringstidspunktTest {
         assertFørsteDagErSkjæringstidspunkt(2.U)
 
         resetSeed(4.januar)
-        perioder(2.S, 2.n_, 2.S) { periode1, _, _ ->
+        perioder(2.S, 2.opphold, 2.S) { periode1, _, _ ->
             assertFørsteDagErSkjæringstidspunkt(periode1, this)
         }
         perioder(2.S, 2.A, 2.F, 2.S) { _, _, _, periode4 ->
@@ -67,10 +67,10 @@ internal class SkjæringstidspunktTest {
         perioder(2.S, 2.P, 2.S) { periode1, _, _ ->
             assertFørsteDagErSkjæringstidspunkt(periode1, this)
         }
-        perioder(2.S, 2.n_, 1.H) { _, _, sisteSykedager ->
+        perioder(2.S, 2.opphold, 1.H) { _, _, sisteSykedager ->
             assertFørsteDagErSkjæringstidspunkt(sisteSykedager, this)
         }
-        perioder(2.S, 2.n_, 1.U) { _, _, sisteSykedager ->
+        perioder(2.S, 2.opphold, 1.U) { _, _, sisteSykedager ->
             assertFørsteDagErSkjæringstidspunkt(sisteSykedager, this)
         }
         perioder(2.S, 2.A, 2.S, 2.A) { _, _, sisteSykedager, _ ->
@@ -91,14 +91,14 @@ internal class SkjæringstidspunktTest {
     @Test
     fun `bare ferie - tidligere sykdom`() {
         perioder(2.S, 1.A, 14.F) { _, _, _ ->
-            assertNull(skjæringstidspunkt())
+            assertNull(sisteSkjæringstidspunkt())
         }
     }
 
     @Test
     fun `ferie i framtiden`() {
-        perioder(2.S, 2.n_, 2.F) { _, _, _ ->
-            assertNull(skjæringstidspunkt())
+        perioder(2.S, 2.opphold, 2.F) { _, _, _ ->
+            assertNull(sisteSkjæringstidspunkt())
         }
     }
 
@@ -111,14 +111,14 @@ internal class SkjæringstidspunktTest {
 
     @Test
     fun `sykedager etterfulgt av implisittdager`() {
-        perioder(2.S, 2.n_) { sykedager, _ ->
+        perioder(2.S, 2.opphold) { sykedager, _ ->
             assertFørsteDagErSkjæringstidspunkt(sykedager, this)
         }
     }
 
     @Test
     fun `søknad med arbeidgjenopptatt gir ikke feil`() {
-        perioder(2.S, 2.n_) { sykedager, _ ->
+        perioder(2.S, 2.opphold) { sykedager, _ ->
             assertFørsteDagErSkjæringstidspunkt(sykedager, this)
         }
     }
@@ -221,21 +221,21 @@ internal class SkjæringstidspunktTest {
         val arbeidsgiver1tidslinje = 14.S
         val arbeidsgiver2tidslinje = 14.S
         assertTrue(arbeidsgiver1tidslinje.sisteDag().erRettFør(arbeidsgiver2tidslinje.førsteDag()))
-        assertSkjæringstidspunkt(1.januar, 31.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
+        assertSkjæringstidspunkt(1.januar, 1.januar til 28.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
     }
 
     @Test
     fun `arbeidsgivertidslinjer med helgegap`() {
-        val arbeidsgiver1tidslinje = 12.S + 2.n_
+        val arbeidsgiver1tidslinje = 12.S + 2.opphold
         val arbeidsgiver2tidslinje = 14.S
-        assertSkjæringstidspunkt(1.januar, 31.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
+        assertSkjæringstidspunkt(1.januar, 1.januar til 28.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
     }
 
     @Test
     fun `arbeidsgivertidslinjer med arbeidsdager i helg`() {
         val arbeidsgiver1tidslinje = 12.S + 1.A
         val arbeidsgiver2tidslinje = 1.A + 14.S
-        assertSkjæringstidspunkt(15.januar, 31.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
+        assertSkjæringstidspunkt(15.januar, 1. januar til 28.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
     }
 
     @Test
@@ -243,21 +243,21 @@ internal class SkjæringstidspunktTest {
         val arbeidsgiver1tidslinje = 14.S
         resetSeed(10.januar)
         val arbeidsgiver2tidslinje = 2.S + 2.A + 7.S
-        assertSkjæringstidspunkt(1.januar, 31.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
+        assertSkjæringstidspunkt(1.januar, 1.januar til 20.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
     }
 
     @Test
     fun `arbeidsgivertidslinjer med helgegap og arbeidsdag på fredag`() {
-        val arbeidsgiver1tidslinje = 11.S + 1.A + 2.n_
+        val arbeidsgiver1tidslinje = 11.S + 1.A + 2.opphold
         val arbeidsgiver2tidslinje = 14.S
-        assertSkjæringstidspunkt(15.januar, 31.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
+        assertSkjæringstidspunkt(15.januar, 1. januar til 28.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
     }
 
     @Test
     fun `arbeidsgivertidslinjer med helgegap og arbeidsdag på mandag`() {
-        val arbeidsgiver1tidslinje = 12.S + 2.n_
+        val arbeidsgiver1tidslinje = 12.S + 2.opphold
         val arbeidsgiver2tidslinje = 1.A + 13.S
-        assertSkjæringstidspunkt(16.januar, 31.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
+        assertSkjæringstidspunkt(16.januar, 1. januar til 28.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
     }
 
     @Test
@@ -265,7 +265,7 @@ internal class SkjæringstidspunktTest {
         val arbeidsgiver1tidslinje = 6.S + 6.A
         resetSeed()
         val arbeidsgiver2tidslinje = 14.S
-        assertSkjæringstidspunkt(1.januar, 31.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
+        assertSkjæringstidspunkt(1.januar, 1. januar til 14.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
     }
 
     @Test
@@ -275,14 +275,14 @@ internal class SkjæringstidspunktTest {
         val arbeidsgiver2tidslinje = 14.A + 14.S
         resetSeed()
         val arbeidsgiver3tidslinje = 7.A + 7.S
-        assertSkjæringstidspunkt(1.januar, 31.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje, arbeidsgiver3tidslinje)
+        assertSkjæringstidspunkt(1.januar, 1. januar til 28.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje, arbeidsgiver3tidslinje)
     }
 
     @Test
     fun `arbeidsgivertidslinjer med ferie som gap blir sammenhengende`() {
         val arbeidsgiver1tidslinje = 7.S + 1.F
         val arbeidsgiver2tidslinje = 1.F + 14.S
-        assertSkjæringstidspunkt(1.januar, 31.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
+        assertSkjæringstidspunkt(1.januar, 1. januar til 23.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
     }
 
     @Test
@@ -290,9 +290,9 @@ internal class SkjæringstidspunktTest {
         val arbeidsgiver1tidslinje = 7.S + 2.F + 7.S
         resetSeed(1.januar)
         val arbeidsgiver2tidslinje = 7.S + 2.A + 7.S
-        assertSkjæringstidspunkt(1.januar, 31.januar, arbeidsgiver1tidslinje)
-        assertSkjæringstidspunkt(10.januar, 31.januar, arbeidsgiver2tidslinje)
-        assertSkjæringstidspunkt(1.januar, 31.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
+        assertSkjæringstidspunkt(1.januar, 1. januar til 16.januar, arbeidsgiver1tidslinje)
+        assertSkjæringstidspunkt(10.januar, 1. januar til 16.januar, arbeidsgiver2tidslinje)
+        assertSkjæringstidspunkt(1.januar, 1. januar til 16.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
     }
 
     @Test
@@ -300,9 +300,9 @@ internal class SkjæringstidspunktTest {
         val arbeidsgiver1tidslinje = 7.S + 2.A + 7.S
         resetSeed(1.januar)
         val arbeidsgiver2tidslinje = 7.S + 2.F + 7.S
-        assertSkjæringstidspunkt(10.januar, 31.januar, arbeidsgiver1tidslinje)
-        assertSkjæringstidspunkt(1.januar, 31.januar, arbeidsgiver2tidslinje)
-        assertSkjæringstidspunkt(1.januar, 31.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
+        assertSkjæringstidspunkt(10.januar, 1. januar til 16.januar, arbeidsgiver1tidslinje)
+        assertSkjæringstidspunkt(1.januar, 1. januar til 16.januar, arbeidsgiver2tidslinje)
+        assertSkjæringstidspunkt(1.januar, 1. januar til 16.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
     }
 
     @Test
@@ -310,9 +310,9 @@ internal class SkjæringstidspunktTest {
         val arbeidsgiver1tidslinje = 7.S + 2.F + 7.S
         resetSeed(1.januar)
         val arbeidsgiver2tidslinje = 7.S + 2.UK + 7.S
-        assertSkjæringstidspunkt(1.januar, 31.januar, arbeidsgiver1tidslinje)
-        assertSkjæringstidspunkt(10.januar, 31.januar, arbeidsgiver2tidslinje)
-        assertSkjæringstidspunkt(1.januar, 31.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
+        assertSkjæringstidspunkt(1.januar, 1. januar til 16.januar, arbeidsgiver1tidslinje)
+        assertSkjæringstidspunkt(10.januar, 1. januar til 16.januar, arbeidsgiver2tidslinje)
+        assertSkjæringstidspunkt(1.januar, 1. januar til 16.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
     }
 
     @Test
@@ -320,9 +320,9 @@ internal class SkjæringstidspunktTest {
         val arbeidsgiver1tidslinje = 7.S + 2.UK + 7.S
         resetSeed(1.januar)
         val arbeidsgiver2tidslinje = 7.S + 2.F + 7.S
-        assertSkjæringstidspunkt(10.januar, 31.januar, arbeidsgiver1tidslinje)
-        assertSkjæringstidspunkt(1.januar, 31.januar, arbeidsgiver2tidslinje)
-        assertSkjæringstidspunkt(1.januar, 31.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
+        assertSkjæringstidspunkt(10.januar, 1. januar til 16.januar, arbeidsgiver1tidslinje)
+        assertSkjæringstidspunkt(1.januar, 1. januar til 16.januar, arbeidsgiver2tidslinje)
+        assertSkjæringstidspunkt(1.januar, 1. januar til 16.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
     }
 
     @Test
@@ -330,13 +330,22 @@ internal class SkjæringstidspunktTest {
         val arbeidsgiver1tidslinje = 7.F + 7.S
         resetSeed(1.januar)
         val arbeidsgiver2tidslinje = 7.A + 7.S
-        assertSkjæringstidspunkt(8.januar, 31.januar, arbeidsgiver1tidslinje)
-        assertSkjæringstidspunkt(8.januar, 31.januar, arbeidsgiver2tidslinje)
-        assertSkjæringstidspunkt(8.januar, 31.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
+        assertSkjæringstidspunkt(8.januar, 1. januar til 14.januar, arbeidsgiver1tidslinje)
+        assertSkjæringstidspunkt(8.januar, 1. januar til 14.januar, arbeidsgiver2tidslinje)
+        assertSkjæringstidspunkt(8.januar, 1. januar til 14.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
     }
 
-    private fun assertSkjæringstidspunkt(forventetSkjæringstidspunkt: LocalDate, kuttdato: LocalDate, vararg tidslinje: Sykdomstidslinje) {
-        assertEquals(forventetSkjæringstidspunkt, Sykdomstidslinje.skjæringstidspunkt(kuttdato, tidslinje.toList()))
+    @Test
+    fun `gir kun skjæringstidspunkt som er relevant for perioden`() {
+        val tidslinje = 7.S + 2.opphold + 3.S + 5.opphold + 3.F
+        assertSkjæringstidspunkt(1.januar, 1.januar til 7.januar, tidslinje)
+        assertSkjæringstidspunkt(10.januar, 10. januar til 12.januar, tidslinje)
+        assertSkjæringstidspunkt(null, 18.januar til 20.januar, tidslinje)
+        assertSkjæringstidspunkt(10.januar, 1.januar til 20.januar, tidslinje)
+    }
+
+    private fun assertSkjæringstidspunkt(forventetSkjæringstidspunkt: LocalDate?, periode: Periode, vararg tidslinje: Sykdomstidslinje) {
+        assertEquals(forventetSkjæringstidspunkt, Sykdomstidslinje.sisteRelevanteSkjæringstidspunktForPerioden(periode, tidslinje.toList()))
     }
 
     private fun assertSkjæringstidspunkt(
@@ -347,7 +356,7 @@ internal class SkjæringstidspunktTest {
             .map { it.sykdomstidslinje() }
             .merge(Dagturnering.TURNERING::beste)
 
-        val skjæringstidspunkt = tidslinje.skjæringstidspunkt()
+        val skjæringstidspunkt = tidslinje.sisteSkjæringstidspunkt()
         assertEquals(forventetSkjæringstidspunkt, skjæringstidspunkt) {
             "Forventet skjæringstidspunkt $forventetSkjæringstidspunkt. " +
                 "Fikk $skjæringstidspunkt\n" +
@@ -418,7 +427,7 @@ internal class SkjæringstidspunktTest {
             dagen: LocalDate,
             sykdomstidslinje: Sykdomstidslinje
         ) {
-            val skjæringstidspunkt = sykdomstidslinje.skjæringstidspunkt()
+            val skjæringstidspunkt = sykdomstidslinje.sisteSkjæringstidspunkt()
             assertEquals(
                 dagen,
                 skjæringstidspunkt
@@ -428,7 +437,7 @@ internal class SkjæringstidspunktTest {
         private fun assertFørsteDagErSkjæringstidspunkt(sykdomstidslinje: Sykdomstidslinje) {
             val førsteDag = sykdomstidslinje.periode()?.start
             assertNotNull(førsteDag)
-            val skjæringstidspunkt = sykdomstidslinje.skjæringstidspunkt()
+            val skjæringstidspunkt = sykdomstidslinje.sisteSkjæringstidspunkt()
             assertEquals(førsteDag, skjæringstidspunkt) {
                 "Forventet $førsteDag, men fikk $skjæringstidspunkt.\nPeriode: ${sykdomstidslinje.periode()}\nTidslinjen:\n$sykdomstidslinje"
             }

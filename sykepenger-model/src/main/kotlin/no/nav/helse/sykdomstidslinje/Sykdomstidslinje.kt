@@ -100,8 +100,13 @@ internal class Sykdomstidslinje private constructor(
     internal fun fremTilOgMed(dato: LocalDate) =
         if (periode == null || dato < førsteDag()) Sykdomstidslinje() else subset(førsteDag() til dato)
 
+    private fun fjernDagerFørSisteOppholdsdagFør(dato: LocalDate) = sisteOppholdsdag(før = dato)?.let { sisteOppholdsdag -> fraOgMed(sisteOppholdsdag) } ?: this
 
-    internal fun fraOgMed(dato: LocalDate) =
+    private fun kuttEtterSisteSykedag(): Sykdomstidslinje = periode
+        ?.findLast { erEnSykedag(this[it]) }
+        ?.let { this.subset(Periode(dager.firstKey(), it)) } ?: Sykdomstidslinje()
+
+    private fun fraOgMed(dato: LocalDate) =
         Sykdomstidslinje(dager.tailMap(dato).toMap())
 
     internal fun trim(periode: Periode) =
@@ -129,10 +134,12 @@ internal class Sykdomstidslinje private constructor(
         låstePerioder.removeIf { it == periode } || throw IllegalArgumentException("Kan ikke låse opp periode $periode")
     }
 
-    internal fun skjæringstidspunkt(kuttdato: LocalDate) =
-        fremTilOgMed(kuttdato).skjæringstidspunkt()
+    internal fun sisteSkjæringstidspunktTidligereEnn(kuttdato: LocalDate) =
+        fremTilOgMed(kuttdato)
+            .kuttEtterSisteSykedag()
+            .sisteSkjæringstidspunkt()
 
-    internal fun skjæringstidspunkt(): LocalDate? {
+    internal fun sisteSkjæringstidspunkt(): LocalDate? {
         val sisteOppholdsdag = sisteOppholdsdag()
         if (sisteOppholdsdag != null && sisteDag() > sisteOppholdsdag) return fraOgMed(sisteOppholdsdag).finnSkjæringstidspunkt()
         return kuttEtterSisteSykedag().finnSkjæringstidspunkt()
@@ -147,7 +154,7 @@ internal class Sykdomstidslinje private constructor(
         val skjæringstidspunkter = mutableListOf<LocalDate>()
         var kuttdato = periode?.endInclusive ?: return skjæringstidspunkter
         do {
-            val skjæringstidspunkt = skjæringstidspunkt(kuttdato)?.also {
+            val skjæringstidspunkt = sisteSkjæringstidspunktTidligereEnn(kuttdato)?.also {
                 kuttdato = it.minusDays(1)
                 skjæringstidspunkter.add(it)
             }
@@ -206,6 +213,7 @@ internal class Sykdomstidslinje private constructor(
             .map { it.key }
 
     private fun sisteOppholdsdag() = periode?.lastOrNull { erOppholdsdag(it) }
+    private fun sisteOppholdsdag(før: LocalDate) = periode?.filter { erOppholdsdag(it) }?.lastOrNull { it.isBefore(før) }
 
     private fun erOppholdsdag(dato: LocalDate): Boolean {
         if (erArbeidsdag(dato)) return true
@@ -224,10 +232,6 @@ internal class Sykdomstidslinje private constructor(
     }
 
     internal fun førsteSykedag() = dager.entries.firstOrNull { erEnSykedag(it.value) }?.key
-
-    private fun kuttEtterSisteSykedag(): Sykdomstidslinje = periode
-        ?.findLast { erEnSykedag(this[it]) }
-        ?.let { this.subset(Periode(dager.firstKey(), it)) } ?: Sykdomstidslinje()
 
     private fun erEnSykedag(it: Dag) =
         it is Sykedag || it is SykHelgedag || it is Arbeidsgiverdag || it is ArbeidsgiverHelgedag || it is ForeldetSykedag
@@ -268,9 +272,10 @@ internal class Sykdomstidslinje private constructor(
 
     internal companion object {
 
-        internal fun skjæringstidspunkt(dato: LocalDate, tidslinjer: List<Sykdomstidslinje>) = tidslinjer
+        internal fun sisteRelevanteSkjæringstidspunktForPerioden(periode: Periode, tidslinjer: List<Sykdomstidslinje>) = tidslinjer
             .merge(sammenhengendeSykdom)
-            .skjæringstidspunkt(dato)
+            .fjernDagerFørSisteOppholdsdagFør(periode.start)
+            .sisteSkjæringstidspunktTidligereEnn(periode.endInclusive)
 
         internal fun skjæringstidspunkter(tidslinjer: List<Sykdomstidslinje>) = tidslinjer
             .merge(sammenhengendeSykdom)

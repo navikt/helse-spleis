@@ -200,7 +200,7 @@ internal class InfotrygdhistorikkElementTest {
         val tidslinje = element.sykdomstidslinje()
         val inspektør = SykdomstidslinjeInspektør(tidslinje)
         assertTrue(inspektør.dager.values.none { it is Dag.UkjentDag })
-        assertEquals(1.januar, tidslinje.skjæringstidspunkt())
+        assertEquals(1.januar, tidslinje.sisteSkjæringstidspunkt())
     }
 
     @Test
@@ -235,7 +235,7 @@ internal class InfotrygdhistorikkElementTest {
 
     @Test
     fun `historikk for overskriver ikke`() {
-        val sykdomstidslinje = 10.A + 5.n_ + 5.S
+        val sykdomstidslinje = 10.A + 5.opphold + 5.S
         val element = historikkelement(listOf(
             ArbeidsgiverUtbetalingsperiode("ag1", 1.januar,  10.januar, 100.prosent, 25000.månedlig),
             Friperiode(11.januar,  15.januar)

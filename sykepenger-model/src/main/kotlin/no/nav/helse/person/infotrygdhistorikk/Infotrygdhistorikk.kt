@@ -73,11 +73,11 @@ internal class Infotrygdhistorikk private constructor(
     }
 
     internal fun skjæringstidspunkt(organisasjonsnummer: String, periode: Periode, tidslinje: Sykdomstidslinje): LocalDate {
-        return Sykdomstidslinje.skjæringstidspunkt(periode.endInclusive, listOf(historikkFor(organisasjonsnummer, tidslinje))) ?: periode.start
+        return Sykdomstidslinje.sisteRelevanteSkjæringstidspunktForPerioden(periode, listOf(historikkFor(organisasjonsnummer, tidslinje))) ?: periode.start
     }
 
     internal fun skjæringstidspunkt(periode: Periode, tidslinjer: List<Sykdomstidslinje>): LocalDate {
-        return Sykdomstidslinje.skjæringstidspunkt(periode.endInclusive, tidslinjer + listOf(sykdomstidslinje())) ?: periode.start
+        return Sykdomstidslinje.sisteRelevanteSkjæringstidspunktForPerioden(periode, tidslinjer + listOf(sykdomstidslinje())) ?: periode.start
     }
 
     internal fun skjæringstidspunkter(tidslinjer: List<Sykdomstidslinje>): List<LocalDate> {
@@ -147,7 +147,7 @@ internal class Infotrygdhistorikk private constructor(
 
         init {
             builder.forlengelsestrategi { dagen ->
-                harBetalt(organisasjonsnummer, samletSykdomstidslinje.skjæringstidspunkt(dagen) ?: dagen)
+                harBetalt(organisasjonsnummer, samletSykdomstidslinje.sisteSkjæringstidspunktTidligereEnn(dagen) ?: dagen)
             }
         }
 

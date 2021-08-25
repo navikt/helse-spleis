@@ -109,9 +109,53 @@ internal class SykdomstidslinjeTest {
 
     @Test
     fun `ferie + ukjente dager i tidslinje skaper rare skjæringstidspunkt`() {
-        val tidslinje = 24.S + 2.F + 5.n_ + 16.F + 5.S
+        val tidslinje = 24.S + 2.F + 5.opphold + 16.F + 5.S
+        val skjæringstidspunkter = tidslinje.skjæringstidspunkter()
+        assertTrue(skjæringstidspunkter.contains(1.januar))
+        assertTrue(skjæringstidspunkter.contains(17.februar))
+        assertEquals(2, skjæringstidspunkter.size)
+    }
+
+    @Test
+    fun `skjæringstidspunkt - sammenhengende syk`() {
+        val tidslinje = 24.S
+        val skjæringstidspunkter = tidslinje.skjæringstidspunkter()
+        assertEquals(1, skjæringstidspunkter.size)
+        assertEquals(1.januar, skjæringstidspunkter.first())
+    }
+
+    @Test
+    fun `skjæringstidspunkt - syk opphold syk`() {
+        val tidslinje = 24.S + 10.opphold + 10.S
         val skjæringstidspunkter = tidslinje.skjæringstidspunkter()
         assertEquals(2, skjæringstidspunkter.size)
+        assertTrue(skjæringstidspunkter.contains(1.januar))
+        assertTrue(skjæringstidspunkter.contains(4.februar))
+    }
+
+    @Test
+    fun `skjæringstidspunkt - syk ferie syk`() {
+        val tidslinje = 24.S + 10.F + 10.S
+        val skjæringstidspunkter = tidslinje.skjæringstidspunkter()
+        assertEquals(1, skjæringstidspunkter.size)
+        assertEquals(1.januar, skjæringstidspunkter.first())
+    }
+
+    @Test
+    fun `skjæringstidspunkt - syk opphold ferie`() {
+        val tidslinje = 24.S + 10.opphold + 10.F
+        val skjæringstidspunkter = tidslinje.skjæringstidspunkter()
+        assertEquals(1, skjæringstidspunkter.size)
+        assertEquals(1.januar, skjæringstidspunkter.first())
+    }
+
+    @Test
+    fun `skjæringstidspunkt - syk ferie opphold syk`() {
+        val tidslinje = 24.S + 10.F + 10.opphold + 10.S
+        val skjæringstidspunkter = tidslinje.skjæringstidspunkter()
+        assertEquals(2, skjæringstidspunkter.size)
+        assertTrue(skjæringstidspunkter.contains(1.januar))
+        assertTrue(skjæringstidspunkter.contains(14.februar))
     }
 
     private val konfliktsky = { venstre: Dag, høyre: Dag ->

@@ -1178,7 +1178,6 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    @Disabled("Feilende test fra prodsak hvor periode havner i revurdering feilet")
     fun `feilet revurdering prodsak`() {
         /* Vi ser flere innslag hvor revurdering har feilet og havnet i REVURDERING_FEILET. Det ser ut som ferie i etterfølgende periode er årsaken.
         * Her er en feilende test. Værsågod :)

@@ -480,7 +480,9 @@ class Person private constructor(
     }
 
     internal fun kanRevurdereInntekt(skjæringstidspunkt: LocalDate) =
-        sammenligningsgrunnlag(skjæringstidspunkt) != null && grunnlagForSykepengegrunnlag(skjæringstidspunkt) != null && vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) != null
+        sammenligningsgrunnlag(skjæringstidspunkt) != null && grunnlagForSykepengegrunnlag(skjæringstidspunkt) != null && vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(
+            skjæringstidspunkt
+        ) != null
 
     internal fun harNødvendigInntekt(skjæringstidspunkt: LocalDate) = arbeidsgivere.harNødvendigInntekt(skjæringstidspunkt)
 

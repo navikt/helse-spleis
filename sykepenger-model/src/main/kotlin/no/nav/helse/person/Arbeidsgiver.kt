@@ -9,9 +9,9 @@ import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_REVURDERT
 import no.nav.helse.person.Vedtaksperiode.Companion.harInntekt
 import no.nav.helse.person.Vedtaksperiode.Companion.harNødvendigInntekt
 import no.nav.helse.person.Vedtaksperiode.Companion.harOverlappendeUtbetaltePerioder
+import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.medSkjæringstidspunkt
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
-import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.reflection.OppdragReflect
@@ -826,7 +826,7 @@ internal class Arbeidsgiver private constructor(
     internal fun forrigeSkjæringstidspunktInnenforArbeidsgiverperioden(regler: ArbeidsgiverRegler, nyFørsteSykedag: LocalDate): LocalDate? {
         val sykdomstidslinje = person.historikkFor(organisasjonsnummer, sykdomstidslinje())
         if (sykdomstidslinje.harNyArbeidsgiverperiodeFør(regler, nyFørsteSykedag)) return null
-        return sykdomstidslinje.skjæringstidspunkt(nyFørsteSykedag.minusDays(1))
+        return sykdomstidslinje.sisteSkjæringstidspunktTidligereEnn(nyFørsteSykedag.minusDays(1))
     }
 
     internal fun builder(regler: ArbeidsgiverRegler, skjæringstidspunkter: List<LocalDate>): UtbetalingstidslinjeBuilder {
