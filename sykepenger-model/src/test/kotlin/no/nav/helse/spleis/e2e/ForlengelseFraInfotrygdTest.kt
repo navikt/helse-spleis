@@ -293,7 +293,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(
             Sykdom(1.februar, 28.februar, 100.prosent),
-            andreInntektskilder = listOf(Søknad.Inntektskilde(false, "ANDRE_ARBEIDSFORHOLD")) // <-- for å sende til Infotrygd
+            andreInntektskilder = listOf(Søknad.Inntektskilde(true, "ANDRE_ARBEIDSFORHOLD")) // <-- for å sende til Infotrygd
         )
         inspektør.låstePerioder.also {
             assertEquals(0, it.size)

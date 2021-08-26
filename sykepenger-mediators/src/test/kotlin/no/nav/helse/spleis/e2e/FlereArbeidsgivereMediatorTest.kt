@@ -73,7 +73,7 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun `tillater ikke søknader med ANDRE_ARBEIDSFORHOLD der bruker ikke er sykmeldt`() {
+    fun `tillater søknader med ANDRE_ARBEIDSFORHOLD med og uten sykmelding - når det finnes flere arbeidsgivere med sykdom `() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), orgnummer = "orgnummer1")
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), orgnummer = "orgnummer2")
         sendSøknad(
@@ -94,12 +94,11 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
             0,
             "MOTTATT_SYKMELDING_FERDIG_GAP",
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
-            "TIL_INFOTRYGD"
         )
         assertTilstander(
             1,
             "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "TIL_INFOTRYGD"
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
         )
     }
 

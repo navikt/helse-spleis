@@ -69,7 +69,7 @@ abstract class SykdomstidslinjeHendelse(
         return (sykdomstidslinje().førsteSykedagEtter(fom) ?: fom) til periode.endInclusive
     }
 
-    internal open fun validerEnArbeidsgiver(): IAktivitetslogg = this
+    internal open fun validerIkkeOppgittFlereArbeidsforholdMedSykmelding(): IAktivitetslogg = this
 
     internal abstract fun valider(periode: Periode): IAktivitetslogg
 

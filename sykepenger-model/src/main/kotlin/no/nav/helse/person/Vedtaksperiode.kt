@@ -411,7 +411,7 @@ internal class Vedtaksperiode private constructor(
     private fun håndterSøknad(hendelse: SykdomstidslinjeHendelse, nesteTilstand: Vedtaksperiodetilstand?) {
         periode = periode.oppdaterFom(hendelse.periode())
         oppdaterHistorikk(hendelse)
-        if (!person.harFlereArbeidsgivereMedSykdom()) hendelse.validerEnArbeidsgiver()
+        if (!person.harFlereArbeidsgivereMedSykdom()) hendelse.validerIkkeOppgittFlereArbeidsforholdMedSykmelding()
         hendelse.valider(periode)
         if (hendelse.hasErrorsOrWorse()) {
             if (person.harFlereArbeidsgivereMedSykdom()) return person.invaliderAllePerioder(
