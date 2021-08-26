@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     kotlin("jvm") version "1.5.21"
 }
@@ -46,11 +44,11 @@ allprojects {
     }
 
     tasks {
-        withType<KotlinCompile> {
+        compileKotlin {
             kotlinOptions.jvmTarget = "16"
         }
 
-        named<KotlinCompile>("compileTestKotlin") {
+        compileTestKotlin {
             kotlinOptions.jvmTarget = "16"
         }
 
