@@ -274,6 +274,11 @@ internal class Vedtaksperiode private constructor(
             return
         }
 
+        if(revurdert.skjæringstidspunkt != this.skjæringstidspunkt && this.erUtbetalt()) {
+            hendelse.error("Kan kun revurdere siste skjæringstidspunkt")
+            return
+        }
+
         if (hendelse.hasErrorsOrWorse()) return
         if (revurdert.erSykeperiodeRettFør(this)) return tilstand.håndterTidligereTilstøtendeUferdigPeriode(this, revurdert, hendelse)
         tilstand.håndterTidligereUferdigPeriode(this, revurdert, hendelse)

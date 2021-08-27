@@ -167,6 +167,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
     }
 
     @Test
+    @Disabled("Denne er skrudd av i påvente av at vi skal støtte revurdering over skjæringstidspunkt")
     fun `overstyr inntekt to vedtak med kort opphold`() {
         nyttVedtak(1.januar, 26.januar, 100.prosent)
 
@@ -231,6 +232,54 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         )
 
         assertEquals(3, inspektør.utbetalinger.filter { it.erUtbetalt() }.size)
+    }
+
+    @Test
+    fun `kan ikke overstyre inntekt på på vedtak med opphold og nytt skjæringstidspunkt etterpå`() {
+        nyttVedtak(1.januar, 26.januar, 100.prosent)
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 14.februar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 14.februar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.februar)
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt(2.vedtaksperiode)
+
+        håndterOverstyring(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar, ident = "N123456")
+
+        assertTilstander(
+            0,
+            TilstandType.START,
+            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
+            TilstandType.AVVENTER_SØKNAD_FERDIG_GAP,
+            TilstandType.AVVENTER_UTBETALINGSGRUNNLAG,
+            TilstandType.AVVENTER_HISTORIKK,
+            TilstandType.AVVENTER_VILKÅRSPRØVING,
+            TilstandType.AVVENTER_HISTORIKK,
+            TilstandType.AVVENTER_SIMULERING,
+            TilstandType.AVVENTER_GODKJENNING,
+            TilstandType.TIL_UTBETALING,
+            TilstandType.AVSLUTTET)
+
+        assertTilstander(
+            1,
+            TilstandType.START,
+            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
+            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            TilstandType.AVVENTER_UTBETALINGSGRUNNLAG,
+            TilstandType.AVVENTER_HISTORIKK,
+            TilstandType.AVVENTER_VILKÅRSPRØVING,
+            TilstandType.AVVENTER_HISTORIKK,
+            TilstandType.AVVENTER_SIMULERING,
+            TilstandType.AVVENTER_GODKJENNING,
+            TilstandType.TIL_UTBETALING,
+            TilstandType.AVSLUTTET
+        )
+        assertErrorTekst(inspektør, "Kan kun revurdere siste skjæringstidspunkt")
     }
 
     @Test

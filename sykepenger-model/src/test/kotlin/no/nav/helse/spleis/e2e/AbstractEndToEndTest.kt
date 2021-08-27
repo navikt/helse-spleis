@@ -134,6 +134,16 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         assertTrue(warningList.isEmpty(), "har ikke fått warnings $warningList")
     }
 
+    protected fun assertErrorTekst(inspektør: TestArbeidsgiverInspektør, vararg errors: String) {
+        val errorList = errors.toMutableList()
+        inspektør.personLogg.accept(object : AktivitetsloggVisitor {
+            override fun visitError(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Error, melding: String, tidsstempel: String) {
+                assertTrue(errorList.remove(melding), "fant ikke error $melding")
+            }
+        })
+        assertTrue(errorList.isEmpty(), "har ikke fått errors $errorList")
+    }
+
     protected fun assertErrors(inspektør: TestArbeidsgiverInspektør) {
         assertTrue(inspektør.personLogg.hasErrorsOrWorse(), inspektør.personLogg.toString())
     }
