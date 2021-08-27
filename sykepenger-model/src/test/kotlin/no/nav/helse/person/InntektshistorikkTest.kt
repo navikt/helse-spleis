@@ -7,7 +7,8 @@ import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -278,128 +279,6 @@ internal class InntektshistorikkTest {
         assertEquals(2, inspektør.inntektTeller.size)
         assertEquals(2, inspektør.inntektTeller.first())
         assertEquals(1, inspektør.inntektTeller.last())
-    }
-
-    @Test
-    fun `Kopier inntektsopplysning fra inntektsmelding`() {
-        inntektsmelding(førsteFraværsdag = 1.januar).addInntekt(historikk, 1.januar)
-
-        assertTrue(historikk.opprettReferanse(1.januar, 10.januar, UUID.randomUUID()))
-
-        assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(1.januar))
-        assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(10.januar))
-
-        assertEquals(2, inspektør.inntektTeller.size)
-        assertEquals(2, inspektør.inntektTeller.first())
-        assertEquals(1, inspektør.inntektTeller.last())
-    }
-
-    @Test
-    fun `Kopierer ikke inntektsmeldinginntekt med annen dato`() {
-        inntektsmelding(førsteFraværsdag = 1.januar).addInntekt(historikk, 1.januar)
-
-        assertFalse(historikk.opprettReferanse(5.januar, 10.januar, UUID.randomUUID()))
-
-        assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(1.januar))
-        assertNull(historikk.grunnlagForSykepengegrunnlag(10.januar))
-
-        assertEquals(1, inspektør.inntektTeller.size)
-        assertEquals(1, inspektør.inntektTeller.first())
-    }
-
-    @Test
-    fun `Oppretter ikke nytt innslag hvis ingen inntekter kopieres`() {
-        assertFalse(historikk.opprettReferanse(1.januar, 10.januar, UUID.randomUUID()))
-
-        assertNull(historikk.grunnlagForSykepengegrunnlag(1.januar))
-        assertNull(historikk.grunnlagForSykepengegrunnlag(10.januar))
-
-        assertTrue(inspektør.inntektTeller.isEmpty())
-    }
-
-    @Test
-    fun `Kopier inntektsopplysning fra saksbehandler`() {
-        historikk {
-            addSaksbehandler(1.januar, UUID.randomUUID(), INNTEKT)
-        }
-
-        assertTrue(historikk.opprettReferanse(1.januar, 10.januar, UUID.randomUUID()))
-
-        assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(1.januar))
-        assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(10.januar))
-
-        assertEquals(2, inspektør.inntektTeller.size)
-        assertEquals(2, inspektør.inntektTeller.first())
-        assertEquals(1, inspektør.inntektTeller.last())
-    }
-
-    @Test
-    fun `Kopierer ikke saksbehandlerinntekt med annen dato`() {
-        historikk {
-            addSaksbehandler(1.januar, UUID.randomUUID(), INNTEKT)
-        }
-
-        assertFalse(historikk.opprettReferanse(5.januar, 10.januar, UUID.randomUUID()))
-
-        assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(1.januar))
-        assertNull(historikk.grunnlagForSykepengegrunnlag(10.januar))
-
-        assertEquals(1, inspektør.inntektTeller.size)
-        assertEquals(1, inspektør.inntektTeller.first())
-    }
-
-    @Test
-    fun `Kopier inntektsopplysningskopi`() {
-        historikk {
-            addSaksbehandler(1.januar, UUID.randomUUID(), INNTEKT)
-        }
-
-        assertTrue(historikk.opprettReferanse(1.januar, 10.januar, UUID.randomUUID()))
-        assertTrue(historikk.opprettReferanse(10.januar, 20.januar, UUID.randomUUID()))
-
-        assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(1.januar))
-        assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(10.januar))
-        assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(20.januar))
-
-        assertEquals(3, inspektør.inntektTeller.size)
-        assertEquals(3, inspektør.inntektTeller[0])
-        assertEquals(2, inspektør.inntektTeller[1])
-        assertEquals(1, inspektør.inntektTeller[2])
-    }
-
-    @Test
-    fun `Kopierer ikke inntektsopplysningskopiinntekt med annen dato`() {
-        historikk {
-            addSaksbehandler(1.januar, UUID.randomUUID(), INNTEKT)
-        }
-
-        assertTrue(historikk.opprettReferanse(1.januar, 10.januar, UUID.randomUUID()))
-        assertFalse(historikk.opprettReferanse(15.januar, 20.januar, UUID.randomUUID()))
-
-        assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(1.januar))
-        assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(10.januar))
-        assertNull(historikk.grunnlagForSykepengegrunnlag(20.januar))
-
-        assertEquals(2, inspektør.inntektTeller.size)
-        assertEquals(2, inspektør.inntektTeller.first())
-        assertEquals(1, inspektør.inntektTeller.last())
-    }
-
-    @Test
-    fun `Kopierer ikke skatteopplysninger`() {
-        inntektperioderForSykepengegrunnlag {
-            1.oktober(2017) til 1.desember(2017) inntekter {
-                ORGNUMMER inntekt INNTEKT
-            }
-        }.forEach { it.lagreInntekter(historikk, 1.januar, UUID.randomUUID()) }
-
-        assertFalse(historikk.opprettReferanse(1.januar, 10.januar, UUID.randomUUID()))
-
-        assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(1.januar))
-        assertNull(historikk.grunnlagForSykepengegrunnlag(10.januar))
-
-        assertEquals(1, inspektør.inntektTeller.size)
-        assertEquals(3, inspektør.inntektTeller.first())
     }
 
     private fun inntektsmelding(

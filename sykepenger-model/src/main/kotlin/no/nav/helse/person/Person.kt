@@ -354,9 +354,6 @@ class Person private constructor(
         vedtaksperiode.håndterHistorikkFraInfotrygd(hendelse, infotrygdhistorikk)
     }
 
-    internal fun historikkFor(orgnummer: String, sykdomstidslinje: Sykdomstidslinje) =
-        infotrygdhistorikk.historikkFor(orgnummer, sykdomstidslinje)
-
     internal fun harInfotrygdUtbetalt(orgnummer: String, skjæringstidspunkt: LocalDate) =
         infotrygdhistorikk.harBetalt(orgnummer, skjæringstidspunkt)
 

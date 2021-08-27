@@ -414,11 +414,10 @@ internal data class PersonData(
                     inntekter: List<InntektshistorikkInnslagData>,
                     inntektshistorikk: Inntektshistorikk
                 ) {
-                    val alleOpplysninger = mutableMapOf<Pair<UUID, UUID>, Inntektshistorikk.Inntektsopplysning>()
                     inntektshistorikk.appender(Inntektshistorikk.RestoreJsonMode) {
                         inntekter.reversed().forEach {
                             innslag(it.id) {
-                                InntektsopplysningData.parseInntekter(it.inntektsopplysninger, this, it.id, alleOpplysninger)
+                                InntektsopplysningData.parseInntekter(it.inntektsopplysninger, this)
                             }
                         }
                     }
@@ -445,9 +444,7 @@ internal data class PersonData(
             internal companion object {
                 internal fun parseInntekter(
                     inntektsopplysninger: List<InntektsopplysningData>,
-                    innslag: Inntektshistorikk.RestoreJsonMode.InnslagAppender,
-                    innslagId: UUID,
-                    alleOpplysninger: MutableMap<Pair<UUID, UUID>, Inntektshistorikk.Inntektsopplysning>
+                    innslag: Inntektshistorikk.RestoreJsonMode.InnslagAppender
                 ) {
                     inntektsopplysninger.forEach { inntektData ->
                         when (inntektData.kilde?.let(Kilde::valueOf)) {
@@ -473,16 +470,6 @@ internal data class PersonData(
                                     dato = requireNotNull(inntektData.dato),
                                     hendelseId = requireNotNull(inntektData.hendelseId),
                                     beløp = requireNotNull(inntektData.beløp).månedlig,
-                                    tidsstempel = requireNotNull(inntektData.tidsstempel)
-                                )
-                            Kilde.INNTEKTSOPPLYSNING_REFERANSE ->
-                                Inntektshistorikk.InntektsopplysningReferanse(
-                                    id = requireNotNull(inntektData.id),
-                                    innslagId = requireNotNull(inntektData.innslagId),
-                                    orginalOpplysningId = requireNotNull(inntektData.orginalOpplysningId),
-                                    orginalOpplysning = alleOpplysninger.getValue(inntektData.innslagId to inntektData.orginalOpplysningId),
-                                    dato = requireNotNull(inntektData.dato),
-                                    hendelseId = requireNotNull(inntektData.hendelseId),
                                     tidsstempel = requireNotNull(inntektData.tidsstempel)
                                 )
                             null -> Inntektshistorikk.SkattComposite(
@@ -519,7 +506,6 @@ internal data class PersonData(
                             Kilde.SKATT_SYKEPENGEGRUNNLAG -> error("Fant ${inntektData.kilde}. Kan kun være i SkattComposite")
                         }
                             .also(innslag::add)
-                            .also { alleOpplysninger[innslagId to inntektData.id] = it }
                     }
                 }
             }

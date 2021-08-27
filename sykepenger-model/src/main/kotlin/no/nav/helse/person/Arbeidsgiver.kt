@@ -28,7 +28,6 @@ import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetaltTidslinje
 import no.nav.helse.utbetalingslinjer.UtbetalingObserver
 import no.nav.helse.utbetalingstidslinje.*
 import no.nav.helse.økonomi.Inntekt.Companion.summer
-import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -67,7 +66,6 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal companion object {
-        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
         internal fun Iterable<Arbeidsgiver>.nåværendeVedtaksperioder(filter: VedtaksperiodeFilter) =
             mapNotNull { it.vedtaksperioder.nåværendeVedtaksperiode(filter) }
@@ -136,7 +134,7 @@ internal class Arbeidsgiver private constructor(
             skjæringstidspunkt: LocalDate
         ): Boolean {
             val orgnumre = arbeidsgivere
-                .filter { it.vedtaksperioder.any { it.periode().overlapperMed(vedtaksperiode.periode()) } }
+                .filter { arbeidsgiver -> arbeidsgiver.vedtaksperioder.any { it.periode().overlapperMed(vedtaksperiode.periode()) } }
                 .map { it.organisasjonsnummer }
                 .distinct()
             return infotrygdhistorikk.ingenUkjenteArbeidsgivere(orgnumre, skjæringstidspunkt)
@@ -823,12 +821,6 @@ internal class Arbeidsgiver private constructor(
     internal fun avgrensetPeriode(periode: Periode) =
         Periode(maxOf(periode.start, skjæringstidspunkt(periode)), periode.endInclusive)
 
-    internal fun forrigeSkjæringstidspunktInnenforArbeidsgiverperioden(regler: ArbeidsgiverRegler, nyFørsteSykedag: LocalDate): LocalDate? {
-        val sykdomstidslinje = person.historikkFor(organisasjonsnummer, sykdomstidslinje())
-        if (sykdomstidslinje.harNyArbeidsgiverperiodeFør(regler, nyFørsteSykedag)) return null
-        return sykdomstidslinje.sisteSkjæringstidspunktTidligereEnn(nyFørsteSykedag.minusDays(1))
-    }
-
     internal fun builder(regler: ArbeidsgiverRegler, skjæringstidspunkter: List<LocalDate>): UtbetalingstidslinjeBuilder {
         return UtbetalingstidslinjeBuilder(
             skjæringstidspunkter = skjæringstidspunkter,
@@ -858,8 +850,6 @@ internal class Arbeidsgiver private constructor(
         // TODO: leiter frem fra forkasta perioder — vilkårsgrunnlag ol. felles data bør lagres på Arbeidsgivernivå
         ForkastetVedtaksperiode.finnForrigeAvsluttaPeriode(forkastede, vedtaksperiode)
     }
-
-    internal fun opprettReferanseTilInntekt(fra: LocalDate, til: LocalDate) = inntektshistorikk.opprettReferanse(fra, til, UUID.randomUUID())
 
     private fun trimTidligereBehandletDager(hendelse: Inntektsmelding) {
         ForkastetVedtaksperiode.overlapperMedForkastet(vedtaksperioder, forkastede, hendelse)

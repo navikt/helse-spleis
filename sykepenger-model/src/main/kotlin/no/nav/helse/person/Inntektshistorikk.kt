@@ -57,19 +57,6 @@ internal class Inntektshistorikk {
     internal fun grunnlagForSammenligningsgrunnlagMedMetadata(dato: LocalDate): Pair<Inntektsopplysning, Inntekt>? =
         historikk.firstOrNull()?.grunnlagForSammenligningsgrunnlag(dato)
 
-    internal fun opprettReferanse(fra: LocalDate, til: LocalDate, hendelseId: UUID): Boolean {
-        if (fra > til) return false
-        if (fra == til) return true
-        val forrigeInnslag = historikk.firstOrNull()
-        forrigeInnslag?.clone()?.also { innslag ->
-            if (innslag.opprettReferanse(fra, til, forrigeInnslag, hendelseId)) {
-                historikk.add(0, innslag)
-                return true
-            }
-        }
-        return false
-    }
-
     internal fun sykepengegrunnlagKommerFraSkatt(skjæringstidspunkt: LocalDate) = grunnlagForSykepengegrunnlagMedMetadata(skjæringstidspunkt)?.first.let { it == null || it is SkattComposite }
     internal fun harGrunnlagForSykepengegrunnlag(dato: LocalDate) =  grunnlagForSykepengegrunnlag(dato) != null
     private fun harGrunnlagForSammenligningsgrunnlag(dato: LocalDate) = grunnlagForSammenligningsgrunnlag(dato) != null
@@ -114,18 +101,6 @@ internal class Inntektshistorikk {
                 .mapNotNull { it.grunnlagForSykepengegrunnlag(periode) }
                 .firstOrNull()
 
-        internal fun opprettReferanse(fra: LocalDate, til: LocalDate, forrigeInnslag: Innslag, hendelseId: UUID): Boolean {
-            inntekter
-                .sorted()
-                .mapNotNull { it.opprettReferanse(fra, til, forrigeInnslag.id, hendelseId) }
-                .firstOrNull()
-                ?.also {
-                    add(it)
-                    return true
-                }
-            return false
-        }
-
         internal companion object {
             internal fun List<Innslag>.nyesteId() = this.first().id
         }
@@ -142,7 +117,6 @@ internal class Inntektshistorikk {
             (-this.dato.compareTo(other.dato)).takeUnless { it == 0 } ?: -this.prioritet.compareTo(other.prioritet)
 
         fun kanLagres(other: Inntektsopplysning) = true
-        fun opprettReferanse(dato: LocalDate, nyDato: LocalDate, innslagId: UUID, hendelseId: UUID): Inntektsopplysning? = null
     }
 
     internal class Saksbehandler(
@@ -162,9 +136,6 @@ internal class Inntektshistorikk {
 
         override fun skalErstattesAv(other: Inntektsopplysning) =
             other is Saksbehandler && this.dato == other.dato
-
-        override fun opprettReferanse(dato: LocalDate, nyDato: LocalDate, innslagId: UUID, hendelseId: UUID) =
-            takeIf { it.dato == dato }?.let { InntektsopplysningReferanse(UUID.randomUUID(), innslagId, id, this, nyDato, hendelseId) }
     }
 
     internal class Infotrygd(
@@ -185,9 +156,6 @@ internal class Inntektshistorikk {
 
         override fun skalErstattesAv(other: Inntektsopplysning) =
             other is Infotrygd && this.dato == other.dato
-
-        override fun opprettReferanse(dato: LocalDate, nyDato: LocalDate, innslagId: UUID, hendelseId: UUID) =
-            takeIf { it.dato == dato }?.let { InntektsopplysningReferanse(UUID.randomUUID(), innslagId, id, this, nyDato, hendelseId) }
     }
 
     internal class Inntektsmelding(
@@ -210,37 +178,6 @@ internal class Inntektshistorikk {
 
         override fun kanLagres(other: Inntektsopplysning) =
             other !is Inntektsmelding || this.dato != other.dato
-
-        override fun opprettReferanse(dato: LocalDate, nyDato: LocalDate, innslagId: UUID, hendelseId: UUID) =
-            takeIf { it.dato == dato }?.let { InntektsopplysningReferanse(UUID.randomUUID(), innslagId, id, this, nyDato, hendelseId) }
-    }
-
-    internal class InntektsopplysningReferanse(
-        private val id: UUID,
-        private val innslagId: UUID,
-        private val orginalOpplysningId: UUID,
-        private val orginalOpplysning: Inntektsopplysning,
-        override val dato: LocalDate,
-        private val hendelseId: UUID,
-        private val tidsstempel: LocalDateTime = LocalDateTime.now()
-    ) : Inntektsopplysning {
-        override val prioritet = 50
-
-        override fun accept(visitor: InntekthistorikkVisitor) {
-            visitor.preVisitInntektsopplysningKopi(this, dato, hendelseId, tidsstempel)
-            orginalOpplysning.accept(visitor)
-            visitor.postVisitInntektsopplysningKopi(this, dato, hendelseId, tidsstempel)
-        }
-
-        override fun grunnlagForSykepengegrunnlag(dato: LocalDate) = takeIf { it.dato == dato }
-            ?.let { orginalOpplysning.grunnlagForSykepengegrunnlag(orginalOpplysning.dato) }
-            ?.let { (_, inntekt) -> this to inntekt }
-
-        override fun skalErstattesAv(other: Inntektsopplysning) =
-            other is InntektsopplysningReferanse && this.dato == other.dato
-
-        override fun opprettReferanse(dato: LocalDate, nyDato: LocalDate, innslagId: UUID, hendelseId: UUID) =
-            takeIf { it.dato == dato }?.let { InntektsopplysningReferanse(UUID.randomUUID(), innslagId, id, this, nyDato, hendelseId) }
     }
 
     internal class SkattComposite(

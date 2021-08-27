@@ -417,22 +417,6 @@ internal interface InntekthistorikkVisitor {
     ) {
     }
 
-    fun preVisitInntektsopplysningKopi(
-        inntektsopplysning: Inntektshistorikk.InntektsopplysningReferanse,
-        dato: LocalDate,
-        hendelseId: UUID,
-        tidsstempel: LocalDateTime
-    ) {
-    }
-
-    fun postVisitInntektsopplysningKopi(
-        inntektsopplysning: Inntektshistorikk.InntektsopplysningReferanse,
-        dato: LocalDate,
-        hendelseId: UUID,
-        tidsstempel: LocalDateTime
-    ) {
-    }
-
     fun visitInfotrygd(
         infotrygd: Inntektshistorikk.Infotrygd,
         dato: LocalDate,

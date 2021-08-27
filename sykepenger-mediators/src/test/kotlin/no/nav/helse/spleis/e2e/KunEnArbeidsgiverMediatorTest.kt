@@ -1,11 +1,9 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggles
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.person.TilstandType
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
-import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.inntektsmeldingkontrakt.Naturalytelse
 import no.nav.inntektsmeldingkontrakt.OpphoerAvNaturalytelse
@@ -362,59 +360,6 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
 
         assertForkastedeTilstander(0, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVSLUTTET_UTEN_UTBETALING")
         assertForkastedeTilstander(1, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP", "TIL_INFOTRYGD")
-    }
-
-    @Test
-    fun `Venter ikke på inntektsmelding hvis gap mellom forrige periode og nå er mindre enn 16 dager`() {
-        Toggles.PraksisendringEnabled.enable {
-            sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 21.januar, sykmeldingsgrad = 100))
-            sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 21.januar, sykmeldingsgrad = 100)))
-            sendUtbetalingshistorikk(0)
-            sendInntektsmelding(0, listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
-            sendUtbetalingsgrunnlag(0)
-            sendYtelserUtenSykepengehistorikk(0)
-            sendVilkårsgrunnlag(0)
-            sendYtelserUtenSykepengehistorikk(0)
-            sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
-            sendUtbetalingsgodkjenning(0, true)
-            sendUtbetaling()
-            assertTilstander(
-                0,
-                "MOTTATT_SYKMELDING_FERDIG_GAP",
-                "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
-                "AVVENTER_UTBETALINGSGRUNNLAG",
-                "AVVENTER_HISTORIKK",
-                "AVVENTER_VILKÅRSPRØVING",
-                "AVVENTER_HISTORIKK",
-                "AVVENTER_SIMULERING",
-                "AVVENTER_GODKJENNING",
-                "TIL_UTBETALING",
-                "AVSLUTTET"
-            )
-
-            sendNySøknad(SoknadsperiodeDTO(fom = 6.februar, tom = 28.februar, sykmeldingsgrad = 100))
-            sendSøknad(1, listOf(SoknadsperiodeDTO(fom = 6.februar, tom = 28.februar, sykmeldingsgrad = 100)))
-            sendUtbetalingsgrunnlag(1)
-            sendYtelserUtenSykepengehistorikk(1)
-            sendVilkårsgrunnlag(1)
-            sendYtelserUtenSykepengehistorikk(1)
-            sendSimulering(1, SimuleringMessage.Simuleringstatus.OK)
-            sendUtbetalingsgodkjenning(1, true)
-            sendUtbetaling()
-            assertTilstander(
-                1,
-                "MOTTATT_SYKMELDING_FERDIG_GAP",
-                "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
-                "AVVENTER_UTBETALINGSGRUNNLAG",
-                "AVVENTER_HISTORIKK",
-                "AVVENTER_VILKÅRSPRØVING",
-                "AVVENTER_HISTORIKK",
-                "AVVENTER_SIMULERING",
-                "AVVENTER_GODKJENNING",
-                "TIL_UTBETALING",
-                "AVSLUTTET"
-            )
-        }
     }
 
     @Disabled("https://trello.com/c/Ob6kSelp")

@@ -103,34 +103,6 @@ class JsonBuilderTest {
     }
 
     @Test
-    fun `gjenoppbygd person er lik opprinnelig person med kopiert inntekt`() {
-        Toggles.PraksisendringEnabled.enable {
-            testSerialiseringAvPerson(personMedLiteGap())
-        }
-    }
-
-    @Test
-    fun `Kopi av inntekt lagrer kun peker til opprinnelig inntektsopplysning`() {
-        Toggles.PraksisendringEnabled.enable {
-            val builder = JsonBuilder()
-            personMedLiteGap().accept(builder)
-            objectMapper.readTree(builder.toString())
-                .get("arbeidsgivere")
-                .first()
-                .get("inntektshistorikk")
-                .flatMap { inntektshistorikk ->
-                    inntektshistorikk["inntektsopplysninger"]
-                        .groupBy { it["id"].asText() }
-                        .values
-                }
-                .forEach {
-                    assertEquals(1, it.size)
-                }
-        }
-    }
-
-
-    @Test
     fun `Lagrer dødsdato på person`() {
         val fom = 1.januar
         val tom = 31.januar

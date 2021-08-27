@@ -168,14 +168,6 @@ internal class Sykdomstidslinje private constructor(
     internal fun førsteIkkeUkjentDagEtter(dato: LocalDate) =
         periode?.firstOrNull { it >= dato && this[it] !is UkjentDag }
 
-    private fun forrigeSykedagFør(dato: LocalDate) =
-        periode?.lastOrNull { it < dato && erEnSykedag(this[it]) }
-
-    internal fun harNyArbeidsgiverperiodeFør(regler: ArbeidsgiverRegler, nesteSykedag: LocalDate): Boolean {
-        val forrigeSykedag = forrigeSykedagFør(nesteSykedag) ?: return false
-        return regler.burdeStarteNyArbeidsgiverperiode(avstandMellomSykedager(forrigeSykedag, nesteSykedag))
-    }
-
     internal fun harNyArbeidsgiverperiodeEtter(regler: ArbeidsgiverRegler, fraOgMed: LocalDate) =
         fraOgMed(fraOgMed)
             .kunSykedager()

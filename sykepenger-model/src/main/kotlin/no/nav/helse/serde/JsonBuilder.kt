@@ -659,16 +659,6 @@ internal class JsonBuilder : AbstractBuilder() {
             inntektsopplysninger.add(InntektsmeldingReflect(inntektsmelding).toMap())
         }
 
-        override fun preVisitInntektsopplysningKopi(
-            inntektsopplysning: Inntektshistorikk.InntektsopplysningReferanse,
-            dato: LocalDate,
-            hendelseId: UUID,
-            tidsstempel: LocalDateTime
-        ) {
-            inntektsopplysninger.add(InntektsopplysningKopiReflect(inntektsopplysning).toMap())
-            pushState(InntektsopplysningKopiState())
-        }
-
         override fun visitInfotrygd(
             infotrygd: Inntektshistorikk.Infotrygd,
             dato: LocalDate,
@@ -721,15 +711,6 @@ internal class JsonBuilder : AbstractBuilder() {
 
         override fun postVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID) = popState()
         override fun postVisitInnslag(innslag: Inntektshistorikk.Innslag, id: UUID) = popState()
-    }
-
-    private class InntektsopplysningKopiState : BuilderState() {
-        override fun postVisitInntektsopplysningKopi(
-            inntektsopplysning: Inntektshistorikk.InntektsopplysningReferanse,
-            dato: LocalDate,
-            hendelseId: UUID,
-            tidsstempel: LocalDateTime
-        ) = popState()
     }
 
     private class VedtaksperiodeState(

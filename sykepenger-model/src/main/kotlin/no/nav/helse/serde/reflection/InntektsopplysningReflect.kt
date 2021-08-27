@@ -9,7 +9,7 @@ import java.time.YearMonth
 import java.util.*
 
 internal enum class Kilde {
-    SKATT_SAMMENLIGNINGSGRUNNLAG, SKATT_SYKEPENGEGRUNNLAG, INFOTRYGD, INNTEKTSMELDING, INNTEKTSOPPLYSNING_REFERANSE, SAKSBEHANDLER
+    SKATT_SAMMENLIGNINGSGRUNNLAG, SKATT_SYKEPENGEGRUNNLAG, INFOTRYGD, INNTEKTSMELDING, SAKSBEHANDLER
 }
 
 internal abstract class InntektsopplysningReflect(
@@ -69,27 +69,6 @@ internal class SaksbehandlerReflect(
 internal class InntektsmeldingReflect(
     inntektsopplysning: Inntektshistorikk.Inntektsmelding
 ) : InntektsopplysningReflect(inntektsopplysning, Kilde.INNTEKTSMELDING)
-
-internal class InntektsopplysningKopiReflect(
-    inntektsopplysning: Inntektshistorikk.InntektsopplysningReferanse
-) {
-    private val id: UUID = inntektsopplysning["id"]
-    private val innslagId: UUID = inntektsopplysning["innslagId"]
-    private val orginalOpplysningId: UUID = inntektsopplysning["orginalOpplysningId"]
-    private val dato: LocalDate = inntektsopplysning["dato"]
-    private val hendelseId: UUID = inntektsopplysning["hendelseId"]
-    private val tidsstempel: LocalDateTime = inntektsopplysning["tidsstempel"]
-
-    internal fun toMap(): Map<String, Any?> = mapOf(
-        "id" to id,
-        "innslagId" to innslagId,
-        "orginalOpplysningId" to orginalOpplysningId,
-        "dato" to dato,
-        "hendelseId" to hendelseId,
-        "kilde" to Kilde.INNTEKTSOPPLYSNING_REFERANSE,
-        "tidsstempel" to tidsstempel
-    )
-}
 
 internal class InfotrygdReflect(
     inntektsopplysning: Inntektshistorikk.Infotrygd

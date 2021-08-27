@@ -1661,18 +1661,6 @@ internal class Vedtaksperiode private constructor(
                         info("Oppdaget at perioden er en forlengelse")
                         return@onSuccess vedtaksperiode.tilstand(hendelse, AvventerUtbetalingsgrunnlag)
                     }
-                    if (!Toggles.PraksisendringEnabled.enabled) return@onSuccess
-
-                    val førsteSykedag = vedtaksperiode.sykdomstidslinje.førsteSykedag() ?: return@onSuccess
-                    val forrigeSkjæringstidspunkt = arbeidsgiver.forrigeSkjæringstidspunktInnenforArbeidsgiverperioden(
-                        vedtaksperiode.regler,
-                        førsteSykedag
-                    ) ?: return@onSuccess
-
-                    infotrygdhistorikk.addInntekter(person, this)
-                    if (!arbeidsgiver.opprettReferanseTilInntekt(forrigeSkjæringstidspunkt, førsteSykedag)) return@onSuccess
-
-                    vedtaksperiode.tilstand(hendelse, AvventerUtbetalingsgrunnlag)
                 }
             }
         }

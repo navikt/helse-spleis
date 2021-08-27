@@ -1,6 +1,5 @@
 package no.nav.helse.serde.api
 
-import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Inntektshistorikk
@@ -10,9 +9,11 @@ import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.api.builders.InntektshistorikkBuilder
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.desember
+import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
+import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.oktober
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
-import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -206,75 +207,5 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
             }
         }
         assertNull(inntektsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.inntekter.single { it.arbeidsgiver == ORGNUMMER }.sammenligningsgrunnlag)
-    }
-
-    @Test
-    fun `Finner inntektsgrunnlag for en arbeidsgiver med en kopiert inntekt`() {
-        Toggles.PraksisendringEnabled.enable()
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-
-        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
-
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-
-        håndterVilkårsgrunnlag(
-            1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-                inntekter = inntektperioderForSammenligningsgrunnlag{ 1.januar(2017) til 1.desember(2017) inntekter {
-                        ORGNUMMER inntekt INNTEKT
-                    }
-                })
-        )
-
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
-
-        håndterSykmelding(Sykmeldingsperiode(10.februar, 28.februar, 100.prosent))
-        håndterSøknadMedValidering(2.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(10.februar, 28.februar, 100.prosent))
-
-        val nyttSammenlingningsGrunnlag = INNTEKT + 1000.månedlig
-
-        håndterUtbetalingsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
-        håndterVilkårsgrunnlag(
-            2.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-                inntekter = inntektperioderForSammenligningsgrunnlag {
-                    1.februar(2017) til 1.januar(2018) inntekter {
-                        ORGNUMMER inntekt nyttSammenlingningsGrunnlag
-                    }
-                })
-        )
-
-        val builder = InntektshistorikkBuilder(person)
-        builder.nøkkeldataOmInntekt(10.februar og 28.februar avvik 7.7)
-
-        FinnInntektshistorikk(person, builder)
-        val inntektsgrunnlag = builder.build()
-
-        assertTrue(inntektsgrunnlag.isNotEmpty())
-        inntektsgrunnlag.single { it.skjæringstidspunkt == 10.februar }.also { inntektsgrunnlaget ->
-            assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, inntektsgrunnlaget.sykepengegrunnlag)
-            assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, inntektsgrunnlaget.omregnetÅrsinntekt)
-            assertEquals(nyttSammenlingningsGrunnlag.reflection { _, mnd, _, _ -> mnd } * 12, inntektsgrunnlaget.sammenligningsgrunnlag)
-            assertEquals(7.7, inntektsgrunnlaget.avviksprosent)
-            assertEquals(1430.7692307692307, inntektsgrunnlaget.maksUtbetalingPerDag)
-            requireNotNull(inntektsgrunnlaget.inntekter.single { it.arbeidsgiver == ORGNUMMER }.omregnetÅrsinntekt).also { omregnetÅrsinntekt ->
-                assertEquals(InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.Inntektsmelding, omregnetÅrsinntekt.kilde)
-                assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, omregnetÅrsinntekt.beløp)
-                assertEquals(INNTEKT.reflection { _, mnd, _, _ -> mnd }, omregnetÅrsinntekt.månedsbeløp)
-            }
-        }
-        inntektsgrunnlag.single { it.skjæringstidspunkt == 10.februar }.inntekter.single { it.arbeidsgiver == ORGNUMMER }.sammenligningsgrunnlag.also { sammenligningsgrunnlag ->
-            requireNotNull(sammenligningsgrunnlag)
-            assertEquals(nyttSammenlingningsGrunnlag.reflection { _, mnd, _, _ -> mnd } * 12, sammenligningsgrunnlag.beløp)
-            sammenligningsgrunnlag.inntekterFraAOrdningen.also {
-                assertEquals(12, it.size)
-                it.forEach { inntekt -> assertEquals(nyttSammenlingningsGrunnlag.reflection { _, mnd, _, _ -> mnd }, inntekt.sum) }
-            }
-        }
-        Toggles.PraksisendringEnabled.pop()
     }
 }

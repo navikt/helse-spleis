@@ -162,41 +162,6 @@ internal class InfotrygdInntektsopplysningTest {
         assertNull(historikk.grunnlagForSykepengegrunnlag(1.januar, 4.januar))
     }
 
-    @Test
-    fun `Kopier inntektsopplysning fra infotrygd`() {
-        Inntektsopplysning.lagreInntekter(
-            listOf(Inntektsopplysning(ORGNR, 1.januar, INNTEKT, true)),
-            historikk,
-            UUID.randomUUID()
-        )
-
-        assertTrue(historikk.opprettReferanse(1.januar, 10.januar, UUID.randomUUID()))
-
-        assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(1.januar))
-        assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(10.januar))
-
-        assertEquals(2, inspektør.inntektTeller.size)
-        assertEquals(2, inspektør.inntektTeller.first())
-        assertEquals(1, inspektør.inntektTeller.last())
-    }
-
-    @Test
-    fun `Kopierer ikke infotrygdinntekt med annen dato`() {
-        Inntektsopplysning.lagreInntekter(
-            listOf(Inntektsopplysning(ORGNR, 1.januar, INNTEKT, true)),
-            historikk,
-            UUID.randomUUID()
-        )
-
-        assertFalse(historikk.opprettReferanse(5.januar, 10.januar, UUID.randomUUID()))
-
-        assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(1.januar))
-        assertNull(historikk.grunnlagForSykepengegrunnlag(10.januar))
-
-        assertEquals(1, inspektør.inntektTeller.size)
-        assertEquals(1, inspektør.inntektTeller.first())
-    }
-
     private fun inntektsopplysning(refusjonTom: LocalDate? = null) =
         Inntektsopplysning(ORGNR, DATO, 1000.månedlig, true, refusjonTom)
 
