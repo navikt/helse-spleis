@@ -262,7 +262,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun harSammeArbeidsgiverSom(hendelse: ArbeidstakerHendelse) = hendelse.organisasjonsnummer() == organisasjonsnummer
 
-    internal fun harUlikFagsystemId(other: Utbetaling) = utbetaling?.hørerSammen(other) == false
+    private fun harUlikFagsystemId(other: Utbetaling) = utbetaling?.hørerSammen(other) == false
 
     internal fun nyRevurderingFør(revurdert: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
         if (revurdert > this || revurdert == this) return
