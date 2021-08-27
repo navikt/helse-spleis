@@ -505,6 +505,10 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
             splitter.håndterFridagOpphold(dagen)
         }
 
+        override fun foreldetSykedag(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate, økonomi: Økonomi) {
+            splitter.addForeldetDag(dagen, økonomi)
+        }
+
         override fun sykHelgedag(
             splitter: UtbetalingstidslinjeBuilder,
             dagen: LocalDate,

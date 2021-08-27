@@ -3295,4 +3295,27 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         assertFalse(2.vedtaksperiode in observatør.manglendeInntektsmeldingVedtaksperioder)
     }
+
+    @Test
+    fun `foreldet sykdomsdag etter opphold skal ikke bli til navdag`() {
+        nyttVedtak(15.januar, 7.februar)
+
+        håndterSykmelding(
+            Sykmeldingsperiode(22.februar, 14.mars, 50.prosent),
+            mottatt=6.august.atStartOfDay(),
+            sykmeldingSkrevet = 6.august.atStartOfDay()
+        )
+        håndterSøknad(Sykdom(22.februar, 14.mars, 50.prosent), sendtTilNav=8.august)
+
+        håndterInntektsmelding(listOf(22.februar til 14.mars))
+        håndterUtbetalingsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+
+        UtbetalingstidslinjeInspektør(inspektør.utbetalingstidslinjer(2.vedtaksperiode)).let {
+            assertEquals(6, it.navHelgDagTeller)
+            assertEquals(15, it.foreldetDagTeller)
+        }
+    }
 }

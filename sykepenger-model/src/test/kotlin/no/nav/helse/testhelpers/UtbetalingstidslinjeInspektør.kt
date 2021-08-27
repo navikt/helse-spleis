@@ -15,6 +15,7 @@ internal class UtbetalingstidslinjeInspektør(utbetalingstidslinje: Utbetalingst
     internal var fridagTeller = 0
     internal var navDagTeller = 0
     internal var navHelgDagTeller = 0
+    internal var foreldetDagTeller = 0
     internal var ukjentDagTeller = 0
     internal var totalUtbetaling = 0.0
     internal var totalInntekt = 0.0
@@ -75,6 +76,11 @@ internal class UtbetalingstidslinjeInspektør(utbetalingstidslinje: Utbetalingst
         dato: LocalDate,
         økonomi: Økonomi
     ) { navHelgDagTeller += 1 }
+    override fun visit(
+        dag: ForeldetDag,
+        dato: LocalDate,
+        økonomi: Økonomi
+    ) { foreldetDagTeller += 1 }
     override fun visit(
         dag: UkjentDag,
         dato: LocalDate,
