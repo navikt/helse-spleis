@@ -165,20 +165,7 @@ internal class Økonomi private constructor(
 
     internal fun låsOpp() = tilstand.låsOpp(this)
 
-    internal fun <R> reflection(
-        block: (
-            grad: Double,
-            arbeidsgiverBetalingProsent: Double,
-            dekningsgrunnlag: Double?,
-            skjæringstidspunkt: LocalDate?,
-            totalGrad: Double?,
-            aktuellDagsinntekt: Double?,
-            arbeidsgiverbeløp: Double?,
-            personbeløp: Double?,
-            er6GBegrenset: Boolean?
-        ) -> R
-    ) =
-        tilstand.reflection(this, block)
+    internal fun <R> reflection(lambda: MedØkonomiData<R>) = tilstand.reflection(this, lambda)
 
     internal fun <R> reflectionRounded(
         block: (
@@ -238,19 +225,9 @@ internal class Økonomi private constructor(
     }
 
     private fun <R> beløpReflection(
-        block: (
-            grad: Double,
-            arbeidsgiverBetalingProsent: Double,
-            dekningsgrunnlag: Double?,
-            skjæringstidspunkt: LocalDate?,
-            totalGrad: Double?,
-            aktuellDagsinntekt: Double?,
-            arbeidsgiverbeløp: Double?,
-            personbeløp: Double?,
-            er6GBegrenset: Boolean?
-        ) -> R
+        lambda: MedØkonomiData<R>
     ) =
-        block(
+        lambda(
             grad.toDouble(),
             arbeidsgiverBetalingProsent.toDouble(),
             dekningsgrunnlag!!.reflection { _, _, daglig, _ -> daglig },
@@ -263,19 +240,9 @@ internal class Økonomi private constructor(
         )
 
     private fun <R> inntektReflection(
-        block: (
-            grad: Double,
-            arbeidsgiverBetalingProsent: Double,
-            dekningsgrunnlag: Double?,
-            skjæringstidspunkt: LocalDate?,
-            totalGrad: Double?,
-            aktuellDagsinntekt: Double?,
-            arbeidsgiverbeløp: Double?,
-            personbeløp: Double?,
-            er6GBegrenset: Boolean?
-        ) -> R
+        lambda: MedØkonomiData<R>
     ) =
-        block(
+        lambda(
             grad.toDouble(),
             arbeidsgiverBetalingProsent.toDouble(),
             dekningsgrunnlag!!.reflection { _, _, daglig, _ -> daglig },
@@ -385,20 +352,7 @@ internal class Økonomi private constructor(
 
         internal open fun grad(økonomi: Økonomi) = økonomi.grad
 
-        internal abstract fun <R> reflection(
-            økonomi: Økonomi,
-            block: (
-                grad: Double,
-                arbeidsgiverBetalingProsent: Double,
-                dekningsgrunnlag: Double?,
-                skjæringstidspunkt: LocalDate?,
-                totalGrad: Double?,
-                aktuellDagsinntekt: Double?,
-                arbeidsgiverbeløp: Double?,
-                personbeløp: Double?,
-                er6GBegrenset: Boolean?
-            ) -> R
-        ): R
+        internal abstract fun <R> reflection(økonomi: Økonomi, lambda: MedØkonomiData<R>):R
 
         internal open fun inntekt(
             økonomi: Økonomi,
@@ -438,25 +392,8 @@ internal class Økonomi private constructor(
 
             override fun lås(økonomi: Økonomi) = økonomi
 
-            override fun <R> reflection(
-                økonomi: Økonomi,
-                block: (
-                    grad: Double,
-                    arbeidsgiverBetalingProsent: Double,
-                    dekningsgrunnlag: Double?,
-                    skjæringstidspunkt: LocalDate?,
-                    totalGrad: Double?,
-                    aktuellDagsinntekt: Double?,
-                    arbeidsgiverbeløp: Double?,
-                    personbeløp: Double?,
-                    er6GBegrenset: Boolean?
-                ) -> R
-            ) =
-                block(
-                    økonomi.grad.toDouble(),
-                    økonomi.arbeidsgiverBetalingProsent.toDouble(),
-                    null, null, null, null, null, null, null
-                )
+            override fun <R> reflection(økonomi: Økonomi, lambda: MedØkonomiData<R>) =
+                lambda(økonomi.grad.toDouble(), økonomi.arbeidsgiverBetalingProsent.toDouble(), null, null, null, null, null, null, null)
         }
 
         internal object HarInntekt : Tilstand() {
@@ -465,20 +402,7 @@ internal class Økonomi private constructor(
                 it.tilstand = Låst
             }
 
-            override fun <R> reflection(
-                økonomi: Økonomi,
-                block: (
-                    grad: Double,
-                    arbeidsgiverBetalingProsent: Double,
-                    dekningsgrunnlag: Double?,
-                    skjæringstidspunkt: LocalDate?,
-                    totalGrad: Double?,
-                    aktuellDagsinntekt: Double?,
-                    arbeidsgiverbeløp: Double?,
-                    personbeløp: Double?,
-                    er6GBegrenset: Boolean?
-                ) -> R
-            ) = økonomi.inntektReflection(block)
+            override fun <R> reflection(økonomi: Økonomi, lambda: MedØkonomiData<R>) = økonomi.inntektReflection(lambda)
 
             override fun betal(økonomi: Økonomi) {
                 økonomi._betal()
@@ -494,20 +418,7 @@ internal class Økonomi private constructor(
                 økonomi._betal()
             }
 
-            override fun <R> reflection(
-                økonomi: Økonomi,
-                block: (
-                    grad: Double,
-                    arbeidsgiverBetalingProsent: Double,
-                    dekningsgrunnlag: Double?,
-                    skjæringstidspunkt: LocalDate?,
-                    totalGrad: Double?,
-                    aktuellDagsinntekt: Double?,
-                    arbeidsgiverbeløp: Double?,
-                    personbeløp: Double?,
-                    er6GBegrenset: Boolean?
-                ) -> R
-            ) = økonomi.beløpReflection(block)
+            override fun <R> reflection(økonomi: Økonomi, lambda: MedØkonomiData<R>) = økonomi.beløpReflection(lambda)
         }
 
         internal object Låst : Tilstand() {
@@ -520,20 +431,7 @@ internal class Økonomi private constructor(
                 tilstand = HarInntekt
             }
 
-            override fun <R> reflection(
-                økonomi: Økonomi,
-                block: (
-                    grad: Double,
-                    arbeidsgiverBetalingProsent: Double,
-                    dekningsgrunnlag: Double?,
-                    skjæringstidspunkt: LocalDate?,
-                    totalGrad: Double?,
-                    aktuellDagsinntekt: Double?,
-                    arbeidsgiverbeløp: Double?,
-                    personbeløp: Double?,
-                    er6GBegrenset: Boolean?
-                ) -> R
-            ) = økonomi.inntektReflection(block)
+            override fun <R> reflection(økonomi: Økonomi, lambda: MedØkonomiData<R>) = økonomi.inntektReflection(lambda)
 
             override fun betal(økonomi: Økonomi) {
                 økonomi.arbeidsgiverbeløp = 0.daglig
@@ -556,20 +454,7 @@ internal class Økonomi private constructor(
 
             override fun er6GBegrenset(økonomi: Økonomi) = false
 
-            override fun <R> reflection(
-                økonomi: Økonomi,
-                block: (
-                    grad: Double,
-                    arbeidsgiverBetalingProsent: Double,
-                    dekningsgrunnlag: Double?,
-                    skjæringstidspunkt: LocalDate?,
-                    totalGrad: Double?,
-                    aktuellDagsinntekt: Double?,
-                    arbeidsgiverbeløp: Double?,
-                    personbeløp: Double?,
-                    er6GBegrenset: Boolean?
-                ) -> R
-            ) = økonomi.beløpReflection(block)
+            override fun <R> reflection(økonomi: Økonomi, lambda: MedØkonomiData<R>) = økonomi.beløpReflection(lambda)
         }
     }
 }
@@ -584,3 +469,15 @@ internal fun List<Økonomi>.erUnderInntekstgrensen(
 ) = Økonomi.erUnderInntektsgrensen(this, alder, dato)
 
 internal fun List<Økonomi>.er6GBegrenset() = Økonomi.er6GBegrenset(this)
+
+internal fun interface MedØkonomiData<R> {
+    operator fun invoke(grad: Double,
+                              arbeidsgiverBetalingProsent: Double,
+                              dekningsgrunnlag: Double?,
+                              skjæringstidspunkt: LocalDate?,
+                              totalGrad: Double?,
+                              aktuellDagsinntekt: Double?,
+                              arbeidsgiverbeløp: Double?,
+                              personbeløp: Double?,
+                              er6GBegrenset: Boolean?): R
+}
