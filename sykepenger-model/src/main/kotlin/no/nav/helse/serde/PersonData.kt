@@ -252,7 +252,7 @@ internal data class PersonData(
 
             class ArbeidsgiverInntektsopplysningData(
                 private val orgnummer: String,
-                private val inntektsopplysning: List<ArbeidsgiverData.InntektsopplysningData>
+                private val inntektsopplysning: ArbeidsgiverData.InntektsopplysningData
             ) {
                 companion object {
                     internal fun List<ArbeidsgiverInntektsopplysningData>.parseArbeidsgiverInntektsopplysninger(): List<ArbeidsgiverInntektsopplysning> =

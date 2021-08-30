@@ -3,7 +3,6 @@ package no.nav.helse.serde.migration
 import no.nav.helse.serde.serdeObjectMapper
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class V114LagreSykepengegrunnlagTest {
@@ -23,7 +22,7 @@ internal class V114LagreSykepengegrunnlagTest {
     private fun migrer(json: String) = listOf(V114LagreSykepengegrunnlag()).migrate(toNode(json))
 
     @Language("JSON")
-    private val personOvergangFraITOriginal= """{
+    private val personOvergangFraITOriginal = """{
         "arbeidsgivere": [
             {
                 "organisasjonsnummer": "987654321",
@@ -96,16 +95,14 @@ internal class V114LagreSykepengegrunnlagTest {
                             "arbeidsgiverInntektsopplysninger": [
                                 {
                                     "orgnummer": "987654321",
-                                    "inntektsopplysning": [
-                                        {
-                                            "id": "e7decc12-507b-4b57-ba87-5d5ae012752d",
-                                            "dato": "2017-12-01",
-                                            "hendelseId": "c9b89436-cc6e-4f85-900e-d72527a99a01",
-                                            "beløp": 31000.0,
-                                            "kilde": "INFOTRYGD",
-                                            "tidsstempel": "2021-08-25T14:50:58.248396"
-                                        }
-                                    ]
+                                    "inntektsopplysning": {
+                                        "id": "e7decc12-507b-4b57-ba87-5d5ae012752d",
+                                        "dato": "2017-12-01",
+                                        "hendelseId": "c9b89436-cc6e-4f85-900e-d72527a99a01",
+                                        "beløp": 31000.0,
+                                        "kilde": "INFOTRYGD",
+                                        "tidsstempel": "2021-08-25T14:50:58.248396"
+                                    }
                                 }
                             ]
                         }
@@ -1325,23 +1322,20 @@ internal class V114LagreSykepengegrunnlagTest {
                         "arbeidsgiverInntektsopplysninger": [
                             {
                                 "orgnummer": "987654321",
-                                "inntektsopplysning": [
-                                    {
-                                        "id": "15abfcab-d6ae-428d-9b9f-4d0445cabcde",
-                                        "dato": "2019-06-01",
-                                        "hendelseId": "518938a9-a856-4c3a-a238-a5fe4f4abcde",
-                                        "beløp": 31000.0,
-                                        "kilde": "INNTEKTSMELDING",
-                                        "tidsstempel": "2021-08-25T13:33:13.364413"
-                                    }
-                                ]
+                                "inntektsopplysning": {
+                                    "id": "15abfcab-d6ae-428d-9b9f-4d0445cabcde",
+                                    "dato": "2019-06-01",
+                                    "hendelseId": "518938a9-a856-4c3a-a238-a5fe4f4abcde",
+                                    "beløp": 31000.0,
+                                    "kilde": "INNTEKTSMELDING",
+                                    "tidsstempel": "2021-08-25T13:33:13.364413"
+                                }
                             },
                             {
                                 "orgnummer": "999999999",
-                                "inntektsopplysning": [
-                                    {
-                                        "id": "fc8e7179-5d63-46ce-a5bf-ec42313ff456",
-                                        "skatteopplysninger": [
+                                "inntektsopplysning": {
+                                    "id": "fc8e7179-5d63-46ce-a5bf-ec42313ff456",
+                                    "skatteopplysninger": [
                                             {
                                                 "dato": "2019-06-01",
                                                 "hendelseId": "ae957631-0f86-4703-907c-320950c96bbb",
@@ -1376,8 +1370,7 @@ internal class V114LagreSykepengegrunnlagTest {
                                                 "beskrivelse": "juicy beskrivelse"
                                             }
                                         ]
-                                    }
-                                ]
+                                }
                             }
                         ]
                     }
@@ -1391,16 +1384,14 @@ internal class V114LagreSykepengegrunnlagTest {
                         "arbeidsgiverInntektsopplysninger": [
                             {
                                 "orgnummer": "987654321",
-                                "inntektsopplysning": [
-                                    {
-                                        "id": "15abfcab-d6ae-428d-9b9f-4d0445cea479",
-                                        "dato": "2018-01-01",
-                                        "hendelseId": "518938a9-a856-4c3a-a238-a5fe4f4020d3",
-                                        "beløp": 31000.0,
-                                        "kilde": "INNTEKTSMELDING",
-                                        "tidsstempel": "2021-08-24T13:33:13.364413"
-                                    }
-                                ]
+                                "inntektsopplysning": {
+                                    "id": "15abfcab-d6ae-428d-9b9f-4d0445cea479",
+                                    "dato": "2018-01-01",
+                                    "hendelseId": "518938a9-a856-4c3a-a238-a5fe4f4020d3",
+                                    "beløp": 31000.0,
+                                    "kilde": "INNTEKTSMELDING",
+                                    "tidsstempel": "2021-08-24T13:33:13.364413"
+                                }
                             }
                         ]
                     }
