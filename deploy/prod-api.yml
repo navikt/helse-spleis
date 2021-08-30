@@ -8,6 +8,8 @@ metadata:
 spec:
   image: {{image}}
   port: 8080
+  ingresses:
+   - https://spleis-api.prod-fss-pub.nais.io
   liveness:
     path: /isalive
     initialDelay: 5
@@ -46,6 +48,8 @@ spec:
       rules:
         - application: spesialist
         - application: spanner
+          namespace: tbd
+          cluster: prod-gcp
   vault:
     enabled: true
   secureLogs:
