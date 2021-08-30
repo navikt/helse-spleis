@@ -67,7 +67,7 @@ internal class JsonBuilder : AbstractBuilder() {
             SerialisertPerson.medSkjemaversjon(serdeObjectMapper.valueToTree(personMap))
 
         override fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) {
-            personMap["aktivitetslogg"] = AktivitetsloggReflect(aktivitetslogg).toMap()
+            personMap["aktivitetslogg"] = AktivitetsloggMap(aktivitetslogg).toMap()
         }
 
         override fun preVisitArbeidsgivere() {
@@ -129,7 +129,7 @@ internal class JsonBuilder : AbstractBuilder() {
         private val arbeidsgiverMap: MutableMap<String, Any?>
     ) : BuilderState() {
         init {
-            arbeidsgiverMap.putAll(ArbeidsgiverReflect(arbeidsgiver).toMap())
+            arbeidsgiverMap.putAll(arbeidsgiver.toMap())
         }
 
         override fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {
@@ -286,7 +286,7 @@ internal class JsonBuilder : AbstractBuilder() {
             nettoBeløp: Int,
             tidsstempel: LocalDateTime
         ) {
-            ferieutbetalingMap["oppdrag"] = OppdragReflect(oppdrag).toMap()
+            ferieutbetalingMap["oppdrag"] = oppdrag.toMap()
         }
 
         override fun postVisitOppdrag(oppdrag: Oppdrag, totalBeløp: Int, nettoBeløp: Int, tidsstempel: LocalDateTime) {
@@ -608,7 +608,7 @@ internal class JsonBuilder : AbstractBuilder() {
             forbrukteSykedager: Int?,
             gjenståendeSykedager: Int?
         ) {
-            utbetalinger.add(UtbetalingReflect(utbetaling).toMap())
+            utbetalinger.add(utbetaling.toMap())
         }
 
         override fun postVisitUtbetalinger(utbetalinger: List<Utbetaling>) {
@@ -646,7 +646,7 @@ internal class JsonBuilder : AbstractBuilder() {
             beløp: Inntekt,
             tidsstempel: LocalDateTime
         ) {
-            inntektsopplysninger.add(SaksbehandlerReflect(saksbehandler).toMap())
+            inntektsopplysninger.add(saksbehandler.toMap())
         }
 
         override fun visitInntektsmelding(
@@ -656,7 +656,7 @@ internal class JsonBuilder : AbstractBuilder() {
             beløp: Inntekt,
             tidsstempel: LocalDateTime
         ) {
-            inntektsopplysninger.add(InntektsmeldingReflect(inntektsmelding).toMap())
+            inntektsopplysninger.add(inntektsmelding.toMap())
         }
 
         override fun visitInfotrygd(
@@ -666,7 +666,7 @@ internal class JsonBuilder : AbstractBuilder() {
             beløp: Inntekt,
             tidsstempel: LocalDateTime
         ) {
-            inntektsopplysninger.add(InfotrygdReflect(infotrygd).toMap())
+            inntektsopplysninger.add(infotrygd.toMap())
         }
 
         override fun preVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID) {
@@ -692,7 +692,7 @@ internal class JsonBuilder : AbstractBuilder() {
             beskrivelse: String,
             tidsstempel: LocalDateTime
         ) {
-            inntektsopplysninger.add(SykepengegrunnlagReflect(sykepengegrunnlag).toMap())
+            inntektsopplysninger.add(sykepengegrunnlag.toMap(Inntektsopplysningskilde.SKATT_SYKEPENGEGRUNNLAG))
         }
 
         override fun visitSkattSammenligningsgrunnlag(
@@ -706,7 +706,7 @@ internal class JsonBuilder : AbstractBuilder() {
             beskrivelse: String,
             tidsstempel: LocalDateTime
         ) {
-            inntektsopplysninger.add(SammenligningsgrunnlagReflect(sammenligningsgrunnlag).toMap())
+            inntektsopplysninger.add(sammenligningsgrunnlag.toMap(Inntektsopplysningskilde.SKATT_SAMMENLIGNINGSGRUNNLAG))
         }
 
         override fun postVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID) = popState()
@@ -718,7 +718,7 @@ internal class JsonBuilder : AbstractBuilder() {
         private val vedtaksperiodeMap: MutableMap<String, Any?>
     ) : BuilderState() {
         init {
-            vedtaksperiodeMap.putAll(VedtaksperiodeReflect(vedtaksperiode).toMap())
+            vedtaksperiodeMap.putAll(vedtaksperiode.toMap())
         }
 
         private var inUtbetaling = false
@@ -910,7 +910,7 @@ internal class JsonBuilder : AbstractBuilder() {
             kilde: Hendelseskilde,
             melding: String? = null
         ) {
-            dateRanges.plus(dato, serialisertSykdomstidslinjedag(dag, kilde, melding))
+            dateRanges.plus(dato, dag.serialiser(kilde.toJson(), melding))
         }
     }
 }

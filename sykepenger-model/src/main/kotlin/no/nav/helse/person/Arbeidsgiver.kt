@@ -14,8 +14,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.medSkjæringstidspunkt
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.serde.reflection.OppdragReflect
-import no.nav.helse.serde.reflection.UtbetalingsdagerReflect
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -490,9 +488,9 @@ internal class Arbeidsgiver private constructor(
                 epost = epost,
                 tidspunkt = tidspunkt,
                 automatiskBehandling = automatiskBehandling,
-                arbeidsgiverOppdrag = OppdragReflect(arbeidsgiverOppdrag).toMap(),
-                personOppdrag = OppdragReflect(personOppdrag).toMap(),
-                utbetalingsdager = UtbetalingsdagerReflect(utbetalingstidslinje).toList(),
+                arbeidsgiverOppdrag = arbeidsgiverOppdrag.toMap(),
+                personOppdrag = personOppdrag.toMap(),
+                utbetalingsdager = utbetalingstidslinje.toList(),
                 vedtaksperiodeIder = vedtaksperioder.iderMedUtbetaling(id) + forkastede.iderMedUtbetaling(id)
             )
         )
@@ -526,9 +524,9 @@ internal class Arbeidsgiver private constructor(
                 epost = epost,
                 tidspunkt = tidspunkt,
                 automatiskBehandling = automatiskBehandling,
-                arbeidsgiverOppdrag = OppdragReflect(arbeidsgiverOppdrag).toMap(),
-                personOppdrag = OppdragReflect(personOppdrag).toMap(),
-                utbetalingsdager = UtbetalingsdagerReflect(utbetalingstidslinje).toList(),
+                arbeidsgiverOppdrag = arbeidsgiverOppdrag.toMap(),
+                personOppdrag = personOppdrag.toMap(),
+                utbetalingsdager = utbetalingstidslinje.toList(),
                 vedtaksperiodeIder = vedtaksperioder.iderMedUtbetaling(id) + forkastede.iderMedUtbetaling(id)
             )
         )
@@ -548,8 +546,8 @@ internal class Arbeidsgiver private constructor(
                 type = type.name,
                 forrigeStatus = Utbetalingstatus.fraTilstand(forrigeTilstand).name,
                 gjeldendeStatus = Utbetalingstatus.fraTilstand(nesteTilstand).name,
-                arbeidsgiverOppdrag = OppdragReflect(arbeidsgiverOppdrag).toMap(),
-                personOppdrag = OppdragReflect(personOppdrag).toMap(),
+                arbeidsgiverOppdrag = arbeidsgiverOppdrag.toMap(),
+                personOppdrag = personOppdrag.toMap(),
             )
         )
     }
@@ -911,6 +909,13 @@ internal class Arbeidsgiver private constructor(
 
     internal fun harGrunnlagForSykepengegrunnlagEllerSammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =
         inntektshistorikk.harGrunnlagForSykepengegrunnlagEllerSammenligningsgrunnlag(skjæringstidspunkt) || vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt).harInntekt()
+
+    internal fun toMap(): Map<String, Any?> = mapOf(
+        "organisasjonsnummer" to organisasjonsnummer,
+        "id" to id,
+        "beregnetUtbetalingstidslinjer" to beregnetUtbetalingstidslinjer.map { Utbetalingstidslinjeberegning.save(it) },
+        "refusjonOpphører" to refusjonOpphører
+    )
 
     internal class JsonRestorer private constructor() {
         internal companion object {

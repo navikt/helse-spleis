@@ -48,6 +48,7 @@ abstract class SykdomstidslinjeHendelse(
         internal fun tidsstempel() = tidsstempel
         internal fun meldingsreferanseId() = meldingsreferanseId
         internal fun erAvType(meldingstype: Melding) = this.type == kildenavn(meldingstype)
+        internal fun toJson() = mapOf("type" to toString(), "id" to meldingsreferanseId(), "tidsstempel" to tidsstempel())
     }
 
     internal open fun forGammel() = false

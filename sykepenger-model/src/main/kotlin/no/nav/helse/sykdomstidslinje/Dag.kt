@@ -1,6 +1,8 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.person.SykdomstidslinjeVisitor
+import no.nav.helse.serde.PersonData
+import no.nav.helse.serde.reflection.serialiserØkonomi
 import no.nav.helse.økonomi.Økonomi
 import java.time.DayOfWeek.*
 import java.time.LocalDate
@@ -12,6 +14,30 @@ internal sealed class Dag(
     protected val kilde: SykdomstidslinjeHendelse.Hendelseskilde
 ) {
     private fun name() = javaClass.canonicalName.split('.').last()
+
+    internal fun serialiser(kildeMap: Map<String, Any>, melding: String? = null) =
+        mutableMapOf<String, Any>().also { map ->
+            map["type"] = this.toJsonType()
+            map["kilde"] = kildeMap
+            leggTilEventueltØkonomiMap(map)
+            map.compute("melding") { _, _ -> melding }
+        }
+    protected open fun leggTilEventueltØkonomiMap(map: MutableMap<String, Any>) {}
+
+    internal fun toJsonType() = when (this) {
+        is Sykedag -> PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG
+        is UkjentDag -> PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.UKJENT_DAG
+        is Arbeidsdag -> PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ARBEIDSDAG
+        is Arbeidsgiverdag -> PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ARBEIDSGIVERDAG
+        is Feriedag -> PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.FERIEDAG
+        is FriskHelgedag -> PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.FRISK_HELGEDAG
+        is ArbeidsgiverHelgedag -> PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ARBEIDSGIVERDAG
+        is ForeldetSykedag -> PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.FORELDET_SYKEDAG
+        is SykHelgedag -> PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG
+        is Permisjonsdag -> PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.PERMISJONSDAG
+        is ProblemDag -> PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.PROBLEMDAG
+        is AvslåttDag -> PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.AVSLÅTT_DAG
+    }
 
     companion object {
         internal val default: BesteStrategy = { venstre: Dag, høyre: Dag ->
@@ -106,8 +132,8 @@ internal sealed class Dag(
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) : Dag(dato, kilde) {
 
-        override fun accept(visitor: SykdomstidslinjeVisitor) =
-            økonomi.accept(visitor, this, dato, kilde)
+        override fun accept(visitor: SykdomstidslinjeVisitor) = økonomi.accept(visitor, this, dato, kilde)
+        override fun leggTilEventueltØkonomiMap(map: MutableMap<String, Any>) = map.putAll(serialiserØkonomi(økonomi))
     }
 
     internal class Feriedag(
@@ -134,8 +160,8 @@ internal sealed class Dag(
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) : Dag(dato, kilde) {
 
-        override fun accept(visitor: SykdomstidslinjeVisitor) =
-            økonomi.accept(visitor, this, dato, kilde)
+        override fun accept(visitor: SykdomstidslinjeVisitor) = økonomi.accept(visitor, this, dato, kilde)
+        override fun leggTilEventueltØkonomiMap(map: MutableMap<String, Any>) = map.putAll(serialiserØkonomi(økonomi))
     }
 
     internal class Sykedag(
@@ -144,8 +170,8 @@ internal sealed class Dag(
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) : Dag(dato, kilde) {
 
-        override fun accept(visitor: SykdomstidslinjeVisitor) =
-            økonomi.accept(visitor, this, dato, kilde)
+        override fun accept(visitor: SykdomstidslinjeVisitor) = økonomi.accept(visitor, this, dato, kilde)
+        override fun leggTilEventueltØkonomiMap(map: MutableMap<String, Any>) = map.putAll(serialiserØkonomi(økonomi))
     }
 
     internal class ForeldetSykedag(
@@ -154,8 +180,8 @@ internal sealed class Dag(
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) : Dag(dato, kilde) {
 
-        override fun accept(visitor: SykdomstidslinjeVisitor) =
-            økonomi.accept(visitor, this, dato, kilde)
+        override fun accept(visitor: SykdomstidslinjeVisitor) = økonomi.accept(visitor, this, dato, kilde)
+        override fun leggTilEventueltØkonomiMap(map: MutableMap<String, Any>) = map.putAll(serialiserØkonomi(økonomi))
     }
 
     internal class SykHelgedag(
@@ -164,8 +190,8 @@ internal sealed class Dag(
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) : Dag(dato, kilde) {
 
-        override fun accept(visitor: SykdomstidslinjeVisitor) =
-            økonomi.accept(visitor, this, dato, kilde)
+        override fun accept(visitor: SykdomstidslinjeVisitor) = økonomi.accept(visitor, this, dato, kilde)
+        override fun leggTilEventueltØkonomiMap(map: MutableMap<String, Any>) = map.putAll(serialiserØkonomi(økonomi))
     }
 
     internal class Permisjonsdag(

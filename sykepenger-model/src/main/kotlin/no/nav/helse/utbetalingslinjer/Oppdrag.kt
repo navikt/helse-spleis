@@ -11,6 +11,7 @@ import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import kotlin.streams.toList
 
 internal class Oppdrag private constructor(
     private val mottaker: String,
@@ -250,6 +251,28 @@ internal class Oppdrag private constructor(
         linkTo = nåværende
         tilstand = Ny()
     }
+
+    internal fun toBehovMap() = mutableMapOf(
+        "mottaker" to mottaker,
+        "fagområde" to fagområde.verdi,
+        "linjer" to map { it.toMap() },
+        "fagsystemId" to fagsystemId,
+        "endringskode" to endringskode.toString()
+    )
+
+    internal fun toMap() = mutableMapOf(
+        "mottaker" to mottaker,
+        "fagområde" to fagområde.verdi,
+        "linjer" to map { it.toMap() },
+        "fagsystemId" to fagsystemId,
+        "endringskode" to endringskode.toString(),
+        "sisteArbeidsgiverdag" to sisteArbeidsgiverdag,
+        "tidsstempel" to tidsstempel,
+        "nettoBeløp" to nettoBeløp,
+        "stønadsdager" to stønadsdager(),
+        "fom" to førstedato,
+        "tom" to sistedato
+    )
 
     private interface Tilstand {
         fun håndterForskjell(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje, aktivitetslogg: IAktivitetslogg)

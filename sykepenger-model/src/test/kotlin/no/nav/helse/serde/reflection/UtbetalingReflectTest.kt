@@ -31,8 +31,7 @@ internal class UtbetalingReflectTest {
     @Test
     fun `Reflect mapper riktige verdier`() {
         val beregningId = UUID.randomUUID()
-        map = UtbetalingReflect(
-            Utbetaling.lagUtbetaling(
+        map = Utbetaling.lagUtbetaling(
                 emptyList(),
                 UNG_PERSON_FNR_2018,
                 beregningId,
@@ -43,8 +42,7 @@ internal class UtbetalingReflectTest {
                 LocalDate.MAX,
                 100,
                 148
-            )
-        ).toMap()
+            ).toMap()
         assertEquals(4, map["stønadsdager"])
         assertEquals(beregningId, map["beregningId"])
         assertEquals(1.januar, map["fom"])
@@ -86,7 +84,7 @@ internal class UtbetalingReflectTest {
                 aktørId = "ignore",
                 fødselsnummer = "ignore",
                 organisasjonsnummer = "ignore",
-                utbetalingId = UtbetalingReflect(utbetaling).toMap()["id"] as UUID,
+                utbetalingId = utbetaling.toMap()["id"] as UUID,
                 vedtaksperiodeId = "ignore",
                 saksbehandler = "Z999999",
                 saksbehandlerEpost = "mille.mellomleder@nav.no",
@@ -124,8 +122,7 @@ internal class UtbetalingReflectTest {
             )
         }
 
-        map = UtbetalingReflect(
-            Utbetaling.lagUtbetaling(
+        map = Utbetaling.lagUtbetaling(
                 listOf(tidligereUtbetaling),
                 UNG_PERSON_FNR_2018,
                 UUID.randomUUID(),
@@ -136,8 +133,7 @@ internal class UtbetalingReflectTest {
                 LocalDate.MAX,
                 100,
                 148
-            )
-        ).toMap()
+            ).toMap()
 
         assertEquals(4, map["stønadsdager"])
         assertEquals(1.januar, map["fom"])
@@ -189,7 +185,7 @@ internal class UtbetalingReflectTest {
                 aktørId = "ignore",
                 fødselsnummer = "ignore",
                 organisasjonsnummer = "ignore",
-                utbetalingId = UtbetalingReflect(utbetaling).toMap()["id"] as UUID,
+                utbetalingId = utbetaling.toMap()["id"] as UUID,
                 vedtaksperiodeId = "ignore",
                 saksbehandler = "Z999999",
                 saksbehandlerEpost = "mille.mellomleder@nav.no",
@@ -241,7 +237,7 @@ internal class UtbetalingReflectTest {
             listOf(tidligereUtbetaling),
             hendelse
         )?.annuller(hendelse)) { "Forventet utbetaling" }
-        map = UtbetalingReflect(utbetaling).toMap()
+        map = utbetaling.toMap()
 
         assertEquals(1.januar, map["fom"])
         assertEquals(4.januar, map["tom"])

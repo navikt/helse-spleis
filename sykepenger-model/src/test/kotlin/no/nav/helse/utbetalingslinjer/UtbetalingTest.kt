@@ -5,7 +5,6 @@ import no.nav.helse.hendelser.UtbetalingHendelse.Oppdragstatus.AKSEPTERT
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.UtbetalingVisitor
-import no.nav.helse.serde.reflection.UtbetalingReflect
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -284,7 +283,7 @@ internal class UtbetalingTest {
             aktørId = "ignore",
             fødselsnummer = "ignore",
             organisasjonsnummer = "ignore",
-            utbetalingId = UtbetalingReflect(utbetaling).toMap()["id"] as UUID,
+            utbetalingId = utbetaling.toMap()["id"] as UUID,
             vedtaksperiodeId = "ignore",
             saksbehandler = "Z999999",
             saksbehandlerEpost = "mille.mellomleder@nav.no",

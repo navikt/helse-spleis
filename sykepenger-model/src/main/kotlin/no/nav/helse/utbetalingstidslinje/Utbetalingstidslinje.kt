@@ -3,7 +3,11 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.contains
 import no.nav.helse.hendelser.til
+import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.UtbetalingsdagVisitor
+import no.nav.helse.serde.DateRanges
+import no.nav.helse.serde.PersonData
+import no.nav.helse.serde.reflection.serialiserØkonomi
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
@@ -247,6 +251,34 @@ internal class Utbetalingstidslinje private constructor(
         }
     }
 
+    fun toMap() = mutableMapOf<String, Any?>("dager" to DateRanges().apply { forEach { plus(it.dato, it.toMap()) } }.toList())
+
+    fun toList(): List<PersonObserver.Utbetalingsdag> {
+        return map { utbetalingsdag ->
+            PersonObserver.Utbetalingsdag(
+                utbetalingsdag.dato,
+                mapDagtype(utbetalingsdag),
+                mapBegrunnelser(utbetalingsdag)
+            )
+        }
+    }
+
+    private fun mapBegrunnelser(utbetalingsdag: Utbetalingsdag) =
+        if (utbetalingsdag is AvvistDag)
+            utbetalingsdag.begrunnelser.map { begrunnelse -> begrunnelse.javaClass.simpleName }
+        else null
+
+    private fun mapDagtype(dag: Utbetalingsdag) = when (dag) {
+        is Arbeidsdag -> PersonData.UtbetalingstidslinjeData.TypeData.Arbeidsdag.name
+        is ArbeidsgiverperiodeDag -> PersonData.UtbetalingstidslinjeData.TypeData.ArbeidsgiverperiodeDag.name
+        is NavDag -> PersonData.UtbetalingstidslinjeData.TypeData.NavDag.name
+        is NavHelgDag -> PersonData.UtbetalingstidslinjeData.TypeData.NavHelgDag.name
+        is Fridag -> PersonData.UtbetalingstidslinjeData.TypeData.Fridag.name
+        is UkjentDag -> PersonData.UtbetalingstidslinjeData.TypeData.UkjentDag.name
+        is AvvistDag -> PersonData.UtbetalingstidslinjeData.TypeData.AvvistDag.name
+        is ForeldetDag -> PersonData.UtbetalingstidslinjeData.TypeData.ForeldetDag.name
+    }
+
     internal sealed class Utbetalingsdag(
         internal val dato: LocalDate,
         internal val økonomi: Økonomi
@@ -271,6 +303,13 @@ internal class Utbetalingstidslinje private constructor(
         internal class ArbeidsgiverperiodeDag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
             override val prioritet = 30
             override fun accept(visitor: UtbetalingsdagVisitor) = økonomi.accept(visitor, this, dato)
+            override fun serialiseringstype(): PersonData.UtbetalingstidslinjeData.TypeData = PersonData.UtbetalingstidslinjeData.TypeData.ArbeidsgiverperiodeDag
+        }
+        abstract fun serialiseringstype(): PersonData.UtbetalingstidslinjeData.TypeData
+        internal open fun toMap() = mutableMapOf<String, Any?>(
+            "type" to serialiseringstype()
+        ).apply {
+            putAll(serialiserØkonomi(økonomi))
         }
 
         internal class NavDag(
@@ -289,6 +328,7 @@ internal class Utbetalingstidslinje private constructor(
                 }
             }
 
+            override fun serialiseringstype(): PersonData.UtbetalingstidslinjeData.TypeData = PersonData.UtbetalingstidslinjeData.TypeData.NavDag
             override fun accept(visitor: UtbetalingsdagVisitor) = økonomi.accept(visitor, this, dato)
         }
 
@@ -296,16 +336,19 @@ internal class Utbetalingstidslinje private constructor(
             Utbetalingsdag(dato, økonomi) {
             override val prioritet = 40
             override fun accept(visitor: UtbetalingsdagVisitor) = økonomi.accept(visitor, this, dato)
+            override fun serialiseringstype(): PersonData.UtbetalingstidslinjeData.TypeData = PersonData.UtbetalingstidslinjeData.TypeData.NavHelgDag
         }
 
         internal class Arbeidsdag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
             override val prioritet = 20
             override fun accept(visitor: UtbetalingsdagVisitor) = økonomi.accept(visitor, this, dato)
+            override fun serialiseringstype(): PersonData.UtbetalingstidslinjeData.TypeData = PersonData.UtbetalingstidslinjeData.TypeData.Arbeidsdag
         }
 
         internal class Fridag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
             override val prioritet = 10
             override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visit(this, dato, økonomi)
+            override fun serialiseringstype(): PersonData.UtbetalingstidslinjeData.TypeData = PersonData.UtbetalingstidslinjeData.TypeData.Fridag
         }
 
         internal class AvvistDag(
@@ -324,17 +367,27 @@ internal class Utbetalingstidslinje private constructor(
             override fun accept(visitor: UtbetalingsdagVisitor) = økonomi.accept(visitor, this, dato)
             internal fun navDag(): Utbetalingsdag =
                 if (EgenmeldingUtenforArbeidsgiverperiode in begrunnelser) this else NavDag(dato, økonomi.låsOpp())
+
+            override internal fun toMap() = mutableMapOf<String, Any?>(
+                "type" to PersonData.UtbetalingstidslinjeData.TypeData.AvvistDag,
+                "begrunnelser" to begrunnelser.map { PersonData.UtbetalingstidslinjeData.BegrunnelseData.fraBegrunnelse(it).name }
+            ).apply {
+                putAll(serialiserØkonomi(økonomi))
+            }
+            override fun serialiseringstype(): PersonData.UtbetalingstidslinjeData.TypeData = PersonData.UtbetalingstidslinjeData.TypeData.AvvistDag
         }
 
         internal class ForeldetDag(dato: LocalDate, økonomi: Økonomi) :
             Utbetalingsdag(dato, økonomi) {
             override val prioritet = 40 // Mellom ArbeidsgiverperiodeDag og NavDag
             override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visit(this, dato, økonomi)
+            override fun serialiseringstype(): PersonData.UtbetalingstidslinjeData.TypeData = PersonData.UtbetalingstidslinjeData.TypeData.ForeldetDag
         }
 
         internal class UkjentDag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
             override val prioritet = 0
             override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visit(this, dato, økonomi)
+            override fun serialiseringstype(): PersonData.UtbetalingstidslinjeData.TypeData = PersonData.UtbetalingstidslinjeData.TypeData.UkjentDag
         }
     }
 }

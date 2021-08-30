@@ -149,8 +149,8 @@ interface PersonObserver {
         val type: String,
         val forrigeStatus: String,
         val gjeldendeStatus: String,
-        val arbeidsgiverOppdrag: Map<String, Any>,
-        val personOppdrag: Map<String, Any>
+        val arbeidsgiverOppdrag: Map<String, Any?>,
+        val personOppdrag: Map<String, Any?>
     )
 
     data class UtbetalingUtbetaltEvent(
@@ -165,8 +165,8 @@ interface PersonObserver {
         val epost: String,
         val tidspunkt: LocalDateTime,
         val automatiskBehandling: Boolean,
-        val arbeidsgiverOppdrag: Map<String, Any>,
-        val personOppdrag: Map<String, Any>,
+        val arbeidsgiverOppdrag: Map<String, Any?>,
+        val personOppdrag: Map<String, Any?>,
         val utbetalingsdager: List<Utbetalingsdag>,
         val vedtaksperiodeIder: List<UUID>
     )
@@ -178,7 +178,7 @@ interface PersonObserver {
     )
 
     data class FeriepengerUtbetaltEvent(
-        val arbeidsgiverOppdrag: Map<String, Any>,
+        val arbeidsgiverOppdrag: MutableMap<String, Any?>,
         val personOppdrag: Map<String, Any> = mapOf("linjer" to emptyList<String>())
     )
 

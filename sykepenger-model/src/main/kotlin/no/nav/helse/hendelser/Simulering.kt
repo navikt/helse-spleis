@@ -46,7 +46,48 @@ class Simulering(
     class SimuleringResultat(
         internal val totalbeløp: Int,
         internal val perioder: List<SimulertPeriode>
-    )
+    ) {
+        fun toMap() = mapOf(
+            "totalbeløp" to totalbeløp,
+            "perioder" to perioder.map { periode ->
+                mapOf(
+                    "fom" to periode.periode.start,
+                    "tom" to periode.periode.endInclusive,
+                    "utbetalinger" to periode.utbetalinger.map { utbetaling ->
+                        mapOf(
+                            "forfallsdato" to utbetaling.forfallsdato,
+                            "utbetalesTil" to mapOf(
+                                "id" to utbetaling.utbetalesTil.id,
+                                "navn" to utbetaling.utbetalesTil.navn
+                            ),
+                            "feilkonto" to utbetaling.feilkonto,
+                            "detaljer" to utbetaling.detaljer.map { detalj ->
+                                mapOf(
+                                    "fom" to detalj.periode.start,
+                                    "tom" to detalj.periode.endInclusive,
+                                    "konto" to detalj.konto,
+                                    "beløp" to detalj.beløp,
+                                    "klassekode" to mapOf(
+                                        "kode" to detalj.klassekode.kode,
+                                        "beskrivelse" to detalj.klassekode.beskrivelse
+                                    ),
+                                    "uføregrad" to detalj.uføregrad,
+                                    "utbetalingstype" to detalj.utbetalingstype,
+                                    "tilbakeføring" to detalj.tilbakeføring,
+                                    "sats" to mapOf(
+                                        "sats" to detalj.sats.sats,
+                                        "antall" to detalj.sats.antall,
+                                        "type" to detalj.sats.type
+                                    ),
+                                    "refunderesOrgnummer" to detalj.refunderesOrgnummer
+                                )
+                            }
+                        )
+                    }
+                )
+            }
+        )
+    }
 
     class SimulertPeriode(
         internal val periode: Periode,
