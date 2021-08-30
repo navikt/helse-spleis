@@ -65,7 +65,7 @@ internal class UtbetalingstidslinjeInspektør(utbetalingstidslinje: Utbetalingst
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        økonomi.reflection { _, _, _, _, _, aktuellDagsinntekt, arbeidsgiverbeløp, _, _ ->
+        økonomi.medData { _, _, _, _, _, aktuellDagsinntekt, arbeidsgiverbeløp, _, _ ->
             navDagTeller += 1
             totalUtbetaling += arbeidsgiverbeløp ?: 0.0
             totalInntekt += aktuellDagsinntekt ?: 0.0

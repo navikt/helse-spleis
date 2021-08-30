@@ -149,7 +149,7 @@ internal class ØkonomiTest {
     @Test
     fun `toMap uten dekningsgrunnlag`() {
         79.5.prosent.sykdomsgrad
-            .reflection { grad, arbeidsgiverBetalingProsent, dekningsgrunnlag, _, _, _, _, _, _ ->
+            .medData { grad, arbeidsgiverBetalingProsent, dekningsgrunnlag, _, _, _, _, _, _ ->
                 assertEquals(79.5, grad)
                 assertEquals(100.0, arbeidsgiverBetalingProsent)
                 assertNull(dekningsgrunnlag)
@@ -159,7 +159,7 @@ internal class ØkonomiTest {
     @Test
     fun `toMap med dekningsgrunnlag`() {
         79.5.prosent.sykdomsgrad.inntekt(1200.4.daglig, skjæringstidspunkt = 1.januar)
-            .reflection { grad, arbeidsgiverBetalingProsent, dekningsgrunnlag, _, _, _, _, _, _ ->
+            .medData { grad, arbeidsgiverBetalingProsent, dekningsgrunnlag, _, _, _, _, _, _ ->
                 assertEquals(79.5, grad)
                 assertEquals(100.0, arbeidsgiverBetalingProsent)
                 assertEquals(1200.4, dekningsgrunnlag)
@@ -169,7 +169,7 @@ internal class ØkonomiTest {
     @Test
     fun `toIntMap med dekningsgrunnlag`() {
         79.5.prosent.sykdomsgrad.inntekt(1200.4.daglig, skjæringstidspunkt = 1.januar)
-            .reflectionRounded { grad, arbeidsgiverBetalingProsent, dekningsgrunnlag, _, _, _, _ ->
+            .medAvrundetData { grad, arbeidsgiverBetalingProsent, dekningsgrunnlag, _, _, _, _ ->
                 assertEquals(80, grad)
                 assertEquals(100, arbeidsgiverBetalingProsent)
                 assertEquals(1200, dekningsgrunnlag)
@@ -187,14 +187,14 @@ internal class ØkonomiTest {
     fun `Beregn utbetaling når mindre enn 6G`() {
         80.prosent.sykdomsgrad.inntekt(1200.daglig, skjæringstidspunkt = 1.januar).also {
             listOf(it).betal(1.januar)
-            it.reflection { grad, arbeidsgiverBetalingProsent, dekningsgrunnlag, _, _, _, arbeidsgiverbeløp, personbeløp, _ ->
+            it.medData { grad, arbeidsgiverBetalingProsent, dekningsgrunnlag, _, _, _, arbeidsgiverbeløp, personbeløp, _ ->
                 assertEquals(80.0, grad)
                 assertEquals(100.0, arbeidsgiverBetalingProsent)
                 assertEquals(1200.0, dekningsgrunnlag)
                 assertEquals(960.0, arbeidsgiverbeløp)
                 assertEquals(0.0, personbeløp)
             }
-            it.reflectionRounded { grad, arbeidsgiverBetalingProsent, dekningsgrunnlag, _, arbeidsgiverbeløp, personbeløp, _ ->
+            it.medAvrundetData { grad, arbeidsgiverBetalingProsent, dekningsgrunnlag, _, arbeidsgiverbeløp, personbeløp, _ ->
             assertEquals(80, grad)
                 assertEquals(100, arbeidsgiverBetalingProsent)
                 assertEquals(1200, dekningsgrunnlag)
@@ -208,7 +208,7 @@ internal class ØkonomiTest {
     fun `arbeidsgiver og person splittes tilsvarer totalt`() {
         Økonomi.sykdomsgrad(100.prosent, 50.prosent).inntekt(999.daglig, skjæringstidspunkt = 1.januar).also {
             listOf(it).betal(1.januar)
-            it.reflection { grad, arbeidsgiverBetalingProsent, dekningsgrunnlag, _, _, _, arbeidsgiverbeløp, personbeløp, _ ->
+            it.medData { grad, arbeidsgiverBetalingProsent, dekningsgrunnlag, _, _, _, arbeidsgiverbeløp, personbeløp, _ ->
             assertEquals(100.0, grad)
                 assertEquals(50.0, arbeidsgiverBetalingProsent)
                 assertEquals(999.0, dekningsgrunnlag)
@@ -315,7 +315,7 @@ internal class ØkonomiTest {
     }
 
     private fun assertUtbetaling(økonomi: Økonomi, expectedArbeidsgiver: Double, expectedPerson: Double) {
-        økonomi.reflection { _, _, _, _, _, _, arbeidsgiverbeløp, personbeløp, _ ->
+        økonomi.medData { _, _, _, _, _, _, arbeidsgiverbeløp, personbeløp, _ ->
             assertEquals(expectedArbeidsgiver, arbeidsgiverbeløp, "arbeidsgiverbeløp problem")
             assertEquals(expectedPerson, personbeløp, "personbeløp problem")
         }

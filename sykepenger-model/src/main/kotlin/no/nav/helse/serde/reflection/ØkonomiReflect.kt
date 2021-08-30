@@ -4,15 +4,15 @@ import no.nav.helse.økonomi.Økonomi
 
 internal fun serialiserØkonomi(økonomi: Økonomi) =
     mutableMapOf<String, Any>().also { map ->
-        økonomi.reflection { grad,
-                             arbeidsgiverBetalingProsent,
-                             dekningsgrunnlag,
-                             skjæringstidspunkt,
-                             totalGrad,
-                             aktuellDagsinntekt,
-                             arbeidsgiverbeløp,
-                             personbeløp,
-                             er6GBegrenset ->
+        økonomi.medData { grad,
+                          arbeidsgiverBetalingProsent,
+                          dekningsgrunnlag,
+                          skjæringstidspunkt,
+                          totalGrad,
+                          aktuellDagsinntekt,
+                          arbeidsgiverbeløp,
+                          personbeløp,
+                          er6GBegrenset ->
             map["grad"] = grad
             map["arbeidsgiverBetalingProsent"] = arbeidsgiverBetalingProsent
             map.compute("skjæringstidspunkt") { _, _ -> skjæringstidspunkt }

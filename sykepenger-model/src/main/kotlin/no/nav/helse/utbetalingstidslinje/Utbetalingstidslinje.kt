@@ -55,7 +55,7 @@ internal class Utbetalingstidslinje private constructor(
                 .toMap()
                 .let(::Sykdomstidslinje)
 
-        private fun Økonomi.medGrad() = Økonomi.sykdomsgrad(reflection { grad, _, _, _, _, _, _, _, _ -> grad }.prosent)
+        private fun Økonomi.medGrad() = Økonomi.sykdomsgrad(medData { grad, _, _, _, _, _, _, _, _ -> grad }.prosent)
 
         private fun Utbetalingsdag.erSykedag() =
             this is NavDag || this is NavHelgDag || this is ArbeidsgiverperiodeDag || this is AvvistDag
@@ -99,7 +99,7 @@ internal class Utbetalingstidslinje private constructor(
 
     private fun avvis(begrunnelserForSkjæringstidspunkt: Map<LocalDate, List<Begrunnelse>>) {
         utbetalingsdager.forEachIndexed { index, utbetalingsdag ->
-            utbetalingsdag.økonomi.reflection { _, _, _, skjæringstidspunkt, _, _, _, _, _ ->
+            utbetalingsdag.økonomi.medData { _, _, _, skjæringstidspunkt, _, _, _, _, _ ->
                 begrunnelserForSkjæringstidspunkt[skjæringstidspunkt]?.also { begrunnelser ->
                     utbetalingsdager[index] = utbetalingsdag.avvis(begrunnelser) ?: utbetalingsdag
                 }
@@ -320,11 +320,11 @@ internal class Utbetalingstidslinje private constructor(
 
             companion object {
                 internal val reflectedArbeidsgiverBeløp = { økonomi: Økonomi ->
-                    økonomi.reflectionRounded { _, _, _, _, arbeidsgiverbeløp, _, _ -> arbeidsgiverbeløp!! }
+                    økonomi.medAvrundetData { _, _, _, _, arbeidsgiverbeløp, _, _ -> arbeidsgiverbeløp!! }
                 }
 
                 internal val reflectedPersonBeløp = { økonomi: Økonomi ->
-                    økonomi.reflectionRounded { _, _, _, _, _, personBeløp, _ -> personBeløp!! }
+                    økonomi.medAvrundetData { _, _, _, _, _, personBeløp, _ -> personBeløp!! }
                 }
             }
 

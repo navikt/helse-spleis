@@ -122,7 +122,7 @@ internal class ØkonomiDagTest {
 
     private fun assertØkonomi(tidslinje: Utbetalingstidslinje, arbeidsgiverbeløp: Double, personbeløp: Double = 0.0) {
         tidslinje.forEach {
-            it.økonomi.reflection {
+            it.økonomi.medData {
                     _,
                     _,
                     _,

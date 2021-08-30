@@ -537,7 +537,7 @@ internal class UtbetalingstidslinjeBuilderTest {
                 .navdager
                 .first()
                 .økonomi
-                .reflection { _, _, dekningsgrunnlag, _, _, _, _, _, _ -> dekningsgrunnlag }
+                .medData { _, _, dekningsgrunnlag, _, _, _, _, _, _ -> dekningsgrunnlag }
         )
         assertEquals(18.januar, inspektør.navdager.first().dato)
     }
@@ -920,7 +920,7 @@ internal class UtbetalingstidslinjeBuilderTest {
 
     private fun assertInntekter(dekningsgrunnlaget: Int? = null, aktuelleDagsinntekten: Int? = null) {
         inspektør.navdager.forEach { navDag ->
-            navDag.økonomi.reflectionRounded { _, _, dekningsgrunnlag, aktuellDagsinntekt, _, _, _ ->
+            navDag.økonomi.medAvrundetData { _, _, dekningsgrunnlag, aktuellDagsinntekt, _, _, _ ->
                 dekningsgrunnlaget?.let { assertEquals(it, dekningsgrunnlag) }
                 aktuelleDagsinntekten?.let { assertEquals(it, aktuellDagsinntekt) }
             }
@@ -931,7 +931,7 @@ internal class UtbetalingstidslinjeBuilderTest {
         filter { it.dato in periode }
             .forEach { utbetalingsdag ->
                 val daglig = dekningsgrunnlaget?.reflection { _, _, _, daglig -> daglig }
-                utbetalingsdag.økonomi.reflectionRounded { _, _, dekningsgrunnlag, _, _, _, _ ->
+                utbetalingsdag.økonomi.medAvrundetData { _, _, dekningsgrunnlag, _, _, _, _ ->
                     assertEquals(daglig, dekningsgrunnlag)
                 }
             }
