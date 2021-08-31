@@ -2013,6 +2013,13 @@ internal class Vedtaksperiode private constructor(
 
             vedtaksperiode.trengerGodkjenning(hendelse)
         }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
+            if (Toggles.RevurderInntekt.enabled) {
+                vedtaksperiode.arbeidsgiver.addInntekt(hendelse)
+                vedtaksperiode.tilstand(hendelse, AvventerVilkårsprøving)
+            }
+        }
     }
 
     private fun trengerGodkjenning(hendelse: IAktivitetslogg) {

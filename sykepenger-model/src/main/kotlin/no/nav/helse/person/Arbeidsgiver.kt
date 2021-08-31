@@ -615,6 +615,10 @@ internal class Arbeidsgiver private constructor(
         inntektsmelding.addInntekt(inntektshistorikk, skjæringstidspunkt)
     }
 
+    internal fun addInntekt(hendelse: OverstyrInntekt) {
+        hendelse.addInntekt(inntektshistorikk)
+    }
+
     internal fun lagreSykepengegrunnlagFraInfotrygd(inntektsopplysninger: List<Inntektsopplysning>, hendelseId: UUID) {
         Inntektsopplysning.lagreInntekter(inntektsopplysninger, inntektshistorikk, hendelseId)
     }
