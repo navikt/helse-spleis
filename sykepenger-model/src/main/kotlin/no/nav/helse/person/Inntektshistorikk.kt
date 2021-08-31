@@ -35,34 +35,41 @@ internal class Inntektshistorikk {
 
     internal fun nyesteId() = historikk.nyesteId()
 
-    internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, dato: LocalDate): Inntekt? =
+    @Deprecated("Skriv om slik at vi kun har grunnlagForSykepengegrunnlag som returnerer inntektsopplysning")
+    internal fun grunnlagForSykepengegrunnlagGammel(skjæringstidspunkt: LocalDate, dato: LocalDate): Inntekt? =
         grunnlagForSykepengegrunnlagMedMetadata(skjæringstidspunkt, dato)?.second
 
-    internal fun grunnlagForSykepengegrunnlagDings(skjæringstidspunkt: LocalDate, dato: LocalDate): Inntektsopplysning? = // TODO
+    internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, dato: LocalDate): Inntektsopplysning? =
         grunnlagForSykepengegrunnlagMedMetadata(skjæringstidspunkt, dato)?.first
 
-    internal fun grunnlagForSykepengegrunnlag(dato: LocalDate): Inntekt? =
+    @Deprecated("Skriv om slik at vi kun har grunnlagForSykepengegrunnlag som returnerer inntektsopplysning")
+    internal fun grunnlagForSykepengegrunnlagGammel(dato: LocalDate): Inntekt? =
         grunnlagForSykepengegrunnlagMedMetadata(dato)?.second
 
+    @Deprecated("Skriv om slik at vi kun har grunnlagForSykepengegrunnlag som returnerer inntektsopplysning")
     internal fun grunnlagForSykepengegrunnlagMedMetadata(skjæringstidspunkt: LocalDate, dato: LocalDate): Pair<Inntektsopplysning, Inntekt>? =
         grunnlagForSykepengegrunnlagMedMetadata(skjæringstidspunkt) ?: skjæringstidspunkt
             .takeIf { it <= dato }
             ?.let { grunnlagForSykepengegrunnlagFraInfotrygdMedMetadata(it til dato) }
 
+    @Deprecated("Skriv om slik at vi kun har grunnlagForSykepengegrunnlag som returnerer inntektsopplysning")
     private fun grunnlagForSykepengegrunnlagMedMetadata(dato: LocalDate): Pair<Inntektsopplysning, Inntekt>? =
         historikk.firstOrNull()?.grunnlagForSykepengegrunnlag(dato)
 
+    @Deprecated("Skriv om slik at vi kun har grunnlagForSykepengegrunnlag som returnerer inntektsopplysning")
     private fun grunnlagForSykepengegrunnlagFraInfotrygdMedMetadata(periode: Periode): Pair<Inntektsopplysning, Inntekt>? =
         historikk.firstOrNull()?.grunnlagForSykepengegrunnlagFraInfotrygd(periode)
 
+    @Deprecated("Skriv om slik at vi kun har grunnlagForSykepengegrunnlag som returnerer inntektsopplysning")
     internal fun grunnlagForSammenligningsgrunnlag(dato: LocalDate): Inntekt? =
         grunnlagForSammenligningsgrunnlagMedMetadata(dato)?.second
 
+    @Deprecated("Skriv om slik at vi kun har grunnlagForSykepengegrunnlag som returnerer inntektsopplysning")
     internal fun grunnlagForSammenligningsgrunnlagMedMetadata(dato: LocalDate): Pair<Inntektsopplysning, Inntekt>? =
         historikk.firstOrNull()?.grunnlagForSammenligningsgrunnlag(dato)
 
     internal fun sykepengegrunnlagKommerFraSkatt(skjæringstidspunkt: LocalDate) = grunnlagForSykepengegrunnlagMedMetadata(skjæringstidspunkt)?.first.let { it == null || it is SkattComposite }
-    internal fun harGrunnlagForSykepengegrunnlag(dato: LocalDate) =  grunnlagForSykepengegrunnlag(dato) != null
+    internal fun harGrunnlagForSykepengegrunnlag(dato: LocalDate) =  grunnlagForSykepengegrunnlagGammel(dato) != null
     private fun harGrunnlagForSammenligningsgrunnlag(dato: LocalDate) = grunnlagForSammenligningsgrunnlag(dato) != null
     internal fun harGrunnlagForSykepengegrunnlagEllerSammenligningsgrunnlag(dato: LocalDate) = harGrunnlagForSykepengegrunnlag(dato) || harGrunnlagForSammenligningsgrunnlag(dato)
 

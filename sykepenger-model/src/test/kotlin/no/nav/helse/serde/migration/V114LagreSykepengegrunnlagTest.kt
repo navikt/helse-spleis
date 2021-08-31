@@ -17,12 +17,18 @@ internal class V114LagreSykepengegrunnlagTest {
         assertEquals(toNode(personOvergangFraITExpected), migrer(personOvergangFraITOriginal))
     }
 
+    @Test
+    fun `Migrerer riktig for overgang fra infotrygd med dato ulikt skjæringstidspunkt og manglende inntektsopplysning for vilkårsgrunnlag`() {
+        assertEquals(toNode(personMedRartSkjæringstidspunktFraITExpected), migrer(personMedRartSkjæringstidspunktFraITOriginal))
+    }
+
     private fun toNode(json: String) = serdeObjectMapper.readTree(json)
 
     private fun migrer(json: String) = listOf(V114LagreSykepengegrunnlag()).migrate(toNode(json))
 
     @Language("JSON")
-    private val personOvergangFraITOriginal = """{
+    private val personMedRartSkjæringstidspunktFraITOriginal = """{
+        "fødselsnummer": "04206913337",
         "arbeidsgivere": [
             {
                 "organisasjonsnummer": "987654321",
@@ -37,7 +43,45 @@ internal class V114LagreSykepengegrunnlagTest {
                                 "beløp": 31000.0,
                                 "kilde": "INFOTRYGD",
                                 "tidsstempel": "2021-08-25T14:50:58.248396"
-                            }
+                            },
+                            {
+                            "id": "fc8e7179-5d63-46ce-a5bf-ec42313ff123",
+                            "skatteopplysninger": [
+                                {
+                                    "dato": "2016-12-05",
+                                    "hendelseId": "ae957631-0f86-4703-907c-320950c96aaa",
+                                    "beløp": 31000.0,
+                                    "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                                    "tidsstempel": "2021-08-24T13:33:13.395239",
+                                    "måned": "2016-11",
+                                    "type": "LØNNSINNTEKT",
+                                    "fordel": "juicy fordel",
+                                    "beskrivelse": "juicy beskrivelse"
+                                },
+                                {
+                                    "dato": "2016-12-05",
+                                    "hendelseId": "ae957631-0f86-4703-907c-320950c96aaa",
+                                    "beløp": 31000.0,
+                                    "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                                    "tidsstempel": "2021-08-24T13:33:13.395239",
+                                    "måned": "2016-10",
+                                    "type": "LØNNSINNTEKT",
+                                    "fordel": "juicy fordel",
+                                    "beskrivelse": "juicy beskrivelse"
+                                },
+                                {
+                                    "dato": "2016-12-05",
+                                    "hendelseId": "ae957631-0f86-4703-907c-320950c96aaa",
+                                    "beløp": 31000.0,
+                                    "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                                    "tidsstempel": "2021-08-24T13:33:13.395239",
+                                    "måned": "2016-09",
+                                    "type": "LØNNSINNTEKT",
+                                    "fordel": "juicy fordel",
+                                    "beskrivelse": "juicy beskrivelse"
+                                }
+                            ]
+                        }
                         ]
                     }
                 ]
@@ -51,6 +95,10 @@ internal class V114LagreSykepengegrunnlagTest {
                     {
                         "skjæringstidspunkt": "2017-12-01",
                         "type": "Infotrygd"
+                    },
+                    {
+                        "skjæringstidspunkt": "2016-12-01",
+                        "type": "Infotrygd"
                     }
                 ]
             }
@@ -60,58 +108,242 @@ internal class V114LagreSykepengegrunnlagTest {
     """
 
     @Language("JSON")
-    private val personOvergangFraITExpected = """{
-        "arbeidsgivere": [
-            {
-                "organisasjonsnummer": "987654321",
-                "inntektshistorikk": [
-                    {
-                        "id": "4e44b7a8-19bd-4ead-8fda-c05ce643d8f8",
-                        "inntektsopplysninger": [
-                            {
-                                "id": "e7decc12-507b-4b57-ba87-5d5ae012752d",
-                                "dato": "2017-12-01",
-                                "hendelseId": "c9b89436-cc6e-4f85-900e-d72527a99a01",
-                                "beløp": 31000.0,
-                                "kilde": "INFOTRYGD",
-                                "tidsstempel": "2021-08-25T14:50:58.248396"
-                            }
-                        ]
-                    }
-                ]
-            }
-        ],
-        "vilkårsgrunnlagHistorikk": [
-            {
-                "id": "dfa125bc-a0f1-454a-90bb-bf4f6d4068c2",
-                "opprettet": "2021-08-25T14:50:58.252058",
-                "vilkårsgrunnlag": [
-                    {
-                        "skjæringstidspunkt": "2017-12-01",
-                        "type": "Infotrygd",
-                        "sykepengegrunnlag": {
-                            "sykepengegrunnlag": 372000.0,
-                            "grunnlagForSykepengegrunnlag": 372000.0,
-                            "arbeidsgiverInntektsopplysninger": [
+    private val personMedRartSkjæringstidspunktFraITExpected = """{
+    "fødselsnummer": "04206913337",
+    "arbeidsgivere": [
+        {
+            "organisasjonsnummer": "987654321",
+            "inntektshistorikk": [
+                {
+                    "id": "4e44b7a8-19bd-4ead-8fda-c05ce643d8f8",
+                    "inntektsopplysninger": [
+                        {
+                            "id": "e7decc12-507b-4b57-ba87-5d5ae012752d",
+                            "dato": "2017-12-01",
+                            "hendelseId": "c9b89436-cc6e-4f85-900e-d72527a99a01",
+                            "beløp": 31000.0,
+                            "kilde": "INFOTRYGD",
+                            "tidsstempel": "2021-08-25T14:50:58.248396"
+                        },
+                        {
+                            "id": "fc8e7179-5d63-46ce-a5bf-ec42313ff123",
+                            "skatteopplysninger": [
                                 {
-                                    "orgnummer": "987654321",
-                                    "inntektsopplysning": {
-                                        "id": "e7decc12-507b-4b57-ba87-5d5ae012752d",
-                                        "dato": "2017-12-01",
-                                        "hendelseId": "c9b89436-cc6e-4f85-900e-d72527a99a01",
-                                        "beløp": 31000.0,
-                                        "kilde": "INFOTRYGD",
-                                        "tidsstempel": "2021-08-25T14:50:58.248396"
-                                    }
+                                    "dato": "2016-12-05",
+                                    "hendelseId": "ae957631-0f86-4703-907c-320950c96aaa",
+                                    "beløp": 31000.0,
+                                    "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                                    "tidsstempel": "2021-08-24T13:33:13.395239",
+                                    "måned": "2016-11",
+                                    "type": "LØNNSINNTEKT",
+                                    "fordel": "juicy fordel",
+                                    "beskrivelse": "juicy beskrivelse"
+                                },
+                                {
+                                    "dato": "2016-12-05",
+                                    "hendelseId": "ae957631-0f86-4703-907c-320950c96aaa",
+                                    "beløp": 31000.0,
+                                    "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                                    "tidsstempel": "2021-08-24T13:33:13.395239",
+                                    "måned": "2016-10",
+                                    "type": "LØNNSINNTEKT",
+                                    "fordel": "juicy fordel",
+                                    "beskrivelse": "juicy beskrivelse"
+                                },
+                                {
+                                    "dato": "2016-12-05",
+                                    "hendelseId": "ae957631-0f86-4703-907c-320950c96aaa",
+                                    "beløp": 31000.0,
+                                    "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                                    "tidsstempel": "2021-08-24T13:33:13.395239",
+                                    "måned": "2016-09",
+                                    "type": "LØNNSINNTEKT",
+                                    "fordel": "juicy fordel",
+                                    "beskrivelse": "juicy beskrivelse"
                                 }
                             ]
                         }
+                    ]
+                }
+            ]
+        }
+    ],
+    "vilkårsgrunnlagHistorikk": [
+        {
+            "id": "dfa125bc-a0f1-454a-90bb-bf4f6d4068c2",
+            "opprettet": "2021-08-25T14:50:58.252058",
+            "vilkårsgrunnlag": [
+                {
+                    "skjæringstidspunkt": "2017-12-01",
+                    "type": "Infotrygd",
+                    "sykepengegrunnlag": {
+                        "sykepengegrunnlag": 372000.0,
+                        "grunnlagForSykepengegrunnlag": 372000.0,
+                        "arbeidsgiverInntektsopplysninger": [
+                            {
+                                "orgnummer": "987654321",
+                                "inntektsopplysning": {
+                                    "id": "e7decc12-507b-4b57-ba87-5d5ae012752d",
+                                    "dato": "2017-12-01",
+                                    "hendelseId": "c9b89436-cc6e-4f85-900e-d72527a99a01",
+                                    "beløp": 31000.0,
+                                    "kilde": "INFOTRYGD",
+                                    "tidsstempel": "2021-08-25T14:50:58.248396"
+                                }
+                            }
+                        ]
                     }
-                ]
-            }
-        ],
-        "skjemaVersjon": 114
-    }
+                },
+                {
+                    "skjæringstidspunkt": "2016-12-01",
+                    "type": "Infotrygd",
+                    "sykepengegrunnlag": {
+                        "sykepengegrunnlag": 0.0,
+                        "grunnlagForSykepengegrunnlag": 0.0,
+                        "arbeidsgiverInntektsopplysninger": []
+                    }
+                }
+            ]
+        }
+    ],
+    "skjemaVersjon": 114
+}
+    """
+
+    @Language("JSON")
+    private val personOvergangFraITOriginal = """{
+    "fødselsnummer": "04206913337",
+    "arbeidsgivere": [
+        {
+            "organisasjonsnummer": "987654321",
+            "inntektshistorikk": [
+                {
+                    "id": "4e44b7a8-19bd-4ead-8fda-c05ce643d8f8",
+                    "inntektsopplysninger": [
+                        {
+                            "id": "e7decc12-507b-4b57-ba87-5d5ae012752d",
+                            "dato": "2017-12-01",
+                            "hendelseId": "c9b89436-cc6e-4f85-900e-d72527a99a01",
+                            "beløp": 31000.0,
+                            "kilde": "INFOTRYGD",
+                            "tidsstempel": "2021-08-25T14:50:58.248396"
+                        },
+                        {
+                            "id": "e7decc12-507b-4b57-ba87-5d5ae0127aaa",
+                            "dato": "2016-12-17",
+                            "hendelseId": "c9b89436-cc6e-4f85-900e-d72527a99aaa",
+                            "beløp": 32000.0,
+                            "kilde": "INFOTRYGD",
+                            "tidsstempel": "2021-08-25T14:50:58.248396"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "vilkårsgrunnlagHistorikk": [
+        {
+            "id": "dfa125bc-a0f1-454a-90bb-bf4f6d4068c2",
+            "opprettet": "2021-08-25T14:50:58.252058",
+            "vilkårsgrunnlag": [
+                {
+                    "skjæringstidspunkt": "2017-12-01",
+                    "type": "Infotrygd"
+                },
+                {
+                    "skjæringstidspunkt": "2016-12-01",
+                    "type": "Infotrygd"
+                }
+            ]
+        }
+    ],
+    "skjemaVersjon": 113
+}
+    """
+
+    @Language("JSON")
+    private val personOvergangFraITExpected = """{
+    "fødselsnummer": "04206913337",
+    "arbeidsgivere": [
+        {
+            "organisasjonsnummer": "987654321",
+            "inntektshistorikk": [
+                {
+                    "id": "4e44b7a8-19bd-4ead-8fda-c05ce643d8f8",
+                    "inntektsopplysninger": [
+                        {
+                            "id": "e7decc12-507b-4b57-ba87-5d5ae012752d",
+                            "dato": "2017-12-01",
+                            "hendelseId": "c9b89436-cc6e-4f85-900e-d72527a99a01",
+                            "beløp": 31000.0,
+                            "kilde": "INFOTRYGD",
+                            "tidsstempel": "2021-08-25T14:50:58.248396"
+                        },
+                        {
+                            "id": "e7decc12-507b-4b57-ba87-5d5ae0127aaa",
+                            "dato": "2016-12-17",
+                            "hendelseId": "c9b89436-cc6e-4f85-900e-d72527a99aaa",
+                            "beløp": 32000.0,
+                            "kilde": "INFOTRYGD",
+                            "tidsstempel": "2021-08-25T14:50:58.248396"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "vilkårsgrunnlagHistorikk": [
+        {
+            "id": "dfa125bc-a0f1-454a-90bb-bf4f6d4068c2",
+            "opprettet": "2021-08-25T14:50:58.252058",
+            "vilkårsgrunnlag": [
+                {
+                    "skjæringstidspunkt": "2017-12-01",
+                    "type": "Infotrygd",
+                    "sykepengegrunnlag": {
+                        "sykepengegrunnlag": 372000.0,
+                        "grunnlagForSykepengegrunnlag": 372000.0,
+                        "arbeidsgiverInntektsopplysninger": [
+                            {
+                                "orgnummer": "987654321",
+                                "inntektsopplysning": {
+                                    "id": "e7decc12-507b-4b57-ba87-5d5ae012752d",
+                                    "dato": "2017-12-01",
+                                    "hendelseId": "c9b89436-cc6e-4f85-900e-d72527a99a01",
+                                    "beløp": 31000.0,
+                                    "kilde": "INFOTRYGD",
+                                    "tidsstempel": "2021-08-25T14:50:58.248396"
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "skjæringstidspunkt": "2016-12-01",
+                    "type": "Infotrygd",
+                    "sykepengegrunnlag": {
+                        "sykepengegrunnlag": 384000.0,
+                        "grunnlagForSykepengegrunnlag": 384000.0,
+                        "arbeidsgiverInntektsopplysninger": [
+                            {
+                                "orgnummer": "987654321",
+                                "inntektsopplysning": {
+                                    "id": "e7decc12-507b-4b57-ba87-5d5ae0127aaa",
+                                    "dato": "2016-12-17",
+                                    "hendelseId": "c9b89436-cc6e-4f85-900e-d72527a99aaa",
+                                    "beløp": 32000.0,
+                                    "kilde": "INFOTRYGD",
+                                    "tidsstempel": "2021-08-25T14:50:58.248396"
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ],
+    "skjemaVersjon": 114
+}
     """
 
     @Language("JSON")

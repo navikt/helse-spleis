@@ -75,7 +75,7 @@ internal class InfotrygdInntektsopplysningTest {
         )
         assertEquals(1, inspektør.inntektTeller.size)
         assertEquals(1, inspektør.inntektTeller.first())
-        assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(1.januar(2018)))
+        assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlagGammel(1.januar(2018)))
     }
 
     @Test
@@ -89,7 +89,7 @@ internal class InfotrygdInntektsopplysningTest {
         assertEquals(2, inspektør.inntektTeller.size)
         assertEquals(2, inspektør.inntektTeller.first())
         assertEquals(1, inspektør.inntektTeller.last())
-        assertEquals(25000.månedlig, historikk.grunnlagForSykepengegrunnlag(1.januar(2018)))
+        assertEquals(25000.månedlig, historikk.grunnlagForSykepengegrunnlagGammel(1.januar(2018)))
     }
 
     @Test
@@ -110,7 +110,7 @@ internal class InfotrygdInntektsopplysningTest {
         assertEquals(2, inspektør.inntektTeller.size)
         assertEquals(24, inspektør.inntektTeller.first())
         assertEquals(23, inspektør.inntektTeller.last())
-        assertEquals(25000.månedlig, historikk.grunnlagForSykepengegrunnlag(1.januar(2018)))
+        assertEquals(25000.månedlig, historikk.grunnlagForSykepengegrunnlagGammel(1.januar(2018)))
     }
 
     @Test
@@ -131,7 +131,7 @@ internal class InfotrygdInntektsopplysningTest {
         assertEquals(2, inspektør.inntektTeller.size)
         assertEquals(24, inspektør.inntektTeller.first())
         assertEquals(1, inspektør.inntektTeller.last())
-        assertEquals(25000.månedlig, historikk.grunnlagForSykepengegrunnlag(1.januar(2018)))
+        assertEquals(25000.månedlig, historikk.grunnlagForSykepengegrunnlagGammel(1.januar(2018)))
     }
 
     @Test
@@ -157,9 +157,9 @@ internal class InfotrygdInntektsopplysningTest {
             historikk,
             UUID.randomUUID()
         )
-        assertEquals(30000.månedlig, historikk.grunnlagForSykepengegrunnlag(1.januar, 11.januar))
-        assertEquals(25000.månedlig, historikk.grunnlagForSykepengegrunnlag(1.januar, 9.januar))
-        assertNull(historikk.grunnlagForSykepengegrunnlag(1.januar, 4.januar))
+        assertEquals(30000.månedlig, historikk.grunnlagForSykepengegrunnlagGammel(1.januar, 11.januar))
+        assertEquals(25000.månedlig, historikk.grunnlagForSykepengegrunnlagGammel(1.januar, 9.januar))
+        assertNull(historikk.grunnlagForSykepengegrunnlagGammel(1.januar, 4.januar))
     }
 
     private fun inntektsopplysning(refusjonTom: LocalDate? = null) =

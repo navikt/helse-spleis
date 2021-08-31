@@ -590,7 +590,7 @@ class Person private constructor(
 
     internal fun vilkårsprøvEtterNyInntekt(hendelse: OverstyrInntekt, kompenseringsdatoForManglendeSkjæringstidspunktIInfotrygd: LocalDate) {
         val skjæringstidspunkt = hendelse.skjæringstidspunkt
-        val grunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag(skjæringstidspunkt, kompenseringsdatoForManglendeSkjæringstidspunktIInfotrygd) // TODO: om vi ikke har sykepengegrunnlag blir den satt som INGEN, dumt å ikke ha: hendelse.severe("Fant ikke grunnlag for sykepengegrunnlag for skjæringstidspunkt: ${skjæringstidspunkt}. Kan ikke revurdere inntekt.")
+        val grunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag(skjæringstidspunkt, kompenseringsdatoForManglendeSkjæringstidspunktIInfotrygd)
         val sammenligningsgrunnlag = sammenligningsgrunnlag(skjæringstidspunkt)
             ?: hendelse.severe("Fant ikke sammenligningsgrunnlag for skjæringstidspunkt: ${skjæringstidspunkt}. Kan ikke revurdere inntekt.")
         val avviksprosent = grunnlagForSykepengegrunnlag.avviksprosent(sammenligningsgrunnlag)

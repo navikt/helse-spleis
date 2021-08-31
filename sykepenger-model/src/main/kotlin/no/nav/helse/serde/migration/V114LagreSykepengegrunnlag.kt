@@ -4,13 +4,17 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.helse.Grunnbeløp
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
 internal class V114LagreSykepengegrunnlag : JsonMigration(version = 114) {
 
     override val description: String = "Beregne og lagre sykepengegrunnlag for alle vilkårsgrunnlagelementert"
 
+
     companion object {
+        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
+
         internal fun genererSykepengegrunnlag(vilkårsgrunnlag: ObjectNode, person: ObjectNode) {
             val skjæringstidspunkt = vilkårsgrunnlag["skjæringstidspunkt"].asText()
             val sykepengegrunnlag = vilkårsgrunnlag.with("sykepengegrunnlag")
@@ -22,7 +26,7 @@ internal class V114LagreSykepengegrunnlag : JsonMigration(version = 114) {
 
 
             val grunnlagForSykepengegrunnlag = person["arbeidsgivere"].sumOf { arbeidsgiver ->
-                leggTilArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysninger, arbeidsgiver as ObjectNode, skjæringstidspunkt)
+                leggTilArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysninger, arbeidsgiver as ObjectNode, skjæringstidspunkt, person["fødselsnummer"].asText())
             } * 12
             val sykepengegrunnlag2 = minOf(grunnlagForSykepengegrunnlag, Grunnbeløp.`6G`.beløp(LocalDate.parse(skjæringstidspunkt)).reflection { årlig, _, _, _ -> årlig })
 
@@ -30,7 +34,7 @@ internal class V114LagreSykepengegrunnlag : JsonMigration(version = 114) {
             sykepengegrunnlag.put("grunnlagForSykepengegrunnlag", grunnlagForSykepengegrunnlag)
         }
 
-        private fun leggTilArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysninger: ArrayNode, arbeidsgiver: ObjectNode, skjæringstidspunkt: String): Double {
+        private fun leggTilArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysninger: ArrayNode, arbeidsgiver: ObjectNode, skjæringstidspunkt: String, fnr: String): Double {
             val inntektsopplysning = finnInntektsopplysning(arbeidsgiver["inntektshistorikk"], skjæringstidspunkt)
 
             if (inntektsopplysning != null) {
@@ -40,6 +44,8 @@ internal class V114LagreSykepengegrunnlag : JsonMigration(version = 114) {
 
                 return if (inntektsopplysning.has("skatteopplysninger")) beregnBeløpFraSkatt(inntektsopplysning.withArray("skatteopplysninger")) else inntektsopplysning["beløp"].asDouble()
             }
+            sikkerLogg.info("Migrering V114: Fant ikke inttektsopplysning for nåværende skjæringstidspunkt $skjæringstidspunkt for fnr $fnr")
+
             return 0.0
         }
 
@@ -52,7 +58,7 @@ internal class V114LagreSykepengegrunnlag : JsonMigration(version = 114) {
                 ?.get("inntektsopplysninger")
                 ?.filterNot { it.has("skatteopplysninger") && it["skatteopplysninger"].first()["kilde"].asText() == "SKATT_SAMMENLIGNINGSGRUNNLAG" }
                 ?.filter {
-                    skjæringstidspunkt == if (it.has("skatteopplysninger")) it["skatteopplysninger"].first()["dato"].asText() else it["dato"].asText()  //TODO: vi har ikke sisteførstekjenteukjentedrittdag fra IT :sob: hvis vi ikke finner inntekt, ta første tidligste IT-inntekt etter skjæringstidspunkt
+                    skjæringstidspunkt == if (it.has("skatteopplysninger")) it["skatteopplysninger"].first()["dato"].asText() else it["dato"].asText()
                 }?.maxByOrNull {
                     when (if (it.has("skatteopplysninger")) it["skatteopplysninger"].first()["kilde"].asText() else it["kilde"].asText()) {
                         "SAKSBEHANDLER" -> 100
@@ -61,7 +67,16 @@ internal class V114LagreSykepengegrunnlag : JsonMigration(version = 114) {
                         "SKATT_SYKEPENGEGRUNNLAG" -> 40
                         else -> 0
                     }
-                }
+                } ?:
+                inntektshistorikk.firstOrNull()
+                    ?.get("inntektsopplysninger")
+                    ?.sortedBy { if(it.has("skatteopplysninger")) it["skatteopplysninger"].first()["dato"].asText() else it["dato"].asText() }
+                    ?.first {
+                        val dato =  if(it.has("skatteopplysninger")) it["skatteopplysninger"].first()["dato"].asText() else it["dato"].asText()
+                        dato > skjæringstidspunkt
+                    }
+                    ?.takeIf { it.has("kilde") && it["kilde"].asText() == "INFOTRYGD" } // TODO: Burde teste at dette ikke brekker for skatteoplysninger
+
     }
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {

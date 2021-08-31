@@ -38,7 +38,7 @@ internal class InntektshistorikkInspektør(arbeidsgiver: Arbeidsgiver) : Arbeids
     val antallInnslag get() = innslag.size
     internal val sisteInnslag get() = innslag.firstOrNull()
 
-    internal fun grunnlagForSykepengegrunnlag(dato: LocalDate) = inntektshistorikk.grunnlagForSykepengegrunnlag(dato)
+    internal fun grunnlagForSykepengegrunnlag(dato: LocalDate) = inntektshistorikk.grunnlagForSykepengegrunnlagGammel(dato)
 
     internal fun grunnlagForSammenligningsgrunnlag(dato: LocalDate) = inntektshistorikk.grunnlagForSammenligningsgrunnlag(dato)
 

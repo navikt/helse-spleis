@@ -70,14 +70,14 @@ internal class Arbeidsgiver private constructor(
 
         internal fun List<Arbeidsgiver>.grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, periodeStart: LocalDate) =
             this.mapNotNull { arbeidsgiver ->
-                arbeidsgiver.inntektshistorikk.grunnlagForSykepengegrunnlagDings(
+                arbeidsgiver.inntektshistorikk.grunnlagForSykepengegrunnlag(
                     skjæringstidspunkt,
                     maxOf(skjæringstidspunkt, periodeStart)
                 )?.let { ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, it) }
             }
 
         internal fun List<Arbeidsgiver>.grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
-            this.mapNotNull { it.inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt) }
+            this.mapNotNull { it.inntektshistorikk.grunnlagForSykepengegrunnlagGammel(skjæringstidspunkt) }
                 .takeIf { it.isNotEmpty() }
                 ?.summer()
 
@@ -87,7 +87,7 @@ internal class Arbeidsgiver private constructor(
                 ?.summer()
 
         internal fun List<Arbeidsgiver>.harGrunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
-            filter { it.inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt) != null }
+            filter { it.inntektshistorikk.grunnlagForSykepengegrunnlagGammel(skjæringstidspunkt) != null }
 
         internal fun List<Arbeidsgiver>.harNødvendigInntekt(skjæringstidspunkt: LocalDate) =
             this.all { it.vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt).harNødvendigInntekt() }
@@ -612,7 +612,7 @@ internal class Arbeidsgiver private constructor(
     internal fun fjernDager(periode: Periode) = sykdomshistorikk.fjernDager(periode)
 
     internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, periodeStart: LocalDate) =
-        inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periodeStart)
+        inntektshistorikk.grunnlagForSykepengegrunnlagGammel(skjæringstidspunkt, periodeStart)
 
     internal fun addInntekt(inntektsmelding: Inntektsmelding, skjæringstidspunkt: LocalDate) {
         inntektsmelding.addInntekt(inntektshistorikk, skjæringstidspunkt)
