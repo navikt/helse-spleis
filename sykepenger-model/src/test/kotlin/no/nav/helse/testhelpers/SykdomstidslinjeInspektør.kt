@@ -29,7 +29,7 @@ internal class SykdomstidslinjeInspektør(tidslinje: Sykdomstidslinje) : Sykdoms
     }
 
     private fun set(dag: Dag, dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
-        økonomi.reflectionRounded {
+        økonomi.medAvrundetData {
             grad, _ -> this.grader[dato] = grad
             set(dag, dato, kilde)
         }

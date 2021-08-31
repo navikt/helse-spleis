@@ -432,7 +432,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
 
         val utbetaling = inspektør(a2).utbetalinger.single()
         val linje = utbetaling.arbeidsgiverOppdrag().linjerUtenOpphør().single()
-        assertEquals(100.0, utbetaling.utbetalingstidslinje()[20.februar].økonomi.reflection { _, _, _, _, totalGrad, _, _, _, _ -> totalGrad })
+        assertEquals(100.0, utbetaling.utbetalingstidslinje()[20.februar].økonomi.medData { _, _, _, _, totalGrad, _, _, _, _ -> totalGrad })
         assertEquals(2077, linje.beløp) // Ikke cappet på 6G, siden personen ikke jobber hos a1 ved dette skjæringstidspunktet
         assertEquals(18.februar, linje.fom)
         assertEquals(20.februar, linje.tom)

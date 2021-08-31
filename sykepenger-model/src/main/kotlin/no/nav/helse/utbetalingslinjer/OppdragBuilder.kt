@@ -44,8 +44,8 @@ internal class OppdragBuilder(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        økonomi.reflection { grad, aktuellDagsinntekt ->
-            if (arbeisdsgiverLinjer.isEmpty()) return@reflection tilstand.nyLinje(dag, dato, grad, aktuellDagsinntekt!!)
+        økonomi.medData { grad, aktuellDagsinntekt ->
+            if (arbeisdsgiverLinjer.isEmpty()) return@medData tilstand.nyLinje(dag, dato, grad, aktuellDagsinntekt!!)
             if (grad == linje.grad && (linje.beløp == null || linje.beløp == fagområde.beløp(dag.økonomi)))
                 tilstand.betalingsdag(dag, dato, grad, aktuellDagsinntekt!!)
             else
@@ -58,7 +58,7 @@ internal class OppdragBuilder(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        økonomi.reflection { grad, _ ->
+        økonomi.medData { grad, _ ->
             if (arbeisdsgiverLinjer.isEmpty() || grad != linje.grad)
                 tilstand.nyLinje(dag, dato, grad)
             else

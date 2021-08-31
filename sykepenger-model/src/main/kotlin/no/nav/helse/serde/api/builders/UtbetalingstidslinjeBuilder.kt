@@ -19,7 +19,7 @@ internal class UtbetalingstidslinjeBuilder(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        økonomi.reflectionRounded { _, aktuellDagsinntekt ->
+        økonomi.medAvrundetData { _, aktuellDagsinntekt ->
             utbetalingstidslinjeMap.add(
                 UtbetalingsdagDTO(
                     type = TypeDataDTO.Arbeidsdag,
@@ -35,7 +35,7 @@ internal class UtbetalingstidslinjeBuilder(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        økonomi.reflectionRounded { _, aktuellDagsinntekt ->
+        økonomi.medAvrundetData { _, aktuellDagsinntekt ->
             utbetalingstidslinjeMap.add(
                 UtbetalingsdagDTO(
                     type = TypeDataDTO.ArbeidsgiverperiodeDag,
@@ -51,7 +51,7 @@ internal class UtbetalingstidslinjeBuilder(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        økonomi.reflection { grad, _, _, _, totalGrad, aktuellDagsinntekt, arbeidsgiverbeløp, _, _ ->
+        økonomi.medData { grad, _, _, _, totalGrad, aktuellDagsinntekt, arbeidsgiverbeløp, _, _ ->
             utbetalingstidslinjeMap.add(
                 NavDagDTO(
                     type = TypeDataDTO.NavDag,
@@ -70,7 +70,7 @@ internal class UtbetalingstidslinjeBuilder(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        økonomi.reflection { grad, _ ->
+        økonomi.medData { grad, _ ->
             utbetalingstidslinjeMap.add(
                 UtbetalingsdagMedGradDTO(
                     type = TypeDataDTO.NavHelgDag,
