@@ -65,7 +65,11 @@ internal class VilkårsgrunnlagHistorikk(private val historikk: MutableList<Inns
             vilkårsgrunnlag[skjæringstidspunkt] = vilkårsgrunnlagElement
         }
 
-        internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) = vilkårsgrunnlag[skjæringstidspunkt]
+        internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) =
+            vilkårsgrunnlag[skjæringstidspunkt] ?: vilkårsgrunnlag.keys.sorted()
+                .firstOrNull { it > skjæringstidspunkt }
+                ?.let { vilkårsgrunnlag[it] }
+                ?.takeIf { it is InfotrygdVilkårsgrunnlag }
 
         internal fun finnBegrunnelser(): Map<LocalDate, List<Begrunnelse>> {
             val begrunnelserForSkjæringstidspunkt = mutableMapOf<LocalDate, List<Begrunnelse>>()
@@ -97,6 +101,7 @@ internal class VilkårsgrunnlagHistorikk(private val historikk: MutableList<Inns
         fun isOk(): Boolean
         fun accept(skjæringstidspunkt: LocalDate, vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor)
         fun sykepengegrunnlag(): Inntekt
+        fun grunnlagForSykepengegrunnlag(): Inntekt
         fun inntektsopplysningPerArbeidsgiver(): Map<String, Inntektshistorikk.Inntektsopplysning>
     }
 
@@ -125,6 +130,8 @@ internal class VilkårsgrunnlagHistorikk(private val historikk: MutableList<Inns
         }
 
         override fun sykepengegrunnlag() = sykepengegrunnlag.sykepengegrunnlag
+        override fun grunnlagForSykepengegrunnlag() = sykepengegrunnlag.grunnlagForSykepengegrunnlag
+
         override fun inntektsopplysningPerArbeidsgiver() = sykepengegrunnlag.inntektsopplysningPerArbeidsgiver()
 
         internal fun grunnlagsdataMedMinimumInntektsvurdering(minimumInntektVurdering: Boolean) = Grunnlagsdata(
@@ -171,7 +178,11 @@ internal class VilkårsgrunnlagHistorikk(private val historikk: MutableList<Inns
             vilkårsgrunnlagHistorikkVisitor.postVisitInfotrygdVilkårsgrunnlag(skjæringstidspunkt, this)
         }
 
-        override fun sykepengegrunnlag() = grunnlagForSykepengegrunnlag.sykepengegrunnlag // TODO: 6g grejer (IT 6g capper, det blir ikke riktig at vi 6g-capper her)
+        override fun sykepengegrunnlag() =
+            grunnlagForSykepengegrunnlag.sykepengegrunnlag // TODO: 6g grejer (IT 6g capper, det blir ikke riktig at vi 6g-capper her)
+
+        override fun grunnlagForSykepengegrunnlag() = grunnlagForSykepengegrunnlag.grunnlagForSykepengegrunnlag
+
         override fun inntektsopplysningPerArbeidsgiver() = grunnlagForSykepengegrunnlag.inntektsopplysningPerArbeidsgiver()
 
     }

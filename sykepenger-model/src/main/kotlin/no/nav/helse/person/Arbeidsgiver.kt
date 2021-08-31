@@ -77,6 +77,13 @@ internal class Arbeidsgiver private constructor(
             }
 
         internal fun List<Arbeidsgiver>.grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
+            this.mapNotNull { arbeidsgiver ->
+                arbeidsgiver.inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt)
+                    ?.let { ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, it) }
+            }
+
+        @Deprecated("Kan denne fjernes?")
+        internal fun List<Arbeidsgiver>.grunnlagForSykepengegrunnlagGammel(skjæringstidspunkt: LocalDate) =
             this.mapNotNull { it.inntektshistorikk.grunnlagForSykepengegrunnlagGammel(skjæringstidspunkt) }
                 .takeIf { it.isNotEmpty() }
                 ?.summer()

@@ -23,6 +23,7 @@ internal class V115LagreVilkårsgrunnlagFraInfotrygdTest {
 
     @Language("JSON")
     private val original = """{
+        "fødselsnummer": "20046913337",
         "arbeidsgivere": [
             {
                 "organisasjonsnummer": "987654321",
@@ -131,6 +132,7 @@ internal class V115LagreVilkårsgrunnlagFraInfotrygdTest {
 
     @Language("JSON")
     private val expected = """{
+        "fødselsnummer": "20046913337",
         "arbeidsgivere": [
             {
                 "organisasjonsnummer": "987654321",

@@ -31,8 +31,8 @@ internal class InntektshistorikkBuilder(private val person: Person) {
         .groupBy { it.skjæringstidspunkt }
         .mapNotNull { (_, value) -> value.maxByOrNull { it.sisteDagISammenhengendePeriode } }
         .map { nøkkeldata ->
-            val grunnlagForSykepengegrunnlag =
-                person.grunnlagForSykepengegrunnlag(nøkkeldata.skjæringstidspunkt, nøkkeldata.sisteDagISammenhengendePeriode)
+            val sykepengegrunnlag = person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(nøkkeldata.skjæringstidspunkt)?.sykepengegrunnlag()!! // TODO: Fortsette å bange eller håndtere annerledes?
+            val grunnlagForSykepengegrunnlag = person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(nøkkeldata.skjæringstidspunkt)?.grunnlagForSykepengegrunnlag()!!
             val sammenligningsgrunnlag = person.sammenligningsgrunnlag(nøkkeldata.skjæringstidspunkt)
 
             val arbeidsgiverinntekt: List<InntektsgrunnlagDTO.ArbeidsgiverinntektDTO> =
@@ -46,13 +46,13 @@ internal class InntektshistorikkBuilder(private val person: Person) {
 
             InntektsgrunnlagDTO(
                 skjæringstidspunkt = nøkkeldata.skjæringstidspunkt,
-                sykepengegrunnlag = grunnlagForSykepengegrunnlag.sykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
-                omregnetÅrsinntekt = grunnlagForSykepengegrunnlag.grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
+                sykepengegrunnlag = sykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
+                omregnetÅrsinntekt = grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
                 sammenligningsgrunnlag = sammenligningsgrunnlag?.reflection { årlig, _, _, _ -> årlig },
                 avviksprosent = nøkkeldata.avviksprosent,
-                maksUtbetalingPerDag = grunnlagForSykepengegrunnlag.sykepengegrunnlag.reflection { _, _, daglig, _ -> daglig },
+                maksUtbetalingPerDag = sykepengegrunnlag.reflection { _, _, daglig, _ -> daglig },
                 inntekter = arbeidsgiverinntekt,
-                oppfyllerKravOmMinstelønn = grunnlagForSykepengegrunnlag.sykepengegrunnlag > person.minimumInntekt(nøkkeldata.skjæringstidspunkt),
+                oppfyllerKravOmMinstelønn = sykepengegrunnlag > person.minimumInntekt(nøkkeldata.skjæringstidspunkt),
                 grunnbeløp = (Grunnbeløp.`1G`
                     .beløp(nøkkeldata.skjæringstidspunkt, nøkkeldata.sisteDagISammenhengendePeriode)
                     .reflection { årlig, _, _, _ -> årlig })
@@ -66,7 +66,7 @@ internal class InntektshistorikkBuilder(private val person: Person) {
         orgnummer: String,
         inntektshistorikk: Inntektshistorikk
     ): InntektsgrunnlagDTO.ArbeidsgiverinntektDTO {
-        val omregnetÅrsinntektDTO = inntektshistorikk.grunnlagForSykepengegrunnlagMedMetadata(skjæringstidspunkt, sisteDagISammenhengendePeriode)
+        val omregnetÅrsinntektDTO = person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)?.grunnlagForSykepengegrunnlag()
             ?.let { (inntektsopplysning, inntekt) ->
                 OmregnetÅrsinntektVisitor(inntektsopplysning, inntekt).omregnetÅrsinntektDTO
             }

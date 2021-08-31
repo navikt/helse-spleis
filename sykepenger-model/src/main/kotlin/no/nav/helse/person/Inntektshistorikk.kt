@@ -42,6 +42,9 @@ internal class Inntektshistorikk {
     internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, dato: LocalDate): Inntektsopplysning? =
         grunnlagForSykepengegrunnlagMedMetadata(skjæringstidspunkt, dato)?.first
 
+    internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate): Inntektsopplysning? =
+        grunnlagForSykepengegrunnlagMedMetadata(skjæringstidspunkt)?.first
+
     @Deprecated("Skriv om slik at vi kun har grunnlagForSykepengegrunnlag som returnerer inntektsopplysning")
     internal fun grunnlagForSykepengegrunnlagGammel(dato: LocalDate): Inntekt? =
         grunnlagForSykepengegrunnlagMedMetadata(dato)?.second

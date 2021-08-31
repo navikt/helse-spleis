@@ -29,5 +29,4 @@ internal class Sykepengegrunnlag(
 
     internal fun avviksprosent(sammenligningsgrunnlag: Inntekt) = grunnlagForSykepengegrunnlag.avviksprosent(sammenligningsgrunnlag)
     internal fun inntektsopplysningPerArbeidsgiver(): Map<String, Inntektshistorikk.Inntektsopplysning> = arbeidsgiverInntektsopplysninger.inntektsopplysningPerArbeidsgiver()
-
 }

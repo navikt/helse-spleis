@@ -451,7 +451,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag, nesteTilstand: Vedtaksperiodetilstand) {
         vilkårsgrunnlag.lagreInntekter(person, skjæringstidspunkt)
-        val grunnlagForSykepengegrunnlag = person.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periode.start)
+        val grunnlagForSykepengegrunnlag = person.grunnlagForSykepengegrunnlag(skjæringstidspunkt)
         val sammenligningsgrunnlag = person.sammenligningsgrunnlag(skjæringstidspunkt)
 
         if (grunnlagForSykepengegrunnlag == null) return person.invaliderAllePerioder(
@@ -1814,7 +1814,7 @@ internal class Vedtaksperiode private constructor(
                         vedtaksperiode.skjæringstidspunkt,
                         periodetype,
                         person.vilkårsgrunnlagHistorikk
-                    ) { person.grunnlagForSykepengegrunnlag(it, vedtaksperiode.periode.start) }
+                    ) { person.grunnlagForSykepengegrunnlagForInfotrygd(it, vedtaksperiode.periode.start) }
                 }
                 onSuccess {
                     val vilkårsgrunnlag = person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt)
