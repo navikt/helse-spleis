@@ -14,7 +14,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
 
-internal class OverstyrInntektTest : AbstractEndToEndTest() {
+internal class RevurderInntektTest : AbstractEndToEndTest() {
 
     @BeforeEach
     fun setup() {
@@ -29,7 +29,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `overstyr inntekt happy case`() {
+    fun `revurder inntekt happy case`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
 
         val tidligereInntektInnslagId = inspektør.inntektInspektør.sisteInnslag?.innslagId
@@ -79,7 +79,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `overstyr inntekt flere ganger`() {
+    fun `revurder inntekt flere ganger`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
         håndterOverstyring(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar, ident = "N123456")
 
@@ -104,7 +104,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `overstyr inntekt ukjent skjæringstidspunkt`() {
+    fun `revurder inntekt ukjent skjæringstidspunkt`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
         håndterOverstyring(inntekt = 32000.månedlig, skjæringstidspunkt = 2.januar, ident = "N123456")
 
@@ -127,7 +127,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `overstyr inntekt tidligere skjæringstidspunkt`() {
+    fun `revurder inntekt tidligere skjæringstidspunkt`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
         nyttVedtak(1.mars, 31.mars, 100.prosent)
 
@@ -235,7 +235,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `kan ikke overstyre inntekt på på vedtak med opphold og nytt skjæringstidspunkt etterpå`() {
+    fun `kan ikke revurdere inntekt på vedtak med opphold og nytt skjæringstidspunkt etterpå`() {
         nyttVedtak(1.januar, 26.januar, 100.prosent)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 14.februar, 100.prosent))
@@ -283,7 +283,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `overstyr inntekt avvik over 25 prosent reduksjon`() {
+    fun `revurder inntekt avvik over 25 prosent reduksjon`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
         håndterOverstyring(inntekt = 7000.månedlig, skjæringstidspunkt = 1.januar, ident = "N123456")
 
@@ -309,7 +309,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `overstyr inntekt avvik over 25 prosent økning`() {
+    fun `revurder inntekt avvik over 25 prosent økning`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
         håndterOverstyring(inntekt = 70000.månedlig, skjæringstidspunkt = 1.januar, ident = "N123456")
 
@@ -335,7 +335,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `overstyr inntekt ny inntekt under en halv G`() {
+    fun `revurder inntekt ny inntekt under en halv G`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
         håndterOverstyring(inntekt = 3000.månedlig, skjæringstidspunkt = 1.januar, ident = "N123456")
         håndterYtelser(1.vedtaksperiode)
@@ -369,7 +369,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `skjæringstidspunkt hos infotrygd`() {
+    fun `revurdering ved skjæringstidspunkt hos infotrygd`() {
         val historikk1 = listOf(
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 29.januar(2018), 18.februar(2018), 100.prosent, 1000.daglig),
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 19.februar(2018), 18.mars(2018), 100.prosent, 1000.daglig),
