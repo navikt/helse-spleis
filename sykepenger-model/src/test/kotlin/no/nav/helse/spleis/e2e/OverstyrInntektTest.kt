@@ -69,4 +69,28 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         // assert at vi bruker den nye inntekten i beregning av penger til sjuk.
         assertInntektForDato(overstyrtInntekt, fom, inspektør)
     }
+
+    @Test
+    fun `overstyrt inntekt til mer enn 25 prosent avvik skal sendes til infotrygd`() {
+        val fom = 1.januar(2021)
+        val overstyrtInntekt = INNTEKT*1.40
+        tilGodkjenning(fom, 31.januar(2021), 100.prosent, fom)
+
+        håndterOverstyring(inntekt = overstyrtInntekt, orgnummer = ORGNUMMER, skjæringstidspunkt = fom, ident = "a123456")
+
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+
+        assertForkastetPeriodeTilstander(1.vedtaksperiode,
+            TilstandType.START,
+            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
+            TilstandType.AVVENTER_SØKNAD_FERDIG_GAP,
+            TilstandType.AVVENTER_UTBETALINGSGRUNNLAG,
+            TilstandType.AVVENTER_HISTORIKK,
+            TilstandType.AVVENTER_VILKÅRSPRØVING,
+            TilstandType.AVVENTER_HISTORIKK,
+            TilstandType.AVVENTER_SIMULERING,
+            TilstandType.AVVENTER_GODKJENNING,
+            TilstandType.AVVENTER_VILKÅRSPRØVING,
+            TilstandType.TIL_INFOTRYGD)
+    }
 }
