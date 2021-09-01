@@ -55,7 +55,7 @@ internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `overstyrer siste utbetalte periode`() {
+    fun `revurderer siste utbetalte periode`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(2.januar, 18.januar)), førsteFraværsdag = 2.januar)
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
@@ -86,7 +86,7 @@ internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `overstyrer siste utbetalte periode i en forlengelse med bare ferie og permisjon`() {
+    fun `revurderer siste utbetalte periode i en forlengelse med bare ferie og permisjon`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(2.januar, 18.januar)), førsteFraværsdag = 2.januar)
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
@@ -124,7 +124,7 @@ internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `vedtaksperiode rebehandler informasjon etter endring fra saksbehandler`() {
+    fun `vedtaksperiode rebehandler informasjon etter overstyring fra saksbehandler`() {
         håndterSykmelding(Sykmeldingsperiode(2.januar, 25.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(2.januar, 17.januar)), førsteFraværsdag = 2.januar)
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(2.januar, 25.januar, 100.prosent))
@@ -160,7 +160,7 @@ internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `grad over grensen endres på enkeltdag`() {
+    fun `grad over grensen overstyres på enkeltdag`() {
         håndterSykmelding(Sykmeldingsperiode(2.januar, 25.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(2.januar, 17.januar)), førsteFraværsdag = 2.januar)
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(2.januar, 25.januar, 100.prosent))
@@ -183,7 +183,7 @@ internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `grad under grensen blir ikke utbetalt`() {
+    fun `grad under grensen blir ikke utbetalt etter overstyring av grad`() {
         håndterSykmelding(Sykmeldingsperiode(2.januar, 25.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(2.januar, 17.januar)), førsteFraværsdag = 2.januar)
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(2.januar, 25.januar, 100.prosent))
@@ -205,7 +205,7 @@ internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `fridager i midten av en periode blir ikke utbetalt`() {
+    fun `overstyrt til fridager i midten av en periode blir ikke utbetalt`() {
         håndterSykmelding(Sykmeldingsperiode(2.januar, 25.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(2.januar, 17.januar)), førsteFraværsdag = 2.januar)
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(2.januar, 25.januar, 100.prosent))
@@ -280,7 +280,6 @@ internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
     }
 
     private fun håndterOverstyringSykedag(periode: Periode) = håndterOverstyring(periode.map { manuellSykedag(it) })
-
     private fun manuellPermisjonsdag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Permisjonsdag)
     private fun manuellFeriedag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Feriedag)
     private fun manuellSykedag(dato: LocalDate, grad: Int = 100) = ManuellOverskrivingDag(dato, Dagtype.Sykedag, grad)
