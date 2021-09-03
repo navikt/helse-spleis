@@ -811,7 +811,7 @@ internal class Vedtaksperiode private constructor(
         håndter(vedtaksperiode, påminnelse)
     }
 
-    override fun toString() = "${this.periode.start} - ${this.periode.endInclusive}"
+    override fun toString() = "${this.periode.start} - ${this.periode.endInclusive} (${this.tilstand::class.simpleName})"
 
     internal fun toMap() = mutableMapOf(
         "id" to id,
