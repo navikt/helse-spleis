@@ -298,7 +298,7 @@ internal class ØkonomiTest {
         listOf(a, b, c).forEach {
             assertTrue(it.er6GBegrenset())
         }
-        assertUtbetaling(a, 485.0, 0.0) // TODO: looksi
+        assertUtbetaling(a, 485.0, 0.0)
         assertUtbetaling(b, 18.0, 20.0)
         assertUtbetaling(c, 72.0, 57.0)
     }

@@ -1362,7 +1362,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(a2, AVSLUTTET, 1)
         assertTilstand(a2, AVSLUTTET, 2)
 
-        // assertAlleBehovBesvart() TODO: Fiks håndtering av InntekterForSykepengegrunnlag-behov
+        assertAlleBehovBesvart() // TODO: Fiks håndtering av InntekterForSykepengegrunnlag-behov
     }
 
     @Test

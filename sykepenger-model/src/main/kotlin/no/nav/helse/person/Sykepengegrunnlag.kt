@@ -16,7 +16,15 @@ internal class Sykepengegrunnlag(
         arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
         skjæringstidspunkt: LocalDate,
     ) : this(
-        minOf(arbeidsgiverInntektsopplysninger.inntekt(), Grunnbeløp.`6G`.beløp(skjæringstidspunkt)), // TODO: skal ikke 6G-cappe sykepengegrunnlag fra infotrygd
+        minOf(arbeidsgiverInntektsopplysninger.inntekt(), Grunnbeløp.`6G`.beløp(skjæringstidspunkt)), 
+        arbeidsgiverInntektsopplysninger,
+        arbeidsgiverInntektsopplysninger.inntekt()
+    )
+
+    constructor(
+        arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
+    ) : this(
+        arbeidsgiverInntektsopplysninger.inntekt(),
         arbeidsgiverInntektsopplysninger,
         arbeidsgiverInntektsopplysninger.inntekt()
     )

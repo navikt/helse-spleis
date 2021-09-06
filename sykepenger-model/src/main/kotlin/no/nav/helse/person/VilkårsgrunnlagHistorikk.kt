@@ -166,7 +166,7 @@ internal class VilkårsgrunnlagHistorikk(private val historikk: MutableList<Inns
         )
     }
 
-    internal class InfotrygdVilkårsgrunnlag(private val grunnlagForSykepengegrunnlag: Sykepengegrunnlag) : VilkårsgrunnlagElement {
+    internal class InfotrygdVilkårsgrunnlag(private val sykepengegrunnlag: Sykepengegrunnlag) : VilkårsgrunnlagElement {
         override fun valider(aktivitetslogg: Aktivitetslogg) {
         }
 
@@ -174,16 +174,16 @@ internal class VilkårsgrunnlagHistorikk(private val historikk: MutableList<Inns
 
         override fun accept(skjæringstidspunkt: LocalDate, vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {
             vilkårsgrunnlagHistorikkVisitor.preVisitInfotrygdVilkårsgrunnlag(skjæringstidspunkt, this)
-            grunnlagForSykepengegrunnlag.accept(vilkårsgrunnlagHistorikkVisitor)
+            sykepengegrunnlag.accept(vilkårsgrunnlagHistorikkVisitor)
             vilkårsgrunnlagHistorikkVisitor.postVisitInfotrygdVilkårsgrunnlag(skjæringstidspunkt, this)
         }
 
         override fun sykepengegrunnlag() =
-            grunnlagForSykepengegrunnlag.sykepengegrunnlag // TODO: 6g grejer (IT 6g capper, det blir ikke riktig at vi 6g-capper her)
+            sykepengegrunnlag.sykepengegrunnlag
 
-        override fun grunnlagForSykepengegrunnlag() = grunnlagForSykepengegrunnlag.grunnlagForSykepengegrunnlag
+        override fun grunnlagForSykepengegrunnlag() = sykepengegrunnlag.grunnlagForSykepengegrunnlag
 
-        override fun inntektsopplysningPerArbeidsgiver() = grunnlagForSykepengegrunnlag.inntektsopplysningPerArbeidsgiver()
+        override fun inntektsopplysningPerArbeidsgiver() = sykepengegrunnlag.inntektsopplysningPerArbeidsgiver()
 
     }
 }

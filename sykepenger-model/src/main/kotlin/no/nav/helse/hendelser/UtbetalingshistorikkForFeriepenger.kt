@@ -18,7 +18,6 @@ class UtbetalingshistorikkForFeriepenger(
     private val utbetalinger: List<Utbetalingsperiode>,
     private val feriepengehistorikk: List<Feriepenger>,
     private val arbeidskategorikoder: Arbeidskategorikoder,
-    //FIXME: Internal?
     internal val opptjeningsår: Year,
     internal val skalBeregnesManuelt: Boolean,
     internal val aktivitetslogg: Aktivitetslogg = Aktivitetslogg()

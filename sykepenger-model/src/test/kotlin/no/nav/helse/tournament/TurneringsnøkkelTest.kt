@@ -62,11 +62,11 @@ internal class TurneringsnøkkelTest {
         object Søknad : TestHendelse()
         object Aareg : TestHendelse() // Dette er ren spekulasjon omkring AAreg som kilde
 
-        override fun sykdomstidslinje(): Sykdomstidslinje = TODO()
-        override fun valider(periode: Periode): Aktivitetslogg = TODO()
-        override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = TODO()
-        override fun aktørId(): String = TODO()
-        override fun fødselsnummer(): String = TODO()
-        override fun organisasjonsnummer(): String = TODO()
+        override fun sykdomstidslinje(): Sykdomstidslinje = throw RuntimeException("Brukes ikke i testene")
+        override fun valider(periode: Periode): Aktivitetslogg = throw RuntimeException("Brukes ikke i testene")
+        override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = throw RuntimeException("Brukes ikke i testene")
+        override fun aktørId(): String = throw RuntimeException("Brukes ikke i testene")
+        override fun fødselsnummer(): String = throw RuntimeException("Brukes ikke i testene")
+        override fun organisasjonsnummer(): String = throw RuntimeException("Brukes ikke i testene")
     }
 }

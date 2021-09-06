@@ -30,8 +30,8 @@ internal class SykdomstidslinjeHendelseTest {
         override fun aktørId() = AKTØR
         override fun fødselsnummer() = FØDSELSNUMMER
         override fun organisasjonsnummer() = ORGNR
-        override fun sykdomstidslinje(): Sykdomstidslinje = TODO("not implemented")
-        override fun valider(periode: Periode): Aktivitetslogg = TODO("not implemented")
-        override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = TODO("not implemented")
+        override fun sykdomstidslinje(): Sykdomstidslinje = throw RuntimeException("Brukes ikke i testene")
+        override fun valider(periode: Periode): Aktivitetslogg = throw RuntimeException("Brukes ikke i testene")
+        override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = throw RuntimeException("Brukes ikke i testene")
     }
 }

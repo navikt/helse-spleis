@@ -462,7 +462,7 @@ class Person private constructor(
         Sykepengegrunnlag(arbeidsgivere.grunnlagForSykepengegrunnlag(skjæringstidspunkt), skjæringstidspunkt)
 
     internal fun grunnlagForSykepengegrunnlagForInfotrygd(skjæringstidspunkt: LocalDate, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden: LocalDate) =
-        Sykepengegrunnlag(arbeidsgivere.grunnlagForSykepengegrunnlag(skjæringstidspunkt, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden), skjæringstidspunkt)
+        Sykepengegrunnlag(arbeidsgivere.grunnlagForSykepengegrunnlag(skjæringstidspunkt, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden))
 
     internal fun sammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =
         arbeidsgivere.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt)
@@ -622,7 +622,7 @@ class Person private constructor(
             is VilkårsgrunnlagHistorikk.Grunnlagsdata -> {
                 val harMinimumInntekt =
                     validerMinimumInntekt(hendelse, fødselsnummer, hendelse.skjæringstidspunkt, grunnlagForSykepengegrunnlag)
-                vilkårsgrunnlagHistorikk.lagre( //TODO: Se i debugger
+                vilkårsgrunnlagHistorikk.lagre(
                     skjæringstidspunkt, grunnlag.kopierGrunnlagsdataMed(
                         sykepengegrunnlag = grunnlagForSykepengegrunnlag,
                         sammenligningsgrunnlag = sammenligningsgrunnlag,

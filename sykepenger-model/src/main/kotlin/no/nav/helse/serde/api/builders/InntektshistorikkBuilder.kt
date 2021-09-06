@@ -67,7 +67,7 @@ internal class InntektshistorikkBuilder(private val person: Person) {
         inntektshistorikk: Inntektshistorikk
     ): InntektsgrunnlagDTO.ArbeidsgiverinntektDTO {
         val omregnetÅrsinntektDTO = person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)?.grunnlagForSykepengegrunnlag()
-            ?.let { (inntektsopplysning, inntekt) ->
+            ?.let { (inntektsopplysning, inntekt) -> // TODO
                 OmregnetÅrsinntektVisitor(inntektsopplysning, inntekt).omregnetÅrsinntektDTO
             }
         val sammenligningsgrunnlagDTO = inntektshistorikk.grunnlagForSammenligningsgrunnlagMedMetadata(skjæringstidspunkt)
