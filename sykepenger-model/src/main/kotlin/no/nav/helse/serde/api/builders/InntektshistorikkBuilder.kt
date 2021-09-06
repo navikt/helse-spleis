@@ -1,9 +1,7 @@
 package no.nav.helse.serde.api.builders
 
 import no.nav.helse.Grunnbeløp
-import no.nav.helse.person.InntekthistorikkVisitor
-import no.nav.helse.person.Inntektshistorikk
-import no.nav.helse.person.Person
+import no.nav.helse.person.*
 import no.nav.helse.serde.api.InntektsgrunnlagDTO
 import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
@@ -30,19 +28,19 @@ internal class InntektshistorikkBuilder(private val person: Person) {
     private fun inntektsgrunnlag() = nøkkeldataOmInntekter
         .groupBy { it.skjæringstidspunkt }
         .mapNotNull { (_, value) -> value.maxByOrNull { it.sisteDagISammenhengendePeriode } }
-        .map { nøkkeldata ->
-            val sykepengegrunnlag = person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(nøkkeldata.skjæringstidspunkt)?.sykepengegrunnlag()!! // TODO: Fortsette å bange eller håndtere annerledes?
-            val grunnlagForSykepengegrunnlag = person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(nøkkeldata.skjæringstidspunkt)?.grunnlagForSykepengegrunnlag()!!
+        .mapNotNull { nøkkeldata -> person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(nøkkeldata.skjæringstidspunkt)?.let { nøkkeldata to it } }
+        .map { (nøkkeldata, vilkårsgrunnlag) ->
+            val sykepengegrunnlag = vilkårsgrunnlag.sykepengegrunnlag()
+            val grunnlagForSykepengegrunnlag = vilkårsgrunnlag.grunnlagForSykepengegrunnlag()
             val sammenligningsgrunnlag = person.sammenligningsgrunnlag(nøkkeldata.skjæringstidspunkt)
 
             val arbeidsgiverinntekt: List<InntektsgrunnlagDTO.ArbeidsgiverinntektDTO> =
-                inntektshistorikk
-                    .map { (orgnummer, inntekthist) ->
-                        arbeidsgiverinntekt(nøkkeldata.skjæringstidspunkt, nøkkeldata.sisteDagISammenhengendePeriode, orgnummer, inntekthist)
-                    }
-                    .filter {
-                            person.harAktivtArbeidsforholdEllerInntekt(nøkkeldata.skjæringstidspunkt, it.arbeidsgiver)
-                    }
+                ArbeidsgiverInntektopplysningerVisitor(vilkårsgrunnlag, nøkkeldata.skjæringstidspunkt).arbeidsgiverInntektDTO()
+
+            val arbeidsgivereMedBareSammenligningsgrunnlag = inntektshistorikk
+                .filterKeys { it !in arbeidsgiverinntekt.map { it.arbeidsgiver } }
+                .map { (orgnummer, inntektshistorikk) -> arbeidsgiverinntekt(nøkkeldata.skjæringstidspunkt, orgnummer, inntektshistorikk) }
+                .filter { person.harAktivtArbeidsforholdEllerInntekt(nøkkeldata.skjæringstidspunkt, it.arbeidsgiver) }
 
             InntektsgrunnlagDTO(
                 skjæringstidspunkt = nøkkeldata.skjæringstidspunkt,
@@ -51,7 +49,7 @@ internal class InntektshistorikkBuilder(private val person: Person) {
                 sammenligningsgrunnlag = sammenligningsgrunnlag?.reflection { årlig, _, _, _ -> årlig },
                 avviksprosent = nøkkeldata.avviksprosent,
                 maksUtbetalingPerDag = sykepengegrunnlag.reflection { _, _, daglig, _ -> daglig },
-                inntekter = arbeidsgiverinntekt,
+                inntekter = arbeidsgiverinntekt + arbeidsgivereMedBareSammenligningsgrunnlag, // TODO: lagre sammenligningsgrunnlaget i stedet for å hente de ut fra inntektshistorikk
                 oppfyllerKravOmMinstelønn = sykepengegrunnlag > person.minimumInntekt(nøkkeldata.skjæringstidspunkt),
                 grunnbeløp = (Grunnbeløp.`1G`
                     .beløp(nøkkeldata.skjæringstidspunkt, nøkkeldata.sisteDagISammenhengendePeriode)
@@ -62,34 +60,55 @@ internal class InntektshistorikkBuilder(private val person: Person) {
 
     private fun arbeidsgiverinntekt(
         skjæringstidspunkt: LocalDate,
-        sisteDagISammenhengendePeriode: LocalDate,
         orgnummer: String,
         inntektshistorikk: Inntektshistorikk
     ): InntektsgrunnlagDTO.ArbeidsgiverinntektDTO {
-        val omregnetÅrsinntektDTO = person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)?.grunnlagForSykepengegrunnlag()
-            ?.let { (inntektsopplysning, inntekt) -> // TODO
-                OmregnetÅrsinntektVisitor(inntektsopplysning, inntekt).omregnetÅrsinntektDTO
-            }
         val sammenligningsgrunnlagDTO = inntektshistorikk.grunnlagForSammenligningsgrunnlagMedMetadata(skjæringstidspunkt)
             ?.let { (sammenligningsgrunnlagsopplysning, sammenligningsgrunnlag) ->
                 SammenligningsgrunnlagVisitor(sammenligningsgrunnlagsopplysning, sammenligningsgrunnlag).sammenligningsgrunnlagDTO
             }
         return InntektsgrunnlagDTO.ArbeidsgiverinntektDTO(
             orgnummer,
-            omregnetÅrsinntektDTO,
+            null,
             sammenligningsgrunnlagDTO
         )
     }
 
-    private class OmregnetÅrsinntektVisitor(
-        inntektsopplysning: Inntektshistorikk.Inntektsopplysning,
-        private val inntekt: Inntekt
-    ) : InntekthistorikkVisitor {
-        lateinit var omregnetÅrsinntektDTO: InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO
+    private inner class ArbeidsgiverInntektopplysningerVisitor(
+        vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
+        private val skjæringstidspunkt: LocalDate
+    ) :
+        VilkårsgrunnlagHistorikkVisitor {
+        private val arbeidsgiverInntektDTO = mutableListOf<InntektsgrunnlagDTO.ArbeidsgiverinntektDTO>()
         private val skattegreier = mutableListOf<InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntekterFraAOrdningenDTO>()
 
+        private lateinit var orgnummer: String
+        lateinit var omregnetÅrsinntektDTO: InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO
+
+        fun arbeidsgiverInntektDTO() = arbeidsgiverInntektDTO
+
         init {
-            inntektsopplysning.accept(this)
+            vilkårsgrunnlag.accept(skjæringstidspunkt, this)
+        }
+
+        override fun preVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {
+            this.orgnummer = orgnummer
+        }
+
+        override fun postVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {
+            val sammenligningsgrunnlagDTO =
+                inntektshistorikk[orgnummer]?.grunnlagForSammenligningsgrunnlagMedMetadata(skjæringstidspunkt)
+                    ?.let { (sammenligningsgrunnlagsopplysning, sammenligningsgrunnlag) ->
+                        SammenligningsgrunnlagVisitor(sammenligningsgrunnlagsopplysning, sammenligningsgrunnlag).sammenligningsgrunnlagDTO
+                    }
+
+            arbeidsgiverInntektDTO.add(
+                InntektsgrunnlagDTO.ArbeidsgiverinntektDTO(
+                    orgnummer,
+                    omregnetÅrsinntektDTO,
+                    sammenligningsgrunnlagDTO
+                )
+            )
         }
 
         override fun visitSaksbehandler(
@@ -159,8 +178,8 @@ internal class InntektshistorikkBuilder(private val person: Person) {
         override fun postVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID) {
             omregnetÅrsinntektDTO = InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO(
                 kilde = InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.AOrdningen,
-                beløp = inntekt.reflection { årlig, _, _, _ -> årlig },
-                månedsbeløp = inntekt.reflection { _, mnd, _, _ -> mnd },
+                beløp = skattComposite.grunnlagForSykepengegrunnlag().reflection { årlig, _, _, _ -> årlig },
+                månedsbeløp = skattComposite.grunnlagForSykepengegrunnlag().reflection { _, mnd, _, _ -> mnd },
                 inntekterFraAOrdningen = skattegreier
                     .groupBy({ it.måned }) { it.sum }
                     .map { (måned: YearMonth, beløp: List<Double>) ->
