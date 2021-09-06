@@ -8,7 +8,6 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
 import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElementTest
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.api.InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO
@@ -17,7 +16,6 @@ import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -986,7 +984,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             ArbeidsgiverUtbetalingsperiode(orgnr2, 20.januar(2021), 26.januar(2021), 100.prosent, inntekt)
         )
 
-        person.håndter(utbetalingshistorikk(vedtaksperiodeId = vedtaksperiodeId1, utbetalinger = utbetalinger, orgnummer = orgnr1, inntektshistorikk = inntektshistorikk)) // TODO
+        person.håndter(utbetalingshistorikk(vedtaksperiodeId = vedtaksperiodeId1, utbetalinger = utbetalinger, orgnummer = orgnr1, inntektshistorikk = inntektshistorikk))
         person.håndter(utbetalingsgrunnlag(vedtaksperiodeId1, person.fangSkjæringstidspunkt(UUID.fromString(vedtaksperiodeId1)), orgnummer = orgnr1))
         person.håndter(
             ytelser(
@@ -997,7 +995,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             )
         )
         person.håndter(søknad(orgnummer = orgnr2, fom = periode.start, tom = periode.endInclusive, grad = 100.prosent).first)
-        person.håndter(utbetalingshistorikk(vedtaksperiodeId = vedtaksperiodeId2, utbetalinger = utbetalinger, orgnummer = orgnr2, inntektshistorikk = inntektshistorikk)) // TODO
+        person.håndter(utbetalingshistorikk(vedtaksperiodeId = vedtaksperiodeId2, utbetalinger = utbetalinger, orgnummer = orgnr2, inntektshistorikk = inntektshistorikk))
         person.håndter(utbetalingsgrunnlag(vedtaksperiodeId2, person.fangSkjæringstidspunkt(UUID.fromString(vedtaksperiodeId2)), orgnummer = orgnr2))
         person.håndter(
             ytelser(
@@ -1101,7 +1099,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             ArbeidsgiverUtbetalingsperiode(orgnr2, 20.januar(2021), 26.januar(2021), 100.prosent, inntekt)
         )
 
-        person.håndter(utbetalingshistorikk(vedtaksperiodeId = vedtaksperiodeId1, utbetalinger = utbetalinger, orgnummer = orgnr1, inntektshistorikk = inntektshistorikk)) // TODO
+        person.håndter(utbetalingshistorikk(vedtaksperiodeId = vedtaksperiodeId1, utbetalinger = utbetalinger, orgnummer = orgnr1, inntektshistorikk = inntektshistorikk))
         person.håndter(utbetalingsgrunnlag(vedtaksperiodeId1, person.fangSkjæringstidspunkt(UUID.fromString(vedtaksperiodeId2)), orgnummer = orgnr1))
         person.håndter(
             ytelser(
@@ -1112,7 +1110,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             )
         )
         person.håndter(søknad(orgnummer = orgnr2, fom = periode.start, tom = periode.endInclusive, grad = 100.prosent).first)
-        person.håndter(utbetalingshistorikk(vedtaksperiodeId = vedtaksperiodeId2, utbetalinger = utbetalinger, orgnummer = orgnr2, inntektshistorikk = inntektshistorikk)) // TODO
+        person.håndter(utbetalingshistorikk(vedtaksperiodeId = vedtaksperiodeId2, utbetalinger = utbetalinger, orgnummer = orgnr2, inntektshistorikk = inntektshistorikk))
         person.håndter(utbetalingsgrunnlag(vedtaksperiodeId2, person.fangSkjæringstidspunkt(UUID.fromString(vedtaksperiodeId2)), orgnummer = orgnr2))
         person.håndter(
             ytelser(

@@ -75,7 +75,7 @@ internal class V114LagreSykepengegrunnlag : JsonMigration(version = 114) {
                         val dato =  if(it.has("skatteopplysninger")) it["skatteopplysninger"].first()["dato"].asText() else it["dato"].asText()
                         dato > skjæringstidspunkt
                     }
-                    ?.takeIf { it.has("kilde") && it["kilde"].asText() == "INFOTRYGD" } // TODO: Burde teste at dette ikke brekker for skatteoplysninger
+                    ?.takeIf { it.has("kilde") && it["kilde"].asText() == "INFOTRYGD" }
 
     }
 

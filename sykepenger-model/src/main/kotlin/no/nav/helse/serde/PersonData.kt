@@ -256,7 +256,7 @@ internal data class PersonData(
             ) {
                 companion object {
                     internal fun List<ArbeidsgiverInntektsopplysningData>.parseArbeidsgiverInntektsopplysninger(): List<ArbeidsgiverInntektsopplysning> =
-                        map { ArbeidsgiverInntektsopplysning(it.orgnummer, ArbeidsgiverData.InntektsopplysningData.parseInntekter(it.inntektsopplysning)) }
+                        map { ArbeidsgiverInntektsopplysning(it.orgnummer, ArbeidsgiverData.InntektsopplysningData.parseInntektsopplysningData(it.inntektsopplysning)) }
                 }
             }
 
@@ -473,14 +473,10 @@ internal data class PersonData(
                     innslag: Inntektshistorikk.RestoreJsonMode.InnslagAppender
                 ) {
                     inntektsopplysninger.forEach { inntektData ->
-                        parseInntektsopplysningData(inntektData)
+                        this.parseInntektsopplysningData(inntektData)
                             .also(innslag::add)
                     }
                 }
-
-                internal fun parseInntekter(inntektsopplysning: InntektsopplysningData): Inntektshistorikk.Inntektsopplysning {
-                    return  parseInntektsopplysningData(inntektsopplysning)
-                } // TODO: trenger ikke egen funksjon for dette
 
                 internal fun parseInntektsopplysningData(inntektData: InntektsopplysningData) =
                     when (inntektData.kilde?.let(Inntektsopplysningskilde::valueOf)) {

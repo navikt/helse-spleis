@@ -320,7 +320,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     protected fun håndterUtbetalingshistorikk(
         vedtaksperiodeId: UUID,
         vararg utbetalinger: Infotrygdperiode,
-        inntektshistorikk: List<Inntektsopplysning>? = null,
+        inntektshistorikk: List<Inntektsopplysning> = emptyList(),
         orgnummer: String = ORGNUMMER,
         besvart: LocalDateTime = LocalDateTime.now()
     ) {
@@ -329,10 +329,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         utbetalingshistorikk(
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalinger = utbetalinger.toList(),
-            inntektshistorikk = inntektshistorikk(
-                inntektshistorikk = inntektshistorikk,
-                orgnummer = orgnummer
-            ),
+            inntektshistorikk = inntektshistorikk,
             orgnummer = orgnummer,
             besvart = besvart
         ).håndter(Person::håndter)
@@ -340,17 +337,14 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
 
     protected fun håndterUtbetalingshistorikkUtenValidering(
         vararg utbetalinger: Infotrygdperiode,
-        inntektshistorikk: List<Inntektsopplysning>? = null,
+        inntektshistorikk: List<Inntektsopplysning> = emptyList(),
         orgnummer: String = ORGNUMMER,
         besvart: LocalDateTime = LocalDateTime.now()
     ) {
         utbetalingshistorikk(
             vedtaksperiodeId = UUID.randomUUID(),
             utbetalinger = utbetalinger.toList(),
-            inntektshistorikk = inntektshistorikk(
-                inntektshistorikk = inntektshistorikk,
-                orgnummer = orgnummer
-            ),
+            inntektshistorikk = inntektshistorikk,
             orgnummer = orgnummer,
             besvart = besvart
         ).håndter(Person::håndter)
@@ -416,7 +410,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     protected fun håndterYtelser(
         vedtaksperiodeId: UUID = 1.vedtaksperiode,
         vararg utbetalinger: Infotrygdperiode,
-        inntektshistorikk: List<Inntektsopplysning>? = null,
+        inntektshistorikk: List<Inntektsopplysning> = emptyList(),
         foreldrepenger: Periode? = null,
         pleiepenger: List<Periode> = emptyList(),
         omsorgspenger: List<Periode> = emptyList(),
@@ -446,7 +440,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         ytelser(
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalinger = utbetalinger.toList(),
-            inntektshistorikk = inntektshistorikk(inntektshistorikk, orgnummer),
+            inntektshistorikk = inntektshistorikk,
             foreldrepenger = foreldrepenger,
             pleiepenger = pleiepenger,
             omsorgspenger = omsorgspenger,
@@ -839,7 +833,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     private fun utbetalingshistorikk(
         vedtaksperiodeId: UUID,
         utbetalinger: List<Infotrygdperiode> = listOf(),
-        inntektshistorikk: List<Inntektsopplysning>? = null,
+        inntektshistorikk: List<Inntektsopplysning> = emptyList(),
         orgnummer: String = ORGNUMMER,
         harStatslønn: Boolean = false,
         besvart: LocalDateTime = LocalDateTime.now(),
@@ -853,7 +847,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             arbeidskategorikoder = emptyMap(),
             harStatslønn = harStatslønn,
             perioder = utbetalinger,
-            inntektshistorikk = inntektshistorikk(inntektshistorikk, orgnummer),
+            inntektshistorikk = inntektshistorikk,
             ugyldigePerioder = emptyList(),
             besvart = besvart
         ).apply {
@@ -886,7 +880,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     protected fun ytelser(
         vedtaksperiodeId: UUID,
         utbetalinger: List<Infotrygdperiode> = listOf(),
-        inntektshistorikk: List<Inntektsopplysning>? = null,
+        inntektshistorikk: List<Inntektsopplysning> = emptyList(),
         foreldrepenger: Periode? = null,
         svangerskapspenger: Periode? = null,
         pleiepenger: List<Periode> = emptyList(),
@@ -933,7 +927,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
                 arbeidskategorikoder = arbeidskategorikoder,
                 harStatslønn = statslønn,
                 perioder = utbetalinger,
-                inntektshistorikk = inntektshistorikk(inntektshistorikk, orgnummer),
+                inntektshistorikk = inntektshistorikk,
                 ugyldigePerioder = emptyList(),
                 besvart = besvart
             )
@@ -973,13 +967,6 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             hendelselogg = this
         }
     }
-
-    private fun inntektshistorikk(
-        inntektshistorikk: List<Inntektsopplysning>?,
-        orgnummer: String
-    ) = inntektshistorikk
-        ?: listOf(Inntektsopplysning(orgnummer, 1.desember(2017), INNTEKT, true))
-
 
     protected fun nyttVedtak(
         fom: LocalDate,

@@ -1362,7 +1362,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(a2, AVSLUTTET, 1)
         assertTilstand(a2, AVSLUTTET, 2)
 
-        assertAlleBehovBesvart() // TODO: Fiks håndtering av InntekterForSykepengegrunnlag-behov
+        assertAlleBehovBesvart()
     }
 
     @Test
@@ -1656,7 +1656,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
 
         assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode(a1), TIL_INFOTRYGD)
-    } // TODO: på en måte fikset, se på den etter prat med legalcec
+    }
 
     @Test
     fun `Tillater førstegangsbehandling av flere arbeidsgivere der inntekt i inntektsmelding er på samme dato`() {

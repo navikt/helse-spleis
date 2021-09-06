@@ -233,7 +233,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
                 Arbeidsforhold(orgnummer = a1, fom = LocalDate.EPOCH, tom = null)
             )
             håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), inntekter = inntekterA1, orgnummer = a1, arbeidsforhold = arbeidsforholdA1)
-            håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1, inntektshistorikk = emptyList())
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode(a1), inntektsvurdering = Inntektsvurdering(
                     listOf(

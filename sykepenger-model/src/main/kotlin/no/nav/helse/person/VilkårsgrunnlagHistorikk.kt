@@ -117,8 +117,7 @@ internal class VilkårsgrunnlagHistorikk(private val historikk: MutableList<Inns
         internal val meldingsreferanseId: UUID?
     ) : VilkårsgrunnlagElement {
 
-        override fun valider(aktivitetslogg: Aktivitetslogg) {
-        }
+        override fun valider(aktivitetslogg: Aktivitetslogg) {}
 
         override fun isOk() = vurdertOk
 
