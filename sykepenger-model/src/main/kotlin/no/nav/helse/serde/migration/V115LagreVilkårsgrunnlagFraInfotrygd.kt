@@ -17,7 +17,7 @@ internal class V115LagreVilkårsgrunnlagFraInfotrygd : JsonMigration(version = 1
 
         jsonNode["arbeidsgivere"].forEach { arbeidsgiver ->
             val infotrygdInntektsopplysninger = arbeidsgiver["inntektshistorikk"].first()["inntektsopplysninger"]
-                .filter { inntektsopplysning -> inntektsopplysning["kilde"].asText() == "INFOTRYGD" }
+                .filter { inntektsopplysning -> !inntektsopplysning.has("skatteopplysninger") && inntektsopplysning["kilde"].asText() == "INFOTRYGD" }
 
             lagreVilkårsgrunnlagFraInfotrygd(infotrygdInntektsopplysninger, skjæringstidspunkterForVilkårsgrunnlag, jsonNode)
         }
@@ -33,7 +33,7 @@ internal class V115LagreVilkårsgrunnlagFraInfotrygd : JsonMigration(version = 1
         inntektsopplysninger.forEach { inntektsopplysning ->
             val dato = inntektsopplysning["dato"].asText()
             if (!skjæringstidspunkterForVilkårsgrunnlag.contains(dato)) {
-                if(nyttInnslag == null) {
+                if (nyttInnslag == null) {
                     nyttInnslag = person["vilkårsgrunnlagHistorikk"].first().deepCopy()
                     nyttInnslag!!.put("id", UUID.randomUUID().toString())
                     nyttInnslag!!.put("opprettet", LocalDateTime.now().toString())
