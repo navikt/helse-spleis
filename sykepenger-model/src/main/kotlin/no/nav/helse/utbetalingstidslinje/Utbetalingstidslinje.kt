@@ -291,6 +291,8 @@ internal class Utbetalingstidslinje private constructor(
             return this.prioritet.compareTo(other.prioritet)
         }
 
+        override fun toString() = "${this.javaClass.simpleName} ($dato) ${økonomi.toShortString()}"
+
         internal fun avvis(begrunnelser: List<Begrunnelse>) = begrunnelser
             .filter { it.avvis(this) }
             .takeIf(List<*>::isNotEmpty)

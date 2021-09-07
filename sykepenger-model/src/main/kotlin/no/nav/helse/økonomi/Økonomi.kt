@@ -246,6 +246,8 @@ internal class Økonomi private constructor(
 
     private fun grad() = tilstand.grad(this)
 
+    internal fun toShortString() = "$grad"
+
     private fun betal() = this.also { tilstand.betal(this) }
 
     internal fun er6GBegrenset() = tilstand.er6GBegrenset(this)

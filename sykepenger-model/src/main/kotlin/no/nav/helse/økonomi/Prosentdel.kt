@@ -34,7 +34,7 @@ class Prosentdel private constructor(private val brøkdel: Double): Comparable<P
         else this.brøkdel.compareTo(other.brøkdel)
 
     override fun toString(): String {
-        return "${(brøkdel * 100)}%"
+        return "${(brøkdel * 100)} %"
     }
 
     internal fun ratio() = brøkdel
