@@ -278,10 +278,4 @@ internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
         assertEquals("H SSSSSHH SSSSSHH USSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         assertEquals(" PNNNNHH NNNNNHH NNNNNHH NNNNNHH NNN", inspektør.utbetalingstidslinjer(2.vedtaksperiode).toString())
     }
-
-    private fun håndterOverstyringSykedag(periode: Periode) = håndterOverstyring(periode.map { manuellSykedag(it) })
-    private fun manuellPermisjonsdag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Permisjonsdag)
-    private fun manuellFeriedag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Feriedag)
-    private fun manuellSykedag(dato: LocalDate, grad: Int = 100) = ManuellOverskrivingDag(dato, Dagtype.Sykedag, grad)
-    private fun manuellArbeidsgiverdag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Egenmeldingsdag)
 }

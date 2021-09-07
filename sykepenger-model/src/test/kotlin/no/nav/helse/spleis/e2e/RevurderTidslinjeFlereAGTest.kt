@@ -19,7 +19,7 @@ import org.junit.jupiter.api.TestInstance.Lifecycle
 import java.time.LocalDate
 
 @TestInstance(Lifecycle.PER_CLASS)
-internal class OverstyrerUtbetaltTidslinjeFlereAGTest : AbstractEndToEndTest() {
+internal class RevurderTidslinjeFlereAGTest : AbstractEndToEndTest() {
 
     private companion object {
         private const val AG1 = "123456789"
@@ -548,8 +548,4 @@ internal class OverstyrerUtbetaltTidslinjeFlereAGTest : AbstractEndToEndTest() {
             assertEquals(1, ikkeUtbetalteUtbetalingerForVedtaksperiode(2.vedtaksperiode(AG2)).size)
         }
     }
-
-    private fun manuellPermisjonsdag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Permisjonsdag)
-    private fun manuellFeriedag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Feriedag)
-    private fun manuellSykedag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Sykedag, 100)
 }

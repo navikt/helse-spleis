@@ -152,18 +152,6 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         assertTrue(inspektør.personLogg.hasActivities(), inspektør.personLogg.toString())
     }
 
-    protected fun replaySykmelding(hendelseId: UUID) = håndterSykmelding(
-        id = hendelseId,
-        sykeperioder = requireNotNull(sykmeldinger[hendelseId])
-    )
-
-    protected fun replaySøknad(hendelseId: UUID) = håndterSøknad(
-        id = hendelseId,
-        sendtTilNav = requireNotNull(søknader[hendelseId]).first,
-        andreInntektskilder = requireNotNull(søknader[hendelseId]).second,
-        perioder = requireNotNull(søknader[hendelseId]).third
-    )
-
     protected fun håndterSykmelding(
         vararg sykeperioder: Sykmeldingsperiode,
         sykmeldingSkrevet: LocalDateTime? = null,
@@ -1473,6 +1461,12 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
 
         return antall
     }
+
+    protected fun manuellPermisjonsdag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Permisjonsdag)
+    protected fun manuellFeriedag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Feriedag)
+    protected fun manuellSykedag(dato: LocalDate, grad: Int = 100) = ManuellOverskrivingDag(dato, Dagtype.Sykedag, grad)
+    protected fun håndterOverstyringSykedag(periode: Periode) = håndterOverstyring(periode.map { manuellSykedag(it) })
+    protected fun manuellArbeidsgiverdag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Egenmeldingsdag)
 }
 
 infix fun <T> T?.er(expected: T?) =

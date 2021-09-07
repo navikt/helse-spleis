@@ -1,8 +1,11 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Toggles
-import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -14,11 +17,10 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.TestInstance.Lifecycle
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 @TestInstance(Lifecycle.PER_CLASS)
-internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
+internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
     @BeforeAll
     fun beforeAll() {
@@ -31,7 +33,7 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `to perioder - overstyr dager i eldste`() {
+    fun `to perioder - revurder dager i eldste`() {
         nyttVedtak(3.januar, 26.januar)
         forlengVedtak(27.januar, 14.februar)
 
@@ -82,7 +84,7 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `overstyring blør ikke ned i sykdomstidslinja på vedtaksperiodenivå`() {
+    fun `revurdering blør ikke ned i sykdomstidslinja på vedtaksperiodenivå`() {
         nyttVedtak(3.januar, 26.januar)
         forlengVedtak(27.januar, 14.februar)
 
@@ -100,7 +102,7 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `to perioder - overstyr dag i nyeste`() {
+    fun `to perioder - revurder dag i nyeste`() {
         nyttVedtak(3.januar, 26.januar)
         forlengVedtak(27.januar, 14.februar)
 
@@ -431,7 +433,7 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `forsøk på å overstyre eldre fagsystemId`() {
+    fun `forsøk på å revurdere eldre fagsystemId`() {
         nyttVedtak(3.januar, 26.januar)
         nyttVedtak(3.mars, 26.mars)
         håndterOverstyring((4.januar til 20.januar).map { manuellFeriedag(it) })
@@ -470,7 +472,7 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `forsøk på å overstyre eldre fagsystemId med nyere periode til godkjenning`() {
+    fun `forsøk på å revurdere eldre fagsystemId med nyere periode til godkjenning`() {
         nyttVedtak(3.januar, 26.januar)
         tilGodkjenning(3.mars, 26.mars, 100.prosent, 3.mars)
         håndterOverstyring((4.januar til 20.januar).map { manuellFeriedag(it) })
@@ -507,7 +509,7 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `samme fagsystemId og forskjellig skjæringstidspunkt - overstyr første periode i siste skjæringstidspunkt`() {
+    fun `samme fagsystemId og forskjellig skjæringstidspunkt - revurder første periode i siste skjæringstidspunkt`() {
         nyttVedtak(3.januar, 26.januar)
         nyttVedtak(1.februar, 20.februar)
         forlengVedtak(21.februar, 10.mars)
@@ -570,7 +572,7 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `samme fagsystemId og forskjellig skjæringstidspunkt - overstyr siste periode i siste skjæringstidspunkt`() {
+    fun `samme fagsystemId og forskjellig skjæringstidspunkt - revurder siste periode i siste skjæringstidspunkt`() {
         nyttVedtak(3.januar, 26.januar)
         nyttVedtak(1.februar, 20.februar)
         forlengVedtak(21.februar, 10.mars)
@@ -629,7 +631,7 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
 
 
     @Test
-    fun `forsøk på å overstyre eldre fagsystemId med nyere perioder uten utbetaling, og periode med utbetaling etterpå`() {
+    fun `forsøk på å revurdere eldre fagsystemId med nyere perioder uten utbetaling, og periode med utbetaling etterpå`() {
         nyttVedtak(3.januar, 26.januar)
         tilGodkjenning(1.mai, 31.mai, 100.prosent, 1.mai)
         håndterSykmelding(Sykmeldingsperiode(3.mars, 15.mars, 100.prosent))
@@ -682,7 +684,7 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `forsøk på å overstyre eldre fagsystemId med nyere perioder med utbetaling, og periode uten utbetaling`() {
+    fun `forsøk på å revurdere eldre fagsystemId med nyere perioder med utbetaling, og periode uten utbetaling`() {
         nyttVedtak(3.januar, 26.januar)
         nyttVedtak(1.mai, 31.mai)
         håndterSykmelding(Sykmeldingsperiode(1.juni, 14.juni, 100.prosent))
@@ -728,7 +730,7 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `overstyrer siste utbetalte periode med bare ferie og permisjon`() {
+    fun `revurderer siste utbetalte periode med bare ferie og permisjon`() {
         nyttVedtak(3.januar, 26.januar)
 
         håndterOverstyring((3.januar til 20.januar).map { manuellFeriedag(it) } + (21.januar til 26.januar).map { manuellPermisjonsdag(it) })
@@ -1329,8 +1331,4 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING_REVURDERING,
         )
     }
-
-    private fun manuellPermisjonsdag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Permisjonsdag)
-    private fun manuellFeriedag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Feriedag)
-    private fun manuellSykedag(dato: LocalDate, grad: Int = 100) = ManuellOverskrivingDag(dato, Dagtype.Sykedag, grad)
 }

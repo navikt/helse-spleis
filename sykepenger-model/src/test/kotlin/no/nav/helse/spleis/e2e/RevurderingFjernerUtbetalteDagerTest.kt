@@ -429,6 +429,4 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         assertEquals("2021-04-23", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[1]["tom"])
         assertWarnings(inspektør)
     }
-
-    private fun manuellFeriedag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Feriedag)
 }
