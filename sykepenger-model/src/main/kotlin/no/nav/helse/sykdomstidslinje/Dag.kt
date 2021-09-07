@@ -106,6 +106,8 @@ internal sealed class Dag(
 
     override fun hashCode() = dato.hashCode() * 37 + this::class.hashCode()
 
+    override fun toString() = "${this::class.java.simpleName} ($dato) $kilde"
+
     internal open fun accept(visitor: SykdomstidslinjeVisitor) {}
 
     internal class UkjentDag(
