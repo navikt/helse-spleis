@@ -23,10 +23,7 @@ import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.api.HendelseDTO
 import no.nav.helse.serde.api.serializePersonForSpeil
 import no.nav.helse.serde.reflection.Utbetalingstatus
-import no.nav.helse.testhelpers.Inntektperioder
-import no.nav.helse.testhelpers.desember
-import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
-import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -279,11 +276,20 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
                 }
             }
         ),
+        inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag = InntektForSykepengegrunnlag(
+            inntekter = inntektperioderForSykepengegrunnlag {
+                val skjæringstidspunkt = inspektør(orgnummer).skjæringstidspunkt(vedtaksperiodeId)
+                skjæringstidspunkt.minusMonths(3L).withDayOfMonth(1) til skjæringstidspunkt.minusMonths(1L).withDayOfMonth(1) inntekter {
+                    orgnummer inntekt inntekt
+                }
+            }
+        ),
         fnr: String = UNG_PERSON_FNR_2018
     ) {
         fun assertEtterspurt(behovtype: Behovtype) =
             assertEtterspurt(Vilkårsgrunnlag::class, behovtype, vedtaksperiodeId, orgnummer)
 
+        // TODO: assert etterspør arbeidsforhold og skatt dersom relevant
         assertEtterspurt(InntekterForSammenligningsgrunnlag)
         assertEtterspurt(Medlemskap)
         vilkårsgrunnlag(
@@ -292,7 +298,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             medlemskapstatus,
             orgnummer,
             inntektsvurdering,
-            fnr = fnr
+            inntektsvurderingForSykepengegrunnlag,
+            fnr = fnr,
         ).håndter(Person::håndter)
     }
 
@@ -758,6 +765,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
         orgnummer: String = ORGNUMMER,
         inntektsvurdering: Inntektsvurdering,
+        inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
         fnr: String = UNG_PERSON_FNR_2018
     ): Vilkårsgrunnlag {
         return Vilkårsgrunnlag(
@@ -767,13 +775,12 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             fødselsnummer = fnr,
             orgnummer = orgnummer,
             inntektsvurdering = inntektsvurdering,
+            inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
             medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
-            opptjeningvurdering = Opptjeningvurdering(
-                if (arbeidsforhold.isEmpty()) listOf(
-                    Arbeidsforhold(orgnummer, 1.januar(2017))
-                )
-                else arbeidsforhold
-            )
+            opptjeningvurdering = Opptjeningvurdering(arbeidsforhold.ifEmpty { listOf(Arbeidsforhold(orgnummer, 1.januar(2017))) }),
+            arbeidsforhold = arbeidsforhold.ifEmpty {
+                listOf(Arbeidsforhold(orgnummer, 1.januar(2017)))
+            }
         ).apply {
             hendelselogg = this
         }
@@ -1288,8 +1295,14 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
                     }
                 }
             ),
-        )
-        )
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                inntekter = inntektperioderForSykepengegrunnlag {
+                    1.oktober(2017) til 1.desember(2017) inntekter {
+                        orgnummer inntekt INNTEKT
+                    }
+                }
+            )
+        ))
     }
 
     protected fun nyPeriode(periode: Periode, orgnummer: String) {
@@ -1336,7 +1349,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
                 fødselsnummer = UNG_PERSON_FNR_2018,
                 orgnummer = orgnummer,
                 fagsystemId = inspektør(orgnummer).fagsystemId(orgnummer.id(0)),
-                utbetalingId = hendelselogg.behov().first { it.type == Behovtype.Utbetaling }.kontekst().getValue("utbetalingId"),
+                utbetalingId = hendelselogg.behov().first { it.type == Utbetaling }.kontekst().getValue("utbetalingId"),
                 avstemmingsnøkkel = 123456L,
                 overføringstidspunkt = LocalDateTime.now()
             )

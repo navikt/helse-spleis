@@ -63,6 +63,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
                     }
                 }
             ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList()) // TODO ok?
         )
         )
 
@@ -107,10 +108,8 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
                     }
                 }
             ),
-        )
-        )
-
-
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList()) // TODO ok?
+        ))
 
         assertEquals(282500.årlig, person.sammenligningsgrunnlag(2.februar))
     }
@@ -146,8 +145,8 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
                     }
                 }
             ),
-        )
-        )
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList()) // TODO ok?
+        ))
 
         person.håndter(
             inntektsmelding(
@@ -2246,12 +2245,13 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
                     inntekter = inntektperioderForSammenligningsgrunnlag {
                         1.januar(2017) til 1.desember(2017) inntekter {
                             a1 inntekt INNTEKT
-                        }
+                           }
                         1.januar(2017) til 1.desember(2017) inntekter {
                             a2 inntekt INNTEKT
                         }
                     },
                 ),
+                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),
                 medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Nei
             )
         )

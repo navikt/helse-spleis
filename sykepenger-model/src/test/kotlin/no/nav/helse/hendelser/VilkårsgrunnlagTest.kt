@@ -191,6 +191,12 @@ internal class VilkårsgrunnlagTest {
                 orgnummer inntekt INNTEKT
             }
         },
+        skatteinntekter: List<ArbeidsgiverInntekt> = inntektperioderForSykepengegrunnlag {
+            1.oktober(2017) til 1.desember(2017) inntekter {
+                orgnummer inntekt INNTEKT
+
+            }
+        },
         arbeidsforhold: List<Arbeidsforhold> = listOf(
             Arbeidsforhold(
                 orgnummer,
@@ -205,7 +211,9 @@ internal class VilkårsgrunnlagTest {
         orgnummer = orgnummer,
         inntektsvurdering = Inntektsvurdering(inntektsmåneder),
         opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
-        medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja)
+        medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
+        inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(skatteinntekter),
+        arbeidsforhold = arbeidsforhold
     )
 
     private fun sykmelding() = Sykmelding(

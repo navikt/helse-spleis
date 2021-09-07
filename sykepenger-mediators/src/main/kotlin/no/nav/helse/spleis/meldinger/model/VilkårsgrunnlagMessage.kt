@@ -36,6 +36,24 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packe
             ArbeidsgiverInntekt(arbeidsgiver, inntekter.flatten())
         }
 
+    private val inntekterForSykepengegrunnlag = packet["@løsning.${InntekterForSykepengegrunnlag.name}"]
+        .flatMap { måned ->
+            måned["inntektsliste"]
+                .groupBy({ inntekt -> inntekt.arbeidsgiver() }) { inntekt ->
+                    ArbeidsgiverInntekt.MånedligInntekt.Sykepengegrunnlag(
+                        yearMonth = måned["årMåned"].asYearMonth(),
+                        inntekt = inntekt["beløp"].asDouble().månedlig,
+                        type = inntekt["inntektstype"].asInntekttype(),
+                        fordel = if (inntekt.path("fordel").isTextual) inntekt["fordel"].asText() else "",
+                        beskrivelse = if (inntekt.path("beskrivelse").isTextual) inntekt["beskrivelse"].asText() else ""
+                    )
+                }.toList()
+        }
+        .groupBy({ (arbeidsgiver, _) -> arbeidsgiver }) { (_, inntekter) -> inntekter }
+        .map { (arbeidsgiver, inntekter) ->
+            ArbeidsgiverInntekt(arbeidsgiver, inntekter.flatten())
+        }
+
     private val arbeidsforhold = packet["@løsning.${Opptjening.name}"].map {
         Arbeidsforhold(
             orgnummer = it["orgnummer"].asText(),
@@ -43,6 +61,16 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packe
             tom = it["ansattTil"].asOptionalLocalDate()
         )
     }
+
+    // TODO: slå sammen med den over?
+    private val arbeidsforhold2 = packet["@løsning.${ArbeidsforholdV2.name}"]
+        .map {
+            Arbeidsforhold(
+                orgnummer = it["orgnummer"].asText(),
+                fom = it["ansattSiden"].asLocalDate(),
+                tom = it["ansattTil"].asOptionalLocalDate()
+            )
+        }
 
     private val medlemskapstatus = when (packet["@løsning.${Medlemskap.name}.resultat.svar"].asText()) {
         "JA" -> Medlemskapsvurdering.Medlemskapstatus.Ja
@@ -60,12 +88,16 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packe
             inntektsvurdering = Inntektsvurdering(
                 inntekter = inntekterForSammenligningsgrunnlag
             ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                inntekter = inntekterForSykepengegrunnlag
+            ),
             opptjeningvurdering = Opptjeningvurdering(
                 arbeidsforhold = arbeidsforhold
             ),
             medlemskapsvurdering = Medlemskapsvurdering(
                 medlemskapstatus = medlemskapstatus
-            )
+            ),
+            arbeidsforhold = arbeidsforhold2
         )
 
     override fun behandle(mediator: IHendelseMediator) {

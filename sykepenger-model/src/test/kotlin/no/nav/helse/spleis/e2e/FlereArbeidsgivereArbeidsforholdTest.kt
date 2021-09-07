@@ -305,7 +305,13 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             val arbeidsforhold1 = emptyList<Arbeidsforhold>()
             håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), a1, inntekter1, arbeidsforhold1)
             håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
-            håndterVilkårsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1, inntektsvurdering = Inntektsvurdering(sammenligningsgrunnlag1))
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode(a1),
+                orgnummer = a1,
+                inntektsvurdering = Inntektsvurdering(sammenligningsgrunnlag1),
+                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter1),
+                arbeidsforhold = arbeidsforhold1
+            )
             håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
             håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), orgnummer = a1)

@@ -450,7 +450,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag, nesteTilstand: Vedtaksperiodetilstand) {
-        vilkårsgrunnlag.lagreInntekter(person, skjæringstidspunkt)
+        vilkårsgrunnlag.lagreSkatteinntekter(person, skjæringstidspunkt)
         val grunnlagForSykepengegrunnlag = person.grunnlagForSykepengegrunnlag(skjæringstidspunkt)
         val sammenligningsgrunnlag = person.sammenligningsgrunnlag(skjæringstidspunkt)
 
@@ -498,6 +498,8 @@ internal class Vedtaksperiode private constructor(
 
     private fun trengerVilkårsgrunnlag(hendelse: IAktivitetslogg) {
         val beregningSlutt = YearMonth.from(skjæringstidspunkt).minusMonths(1)
+        inntekterForSykepengegrunnlag(hendelse, beregningSlutt.minusMonths(2), beregningSlutt)
+        arbeidsforhold(hendelse)
         inntektsberegning(hendelse, beregningSlutt.minusMonths(11), beregningSlutt)
         opptjening(hendelse)
         medlemskap(hendelse, periode.start, periode.endInclusive)
@@ -1721,10 +1723,20 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
+            vilkårsgrunnlag.loggUkjenteArbeidsforhold(vedtaksperiode.person, vedtaksperiode.skjæringstidspunkt)
+            if (Toggles.FlereArbeidsgivereUlikFom.enabled) {
+                vilkårsgrunnlag.lagreArbeidsforhold(vedtaksperiode.person, vedtaksperiode.skjæringstidspunkt)
+                vilkårsgrunnlag.lagreInntekter(vedtaksperiode.person, vedtaksperiode.skjæringstidspunkt)
+
+                if (vedtaksperiode.person.harRelevanteArbeidsforholdForFlereArbeidsgivere(vedtaksperiode.skjæringstidspunkt)) {
+                    vedtaksperiode.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE
+                }
+            }
             vedtaksperiode.forberedMuligUtbetaling(vilkårsgrunnlag)
         }
     }
 
+    // TODO: fjern tilstand
     internal object AvventerUtbetalingsgrunnlag : Vedtaksperiodetilstand {
         override val type = AVVENTER_UTBETALINGSGRUNNLAG
 

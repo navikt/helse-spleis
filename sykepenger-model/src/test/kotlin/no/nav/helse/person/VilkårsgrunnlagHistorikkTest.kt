@@ -22,6 +22,10 @@ internal class VilkårsgrunnlagHistorikkTest {
     private lateinit var historikk: VilkårsgrunnlagHistorikk
     private val inspektør get() = Vilkårgrunnlagsinspektør(historikk)
 
+    companion object {
+        private val arbeidsforhold = listOf(Arbeidsforhold("123456789", 1.desember(2017)))
+    }
+
     @BeforeEach
     fun beforEach() {
         historikk = VilkårsgrunnlagHistorikk()
@@ -36,8 +40,10 @@ internal class VilkårsgrunnlagHistorikkTest {
             fødselsnummer = "20043769969",
             orgnummer = "ORGNUMMER",
             inntektsvurdering = Inntektsvurdering(emptyList()),
-            opptjeningvurdering = Opptjeningvurdering(listOf(Arbeidsforhold("123456789", 1.desember(2017)))),
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja)
+            opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
+            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),  // TODO ok?
+            arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(sykepengegrunnlag(10000.månedlig), 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)
         historikk.lagre(vilkårsgrunnlag, 1.januar)
@@ -48,6 +54,7 @@ internal class VilkårsgrunnlagHistorikkTest {
 
     @Test
     fun `ny vilkårsprøving på samme skjæringstidspunkt overskriver gammel vilkårsprøving - medfører nytt innslag`() {
+        val arbeidsforhold = arbeidsforhold
         val vilkårsgrunnlag1 = Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = UUID.randomUUID().toString(),
@@ -55,8 +62,10 @@ internal class VilkårsgrunnlagHistorikkTest {
             fødselsnummer = "20043769969",
             orgnummer = "ORGNUMMER",
             inntektsvurdering = Inntektsvurdering(emptyList()),
-            opptjeningvurdering = Opptjeningvurdering(listOf(Arbeidsforhold("123456789", 1.desember(2017)))),
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja)
+            opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
+            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),  // TODO ok?
+            arbeidsforhold = arbeidsforhold
         )
         val vilkårsgrunnlag2 = Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
@@ -65,8 +74,10 @@ internal class VilkårsgrunnlagHistorikkTest {
             fødselsnummer = "20043769969",
             orgnummer = "ORGNUMMER",
             inntektsvurdering = Inntektsvurdering(emptyList()),
-            opptjeningvurdering = Opptjeningvurdering(listOf(Arbeidsforhold("123456789", 1.desember(2017)))),
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei)
+            opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
+            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),  // TODO ok?
+            arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag1.valider(sykepengegrunnlag(10000.månedlig), 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)
         vilkårsgrunnlag2.valider(sykepengegrunnlag(10000.månedlig), 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)
@@ -92,8 +103,10 @@ internal class VilkårsgrunnlagHistorikkTest {
             fødselsnummer = "20043769969",
             orgnummer = "ORGNUMMER",
             inntektsvurdering = Inntektsvurdering(emptyList()),
-            opptjeningvurdering = Opptjeningvurdering(listOf(Arbeidsforhold("123456789", 1.desember(2017)))),
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja)
+            opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
+            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),  // TODO ok?
+            arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(sykepengegrunnlag(10000.månedlig), 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)
         historikk.lagre(vilkårsgrunnlag, 1.januar)
@@ -111,8 +124,10 @@ internal class VilkårsgrunnlagHistorikkTest {
             fødselsnummer = "20043769969",
             orgnummer = "ORGNUMMER",
             inntektsvurdering = Inntektsvurdering(emptyList()),
-            opptjeningvurdering = Opptjeningvurdering(listOf(Arbeidsforhold("123456789", 1.desember(2017)))),
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja)
+            opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
+            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),  // TODO ok?
+            arbeidsforhold = arbeidsforhold
         )
         val infotrygdhistorikk = Infotrygdhistorikk().apply {
             oppdaterHistorikk(
@@ -147,8 +162,10 @@ internal class VilkårsgrunnlagHistorikkTest {
             fødselsnummer = "20043769969",
             orgnummer = "ORGNUMMER",
             inntektsvurdering = Inntektsvurdering(emptyList()),
-            opptjeningvurdering = Opptjeningvurdering(listOf(Arbeidsforhold("123456789", 1.desember(2017)))),
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja)
+            opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
+            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),  // TODO ok?
+            arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(sykepengegrunnlag(10000.månedlig), 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag, 1.januar)
@@ -166,8 +183,10 @@ internal class VilkårsgrunnlagHistorikkTest {
             fødselsnummer = "20043769969",
             orgnummer = "ORGNUMMER",
             inntektsvurdering = Inntektsvurdering(emptyList()),
-            opptjeningvurdering = Opptjeningvurdering(listOf(Arbeidsforhold("123456789", 1.desember(2017)))),
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei)
+            opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
+            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),  // TODO ok?
+            arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(sykepengegrunnlag(10000.månedlig), 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag, 1.januar)
@@ -265,8 +284,10 @@ internal class VilkårsgrunnlagHistorikkTest {
             fødselsnummer = "20043769969",
             orgnummer = "ORGNUMMER",
             inntektsvurdering = Inntektsvurdering(emptyList()),
-            opptjeningvurdering = Opptjeningvurdering(listOf(Arbeidsforhold("123456789", 1.desember(2017)))),
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei)
+            opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
+            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),  // TODO ok?
+            arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag1.valider(sykepengegrunnlag(10000.månedlig), 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)
         val vilkårsgrunnlag2 = Vilkårsgrunnlag(
@@ -276,8 +297,10 @@ internal class VilkårsgrunnlagHistorikkTest {
             fødselsnummer = "20043769969",
             orgnummer = "ORGNUMMER",
             inntektsvurdering = Inntektsvurdering(emptyList()),
-            opptjeningvurdering = Opptjeningvurdering(listOf(Arbeidsforhold("123456789", 1.desember(2017)))),
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja)
+            opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
+            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),  // TODO ok?
+            arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag2.valider(sykepengegrunnlag(10000.månedlig), 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag1, 10.januar)
@@ -297,8 +320,10 @@ internal class VilkårsgrunnlagHistorikkTest {
             fødselsnummer = "20043769969",
             orgnummer = "ORGNUMMER",
             inntektsvurdering = Inntektsvurdering(emptyList()),
-            opptjeningvurdering = Opptjeningvurdering(listOf(Arbeidsforhold("123456789", 1.desember(2017)))),
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei)
+            opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
+            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),  // TODO ok?
+            arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag1.valider(sykepengegrunnlag(10000.månedlig), 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)
         val vilkårsgrunnlag2 = Vilkårsgrunnlag(
@@ -308,8 +333,10 @@ internal class VilkårsgrunnlagHistorikkTest {
             fødselsnummer = "20043769969",
             orgnummer = "ORGNUMMER",
             inntektsvurdering = Inntektsvurdering(emptyList()),
-            opptjeningvurdering = Opptjeningvurdering(listOf(Arbeidsforhold("123456789", 1.desember(2017)))),
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja)
+            opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
+            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),  // TODO ok?
+            arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag2.valider(sykepengegrunnlag(10000.månedlig), 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag1, 10.januar)
@@ -329,8 +356,10 @@ internal class VilkårsgrunnlagHistorikkTest {
             fødselsnummer = "20043769969",
             orgnummer = "ORGNUMMER",
             inntektsvurdering = Inntektsvurdering(emptyList()),
-            opptjeningvurdering = Opptjeningvurdering(listOf(Arbeidsforhold("123456789", 1.desember(2017)))),
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja)
+            opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
+            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),  // TODO ok?
+            arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(sykepengegrunnlag(10.månedlig), 10.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag, 1.januar)

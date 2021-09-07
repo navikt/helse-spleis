@@ -4,9 +4,7 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
-import no.nav.helse.testhelpers.desember
-import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
-import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -230,6 +228,12 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
                         ORGNUMMER inntekt 31000.månedlig
                     }
                 }),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                inntektperioderForSykepengegrunnlag {
+                    1.oktober(2017) til 1.desember(2017) inntekter {
+                        ORGNUMMER inntekt 31000.månedlig
+                    }
+                }),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             opptjeningvurdering = Opptjeningvurdering(
                 listOf(
@@ -237,6 +241,12 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
                         ORGNUMMER,
                         1.januar(2017)
                     )
+                )
+            ),
+            arbeidsforhold = listOf(
+                Arbeidsforhold(
+                    ORGNUMMER,
+                    1.januar(2017)
                 )
             )
         ).apply {

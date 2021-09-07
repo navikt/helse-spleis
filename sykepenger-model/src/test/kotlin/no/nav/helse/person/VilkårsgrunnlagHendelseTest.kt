@@ -155,6 +155,7 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
     private fun håndterVilkårsgrunnlag(
         beregnetInntekt: Inntekt = 1000.månedlig,
         inntekter: List<ArbeidsgiverInntekt>,
+        inntekterForSykepengegrunnlag: List<ArbeidsgiverInntekt> = emptyList(), // TODO: burde ikke være empty list?
         arbeidsforhold: List<Arbeidsforhold>
     ) {
         person.håndter(sykmelding())
@@ -162,7 +163,7 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
         person.håndter(inntektsmelding(beregnetInntekt = beregnetInntekt))
         person.håndter(utbetalingsgrunnlag())
         person.håndter(ytelser())
-        person.håndter(vilkårsgrunnlag(inntekter = inntekter, arbeidsforhold = arbeidsforhold))
+        person.håndter(vilkårsgrunnlag(inntekter = inntekter, inntekterForSykepengegrunnlag = inntekterForSykepengegrunnlag, arbeidsforhold = arbeidsforhold))
     }
 
     private fun sykmelding(
@@ -218,6 +219,7 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
 
     private fun vilkårsgrunnlag(
         inntekter: List<ArbeidsgiverInntekt>,
+        inntekterForSykepengegrunnlag: List<ArbeidsgiverInntekt>,
         arbeidsforhold: List<Arbeidsforhold>
     ) =
         Vilkårsgrunnlag(
@@ -228,7 +230,9 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
             orgnummer = ORGNUMMER,
             inntektsvurdering = Inntektsvurdering(inntekter),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            opptjeningvurdering = Opptjeningvurdering(arbeidsforhold)
+            opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
+            arbeidsforhold = arbeidsforhold,
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekterForSykepengegrunnlag)
         ).apply {
             hendelse = this
         }

@@ -189,6 +189,18 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
                         1.januar(2017)
                     )
                 )
+            ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                inntektperioderForSykepengegrunnlag {
+                    1.oktober(2017) til 1.desember(2017) inntekter {
+                        ORGNUMMER inntekt 31000.månedlig
+                    }
+                }),
+            arbeidsforhold = listOf(
+                Arbeidsforhold(
+                    ORGNUMMER,
+                    1.januar(2017)
+                )
             )
         ).apply {
             hendelse = this

@@ -2031,7 +2031,18 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
                 1.januar(2017) til 1.desember(2017) inntekter {
                     orgnummer inntekt 31000.månedlig
                 }
-            })
+            }),
+            inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektperioderForSykepengegrunnlag {
+                1.oktober(2017) til 1.desember(2017) inntekter {
+                    orgnummer inntekt 31000.månedlig
+                }
+            }),
+            arbeidsforhold: List<Arbeidsforhold> = listOf(
+                Arbeidsforhold(
+                    orgnummer,
+                    1.januar(2017)
+                )
+            )
         ) = Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeId,
@@ -2039,14 +2050,9 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             fødselsnummer = fnr,
             orgnummer = orgnummer,
             inntektsvurdering = inntektsvurdering,
-            opptjeningvurdering = Opptjeningvurdering(
-                listOf(
-                    Arbeidsforhold(
-                        orgnummer,
-                        1.januar(2017)
-                    )
-                )
-            ),
+            inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
+            opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
+            arbeidsforhold = arbeidsforhold,
             medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus)
         )
 

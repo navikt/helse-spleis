@@ -16,6 +16,7 @@ import no.nav.helse.spleis.meldinger.model.VilkårsgrunnlagMessage.Companion.asI
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import java.util.*
 
+// TODO: fjerne klassen
 internal class UtbetalingsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packet) {
     private val aktørId = packet["aktørId"].asText()
     private val orgnummer = packet["organisasjonsnummer"].asText()

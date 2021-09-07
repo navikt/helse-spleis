@@ -117,7 +117,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             håndterUtbetalingsgrunnlag(1.vedtaksperiode(a1), inntekter = inntekter, orgnummer = a1, arbeidsforhold = arbeidsforhold)
             håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
             håndterVilkårsgrunnlag(
-                1.vedtaksperiode(a1), inntektsvurdering = Inntektsvurdering(
+                1.vedtaksperiode(a1),
+                inntektsvurdering = Inntektsvurdering(
                     listOf(
                         sammenligningsgrunnlag(
                             a1, finnSkjæringstidspunkt(
@@ -130,7 +131,12 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
                                     a1
                                 )), 1000.månedlig.repeat(12))
                     )
-                ), orgnummer = a1
+                ),
+                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                    inntekter = inntekter
+                ),
+                arbeidsforhold = arbeidsforhold,
+                orgnummer = a1
             )
             håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
             håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
@@ -138,9 +144,9 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
 
             val a1Linje = inspektør(a1).utbetalinger.last().arbeidsgiverOppdrag().single()
-            Assertions.assertEquals(17.januar, a1Linje.fom)
-            Assertions.assertEquals(15.mars, a1Linje.tom)
-            Assertions.assertEquals(2161, a1Linje.beløp)
+            assertEquals(17.januar, a1Linje.fom)
+            assertEquals(15.mars, a1Linje.tom)
+            assertEquals(2161, a1Linje.beløp)
 
             Assertions.assertFalse(inspektør(a1).warnings.contains("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold"))
             Assertions.assertFalse(inspektør(a1).warnings.contains("Den sykmeldte har skiftet arbeidsgiver, og det er beregnet at den nye arbeidsgiveren mottar refusjon lik forrige. Kontroller at dagsatsen blir riktig."))

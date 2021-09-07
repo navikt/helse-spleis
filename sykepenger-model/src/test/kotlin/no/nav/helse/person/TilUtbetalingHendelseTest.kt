@@ -3,9 +3,7 @@ package no.nav.helse.person
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
-import no.nav.helse.testhelpers.desember
-import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
-import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -348,6 +346,18 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
                         ORGNUMMER,
                         1.januar(2017)
                     )
+                )
+            ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                inntektperioderForSykepengegrunnlag {
+                    1.oktober(2017) til 1.desember(2017) inntekter {
+                        ORGNUMMER inntekt 31000.månedlig
+                    }
+                }),
+            arbeidsforhold = listOf(
+                Arbeidsforhold(
+                    ORGNUMMER,
+                    1.januar(2017)
                 )
             )
         ).apply {
