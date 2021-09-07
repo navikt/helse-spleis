@@ -71,7 +71,7 @@ internal class V114LagreSykepengegrunnlag : JsonMigration(version = 114) {
                 inntektshistorikk.firstOrNull()
                     ?.get("inntektsopplysninger")
                     ?.sortedBy { if(it.has("skatteopplysninger")) it["skatteopplysninger"].first()["dato"].asText() else it["dato"].asText() }
-                    ?.first {
+                    ?.firstOrNull {
                         val dato =  if(it.has("skatteopplysninger")) it["skatteopplysninger"].first()["dato"].asText() else it["dato"].asText()
                         dato > skjæringstidspunkt
                     }
@@ -84,10 +84,4 @@ internal class V114LagreSykepengegrunnlag : JsonMigration(version = 114) {
             it["vilkårsgrunnlag"]
         }.forEach { genererSykepengegrunnlag((it as ObjectNode), jsonNode) }
     }
-
-
-
-
 }
-
-
