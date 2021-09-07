@@ -11,15 +11,17 @@ internal class V115LagreVilkårsgrunnlagFraInfotrygd : JsonMigration(version = 1
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         val skjæringstidspunkterForVilkårsgrunnlag = jsonNode["vilkårsgrunnlagHistorikk"]
-            .first()["vilkårsgrunnlag"]
-            .filter { vilkårsgrunnlag -> vilkårsgrunnlag["type"].asText() == "Infotrygd" }
-            .map { it["skjæringstidspunkt"].asText() }
+            .firstOrNull()?.get("vilkårsgrunnlag")
+            ?.filter { vilkårsgrunnlag -> vilkårsgrunnlag["type"].asText() == "Infotrygd" }
+            ?.map { it["skjæringstidspunkt"].asText() }
 
         jsonNode["arbeidsgivere"].forEach { arbeidsgiver ->
-            val infotrygdInntektsopplysninger = arbeidsgiver["inntektshistorikk"].first()["inntektsopplysninger"]
-                .filter { inntektsopplysning -> !inntektsopplysning.has("skatteopplysninger") && inntektsopplysning["kilde"].asText() == "INFOTRYGD" }
+            val infotrygdInntektsopplysninger = arbeidsgiver["inntektshistorikk"].firstOrNull()?.get("inntektsopplysninger")
+                ?.filter { inntektsopplysning -> !inntektsopplysning.has("skatteopplysninger") && inntektsopplysning["kilde"].asText() == "INFOTRYGD" }
 
-            lagreVilkårsgrunnlagFraInfotrygd(infotrygdInntektsopplysninger, skjæringstidspunkterForVilkårsgrunnlag, jsonNode)
+            if(skjæringstidspunkterForVilkårsgrunnlag != null && infotrygdInntektsopplysninger != null) {
+                lagreVilkårsgrunnlagFraInfotrygd(infotrygdInntektsopplysninger, skjæringstidspunkterForVilkårsgrunnlag, jsonNode)
+            }
         }
     }
 
