@@ -154,7 +154,7 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
     private fun håndterVilkårsgrunnlag(
         beregnetInntekt: Inntekt = 1000.månedlig,
         inntekter: List<ArbeidsgiverInntekt>,
-        inntekterForSykepengegrunnlag: List<ArbeidsgiverInntekt> = emptyList(), // TODO: burde ikke være empty list?
+        inntekterForSykepengegrunnlag: List<ArbeidsgiverInntekt> = emptyList(), // TODO: burde den ha annen default enn emptylist?
         arbeidsforhold: List<Arbeidsforhold>
     ) {
         person.håndter(sykmelding())

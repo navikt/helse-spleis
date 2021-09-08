@@ -364,6 +364,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         )
     }
 
+    // TODO: er denne testen relevant? Vi sender ikke med arbeidsgiverinfo for forlengelser
     @Test
     fun `fremtidig test av utbetalingstidslinjeBuilder, historikk fra flere arbeidsgivere`() {
         håndterSykmelding(Sykmeldingsperiode(20.september(2020), 19.oktober(2020), 100.prosent))
@@ -382,14 +383,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
                 Inntektsopplysning("12345789", 21.august(2019), 22600.månedlig, true)
             )
         )
-        // TODO: Få med arbeidsforholdhistorikken
-        /*håndterUtbetalingsgrunnlag(
-            vedtaksperiodeId = 1.vedtaksperiode,
-            arbeidsforhold = listOf(
-                Arbeidsforhold(ORGNUMMER, 1.januar, null),
-                Arbeidsforhold("12345789", 1.januar, null)
-            )
-        )*/
         håndterYtelser(1.vedtaksperiode)
 
         inspektør.also {

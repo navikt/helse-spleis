@@ -36,18 +36,9 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
     fun `Inntekter fra flere arbeidsgivere`() {
         Toggles.FlereArbeidsgivereUlikFom.enable {
             nyPeriode(
-                1.januar til 31.januar, a1, inntekt = 16000.månedlig, inntekterForSykepengegrunnlag = inntektperioderForSykepengegrunnlag {
-                    1.oktober(2017) til 1.desember(2017) inntekter {
-                        a1 inntekt 15000
-                        a3 inntekt 7500
-                        a4 inntekt 2500
-                    }
-                },
-                arbeidsforhold = listOf(
-                    Arbeidsforhold(a1, LocalDate.EPOCH, null),
-                    Arbeidsforhold(a3, LocalDate.EPOCH, null),
-                    Arbeidsforhold(a4, LocalDate.EPOCH, null)
-                )
+                periode = 1.januar til 31.januar,
+                orgnummer = a1,
+                inntekt = 16000.månedlig,
             )
             assertNoErrors(a1Inspektør)
             assertNoErrors(a2Inspektør)
@@ -69,7 +60,19 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
                         a4 inntekt 2500
                     }
                 },
-                inntekterForSykepengegrunnlag = inntektperioderForSykepengegrunnlag { }
+                inntekterForSykepengegrunnlag = inntektperioderForSykepengegrunnlag {
+                    1.oktober(2017) til 1.desember(2017) inntekter {
+                        a1 inntekt 15000
+                        a3 inntekt 4750
+                        a4 inntekt 2250
+                    }
+                },
+                arbeidsforhold = listOf(
+                    Arbeidsforhold(a1, LocalDate.EPOCH, null),
+                    Arbeidsforhold(a2, LocalDate.EPOCH, null),
+                    Arbeidsforhold(a3, LocalDate.EPOCH, null),
+                    Arbeidsforhold(a4, LocalDate.EPOCH, null)
+                )
             ).håndter(Person::håndter)
 
             assertNoErrors(a1Inspektør)
@@ -77,8 +80,8 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
 
             assertInntektForDato(16000.månedlig, 1.januar, a1Inspektør)
             assertInntektForDato(null, 1.januar, a2Inspektør)
-            assertInntektForDato(7500.månedlig, 1.januar, a3Inspektør)
-            assertInntektForDato(2500.månedlig, 1.januar, a4Inspektør)
+            assertInntektForDato(4750.månedlig, 1.januar, a3Inspektør)
+            assertInntektForDato(2250.månedlig, 1.januar, a4Inspektør)
 
             val vilkårsgrunnlag = a1Inspektør.vilkårsgrunnlag(1.vedtaksperiode(a1)) as VilkårsgrunnlagHistorikk.Grunnlagsdata?
             assertEquals(300000.årlig, vilkårsgrunnlag?.sammenligningsgrunnlag)
@@ -94,18 +97,12 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
                 a4 inntekt 2500
             }
         }
-
         val arbeidsforhold = listOf(
             Arbeidsforhold(a1, LocalDate.EPOCH, null),
             Arbeidsforhold(a3, LocalDate.EPOCH, null),
             Arbeidsforhold(a4, LocalDate.EPOCH, null)
         )
-        nyPeriode(
-            1.januar til 31.januar,
-            a1,
-            inntekterForSykepengegrunnlag = inntekterForSykepengegrunnlag,
-            arbeidsforhold = arbeidsforhold
-        ) // TODO fjern I og A
+        nyPeriode(1.januar til 31.januar, a1, INNTEKT)
 
         person.håndter(
             vilkårsgrunnlag(
@@ -129,7 +126,6 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
                 arbeidsforhold = arbeidsforhold
             )
         )
-
         assertEquals(300000.årlig, person.sammenligningsgrunnlag(1.januar))
     }
 
@@ -146,10 +142,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             Arbeidsforhold(a1, LocalDate.EPOCH, null),
             Arbeidsforhold(a2, LocalDate.EPOCH, null)
         )
-        nyPeriode(
-            1.januar til 31.januar, a1, 25000.månedlig, inntekterForSykepengegrunnlag = inntekterForSykepengegrunnlag,
-            arbeidsforhold = arbeidsforhold
-        )
+        nyPeriode(1.januar til 31.januar, a1, 25000.månedlig)
 
         vilkårsgrunnlag(
             a1.id(0),
@@ -206,10 +199,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
                 }
             }
             val arbeidsforhold = listOf(Arbeidsforhold(a1, LocalDate.EPOCH, null))
-            nyPeriode(
-                1.januar til 31.januar, a1, 25000.månedlig, inntekterForSykepengegrunnlag = inntekterForSykepengegrunnlag,
-                arbeidsforhold = arbeidsforhold
-            )
+            nyPeriode(1.januar til 31.januar, a1, 25000.månedlig)
             vilkårsgrunnlag(
                 a1.id(0),
                 orgnummer = a1,
@@ -252,10 +242,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
                 Arbeidsforhold(a1, LocalDate.EPOCH, null),
                 Arbeidsforhold(a2, LocalDate.EPOCH, null)
             )
-            nyPeriode(
-                1.januar til 31.januar, a1, 25000.månedlig, inntekterForSykepengegrunnlag = inntekterForSykepengegrunnlag,
-                arbeidsforhold = arbeidsforhold
-            )
+            nyPeriode(1.januar til 31.januar, a1, 25000.månedlig)
             vilkårsgrunnlag(
                 a1.id(0),
                 orgnummer = a1,
@@ -291,11 +278,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
                 Arbeidsforhold(a1, LocalDate.EPOCH, null),
                 Arbeidsforhold(a2, 1.november, null)
             )
-            nyPeriode(
-                1.januar til 31.januar, a1, 25000.månedlig,
-                inntekterForSykepengegrunnlag = inntekterForSykepengegrunnlag,
-                arbeidsforhold = arbeidsforhold
-            )
+            nyPeriode(1.januar til 31.januar, a1, 25000.månedlig)
             vilkårsgrunnlag(
                 a1.id(0),
                 orgnummer = a1,
@@ -317,9 +300,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
     private fun nyPeriode(
         periode: Periode,
         orgnummer: String,
-        inntekt: Inntekt = INNTEKT,
-        inntekterForSykepengegrunnlag: List<ArbeidsgiverInntekt>, // TODO: fjern
-        arbeidsforhold: List<Arbeidsforhold>
+        inntekt: Inntekt
     ) {
         sykmelding(
             UUID.randomUUID(),
@@ -339,12 +320,6 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             førsteFraværsdag = periode.start,
             orgnummer = orgnummer
         ).håndter(Person::håndter)
-        /* håndterUtbetalingsgrunnlag( // TODO: trygt å fjerne?
-            vedtaksperiodeId = 1.vedtaksperiode(orgnummer),
-            orgnummer = orgnummer,
-            inntekter = inntekterForSykepengegrunnlag,
-            arbeidsforhold = arbeidsforhold
-        )*/
         ytelser(
             vedtaksperiodeId = 1.vedtaksperiode(orgnummer),
             orgnummer = orgnummer,

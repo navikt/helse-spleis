@@ -31,11 +31,11 @@ class ArbeidsgiverInntekt(
 
     companion object {
         fun lagreSykepengegrunnlag(inntekter: List<ArbeidsgiverInntekt>, person: Person, skjæringstidspunkt: LocalDate, hendelse: PersonHendelse) {
-            inntekter.forEach { person.lagreSykepengegrunnlagFraInfotrygd(it.arbeidsgiver, it, skjæringstidspunkt, hendelse) }
+            inntekter.forEach { person.lagreGrunnlagForSykepengegrunnlag(it.arbeidsgiver, it, skjæringstidspunkt, hendelse) }
         }
 
         fun lagreSammenligningsgrunnlag(inntekter: List<ArbeidsgiverInntekt>, person: Person, skjæringstidspunkt: LocalDate, hendelse: PersonHendelse) {
-            inntekter.forEach { person.lagreSammenligningsgrunnlag(it.arbeidsgiver, it, skjæringstidspunkt, hendelse) }
+            inntekter.forEach { person.lagreGrunnlagForSammenligningsgrunnlag(it.arbeidsgiver, it, skjæringstidspunkt, hendelse) }
         }
 
         internal fun List<ArbeidsgiverInntekt>.kilder(antallMåneder: Int) = this

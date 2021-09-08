@@ -293,7 +293,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             assertEtterspurt(Vilkårsgrunnlag::class, behovtype, vedtaksperiodeId, orgnummer)
 
         assertEtterspurt(Behovtype.InntekterForSammenligningsgrunnlag)
-        assertEtterspurt(Behovtype.InntekterForSykepengegrunnlag)         // TODO: assert etterspør arbeidsforhold og skatt dersom relevant
+        assertEtterspurt(Behovtype.InntekterForSykepengegrunnlag)
+        assertEtterspurt(Behovtype.ArbeidsforholdV2)
         assertEtterspurt(Behovtype.Medlemskap)
         vilkårsgrunnlag(
             vedtaksperiodeId,
@@ -988,7 +989,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         inntekterBlock: Inntektperioder.() -> Unit = { defaultInntekter(orgnummer, fom) },
         inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag = InntektForSykepengegrunnlag(
             inntekter = inntektperioderForSykepengegrunnlag {
-                fom.minusMonths(3) til fom.minusMonths(1) inntekter { // TODO: riktig antall måneder?
+                fom.minusMonths(3) til fom.minusMonths(1) inntekter { // TODO: riktig datoer?
                     orgnummer inntekt INNTEKT
                 }
             }

@@ -42,7 +42,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             inntektsvurdering = Inntektsvurdering(emptyList()),
             opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),  // TODO ok?
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),
             arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(sykepengegrunnlag(10000.månedlig), 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)
@@ -64,7 +64,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             inntektsvurdering = Inntektsvurdering(emptyList()),
             opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),  // TODO ok?
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),
             arbeidsforhold = arbeidsforhold
         )
         val vilkårsgrunnlag2 = Vilkårsgrunnlag(
@@ -76,7 +76,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             inntektsvurdering = Inntektsvurdering(emptyList()),
             opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),  // TODO ok?
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),
             arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag1.valider(sykepengegrunnlag(10000.månedlig), 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)
@@ -105,7 +105,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             inntektsvurdering = Inntektsvurdering(emptyList()),
             opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),  // TODO ok?
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),
             arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(sykepengegrunnlag(10000.månedlig), 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)
@@ -126,7 +126,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             inntektsvurdering = Inntektsvurdering(emptyList()),
             opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),  // TODO ok?
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),
             arbeidsforhold = arbeidsforhold
         )
         val infotrygdhistorikk = Infotrygdhistorikk().apply {
@@ -164,7 +164,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             inntektsvurdering = Inntektsvurdering(emptyList()),
             opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),  // TODO ok?
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),
             arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(sykepengegrunnlag(10000.månedlig), 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)
@@ -185,7 +185,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             inntektsvurdering = Inntektsvurdering(emptyList()),
             opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),  // TODO ok?
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),
             arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(sykepengegrunnlag(10000.månedlig), 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)
@@ -286,7 +286,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             inntektsvurdering = Inntektsvurdering(emptyList()),
             opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),  // TODO ok?
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),
             arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag1.valider(sykepengegrunnlag(10000.månedlig), 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)
@@ -299,7 +299,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             inntektsvurdering = Inntektsvurdering(emptyList()),
             opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),  // TODO ok?
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),
             arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag2.valider(sykepengegrunnlag(10000.månedlig), 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)
@@ -322,7 +322,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             inntektsvurdering = Inntektsvurdering(emptyList()),
             opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),  // TODO ok?
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),
             arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag1.valider(sykepengegrunnlag(10000.månedlig), 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)
@@ -335,7 +335,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             inntektsvurdering = Inntektsvurdering(emptyList()),
             opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),  // TODO ok?
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),
             arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag2.valider(sykepengegrunnlag(10000.månedlig), 10000.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)
@@ -358,7 +358,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             inntektsvurdering = Inntektsvurdering(emptyList()),
             opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),  // TODO ok?
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),
             arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(sykepengegrunnlag(10.månedlig), 10.månedlig, 1.januar, Periodetype.FØRSTEGANGSBEHANDLING, 1)

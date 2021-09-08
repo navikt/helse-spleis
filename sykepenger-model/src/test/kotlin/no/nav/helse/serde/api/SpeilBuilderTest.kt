@@ -67,7 +67,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), id = inntektsmeldingId)
 
         håndterYtelser(1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER, 1.januar(2017), null)))
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -1853,7 +1853,6 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             })
         }
 
-        // TODO: fjerne?
         private fun Person.fangSkjæringstidspunkt(vedtaksperiodeId: UUID): LocalDate {
             lateinit var skjæringstidpunkt: LocalDate
             accept(object : PersonVisitor {

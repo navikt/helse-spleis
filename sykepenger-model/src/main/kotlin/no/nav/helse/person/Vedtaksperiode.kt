@@ -1541,7 +1541,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
-            return vedtaksperiode.tilstand(gjenopptaBehandling, AvventerHistorikk)
+            vedtaksperiode.tilstand(gjenopptaBehandling, AvventerHistorikk)
         }
     }
 

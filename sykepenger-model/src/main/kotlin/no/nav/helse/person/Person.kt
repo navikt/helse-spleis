@@ -422,7 +422,7 @@ class Person private constructor(
         this.dødsdato = dødsdato
     }
 
-    internal fun lagreSykepengegrunnlagFraInfotrygd(
+    internal fun lagreGrunnlagForSykepengegrunnlag(
         orgnummer: String,
         arbeidsgiverInntekt: ArbeidsgiverInntekt,
         skjæringstidspunkt: LocalDate,
@@ -431,7 +431,7 @@ class Person private constructor(
         finnArbeidsgiverForInntekter(orgnummer, hendelse).lagreSykepengegrunnlag(arbeidsgiverInntekt, skjæringstidspunkt, hendelse)
     }
 
-    internal fun lagreSammenligningsgrunnlag(
+    internal fun lagreGrunnlagForSammenligningsgrunnlag(
         orgnummer: String,
         arbeidsgiverInntekt: ArbeidsgiverInntekt,
         skjæringstidspunkt: LocalDate,

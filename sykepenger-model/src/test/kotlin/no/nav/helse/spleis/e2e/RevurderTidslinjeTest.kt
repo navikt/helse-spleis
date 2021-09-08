@@ -942,6 +942,9 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             3.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_UFERDIG_FORLENGELSE,
+            AVVENTER_HISTORIKK
         )
         assertNoErrors(inspektør)
     }
