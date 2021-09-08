@@ -201,6 +201,12 @@ internal class Vedtaksperiode private constructor(
         tilstand.håndter(this, vilkårsgrunnlag)
     }
 
+    internal fun håndter(utbetalingsgrunnlag: Utbetalingsgrunnlag) {
+        if (!utbetalingsgrunnlag.erRelevant(id)) return
+        kontekst(utbetalingsgrunnlag)
+        tilstand.håndter(this, utbetalingsgrunnlag)
+    }
+
     internal fun håndter(simulering: Simulering) {
         if (!simulering.erRelevant(id)) return
         kontekst(simulering)
@@ -937,6 +943,8 @@ internal class Vedtaksperiode private constructor(
         ) {
             hendelse.error("Forventet ikke overstyring fra saksbehandler i %s", type.name)
         }
+
+        fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: Utbetalingsgrunnlag) {}
 
         fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {}
 
@@ -1713,7 +1721,22 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    // TODO: legg til AvventerUtbetalingsgrunnlag-tilstand igjen
+    internal object AvventerUtbetalingsgrunnlag : Vedtaksperiodetilstand {
+        override val type = AVVENTER_UTBETALINGSGRUNNLAG
+
+        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            vedtaksperiode.tilstand(påminnelse, AvventerHistorikk)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, utbetalingsgrunnlag: Utbetalingsgrunnlag) {
+            vedtaksperiode.tilstand(utbetalingsgrunnlag, AvventerHistorikk)
+        }
+    }
+
     internal object AvventerHistorikk : Vedtaksperiodetilstand {
         override val type = AVVENTER_HISTORIKK
 

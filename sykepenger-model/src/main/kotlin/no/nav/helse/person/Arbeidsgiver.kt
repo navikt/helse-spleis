@@ -372,6 +372,12 @@ internal class Arbeidsgiver private constructor(
         finalize(vilkårsgrunnlag)
     }
 
+    internal fun håndter(utbetalingsgrunnlag: Utbetalingsgrunnlag) {
+        utbetalingsgrunnlag.kontekst(this)
+        håndter(utbetalingsgrunnlag, Vedtaksperiode::håndter)
+        finalize(utbetalingsgrunnlag)
+    }
+
     internal fun håndter(simulering: Simulering) {
         simulering.kontekst(this)
         håndter(simulering, Vedtaksperiode::håndter)
