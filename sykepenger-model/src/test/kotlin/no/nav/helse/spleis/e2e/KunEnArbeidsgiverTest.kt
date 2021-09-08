@@ -396,7 +396,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             arbeidsforhold = listOf(
                 Arbeidsforhold(ORGNUMMER, 1.januar, null),
                 Arbeidsforhold("12345789", 1.januar, null)
-        ))
+            )
+        )
         håndterYtelser(1.vedtaksperiode)
 
         inspektør.also {
@@ -3217,7 +3218,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `forlengelse av vedtaksperiode hvor utbetalinger tidligere har nådd makstid, men ikke har mottatt ytelser i 26 uker - skal få warning om at vilkårsgrunnlag må etterspørres` () {
+    fun `forlengelse av vedtaksperiode hvor utbetalinger tidligere har nådd makstid, men ikke har mottatt ytelser i 26 uker - skal få warning om at vilkårsgrunnlag må etterspørres`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
@@ -3238,8 +3239,20 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         (months2018 + months2019).forEachIndexed { index, yearMonth ->
             val vedtaksperiodeIndex = index + 2
-            håndterSykmelding(Sykmeldingsperiode(LocalDate.of(yearMonth.year, yearMonth.month, 1), LocalDate.of(yearMonth.year, yearMonth.month, yearMonth.lengthOfMonth()), 100.prosent))
-            håndterSøknad(Sykdom(LocalDate.of(yearMonth.year, yearMonth.month, 1), LocalDate.of(yearMonth.year, yearMonth.month, yearMonth.lengthOfMonth()), 100.prosent))
+            håndterSykmelding(
+                Sykmeldingsperiode(
+                    LocalDate.of(yearMonth.year, yearMonth.month, 1),
+                    LocalDate.of(yearMonth.year, yearMonth.month, yearMonth.lengthOfMonth()),
+                    100.prosent
+                )
+            )
+            håndterSøknad(
+                Sykdom(
+                    LocalDate.of(yearMonth.year, yearMonth.month, 1),
+                    LocalDate.of(yearMonth.year, yearMonth.month, yearMonth.lengthOfMonth()),
+                    100.prosent
+                )
+            )
             håndterUtbetalingsgrunnlag(vedtaksperiodeIndex.vedtaksperiode)
             håndterYtelser(vedtaksperiodeIndex.vedtaksperiode)
             if (inspektør.etterspurteBehov(vedtaksperiodeIndex.vedtaksperiode, Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering)) {
@@ -3304,10 +3317,10 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         håndterSykmelding(
             Sykmeldingsperiode(22.februar, 14.mars, 50.prosent),
-            mottatt=6.august.atStartOfDay(),
+            mottatt = 6.august.atStartOfDay(),
             sykmeldingSkrevet = 6.august.atStartOfDay()
         )
-        håndterSøknad(Sykdom(22.februar, 14.mars, 50.prosent), sendtTilNav=8.august)
+        håndterSøknad(Sykdom(22.februar, 14.mars, 50.prosent), sendtTilNav = 8.august)
 
         håndterInntektsmelding(listOf(22.februar til 14.mars))
         håndterUtbetalingsgrunnlag(2.vedtaksperiode)
@@ -3319,5 +3332,28 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertEquals(6, it.navHelgDagTeller)
             assertEquals(15, it.foreldetDagTeller)
         }
+    }
+
+    @Test
+    @Disabled
+    fun `gammel inntektsmelding med endring i refusjon kaster ut ny periode etter gap via replay`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 30.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 30.januar, 100.prosent))
+        val inntektsmeldingUUID = håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            beregnetInntekt = 26000.månedlig,
+            refusjon = Refusjon(null, 16000.månedlig)
+        )
+
+        håndterSykmelding(Sykmeldingsperiode(1.mai, 30.mai, 100.prosent))
+        håndterSøknad(Sykdom(1.mai, 30.mai, 100.prosent))
+        håndterInntektsmeldingReplay(inntektsmeldingUUID, 2.vedtaksperiode)
+
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP
+        )
     }
 }
