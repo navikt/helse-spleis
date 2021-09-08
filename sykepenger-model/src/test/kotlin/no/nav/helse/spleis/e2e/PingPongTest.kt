@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Toggles
-import no.nav.helse.hendelser.Arbeidsforhold
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.UtbetalingHendelse
@@ -17,7 +16,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 internal class PingPongTest : AbstractEndToEndTest() {
@@ -85,11 +83,6 @@ internal class PingPongTest : AbstractEndToEndTest() {
         val inntekter = listOf(Inntektsopplysning(a2, 1.februar, 25000.månedlig, true))
         håndterUtbetalingshistorikk(1.vedtaksperiode(a2), historikk, inntektshistorikk = inntekter, orgnummer = a2)
         håndterYtelser(1.vedtaksperiode(a2), orgnummer = a2)
-        håndterVilkårsgrunnlag(
-            1.vedtaksperiode(a2),
-            orgnummer = a2,
-            arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER, LocalDate.EPOCH, 1.februar))
-        )
 
         assertEquals(31, inspektør(ORGNUMMER).utbetalingstidslinjeBeregninger.last().utbetalingstidslinje().size)
         assertTrue(inspektør(a2).utbetalingstidslinjer(1.vedtaksperiode(a2)).none { it is Utbetalingstidslinje.Utbetalingsdag.AvvistDag })
