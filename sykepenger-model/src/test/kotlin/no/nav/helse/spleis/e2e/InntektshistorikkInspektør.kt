@@ -138,9 +138,9 @@ internal class InntektshistorikkInspektør(arbeidsgiver: Arbeidsgiver) : Arbeids
     ) {
         inntektsopplysninger.add(
             Opplysning(
-                skattedato,
-                saksbehandler.grunnlagForSykepengegrunnlag(skattedato)?.second,
-                saksbehandler.grunnlagForSammenligningsgrunnlag(skattedato)?.second,
+                dato,
+                saksbehandler.grunnlagForSykepengegrunnlag(dato)?.second,
+                saksbehandler.grunnlagForSammenligningsgrunnlag(dato)?.second,
                 Kilde.SAKSBEHANDLER
             )
         )
