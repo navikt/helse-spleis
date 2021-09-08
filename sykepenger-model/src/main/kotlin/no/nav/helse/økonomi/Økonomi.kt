@@ -198,7 +198,7 @@ internal class Økonomi private constructor(
             )
         }
 
-    internal fun medData(block: (grad: Double, aktuellDagsinntekt: Double?) -> Unit) {
+    internal fun <R>  medData(block: (grad: Double, aktuellDagsinntekt: Double?) -> R) =
         medData { grad: Double,
                   _: Double,
                   _: Double?,
@@ -210,7 +210,6 @@ internal class Økonomi private constructor(
                   _: Boolean? ->
             block(grad, aktuellDagsinntekt)
         }
-    }
 
     internal fun medAvrundetData(block: (Int, Int?) -> Unit) {
         medAvrundetData { grad: Int,
@@ -245,8 +244,6 @@ internal class Økonomi private constructor(
             null, null, null)
 
     private fun grad() = tilstand.grad(this)
-
-    internal fun toShortString() = "$grad"
 
     private fun betal() = this.also { tilstand.betal(this) }
 
