@@ -155,7 +155,6 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
         person.håndter(sykmelding())
         person.håndter(søknad())
         person.håndter(inntektsmelding())
-        person.håndter(utbetalingsgrunnlag(1.vedtaksperiode))
         person.håndter(ytelser(1.vedtaksperiode))
         person.håndter(vilkårsgrunnlag(1.vedtaksperiode))
         person.håndter(ytelser(1.vedtaksperiode))
@@ -208,18 +207,6 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
         utbetalingGodkjent = godkjent,
         godkjenttidspunkt = LocalDateTime.now(),
         automatiskBehandling = automatiskBehandling,
-    ).apply {
-        hendelse = this
-    }
-
-    private fun utbetalingsgrunnlag(vedtaksperiodeId: UUID) = Utbetalingsgrunnlag(
-        meldingsreferanseId = UUID.randomUUID(),
-        aktørId = "aktørId",
-        fødselsnummer = UNG_PERSON_FNR_2018,
-        orgnummer = ORGNUMMER,
-        vedtaksperiodeId = vedtaksperiodeId,
-        inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),
-        arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER, 1.januar, null))
     ).apply {
         hendelse = this
     }

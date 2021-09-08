@@ -34,7 +34,6 @@ internal class VilkårsgrunnlagTest {
         person.håndter(sykmelding())
         person.håndter(søknad())
         person.håndter(inntektsmelding())
-        person.håndter(utbetalingsgrunnlag())
         person.håndter(ytelser())
     }
 
@@ -253,16 +252,6 @@ internal class VilkårsgrunnlagTest {
             begrunnelseForReduksjonEllerIkkeUtbetalt = null,
             mottatt = LocalDateTime.now()
         )
-
-    private fun utbetalingsgrunnlag() = Utbetalingsgrunnlag(
-        meldingsreferanseId = UUID.randomUUID(),
-        aktørId = aktørId,
-        fødselsnummer = UNG_PERSON_FNR_2018,
-        orgnummer = orgnummer,
-        vedtaksperiodeId = UUID.fromString(vedtaksperiodeId()),
-        inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),
-        arbeidsforhold = listOf(Arbeidsforhold(orgnummer, 1.januar, null))
-    )
 
     private fun ytelser() = Ytelser(
         meldingsreferanseId = UUID.randomUUID(),

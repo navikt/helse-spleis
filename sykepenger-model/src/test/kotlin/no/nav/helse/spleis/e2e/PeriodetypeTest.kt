@@ -25,7 +25,6 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
             førsteFraværsdag = 28.januar(2020)
         )
 
-        håndterUtbetalingsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -50,7 +49,6 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
             TilstandType.MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             TilstandType.MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
             TilstandType.AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE,
-            TilstandType.AVVENTER_UTBETALINGSGRUNNLAG,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_VILKÅRSPRØVING,
             TilstandType.AVVENTER_HISTORIKK,
@@ -74,7 +72,6 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(Periode(28.januar(2020), 12.februar(2020))),
             førsteFraværsdag = 28.januar(2020)
         )
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -84,7 +81,6 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
             }
         ))
         håndterYtelser(1.vedtaksperiode)
-        håndterUtbetalingsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
 
@@ -93,7 +89,6 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
             TilstandType.START,
             TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
             TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            TilstandType.AVVENTER_UTBETALINGSGRUNNLAG,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_VILKÅRSPRØVING,
             TilstandType.AVVENTER_HISTORIKK,
@@ -105,7 +100,6 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
             TilstandType.MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
             TilstandType.AVVENTER_UFERDIG_FORLENGELSE,
-            TilstandType.AVVENTER_UTBETALINGSGRUNNLAG,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_SIMULERING,
             TilstandType.AVVENTER_GODKJENNING
@@ -124,7 +118,6 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(29.januar, 23.februar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk, inntektshistorikk = inntekter)
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
@@ -133,7 +126,6 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
             TilstandType.START,
             TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
             TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            TilstandType.AVVENTER_UTBETALINGSGRUNNLAG,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_SIMULERING,
             TilstandType.AVVENTER_GODKJENNING
@@ -151,7 +143,6 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(29.januar, 23.februar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk, inntektshistorikk = inntekter)
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
@@ -165,7 +156,6 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(26.februar, 15.april, 100.prosent))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(26.februar, 15.april, 100.prosent))
-        håndterUtbetalingsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
 
@@ -185,7 +175,6 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(Periode(20.januar(2020), 4.februar(2020))),
             førsteFraværsdag = 20.januar(2020)
         )
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -196,7 +185,6 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
         ))
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalingsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
 
@@ -205,7 +193,6 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
             TilstandType.START,
             TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
             TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            TilstandType.AVVENTER_UTBETALINGSGRUNNLAG,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_VILKÅRSPRØVING,
             TilstandType.AVVENTER_HISTORIKK,
@@ -217,7 +204,6 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
             TilstandType.START,
             TilstandType.MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
-            TilstandType.AVVENTER_UTBETALINGSGRUNNLAG,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_SIMULERING,
             TilstandType.AVVENTER_GODKJENNING

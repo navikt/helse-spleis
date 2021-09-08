@@ -13,7 +13,7 @@ internal class VilkårsgrunnlagRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : ArbeidsgiverBehovRiver(rapidsConnection, messageMediator) {
-    override val behov = listOf(InntekterForSammenligningsgrunnlag, Opptjening, Medlemskap)
+    override val behov = listOf(InntekterForSammenligningsgrunnlag, InntekterForSykepengegrunnlag, ArbeidsforholdV2, Medlemskap)
 
     override val riverName = "Vilkårsgrunnlag"
 
@@ -30,10 +30,18 @@ internal class VilkårsgrunnlagRiver(
         message.interestedIn("@løsning.${Medlemskap.name}.resultat.svar") {
             require(it.asText() in listOf("JA", "NEI", "UAVKLART")) { "svar (${it.asText()}) er ikke JA, NEI eller UAVKLART" }
         }
-        message.requireArray("@løsning.${Opptjening.name}") {
+        message.requireArray("@løsning.${InntekterForSykepengegrunnlag.name}") {
+            require("årMåned", JsonNode::asYearMonth)
+            requireArray("inntektsliste") {
+                requireKey("beløp")
+                requireAny("inntektstype", listOf("LOENNSINNTEKT", "NAERINGSINNTEKT", "PENSJON_ELLER_TRYGD", "YTELSE_FRA_OFFENTLIGE"))
+                interestedIn("orgnummer", "fødselsnummer", "aktørId", "fordel", "beskrivelse")
+            }
+        }
+        message.requireArray("@løsning.${ArbeidsforholdV2.name}"){
             requireKey("orgnummer")
             require("ansattSiden", JsonNode::asLocalDate)
-            interestedIn("ansattTil") { it.asLocalDate() }
+            interestedIn("ansattTil", JsonNode::asLocalDate)
         }
     }
 

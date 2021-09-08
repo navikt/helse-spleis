@@ -25,7 +25,6 @@ internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 19.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 20.januar, 19.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -43,7 +42,6 @@ internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_UTBETALINGSGRUNNLAG,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -57,14 +55,12 @@ internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 19.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 20.januar, 19.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(21.januar, 31.januar, 100.prosent))
-        håndterUtbetalingsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
@@ -80,7 +76,6 @@ internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
             2.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-            AVVENTER_UTBETALINGSGRUNNLAG,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -94,7 +89,6 @@ internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 20.januar, 100.prosent, 100.prosent)) // 100 prosent arbeidshelse => 0 prosent syk
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -127,7 +121,6 @@ internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 19.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 20.januar, 19.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -136,7 +129,6 @@ internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 20.mars, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 20.mars, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.mars, 16.mars)))
-        håndterUtbetalingsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode)

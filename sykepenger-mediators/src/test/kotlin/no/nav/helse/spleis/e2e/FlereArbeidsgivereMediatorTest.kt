@@ -196,7 +196,6 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
-        sendUtbetalingsgrunnlag(0)
         sendYtelser(0)
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
@@ -208,7 +207,6 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
             0,
             "MOTTATT_SYKMELDING_FERDIG_GAP",
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
-            "AVVENTER_UTBETALINGSGRUNNLAG",
             "AVVENTER_HISTORIKK",
             "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
@@ -237,7 +235,6 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
-        sendUtbetalingsgrunnlag(0)
         sendYtelser(0)
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
@@ -254,7 +251,6 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
             0,
             "MOTTATT_SYKMELDING_FERDIG_GAP",
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
-            "AVVENTER_UTBETALINGSGRUNNLAG",
             "AVVENTER_HISTORIKK",
             "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",

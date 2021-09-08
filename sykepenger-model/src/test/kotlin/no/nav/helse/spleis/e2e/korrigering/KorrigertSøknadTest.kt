@@ -103,7 +103,6 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -137,7 +136,6 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(28.februar, 28.februar))
-        håndterUtbetalingsgrunnlag(2.vedtaksperiode)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
 
         SykdomstidslinjeInspektør(inspektør.sykdomstidslinje).also {
@@ -145,8 +143,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         }
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         assertTilstander(
-            2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-            AVVENTER_UTBETALINGSGRUNNLAG, AVVENTER_HISTORIKK
+            2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK
         )
         assertEquals(1, inspektør.personLogg.warn().size)
     }
@@ -215,7 +212,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
             assertTrue(it[31.januar] is Feriedag)
         }
         assertTilstander(
-            1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_UTBETALINGSGRUNNLAG
+            1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_HISTORIKK
         )
         assertTilstander(
             2.vedtaksperiode,
@@ -246,7 +243,6 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(31.januar, 31.januar))
 
@@ -255,7 +251,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         }
         assertTilstander(
             1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_UTBETALINGSGRUNNLAG, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING
+            AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING
         )
         assertEquals(1, inspektør.personLogg.warn().size)
     }
@@ -265,7 +261,6 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(31.januar, 31.januar))
@@ -278,7 +273,6 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_UTBETALINGSGRUNNLAG,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK
@@ -291,7 +285,6 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(31.januar, 31.januar))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -305,7 +298,6 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_UTBETALINGSGRUNNLAG,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -320,7 +312,6 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(31.januar, 31.januar))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -335,7 +326,6 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_UTBETALINGSGRUNNLAG,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,

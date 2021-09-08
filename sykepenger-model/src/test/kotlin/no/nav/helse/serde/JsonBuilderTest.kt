@@ -213,7 +213,6 @@ class JsonBuilderTest {
                 )
                 fangeSykdomstidslinje()
                 håndter(inntektsmelding(fom = fom))
-                håndter(utbetalingsgrunnlag(vedtaksperiodeId = UUID.fromString(vedtaksperiodeId), skjæringstidspunkt = fom.plusDays(15)))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
@@ -230,7 +229,6 @@ class JsonBuilderTest {
             fangeVedtaksperiode()
             håndter(søknad(fom = 1.februar, tom = 10.februar))
             håndter(utbetalingshistorikk())
-            håndter(utbetalingsgrunnlag(vedtaksperiodeId = UUID.fromString(vedtaksperiodeId), skjæringstidspunkt = 16.januar))
         }
 
         fun ingenBetalingsperson(
@@ -297,7 +295,6 @@ class JsonBuilderTest {
                         perioder = listOf(Periode(fom, 4.januar), Periode(8.januar, 16.januar))
                     )
                 )
-                håndter(utbetalingsgrunnlag(vedtaksperiodeId = UUID.fromString(vedtaksperiodeId), skjæringstidspunkt = fom.plusDays(15)))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
@@ -332,7 +329,6 @@ class JsonBuilderTest {
                 fangeVedtaksperiode()
                 håndter(søknad(fom = 1.januar, tom = 31.januar, hendelseId = søknadhendelseId))
                 håndter(utbetalingshistorikk(refusjoner, inntektshistorikk))
-                håndter(utbetalingsgrunnlag(vedtaksperiodeId = UUID.fromString(vedtaksperiodeId), skjæringstidspunkt = 1.desember))
                 håndter(
                     ytelser(
                         hendelseId = søknadhendelseId,
@@ -368,7 +364,6 @@ class JsonBuilderTest {
                 )
                 fangeSykdomstidslinje()
                 håndter(inntektsmelding(fom = fom))
-                håndter(utbetalingsgrunnlag(vedtaksperiodeId = UUID.fromString(vedtaksperiodeId), skjæringstidspunkt = fom.plusDays(15)))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
@@ -436,29 +431,25 @@ class JsonBuilderTest {
                 )
                 fangeSykdomstidslinje()
                 håndter(inntektsmelding(fom = fom))
-                håndter(utbetalingsgrunnlag(
-                    vedtaksperiodeId = UUID.fromString(vedtaksperiodeId),
-                    skjæringstidspunkt = fom.plusDays(15),
-                    arbeidsforhold = listOf(
-                        Arbeidsforhold(orgnummer, LocalDate.EPOCH, null),
-                        Arbeidsforhold("04201337", LocalDate.EPOCH, null)
-                    ),
-                    inntekter = inntektperioderForSykepengegrunnlag {
-                        1.oktober(2017) til 1.desember(2017) inntekter {
-                            orgnummer inntekt 31000.månedlig
-                            "04201337" inntekt 32000.månedlig
-                        }
-                    }
-                ))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(vilkårsgrunnlag(
                     vedtaksperiodeId = vedtaksperiodeId,
-                    inntektperioderForSammenligningsgrunnlag {
+                    inntektsvurdering = inntektperioderForSammenligningsgrunnlag {
                         1.januar(2017) til 1.desember(2017) inntekter {
                             orgnummer inntekt 31000.månedlig
                             "04201337" inntekt 32000.månedlig
                         }
-                    }
+                    },
+                    inntektsvurderingForSykepengegrunnlag = inntektperioderForSykepengegrunnlag {
+                        1.oktober(2017) til 1.desember(2017) inntekter {
+                            orgnummer inntekt 31000.månedlig
+                            "04201337" inntekt 32000.månedlig
+                        }
+                    },
+                    arbeidsforhold = listOf(
+                        Arbeidsforhold(orgnummer, LocalDate.EPOCH, null),
+                        Arbeidsforhold("04201337", LocalDate.EPOCH, null)
+                    )
                 ))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
@@ -593,12 +584,7 @@ class JsonBuilderTest {
                     orgnummer inntekt 31000.månedlig
                 }
             },
-            arbeidsforhold: List<Arbeidsforhold> = listOf(
-                Arbeidsforhold(
-                    orgnummer,
-                    1.januar(2017)
-                )
-            )
+            arbeidsforhold: List<Arbeidsforhold> = listOf(Arbeidsforhold(orgnummer, 1.januar(2017)))
         ) = Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeId,
@@ -607,9 +593,7 @@ class JsonBuilderTest {
             orgnummer = orgnummer,
             inntektsvurdering = Inntektsvurdering(inntektsvurdering),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektsvurderingForSykepengegrunnlag),
-            opptjeningvurdering = Opptjeningvurdering(
-               arbeidsforhold
-            ),
+            opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
             arbeidsforhold = arbeidsforhold,
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja)
         )
@@ -630,32 +614,6 @@ class JsonBuilderTest {
             ugyldigePerioder = emptyList(),
             besvart = LocalDateTime.now()
         )
-
-        private fun utbetalingsgrunnlag(
-            vedtaksperiodeId: UUID = UUID.randomUUID(),
-            skjæringstidspunkt: LocalDate,
-            inntekter: List<ArbeidsgiverInntekt> = listOf(
-                ArbeidsgiverInntekt(orgnummer, (0..3).map {
-                    val yearMonth = YearMonth.from(skjæringstidspunkt).minusMonths(3L - it)
-                    ArbeidsgiverInntekt.MånedligInntekt.Sykepengegrunnlag(
-                        yearMonth = yearMonth,
-                        type = ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
-                        inntekt = 31000.månedlig,
-                        fordel = "juicy fordel",
-                        beskrivelse = "juicy beskrivelse"
-                    )
-                })
-            ),
-            arbeidsforhold: List<Arbeidsforhold> = listOf(Arbeidsforhold(orgnummer, 1.januar, null))
-        ) = Utbetalingsgrunnlag(
-            UUID.randomUUID(),
-            AbstractPersonTest.AKTØRID, AbstractPersonTest.UNG_PERSON_FNR_2018,
-            orgnummer,
-            vedtaksperiodeId,
-            InntektForSykepengegrunnlag(inntekter),
-            arbeidsforhold
-        )
-
 
         fun ytelser(
             hendelseId: UUID = UUID.randomUUID(),

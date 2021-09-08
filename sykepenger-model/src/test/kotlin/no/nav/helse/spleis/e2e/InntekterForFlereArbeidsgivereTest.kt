@@ -339,12 +339,12 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             førsteFraværsdag = periode.start,
             orgnummer = orgnummer
         ).håndter(Person::håndter)
-        håndterUtbetalingsgrunnlag( // TODO: fjern
+        /* håndterUtbetalingsgrunnlag( // TODO: trygt å fjerne?
             vedtaksperiodeId = 1.vedtaksperiode(orgnummer),
             orgnummer = orgnummer,
             inntekter = inntekterForSykepengegrunnlag,
             arbeidsforhold = arbeidsforhold
-        )
+        )*/
         ytelser(
             vedtaksperiodeId = 1.vedtaksperiode(orgnummer),
             orgnummer = orgnummer,

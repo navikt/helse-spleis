@@ -39,7 +39,6 @@ internal class YtelserHendelseTest : AbstractEndToEndTest() {
         assertEquals(AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
 
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         person.håndter(ytelser(1.vedtaksperiode))
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(AVVENTER_VILKÅRSPRØVING, inspektør.sisteTilstand(1.vedtaksperiode))
@@ -137,7 +136,6 @@ internal class YtelserHendelseTest : AbstractEndToEndTest() {
             svangerskapYtelse = svangerskapsytelse,
             ugyldigePerioder = ugyldigePerioder
         )
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
 
         ytelser.håndter(Person::håndter)
         return ytelser
@@ -153,7 +151,6 @@ internal class YtelserHendelseTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)))
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         person.håndter(
             ytelser(
                 vedtaksperiodeId = 1.vedtaksperiode,

@@ -82,8 +82,8 @@ internal abstract class AbstractEndToEndMediatorTest {
         egenmeldinger: List<PeriodeDTO> = emptyList(),
         andreInntektskilder: List<InntektskildeDTO>? = null
     ) {
-        assertFalse(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, InntekterForSammenligningsgrunnlag))
-        assertFalse(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Opptjening))
+        assertFalse(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Foreldrepenger))
+
         testRapid.sendTestMessage(
             meldingsfabrikk.lagSøknadNav(
                 perioder = perioder,
@@ -108,8 +108,7 @@ internal abstract class AbstractEndToEndMediatorTest {
         perioder: List<SoknadsperiodeDTO>,
         egenmeldinger: List<PeriodeDTO> = emptyList()
     ) {
-        assertFalse(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, InntekterForSammenligningsgrunnlag))
-        assertFalse(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Opptjening))
+        assertFalse(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Foreldrepenger))
         testRapid.sendTestMessage(meldingsfabrikk.lagSøknadArbeidsgiver(perioder, egenmeldinger))
     }
 
@@ -121,8 +120,7 @@ internal abstract class AbstractEndToEndMediatorTest {
         beregnetInntekt: Double = INNTEKT,
         opphørsdatoForRefusjon: LocalDate? = null
     ) {
-        assertFalse(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, InntekterForSammenligningsgrunnlag))
-        assertFalse(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Opptjening))
+        assertFalse(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Foreldrepenger))
         testRapid.sendTestMessage(
             meldingsfabrikk.lagInnteksmelding(
                 arbeidsgiverperiode,
@@ -199,28 +197,6 @@ internal abstract class AbstractEndToEndMediatorTest {
         )
     }
 
-    protected fun sendUtbetalingsgrunnlag(
-        vedtaksperiodeIndeks: Int,
-        inntekter: List<Pair<YearMonth, Double>> = 1.rangeTo(12).map { YearMonth.of(2017, it) to INNTEKT },
-        arbeidsforhold: List<TestMessageFactory.Arbeidsforhold> = listOf(
-            TestMessageFactory.Arbeidsforhold(
-                orgnummer = ORGNUMMER,
-                ansattSiden = 1.januar(2010),
-                ansattTil = null
-            )
-        )
-    ) {
-        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, ArbeidsforholdV2))
-        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, InntekterForSykepengegrunnlag))
-
-        testRapid.sendTestMessage(meldingsfabrikk.lagUtbetalingsgrunnlag(
-            vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
-            tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, ArbeidsforholdV2),
-            inntekter = inntekter,
-            arbeidsforhold = arbeidsforhold
-        ))
-    }
-
     protected fun sendYtelser(
         vedtaksperiodeIndeks: Int,
         pleiepenger: List<TestMessageFactory.PleiepengerTestdata> = emptyList(),
@@ -275,18 +251,20 @@ internal abstract class AbstractEndToEndMediatorTest {
     protected fun sendVilkårsgrunnlag(
         vedtaksperiodeIndeks: Int,
         inntekter: List<Pair<YearMonth, Double>> = 1.rangeTo(12).map { YearMonth.of(2017, it) to INNTEKT },
-        opptjening: List<Triple<String, LocalDate, LocalDate?>> = listOf(
-            Triple(
+        arbeidsforhold: List<TestMessageFactory.Arbeidsforhold> = listOf(
+            TestMessageFactory.Arbeidsforhold(
                 ORGNUMMER,
                 1.januar(2010),
                 null
             )
         ),
-        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja
+        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+        inntekterForSykepengegrunnlag: List<Pair<YearMonth, Double>> = 1.rangeTo(12).map { YearMonth.of(2017, it) to INNTEKT },
     ) {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, InntekterForSammenligningsgrunnlag))
-        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Opptjening))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Medlemskap))
+        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, ArbeidsforholdV2))
+        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, InntekterForSykepengegrunnlag))
         testRapid.sendTestMessage(
             meldingsfabrikk.lagVilkårsgrunnlag(
                 vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
@@ -295,8 +273,9 @@ internal abstract class AbstractEndToEndMediatorTest {
                     InntekterForSammenligningsgrunnlag
                 ),
                 inntekter = inntekter,
-                opptjening = opptjening,
-                medlemskapstatus = medlemskapstatus
+                arbeidsforhold = (arbeidsforhold),
+                medlemskapstatus = medlemskapstatus,
+                inntekterForSykepengegrunnlag = inntekterForSykepengegrunnlag,
             )
         )
     }

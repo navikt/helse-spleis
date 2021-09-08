@@ -19,14 +19,12 @@ internal class ArbeidskategoriKodeTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(
             1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.desember(2017), 31.desember(2017), 100.prosent, 15000.daglig),
             arbeidskategorikoder = mapOf("05" to 1.desember(2017))
         )
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_UTBETALINGSGRUNNLAG,
             AVVENTER_HISTORIKK, TIL_INFOTRYGD
         )
     }
@@ -38,14 +36,12 @@ internal class ArbeidskategoriKodeTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
         val arbeidskategorier = mapOf("05" to 1.desember(2017))
         val historikk = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.desember(2017), 28.desember(2017), 100.prosent, 15000.daglig))
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, *historikk, arbeidskategorikoder = arbeidskategorier, inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.desember(2017), INNTEKT, true)))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         assertTilstander(
             1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_UTBETALINGSGRUNNLAG, AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING
+            AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING
         )
     }
 }

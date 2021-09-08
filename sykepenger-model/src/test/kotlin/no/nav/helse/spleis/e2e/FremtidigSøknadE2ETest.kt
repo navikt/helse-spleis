@@ -22,7 +22,6 @@ internal class FremtidigSøknadE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent))
         håndterInntektsmelding(listOf(Periode(fom, sisteArbeidsgiverdag)), førsteFraværsdag = fom)
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -40,7 +39,6 @@ internal class FremtidigSøknadE2ETest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_UTBETALINGSGRUNNLAG,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,

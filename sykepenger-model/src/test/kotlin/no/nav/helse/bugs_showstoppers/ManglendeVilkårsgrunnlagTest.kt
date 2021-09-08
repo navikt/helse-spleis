@@ -38,14 +38,22 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
                 29.januar til 29.januar
             ), 29.januar
         )
-        håndterUtbetalingsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
         håndterVilkårsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
 
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, AVVENTER_UTBETALINGSGRUNNLAG, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+        assertTilstander(
+            3.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING
+        )
     }
 
     @Test
@@ -76,17 +84,24 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
             ), 1.januar
         )
 
-        håndterUtbetalingsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
 
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, AVVENTER_UTBETALINGSGRUNNLAG, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING)
+        assertTilstander(
+            3.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING
+        )
         assertTilstander(4.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE)
 
         assertTrue(inspektør.etterspurteBehov(1.vedtaksperiode).isEmpty())
         assertTrue(inspektør.etterspurteBehov(2.vedtaksperiode).isEmpty())
-        assertTrue(inspektør.etterspurteBehov(3.vedtaksperiode).map { it.type }.containsAll(listOf(InntekterForSammenligningsgrunnlag, Opptjening, Medlemskap)))
+        assertTrue(inspektør.etterspurteBehov(3.vedtaksperiode).map { it.type }
+            .containsAll(listOf(InntekterForSammenligningsgrunnlag, Medlemskap, InntekterForSykepengegrunnlag, ArbeidsforholdV2)))
         assertTrue(inspektør.etterspurteBehov(4.vedtaksperiode).isEmpty())
     }
 
@@ -116,28 +131,34 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
             ), 24.januar
         )
 
-        håndterUtbetalingsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
 
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, AVVENTER_UTBETALINGSGRUNNLAG, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING)
+        assertTilstander(
+            3.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING
+        )
 
         assertTrue(inspektør.etterspurteBehov(1.vedtaksperiode).isEmpty())
         assertTrue(inspektør.etterspurteBehov(2.vedtaksperiode).isEmpty())
-        assertTrue(inspektør.etterspurteBehov(3.vedtaksperiode).map { it.type }.containsAll(listOf(InntekterForSammenligningsgrunnlag, Opptjening, Medlemskap)))
+        assertTrue(inspektør.etterspurteBehov(3.vedtaksperiode).map { it.type }
+            .containsAll(listOf(InntekterForSammenligningsgrunnlag, Medlemskap, InntekterForSykepengegrunnlag, ArbeidsforholdV2)))
     }
 
     @Test
     fun `periode etter en periode med ferie - opphav i Infotrygd`() {
-        val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.desember(2017),  31.desember(2017), 100.prosent, INNTEKT)
+        val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.desember(2017), 31.desember(2017), 100.prosent, INNTEKT)
         val inntektshistorikk = listOf(
             Inntektsopplysning(ORGNUMMER, 1.desember(2017), INNTEKT, true)
         )
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk, inntektshistorikk = inntektshistorikk)
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -145,12 +166,10 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(1.februar, 28.februar))
-        håndterUtbetalingsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
-        håndterUtbetalingsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
 
         assertTilstander(
@@ -158,27 +177,25 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_UTBETALINGSGRUNNLAG,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET
         )
-        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_UTBETALINGSGRUNNLAG, AVVENTER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_UTBETALINGSGRUNNLAG, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
     }
 
     @Test
     fun `periode etter en periode med permisjon (gir warning) - opphav i Infotrygd`() {
-        val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.desember(2017),  31.desember(2017), 100.prosent, INNTEKT)
+        val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.desember(2017), 31.desember(2017), 100.prosent, INNTEKT)
         val inntektshistorikk = listOf(
             Inntektsopplysning(ORGNUMMER, 1.desember(2017), INNTEKT, true)
         )
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk, inntektshistorikk = inntektshistorikk)
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -186,13 +203,11 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Permisjon(1.februar, 28.februar))
-        håndterUtbetalingsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
-        håndterUtbetalingsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
 
         assertTilstander(
@@ -200,14 +215,13 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_UTBETALINGSGRUNNLAG,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET
         )
-        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_UTBETALINGSGRUNNLAG, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_UTBETALINGSGRUNNLAG, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
     }
 }

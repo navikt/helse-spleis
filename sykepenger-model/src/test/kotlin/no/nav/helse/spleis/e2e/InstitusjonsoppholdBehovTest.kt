@@ -22,7 +22,6 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020), 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar(2020), 31.januar(2020), 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar(2020), 16.januar(2020))))
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, institusjonsoppholdsperioder = emptyList())
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -41,7 +40,6 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
             TilstandType.START,
             TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
             TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            TilstandType.AVVENTER_UTBETALINGSGRUNNLAG,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_VILKÅRSPRØVING,
             TilstandType.AVVENTER_HISTORIKK,
@@ -57,7 +55,6 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020), 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar(2020), 31.januar(2020), 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar(2020), 16.januar(2020))))
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, institusjonsoppholdsperioder = listOf(1.januar(2020) til 31.januar(2020)))
 
         assertForkastetPeriodeTilstander(
@@ -65,7 +62,6 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
             TilstandType.START,
             TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
             TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            TilstandType.AVVENTER_UTBETALINGSGRUNNLAG,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.TIL_INFOTRYGD
         )
@@ -76,7 +72,6 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020), 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar(2020), 31.januar(2020), 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar(2020), 16.januar(2020))))
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, institusjonsoppholdsperioder = listOf(1.desember(2019) til 1.januar(2020)))
 
         assertForkastetPeriodeTilstander(
@@ -84,7 +79,6 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
             TilstandType.START,
             TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
             TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            TilstandType.AVVENTER_UTBETALINGSGRUNNLAG,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.TIL_INFOTRYGD
         )
@@ -95,7 +89,6 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020), 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar(2020), 31.januar(2020), 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar(2020), 16.januar(2020))))
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, institusjonsoppholdsperioder = listOf(31.januar(2020) til 14.februar(2020)))
 
         assertForkastetPeriodeTilstander(
@@ -103,7 +96,6 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
             TilstandType.START,
             TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
             TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            TilstandType.AVVENTER_UTBETALINGSGRUNNLAG,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.TIL_INFOTRYGD
         )
@@ -114,7 +106,6 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020), 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar(2020), 31.januar(2020), 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar(2020), 16.januar(2020))))
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(
             1.vedtaksperiode,
             institusjonsoppholdsperioder = listOf(
@@ -145,7 +136,6 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
             TilstandType.START,
             TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
             TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            TilstandType.AVVENTER_UTBETALINGSGRUNNLAG,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_VILKÅRSPRØVING,
             TilstandType.AVVENTER_HISTORIKK,
@@ -161,7 +151,6 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020), 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar(2020), 31.januar(2020), 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar(2020), 16.januar(2020))))
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, institusjonsoppholdsperioder = listOf(1.februar(2020) til null))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -180,7 +169,6 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
             TilstandType.START,
             TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
             TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            TilstandType.AVVENTER_UTBETALINGSGRUNNLAG,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_VILKÅRSPRØVING,
             TilstandType.AVVENTER_HISTORIKK,
@@ -196,7 +184,6 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020), 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar(2020), 31.januar(2020), 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar(2020), 16.januar(2020))))
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, institusjonsoppholdsperioder = listOf(31.januar(2020) til null))
 
         assertForkastetPeriodeTilstander(
@@ -204,7 +191,6 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
             TilstandType.START,
             TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
             TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            TilstandType.AVVENTER_UTBETALINGSGRUNNLAG,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.TIL_INFOTRYGD
         )
@@ -215,7 +201,6 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020), 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar(2020), 31.januar(2020), 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar(2020), 16.januar(2020))))
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, institusjonsoppholdsperioder = listOf(31.desember(2019) til null))
 
         assertForkastetPeriodeTilstander(
@@ -223,7 +208,6 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
             TilstandType.START,
             TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
             TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            TilstandType.AVVENTER_UTBETALINGSGRUNNLAG,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.TIL_INFOTRYGD
         )

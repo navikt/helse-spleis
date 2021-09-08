@@ -54,16 +54,7 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packe
             ArbeidsgiverInntekt(arbeidsgiver, inntekter.flatten())
         }
 
-    private val arbeidsforhold = packet["@løsning.${Opptjening.name}"].map {
-        Arbeidsforhold(
-            orgnummer = it["orgnummer"].asText(),
-            fom = it["ansattSiden"].asLocalDate(),
-            tom = it["ansattTil"].asOptionalLocalDate()
-        )
-    }
-
-    // TODO: slå sammen med den over?
-    private val arbeidsforhold2 = packet["@løsning.${ArbeidsforholdV2.name}"]
+    private val arbeidsforhold = packet["@løsning.${ArbeidsforholdV2.name}"]
         .map {
             Arbeidsforhold(
                 orgnummer = it["orgnummer"].asText(),
@@ -97,7 +88,7 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packe
             medlemskapsvurdering = Medlemskapsvurdering(
                 medlemskapstatus = medlemskapstatus
             ),
-            arbeidsforhold = arbeidsforhold2
+            arbeidsforhold = arbeidsforhold
         )
 
     override fun behandle(mediator: IHendelseMediator) {

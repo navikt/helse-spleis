@@ -290,42 +290,6 @@ internal class TestMessageFactory(
         val tom: LocalDate
     )
 
-    fun lagUtbetalingsgrunnlag(
-        vedtaksperiodeId: UUID,
-        tilstand: TilstandType,
-        inntekter: List<Pair<YearMonth, Double>>,
-        arbeidsforhold: List<Arbeidsforhold>,
-    ) = lagBehovMedLøsning(
-        behov = listOf(InntekterForSykepengegrunnlag.name, ArbeidsforholdV2.name),
-        vedtaksperiodeId = vedtaksperiodeId,
-        tilstand = tilstand,
-        løsninger = mapOf(
-            InntekterForSykepengegrunnlag.name to inntekter
-                .groupBy { it.first }
-                .map {
-                    mapOf(
-                        "årMåned" to it.key,
-                        "inntektsliste" to it.value.map {
-                            mapOf(
-                                "beløp" to it.second,
-                                "inntektstype" to "LOENNSINNTEKT",
-                                "orgnummer" to organisasjonsnummer,
-                                "fordel" to "kontantytelse",
-                                "beskrivelse" to "fastloenn"
-                            )
-                        }
-                    )
-                },
-            ArbeidsforholdV2.name to arbeidsforhold.map {
-                mapOf(
-                    "orgnummer" to it.orgnummer,
-                    "ansattSiden" to it.ansattSiden,
-                    "ansattTil" to it.ansattTil
-                )
-            }
-        )
-    )
-
     data class Arbeidsforhold(
         val orgnummer: String,
         val ansattSiden: LocalDate,
@@ -447,15 +411,18 @@ internal class TestMessageFactory(
         vedtaksperiodeId: UUID,
         tilstand: TilstandType,
         inntekter: List<Pair<YearMonth, Double>>,
-        opptjening: List<Triple<String, LocalDate, LocalDate?>>,
-        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
+        inntekterForSykepengegrunnlag: List<Pair<YearMonth, Double>>,
+        arbeidsforhold: List<Arbeidsforhold>,
+        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
+
     ): String {
         return lagBehovMedLøsning(
             behov = listOf(
                 InntekterForSammenligningsgrunnlag.name,
-                Opptjening.name,
                 Arbeidsavklaringspenger.name,
-                Medlemskap.name
+                Medlemskap.name,
+                InntekterForSykepengegrunnlag.name,
+                ArbeidsforholdV2.name
             ),
             vedtaksperiodeId = vedtaksperiodeId,
             tilstand = tilstand,
@@ -476,13 +443,6 @@ internal class TestMessageFactory(
                             }
                         )
                     },
-                Opptjening.name to opptjening.map {
-                    mapOf(
-                        "orgnummer" to it.first,
-                        "ansattSiden" to it.second,
-                        "ansattTil" to it.third
-                    )
-                },
                 Medlemskap.name to mapOf<String, Any>(
                     "resultat" to mapOf<String, Any>(
                         "svar" to when (medlemskapstatus) {
@@ -491,7 +451,30 @@ internal class TestMessageFactory(
                             else -> "UAVKLART"
                         }
                     )
-                )
+                ),
+                InntekterForSykepengegrunnlag.name to inntekterForSykepengegrunnlag
+                    .groupBy { it.first }
+                    .map {
+                        mapOf(
+                            "årMåned" to it.key,
+                            "inntektsliste" to it.value.map {
+                                mapOf(
+                                    "beløp" to it.second,
+                                    "inntektstype" to "LOENNSINNTEKT",
+                                    "orgnummer" to organisasjonsnummer,
+                                    "fordel" to "kontantytelse",
+                                    "beskrivelse" to "fastloenn"
+                                )
+                            }
+                        )
+                    },
+                ArbeidsforholdV2.name to arbeidsforhold.map {
+                    mapOf(
+                        "orgnummer" to it.orgnummer,
+                        "ansattSiden" to it.ansattSiden,
+                        "ansattTil" to it.ansattTil
+                    )
+                }
             )
         )
     }

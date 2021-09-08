@@ -93,7 +93,6 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
                 arbeidsgiverperioder = listOf(Periode(3.januar, 18.januar))
             )
         )
-        person.håndter(utbetalingsgrunnlag())
         person.håndter(ytelser())
         println()
         val inntektsberegningStart =
@@ -161,7 +160,6 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
         person.håndter(sykmelding())
         person.håndter(søknad())
         person.håndter(inntektsmelding(beregnetInntekt = beregnetInntekt))
-        person.håndter(utbetalingsgrunnlag())
         person.håndter(ytelser())
         person.håndter(vilkårsgrunnlag(inntekter = inntekter, inntekterForSykepengegrunnlag = inntekterForSykepengegrunnlag, arbeidsforhold = arbeidsforhold))
     }
@@ -236,18 +234,6 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
         ).apply {
             hendelse = this
         }
-
-    private fun utbetalingsgrunnlag() = Utbetalingsgrunnlag(
-        meldingsreferanseId = UUID.randomUUID(),
-        aktørId = "aktørId",
-        fødselsnummer = UNG_PERSON_FNR_2018,
-        orgnummer = ORGNUMMER,
-        vedtaksperiodeId = 1.vedtaksperiode,
-        inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),
-        arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER    , 1.januar, null))
-    ).apply {
-        hendelse = this
-    }
 
     private fun ytelser() = Ytelser(
         meldingsreferanseId = UUID.randomUUID(),

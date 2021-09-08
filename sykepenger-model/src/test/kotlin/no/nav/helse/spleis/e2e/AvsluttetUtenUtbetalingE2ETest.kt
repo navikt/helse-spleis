@@ -26,7 +26,6 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.mars, 26.mars, 100.prosent))
         håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(3.mars, 18.mars)))
         håndterSøknadMedValidering(2.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.mars, 26.mars, 100.prosent))
-        håndterUtbetalingsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode)
@@ -39,7 +38,6 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
             TilstandType.START,
             TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
             TilstandType.AVVENTER_SØKNAD_FERDIG_GAP,
-            TilstandType.AVVENTER_UTBETALINGSGRUNNLAG,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_VILKÅRSPRØVING,
             TilstandType.AVVENTER_HISTORIKK,
@@ -85,7 +83,6 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
         )
 
         håndterSøknadMedValidering(3.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(8.mars, 26.mars, 100.prosent))
-        håndterUtbetalingsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
         håndterVilkårsgrunnlag(3.vedtaksperiode, INNTEKT)
         håndterYtelser(3.vedtaksperiode)
@@ -97,7 +94,6 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
             3.vedtaksperiode,
             TilstandType.START,
             TilstandType.MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-            TilstandType.AVVENTER_UTBETALINGSGRUNNLAG,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_VILKÅRSPRØVING,
             TilstandType.AVVENTER_HISTORIKK,

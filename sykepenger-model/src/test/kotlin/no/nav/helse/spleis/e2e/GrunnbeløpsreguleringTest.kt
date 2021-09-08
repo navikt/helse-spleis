@@ -115,7 +115,6 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
             håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
         }
 
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, HØY_INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -294,7 +293,6 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
             førsteFraværsdag = førsteFraværsdag,
             refusjon = Refusjon(null, HØY_INNTEKT, emptyList())
         )
-        håndterUtbetalingsgrunnlag(vedtaksperiodeIndeks.vedtaksperiode)
         håndterYtelser(vedtaksperiodeIndeks.vedtaksperiode)
         håndterVilkårsgrunnlag(vedtaksperiodeIndeks.vedtaksperiode, HØY_INNTEKT, inntektsvurdering = inntekter)
         håndterYtelser(vedtaksperiodeIndeks.vedtaksperiode)
@@ -330,7 +328,6 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
     ) {
         håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent), sendtTilNav = tom)
-        håndterUtbetalingsgrunnlag(vedtaksperiodeIndeks.vedtaksperiode)
         håndterYtelser(vedtaksperiodeIndeks.vedtaksperiode)
         håndterSimulering(vedtaksperiodeIndeks.vedtaksperiode)
         håndterUtbetalingsgodkjenning(vedtaksperiodeIndeks.vedtaksperiode, true)

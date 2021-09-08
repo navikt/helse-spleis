@@ -78,7 +78,6 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         is AnnulleringMessage -> KANSELLER_UTBETALING
         is EtterbetalingMessage -> GRUNNBELØPSREGULERING
         is OverstyrTidslinjeMessage -> OVERSTYRTIDSLINJE
-        is UtbetalingsgrunnlagMessage -> if (Toggles.FlereArbeidsgivereUlikFom.enabled) UTBETALINGSGRUNNLAG else null
         is UtbetalingshistorikkForFeriepengerMessage -> null //TODO: Skal lagres som UTBETALINGSHISTORIKK_FOR_FERIEPENGER
         is AvstemmingMessage,
         is PersonPåminnelseMessage,
@@ -109,7 +108,6 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         OVERSTYRTIDSLINJE,
         UTBETALINGPÅMINNELSE,
         YTELSER,
-        UTBETALINGSGRUNNLAG,
         VILKÅRSGRUNNLAG,
         UTBETALINGSGODKJENNING,
         UTBETALING_OVERFØRT,

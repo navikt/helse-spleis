@@ -17,7 +17,6 @@ internal class OpplæringspengerBehovTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020), 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar(2020), 31.januar(2020), 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar(2020), 16.januar(2020))))
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, opplæringspenger = emptyList())
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -36,7 +35,6 @@ internal class OpplæringspengerBehovTest : AbstractEndToEndTest() {
             TilstandType.START,
             TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
             TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            TilstandType.AVVENTER_UTBETALINGSGRUNNLAG,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_VILKÅRSPRØVING,
             TilstandType.AVVENTER_HISTORIKK,
@@ -52,7 +50,6 @@ internal class OpplæringspengerBehovTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020), 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar(2020), 31.januar(2020), 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar(2020), 16.januar(2020))))
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, opplæringspenger = listOf(1.januar(2020) til 31.januar(2020)))
 
         assertForkastetPeriodeTilstander(
@@ -60,7 +57,6 @@ internal class OpplæringspengerBehovTest : AbstractEndToEndTest() {
             TilstandType.START,
             TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
             TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            TilstandType.AVVENTER_UTBETALINGSGRUNNLAG,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.TIL_INFOTRYGD
         )
@@ -71,7 +67,6 @@ internal class OpplæringspengerBehovTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020), 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar(2020), 31.januar(2020), 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar(2020), 16.januar(2020))))
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, opplæringspenger = listOf(1.desember(2019) til 1.januar(2020)))
 
         assertForkastetPeriodeTilstander(
@@ -79,7 +74,6 @@ internal class OpplæringspengerBehovTest : AbstractEndToEndTest() {
             TilstandType.START,
             TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
             TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            TilstandType.AVVENTER_UTBETALINGSGRUNNLAG,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.TIL_INFOTRYGD
         )
@@ -90,7 +84,6 @@ internal class OpplæringspengerBehovTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020), 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar(2020), 31.januar(2020), 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar(2020), 16.januar(2020))))
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, opplæringspenger = listOf(31.januar(2020) til 14.februar(2020)))
 
         assertForkastetPeriodeTilstander(
@@ -98,7 +91,6 @@ internal class OpplæringspengerBehovTest : AbstractEndToEndTest() {
             TilstandType.START,
             TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
             TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            TilstandType.AVVENTER_UTBETALINGSGRUNNLAG,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.TIL_INFOTRYGD
         )
@@ -110,7 +102,6 @@ internal class OpplæringspengerBehovTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar(2020), 31.januar(2020), 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar(2020), 16.januar(2020))))
         val opplæringspenger = listOf(1.desember(2019) til 31.desember(2019), 1.februar(2020) til 29.februar(2020))
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode)
         håndterYtelser(
             1.vedtaksperiode,
             opplæringspenger = opplæringspenger
@@ -135,7 +126,6 @@ internal class OpplæringspengerBehovTest : AbstractEndToEndTest() {
             TilstandType.START,
             TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
             TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            TilstandType.AVVENTER_UTBETALINGSGRUNNLAG,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_VILKÅRSPRØVING,
             TilstandType.AVVENTER_HISTORIKK,

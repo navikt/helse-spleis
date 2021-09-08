@@ -372,12 +372,6 @@ internal class Arbeidsgiver private constructor(
         finalize(vilkårsgrunnlag)
     }
 
-    internal fun håndter(utbetalingsgrunnlag: Utbetalingsgrunnlag) {
-        utbetalingsgrunnlag.kontekst(this)
-        håndter(utbetalingsgrunnlag, Vedtaksperiode::håndter)
-        finalize(utbetalingsgrunnlag)
-    }
-
     internal fun håndter(simulering: Simulering) {
         simulering.kontekst(this)
         håndter(simulering, Vedtaksperiode::håndter)
@@ -771,7 +765,7 @@ internal class Arbeidsgiver private constructor(
             skalGjenopptaBehandling = false
             val gjenopptaBehandling = GjenopptaBehandling(hendelse)
             énHarHåndtert(gjenopptaBehandling, Vedtaksperiode::håndter)
-            Vedtaksperiode.gjenopptaBehandling(hendelse, person, AvventerArbeidsgivere, AvventerUtbetalingsgrunnlag)
+            Vedtaksperiode.gjenopptaBehandling(hendelse, person, AvventerArbeidsgivere, AvventerHistorikk)
             Vedtaksperiode.gjenopptaBehandling(hendelse, person, AvventerArbeidsgivereRevurdering, AvventerHistorikkRevurdering, IKKE_FERDIG_REVURDERT)
         }
 

@@ -49,22 +49,9 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
         person.håndter(sykmelding())
         person.håndter(søknad())
         person.håndter(inntektsmelding())
-        person.håndter(utbetalingsgrunnlag())
         person.håndter(ytelser())
         person.håndter(vilkårsgrunnlag())
         person.håndter(ytelser())
-    }
-
-    private fun utbetalingsgrunnlag() = Utbetalingsgrunnlag(
-        meldingsreferanseId = UUID.randomUUID(),
-        aktørId = "aktørId",
-        fødselsnummer = UNG_PERSON_FNR_2018,
-        orgnummer = ORGNUMMER,
-        vedtaksperiodeId = 1.vedtaksperiode,
-        inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),
-        arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER, LocalDate.EPOCH, null))
-    ).apply {
-        hendelse = this
     }
 
     private fun ytelser(

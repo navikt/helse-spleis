@@ -98,7 +98,14 @@ internal class MessageMediatorTest {
 
     @Test
     fun vilkårsgrunnlag() {
-        testRapid.sendTestMessage(meldingsfabrikk.lagVilkårsgrunnlag(UUID.randomUUID(), TilstandType.START, emptyList(), emptyList(), Medlemskapsvurdering.Medlemskapstatus.Ja))
+        testRapid.sendTestMessage(meldingsfabrikk.lagVilkårsgrunnlag(
+            vedtaksperiodeId = UUID.randomUUID(),
+            tilstand = TilstandType.START,
+            inntekter = emptyList(),
+            inntekterForSykepengegrunnlag = emptyList(),
+            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+            arbeidsforhold = emptyList()
+        ))
         assertTrue(hendelseMediator.lestVilkårsgrunnlag)
     }
 

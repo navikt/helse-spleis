@@ -296,10 +296,6 @@ class Aktivitetslogg(
                     )
                 }
 
-                internal fun opptjening(aktivitetslogg: IAktivitetslogg) {
-                    aktivitetslogg.behov(Behovtype.Opptjening, "Trenger informasjon om sykepengeopptjening")
-                }
-
                 internal fun arbeidsforhold(aktivitetslogg: IAktivitetslogg) {
                     aktivitetslogg.behov(Behovtype.ArbeidsforholdV2, "Trenger informasjon om arbeidsforhold")
                 }
@@ -417,7 +413,6 @@ class Aktivitetslogg(
                 Utbetaling,
                 InntekterForSammenligningsgrunnlag,
                 InntekterForSykepengegrunnlag,
-                Opptjening,
                 Dagpenger,
                 Arbeidsavklaringspenger,
                 Medlemskap,

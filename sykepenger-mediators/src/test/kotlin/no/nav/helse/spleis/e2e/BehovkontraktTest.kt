@@ -21,22 +21,18 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
-        sendUtbetalingsgrunnlag(0)
         sendYtelser(0)
         val behov = testRapid.inspektør.melding(testRapid.inspektør.antall() - 1)
-        assertVedtaksperiodeBehov(behov, Dagpenger, InntekterForSammenligningsgrunnlag, Medlemskap, Opptjening)
+        assertVedtaksperiodeBehov(
+            behov,
+            Dagpenger,
+            InntekterForSammenligningsgrunnlag,
+            InntekterForSykepengegrunnlag,
+            Medlemskap,
+            ArbeidsforholdV2
+        )
         assertInntekterForSammenligningsgrunnlagdetaljer(behov)
         assertMedlemskapdetaljer(behov)
-        assertOpptjeningdetaljer(behov)
-    }
-
-    @Test
-    fun utbetalingsgrunnlag() {
-        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
-        sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
-        val behov = testRapid.inspektør.melding(testRapid.inspektør.antall() - 1)
-        assertVedtaksperiodeBehov(behov, InntekterForSykepengegrunnlag, ArbeidsforholdV2)
         assertInntekterForSykepengegrunnlagdetaljer(behov)
         assertArbeidsforholdV2detaljer(behov)
     }
@@ -46,9 +42,19 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
-        sendUtbetalingsgrunnlag(0)
         val behov = testRapid.inspektør.melding(testRapid.inspektør.antall() - 1)
-        assertVedtaksperiodeBehov(behov, Arbeidsavklaringspenger, Dagpenger, Dødsinfo, Foreldrepenger, Institusjonsopphold, Omsorgspenger, Opplæringspenger, Pleiepenger, Sykepengehistorikk)
+        assertVedtaksperiodeBehov(
+            behov,
+            Arbeidsavklaringspenger,
+            Dagpenger,
+            Dødsinfo,
+            Foreldrepenger,
+            Institusjonsopphold,
+            Omsorgspenger,
+            Opplæringspenger,
+            Pleiepenger,
+            Sykepengehistorikk
+        )
         assertArbeidsavklaringspengerdetaljer(behov)
         assertDagpengerdetaljer(behov)
         assertDødsinfodetaljer(behov)
@@ -65,7 +71,6 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
-        sendUtbetalingsgrunnlag(0)
         sendYtelser(0)
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
@@ -79,7 +84,6 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
-        sendUtbetalingsgrunnlag(0)
         sendYtelser(0)
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
@@ -94,7 +98,6 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
-        sendUtbetalingsgrunnlag(0)
         sendYtelser(0)
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
@@ -110,7 +113,6 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
-        sendUtbetalingsgrunnlag(0)
         sendYtelser(0)
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
@@ -169,10 +171,6 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
     private fun assertMedlemskapdetaljer(behov: JsonNode) {
         assertDato(behov.path(Medlemskap.name).path("medlemskapPeriodeFom").asText())
         assertDato(behov.path(Medlemskap.name).path("medlemskapPeriodeTom").asText())
-    }
-
-    private fun assertOpptjeningdetaljer(behov: JsonNode) {
-        assertTrue(behov.path(Opptjening.name).isEmpty)
     }
 
     private fun assertArbeidsforholdV2detaljer(behov: JsonNode) {

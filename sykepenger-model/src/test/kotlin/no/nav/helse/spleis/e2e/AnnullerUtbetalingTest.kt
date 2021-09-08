@@ -224,7 +224,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         inspektør.also {
             assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
             assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(2.vedtaksperiode))
-            assertEquals(TilstandType.AVVENTER_UTBETALINGSGRUNNLAG, inspektør.sisteTilstand(3.vedtaksperiode))
+            assertEquals(TilstandType.AVVENTER_HISTORIKK, inspektør.sisteTilstand(3.vedtaksperiode))
         }
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
         inspektør.also {
@@ -422,7 +422,6 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         nyttVedtak(3.januar, 26.januar, 100.prosent, 3.januar)
         håndterSykmelding(Sykmeldingsperiode(27.januar, 31.januar, 100.prosent))
         håndterSøknadMedValidering(2.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(27.januar, 31.januar, 100.prosent))
-        håndterUtbetalingsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, false)
