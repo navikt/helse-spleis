@@ -35,6 +35,9 @@ spec:
           application: sparke-feriepenger
           access: write
         - team: tbd
+          application: sparker-alt
+          access: write
+        - team: tbd
           application: sparkel-aareg
           access: readwrite
         - team: tbd
