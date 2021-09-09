@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.Person
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
@@ -34,58 +33,57 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
 
     @Test
     fun `Inntekter fra flere arbeidsgivere`() {
-        Toggles.FlereArbeidsgivereUlikFom.enable {
-            nyPeriode(
-                periode = 1.januar til 31.januar,
-                orgnummer = a1,
-                inntekt = 16000.månedlig,
+        nyPeriode(
+            periode = 1.januar til 31.januar,
+            orgnummer = a1,
+            inntekt = 16000.månedlig,
+        )
+        assertNoErrors(a1Inspektør)
+        assertNoErrors(a2Inspektør)
+
+        vilkårsgrunnlag(
+            a1.id(0),
+            orgnummer = a1,
+            inntekter = inntektperioderForSammenligningsgrunnlag {
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt 15000
+                }
+                1.januar(2017) til 1.juni(2017) inntekter {
+                    a2 inntekt 5000
+                    a3 inntekt 3000
+                    a4 inntekt 2000
+                }
+                1.juli(2017) til 1.desember(2017) inntekter {
+                    a3 inntekt 7500
+                    a4 inntekt 2500
+                }
+            },
+            inntekterForSykepengegrunnlag = inntektperioderForSykepengegrunnlag {
+                1.oktober(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt 15000
+                    a3 inntekt 4750
+                    a4 inntekt 2250
+                }
+            },
+            arbeidsforhold = listOf(
+                Arbeidsforhold(a1, LocalDate.EPOCH, null),
+                Arbeidsforhold(a2, LocalDate.EPOCH, null),
+                Arbeidsforhold(a3, LocalDate.EPOCH, null),
+                Arbeidsforhold(a4, LocalDate.EPOCH, null)
             )
-            assertNoErrors(a1Inspektør)
-            assertNoErrors(a2Inspektør)
+        ).håndter(Person::håndter)
 
-            vilkårsgrunnlag(
-                a1.id(0),
-                orgnummer = a1,
-                inntekter = inntektperioderForSammenligningsgrunnlag {
-                    1.januar(2017) til 1.desember(2017) inntekter {
-                        a1 inntekt 15000
-                    }
-                    1.januar(2017) til 1.juni(2017) inntekter {
-                        a2 inntekt 5000
-                        a3 inntekt 3000
-                        a4 inntekt 2000
-                    }
-                    1.juli(2017) til 1.desember(2017) inntekter {
-                        a3 inntekt 7500
-                        a4 inntekt 2500
-                    }
-                },
-                inntekterForSykepengegrunnlag = inntektperioderForSykepengegrunnlag {
-                    1.oktober(2017) til 1.desember(2017) inntekter {
-                        a1 inntekt 15000
-                        a3 inntekt 4750
-                        a4 inntekt 2250
-                    }
-                },
-                arbeidsforhold = listOf(
-                    Arbeidsforhold(a1, LocalDate.EPOCH, null),
-                    Arbeidsforhold(a2, LocalDate.EPOCH, null),
-                    Arbeidsforhold(a3, LocalDate.EPOCH, null),
-                    Arbeidsforhold(a4, LocalDate.EPOCH, null)
-                )
-            ).håndter(Person::håndter)
+        assertNoErrors(a1Inspektør)
+        assertNoErrors(a2Inspektør)
 
-            assertNoErrors(a1Inspektør)
-            assertNoErrors(a2Inspektør)
+        assertInntektForDato(16000.månedlig, 1.januar, a1Inspektør)
+        assertInntektForDato(null, 1.januar, a2Inspektør)
+        assertInntektForDato(4750.månedlig, 1.januar, a3Inspektør)
+        assertInntektForDato(2250.månedlig, 1.januar, a4Inspektør)
 
-            assertInntektForDato(16000.månedlig, 1.januar, a1Inspektør)
-            assertInntektForDato(null, 1.januar, a2Inspektør)
-            assertInntektForDato(4750.månedlig, 1.januar, a3Inspektør)
-            assertInntektForDato(2250.månedlig, 1.januar, a4Inspektør)
+        val vilkårsgrunnlag = a1Inspektør.vilkårsgrunnlag(1.vedtaksperiode(a1)) as VilkårsgrunnlagHistorikk.Grunnlagsdata?
+        assertEquals(300000.årlig, vilkårsgrunnlag?.sammenligningsgrunnlag)
 
-            val vilkårsgrunnlag = a1Inspektør.vilkårsgrunnlag(1.vedtaksperiode(a1)) as VilkårsgrunnlagHistorikk.Grunnlagsdata?
-            assertEquals(300000.årlig, vilkårsgrunnlag?.sammenligningsgrunnlag)
-        }
     }
 
     @Test
@@ -163,13 +161,9 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             )
         ).håndter(Person::håndter)
 
-        if (Toggles.FlereArbeidsgivereUlikFom.enabled) {
-            assertEquals(4, a1Inspektør.inntektInspektør.antallInnslag)
-            assertEquals(2, a2Inspektør.inntektInspektør.antallInnslag)
-        } else {
-            assertEquals(3, a1Inspektør.inntektInspektør.antallInnslag)
-            assertEquals(1, a2Inspektør.inntektInspektør.antallInnslag)
-        }
+        assertEquals(4, a1Inspektør.inntektInspektør.antallInnslag)
+        assertEquals(2, a2Inspektør.inntektInspektør.antallInnslag)
+
         assertEquals(5000.månedlig, a2Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.first { it.kilde == Kilde.INFOTRYGD }?.sykepengegrunnlag)
         assertEquals(24500.månedlig, a1Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.first { it.kilde == Kilde.INFOTRYGD }?.sykepengegrunnlag)
         assertEquals(
@@ -177,12 +171,10 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             a1Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.first { it.kilde == Kilde.SKATT && it.sammenligningsgrunnlag != null }?.sammenligningsgrunnlag
         )
 
-        if (Toggles.FlereArbeidsgivereUlikFom.enabled) {
-            assertEquals(
-                23500.månedlig,
-                a1Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.first { it.kilde == Kilde.SKATT && it.sykepengegrunnlag != null }?.sykepengegrunnlag
-            )
-        }
+        assertEquals(
+            23500.månedlig,
+            a1Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.first { it.kilde == Kilde.SKATT && it.sykepengegrunnlag != null }?.sykepengegrunnlag
+        )
 
         assertEquals(
             25000.månedlig,
@@ -192,109 +184,106 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
 
     @Test
     fun `Skatteinntekter for sykepengegrunnlag legges i inntektshistorikken`() {
-        Toggles.FlereArbeidsgivereUlikFom.enable {
-            val inntekterForSykepengegrunnlag = inntektperioderForSykepengegrunnlag {
-                1.oktober(2017) til 1.desember(2017) inntekter {
-                    a1 inntekt 15000
-                }
+        val inntekterForSykepengegrunnlag = inntektperioderForSykepengegrunnlag {
+            1.oktober(2017) til 1.desember(2017) inntekter {
+                a1 inntekt 15000
             }
-            val arbeidsforhold = listOf(Arbeidsforhold(a1, LocalDate.EPOCH, null))
-            nyPeriode(1.januar til 31.januar, a1, 25000.månedlig)
-            vilkårsgrunnlag(
-                a1.id(0),
-                orgnummer = a1,
-                inntekter = inntektperioderForSammenligningsgrunnlag {
-                    1.januar(2017) til 1.desember(2017) inntekter {
-                        a1 inntekt 24000
-                    }
-                },
-                inntekterForSykepengegrunnlag = inntekterForSykepengegrunnlag,
-                arbeidsforhold = arbeidsforhold
-            ).håndter(Person::håndter)
-
-            assertEquals(3, a1Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.size)
-            assertEquals(3, a1Inspektør.inntektInspektør.antallInnslag)
-            assertEquals(
-                25000.månedlig,
-                a1Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.get(0)?.sykepengegrunnlag
-            )
-            assertEquals(
-                15000.månedlig,
-                a1Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.get(1)?.sykepengegrunnlag
-            )
-            assertEquals(
-                24000.månedlig,
-                a1Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.get(2)?.sammenligningsgrunnlag
-            )
         }
+        val arbeidsforhold = listOf(Arbeidsforhold(a1, LocalDate.EPOCH, null))
+        nyPeriode(1.januar til 31.januar, a1, 25000.månedlig)
+        vilkårsgrunnlag(
+            a1.id(0),
+            orgnummer = a1,
+            inntekter = inntektperioderForSammenligningsgrunnlag {
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt 24000
+                }
+            },
+            inntekterForSykepengegrunnlag = inntekterForSykepengegrunnlag,
+            arbeidsforhold = arbeidsforhold
+        ).håndter(Person::håndter)
+
+        assertEquals(3, a1Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.size)
+        assertEquals(3, a1Inspektør.inntektInspektør.antallInnslag)
+        assertEquals(
+            25000.månedlig,
+            a1Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.get(0)?.sykepengegrunnlag
+        )
+        assertEquals(
+            15000.månedlig,
+            a1Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.get(1)?.sykepengegrunnlag
+        )
+        assertEquals(
+            24000.månedlig,
+            a1Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.get(2)?.sammenligningsgrunnlag
+        )
+
     }
 
     @Test
     fun `Skatteinntekter og inntektsmelding for en arbeidsgiver og kun skatt for andre arbeidsgiver - gir korrekt sykepenge- og sammenligningsgrunnlag`() {
-        Toggles.FlereArbeidsgivereUlikFom.enable {
-            val inntekterForSykepengegrunnlag = inntektperioderForSykepengegrunnlag {
-                1.oktober(2017) til 1.desember(2017) inntekter {
-                    a1 inntekt 15000
-                    a2 inntekt 21000
-                }
+        val inntekterForSykepengegrunnlag = inntektperioderForSykepengegrunnlag {
+            1.oktober(2017) til 1.desember(2017) inntekter {
+                a1 inntekt 15000
+                a2 inntekt 21000
             }
-            val arbeidsforhold = listOf(
-                Arbeidsforhold(a1, LocalDate.EPOCH, null),
-                Arbeidsforhold(a2, LocalDate.EPOCH, null)
-            )
-            nyPeriode(1.januar til 31.januar, a1, 25000.månedlig)
-            vilkårsgrunnlag(
-                a1.id(0),
-                orgnummer = a1,
-                inntekter = inntektperioderForSammenligningsgrunnlag {
-                    1.januar(2017) til 1.desember(2017) inntekter {
-                        a1 inntekt 24000
-                        a2 inntekt 20000
-                    }
-                },
-                inntekterForSykepengegrunnlag = inntekterForSykepengegrunnlag,
-                arbeidsforhold = arbeidsforhold
-            ).håndter(Person::håndter)
-
-            assertEquals(552000.årlig, person.sykepengegrunnlag(1.januar))
-            assertEquals(528000.årlig, person.sammenligningsgrunnlag(1.januar))
         }
+        val arbeidsforhold = listOf(
+            Arbeidsforhold(a1, LocalDate.EPOCH, null),
+            Arbeidsforhold(a2, LocalDate.EPOCH, null)
+        )
+        nyPeriode(1.januar til 31.januar, a1, 25000.månedlig)
+        vilkårsgrunnlag(
+            a1.id(0),
+            orgnummer = a1,
+            inntekter = inntektperioderForSammenligningsgrunnlag {
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt 24000
+                    a2 inntekt 20000
+                }
+            },
+            inntekterForSykepengegrunnlag = inntekterForSykepengegrunnlag,
+            arbeidsforhold = arbeidsforhold
+        ).håndter(Person::håndter)
+
+        assertEquals(552000.årlig, person.sykepengegrunnlag(1.januar))
+        assertEquals(528000.årlig, person.sammenligningsgrunnlag(1.januar))
+
     }
 
     @Disabled("8-28 b")
     @Test
     fun `Skatteinntekter og inntektsmelding for en arbeidsgiver og kun skatt (i to måneder) for andre arbeidsgiver - gir korrekt sykepenge- og sammenligningsgrunnlag`() {
-        Toggles.FlereArbeidsgivereUlikFom.enable {
-            val inntekterForSykepengegrunnlag = inntektperioderForSykepengegrunnlag {
-                1.oktober(2017) til 1.november(2017) inntekter {
-                    a1 inntekt 15000
-                }
-                1.november(2017) til 1.desember(2017) inntekter {
-                    a1 inntekt 15000
-                    a2 inntekt 21000
-                }
+        val inntekterForSykepengegrunnlag = inntektperioderForSykepengegrunnlag {
+            1.oktober(2017) til 1.november(2017) inntekter {
+                a1 inntekt 15000
             }
-            val arbeidsforhold = listOf(
-                Arbeidsforhold(a1, LocalDate.EPOCH, null),
-                Arbeidsforhold(a2, 1.november, null)
-            )
-            nyPeriode(1.januar til 31.januar, a1, 25000.månedlig)
-            vilkårsgrunnlag(
-                a1.id(0),
-                orgnummer = a1,
-                inntekter = inntektperioderForSammenligningsgrunnlag {
-                    1.januar(2017) til 1.desember(2017) inntekter {
-                        a1 inntekt 24000
-                        a2 inntekt 20000
-                    }
-                },
-                inntekterForSykepengegrunnlag = inntekterForSykepengegrunnlag,
-                arbeidsforhold = arbeidsforhold
-            ).håndter(Person::håndter)
-
-            assertEquals(552000.årlig, person.sykepengegrunnlag(1.januar))
-            assertEquals(528000.årlig, person.sammenligningsgrunnlag(1.januar))
+            1.november(2017) til 1.desember(2017) inntekter {
+                a1 inntekt 15000
+                a2 inntekt 21000
+            }
         }
+        val arbeidsforhold = listOf(
+            Arbeidsforhold(a1, LocalDate.EPOCH, null),
+            Arbeidsforhold(a2, 1.november, null)
+        )
+        nyPeriode(1.januar til 31.januar, a1, 25000.månedlig)
+        vilkårsgrunnlag(
+            a1.id(0),
+            orgnummer = a1,
+            inntekter = inntektperioderForSammenligningsgrunnlag {
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt 24000
+                    a2 inntekt 20000
+                }
+            },
+            inntekterForSykepengegrunnlag = inntekterForSykepengegrunnlag,
+            arbeidsforhold = arbeidsforhold
+        ).håndter(Person::håndter)
+
+        assertEquals(552000.årlig, person.sykepengegrunnlag(1.januar))
+        assertEquals(528000.årlig, person.sammenligningsgrunnlag(1.januar))
+
     }
 
     private fun nyPeriode(
@@ -360,6 +349,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             )
         ).apply {
             hendelselogg = this
+
         }
     }
 }

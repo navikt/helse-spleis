@@ -24,7 +24,10 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import java.time.*
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.Year
 import java.util.*
 
 class JsonBuilderTest {
@@ -163,9 +166,7 @@ class JsonBuilderTest {
 
     @Test
     fun `Skal serialisere ukjentdager på sykdomstidslinjen til ghost`() =
-        Toggles.FlereArbeidsgivereUlikFom.enable {
             testSerialiseringAvPerson(personMedGhost())
-        }
 
     private fun testSerialiseringAvPerson(person: Person) {
         val jsonBuilder = JsonBuilder()

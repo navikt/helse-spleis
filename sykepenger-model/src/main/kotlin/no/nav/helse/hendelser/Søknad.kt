@@ -1,6 +1,5 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.Toggles
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.Dag
@@ -55,11 +54,7 @@ class Søknad(
     override fun aktørId() = aktørId
 
     override fun validerIkkeOppgittFlereArbeidsforholdMedSykmelding(): IAktivitetslogg {
-        if(Toggles.FlereArbeidsgivereUlikFom.enabled) {
-            andreInntektskilder.forEach { it.validerIkkeSykmeldt(this) }
-        } else {
-            if (andreInntektskilder.isNotEmpty()) error("Søknad inneholder andre inntektskilder og vi kjenner bare til én arbeidsgiver")
-        }
+        andreInntektskilder.forEach { it.validerIkkeSykmeldt(this) }
         return this
     }
 
@@ -206,13 +201,11 @@ class Søknad(
         fun valider(aktivitetslogg: IAktivitetslogg) {
             if (type != "ANDRE_ARBEIDSFORHOLD") {
                 aktivitetslogg.error("Søknaden inneholder andre inntektskilder enn ANDRE_ARBEIDSFORHOLD")
-            } else if (!Toggles.FlereArbeidsgivereUlikFom.enabled && !sykmeldt) {
-                aktivitetslogg.error("Søknaden inneholder andre arbeidsforhold, men bruker er ikke sykmeldt")
             }
         }
 
         fun validerIkkeSykmeldt(aktivitetslogg: IAktivitetslogg) {
-            if(sykmeldt) aktivitetslogg.error("Søknaden inneholder andre arbeidsforhold, men bruker er ikke sykmeldt")
+            if (sykmeldt) aktivitetslogg.error("Søknaden inneholder andre arbeidsforhold, men bruker er ikke sykmeldt")
         }
     }
 }

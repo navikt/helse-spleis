@@ -1,10 +1,8 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.SøknadArbeidsgiver.Sykdom
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
-import no.nav.helse.person.Inntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.person.Inntektskilde.FLERE_ARBEIDSGIVERE
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.TilstandType.*
@@ -1316,48 +1314,6 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `flere arbeidsgivere med inntekter på forskjellige skjæringstidspunkt skal til infotrygd`() = Toggles.FlereArbeidsgivereUlikFom.disable {
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a1)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
-        var infotrygdPerioder = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar, 100.prosent, INNTEKT)
-        )
-        val inntektshistorikk = mutableListOf(Inntektsopplysning(a1, 1.januar, INNTEKT, true))
-        håndterUtbetalingshistorikk(
-            1.vedtaksperiode(a1),
-            *infotrygdPerioder,
-            inntektshistorikk = inntektshistorikk,
-            orgnummer = a1,
-            besvart = LocalDateTime.now().minusHours(24)
-        )
-        håndterYtelser(
-            1.vedtaksperiode(a1),
-            *infotrygdPerioder,
-            inntektshistorikk = inntektshistorikk,
-            orgnummer = a1,
-            besvart = LocalDateTime.now().minusHours(24)
-        )
-        håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
-
-        infotrygdPerioder += ArbeidsgiverUtbetalingsperiode(a2, 1.mars, 31.mars, 100.prosent, INNTEKT)
-        inntektshistorikk += Inntektsopplysning(a2, 1.mars, INNTEKT, true)
-
-        håndterSykmelding(Sykmeldingsperiode(1.april, 30.april, 100.prosent), orgnummer = a2)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.april, 30.april, 100.prosent), orgnummer = a2)
-        håndterUtbetalingshistorikk(1.vedtaksperiode(a2), *infotrygdPerioder, inntektshistorikk = inntektshistorikk, orgnummer = a2)
-        assertForkastetPeriodeTilstander(
-            a2,
-            1.vedtaksperiode(a2),
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            TIL_INFOTRYGD
-        )
-    }
-
-    @Test
     fun `Kaster ut perioder hvis ikke alle forlengelser fra IT har fått sykmeldinger`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
@@ -1512,27 +1468,6 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
 
         håndterUtbetalingshistorikk(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
-
-        assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode(a1), TIL_INFOTRYGD)
-    }
-
-    @Test
-    fun `Sykefravær rett etter periode i infotrygd på annen arbeidsgiver forkastes`() = Toggles.FlereArbeidsgivereUlikFom.disable {
-        val periode = 1.februar(2021) til 28.februar(2021)
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-
-        val inntektshistorikk = listOf(
-            Inntektsopplysning(a2, 20.januar(2021), INNTEKT, true)
-        )
-
-        val utbetalinger = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(a2, 20.januar(2021), 31.januar(2021), 100.prosent, INNTEKT)
-        )
-
-        håndterUtbetalingshistorikk(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
-        håndterInntektsmelding(listOf(1.februar(2021) til 16.februar(2021)), førsteFraværsdag = 1.februar(2021), orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
 
         assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode(a1), TIL_INFOTRYGD)
     }

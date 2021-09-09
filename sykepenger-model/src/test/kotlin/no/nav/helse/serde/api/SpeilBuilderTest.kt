@@ -1,6 +1,5 @@
 package no.nav.helse.serde.api
 
-import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Dagtype.Feriedag
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
@@ -1391,7 +1390,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Flere arbeidsgivere med ghosts`() = Toggles.FlereArbeidsgivereUlikFom.enable {
+    fun `Flere arbeidsgivere med ghosts`() {
         val a1 = "orgnummer1"
         val a2 = "orgnummer2"
         val a3 = "orgnummer3"

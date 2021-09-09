@@ -273,7 +273,7 @@ internal class Vedtaksperiode private constructor(
             return
         }
 
-        if(revurdert.skjæringstidspunkt != this.skjæringstidspunkt && this.erUtbetalt()) {
+        if (revurdert.skjæringstidspunkt != this.skjæringstidspunkt && this.erUtbetalt()) {
             hendelse.error("Kan kun revurdere siste skjæringstidspunkt")
             return
         }
@@ -1710,13 +1710,11 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
             vilkårsgrunnlag.loggUkjenteArbeidsforhold(vedtaksperiode.person, vedtaksperiode.skjæringstidspunkt)
-            if (Toggles.FlereArbeidsgivereUlikFom.enabled) {
-                vilkårsgrunnlag.lagreArbeidsforhold(vedtaksperiode.person, vedtaksperiode.skjæringstidspunkt)
-                vilkårsgrunnlag.lagreSkatteinntekter(vedtaksperiode.person, vedtaksperiode.skjæringstidspunkt)
+            vilkårsgrunnlag.lagreArbeidsforhold(vedtaksperiode.person, vedtaksperiode.skjæringstidspunkt)
+            vilkårsgrunnlag.lagreSkatteinntekter(vedtaksperiode.person, vedtaksperiode.skjæringstidspunkt)
 
-                if (vedtaksperiode.person.harRelevanteArbeidsforholdForFlereArbeidsgivere(vedtaksperiode.skjæringstidspunkt)) {
-                    vedtaksperiode.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE
-                }
+            if (vedtaksperiode.person.harRelevanteArbeidsforholdForFlereArbeidsgivere(vedtaksperiode.skjæringstidspunkt)) {
+                vedtaksperiode.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE
             }
             vedtaksperiode.forberedMuligUtbetaling(vilkårsgrunnlag)
         }
@@ -1834,25 +1832,24 @@ internal class Vedtaksperiode private constructor(
                         }
                     }
                 }
-                harNødvendigInntekt(person, vedtaksperiode.skjæringstidspunkt) // TODO: forventer at denne ikke trengs lenger, sjekk om dette stemmer når lagring av sykepengegrunnlaget er stabilt. Kan hvertfall ikke fjernes før https://trello.com/c/pY0WYUC0
+                harNødvendigInntekt(
+                    person,
+                    vedtaksperiode.skjæringstidspunkt
+                ) // TODO: forventer at denne ikke trengs lenger, sjekk om dette stemmer når lagring av sykepengegrunnlaget er stabilt. Kan hvertfall ikke fjernes før https://trello.com/c/pY0WYUC0
                 lateinit var arbeidsgiverUtbetalinger2: ArbeidsgiverUtbetalinger
                 valider("Feil ved kalkulering av utbetalingstidslinjer") {
-                    if (Toggles.FlereArbeidsgivereUlikFom.enabled) {
-                        person.fyllUtPeriodeMedForventedeDager(ytelser, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt)
-                    }
+                    person.fyllUtPeriodeMedForventedeDager(ytelser, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt)
                     arbeidsgiverUtbetalinger2 = vedtaksperiode.person.arbeidsgiverUtbetalinger()
                     arbeidsgiver.beregn(this, arbeidsgiverUtbetalinger2, vedtaksperiode.periode)
                 }
                 onSuccess {
-                    if (Toggles.FlereArbeidsgivereUlikFom.enabled) {
-                        if (person.harVedtaksperiodeForArbeidsgiverMedUkjentArbeidsforhold(vedtaksperiode.skjæringstidspunkt)) {
-                            ytelser.warn("Arbeidsgiver er ikke registrert i Aa-registeret.")
-                        }
-                        if (vedtaksperiode.person.harKunEtAnnetAktivtArbeidsforholdEnn(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer)) {
-                            ytelser.warn("Den sykmeldte har skiftet arbeidsgiver, og det er beregnet at den nye arbeidsgiveren mottar refusjon lik forrige. Kontroller at dagsatsen blir riktig.")
-                        } else if (vedtaksperiode.person.harFlereArbeidsgivereUtenSykdomVedSkjæringstidspunkt(vedtaksperiode.skjæringstidspunkt)) {
-                            ytelser.warn("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold")
-                        }
+                    if (person.harVedtaksperiodeForArbeidsgiverMedUkjentArbeidsforhold(vedtaksperiode.skjæringstidspunkt)) {
+                        ytelser.warn("Arbeidsgiver er ikke registrert i Aa-registeret.")
+                    }
+                    if (vedtaksperiode.person.harKunEtAnnetAktivtArbeidsforholdEnn(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer)) {
+                        ytelser.warn("Den sykmeldte har skiftet arbeidsgiver, og det er beregnet at den nye arbeidsgiveren mottar refusjon lik forrige. Kontroller at dagsatsen blir riktig.")
+                    } else if (vedtaksperiode.person.harFlereArbeidsgivereUtenSykdomVedSkjæringstidspunkt(vedtaksperiode.skjæringstidspunkt)) {
+                        ytelser.warn("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold")
                     }
                     vedtaksperiode.forsøkUtbetaling(arbeidsgiverUtbetalinger2.tidslinjeEngine, ytelser)
                 }
@@ -2442,7 +2439,7 @@ data class InntektsmeldingInfo(
     internal val id: UUID,
     internal val arbeidsforholdId: String?
 ) {
-    fun toMap() = mapOf( "id" to id, "arbeidsforholdId" to arbeidsforholdId )
+    fun toMap() = mapOf("id" to id, "arbeidsforholdId" to arbeidsforholdId)
 }
 
 internal typealias VedtaksperiodeFilter = (Vedtaksperiode) -> Boolean

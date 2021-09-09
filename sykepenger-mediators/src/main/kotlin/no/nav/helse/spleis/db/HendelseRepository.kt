@@ -7,7 +7,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.Toggles
 import no.nav.helse.spleis.PostgresProbe
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.*
 import no.nav.helse.spleis.meldinger.model.*
@@ -78,7 +77,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         is AnnulleringMessage -> KANSELLER_UTBETALING
         is EtterbetalingMessage -> GRUNNBELØPSREGULERING
         is OverstyrTidslinjeMessage -> OVERSTYRTIDSLINJE
-        is UtbetalingsgrunnlagMessage -> if (Toggles.FlereArbeidsgivereUlikFom.enabled) UTBETALINGSGRUNNLAG else null
+        is UtbetalingsgrunnlagMessage -> UTBETALINGSGRUNNLAG
         is UtbetalingshistorikkForFeriepengerMessage -> null //TODO: Skal lagres som UTBETALINGSHISTORIKK_FOR_FERIEPENGER
         is AvstemmingMessage,
         is PersonPåminnelseMessage,
