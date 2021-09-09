@@ -29,7 +29,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
     @AfterAll
     fun afterAll() {
-        Toggles.RevurderTidligerePeriode.disable()
+        Toggles.RevurderTidligerePeriode.pop()
     }
 
     @Test

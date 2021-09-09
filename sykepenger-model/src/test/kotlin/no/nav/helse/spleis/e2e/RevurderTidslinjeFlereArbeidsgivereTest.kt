@@ -1,8 +1,11 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Toggles
-import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.februar
@@ -16,7 +19,6 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle
-import java.time.LocalDate
 
 @TestInstance(Lifecycle.PER_CLASS)
 internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() {
@@ -33,7 +35,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
 
     @AfterAll
     fun afterAll() {
-        Toggles.RevurderTidligerePeriode.disable()
+        Toggles.RevurderTidligerePeriode.pop()
     }
 
     @Test
@@ -53,7 +55,6 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
             orgnummer = haandtverkerne
         )
 
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
         håndterYtelser(vedtaksperiodeId = 1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
         håndterVilkårsgrunnlag(
             vedtaksperiodeId = 1.vedtaksperiode(aadvokatene),
@@ -70,7 +71,6 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
         håndterUtbetalt(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
 
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
         håndterYtelser(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
         håndterSimulering(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
@@ -90,8 +90,6 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = haandtverkerne)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = aadvokatene)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = haandtverkerne)
-        håndterUtbetalingsgrunnlag(2.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
-        håndterUtbetalingsgrunnlag(2.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
 
         håndterYtelser(2.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
         håndterYtelser(2.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
@@ -100,7 +98,6 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         håndterUtbetalingsgodkjenning(2.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
         håndterUtbetalt(2.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
 
-        håndterUtbetalingsgrunnlag(2.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
         håndterYtelser(2.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
         håndterSimulering(2.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
@@ -112,7 +109,6 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 2.vedtaksperiode(aadvokatene),
                 START,
                 MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-                AVVENTER_UTBETALINGSGRUNNLAG,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
@@ -128,10 +124,8 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 2.vedtaksperiode(haandtverkerne),
                 START,
                 MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-                AVVENTER_UTBETALINGSGRUNNLAG,
                 AVVENTER_HISTORIKK,
                 AVVENTER_ARBEIDSGIVERE,
-                AVVENTER_UTBETALINGSGRUNNLAG,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
@@ -160,7 +154,6 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
             orgnummer = haandtverkerne
         )
 
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
         håndterYtelser(vedtaksperiodeId = 1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
         håndterVilkårsgrunnlag(
             vedtaksperiodeId = 1.vedtaksperiode(aadvokatene),
@@ -177,7 +170,6 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
         håndterUtbetalt(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
 
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
         håndterYtelser(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
         håndterSimulering(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
@@ -199,7 +191,6 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 MOTTATT_SYKMELDING_FERDIG_GAP,
                 AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
                 AVVENTER_ARBEIDSGIVERE,
-                AVVENTER_UTBETALINGSGRUNNLAG,
                 AVVENTER_HISTORIKK,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
@@ -224,7 +215,6 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 MOTTATT_SYKMELDING_FERDIG_GAP,
                 AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
                 AVVENTER_ARBEIDSGIVERE,
-                AVVENTER_UTBETALINGSGRUNNLAG,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
@@ -257,7 +247,6 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
             orgnummer = haandtverkerne
         )
 
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
         håndterYtelser(vedtaksperiodeId = 1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
         håndterVilkårsgrunnlag(
             vedtaksperiodeId = 1.vedtaksperiode(aadvokatene),
@@ -274,7 +263,6 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
         håndterUtbetalt(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
 
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
         håndterYtelser(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
         håndterSimulering(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
@@ -298,7 +286,6 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 MOTTATT_SYKMELDING_FERDIG_GAP,
                 AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
                 AVVENTER_ARBEIDSGIVERE,
-                AVVENTER_UTBETALINGSGRUNNLAG,
                 AVVENTER_HISTORIKK,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
@@ -330,7 +317,6 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 MOTTATT_SYKMELDING_FERDIG_GAP,
                 AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
                 AVVENTER_ARBEIDSGIVERE,
-                AVVENTER_UTBETALINGSGRUNNLAG,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
@@ -363,7 +349,6 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
             orgnummer = haandtverkerne
         )
 
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
         håndterYtelser(vedtaksperiodeId = 1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
         håndterVilkårsgrunnlag(
             vedtaksperiodeId = 1.vedtaksperiode(aadvokatene),
@@ -380,7 +365,6 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
         håndterUtbetalt(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
 
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
         håndterYtelser(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
         håndterSimulering(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
@@ -391,8 +375,6 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = aadvokatene)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = haandtverkerne)
 
-        håndterUtbetalingsgrunnlag(2.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
-        håndterUtbetalingsgrunnlag(2.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
         håndterYtelser(vedtaksperiodeId = 2.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
         håndterYtelser(vedtaksperiodeId = 2.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
         håndterYtelser(vedtaksperiodeId = 2.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
@@ -401,7 +383,6 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         håndterUtbetalingsgodkjenning(2.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
         håndterUtbetalt(2.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
 
-        håndterUtbetalingsgrunnlag(2.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
         håndterYtelser(vedtaksperiodeId = 2.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
 
         håndterSimulering(2.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
@@ -427,7 +408,6 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 MOTTATT_SYKMELDING_FERDIG_GAP,
                 AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
                 AVVENTER_ARBEIDSGIVERE,
-                AVVENTER_UTBETALINGSGRUNNLAG,
                 AVVENTER_HISTORIKK,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
@@ -443,7 +423,6 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 2.vedtaksperiode(aadvokatene),
                 START,
                 MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-                AVVENTER_UTBETALINGSGRUNNLAG,
                 AVVENTER_HISTORIKK,
                 AVVENTER_ARBEIDSGIVERE,
                 AVVENTER_HISTORIKK,
@@ -470,7 +449,6 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 MOTTATT_SYKMELDING_FERDIG_GAP,
                 AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
                 AVVENTER_ARBEIDSGIVERE,
-                AVVENTER_UTBETALINGSGRUNNLAG,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
@@ -485,10 +463,8 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 2.vedtaksperiode(haandtverkerne),
                 START,
                 MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-                AVVENTER_UTBETALINGSGRUNNLAG,
                 AVVENTER_HISTORIKK,
                 AVVENTER_ARBEIDSGIVERE,
-                AVVENTER_UTBETALINGSGRUNNLAG,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
@@ -522,7 +498,6 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
             orgnummer = haandtverkerne
         )
 
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
         håndterYtelser(vedtaksperiodeId = 1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
         håndterVilkårsgrunnlag(
             vedtaksperiodeId = 1.vedtaksperiode(aadvokatene),
@@ -539,7 +514,6 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
         håndterUtbetalt(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
 
-        håndterUtbetalingsgrunnlag(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
         håndterYtelser(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
         håndterSimulering(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
@@ -550,8 +524,6 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = aadvokatene)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = haandtverkerne)
 
-        håndterUtbetalingsgrunnlag(2.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
-        håndterUtbetalingsgrunnlag(2.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
         håndterYtelser(vedtaksperiodeId = 2.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
         håndterYtelser(vedtaksperiodeId = 2.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
         håndterYtelser(vedtaksperiodeId = 2.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
@@ -560,7 +532,6 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         håndterUtbetalingsgodkjenning(2.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
         håndterUtbetalt(2.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
 
-        håndterUtbetalingsgrunnlag(2.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
         håndterYtelser(vedtaksperiodeId = 2.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
 
         håndterSimulering(2.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
@@ -581,7 +552,6 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 MOTTATT_SYKMELDING_FERDIG_GAP,
                 AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
                 AVVENTER_ARBEIDSGIVERE,
-                AVVENTER_UTBETALINGSGRUNNLAG,
                 AVVENTER_HISTORIKK,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
@@ -596,7 +566,6 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 2.vedtaksperiode(aadvokatene),
                 START,
                 MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-                AVVENTER_UTBETALINGSGRUNNLAG,
                 AVVENTER_HISTORIKK,
                 AVVENTER_ARBEIDSGIVERE,
                 AVVENTER_HISTORIKK,
@@ -623,7 +592,6 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 MOTTATT_SYKMELDING_FERDIG_GAP,
                 AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
                 AVVENTER_ARBEIDSGIVERE,
-                AVVENTER_UTBETALINGSGRUNNLAG,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
@@ -637,10 +605,8 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 2.vedtaksperiode(haandtverkerne),
                 START,
                 MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-                AVVENTER_UTBETALINGSGRUNNLAG,
                 AVVENTER_HISTORIKK,
                 AVVENTER_ARBEIDSGIVERE,
-                AVVENTER_UTBETALINGSGRUNNLAG,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
