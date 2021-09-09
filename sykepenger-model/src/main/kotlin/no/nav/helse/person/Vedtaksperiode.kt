@@ -1849,6 +1849,7 @@ internal class Vedtaksperiode private constructor(
                     if (vedtaksperiode.person.harKunEtAnnetAktivtArbeidsforholdEnn(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer)) {
                         ytelser.warn("Den sykmeldte har skiftet arbeidsgiver, og det er beregnet at den nye arbeidsgiveren mottar refusjon lik forrige. Kontroller at dagsatsen blir riktig.")
                     } else if (vedtaksperiode.person.harFlereArbeidsgivereUtenSykdomVedSkjæringstidspunkt(vedtaksperiode.skjæringstidspunkt)) {
+                        person.loggTilfelleAvFlereArbeidsgivereMedSkatteinntekt(vedtaksperiode.skjæringstidspunkt)
                         ytelser.warn("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold")
                     }
                     vedtaksperiode.forsøkUtbetaling(arbeidsgiverUtbetalinger2.tidslinjeEngine, ytelser)

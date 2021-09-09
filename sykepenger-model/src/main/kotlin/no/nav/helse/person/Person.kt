@@ -3,6 +3,7 @@ package no.nav.helse.person
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.Arbeidsgiver.Companion.antallArbeidsgivereMedOverlappendeVedtaksperioder
+import no.nav.helse.person.Arbeidsgiver.Companion.antallMedVedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.forlengerIkkeBareAnnenArbeidsgiver
 import no.nav.helse.person.Arbeidsgiver.Companion.forlengerSammePeriode
@@ -572,6 +573,22 @@ class Person private constructor(
 
     internal fun harFlereArbeidsgivereUtenSykdomVedSkjæringstidspunkt(skjæringstidspunkt: LocalDate) =
         arbeidsgivere.relevanteArbeidsforhold(skjæringstidspunkt).any { it.grunnlagForSykepengegrunnlagKommerFraSkatt(skjæringstidspunkt) }
+
+    internal fun loggTilfelleAvFlereArbeidsgivereMedSkatteinntekt(skjæringstidspunkt: LocalDate) {
+        val relevanteArbeidsforhold = arbeidsgivere.relevanteArbeidsforhold(skjæringstidspunkt)
+        val relevanteArbeidsforholdMedVedtaksperiode = relevanteArbeidsforhold.antallMedVedtaksperioder(skjæringstidspunkt)
+
+        if(relevanteArbeidsforhold.size == relevanteArbeidsforholdMedVedtaksperiode) {
+            sikkerLogg.info("Person har flere arbeidsgivere og er: ulik fom  ($fødselsnummer)")
+        }
+        else if (relevanteArbeidsforholdMedVedtaksperiode == 1) {
+            sikkerLogg.info("Person har flere arbeidsgivere og er: ghosts  ($fødselsnummer)")
+        }
+        else {
+            sikkerLogg.info("Person har flere arbeidsgivere og er: ghost eller blanding ($fødselsnummer")
+        }
+
+    }
 
     private fun arbeidsgivereMedAktiveArbeidsforhold(skjæringstidspunkt: LocalDate): List<Arbeidsgiver> =
         arbeidsgivere.filter { it.harAktivtArbeidsforhold(skjæringstidspunkt) }

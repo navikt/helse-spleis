@@ -68,6 +68,9 @@ internal class Arbeidsgiver private constructor(
         internal fun Iterable<Arbeidsgiver>.nåværendeVedtaksperioder(filter: VedtaksperiodeFilter) =
             mapNotNull { it.vedtaksperioder.nåværendeVedtaksperiode(filter) }
 
+        internal fun List<Arbeidsgiver>.antallMedVedtaksperioder(skjæringstidspunkt: LocalDate) =
+            this.count { arbeidsgiver -> arbeidsgiver.vedtaksperioder.any { vedtaksperiode -> vedtaksperiode.gjelder(skjæringstidspunkt) } }
+
         internal fun List<Arbeidsgiver>.grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, periodeStart: LocalDate) =
             this.mapNotNull { arbeidsgiver ->
                 arbeidsgiver.inntektshistorikk.grunnlagForSykepengegrunnlag(
@@ -166,7 +169,11 @@ internal class Arbeidsgiver private constructor(
             this.relevanteArbeidsforhold(skjæringstidspunkt).size > 1
 
         internal fun Iterable<Arbeidsgiver>.relevanteArbeidsforhold(skjæringstidspunkt: LocalDate) =
-            filter {(it.arbeidsforholdhistorikk.harAktivtArbeidsforhold(skjæringstidspunkt) && !it.arbeidsforholdhistorikk.arbeidsforholdErEldreEnnTreMåneder(skjæringstidspunkt)) || it.harGrunnlagForSykepengegrunnlag(skjæringstidspunkt)}
+            filter {
+                (it.arbeidsforholdhistorikk.harAktivtArbeidsforhold(skjæringstidspunkt) && !it.arbeidsforholdhistorikk.arbeidsforholdErEldreEnnTreMåneder(
+                    skjæringstidspunkt
+                )) || it.harGrunnlagForSykepengegrunnlag(skjæringstidspunkt)
+            }
     }
 
     internal fun accept(visitor: ArbeidsgiverVisitor) {
@@ -700,7 +707,7 @@ internal class Arbeidsgiver private constructor(
             return gjenopptaBehandling()
         }
 
-        if(Toggles.RevurderTidligerePeriode.enabled) {
+        if (Toggles.RevurderTidligerePeriode.enabled) {
             inntektshistorikk {
                 addSaksbehandler(hendelse.skjæringstidspunkt, hendelse.meldingsreferanseId(), hendelse.inntekt)
             }
@@ -833,11 +840,15 @@ internal class Arbeidsgiver private constructor(
     internal fun avgrensetPeriode(periode: Periode) =
         Periode(maxOf(periode.start, skjæringstidspunkt(periode)), periode.endInclusive)
 
-    internal fun builder(regler: ArbeidsgiverRegler, skjæringstidspunkter: List<LocalDate>, inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver: Map<LocalDate, Map<String, Inntektshistorikk.Inntektsopplysning>>?): UtbetalingstidslinjeBuilder {
+    internal fun builder(
+        regler: ArbeidsgiverRegler,
+        skjæringstidspunkter: List<LocalDate>,
+        inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver: Map<LocalDate, Map<String, Inntektshistorikk.Inntektsopplysning>>?
+    ): UtbetalingstidslinjeBuilder {
         return UtbetalingstidslinjeBuilder(
             skjæringstidspunkter = skjæringstidspunkter,
-            inntektPerSkjæringstidspunkt = inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver?.mapValues {
-                (_, inntektsopplysningPerArbeidsgiver) -> inntektsopplysningPerArbeidsgiver[organisasjonsnummer]
+            inntektPerSkjæringstidspunkt = inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver?.mapValues { (_, inntektsopplysningPerArbeidsgiver) ->
+                inntektsopplysningPerArbeidsgiver[organisasjonsnummer]
             },
             arbeidsgiverRegler = regler
         )
@@ -924,7 +935,9 @@ internal class Arbeidsgiver private constructor(
         inntektshistorikk.harGrunnlagForSykepengegrunnlag(skjæringstidspunkt) || vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt).harInntekt()
 
     internal fun harGrunnlagForSykepengegrunnlagEllerSammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =
-        inntektshistorikk.harGrunnlagForSykepengegrunnlagEllerSammenligningsgrunnlag(skjæringstidspunkt) || vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt).harInntekt()
+        inntektshistorikk.harGrunnlagForSykepengegrunnlagEllerSammenligningsgrunnlag(skjæringstidspunkt) || vedtaksperioder.medSkjæringstidspunkt(
+            skjæringstidspunkt
+        ).harInntekt()
 
     internal fun toMap(): Map<String, Any?> = mapOf(
         "organisasjonsnummer" to organisasjonsnummer,
