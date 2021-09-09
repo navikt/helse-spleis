@@ -205,7 +205,7 @@ class Søknad(
         }
 
         fun validerIkkeSykmeldt(aktivitetslogg: IAktivitetslogg) {
-            if (sykmeldt) aktivitetslogg.error("Søknaden inneholder andre arbeidsforhold, men bruker er ikke sykmeldt")
+            if (sykmeldt) aktivitetslogg.error("Søknaden inneholder ANDRE_ARBEIDSFORHOLD med sykdom, men vi kjenner kun til sykdom ved ett arbeidsforhold")
         }
     }
 }
