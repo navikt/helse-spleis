@@ -8,8 +8,8 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.arbeidsforho
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.dagpenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.dødsinformasjon
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.foreldrepenger
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.inntekterForSammenligningsgrunnlag
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.inntekterForSykepengegrunnlag
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.inntektsberegning
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.institusjonsopphold
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.medlemskap
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.omsorgspenger
@@ -488,7 +488,7 @@ internal class Vedtaksperiode private constructor(
         val beregningSlutt = YearMonth.from(skjæringstidspunkt).minusMonths(1)
         inntekterForSykepengegrunnlag(hendelse, beregningSlutt.minusMonths(2), beregningSlutt)
         arbeidsforhold(hendelse)
-        inntektsberegning(hendelse, beregningSlutt.minusMonths(11), beregningSlutt)
+        inntekterForSammenligningsgrunnlag(hendelse, beregningSlutt.minusMonths(11), beregningSlutt)
         medlemskap(hendelse, periode.start, periode.endInclusive)
     }
 

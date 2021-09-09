@@ -266,7 +266,7 @@ class Aktivitetslogg(
                     )
                 }
 
-                internal fun inntektsberegning(
+                internal fun inntekterForSammenligningsgrunnlag(
                     aktivitetslogg: IAktivitetslogg,
                     beregningStart: YearMonth,
                     beregningSlutt: YearMonth
