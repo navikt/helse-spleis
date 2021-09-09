@@ -413,6 +413,8 @@ class Aktivitetslogg(
                 Utbetaling,
                 InntekterForSammenligningsgrunnlag,
                 InntekterForSykepengegrunnlag,
+                @Deprecated("Må migreres bort")
+                Opptjening,
                 Dagpenger,
                 Arbeidsavklaringspenger,
                 Medlemskap,
