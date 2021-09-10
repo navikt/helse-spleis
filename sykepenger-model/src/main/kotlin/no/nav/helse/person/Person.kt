@@ -248,7 +248,7 @@ class Person private constructor(
         }
 
         if (hendelse.hasErrorsOrWorse()) return
-        vedtaksperiode.revurder(hendelse, vedtaksperiode)
+        vedtaksperiode.revurder(hendelse)
     }
 
     fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, påminnelse: Påminnelse) {

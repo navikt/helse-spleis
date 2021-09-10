@@ -342,9 +342,9 @@ internal class Vedtaksperiode private constructor(
         tilstand.revurder(this, hendelse)
     }
 
-    internal fun revurder(hendelse: OverstyrInntekt, other: Vedtaksperiode) {
+    internal fun revurder(hendelse: OverstyrInntekt) {
         kontekst(hendelse)
-        tilstand.revurder(this, hendelse, other)
+        tilstand.revurder(this, hendelse)
     }
 
     internal fun sammeArbeidsgiverPeriodeOgUtbetalt(other: Vedtaksperiode) =
@@ -945,19 +945,11 @@ internal class Vedtaksperiode private constructor(
 
         fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {}
 
-        fun revurder(
-            vedtaksperiode: Vedtaksperiode,
-            hendelse: OverstyrTidslinje
-        ) {
+        fun revurder(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
             hendelse.error("Forventet ikke overstyring fra saksbehandler i %s", type.name)
         }
 
-        //TODO: Fjerne other, er ikke i bruk, og er også samme periode som this der metoden blir kalt
-        fun revurder(
-            vedtaksperiode: Vedtaksperiode,
-            hendelse: OverstyrInntekt,
-            other: Vedtaksperiode
-        ) {
+        fun revurder(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
             hendelse.error("Forventet ikke overstyring fra saksbehandler i %s", type.name)
         }
 
@@ -2296,7 +2288,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.tilstand(hendelse, AvventerHistorikkRevurdering)
         }
 
-        override fun revurder(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt, other: Vedtaksperiode) {
+        override fun revurder(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
             vedtaksperiode.tilstand(hendelse, AvventerVilkårsprøvingRevurdering)
             vedtaksperiode.tilstand.håndter(vedtaksperiode, hendelse)
         }
