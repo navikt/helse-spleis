@@ -14,6 +14,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.harArbeidsgivereMedOverlappend
 import no.nav.helse.person.Arbeidsgiver.Companion.harGrunnlagForSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntekt
 import no.nav.helse.person.Arbeidsgiver.Companion.harRelevanteArbeidsforholdForFlereArbeidsgivere
+import no.nav.helse.person.Arbeidsgiver.Companion.kanOverstyres
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.relevanteArbeidsforhold
 import no.nav.helse.person.Vedtaksperiode.Companion.ALLE
@@ -212,6 +213,9 @@ class Person private constructor(
 
     fun håndter(hendelse: OverstyrTidslinje) {
         hendelse.kontekst(this)
+        if (!arbeidsgivere.kanOverstyres(hendelse)) {
+            return hendelse.error("Kan ikke overstyre en pågående behandling der én eller flere perioder er behandlet ferdig")
+        }
         finnArbeidsgiver(hendelse).håndter(hendelse)
     }
 
@@ -224,15 +228,18 @@ class Person private constructor(
         observers.forEach { it.annullering(event) }
     }
 
+    internal fun overstyrUtkastRevurdering(hendelse: OverstyrTidslinje) {
+        val førstePeriode = finnArbeidsgiver(hendelse).førstePeriodeTilRevurdering(hendelse)
+        igangsettRevurdering(hendelse, førstePeriode)
+    }
+
     internal fun igangsettRevurdering(hendelse: OverstyrTidslinje, vedtaksperiode: Vedtaksperiode) {
         arbeidsgivere.forEach {
             it.startRevurderingForAlleBerørtePerioder(hendelse, vedtaksperiode)
         }
 
-        if (Toggles.RevurderTidligerePeriode.enabled) {
-            if (hendelse.hasErrorsOrWorse()) return
-            vedtaksperiode.revurder(hendelse, vedtaksperiode)
-        }
+        if (hendelse.hasErrorsOrWorse()) return
+        vedtaksperiode.revurder(hendelse)
     }
 
     internal fun igangsettRevurdering(hendelse: OverstyrInntekt, vedtaksperiode: Vedtaksperiode) {
@@ -240,10 +247,8 @@ class Person private constructor(
             it.startRevurderingForAlleBerørtePerioder(hendelse, vedtaksperiode)
         }
 
-        if (Toggles.RevurderTidligerePeriode.enabled) {
-            if (hendelse.hasErrorsOrWorse()) return
-            vedtaksperiode.revurder(hendelse, vedtaksperiode)
-        }
+        if (hendelse.hasErrorsOrWorse()) return
+        vedtaksperiode.revurder(hendelse, vedtaksperiode)
     }
 
     fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, påminnelse: Påminnelse) {

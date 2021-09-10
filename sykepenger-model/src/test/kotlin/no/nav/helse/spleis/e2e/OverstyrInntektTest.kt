@@ -13,13 +13,11 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
 
     @BeforeEach
     fun setup() {
-        Toggles.RevurderTidligerePeriode.enable()
         Toggles.RevurderInntekt.enable()
     }
 
     @AfterEach
     fun tearDown() {
-        Toggles.RevurderTidligerePeriode.pop()
         Toggles.RevurderInntekt.pop()
     }
 

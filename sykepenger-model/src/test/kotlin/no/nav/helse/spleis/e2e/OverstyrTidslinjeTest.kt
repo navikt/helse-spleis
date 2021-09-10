@@ -13,11 +13,10 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
+internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
 
     @Test
     fun `kan ikke utbetale overstyrt utbetaling`() {

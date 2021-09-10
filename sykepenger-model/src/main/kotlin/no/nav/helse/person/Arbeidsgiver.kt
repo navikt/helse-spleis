@@ -5,7 +5,10 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.Vedtaksperiode.*
 import no.nav.helse.person.Vedtaksperiode.Companion.ALLE
+import no.nav.helse.person.Vedtaksperiode.Companion.AVVENTER_GODKJENT_REVURDERING
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_REVURDERT
+import no.nav.helse.person.Vedtaksperiode.Companion.KLAR_TIL_BEHANDLING
+import no.nav.helse.person.Vedtaksperiode.Companion.REVURDERING_IGANGSATT
 import no.nav.helse.person.Vedtaksperiode.Companion.harInntekt
 import no.nav.helse.person.Vedtaksperiode.Companion.harNødvendigInntekt
 import no.nav.helse.person.Vedtaksperiode.Companion.harOverlappendeUtbetaltePerioder
@@ -64,6 +67,15 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal companion object {
+
+        internal fun List<Arbeidsgiver>.kanOverstyres(hendelse: OverstyrTidslinje): Boolean {
+            val overlappendePerioder = flatMap { it.overlappendePerioder(hendelse) }
+            return when {
+                overlappendePerioder.any(KLAR_TIL_BEHANDLING) -> overlappendePerioder.all(KLAR_TIL_BEHANDLING)
+                overlappendePerioder.any(REVURDERING_IGANGSATT) -> overlappendePerioder.all(REVURDERING_IGANGSATT)
+                else -> true
+            }
+        }
 
         internal fun Iterable<Arbeidsgiver>.nåværendeVedtaksperioder(filter: VedtaksperiodeFilter) =
             mapNotNull { it.vedtaksperioder.nåværendeVedtaksperiode(filter) }
@@ -607,9 +619,23 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(hendelse: OverstyrInntekt) {
         hendelse.kontekst(this)
-        vedtaksperioder.firstOrNull { it.gjelder(hendelse.skjæringstidspunkt) }
+        vedtaksperioder
+            .firstOrNull { it.gjelder(hendelse.skjæringstidspunkt) }
             ?.håndter(hendelse)
         finalize(hendelse)
+    }
+
+    internal fun førstePeriodeTilRevurdering(hendelse: PersonHendelse) = vedtaksperioder
+        .filter(AVVENTER_GODKJENT_REVURDERING)
+        .minOrNull()
+        ?: hendelse.severe("Fant ikke periode til revurdering, selv om vi kommer fra en periode til revurdering?!")
+
+    internal fun oppdaterHistorikkRevurdering(hendelse: OverstyrTidslinje) {
+        hendelse.info("Oppdaterer sykdomshistorikk med overstyrte dager")
+        val overlappendePerioder = overlappendePerioder(hendelse)
+        overlappendePerioder.forEach { låsOpp(it.periode()) }
+        oppdaterSykdom(hendelse)
+        overlappendePerioder.forEach { lås(it.periode()) }
     }
 
     internal fun oppdaterSykdom(hendelse: SykdomstidslinjeHendelse) = sykdomshistorikk.håndter(hendelse)
@@ -694,10 +720,6 @@ internal class Arbeidsgiver private constructor(
             hendelse.info("Revurdering blokkeres, gjenopptar behandling")
             return gjenopptaBehandling()
         }
-
-        if (!Toggles.RevurderTidligerePeriode.enabled) {
-            vedtaksperioder.sisteSammenhengedeUtbetaling(vedtaksperiode)?.revurder(hendelse, vedtaksperiode)
-        }
     }
 
     internal fun startRevurderingForAlleBerørtePerioder(hendelse: OverstyrInntekt, vedtaksperiode: Vedtaksperiode) {
@@ -707,10 +729,8 @@ internal class Arbeidsgiver private constructor(
             return gjenopptaBehandling()
         }
 
-        if (Toggles.RevurderTidligerePeriode.enabled) {
-            inntektshistorikk {
-                addSaksbehandler(hendelse.skjæringstidspunkt, hendelse.meldingsreferanseId(), hendelse.inntekt)
-            }
+        inntektshistorikk {
+            addSaksbehandler(hendelse.skjæringstidspunkt, hendelse.meldingsreferanseId(), hendelse.inntekt)
         }
     }
 
@@ -721,6 +741,8 @@ internal class Arbeidsgiver private constructor(
         val tidligereOgEttergølgende1 = vedtaksperioder.sorted().firstOrNull { it.periode().overlapperMed(segSelv) }?.let(::tidligereOgEttergølgende)
         return fun(vedtaksperiode: Vedtaksperiode) = tidligereOgEttergølgende1 != null && vedtaksperiode in tidligereOgEttergølgende1
     }
+
+    internal fun overlappendePerioder(hendelse: SykdomstidslinjeHendelse) = vedtaksperioder.filter { hendelse.erRelevant(it.periode()) }
 
     private fun nyVedtaksperiode(hendelse: SykdomstidslinjeHendelse): Vedtaksperiode {
         return Vedtaksperiode(

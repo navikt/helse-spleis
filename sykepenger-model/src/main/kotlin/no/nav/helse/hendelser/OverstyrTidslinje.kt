@@ -29,6 +29,7 @@ class OverstyrTidslinje(
 ) : SykdomstidslinjeHendelse(meldingsreferanseId, opprettet) {
 
     private val sykdomstidslinje: Sykdomstidslinje
+    private var håndtert: Boolean = false
 
     init {
         sykdomstidslinje = dager.map {
@@ -62,6 +63,13 @@ class OverstyrTidslinje(
                 )
             }
         }.reduce { acc, manuellOverskrivingDag -> acc + manuellOverskrivingDag }
+    }
+
+    internal fun alleredeHåndtert() = håndtert
+
+    internal fun markerHåndtert() {
+        require(!håndtert) { "Flere perioder forsøker å markere hendelsen som håndtert. Kun én periode skal håndtere hendelsen" }
+        håndtert = true
     }
 
     override fun sykdomstidslinje() = sykdomstidslinje

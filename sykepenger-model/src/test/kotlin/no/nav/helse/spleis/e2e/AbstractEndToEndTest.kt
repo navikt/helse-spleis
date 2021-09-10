@@ -1,21 +1,14 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.Arbeidsavklaringspenger
-import no.nav.helse.hendelser.Dagpenger
-import no.nav.helse.hendelser.Dødsinfo
-import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.Institusjonsopphold.Institusjonsoppholdsperiode
-import no.nav.helse.hendelser.Omsorgspenger
-import no.nav.helse.hendelser.Opplæringspenger
-import no.nav.helse.hendelser.Pleiepenger
-import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Simulering.*
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.Arbeidskategorikode.Arbeidstaker
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.KodePeriode
 import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
-import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -23,6 +16,7 @@ import no.nav.helse.serde.api.HendelseDTO
 import no.nav.helse.serde.api.serializePersonForSpeil
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.testhelpers.*
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -869,7 +863,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         val meldingsreferanseId = UUID.randomUUID()
 
         val bedtOmSykepengehistorikk = erEtterspurt(Behovtype.Sykepengehistorikk, vedtaksperiodeId, orgnummer, AVVENTER_HISTORIKK)
-            || erEtterspurt(Behovtype.Sykepengehistorikk, vedtaksperiodeId, orgnummer, TilstandType.AVVENTER_HISTORIKK_REVURDERING)
+            || erEtterspurt(Behovtype.Sykepengehistorikk, vedtaksperiodeId, orgnummer, AVVENTER_HISTORIKK_REVURDERING)
         if (bedtOmSykepengehistorikk) assertEtterspurt(Ytelser::class, Behovtype.Sykepengehistorikk, vedtaksperiodeId, orgnummer)
         val harSpesifisertSykepengehistorikk = utbetalinger.isNotEmpty() || arbeidskategorikoder.isNotEmpty()
 
@@ -937,6 +931,113 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         }
     }
 
+    protected fun tilGodkjenning(fom: LocalDate, tom: LocalDate, vararg organisasjonsnummere: String) {
+        require(organisasjonsnummere.isNotEmpty()) { "Må inneholde minst ett organisasjonsnummer" }
+        organisasjonsnummere.forEach {
+            håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent), orgnummer = it)
+        }
+        organisasjonsnummere.forEach {
+            håndterSøknad(Sykdom(fom, tom, 100.prosent), orgnummer = it)
+
+        }
+        organisasjonsnummere.forEach {
+            håndterInntektsmelding(
+                arbeidsgiverperioder = listOf(Periode(fom, fom.plusDays(15))),
+                refusjon = Refusjon(null, 20000.månedlig, emptyList()),
+                orgnummer = it
+            )
+        }
+        val (første, resten) = organisasjonsnummere.first() to organisasjonsnummere.drop(1)
+
+        første.let { organisasjonsnummer ->
+            håndterYtelser(vedtaksperiodeId = 1.vedtaksperiode(organisasjonsnummer), orgnummer = organisasjonsnummer)
+            håndterVilkårsgrunnlag(
+                vedtaksperiodeId = 1.vedtaksperiode(organisasjonsnummer),
+                orgnummer = organisasjonsnummer,
+                inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
+                    fom.minusYears(1) til fom.minusMonths(1) inntekter {
+                        organisasjonsnummere.forEach {
+                            it inntekt 20000.månedlig
+                        }
+                    }
+                })
+            )
+            håndterYtelser(1.vedtaksperiode(organisasjonsnummer), orgnummer = organisasjonsnummer)
+            håndterSimulering(1.vedtaksperiode(organisasjonsnummer), orgnummer = organisasjonsnummer)
+        }
+    }
+
+    protected fun nyeVedtak(fom: LocalDate, tom: LocalDate, vararg organisasjonsnummere: String) {
+        require(organisasjonsnummere.isNotEmpty()) { "Må inneholde minst ett organisasjonsnummer" }
+        organisasjonsnummere.forEach {
+            håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent), orgnummer = it)
+        }
+        organisasjonsnummere.forEach {
+            håndterSøknad(Sykdom(fom, tom, 100.prosent), orgnummer = it)
+
+        }
+        organisasjonsnummere.forEach {
+            håndterInntektsmelding(
+                arbeidsgiverperioder = listOf(Periode(fom, fom.plusDays(15))),
+                refusjon = Refusjon(null, 20000.månedlig, emptyList()),
+                orgnummer = it
+            )
+        }
+        val (første, resten) = organisasjonsnummere.first() to organisasjonsnummere.drop(1)
+
+        første.let { organisasjonsnummer ->
+            håndterYtelser(vedtaksperiodeId = 1.vedtaksperiode(organisasjonsnummer), orgnummer = organisasjonsnummer)
+            håndterVilkårsgrunnlag(
+                vedtaksperiodeId = 1.vedtaksperiode(organisasjonsnummer),
+                orgnummer = organisasjonsnummer,
+                inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
+                    fom.minusYears(1) til fom.minusMonths(1) inntekter {
+                        organisasjonsnummere.forEach {
+                            it inntekt 20000.månedlig
+                        }
+                    }
+                })
+            )
+            håndterYtelser(1.vedtaksperiode(organisasjonsnummer), orgnummer = organisasjonsnummer)
+            håndterSimulering(1.vedtaksperiode(organisasjonsnummer), orgnummer = organisasjonsnummer)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode(organisasjonsnummer), orgnummer = organisasjonsnummer)
+            håndterUtbetalt(1.vedtaksperiode(organisasjonsnummer), orgnummer = organisasjonsnummer)
+        }
+
+        resten.forEach { organisasjonsnummer ->
+            håndterYtelser(1.vedtaksperiode(organisasjonsnummer), orgnummer = organisasjonsnummer)
+            håndterSimulering(1.vedtaksperiode(organisasjonsnummer), orgnummer = organisasjonsnummer)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode(organisasjonsnummer), orgnummer = organisasjonsnummer)
+            håndterUtbetalt(1.vedtaksperiode(organisasjonsnummer), orgnummer = organisasjonsnummer)
+        }
+    }
+
+    protected fun forlengVedtak(fom: LocalDate, tom: LocalDate, vararg organisasjonsnummere: String) {
+        require(organisasjonsnummere.isNotEmpty()) { "Må inneholde minst ett organisasjonsnummer" }
+        organisasjonsnummere.forEach { håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent), orgnummer = it) }
+        organisasjonsnummere.forEach { håndterSøknad(Sykdom(fom, tom, 100.prosent), orgnummer = it) }
+        organisasjonsnummere.forEach { håndterYtelser(vedtaksperiodeId = observatør.sisteVedtaksperiode(it), orgnummer = it) }
+
+        val (første, resten) = organisasjonsnummere.first() to organisasjonsnummere.drop(1)
+
+        første.let { organisasjonsnummer ->
+            val vedtaksperiodeId = observatør.sisteVedtaksperiode(organisasjonsnummer)
+            håndterYtelser(vedtaksperiodeId, orgnummer = organisasjonsnummer)
+            håndterSimulering(vedtaksperiodeId, orgnummer = organisasjonsnummer)
+            håndterUtbetalingsgodkjenning(vedtaksperiodeId, orgnummer = organisasjonsnummer)
+            håndterUtbetalt(vedtaksperiodeId, orgnummer = organisasjonsnummer)
+        }
+
+        resten.forEach { organisasjonsnummer ->
+            val vedtaksperiodeId = observatør.sisteVedtaksperiode(organisasjonsnummer)
+            håndterYtelser(vedtaksperiodeId, orgnummer = organisasjonsnummer)
+            håndterSimulering(vedtaksperiodeId, orgnummer = organisasjonsnummer)
+            håndterUtbetalingsgodkjenning(vedtaksperiodeId, orgnummer = organisasjonsnummer)
+            håndterUtbetalt(vedtaksperiodeId, orgnummer = organisasjonsnummer)
+        }
+    }
+
+
     protected fun nyttVedtak(
         fom: LocalDate,
         tom: LocalDate,
@@ -1003,7 +1104,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             førsteFraværsdag = førsteFraværsdag,
             orgnummer = orgnummer
         )
-        håndterSøknadMedValidering(id, Søknad.Søknadsperiode.Sykdom(fom, tom, grad), orgnummer = orgnummer)
+        håndterSøknadMedValidering(id, Sykdom(fom, tom, grad), orgnummer = orgnummer)
         håndterYtelser(id, orgnummer = orgnummer)
         håndterVilkårsgrunnlag(
             id,
@@ -1021,7 +1122,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     protected fun forlengVedtak(fom: LocalDate, tom: LocalDate, grad: Prosentdel = 100.prosent, orgnummer: String = ORGNUMMER, skalSimuleres: Boolean = true) {
         håndterSykmelding(Sykmeldingsperiode(fom, tom, grad), orgnummer = orgnummer)
         val id = observatør.sisteVedtaksperiode()
-        håndterSøknadMedValidering(id, Søknad.Søknadsperiode.Sykdom(fom, tom, grad), orgnummer = orgnummer)
+        håndterSøknadMedValidering(id, Sykdom(fom, tom, grad), orgnummer = orgnummer)
         håndterYtelser(id, orgnummer = orgnummer)
         if (skalSimuleres) håndterSimulering(id, orgnummer = orgnummer)
         håndterUtbetalingsgodkjenning(id, true, orgnummer = orgnummer)
@@ -1031,7 +1132,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     protected fun forlengPeriode(fom: LocalDate, tom: LocalDate, grad: Prosentdel = 100.prosent, orgnummer: String = ORGNUMMER) {
         håndterSykmelding(Sykmeldingsperiode(fom, tom, grad), orgnummer = orgnummer)
         val id = observatør.sisteVedtaksperiode()
-        håndterSøknadMedValidering(id, Søknad.Søknadsperiode.Sykdom(fom, tom, grad), orgnummer = orgnummer)
+        håndterSøknadMedValidering(id, Sykdom(fom, tom, grad), orgnummer = orgnummer)
     }
 
     protected fun simulering(
@@ -1298,7 +1399,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         person.håndter(
             søknad(
                 UUID.randomUUID(),
-                Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent),
+                Sykdom(periode.start, periode.endInclusive, 100.prosent),
                 orgnummer = orgnummer
             )
         )
@@ -1462,6 +1563,63 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     protected fun manuellSykedag(dato: LocalDate, grad: Int = 100) = ManuellOverskrivingDag(dato, Dagtype.Sykedag, grad)
     protected fun håndterOverstyringSykedag(periode: Periode) = håndterOverstyring(periode.map { manuellSykedag(it) })
     protected fun manuellArbeidsgiverdag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Egenmeldingsdag)
+
+    inline fun <reified R: Utbetalingsdag> assertUtbetalingsdag(dag: Utbetalingsdag, expectedDagtype: KClass<R>, expectedTotalgrad: Double = 100.0) {
+        dag.let {
+            it.økonomi.medData { _, _, _, _, totalGrad, _, _, _, _ ->
+                assertEquals(expectedTotalgrad, totalGrad)
+            }
+            assertEquals(it::class, expectedDagtype)
+        }
+    }
+
+    protected fun TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(førsteAG: Boolean = true): Array<out TilstandType> =
+        if (førsteAG) arrayOf(
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_ARBEIDSGIVERE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
+        ) else arrayOf(
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_ARBEIDSGIVERE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
+        )
+
+    protected fun TIL_AVSLUTTET_FORLENGELSE(førsteAG: Boolean = true) =
+        if (førsteAG) arrayOf(
+            START,
+            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_ARBEIDSGIVERE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+        ) else arrayOf(
+            START,
+            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_ARBEIDSGIVERE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+        )
 }
 
 infix fun <T> T?.er(expected: T?) =

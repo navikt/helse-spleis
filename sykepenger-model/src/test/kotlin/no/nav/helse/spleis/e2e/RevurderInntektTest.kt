@@ -18,13 +18,11 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
 
     @BeforeEach
     fun setup() {
-        Toggles.RevurderTidligerePeriode.enable()
         Toggles.RevurderInntekt.enable()
     }
 
     @AfterEach
     fun tearDown() {
-        Toggles.RevurderTidligerePeriode.pop()
         Toggles.RevurderInntekt.pop()
     }
 

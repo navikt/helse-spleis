@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggles
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
@@ -21,16 +20,6 @@ import java.time.LocalDateTime
 
 @TestInstance(Lifecycle.PER_CLASS)
 internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
-
-    @BeforeAll
-    fun beforeAll() {
-        Toggles.RevurderTidligerePeriode.enable()
-    }
-
-    @AfterAll
-    fun afterAll() {
-        Toggles.RevurderTidligerePeriode.pop()
-    }
 
     @Test
     fun `to perioder - revurder dager i eldste`() {
@@ -1107,56 +1096,6 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         assertEquals(1, inspektør.avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
         assertEquals(2, inspektør.avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
         assertEquals(2, inspektør.avsluttedeUtbetalingerForVedtaksperiode(3.vedtaksperiode).size)
-    }
-
-    @Test
-    fun `revurdering av periode uten utbetaling medfører at perioden blir revurdert og utbetalt`() {
-        Toggles.RevurderTidligerePeriode.disable {
-            nyttVedtak(1.januar, 31.januar)
-            forlengVedtak(1.februar, 15.februar, grad = 19.prosent, skalSimuleres = false)
-
-            assertEquals(237, inspektør.gjenståendeSykedager(2.vedtaksperiode))
-
-            håndterOverstyring((1.februar til 15.februar).map { manuellSykedag(it, 30) })
-            håndterYtelser(2.vedtaksperiode)
-            håndterSimulering(2.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-            håndterUtbetalt(2.vedtaksperiode)
-
-            assertTilstander(
-                1.vedtaksperiode,
-                START,
-                MOTTATT_SYKMELDING_FERDIG_GAP,
-                AVVENTER_SØKNAD_FERDIG_GAP,
-                AVVENTER_HISTORIKK,
-                AVVENTER_VILKÅRSPRØVING,
-                AVVENTER_HISTORIKK,
-                AVVENTER_SIMULERING,
-                AVVENTER_GODKJENNING,
-                TIL_UTBETALING,
-                AVSLUTTET
-            )
-            assertTilstander(
-                2.vedtaksperiode,
-                START,
-                MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-                AVVENTER_HISTORIKK,
-                AVVENTER_GODKJENNING,
-                AVSLUTTET,
-                AVVENTER_HISTORIKK_REVURDERING,
-                AVVENTER_SIMULERING_REVURDERING,
-                AVVENTER_GODKJENNING_REVURDERING,
-                TIL_UTBETALING,
-                AVSLUTTET
-            )
-
-            assertEquals(1, inspektør.avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
-            assertEquals(0, inspektør.ikkeUtbetalteUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
-
-            assertEquals(226, inspektør.gjenståendeSykedager(2.vedtaksperiode))
-            assertEquals(2, inspektør.avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
-            assertEquals(0, inspektør.ikkeUtbetalteUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
-        }
     }
 
     @Test

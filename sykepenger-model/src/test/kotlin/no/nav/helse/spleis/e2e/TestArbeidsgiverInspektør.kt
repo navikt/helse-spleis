@@ -441,6 +441,7 @@ internal class TestArbeidsgiverInspektør(
     internal fun utbetaling(indeks: Int) = utbetalinger[indeks]
     internal fun utbetalingId(indeks: Int) = utbetalingIder[indeks]
     internal fun utbetalingUtbetalingstidslinje(indeks: Int) = utbetalingutbetalingstidslinjer[indeks]
+    internal fun sisteUtbetalingUtbetalingstidslinje() = utbetalingutbetalingstidslinjer.last()
     internal fun periode(id: UUID) = id.finn(perioder)
 
     internal fun periodeErForkastet(id: UUID) = id.finn(vedtaksperiodeForkastet)

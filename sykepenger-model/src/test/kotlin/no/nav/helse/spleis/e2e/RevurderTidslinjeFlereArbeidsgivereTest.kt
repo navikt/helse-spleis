@@ -28,16 +28,6 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         private const val haandtverkerne = "987612345"
     }
 
-    @BeforeAll
-    fun beforeAll() {
-        Toggles.RevurderTidligerePeriode.enable()
-    }
-
-    @AfterAll
-    fun afterAll() {
-        Toggles.RevurderTidligerePeriode.pop()
-    }
-
     @Test
     fun `forlengelse av revurderte flere arbeidsgivere bør da virke`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = aadvokatene)
