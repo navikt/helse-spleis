@@ -172,7 +172,8 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             orgnummer = a1,
             inntektsvurdering = Inntektsvurdering(sammenligningsgrunnlag1),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter1),
-            arbeidsforhold = arbeidsforhold1
+            arbeidsforhold = arbeidsforhold1,
+            opptjening = Opptjeningvurdering(listOf(Arbeidsforhold(a1, LocalDate.EPOCH, null)))
         )
         håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
         håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
@@ -571,6 +572,42 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             arbeidsforhold = arbeidsforhold
         )
         assertFalse(person.harVedtaksperiodeForArbeidsgiverMedUkjentArbeidsforhold(1.januar))
+    }
+
+    @Test
+    fun `Forlengelser skal ikke få warning på at arbeidsgiver ikke finnes i Aa-reg`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 1.januar,
+            orgnummer = a1,
+            refusjon = Refusjon(null, INNTEKT)
+        )
+
+        håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode(a1),
+            orgnummer = a1,
+            inntektsvurdering = Inntektsvurdering(
+                listOf(sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode(a1)), INNTEKT.repeat(12)))
+            ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),
+            arbeidsforhold = emptyList(),
+            opptjening = Opptjeningvurdering(
+                listOf(Arbeidsforhold(a1, 1.januar(2016), null))
+            )
+        )
+        håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), orgnummer = a1)
+        håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
+        håndterYtelser(2.vedtaksperiode(a1), orgnummer = a1)
+
+        assertEquals(1, inspektør(a1).warnings.count { it == "Arbeidsgiver er ikke registrert i Aa-registeret." })
     }
 
     fun arbeidsgivere(): List<String> {

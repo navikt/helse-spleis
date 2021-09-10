@@ -951,7 +951,7 @@ internal class Arbeidsgiver private constructor(
         inntektshistorikk.sykepengegrunnlagKommerFraSkatt(skjæringstidspunkt)
 
     internal fun harVedtaksperiodeMedUkjentArbeidsforhold(skjæringstidspunkt: LocalDate) =
-        !harAktivtArbeidsforhold(skjæringstidspunkt) && vedtaksperioder.any { it.harUferdigFørstegangsbehandling(skjæringstidspunkt) }
+        !harAktivtArbeidsforhold(skjæringstidspunkt) && vedtaksperioder.any { it.gjelder(skjæringstidspunkt) }
 
     internal fun harGrunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
         inntektshistorikk.harGrunnlagForSykepengegrunnlag(skjæringstidspunkt) || vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt).harInntekt()

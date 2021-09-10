@@ -281,6 +281,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             })
         )),
         arbeidsforhold: List<Arbeidsforhold> = finnArbeidsgivere().map { Arbeidsforhold(it, LocalDate.EPOCH, null) },
+        opptjening: Opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
         fnr: String = UNG_PERSON_FNR_2018
     ) {
         fun assertEtterspurt(behovtype: Behovtype) =
@@ -291,12 +292,13 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         assertEtterspurt(Behovtype.ArbeidsforholdV2)
         assertEtterspurt(Behovtype.Medlemskap)
         vilkårsgrunnlag(
-            vedtaksperiodeId,
-            arbeidsforhold,
-            medlemskapstatus,
-            orgnummer,
-            inntektsvurdering,
-            inntektsvurderingForSykepengegrunnlag,
+            vedtaksperiodeId = vedtaksperiodeId,
+            medlemskapstatus = medlemskapstatus,
+            orgnummer = orgnummer,
+            arbeidsforhold = arbeidsforhold,
+            opptjening = opptjening,
+            inntektsvurdering = inntektsvurdering,
+            inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
             fnr = fnr
         ).håndter(Person::håndter)
     }
@@ -729,9 +731,10 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
 
     protected fun vilkårsgrunnlag(
         vedtaksperiodeId: UUID,
-        arbeidsforhold: List<Arbeidsforhold> = emptyList(),
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
         orgnummer: String = ORGNUMMER,
+        arbeidsforhold: List<Arbeidsforhold> = listOf(Arbeidsforhold(orgnummer, 1.januar(2017))),
+        opptjening: Opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
         inntektsvurdering: Inntektsvurdering,
         inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
         fnr: String = UNG_PERSON_FNR_2018
@@ -745,10 +748,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             inntektsvurdering = inntektsvurdering,
             inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
             medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
-            opptjeningvurdering = Opptjeningvurdering(arbeidsforhold.ifEmpty { listOf(Arbeidsforhold(orgnummer, 1.januar(2017))) }),
-            arbeidsforhold = arbeidsforhold.ifEmpty {
-                listOf(Arbeidsforhold(orgnummer, 1.januar(2017)))
-            }
+            opptjeningvurdering = opptjening,
+            arbeidsforhold = arbeidsforhold
         ).apply {
             hendelselogg = this
         }

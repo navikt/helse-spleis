@@ -1719,6 +1719,10 @@ internal class Vedtaksperiode private constructor(
             vilkårsgrunnlag.lagreArbeidsforhold(vedtaksperiode.person, vedtaksperiode.skjæringstidspunkt)
             vilkårsgrunnlag.lagreSkatteinntekter(vedtaksperiode.person, vedtaksperiode.skjæringstidspunkt)
 
+            if (vedtaksperiode.person.harVedtaksperiodeForArbeidsgiverMedUkjentArbeidsforhold(vedtaksperiode.skjæringstidspunkt)) {
+                vilkårsgrunnlag.warn("Arbeidsgiver er ikke registrert i Aa-registeret.")
+            }
+
             if (vedtaksperiode.person.harRelevanteArbeidsforholdForFlereArbeidsgivere(vedtaksperiode.skjæringstidspunkt)) {
                 vedtaksperiode.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE
             }
@@ -1849,9 +1853,6 @@ internal class Vedtaksperiode private constructor(
                     arbeidsgiver.beregn(this, arbeidsgiverUtbetalinger2, vedtaksperiode.periode)
                 }
                 onSuccess {
-                    if (person.harVedtaksperiodeForArbeidsgiverMedUkjentArbeidsforhold(vedtaksperiode.skjæringstidspunkt)) {
-                        ytelser.warn("Arbeidsgiver er ikke registrert i Aa-registeret.")
-                    }
                     if (vedtaksperiode.person.harKunEtAnnetAktivtArbeidsforholdEnn(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer)) {
                         ytelser.warn("Den sykmeldte har skiftet arbeidsgiver, og det er beregnet at den nye arbeidsgiveren mottar refusjon lik forrige. Kontroller at dagsatsen blir riktig.")
                     } else if (vedtaksperiode.person.harFlereArbeidsgivereUtenSykdomVedSkjæringstidspunkt(vedtaksperiode.skjæringstidspunkt)) {
@@ -2051,9 +2052,6 @@ internal class Vedtaksperiode private constructor(
     internal fun ikkeFerdigRevurdert() = tilstand in listOf(AvventerArbeidsgivereRevurdering, AvventerHistorikkRevurdering)
     internal fun avventerRevurdering() = tilstand in listOf(AvventerGjennomførtRevurdering, AvventerGodkjenningRevurdering)
     internal fun erITilstandForRevurdering() = tilstand == AvventerSimuleringRevurdering || ikkeFerdigRevurdert() || avventerRevurdering()
-
-    internal fun harUferdigFørstegangsbehandling(skjæringstidspunkt: LocalDate) =
-        this.skjæringstidspunkt == skjæringstidspunkt && !this.erUtbetalt() && this.periodetype() == FØRSTEGANGSBEHANDLING
 
     internal object AvventerGodkjenningRevurdering : Vedtaksperiodetilstand {
         override val type = AVVENTER_GODKJENNING_REVURDERING
