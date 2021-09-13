@@ -71,7 +71,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Teller ikke med utbetalinger gjort etter feriepengekjøring i IT`() {
+    fun `Teller ikke med utbetalinger gjort etter feriepengekjøring i IT - oppdatert for rekjøring i september`() {
         val historikk = utbetalingshistorikkForFeriepenger(
             listOf(
                 UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(
@@ -79,7 +79,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
                     1.desember(2017),
                     31.januar(2018),
                     1000,
-                    11.mai(2021)
+                    19.september(2021)
                 )
             )
         )

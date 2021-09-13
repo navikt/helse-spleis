@@ -158,7 +158,7 @@ internal class Feriepengeberegner(
         fun utbetalteDager(opptjeningsår: Year) = utbetalteDager.filter(opptjeningsårFilter(opptjeningsår))
 
         private inner class InfotrygdUtbetalteDagerVisitor : FeriepengeutbetalingsperiodeVisitor {
-            private fun erUtbetaltEtterFeriepengekjøringIT(utbetalt: LocalDate) = LocalDate.of(2021, 5, 8) <= utbetalt
+            private fun erUtbetaltEtterFeriepengekjøringIT(utbetalt: LocalDate) = LocalDate.of(2021, 9, 18) <= utbetalt
 
             override fun visitPersonutbetalingsperiode(orgnr: String, periode: Periode, beløp: Int, utbetalt: LocalDate) {
                 if(erUtbetaltEtterFeriepengekjøringIT(utbetalt)) return
