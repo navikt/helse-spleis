@@ -1,21 +1,16 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggles
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.TilstandType.*
-import no.nav.helse.testhelpers.desember
-import no.nav.helse.testhelpers.februar
+import no.nav.helse.testhelpers.*
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
-import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle
@@ -610,6 +605,34 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
             assertEquals(1, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode(haandtverkerne)).size)
             assertEquals(1, ikkeUtbetalteUtbetalingerForVedtaksperiode(2.vedtaksperiode(haandtverkerne)).size)
         }
+    }
+
+    @Test
+    fun `bug - forkastet og revurdert periode uten endring i utbetaling skal ikke filtreres vekk`() {
+        val (AG1, AG2) = "123456789" to "987654321"
+        nyeVedtak(1.januar, 31.januar, AG1, AG2)
+        forlengVedtak(1.februar, 28.februar, AG1, AG2)
+
+        håndterOverstyring((14.februar til 18.februar).map { manuellFeriedag(it) }, orgnummer = AG1)
+        håndterYtelser(2.vedtaksperiode(AG1), orgnummer = AG1)
+        håndterSimulering(2.vedtaksperiode(AG1), orgnummer = AG1)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode(AG1), orgnummer = AG1)
+        håndterUtbetalt(2.vedtaksperiode(AG1), orgnummer = AG1)
+
+        håndterYtelser(2.vedtaksperiode(AG2), orgnummer = AG2)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode(AG2), orgnummer = AG2)
+
+        forlengVedtak(1.mars, 31.mars, AG1, AG2)
+        håndterSykmelding(Sykmeldingsperiode(1.april, 22.april, 100.prosent), orgnummer = AG1)
+        håndterSykmelding(Sykmeldingsperiode(1.april, 23.april, 100.prosent), orgnummer = AG2)
+        håndterSøknad(Sykdom(1.april, 22.april, 100.prosent), orgnummer = AG1)
+        håndterSøknad(Sykdom(1.april, 23.april, 100.prosent), orgnummer = AG2)
+
+        val personDTO = speilApi()
+        val ag1 = personDTO.arbeidsgivere[0]
+        val ag2 = personDTO.arbeidsgivere[1]
+        assertEquals(3, ag1.vedtaksperioder.size)
+        assertEquals(3, ag2.vedtaksperioder.size)
     }
 
 }

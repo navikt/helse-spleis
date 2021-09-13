@@ -110,6 +110,7 @@ internal class Utbetaling private constructor(
     internal fun harFeilet() = tilstand == UtbetalingFeilet
     internal fun erAnnullering() = type == Utbetalingtype.ANNULLERING
     internal fun erEtterutbetaling() = type == Utbetalingtype.ETTERUTBETALING
+    internal fun revurdertUtenEndring() = type == Utbetalingtype.REVURDERING && tilstand == GodkjentUtenUtbetaling
 
     // this kan revurdere other gitt at fagsystemId == other.fagsystemId,
     // og at this er lik den siste aktive utbetalingen for fagsystemIden

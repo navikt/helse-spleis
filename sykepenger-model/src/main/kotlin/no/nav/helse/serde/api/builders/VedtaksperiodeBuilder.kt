@@ -264,7 +264,7 @@ internal class VedtaksperiodeBuilder(
                 utbetaling.erAnnullering() && utbetaling.erUtbetalt() -> TilstandstypeDTO.Annullert
                 utbetaling.erAnnullering() && utbetaling.harFeilet() -> TilstandstypeDTO.AnnulleringFeilet
                 utbetaling.erAnnullering() -> TilstandstypeDTO.TilAnnullering
-                utbetaling.harUtbetalinger() -> TilstandstypeDTO.Utbetalt
+                utbetaling.revurdertUtenEndring() || utbetaling.harUtbetalinger() -> TilstandstypeDTO.Utbetalt
                 utbetaling.utbetalingstidslinje(periode).kunFridager() -> TilstandstypeDTO.KunFerie
                 else -> TilstandstypeDTO.IngenUtbetaling
             }
