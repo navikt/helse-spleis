@@ -1,10 +1,7 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.til
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -1217,6 +1214,32 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVSLUTTET,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
+        )
+    }
+
+    @Test
+    fun `overstyre periode som etterfølges av forkastede perioder`() {
+        // Fremprovoserer et case hvor det at inntektsmeldingen kaster ut etterfølgende perioder fjerner låsene i sykdomshistorikken. Da kræsjer revurderingen
+        // fordi vi forsøker å låse opp perioder som ikke er låste.
+
+        nyttVedtak(1.januar, 31.januar)
+        forlengVedtak(1.februar, 28.februar)
+        forlengVedtak(1.mars, 31.mars)
+        håndterSykmelding(Sykmeldingsperiode(1.april, 10.april,100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Refusjon(2.april, INNTEKT))
+
+        håndterOverstyring((1..31).map { ManuellOverskrivingDag(it.mars, Dagtype.Feriedag) })
+
+        assertTilstander(
+            3.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_HISTORIKK_REVURDERING
         )
     }
 }

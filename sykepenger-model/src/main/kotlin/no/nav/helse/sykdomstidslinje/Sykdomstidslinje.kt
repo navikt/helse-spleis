@@ -115,23 +115,22 @@ internal class Sykdomstidslinje private constructor(
     internal fun forsøkUtvidelse(periode: Periode) =
         Sykdomstidslinje(dager.toSortedMap(), periode.merge(this.periode), låstePerioder.toMutableList()).takeIf { it.periode != this.periode }
 
+    internal fun erLåst(periode: Periode) = låstePerioder.contains(periode)
+
     internal fun lås(periode: Periode) = this.also {
         requireNotNull(this.periode)
         require(periode in this.periode)
         låstePerioder.add(periode)
     }
 
+    internal fun låsOpp(periode: Periode) = this.also {
+        låstePerioder.removeIf { it == periode } || throw IllegalArgumentException("Kan ikke låse opp periode $periode")
+    }
+
     override operator fun iterator() = object : Iterator<Dag> {
         private val periodeIterator = periode?.iterator()
         override fun hasNext() = periodeIterator?.hasNext() ?: false
         override fun next() = this@Sykdomstidslinje[periodeIterator?.next() ?: throw NoSuchElementException()]
-    }
-
-    /**
-     * Støtter kun å låse opp de perioder som tidligere har blitt låst
-     */
-    internal fun låsOpp(periode: Periode) = this.also {
-        låstePerioder.removeIf { it == periode } || throw IllegalArgumentException("Kan ikke låse opp periode $periode")
     }
 
     internal fun sisteSkjæringstidspunktTidligereEnn(kuttdato: LocalDate) =

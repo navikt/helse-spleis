@@ -633,7 +633,13 @@ internal class Arbeidsgiver private constructor(
     internal fun oppdaterHistorikkRevurdering(hendelse: OverstyrTidslinje) {
         hendelse.info("Oppdaterer sykdomshistorikk med overstyrte dager")
         val overlappendePerioder = overlappendePerioder(hendelse)
-        overlappendePerioder.forEach { låsOpp(it.periode()) }
+        overlappendePerioder.forEach {
+            // Vi har hatt en bug der vi opprettet nye elementer i sykdomshistorikken uten å kopiere låser. Derfor er låsene inkonsistente
+            // og vi må i revurderingsøyemed sjekke før vi låser opp.
+            if(sykdomshistorikk.sykdomstidslinje().erLåst(it.periode())) {
+                låsOpp(it.periode())
+            }
+        }
         oppdaterSykdom(hendelse)
         overlappendePerioder.forEach { lås(it.periode()) }
     }
@@ -825,7 +831,7 @@ internal class Arbeidsgiver private constructor(
         sykdomshistorikk.sykdomstidslinje().lås(periode)
     }
 
-    internal fun låsOpp(periode: Periode) {
+    private fun låsOpp(periode: Periode) {
         sykdomshistorikk.sykdomstidslinje().låsOpp(periode)
     }
 

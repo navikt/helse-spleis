@@ -158,6 +158,21 @@ internal class SykdomstidslinjeTest {
         assertTrue(skjæringstidspunkter.contains(14.februar))
     }
 
+    @Test
+    fun `erlåst - låst periode`() {
+        val tidslinje = 24.S
+        val periode = requireNotNull(tidslinje.periode())
+        tidslinje.lås(periode)
+        assertTrue(tidslinje.erLåst(periode))
+    }
+
+    @Test
+    fun `erlåst - ikke låst periode`() {
+        val tidslinje = 24.S
+        val periode = requireNotNull(tidslinje.periode())
+        assertFalse(tidslinje.erLåst(periode))
+    }
+
     private val konfliktsky = { venstre: Dag, høyre: Dag ->
         when {
             venstre is Dag.UkjentDag -> høyre
