@@ -134,7 +134,10 @@ internal class Sykdomshistorikk private constructor(
                 historikk: Sykdomshistorikk,
                 periode: Periode
             ) : Element {
-                return Element(beregnetSykdomstidslinje = historikk.sykdomstidslinje().trim(periode))
+                val orginalTidslinje = historikk.sykdomstidslinje()
+                val trimmetTidslinje = orginalTidslinje.trim(periode)
+                    .also { it.kopierLåser(orginalTidslinje) }
+                return Element(beregnetSykdomstidslinje = trimmetTidslinje)
             }
         }
     }
