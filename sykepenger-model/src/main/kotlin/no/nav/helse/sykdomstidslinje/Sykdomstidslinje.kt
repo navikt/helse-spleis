@@ -9,6 +9,7 @@ import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.sykdomstidslinje.Dag.Companion.default
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
+import no.nav.helse.sykdomstidslinje.Dag.Companion.toDatoDagMap
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
@@ -30,6 +31,8 @@ internal class Sykdomstidslinje private constructor(
     private val periode: Periode? = periode ?: if (dager.size > 0) Periode(dager.firstKey(), dager.lastKey()) else null
 
     internal constructor(dager: Map<LocalDate, Dag> = emptyMap()) : this(dager.toSortedMap())
+
+    internal constructor(dager: Collection<Dag>) : this(dager.toDatoDagMap())
 
     internal constructor(original: Sykdomstidslinje, spanningPeriode: Periode) :
         this(original.dager, original.periode?.merge(spanningPeriode), original.låstePerioder)
@@ -60,6 +63,13 @@ internal class Sykdomstidslinje private constructor(
             nyeDager.toSortedMap(),
             this.periode?.merge(other.periode) ?: other.periode,
             this.låstePerioder.toMutableList()
+        )
+    }
+
+    internal fun filtrerVekk(other: Sykdomstidslinje): Sykdomstidslinje {
+        val nyeDager = dager.toMap(mutableMapOf<LocalDate, Dag>()).filterNot { it.key in other.dager.keys }
+        return Sykdomstidslinje(
+            nyeDager.toSortedMap(),
         )
     }
 
@@ -198,10 +208,15 @@ internal class Sykdomstidslinje private constructor(
 
     internal fun harSykedager() = any { it is Sykedag || it is SykHelgedag || it is ForeldetSykedag }
 
+    internal fun harProblemdager() = any { it is ProblemDag }
+
     private fun kunSykedager() =
         this.dager
             .filterValues { erEnSykedag(it) }
             .map { it.key }
+
+    internal fun kunFeriedager() =
+        this.dager.filter { erFeriedag(it.key) }
 
     private fun sisteOppholdsdag() = periode?.lastOrNull { erOppholdsdag(it) }
     private fun sisteOppholdsdag(før: LocalDate) = periode?.filter { erOppholdsdag(it) }?.lastOrNull { it.isBefore(før) }
@@ -214,6 +229,9 @@ internal class Sykdomstidslinje private constructor(
 
     private fun erArbeidsdag(dato: LocalDate) =
         this[dato] is Arbeidsdag || this[dato] is FriskHelgedag
+
+    private fun erFeriedag(dato: LocalDate) =
+        this[dato] is Feriedag
 
     private fun erGyldigHelgegap(dato: LocalDate): Boolean {
         if (!dato.erHelg()) return false

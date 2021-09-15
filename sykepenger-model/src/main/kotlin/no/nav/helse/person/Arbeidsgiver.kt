@@ -310,7 +310,16 @@ internal class Arbeidsgiver private constructor(
         håndterEllerOpprettVedtaksperiode(sykmelding, Vedtaksperiode::håndter)
     }
 
+    private fun korrigerFerieIForkant(søknad: Søknad) {
+        val feriedagerPåStartAvSøknad = søknad.feriedagerIForkantAvSykmeldingsperiode() ?: return
+        søknad.leggTilFeriedagerSomIkkeSkalVæreMedISykdomstidslinja(feriedagerPåStartAvSøknad)
+        if (vedtaksperioder.any {it.overlapperMenUlikFerieinformasjon(feriedagerPåStartAvSøknad)}) {
+            søknad.warn("Det er oppgitt ny informasjon om ferie i søknaden som det ikke har blitt opplyst om tidligere. Tidligere periode må revurderes.")
+        }
+    }
+
     internal fun håndter(søknad: Søknad) {
+        korrigerFerieIForkant(søknad)
         if (Toggles.OppretteVedtaksperioderVedSøknad.enabled) return håndterEllerOpprettVedtaksperiode(søknad, Vedtaksperiode::håndter)
         søknad.kontekst(this)
         noenHarHåndtert(søknad, Vedtaksperiode::håndter, "Forventet ikke søknad. Har nok ikke mottatt sykmelding")

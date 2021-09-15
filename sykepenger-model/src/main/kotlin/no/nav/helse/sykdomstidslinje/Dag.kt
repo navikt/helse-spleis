@@ -39,6 +39,8 @@ internal sealed class Dag(
     }
 
     companion object {
+        internal fun Collection<Dag>.toDatoDagMap(): Map<LocalDate, Dag> = this.associateBy { it.dato }
+
         internal val default: BesteStrategy = { venstre: Dag, høyre: Dag ->
             require(venstre.dato == høyre.dato) { "Støtter kun sammenlikning av dager med samme dato" }
             if (venstre == høyre) venstre else ProblemDag(

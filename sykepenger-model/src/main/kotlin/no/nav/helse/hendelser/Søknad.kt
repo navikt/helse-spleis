@@ -27,6 +27,7 @@ class Søknad(
 
     private val sykdomsperiode: Periode
     private val sykdomstidslinje: Sykdomstidslinje
+    private var sykdomstidslinjeUtenUønsketFerieIForkant: Sykdomstidslinje? = null
 
     private companion object {
         private const val tidslinjegrense = 40L
@@ -45,7 +46,8 @@ class Søknad(
         if (it) error("Søknaden kan ikke være eldre enn avskjæringsdato")
     }
 
-    override fun sykdomstidslinje() = sykdomstidslinje
+    override fun sykdomstidslinje() =
+        sykdomstidslinjeUtenUønsketFerieIForkant ?: sykdomstidslinje
 
     override fun fødselsnummer() = fnr
 
@@ -76,6 +78,18 @@ class Søknad(
     override fun melding(klassName: String) = "Søknad"
 
     internal fun harArbeidsdager() = perioder.filterIsInstance<Søknadsperiode.Arbeid>().isNotEmpty()
+
+    internal fun feriedagerIForkantAvSykmeldingsperiode(): Sykdomstidslinje? {
+        val sykmeldingFom = sykdomsperiode.start
+        return sykdomstidslinje.kunFeriedager().filter { it.key < sykmeldingFom }.let { if (it.isNotEmpty()) Sykdomstidslinje(it) else null}
+    }
+
+    // registrerer feriedager i forkant av sykmeldingsperioden i søknaden som vi ikke ønsker å beholde
+    // kan fjernes når søkere ikke lenger har anledning til å oppgi slik informasjon
+    internal fun leggTilFeriedagerSomIkkeSkalVæreMedISykdomstidslinja(feriedagerÅFjerne: Sykdomstidslinje) {
+        sykdomstidslinjeUtenUønsketFerieIForkant = sykdomstidslinje.filtrerVekk(feriedagerÅFjerne)
+        info("Feriedager oppgitt i forkant av sykmeldingsperiode, oversees")
+    }
 
     private fun avskjæringsdato(): LocalDate = sendtTilNAV.toLocalDate().minusMonths(3).withDayOfMonth(1)
 
