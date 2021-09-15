@@ -7,7 +7,6 @@ import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.serde.DateRanges
 import no.nav.helse.serde.PersonData
-import no.nav.helse.serde.reflection.serialiserØkonomi
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
@@ -311,7 +310,7 @@ internal class Utbetalingstidslinje private constructor(
         internal open fun toMap() = mutableMapOf<String, Any?>(
             "type" to serialiseringstype()
         ).apply {
-            putAll(serialiserØkonomi(økonomi))
+            putAll(økonomi.toMap())
         }
 
         internal class NavDag(
@@ -374,7 +373,7 @@ internal class Utbetalingstidslinje private constructor(
                 "type" to PersonData.UtbetalingstidslinjeData.TypeData.AvvistDag,
                 "begrunnelser" to begrunnelser.map { PersonData.UtbetalingstidslinjeData.BegrunnelseData.fraBegrunnelse(it).name }
             ).apply {
-                putAll(serialiserØkonomi(økonomi))
+                putAll(økonomi.toMap())
             }
             override fun serialiseringstype(): PersonData.UtbetalingstidslinjeData.TypeData = PersonData.UtbetalingstidslinjeData.TypeData.AvvistDag
         }

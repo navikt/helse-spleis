@@ -165,6 +165,28 @@ internal class Økonomi private constructor(
 
     internal fun låsOpp() = tilstand.låsOpp(this)
 
+    internal fun toMap() = mutableMapOf<String, Any>().also { map ->
+        medData { grad,
+                  arbeidsgiverBetalingProsent,
+                  dekningsgrunnlag,
+                  skjæringstidspunkt,
+                  totalGrad,
+                  aktuellDagsinntekt,
+                  arbeidsgiverbeløp,
+                  personbeløp,
+                  er6GBegrenset ->
+            map["grad"] = grad
+            map["arbeidsgiverBetalingProsent"] = arbeidsgiverBetalingProsent
+            map.compute("skjæringstidspunkt") { _, _ -> skjæringstidspunkt }
+            map.compute("totalGrad") { _, _ -> totalGrad }
+            map.compute("dekningsgrunnlag") { _, _ -> dekningsgrunnlag }
+            map.compute("aktuellDagsinntekt") { _, _ -> aktuellDagsinntekt }
+            map.compute("arbeidsgiverbeløp") { _, _ -> arbeidsgiverbeløp }
+            map.compute("personbeløp") { _, _ -> personbeløp }
+            map.compute("er6GBegrenset") { _, _ -> er6GBegrenset }
+        }
+    }
+
     internal fun <R> medData(lambda: MedØkonomiData<R>) = tilstand.medData(this, lambda)
 
     internal fun <R> medAvrundetData(

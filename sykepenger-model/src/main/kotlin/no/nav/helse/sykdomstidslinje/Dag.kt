@@ -2,7 +2,6 @@ package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.serde.PersonData
-import no.nav.helse.serde.reflection.serialiserØkonomi
 import no.nav.helse.økonomi.Økonomi
 import java.time.DayOfWeek.*
 import java.time.LocalDate
@@ -135,7 +134,7 @@ internal sealed class Dag(
     ) : Dag(dato, kilde) {
 
         override fun accept(visitor: SykdomstidslinjeVisitor) = økonomi.accept(visitor, this, dato, kilde)
-        override fun leggTilEventueltØkonomiMap(map: MutableMap<String, Any>) = map.putAll(serialiserØkonomi(økonomi))
+        override fun leggTilEventueltØkonomiMap(map: MutableMap<String, Any>) = map.putAll(økonomi.toMap())
     }
 
     internal class Feriedag(
@@ -163,7 +162,7 @@ internal sealed class Dag(
     ) : Dag(dato, kilde) {
 
         override fun accept(visitor: SykdomstidslinjeVisitor) = økonomi.accept(visitor, this, dato, kilde)
-        override fun leggTilEventueltØkonomiMap(map: MutableMap<String, Any>) = map.putAll(serialiserØkonomi(økonomi))
+        override fun leggTilEventueltØkonomiMap(map: MutableMap<String, Any>) = map.putAll(økonomi.toMap())
     }
 
     internal class Sykedag(
@@ -173,7 +172,7 @@ internal sealed class Dag(
     ) : Dag(dato, kilde) {
 
         override fun accept(visitor: SykdomstidslinjeVisitor) = økonomi.accept(visitor, this, dato, kilde)
-        override fun leggTilEventueltØkonomiMap(map: MutableMap<String, Any>) = map.putAll(serialiserØkonomi(økonomi))
+        override fun leggTilEventueltØkonomiMap(map: MutableMap<String, Any>) = map.putAll(økonomi.toMap())
     }
 
     internal class ForeldetSykedag(
@@ -183,7 +182,7 @@ internal sealed class Dag(
     ) : Dag(dato, kilde) {
 
         override fun accept(visitor: SykdomstidslinjeVisitor) = økonomi.accept(visitor, this, dato, kilde)
-        override fun leggTilEventueltØkonomiMap(map: MutableMap<String, Any>) = map.putAll(serialiserØkonomi(økonomi))
+        override fun leggTilEventueltØkonomiMap(map: MutableMap<String, Any>) = map.putAll(økonomi.toMap())
     }
 
     internal class SykHelgedag(
@@ -193,7 +192,7 @@ internal sealed class Dag(
     ) : Dag(dato, kilde) {
 
         override fun accept(visitor: SykdomstidslinjeVisitor) = økonomi.accept(visitor, this, dato, kilde)
-        override fun leggTilEventueltØkonomiMap(map: MutableMap<String, Any>) = map.putAll(serialiserØkonomi(økonomi))
+        override fun leggTilEventueltØkonomiMap(map: MutableMap<String, Any>) = map.putAll(økonomi.toMap())
     }
 
     internal class Permisjonsdag(
