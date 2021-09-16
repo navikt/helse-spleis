@@ -30,12 +30,6 @@ internal class Feriepengeutbetaling private constructor(
         fun List<Feriepengeutbetaling>.gjelderFeriepengeutbetaling(hendelse: UtbetalingHendelse) = any { hendelse.erRelevant(it.oppdrag.fagsystemId()) }
     }
 
-    private val observers = mutableListOf<UtbetalingObserver>()
-
-    internal fun registrer(observer: UtbetalingObserver) {
-        observers.add(observer)
-    }
-
     internal fun accept(visitor: FeriepengeutbetalingVisitor) {
         visitor.preVisitFeriepengeutbetaling(
             this,

@@ -88,7 +88,9 @@ internal class Arbeidsgiver private constructor(
                 arbeidsgiver.inntektshistorikk.grunnlagForSykepengegrunnlag(
                     skjæringstidspunkt,
                     maxOf(skjæringstidspunkt, periodeStart)
-                )?.let { ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, it) }
+                )
+//                    ?.takeIf { it is Inntektshistorikk.Infotrygd }
+                    ?.let { ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, it) }
             }
 
         internal fun List<Arbeidsgiver>.grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
@@ -286,8 +288,6 @@ internal class Arbeidsgiver private constructor(
             feriepengeutbetalinger.add(feriepengeutbetaling)
         }
 
-        feriepengeutbetaling.registrer(this)
-
         if (Toggles.SendFeriepengeOppdrag.enabled && feriepengeutbetaling.sendTilOppdrag) {
             feriepengeutbetaling.overfør(utbetalingshistorikkForFeriepenger)
         }
@@ -425,7 +425,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     private fun håndterFeriepengeUtbetaling(utbetalingHendelse: UtbetalingHendelse) {
-        feriepengeutbetalinger.map { it.håndter(utbetalingHendelse, person) }
+        feriepengeutbetalinger.forEach { it.håndter(utbetalingHendelse, person) }
     }
 
     private fun håndterUtbetaling(utbetaling: UtbetalingHendelse) {

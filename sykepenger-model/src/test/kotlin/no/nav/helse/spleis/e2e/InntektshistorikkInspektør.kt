@@ -22,7 +22,7 @@ internal class InntektshistorikkInspektør(arbeidsgiver: Arbeidsgiver) : Arbeids
 
     private val innslag = mutableListOf<Innslag>()
     private val inntektsopplysninger = mutableListOf<Opplysning>()
-    private lateinit var inntektshistorikk: Inntektshistorikk
+    internal lateinit var inntektshistorikk: Inntektshistorikk
 
     class Opplysning(
         val dato: LocalDate,

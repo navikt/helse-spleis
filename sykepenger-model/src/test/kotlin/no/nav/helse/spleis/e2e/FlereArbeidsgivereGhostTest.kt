@@ -1,16 +1,19 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.person.Inntektshistorikk.Skatt.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.person.Inntektskilde
-import no.nav.helse.testhelpers.april
-import no.nav.helse.testhelpers.desember
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.mars
+import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
+import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.YearMonth
+import java.util.*
 
 internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
     private companion object {
@@ -569,5 +572,31 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         )
 
         assertErrors(inspektør(a1))
+    }
+
+    @Disabled("Jobber med å identifisere feil etter fjerning av tilstand")
+    @Test
+    fun `bladibla-dibla`() {
+        håndterSykmelding(Sykmeldingsperiode(1.juni(2015), 10.juni(2015), 100.prosent), orgnummer = a2)
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(1.juni(2015), 10.juni(2015), 100.prosent), orgnummer = a2)
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
+
+        val utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar, 100.prosent, INNTEKT))
+        val inntektshistorikk = listOf(Inntektsopplysning(a1, 17.januar, INNTEKT, true))
+
+        håndterUtbetalingshistorikk(1.vedtaksperiode(a1), orgnummer = a1, utbetalinger = utbetalinger, inntektshistorikk = inntektshistorikk)
+
+        inspektør(a2).inntektInspektør.inntektshistorikk{
+            val hendelseId = UUID.randomUUID()
+            addSkattSykepengegrunnlag(17.januar, hendelseId, INNTEKT, YearMonth.of(2017,12), LØNNSINNTEKT, "fordel", "beskrivelse")
+            addSkattSykepengegrunnlag(17.januar, hendelseId, INNTEKT, YearMonth.of(2017,11), LØNNSINNTEKT, "fordel", "beskrivelse")
+            addSkattSykepengegrunnlag(17.januar, hendelseId, INNTEKT, YearMonth.of(2017,10), LØNNSINNTEKT, "fordel", "beskrivelse")
+        }
+
+        håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
+
+        assertEquals(1431, inspektør(a1).arbeidsgiverOppdrag.last().first().beløp)
     }
 }
