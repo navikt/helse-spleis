@@ -29,7 +29,7 @@ jobs:
       - name: test and build
         run: ./gradlew test build
         env:
-          JAVA_OPT: -Xmx2048m
+          JAVA_OPTS: -Xmx2048m
       - name: build docker image
         run: docker build . --pull -t ${{ needs.set_version.outputs.image }}
       - name: push docker image
