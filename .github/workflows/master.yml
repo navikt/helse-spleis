@@ -28,7 +28,7 @@ jobs:
         shell: bash
         run: |
             mkdir -p ~/.gradle/
-            echo "::set-env name=GRADLE_USER_HOME::$HOME/.gradle"
+            echo "GRADLE_USER_HOME=$HOME/.gradle" >> $GITHUB_ENV
             echo org.gradle.jvmargs=-Xmx2048m > ~/.gradle/gradle.properties
       - name: test and build
         run: ./gradlew test build
