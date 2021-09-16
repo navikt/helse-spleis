@@ -27,7 +27,9 @@ jobs:
       - name: print JAVA_OPTS
         run: echo $JAVA_OPTS
       - name: test and build
-        run: JAVA_OPTS="$JAVA_OPTS -Xmx2048m" ./gradlew test build
+        run: ./gradlew test build
+        env:
+          JAVA_OPT: -Xmx2048m
       - name: build docker image
         run: docker build . --pull -t ${{ needs.set_version.outputs.image }}
       - name: push docker image
