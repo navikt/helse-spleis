@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.antallEtterspurteBehov
 import no.nav.helse.etterspurteBehov
 import no.nav.helse.etterspurteBehovFinnes
 import no.nav.helse.hendelser.Periode
@@ -447,6 +448,9 @@ internal class TestArbeidsgiverInspektør(
     internal fun periodeErForkastet(id: UUID) = id.finn(vedtaksperiodeForkastet)
 
     internal fun periodeErIkkeForkastet(id: UUID) = !periodeErForkastet(id)
+
+    internal fun antallEtterspurteBehov(vedtaksperiodeId: UUID, behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
+        personLogg.antallEtterspurteBehov(vedtaksperiodeId, behovtype)
 
     internal fun etterspurteBehov(vedtaksperiodeId: UUID, behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
         personLogg.etterspurteBehovFinnes(vedtaksperiodeId, behovtype)

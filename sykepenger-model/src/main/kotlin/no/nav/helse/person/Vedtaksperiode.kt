@@ -1335,6 +1335,10 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.trengerYtelser(hendelse)
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            vedtaksperiode.trengerYtelser(påminnelse)
+        }
+
         override fun håndter(
             person: Person,
             arbeidsgiver: Arbeidsgiver,

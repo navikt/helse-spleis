@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.TestInstance.Lifecycle
 import java.time.LocalDateTime
+import java.util.*
 
 @TestInstance(Lifecycle.PER_CLASS)
 internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
@@ -1241,5 +1243,28 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVSLUTTET,
             AVVENTER_HISTORIKK_REVURDERING
         )
+    }
+
+    private fun assertEtterspurteYtelser(expected: Int, vedtaksperiode: UUID) {
+            assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiode, Aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger))
+            assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiode, Aktivitetslogg.Aktivitet.Behov.Behovtype.Pleiepenger))
+            assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiode, Aktivitetslogg.Aktivitet.Behov.Behovtype.Omsorgspenger))
+            assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiode, Aktivitetslogg.Aktivitet.Behov.Behovtype.Opplæringspenger))
+            assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiode, Aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger))
+            assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiode, Aktivitetslogg.Aktivitet.Behov.Behovtype.Dagpenger))
+            assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiode, Aktivitetslogg.Aktivitet.Behov.Behovtype.Institusjonsopphold))
+            assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiode, Aktivitetslogg.Aktivitet.Behov.Behovtype.Dødsinfo))
+    }
+
+    @Test
+    fun `etterspør ytelser ved påminnelser i avventer_historikk_revurdering`() {
+        nyttVedtak(1.januar, 31.januar)
+        assertEtterspurteYtelser(2, 1.vedtaksperiode)
+
+        håndterOverstyring((25.januar til 26.januar).map { manuellFeriedag(it) })
+        assertEtterspurteYtelser(3, 1.vedtaksperiode)
+
+        håndterPåminnelse(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        assertEtterspurteYtelser(4, 1.vedtaksperiode)
     }
 }

@@ -5,6 +5,11 @@ import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.TilstandType
 import java.util.*
 
+internal fun IAktivitetslogg.antallEtterspurteBehov(vedtaksperiodeId: UUID, behov: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
+    this.behov().filter {
+        it.kontekst()["vedtaksperiodeId"] == vedtaksperiodeId.toString()
+    }.filter { it.type == behov }.size
+
 internal fun IAktivitetslogg.etterspurteBehovFinnes(vedtaksperiodeId: UUID, behov: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
     this.behov().filter {
         it.kontekst()["vedtaksperiodeId"] == vedtaksperiodeId.toString()
