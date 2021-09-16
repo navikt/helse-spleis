@@ -1,4 +1,4 @@
-name: Bygg og deploy app
+name: Alt utenom API
 
 on:
   push:

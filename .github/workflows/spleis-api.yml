@@ -1,4 +1,4 @@
-name: Bygg og deploy api
+name: API
 
 on:
   push:
