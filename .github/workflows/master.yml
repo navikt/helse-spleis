@@ -24,6 +24,12 @@ jobs:
       - uses: actions/setup-java@v1
         with:
           java-version: '16.x'
+      - name: lag gradle.properties
+        shell: bash
+        run: |
+            mkdir -p ~/.gradle/
+            echo "::set-env name=GRADLE_USER_HOME::$HOME/.gradle"
+            echo org.gradle.jvmargs=-Xmx2048m > ~/.gradle/gradle.properties
       - name: test and build
         run: ./gradlew test build
         env:
