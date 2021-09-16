@@ -25,7 +25,7 @@ jobs:
         with:
           java-version: '16.x'
       - name: test and build
-        run: ./gradlew test build
+        run: GRADLE_OPTS=-Xmx2048m ./gradlew test build
       - name: build docker image
         run: docker build . --pull -t ${{ needs.set_version.outputs.image }}
       - name: push docker image
