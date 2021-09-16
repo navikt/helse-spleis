@@ -24,12 +24,10 @@ jobs:
       - uses: actions/setup-java@v1
         with:
           java-version: '16.x'
-      - name: print JAVA_OPTS
-        run: echo $JAVA_OPTS
       - name: test and build
         run: ./gradlew test build
         env:
-          JAVA_OPTS: -Xmx2048m
+          JAVA_OPTS: -Xmx4096m
       - name: build docker image
         run: docker build . --pull -t ${{ needs.set_version.outputs.image }}
       - name: push docker image
