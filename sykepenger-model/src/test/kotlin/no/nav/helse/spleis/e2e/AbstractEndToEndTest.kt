@@ -115,13 +115,13 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     }
 
     protected fun assertWarningTekst(inspektør: TestArbeidsgiverInspektør, vararg warnings: String) {
-        val warningList = warnings.toMutableList()
+        val wantedWarnings = warnings.toMutableList()
         inspektør.personLogg.accept(object : AktivitetsloggVisitor {
             override fun visitWarn(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Warn, melding: String, tidsstempel: String) {
-                assertTrue(warningList.remove(melding), "fant ikke warning $melding")
+                assertTrue(wantedWarnings.remove(melding), "fant ikke warning $melding")
             }
         })
-        assertTrue(warningList.isEmpty(), "har ikke fått warnings $warningList")
+        assertTrue(wantedWarnings.isEmpty(), "forventede warnings mangler: $wantedWarnings")
     }
 
     protected fun assertErrorTekst(inspektør: TestArbeidsgiverInspektør, vararg errors: String) {

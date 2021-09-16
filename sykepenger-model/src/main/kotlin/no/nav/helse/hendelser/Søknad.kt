@@ -143,8 +143,6 @@ class Søknad(
         }
 
         class Ferie(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom) {
-            override fun valider(søknad: Søknad) =
-                valider(søknad, "Søknaden inneholder Feriedager utenfor perioden søknaden gjelder for")
 
             override fun sykdomstidslinje(avskjæringsdato: LocalDate, kilde: Hendelseskilde) =
                 Sykdomstidslinje.feriedager(periode.start, periode.endInclusive, kilde)

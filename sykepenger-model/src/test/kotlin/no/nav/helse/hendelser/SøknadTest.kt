@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.testhelpers.desember
+import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mai
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -86,9 +87,15 @@ internal class SøknadTest {
     }
 
     @Test
-    fun `ferie ligger utenfor sykdomsvindu`() {
+    fun `ferie foran sykdomsvindu`() {
+        søknad(Sykdom(1.februar, 10.februar, 100.prosent), Ferie(20.januar, 31.januar))
+        assertFalse(søknad.valider(EN_PERIODE).hasWarningsOrWorse())
+    }
+
+    @Test
+    fun `ferie etter sykdomsvindu - ikke et realistisk scenario`() {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent), Ferie(2.januar, 16.januar))
-        assertTrue(søknad.valider(EN_PERIODE).hasWarningsOrWorse())
+        assertFalse(søknad.valider(EN_PERIODE).hasWarningsOrWorse())
     }
 
     @Test
