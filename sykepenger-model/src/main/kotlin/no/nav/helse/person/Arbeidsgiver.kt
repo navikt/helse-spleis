@@ -84,13 +84,13 @@ internal class Arbeidsgiver private constructor(
             this.count { arbeidsgiver -> arbeidsgiver.vedtaksperioder.any { vedtaksperiode -> vedtaksperiode.gjelder(skjæringstidspunkt) } }
 
         internal fun List<Arbeidsgiver>.grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, periodeStart: LocalDate) =
-            this.mapNotNull { arbeidsgiver ->
-                arbeidsgiver.inntektshistorikk.grunnlagForSykepengegrunnlag(
+            fold(emptyList<ArbeidsgiverInntektsopplysning>()) { inntektsopplysninger, arbeidsgiver ->
+                val inntektsopplysning = arbeidsgiver.inntektshistorikk.grunnlagForSykepengegrunnlag(
                     skjæringstidspunkt,
                     maxOf(skjæringstidspunkt, periodeStart)
                 )
-//                    ?.takeIf { it is Inntektshistorikk.Infotrygd }
-                    ?.let { ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, it) }
+                if (inntektsopplysning == null || inntektsopplysning !is Inntektshistorikk.Infotrygd) inntektsopplysninger
+                else inntektsopplysninger + ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, inntektsopplysning)
             }
 
         internal fun List<Arbeidsgiver>.grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
@@ -313,7 +313,7 @@ internal class Arbeidsgiver private constructor(
     private fun korrigerFerieIForkant(søknad: Søknad) {
         val feriedagerPåStartAvSøknad = søknad.feriedagerIForkantAvSykmeldingsperiode() ?: return
         søknad.leggTilFeriedagerSomIkkeSkalVæreMedISykdomstidslinja(feriedagerPåStartAvSøknad)
-        if (vedtaksperioder.any {it.overlapperMenUlikFerieinformasjon(feriedagerPåStartAvSøknad)}) {
+        if (vedtaksperioder.any { it.overlapperMenUlikFerieinformasjon(feriedagerPåStartAvSøknad) }) {
             søknad.warn("Det er oppgitt ny informasjon om ferie i søknaden som det ikke har blitt opplyst om tidligere. Tidligere periode må revurderes.")
         }
     }
@@ -645,7 +645,7 @@ internal class Arbeidsgiver private constructor(
         overlappendePerioder.forEach {
             // Vi har hatt en bug der vi opprettet nye elementer i sykdomshistorikken uten å kopiere låser. Derfor er låsene inkonsistente
             // og vi må i revurderingsøyemed sjekke før vi låser opp.
-            if(sykdomshistorikk.sykdomstidslinje().erLåst(it.periode())) {
+            if (sykdomshistorikk.sykdomstidslinje().erLåst(it.periode())) {
                 låsOpp(it.periode())
             }
         }

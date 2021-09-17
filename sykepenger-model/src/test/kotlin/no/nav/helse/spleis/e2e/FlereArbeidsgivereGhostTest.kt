@@ -9,7 +9,6 @@ import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.YearMonth
@@ -574,11 +573,15 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         assertErrors(inspektør(a1))
     }
 
-    @Disabled("Jobber med å identifisere feil etter fjerning av tilstand")
     @Test
-    fun `bladibla-dibla`() {
-        håndterSykmelding(Sykmeldingsperiode(1.juni(2015), 10.juni(2015), 100.prosent), orgnummer = a2)
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(1.juni(2015), 10.juni(2015), 100.prosent), orgnummer = a2)
+    fun `Ignorerer skatteinntekter hentet før vilkårsgrunnlag for infotrygd ble lagret`() {
+        /*
+        * Denne testen passer på at vi ikke tar med skatteinntekter ved overgang fra infotrygd.
+        * Tidligere hentet vi skatteinntekter i tilstanden Utbetalingsgrunnlag som lå rett før AvventerHistorikk.
+        * For de vedtaksperiodene som allerede hadde hentet skatteinntekter via denne tilstanden,
+        * ble skatteinntektene lagret og tatt med i sykepengegrunnlaget for infotrygd.
+        * Sykepengegrunnlaget for infotrygd skal utelukkende være basert på inntekter fra infotrygd
+        * */
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
@@ -588,11 +591,14 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         håndterUtbetalingshistorikk(1.vedtaksperiode(a1), orgnummer = a1, utbetalinger = utbetalinger, inntektshistorikk = inntektshistorikk)
 
-        inspektør(a2).inntektInspektør.inntektshistorikk{
+        person.lagreArbeidsforhold(a1, listOf(Arbeidsforhold(a1, LocalDate.EPOCH)), person.aktivitetslogg, 17.januar)
+        person.lagreArbeidsforhold(a2, listOf(Arbeidsforhold(a2, LocalDate.EPOCH)), person.aktivitetslogg, 17.januar)
+
+        inspektør(a2).inntektInspektør.inntektshistorikk {
             val hendelseId = UUID.randomUUID()
-            addSkattSykepengegrunnlag(17.januar, hendelseId, INNTEKT, YearMonth.of(2017,12), LØNNSINNTEKT, "fordel", "beskrivelse")
-            addSkattSykepengegrunnlag(17.januar, hendelseId, INNTEKT, YearMonth.of(2017,11), LØNNSINNTEKT, "fordel", "beskrivelse")
-            addSkattSykepengegrunnlag(17.januar, hendelseId, INNTEKT, YearMonth.of(2017,10), LØNNSINNTEKT, "fordel", "beskrivelse")
+            addSkattSykepengegrunnlag(17.januar, hendelseId, INNTEKT, YearMonth.of(2017, 12), LØNNSINNTEKT, "fordel", "beskrivelse")
+            addSkattSykepengegrunnlag(17.januar, hendelseId, INNTEKT, YearMonth.of(2017, 11), LØNNSINNTEKT, "fordel", "beskrivelse")
+            addSkattSykepengegrunnlag(17.januar, hendelseId, INNTEKT, YearMonth.of(2017, 10), LØNNSINNTEKT, "fordel", "beskrivelse")
         }
 
         håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
