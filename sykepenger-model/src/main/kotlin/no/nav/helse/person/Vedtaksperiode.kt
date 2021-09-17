@@ -330,6 +330,10 @@ internal class Vedtaksperiode private constructor(
     private fun erAvsluttet() =
         utbetaling?.erAvsluttet() == true || tilstand == AvsluttetUtenUtbetaling
 
+    internal fun kanForkastes(annullerteFagsystemIder: List<String>) = !erAvsluttet() || harAnnullertUtbetaling(annullerteFagsystemIder)
+
+    private fun harAnnullertUtbetaling(annullerteFagsystemIder: List<String>) = utbetalinger.flatMap { it.fagsystemIder() }.any { annullerteFagsystemIder.contains(it) }
+
     private fun erUtbetalt() = tilstand == Avsluttet && utbetaling?.erAvsluttet() == true
 
     private fun sammeArbeidsgiverperiode(other: Vedtaksperiode): Boolean {

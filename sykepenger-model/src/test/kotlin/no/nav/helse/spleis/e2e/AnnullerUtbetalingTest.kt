@@ -302,8 +302,8 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
             assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
             assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(2.vedtaksperiode))
             assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(3.vedtaksperiode))
-            assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
-            assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
+            assertFalse(inspektør.periodeErForkastet(1.vedtaksperiode))
+            assertFalse(inspektør.periodeErForkastet(2.vedtaksperiode))
             assertTrue(inspektør.periodeErForkastet(3.vedtaksperiode))
         }
     }

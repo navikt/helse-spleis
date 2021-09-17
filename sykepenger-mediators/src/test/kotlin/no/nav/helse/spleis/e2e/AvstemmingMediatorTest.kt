@@ -16,7 +16,7 @@ import java.util.*
 internal class AvstemmingMediatorTest : AbstractEndToEndMediatorTest() {
 
     @Test
-    fun `avstemming`() {
+    fun avstemming() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
@@ -47,18 +47,18 @@ internal class AvstemmingMediatorTest : AbstractEndToEndMediatorTest() {
         assertEquals(AKTØRID, avstemt.path("aktørId").asText())
         assertEquals(1, avstemt.path("arbeidsgivere").size())
         assertEquals(ORGNUMMER, avstemt.path("arbeidsgivere").path(0).path("organisasjonsnummer").asText())
-        assertEquals(1, vedtaksperioder.size())
+        assertEquals(2, vedtaksperioder.size())
         assertDoesNotThrow { UUID.fromString(vedtaksperioder.path(0).path("id").asText()) }
-        assertEquals("AVVENTER_SIMULERING", vedtaksperioder.path(0).path("tilstand").asText())
+        assertEquals("AVSLUTTET", vedtaksperioder.path(0).path("tilstand").asText())
         assertDoesNotThrow { LocalDateTime.parse(vedtaksperioder.path(0).path("tidsstempel").asText()) }
+        assertDoesNotThrow { UUID.fromString(vedtaksperioder.path(1).path("id").asText()) }
+        assertEquals("AVVENTER_SIMULERING", vedtaksperioder.path(1).path("tilstand").asText())
+        assertDoesNotThrow { LocalDateTime.parse(vedtaksperioder.path(1).path("tidsstempel").asText()) }
 
-        assertEquals(2, forkastedeVedtaksperioder.size())
+        assertEquals(1, forkastedeVedtaksperioder.size())
         assertDoesNotThrow { UUID.fromString(forkastedeVedtaksperioder.path(0).path("id").asText()) }
-        assertEquals("AVSLUTTET", forkastedeVedtaksperioder.path(0).path("tilstand").asText())
+        assertEquals("TIL_INFOTRYGD", forkastedeVedtaksperioder.path(0).path("tilstand").asText())
         assertDoesNotThrow { LocalDateTime.parse(forkastedeVedtaksperioder.path(0).path("tidsstempel").asText()) }
-        assertDoesNotThrow { UUID.fromString(forkastedeVedtaksperioder.path(1).path("id").asText()) }
-        assertEquals("TIL_INFOTRYGD", forkastedeVedtaksperioder.path(1).path("tilstand").asText())
-        assertDoesNotThrow { LocalDateTime.parse(forkastedeVedtaksperioder.path(1).path("tidsstempel").asText()) }
 
         assertEquals(2, utbetalinger.size())
         assertDoesNotThrow { UUID.fromString(utbetalinger.path(0).path("id").asText()) }

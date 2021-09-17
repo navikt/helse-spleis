@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
-import no.nav.helse.person.TilstandType
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.testhelpers.januar
 import no.nav.inntektsmeldingkontrakt.Naturalytelse
@@ -137,7 +136,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         assertEquals(UNG_PERSON_FNR_2018, annulleringsmelding.path("fødselsnummer").asText())
         assertEquals(AKTØRID, annulleringsmelding.path("aktørId").asText())
         assertEquals(ORGNUMMER, annulleringsmelding.path("organisasjonsnummer").asText())
-        assertForkastedeTilstander(
+        assertTilstander(
             0,
             "MOTTATT_SYKMELDING_FERDIG_GAP",
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
@@ -329,18 +328,12 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun `replayer inntektsmeldinger hvis er i gap og venter på inntektsmelding og forrige periode er sendt til IT`() {
-        sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 15.januar, sykmeldingsgrad = 100))
-        sendSøknadArbeidsgiver(0, listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 15.januar, sykmeldingsgrad = 100)))
-        sendInntektsmelding(0, listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar, opphørsdatoForRefusjon = 1.januar)
+    fun `replayer inntektsmeldinger hvis er i gap og venter på inntektsmelding`() {
+        sendInntektsmelding(listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
+        sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 20.januar, sykmeldingsgrad = 100))
+        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 20.januar, sykmeldingsgrad = 100)))
 
-        sendNySøknad(SoknadsperiodeDTO(fom = 16.januar, tom = 25.januar, sykmeldingsgrad = 100))
-        sendSøknad(1, listOf(SoknadsperiodeDTO(fom = 16.januar, tom = 25.januar, sykmeldingsgrad = 100)))
-        sendUtbetalingshistorikk(1)
-        sendNyPåminnelse(1, TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
-
-        assertForkastedeTilstander(0, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVSLUTTET_UTEN_UTBETALING")
-        assertForkastedeTilstander(1, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP", "TIL_INFOTRYGD")
+        assertTilstander(0, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP", "AVVENTER_HISTORIKK")
     }
 
     @Disabled("https://trello.com/c/Ob6kSelp")

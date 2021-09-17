@@ -285,7 +285,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             assertEquals(Periode(1.mars, 31.mars), it.first())
         }
 
-        assertForkastetPeriodeTilstander(
+        assertTilstander(
             1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
@@ -359,7 +359,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(4.vedtaksperiode, true)
         håndterUtbetalt(4.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
-        assertForkastetPeriodeTilstander(
+        assertTilstander(
             1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
@@ -398,7 +398,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         inspektør.utbetalinger.aktive().also { utbetalinger ->
             assertEquals(1, utbetalinger.size)
             UtbetalingstidslinjeInspektør(utbetalinger.first().utbetalingstidslinje()).also {
-                assertEquals(0, it.arbeidsgiverperiodeDagTeller)
+                assertEquals(15, it.arbeidsgiverperiodeDagTeller)
                 assertEquals(16, it.navDagTeller)
             }
         }

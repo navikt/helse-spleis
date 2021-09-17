@@ -121,6 +121,16 @@ internal abstract class AbstractEndToEndMediatorTest {
         opphørsdatoForRefusjon: LocalDate? = null
     ) {
         assertFalse(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Foreldrepenger))
+        sendInntektsmelding(arbeidsgiverperiode, førsteFraværsdag, opphørAvNaturalytelser, beregnetInntekt, opphørsdatoForRefusjon)
+    }
+
+    protected fun sendInntektsmelding(
+        arbeidsgiverperiode: List<Periode>,
+        førsteFraværsdag: LocalDate,
+        opphørAvNaturalytelser: List<OpphoerAvNaturalytelse> = emptyList(),
+        beregnetInntekt: Double = INNTEKT,
+        opphørsdatoForRefusjon: LocalDate? = null
+    ) {
         testRapid.sendTestMessage(
             meldingsfabrikk.lagInnteksmelding(
                 arbeidsgiverperiode,

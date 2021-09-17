@@ -1068,53 +1068,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `vilkårsgrunnlagfeil forkaster også tidligere AVSLUTTET_UTEN_UTBETALING`() {
-        håndterSykmelding(Sykmeldingsperiode(2.mars(2020), 29.mars(2020), 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(2.mars(2020), 29.mars(2020), 100.prosent))
-
-        håndterSykmelding(Sykmeldingsperiode(30.mars(2020), 15.april(2020), 100.prosent))
-
-        håndterSøknad(Sykdom(30.mars(2020), 15.april(2020), 100.prosent))
-
-        håndterInntektsmeldingMedValidering(
-            1.vedtaksperiode, listOf(
-                Periode(2.mars(2020), 2.mars(2020)),
-                Periode(16.mars(2020), 29.mars(2020)),
-                Periode(30.mars(2020), 30.mars(2020))
-            ), førsteFraværsdag = 16.mars(2020), refusjon = Refusjon(null, INNTEKT, emptyList())
-        )
-
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVSLUTTET_UTEN_UTBETALING
-        )
-        håndterYtelser(2.vedtaksperiode)
-        håndterVilkårsgrunnlag(
-            vedtaksperiodeId = 2.vedtaksperiode,
-            inntekt = INGEN
-        ) // make sure Vilkårsgrunnlag fails
-
-        assertForkastetPeriodeTilstander(
-            1.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVSLUTTET_UTEN_UTBETALING
-        )
-
-        assertForkastetPeriodeTilstander(
-            2.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-            AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
-            TIL_INFOTRYGD
-        )
-    }
-
-    @Test
     fun `ikke medlem avviser alle dager og legger på warning`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
@@ -1646,33 +1599,15 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
     @Test
     fun `sykdomstidslinje tømmes helt når perioder blir forkastet, dersom det ikke finnes noen perioder igjen`() {
-        //(prod-case der to dager ble igjen etter forkastelse, som medførte wonky sykdomstidslinje senere i behandlingen)
-        håndterSykmelding(Sykmeldingsperiode(27.april(2020), 30.april(2020), 100.prosent)) // (1.vedtaksperiode)
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(27.april(2020), 30.april(2020), 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(7.april(2020), 30.april(2020), 100.prosent)) // (1.vedtaksperiode)
+        håndterSøknad(Sykdom(7.april(2020), 30.april(2020), 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(8.juni(2020), 21.juni(2020), 100.prosent)) // (2.vedtaksperiode)
         håndterSøknad(Sykdom(8.juni(2020), 21.juni(2020), 100.prosent))
         håndterInntektsmelding(listOf(Periode(8.juni(2020), 23.juni(2020))), førsteFraværsdag = 8.juni(2020))
 
         håndterSykmelding(Sykmeldingsperiode(21.juni(2020), 11.juli(2020), 100.prosent))
-        håndterSøknad(Sykdom(21.juni(2020), 11.juli(2020), 100.prosent)) // (3.vedtaksperiode)
-
-        håndterSykmelding(Sykmeldingsperiode(12.juli(2020), 31.juli(2020), 100.prosent)) // (4.vedtaksperiode)
-        håndterSøknad(Sykdom(12.juli(2020), 31.juli(2020), 100.prosent))
-
-        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
-        assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
-        assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
-        assertTilstander(4.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE)
-        håndterUtbetalingshistorikk(
-            3.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 24.juni(2020), 11.juli(2020), 100.prosent, 1814.daglig),
-            inntektshistorikk = listOf(
-                Inntektsopplysning(ORGNUMMER, 24.juni(2020), INNTEKT, true)
-            )
-        )
-        assertTrue(inspektør.periodeErForkastet(3.vedtaksperiode))
-        assertTrue(inspektør.periodeErForkastet(4.vedtaksperiode))
+        assertNull(inspektør.sykdomstidslinje.periode(), "Sykdomstidslinja burde ikke ha en periode her, for alle vedtaksperioder skal være forkastet pga overlappende sykmelding")
     }
 
     @Test

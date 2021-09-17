@@ -22,10 +22,7 @@ internal class VedtaksperiodeAvbruttE2ETest : AbstractEndToEndTest() {
         håndterYtelser(4.vedtaksperiode)
         håndterSimulering(4.vedtaksperiode)
         håndterUtbetalingsgodkjenning(4.vedtaksperiode, false) // <- TIL_INFOTRYGD
-        assertEquals(4, observatør.avbruttePerioder())
-        assertEquals(AVSLUTTET, observatør.avbrutt(1.vedtaksperiode))
-        assertEquals(AVSLUTTET, observatør.avbrutt(2.vedtaksperiode))
-        assertEquals(AVSLUTTET, observatør.avbrutt(3.vedtaksperiode))
+        assertEquals(1, observatør.avbruttePerioder())
         assertEquals(TIL_INFOTRYGD, observatør.avbrutt(4.vedtaksperiode))
     }
 }

@@ -70,7 +70,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(21.november(2020), 10.desember(2020), 100.prosent))
         håndterSøknad(Sykdom(21.november(2020), 10.desember(2020), 100.prosent))
 
-        assertForkastetPeriodeTilstander(
+        assertTilstander(
             1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
@@ -162,7 +162,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         )
         håndterSøknad(Sykdom(21.november(2020), 10.desember(2020), 100.prosent))
 
-        assertForkastetPeriodeTilstander(
+        assertTilstander(
             1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
@@ -241,7 +241,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         )
         håndterSøknad(Sykdom(21.november(2020), 10.desember(2020), 100.prosent))
 
-        assertForkastetPeriodeTilstander(
+        assertTilstander(
             1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
@@ -320,12 +320,12 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(Periode(1.november(2020), 16.november(2020))),
             førsteFraværsdag = 1.november(2020),
-            refusjon = Refusjon(null, Inntekt.INGEN, emptyList()),
+            refusjon = Refusjon(null, INGEN, emptyList()),
             beregnetInntekt = INNTEKT
         )
         håndterSøknad(Sykdom(21.november(2020), 10.desember(2020), 100.prosent))
 
-        assertForkastetPeriodeTilstander(
+        assertTilstander(
             1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
@@ -373,7 +373,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         )
         håndterSøknad(Sykdom(21.november(2020), 10.desember(2020), 100.prosent))
 
-        assertForkastetPeriodeTilstander(
+        assertTilstander(
             1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
@@ -635,7 +635,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(22.januar, 31.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(22.januar, 1.februar, 100.prosent))
 
-        assertForkastetPeriodeTilstander(
+        assertTilstander(
             1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
@@ -775,17 +775,17 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(15.januar, 21.januar, 100.prosent))
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(15.januar, 21.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(22.januar, 7.februar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(22.januar, 7.februar, 100.prosent))
+        håndterSøknad(Sykdom(22.januar, 7.februar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(8.februar, 21.februar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(8.februar, 21.februar, 100.prosent))
+        håndterSøknad(Sykdom(8.februar, 21.februar, 100.prosent))
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(6.januar til 21.januar),
             førsteFraværsdag = 22.januar,
             refusjon = Refusjon(null, 25000.månedlig, emptyList()),
             beregnetInntekt = 30000.månedlig
         )
-        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
-        assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
+        assertFalse(inspektør.periodeErForkastet(1.vedtaksperiode))
+        assertFalse(inspektør.periodeErForkastet(2.vedtaksperiode))
         assertTrue(inspektør.periodeErForkastet(3.vedtaksperiode))
         assertTrue(inspektør.periodeErForkastet(4.vedtaksperiode))
     }
@@ -852,14 +852,14 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             beregnetInntekt = INGEN
         )
 
-        assertForkastetPeriodeTilstander(
+        assertTilstander(
             1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVSLUTTET_UTEN_UTBETALING,
         )
 
-        assertForkastetPeriodeTilstander(
+        assertTilstander(
             2.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_UFERDIG_GAP,
@@ -893,14 +893,14 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             beregnetInntekt = INGEN
         )
 
-        assertForkastetPeriodeTilstander(
+        assertTilstander(
             1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVSLUTTET_UTEN_UTBETALING,
         )
 
-        assertForkastetPeriodeTilstander(
+        assertTilstander(
             2.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
