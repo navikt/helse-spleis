@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 
 internal class CreateØkonomiTest {
@@ -125,7 +124,7 @@ internal class CreateØkonomiTest {
         totalGrad: Double? = null
     ) = PersonData.ArbeidsgiverData.SykdomstidslinjeData.DagData(
         PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG,
-        PersonData.ArbeidsgiverData.SykdomstidslinjeData.KildeData("type", UUID.randomUUID(), LocalDateTime.now()),
+        PersonData.ArbeidsgiverData.SykdomstidslinjeData.KildeData("type", UUID.randomUUID(), 1.januar.atStartOfDay()),
         grad,
         arbeidsgiverBetalingProsent,
         aktuellDagsinntekt,
@@ -154,7 +153,7 @@ internal class CreateØkonomiTest {
 
     private fun createØkonomi(dagData: PersonData.ArbeidsgiverData.SykdomstidslinjeData.DagData): Økonomi {
         lateinit var fangetØkonomi: Økonomi
-        dagData.parseDag(LocalDate.now()).accept(object : SykdomstidslinjeVisitor {
+        dagData.parseDag(1.januar).accept(object : SykdomstidslinjeVisitor {
             override fun visitDag(
                 dag: Dag.Sykedag,
                 dato: LocalDate,
