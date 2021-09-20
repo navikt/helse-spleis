@@ -2307,4 +2307,38 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             assertEquals(a2, it.arbeidsgiverOppdrag().mottaker())
         }
     }
+
+    @Test
+    fun `sykepengegrunnlag settes per arbeidsgiver i vedtakfattet-event`() {
+        val periode = 27.januar(2021) til 31.januar(2021)
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+
+        val inntektshistorikk = listOf(
+            Inntektsopplysning(a1, 20.januar(2021), INNTEKT, true),
+            Inntektsopplysning(a2, 20.januar(2021), 1000.00.månedlig, true)
+        )
+
+        val utbetalinger = arrayOf(
+            ArbeidsgiverUtbetalingsperiode(a1, 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(a2, 20.januar(2021), 26.januar(2021), 100.prosent, 1000.00.månedlig)
+        )
+
+        håndterUtbetalingshistorikk(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
+
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode(a2), orgnummer = a2)
+
+        håndterYtelser(1.vedtaksperiode(a1), orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
+
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), true, a1)
+        håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
+
+        assertEquals(31000.00 * 12, observatør.vedtakFattetEvent[1.vedtaksperiode(a1)]?.grunnlagForSykepengegrunnlagPerArbeidsgiver?.get(a1))
+        assertEquals(12000.00, observatør.vedtakFattetEvent[1.vedtaksperiode(a1)]?.grunnlagForSykepengegrunnlagPerArbeidsgiver?.get(a2))
+    }
 }

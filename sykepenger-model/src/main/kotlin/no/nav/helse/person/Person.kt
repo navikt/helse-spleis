@@ -17,6 +17,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.harRelevanteArbeidsforholdForF
 import no.nav.helse.person.Arbeidsgiver.Companion.kanOverstyres
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.relevanteArbeidsforhold
+import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.grunnlagForSykepengegrunnlagPerArbeidsgiver
 import no.nav.helse.person.Vedtaksperiode.Companion.ALLE
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -469,6 +470,9 @@ class Person private constructor(
 
     internal fun grunnlagForSykepengegrunnlagForInfotrygd(skjæringstidspunkt: LocalDate, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden: LocalDate) =
         Sykepengegrunnlag(arbeidsgivere.grunnlagForSykepengegrunnlag(skjæringstidspunkt, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden))
+
+    internal fun grunnlagForSykepengegrunnlagPerArbeidsgiver(skjæringstidspunkt: LocalDate) =
+        arbeidsgivere.grunnlagForSykepengegrunnlag(skjæringstidspunkt).grunnlagForSykepengegrunnlagPerArbeidsgiver()
 
     internal fun sammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =
         arbeidsgivere.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt)

@@ -545,7 +545,8 @@ internal class Vedtaksperiode private constructor(
 
     private fun vedtakFattet(hendelse: IAktivitetslogg) {
         val sykepengegrunnlag = person.sykepengegrunnlag(skjæringstidspunkt) ?: Inntekt.INGEN
-        Utbetaling.vedtakFattet(utbetaling, hendelse, person, id, periode, hendelseIder, skjæringstidspunkt, sykepengegrunnlag, inntekt() ?: Inntekt.INGEN)
+        val grunnlagForSykepengegrunnlag = person.grunnlagForSykepengegrunnlagPerArbeidsgiver(skjæringstidspunkt)
+        Utbetaling.vedtakFattet(utbetaling, hendelse, person, id, periode, hendelseIder, skjæringstidspunkt, sykepengegrunnlag, grunnlagForSykepengegrunnlag, inntekt() ?: Inntekt.INGEN)
     }
 
     private fun tickleForArbeidsgiveravhengighet(påminnelse: Påminnelse) {

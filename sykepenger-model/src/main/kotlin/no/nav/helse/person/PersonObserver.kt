@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Påminnelse
+import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -192,6 +193,7 @@ interface PersonObserver {
         val hendelseIder: Set<UUID>,
         val skjæringstidspunkt: LocalDate,
         val sykepengegrunnlag: Double,
+        val grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Double>,
         val inntekt: Double,
         val utbetalingId: UUID?
     )
