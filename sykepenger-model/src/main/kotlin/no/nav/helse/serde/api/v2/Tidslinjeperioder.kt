@@ -2,71 +2,89 @@ package no.nav.helse.serde.api.v2
 
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
+import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.person.Vedtaksperiode.AvsluttetUtenUtbetaling
 import no.nav.helse.serde.api.HendelseDTO
 import no.nav.helse.serde.api.SimuleringsdataDTO
 import no.nav.helse.serde.api.SykdomstidslinjedagDTO
 import no.nav.helse.serde.api.UtbetalingstidslinjedagDTO
+import no.nav.helse.serde.api.v2.Behandlingstype.UBEREGNET
+import no.nav.helse.serde.api.v2.Behandlingstype.VENTER
 import no.nav.helse.serde.api.v2.Generasjoner.Generasjon.Companion.fjernErstattede
 import no.nav.helse.serde.api.v2.Generasjoner.Generasjon.Companion.sammenstillMedNeste
+import no.nav.helse.serde.api.v2.Generasjoner.Generasjon.Companion.sorterGenerasjoner
 import no.nav.helse.serde.api.v2.Generasjoner.Generasjon.Companion.toDTO
 import no.nav.helse.serde.api.v2.Tidslinjebereginger.ITidslinjeberegning
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-internal class Generasjoner(perioder: Perioder) {
+internal class Generasjoner(perioder: Tidslinjeperioder) {
     private val generasjoner: List<Generasjon> = perioder.toGenerasjoner()
 
     internal fun build(): List<no.nav.helse.serde.api.v2.Generasjon> {
         return generasjoner
             .sammenstillMedNeste()
             .fjernErstattede()
+            .sorterGenerasjoner()
             .toDTO()
             .reversed()
     }
 
-    internal class Generasjon(perioder: List<Periode>) {
+    internal class Generasjon(perioder: List<Tidslinjeperiode>) {
         private val perioder = perioder.toMutableList()
         private var erstattet: Boolean = false
 
-        private val tidslinjeperioder = perioder.filterIsInstance<Tidslinjeperiode>()
+        private val tidslinjeperioder = perioder.filterIsInstance<BeregnetPeriode>()
 
-        private fun finnPeriode(periode: Periode) = perioder.find { it.erSammeVedtaksperiode(periode) }
-        private fun inneholderPeriode(periode: Periode) = finnPeriode(periode) != null
-        private fun erFagsystemIdAnnullert(periode: Tidslinjeperiode): Boolean = tidslinjeperioder.any { it.harSammeFagsystemId(periode) && it.erAnnullering() }
-        private fun harMinstÉnRevurdertPeriodeTidligereEnn(periode: Periode): Boolean = tidslinjeperioder.any { it.erRevurdering() && it.fom < periode.fom }
+        private fun finnPeriode(periode: Tidslinjeperiode) = perioder.find { it.erSammeVedtaksperiode(periode) }
+        private fun inneholderPeriode(periode: Tidslinjeperiode) = finnPeriode(periode) != null
+        private fun erFagsystemIdAnnullert(periode: BeregnetPeriode): Boolean = tidslinjeperioder.any { it.harSammeFagsystemId(periode) && it.erAnnullering() }
+        private fun harMinstÉnRevurdertPeriodeTidligereEnn(tidslinjeperiode: Tidslinjeperiode): Boolean = tidslinjeperioder.any { it.erRevurdering() && it.fom < tidslinjeperiode.fom }
 
-        private fun finnKandidaterForSammenstilling(nesteGenerasjon: Generasjon): Pair<List<Periode>, List<Periode>> {
+        private fun finnKandidaterForSammenstilling(nesteGenerasjon: Generasjon): Pair<List<Tidslinjeperiode>, List<Tidslinjeperiode>> {
             return perioder.partition {
-//                if (it is KortPeriode) return@partition SKAL_SAMMENSTILLES
-                if (it is Tidslinjeperiode && !it.erAnnullering() && nesteGenerasjon.erFagsystemIdAnnullert(it)) return@partition SKAL_IKKE_SAMMENSTILLES
+                if (it is UberegnetPeriode) return@partition SKAL_SAMMENSTILLES
+                if (it is BeregnetPeriode && !it.erAnnullering() && nesteGenerasjon.erFagsystemIdAnnullert(it)) return@partition SKAL_IKKE_SAMMENSTILLES
                 if (nesteGenerasjon.harMinstÉnRevurdertPeriodeTidligereEnn(it)) return@partition SKAL_IKKE_SAMMENSTILLES
                 !nesteGenerasjon.inneholderPeriode(it)
             }
         }
 
-        private fun utvidMed(perioder: List<Periode>) {
+        private fun sorterFallende(): Generasjon {
+            perioder.sortByDescending { it.fom }
+            return this
+        }
+
+        private fun fjernPerioderSomVenter(perioder: List<Tidslinjeperiode>) {
+            this.perioder.removeAll(perioder.filter { it.venter() })
+        }
+
+        private fun utvidMed(perioder: List<Tidslinjeperiode>) {
             this.perioder.addAll(perioder)
         }
 
-        companion object {
+        internal companion object {
             private const val SKAL_IKKE_SAMMENSTILLES: Boolean = false
             private const val SKAL_SAMMENSTILLES: Boolean = true
 
-            fun List<Generasjon>.sammenstillMedNeste(): List<Generasjon> {
+            internal fun List<Generasjon>.sammenstillMedNeste(): List<Generasjon> {
                 forEachIndexed { index, generasjon ->
-                    if (index == size - 1) return@forEachIndexed
+                    if (index == size - 1) return@forEachIndexed // siste generasjon skal ikke gjøres noe med
                     val nesteGenerasjon = this[index + 1]
                     val (perioderSomSkalSammenstilles, ikkeSammenstiltePerioder) = generasjon.finnKandidaterForSammenstilling(nesteGenerasjon)
                     nesteGenerasjon.utvidMed(perioderSomSkalSammenstilles)
+                    generasjon.fjernPerioderSomVenter(perioderSomSkalSammenstilles)
                     generasjon.erstattet = ikkeSammenstiltePerioder.isEmpty()
                 }
                 return this
             }
 
-            fun List<Generasjon>.fjernErstattede() = filterNot { it.erstattet }
+            internal fun List<Generasjon>.fjernErstattede() = filterNot { it.erstattet }
 
-            fun List<Generasjon>.toDTO(): List<no.nav.helse.serde.api.v2.Generasjon> {
+            internal fun List<Generasjon>.sorterGenerasjoner() = map { it.sorterFallende() }
+
+            internal fun List<Generasjon>.toDTO(): List<no.nav.helse.serde.api.v2.Generasjon> {
                 return map {
                     Generasjon(UUID.randomUUID(), it.perioder)
                 }
@@ -75,22 +93,22 @@ internal class Generasjoner(perioder: Perioder) {
     }
 }
 
-internal class Perioder(
+internal class Tidslinjeperioder(
     private val forkastetVedtaksperiodeIder: List<UUID>,
     vedtaksperioder: List<IVedtaksperiode>,
     tidslinjeberegninger: Tidslinjebereginger
 ) {
-    private var perioder: List<Periode>
+    private var perioder: List<Tidslinjeperiode>
 
     private fun erForkastet(vedtaksperiodeId: UUID) = vedtaksperiodeId in forkastetVedtaksperiodeIder
 
     init {
         perioder = vedtaksperioder.toMutableList().flatMap { periode ->
             when {
-                periode.utbetalinger.isEmpty() -> listOf(nyKortPeriode(periode, erForkastet(periode.vedtaksperiodeId)))
+                periode.utbetalinger.isEmpty() -> listOf(uberegnetPeriode(periode, erForkastet(periode.vedtaksperiodeId)))
                 else -> periode.utbetalinger.map { utbetaling ->
                     val tidslinjeberegning = tidslinjeberegninger.finn(utbetaling.beregningId)
-                    nyPeriode(periode, utbetaling, tidslinjeberegning, erForkastet(periode.vedtaksperiodeId))
+                    beregnetPeriode(periode, utbetaling, tidslinjeberegning, erForkastet(periode.vedtaksperiodeId))
                 }
             }
         }.sortedBy { it.opprettet }
@@ -100,27 +118,27 @@ internal class Perioder(
         Generasjoner.Generasjon(listOf(it))
     }
 
-    private fun nyKortPeriode(periode: IVedtaksperiode, erForkastet: Boolean): KortPeriode {
-        return KortPeriode(
+    private fun uberegnetPeriode(periode: IVedtaksperiode, erForkastet: Boolean): UberegnetPeriode {
+        return UberegnetPeriode(
             vedtaksperiodeId = periode.vedtaksperiodeId,
             fom = periode.fom,
             tom = periode.tom,
             sammenslåttTidslinje = periode.sykdomstidslinje.merge(emptyList()),
-            behandlingstype = Behandlingstype.KORT_PERIODE,
+            behandlingstype = if (periode.tilstand == AvsluttetUtenUtbetaling) UBEREGNET else VENTER,
             periodetype = periode.periodetype,
             inntektskilde = periode.inntektskilde,
             erForkastet = erForkastet,
-            opprettet = periode.opprettet
+            opprettet = periode.oppdatert
         )
     }
 
-    private fun nyPeriode(
+    private fun beregnetPeriode(
         periode: IVedtaksperiode,
         utbetaling: IUtbetaling,
         tidslinjeberegning: ITidslinjeberegning,
         erForkastet: Boolean
-    ): Tidslinjeperiode {
-        return Tidslinjeperiode(
+    ): BeregnetPeriode {
+        return BeregnetPeriode(
             vedtaksperiodeId = periode.vedtaksperiodeId,
             beregningId = utbetaling.beregningId,
             fom = periode.fom,
@@ -155,7 +173,8 @@ internal class IVedtaksperiode(
     utbetalinger: List<IUtbetaling>,
     val periodetype: Periodetype,
     val sykdomstidslinje: List<SykdomstidslinjedagDTO>,
-    val opprettet: LocalDateTime,
+    val oppdatert: LocalDateTime,
+    val tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
     val skjæringstidspunkt: LocalDate
 ) {
     val utbetalinger = utbetalinger.toMutableList()

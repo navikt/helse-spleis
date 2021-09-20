@@ -10,19 +10,13 @@ import java.time.LocalDateTime
 import java.util.*
 
 internal class ForkastetVedtaksperiodeAkkumulator : VedtaksperiodeVisitor {
-    private val forkastedeVedtaksperioder = mutableListOf<Vedtaksperiode>()
     private val forkastedeVedtaksperioderIder = mutableListOf<UUID>()
 
     internal fun leggTil(vedtaksperiode: Vedtaksperiode) {
-        forkastedeVedtaksperioder.add(vedtaksperiode)
+        vedtaksperiode.accept(this)
     }
 
-    internal fun toList(): List<UUID> {
-        forkastedeVedtaksperioder.forEach {
-            it.accept(this)
-        }
-        return forkastedeVedtaksperioderIder.toList()
-    }
+    internal fun toList() = forkastedeVedtaksperioderIder.toList()
 
     override fun preVisitVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,

@@ -3,6 +3,7 @@ package no.nav.helse.serde.api.v2
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
 import no.nav.helse.serde.api.*
+import no.nav.helse.serde.api.v2.Behandlingstype.VENTER
 import no.nav.helse.serde.mapping.SpeilDagtype
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -10,14 +11,21 @@ import java.util.*
 
 internal data class Generasjon(
     val id: UUID, // Runtime
-    val perioder: List<Periode>
+    val perioder: List<Tidslinjeperiode>
 )
 
 internal enum class Behandlingstype {
-    UBEHANDLET, BEHANDLET, KORT_PERIODE
+    // Perioder som aldri har blitt beregnet hos oss
+    UBEREGNET,
+    // Perioder som har blitt beregnet - dvs har fått en utbetaling av noe slag
+    BEHANDLET,
+    // Perioder som venter på beregning
+    VENTER
 }
 
-internal interface Periode {
+internal interface Tidslinjeperiode {
+    // Brukes i Speil for å kunne korrelere tidslinje-komponenten og saksbildet. Trenger ikke være persistent på tvers av snapshots.
+    val tidslinjeperiodeId: UUID
     val vedtaksperiodeId: UUID
     val fom: LocalDate
     val tom: LocalDate
@@ -28,7 +36,8 @@ internal interface Periode {
     val erForkastet: Boolean
     val opprettet: LocalDateTime
 
-    fun erSammeVedtaksperiode(other: Periode) = vedtaksperiodeId == other.vedtaksperiodeId
+    fun erSammeVedtaksperiode(other: Tidslinjeperiode) = vedtaksperiodeId == other.vedtaksperiodeId
+    fun venter() = behandlingstype == VENTER
 }
 
 internal data class Utbetalingsinfo(
@@ -47,7 +56,7 @@ internal data class SammenslåttDag(
     val begrunnelser: List<BegrunnelseDTO>? = null,
 )
 
-internal data class KortPeriode(
+internal data class UberegnetPeriode(
     override val vedtaksperiodeId: UUID,
     override val fom: LocalDate,
     override val tom: LocalDate,
@@ -57,10 +66,12 @@ internal data class KortPeriode(
     override val inntektskilde: Inntektskilde,
     override val erForkastet: Boolean,
     override val opprettet: LocalDateTime
-) : Periode
+) : Tidslinjeperiode {
+    override val tidslinjeperiodeId: UUID = UUID.randomUUID()
+}
 
 // Dekker datagrunnlaget vi trenger for å populere både pølsen og _hele_ saksbildet
-internal data class Tidslinjeperiode(
+internal data class BeregnetPeriode(
     override val vedtaksperiodeId: UUID,
     override val fom: LocalDate,
     override val tom: LocalDate,
@@ -81,14 +92,12 @@ internal data class Tidslinjeperiode(
     val inntektshistorikkId: UUID,
     val vilkårsgrunnlagshistorikkId: UUID
     //Lookup for vilkår(beregningId, skjæringstidspunkt), inntektsgrunnlag(beregningId, skjæringstidspunkt)
-) : Periode {
-    // Brukes i Speil for å kunne korrelere tidslinje-komponenten og saksbildet. Trenger ikke være persistent på tvers av snapshots.
-    internal val tidslinjeperiodeId = UUID.randomUUID()
+) : Tidslinjeperiode {
+    override val tidslinjeperiodeId: UUID = UUID.randomUUID()
 
     internal fun erAnnullering() = utbetalingstype == "ANNULLERING"
     internal fun erRevurdering() = utbetalingstype == "REVURDERING"
-
-    internal fun harSammeFagsystemId(other: Tidslinjeperiode) = fagsystemId() == other.fagsystemId()
+    internal fun harSammeFagsystemId(other: BeregnetPeriode) = fagsystemId() == other.fagsystemId()
 
     private fun fagsystemId() = utbetalingDTO.arbeidsgiverFagsystemId
     val utbetalingstilstand = utbetalingDTO.status

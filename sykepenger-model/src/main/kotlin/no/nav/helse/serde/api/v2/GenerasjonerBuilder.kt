@@ -39,8 +39,8 @@ internal class GenerasjonerBuilder(private val hendelser: List<HendelseDTO>) : A
     fun build(): List<Generasjon> {
         vedtaksperiodeAkkumulator.supplerMedAnnulleringer(annulleringer)
         val tidslinjebereginger = Tidslinjebereginger(generasjonIderAkkumulator.toList(), sykdomshistorikkAkkumulator)
-        val perioder = Perioder(forkastetVedtaksperiodeAkkumulator.toList(), vedtaksperiodeAkkumulator.toList(), tidslinjebereginger)
-        return Generasjoner(perioder).build()
+        val tidslinjeperioder = Tidslinjeperioder(forkastetVedtaksperiodeAkkumulator.toList(), vedtaksperiodeAkkumulator.toList(), tidslinjebereginger)
+        return Generasjoner(tidslinjeperioder).build()
     }
 
     override fun preVisitForkastetPeriode(vedtaksperiode: Vedtaksperiode, forkastetÅrsak: ForkastetÅrsak) {
@@ -77,7 +77,8 @@ internal class GenerasjonerBuilder(private val hendelser: List<HendelseDTO>) : A
                 utbetalinger = utbetalinger,
                 periodetype = periodetype,
                 sykdomstidslinje = sykdomstidslinje,
-                opprettet = opprettet,
+                tilstand = tilstand,
+                oppdatert = oppdatert,
                 skjæringstidspunkt = skjæringstidspunkt
             )
         )
