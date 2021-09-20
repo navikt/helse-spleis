@@ -30,8 +30,8 @@ internal class GenerasjonerBuilderTest: AbstractEndToEndTest() {
 
         assertEquals(1, generasjoner.size)
         assertEquals(1, generasjoner[0].perioder.size)
-        0.generasjon { generasjonens ->
-            generasjonens tidslinjeperiode 0 er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
+        0.generasjon {
+            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
         }
     }
 
@@ -42,9 +42,9 @@ internal class GenerasjonerBuilderTest: AbstractEndToEndTest() {
 
         assertEquals(1, generasjoner.size)
         assertEquals(2, generasjoner[0].perioder.size)
-        0.generasjon { generasjonens ->
-            generasjonens tidslinjeperiode 0 er "Utbetalt" avType "UTBETALING" fra (1.februar til 28.februar) medAntallDager 28
-            generasjonens tidslinjeperiode 1 er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
+        0.generasjon {
+            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.februar til 28.februar) medAntallDager 28
+            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
         }
     }
 
@@ -53,9 +53,9 @@ internal class GenerasjonerBuilderTest: AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         nyttVedtak(2.februar, 28.februar)
 
-        0.generasjon { generasjonens ->
-            generasjonens tidslinjeperiode 0 er "Utbetalt" avType "UTBETALING" fra (2.februar til 28.februar) medAntallDager 27
-            generasjonens tidslinjeperiode 1 er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
+        0.generasjon {
+            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (2.februar til 28.februar) medAntallDager 27
+            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
         }
     }
 
@@ -69,12 +69,12 @@ internal class GenerasjonerBuilderTest: AbstractEndToEndTest() {
         assertEquals(1, generasjoner[0].perioder.size)
         assertEquals(1, generasjoner[1].perioder.size)
 
-        0.generasjon { generasjonens ->
-            generasjonens tidslinjeperiode 0 er "Ubetalt" avType "REVURDERING" fra (1.januar til 31.januar) medAntallDager 31
+        0.generasjon {
+            tidslinjeperiode(0) er "Ubetalt" avType "REVURDERING" fra (1.januar til 31.januar) medAntallDager 31
         }
 
-        1.generasjon { generasjonens ->
-            generasjonens tidslinjeperiode 0 er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
+        1.generasjon {
+            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
         }
     }
 
@@ -90,14 +90,14 @@ internal class GenerasjonerBuilderTest: AbstractEndToEndTest() {
         assertEquals(2, generasjoner[0].perioder.size)
         assertEquals(2, generasjoner[1].perioder.size)
 
-        0.generasjon { generasjonens ->
-            generasjonens tidslinjeperiode 0 er "Ubetalt" avType "REVURDERING" fra (1.februar til 28.februar) medAntallDager 28
-            generasjonens tidslinjeperiode 1 er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
+        0.generasjon {
+            tidslinjeperiode(0) er "Ubetalt" avType "REVURDERING" fra (1.februar til 28.februar) medAntallDager 28
+            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
         }
 
-        1.generasjon { generasjonens ->
-            generasjonens tidslinjeperiode 0 er "Utbetalt" avType "UTBETALING" fra (1.februar til 28.februar) medAntallDager 28
-            generasjonens tidslinjeperiode 1 er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
+        1.generasjon {
+            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.februar til 28.februar) medAntallDager 28
+            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
         }
     }
 
@@ -114,14 +114,14 @@ internal class GenerasjonerBuilderTest: AbstractEndToEndTest() {
         assertEquals(2, generasjoner[0].perioder.size)
         assertEquals(2, generasjoner[1].perioder.size)
 
-        0.generasjon { generasjonens ->
-            generasjonens tidslinjeperiode 0 er "Ubetalt" avType "REVURDERING" fra (1.februar til 28.februar) medAntallDager 28
-            generasjonens tidslinjeperiode 1 er "Ubetalt" avType "REVURDERING" fra (1.januar til 31.januar) medAntallDager 31
+        0.generasjon {
+            tidslinjeperiode(0) er "Ubetalt" avType "REVURDERING" fra (1.februar til 28.februar) medAntallDager 28
+            tidslinjeperiode(1) er "Ubetalt" avType "REVURDERING" fra (1.januar til 31.januar) medAntallDager 31
         }
 
-        1.generasjon { generasjonens ->
-            generasjonens tidslinjeperiode 0 er "Utbetalt" avType "UTBETALING" fra (1.februar til 28.februar) medAntallDager 28
-            generasjonens tidslinjeperiode 1 er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
+        1.generasjon {
+            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.februar til 28.februar) medAntallDager 28
+            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
         }
     }
 
@@ -145,19 +145,19 @@ internal class GenerasjonerBuilderTest: AbstractEndToEndTest() {
         assertEquals(2, generasjoner[1].perioder.size)
         assertEquals(2, generasjoner[2].perioder.size)
 
-        0.generasjon { generasjonens ->
-            generasjonens tidslinjeperiode 0 er "Ubetalt" avType "REVURDERING" fra (1.februar til 28.februar) medAntallDager 28
-            generasjonens tidslinjeperiode 1 er "Ubetalt" avType "REVURDERING" fra (1.januar til 31.januar) medAntallDager 31
+        0.generasjon {
+            tidslinjeperiode(0) er "Ubetalt" avType "REVURDERING" fra (1.februar til 28.februar) medAntallDager 28
+            tidslinjeperiode(1) er "Ubetalt" avType "REVURDERING" fra (1.januar til 31.januar) medAntallDager 31
         }
 
-        1.generasjon { generasjonens ->
-            generasjonens tidslinjeperiode 0 er "Utbetalt" avType "REVURDERING" fra (1.februar til 28.februar) medAntallDager 28
-            generasjonens tidslinjeperiode 1 er "Utbetalt" avType "REVURDERING" fra (1.januar til 31.januar) medAntallDager 31
+        1.generasjon {
+            tidslinjeperiode(0) er "Utbetalt" avType "REVURDERING" fra (1.februar til 28.februar) medAntallDager 28
+            tidslinjeperiode(1) er "Utbetalt" avType "REVURDERING" fra (1.januar til 31.januar) medAntallDager 31
         }
 
-        2.generasjon { generasjonens ->
-            generasjonens tidslinjeperiode 0 er "Utbetalt" avType "UTBETALING" fra (1.februar til 28.februar) medAntallDager 28
-            generasjonens tidslinjeperiode 1 er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
+        2.generasjon {
+            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.februar til 28.februar) medAntallDager 28
+            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
         }
     }
 
@@ -188,24 +188,24 @@ internal class GenerasjonerBuilderTest: AbstractEndToEndTest() {
         assertEquals(2, generasjoner[2].perioder.size)
         assertEquals(2, generasjoner[3].perioder.size)
 
-        0.generasjon { generasjonens ->
-            generasjonens tidslinjeperiode 0 er "Ubetalt" avType "REVURDERING" fra (1.februar til 28.februar) medAntallDager 28
-            generasjonens tidslinjeperiode 1 er "Utbetalt" avType "REVURDERING" fra (1.januar til 31.januar) medAntallDager 31
+        0.generasjon {
+            tidslinjeperiode(0) er "Ubetalt" avType "REVURDERING" fra (1.februar til 28.februar) medAntallDager 28
+            tidslinjeperiode(1) er "Utbetalt" avType "REVURDERING" fra (1.januar til 31.januar) medAntallDager 31
         }
 
-        1.generasjon { generasjonens ->
-            generasjonens tidslinjeperiode 0 er "Utbetalt" avType "REVURDERING" fra (1.februar til 28.februar) medAntallDager 28
-            generasjonens tidslinjeperiode 1 er "Utbetalt" avType "REVURDERING" fra (1.januar til 31.januar) medAntallDager 31
+        1.generasjon {
+            tidslinjeperiode(0) er "Utbetalt" avType "REVURDERING" fra (1.februar til 28.februar) medAntallDager 28
+            tidslinjeperiode(1) er "Utbetalt" avType "REVURDERING" fra (1.januar til 31.januar) medAntallDager 31
         }
 
-        2.generasjon { generasjonens ->
-            generasjonens tidslinjeperiode 0 er "Utbetalt" avType "REVURDERING" fra (1.februar til 28.februar) medAntallDager 28
-            generasjonens tidslinjeperiode 1 er "Utbetalt" avType "REVURDERING" fra (1.januar til 31.januar) medAntallDager 31
+        2.generasjon {
+            tidslinjeperiode(0) er "Utbetalt" avType "REVURDERING" fra (1.februar til 28.februar) medAntallDager 28
+            tidslinjeperiode(1) er "Utbetalt" avType "REVURDERING" fra (1.januar til 31.januar) medAntallDager 31
         }
 
-        3.generasjon { generasjonens ->
-            generasjonens tidslinjeperiode 0 er "Utbetalt" avType "UTBETALING" fra (1.februar til 28.februar) medAntallDager 28
-            generasjonens tidslinjeperiode 1 er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
+        3.generasjon {
+            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.februar til 28.februar) medAntallDager 28
+            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
         }
     }
 
@@ -221,14 +221,14 @@ internal class GenerasjonerBuilderTest: AbstractEndToEndTest() {
         assertEquals(2, generasjoner[0].perioder.size)
         assertEquals(2, generasjoner[1].perioder.size)
 
-        0.generasjon { generasjonens ->
-            generasjonens tidslinjeperiode 0 er "Ubetalt" avType "REVURDERING" fra (2.februar til 28.februar) medAntallDager 27
-            generasjonens tidslinjeperiode 1 er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
+        0.generasjon {
+            tidslinjeperiode(0) er "Ubetalt" avType "REVURDERING" fra (2.februar til 28.februar) medAntallDager 27
+            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
         }
 
-        1.generasjon { generasjonens ->
-            generasjonens tidslinjeperiode 0 er "Utbetalt" avType "UTBETALING" fra (2.februar til 28.februar) medAntallDager 27
-            generasjonens tidslinjeperiode 1 er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
+        1.generasjon {
+            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (2.februar til 28.februar) medAntallDager 27
+            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
         }
     }
 
@@ -241,12 +241,12 @@ internal class GenerasjonerBuilderTest: AbstractEndToEndTest() {
         assertEquals(1, generasjoner[0].perioder.size)
         assertEquals(1, generasjoner[1].perioder.size)
 
-        0.generasjon { generasjonens ->
-            generasjonens tidslinjeperiode 0 er "Sendt" avType "ANNULLERING" fra (1.januar til 31.januar) medAntallDager 31
+        0.generasjon {
+            tidslinjeperiode(0) er "Sendt" avType "ANNULLERING" fra (1.januar til 31.januar) medAntallDager 31
         }
 
-        1.generasjon { generasjonens ->
-            generasjonens tidslinjeperiode 0 er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
+        1.generasjon {
+            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
         }
     }
 
@@ -260,14 +260,14 @@ internal class GenerasjonerBuilderTest: AbstractEndToEndTest() {
         assertEquals(2, generasjoner[0].perioder.size)
         assertEquals(2, generasjoner[1].perioder.size)
 
-        0.generasjon { generasjonens ->
-            generasjonens tidslinjeperiode 0 er "Sendt" avType "ANNULLERING" fra (1.februar til 28.februar) medAntallDager 28
-            generasjonens tidslinjeperiode 1 er "Sendt" avType "ANNULLERING" fra (1.januar til 31.januar) medAntallDager 31
+        0.generasjon {
+            tidslinjeperiode(0) er "Sendt" avType "ANNULLERING" fra (1.februar til 28.februar) medAntallDager 28
+            tidslinjeperiode(1) er "Sendt" avType "ANNULLERING" fra (1.januar til 31.januar) medAntallDager 31
         }
 
-        1.generasjon { generasjonens ->
-            generasjonens tidslinjeperiode 0 er "Utbetalt" avType "UTBETALING" fra (1.februar til 28.februar) medAntallDager 28
-            generasjonens tidslinjeperiode 1 er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
+        1.generasjon {
+            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.februar til 28.februar) medAntallDager 28
+            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
         }
     }
 
@@ -281,14 +281,14 @@ internal class GenerasjonerBuilderTest: AbstractEndToEndTest() {
         assertEquals(2, generasjoner[0].perioder.size)
         assertEquals(2, generasjoner[1].perioder.size)
 
-        0.generasjon { generasjonens ->
-            generasjonens tidslinjeperiode 0 er "Sendt" avType "ANNULLERING" fra (1.februar til 28.februar) medAntallDager 28
-            generasjonens tidslinjeperiode 1 er "Sendt" avType "ANNULLERING" fra (1.januar til 31.januar) medAntallDager 31
+        0.generasjon {
+            tidslinjeperiode(0) er "Sendt" avType "ANNULLERING" fra (1.februar til 28.februar) medAntallDager 28
+            tidslinjeperiode(1) er "Sendt" avType "ANNULLERING" fra (1.januar til 31.januar) medAntallDager 31
         }
 
-        1.generasjon { generasjonens ->
-            generasjonens tidslinjeperiode 0 er "Utbetalt" avType "UTBETALING" fra (1.februar til 28.februar) medAntallDager 28
-            generasjonens tidslinjeperiode 1 er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
+        1.generasjon {
+            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.februar til 28.februar) medAntallDager 28
+            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
         }
     }
 
@@ -302,14 +302,14 @@ internal class GenerasjonerBuilderTest: AbstractEndToEndTest() {
         assertEquals(2, generasjoner[0].perioder.size)
         assertEquals(2, generasjoner[1].perioder.size)
 
-        0.generasjon { generasjonens ->
-            generasjonens tidslinjeperiode 0 er "Sendt" avType "ANNULLERING" fra (1.mars til 31.mars) medAntallDager 31
-            generasjonens tidslinjeperiode 1 er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
+        0.generasjon {
+            tidslinjeperiode(0) er "Sendt" avType "ANNULLERING" fra (1.mars til 31.mars) medAntallDager 31
+            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
         }
 
-        1.generasjon { generasjonens ->
-            generasjonens tidslinjeperiode 0 er "Utbetalt" avType "UTBETALING" fra (1.mars til 31.mars) medAntallDager 31
-            generasjonens tidslinjeperiode 1 er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
+        1.generasjon { ->
+            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.mars til 31.mars) medAntallDager 31
+            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
         }
     }
 
@@ -331,15 +331,15 @@ internal class GenerasjonerBuilderTest: AbstractEndToEndTest() {
         assertEquals(3, generasjoner[0].perioder.size)
         assertEquals(2, generasjoner[1].perioder.size)
 
-        0.generasjon { generasjonens ->
-            generasjonens tidslinjeperiode 0 er "Utbetalt" avType "UTBETALING" fra (1.mars til 31.mars) medAntallDager 31
-            generasjonens tidslinjeperiode 1 er "Utbetalt" avType "REVURDERING" fra (1.februar til 28.februar) medAntallDager 28
-            generasjonens tidslinjeperiode 2 er "Utbetalt" avType "REVURDERING" fra (1.januar til 31.januar) medAntallDager 31
+        0.generasjon {
+            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.mars til 31.mars) medAntallDager 31
+            tidslinjeperiode(1) er "Utbetalt" avType "REVURDERING" fra (1.februar til 28.februar) medAntallDager 28
+            tidslinjeperiode(2) er "Utbetalt" avType "REVURDERING" fra (1.januar til 31.januar) medAntallDager 31
         }
 
-        1.generasjon { generasjonens ->
-            generasjonens tidslinjeperiode 0 er "Utbetalt" avType "UTBETALING" fra (1.februar til 28.februar) medAntallDager 28
-            generasjonens tidslinjeperiode 1 er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
+        1.generasjon {
+            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.februar til 28.februar) medAntallDager 28
+            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
         }
     }
 
@@ -367,21 +367,21 @@ internal class GenerasjonerBuilderTest: AbstractEndToEndTest() {
         assertEquals(3, generasjoner[1].perioder.size)
         assertEquals(2, generasjoner[2].perioder.size)
 
-        0.generasjon { generasjonens ->
-            generasjonens tidslinjeperiode 0 er "Utbetalt" avType "REVURDERING" fra (1.mars til 31.mars) medAntallDager 31
-            generasjonens tidslinjeperiode 1 er "Utbetalt" avType "REVURDERING" fra (1.februar til 28.februar) medAntallDager 28
-            generasjonens tidslinjeperiode 2 er "Utbetalt" avType "REVURDERING" fra (1.januar til 31.januar) medAntallDager 31
+        0.generasjon {
+            tidslinjeperiode(0) er "Utbetalt" avType "REVURDERING" fra (1.mars til 31.mars) medAntallDager 31
+            tidslinjeperiode(1) er "Utbetalt" avType "REVURDERING" fra (1.februar til 28.februar) medAntallDager 28
+            tidslinjeperiode(2) er "Utbetalt" avType "REVURDERING" fra (1.januar til 31.januar) medAntallDager 31
         }
 
-        1.generasjon { generasjonens ->
-            generasjonens tidslinjeperiode 0 er "Utbetalt" avType "UTBETALING" fra (1.mars til 31.mars) medAntallDager 31
-            generasjonens tidslinjeperiode 1 er "Utbetalt" avType "REVURDERING" fra (1.februar til 28.februar) medAntallDager 28
-            generasjonens tidslinjeperiode 2 er "Utbetalt" avType "REVURDERING" fra (1.januar til 31.januar) medAntallDager 31
+        1.generasjon {
+            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.mars til 31.mars) medAntallDager 31
+            tidslinjeperiode(1) er "Utbetalt" avType "REVURDERING" fra (1.februar til 28.februar) medAntallDager 28
+            tidslinjeperiode(2) er "Utbetalt" avType "REVURDERING" fra (1.januar til 31.januar) medAntallDager 31
         }
 
-        2.generasjon { generasjonens ->
-            generasjonens tidslinjeperiode 0 er "Utbetalt" avType "UTBETALING" fra (1.februar til 28.februar) medAntallDager 28
-            generasjonens tidslinjeperiode 1 er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
+        2.generasjon {
+            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.februar til 28.februar) medAntallDager 28
+            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
         }
     }
 
@@ -395,8 +395,8 @@ internal class GenerasjonerBuilderTest: AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 15.januar, 100.prosent))
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(1.januar, 15.januar, 100.prosent))
 
-        0.generasjon { generasjonens ->
-            generasjonens kortPeriode 0 fra (1.januar til 15.januar) medAntallDager 15
+        0.generasjon {
+            kortPeriode(0) fra (1.januar til 15.januar) medAntallDager 15
         }
     }
 
@@ -414,9 +414,9 @@ internal class GenerasjonerBuilderTest: AbstractEndToEndTest() {
         assertEquals(1, generasjoner.size)
         assertEquals(2, generasjoner[0].perioder.size)
 
-        0.generasjon { generasjonens ->
-            generasjonens tidslinjeperiode 0 er "Ubetalt" avType "UTBETALING" fra (16.januar til 15.februar) medAntallDager 31
-            generasjonens kortPeriode 1 fra (1.januar til 15.januar) medAntallDager 15
+        0.generasjon {
+            tidslinjeperiode(0) er "Ubetalt" avType "UTBETALING" fra (16.januar til 15.februar) medAntallDager 31
+            kortPeriode(1) fra (1.januar til 15.januar) medAntallDager 15
         }
     }
 
@@ -435,13 +435,13 @@ internal class GenerasjonerBuilderTest: AbstractEndToEndTest() {
         håndterYtelser()
 
         0.generasjon {
-            it tidslinjeperiode 0 er "GodkjentUtenUtbetaling" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
+            tidslinjeperiode(0) er "GodkjentUtenUtbetaling" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
         }
     }
 
-    private fun Int.generasjon(assertBlock: (generasjon: Generasjon) -> Unit) {
+    private fun Int.generasjon(assertBlock: Generasjon.() -> Unit) {
         require(this >= 0) {"Kan ikke være et negativt tall!"}
-        assertBlock(generasjoner[this])
+        generasjoner[this].run(assertBlock)
     }
 
     private infix fun <T: Periode> T.medAntallDager(antall: Int): T {
@@ -465,13 +465,13 @@ internal class GenerasjonerBuilderTest: AbstractEndToEndTest() {
         return this
     }
 
-    private infix fun Generasjon.tidslinjeperiode(index: Int): Tidslinjeperiode {
+    private fun Generasjon.tidslinjeperiode(index: Int): Tidslinjeperiode {
         val periode = this.perioder[index]
         require(periode is Tidslinjeperiode) { "Perioden er ikke en tidslinjeperiode!" }
         return periode
     }
 
-    private infix fun Generasjon.kortPeriode(index: Int): KortPeriode {
+    private fun Generasjon.kortPeriode(index: Int): KortPeriode {
         val periode = this.perioder[index]
         require(periode is KortPeriode) { "Perioden er ikke en kort periode!" }
         return periode
