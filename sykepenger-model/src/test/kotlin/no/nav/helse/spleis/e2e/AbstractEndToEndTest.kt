@@ -598,7 +598,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = orgnummer,
             fagsystemId = fagsystemId,
-            utbetalingId = "",
+            utbetalingId = inspektør.sisteBehov(Behovtype.Utbetaling).kontekst().getValue("utbetalingId"),
             status = status,
             melding = "hey",
             avstemmingsnøkkel = 654321L,

@@ -53,7 +53,7 @@ internal class Feriepengeutbetaling private constructor(
     }
 
     fun håndter(utbetalingHendelse: UtbetalingHendelse, person: Person) {
-        if (!utbetalingHendelse.erRelevant(oppdrag.fagsystemId())) return
+        if (!utbetalingHendelse.erRelevant(oppdrag.fagsystemId(), utbetalingId)) return
 
         utbetalingHendelse.info("Behandler svar fra Oppdrag/UR/spenn for feriepenger")
         utbetalingHendelse.valider()
