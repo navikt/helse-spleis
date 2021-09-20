@@ -1,7 +1,47 @@
 package no.nav.helse.serde.api.v2
 
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.person.*
+import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.person.VedtaksperiodeVisitor
 import no.nav.helse.serde.api.SykdomstidslinjedagDTO
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
+
+internal class ForkastetVedtaksperiodeAkkumulator : VedtaksperiodeVisitor {
+    private val forkastedeVedtaksperioder = mutableListOf<Vedtaksperiode>()
+    private val forkastedeVedtaksperioderIder = mutableListOf<UUID>()
+
+    internal fun leggTil(vedtaksperiode: Vedtaksperiode) {
+        forkastedeVedtaksperioder.add(vedtaksperiode)
+    }
+
+    internal fun toList(): List<UUID> {
+        forkastedeVedtaksperioder.forEach {
+            it.accept(this)
+        }
+        return forkastedeVedtaksperioderIder.toList()
+    }
+
+    override fun preVisitVedtaksperiode(
+        vedtaksperiode: Vedtaksperiode,
+        id: UUID,
+        tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
+        opprettet: LocalDateTime,
+        oppdatert: LocalDateTime,
+        periode: Periode,
+        opprinneligPeriode: Periode,
+        skjæringstidspunkt: LocalDate,
+        periodetype: Periodetype,
+        forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
+        hendelseIder: Set<UUID>,
+        inntektsmeldingInfo: InntektsmeldingInfo?,
+        inntektskilde: Inntektskilde
+    ) {
+        forkastedeVedtaksperioderIder.add(id)
+    }
+}
 
 internal class VedtaksperiodeAkkumulator {
     private val vedtaksperioder = mutableListOf<IVedtaksperiode>()

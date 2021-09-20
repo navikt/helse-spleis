@@ -9,12 +9,13 @@ import no.nav.helse.serde.api.UtbetalingstidslinjedagDTO
 import no.nav.helse.serde.api.v2.Generasjoner.Generasjon.Companion.fjernErstattede
 import no.nav.helse.serde.api.v2.Generasjoner.Generasjon.Companion.sammenstillMedNeste
 import no.nav.helse.serde.api.v2.Generasjoner.Generasjon.Companion.toDTO
+import no.nav.helse.serde.api.v2.Tidslinjebereginger.ITidslinjeberegning
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-internal class Generasjoner(tidslinjeperioder: Tidslinjeperioder) {
-    private val generasjoner: List<Generasjon> = tidslinjeperioder.toGenerasjoner()
+internal class Generasjoner(perioder: Perioder) {
+    private val generasjoner: List<Generasjon> = perioder.toGenerasjoner()
 
     internal fun build(): List<no.nav.helse.serde.api.v2.Generasjon> {
         return generasjoner
@@ -74,16 +75,22 @@ internal class Generasjoner(tidslinjeperioder: Tidslinjeperioder) {
     }
 }
 
-internal class Tidslinjeperioder(vedtaksperioder: List<IVedtaksperiode>, tidslinjeberegninger: Tidslinjebereginger) {
+internal class Perioder(
+    private val forkastetVedtaksperiodeIder: List<UUID>,
+    vedtaksperioder: List<IVedtaksperiode>,
+    tidslinjeberegninger: Tidslinjebereginger
+) {
     private var perioder: List<Periode>
+
+    private fun erForkastet(vedtaksperiodeId: UUID) = vedtaksperiodeId in forkastetVedtaksperiodeIder
 
     init {
         perioder = vedtaksperioder.toMutableList().flatMap { periode ->
             when {
-                periode.utbetalinger.isEmpty() -> listOf(nyKortPeriode(periode))
+                periode.utbetalinger.isEmpty() -> listOf(nyKortPeriode(periode, erForkastet(periode.vedtaksperiodeId)))
                 else -> periode.utbetalinger.map { utbetaling ->
                     val tidslinjeberegning = tidslinjeberegninger.finn(utbetaling.beregningId)
-                    nyPeriode(periode, utbetaling, tidslinjeberegning)
+                    nyPeriode(periode, utbetaling, tidslinjeberegning, erForkastet(periode.vedtaksperiodeId))
                 }
             }
         }.sortedBy { it.opprettet }
@@ -93,7 +100,7 @@ internal class Tidslinjeperioder(vedtaksperioder: List<IVedtaksperiode>, tidslin
         Generasjoner.Generasjon(listOf(it))
     }
 
-    private fun nyKortPeriode(periode: IVedtaksperiode): KortPeriode {
+    private fun nyKortPeriode(periode: IVedtaksperiode, erForkastet: Boolean): KortPeriode {
         return KortPeriode(
             vedtaksperiodeId = periode.vedtaksperiodeId,
             fom = periode.fom,
@@ -102,18 +109,23 @@ internal class Tidslinjeperioder(vedtaksperioder: List<IVedtaksperiode>, tidslin
             behandlingstype = Behandlingstype.KORT_PERIODE,
             periodetype = periode.periodetype,
             inntektskilde = periode.inntektskilde,
-            erForkastet = false,
+            erForkastet = erForkastet,
             opprettet = periode.opprettet
         )
     }
 
-    private fun nyPeriode(periode: IVedtaksperiode, utbetaling: IUtbetaling, tidslinjeberegning: Tidslinjebereginger.ITidslinjeberegning): Tidslinjeperiode {
+    private fun nyPeriode(
+        periode: IVedtaksperiode,
+        utbetaling: IUtbetaling,
+        tidslinjeberegning: ITidslinjeberegning,
+        erForkastet: Boolean
+    ): Tidslinjeperiode {
         return Tidslinjeperiode(
             vedtaksperiodeId = periode.vedtaksperiodeId,
             beregningId = utbetaling.beregningId,
             fom = periode.fom,
             tom = periode.tom,
-            erForkastet = periode.erForkastet,
+            erForkastet = erForkastet,
             behandlingstype = periode.behandlingstype,
             periodetype = periode.periodetype,
             inntektskilde = periode.inntektskilde,
@@ -137,7 +149,6 @@ internal class IVedtaksperiode(
     val fom: LocalDate,
     val tom: LocalDate,
     val behandlingstype: Behandlingstype,
-    val erForkastet: Boolean,
     val inntektskilde: Inntektskilde,
     val hendelser: List<HendelseDTO>,
     val simuleringsdataDTO: SimuleringsdataDTO?,

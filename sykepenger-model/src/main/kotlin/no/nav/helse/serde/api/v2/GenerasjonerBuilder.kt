@@ -3,7 +3,6 @@ package no.nav.helse.serde.api.v2
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.*
 import no.nav.helse.serde.api.HendelseDTO
-import no.nav.helse.serde.api.v2.buildere.*
 import no.nav.helse.serde.api.v2.buildere.SimuleringBuilder
 import no.nav.helse.serde.api.v2.buildere.SykdomshistorikkBuilder
 import no.nav.helse.serde.api.v2.buildere.UtbetalingBuilder
@@ -32,6 +31,7 @@ internal typealias FagsystemId = String
 internal class GenerasjonerBuilder(private val hendelser: List<HendelseDTO>) : ArbeidsgiverVisitor {
 
     private val vedtaksperiodeAkkumulator = VedtaksperiodeAkkumulator()
+    private val forkastetVedtaksperiodeAkkumulator = ForkastetVedtaksperiodeAkkumulator()
     private val generasjonIderAkkumulator = GenerasjonIderAkkumulator()
     private val sykdomshistorikkAkkumulator = SykdomshistorikkAkkumulator()
     private val annulleringer = AnnulleringerAkkumulator()
@@ -39,8 +39,12 @@ internal class GenerasjonerBuilder(private val hendelser: List<HendelseDTO>) : A
     fun build(): List<Generasjon> {
         vedtaksperiodeAkkumulator.supplerMedAnnulleringer(annulleringer)
         val tidslinjebereginger = Tidslinjebereginger(generasjonIderAkkumulator.toList(), sykdomshistorikkAkkumulator)
-        val tidslinjeperioder = Tidslinjeperioder(vedtaksperiodeAkkumulator.toList(), tidslinjebereginger)
-        return Generasjoner(tidslinjeperioder).build()
+        val perioder = Perioder(forkastetVedtaksperiodeAkkumulator.toList(), vedtaksperiodeAkkumulator.toList(), tidslinjebereginger)
+        return Generasjoner(perioder).build()
+    }
+
+    override fun preVisitForkastetPeriode(vedtaksperiode: Vedtaksperiode, forkastetÅrsak: ForkastetÅrsak) {
+        forkastetVedtaksperiodeAkkumulator.leggTil(vedtaksperiode)
     }
 
     override fun preVisitVedtaksperiode(
@@ -67,15 +71,14 @@ internal class GenerasjonerBuilder(private val hendelser: List<HendelseDTO>) : A
                 periode.start,
                 periode.endInclusive,
                 behandlingstype = Behandlingstype.BEHANDLET,
-                erForkastet = false,
                 inntektskilde = inntektskilde,
                 hendelser = hendelser.filter { it.id in hendelseIder.map { id -> id.toString() } },
-                periodetype = periodetype,
-                skjæringstidspunkt = skjæringstidspunkt,
-                utbetalinger = utbetalinger,
                 simuleringsdataDTO = simulering,
+                utbetalinger = utbetalinger,
+                periodetype = periodetype,
                 sykdomstidslinje = sykdomstidslinje,
-                opprettet = opprettet
+                opprettet = opprettet,
+                skjæringstidspunkt = skjæringstidspunkt
             )
         )
     }

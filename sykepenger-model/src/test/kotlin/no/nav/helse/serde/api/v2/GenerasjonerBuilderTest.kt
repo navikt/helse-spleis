@@ -11,10 +11,10 @@ import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class GenerasjonerBuilderTest: AbstractEndToEndTest() {
+internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
     private val generasjoner get() = generasjoner()
 
@@ -31,7 +31,7 @@ internal class GenerasjonerBuilderTest: AbstractEndToEndTest() {
         assertEquals(1, generasjoner.size)
         assertEquals(1, generasjoner[0].perioder.size)
         0.generasjon {
-            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
+            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31 forkastet false
         }
     }
 
@@ -43,8 +43,8 @@ internal class GenerasjonerBuilderTest: AbstractEndToEndTest() {
         assertEquals(1, generasjoner.size)
         assertEquals(2, generasjoner[0].perioder.size)
         0.generasjon {
-            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.februar til 28.februar) medAntallDager 28
-            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
+            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.februar til 28.februar) medAntallDager 28 forkastet false
+            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31 forkastet false
         }
     }
 
@@ -54,8 +54,8 @@ internal class GenerasjonerBuilderTest: AbstractEndToEndTest() {
         nyttVedtak(2.februar, 28.februar)
 
         0.generasjon {
-            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (2.februar til 28.februar) medAntallDager 27
-            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
+            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (2.februar til 28.februar) medAntallDager 27 forkastet false
+            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31 forkastet false
         }
     }
 
@@ -70,11 +70,11 @@ internal class GenerasjonerBuilderTest: AbstractEndToEndTest() {
         assertEquals(1, generasjoner[1].perioder.size)
 
         0.generasjon {
-            tidslinjeperiode(0) er "Ubetalt" avType "REVURDERING" fra (1.januar til 31.januar) medAntallDager 31
+            tidslinjeperiode(0) er "Ubetalt" avType "REVURDERING" fra (1.januar til 31.januar) medAntallDager 31 forkastet false
         }
 
         1.generasjon {
-            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
+            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31 forkastet false
         }
     }
 
@@ -91,13 +91,13 @@ internal class GenerasjonerBuilderTest: AbstractEndToEndTest() {
         assertEquals(2, generasjoner[1].perioder.size)
 
         0.generasjon {
-            tidslinjeperiode(0) er "Ubetalt" avType "REVURDERING" fra (1.februar til 28.februar) medAntallDager 28
-            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
+            tidslinjeperiode(0) er "Ubetalt" avType "REVURDERING" fra (1.februar til 28.februar) medAntallDager 28 forkastet false
+            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31 forkastet false
         }
 
         1.generasjon {
-            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.februar til 28.februar) medAntallDager 28
-            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
+            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.februar til 28.februar) medAntallDager 28 forkastet false
+            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31 forkastet false
         }
     }
 
@@ -115,13 +115,13 @@ internal class GenerasjonerBuilderTest: AbstractEndToEndTest() {
         assertEquals(2, generasjoner[1].perioder.size)
 
         0.generasjon {
-            tidslinjeperiode(0) er "Ubetalt" avType "REVURDERING" fra (1.februar til 28.februar) medAntallDager 28
-            tidslinjeperiode(1) er "Ubetalt" avType "REVURDERING" fra (1.januar til 31.januar) medAntallDager 31
+            tidslinjeperiode(0) er "Ubetalt" avType "REVURDERING" fra (1.februar til 28.februar) medAntallDager 28 forkastet false
+            tidslinjeperiode(1) er "Ubetalt" avType "REVURDERING" fra (1.januar til 31.januar) medAntallDager 31 forkastet false
         }
 
         1.generasjon {
-            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.februar til 28.februar) medAntallDager 28
-            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
+            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.februar til 28.februar) medAntallDager 28 forkastet false
+            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31 forkastet false
         }
     }
 
@@ -146,18 +146,18 @@ internal class GenerasjonerBuilderTest: AbstractEndToEndTest() {
         assertEquals(2, generasjoner[2].perioder.size)
 
         0.generasjon {
-            tidslinjeperiode(0) er "Ubetalt" avType "REVURDERING" fra (1.februar til 28.februar) medAntallDager 28
-            tidslinjeperiode(1) er "Ubetalt" avType "REVURDERING" fra (1.januar til 31.januar) medAntallDager 31
+            tidslinjeperiode(0) er "Ubetalt" avType "REVURDERING" fra (1.februar til 28.februar) medAntallDager 28 forkastet false
+            tidslinjeperiode(1) er "Ubetalt" avType "REVURDERING" fra (1.januar til 31.januar) medAntallDager 31 forkastet false
         }
 
         1.generasjon {
-            tidslinjeperiode(0) er "Utbetalt" avType "REVURDERING" fra (1.februar til 28.februar) medAntallDager 28
-            tidslinjeperiode(1) er "Utbetalt" avType "REVURDERING" fra (1.januar til 31.januar) medAntallDager 31
+            tidslinjeperiode(0) er "Utbetalt" avType "REVURDERING" fra (1.februar til 28.februar) medAntallDager 28 forkastet false
+            tidslinjeperiode(1) er "Utbetalt" avType "REVURDERING" fra (1.januar til 31.januar) medAntallDager 31 forkastet false
         }
 
         2.generasjon {
-            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.februar til 28.februar) medAntallDager 28
-            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
+            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.februar til 28.februar) medAntallDager 28 forkastet false
+            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31 forkastet false
         }
     }
 
@@ -189,23 +189,23 @@ internal class GenerasjonerBuilderTest: AbstractEndToEndTest() {
         assertEquals(2, generasjoner[3].perioder.size)
 
         0.generasjon {
-            tidslinjeperiode(0) er "Ubetalt" avType "REVURDERING" fra (1.februar til 28.februar) medAntallDager 28
-            tidslinjeperiode(1) er "Utbetalt" avType "REVURDERING" fra (1.januar til 31.januar) medAntallDager 31
+            tidslinjeperiode(0) er "Ubetalt" avType "REVURDERING" fra (1.februar til 28.februar) medAntallDager 28 forkastet false
+            tidslinjeperiode(1) er "Utbetalt" avType "REVURDERING" fra (1.januar til 31.januar) medAntallDager 31 forkastet false
         }
 
         1.generasjon {
-            tidslinjeperiode(0) er "Utbetalt" avType "REVURDERING" fra (1.februar til 28.februar) medAntallDager 28
-            tidslinjeperiode(1) er "Utbetalt" avType "REVURDERING" fra (1.januar til 31.januar) medAntallDager 31
+            tidslinjeperiode(0) er "Utbetalt" avType "REVURDERING" fra (1.februar til 28.februar) medAntallDager 28 forkastet false
+            tidslinjeperiode(1) er "Utbetalt" avType "REVURDERING" fra (1.januar til 31.januar) medAntallDager 31 forkastet false
         }
 
         2.generasjon {
-            tidslinjeperiode(0) er "Utbetalt" avType "REVURDERING" fra (1.februar til 28.februar) medAntallDager 28
-            tidslinjeperiode(1) er "Utbetalt" avType "REVURDERING" fra (1.januar til 31.januar) medAntallDager 31
+            tidslinjeperiode(0) er "Utbetalt" avType "REVURDERING" fra (1.februar til 28.februar) medAntallDager 28 forkastet false
+            tidslinjeperiode(1) er "Utbetalt" avType "REVURDERING" fra (1.januar til 31.januar) medAntallDager 31 forkastet false
         }
 
         3.generasjon {
-            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.februar til 28.februar) medAntallDager 28
-            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
+            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.februar til 28.februar) medAntallDager 28 forkastet false
+            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31 forkastet false
         }
     }
 
@@ -222,13 +222,13 @@ internal class GenerasjonerBuilderTest: AbstractEndToEndTest() {
         assertEquals(2, generasjoner[1].perioder.size)
 
         0.generasjon {
-            tidslinjeperiode(0) er "Ubetalt" avType "REVURDERING" fra (2.februar til 28.februar) medAntallDager 27
-            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
+            tidslinjeperiode(0) er "Ubetalt" avType "REVURDERING" fra (2.februar til 28.februar) medAntallDager 27 forkastet false
+            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31 forkastet false
         }
 
         1.generasjon {
-            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (2.februar til 28.februar) medAntallDager 27
-            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
+            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (2.februar til 28.februar) medAntallDager 27 forkastet false
+            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31 forkastet false
         }
     }
 
@@ -242,11 +242,11 @@ internal class GenerasjonerBuilderTest: AbstractEndToEndTest() {
         assertEquals(1, generasjoner[1].perioder.size)
 
         0.generasjon {
-            tidslinjeperiode(0) er "Sendt" avType "ANNULLERING" fra (1.januar til 31.januar) medAntallDager 31
+            tidslinjeperiode(0) er "Sendt" avType "ANNULLERING" fra (1.januar til 31.januar) medAntallDager 31 forkastet true
         }
 
         1.generasjon {
-            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
+            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31 forkastet true
         }
     }
 
@@ -261,13 +261,13 @@ internal class GenerasjonerBuilderTest: AbstractEndToEndTest() {
         assertEquals(2, generasjoner[1].perioder.size)
 
         0.generasjon {
-            tidslinjeperiode(0) er "Sendt" avType "ANNULLERING" fra (1.februar til 28.februar) medAntallDager 28
-            tidslinjeperiode(1) er "Sendt" avType "ANNULLERING" fra (1.januar til 31.januar) medAntallDager 31
+            tidslinjeperiode(0) er "Sendt" avType "ANNULLERING" fra (1.februar til 28.februar) medAntallDager 28 forkastet true
+            tidslinjeperiode(1) er "Sendt" avType "ANNULLERING" fra (1.januar til 31.januar) medAntallDager 31 forkastet true
         }
 
         1.generasjon {
-            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.februar til 28.februar) medAntallDager 28
-            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
+            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.februar til 28.februar) medAntallDager 28 forkastet true
+            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31 forkastet true
         }
     }
 
@@ -282,13 +282,13 @@ internal class GenerasjonerBuilderTest: AbstractEndToEndTest() {
         assertEquals(2, generasjoner[1].perioder.size)
 
         0.generasjon {
-            tidslinjeperiode(0) er "Sendt" avType "ANNULLERING" fra (1.februar til 28.februar) medAntallDager 28
-            tidslinjeperiode(1) er "Sendt" avType "ANNULLERING" fra (1.januar til 31.januar) medAntallDager 31
+            tidslinjeperiode(0) er "Sendt" avType "ANNULLERING" fra (1.februar til 28.februar) medAntallDager 28 forkastet true
+            tidslinjeperiode(1) er "Sendt" avType "ANNULLERING" fra (1.januar til 31.januar) medAntallDager 31 forkastet true
         }
 
         1.generasjon {
-            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.februar til 28.februar) medAntallDager 28
-            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
+            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.februar til 28.februar) medAntallDager 28 forkastet true
+            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31 forkastet true
         }
     }
 
@@ -303,13 +303,13 @@ internal class GenerasjonerBuilderTest: AbstractEndToEndTest() {
         assertEquals(2, generasjoner[1].perioder.size)
 
         0.generasjon {
-            tidslinjeperiode(0) er "Sendt" avType "ANNULLERING" fra (1.mars til 31.mars) medAntallDager 31
-            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
+            tidslinjeperiode(0) er "Sendt" avType "ANNULLERING" fra (1.mars til 31.mars) medAntallDager 31 forkastet true
+            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31 forkastet true
         }
 
-        1.generasjon { ->
-            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.mars til 31.mars) medAntallDager 31
-            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
+        1.generasjon {
+            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.mars til 31.mars) medAntallDager 31 forkastet true
+            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31 forkastet true
         }
     }
 
@@ -332,14 +332,14 @@ internal class GenerasjonerBuilderTest: AbstractEndToEndTest() {
         assertEquals(2, generasjoner[1].perioder.size)
 
         0.generasjon {
-            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.mars til 31.mars) medAntallDager 31
-            tidslinjeperiode(1) er "Utbetalt" avType "REVURDERING" fra (1.februar til 28.februar) medAntallDager 28
-            tidslinjeperiode(2) er "Utbetalt" avType "REVURDERING" fra (1.januar til 31.januar) medAntallDager 31
+            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.mars til 31.mars) medAntallDager 31 forkastet false
+            tidslinjeperiode(1) er "Utbetalt" avType "REVURDERING" fra (1.februar til 28.februar) medAntallDager 28 forkastet false
+            tidslinjeperiode(2) er "Utbetalt" avType "REVURDERING" fra (1.januar til 31.januar) medAntallDager 31 forkastet false
         }
 
         1.generasjon {
-            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.februar til 28.februar) medAntallDager 28
-            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
+            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.februar til 28.februar) medAntallDager 28 forkastet false
+            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31 forkastet false
         }
     }
 
@@ -368,26 +368,21 @@ internal class GenerasjonerBuilderTest: AbstractEndToEndTest() {
         assertEquals(2, generasjoner[2].perioder.size)
 
         0.generasjon {
-            tidslinjeperiode(0) er "Utbetalt" avType "REVURDERING" fra (1.mars til 31.mars) medAntallDager 31
-            tidslinjeperiode(1) er "Utbetalt" avType "REVURDERING" fra (1.februar til 28.februar) medAntallDager 28
-            tidslinjeperiode(2) er "Utbetalt" avType "REVURDERING" fra (1.januar til 31.januar) medAntallDager 31
+            tidslinjeperiode(0) er "Utbetalt" avType "REVURDERING" fra (1.mars til 31.mars) medAntallDager 31 forkastet false
+            tidslinjeperiode(1) er "Utbetalt" avType "REVURDERING" fra (1.februar til 28.februar) medAntallDager 28 forkastet false
+            tidslinjeperiode(2) er "Utbetalt" avType "REVURDERING" fra (1.januar til 31.januar) medAntallDager 31 forkastet false
         }
 
         1.generasjon {
-            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.mars til 31.mars) medAntallDager 31
-            tidslinjeperiode(1) er "Utbetalt" avType "REVURDERING" fra (1.februar til 28.februar) medAntallDager 28
-            tidslinjeperiode(2) er "Utbetalt" avType "REVURDERING" fra (1.januar til 31.januar) medAntallDager 31
+            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.mars til 31.mars) medAntallDager 31 forkastet false
+            tidslinjeperiode(1) er "Utbetalt" avType "REVURDERING" fra (1.februar til 28.februar) medAntallDager 28 forkastet false
+            tidslinjeperiode(2) er "Utbetalt" avType "REVURDERING" fra (1.januar til 31.januar) medAntallDager 31 forkastet false
         }
 
         2.generasjon {
-            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.februar til 28.februar) medAntallDager 28
-            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
+            tidslinjeperiode(0) er "Utbetalt" avType "UTBETALING" fra (1.februar til 28.februar) medAntallDager 28 forkastet false
+            tidslinjeperiode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31 forkastet false
         }
-    }
-
-    @Test
-    fun `Perioder markert som forkastet`() {
-        TODO()
     }
 
     @Test
@@ -396,7 +391,7 @@ internal class GenerasjonerBuilderTest: AbstractEndToEndTest() {
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(1.januar, 15.januar, 100.prosent))
 
         0.generasjon {
-            kortPeriode(0) fra (1.januar til 15.januar) medAntallDager 15
+            kortPeriode(0) fra (1.januar til 15.januar) medAntallDager 15 forkastet false
         }
     }
 
@@ -415,8 +410,8 @@ internal class GenerasjonerBuilderTest: AbstractEndToEndTest() {
         assertEquals(2, generasjoner[0].perioder.size)
 
         0.generasjon {
-            tidslinjeperiode(0) er "Ubetalt" avType "UTBETALING" fra (16.januar til 15.februar) medAntallDager 31
-            kortPeriode(1) fra (1.januar til 15.januar) medAntallDager 15
+            tidslinjeperiode(0) er "Ubetalt" avType "UTBETALING" fra (16.januar til 15.februar) medAntallDager 31 forkastet false
+            kortPeriode(1) fra (1.januar til 15.januar) medAntallDager 15 forkastet false
         }
     }
 
@@ -435,17 +430,22 @@ internal class GenerasjonerBuilderTest: AbstractEndToEndTest() {
         håndterYtelser()
 
         0.generasjon {
-            tidslinjeperiode(0) er "GodkjentUtenUtbetaling" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31
+            tidslinjeperiode(0) er "GodkjentUtenUtbetaling" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31 forkastet false
         }
     }
 
     private fun Int.generasjon(assertBlock: Generasjon.() -> Unit) {
-        require(this >= 0) {"Kan ikke være et negativt tall!"}
+        require(this >= 0) { "Kan ikke være et negativt tall!" }
         generasjoner[this].run(assertBlock)
     }
 
-    private infix fun <T: Periode> T.medAntallDager(antall: Int): T {
+    private infix fun <T : Periode> T.medAntallDager(antall: Int): T {
         assertEquals(antall, sammenslåttTidslinje.size)
+        return this
+    }
+
+    private infix fun <T : Periode> T.forkastet(forkastet: Boolean): T {
+        assertEquals(forkastet, this.erForkastet)
         return this
     }
 
@@ -459,7 +459,7 @@ internal class GenerasjonerBuilderTest: AbstractEndToEndTest() {
         return this
     }
 
-    private infix fun <T: Periode> T.fra(periode: no.nav.helse.hendelser.Periode): T {
+    private infix fun <T : Periode> T.fra(periode: no.nav.helse.hendelser.Periode): T {
         assertEquals(periode.start, this.fom)
         assertEquals(periode.endInclusive, this.tom)
         return this
