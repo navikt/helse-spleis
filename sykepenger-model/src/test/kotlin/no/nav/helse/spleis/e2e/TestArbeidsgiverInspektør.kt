@@ -46,7 +46,7 @@ internal class TestArbeidsgiverInspektør(
     internal val sykdomshistorikkDagTeller = mutableMapOf<KClass<out Dag>, Int>()
     internal val vedtaksperiodeDagTeller = mutableMapOf<UUID, MutableMap<KClass<out Dag>, Int>>()
     internal val utbetalinger = mutableListOf<Utbetaling>()
-    internal val feriepengeutbetalingslinjer = mutableListOf<Feriepengeutbetalingslinje>()
+    internal val feriepengeoppdrag = mutableListOf<Feriepengeoppdrag>()
     internal val infotrygdFeriepengebeløpPerson = mutableListOf<Double>()
     internal val infotrygdFeriepengebeløpArbeidsgiver = mutableListOf<Double>()
     internal val spleisFeriepengebeløpArbeidsgiver = mutableListOf<Double>()
@@ -215,6 +215,8 @@ internal class TestArbeidsgiverInspektør(
         nettoBeløp: Int,
         tidsstempel: LocalDateTime
     ) {
+        if (inFeriepengeutbetaling) feriepengeoppdrag.add(Feriepengeoppdrag(oppdrag.fagsystemId()))
+
         if (oppdrag != arbeidsgiverOppdrag.lastOrNull()) return
         this.totalBeløp.add(totalBeløp)
         this.nettoBeløp.add(nettoBeløp)
@@ -235,8 +237,18 @@ internal class TestArbeidsgiverInspektør(
         datoStatusFom: LocalDate?,
         klassekode: Klassekode
     ) {
-        if(inFeriepengeutbetaling) feriepengeutbetalingslinjer.add(Feriepengeutbetalingslinje(fom, tom, satstype, beløp, grad, klassekode, endringskode))
+        if(inFeriepengeutbetaling) {
+            feriepengeoppdrag
+                .lastOrNull()
+                ?.feriepengeutbetalingslinjer
+                ?.add(Feriepengeutbetalingslinje(fom, tom, satstype, beløp, grad, klassekode, endringskode))
+        }
     }
+
+    internal data class Feriepengeoppdrag(
+        val fagsystemId: String,
+        val feriepengeutbetalingslinjer: MutableList<Feriepengeutbetalingslinje> = mutableListOf()
+    )
 
     internal data class Feriepengeutbetalingslinje(
         val fom: LocalDate,

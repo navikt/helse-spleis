@@ -55,7 +55,7 @@ internal class Feriepengeutbetaling private constructor(
     fun håndter(utbetalingHendelse: UtbetalingHendelse, person: Person) {
         if (!utbetalingHendelse.erRelevant(oppdrag.fagsystemId())) return
 
-        utbetalingHendelse.info("Behandler svar fra Oppdrag/UR/spenn for feriepenger ")
+        utbetalingHendelse.info("Behandler svar fra Oppdrag/UR/spenn for feriepenger")
         utbetalingHendelse.valider()
         val utbetaltOk = !utbetalingHendelse.hasErrorsOrWorse()
         lagreInformasjon(utbetalingHendelse, utbetaltOk)
@@ -133,12 +133,13 @@ internal class Feriepengeutbetaling private constructor(
             val beløp = differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd.roundToInt()
 
             val forrigeSendteOppdrag =
-                tidligereFeriepengeutbetalinger.lastOrNull { it.gjelderForÅr(utbetalingshistorikkForFeriepenger.opptjeningsår) && it.sendTilOppdrag }?.oppdrag
+                tidligereFeriepengeutbetalinger
+                    .lastOrNull { it.gjelderForÅr(utbetalingshistorikkForFeriepenger.opptjeningsår) && it.sendTilOppdrag }
+                    ?.oppdrag
+                    ?.takeIf { it.linjerUtenOpphør().isNotEmpty() }
 
             val fagsystemId =
-                tidligereFeriepengeutbetalinger
-                    .firstOrNull { it.gjelderForÅr(utbetalingshistorikkForFeriepenger.opptjeningsår) && it.sendTilOppdrag }
-                    ?.oppdrag
+                forrigeSendteOppdrag
                     ?.fagsystemId()
                     ?: genererUtbetalingsreferanse(UUID.randomUUID())
 
@@ -185,6 +186,7 @@ internal class Feriepengeutbetaling private constructor(
                 Oppdrag: ${oppdrag.toMap()}
                 Datoer: ${feriepengeberegner.feriepengedatoer()}
                 Differanse fra forrige sendte oppdrag: ${forrigeSendteOppdrag?.totalbeløp()?.minus(oppdrag.totalbeløp())}
+                Skal sendes til oppdrag: $sendTilOppdrag
                 """.trimIndent()
             )
 
