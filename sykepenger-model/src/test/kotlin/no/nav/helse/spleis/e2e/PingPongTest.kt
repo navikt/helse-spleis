@@ -1,14 +1,14 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -66,5 +66,47 @@ internal class PingPongTest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(2.vedtaksperiode, historie, inntektshistorikk = inntekter)
         håndterYtelser(2.vedtaksperiode)
         assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+    }
+
+    @Test
+    fun `kort periode - infotrygd - spleis --- inntekt kommer fra infotrygd`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(1.januar, 16.januar, 100.prosent))
+
+        håndterSykmelding(Sykmeldingsperiode(17.januar, 27.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(17.januar, 27.januar, 100.prosent))
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+
+        håndterSykmelding(Sykmeldingsperiode(28.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(28.januar, 31.januar, 100.prosent))
+
+        val historie = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar,  27.januar, 100.prosent, 1000.daglig)
+        val inntekt = listOf(Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT - 100.månedlig, true))
+
+        håndterUtbetalingshistorikk(3.vedtaksperiode, historie, inntektshistorikk = inntekt)
+        håndterYtelser(3.vedtaksperiode)
+        assertEquals(1.januar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
+        assertEquals(INNTEKT - 100.månedlig, inspektør.vilkårsgrunnlag(3.vedtaksperiode)?.grunnlagForSykepengegrunnlag())
+    }
+
+    @Test
+    fun `spleis - infotrygd - spleis --- inntekt kommer fra første periode`() {
+        nyttVedtak(20.desember(2017), 16.januar)
+        håndterSykmelding(Sykmeldingsperiode(17.januar, 27.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(17.januar, 27.januar, 100.prosent))
+
+        håndterInntektsmelding(listOf(20.desember(2017) til 5.januar))
+
+        håndterSykmelding(Sykmeldingsperiode(28.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(28.januar, 31.januar, 100.prosent))
+
+        val historie = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar,  27.januar, 100.prosent, 1000.daglig)
+        val inntekt = listOf(Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT - 100.månedlig, true))
+
+        håndterUtbetalingshistorikk(3.vedtaksperiode, historie, inntektshistorikk = inntekt)
+        håndterYtelser(3.vedtaksperiode)
+        assertEquals(20.desember(2017), inspektør.skjæringstidspunkt(3.vedtaksperiode))
+        assertEquals(INNTEKT, inspektør.vilkårsgrunnlag(3.vedtaksperiode)?.grunnlagForSykepengegrunnlag())
     }
 }

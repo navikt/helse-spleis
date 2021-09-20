@@ -660,47 +660,24 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `ny sykmelding etter en annen utbetalt, før en annen til utbetaling som ikke er forlengelse`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterYtelser(1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
-
-        håndterSykmelding(Sykmeldingsperiode(1.april, 30.april, 100.prosent))
-        håndterSøknad(Sykdom(1.april, 30.april, 100.prosent))
-        håndterInntektsmelding(listOf(1.april til 16.april))
-        håndterYtelser(2.vedtaksperiode)
-        håndterVilkårsgrunnlag(2.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.januar(2017) til 1.mars inntekter {
-                    ORGNUMMER inntekt INNTEKT
-                }
-            }
-        ))
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode) // TODO: denne må jobbes med fordi her må evt. utbetalingen annulleres!
+    fun `skal ikke kaste perioder til utbetaling, selv ved out of order sykmeldinger`() {
+        nyttVedtak(1.januar, 31.januar)
+        tilGodkjent(1.april, 30.april, 100.prosent, 1.april)
 
         håndterSykmelding(Sykmeldingsperiode(19.februar, 28.februar, 100.prosent))
 
         assertFalse(inspektør.periodeErForkastet(1.vedtaksperiode))
-        assertForkastetPeriodeTilstander(
+        assertTilstander(
             2.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            TIL_INFOTRYGD
+            TIL_UTBETALING
         )
         assertForkastetPeriodeTilstander(
             3.vedtaksperiode,

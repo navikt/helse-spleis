@@ -330,7 +330,9 @@ internal class Vedtaksperiode private constructor(
     private fun erAvsluttet() =
         utbetaling?.erAvsluttet() == true || tilstand == AvsluttetUtenUtbetaling
 
-    internal fun kanForkastes(annullerteFagsystemIder: List<String>) = !erAvsluttet() || harAnnullertUtbetaling(annullerteFagsystemIder)
+    private fun utbetalingTillaterForkasting() = utbetaling?.tillaterForkastingAvPeriode() ?: true
+    private fun tilstandTillaterForkasting() = tilstand.kanForkastes
+    internal fun kanForkastes(annullerteFagsystemIder: List<String>) = (utbetalingTillaterForkasting() && tilstandTillaterForkasting()) || harAnnullertUtbetaling(annullerteFagsystemIder)
 
     private fun harAnnullertUtbetaling(annullerteFagsystemIder: List<String>) = utbetalinger.flatMap { it.fagsystemIder() }.any { annullerteFagsystemIder.contains(it) }
 
@@ -432,7 +434,7 @@ internal class Vedtaksperiode private constructor(
     private fun overlappendeSøknadIkkeStøttet(søknad: Søknad, egendefinertFeiltekst: String? = null) {
         søknad.trimLeft(periode.endInclusive)
         søknad.error(egendefinertFeiltekst ?: "Mottatt flere søknader for perioden - det støttes ikke før replay av hendelser er på plass")
-        if (!tilstand.skalForkastesVedOverlapp) return
+        if (!tilstand.kanForkastes) return
         tilstand(søknad, TilInfotrygd)
     }
 
@@ -821,7 +823,7 @@ internal class Vedtaksperiode private constructor(
     internal interface Vedtaksperiodetilstand : Aktivitetskontekst {
         val type: TilstandType
         val erFerdigBehandlet: Boolean get() = false
-        val skalForkastesVedOverlapp: Boolean get() = true
+        val kanForkastes: Boolean get() = true
 
         fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {}
 
@@ -855,7 +857,7 @@ internal class Vedtaksperiode private constructor(
 
         fun håndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
             sykmelding.overlappIkkeStøttet(vedtaksperiode.periode)
-            if (!skalForkastesVedOverlapp) return
+            if (!kanForkastes) return
             vedtaksperiode.tilstand(sykmelding, TilInfotrygd)
         }
 
@@ -866,7 +868,7 @@ internal class Vedtaksperiode private constructor(
         fun håndter(vedtaksperiode: Vedtaksperiode, søknad: SøknadArbeidsgiver) {
             søknad.trimLeft(vedtaksperiode.periode.endInclusive)
             søknad.error("Mottatt flere søknader for perioden - det støttes ikke før replay av hendelser er på plass")
-            if (!skalForkastesVedOverlapp) return
+            if (!kanForkastes) return
             vedtaksperiode.tilstand(søknad, TilInfotrygd)
         }
 
@@ -2136,7 +2138,7 @@ internal class Vedtaksperiode private constructor(
 
     internal object TilUtbetaling : Vedtaksperiodetilstand {
         override val type = TIL_UTBETALING
-        override val skalForkastesVedOverlapp = false
+        override val kanForkastes = false
 
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
             LocalDateTime.MAX
@@ -2181,7 +2183,7 @@ internal class Vedtaksperiode private constructor(
 
     internal object UtbetalingFeilet : Vedtaksperiodetilstand {
         override val type = UTBETALING_FEILET
-        override val skalForkastesVedOverlapp = false
+        override val kanForkastes = false
 
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
             LocalDateTime.MAX
@@ -2218,7 +2220,7 @@ internal class Vedtaksperiode private constructor(
     internal object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
         override val type = AVSLUTTET_UTEN_UTBETALING
         override val erFerdigBehandlet = true
-        override val skalForkastesVedOverlapp = false
+        override val kanForkastes = false
 
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
             LocalDateTime.MAX
@@ -2259,7 +2261,7 @@ internal class Vedtaksperiode private constructor(
         override val type = AVSLUTTET
 
         override val erFerdigBehandlet = true
-        override val skalForkastesVedOverlapp = false
+        override val kanForkastes = false
 
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
             LocalDateTime.MAX

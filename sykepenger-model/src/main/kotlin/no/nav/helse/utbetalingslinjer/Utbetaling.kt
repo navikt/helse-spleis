@@ -107,6 +107,7 @@ internal class Utbetaling private constructor(
     internal fun erForkastet() = tilstand == Forkastet
     private fun erAktiv() = erUtbetalt() || tilstand in listOf(Godkjent, Sendt, Overført, UtbetalingFeilet)
     internal fun erAvsluttet() = tilstand in listOf(GodkjentUtenUtbetaling, Utbetalt, Annullert)
+    internal fun tillaterForkastingAvPeriode() = !(erAvsluttet() || tilstand in listOf(Overført, Sendt, Godkjent))
     internal fun erAvvist() = tilstand in listOf(IkkeGodkjent)
     internal fun harFeilet() = tilstand == UtbetalingFeilet
     internal fun erAnnullering() = type == Utbetalingtype.ANNULLERING

@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.UtbetalingHendelse
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.OppdragVisitor
@@ -456,6 +457,23 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         assertEquals("Ola Nordmann", observatør.annulleringer.first().saksbehandlerIdent)
+    }
+
+    @Test
+    fun `skal ikke forkaste utbetalte perioder, med mindre de blir annullert`() {
+        // lag en periode
+        nyttVedtak(1.januar, 31.januar)
+        // prøv å forkast, ikke klar det
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 20.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 20.februar, 100.prosent))
+        assertTrue(inspektør.periodeErIkkeForkastet(1.vedtaksperiode))
+        assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
+        // annullér
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
+        håndterUtbetalt(1.vedtaksperiode)
+        // sjekk at _nå_ er den forkasta
+        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
+        assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
     }
 
     private inner class TestOppdragInspektør(oppdrag: Oppdrag) : OppdragVisitor {
