@@ -304,12 +304,12 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
         0.generasjon {
             beregnetPeriode(0) er "Sendt" avType "ANNULLERING" fra (1.mars til 31.mars) medAntallDager 31 forkastet true
-            beregnetPeriode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31 forkastet true
+            beregnetPeriode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31 forkastet false
         }
 
         1.generasjon {
             beregnetPeriode(0) er "Utbetalt" avType "UTBETALING" fra (1.mars til 31.mars) medAntallDager 31 forkastet true
-            beregnetPeriode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31 forkastet true
+            beregnetPeriode(1) er "Utbetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31 forkastet false
         }
     }
 
