@@ -7,7 +7,7 @@ val hikariVersion = "5.0.0"
 val jacksonVersion = "2.12.4"
 val junitJupiterVersion = "5.7.2"
 val kotliqueryVersion = "1.3.1"
-val vaultJdbcVersion = "1.3.7"
+val vaultJdbcVersion = "1.3.9"
 
 allprojects {
     group = "no.nav.helse"
