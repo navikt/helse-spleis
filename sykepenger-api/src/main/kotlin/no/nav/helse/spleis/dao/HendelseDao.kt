@@ -12,8 +12,8 @@ internal class HendelseDao(private val dataSource: DataSource) {
         return using(sessionOf(dataSource)) { session ->
             session.run(
                 queryOf(
-                    "SELECT data FROM melding WHERE AND melding_id = ?",
-                    meldingsReferanse
+                    "SELECT data FROM melding WHERE melding_id = ?",
+                    meldingsReferanse.toString()
                 ).map {
                     it.string("data")
                 }.asSingle

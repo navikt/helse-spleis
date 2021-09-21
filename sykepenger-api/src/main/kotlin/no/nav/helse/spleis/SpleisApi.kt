@@ -63,7 +63,13 @@ internal fun Application.spannerApi(dataSource: DataSource, authProviderName: St
             get("/api/hendelse-json/{hendelse}") {
                 val hendelseId = call.parameters["hendelse"] ?: throw IllegalArgumentException("Kall Mangler hendelse referanse")
 
-                val hendelse = hendelseDao.hentHendelse(UUID.fromString(hendelseId)) ?:
+                val meldingsReferanse = try {
+                    UUID.fromString(hendelseId)
+                } catch(e:IllegalArgumentException) {
+                    throw BadRequestException("meldingsreferanse bør/skal være en UUID")
+                }
+
+                val hendelse = hendelseDao.hentHendelse(meldingsReferanse) ?:
                     throw NotFoundException("Kunne ikke finne hendelse for hendelsereferanse = ${hendelseId}")
 
 

@@ -17,6 +17,7 @@ import no.nav.helse.serde.serialize
 import no.nav.helse.spleis.config.AzureAdAppConfig
 import no.nav.helse.spleis.config.DataSourceConfiguration
 import no.nav.helse.spleis.config.KtorConfig
+import no.nav.helse.spleis.dao.HendelseDao
 import org.awaitility.Awaitility.await
 import org.flywaydb.core.Flyway
 import org.junit.jupiter.api.*
@@ -38,6 +39,7 @@ import kotlin.system.measureTimeMillis
 internal class RestApiTest {
     private companion object {
         private const val UNG_PERSON_FNR_2018 = "12020052345"
+        private val MELDINGSREFERANSE = UUID.randomUUID()
         private const val AKTØRID = "42"
     }
 
@@ -67,8 +69,11 @@ internal class RestApiTest {
         await("vent på WireMockServer har startet")
             .atMost(5, SECONDS)
             .until {
-                try { Socket("localhost", wireMockServer.port()).use { it.isConnected } }
-                catch (err: Exception) { false }
+                try {
+                    Socket("localhost", wireMockServer.port()).use { it.isConnected }
+                } catch (err: Exception) {
+                    false
+                }
             }
         jwtStub = JwtStub("Microsoft Azure AD", wireMockServer)
         stubFor(jwtStub.stubbedJwkProvider())
@@ -119,6 +124,7 @@ internal class RestApiTest {
         flyway.migrate()
 
         dataSource.lagrePerson(AKTØRID, UNG_PERSON_FNR_2018, Person(AKTØRID, UNG_PERSON_FNR_2018))
+        dataSource.lagreHendelse(MELDINGSREFERANSE)
 
         teller.set(0)
     }
@@ -126,29 +132,64 @@ internal class RestApiTest {
     private fun DataSource.lagrePerson(aktørId: String, fødselsnummer: String, person: Person) {
         val serialisertPerson = person.serialize()
         using(sessionOf(this)) {
-            it.run(queryOf("INSERT INTO person (aktor_id, fnr, skjema_versjon, data) VALUES (?, ?, ?, (to_json(?::json)))",
-                aktørId.toLong(), fødselsnummer.toLong(), serialisertPerson.skjemaVersjon, serialisertPerson.json).asExecute)
+            it.run(
+                queryOf(
+                    "INSERT INTO person (aktor_id, fnr, skjema_versjon, data) VALUES (?, ?, ?, (to_json(?::json)))",
+                    aktørId.toLong(), fødselsnummer.toLong(), serialisertPerson.skjemaVersjon, serialisertPerson.json
+                ).asExecute
+            )
+        }
+    }
+
+
+    private fun DataSource.lagreHendelse(
+        meldingsReferanse: UUID,
+        meldingstype: HendelseDao.Meldingstype = HendelseDao.Meldingstype.INNTEKTSMELDING,
+        fødselsnummer: String = UNG_PERSON_FNR_2018,
+        data: String = "{}"
+    ) {
+        using(sessionOf(this)) {
+            it.run(
+                queryOf(
+                    "INSERT INTO melding (fnr, melding_id, melding_type, data) VALUES (?, ?, ?, (to_json(?::json)))",
+                    fødselsnummer.toLong(),
+                    meldingsReferanse.toString(),
+                    meldingstype.toString(),
+                    data
+                ).asExecute
+            )
         }
     }
 
     @Test
     fun `hent person`() {
-        await().atMost(5, SECONDS).untilAsserted { "/api/person-snapshot".httpGet(HttpStatusCode.OK, mapOf("fnr" to UNG_PERSON_FNR_2018)) }
+         "/api/person-snapshot".httpGet(HttpStatusCode.OK, mapOf("fnr" to UNG_PERSON_FNR_2018))
     }
 
     @Test
     fun `hent personJson med fnr`() {
-        await().atMost(5, SECONDS).untilAsserted { "/api/person-json".httpGet(HttpStatusCode.OK, mapOf("fnr" to UNG_PERSON_FNR_2018)) }
+         "/api/person-json".httpGet(HttpStatusCode.OK, mapOf("fnr" to UNG_PERSON_FNR_2018))
     }
 
     @Test
     fun `hent personJson med aktørId`() {
-        await().atMost(5, SECONDS).untilAsserted { "/api/person-json".httpGet(HttpStatusCode.OK, mapOf("aktorId" to AKTØRID)) }
+         "/api/person-json".httpGet(HttpStatusCode.OK, mapOf("aktorId" to AKTØRID))
+    }
+
+
+    @Test
+    fun `finner ikke melding`() {
+         "/api/hendelse-json/${UUID.randomUUID()}".httpGet(HttpStatusCode.NotFound)
+    }
+
+    @Test
+    fun `finner melding`() {
+        "/api/hendelse-json/${MELDINGSREFERANSE}".httpGet(HttpStatusCode.OK)
     }
 
     @Disabled("Tester bruk av preStopHook")
     @Test
-    fun `preStop`() {
+    fun preStop() {
         teller.set(3)
         thread {
             Thread.sleep(900)
@@ -161,7 +202,11 @@ internal class RestApiTest {
         assertTrue(ms >= 1400)
     }
 
-    private fun String.httpGet(expectedStatus: HttpStatusCode = HttpStatusCode.OK, headers: Map<String, String> = emptyMap(), testBlock: String.() -> Unit = {}) {
+    private fun String.httpGet(
+        expectedStatus: HttpStatusCode = HttpStatusCode.OK,
+        headers: Map<String, String> = emptyMap(),
+        testBlock: String.() -> Unit = {}
+    ) {
         val token = jwtStub.createTokenFor(
             subject = "en_saksbehandler_ident",
             groups = listOf("sykepenger-saksbehandler-gruppe"),
