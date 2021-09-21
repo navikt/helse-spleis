@@ -22,7 +22,6 @@ import org.awaitility.Awaitility.await
 import org.flywaydb.core.Flyway
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.junit.jupiter.api.io.TempDir
 import java.net.Socket
@@ -32,8 +31,6 @@ import java.util.*
 import java.util.concurrent.TimeUnit.SECONDS
 import java.util.concurrent.atomic.AtomicInteger
 import javax.sql.DataSource
-import kotlin.concurrent.thread
-import kotlin.system.measureTimeMillis
 
 @TestInstance(Lifecycle.PER_CLASS)
 internal class RestApiTest {
@@ -54,7 +51,6 @@ internal class RestApiTest {
     private lateinit var app: ApplicationEngine
     private lateinit var appBaseUrl: String
     private val teller = AtomicInteger()
-    private val spesialistClientId = UUID.randomUUID().toString()
 
     @BeforeAll
     internal fun `start embedded environment`(@TempDir postgresPath: Path) {
@@ -141,7 +137,6 @@ internal class RestApiTest {
         }
     }
 
-
     private fun DataSource.lagreHendelse(
         meldingsReferanse: UUID,
         meldingstype: HendelseDao.Meldingstype = HendelseDao.Meldingstype.INNTEKTSMELDING,
@@ -163,43 +158,27 @@ internal class RestApiTest {
 
     @Test
     fun `hent person`() {
-         "/api/person-snapshot".httpGet(HttpStatusCode.OK, mapOf("fnr" to UNG_PERSON_FNR_2018))
+        "/api/person-snapshot".httpGet(HttpStatusCode.OK, mapOf("fnr" to UNG_PERSON_FNR_2018))
     }
 
     @Test
     fun `hent personJson med fnr`() {
-         "/api/person-json".httpGet(HttpStatusCode.OK, mapOf("fnr" to UNG_PERSON_FNR_2018))
+        "/api/person-json".httpGet(HttpStatusCode.OK, mapOf("fnr" to UNG_PERSON_FNR_2018))
     }
 
     @Test
     fun `hent personJson med aktørId`() {
-         "/api/person-json".httpGet(HttpStatusCode.OK, mapOf("aktorId" to AKTØRID))
+        "/api/person-json".httpGet(HttpStatusCode.OK, mapOf("aktorId" to AKTØRID))
     }
-
 
     @Test
     fun `finner ikke melding`() {
-         "/api/hendelse-json/${UUID.randomUUID()}".httpGet(HttpStatusCode.NotFound)
+        "/api/hendelse-json/${UUID.randomUUID()}".httpGet(HttpStatusCode.NotFound)
     }
 
     @Test
     fun `finner melding`() {
         "/api/hendelse-json/${MELDINGSREFERANSE}".httpGet(HttpStatusCode.OK)
-    }
-
-    @Disabled("Tester bruk av preStopHook")
-    @Test
-    fun preStop() {
-        teller.set(3)
-        thread {
-            Thread.sleep(900)
-            do {
-                Thread.sleep(100)
-            } while (teller.decrementAndGet() != 0)
-        }
-        val handleRequest = appBaseUrl.handleRequest(HttpMethod.Get, "/stop")
-        val ms = measureTimeMillis { handleRequest.responseCode }
-        assertTrue(ms >= 1400)
     }
 
     private fun String.httpGet(
