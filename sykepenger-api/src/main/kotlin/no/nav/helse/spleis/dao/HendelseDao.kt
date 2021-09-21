@@ -7,6 +7,22 @@ import java.util.*
 import javax.sql.DataSource
 
 internal class HendelseDao(private val dataSource: DataSource) {
+
+    fun hentHendelse(meldingsReferanse: UUID): String? {
+        return using(sessionOf(dataSource)) { session ->
+            session.run(
+                queryOf(
+                    "SELECT data FROM melding WHERE AND melding_id = ?",
+                    meldingsReferanse
+                ).map {
+                    it.string("data")
+                }.asSingle
+            )
+        }.also {
+            PostgresProbe.hendelseLestFraDb()
+        }
+    }
+
     fun hentHendelser(referanser: Set<UUID>): List<Pair<Meldingstype, String>> {
         if (referanser.isEmpty()) return emptyList()
         return using(sessionOf(dataSource)) { session ->
@@ -19,7 +35,8 @@ internal class HendelseDao(private val dataSource: DataSource) {
                     *referanser.map { it.toString() }.toTypedArray()
                 ).map {
                     Meldingstype.valueOf(it.string("melding_type")) to it.string("data")
-                }.asList)
+                }.asList
+            )
         }.onEach {
             PostgresProbe.hendelseLestFraDb()
         }
@@ -33,7 +50,8 @@ internal class HendelseDao(private val dataSource: DataSource) {
                     fødselsnummer, *Meldingstype.values().map(Enum<*>::name).toTypedArray()
                 ).map {
                     UUID.fromString(it.string("melding_id")) to it.string("data")
-                }.asList).toMap()
+                }.asList
+            ).toMap()
         }
     }
 

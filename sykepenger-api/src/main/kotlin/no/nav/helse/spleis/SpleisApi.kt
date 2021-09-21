@@ -19,6 +19,7 @@ import no.nav.helse.spleis.dao.HendelseDao.Meldingstype.*
 import no.nav.helse.spleis.dao.PersonDao
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.*
 import javax.sql.DataSource
 import no.nav.helse.serde.api.InntektsmeldingDTO as SerdeInntektsmeldingDTO
 import no.nav.helse.serde.api.SykmeldingDTO as SerdeSykmeldingDTO
@@ -57,6 +58,16 @@ internal fun Application.spannerApi(dataSource: DataSource, authProviderName: St
                 val person = personDao.hentPersonFraFnr(fnr) ?: throw NotFoundException("Kunne ikke finne person")
 
                 call.respond(person.deserialize { hendelseDao.hentAlleHendelser(fnr) }.serialize().json)
+            }
+
+            get("/api/hendelse-json/{hendelse}") {
+                val hendelseId = call.parameters["hendelse"] ?: throw IllegalArgumentException("Kall Mangler hendelse referanse")
+
+                val hendelse = hendelseDao.hentHendelse(UUID.fromString(hendelseId)) ?:
+                    throw NotFoundException("Kunne ikke finne hendelse for hendelsereferanse = ${hendelseId}")
+
+
+                call.respondText(hendelse, ContentType.Application.Json)
             }
         }
     }
