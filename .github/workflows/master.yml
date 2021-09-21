@@ -26,12 +26,6 @@ jobs:
           distribution: 'temurin'
           java-version: '16.x'
           cache: 'gradle'
-      - name: lag gradle.properties
-        shell: bash
-        run: |
-            mkdir -p ~/.gradle/
-            echo "GRADLE_USER_HOME=$HOME/.gradle" >> $GITHUB_ENV
-            echo org.gradle.jvmargs=-Xmx2048m > ~/.gradle/gradle.properties
       - name: test and build
         run: ./gradlew test build
       - name: build docker image
