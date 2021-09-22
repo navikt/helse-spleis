@@ -246,7 +246,6 @@ internal class Utbetaling private constructor(
 
     private fun tilstand(neste: Tilstand, hendelse: IAktivitetslogg) {
         val forrigeTilstand = tilstand
-        tilstand.leaving(this, hendelse)
         tilstand = neste
         oppdatert = LocalDateTime.now()
         observers.forEach {
@@ -628,7 +627,6 @@ internal class Utbetaling private constructor(
             hendelse.error("Forventet ikke avslutte på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
         }
         fun entering(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {}
-        fun leaving(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {}
     }
 
     internal object Ubetalt : Tilstand {
