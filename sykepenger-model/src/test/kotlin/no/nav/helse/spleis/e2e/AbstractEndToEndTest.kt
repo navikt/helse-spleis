@@ -268,18 +268,20 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
                 }
             }
         ),
-        inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag = InntektForSykepengegrunnlag(listOf(
-            ArbeidsgiverInntekt(orgnummer, (0..2).map {
-                val yearMonth = YearMonth.from(inspektør(orgnummer).skjæringstidspunkt(vedtaksperiodeIdInnhenter)).minusMonths(3L - it)
-                ArbeidsgiverInntekt.MånedligInntekt.Sykepengegrunnlag(
-                    yearMonth = yearMonth,
-                    type = ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
-                    inntekt = INNTEKT,
-                    fordel = "fordel",
-                    beskrivelse = "beskrivelse"
-                )
-            })
-        )),
+        inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag = InntektForSykepengegrunnlag(
+            listOf(
+                ArbeidsgiverInntekt(orgnummer, (0..2).map {
+                    val yearMonth = YearMonth.from(inspektør(orgnummer).skjæringstidspunkt(vedtaksperiodeIdInnhenter)).minusMonths(3L - it)
+                    ArbeidsgiverInntekt.MånedligInntekt.Sykepengegrunnlag(
+                        yearMonth = yearMonth,
+                        type = ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
+                        inntekt = INNTEKT,
+                        fordel = "fordel",
+                        beskrivelse = "beskrivelse"
+                    )
+                })
+            )
+        ),
         arbeidsforhold: List<Arbeidsforhold> = finnArbeidsgivere().map { Arbeidsforhold(it, LocalDate.EPOCH, null) },
         opptjening: Opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
         fnr: String = UNG_PERSON_FNR_2018
@@ -968,7 +970,16 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         }
     }
 
-    protected fun nyeVedtak(fom: LocalDate, tom: LocalDate, vararg organisasjonsnummere: String) {
+    protected fun nyeVedtak(
+        fom: LocalDate,
+        tom: LocalDate,
+        vararg organisasjonsnummere: String,
+        inntekterBlock: Inntektperioder.() -> Unit = {
+            organisasjonsnummere.forEach {
+                lagInntektperioder(it, fom, 20000.månedlig)
+            }
+        }
+    ) {
         require(organisasjonsnummere.isNotEmpty()) { "Må inneholde minst ett organisasjonsnummer" }
         organisasjonsnummere.forEach {
             håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent), orgnummer = it)
@@ -992,11 +1003,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
                 vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
                 orgnummer = organisasjonsnummer,
                 inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
-                    fom.minusYears(1) til fom.minusMonths(1) inntekter {
-                        organisasjonsnummere.forEach {
-                            it inntekt 20000.månedlig
-                        }
-                    }
+                    inntekterBlock()
                 })
             )
             håndterYtelser(1.vedtaksperiode, orgnummer = organisasjonsnummer)
@@ -1045,7 +1052,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         grad: Prosentdel = 100.prosent,
         førsteFraværsdag: LocalDate = fom,
         orgnummer: String = ORGNUMMER,
-        inntekterBlock: Inntektperioder.() -> Unit = { defaultInntekter(orgnummer, fom) }
+        inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, fom) }
     ) {
         val id = tilGodkjent(fom, tom, grad, førsteFraværsdag, orgnummer = orgnummer, inntekterBlock = inntekterBlock)
         håndterUtbetalt({ id }, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT, orgnummer = orgnummer)
@@ -1057,7 +1064,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         grad: Prosentdel,
         førsteFraværsdag: LocalDate,
         orgnummer: String = ORGNUMMER,
-        inntekterBlock: Inntektperioder.() -> Unit = { defaultInntekter(orgnummer, fom) }
+        inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, fom) }
     ): UUID {
         val id = tilGodkjenning(fom, tom, grad, førsteFraværsdag, orgnummer = orgnummer, inntekterBlock = inntekterBlock)
         håndterUtbetalingsgodkjenning({ id }, true, orgnummer = orgnummer)
@@ -1070,16 +1077,16 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         grad: Prosentdel,
         førsteFraværsdag: LocalDate,
         orgnummer: String = ORGNUMMER,
-        inntekterBlock: Inntektperioder.() -> Unit = { defaultInntekter(orgnummer, fom) }
+        inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, fom) }
     ): UUID {
         val id = tilYtelser(fom, tom, grad, førsteFraværsdag, orgnummer = orgnummer, inntekterBlock = inntekterBlock)
         håndterSimulering({ id }, orgnummer = orgnummer)
         return id
     }
 
-    private fun Inntektperioder.defaultInntekter(orgnummer: String, fom: LocalDate) =
+    protected fun Inntektperioder.lagInntektperioder(orgnummer: String = ORGNUMMER, fom: LocalDate, inntekt: Inntekt = INNTEKT) =
         fom.minusYears(1) til fom.minusMonths(1) inntekter {
-            orgnummer inntekt INNTEKT
+            orgnummer inntekt inntekt
         }
 
     protected fun tilYtelser(
@@ -1088,7 +1095,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         grad: Prosentdel,
         førsteFraværsdag: LocalDate,
         orgnummer: String = ORGNUMMER,
-        inntekterBlock: Inntektperioder.() -> Unit = { defaultInntekter(orgnummer, fom) },
+        inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, fom) },
         inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag = InntektForSykepengegrunnlag(
             inntekter = inntektperioderForSykepengegrunnlag {
                 fom.minusMonths(3) til fom.minusMonths(1) inntekter { // TODO: riktig datoer?
@@ -1259,13 +1266,13 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         orgnummer: String,
         skjæringstidspunkt: LocalDate,
         inntekter: List<Inntekt>
-    ) = lagMånedsinntekter(orgnummer, skjæringstidspunkt, inntekter,  creator = ArbeidsgiverInntekt.MånedligInntekt::Sykepengegrunnlag)
+    ) = lagMånedsinntekter(orgnummer, skjæringstidspunkt, inntekter, creator = ArbeidsgiverInntekt.MånedligInntekt::Sykepengegrunnlag)
 
     protected fun sammenligningsgrunnlag(
         orgnummer: String,
         skjæringstidspunkt: LocalDate,
         inntekter: List<Inntekt>
-    ) = lagMånedsinntekter(orgnummer, skjæringstidspunkt, inntekter,  creator = ArbeidsgiverInntekt.MånedligInntekt::Sammenligningsgrunnlag)
+    ) = lagMånedsinntekter(orgnummer, skjæringstidspunkt, inntekter, creator = ArbeidsgiverInntekt.MånedligInntekt::Sammenligningsgrunnlag)
 
     private fun lagMånedsinntekter(
         orgnummer: String,
@@ -1526,7 +1533,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     protected fun håndterOverstyringSykedag(periode: Periode) = håndterOverstyring(periode.map { manuellSykedag(it) })
     protected fun manuellArbeidsgiverdag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Egenmeldingsdag)
 
-    inline fun <reified R: Utbetalingsdag> assertUtbetalingsdag(dag: Utbetalingsdag, expectedDagtype: KClass<R>, expectedTotalgrad: Double = 100.0) {
+    inline fun <reified R : Utbetalingsdag> assertUtbetalingsdag(dag: Utbetalingsdag, expectedDagtype: KClass<R>, expectedTotalgrad: Double = 100.0) {
         dag.let {
             it.økonomi.medData { _, _, _, _, totalGrad, _, _, _, _ ->
                 assertEquals(expectedTotalgrad, totalGrad)

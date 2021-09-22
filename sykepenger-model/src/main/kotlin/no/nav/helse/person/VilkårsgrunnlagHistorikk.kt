@@ -172,7 +172,7 @@ internal class VilkårsgrunnlagHistorikk(private val historikk: MutableList<Inns
         override fun isOk() = true
 
         override fun accept(skjæringstidspunkt: LocalDate, vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {
-            vilkårsgrunnlagHistorikkVisitor.preVisitInfotrygdVilkårsgrunnlag(skjæringstidspunkt, this)
+            vilkårsgrunnlagHistorikkVisitor.preVisitInfotrygdVilkårsgrunnlag(this, skjæringstidspunkt, sykepengegrunnlag)
             sykepengegrunnlag.accept(vilkårsgrunnlagHistorikkVisitor)
             vilkårsgrunnlagHistorikkVisitor.postVisitInfotrygdVilkårsgrunnlag(skjæringstidspunkt, this)
         }

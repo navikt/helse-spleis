@@ -118,7 +118,7 @@ internal class InntektshistorikkInspektør(arbeidsgiver: Arbeidsgiver) : Arbeids
         skattedato = dato
     }
 
-    override fun postVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID) {
+    override fun postVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID, dato: LocalDate) {
         inntektsopplysninger.add(
             Opplysning(
                 skattedato,

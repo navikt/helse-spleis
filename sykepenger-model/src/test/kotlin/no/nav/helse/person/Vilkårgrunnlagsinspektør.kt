@@ -25,7 +25,11 @@ internal class Vilkårgrunnlagsinspektør(historikk: VilkårsgrunnlagHistorikk) 
         vilkårsgrunnlagTeller[innslag] = teller.inc()
     }
 
-    override fun preVisitInfotrygdVilkårsgrunnlag(skjæringstidspunkt: LocalDate, infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag) {
+    override fun preVisitInfotrygdVilkårsgrunnlag(
+        infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag,
+        skjæringstidspunkt: LocalDate,
+        sykepengegrunnlag: Sykepengegrunnlag
+    ) {
         val teller = vilkårsgrunnlagTeller.getOrDefault(innslag, 0)
         vilkårsgrunnlagTeller[innslag] = teller.inc()
     }

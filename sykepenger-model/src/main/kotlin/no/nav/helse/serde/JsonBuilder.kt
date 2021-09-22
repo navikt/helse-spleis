@@ -561,8 +561,9 @@ internal class JsonBuilder : AbstractBuilder() {
         }
 
         override fun preVisitInfotrygdVilkårsgrunnlag(
+            infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag,
             skjæringstidspunkt: LocalDate,
-            infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag
+            sykepengegrunnlag: Sykepengegrunnlag
         ) {
             val sykepengegrunnlag = mutableMapOf<String, Any>()
             vilkårsgrunnlagElement.add(
@@ -646,7 +647,7 @@ internal class JsonBuilder : AbstractBuilder() {
             inntektsopplysning.putAll(infotrygd.toMap())
         }
 
-        override fun preVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID) {
+        override fun preVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID, dato: LocalDate) {
             val skatteopplysninger = mutableListOf<Map<String, Any?>>()
             this.inntektsopplysning.putAll(
                 mutableMapOf(
@@ -775,7 +776,7 @@ internal class JsonBuilder : AbstractBuilder() {
             inntektsopplysninger.add(infotrygd.toMap())
         }
 
-        override fun preVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID) {
+        override fun preVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID, dato: LocalDate) {
             val skatteopplysninger = mutableListOf<Map<String, Any?>>()
             this.inntektsopplysninger.add(
                 mutableMapOf(
@@ -815,7 +816,7 @@ internal class JsonBuilder : AbstractBuilder() {
             inntektsopplysninger.add(sammenligningsgrunnlag.toMap(Inntektsopplysningskilde.SKATT_SAMMENLIGNINGSGRUNNLAG))
         }
 
-        override fun postVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID) = popState()
+        override fun postVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID, dato: LocalDate) = popState()
         override fun postVisitInnslag(innslag: Inntektshistorikk.Innslag, id: UUID) = popState()
     }
 

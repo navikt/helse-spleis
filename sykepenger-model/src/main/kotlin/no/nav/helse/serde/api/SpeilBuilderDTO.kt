@@ -345,7 +345,7 @@ data class InntektsgrunnlagDTO(
     data class ArbeidsgiverinntektDTO(
         val arbeidsgiver: String,
         val omregnetÅrsinntekt: OmregnetÅrsinntektDTO?,
-        val sammenligningsgrunnlag: SammenligningsgrunnlagDTO? = null
+        val sammenligningsgrunnlag: SammenligningsgrunnlagDTO? = null // Per arbeidsgivere
     ) {
         data class OmregnetÅrsinntektDTO(
             val kilde: InntektkildeDTO,

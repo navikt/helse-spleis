@@ -90,7 +90,11 @@ internal interface VilkårsgrunnlagHistorikkVisitor : InntekthistorikkVisitor {
     fun postVisitVilkårsgrunnlagHistorikk() {}
     fun preVisitGrunnlagsdata(skjæringstidspunkt: LocalDate, grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata) {}
     fun postVisitGrunnlagsdata(skjæringstidspunkt: LocalDate, grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata) {}
-    fun preVisitInfotrygdVilkårsgrunnlag(skjæringstidspunkt: LocalDate, infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag) {}
+    fun preVisitInfotrygdVilkårsgrunnlag(
+        infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag,
+        skjæringstidspunkt: LocalDate,
+        sykepengegrunnlag: Sykepengegrunnlag
+    ) {}
     fun postVisitInfotrygdVilkårsgrunnlag(skjæringstidspunkt: LocalDate, infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag) {}
     fun preVisitSykepengegrunnlag(sykepengegrunnlag1: Sykepengegrunnlag, sykepengegrunnlag: Inntekt, grunnlagForSykepengegrunnlag: Inntekt) {}
     fun postVisitSykepengegrunnlag(sykepengegrunnlag1: Sykepengegrunnlag, sykepengegrunnlag: Inntekt, grunnlagForSykepengegrunnlag: Inntekt) {}
@@ -432,7 +436,7 @@ internal interface InntekthistorikkVisitor {
     ) {
     }
 
-    fun preVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID) {}
+    fun preVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID, dato: LocalDate) {}
     fun visitSkattSykepengegrunnlag(
         sykepengegrunnlag: Inntektshistorikk.Skatt.Sykepengegrunnlag,
         dato: LocalDate,
@@ -459,7 +463,7 @@ internal interface InntekthistorikkVisitor {
     ) {
     }
 
-    fun postVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID) {}
+    fun postVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID, dato: LocalDate) {}
 }
 
 internal interface UtbetalingVisitor : UtbetalingsdagVisitor, OppdragVisitor {

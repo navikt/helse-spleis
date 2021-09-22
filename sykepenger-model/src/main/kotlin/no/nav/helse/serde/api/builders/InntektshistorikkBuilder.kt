@@ -153,7 +153,7 @@ internal class InntektshistorikkBuilder(private val person: Person) {
             )
         }
 
-        override fun preVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID) {
+        override fun preVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID, dato: LocalDate) {
             skattegreier.clear()
         }
 
@@ -175,7 +175,7 @@ internal class InntektshistorikkBuilder(private val person: Person) {
                 ))
         }
 
-        override fun postVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID) {
+        override fun postVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID, dato: LocalDate) {
             omregnetÅrsinntektDTO = InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO(
                 kilde = InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.AOrdningen,
                 beløp = skattComposite.grunnlagForSykepengegrunnlag().reflection { årlig, _, _, _ -> årlig },
@@ -203,7 +203,7 @@ internal class InntektshistorikkBuilder(private val person: Person) {
             inntektsopplysning.accept(this)
         }
 
-        override fun preVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID) {
+        override fun preVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID, dato: LocalDate) {
             skattegreier.clear()
         }
 
@@ -225,7 +225,7 @@ internal class InntektshistorikkBuilder(private val person: Person) {
                 ))
         }
 
-        override fun postVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID) {
+        override fun postVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID, dato: LocalDate) {
             sammenligningsgrunnlagDTO = InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.SammenligningsgrunnlagDTO(
                 beløp = inntekt.reflection { årlig, _, _, _ -> årlig },
                 inntekterFraAOrdningen = skattegreier

@@ -235,9 +235,9 @@ internal class Inntektshistorikk {
         override val prioritet = inntektsopplysninger.first().prioritet
 
         override fun accept(visitor: InntekthistorikkVisitor) {
-            visitor.preVisitSkatt(this, id)
+            visitor.preVisitSkatt(this, id, dato)
             inntektsopplysninger.forEach { it.accept(visitor) }
-            visitor.postVisitSkatt(this, id)
+            visitor.postVisitSkatt(this, id, dato)
         }
 
         override fun grunnlagForSykepengegrunnlag(dato: LocalDate) =
@@ -264,6 +264,8 @@ internal class Inntektshistorikk {
                 ?.summer()
                 ?.div(12)
                 ?.let { this to it }
+
+        internal fun sammenligningsgrunnlag() = grunnlagForSammenligningsgrunnlag(dato)?.second
 
         override fun skalErstattesAv(other: Inntektsopplysning): Boolean =
             this.inntektsopplysninger.any { it.skalErstattesAv(other) }

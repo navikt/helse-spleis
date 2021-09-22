@@ -130,8 +130,12 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.preVisitGrunnlagsdata(skjæringstidspunkt, grunnlagsdata)
     }
 
-    override fun preVisitInfotrygdVilkårsgrunnlag(skjæringstidspunkt: LocalDate, infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag) {
-        delegatee.preVisitInfotrygdVilkårsgrunnlag(skjæringstidspunkt, infotrygdVilkårsgrunnlag)
+    override fun preVisitInfotrygdVilkårsgrunnlag(
+        infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag,
+        skjæringstidspunkt: LocalDate,
+        sykepengegrunnlag: Sykepengegrunnlag
+    ) {
+        delegatee.preVisitInfotrygdVilkårsgrunnlag(infotrygdVilkårsgrunnlag, skjæringstidspunkt, sykepengegrunnlag)
     }
 
     override fun postVisitInnslag(innslag: VilkårsgrunnlagHistorikk.Innslag, id: UUID, opprettet: LocalDateTime) {
@@ -614,8 +618,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.visitInfotrygd(infotrygd, dato, hendelseId, beløp, tidsstempel)
     }
 
-    override fun preVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID) {
-        delegatee.preVisitSkatt(skattComposite, id)
+    override fun preVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID, dato: LocalDate) {
+        delegatee.preVisitSkatt(skattComposite, id, dato)
     }
 
     override fun visitSkattSykepengegrunnlag(
@@ -646,8 +650,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.visitSkattSammenligningsgrunnlag(sammenligningsgrunnlag, dato, hendelseId, beløp, måned, type, fordel, beskrivelse, tidsstempel)
     }
 
-    override fun postVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID) {
-        delegatee.postVisitSkatt(skattComposite, id)
+    override fun postVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID, dato: LocalDate) {
+        delegatee.postVisitSkatt(skattComposite, id, dato)
     }
 
     override fun preVisitUtbetaling(
