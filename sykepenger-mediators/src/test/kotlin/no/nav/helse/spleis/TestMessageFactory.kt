@@ -11,6 +11,7 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.person.TilstandType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.serde.reflection.Utbetalingstatus
+import no.nav.helse.spleis.TestMessageFactory.UtbetalingshistorikkTestdata.Companion.toJson
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.*
 import no.nav.syfo.kafka.felles.*
@@ -88,7 +89,8 @@ internal class TestMessageFactory(
         orgnummer: String = organisasjonsnummer,
         fravær: List<FravarDTO> = emptyList(),
         egenmeldinger: List<PeriodeDTO> = emptyList(),
-        andreInntektskilder: List<InntektskildeDTO>? = null
+        andreInntektskilder: List<InntektskildeDTO>? = null,
+        sendtNav: LocalDateTime? = perioder.maxOfOrNull { it.tom!! }?.atStartOfDay()
     ): String {
         val fom = perioder.minOfOrNull { it.fom!! }
         val sendtSøknad = SykepengesoknadDTO(
@@ -101,7 +103,7 @@ internal class TestMessageFactory(
             tom = perioder.maxOfOrNull { it.tom!! },
             type = SoknadstypeDTO.ARBEIDSTAKERE,
             startSyketilfelle = LocalDate.now(),
-            sendtNav = perioder.maxOfOrNull { it.tom!! }?.atStartOfDay(),
+            sendtNav = sendtNav,
             papirsykmeldinger = emptyList(),
             egenmeldinger = egenmeldinger,
             fravar = fravær,
@@ -144,7 +146,7 @@ internal class TestMessageFactory(
         return nyHendelse("inntektsmelding", inntektsmelding.toMap())
     }
 
-    fun lagUtbetalingshistorikk(vedtaksperiodeId: UUID, tilstand: TilstandType): String {
+    fun lagUtbetalingshistorikk(vedtaksperiodeId: UUID, tilstand: TilstandType, sykepengehistorikk: List<UtbetalingshistorikkTestdata>? = emptyList()): String {
         return lagBehovMedLøsning(
             vedtaksperiodeId = vedtaksperiodeId,
             tilstand = tilstand,
@@ -236,6 +238,7 @@ internal class TestMessageFactory(
         val arbeidskategorikode: String,
         val utbetalteSykeperioder: List<UtbetaltSykeperiode> = emptyList(),
         val inntektsopplysninger: List<Inntektsopplysninger> = emptyList(),
+        val statslønn: Boolean = false
     ) {
         class UtbetaltSykeperiode(
             val fom: LocalDate,
@@ -253,6 +256,38 @@ internal class TestMessageFactory(
             val refusjonTilArbeidsgiver: Boolean,
             val refusjonTom: LocalDate? = null
         )
+
+        private fun toJson() = mapOf(
+            "statslønn" to statslønn,
+            "inntektsopplysninger" to inntektsopplysninger.map {
+                mapOf(
+                    "sykepengerFom" to it.sykepengerFom,
+                    "inntekt" to it.inntekt,
+                    "orgnummer" to it.organisasjonsnummer,
+                    "refusjonTilArbeidsgiver" to it.refusjonTilArbeidsgiver,
+                    "refusjonTom" to it.refusjonTom
+                )
+            },
+            "utbetalteSykeperioder" to utbetalteSykeperioder.map {
+                mapOf(
+                    "fom" to it.fom,
+                    "tom" to it.tom,
+                    "dagsats" to it.dagsats,
+                    "utbetalingsGrad" to it.utbetalingsgrad,
+                    "orgnummer" to it.organisasjonsnummer,
+                    "typeKode" to it.typekode
+                )
+            },
+            "arbeidsKategoriKode" to arbeidskategorikode
+        )
+
+        companion object {
+            fun List<UtbetalingshistorikkTestdata>.toJson() = mapOf(
+                "Sykepengehistorikk" to map { data ->
+                    data.toJson()
+                }
+            )
+        }
     }
 
     class PleiepengerTestdata(
@@ -320,33 +355,7 @@ internal class TestMessageFactory(
 
         val sykepengehistorikkMap = sykepengehistorikk?.let {
             behovliste.add("Sykepengehistorikk")
-            mapOf(
-                "Sykepengehistorikk" to sykepengehistorikk.map { data ->
-                    mapOf(
-                        "statslønn" to false,
-                        "inntektsopplysninger" to data.inntektsopplysninger.map {
-                            mapOf(
-                                "sykepengerFom" to it.sykepengerFom,
-                                "inntekt" to it.inntekt,
-                                "orgnummer" to it.organisasjonsnummer,
-                                "refusjonTilArbeidsgiver" to it.refusjonTilArbeidsgiver,
-                                "refusjonTom" to it.refusjonTom
-                            )
-                        },
-                        "utbetalteSykeperioder" to data.utbetalteSykeperioder.map {
-                            mapOf(
-                                "fom" to it.fom,
-                                "tom" to it.tom,
-                                "dagsats" to it.dagsats,
-                                "utbetalingsGrad" to it.utbetalingsgrad,
-                                "orgnummer" to it.organisasjonsnummer,
-                                "typeKode" to it.typekode
-                            )
-                        },
-                        "arbeidsKategoriKode" to data.arbeidskategorikode
-                    )
-                }
-            )
+            sykepengehistorikk.toJson()
         } ?: emptyMap()
 
         return lagBehovMedLøsning(

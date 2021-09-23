@@ -136,9 +136,10 @@ internal class TestRapid : RapidsConnection() {
         fun melding(indeks: Int) = jsonmeldinger.getOrPut(indeks) { objectMapper.readTree(messages[indeks].second) }
         fun antall() = messages.size
 
-        fun siste(name: String) =
-            messages.mapIndexed { indeks, _ -> melding(indeks) }
-                .last { name == it.path("@event_name").asText() }
+        fun siste(name: String) = meldinger(name).last()
+
+        fun meldinger(name: String) = messages.mapIndexed { indeks, _ -> melding(indeks) }
+            .filter { name == it.path("@event_name").asText() }
 
         fun vedtaksperiodeId(indeks: Int) = vedtaksperiodeIder.elementAt(indeks)
         fun utbetalingtilstander(utbetalingIndeks: Int) =

@@ -6,7 +6,11 @@ import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.syfo.kafka.felles.InntektskildeDTO
 import no.nav.syfo.kafka.felles.InntektskildetypeDTO
 import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
+import java.util.*
 
 internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
 
@@ -263,5 +267,29 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
             "MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE",
             "TIL_INFOTRYGD"
         )
+    }
+
+    @Disabled("Wip test")
+    @Test
+    fun `sender riktig orgnummer til for alle arbeidsgivere i trenger_ikke_inntektsmelding ved forkasting av vedtaksperiode kanskje muligens under tvil`() {
+        val a1 = "arbeidsgiver 1"
+        val a2 = "arbeidsgiver 2"
+        sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100), orgnummer = a1)
+        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)), orgnummer = a1)
+        sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100), orgnummer = a2)
+        sendSøknad(
+            1,
+            listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)),
+            orgnummer = a2,
+            sendtNav = LocalDateTime.MAX,
+            andreInntektskilder = listOf(InntektskildeDTO(InntektskildetypeDTO.FOSTERHJEMGODTGJORELSE, true))
+        )
+
+        val melding = testRapid.inspektør.meldinger("trenger_ikke_inntektsmelding")
+        val meldingOrgnummer = melding.first()["organisasjonsnummer"].asText()
+        val meldingVedtaksperiodeId = UUID.fromString(melding.first()["vedtaksperiodeId"].asText())
+
+        assertEquals(testRapid.inspektør.vedtaksperiodeId(0), meldingVedtaksperiodeId)
+        assertEquals("arbeidsgiver 1", meldingOrgnummer)
     }
 }
