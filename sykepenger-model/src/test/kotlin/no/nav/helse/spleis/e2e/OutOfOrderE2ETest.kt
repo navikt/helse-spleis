@@ -1,7 +1,10 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.SøknadArbeidsgiver
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -610,7 +613,7 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(19.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(19.februar, 28.februar, 100.prosent))
-        håndterInntektsmeldingReplay(inntektsmelding, 3.vedtaksperiode)
+        håndterInntektsmeldingReplay(inntektsmelding, 3.vedtaksperiode(ORGNUMMER))
 
         assertFalse(inspektør.periodeErForkastet(1.vedtaksperiode))
         assertTilstander(
@@ -872,7 +875,7 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(10.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(10.februar, 28.februar, 100.prosent))
         håndterUtbetalingshistorikk(
-            vedtaksperiodeId = 4.vedtaksperiode,
+            vedtaksperiodeIdInnhenter = 4.vedtaksperiode,
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 9.februar, 100.prosent, 1000.daglig),
             inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
         )

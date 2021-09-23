@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -11,11 +12,12 @@ import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle
 import java.time.LocalDateTime
-import java.util.*
 
 @TestInstance(Lifecycle.PER_CLASS)
 internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
@@ -83,8 +85,8 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
         assertNoErrors(inspektør)
         assertEquals(3, inspektør.sykdomshistorikkDagTeller[Dag.Feriedag::class])
-        assertNull(inspektør.vedtaksperiodeDagTeller[1.vedtaksperiode]?.get(Dag.Feriedag::class))
-        assertNull(inspektør.vedtaksperiodeDagTeller[2.vedtaksperiode]?.get(Dag.Feriedag::class))
+        assertNull(inspektør.vedtaksperiodeDagTeller(1.vedtaksperiode)?.get(Dag.Feriedag::class))
+        assertNull(inspektør.vedtaksperiodeDagTeller(2.vedtaksperiode)?.get(Dag.Feriedag::class))
     }
 
     @Test
@@ -1245,15 +1247,15 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         )
     }
 
-    private fun assertEtterspurteYtelser(expected: Int, vedtaksperiode: UUID) {
-            assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiode, Aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger))
-            assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiode, Aktivitetslogg.Aktivitet.Behov.Behovtype.Pleiepenger))
-            assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiode, Aktivitetslogg.Aktivitet.Behov.Behovtype.Omsorgspenger))
-            assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiode, Aktivitetslogg.Aktivitet.Behov.Behovtype.Opplæringspenger))
-            assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiode, Aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger))
-            assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiode, Aktivitetslogg.Aktivitet.Behov.Behovtype.Dagpenger))
-            assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiode, Aktivitetslogg.Aktivitet.Behov.Behovtype.Institusjonsopphold))
-            assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiode, Aktivitetslogg.Aktivitet.Behov.Behovtype.Dødsinfo))
+    private fun assertEtterspurteYtelser(expected: Int, vedtaksperiodeIdInnhenter: IdInnhenter) {
+            assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger))
+            assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Pleiepenger))
+            assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Omsorgspenger))
+            assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Opplæringspenger))
+            assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger))
+            assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Dagpenger))
+            assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Institusjonsopphold))
+            assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Dødsinfo))
     }
 
     @Test

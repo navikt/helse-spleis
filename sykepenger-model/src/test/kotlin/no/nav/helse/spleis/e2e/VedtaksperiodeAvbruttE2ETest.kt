@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.testhelpers.april
 import no.nav.helse.testhelpers.februar
@@ -23,6 +22,6 @@ internal class VedtaksperiodeAvbruttE2ETest : AbstractEndToEndTest() {
         håndterSimulering(4.vedtaksperiode)
         håndterUtbetalingsgodkjenning(4.vedtaksperiode, false) // <- TIL_INFOTRYGD
         assertEquals(1, observatør.avbruttePerioder())
-        assertEquals(TIL_INFOTRYGD, observatør.avbrutt(4.vedtaksperiode))
+        assertEquals(TIL_INFOTRYGD, observatør.avbrutt(4.vedtaksperiode(ORGNUMMER)))
     }
 }

@@ -1,7 +1,10 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.februar
@@ -39,9 +42,9 @@ internal class RevurderTidslinjeFlereAGTest : AbstractEndToEndTest() {
             orgnummer = AG2
         )
 
-        håndterYtelser(vedtaksperiodeId = 1.vedtaksperiode(AG1), orgnummer = AG1)
+        håndterYtelser(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = AG1)
         håndterVilkårsgrunnlag(
-            vedtaksperiodeId = 1.vedtaksperiode(AG1),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             orgnummer = AG1,
             inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
                 1.januar(2017) til 1.desember(2017) inntekter {
@@ -50,28 +53,28 @@ internal class RevurderTidslinjeFlereAGTest : AbstractEndToEndTest() {
                 }
             })
         )
-        håndterYtelser(1.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterSimulering(1.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterUtbetalt(1.vedtaksperiode(AG1), orgnummer = AG1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = AG1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = AG1)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = AG1)
 
-        håndterYtelser(1.vedtaksperiode(AG2), orgnummer = AG2)
-        håndterSimulering(1.vedtaksperiode(AG2), orgnummer = AG2)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode(AG2), orgnummer = AG2)
-        håndterUtbetalt(1.vedtaksperiode(AG2), orgnummer = AG2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = AG2)
+        håndterSimulering(1.vedtaksperiode, orgnummer = AG2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = AG2)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = AG2)
 
         håndterOverstyring((20.januar til 22.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
-        håndterYtelser(1.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterSimulering(1.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterUtbetalt(1.vedtaksperiode(AG1), orgnummer = AG1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = AG1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = AG1)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = AG1)
 
-        håndterYtelser(1.vedtaksperiode(AG2), orgnummer = AG2)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode(AG2), orgnummer = AG2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = AG2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = AG2)
 
         inspektør(AG1) {
             assertTilstander(
-                1.vedtaksperiode(AG1),
+                1.vedtaksperiode,
                 *TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(),
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
@@ -85,7 +88,7 @@ internal class RevurderTidslinjeFlereAGTest : AbstractEndToEndTest() {
 
         inspektør(AG2) {
             assertTilstander(
-                1.vedtaksperiode(AG2),
+                1.vedtaksperiode,
                 *TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(false),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
@@ -114,9 +117,9 @@ internal class RevurderTidslinjeFlereAGTest : AbstractEndToEndTest() {
             orgnummer = AG2
         )
 
-        håndterYtelser(vedtaksperiodeId = 1.vedtaksperiode(AG1), orgnummer = AG1)
+        håndterYtelser(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = AG1)
         håndterVilkårsgrunnlag(
-            vedtaksperiodeId = 1.vedtaksperiode(AG1),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             orgnummer = AG1,
             inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
                 1.januar(2017) til 1.desember(2017) inntekter {
@@ -125,30 +128,30 @@ internal class RevurderTidslinjeFlereAGTest : AbstractEndToEndTest() {
                 }
             })
         )
-        håndterYtelser(1.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterSimulering(1.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterUtbetalt(1.vedtaksperiode(AG1), orgnummer = AG1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = AG1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = AG1)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = AG1)
 
-        håndterYtelser(1.vedtaksperiode(AG2), orgnummer = AG2)
-        håndterSimulering(1.vedtaksperiode(AG2), orgnummer = AG2)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode(AG2), orgnummer = AG2)
-        håndterUtbetalt(1.vedtaksperiode(AG2), orgnummer = AG2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = AG2)
+        håndterSimulering(1.vedtaksperiode, orgnummer = AG2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = AG2)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = AG2)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = AG1)
 
         håndterOverstyring((20.januar til 22.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
-        håndterYtelser(1.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterSimulering(1.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterUtbetalt(1.vedtaksperiode(AG1), orgnummer = AG1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = AG1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = AG1)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = AG1)
 
-        håndterYtelser(1.vedtaksperiode(AG2), orgnummer = AG2)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode(AG2), orgnummer = AG2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = AG2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = AG2)
 
         inspektør(AG1) {
             assertTilstander(
-                1.vedtaksperiode(AG1),
+                1.vedtaksperiode,
                 *TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(),
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
@@ -157,7 +160,7 @@ internal class RevurderTidslinjeFlereAGTest : AbstractEndToEndTest() {
                 AVSLUTTET
             )
             assertTilstander(
-                2.vedtaksperiode(AG1),
+                2.vedtaksperiode,
                 START,
                 MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
                 MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
@@ -169,7 +172,7 @@ internal class RevurderTidslinjeFlereAGTest : AbstractEndToEndTest() {
 
         inspektør(AG2) {
             assertTilstander(
-                1.vedtaksperiode(AG2),
+                1.vedtaksperiode,
                 *TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(false),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
@@ -198,9 +201,9 @@ internal class RevurderTidslinjeFlereAGTest : AbstractEndToEndTest() {
             orgnummer = AG2
         )
 
-        håndterYtelser(vedtaksperiodeId = 1.vedtaksperiode(AG1), orgnummer = AG1)
+        håndterYtelser(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = AG1)
         håndterVilkårsgrunnlag(
-            vedtaksperiodeId = 1.vedtaksperiode(AG1),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             orgnummer = AG1,
             inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
                 1.januar(2017) til 1.desember(2017) inntekter {
@@ -209,57 +212,57 @@ internal class RevurderTidslinjeFlereAGTest : AbstractEndToEndTest() {
                 }
             })
         )
-        håndterYtelser(1.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterSimulering(1.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterUtbetalt(1.vedtaksperiode(AG1), orgnummer = AG1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = AG1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = AG1)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = AG1)
 
-        håndterYtelser(1.vedtaksperiode(AG2), orgnummer = AG2)
-        håndterSimulering(1.vedtaksperiode(AG2), orgnummer = AG2)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode(AG2), orgnummer = AG2)
-        håndterUtbetalt(1.vedtaksperiode(AG2), orgnummer = AG2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = AG2)
+        håndterSimulering(1.vedtaksperiode, orgnummer = AG2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = AG2)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = AG2)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = AG1)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = AG2)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = AG1)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = AG2)
 
-        håndterYtelser(vedtaksperiodeId = 2.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterYtelser(vedtaksperiodeId = 2.vedtaksperiode(AG2), orgnummer = AG2)
-        håndterYtelser(vedtaksperiodeId = 2.vedtaksperiode(AG1), orgnummer = AG1)
+        håndterYtelser(vedtaksperiodeIdInnhenter = 2.vedtaksperiode, orgnummer = AG1)
+        håndterYtelser(vedtaksperiodeIdInnhenter = 2.vedtaksperiode, orgnummer = AG2)
+        håndterYtelser(vedtaksperiodeIdInnhenter = 2.vedtaksperiode, orgnummer = AG1)
 
-        håndterSimulering(2.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterUtbetalt(2.vedtaksperiode(AG1), orgnummer = AG1)
+        håndterSimulering(2.vedtaksperiode, orgnummer = AG1)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = AG1)
+        håndterUtbetalt(2.vedtaksperiode, orgnummer = AG1)
 
-        håndterYtelser(vedtaksperiodeId = 2.vedtaksperiode(AG2), orgnummer = AG2)
+        håndterYtelser(vedtaksperiodeIdInnhenter = 2.vedtaksperiode, orgnummer = AG2)
 
-        håndterSimulering(2.vedtaksperiode(AG2), orgnummer = AG2)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode(AG2), orgnummer = AG2)
-        håndterUtbetalt(2.vedtaksperiode(AG2), orgnummer = AG2)
+        håndterSimulering(2.vedtaksperiode, orgnummer = AG2)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = AG2)
+        håndterUtbetalt(2.vedtaksperiode, orgnummer = AG2)
 
         håndterOverstyring((20.januar til 22.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
-        håndterYtelser(1.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterYtelser(1.vedtaksperiode(AG2), orgnummer = AG2)
-        håndterYtelser(2.vedtaksperiode(AG1), orgnummer = AG1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = AG2)
+        håndterYtelser(2.vedtaksperiode, orgnummer = AG1)
 
-        håndterSimulering(2.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterUtbetalt(2.vedtaksperiode(AG1), orgnummer = AG1)
+        håndterSimulering(2.vedtaksperiode, orgnummer = AG1)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = AG1)
+        håndterUtbetalt(2.vedtaksperiode, orgnummer = AG1)
 
-        håndterYtelser(2.vedtaksperiode(AG2), orgnummer = AG2)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode(AG2), orgnummer = AG2)
+        håndterYtelser(2.vedtaksperiode, orgnummer = AG2)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = AG2)
 
         inspektør(AG1) {
             assertTilstander(
-                1.vedtaksperiode(AG1),
+                1.vedtaksperiode,
                 *TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(),
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVSLUTTET
             )
             assertTilstander(
-                2.vedtaksperiode(AG1),
+                2.vedtaksperiode,
                 *TIL_AVSLUTTET_FORLENGELSE(),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
@@ -269,13 +272,13 @@ internal class RevurderTidslinjeFlereAGTest : AbstractEndToEndTest() {
                 AVSLUTTET
             )
             assertHasNoErrors()
-            assertEquals(2, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode(AG1)).size)
-            assertEquals(2, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode(AG1)).size)
+            assertEquals(2, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
+            assertEquals(2, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
         }
 
         inspektør(AG2) {
             assertTilstander(
-                1.vedtaksperiode(AG2),
+                1.vedtaksperiode,
                 *TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(false),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
@@ -283,7 +286,7 @@ internal class RevurderTidslinjeFlereAGTest : AbstractEndToEndTest() {
                 AVSLUTTET
             )
             assertTilstander(
-                2.vedtaksperiode(AG2),
+                2.vedtaksperiode,
                 *TIL_AVSLUTTET_FORLENGELSE(false),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
@@ -291,8 +294,8 @@ internal class RevurderTidslinjeFlereAGTest : AbstractEndToEndTest() {
                 AVSLUTTET
             )
             assertHasNoErrors()
-            assertEquals(2, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode(AG2)).size)
-            assertEquals(2, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode(AG2)).size)
+            assertEquals(2, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
+            assertEquals(2, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
         }
     }
 
@@ -313,9 +316,9 @@ internal class RevurderTidslinjeFlereAGTest : AbstractEndToEndTest() {
             orgnummer = AG2
         )
 
-        håndterYtelser(vedtaksperiodeId = 1.vedtaksperiode(AG1), orgnummer = AG1)
+        håndterYtelser(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = AG1)
         håndterVilkårsgrunnlag(
-            vedtaksperiodeId = 1.vedtaksperiode(AG1),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             orgnummer = AG1,
             inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
                 1.januar(2017) til 1.desember(2017) inntekter {
@@ -324,51 +327,51 @@ internal class RevurderTidslinjeFlereAGTest : AbstractEndToEndTest() {
                 }
             })
         )
-        håndterYtelser(1.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterSimulering(1.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterUtbetalt(1.vedtaksperiode(AG1), orgnummer = AG1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = AG1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = AG1)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = AG1)
 
-        håndterYtelser(1.vedtaksperiode(AG2), orgnummer = AG2)
-        håndterSimulering(1.vedtaksperiode(AG2), orgnummer = AG2)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode(AG2), orgnummer = AG2)
-        håndterUtbetalt(1.vedtaksperiode(AG2), orgnummer = AG2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = AG2)
+        håndterSimulering(1.vedtaksperiode, orgnummer = AG2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = AG2)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = AG2)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = AG1)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = AG2)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = AG1)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = AG2)
 
-        håndterYtelser(vedtaksperiodeId = 2.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterYtelser(vedtaksperiodeId = 2.vedtaksperiode(AG2), orgnummer = AG2)
-        håndterYtelser(vedtaksperiodeId = 2.vedtaksperiode(AG1), orgnummer = AG1)
+        håndterYtelser(vedtaksperiodeIdInnhenter = 2.vedtaksperiode, orgnummer = AG1)
+        håndterYtelser(vedtaksperiodeIdInnhenter = 2.vedtaksperiode, orgnummer = AG2)
+        håndterYtelser(vedtaksperiodeIdInnhenter = 2.vedtaksperiode, orgnummer = AG1)
 
-        håndterSimulering(2.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterUtbetalt(2.vedtaksperiode(AG1), orgnummer = AG1)
+        håndterSimulering(2.vedtaksperiode, orgnummer = AG1)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = AG1)
+        håndterUtbetalt(2.vedtaksperiode, orgnummer = AG1)
 
-        håndterYtelser(vedtaksperiodeId = 2.vedtaksperiode(AG2), orgnummer = AG2)
+        håndterYtelser(vedtaksperiodeIdInnhenter = 2.vedtaksperiode, orgnummer = AG2)
 
-        håndterSimulering(2.vedtaksperiode(AG2), orgnummer = AG2)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode(AG2), orgnummer = AG2)
-        håndterUtbetalt(2.vedtaksperiode(AG2), orgnummer = AG2)
+        håndterSimulering(2.vedtaksperiode, orgnummer = AG2)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = AG2)
+        håndterUtbetalt(2.vedtaksperiode, orgnummer = AG2)
 
         håndterOverstyring((20.januar til 22.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
-        håndterYtelser(1.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterYtelser(1.vedtaksperiode(AG2), orgnummer = AG2)
-        håndterYtelser(2.vedtaksperiode(AG1), orgnummer = AG1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = AG2)
+        håndterYtelser(2.vedtaksperiode, orgnummer = AG1)
 
-        håndterSimulering(2.vedtaksperiode(AG1), orgnummer = AG1)
+        håndterSimulering(2.vedtaksperiode, orgnummer = AG1)
 
         inspektør(AG1) {
             assertTilstander(
-                1.vedtaksperiode(AG1),
+                1.vedtaksperiode,
                 *TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(),
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING
             )
             assertTilstander(
-                2.vedtaksperiode(AG1),
+                2.vedtaksperiode,
                 *TIL_AVSLUTTET_FORLENGELSE(),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
@@ -376,41 +379,41 @@ internal class RevurderTidslinjeFlereAGTest : AbstractEndToEndTest() {
                 AVVENTER_GODKJENNING_REVURDERING
             )
             assertHasNoErrors()
-            assertEquals(1, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode(AG1)).size)
-            assertEquals(1, ikkeUtbetalteUtbetalingerForVedtaksperiode(1.vedtaksperiode(AG1)).size)
-            assertEquals(1, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode(AG1)).size)
-            assertEquals(1, ikkeUtbetalteUtbetalingerForVedtaksperiode(2.vedtaksperiode(AG1)).size)
+            assertEquals(1, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
+            assertEquals(1, ikkeUtbetalteUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
+            assertEquals(1, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
+            assertEquals(1, ikkeUtbetalteUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
         }
 
         inspektør(AG2) {
             assertTilstander(
-                1.vedtaksperiode(AG2),
+                1.vedtaksperiode,
                 *TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(false),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING
             )
             assertTilstander(
-                2.vedtaksperiode(AG2),
+                2.vedtaksperiode,
                 *TIL_AVSLUTTET_FORLENGELSE(false),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING
             )
             assertHasNoErrors()
-            assertEquals(1, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode(AG2)).size)
-            assertEquals(1, ikkeUtbetalteUtbetalingerForVedtaksperiode(1.vedtaksperiode(AG2)).size)
-            assertEquals(1, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode(AG2)).size)
-            assertEquals(1, ikkeUtbetalteUtbetalingerForVedtaksperiode(2.vedtaksperiode(AG2)).size)
+            assertEquals(1, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
+            assertEquals(1, ikkeUtbetalteUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
+            assertEquals(1, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
+            assertEquals(1, ikkeUtbetalteUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
         }
     }
 
     @Test
     fun `kan ikke revurdere én AG hvis en annen AG er til godkjenning`() {
         tilGodkjenning(1.januar, 31.januar, AG1, AG2)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterUtbetalt(1.vedtaksperiode(AG1), orgnummer = AG1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = AG1)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = AG1)
 
-        håndterYtelser(1.vedtaksperiode(AG2), orgnummer = AG2)
-        håndterSimulering(1.vedtaksperiode(AG2), orgnummer = AG2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = AG2)
+        håndterSimulering(1.vedtaksperiode, orgnummer = AG2)
         håndterOverstyring((29.januar til 29.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
         assertErrorTekst(inspektør(AG2), "Kan ikke overstyre en pågående behandling der én eller flere perioder er behandlet ferdig")
     }

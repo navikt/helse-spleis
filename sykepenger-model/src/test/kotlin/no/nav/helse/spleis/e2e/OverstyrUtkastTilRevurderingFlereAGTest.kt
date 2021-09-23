@@ -23,21 +23,21 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
         forlengVedtak(1.februar, 28.februar, AG1, AG2)
 
         håndterOverstyring((29.januar til 29.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
-        håndterYtelser(1.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterYtelser(1.vedtaksperiode(AG2), orgnummer = AG2)
-        håndterYtelser(2.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterSimulering(2.vedtaksperiode(AG1), orgnummer = AG1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = AG2)
+        håndterYtelser(2.vedtaksperiode, orgnummer = AG1)
+        håndterSimulering(2.vedtaksperiode, orgnummer = AG1)
 
         håndterOverstyring((30.januar til 31.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
-        håndterYtelser(1.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterYtelser(1.vedtaksperiode(AG2), orgnummer = AG2)
-        håndterYtelser(2.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterSimulering(2.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterUtbetalt(2.vedtaksperiode(AG1), orgnummer = AG1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = AG2)
+        håndterYtelser(2.vedtaksperiode, orgnummer = AG1)
+        håndterSimulering(2.vedtaksperiode, orgnummer = AG1)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = AG1)
+        håndterUtbetalt(2.vedtaksperiode, orgnummer = AG1)
 
-        håndterYtelser(2.vedtaksperiode(AG2), orgnummer = AG2)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode(AG2), orgnummer = AG2)
+        håndterYtelser(2.vedtaksperiode, orgnummer = AG2)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = AG2)
 
         inspektør(AG1) {
             val utbetalingstidslinje = sisteUtbetalingUtbetalingstidslinje()
@@ -46,7 +46,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
             assertUtbetalingsdag(utbetalingstidslinje[31.januar], expectedDagtype = Fridag::class, 50.0)
             assertNoErrors(this)
             assertTilstander(
-                1.vedtaksperiode(AG1),
+                1.vedtaksperiode,
                 *TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(),
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
@@ -55,7 +55,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
                 AVSLUTTET
             )
             assertTilstander(
-                2.vedtaksperiode(AG1),
+                2.vedtaksperiode,
                 *TIL_AVSLUTTET_FORLENGELSE(),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
@@ -78,7 +78,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
             assertUtbetalingsdag(utbetalingstidslinje[31.januar], expectedDagtype = NavDag::class, 50.0)
 
             assertTilstander(
-                1.vedtaksperiode(AG2),
+                1.vedtaksperiode,
                 *TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(false),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
@@ -89,7 +89,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
                 AVSLUTTET
             )
             assertTilstander(
-                2.vedtaksperiode(AG2),
+                2.vedtaksperiode,
                 *TIL_AVSLUTTET_FORLENGELSE(false),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
@@ -105,24 +105,24 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
         forlengVedtak(1.februar, 28.februar, AG1, AG2)
 
         håndterOverstyring((29.januar til 31.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
-        håndterYtelser(1.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterYtelser(1.vedtaksperiode(AG2), orgnummer = AG2)
-        håndterYtelser(2.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterSimulering(2.vedtaksperiode(AG1), orgnummer = AG1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = AG2)
+        håndterYtelser(2.vedtaksperiode, orgnummer = AG1)
+        håndterSimulering(2.vedtaksperiode, orgnummer = AG1)
 
         håndterOverstyring((30.januar til 31.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
 
         inspektør(AG1) {
             assertNoErrors(this)
             assertTilstander(
-                1.vedtaksperiode(AG1),
+                1.vedtaksperiode,
                 *TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(),
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING
             )
             assertTilstander(
-                2.vedtaksperiode(AG1),
+                2.vedtaksperiode,
                 *TIL_AVSLUTTET_FORLENGELSE(),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
@@ -135,7 +135,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
         inspektør(AG2) {
             assertNoErrors(this)
             assertTilstander(
-                1.vedtaksperiode(AG2),
+                1.vedtaksperiode,
                 *TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(false),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
@@ -143,7 +143,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
                 AVVENTER_ARBEIDSGIVERE_REVURDERING
             )
             assertTilstander(
-                2.vedtaksperiode(AG2),
+                2.vedtaksperiode,
                 *TIL_AVSLUTTET_FORLENGELSE(false),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING
             )
@@ -156,13 +156,13 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
         forlengVedtak(1.februar, 28.februar, AG1, AG2)
 
         håndterOverstyring((29.januar til 29.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
-        håndterYtelser(1.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterYtelser(1.vedtaksperiode(AG2), orgnummer = AG2)
-        håndterYtelser(2.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterSimulering(2.vedtaksperiode(AG1), orgnummer = AG1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = AG2)
+        håndterYtelser(2.vedtaksperiode, orgnummer = AG1)
+        håndterSimulering(2.vedtaksperiode, orgnummer = AG1)
 
         håndterOverstyring((30.januar til 31.januar).map { manuellFeriedag(it) }, orgnummer = AG2)
-        håndterYtelser(1.vedtaksperiode(AG2), orgnummer = AG2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = AG2)
 
         inspektør(AG1) {
             val utbetalingstidslinje = sisteUtbetalingUtbetalingstidslinje()
@@ -171,7 +171,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
             assertUtbetalingsdag(utbetalingstidslinje[31.januar], expectedDagtype = NavDag::class, 50.0)
             assertNoErrors(this)
             assertTilstander(
-                1.vedtaksperiode(AG1),
+                1.vedtaksperiode,
                 *TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(),
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
@@ -179,7 +179,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
                 AVVENTER_HISTORIKK_REVURDERING
             )
             assertTilstander(
-                2.vedtaksperiode(AG1),
+                2.vedtaksperiode,
                 *TIL_AVSLUTTET_FORLENGELSE(),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
@@ -196,7 +196,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
             assertUtbetalingsdag(utbetalingstidslinje[31.januar], expectedDagtype = Fridag::class, 50.0)
             assertNoErrors(this)
             assertTilstander(
-                1.vedtaksperiode(AG2),
+                1.vedtaksperiode,
                 *TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(false),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
@@ -205,7 +205,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
                 AVVENTER_ARBEIDSGIVERE_REVURDERING
             )
             assertTilstander(
-                2.vedtaksperiode(AG2),
+                2.vedtaksperiode,
                 *TIL_AVSLUTTET_FORLENGELSE(false),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING
             )
@@ -218,16 +218,16 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
         forlengVedtak(1.februar, 28.februar, AG1, AG2)
 
         håndterOverstyring((29.januar til 31.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
-        håndterYtelser(1.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterYtelser(1.vedtaksperiode(AG2), orgnummer = AG2)
-        håndterYtelser(2.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterSimulering(2.vedtaksperiode(AG1), orgnummer = AG1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = AG2)
+        håndterYtelser(2.vedtaksperiode, orgnummer = AG1)
+        håndterSimulering(2.vedtaksperiode, orgnummer = AG1)
 
         håndterOverstyring((1.februar til 2.februar).map { manuellFeriedag(it) }, orgnummer = AG2)
-        håndterYtelser(1.vedtaksperiode(AG2), orgnummer = AG2)
-        håndterYtelser(1.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterYtelser(1.vedtaksperiode(AG2), orgnummer = AG2)
-        håndterYtelser(2.vedtaksperiode(AG1), orgnummer = AG1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = AG2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = AG2)
+        håndterYtelser(2.vedtaksperiode, orgnummer = AG1)
 
         inspektør(AG1) {
             val utbetalingstidslinje = sisteUtbetalingUtbetalingstidslinje()
@@ -239,7 +239,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
 
             assertNoErrors(this)
             assertTilstander(
-                1.vedtaksperiode(AG1),
+                1.vedtaksperiode,
                 *TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(),
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
@@ -248,7 +248,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
                 AVVENTER_GJENNOMFØRT_REVURDERING
             )
             assertTilstander(
-                2.vedtaksperiode(AG1),
+                2.vedtaksperiode,
                 *TIL_AVSLUTTET_FORLENGELSE(),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
@@ -270,7 +270,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
 
             assertNoErrors(this)
             assertTilstander(
-                1.vedtaksperiode(AG2),
+                1.vedtaksperiode,
                 *TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(false),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
@@ -281,7 +281,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
                 AVVENTER_GJENNOMFØRT_REVURDERING
             )
             assertTilstander(
-                2.vedtaksperiode(AG2),
+                2.vedtaksperiode,
                 *TIL_AVSLUTTET_FORLENGELSE(false),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING
             )
@@ -294,24 +294,24 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
         forlengVedtak(1.februar, 28.februar, AG1, AG2)
 
         håndterOverstyring((29.januar til 31.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
-        håndterYtelser(1.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterYtelser(1.vedtaksperiode(AG2), orgnummer = AG2)
-        håndterYtelser(2.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterSimulering(2.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterUtbetalt(2.vedtaksperiode(AG1), orgnummer = AG1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = AG2)
+        håndterYtelser(2.vedtaksperiode, orgnummer = AG1)
+        håndterSimulering(2.vedtaksperiode, orgnummer = AG1)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = AG1)
+        håndterUtbetalt(2.vedtaksperiode, orgnummer = AG1)
 
         håndterOverstyring((1.februar til 2.februar).map { manuellFeriedag(it) }, orgnummer = AG2)
         inspektør(AG1) {
             assertTilstander(
-                1.vedtaksperiode(AG1),
+                1.vedtaksperiode,
                 *TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(),
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVSLUTTET
             )
             assertTilstander(
-                2.vedtaksperiode(AG1),
+                2.vedtaksperiode,
                 *TIL_AVSLUTTET_FORLENGELSE(),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
@@ -324,14 +324,14 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
         inspektør(AG2) {
             assertErrorTekst(this, "Kan ikke overstyre en pågående behandling der én eller flere perioder er behandlet ferdig")
             assertTilstander(
-                1.vedtaksperiode(AG2),
+                1.vedtaksperiode,
                 *TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(false),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING
             )
             assertTilstander(
-                2.vedtaksperiode(AG2),
+                2.vedtaksperiode,
                 *TIL_AVSLUTTET_FORLENGELSE(false),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING
@@ -345,25 +345,25 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
         forlengVedtak(1.februar, 28.februar, AG1, AG2)
 
         håndterOverstyring((29.januar til 31.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
-        håndterYtelser(1.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterYtelser(1.vedtaksperiode(AG2), orgnummer = AG2)
-        håndterYtelser(2.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterSimulering(2.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterUtbetalt(2.vedtaksperiode(AG1), orgnummer = AG1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = AG2)
+        håndterYtelser(2.vedtaksperiode, orgnummer = AG1)
+        håndterSimulering(2.vedtaksperiode, orgnummer = AG1)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = AG1)
+        håndterUtbetalt(2.vedtaksperiode, orgnummer = AG1)
 
         håndterOverstyring((1.februar til 2.februar).map { manuellFeriedag(it) }, orgnummer = AG1)
         inspektør(AG1) {
             assertErrorTekst(this, "Kan ikke overstyre en pågående behandling der én eller flere perioder er behandlet ferdig")
             assertTilstander(
-                1.vedtaksperiode(AG1),
+                1.vedtaksperiode,
                 *TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(),
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVSLUTTET
             )
             assertTilstander(
-                2.vedtaksperiode(AG1),
+                2.vedtaksperiode,
                 *TIL_AVSLUTTET_FORLENGELSE(),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
@@ -375,14 +375,14 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
         }
         inspektør(AG2) {
             assertTilstander(
-                1.vedtaksperiode(AG2),
+                1.vedtaksperiode,
                 *TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(false),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING
             )
             assertTilstander(
-                2.vedtaksperiode(AG2),
+                2.vedtaksperiode,
                 *TIL_AVSLUTTET_FORLENGELSE(false),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING

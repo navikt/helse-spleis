@@ -430,7 +430,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
             AVSLUTTET
         )
         assertEquals(1, observatør.utbetalingUtenUtbetalingEventer.size)
-        assertEquals(observatør.vedtakFattetEvent[1.vedtaksperiode]?.utbetalingId, observatør.utbetalingUtenUtbetalingEventer.last().utbetalingId)
+        assertEquals(observatør.vedtakFattetEvent[1.vedtaksperiode(ORGNUMMER)]?.utbetalingId, observatør.utbetalingUtenUtbetalingEventer.last().utbetalingId)
     }
 
     @Test

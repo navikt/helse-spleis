@@ -90,7 +90,7 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
                 }"
             )
         ),
-        vedtaksperiodeId = "${1.vedtaksperiode}",
+        vedtaksperiodeId = "${1.vedtaksperiode(ORGNUMMER)}",
         saksbehandler = "Ola Nordmann",
         saksbehandlerEpost = "ola@nordmann.ss",
         utbetalingGodkjent = godkjent,
@@ -111,13 +111,13 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
             organisasjonsnummer = ORGNUMMER,
-            vedtaksperiodeId = "${1.vedtaksperiode}",
+            vedtaksperiodeId = "${1.vedtaksperiode(ORGNUMMER)}",
             utbetalingshistorikk = Utbetalingshistorikk(
                 meldingsreferanseId = meldingsreferanseId,
                 aktørId = "aktørId",
                 fødselsnummer = UNG_PERSON_FNR_2018,
                 organisasjonsnummer = ORGNUMMER,
-                vedtaksperiodeId = "${1.vedtaksperiode}",
+                vedtaksperiodeId = "${1.vedtaksperiode(ORGNUMMER)}",
                 arbeidskategorikoder = emptyMap(),
                 harStatslønn = false,
                 perioder = utbetalinger,
@@ -205,7 +205,7 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
     private fun vilkårsgrunnlag() =
         Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = "${1.vedtaksperiode}",
+            vedtaksperiodeId = "${1.vedtaksperiode(ORGNUMMER)}",
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = ORGNUMMER,
@@ -243,7 +243,7 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
     private fun simulering() =
         Simulering(
             meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = "${1.vedtaksperiode}",
+            vedtaksperiodeId = "${1.vedtaksperiode(ORGNUMMER)}",
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = ORGNUMMER,

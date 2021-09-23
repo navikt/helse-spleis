@@ -22,7 +22,7 @@ import kotlin.reflect.KClass
 
 internal class TestArbeidsgiverInspektør(
     private val person: Person,
-    orgnummer: String? = null
+    private val orgnummer: String
 ) : ArbeidsgiverVisitor {
     internal var vedtaksperiodeTeller: Int = 0
         private set
@@ -443,74 +443,81 @@ internal class TestArbeidsgiverInspektør(
         }
     }
 
+    private fun <V> IdInnhenter.finn(hva: Map<Int, V>) = hva.getValue(this.indeks)
+    private val IdInnhenter.indeks get() = this(orgnummer).indeks
+
     private fun <V> UUID.finn(hva: Map<Int, V>) = hva.getValue(this.indeks)
     private val UUID.indeks get() = vedtaksperiodeindekser[this] ?: fail { "Vedtaksperiode $this finnes ikke" }
+
     private val UUID.utbetalingsindeks get() = this.finn(vedtaksperiodeutbetalinger)
 
-    internal fun gjeldendeUtbetalingForVedtaksperiode(id: UUID) = avsluttedeUtbetalingerForVedtaksperiode(id).last()
-    internal fun ikkeUtbetalteUtbetalingerForVedtaksperiode(id: UUID) = utbetalinger.filterIndexed { index, _ -> index in id.utbetalingsindeks }.filter { it.erUbetalt() }
-    internal fun avsluttedeUtbetalingerForVedtaksperiode(id: UUID) = utbetalinger.filterIndexed { index, _ -> index in id.utbetalingsindeks }.filter { it.erAvsluttet() }
+    internal fun gjeldendeUtbetalingForVedtaksperiode(vedtaksperiodeIdInnhenter: IdInnhenter) = avsluttedeUtbetalingerForVedtaksperiode(vedtaksperiodeIdInnhenter).last()
+    internal fun ikkeUtbetalteUtbetalingerForVedtaksperiode(vedtaksperiodeIdInnhenter: IdInnhenter) = utbetalinger.filterIndexed { index, _ -> index in vedtaksperiodeIdInnhenter(orgnummer).utbetalingsindeks }.filter { it.erUbetalt() }
+    internal fun avsluttedeUtbetalingerForVedtaksperiode(vedtaksperiodeIdInnhenter: IdInnhenter) = utbetalinger.filterIndexed { index, _ -> index in vedtaksperiodeIdInnhenter(orgnummer).utbetalingsindeks }.filter { it.erAvsluttet() }
     internal fun utbetalingtilstand(indeks: Int) = utbetalingstilstander[indeks]
     internal fun utbetaling(indeks: Int) = utbetalinger[indeks]
     internal fun utbetalingId(indeks: Int) = utbetalingIder[indeks]
     internal fun utbetalingUtbetalingstidslinje(indeks: Int) = utbetalingutbetalingstidslinjer[indeks]
     internal fun sisteUtbetalingUtbetalingstidslinje() = utbetalingutbetalingstidslinjer.last()
-    internal fun periode(id: UUID) = id.finn(perioder)
+    internal fun periode(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(perioder)
+    internal fun vedtaksperiodeDagTeller(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeDagTeller[vedtaksperiodeIdInnhenter(orgnummer)]
 
-    internal fun periodeErForkastet(id: UUID) = id.finn(vedtaksperiodeForkastet)
+    internal fun periodeErForkastet(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(vedtaksperiodeForkastet)
 
-    internal fun periodeErIkkeForkastet(id: UUID) = !periodeErForkastet(id)
+    internal fun periodeErIkkeForkastet(vedtaksperiodeIdInnhenter: IdInnhenter) = !periodeErForkastet(vedtaksperiodeIdInnhenter)
 
-    internal fun antallEtterspurteBehov(vedtaksperiodeId: UUID, behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
-        personLogg.antallEtterspurteBehov(vedtaksperiodeId, behovtype)
+    internal fun antallEtterspurteBehov(vedtaksperiodeIdInnhenter: IdInnhenter, behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
+        personLogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter(orgnummer), behovtype)
 
-    internal fun etterspurteBehov(vedtaksperiodeId: UUID, behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
-        personLogg.etterspurteBehovFinnes(vedtaksperiodeId, behovtype)
+    internal fun etterspurteBehov(vedtaksperiodeIdInnhenter: IdInnhenter, behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
+        personLogg.etterspurteBehovFinnes(vedtaksperiodeIdInnhenter(orgnummer), behovtype)
 
     internal fun etterspurteBehov(vedtaksperiodeId: UUID, tilstand: TilstandType, behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
         personLogg.etterspurteBehovFinnes(vedtaksperiodeId, tilstand, behovtype)
 
-    internal fun etterspurteBehov(vedtaksperiodeId: UUID) =
-        personLogg.etterspurteBehov(vedtaksperiodeId)
+    internal fun etterspurteBehov(vedtaksperiodeIdInnhenter: IdInnhenter) =
+        personLogg.etterspurteBehov(vedtaksperiodeIdInnhenter(orgnummer))
 
-    internal fun sisteBehov(id: UUID) =
-        personLogg.behov().last { it.kontekst()["vedtaksperiodeId"] == id.toString() }
+    internal fun sisteBehov(vedtaksperiodeIdInnhenter: IdInnhenter) =
+        personLogg.behov().last { it.kontekst()["vedtaksperiodeId"] == vedtaksperiodeIdInnhenter(orgnummer).toString() }
 
     internal fun sisteBehov(type: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
         personLogg.behov().last { it.type == type }
 
     internal fun maksdato(indeks: Int) = maksdatoer[indeks]
     internal fun maksdatoVedSisteVedtak() = utbetalinger.indexOfLast(Utbetaling::erAvsluttet).takeIf { it > -1 }?.let { index -> maksdato(index) }
-    internal fun sisteMaksdato(id: UUID) = maksdatoer.filterIndexed { index, _ -> index in id.utbetalingsindeks }.last()
+    internal fun sisteMaksdato(vedtaksperiodeIdInnhenter: IdInnhenter) = maksdatoer.filterIndexed { index, _ -> index in vedtaksperiodeIdInnhenter(orgnummer).utbetalingsindeks }.last()
 
     internal fun forbrukteSykedager(indeks: Int) = forbrukteSykedagerer[indeks]
     internal fun gjenståendeSykedager(indeks: Int) = gjenståendeSykedagerer[indeks]
 
-    internal fun gjenståendeSykedager(id: UUID) = gjenståendeSykedagerer.filterIndexed { index, _ -> index in id.utbetalingsindeks }.last() ?: fail {
-        "Vedtaksperiode $id har ikke oppgitt gjenstående sykedager"
+    internal fun gjenståendeSykedager(vedtaksperiodeIdInnhenter: IdInnhenter) = gjenståendeSykedagerer.filterIndexed { index, _ -> index in vedtaksperiodeIdInnhenter(orgnummer).utbetalingsindeks }.last() ?: fail {
+        "Vedtaksperiode ${vedtaksperiodeIdInnhenter(orgnummer)} har ikke oppgitt gjenstående sykedager"
     }
 
-    internal fun forlengelseFraInfotrygd(id: UUID) = id.finn(forlengelserFraInfotrygd)
+    internal fun forlengelseFraInfotrygd(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(forlengelserFraInfotrygd)
 
-    internal fun vilkårsgrunnlag(id: UUID) = person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt(id))
+    internal fun vilkårsgrunnlag(vedtaksperiodeIdInnhenter: IdInnhenter) = person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt(vedtaksperiodeIdInnhenter))
 
     internal fun utbetalingslinjer(indeks: Int) = arbeidsgiverOppdrag[indeks]
 
-    internal fun sisteTilstand(id: UUID) = id.finn(tilstander)
+    internal fun sisteTilstand(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(tilstander)
 
-    internal fun skjæringstidspunkt(id: UUID) = id.finn(skjæringstidspunkter)
+    internal fun skjæringstidspunkt(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(skjæringstidspunkter)
 
-    internal fun utbetalingstidslinjer(id: UUID) = id.finn(utbetalingstidslinjer)
+    internal fun utbetalingstidslinjer(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(utbetalingstidslinjer)
 
-    internal fun vedtaksperioder(id: UUID) = id.finn(vedtaksperioder)
+    internal fun vedtaksperioder(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(vedtaksperioder)
 
-    internal fun hendelseIder(id: UUID) = id.finn(hendelseIder)
+    internal fun hendelseIder(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(hendelseIder)
 
-    internal fun fagsystemId(id: UUID) = id.finn(fagsystemIder)
+    internal fun fagsystemId(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(fagsystemIder)
 
-    internal fun inntektskilde(id: UUID) = id.finn(inntektskilder)
+    internal fun inntektskilde(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(inntektskilder)
 
     internal fun periodetype(id: UUID) = id.finn(periodetyper)
+
+    internal fun vedtaksperiodeId(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter(orgnummer)
 
     internal data class UtbetalingstidslinjeberegningData(
         val id: UUID,

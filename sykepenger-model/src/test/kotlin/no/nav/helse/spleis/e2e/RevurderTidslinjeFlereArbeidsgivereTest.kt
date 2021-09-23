@@ -7,7 +7,6 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.*
-import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -40,9 +39,9 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
             orgnummer = haandtverkerne
         )
 
-        håndterYtelser(vedtaksperiodeId = 1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
+        håndterYtelser(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = aadvokatene)
         håndterVilkårsgrunnlag(
-            vedtaksperiodeId = 1.vedtaksperiode(aadvokatene),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             orgnummer = aadvokatene,
             inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
                 1.januar(2017) til 1.desember(2017) inntekter {
@@ -51,24 +50,24 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 }
             })
         )
-        håndterYtelser(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
-        håndterSimulering(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
-        håndterUtbetalt(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
+        håndterYtelser(1.vedtaksperiode, orgnummer = aadvokatene)
+        håndterSimulering(1.vedtaksperiode, orgnummer = aadvokatene)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = aadvokatene)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = aadvokatene)
 
-        håndterYtelser(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
-        håndterSimulering(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
-        håndterUtbetalt(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
+        håndterYtelser(1.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterSimulering(1.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = haandtverkerne)
 
         håndterOverstyring((20.januar til 22.januar).map { manuellFeriedag(it) }, orgnummer = aadvokatene)
-        håndterYtelser(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
-        håndterSimulering(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
-        håndterUtbetalt(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
+        håndterYtelser(1.vedtaksperiode, orgnummer = aadvokatene)
+        håndterSimulering(1.vedtaksperiode, orgnummer = aadvokatene)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = aadvokatene)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = aadvokatene)
 
-        håndterYtelser(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
+        håndterYtelser(1.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = haandtverkerne)
 
         // og så forlenger vi.
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = aadvokatene)
@@ -76,22 +75,22 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = aadvokatene)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = haandtverkerne)
 
-        håndterYtelser(2.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
-        håndterYtelser(2.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
+        håndterYtelser(2.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterYtelser(2.vedtaksperiode, orgnummer = aadvokatene)
 
-        håndterSimulering(2.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
-        håndterUtbetalt(2.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
+        håndterSimulering(2.vedtaksperiode, orgnummer = aadvokatene)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = aadvokatene)
+        håndterUtbetalt(2.vedtaksperiode, orgnummer = aadvokatene)
 
-        håndterYtelser(2.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
-        håndterSimulering(2.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
-        håndterUtbetalt(2.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
+        håndterYtelser(2.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterSimulering(2.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterUtbetalt(2.vedtaksperiode, orgnummer = haandtverkerne)
 
 
         inspektør(aadvokatene) {
             assertTilstander(
-                2.vedtaksperiode(aadvokatene),
+                2.vedtaksperiode,
                 START,
                 MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
                 AVVENTER_HISTORIKK,
@@ -106,7 +105,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
 
         inspektør(haandtverkerne) {
             assertTilstander(
-                2.vedtaksperiode(haandtverkerne),
+                2.vedtaksperiode,
                 START,
                 MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
                 AVVENTER_HISTORIKK,
@@ -139,9 +138,9 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
             orgnummer = haandtverkerne
         )
 
-        håndterYtelser(vedtaksperiodeId = 1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
+        håndterYtelser(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = aadvokatene)
         håndterVilkårsgrunnlag(
-            vedtaksperiodeId = 1.vedtaksperiode(aadvokatene),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             orgnummer = aadvokatene,
             inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
                 1.januar(2017) til 1.desember(2017) inntekter {
@@ -150,28 +149,28 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 }
             })
         )
-        håndterYtelser(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
-        håndterSimulering(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
-        håndterUtbetalt(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
+        håndterYtelser(1.vedtaksperiode, orgnummer = aadvokatene)
+        håndterSimulering(1.vedtaksperiode, orgnummer = aadvokatene)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = aadvokatene)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = aadvokatene)
 
-        håndterYtelser(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
-        håndterSimulering(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
-        håndterUtbetalt(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
+        håndterYtelser(1.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterSimulering(1.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = haandtverkerne)
 
         håndterOverstyring((20.januar til 22.januar).map { manuellFeriedag(it) }, orgnummer = aadvokatene)
-        håndterYtelser(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
-        håndterSimulering(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
-        håndterUtbetalt(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
+        håndterYtelser(1.vedtaksperiode, orgnummer = aadvokatene)
+        håndterSimulering(1.vedtaksperiode, orgnummer = aadvokatene)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = aadvokatene)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = aadvokatene)
 
-        håndterYtelser(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
+        håndterYtelser(1.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = haandtverkerne)
 
         inspektør(aadvokatene) {
             assertTilstander(
-                1.vedtaksperiode(aadvokatene),
+                1.vedtaksperiode,
                 START,
                 MOTTATT_SYKMELDING_FERDIG_GAP,
                 AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
@@ -195,7 +194,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
 
         inspektør(haandtverkerne) {
             assertTilstander(
-                1.vedtaksperiode(haandtverkerne),
+                1.vedtaksperiode,
                 START,
                 MOTTATT_SYKMELDING_FERDIG_GAP,
                 AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
@@ -232,9 +231,9 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
             orgnummer = haandtverkerne
         )
 
-        håndterYtelser(vedtaksperiodeId = 1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
+        håndterYtelser(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = aadvokatene)
         håndterVilkårsgrunnlag(
-            vedtaksperiodeId = 1.vedtaksperiode(aadvokatene),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             orgnummer = aadvokatene,
             inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
                 1.januar(2017) til 1.desember(2017) inntekter {
@@ -243,30 +242,30 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 }
             })
         )
-        håndterYtelser(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
-        håndterSimulering(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
-        håndterUtbetalt(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
+        håndterYtelser(1.vedtaksperiode, orgnummer = aadvokatene)
+        håndterSimulering(1.vedtaksperiode, orgnummer = aadvokatene)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = aadvokatene)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = aadvokatene)
 
-        håndterYtelser(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
-        håndterSimulering(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
-        håndterUtbetalt(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
+        håndterYtelser(1.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterSimulering(1.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = haandtverkerne)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = aadvokatene)
 
         håndterOverstyring((20.januar til 22.januar).map { manuellFeriedag(it) }, orgnummer = aadvokatene)
-        håndterYtelser(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
-        håndterSimulering(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
-        håndterUtbetalt(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
+        håndterYtelser(1.vedtaksperiode, orgnummer = aadvokatene)
+        håndterSimulering(1.vedtaksperiode, orgnummer = aadvokatene)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = aadvokatene)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = aadvokatene)
 
-        håndterYtelser(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
+        håndterYtelser(1.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = haandtverkerne)
 
         inspektør(aadvokatene) {
             assertTilstander(
-                1.vedtaksperiode(aadvokatene),
+                1.vedtaksperiode,
                 START,
                 MOTTATT_SYKMELDING_FERDIG_GAP,
                 AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
@@ -285,7 +284,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 AVSLUTTET
             )
             assertTilstander(
-                2.vedtaksperiode(aadvokatene),
+                2.vedtaksperiode,
                 START,
                 MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
                 MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
@@ -297,7 +296,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
 
         inspektør(haandtverkerne) {
             assertTilstander(
-                1.vedtaksperiode(haandtverkerne),
+                1.vedtaksperiode,
                 START,
                 MOTTATT_SYKMELDING_FERDIG_GAP,
                 AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
@@ -334,9 +333,9 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
             orgnummer = haandtverkerne
         )
 
-        håndterYtelser(vedtaksperiodeId = 1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
+        håndterYtelser(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = aadvokatene)
         håndterVilkårsgrunnlag(
-            vedtaksperiodeId = 1.vedtaksperiode(aadvokatene),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             orgnummer = aadvokatene,
             inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
                 1.januar(2017) til 1.desember(2017) inntekter {
@@ -345,50 +344,50 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 }
             })
         )
-        håndterYtelser(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
-        håndterSimulering(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
-        håndterUtbetalt(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
+        håndterYtelser(1.vedtaksperiode, orgnummer = aadvokatene)
+        håndterSimulering(1.vedtaksperiode, orgnummer = aadvokatene)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = aadvokatene)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = aadvokatene)
 
-        håndterYtelser(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
-        håndterSimulering(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
-        håndterUtbetalt(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
+        håndterYtelser(1.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterSimulering(1.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = haandtverkerne)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = aadvokatene)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = haandtverkerne)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = aadvokatene)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = haandtverkerne)
 
-        håndterYtelser(vedtaksperiodeId = 2.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
-        håndterYtelser(vedtaksperiodeId = 2.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
-        håndterYtelser(vedtaksperiodeId = 2.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
+        håndterYtelser(vedtaksperiodeIdInnhenter = 2.vedtaksperiode, orgnummer = aadvokatene)
+        håndterYtelser(vedtaksperiodeIdInnhenter = 2.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterYtelser(vedtaksperiodeIdInnhenter = 2.vedtaksperiode, orgnummer = aadvokatene)
 
-        håndterSimulering(2.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
-        håndterUtbetalt(2.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
+        håndterSimulering(2.vedtaksperiode, orgnummer = aadvokatene)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = aadvokatene)
+        håndterUtbetalt(2.vedtaksperiode, orgnummer = aadvokatene)
 
-        håndterYtelser(vedtaksperiodeId = 2.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
+        håndterYtelser(vedtaksperiodeIdInnhenter = 2.vedtaksperiode, orgnummer = haandtverkerne)
 
-        håndterSimulering(2.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
-        håndterUtbetalt(2.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
+        håndterSimulering(2.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterUtbetalt(2.vedtaksperiode, orgnummer = haandtverkerne)
 
         håndterOverstyring((20.januar til 22.januar).map { manuellFeriedag(it) }, orgnummer = aadvokatene)
-        håndterYtelser(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
-        håndterYtelser(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
-        håndterYtelser(2.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
+        håndterYtelser(1.vedtaksperiode, orgnummer = aadvokatene)
+        håndterYtelser(1.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterYtelser(2.vedtaksperiode, orgnummer = aadvokatene)
 
-        håndterSimulering(2.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
-        håndterUtbetalt(2.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
+        håndterSimulering(2.vedtaksperiode, orgnummer = aadvokatene)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = aadvokatene)
+        håndterUtbetalt(2.vedtaksperiode, orgnummer = aadvokatene)
 
-        håndterYtelser(2.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
+        håndterYtelser(2.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = haandtverkerne)
 
         inspektør(aadvokatene) {
             assertTilstander(
-                1.vedtaksperiode(aadvokatene),
+                1.vedtaksperiode,
                 START,
                 MOTTATT_SYKMELDING_FERDIG_GAP,
                 AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
@@ -405,7 +404,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 AVSLUTTET
             )
             assertTilstander(
-                2.vedtaksperiode(aadvokatene),
+                2.vedtaksperiode,
                 START,
                 MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
                 AVVENTER_HISTORIKK,
@@ -423,13 +422,13 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 AVSLUTTET
             )
             assertHasNoErrors()
-            assertEquals(2, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode(aadvokatene)).size)
-            assertEquals(2, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode(aadvokatene)).size)
+            assertEquals(2, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
+            assertEquals(2, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
         }
 
         inspektør(haandtverkerne) {
             assertTilstander(
-                1.vedtaksperiode(haandtverkerne),
+                1.vedtaksperiode,
                 START,
                 MOTTATT_SYKMELDING_FERDIG_GAP,
                 AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
@@ -445,7 +444,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 AVSLUTTET
             )
             assertTilstander(
-                2.vedtaksperiode(haandtverkerne),
+                2.vedtaksperiode,
                 START,
                 MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
                 AVVENTER_HISTORIKK,
@@ -461,8 +460,8 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 AVSLUTTET
             )
             assertHasNoErrors()
-            assertEquals(2, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode(haandtverkerne)).size)
-            assertEquals(2, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode(haandtverkerne)).size)
+            assertEquals(2, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
+            assertEquals(2, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
         }
     }
 
@@ -483,9 +482,9 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
             orgnummer = haandtverkerne
         )
 
-        håndterYtelser(vedtaksperiodeId = 1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
+        håndterYtelser(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = aadvokatene)
         håndterVilkårsgrunnlag(
-            vedtaksperiodeId = 1.vedtaksperiode(aadvokatene),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             orgnummer = aadvokatene,
             inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
                 1.januar(2017) til 1.desember(2017) inntekter {
@@ -494,45 +493,45 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 }
             })
         )
-        håndterYtelser(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
-        håndterSimulering(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
-        håndterUtbetalt(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
+        håndterYtelser(1.vedtaksperiode, orgnummer = aadvokatene)
+        håndterSimulering(1.vedtaksperiode, orgnummer = aadvokatene)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = aadvokatene)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = aadvokatene)
 
-        håndterYtelser(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
-        håndterSimulering(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
-        håndterUtbetalt(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
+        håndterYtelser(1.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterSimulering(1.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = haandtverkerne)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = aadvokatene)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = haandtverkerne)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = aadvokatene)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = haandtverkerne)
 
-        håndterYtelser(vedtaksperiodeId = 2.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
-        håndterYtelser(vedtaksperiodeId = 2.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
-        håndterYtelser(vedtaksperiodeId = 2.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
+        håndterYtelser(vedtaksperiodeIdInnhenter = 2.vedtaksperiode, orgnummer = aadvokatene)
+        håndterYtelser(vedtaksperiodeIdInnhenter = 2.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterYtelser(vedtaksperiodeIdInnhenter = 2.vedtaksperiode, orgnummer = aadvokatene)
 
-        håndterSimulering(2.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
-        håndterUtbetalt(2.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
+        håndterSimulering(2.vedtaksperiode, orgnummer = aadvokatene)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = aadvokatene)
+        håndterUtbetalt(2.vedtaksperiode, orgnummer = aadvokatene)
 
-        håndterYtelser(vedtaksperiodeId = 2.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
+        håndterYtelser(vedtaksperiodeIdInnhenter = 2.vedtaksperiode, orgnummer = haandtverkerne)
 
-        håndterSimulering(2.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
-        håndterUtbetalt(2.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
+        håndterSimulering(2.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterUtbetalt(2.vedtaksperiode, orgnummer = haandtverkerne)
 
         håndterOverstyring((20.januar til 22.januar).map { manuellFeriedag(it) }, orgnummer = aadvokatene)
-        håndterYtelser(1.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
-        håndterYtelser(1.vedtaksperiode(haandtverkerne), orgnummer = haandtverkerne)
-        håndterYtelser(2.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
+        håndterYtelser(1.vedtaksperiode, orgnummer = aadvokatene)
+        håndterYtelser(1.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterYtelser(2.vedtaksperiode, orgnummer = aadvokatene)
 
-        håndterSimulering(2.vedtaksperiode(aadvokatene), orgnummer = aadvokatene)
+        håndterSimulering(2.vedtaksperiode, orgnummer = aadvokatene)
 
         inspektør(aadvokatene) {
             assertTilstander(
-                1.vedtaksperiode(aadvokatene),
+                1.vedtaksperiode,
                 START,
                 MOTTATT_SYKMELDING_FERDIG_GAP,
                 AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
@@ -548,7 +547,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 AVVENTER_GJENNOMFØRT_REVURDERING
             )
             assertTilstander(
-                2.vedtaksperiode(aadvokatene),
+                2.vedtaksperiode,
                 START,
                 MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
                 AVVENTER_HISTORIKK,
@@ -564,15 +563,15 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 AVVENTER_GODKJENNING_REVURDERING
             )
             assertHasNoErrors()
-            assertEquals(1, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode(aadvokatene)).size)
-            assertEquals(1, ikkeUtbetalteUtbetalingerForVedtaksperiode(1.vedtaksperiode(aadvokatene)).size)
-            assertEquals(1, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode(aadvokatene)).size)
-            assertEquals(1, ikkeUtbetalteUtbetalingerForVedtaksperiode(2.vedtaksperiode(aadvokatene)).size)
+            assertEquals(1, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
+            assertEquals(1, ikkeUtbetalteUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
+            assertEquals(1, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
+            assertEquals(1, ikkeUtbetalteUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
         }
 
         inspektør(haandtverkerne) {
             assertTilstander(
-                1.vedtaksperiode(haandtverkerne),
+                1.vedtaksperiode,
                 START,
                 MOTTATT_SYKMELDING_FERDIG_GAP,
                 AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
@@ -587,7 +586,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 AVVENTER_GJENNOMFØRT_REVURDERING
             )
             assertTilstander(
-                2.vedtaksperiode(haandtverkerne),
+                2.vedtaksperiode,
                 START,
                 MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
                 AVVENTER_HISTORIKK,
@@ -600,10 +599,10 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 AVVENTER_ARBEIDSGIVERE_REVURDERING
             )
             assertHasNoErrors()
-            assertEquals(1, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode(haandtverkerne)).size)
-            assertEquals(1, ikkeUtbetalteUtbetalingerForVedtaksperiode(1.vedtaksperiode(haandtverkerne)).size)
-            assertEquals(1, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode(haandtverkerne)).size)
-            assertEquals(1, ikkeUtbetalteUtbetalingerForVedtaksperiode(2.vedtaksperiode(haandtverkerne)).size)
+            assertEquals(1, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
+            assertEquals(1, ikkeUtbetalteUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
+            assertEquals(1, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
+            assertEquals(1, ikkeUtbetalteUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
         }
     }
 
@@ -614,13 +613,13 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         forlengVedtak(1.februar, 28.februar, AG1, AG2)
 
         håndterOverstyring((14.februar til 18.februar).map { manuellFeriedag(it) }, orgnummer = AG1)
-        håndterYtelser(2.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterSimulering(2.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode(AG1), orgnummer = AG1)
-        håndterUtbetalt(2.vedtaksperiode(AG1), orgnummer = AG1)
+        håndterYtelser(2.vedtaksperiode, orgnummer = AG1)
+        håndterSimulering(2.vedtaksperiode, orgnummer = AG1)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = AG1)
+        håndterUtbetalt(2.vedtaksperiode, orgnummer = AG1)
 
-        håndterYtelser(2.vedtaksperiode(AG2), orgnummer = AG2)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode(AG2), orgnummer = AG2)
+        håndterYtelser(2.vedtaksperiode, orgnummer = AG2)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = AG2)
 
         forlengVedtak(1.mars, 31.mars, AG1, AG2)
         håndterSykmelding(Sykmeldingsperiode(1.april, 22.april, 100.prosent), orgnummer = AG1)

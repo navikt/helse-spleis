@@ -3,6 +3,7 @@ package no.nav.helse.person
 import no.nav.helse.spleis.e2e.TestArbeidsgiverInspektør
 import no.nav.helse.spleis.e2e.TestObservatør
 import org.junit.jupiter.api.BeforeEach
+import java.util.*
 
 internal abstract class AbstractPersonTest {
 
@@ -16,8 +17,7 @@ internal abstract class AbstractPersonTest {
     protected lateinit var observatør: TestObservatør
     protected val inspektør get() = inspektør(ORGNUMMER)
 
-    protected val Int.vedtaksperiode get() = this.vedtaksperiode(ORGNUMMER)
-    protected val Int.utbetaling get() = this.utbetaling(ORGNUMMER)
+    protected val Int.vedtaksperiode: IdInnhenter get() = { orgnummer -> this.vedtaksperiode(orgnummer) }
 
     @BeforeEach
     internal fun createTestPerson() {
@@ -25,10 +25,10 @@ internal abstract class AbstractPersonTest {
         observatør = TestObservatør().also { person.addObserver(it) }
     }
 
-    protected fun Int.vedtaksperiode(orgnummer: String) = vedtaksperiodeId(this - 1, orgnummer)
-    protected fun Int.utbetaling(orgnummer: String) = utbetalingId(this - 1, orgnummer)
+    private fun Int.vedtaksperiode(orgnummer: String) = observatør.vedtaksperiode(orgnummer, this - 1)
+    protected fun Int.utbetaling(orgnummer: String) = inspektør(orgnummer).utbetalingId(this - 1)
     protected fun inspektør(orgnummer: String) = TestArbeidsgiverInspektør(person, orgnummer)
     protected fun inspektør(orgnummer: String, block: TestArbeidsgiverInspektør.() -> Unit) = inspektør(orgnummer).run(block)
-    protected fun vedtaksperiodeId(indeks: Int, orgnummer: String = ORGNUMMER) = observatør.vedtaksperiode(orgnummer, indeks)
-    protected fun utbetalingId(indeks: Int, orgnummer: String = ORGNUMMER) = inspektør(orgnummer).utbetalingId(indeks)
 }
+
+internal typealias IdInnhenter = (orgnummer: String) -> UUID

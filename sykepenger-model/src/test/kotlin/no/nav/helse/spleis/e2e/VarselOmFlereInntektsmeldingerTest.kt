@@ -25,7 +25,7 @@ internal class VarselOmFlereInntektsmeldingerTest : AbstractEndToEndTest() {
 
         håndterYtelser(3.vedtaksperiode)
         håndterVilkårsgrunnlag(
-            vedtaksperiodeId = 3.vedtaksperiode, inntekt = INNTEKT, inntektsvurdering = Inntektsvurdering(
+            vedtaksperiodeIdInnhenter = 3.vedtaksperiode, inntekt = INNTEKT, inntektsvurdering = Inntektsvurdering(
                 inntekter = inntektperioderForSammenligningsgrunnlag {
                     1.januar(2020) til 1.april(2021) inntekter {
                         ORGNUMMER inntekt INNTEKT
@@ -68,7 +68,7 @@ internal class VarselOmFlereInntektsmeldingerTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent))
         håndterInntektsmelding(arbeidsgiverperioder = listOf(1.februar til 16.februar), førsteFraværsdag = 1.februar)
         håndterYtelser(1.vedtaksperiode)
-        håndterVilkårsgrunnlag(vedtaksperiodeId = 1.vedtaksperiode, inntekt = INNTEKT, inntektsvurdering = Inntektsvurdering(
+        håndterVilkårsgrunnlag(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, inntekt = INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.februar(2017) til 1.januar inntekter {
                     ORGNUMMER inntekt INNTEKT

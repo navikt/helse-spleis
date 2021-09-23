@@ -189,7 +189,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
         }
 
     private fun utbetalingsgodkjenning(
-        vedtaksperiodeId: UUID,
+        vedtaksperiodeIdInnhenter: IdInnhenter,
         godkjent: Boolean,
         godkjentAv: String,
         automatiskBehandling: Boolean
@@ -201,7 +201,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
         utbetalingId = UUID.fromString(inspektør.sisteBehov(Behovtype.Godkjenning).kontekst()["utbetalingId"] ?: throw IllegalStateException("Finner ikke utbetalingId i: ${inspektør.sisteBehov(
             Behovtype.Godkjenning
         ).kontekst()}")),
-        vedtaksperiodeId = "$vedtaksperiodeId",
+        vedtaksperiodeId = "${vedtaksperiodeIdInnhenter(ORGNUMMER)}",
         saksbehandler = godkjentAv,
         saksbehandlerEpost = "mille.mellomleder@nav.no",
         utbetalingGodkjent = godkjent,
@@ -212,7 +212,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
     }
 
     private fun ytelser(
-        vedtaksperiodeId: UUID,
+        vedtaksperiodeIdInnhenter: IdInnhenter,
         utbetalinger: List<Infotrygdperiode> = emptyList(),
         foreldrepengeYtelse: Periode? = null,
         svangerskapYtelse: Periode? = null
@@ -223,13 +223,13 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             organisasjonsnummer = ORGNUMMER,
-            vedtaksperiodeId = "$vedtaksperiodeId",
+            vedtaksperiodeId = "${vedtaksperiodeIdInnhenter(ORGNUMMER)}",
             utbetalingshistorikk = Utbetalingshistorikk(
                 meldingsreferanseId = meldingsreferanseId,
                 aktørId = AKTØRID,
                 fødselsnummer = UNG_PERSON_FNR_2018,
                 organisasjonsnummer = ORGNUMMER,
-                vedtaksperiodeId = "$vedtaksperiodeId",
+                vedtaksperiodeId = "${vedtaksperiodeIdInnhenter(ORGNUMMER)}",
                 arbeidskategorikoder = emptyMap(),
                 harStatslønn = false,
                 perioder = utbetalinger,
@@ -314,10 +314,10 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
             hendelse = this
         }
 
-    private fun vilkårsgrunnlag(vedtaksperiodeId: UUID) =
+    private fun vilkårsgrunnlag(vedtaksperiodeIdInnhenter: IdInnhenter) =
         Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = "$vedtaksperiodeId",
+            vedtaksperiodeId = "${vedtaksperiodeIdInnhenter(ORGNUMMER)}",
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = ORGNUMMER,
@@ -351,10 +351,10 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
             hendelse = this
         }
 
-    private fun simulering(vedtaksperiodeId: UUID) =
+    private fun simulering(vedtaksperiodeIdInnhenter: IdInnhenter) =
         Simulering(
             meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = "$vedtaksperiodeId",
+            vedtaksperiodeId = "${vedtaksperiodeIdInnhenter(ORGNUMMER)}",
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = ORGNUMMER,

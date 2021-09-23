@@ -9,7 +9,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -65,13 +64,13 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
             organisasjonsnummer = ORGNUMMER,
-            vedtaksperiodeId = "${1.vedtaksperiode}",
+            vedtaksperiodeId = "${1.vedtaksperiode(ORGNUMMER)}",
             utbetalingshistorikk = Utbetalingshistorikk(
                 meldingsreferanseId = meldingsreferanseId,
                 aktørId = "aktørId",
                 fødselsnummer = UNG_PERSON_FNR_2018,
                 organisasjonsnummer = ORGNUMMER,
-                vedtaksperiodeId = "${1.vedtaksperiode}",
+                vedtaksperiodeId = "${1.vedtaksperiode(ORGNUMMER)}",
                 arbeidskategorikoder = emptyMap(),
                 harStatslønn = false,
                 perioder = utbetalinger,
@@ -159,7 +158,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
     private fun vilkårsgrunnlag() =
         Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = "${1.vedtaksperiode}",
+            vedtaksperiodeId = "${1.vedtaksperiode(ORGNUMMER)}",
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = ORGNUMMER,
@@ -196,7 +195,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
     private fun simulering(simuleringOK: Boolean = true, dagsats: Int = 1431) =
         Simulering(
             meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = "${1.vedtaksperiode}",
+            vedtaksperiodeId = "${1.vedtaksperiode(ORGNUMMER)}",
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = ORGNUMMER,

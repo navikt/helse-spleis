@@ -26,7 +26,7 @@ internal class VilkårsgrunnlagTest {
 
     private lateinit var person: Person
     private val observatør = TestObservatør()
-    private fun inspektør() = TestArbeidsgiverInspektør(person)
+    private fun inspektør() = TestArbeidsgiverInspektør(person, orgnummer)
 
     @BeforeEach
     fun setup() {
@@ -133,8 +133,8 @@ internal class VilkårsgrunnlagTest {
     }
 
     private fun dataForVilkårsvurdering(): VilkårsgrunnlagHistorikk.Grunnlagsdata? {
-        val inspektør = TestArbeidsgiverInspektør(person)
-        return inspektør.vilkårsgrunnlag(observatør.vedtaksperiode(orgnummer, 0)) as VilkårsgrunnlagHistorikk.Grunnlagsdata?
+        val inspektør = TestArbeidsgiverInspektør(person, orgnummer)
+        return inspektør.vilkårsgrunnlag { observatør.vedtaksperiode(orgnummer, 0) } as VilkårsgrunnlagHistorikk.Grunnlagsdata?
     }
 
     private fun hentTilstand(): Vedtaksperiodetilstand? {

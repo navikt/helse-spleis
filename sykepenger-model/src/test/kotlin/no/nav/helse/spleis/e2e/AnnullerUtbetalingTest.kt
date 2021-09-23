@@ -3,9 +3,9 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.UtbetalingHendelse
-import no.nav.helse.hendelser.til
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
+import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.person.TilstandType
 import no.nav.helse.serde.api.TilstandstypeDTO
@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
 
 internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
@@ -109,10 +108,10 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         sisteBehovErAnnullering(1.vedtaksperiode)
     }
 
-    private fun sisteBehovErAnnullering(vedtaksperiode: UUID) {
+    private fun sisteBehovErAnnullering(vedtaksperiodeIdInnhenter: IdInnhenter) {
         sjekkAt(inspektør.personLogg.behov().last()) {
             type er Behovtype.Utbetaling
-            detaljer()["fagsystemId"] er inspektør.fagsystemId(vedtaksperiode)
+            detaljer()["fagsystemId"] er inspektør.fagsystemId(vedtaksperiodeIdInnhenter)
             hentLinjer()[0]["statuskode"] er "OPPH"
         }
     }

@@ -26,7 +26,7 @@ internal class YtelserHendelseTest : AbstractEndToEndTest() {
 
     @Test
     fun `ytelser på feil tidspunkt`() {
-        assertThrows<Aktivitetslogg.AktivitetException> { person.håndter(ytelser(vedtaksperiodeId = UUID.randomUUID())) }
+        assertThrows<Aktivitetslogg.AktivitetException> { person.håndter(ytelser(vedtaksperiodeIdInnhenter = { UUID.randomUUID() })) }
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         person.håndter(ytelser(1.vedtaksperiode))
@@ -129,7 +129,7 @@ internal class YtelserHendelseTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)))
         val ytelser = ytelser(
-            vedtaksperiodeId = 1.vedtaksperiode,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             utbetalinger = utbetalinger,
             inntektshistorikk = inntektshistorikk,
             foreldrepengeYtelse = foreldrepengeytelse,
@@ -153,7 +153,7 @@ internal class YtelserHendelseTest : AbstractEndToEndTest() {
         håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)))
         person.håndter(
             ytelser(
-                vedtaksperiodeId = 1.vedtaksperiode,
+                vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
                 ugyldigePerioder = listOf(null to null),
                 foreldrepengeYtelse = null,
                 svangerskapYtelse = null
@@ -162,7 +162,7 @@ internal class YtelserHendelseTest : AbstractEndToEndTest() {
     }
 
     private fun ytelser(
-        vedtaksperiodeId: UUID,
+        vedtaksperiodeIdInnhenter: IdInnhenter,
         utbetalinger: List<Infotrygdperiode> = emptyList(),
         inntektshistorikk: List<Inntektsopplysning> = emptyList(),
         foreldrepengeYtelse: Periode? = null,
@@ -175,13 +175,13 @@ internal class YtelserHendelseTest : AbstractEndToEndTest() {
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
             organisasjonsnummer = ORGNUMMER,
-            vedtaksperiodeId = "$vedtaksperiodeId",
+            vedtaksperiodeId = "${vedtaksperiodeIdInnhenter(ORGNUMMER)}",
             utbetalingshistorikk = Utbetalingshistorikk(
                 meldingsreferanseId = meldingsreferanseId,
                 aktørId = "aktørId",
                 fødselsnummer = UNG_PERSON_FNR_2018,
                 organisasjonsnummer = ORGNUMMER,
-                vedtaksperiodeId = "$vedtaksperiodeId",
+                vedtaksperiodeId = "${vedtaksperiodeIdInnhenter(ORGNUMMER)}",
                 arbeidskategorikoder = emptyMap(),
                 harStatslønn = false,
                 perioder = utbetalinger,

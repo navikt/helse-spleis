@@ -178,7 +178,7 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
     fun `uten perioder fra før uten inntektsmelding`() {
         håndterSøknad(Sykdom(3.januar, 31.januar, 100.prosent))
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
-        assertTrue(observatør.bedtOmInntektsmeldingReplay(1.vedtaksperiode))
+        assertTrue(observatør.bedtOmInntektsmeldingReplay(1.vedtaksperiode(ORGNUMMER)))
     }
 
     @Test
@@ -191,7 +191,7 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
     fun `uten perioder fra før med inntektsmelding`() {
         val inntektsmeldingId = håndterInntektsmelding(listOf(3.januar til 18.januar))
         håndterSøknad(Sykdom(3.januar, 31.januar, 100.prosent))
-        håndterInntektsmeldingReplay(inntektsmeldingId, 1.vedtaksperiode)
+        håndterInntektsmeldingReplay(inntektsmeldingId, 1.vedtaksperiode(ORGNUMMER))
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_HISTORIKK)
     }
 
@@ -199,7 +199,7 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
     fun `uten perioder fra før med refusjon opphørt`() {
         val inntektsmeldingId = håndterInntektsmelding(listOf(3.januar til 18.januar), refusjon = Refusjon(18.januar, INNTEKT, emptyList()))
         håndterSøknad(Sykdom(3.januar, 31.januar, 100.prosent))
-        håndterInntektsmeldingReplay(inntektsmeldingId, 1.vedtaksperiode)
+        håndterInntektsmeldingReplay(inntektsmeldingId, 1.vedtaksperiode(ORGNUMMER))
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, TIL_INFOTRYGD)
     }
 
@@ -209,7 +209,7 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent))
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP)
-        assertFalse(observatør.bedtOmInntektsmeldingReplay(2.vedtaksperiode))
+        assertFalse(observatør.bedtOmInntektsmeldingReplay(2.vedtaksperiode(ORGNUMMER)))
     }
 
     @Test
@@ -218,7 +218,7 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(6.januar, 7.januar, 100.prosent))
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
         assertTilstander(2.vedtaksperiode, START, AVSLUTTET_UTEN_UTBETALING)
-        assertFalse(observatør.bedtOmInntektsmeldingReplay(2.vedtaksperiode))
+        assertFalse(observatør.bedtOmInntektsmeldingReplay(2.vedtaksperiode(ORGNUMMER)))
     }
 
     @Test
@@ -226,7 +226,7 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 20.januar, 100.prosent))
         håndterInntektsmelding(listOf(3.januar til 18.januar), førsteFraværsdag = 25.januar)
         håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent))
-        assertFalse(observatør.bedtOmInntektsmeldingReplay(2.vedtaksperiode)) { "Periode 2 vil be om replay av inntektsmelding så snart perioden foran er ferdigbehandlet" }
+        assertFalse(observatør.bedtOmInntektsmeldingReplay(2.vedtaksperiode(ORGNUMMER))) { "Periode 2 vil be om replay av inntektsmelding så snart perioden foran er ferdigbehandlet" }
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP)
     }
@@ -242,7 +242,7 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
             ), førsteFraværsdag = 18.januar
         )
         håndterSøknad(Sykdom(18.januar, 31.januar, 100.prosent))
-        håndterInntektsmeldingReplay(inntektsmeldingId, 2.vedtaksperiode)
+        håndterInntektsmeldingReplay(inntektsmeldingId, 2.vedtaksperiode(ORGNUMMER))
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_HISTORIKK)
     }
@@ -252,7 +252,7 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
         nyttVedtak(3.januar, 20.januar, 100.prosent)
         håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent))
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
-        assertTrue(observatør.bedtOmInntektsmeldingReplay(2.vedtaksperiode))
+        assertTrue(observatør.bedtOmInntektsmeldingReplay(2.vedtaksperiode(ORGNUMMER)))
     }
 
     @Test
@@ -276,7 +276,7 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 16.januar, 100.prosent))
         håndterInntektsmelding(listOf(3.januar til 18.januar))
         håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent))
-        assertFalse(observatør.bedtOmInntektsmeldingReplay(2.vedtaksperiode)) { "Periode 2 vil be om replay av inntektsmelding så snart perioden foran er ferdigbehandlet" }
+        assertFalse(observatør.bedtOmInntektsmeldingReplay(2.vedtaksperiode(ORGNUMMER))) { "Periode 2 vil be om replay av inntektsmelding så snart perioden foran er ferdigbehandlet" }
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE)
     }
@@ -295,7 +295,7 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 24.januar, 100.prosent))
         val inntektsmeldingId = håndterInntektsmelding(listOf(3.januar til 18.januar), refusjon = Refusjon(25.januar, INNTEKT, emptyList()))
         håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent))
-        håndterInntektsmeldingReplay(inntektsmeldingId, 2.vedtaksperiode)
+        håndterInntektsmeldingReplay(inntektsmeldingId, 2.vedtaksperiode(ORGNUMMER))
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, TIL_INFOTRYGD)
     }

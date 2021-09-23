@@ -16,7 +16,6 @@ import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
-import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -830,7 +829,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar(2020), 28.februar(2020), 100.prosent))
         håndterSøknad(Sykdom(1.februar(2020), 28.februar(2020), 100.prosent))
         håndterYtelser(
-            vedtaksperiodeId = 2.vedtaksperiode,
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode,
             utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar(2020), 31.januar(2020), 100.prosent, 1400.daglig)),
             inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 17.januar(2020), 1400.daglig, true))
         )
@@ -1779,7 +1778,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.mars til 16.mars))
 
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
-        val sykdomstidslinjedagerForAndrePeriode = inspektør.vedtaksperiodeDagTeller[2.vedtaksperiode]!!
+        val sykdomstidslinjedagerForAndrePeriode = inspektør.vedtaksperiodeDagTeller(2.vedtaksperiode)!!
         assertEquals(21, sykdomstidslinjedagerForAndrePeriode.values.reduce { acc, i -> acc + i })
         assertEquals(7, sykdomstidslinjedagerForAndrePeriode[Sykedag::class])
         assertEquals(4, sykdomstidslinjedagerForAndrePeriode[SykHelgedag::class])

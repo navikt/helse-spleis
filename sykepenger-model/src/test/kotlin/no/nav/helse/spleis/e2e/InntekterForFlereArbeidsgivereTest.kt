@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -42,7 +43,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertNoErrors(a2Inspektør)
 
         vilkårsgrunnlag(
-            a1.id(0),
+            1.vedtaksperiode,
             orgnummer = a1,
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2017) til 1.desember(2017) inntekter {
@@ -81,7 +82,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertInntektForDato(4750.månedlig, 1.januar, a3Inspektør)
         assertInntektForDato(2250.månedlig, 1.januar, a4Inspektør)
 
-        val vilkårsgrunnlag = a1Inspektør.vilkårsgrunnlag(1.vedtaksperiode(a1)) as VilkårsgrunnlagHistorikk.Grunnlagsdata?
+        val vilkårsgrunnlag = a1Inspektør.vilkårsgrunnlag(1.vedtaksperiode) as VilkårsgrunnlagHistorikk.Grunnlagsdata?
         assertEquals(300000.årlig, vilkårsgrunnlag?.sammenligningsgrunnlag)
 
     }
@@ -104,7 +105,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
 
         person.håndter(
             vilkårsgrunnlag(
-                a1.id(0),
+                1.vedtaksperiode,
                 orgnummer = a1,
                 inntekter = inntektperioderForSammenligningsgrunnlag {
                     1.januar(2017) til 1.desember(2017) inntekter {
@@ -143,7 +144,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         nyPeriode(1.januar til 31.januar, a1, 25000.månedlig)
 
         vilkårsgrunnlag(
-            a1.id(0),
+            1.vedtaksperiode,
             orgnummer = a1,
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2017) til 1.desember(2017) inntekter {
@@ -155,7 +156,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         ).håndter(Person::håndter)
 
         ytelser(
-            a1.id(0), orgnummer = a1, inntektshistorikk = listOf(
+            1.vedtaksperiode, orgnummer = a1, inntektshistorikk = listOf(
                 Inntektsopplysning(a1, 1.januar, 24500.månedlig, true),
                 Inntektsopplysning(a2, 1.januar(2016), 5000.månedlig, true)
             )
@@ -192,7 +193,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         val arbeidsforhold = listOf(Arbeidsforhold(a1, LocalDate.EPOCH, null))
         nyPeriode(1.januar til 31.januar, a1, 25000.månedlig)
         vilkårsgrunnlag(
-            a1.id(0),
+            1.vedtaksperiode,
             orgnummer = a1,
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2017) til 1.desember(2017) inntekter {
@@ -205,18 +206,9 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
 
         assertEquals(3, a1Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.size)
         assertEquals(3, a1Inspektør.inntektInspektør.antallInnslag)
-        assertEquals(
-            25000.månedlig,
-            a1Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.get(0)?.sykepengegrunnlag
-        )
-        assertEquals(
-            15000.månedlig,
-            a1Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.get(1)?.sykepengegrunnlag
-        )
-        assertEquals(
-            24000.månedlig,
-            a1Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.get(2)?.sammenligningsgrunnlag
-        )
+        assertEquals(25000.månedlig, a1Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.get(0)?.sykepengegrunnlag)
+        assertEquals(15000.månedlig, a1Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.get(1)?.sykepengegrunnlag)
+        assertEquals(24000.månedlig, a1Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.get(2)?.sammenligningsgrunnlag)
 
     }
 
@@ -234,7 +226,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
         nyPeriode(1.januar til 31.januar, a1, 25000.månedlig)
         vilkårsgrunnlag(
-            a1.id(0),
+            1.vedtaksperiode,
             orgnummer = a1,
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2017) til 1.desember(2017) inntekter {
@@ -269,7 +261,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
         nyPeriode(1.januar til 31.januar, a1, 25000.månedlig)
         vilkårsgrunnlag(
-            a1.id(0),
+            1.vedtaksperiode,
             orgnummer = a1,
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2017) til 1.desember(2017) inntekter {
@@ -310,7 +302,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             orgnummer = orgnummer
         ).håndter(Person::håndter)
         ytelser(
-            vedtaksperiodeId = 1.vedtaksperiode(orgnummer),
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             orgnummer = orgnummer,
             inntektshistorikk = emptyList(),
             besvart = LocalDateTime.now().minusHours(24)
@@ -318,7 +310,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
     }
 
     private fun vilkårsgrunnlag(
-        vedtaksperiodeId: UUID,
+        vedtaksperiodeIdInnhenter: IdInnhenter,
         arbeidsforhold: List<Arbeidsforhold>? = null,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
         orgnummer: String = ORGNUMMER,
@@ -328,7 +320,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
     ): Vilkårsgrunnlag {
         return Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = vedtaksperiodeId.toString(),
+            vedtaksperiodeId = vedtaksperiodeIdInnhenter(orgnummer).toString(),
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = orgnummer,

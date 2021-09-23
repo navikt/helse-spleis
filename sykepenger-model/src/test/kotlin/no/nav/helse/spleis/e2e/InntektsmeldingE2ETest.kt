@@ -6,7 +6,6 @@ import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.*
-import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -14,7 +13,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
 
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
@@ -577,8 +575,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
 
-        håndterInntektsmeldingReplay(inntektsmeldingId1, 2.vedtaksperiode)
-        håndterInntektsmeldingReplay(inntektsmeldingId2, 2.vedtaksperiode)
+        håndterInntektsmeldingReplay(inntektsmeldingId1, 2.vedtaksperiode(ORGNUMMER))
+        håndterInntektsmeldingReplay(inntektsmeldingId2, 2.vedtaksperiode(ORGNUMMER))
         assertTilstander(
             2.vedtaksperiode,
             START,
@@ -600,7 +598,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(21.januar, 31.januar, 100.prosent))
 
-        håndterInntektsmeldingReplay(inntektsmeldingId, 1.vedtaksperiode)
+        håndterInntektsmeldingReplay(inntektsmeldingId, 1.vedtaksperiode(ORGNUMMER))
 
         assertTilstander(
             1.vedtaksperiode,
@@ -734,7 +732,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         val inntektsmeldingId = håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 3.februar)
         håndterSykmelding(Sykmeldingsperiode(3.februar, 25.februar, 100.prosent))
         håndterSøknad(Sykdom(3.februar, 25.februar, 100.prosent))
-        håndterInntektsmeldingReplay(inntektsmeldingId, 1.vedtaksperiode)
+        håndterInntektsmeldingReplay(inntektsmeldingId, 1.vedtaksperiode(ORGNUMMER))
         val utbetalinger = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 21.januar, 100.prosent, 1000.daglig)
         val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true))
         håndterYtelser(1.vedtaksperiode, utbetalinger, inntektshistorikk = inntektshistorikk)
@@ -822,9 +820,9 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         val inntektsmelding3 = håndterInntektsmelding(listOf(3.januar til 18.januar), 23.februar)
         håndterSykmelding(Sykmeldingsperiode(23.februar, 25.februar, 100.prosent))
         håndterSøknad(Sykdom(23.februar, 25.februar, 100.prosent, null))
-        håndterInntektsmeldingReplay(inntektsmelding1, 4.vedtaksperiode)
-        håndterInntektsmeldingReplay(inntektsmelding2, 4.vedtaksperiode)
-        håndterInntektsmeldingReplay(inntektsmelding3, 4.vedtaksperiode)
+        håndterInntektsmeldingReplay(inntektsmelding1, 4.vedtaksperiode(ORGNUMMER))
+        håndterInntektsmeldingReplay(inntektsmelding2, 4.vedtaksperiode(ORGNUMMER))
+        håndterInntektsmeldingReplay(inntektsmelding3, 4.vedtaksperiode(ORGNUMMER))
         håndterYtelser(4.vedtaksperiode)
         håndterVilkårsgrunnlag(4.vedtaksperiode)
         håndterYtelser(4.vedtaksperiode)

@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.person.Aktivitetskontekst
+import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.SpesifikkKontekst
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.UtbetalingstidslinjeInspektør
@@ -16,7 +17,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import java.util.*
 
 internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
 
@@ -138,11 +138,9 @@ internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
         assertFalse(inspektør.vedtaksperiodeLogg(2.vedtaksperiode).hasWarningsOrWorse())
     }
 
-    private fun TestArbeidsgiverInspektør.vedtaksperiodeLogg(id: UUID) = personLogg.logg(object : Aktivitetskontekst {
-        override fun toSpesifikkKontekst(): SpesifikkKontekst {
-            return SpesifikkKontekst("Vedtaksperiode", mapOf(
-                "vedtaksperiodeId" to "$id"
-            ))
-        }
+    private fun TestArbeidsgiverInspektør.vedtaksperiodeLogg(vedtaksperiodeIdInnhenter: IdInnhenter) = personLogg.logg(object : Aktivitetskontekst {
+        override fun toSpesifikkKontekst() = SpesifikkKontekst("Vedtaksperiode", mapOf(
+            "vedtaksperiodeId" to "${this@vedtaksperiodeLogg.vedtaksperiodeId(vedtaksperiodeIdInnhenter)}"
+        ))
     })
 }

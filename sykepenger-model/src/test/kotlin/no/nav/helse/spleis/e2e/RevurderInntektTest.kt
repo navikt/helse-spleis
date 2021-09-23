@@ -11,8 +11,11 @@ import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.Test
 
 internal class RevurderInntektTest : AbstractEndToEndTest() {
 
@@ -414,7 +417,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         val utbetalingEvent = observatør.utbetalingMedUtbetalingEventer.first()
 
         assertEquals(1, utbetalingEvent.vedtaksperiodeIder.size)
-        assertEquals(1.vedtaksperiode, utbetalingEvent.vedtaksperiodeIder.first())
+        assertEquals(1.vedtaksperiode(ORGNUMMER), utbetalingEvent.vedtaksperiodeIder.first())
     }
 
     @Test
@@ -426,9 +429,9 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         val andreEvent = observatør.utbetalingMedUtbetalingEventer.last()
 
         assertEquals(1, førsteEvent.vedtaksperiodeIder.size)
-        assertEquals(1.vedtaksperiode, førsteEvent.vedtaksperiodeIder.first())
+        assertEquals(1.vedtaksperiode(ORGNUMMER), førsteEvent.vedtaksperiodeIder.first())
         assertEquals(1, andreEvent.vedtaksperiodeIder.size)
-        assertEquals(2.vedtaksperiode, andreEvent.vedtaksperiodeIder.first())
+        assertEquals(2.vedtaksperiode(ORGNUMMER), andreEvent.vedtaksperiodeIder.first())
     }
 
     @Test
@@ -447,8 +450,8 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         val utbetalingsevent = observatør.utbetalingMedUtbetalingEventer.last()
 
         assertEquals(2, utbetalingsevent.vedtaksperiodeIder.size)
-        assertTrue(utbetalingsevent.vedtaksperiodeIder.contains(1.vedtaksperiode))
-        assertTrue(utbetalingsevent.vedtaksperiodeIder.contains(2.vedtaksperiode))
+        assertTrue(utbetalingsevent.vedtaksperiodeIder.contains(1.vedtaksperiode(ORGNUMMER)))
+        assertTrue(utbetalingsevent.vedtaksperiodeIder.contains(2.vedtaksperiode(ORGNUMMER)))
     }
 
     @Test
@@ -460,6 +463,6 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         val utbetalingEvent = observatør.utbetalingMedUtbetalingEventer.first()
 
         assertEquals(1, utbetalingEvent.vedtaksperiodeIder.size)
-        assertEquals(1.vedtaksperiode, utbetalingEvent.vedtaksperiodeIder.first())
+        assertEquals(1.vedtaksperiode(ORGNUMMER), utbetalingEvent.vedtaksperiodeIder.first())
     }
 }
