@@ -1393,12 +1393,6 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.forkastUgyldigeUtbetalinger(hendelse)
         }
 
-        override fun makstid(
-            vedtaksperiode: Vedtaksperiode,
-            tilstandsendringstidspunkt: LocalDateTime
-        ): LocalDateTime = tilstandsendringstidspunkt
-            .plusDays(15)
-
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             vedtaksperiode.tickleForArbeidsgiveravhengighet(påminnelse)
         }
