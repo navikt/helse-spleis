@@ -2004,15 +2004,6 @@ internal class Vedtaksperiode private constructor(
                 hendelse.info("Infotrygdhistorikken har endret seg, reberegner periode")
             }
 
-            if (vedtaksperiode.inntektskilde == Inntektskilde.FLERE_ARBEIDSGIVERE
-                && !person.harFlereArbeidsgivereMedSykdom()
-                && !person.harRelevanteArbeidsforholdForFlereArbeidsgivere(vedtaksperiode.skjæringstidspunkt)
-            ) {
-                hendelse.info("${vedtaksperiode.fødselsnummer} sin vedtaksperiode ${vedtaksperiode.id} er identifisert som feilmerket FLERE_ARBEIDSGIVERE. Setter inntektskilde til EN_ARBEIDSGIVER")
-                sikkerLogg.info("${vedtaksperiode.fødselsnummer} sin vedtaksperiode ${vedtaksperiode.id} er identifisert som feilmerket FLERE_ARBEIDSGIVERE. Setter inntektskilde til EN_ARBEIDSGIVER")
-                vedtaksperiode.inntektskilde = Inntektskilde.EN_ARBEIDSGIVER
-            }
-
             vedtaksperiode.trengerGodkjenning(hendelse)
         }
 
