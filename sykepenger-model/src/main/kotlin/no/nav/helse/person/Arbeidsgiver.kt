@@ -696,6 +696,7 @@ internal class Arbeidsgiver private constructor(
         filter: VedtaksperiodeFilter,
         årsak: ForkastetÅrsak
     ): List<Vedtaksperiode> {
+        hendelse.kontekst(this)
         return forkast(filter, årsak)
             .takeIf { it.isNotEmpty() }
             ?.also { perioder ->
@@ -827,8 +828,7 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
-    internal class GjenopptaBehandling(private val hendelse: ArbeidstakerHendelse) :
-        ArbeidstakerHendelse(hendelse) {
+    internal class GjenopptaBehandling(private val hendelse: ArbeidstakerHendelse) : ArbeidstakerHendelse(hendelse) {
         override fun organisasjonsnummer() = hendelse.organisasjonsnummer()
         override fun aktørId() = hendelse.aktørId()
         override fun fødselsnummer() = hendelse.fødselsnummer()

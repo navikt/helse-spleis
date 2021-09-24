@@ -623,16 +623,21 @@ internal class TestMessageFactory(
         )
     }
 
-    fun lagPåminnelse(vedtaksperiodeId: UUID, tilstand: TilstandType): String {
+    fun lagPåminnelse(
+        vedtaksperiodeId: UUID,
+        tilstand: TilstandType,
+        orgnummer: String = organisasjonsnummer,
+        tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now()
+    ): String {
         return nyHendelse(
             "påminnelse", mapOf(
                 "aktørId" to aktørId,
                 "fødselsnummer" to fødselsnummer,
-                "organisasjonsnummer" to organisasjonsnummer,
+                "organisasjonsnummer" to orgnummer,
                 "vedtaksperiodeId" to vedtaksperiodeId,
                 "tilstand" to tilstand.name,
                 "antallGangerPåminnet" to 0,
-                "tilstandsendringstidspunkt" to LocalDateTime.now(),
+                "tilstandsendringstidspunkt" to tilstandsendringstidspunkt,
                 "påminnelsestidspunkt" to LocalDateTime.now(),
                 "nestePåminnelsestidspunkt" to LocalDateTime.now()
             )

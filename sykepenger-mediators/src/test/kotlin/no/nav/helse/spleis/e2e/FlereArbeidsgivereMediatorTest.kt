@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.person.TilstandType
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.testhelpers.januar
 import no.nav.inntektsmeldingkontrakt.Periode
@@ -7,7 +8,6 @@ import no.nav.syfo.kafka.felles.InntektskildeDTO
 import no.nav.syfo.kafka.felles.InntektskildetypeDTO
 import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*
@@ -269,9 +269,8 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
         )
     }
 
-    @Disabled("Wip test")
     @Test
-    fun `sender riktig orgnummer til for alle arbeidsgivere i trenger_ikke_inntektsmelding ved forkasting av vedtaksperiode kanskje muligens under tvil`() {
+    fun `sender riktig orgnummer i trenger_ikke_inntektsmelding for arbeidsgiveren som venter på inntektsmelding`() {
         val a1 = "arbeidsgiver 1"
         val a2 = "arbeidsgiver 2"
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100), orgnummer = a1)
@@ -286,10 +285,33 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
         )
 
         val melding = testRapid.inspektør.meldinger("trenger_ikke_inntektsmelding")
-        val meldingOrgnummer = melding.first()["organisasjonsnummer"].asText()
-        val meldingVedtaksperiodeId = UUID.fromString(melding.first()["vedtaksperiodeId"].asText())
+        val orgnumre = melding.map { it["organisasjonsnummer"].asText() }.sorted()
+        val vedtaksperiodeIder = melding.map { UUID.fromString(it["vedtaksperiodeId"].asText()) }.sorted()
 
-        assertEquals(testRapid.inspektør.vedtaksperiodeId(0), meldingVedtaksperiodeId)
-        assertEquals("arbeidsgiver 1", meldingOrgnummer)
+        assertEquals(listOf("arbeidsgiver 1"), orgnumre)
+        assertEquals(listOf(testRapid.inspektør.vedtaksperiodeId(0)), vedtaksperiodeIder)
+    }
+
+    @Test
+    fun `sender riktig orgnummer i trenger_ikke_inntektsmelding for alle arbeidsgivere som venter på inntektsmelding`() {
+        val a1 = "arbeidsgiver 1"
+        val a2 = "arbeidsgiver 2"
+        sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100), orgnummer = a1)
+        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)), orgnummer = a1)
+        sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100), orgnummer = a2)
+        sendSøknad(1, listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)), orgnummer = a2)
+        sendNyPåminnelse(
+            vedtaksperiodeIndeks = 0,
+            orgnummer = a1,
+            tilstandsendringstidspunkt = LocalDateTime.MIN,
+            tilstandType = TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP
+        )
+
+        val melding = testRapid.inspektør.meldinger("trenger_ikke_inntektsmelding")
+        val orgnumre = melding.map { it["organisasjonsnummer"].asText() }.sorted()
+        val vedtaksperiodeIder = melding.map { UUID.fromString(it["vedtaksperiodeId"].asText()) }.sorted()
+
+        assertEquals(listOf(testRapid.inspektør.vedtaksperiodeId(0), testRapid.inspektør.vedtaksperiodeId(1)).sorted(), vedtaksperiodeIder)
+        assertEquals(listOf("arbeidsgiver 1", "arbeidsgiver 2").sorted(), orgnumre)
     }
 }

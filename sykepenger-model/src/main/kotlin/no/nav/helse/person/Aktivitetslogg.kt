@@ -101,14 +101,26 @@ class Aktivitetslogg(
 
     override fun kontekster() =
         aktiviteter
-            .groupBy { it.kontekst(listOf("Person", "Arbeidsgiver", "Vedtaksperiode")) }
+            .groupBy { it.kontekst(null) }
             .map { Aktivitetslogg(this).apply { aktiviteter.addAll(it.value) } }
+
+    override fun hendelseskontekster(): Map<String, String> {
+        return kontekster
+            .map(Aktivitetskontekst::toSpesifikkKontekst)
+            .filter { it.kontekstType in MODELL_KONTEKSTER }
+            .map(SpesifikkKontekst::kontekstMap)
+            .fold(mapOf()) { result, kontekst -> result + kontekst }
+    }
 
     private fun info() = Aktivitet.Info.filter(aktiviteter)
     internal fun warn() = Aktivitet.Warn.filter(aktiviteter)
     override fun behov() = Behov.filter(aktiviteter)
     private fun error() = Aktivitet.Error.filter(aktiviteter)
     private fun severe() = Aktivitet.Severe.filter(aktiviteter)
+
+    companion object {
+        private val MODELL_KONTEKSTER: Array<String> = arrayOf("Person", "Arbeidsgiver", "Vedtaksperiode")
+    }
 
     class AktivitetException internal constructor(private val aktivitetslogg: Aktivitetslogg) :
         RuntimeException(aktivitetslogg.toString()) {
@@ -131,12 +143,11 @@ class Aktivitetslogg(
             private val tidsstempelformat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
         }
 
-        fun kontekst(): Map<String, String> = kontekst(emptyList())
+        fun kontekst(): Map<String, String> = kontekst(null)
 
-        internal fun kontekst(typer: List<String>): Map<String, String> =
-            kontekster
-                .let { if (typer.isEmpty()) it else it.filter { kontekst -> kontekst.kontekstType in typer } }
-                .fold(mutableMapOf()) { result, kontekst -> result.apply { putAll(kontekst.kontekstMap) } }
+        internal fun kontekst(typer: Array<String>?): Map<String, String> = kontekster
+            .filter { typer == null || it.kontekstType in typer }
+            .fold(mapOf()) { result, kontekst -> result + kontekst.kontekstMap }
 
         override fun compareTo(other: Aktivitet) = this.tidsstempel.compareTo(other.tidsstempel)
             .let { if (it == 0) other.alvorlighetsgrad.compareTo(this.alvorlighetsgrad) else it }
@@ -486,6 +497,7 @@ interface IAktivitetslogg {
     fun kontekst(kontekst: Aktivitetskontekst)
     fun kontekst(person: Person)
     fun kontekster(): List<IAktivitetslogg>
+    fun hendelseskontekster(): Map<String, String>
     fun toMap(): Map<String, List<Map<String, Any>>>
     val etterlevelse: Etterlevelse
 }

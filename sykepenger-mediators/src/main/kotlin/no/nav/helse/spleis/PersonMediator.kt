@@ -7,7 +7,10 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.Påminnelse
-import no.nav.helse.person.*
+import no.nav.helse.person.Person
+import no.nav.helse.person.PersonHendelse
+import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.TilstandType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.db.HendelseRepository
@@ -309,11 +312,7 @@ internal class PersonMediator(
         this["@id"] = UUID.randomUUID()
         this["@opprettet"] = LocalDateTime.now()
         this["@forårsaket_av"] = message.tracinginfo()
-        this["aktørId"] = hendelse.aktørId()
-        this["fødselsnummer"] = hendelse.fødselsnummer()
-        if (hendelse is ArbeidstakerHendelse) {
-            this["organisasjonsnummer"] = hendelse.organisasjonsnummer()
-        }
+        hendelse.hendelseskontekster().forEach(this::set)
     }
 
     private fun queueMessage(eventName: String, outgoingMessage: JsonMessage) {
