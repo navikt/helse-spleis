@@ -8,6 +8,7 @@ import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
+import io.ktor.util.pipeline.*
 import no.nav.helse.person.Person
 import no.nav.helse.serde.api.PersonDTO
 import no.nav.helse.serde.api.hendelseReferanserForPerson
@@ -51,11 +52,9 @@ internal fun Application.spannerApi(dataSource: DataSource, authProviderName: St
     routing {
         authenticate(authProviderName) {
             get("/api/person-json") {
-                val fnr = call.request.header("fnr")?.toLong()
-                    ?: call.request.header("aktorId")?.toLong()?.let(personDao::hentFødselsnummer)
-                    ?: throw BadRequestException("Mangler fnr eller aktorId i headers")
+                val fnr = fnr(personDao)
 
-                val person = personDao.hentPersonFraFnr(fnr) ?: throw NotFoundException("Kunne ikke finne person")
+                val person = personDao.hentPersonFraFnr(fnr) ?: throw NotFoundException("Kunne ikke finne person for fødselsnummer")
 
                 call.respond(person.deserialize { hendelseDao.hentAlleHendelser(fnr) }.serialize().json)
             }
@@ -65,18 +64,27 @@ internal fun Application.spannerApi(dataSource: DataSource, authProviderName: St
 
                 val meldingsReferanse = try {
                     UUID.fromString(hendelseId)
-                } catch(e:IllegalArgumentException) {
+                } catch (e: IllegalArgumentException) {
                     throw BadRequestException("meldingsreferanse bør/skal være en UUID")
                 }
 
-                val hendelse = hendelseDao.hentHendelse(meldingsReferanse) ?:
-                    throw NotFoundException("Kunne ikke finne hendelse for hendelsereferanse = ${hendelseId}")
+                val hendelse =
+                    hendelseDao.hentHendelse(meldingsReferanse) ?: throw NotFoundException("Kunne ikke finne hendelse for hendelsereferanse = ${hendelseId}")
 
 
                 call.respondText(hendelse, ContentType.Application.Json)
             }
         }
     }
+}
+
+private fun PipelineContext<Unit, ApplicationCall>.fnr(personDao: PersonDao): Long {
+    val fnr = call.request.header("fnr")?.toLong()
+    if (fnr != null) {
+        return fnr
+    }
+    val aktorid = call.request.header("aktorId")?.toLong() ?: throw BadRequestException("Mangler fnr eller aktorId i headers")
+    return personDao.hentFødselsnummer(aktorid) ?: throw NotFoundException("Fant ikke aktør-ID")
 }
 
 private fun håndterPerson(person: Person, hendelseDao: HendelseDao): PersonDTO {
