@@ -525,8 +525,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     protected fun håndterOverstyring(
         inntekt: Inntekt = 31000.månedlig,
         orgnummer: String = ORGNUMMER,
-        skjæringstidspunkt: LocalDate,
-        ident: String
+        skjæringstidspunkt: LocalDate
     ) {
         OverstyrInntekt(
             meldingsreferanseId = UUID.randomUUID(),
@@ -534,8 +533,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             aktørId = AKTØRID,
             organisasjonsnummer = orgnummer,
             inntekt = inntekt,
-            skjæringstidspunkt = skjæringstidspunkt,
-            ident = ident
+            skjæringstidspunkt = skjæringstidspunkt
         ).håndter(Person::håndter)
     }
 

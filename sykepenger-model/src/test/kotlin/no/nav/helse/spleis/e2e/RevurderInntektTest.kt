@@ -35,7 +35,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
 
         val tidligereInntektInnslagId = inspektør.inntektInspektør.sisteInnslag?.innslagId
 
-        håndterOverstyring(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar, ident = "N123456")
+        håndterOverstyring(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -81,14 +81,14 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     @Test
     fun `revurder inntekt flere ganger`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
-        håndterOverstyring(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar, ident = "N123456")
+        håndterOverstyring(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar)
 
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode)
 
-        håndterOverstyring(inntekt = 31000.månedlig, skjæringstidspunkt = 1.januar, ident = "N123456")
+        håndterOverstyring(inntekt = 31000.månedlig, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -106,7 +106,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     @Test
     fun `revurder inntekt ukjent skjæringstidspunkt`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
-        håndterOverstyring(inntekt = 32000.månedlig, skjæringstidspunkt = 2.januar, ident = "N123456")
+        håndterOverstyring(inntekt = 32000.månedlig, skjæringstidspunkt = 2.januar)
 
         assertTilstander(
             0,
@@ -130,7 +130,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
         nyttVedtak(1.mars, 31.mars, 100.prosent)
 
-        håndterOverstyring(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar, ident = "N123456")
+        håndterOverstyring(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar)
 
         assertTilstander(
             0,
@@ -178,7 +178,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt(2.vedtaksperiode)
 
-        håndterOverstyring(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar, ident = "N123456")
+        håndterOverstyring(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar)
 
         håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
@@ -242,7 +242,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt(2.vedtaksperiode)
 
-        håndterOverstyring(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar, ident = "N123456")
+        håndterOverstyring(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar)
 
         assertTilstander(
             0,
@@ -276,7 +276,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     @Test
     fun `revurder inntekt avvik over 25 prosent reduksjon`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
-        håndterOverstyring(inntekt = 7000.månedlig, skjæringstidspunkt = 1.januar, ident = "N123456")
+        håndterOverstyring(inntekt = 7000.månedlig, skjæringstidspunkt = 1.januar)
 
         assertTilstander(
             0,
@@ -301,7 +301,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     @Test
     fun `revurder inntekt avvik over 25 prosent økning`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
-        håndterOverstyring(inntekt = 70000.månedlig, skjæringstidspunkt = 1.januar, ident = "N123456")
+        håndterOverstyring(inntekt = 70000.månedlig, skjæringstidspunkt = 1.januar)
 
         assertTilstander(
             0,
@@ -326,7 +326,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     @Test
     fun `revurder inntekt ny inntekt under en halv G`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
-        håndterOverstyring(inntekt = 3000.månedlig, skjæringstidspunkt = 1.januar, ident = "N123456")
+        håndterOverstyring(inntekt = 3000.månedlig, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
@@ -383,7 +383,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode)
 
         forlengVedtak(1.juli(2020), 30.juli(2020))
-        håndterOverstyring(inntekt = 35000.månedlig, skjæringstidspunkt = 18.mars(2020), ident = "N123456")
+        håndterOverstyring(inntekt = 35000.månedlig, skjæringstidspunkt = 18.mars(2020))
 
         assertTilstander(
             0,
@@ -439,7 +439,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
         forlengVedtak(1.februar, 28.februar)
 
-        håndterOverstyring(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar, ident = "N123456")
+        håndterOverstyring(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar)
 
         håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)

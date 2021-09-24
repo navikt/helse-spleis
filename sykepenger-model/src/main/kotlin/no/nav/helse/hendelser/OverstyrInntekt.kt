@@ -14,8 +14,7 @@ class OverstyrInntekt(
     private val aktørId: String,
     private val organisasjonsnummer: String,
     internal val inntekt: Inntekt,
-    internal val skjæringstidspunkt: LocalDate,
-    internal val ident: String
+    internal val skjæringstidspunkt: LocalDate
 ) : ArbeidstakerHendelse(meldingsreferanseId) {
 
     override fun aktørId() = aktørId

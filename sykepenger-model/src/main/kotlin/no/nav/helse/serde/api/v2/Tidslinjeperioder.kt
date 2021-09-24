@@ -156,7 +156,6 @@ internal class Tidslinjeperioder(
             gjenståendeSykedager = utbetaling.gjenståendeSykedager,
             forbrukteSykedager = utbetaling.forbrukteSykedager,
             utbetalingDTO = utbetaling.toDTO(),
-            inntektshistorikkId = tidslinjeberegning.inntektshistorikkId,
             vilkårsgrunnlagshistorikkId = tidslinjeberegning.vilkårsgrunnlagshistorikkId
         )
     }

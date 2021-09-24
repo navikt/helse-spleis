@@ -29,7 +29,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
 
         assertInntektForDato(INNTEKT, fom, inspektør)
 
-        håndterOverstyring(inntekt = overstyrtInntekt, orgnummer = ORGNUMMER, skjæringstidspunkt = fom, ident = "a123456")
+        håndterOverstyring(inntekt = overstyrtInntekt, orgnummer = ORGNUMMER, skjæringstidspunkt = fom)
 
         assertTilstander(1.vedtaksperiode,
             TilstandType.START,
@@ -72,7 +72,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         val overstyrtInntekt = INNTEKT*1.40
         tilGodkjenning(fom, 31.januar(2021), 100.prosent, fom)
 
-        håndterOverstyring(inntekt = overstyrtInntekt, orgnummer = ORGNUMMER, skjæringstidspunkt = fom, ident = "a123456")
+        håndterOverstyring(inntekt = overstyrtInntekt, orgnummer = ORGNUMMER, skjæringstidspunkt = fom)
 
         håndterVilkårsgrunnlag(1.vedtaksperiode)
 

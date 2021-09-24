@@ -22,8 +22,8 @@ import kotlin.reflect.KClass
 
 internal class TestArbeidsgiverInspektør(
     private val person: Person,
-    private val orgnummer: String
-) : ArbeidsgiverVisitor {
+    val orgnummer: String
+) : ArbeidsgiverVisitor, VilkårsgrunnlagHistorikkVisitor {
     internal var vedtaksperiodeTeller: Int = 0
         private set
     private var vedtaksperiodeindeks = 0
@@ -71,6 +71,9 @@ internal class TestArbeidsgiverInspektør(
     internal val vilkårsgrunnlagHistorikk: MutableList<Pair<LocalDate, VilkårsgrunnlagHistorikk.Grunnlagsdata>>
     internal var warnings: List<String>
     private var personInspektør: HentAktivitetslogg
+
+    private val vilkårsgrunnlagHistorikkInnslag: MutableList<InnslagId> = mutableListOf()
+    internal fun vilkårsgrunnlagHistorikkInnslag() = vilkårsgrunnlagHistorikkInnslag.sortedByDescending { it.timestamp }.toList()
 
     init {
         personInspektør = HentAktivitetslogg(person, orgnummer).also { results ->
@@ -144,6 +147,10 @@ internal class TestArbeidsgiverInspektør(
             inntektshistorikkInnslagId = inntektshistorikkInnslagId,
             vilkårsgrunnlagHistorikkInnslagId = vilkårsgrunnlagHistorikkInnslagId
         ))
+    }
+
+    override fun postVisitInnslag(innslag: VilkårsgrunnlagHistorikk.Innslag, id: UUID, opprettet: LocalDateTime) {
+        vilkårsgrunnlagHistorikkInnslag.add(InnslagId(id, opprettet))
     }
 
     override fun preVisitVedtaksperiode(
@@ -370,6 +377,8 @@ internal class TestArbeidsgiverInspektør(
             vedtaksperiodeId = id
         }
 
+
+
         override fun postVisitVedtaksperiode(
             vedtaksperiode: Vedtaksperiode,
             id: UUID,
@@ -525,5 +534,10 @@ internal class TestArbeidsgiverInspektør(
         val sykdomshistorikkElementId: UUID,
         val inntektshistorikkInnslagId: UUID,
         val vilkårsgrunnlagHistorikkInnslagId: UUID
+    )
+
+    internal data class InnslagId(
+        val id: UUID,
+        val timestamp: LocalDateTime
     )
 }

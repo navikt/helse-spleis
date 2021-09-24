@@ -89,7 +89,6 @@ internal data class BeregnetPeriode(
     val utbetalingDTO: UtbetalingDTO,
     val hendelser: List<HendelseDTO>,
     val simulering: SimuleringsdataDTO?,
-    val inntektshistorikkId: UUID,
     val vilkårsgrunnlagshistorikkId: UUID
     //Lookup for vilkår(beregningId, skjæringstidspunkt), inntektsgrunnlag(beregningId, skjæringstidspunkt)
 ) : Tidslinjeperiode {

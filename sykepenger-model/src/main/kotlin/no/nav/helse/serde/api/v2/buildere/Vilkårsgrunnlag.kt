@@ -12,7 +12,6 @@ import no.nav.helse.serde.api.InntektsgrunnlagDTO.ArbeidsgiverinntektDTO
 import no.nav.helse.serde.api.InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntekterFraAOrdningenDTO
 import no.nav.helse.serde.api.InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.*
 import no.nav.helse.serde.api.MedlemskapstatusDTO
-import no.nav.helse.serde.api.v2.buildere.ISammenligningsgrunnlag.Companion.finn
 import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -23,10 +22,11 @@ import kotlin.properties.Delegates
 private typealias VilkårsgrunnlagHistorikkId = UUID
 
 internal class IInnslag(
-    private val innslag: Map<LocalDate, IVilkårsgrunnlag>
-) {
+    private val innslag: Map<LocalDate, IVilkårsgrunnlag>) {
 
+    fun vilkårsgrunnlag(skjæringstidspunkt: LocalDate) = innslag[skjæringstidspunkt]
 }
+
 
 internal class ISykepengegrunnlag(
     val inntekterPerArbeidsgiver: List<ArbeidsgiverinntektDTO>,
@@ -46,7 +46,6 @@ internal interface IVilkårsgrunnlag {
     val skjæringstidspunkt: LocalDate
     val omregnetÅrsinntekt: Double?
     val sammenligningsgrunnlag: Double?
-    val maksUtbetalingPerDag: Double?
     val inntekter: List<ArbeidsgiverinntektDTO>
 }
 
@@ -54,8 +53,7 @@ internal class SpleisGrunnlag(
     override val skjæringstidspunkt: LocalDate,
     override val omregnetÅrsinntekt: Double?,
     override val sammenligningsgrunnlag: Double?,
-    override val maksUtbetalingPerDag: Double?,
-    override val inntekter: List<ArbeidsgiverinntektDTO>,
+    override val inntekter: List<ArbeidsgiverinntektDTO>, //TODO: Lag et nytt objekt
     val avviksprosent: Double?,
     val oppfyllerKravOmMinstelønn: Boolean?,
     val grunnbeløp: Int,
@@ -66,35 +64,8 @@ internal class InfotrygdGrunnlag(
     override val skjæringstidspunkt: LocalDate,
     override val omregnetÅrsinntekt: Double?,
     override val sammenligningsgrunnlag: Double?,
-    override val maksUtbetalingPerDag: Double?,
     override val inntekter: List<ArbeidsgiverinntektDTO>
 ) : IVilkårsgrunnlag
-
-
-class ISammenligningsgrunnlag(
-    private val organisasjonsnummer: String,
-    private val sammenligningsgrunnlag: Double,
-    private val grunnlagForISammenligningsgrunnlag: List<Pair<YearMonth, Double>>
-) {
-    companion object {
-        fun List<ISammenligningsgrunnlag>.finn(organisasjonsnummer: String) =
-            find { it.organisasjonsnummer == organisasjonsnummer }?.let { iSammenligningsgrunnlag ->
-                ArbeidsgiverinntektDTO.SammenligningsgrunnlagDTO(
-                    beløp = iSammenligningsgrunnlag.sammenligningsgrunnlag,
-                    inntekterFraAOrdningen = iSammenligningsgrunnlag.grunnlagForISammenligningsgrunnlag
-                        .map { ArbeidsgiverinntektDTO.SammenligningsgrunnlagDTO.InntekterFraAOrdningenDTO(it.first, it.second) }
-                )
-            }
-    }
-}
-
-class OppsamletSammenligningsgrunnlag() {
-    private val oppsamler = mutableMapOf<LocalDate, List<ISammenligningsgrunnlag>>()
-
-    fun sammenligningsgrunlag(skjæringstidspunkt: LocalDate, organisasjonsnummer: String) =
-        oppsamler[skjæringstidspunkt]?.finn(organisasjonsnummer)
-}
-
 
 internal class InntektBuilder(private val inntekt: Inntekt) {
     fun build(): IInntekt {
@@ -104,8 +75,10 @@ internal class InntektBuilder(private val inntekt: Inntekt) {
     }
 }
 
-
-internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk, private val sammenligningsgrunnlag: ISammenligningsgrunnlag) :
+internal class VilkårsgrunnlagBuilder(
+    vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
+    private val sammenligningsgrunnlagBuilder: OppsamletSammenligningsgrunnlagBuilder
+) :
     VilkårsgrunnlagHistorikkVisitor {
     private val historikk = mutableMapOf<VilkårsgrunnlagHistorikkId, IInnslag>()
 
@@ -113,11 +86,16 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
         vilkårsgrunnlagHistorikk.accept(this)
     }
 
+    fun generasjoner() = historikk.toMap()
+
     override fun preVisitInnslag(innslag: VilkårsgrunnlagHistorikk.Innslag, id: UUID, opprettet: LocalDateTime) {
-        historikk.putIfAbsent(id, InnslagBuilder(innslag, sammenligningsgrunnlag).build())
+        historikk.putIfAbsent(id, InnslagBuilder(innslag, sammenligningsgrunnlagBuilder).build())
     }
 
-    internal class InnslagBuilder(innslag: VilkårsgrunnlagHistorikk.Innslag, private val sammenligningsgrunnlag: ISammenligningsgrunnlag) : VilkårsgrunnlagHistorikkVisitor {
+    internal class InnslagBuilder(
+        innslag: VilkårsgrunnlagHistorikk.Innslag,
+        private val sammenligningsgrunnlagBuilder: OppsamletSammenligningsgrunnlagBuilder
+    ) : VilkårsgrunnlagHistorikkVisitor {
         private val vilkårsgrunnlag = mutableMapOf<LocalDate, IVilkårsgrunnlag>()
 
         init {
@@ -127,7 +105,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
         fun build() = IInnslag(vilkårsgrunnlag.toMap())
 
         override fun preVisitGrunnlagsdata(skjæringstidspunkt: LocalDate, grunnlagsdata: Grunnlagsdata) {
-            val sykepengegrunnlag = SykepengegrunnlagBuilder(grunnlagsdata.sykepengegrunnlag, sammenligningsgrunnlag).build()
+            val sykepengegrunnlag = SykepengegrunnlagBuilder(grunnlagsdata.sykepengegrunnlag, sammenligningsgrunnlagBuilder).build()
             val sammenligningsgrunnlag = InntektBuilder(grunnlagsdata.sammenligningsgrunnlag).build()
             val grunnbeløp = InntektBuilder(Grunnbeløp.`1G`.beløp(skjæringstidspunkt)).build()
             val avviksprosent = grunnlagsdata.avviksprosent?.prosent()
@@ -142,7 +120,6 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                     skjæringstidspunkt = skjæringstidspunkt,
                     omregnetÅrsinntekt = sykepengegrunnlag.omregnetÅrsinntekt,
                     sammenligningsgrunnlag = sammenligningsgrunnlag.årlig,
-                    maksUtbetalingPerDag = sykepengegrunnlag.maksUtbetalingPerDag,
                     inntekter = sykepengegrunnlag.inntekterPerArbeidsgiver,
                     avviksprosent = avviksprosent,
                     oppfyllerKravOmMinstelønn = grunnlagsdata.harOpptjening,
@@ -157,19 +134,21 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             skjæringstidspunkt: LocalDate,
             sykepengegrunnlag: Sykepengegrunnlag
         ) {
-            val sykepengegrunnlag = SykepengegrunnlagBuilder(sykepengegrunnlag, TODO()).build()
+            val byggetSykepengegrunnlag = SykepengegrunnlagBuilder(sykepengegrunnlag, sammenligningsgrunnlagBuilder).build()
             vilkårsgrunnlag.putIfAbsent(
                 skjæringstidspunkt, InfotrygdGrunnlag(
                     skjæringstidspunkt = skjæringstidspunkt,
-                    omregnetÅrsinntekt = sykepengegrunnlag.sykepengegrunnlag,
-                    sammenligningsgrunnlag = TODO(), // TOTALT for alle arbeidsgivere
-                    maksUtbetalingPerDag = null,
-                    inntekter = sykepengegrunnlag.inntekterPerArbeidsgiver
+                    omregnetÅrsinntekt = byggetSykepengegrunnlag.sykepengegrunnlag,
+                    sammenligningsgrunnlag = null,
+                    inntekter = byggetSykepengegrunnlag.inntekterPerArbeidsgiver
                 )
             )
         }
 
-        private class SykepengegrunnlagBuilder(sykepengegrunnlag: Sykepengegrunnlag, private val sammenligningsgrunnlag: ISammenligningsgrunnlag) :
+        private class SykepengegrunnlagBuilder(
+            sykepengegrunnlag: Sykepengegrunnlag,
+            private val sammenligningsgrunnlagBuilder: OppsamletSammenligningsgrunnlagBuilder
+        ) :
             VilkårsgrunnlagHistorikkVisitor {
             private val inntekterPerArbeidsgiver = mutableListOf<ArbeidsgiverinntektDTO>()
             private lateinit var sykepengegrunnlag: IInntekt
@@ -188,16 +167,15 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
 
             override fun preVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {
 
-                inntekterPerArbeidsgiver.add(InntektsopplysningBuilder(orgnummer, arbeidsgiverInntektsopplysning, sammenligningsgrunnlag).build())
+                inntekterPerArbeidsgiver.add(InntektsopplysningBuilder(orgnummer, arbeidsgiverInntektsopplysning, sammenligningsgrunnlagBuilder).build())
             }
         }
-
 
 
         private class InntektsopplysningBuilder(
             private val organisasjonsnummer: String,
             inntektsopplysning: ArbeidsgiverInntektsopplysning,
-            private val isammenligningsgrunnlag: ISammenligningsgrunnlag,
+            private val sammenligningsgrunnlagBuilder: OppsamletSammenligningsgrunnlagBuilder
         ) : VilkårsgrunnlagHistorikkVisitor {
             private lateinit var inntekt: ArbeidsgiverinntektDTO
 
@@ -210,17 +188,17 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             private fun nyArbeidsgiverInntekt(
                 kilde: ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO,
                 inntekt: IInntekt,
-                inntekterFraAOrdningenDTO: List<InntekterFraAOrdningenDTO>? = null
+                skjæringstidspunkt: LocalDate,
+                inntekterFraAOrdningenDTO: List<InntekterFraAOrdningenDTO>? = null,
             ) = ArbeidsgiverinntektDTO(
                 organisasjonsnummer,
                 ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO(kilde, inntekt.årlig, inntekt.månedlig, inntekterFraAOrdningenDTO),
-                TODO()
-                // TODO: Her skal vi ha sammenligningsgrunnlag for _denne_ arbeidsgiveren
+                sammenligningsgrunnlag = sammenligningsgrunnlagBuilder.sammenligningsgrunnlag(organisasjonsnummer, skjæringstidspunkt)
             )
 
             override fun visitInfotrygd(infotrygd: Infotrygd, dato: LocalDate, hendelseId: UUID, beløp: Inntekt, tidsstempel: LocalDateTime) {
                 val inntekt = InntektBuilder(beløp).build()
-                this.inntekt = nyArbeidsgiverInntekt(Infotrygd, inntekt)
+                this.inntekt = nyArbeidsgiverInntekt(Infotrygd, inntekt, dato)
             }
 
             override fun visitSaksbehandler(
@@ -231,7 +209,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                 tidsstempel: LocalDateTime
             ) {
                 val inntekt = InntektBuilder(beløp).build()
-                this.inntekt = nyArbeidsgiverInntekt(Saksbehandler, inntekt)
+                this.inntekt = nyArbeidsgiverInntekt(Saksbehandler, inntekt, dato)
             }
 
             override fun visitInntektsmelding(
@@ -242,12 +220,12 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                 tidsstempel: LocalDateTime
             ) {
                 val inntekt = InntektBuilder(beløp).build()
-                this.inntekt = nyArbeidsgiverInntekt(Inntektsmelding, inntekt)
+                this.inntekt = nyArbeidsgiverInntekt(Inntektsmelding, inntekt, dato)
             }
 
             override fun preVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID, dato: LocalDate) {
                 val (inntekt, inntekterFraAOrdningenDTO) = SkattBuilder(skattComposite).build()
-                this.inntekt = nyArbeidsgiverInntekt(AOrdningen, inntekt, inntekterFraAOrdningenDTO)
+                this.inntekt = nyArbeidsgiverInntekt(AOrdningen, inntekt, dato, inntekterFraAOrdningenDTO)
             }
 
             private class SkattBuilder(skattComposite: Inntektshistorikk.SkattComposite) : VilkårsgrunnlagHistorikkVisitor {
