@@ -28,7 +28,7 @@ internal class OppsamletSammenligningsgrunnlagBuilderTest : AbstractEndToEndTest
     private val inntekt = primitivInntekt.månedlig
 
     @Test
-    fun happycase() {
+    fun `har sammenligningsgrunnlag for enkel periode`() {
         nyttVedtak(1.januar, 31.januar) {
             lagInntektperioder(fom = 1.januar, inntekt = inntekt)
         }
@@ -37,7 +37,7 @@ internal class OppsamletSammenligningsgrunnlagBuilderTest : AbstractEndToEndTest
     }
 
     @Test
-    fun `overgang fra Infotrygd`() {
+    fun `har ikke sammenligningsgrunnlag etter overgang fra Infotrygd`() {
         val skjæringstidspunkt = 1.desember(2017)
         val infotrygdperioder = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, skjæringstidspunkt, 31.desember(2017), 100.prosent, inntekt))
         val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, skjæringstidspunkt, inntekt, true))
@@ -52,7 +52,7 @@ internal class OppsamletSammenligningsgrunnlagBuilderTest : AbstractEndToEndTest
     }
 
     @Test
-    fun `flere AG`() {
+    fun `har sammenligningsgrunnlag for alle arbeidsgivere`() {
         nyeVedtak(1.januar, 31.januar, AG1, AG2) {
             lagInntektperioder(fom = 1.januar, inntekt = 20000.månedlig, orgnummer = AG1)
             lagInntektperioder(fom = 1.januar, inntekt = 20000.månedlig, orgnummer = AG2)
@@ -63,7 +63,6 @@ internal class OppsamletSammenligningsgrunnlagBuilderTest : AbstractEndToEndTest
 
         assertInntekter(grunnlagAg1, 1.januar(2017), 31.desember(2017), 20000.0, 240000.0)
         assertInntekter(grunnlagAg2, 1.januar(2017), 31.desember(2017), 20000.0, 240000.0)
-
     }
 
     private fun assertInntekter(
