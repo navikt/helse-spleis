@@ -4,7 +4,6 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.serde.api.InntektsgrunnlagDTO
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
@@ -12,8 +11,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.YearMonth
 
 internal class OppsamletSammenligningsgrunnlagBuilderTest : AbstractEndToEndTest() {
 
@@ -32,8 +29,7 @@ internal class OppsamletSammenligningsgrunnlagBuilderTest : AbstractEndToEndTest
         nyttVedtak(1.januar, 31.januar) {
             lagInntektperioder(fom = 1.januar, inntekt = inntekt)
         }
-        val sammenligningsgrunnlag = grunnlag.sammenligningsgrunnlag(ORGNUMMER, 1.januar)
-        assertInntekter(sammenligningsgrunnlag, 1.januar(2017), 31.desember(2017), 40000.0, 480000.0)
+        assertEquals(480000.0, grunnlag.sammenligningsgrunnlag(ORGNUMMER, 1.januar))
     }
 
     @Test
@@ -58,34 +54,7 @@ internal class OppsamletSammenligningsgrunnlagBuilderTest : AbstractEndToEndTest
             lagInntektperioder(fom = 1.januar, inntekt = 20000.månedlig, orgnummer = AG2)
         }
 
-        val grunnlagAg1 = grunnlag.sammenligningsgrunnlag(AG1, 1.januar)
-        val grunnlagAg2 = grunnlag.sammenligningsgrunnlag(AG2, 1.januar)
-
-        assertInntekter(grunnlagAg1, 1.januar(2017), 31.desember(2017), 20000.0, 240000.0)
-        assertInntekter(grunnlagAg2, 1.januar(2017), 31.desember(2017), 20000.0, 240000.0)
-    }
-
-    private fun assertInntekter(
-        actualSammenligningsgrunnlag: Sammenligningsgrunnlag?,
-        fom: LocalDate,
-        tom: LocalDate,
-        inntekt: Double,
-        expectedSammenligningsgrunnlag: Double,
-    ) {
-        requireNotNull(actualSammenligningsgrunnlag) { "Forventet at vi har et sammenligningsgrunnlag" }
-        actualSammenligningsgrunnlag.inntekterFraAOrdningen.containsAll(expectedInntekterFraAOrdningen(fom, tom, inntekt))
-        assertEquals(expectedSammenligningsgrunnlag, actualSammenligningsgrunnlag.beløp)
-    }
-
-    private fun expectedInntekterFraAOrdningen(
-        fom: LocalDate,
-        tom: LocalDate,
-        inntekt: Double
-    ): List<InntekterFraAOrdningen> {
-        val måneder = mutableSetOf<YearMonth>()
-        fom.datesUntil(tom.plusDays(1)).forEach {
-            måneder.add(YearMonth.from(it))
-        }
-        return måneder.map { InntekterFraAOrdningen(it, inntekt) }
+        assertEquals(240000.0, grunnlag.sammenligningsgrunnlag(AG1, 1.januar))
+        assertEquals(240000.0, grunnlag.sammenligningsgrunnlag(AG2, 1.januar))
     }
 }

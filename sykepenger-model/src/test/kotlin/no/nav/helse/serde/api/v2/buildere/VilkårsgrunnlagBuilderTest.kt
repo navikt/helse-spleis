@@ -7,8 +7,6 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.serde.api.InntektsgrunnlagDTO
-import no.nav.helse.serde.api.InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.*
 import no.nav.helse.serde.api.MedlemskapstatusDTO
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.testhelpers.desember
@@ -83,10 +81,10 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
 
         assertEquals(2, vilkårsgrunnlag.inntekter.size)
         val inntektAg1 = vilkårsgrunnlag.inntekter.first { it.arbeidsgiver == AG1 }
-        assertEquals(228000.0, inntektAg1.sammenligningsgrunnlag?.beløp)
+        assertEquals(228000.0, inntektAg1.sammenligningsgrunnlag)
 
         val inntektAg2 = vilkårsgrunnlag.inntekter.first { it.arbeidsgiver == AG2 }
-        assertEquals(252000.0, inntektAg2.sammenligningsgrunnlag?.beløp)
+        assertEquals(252000.0, inntektAg2.sammenligningsgrunnlag)
     }
 
 
@@ -106,14 +104,14 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         assertSpleisVilkårsprøving(førsteGenerasjon, 372000.0, 93634, true, 0.0, MedlemskapstatusDTO.JA, 372000.0, 1.januar)
         assertEquals(1, førsteGenerasjon.inntekter.size)
         val inntekt = førsteGenerasjon.inntekter.first()
-        assertEquals(372000.0, inntekt.sammenligningsgrunnlag?.beløp)
+        assertEquals(372000.0, inntekt.sammenligningsgrunnlag)
         assertEquals(372000.0, inntekt.omregnetÅrsinntekt?.beløp)
 
         val andreGenerasjon = requireNotNull(generasjoner[innslag.first().id]?.vilkårsgrunnlagSpleis(1.januar))
         assertSpleisVilkårsprøving(andreGenerasjon, 372000.0, 93634, true, 12.9, MedlemskapstatusDTO.JA, 420000.0, 1.januar)
         assertEquals(1, andreGenerasjon.inntekter.size)
         val inntekt2 = andreGenerasjon.inntekter.first()
-        assertEquals(372000.0, inntekt2.sammenligningsgrunnlag?.beløp)
+        assertEquals(372000.0, inntekt2.sammenligningsgrunnlag)
         assertEquals(420000.0, inntekt2.omregnetÅrsinntekt?.beløp)
     }
 
@@ -198,6 +196,8 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         assertInntekt(inntekt, ORGNUMMER, null, 480000.0, Inntektkilde.Infotrygd, primitivInntekt, false)
     }
 
+    @Test
+    fun `ghosts`() {}
 
     private fun assertInfotrygdVilkårsprøving(
         vilkårsgrunnlag: InfotrygdGrunnlag,
@@ -235,7 +235,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         kilde: Inntektkilde,
         månedsbeløp: Double
     ) {
-        assertEquals(sammenligningsgrunnlag, inntekt.sammenligningsgrunnlag?.beløp)
+        assertEquals(sammenligningsgrunnlag, inntekt.sammenligningsgrunnlag)
         assertEquals(omregnetÅrsinntektBeløp, inntekt.omregnetÅrsinntekt?.beløp)
         assertEquals(kilde, inntekt.omregnetÅrsinntekt?.kilde)
         assertEquals(månedsbeløp, inntekt.omregnetÅrsinntekt?.månedsbeløp)
@@ -251,7 +251,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         harInntektFraAOrdningen: Boolean
     ) {
         assertEquals(orgnummer, inntekt.arbeidsgiver)
-        assertEquals(sammenligningsgrunnlag, inntekt.sammenligningsgrunnlag?.beløp)
+        assertEquals(sammenligningsgrunnlag, inntekt.sammenligningsgrunnlag)
         assertEquals(omregnetÅrsinntekt, inntekt.omregnetÅrsinntekt?.beløp)
         assertEquals(inntektskilde, inntekt.omregnetÅrsinntekt?.kilde)
         assertEquals(omregnetÅrsinntektMånedsbeløp, inntekt.omregnetÅrsinntekt?.månedsbeløp)

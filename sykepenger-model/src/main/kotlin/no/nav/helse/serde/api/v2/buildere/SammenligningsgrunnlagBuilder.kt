@@ -5,7 +5,6 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.InntekthistorikkVisitor
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.PersonVisitor
-import no.nav.helse.serde.api.InntektsgrunnlagDTO
 import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -28,7 +27,7 @@ internal class OppsamletSammenligningsgrunnlagBuilder(person: Person) : PersonVi
     }
 
     private class NyesteInnslag(
-        private val sammenligningsgrunnlagDTO: Map<LocalDate, Sammenligningsgrunnlag>
+        private val sammenligningsgrunnlagDTO: Map<LocalDate, Double>
     ) {
         fun sammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =
             sammenligningsgrunnlagDTO[skjæringstidspunkt]
@@ -54,7 +53,7 @@ internal class OppsamletSammenligningsgrunnlagBuilder(person: Person) : PersonVi
     }
 
     private class InntektsopplysningBuilder(innslag: Inntektshistorikk.Innslag) : InntekthistorikkVisitor {
-        private val akkumulator = mutableMapOf<LocalDate, Sammenligningsgrunnlag>()
+        private val akkumulator = mutableMapOf<LocalDate, Double>()
 
         init {
             innslag.accept(this)
@@ -64,12 +63,7 @@ internal class OppsamletSammenligningsgrunnlagBuilder(person: Person) : PersonVi
 
         override fun preVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID, dato: LocalDate) {
             skattComposite.sammenligningsgrunnlag()?.let {
-                akkumulator.put(
-                    dato, Sammenligningsgrunnlag(
-                        beløp = InntektBuilder(it).build().årlig,
-                        inntekterFraAOrdningen = InntekterFraAOrdningenBuilder(skattComposite).build()
-                    )
-                )
+                akkumulator.put(dato, InntektBuilder(it).build().årlig)
             }
         }
     }
@@ -104,7 +98,7 @@ internal class OppsamletSammenligningsgrunnlagBuilder(person: Person) : PersonVi
 internal data class Arbeidsgiverinntekt(
     val arbeidsgiver: String,
     val omregnetÅrsinntekt: OmregnetÅrsinntekt?,
-    val sammenligningsgrunnlag: Sammenligningsgrunnlag? = null
+    val sammenligningsgrunnlag: Double? = null
 )
 
 internal data class OmregnetÅrsinntekt(
@@ -117,11 +111,6 @@ internal data class OmregnetÅrsinntekt(
 internal enum class Inntektkilde {
     Saksbehandler, Inntektsmelding, Infotrygd, AOrdningen
 }
-
-internal data class Sammenligningsgrunnlag(
-    val beløp: Double,
-    val inntekterFraAOrdningen: List<InntekterFraAOrdningen>
-)
 
 internal data class InntekterFraAOrdningen(
     val måned: YearMonth,
