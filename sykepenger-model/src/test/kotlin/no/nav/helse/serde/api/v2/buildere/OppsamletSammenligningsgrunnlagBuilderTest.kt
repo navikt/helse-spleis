@@ -66,26 +66,26 @@ internal class OppsamletSammenligningsgrunnlagBuilderTest : AbstractEndToEndTest
     }
 
     private fun assertInntekter(
-        actualSammenligningsgrunnlagDto: InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.SammenligningsgrunnlagDTO?,
+        actualSammenligningsgrunnlag: Sammenligningsgrunnlag?,
         fom: LocalDate,
         tom: LocalDate,
         inntekt: Double,
         expectedSammenligningsgrunnlag: Double,
     ) {
-        requireNotNull(actualSammenligningsgrunnlagDto) { "Forventet at vi har et sammenligningsgrunnlag" }
-        actualSammenligningsgrunnlagDto.inntekterFraAOrdningen.containsAll(expectedInntekterFraAOrdningen(fom, tom, inntekt))
-        assertEquals(expectedSammenligningsgrunnlag, actualSammenligningsgrunnlagDto.beløp)
+        requireNotNull(actualSammenligningsgrunnlag) { "Forventet at vi har et sammenligningsgrunnlag" }
+        actualSammenligningsgrunnlag.inntekterFraAOrdningen.containsAll(expectedInntekterFraAOrdningen(fom, tom, inntekt))
+        assertEquals(expectedSammenligningsgrunnlag, actualSammenligningsgrunnlag.beløp)
     }
 
     private fun expectedInntekterFraAOrdningen(
         fom: LocalDate,
         tom: LocalDate,
         inntekt: Double
-    ): List<InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.SammenligningsgrunnlagDTO.InntekterFraAOrdningenDTO> {
+    ): List<InntekterFraAOrdningen> {
         val måneder = mutableSetOf<YearMonth>()
         fom.datesUntil(tom.plusDays(1)).forEach {
             måneder.add(YearMonth.from(it))
         }
-        return måneder.map { InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.SammenligningsgrunnlagDTO.InntekterFraAOrdningenDTO(it, inntekt) }
+        return måneder.map { InntekterFraAOrdningen(it, inntekt) }
     }
 }

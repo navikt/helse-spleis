@@ -12,6 +12,7 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
+// Samler opp hver arbeidsgivers siste generasjon av sammenligningsgrunnlag per skjæringstidspunkt
 internal class OppsamletSammenligningsgrunnlagBuilder(person: Person) : PersonVisitor {
     private val akkumulator: MutableMap<String, NyesteInnslag> = mutableMapOf()
 
@@ -19,85 +20,113 @@ internal class OppsamletSammenligningsgrunnlagBuilder(person: Person) : PersonVi
         person.accept(this)
     }
 
+    internal fun sammenligningsgrunnlag(organisasjonsnummer: String, skjæringstidspunkt: LocalDate) =
+        akkumulator[organisasjonsnummer]?.sammenligningsgrunnlag(skjæringstidspunkt)
+
     override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
         SammenligningsgrunnlagBuilder(arbeidsgiver).build()?.let { akkumulator[organisasjonsnummer] = it }
     }
 
-    internal fun sammenligningsgrunnlag(organisasjonsnummer: String, skjæringstidspunkt: LocalDate) =
-        akkumulator[organisasjonsnummer]?.sammenligningsgrunnlag(skjæringstidspunkt)
-}
-
-internal class NyesteInnslag(
-    private val sammenligningsgrunnlagDTO: Map<LocalDate, InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.SammenligningsgrunnlagDTO>
-) {
-    fun sammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =
-        sammenligningsgrunnlagDTO[skjæringstidspunkt]
-}
-
-internal class SammenligningsgrunnlagBuilder(arbeidsgiver: Arbeidsgiver) : ArbeidsgiverVisitor {
-
-    private var nyesteInnslag: NyesteInnslag? = null
-
-    init {
-        arbeidsgiver.accept(this)
-
+    private class NyesteInnslag(
+        private val sammenligningsgrunnlagDTO: Map<LocalDate, Sammenligningsgrunnlag>
+    ) {
+        fun sammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =
+            sammenligningsgrunnlagDTO[skjæringstidspunkt]
     }
 
-    override fun preVisitInnslag(innslag: Inntektshistorikk.Innslag, id: UUID) {
-        if (nyesteInnslag != null) return
-        nyesteInnslag = NyesteInnslag(
-            InntektsopplysningBuilder(innslag).build()
-        )
+    private class SammenligningsgrunnlagBuilder(arbeidsgiver: Arbeidsgiver) : ArbeidsgiverVisitor {
+
+        private var nyesteInnslag: NyesteInnslag? = null
+
+        init {
+            arbeidsgiver.accept(this)
+
+        }
+
+        override fun preVisitInnslag(innslag: Inntektshistorikk.Innslag, id: UUID) {
+            if (nyesteInnslag != null) return
+            nyesteInnslag = NyesteInnslag(
+                InntektsopplysningBuilder(innslag).build()
+            )
+        }
+
+        fun build() = nyesteInnslag
     }
 
-    fun build() = nyesteInnslag
-}
+    private class InntektsopplysningBuilder(innslag: Inntektshistorikk.Innslag) : InntekthistorikkVisitor {
+        private val akkumulator = mutableMapOf<LocalDate, Sammenligningsgrunnlag>()
 
-internal class InntektsopplysningBuilder(val innslag: Inntektshistorikk.Innslag) : InntekthistorikkVisitor {
-    private val akkumulator = mutableMapOf<LocalDate, InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.SammenligningsgrunnlagDTO>()
+        init {
+            innslag.accept(this)
+        }
 
-    init {
-        innslag.accept(this)
-    }
+        fun build() = akkumulator.toMap()
 
-    fun build() = akkumulator.toMap()
-
-    override fun preVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID, dato: LocalDate) {
-        skattComposite.sammenligningsgrunnlag()?.let {
-            akkumulator.put(
-                dato, InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.SammenligningsgrunnlagDTO(
-                    beløp = InntektBuilder(it).build().årlig,
-                    inntekterFraAOrdningen = InntekterFraAOrdningenBuilder(skattComposite).build()
+        override fun preVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID, dato: LocalDate) {
+            skattComposite.sammenligningsgrunnlag()?.let {
+                akkumulator.put(
+                    dato, Sammenligningsgrunnlag(
+                        beløp = InntektBuilder(it).build().årlig,
+                        inntekterFraAOrdningen = InntekterFraAOrdningenBuilder(skattComposite).build()
+                    )
                 )
+            }
+        }
+    }
+
+    private class InntekterFraAOrdningenBuilder(skattComposite: Inntektshistorikk.SkattComposite) : InntekthistorikkVisitor {
+        private val akkumulator = mutableListOf<InntekterFraAOrdningen>()
+
+        init {
+            skattComposite.accept(this)
+        }
+
+        fun build() = akkumulator.toList()
+
+        override fun visitSkattSammenligningsgrunnlag(
+            sammenligningsgrunnlag: Inntektshistorikk.Skatt.Sammenligningsgrunnlag,
+            dato: LocalDate,
+            hendelseId: UUID,
+            beløp: Inntekt,
+            måned: YearMonth,
+            type: Inntektshistorikk.Skatt.Inntekttype,
+            fordel: String,
+            beskrivelse: String,
+            tidsstempel: LocalDateTime
+        ) {
+            akkumulator.add(
+                InntekterFraAOrdningen(måned, InntektBuilder(beløp).build().månedlig)
             )
         }
     }
 }
 
-internal class InntekterFraAOrdningenBuilder(skattComposite: Inntektshistorikk.SkattComposite) : InntekthistorikkVisitor {
-    private val akkumulator = mutableListOf<InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.SammenligningsgrunnlagDTO.InntekterFraAOrdningenDTO>()
+internal data class Arbeidsgiverinntekt(
+    val arbeidsgiver: String,
+    val omregnetÅrsinntekt: OmregnetÅrsinntekt?,
+    val sammenligningsgrunnlag: Sammenligningsgrunnlag? = null
+)
 
-    init {
-        skattComposite.accept(this)
-    }
+internal data class OmregnetÅrsinntekt(
+    val kilde: Inntektkilde,
+    val beløp: Double,
+    val månedsbeløp: Double,
+    val inntekterFraAOrdningen: List<InntekterFraAOrdningen>? = null //kun gyldig for A-ordningen
+)
 
-    fun build() = akkumulator.toList()
-
-    override fun visitSkattSammenligningsgrunnlag(
-        sammenligningsgrunnlag: Inntektshistorikk.Skatt.Sammenligningsgrunnlag,
-        dato: LocalDate,
-        hendelseId: UUID,
-        beløp: Inntekt,
-        måned: YearMonth,
-        type: Inntektshistorikk.Skatt.Inntekttype,
-        fordel: String,
-        beskrivelse: String,
-        tidsstempel: LocalDateTime
-    ) {
-        akkumulator.add(
-            InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.SammenligningsgrunnlagDTO.InntekterFraAOrdningenDTO(måned, InntektBuilder(beløp).build().månedlig)
-        )
-    }
+internal enum class Inntektkilde {
+    Saksbehandler, Inntektsmelding, Infotrygd, AOrdningen
 }
+
+internal data class Sammenligningsgrunnlag(
+    val beløp: Double,
+    val inntekterFraAOrdningen: List<InntekterFraAOrdningen>
+)
+
+internal data class InntekterFraAOrdningen(
+    val måned: YearMonth,
+    val sum: Double
+)
+
 
 

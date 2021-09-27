@@ -65,7 +65,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         assertEquals(1, spleisgrunnlag.inntekter.size)
 
         val inntekt = spleisgrunnlag.inntekter.first()
-        assertInntekt(inntekt, ORGNUMMER, 480000.0, 480000.0, Inntektsmelding, primitivInntekt, false)
+        assertInntekt(inntekt, ORGNUMMER, 480000.0, 480000.0, Inntektkilde.Inntektsmelding, primitivInntekt, false)
     }
 
     @Test
@@ -136,17 +136,17 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
 
         assertEquals(2, førsteGenerasjon.inntekter.size)
         val inntektAg1 = førsteGenerasjon.inntekter.first { it.arbeidsgiver == AG1 }
-        assertArbeidsgiverinnekt(inntektAg1, sammenligningsgrunnlag = 228000.0, omregnetÅrsinntektBeløp = 240000.0, kilde = Inntektsmelding, månedsbeløp= 20000.0)
+        assertArbeidsgiverinnekt(inntektAg1, sammenligningsgrunnlag = 228000.0, omregnetÅrsinntektBeløp = 240000.0, kilde = Inntektkilde.Inntektsmelding, månedsbeløp= 20000.0)
 
         val inntektAg2 = førsteGenerasjon.inntekter.first { it.arbeidsgiver == AG2 }
-        assertArbeidsgiverinnekt(inntektAg2, sammenligningsgrunnlag = 252000.0, omregnetÅrsinntektBeløp = 240000.0, kilde = Inntektsmelding, månedsbeløp= 20000.0)
+        assertArbeidsgiverinnekt(inntektAg2, sammenligningsgrunnlag = 252000.0, omregnetÅrsinntektBeløp = 240000.0, kilde = Inntektkilde.Inntektsmelding, månedsbeløp= 20000.0)
 
         val andreGenerasjon = requireNotNull(generasjoner[innslag.first().id]?.vilkårsgrunnlagSpleis(1.januar))
         assertSpleisVilkårsprøving(andreGenerasjon, 480000.0, 93634, true, 5.3, MedlemskapstatusDTO.JA, 456000.0, 1.januar)
 
         assertEquals(2, andreGenerasjon.inntekter.size)
         val inntekt2Ag1 = andreGenerasjon.inntekter.first { it.arbeidsgiver == AG1 }
-        assertArbeidsgiverinnekt(inntekt2Ag1, sammenligningsgrunnlag = 228000.0, omregnetÅrsinntektBeløp = 216000.0, kilde = Saksbehandler, månedsbeløp= 18000.0)
+        assertArbeidsgiverinnekt(inntekt2Ag1, sammenligningsgrunnlag = 228000.0, omregnetÅrsinntektBeløp = 216000.0, kilde = Inntektkilde.Saksbehandler, månedsbeløp= 18000.0)
 
         val inntekt2Ag2 = andreGenerasjon.inntekter.first { it.arbeidsgiver == AG2 }
         assertEquals(inntektAg2, inntekt2Ag2)
@@ -168,7 +168,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         assertSpleisVilkårsprøving(førsteGenerasjon, 372000.0, 93634, true, 0.0, MedlemskapstatusDTO.JA, 372000.0, 1.januar)
         assertEquals(1, førsteGenerasjon.inntekter.size)
         val inntekt = førsteGenerasjon.inntekter.first()
-        assertInntekt(inntekt, ORGNUMMER, 372000.0, 372000.0, Inntektsmelding, 31000.0, false)
+        assertInntekt(inntekt, ORGNUMMER, 372000.0, 372000.0, Inntektkilde.Inntektsmelding, 31000.0, false)
 
         val andreGenerasjon = generasjoner.første().vilkårsgrunnlagSpleis(1.mars)
         assertSpleisVilkårsprøving(andreGenerasjon, 372000.0, 93634, true, 0.0, MedlemskapstatusDTO.VET_IKKE, 372000.0, 1.mars)
@@ -195,7 +195,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         assertInfotrygdVilkårsprøving(førsteGenerasjon, skjæringstidspunkt, 480000.0)
         assertEquals(1, førsteGenerasjon.inntekter.size)
         val inntekt = førsteGenerasjon.inntekter.first()
-        assertInntekt(inntekt, ORGNUMMER, null, 480000.0, Infotrygd, primitivInntekt, false)
+        assertInntekt(inntekt, ORGNUMMER, null, 480000.0, Inntektkilde.Infotrygd, primitivInntekt, false)
     }
 
 
@@ -229,10 +229,10 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
     }
 
     private fun assertArbeidsgiverinnekt(
-        inntekt: InntektsgrunnlagDTO.ArbeidsgiverinntektDTO,
+        inntekt: Arbeidsgiverinntekt,
         sammenligningsgrunnlag: Double,
         omregnetÅrsinntektBeløp: Double,
-        kilde: InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO,
+        kilde: Inntektkilde,
         månedsbeløp: Double
     ) {
         assertEquals(sammenligningsgrunnlag, inntekt.sammenligningsgrunnlag?.beløp)
@@ -242,11 +242,11 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
     }
 
     private fun assertInntekt(
-        inntekt: InntektsgrunnlagDTO.ArbeidsgiverinntektDTO,
+        inntekt: Arbeidsgiverinntekt,
         orgnummer: String,
         sammenligningsgrunnlag: Double?,
         omregnetÅrsinntekt: Double,
-        inntektskilde: InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO,
+        inntektskilde: Inntektkilde,
         omregnetÅrsinntektMånedsbeløp: Double,
         harInntektFraAOrdningen: Boolean
     ) {
