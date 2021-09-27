@@ -15,6 +15,8 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
+import java.math.RoundingMode
 import java.time.LocalDate
 import java.util.*
 
@@ -103,21 +105,28 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         assertEquals(372000.0, inntekt.sammenligningsgrunnlag?.beløp)
         assertEquals(372000.0, inntekt.omregnetÅrsinntekt?.beløp)
 
-        val andre = requireNotNull(generasjoner[innslag.first().id]?.vilkårsgrunnlagSpleis(1.januar))
-        assertSpleisVilkårsprøving(førsteGenerasjon, 372000.0, 93634, true, 0.0, MedlemskapstatusDTO.JA, 372000.0, 1.januar)
-
-
+        val andreGenerasjon = requireNotNull(generasjoner[innslag.first().id]?.vilkårsgrunnlagSpleis(1.januar))
+        assertSpleisVilkårsprøving(andreGenerasjon, 372000.0, 93634, true, 12.9, MedlemskapstatusDTO.JA, 420000.0, 1.januar)
+        assertEquals(1, andreGenerasjon.inntekter.size)
+        val inntekt2 = andreGenerasjon.inntekter.first()
+        assertEquals(372000.0, inntekt2.sammenligningsgrunnlag?.beløp)
+        assertEquals(420000.0, inntekt2.omregnetÅrsinntekt?.beløp)
     }
 
     @Test
     fun `revurdering av inntekt flere AG`() {
+
     }
 
     @Test
-    fun `flere skjæringstidspunkt`() {}
+    fun `flere skjæringstidspunkt`() {
+
+    }
 
     @Test
-    fun `infotrygdforlengelse`() {}
+    fun `infotrygdforlengelse`() {
+
+    }
 
 //    @Test
 //    fun `har ikke sammenligningsgrunnlag etter overgang fra Infotrygd`() {
@@ -148,7 +157,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         assertEquals(sammenligningsgrunnlag, vilkårsgrunnlag.sammenligningsgrunnlag)
         assertEquals(grunnbeløp, vilkårsgrunnlag.grunnbeløp)
         assertEquals(oppfyllerKravOmMinstelønn, vilkårsgrunnlag.oppfyllerKravOmMinstelønn)
-        assertEquals(avviksprosent, vilkårsgrunnlag.avviksprosent)
+        assertEquals(avviksprosent, BigDecimal(vilkårsgrunnlag.avviksprosent!!).setScale(2, RoundingMode.HALF_DOWN).toDouble())
         assertEquals(medlemskapstatus, vilkårsgrunnlag.medlemskapstatus)
         assertEquals(omregnetÅrsinntekt, vilkårsgrunnlag.omregnetÅrsinntekt)
         assertEquals(skjæringstidspunkt, vilkårsgrunnlag.skjæringstidspunkt)

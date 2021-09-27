@@ -72,7 +72,7 @@ internal class TestArbeidsgiverInspektør(
     internal var warnings: List<String>
     private var personInspektør: HentAktivitetslogg
 
-    private val vilkårsgrunnlagHistorikkInnslag: MutableList<InnslagId> = mutableListOf()
+    private val vilkårsgrunnlagHistorikkInnslag: List<InnslagId>
     internal fun vilkårsgrunnlagHistorikkInnslag() = vilkårsgrunnlagHistorikkInnslag.sortedByDescending { it.timestamp }.toList()
 
     init {
@@ -80,6 +80,7 @@ internal class TestArbeidsgiverInspektør(
             personLogg = results.aktivitetslogg
             warnings = results.warnings
             vilkårsgrunnlagHistorikk = results.vilkårsgrunnlagHistorikk
+            vilkårsgrunnlagHistorikkInnslag = results.vilkårsgrunnlagHistorikkInnslag.toList()
             results.arbeidsgiver.accept(this)
         }
     }
@@ -89,6 +90,7 @@ internal class TestArbeidsgiverInspektør(
         lateinit var arbeidsgiver: Arbeidsgiver
         val vilkårsgrunnlagHistorikk = mutableListOf<Pair<LocalDate,VilkårsgrunnlagHistorikk.Grunnlagsdata>>()
         val warnings = mutableListOf<String>()
+        val vilkårsgrunnlagHistorikkInnslag: MutableList<InnslagId> = mutableListOf()
 
         init {
             person.accept(this)
@@ -106,6 +108,10 @@ internal class TestArbeidsgiverInspektør(
 
         override fun preVisitGrunnlagsdata(skjæringstidspunkt: LocalDate, grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata) {
             vilkårsgrunnlagHistorikk.add(skjæringstidspunkt to grunnlagsdata)
+        }
+
+        override fun preVisitInnslag(innslag: VilkårsgrunnlagHistorikk.Innslag, id: UUID, opprettet: LocalDateTime) {
+            vilkårsgrunnlagHistorikkInnslag.add(InnslagId(id, opprettet))
         }
 
         override fun visitWarn(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Warn, melding: String, tidsstempel: String) {
@@ -147,10 +153,6 @@ internal class TestArbeidsgiverInspektør(
             inntektshistorikkInnslagId = inntektshistorikkInnslagId,
             vilkårsgrunnlagHistorikkInnslagId = vilkårsgrunnlagHistorikkInnslagId
         ))
-    }
-
-    override fun postVisitInnslag(innslag: VilkårsgrunnlagHistorikk.Innslag, id: UUID, opprettet: LocalDateTime) {
-        vilkårsgrunnlagHistorikkInnslag.add(InnslagId(id, opprettet))
     }
 
     override fun preVisitVedtaksperiode(
