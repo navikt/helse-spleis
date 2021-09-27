@@ -220,12 +220,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `6G begrenset`() {
-
-    }
-
-    @Test
-    fun `ghosts`() {
+    fun `har med inntekt fra ghost`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = ORGNUMMER)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = ORGNUMMER)
         håndterInntektsmelding(
