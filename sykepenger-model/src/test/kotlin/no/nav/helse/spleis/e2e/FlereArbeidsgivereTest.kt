@@ -31,8 +31,6 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         private const val a4 = "arbeidsgiver 4"
     }
 
-    private val String.inspektør get() = inspektør(this)
-
     @Test
     fun `Sammenligningsgrunnlag for flere arbeidsgivere`() {
         val periodeA1 = 1.januar til 31.januar

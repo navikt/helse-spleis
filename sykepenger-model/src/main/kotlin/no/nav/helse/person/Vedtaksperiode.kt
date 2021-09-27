@@ -329,9 +329,11 @@ internal class Vedtaksperiode private constructor(
 
     private fun utbetalingTillaterForkasting() = utbetaling?.tillaterForkastingAvPeriode() ?: true
     private fun tilstandTillaterForkasting() = tilstand.kanForkastes
-    internal fun kanForkastes(annullerteFagsystemIder: List<String>) = (utbetalingTillaterForkasting() && tilstandTillaterForkasting()) || harAnnullertUtbetaling(annullerteFagsystemIder)
+    internal fun kanForkastes(annullerteFagsystemIder: List<String>) =
+        (utbetalingTillaterForkasting() && tilstandTillaterForkasting()) || harAnnullertUtbetaling(annullerteFagsystemIder)
 
-    private fun harAnnullertUtbetaling(annullerteFagsystemIder: List<String>) = utbetalinger.flatMap { it.fagsystemIder() }.any { annullerteFagsystemIder.contains(it) }
+    private fun harAnnullertUtbetaling(annullerteFagsystemIder: List<String>) =
+        utbetalinger.flatMap { it.fagsystemIder() }.any { annullerteFagsystemIder.contains(it) }
 
     private fun erUtbetalt() = tilstand == Avsluttet && utbetaling?.erAvsluttet() == true
 
@@ -536,7 +538,18 @@ internal class Vedtaksperiode private constructor(
     private fun vedtakFattet(hendelse: IAktivitetslogg) {
         val sykepengegrunnlag = person.sykepengegrunnlag(skjæringstidspunkt) ?: Inntekt.INGEN
         val grunnlagForSykepengegrunnlag = person.grunnlagForSykepengegrunnlagPerArbeidsgiver(skjæringstidspunkt)
-        Utbetaling.vedtakFattet(utbetaling, hendelse, person, id, periode, hendelseIder, skjæringstidspunkt, sykepengegrunnlag, grunnlagForSykepengegrunnlag, inntekt() ?: Inntekt.INGEN)
+        Utbetaling.vedtakFattet(
+            utbetaling,
+            hendelse,
+            person,
+            id,
+            periode,
+            hendelseIder,
+            skjæringstidspunkt,
+            sykepengegrunnlag,
+            grunnlagForSykepengegrunnlag,
+            inntekt() ?: Inntekt.INGEN
+        )
     }
 
     private fun tickleForArbeidsgiveravhengighet(påminnelse: Påminnelse) {
@@ -1836,10 +1849,8 @@ internal class Vedtaksperiode private constructor(
                         }
                     }
                 }
-                harNødvendigInntekt(
-                    person,
-                    vedtaksperiode.skjæringstidspunkt
-                ) // TODO: forventer at denne ikke trengs lenger, sjekk om dette stemmer når lagring av sykepengegrunnlaget er stabilt. Kan hvertfall ikke fjernes før https://trello.com/c/pY0WYUC0
+                // TODO: forventer at denne ikke trengs lenger, sjekk om dette stemmer når lagring av sykepengegrunnlaget er stabilt. Kan hvertfall ikke fjernes før https://trello.com/c/pY0WYUC0
+                harNødvendigInntekt(person, vedtaksperiode.skjæringstidspunkt)
                 lateinit var arbeidsgiverUtbetalinger2: ArbeidsgiverUtbetalinger
                 valider("Feil ved kalkulering av utbetalingstidslinjer") {
                     person.fyllUtPeriodeMedForventedeDager(ytelser, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt)
@@ -1849,7 +1860,10 @@ internal class Vedtaksperiode private constructor(
                 onSuccess {
                     if (vedtaksperiode.person.harKunEtAnnetAktivtArbeidsforholdEnn(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer)) {
                         ytelser.warn("Den sykmeldte har skiftet arbeidsgiver, og det er beregnet at den nye arbeidsgiveren mottar refusjon lik forrige. Kontroller at dagsatsen blir riktig.")
-                    } else if (vedtaksperiode.person.harFlereArbeidsgivereUtenSykdomVedSkjæringstidspunkt(vedtaksperiode.skjæringstidspunkt)) {
+                    } else if (
+                        person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt) !is VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag &&
+                        vedtaksperiode.person.harFlereArbeidsgivereUtenSykdomVedSkjæringstidspunkt(vedtaksperiode.skjæringstidspunkt)
+                    ) {
                         person.loggTilfelleAvFlereArbeidsgivereMedSkatteinntekt(vedtaksperiode.skjæringstidspunkt)
                         ytelser.warn("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold")
                     }

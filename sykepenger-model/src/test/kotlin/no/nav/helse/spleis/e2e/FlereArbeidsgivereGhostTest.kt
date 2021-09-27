@@ -459,4 +459,141 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         assertEquals(1431, inspektør(a1).arbeidsgiverOppdrag.last().first().beløp)
     }
+
+    @Test
+    fun `Overgang fra infotrygd skal ikke få ghost warning selv om vi har lagret skatteinntekter i en gammel versjon av spleis`() {
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
+
+        val utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar, 100.prosent, INNTEKT))
+        val inntektshistorikk = listOf(Inntektsopplysning(a1, 17.januar, INNTEKT, true))
+
+        håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a1, utbetalinger = utbetalinger, inntektshistorikk = inntektshistorikk)
+
+        person.lagreArbeidsforhold(a1, listOf(Arbeidsforhold(a1, LocalDate.EPOCH)), person.aktivitetslogg, 17.januar)
+        person.lagreArbeidsforhold(a2, listOf(Arbeidsforhold(a2, LocalDate.EPOCH)), person.aktivitetslogg, 17.januar)
+
+        inspektør(a2).inntektInspektør.inntektshistorikk {
+            val hendelseId = UUID.randomUUID()
+            addSkattSykepengegrunnlag(17.januar, hendelseId, INNTEKT, YearMonth.of(2017, 12), LØNNSINNTEKT, "fordel", "beskrivelse")
+            addSkattSykepengegrunnlag(17.januar, hendelseId, INNTEKT, YearMonth.of(2017, 11), LØNNSINNTEKT, "fordel", "beskrivelse")
+            addSkattSykepengegrunnlag(17.januar, hendelseId, INNTEKT, YearMonth.of(2017, 10), LØNNSINNTEKT, "fordel", "beskrivelse")
+        }
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+
+        assertNoWarnings(a1.inspektør)
+    }
+
+    @Test
+    fun `Forlengelse etter ping-pong (Spleis-IT-Spleis) skal få ghost warning`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 1.januar,
+            orgnummer = a1,
+            refusjon = Refusjon(null, 30000.månedlig, emptyList())
+        )
+
+        val inntekter = listOf(
+            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3)),
+            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 35000.månedlig.repeat(3))
+        )
+
+        val arbeidsforhold = listOf(
+            Arbeidsforhold(orgnummer = a1, fom = LocalDate.EPOCH, tom = null),
+            Arbeidsforhold(orgnummer = a2, fom = LocalDate.EPOCH, tom = null)
+        )
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+                listOf(
+                    sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(12)),
+                    sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 35000.månedlig.repeat(12))
+                )
+            ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter),
+            arbeidsforhold = arbeidsforhold,
+            orgnummer = a1
+        )
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+
+        val utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(a1, 1.februar, 28.februar, 100.prosent, 30000.månedlig))
+        val inntektshistorikk = listOf(Inntektsopplysning(a1, 1.februar, 30000.månedlig, true))
+
+        håndterUtbetalingshistorikk(2.vedtaksperiode, orgnummer = a1, utbetalinger = utbetalinger, inntektshistorikk = inntektshistorikk)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+
+        assertWarningTekst(
+            a1.inspektør,
+            "Brukeren har flere inntekter de siste tre måneder enn det som er brukt i sykepengegrunnlaget. Kontroller om brukeren har andre arbeidsforhold eller ytelser på sykmeldingstidspunktet som påvirker utbetalingen.",
+            "Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold",
+            "Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold"
+        )
+    }
+
+    @Test
+    fun `Spleisforlengelse skal få ghost warning`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 1.januar,
+            orgnummer = a1,
+            refusjon = Refusjon(null, 30000.månedlig, emptyList())
+        )
+
+        val inntekter = listOf(
+            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3)),
+            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 35000.månedlig.repeat(3))
+        )
+
+        val arbeidsforhold = listOf(
+            Arbeidsforhold(orgnummer = a1, fom = LocalDate.EPOCH, tom = null),
+            Arbeidsforhold(orgnummer = a2, fom = LocalDate.EPOCH, tom = null)
+        )
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+                listOf(
+                    sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(12)),
+                    sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 35000.månedlig.repeat(12))
+                )
+            ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter),
+            arbeidsforhold = arbeidsforhold,
+            orgnummer = a1
+        )
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
+
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+
+        assertWarningTekst(
+            a1.inspektør,
+            "Brukeren har flere inntekter de siste tre måneder enn det som er brukt i sykepengegrunnlaget. Kontroller om brukeren har andre arbeidsforhold eller ytelser på sykmeldingstidspunktet som påvirker utbetalingen.",
+            "Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold",
+            "Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold"
+        )
+    }
 }

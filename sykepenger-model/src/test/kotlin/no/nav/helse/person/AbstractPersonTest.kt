@@ -16,6 +16,7 @@ internal abstract class AbstractPersonTest {
     protected lateinit var person: Person
     protected lateinit var observatør: TestObservatør
     protected val inspektør get() = inspektør(ORGNUMMER)
+    protected val String.inspektør get() = inspektør(this)
 
     protected val Int.vedtaksperiode: IdInnhenter get() = { orgnummer -> this.vedtaksperiode(orgnummer) }
 
