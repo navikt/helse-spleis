@@ -31,7 +31,7 @@ internal class Tidslinjebereginger(generasjonIder: List<GenerasjonIder>, sykdoms
         internal val inntektshistorikkId: InntektshistorikkId,
         internal val vilkårsgrunnlagshistorikkId: VilkårsgrunnlagshistorikkId
     ) {
-        fun sykdomstidslinje(utbetalingstidslinje: List<UtbetalingstidslinjedagDTO>, fom: LocalDate, tom: LocalDate): List<SammenslåttDag> {
+        fun sammenslåttTidslinje(utbetalingstidslinje: List<UtbetalingstidslinjedagDTO>, fom: LocalDate, tom: LocalDate): List<SammenslåttDag> {
             return sykdomstidslinje
                 .subset(fom, tom)
                 .merge(utbetalingstidslinje)

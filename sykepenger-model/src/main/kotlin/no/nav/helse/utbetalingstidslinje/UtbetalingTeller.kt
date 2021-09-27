@@ -43,7 +43,7 @@ internal class UtbetalingTeller private constructor(
 
         return harNåddMaksSykepengedager
             || gammelpersonDager >= arbeidsgiverRegler.maksSykepengedagerOver67()
-            || dato.plusDays(1) >= alder.øvreAldersgrense
+            || dato.plusDays(1) >= alder.datoForØvreAldersgrense
     }
 
     internal fun maksdato(sisteUtbetalingsdag: LocalDate) =

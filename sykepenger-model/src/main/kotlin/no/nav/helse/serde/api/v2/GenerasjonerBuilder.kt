@@ -28,7 +28,7 @@ internal typealias VilkårsgrunnlagshistorikkId = UUID
 internal typealias FagsystemId = String
 
 // Besøker hele arbeidsgiver-treet
-internal class GenerasjonerBuilder(private val hendelser: List<HendelseDTO>) : ArbeidsgiverVisitor {
+internal class GenerasjonerBuilder(private val hendelser: List<HendelseDTO>, private val fødselsnummer: String) : ArbeidsgiverVisitor {
 
     private val vedtaksperiodeAkkumulator = VedtaksperiodeAkkumulator()
     private val forkastetVedtaksperiodeAkkumulator = ForkastetVedtaksperiodeAkkumulator()
@@ -39,7 +39,12 @@ internal class GenerasjonerBuilder(private val hendelser: List<HendelseDTO>) : A
     fun build(): List<Generasjon> {
         vedtaksperiodeAkkumulator.supplerMedAnnulleringer(annulleringer)
         val tidslinjebereginger = Tidslinjebereginger(generasjonIderAkkumulator.toList(), sykdomshistorikkAkkumulator)
-        val tidslinjeperioder = Tidslinjeperioder(forkastetVedtaksperiodeAkkumulator.toList(), vedtaksperiodeAkkumulator.toList(), tidslinjebereginger)
+        val tidslinjeperioder = Tidslinjeperioder(
+            fødselsnummer,
+            forkastetVedtaksperiodeAkkumulator.toList(),
+            vedtaksperiodeAkkumulator.toList(),
+            tidslinjebereginger
+        )
         return Generasjoner(tidslinjeperioder).build()
     }
 

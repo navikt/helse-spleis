@@ -8,14 +8,14 @@ import java.time.temporal.ChronoUnit.YEARS
 
 internal class Alder(fødselsnummer: String) {
     private val individnummer = fødselsnummer.substring(6, 9).toInt()
-    private val fødselsdag = LocalDate.of(
+    private val fødselsdato = LocalDate.of(
         fødselsnummer.substring(4, 6).toInt().toYear(individnummer),
         fødselsnummer.substring(2, 4).toInt(),
         fødselsnummer.substring(0, 2).toInt().toDay()
     )
-    internal val øvreAldersgrense = fødselsdag.plusYears(70).øvreAldersgrense()
-    internal val redusertYtelseAlder = fødselsdag.plusYears(67)
-    private val forhøyetInntektskravAlder = fødselsdag.plusYears(67)
+    internal val datoForØvreAldersgrense = fødselsdato.plusYears(70).trimHelg()
+    internal val redusertYtelseAlder = fødselsdato.plusYears(67)
+    private val forhøyetInntektskravAlder = fødselsdato.plusYears(67)
 
     private fun Int.toDay() = if (this > 40) this - 40 else this
 
@@ -28,7 +28,7 @@ internal class Alder(fødselsnummer: String) {
         }
     }
 
-    private fun LocalDate.øvreAldersgrense() = this.minusDays(
+    private fun LocalDate.trimHelg() = this.minusDays(
         when (this.dayOfWeek) {
             DayOfWeek.SUNDAY -> 1
             DayOfWeek.MONDAY -> 2
@@ -36,8 +36,8 @@ internal class Alder(fødselsnummer: String) {
         }
     )
 
-    internal fun alderPåDato(dato: LocalDate) = YEARS.between(fødselsdag, dato).toInt()
-    private fun alderVedSluttenAvÅret(year: Year) = YEARS.between(Year.from(fødselsdag), year).toInt()
+    internal fun alderPåDato(dato: LocalDate) = YEARS.between(fødselsdato, dato).toInt()
+    private fun alderVedSluttenAvÅret(year: Year) = YEARS.between(Year.from(fødselsdato), year).toInt()
 
     internal fun minimumInntekt(dato: LocalDate) = (if (forhøyetInntektskrav(dato)) Grunnbeløp.`2G` else Grunnbeløp.halvG).dagsats(dato)
 

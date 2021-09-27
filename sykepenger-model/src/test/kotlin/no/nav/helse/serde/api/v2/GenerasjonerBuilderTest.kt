@@ -7,19 +7,22 @@ import no.nav.helse.hendelser.SøknadArbeidsgiver
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
     private val generasjoner get() = generasjoner()
 
     private fun generasjoner(): List<Generasjon> {
-        val generasjonerBuilder = GenerasjonerBuilder(emptyList())
+        val generasjonerBuilder = GenerasjonerBuilder(søknadDTOer, UNG_PERSON_FNR_2018)
         person.arbeidsgiver(ORGNUMMER).accept(generasjonerBuilder)
         return generasjonerBuilder.build()
     }
@@ -500,6 +503,124 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         0.generasjon {
             beregnetPeriode(0) er "GodkjentUtenUtbetaling" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31 forkastet false
         }
+    }
+
+    @Test
+    fun `får riktig aldersvilkår per periode`() {
+        nyttVedtak(1.januar, 31.januar)
+        forlengVedtak(1.februar, 28.februar)
+
+        0.generasjon {
+            beregnetPeriode(0).assertAldersvilkår(true, 18)
+            beregnetPeriode(1).assertAldersvilkår(true, 17)
+        }
+    }
+
+    @Test
+    fun `får riktig sykepengedager-vilkår per periode`() {
+        nyttVedtak(1.januar, 31.januar)
+        forlengVedtak(1.februar, 28.februar)
+
+        0.generasjon {
+            beregnetPeriode(0).assertSykepengedagerVilkår(31, 217, 28.desember, 1.januar, true)
+            beregnetPeriode(1).assertSykepengedagerVilkår(11, 237, 28.desember, 1.januar, true)
+        }
+    }
+
+    @Test
+    fun `får riktig søknadsfrist-vilkår per periode`() {
+        nyttVedtak(1.januar, 31.januar)
+        forlengVedtak(1.februar, 28.februar)
+
+        0.generasjon {
+            beregnetPeriode(0).assertSøknadsfristVilkår(1.februar, 28.februar, 28.februar.atStartOfDay(), true)
+            beregnetPeriode(1).assertSøknadsfristVilkår(1.januar, 31.januar, 31.januar.atStartOfDay(), true)
+        }
+    }
+
+    @Test
+    fun `får riktig vilkår per periode ved revurdering av siste periode`() {
+        nyttVedtak(1.januar, 31.januar)
+        forlengVedtak(1.februar, 28.februar)
+        håndterOverstyring((27.februar til 28.februar).map { manuellFeriedag(it) })
+        håndterYtelser(2.vedtaksperiode)
+
+        0.generasjon {
+            beregnetPeriode(0).assertAldersvilkår(true, 18)
+            beregnetPeriode(1).assertAldersvilkår(true, 17)
+            beregnetPeriode(0).assertSykepengedagerVilkår(29,219, 1.januar(2019), 1.januar,true)
+            beregnetPeriode(1).assertSykepengedagerVilkår(11,237, 28.desember, 1.januar,true)
+            beregnetPeriode(0).assertSøknadsfristVilkår(1.februar, 28.februar, 28.februar.atStartOfDay(),true)
+            beregnetPeriode(1).assertSøknadsfristVilkår(1.januar, 31.januar, 31.januar.atStartOfDay(),true)
+        }
+        1.generasjon {
+            beregnetPeriode(0).assertSøknadsfristVilkår(1.februar, 28.februar, 28.februar.atStartOfDay(), true)
+            beregnetPeriode(1).assertSøknadsfristVilkår(1.januar, 31.januar, 31.januar.atStartOfDay(), true)
+            beregnetPeriode(0).assertSykepengedagerVilkår(31, 217, 28.desember, 1.januar, true)
+            beregnetPeriode(1).assertSykepengedagerVilkår(11, 237, 28.desember, 1.januar, true)
+            beregnetPeriode(0).assertSøknadsfristVilkår(1.februar, 28.februar, 28.februar.atStartOfDay(),true)
+            beregnetPeriode(1).assertSøknadsfristVilkår(1.januar, 31.januar, 31.januar.atStartOfDay(),true)
+        }
+    }
+
+    @Test
+    fun `får riktig vilkår per periode ved revurdering av første periode`() {
+        nyttVedtak(1.januar, 31.januar)
+        forlengVedtak(1.februar, 28.februar)
+        håndterOverstyring((30.januar til 31.januar).map { manuellFeriedag(it) })
+        håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+
+        0.generasjon {
+            beregnetPeriode(0).assertAldersvilkår(true, 18)
+            beregnetPeriode(1).assertAldersvilkår(true, 17)
+            // Revurdering av tidligere periode medfører at alle perioder berørt av revurderingen deler den samme utbetalingen, og derfor ender opp med samme
+            // gjenstående dager, forbrukte dager og maksdato. Kan muligens skrives om i modellen slik at disse tallene kan fiskes ut fra utbetalingen gitt en
+            // periode
+            beregnetPeriode(0).assertSykepengedagerVilkår(29,219, 1.januar(2019), 1.januar,true)
+            beregnetPeriode(1).assertSykepengedagerVilkår(29,219, 1.januar(2019), 1.januar,true)
+            beregnetPeriode(0).assertSøknadsfristVilkår(1.februar, 28.februar, 28.februar.atStartOfDay(),true)
+            beregnetPeriode(1).assertSøknadsfristVilkår(1.januar, 31.januar, 31.januar.atStartOfDay(),true)
+        }
+        1.generasjon {
+            beregnetPeriode(0).assertSøknadsfristVilkår(1.februar, 28.februar, 28.februar.atStartOfDay(), true)
+            beregnetPeriode(1).assertSøknadsfristVilkår(1.januar, 31.januar, 31.januar.atStartOfDay(), true)
+            beregnetPeriode(0).assertSykepengedagerVilkår(31, 217, 28.desember, 1.januar, true)
+            beregnetPeriode(1).assertSykepengedagerVilkår(11, 237, 28.desember, 1.januar, true)
+            beregnetPeriode(0).assertSøknadsfristVilkår(1.februar, 28.februar, 28.februar.atStartOfDay(),true)
+            beregnetPeriode(1).assertSøknadsfristVilkår(1.januar, 31.januar, 31.januar.atStartOfDay(),true)
+        }
+    }
+
+    private fun BeregnetPeriode.assertAldersvilkår(expectedOppfylt: Boolean, expectedAlderSisteSykedag: Int) {
+        assertEquals(expectedOppfylt, periodevilkår.alder.oppfylt)
+        assertEquals(expectedAlderSisteSykedag, periodevilkår.alder.alderSisteSykedag)
+    }
+
+    private fun BeregnetPeriode.assertSykepengedagerVilkår(
+        expectedForbrukteSykedager: Int,
+        expectedGjenståendeSykedager: Int,
+        expectedMaksdato: LocalDate,
+        expectedSkjæringstidspunkt: LocalDate,
+        expectedOppfylt: Boolean
+    ) {
+        assertEquals(expectedForbrukteSykedager, periodevilkår.sykepengedager.forbrukteSykedager)
+        assertEquals(expectedGjenståendeSykedager, periodevilkår.sykepengedager.gjenståendeDager)
+        assertEquals(expectedMaksdato, periodevilkår.sykepengedager.maksdato)
+        assertEquals(expectedSkjæringstidspunkt, periodevilkår.sykepengedager.skjæringstidspunkt)
+        assertEquals(expectedOppfylt, periodevilkår.sykepengedager.oppfylt)
+    }
+
+    private fun BeregnetPeriode.assertSøknadsfristVilkår(
+        expectedSøknadFom: LocalDate,
+        expectedSøknadTom: LocalDate,
+        expectedSendtNav: LocalDateTime,
+        expectedOppfylt: Boolean
+    ) {
+        assertEquals(expectedSøknadFom, periodevilkår.søknadsfrist?.søknadFom)
+        assertEquals(expectedSøknadTom, periodevilkår.søknadsfrist?.søknadTom)
+        assertEquals(expectedSendtNav, periodevilkår.søknadsfrist?.sendtNav)
+        assertEquals(expectedOppfylt, periodevilkår.søknadsfrist?.oppfylt)
     }
 
     private fun Int.generasjon(assertBlock: Generasjon.() -> Unit) {

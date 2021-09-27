@@ -86,7 +86,7 @@ internal class MaksimumSykepengedagerfilter(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        if (dato >= alder.øvreAldersgrense) state(State.ØvreAldersgrense) else betalbarDager[dato] = dag
+        if (dato >= alder.datoForØvreAldersgrense) state(State.ØvreAldersgrense) else betalbarDager[dato] = dag
         state.betalbarDag(this, dato)
     }
 

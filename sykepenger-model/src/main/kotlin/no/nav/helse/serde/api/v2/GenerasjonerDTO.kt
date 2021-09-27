@@ -89,7 +89,8 @@ internal data class BeregnetPeriode(
     val utbetalingDTO: UtbetalingDTO,
     val hendelser: List<HendelseDTO>,
     val simulering: SimuleringsdataDTO?,
-    val vilkårsgrunnlagshistorikkId: UUID
+    val vilkårsgrunnlagshistorikkId: UUID,
+    val periodevilkår: Vilkår
     //Lookup for vilkår(beregningId, skjæringstidspunkt), inntektsgrunnlag(beregningId, skjæringstidspunkt)
 ) : Tidslinjeperiode {
     override val tidslinjeperiodeId: UUID = UUID.randomUUID()
@@ -101,6 +102,32 @@ internal data class BeregnetPeriode(
     private fun fagsystemId() = utbetalingDTO.arbeidsgiverFagsystemId
     val utbetalingstilstand = utbetalingDTO.status
     val utbetalingstype = utbetalingDTO.type
+
+    data class Vilkår(
+        val sykepengedager: Sykepengedager,
+        val alder: Alder,
+        val søknadsfrist: Søknadsfrist?
+    )
+
+    data class Sykepengedager(
+        val skjæringstidspunkt: LocalDate,
+        val maksdato: LocalDate,
+        val forbrukteSykedager: Int?,
+        val gjenståendeDager: Int?,
+        val oppfylt: Boolean
+    )
+
+    data class Alder(
+        val alderSisteSykedag: Int,
+        val oppfylt: Boolean
+    )
+
+    data class Søknadsfrist(
+        val sendtNav: LocalDateTime,
+        val søknadFom: LocalDate,
+        val søknadTom: LocalDate,
+        val oppfylt: Boolean
+    )
 }
 
 data class UtbetalingDTO(

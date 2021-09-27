@@ -13,6 +13,7 @@ import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.api.HendelseDTO
+import no.nav.helse.serde.api.SøknadNavDTO
 import no.nav.helse.serde.api.serializePersonForSpeil
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.testhelpers.*
@@ -46,6 +47,16 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     private val sykmeldinger = mutableMapOf<UUID, Array<out Sykmeldingsperiode>>()
     private val søknader = mutableMapOf<UUID, Triple<LocalDate, List<Søknad.Inntektskilde>, Array<out Søknad.Søknadsperiode>>>()
     private val inntektsmeldinger = mutableMapOf<UUID, () -> Inntektsmelding>()
+    protected val søknadDTOer get() = søknader.map { (id, triple) ->
+        val søknadsperiode = Søknad.Søknadsperiode.søknadsperiode(triple.third.toList())!!
+        SøknadNavDTO(
+            id = id.toString(),
+            fom = søknadsperiode.first(),
+            tom = søknadsperiode.last(),
+            rapportertdato = triple.first.atStartOfDay(),
+            sendtNav = triple.first.atStartOfDay()
+        )
+    }
 
     fun <T> sjekkAt(t: T, init: T.() -> Unit) {
         t.init()

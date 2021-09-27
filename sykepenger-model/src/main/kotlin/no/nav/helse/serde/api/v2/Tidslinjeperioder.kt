@@ -4,10 +4,8 @@ import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.AvsluttetUtenUtbetaling
-import no.nav.helse.serde.api.HendelseDTO
-import no.nav.helse.serde.api.SimuleringsdataDTO
-import no.nav.helse.serde.api.SykdomstidslinjedagDTO
-import no.nav.helse.serde.api.UtbetalingstidslinjedagDTO
+import no.nav.helse.serde.api.*
+import no.nav.helse.serde.api.HendelseDTO.Companion.finn
 import no.nav.helse.serde.api.v2.Behandlingstype.UBEREGNET
 import no.nav.helse.serde.api.v2.Behandlingstype.VENTER
 import no.nav.helse.serde.api.v2.Generasjoner.Generasjon.Companion.fjernErstattede
@@ -15,6 +13,7 @@ import no.nav.helse.serde.api.v2.Generasjoner.Generasjon.Companion.sammenstillMe
 import no.nav.helse.serde.api.v2.Generasjoner.Generasjon.Companion.sorterGenerasjoner
 import no.nav.helse.serde.api.v2.Generasjoner.Generasjon.Companion.toDTO
 import no.nav.helse.serde.api.v2.Tidslinjebereginger.ITidslinjeberegning
+import no.nav.helse.utbetalingstidslinje.Alder
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -94,6 +93,7 @@ internal class Generasjoner(perioder: Tidslinjeperioder) {
 }
 
 internal class Tidslinjeperioder(
+    private val fødselsnummer: String,
     private val forkastetVedtaksperiodeIder: List<UUID>,
     vedtaksperioder: List<IVedtaksperiode>,
     tidslinjeberegninger: Tidslinjebereginger
@@ -138,6 +138,7 @@ internal class Tidslinjeperioder(
         tidslinjeberegning: ITidslinjeberegning,
         erForkastet: Boolean
     ): BeregnetPeriode {
+        val sammenslåttTidslinje = tidslinjeberegning.sammenslåttTidslinje(utbetaling.utbetalingstidslinje, periode.fom, periode.tom)
         return BeregnetPeriode(
             vedtaksperiodeId = periode.vedtaksperiodeId,
             beregningId = utbetaling.beregningId,
@@ -152,12 +153,44 @@ internal class Tidslinjeperioder(
             simulering = periode.simuleringsdataDTO,
             maksdato = utbetaling.maksdato,
             opprettet = utbetaling.opprettet,
-            sammenslåttTidslinje = tidslinjeberegning.sykdomstidslinje(utbetaling.utbetalingstidslinje, periode.fom, periode.tom),
+            periodevilkår = periodevilkår(periode, utbetaling, sammenslåttTidslinje, periode.hendelser),
+            sammenslåttTidslinje = sammenslåttTidslinje,
             gjenståendeSykedager = utbetaling.gjenståendeSykedager,
             forbrukteSykedager = utbetaling.forbrukteSykedager,
             utbetalingDTO = utbetaling.toDTO(),
             vilkårsgrunnlagshistorikkId = tidslinjeberegning.vilkårsgrunnlagshistorikkId
         )
+    }
+
+    private fun List<SammenslåttDag>.sisteNavDag() = lastOrNull { it.utbetalingsdagtype == TypeDataDTO.NavDag }
+
+    private fun periodevilkår(
+        periode: IVedtaksperiode,
+        utbetaling: IUtbetaling,
+        sammenslåttTidslinje: List<SammenslåttDag>,
+        hendelser: List<HendelseDTO>
+    ): BeregnetPeriode.Vilkår {
+        val sisteSykepengedag = sammenslåttTidslinje.sisteNavDag()?.dagen ?: periode.tom
+        val sykepengedager = BeregnetPeriode.Sykepengedager(
+            periode.skjæringstidspunkt,
+            utbetaling.maksdato,
+            utbetaling.forbrukteSykedager,
+            utbetaling.gjenståendeSykedager,
+            utbetaling.maksdato > sisteSykepengedag
+        )
+        val alder = Alder(fødselsnummer).let {
+            BeregnetPeriode.Alder(it.alderPåDato(sisteSykepengedag), it.datoForØvreAldersgrense > sisteSykepengedag)
+        }
+        val søknadsfrist = hendelser.finn<SøknadNavDTO>()?.let {
+            BeregnetPeriode.Søknadsfrist(
+                sendtNav = it.sendtNav,
+                søknadFom = it.fom,
+                søknadTom = it.tom,
+                oppfylt = it.søknadsfristOppfylt()
+            )
+        }
+
+        return BeregnetPeriode.Vilkår(sykepengedager, alder, søknadsfrist)
     }
 }
 
