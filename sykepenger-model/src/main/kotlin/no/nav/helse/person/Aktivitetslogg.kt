@@ -1,6 +1,7 @@
 package no.nav.helse.person
 
 import no.nav.helse.Toggles
+import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov
 import no.nav.helse.person.vilkår.Etterlevelse
@@ -111,6 +112,8 @@ class Aktivitetslogg(
             .map(SpesifikkKontekst::kontekstMap)
             .fold(mapOf()) { result, kontekst -> result + kontekst }
     }
+
+    override fun hendelseskontekst(): Hendelseskontekst = Hendelseskontekst(hendelseskontekster())
 
     private fun info() = Aktivitet.Info.filter(aktiviteter)
     internal fun warn() = Aktivitet.Warn.filter(aktiviteter)
@@ -498,6 +501,7 @@ interface IAktivitetslogg {
     fun kontekst(person: Person)
     fun kontekster(): List<IAktivitetslogg>
     fun hendelseskontekster(): Map<String, String>
+    fun hendelseskontekst(): Hendelseskontekst
     fun toMap(): Map<String, List<Map<String, Any>>>
     val etterlevelse: Etterlevelse
 }

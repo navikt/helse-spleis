@@ -252,16 +252,16 @@ class Person private constructor(
         vedtaksperiode.revurder(hendelse)
     }
 
-    fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, påminnelse: Påminnelse) {
-        observers.forEach { it.vedtaksperiodePåminnet(vedtaksperiodeId, påminnelse) }
+    fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {
+        observers.forEach { it.vedtaksperiodePåminnet(påminnelse.hendelseskontekst(), påminnelse) }
     }
 
-    fun vedtaksperiodeIkkePåminnet(påminnelse: Påminnelse, vedtaksperiodeId: UUID, tilstandType: TilstandType) {
-        observers.forEach { it.vedtaksperiodeIkkePåminnet(påminnelse, vedtaksperiodeId, tilstandType) }
+    fun vedtaksperiodeIkkePåminnet(påminnelse: Påminnelse, tilstandType: TilstandType) {
+        observers.forEach { it.vedtaksperiodeIkkePåminnet(påminnelse.hendelseskontekst(), tilstandType) }
     }
 
-    fun vedtaksperiodeAvbrutt(event: PersonObserver.VedtaksperiodeAvbruttEvent) {
-        observers.forEach { it.vedtaksperiodeAvbrutt(event) }
+    fun vedtaksperiodeAvbrutt(aktivitetslogg: IAktivitetslogg, event: PersonObserver.VedtaksperiodeAvbruttEvent) {
+        observers.forEach { it.vedtaksperiodeAvbrutt(aktivitetslogg.hendelseskontekst(), event) }
     }
 
     @Deprecated("Fjernes til fordel for utbetaling_utbetalt")
@@ -269,37 +269,31 @@ class Person private constructor(
         observers.forEach { it.vedtaksperiodeUtbetalt(event) }
     }
 
-    fun vedtaksperiodeEndret(event: PersonObserver.VedtaksperiodeEndretEvent) {
+    fun vedtaksperiodeEndret(aktivitetslogg: IAktivitetslogg, event: PersonObserver.VedtaksperiodeEndretEvent) {
         observers.forEach {
-            it.vedtaksperiodeEndret(event)
-            it.personEndret(
-                PersonObserver.PersonEndretEvent(
-                    aktørId = aktørId,
-                    fødselsnummer = fødselsnummer,
-                    person = this
-                )
-            )
+            it.vedtaksperiodeEndret(aktivitetslogg.hendelseskontekst(), event)
+            it.personEndret(aktivitetslogg.hendelseskontekst())
         }
     }
 
-    fun vedtaksperiodeReberegnet(vedtaksperiodeId: UUID) {
+    fun vedtaksperiodeReberegnet(hendelseskontekst: Hendelseskontekst) {
         observers.forEach {
-            it.vedtaksperiodeReberegnet(vedtaksperiodeId)
+            it.vedtaksperiodeReberegnet(hendelseskontekst)
         }
     }
 
-    fun inntektsmeldingReplay(event: PersonObserver.InntektsmeldingReplayEvent) {
+    fun inntektsmeldingReplay(vedtaksperiodeId: UUID) {
         observers.forEach {
-            it.inntektsmeldingReplay(event)
+            it.inntektsmeldingReplay(fødselsnummer, vedtaksperiodeId)
         }
     }
 
-    fun trengerInntektsmelding(event: PersonObserver.ManglendeInntektsmeldingEvent) {
-        observers.forEach { it.manglerInntektsmelding(event) }
+    fun trengerInntektsmelding(hendelseskontekst: Hendelseskontekst, event: PersonObserver.ManglendeInntektsmeldingEvent) {
+        observers.forEach { it.manglerInntektsmelding(hendelseskontekst, event) }
     }
 
-    fun trengerIkkeInntektsmelding(event: PersonObserver.TrengerIkkeInntektsmeldingEvent) {
-        observers.forEach { it.trengerIkkeInntektsmelding(event) }
+    fun trengerIkkeInntektsmelding(hendelseskontekst: Hendelseskontekst, event: PersonObserver.TrengerIkkeInntektsmeldingEvent) {
+        observers.forEach { it.trengerIkkeInntektsmelding(hendelseskontekst, event) }
     }
 
     internal fun utbetalingUtbetalt(event: PersonObserver.UtbetalingUtbetaltEvent) {
@@ -314,8 +308,8 @@ class Person private constructor(
         observers.forEach { it.utbetalingEndret(event) }
     }
 
-    internal fun vedtakFattet(vedtakFattetEvent: PersonObserver.VedtakFattetEvent) {
-        observers.forEach { it.vedtakFattet(vedtakFattetEvent) }
+    internal fun vedtakFattet(hendelseskontekst: Hendelseskontekst, vedtakFattetEvent: PersonObserver.VedtakFattetEvent) {
+        observers.forEach { it.vedtakFattet(hendelseskontekst, vedtakFattetEvent) }
     }
 
     internal fun feriepengerUtbetalt(feriepengerUtbetaltEvent: PersonObserver.FeriepengerUtbetaltEvent) {

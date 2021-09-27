@@ -317,11 +317,8 @@ internal class Vedtaksperiode private constructor(
         if (årsak !== ERSTATTES && !erAvsluttet() && this.tilstand !is RevurderingFeilet) tilstand(hendelse, TilInfotrygd)
         forkastUgyldigeUtbetalinger(hendelse)
         person.vedtaksperiodeAvbrutt(
+            hendelse,
             PersonObserver.VedtaksperiodeAvbruttEvent(
-                vedtaksperiodeId = id,
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                organisasjonsnummer = organisasjonsnummer,
                 gjeldendeTilstand = tilstand.type
             )
         )
@@ -359,6 +356,7 @@ internal class Vedtaksperiode private constructor(
     internal fun periode() = periode
 
     private fun kontekst(hendelse: IAktivitetslogg) {
+        hendelse.kontekst(arbeidsgiver)
         hendelse.kontekst(this)
         hendelse.kontekst(this.tilstand)
     }
@@ -495,32 +493,28 @@ internal class Vedtaksperiode private constructor(
         medlemskap(hendelse, periode.start, periode.endInclusive)
     }
 
-    private fun trengerInntektsmelding() {
+    private fun trengerInntektsmelding(hendelseskontekst: Hendelseskontekst) {
         this.person.trengerInntektsmelding(
+            hendelseskontekst,
             PersonObserver.ManglendeInntektsmeldingEvent(
-                vedtaksperiodeId = this.id,
-                organisasjonsnummer = this.organisasjonsnummer,
-                fødselsnummer = this.fødselsnummer,
                 fom = this.periode.start,
                 tom = this.periode.endInclusive
             )
         )
     }
 
-    private fun trengerIkkeInntektsmelding() {
+    private fun trengerIkkeInntektsmelding(hendelseskontekst: Hendelseskontekst) {
         this.person.trengerIkkeInntektsmelding(
+            hendelseskontekst,
             PersonObserver.TrengerIkkeInntektsmeldingEvent(
-                vedtaksperiodeId = this.id,
-                organisasjonsnummer = this.organisasjonsnummer,
-                fødselsnummer = this.fødselsnummer,
                 fom = this.periode.start,
                 tom = this.periode.endInclusive
             )
         )
     }
 
-    private fun emitVedtaksperiodeReberegnet() {
-        person.vedtaksperiodeReberegnet(id)
+    private fun emitVedtaksperiodeReberegnet(hendelseskontekst: Hendelseskontekst) {
+        person.vedtaksperiodeReberegnet(hendelseskontekst)
     }
 
     private fun emitVedtaksperiodeEndret(
@@ -528,10 +522,6 @@ internal class Vedtaksperiode private constructor(
         previousState: Vedtaksperiodetilstand = tilstand
     ) {
         val event = PersonObserver.VedtaksperiodeEndretEvent(
-            vedtaksperiodeId = id,
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
             gjeldendeTilstand = tilstand.type,
             forrigeTilstand = previousState.type,
             aktivitetslogg = aktivitetslogg.toMap(),
@@ -540,7 +530,7 @@ internal class Vedtaksperiode private constructor(
             makstid = tilstand.makstid(this, LocalDateTime.now())
         )
 
-        person.vedtaksperiodeEndret(event)
+        person.vedtaksperiodeEndret(aktivitetslogg, event)
     }
 
     private fun vedtakFattet(hendelse: IAktivitetslogg) {
@@ -554,7 +544,6 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun gjenopptaBehandling(hendelse: ArbeidstakerHendelse, nesteTilstand: Vedtaksperiodetilstand) {
-        hendelse.kontekst(arbeidsgiver)
         kontekst(hendelse)
         tilstand(hendelse, nesteTilstand)
     }
@@ -794,8 +783,8 @@ internal class Vedtaksperiode private constructor(
         person.harArbeidsgivereMedOverlappendeUtbetaltePerioder(organisasjonsnummer, periode)
 
     private fun Vedtaksperiodetilstand.påminnelse(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-        if (!påminnelse.gjelderTilstand(type)) return vedtaksperiode.person.vedtaksperiodeIkkePåminnet(påminnelse, vedtaksperiode.id, type)
-        vedtaksperiode.person.vedtaksperiodePåminnet(vedtaksperiode.id, påminnelse)
+        if (!påminnelse.gjelderTilstand(type)) return vedtaksperiode.person.vedtaksperiodeIkkePåminnet(påminnelse, type)
+        vedtaksperiode.person.vedtaksperiodePåminnet(påminnelse)
         if (LocalDateTime.now() >= makstid(
                 vedtaksperiode,
                 påminnelse.tilstandsendringstidspunkt()
@@ -1420,11 +1409,11 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.trengerInntektsmelding()
+            vedtaksperiode.trengerInntektsmelding(hendelse.hendelseskontekst())
         }
 
         override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
-            vedtaksperiode.trengerIkkeInntektsmelding()
+            vedtaksperiode.trengerIkkeInntektsmelding(aktivitetslogg.hendelseskontekst())
         }
     }
 
@@ -1489,7 +1478,7 @@ internal class Vedtaksperiode private constructor(
         override val type = AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.person.inntektsmeldingReplay(PersonObserver.InntektsmeldingReplayEvent(vedtaksperiode.fødselsnummer, vedtaksperiode.id))
+            vedtaksperiode.person.inntektsmeldingReplay(vedtaksperiode.id)
         }
 
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {}
@@ -1632,9 +1621,9 @@ internal class Vedtaksperiode private constructor(
         override val type = AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.person.inntektsmeldingReplay(PersonObserver.InntektsmeldingReplayEvent(vedtaksperiode.fødselsnummer, vedtaksperiode.id))
+            vedtaksperiode.person.inntektsmeldingReplay(vedtaksperiode.id)
             if (vedtaksperiode.arbeidsgiver.finnForkastetSykeperiodeRettFør(vedtaksperiode) == null) {
-                vedtaksperiode.trengerInntektsmelding()
+                vedtaksperiode.trengerInntektsmelding(hendelse.hendelseskontekst())
             }
             vedtaksperiode.trengerHistorikkFraInfotrygd(hendelse)
         }
@@ -1688,7 +1677,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
-            vedtaksperiode.trengerIkkeInntektsmelding()
+            vedtaksperiode.trengerIkkeInntektsmelding(aktivitetslogg.hendelseskontekst())
         }
 
     }
@@ -1961,7 +1950,7 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             vedtaksperiode.håndterOverlappendeSøknad(søknad, AvventerHistorikk)
             if (søknad.hasErrorsOrWorse()) return
-            vedtaksperiode.emitVedtaksperiodeReberegnet()
+            vedtaksperiode.emitVedtaksperiodeReberegnet(søknad.hendelseskontekst())
         }
 
         override fun håndter(

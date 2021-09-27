@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonHendelse
@@ -69,11 +70,11 @@ internal class PersonMediator(
         meldinger.add(Pakke(fødselsnummer, eventName, message))
     }
 
-    override fun inntektsmeldingReplay(event: PersonObserver.InntektsmeldingReplayEvent) {
-        hendelseRepository.finnInntektsmeldinger(event.fnr).forEach { inntektsmelding ->
+    override fun inntektsmeldingReplay(fødselsnummer: String, vedtaksperiodeId: UUID) {
+        hendelseRepository.finnInntektsmeldinger(fødselsnummer).forEach { inntektsmelding ->
             createReplayMessage(inntektsmelding, mapOf(
                 "@event_name" to "inntektsmelding_replay",
-                "vedtaksperiodeId" to event.vedtaksperiodeId
+                "vedtaksperiodeId" to vedtaksperiodeId
             ))
         }
     }
@@ -85,15 +86,14 @@ internal class PersonMediator(
         replays.add(message.toString())
     }
 
-    override fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, påminnelse: Påminnelse) {
+    override fun vedtaksperiodePåminnet(hendelseskontekst: Hendelseskontekst, påminnelse: Påminnelse) {
         queueMessage("vedtaksperiode_påminnet", JsonMessage.newMessage(påminnelse.toOutgoingMessage()))
     }
 
-    override fun vedtaksperiodeIkkePåminnet(påminnelse: Påminnelse, vedtaksperiodeId: UUID, nåværendeTilstand: TilstandType) {
+    override fun vedtaksperiodeIkkePåminnet(hendelseskontekst: Hendelseskontekst, nåværendeTilstand: TilstandType) {
         queueMessage(
             "vedtaksperiode_ikke_påminnet", JsonMessage.newMessage(
                 mapOf(
-                    "vedtaksperiodeId" to vedtaksperiodeId,
                     "tilstand" to nåværendeTilstand
                 )
             )
@@ -160,22 +160,16 @@ internal class PersonMediator(
             )
         )
 
-    override fun vedtaksperiodeReberegnet(vedtaksperiodeId: UUID) {
+    override fun vedtaksperiodeReberegnet(hendelseskontekst: Hendelseskontekst) {
         queueMessage(
-            "vedtaksperiode_reberegnet", JsonMessage.newMessage(
-                mapOf(
-                    "vedtaksperiodeId" to vedtaksperiodeId
-                )
-            )
+            "vedtaksperiode_reberegnet", JsonMessage.newMessage()
         )
     }
 
-    override fun vedtaksperiodeEndret(event: PersonObserver.VedtaksperiodeEndretEvent) {
+    override fun vedtaksperiodeEndret(hendelseskontekst: Hendelseskontekst, event: PersonObserver.VedtaksperiodeEndretEvent) {
         queueMessage(
             "vedtaksperiode_endret", JsonMessage.newMessage(
                 mapOf(
-                    "vedtaksperiodeId" to event.vedtaksperiodeId,
-                    "organisasjonsnummer" to event.organisasjonsnummer,
                     "gjeldendeTilstand" to event.gjeldendeTilstand,
                     "forrigeTilstand" to event.forrigeTilstand,
                     "aktivitetslogg" to event.aktivitetslogg.toMap(),
@@ -187,11 +181,10 @@ internal class PersonMediator(
         )
     }
 
-    override fun vedtaksperiodeAvbrutt(event: PersonObserver.VedtaksperiodeAvbruttEvent) {
+    override fun vedtaksperiodeAvbrutt(hendelseskontekst: Hendelseskontekst, event: PersonObserver.VedtaksperiodeAvbruttEvent) {
         queueMessage(
             "vedtaksperiode_forkastet", JsonMessage.newMessage(
                 mapOf(
-                    "vedtaksperiodeId" to event.vedtaksperiodeId,
                     "tilstand" to event.gjeldendeTilstand
                 )
             )
@@ -199,11 +192,12 @@ internal class PersonMediator(
     }
 
     override fun vedtakFattet(
-        event: PersonObserver.VedtakFattetEvent) {
+        hendelseskontekst: Hendelseskontekst,
+        event: PersonObserver.VedtakFattetEvent
+    ) {
         vedtak = true
         queueMessage("vedtak_fattet", JsonMessage.newMessage(
             mutableMapOf(
-                "vedtaksperiodeId" to event.vedtaksperiodeId,
                 "fom" to event.periode.start,
                 "tom" to event.periode.endInclusive,
                 "hendelser" to event.hendelseIder,
@@ -267,7 +261,7 @@ internal class PersonMediator(
         queueMessage("person_avstemt", JsonMessage.newMessage(result))
     }
 
-    override fun vedtaksperiodeIkkeFunnet(vedtaksperiodeEvent: PersonObserver.VedtaksperiodeIkkeFunnetEvent) {
+    override fun vedtaksperiodeIkkeFunnet(hendelseskontekst: Hendelseskontekst, vedtaksperiodeEvent: PersonObserver.VedtaksperiodeIkkeFunnetEvent) {
         queueMessage(
             "vedtaksperiode_ikke_funnet", JsonMessage.newMessage(
                 mapOf(
@@ -277,11 +271,10 @@ internal class PersonMediator(
         )
     }
 
-    override fun manglerInntektsmelding(event: PersonObserver.ManglendeInntektsmeldingEvent) {
+    override fun manglerInntektsmelding(hendelseskontekst: Hendelseskontekst, event: PersonObserver.ManglendeInntektsmeldingEvent) {
         queueMessage(
             "trenger_inntektsmelding", JsonMessage.newMessage(
                 mapOf(
-                    "vedtaksperiodeId" to event.vedtaksperiodeId,
                     "fom" to event.fom,
                     "tom" to event.tom
                 )
@@ -289,11 +282,10 @@ internal class PersonMediator(
         )
     }
 
-    override fun trengerIkkeInntektsmelding(event: PersonObserver.TrengerIkkeInntektsmeldingEvent) {
+    override fun trengerIkkeInntektsmelding(hendelseskontekst: Hendelseskontekst, event: PersonObserver.TrengerIkkeInntektsmeldingEvent) {
         queueMessage(
             "trenger_ikke_inntektsmelding", JsonMessage.newMessage(
                 mapOf(
-                    "vedtaksperiodeId" to event.vedtaksperiodeId,
                     "fom" to event.fom,
                     "tom" to event.tom
                 )

@@ -42,11 +42,9 @@ class Påminnelse(
 
     internal fun vedtaksperiodeIkkeFunnet(observer: PersonObserver) {
         observer.vedtaksperiodeIkkeFunnet(
+            hendelseskontekst(),
             PersonObserver.VedtaksperiodeIkkeFunnetEvent(
-                vedtaksperiodeId = UUID.fromString(vedtaksperiodeId),
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                organisasjonsnummer = organisasjonsnummer
+                vedtaksperiodeId = UUID.fromString(vedtaksperiodeId)
             )
         )
     }

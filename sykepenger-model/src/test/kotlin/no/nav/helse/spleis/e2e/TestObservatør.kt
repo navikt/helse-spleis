@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.VedtaksperiodeEndretEvent
 import no.nav.helse.person.TilstandType
@@ -60,35 +61,34 @@ internal class TestObservatør : PersonObserver {
         utbetaltEndretEventer.add(event)
     }
 
-    override fun vedtakFattet(event: PersonObserver.VedtakFattetEvent) {
-        vedtakFattetEvent[event.vedtaksperiodeId] = event
+    override fun vedtakFattet(hendelseskontekst: Hendelseskontekst, event: PersonObserver.VedtakFattetEvent) {
+        vedtakFattetEvent[hendelseskontekst.vedtaksperiodeId()] = event
     }
 
-    override fun vedtaksperiodeEndret(event: VedtaksperiodeEndretEvent) {
-        sisteVedtaksperiode = event.vedtaksperiodeId
-        vedtaksperiodeendringer.getOrPut(event.vedtaksperiodeId) { mutableListOf(event) }.add(event)
-        vedtaksperioder.getOrPut(event.organisasjonsnummer) { mutableSetOf() }.add(sisteVedtaksperiode)
+    override fun vedtaksperiodeEndret(hendelseskontekst: Hendelseskontekst, event: VedtaksperiodeEndretEvent) {
+        sisteVedtaksperiode = hendelseskontekst.vedtaksperiodeId()
+        vedtaksperiodeendringer.getOrPut(hendelseskontekst.vedtaksperiodeId()) { mutableListOf(event) }.add(event)
+        vedtaksperioder.getOrPut(hendelseskontekst.orgnummer()) { mutableSetOf() }.add(sisteVedtaksperiode)
         if (event.gjeldendeTilstand != event.forrigeTilstand) {
-            tilstandsendringer.getOrPut(event.vedtaksperiodeId) { mutableListOf(TilstandType.START) }.add(event.gjeldendeTilstand)
+            tilstandsendringer.getOrPut(hendelseskontekst.vedtaksperiodeId()) { mutableListOf(TilstandType.START) }.add(event.gjeldendeTilstand)
         }
-        if (event.gjeldendeTilstand == TilstandType.AVSLUTTET) utbetalteVedtaksperioder.add(event.vedtaksperiodeId)
+        if (event.gjeldendeTilstand == TilstandType.AVSLUTTET) utbetalteVedtaksperioder.add(hendelseskontekst.vedtaksperiodeId())
     }
 
-
-    override fun vedtaksperiodeReberegnet(vedtaksperiodeId: UUID) {
-        reberegnedeVedtaksperioder.add(vedtaksperiodeId)
+    override fun vedtaksperiodeReberegnet(hendelseskontekst: Hendelseskontekst) {
+        reberegnedeVedtaksperioder.add(hendelseskontekst.vedtaksperiodeId())
     }
 
-    override fun manglerInntektsmelding(event: PersonObserver.ManglendeInntektsmeldingEvent) {
-        manglendeInntektsmeldingVedtaksperioder.add(event.vedtaksperiodeId)
+    override fun manglerInntektsmelding(hendelseskontekst: Hendelseskontekst, event: PersonObserver.ManglendeInntektsmeldingEvent) {
+        manglendeInntektsmeldingVedtaksperioder.add(hendelseskontekst.vedtaksperiodeId())
     }
 
-    override fun trengerIkkeInntektsmelding(event: PersonObserver.TrengerIkkeInntektsmeldingEvent) {
-        trengerIkkeInntektsmeldingVedtaksperioder.add(event.vedtaksperiodeId)
+    override fun trengerIkkeInntektsmelding(hendelseskontekst: Hendelseskontekst, event: PersonObserver.TrengerIkkeInntektsmeldingEvent) {
+        trengerIkkeInntektsmeldingVedtaksperioder.add(hendelseskontekst.vedtaksperiodeId())
     }
 
-    override fun inntektsmeldingReplay(event: PersonObserver.InntektsmeldingReplayEvent) {
-        inntektsmeldingReplayEventer.add(event.vedtaksperiodeId)
+    override fun inntektsmeldingReplay(fødselsnummer: String, vedtaksperiodeId: UUID) {
+        inntektsmeldingReplayEventer.add(vedtaksperiodeId)
     }
 
     override fun vedtaksperiodeUtbetalt(event: PersonObserver.UtbetaltEvent) {
@@ -99,7 +99,16 @@ internal class TestObservatør : PersonObserver {
         annulleringer.add(event)
     }
 
-    override fun vedtaksperiodeAvbrutt(event: PersonObserver.VedtaksperiodeAvbruttEvent) {
-        avbruttEventer[event.vedtaksperiodeId] = event.gjeldendeTilstand
+    override fun vedtaksperiodeAvbrutt(hendelseskontekst: Hendelseskontekst, event: PersonObserver.VedtaksperiodeAvbruttEvent) {
+        avbruttEventer[hendelseskontekst.vedtaksperiodeId()] = event.gjeldendeTilstand
+    }
+
+    private fun Hendelseskontekst.toMap() = mutableMapOf<String, String>().also { appendTo(it::set) }
+
+    private fun Hendelseskontekst.vedtaksperiodeId(): UUID {
+        return UUID.fromString(toMap()["vedtaksperiodeId"])
+    }
+    private fun Hendelseskontekst.orgnummer(): String {
+        return toMap()["organisasjonsnummer"]!!
     }
 }

@@ -1,44 +1,18 @@
 package no.nav.helse.person
 
+import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Påminnelse
-import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
 interface PersonObserver {
-    data class PersonEndretEvent(
-        val aktørId: String,
-        val person: Person,
-        val fødselsnummer: String
-    )
-
-    data class VedtaksperiodeReplayEvent(
-        val vedtaksperiodeId: UUID,
-        val aktørId: String,
-        val fødselsnummer: String,
-        val organisasjonsnummer: String,
-        val hendelseIder: List<UUID>
-    )
-
-    data class InntektsmeldingReplayEvent(
-        val fnr: String,
+    data class VedtaksperiodeIkkeFunnetEvent(
         val vedtaksperiodeId: UUID
     )
 
-    data class VedtaksperiodeIkkeFunnetEvent(
-        val vedtaksperiodeId: UUID,
-        val aktørId: String,
-        val fødselsnummer: String,
-        val organisasjonsnummer: String
-    )
-
     data class VedtaksperiodeEndretEvent(
-        val vedtaksperiodeId: UUID,
-        val aktørId: String,
-        val fødselsnummer: String,
-        val organisasjonsnummer: String,
         val gjeldendeTilstand: TilstandType,
         val forrigeTilstand: TilstandType,
         val aktivitetslogg: Map<String, List<Map<String, Any>>>,
@@ -48,10 +22,6 @@ interface PersonObserver {
     )
 
     data class VedtaksperiodeAvbruttEvent(
-        val vedtaksperiodeId: UUID,
-        val aktørId: String,
-        val fødselsnummer: String,
-        val organisasjonsnummer: String,
         val gjeldendeTilstand: TilstandType
     )
 
@@ -112,17 +82,11 @@ interface PersonObserver {
     }
 
     data class ManglendeInntektsmeldingEvent(
-        val vedtaksperiodeId: UUID,
-        val fødselsnummer: String,
-        val organisasjonsnummer: String,
         val fom: LocalDate,
         val tom: LocalDate
     )
 
     data class TrengerIkkeInntektsmeldingEvent(
-        val vedtaksperiodeId: UUID,
-        val fødselsnummer: String,
-        val organisasjonsnummer: String,
         val fom: LocalDate,
         val tom: LocalDate
     )
@@ -188,7 +152,6 @@ interface PersonObserver {
     )
 
     data class VedtakFattetEvent(
-        val vedtaksperiodeId: UUID,
         val periode: Periode,
         val hendelseIder: Set<UUID>,
         val skjæringstidspunkt: LocalDate,
@@ -198,18 +161,18 @@ interface PersonObserver {
         val utbetalingId: UUID?
     )
 
-    fun inntektsmeldingReplay(event: InntektsmeldingReplayEvent) {}
-    fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, påminnelse: Påminnelse) {}
-    fun vedtaksperiodeIkkePåminnet(påminnelse: Påminnelse, vedtaksperiodeId: UUID, nåværendeTilstand: TilstandType) {}
-    fun vedtaksperiodeEndret(event: VedtaksperiodeEndretEvent) {}
-    fun vedtaksperiodeReberegnet(vedtaksperiodeId: UUID) {}
-    fun vedtaksperiodeAvbrutt(event: VedtaksperiodeAvbruttEvent) {}
+    fun inntektsmeldingReplay(fødselsnummer: String, vedtaksperiodeId: UUID) {}
+    fun vedtaksperiodePåminnet(hendelseskontekst: Hendelseskontekst, påminnelse: Påminnelse) {}
+    fun vedtaksperiodeIkkePåminnet(hendelseskontekst: Hendelseskontekst, nåværendeTilstand: TilstandType) {}
+    fun vedtaksperiodeEndret(hendelseskontekst: Hendelseskontekst, event: VedtaksperiodeEndretEvent) {}
+    fun vedtaksperiodeReberegnet(hendelseskontekst: Hendelseskontekst) {}
+    fun vedtaksperiodeAvbrutt(hendelseskontekst: Hendelseskontekst, event: VedtaksperiodeAvbruttEvent) {}
     @Deprecated("Fjernes til fordel for utbetaling_utbetalt")
     fun vedtaksperiodeUtbetalt(event: UtbetaltEvent) {}
-    fun personEndret(personEndretEvent: PersonEndretEvent) {}
-    fun vedtaksperiodeIkkeFunnet(vedtaksperiodeEvent: VedtaksperiodeIkkeFunnetEvent) {}
-    fun manglerInntektsmelding(event: ManglendeInntektsmeldingEvent) {}
-    fun trengerIkkeInntektsmelding(event: TrengerIkkeInntektsmeldingEvent) {}
+    fun personEndret(hendelseskontekst: Hendelseskontekst) {}
+    fun vedtaksperiodeIkkeFunnet(hendelseskontekst: Hendelseskontekst, vedtaksperiodeEvent: VedtaksperiodeIkkeFunnetEvent) {}
+    fun manglerInntektsmelding(hendelseskontekst: Hendelseskontekst, event: ManglendeInntektsmeldingEvent) {}
+    fun trengerIkkeInntektsmelding(hendelseskontekst: Hendelseskontekst, event: TrengerIkkeInntektsmeldingEvent) {}
     fun utbetalingEndret(event: UtbetalingEndretEvent) {}
     fun utbetalingUtbetalt(event: UtbetalingUtbetaltEvent) {}
     fun utbetalingUtenUtbetaling(event: UtbetalingUtbetaltEvent) {}
@@ -217,5 +180,5 @@ interface PersonObserver {
     fun annullering(event: UtbetalingAnnullertEvent) {}
     fun avstemt(result: Map<String, Any>) {}
     fun hendelseIkkeHåndtert(event: HendelseIkkeHåndtertEvent) {}
-    fun vedtakFattet(event: VedtakFattetEvent) {}
+    fun vedtakFattet(hendelseskontekst: Hendelseskontekst, event: VedtakFattetEvent) {}
 }

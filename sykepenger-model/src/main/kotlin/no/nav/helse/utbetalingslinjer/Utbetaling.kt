@@ -272,13 +272,13 @@ internal class Utbetaling private constructor(
             inntekt: Inntekt
         ) {
             utbetaling?.vedtakFattet(hendelse, person, vedtaksperiodeId, periode, hendelseIder, skjæringstidspunkt, sykepengegrunnlag, grunnlagForSykepengegrunnlag, inntekt)
-                ?: sendVedtakFattet(utbetaling, person, vedtaksperiodeId, periode, hendelseIder, skjæringstidspunkt, sykepengegrunnlag, grunnlagForSykepengegrunnlag, inntekt)
+                ?: sendVedtakFattet(hendelse.hendelseskontekst(), utbetaling, person, periode, hendelseIder, skjæringstidspunkt, sykepengegrunnlag, grunnlagForSykepengegrunnlag, inntekt)
         }
 
         private fun sendVedtakFattet(
+            hendelseskontekst: Hendelseskontekst,
             utbetaling: Utbetaling?,
             person: Person,
-            vedtaksperiodeId: UUID,
             periode: Periode,
             hendelseIder: Set<UUID>,
             skjæringstidspunkt: LocalDate,
@@ -286,8 +286,7 @@ internal class Utbetaling private constructor(
             grunnlagForSykepengegrunnlag: Map<String, Double>,
             inntekt: Inntekt
         ) {
-            person.vedtakFattet(PersonObserver.VedtakFattetEvent(
-                vedtaksperiodeId,
+            person.vedtakFattet(hendelseskontekst, PersonObserver.VedtakFattetEvent(
                 periode,
                 hendelseIder,
                 skjæringstidspunkt,
@@ -649,7 +648,7 @@ internal class Utbetaling private constructor(
         ) {
             check(!utbetaling.harUtbetalinger()) { "Kan ikke lukkes når utbetaling har utbetalinger" }
             godkjenn(utbetaling, hendelse, Vurdering.automatiskGodkjent)
-            sendVedtakFattet(utbetaling, person, vedtaksperiodeId, periode, hendelseIder, skjæringstidspunkt, sykepengegrunnlag, grunnlagForSykepengegrunnlag, inntekt)
+            sendVedtakFattet(hendelse.hendelseskontekst(), utbetaling, person, periode, hendelseIder, skjæringstidspunkt, sykepengegrunnlag, grunnlagForSykepengegrunnlag, inntekt)
         }
 
         override fun godkjenn(utbetaling: Utbetaling, hendelse: IAktivitetslogg, vurdering: Vurdering) {
@@ -706,7 +705,7 @@ internal class Utbetaling private constructor(
             grunnlagForSykepengegrunnlag: Map<String, Double>,
             inntekt: Inntekt
         ) {
-            sendVedtakFattet(utbetaling, person, vedtaksperiodeId, periode, hendelseIder, skjæringstidspunkt, sykepengegrunnlag, grunnlagForSykepengegrunnlag, inntekt)
+            sendVedtakFattet(hendelse.hendelseskontekst(), utbetaling, person, periode, hendelseIder, skjæringstidspunkt, sykepengegrunnlag, grunnlagForSykepengegrunnlag, inntekt)
         }
 
         override fun avslutt(
@@ -835,7 +834,7 @@ internal class Utbetaling private constructor(
             grunnlagForSykepengegrunnlag: Map<String, Double>,
             inntekt: Inntekt
         ) {
-            sendVedtakFattet(utbetaling, person, vedtaksperiodeId, periode, hendelseIder, skjæringstidspunkt, sykepengegrunnlag, grunnlagForSykepengegrunnlag, inntekt)
+            sendVedtakFattet(hendelse.hendelseskontekst(), utbetaling, person, periode, hendelseIder, skjæringstidspunkt, sykepengegrunnlag, grunnlagForSykepengegrunnlag, inntekt)
         }
 
         override fun avslutt(
