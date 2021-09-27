@@ -1,19 +1,23 @@
 package no.nav.helse.serde.api.v2.buildere
 
 import no.nav.helse.Toggles
+import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.serde.api.InntektsgrunnlagDTO
-import no.nav.helse.serde.api.InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.Inntektsmelding
+import no.nav.helse.serde.api.InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.*
 import no.nav.helse.serde.api.MedlemskapstatusDTO
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.Kilde
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.mars
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -49,8 +53,6 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         håndterYtelser()
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt = inntekt)
-        håndterYtelser()
-        håndterSimulering()
 
         val vilkårsgrunnlagGenerasjoner = vilkårsgrunnlag.generasjoner()
 
@@ -114,13 +116,63 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
+    @Disabled("Vi støtter ikke revurdering av inntekt på flere arbeidsgivere. Vi overstyrer begge arbeidsgiverne")
     fun `revurdering av inntekt flere AG`() {
+        nyeVedtak(1.januar, 31.januar, AG1, AG2) {
+            lagInntektperioder(fom = 1.januar, inntekt = 19000.månedlig, orgnummer = AG1)
+            lagInntektperioder(fom = 1.januar, inntekt = 21000.månedlig, orgnummer = AG2)
+        }
 
+        håndterOverstyring(inntekt = 18000.månedlig, skjæringstidspunkt = 1.januar, orgnummer = AG1)
+
+        val innslag = inspektør.vilkårsgrunnlagHistorikkInnslag()
+        val generasjoner = vilkårsgrunnlag.generasjoner()
+        assertEquals(2, generasjoner.size)
+
+        val førsteGenerasjon = requireNotNull(generasjoner[innslag.last().id]?.vilkårsgrunnlagSpleis(1.januar))
+        assertSpleisVilkårsprøving(førsteGenerasjon, 480000.0, 93634, true, 0.0, MedlemskapstatusDTO.JA, 480000.0, 1.januar)
+
+        assertEquals(2, førsteGenerasjon.inntekter.size)
+        val inntektAg1 = førsteGenerasjon.inntekter.first { it.arbeidsgiver == AG1 }
+        assertArbeidsgiverinnekt(inntektAg1, sammenligningsgrunnlag = 228000.0, omregnetÅrsinntektBeløp = 240000.0, kilde = Inntektsmelding, månedsbeløp= 20000.0)
+
+        val inntektAg2 = førsteGenerasjon.inntekter.first { it.arbeidsgiver == AG2 }
+        assertArbeidsgiverinnekt(inntektAg2, sammenligningsgrunnlag = 252000.0, omregnetÅrsinntektBeløp = 240000.0, kilde = Inntektsmelding, månedsbeløp= 20000.0)
+
+        val andreGenerasjon = requireNotNull(generasjoner[innslag.first().id]?.vilkårsgrunnlagSpleis(1.januar))
+        assertSpleisVilkårsprøving(andreGenerasjon, 480000.0, 93634, true, 5.3, MedlemskapstatusDTO.JA, 456000.0, 1.januar)
+
+        assertEquals(2, andreGenerasjon.inntekter.size)
+        val inntekt2Ag1 = andreGenerasjon.inntekter.first { it.arbeidsgiver == AG1 }
+        assertArbeidsgiverinnekt(inntekt2Ag1, sammenligningsgrunnlag = 228000.0, omregnetÅrsinntektBeløp = 216000.0, kilde = Saksbehandler, månedsbeløp= 18000.0)
+
+        val inntekt2Ag2 = andreGenerasjon.inntekter.first { it.arbeidsgiver == AG2 }
+        assertEquals(inntektAg2, inntekt2Ag2)
     }
 
     @Test
     fun `flere skjæringstidspunkt`() {
+        nyttVedtak(1.januar, 31.januar)
 
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
+        håndterInntektsmelding(listOf(1.mars til 16.mars))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent))
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode, medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.VetIkke)
+
+        val generasjoner = vilkårsgrunnlag.generasjoner()
+
+        val førsteGenerasjon = generasjoner.første().vilkårsgrunnlagSpleis(1.januar)
+        assertSpleisVilkårsprøving(førsteGenerasjon, 372000.0, 93634, true, 0.0, MedlemskapstatusDTO.JA, 372000.0, 1.januar)
+        assertEquals(1, førsteGenerasjon.inntekter.size)
+        val inntekt = førsteGenerasjon.inntekter.first()
+        assertInntekt(inntekt, ORGNUMMER, 372000.0, 372000.0, Inntektsmelding, 31000.0, false)
+
+        val andreGenerasjon = generasjoner.første().vilkårsgrunnlagSpleis(1.mars)
+        assertSpleisVilkårsprøving(andreGenerasjon, 372000.0, 93634, true, 0.0, MedlemskapstatusDTO.VET_IKKE, 372000.0, 1.mars)
+        assertEquals(1, førsteGenerasjon.inntekter.size)
+        val inntekt2 = førsteGenerasjon.inntekter.first()
+        assertEquals(inntekt, inntekt2)
     }
 
     @Test
@@ -161,6 +213,19 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         assertEquals(medlemskapstatus, vilkårsgrunnlag.medlemskapstatus)
         assertEquals(omregnetÅrsinntekt, vilkårsgrunnlag.omregnetÅrsinntekt)
         assertEquals(skjæringstidspunkt, vilkårsgrunnlag.skjæringstidspunkt)
+    }
+
+    private fun assertArbeidsgiverinnekt(
+        inntekt: InntektsgrunnlagDTO.ArbeidsgiverinntektDTO,
+        sammenligningsgrunnlag: Double,
+        omregnetÅrsinntektBeløp: Double,
+        kilde: InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO,
+        månedsbeløp: Double
+    ) {
+        assertEquals(sammenligningsgrunnlag, inntekt.sammenligningsgrunnlag?.beløp)
+        assertEquals(omregnetÅrsinntektBeløp, inntekt.omregnetÅrsinntekt?.beløp)
+        assertEquals(kilde, inntekt.omregnetÅrsinntekt?.kilde)
+        assertEquals(månedsbeløp, inntekt.omregnetÅrsinntekt?.månedsbeløp)
     }
 
     private fun assertInntekt(
