@@ -5,11 +5,13 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
+import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
+import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.api.InntektsgrunnlagDTO
 import no.nav.helse.serde.api.InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.*
 import no.nav.helse.serde.api.MedlemskapstatusDTO
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.spleis.e2e.Kilde
+import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -176,25 +178,36 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `infotrygdforlengelse`() {
+    fun `har ikke sammenligningsgrunnlag etter overgang fra Infotrygd`() {
+        val skjæringstidspunkt = 1.desember(2017)
+        val infotrygdperioder = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, skjæringstidspunkt, 31.desember(2017), 100.prosent, inntekt))
+        val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, skjæringstidspunkt, inntekt, true))
 
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode, *infotrygdperioder, inntektshistorikk = inntektshistorikk)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+
+        val generasjoner = vilkårsgrunnlag.generasjoner()
+
+        val førsteGenerasjon = generasjoner.første().vilkårsgrunnlagInfotrygd(skjæringstidspunkt)
+        assertInfotrygdVilkårsprøving(førsteGenerasjon, skjæringstidspunkt, 480000.0)
+        assertEquals(1, førsteGenerasjon.inntekter.size)
+        val inntekt = førsteGenerasjon.inntekter.first()
+        assertInntekt(inntekt, ORGNUMMER, null, 480000.0, Infotrygd, primitivInntekt, false)
     }
 
-//    @Test
-//    fun `har ikke sammenligningsgrunnlag etter overgang fra Infotrygd`() {
-//        val skjæringstidspunkt = 1.desember(2017)
-//        val infotrygdperioder = arrayOf(ArbeidsgiverUtbetalingsperiode(AbstractPersonTest.ORGNUMMER, skjæringstidspunkt, 31.desember(2017), 100.prosent, inntekt))
-//        val inntektshistorikk = listOf(Inntektsopplysning(AbstractPersonTest.ORGNUMMER, skjæringstidspunkt, inntekt, true))
-//
-//        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-//        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
-//        håndterUtbetalingshistorikk(1.vedtaksperiode, *infotrygdperioder, inntektshistorikk = inntektshistorikk)
-//        håndterYtelser(1.vedtaksperiode)
-//        håndterSimulering(1.vedtaksperiode)
-//
-//        assertEquals(null, grunnlag.sammenligningsgrunnlag(AbstractPersonTest.ORGNUMMER, skjæringstidspunkt))
-//    }
-//
+
+    private fun assertInfotrygdVilkårsprøving(
+        vilkårsgrunnlag: InfotrygdGrunnlag,
+        skjæringstidspunkt: LocalDate,
+        omregnetÅrsinntekt: Double,
+    ) {
+        assertEquals(skjæringstidspunkt, vilkårsgrunnlag.skjæringstidspunkt)
+        assertNull(vilkårsgrunnlag.sammenligningsgrunnlag)
+        assertEquals(omregnetÅrsinntekt, vilkårsgrunnlag.omregnetÅrsinntekt)
+    }
 
     private fun assertSpleisVilkårsprøving(
         vilkårsgrunnlag: SpleisGrunnlag,
@@ -231,7 +244,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
     private fun assertInntekt(
         inntekt: InntektsgrunnlagDTO.ArbeidsgiverinntektDTO,
         orgnummer: String,
-        sammenligningsgrunnlag: Double,
+        sammenligningsgrunnlag: Double?,
         omregnetÅrsinntekt: Double,
         inntektskilde: InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO,
         omregnetÅrsinntektMånedsbeløp: Double,
