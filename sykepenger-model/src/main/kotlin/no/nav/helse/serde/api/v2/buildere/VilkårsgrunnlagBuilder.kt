@@ -43,6 +43,7 @@ internal interface IVilkårsgrunnlag {
     val skjæringstidspunkt: LocalDate
     val omregnetÅrsinntekt: Double?
     val sammenligningsgrunnlag: Double?
+    val sykepengegrunnlag: Double
     val inntekter: List<Arbeidsgiverinntekt>
 }
 
@@ -51,17 +52,20 @@ internal class SpleisGrunnlag(
     override val omregnetÅrsinntekt: Double?,
     override val sammenligningsgrunnlag: Double?,
     override val inntekter: List<Arbeidsgiverinntekt>,
+    override val sykepengegrunnlag: Double,
     val avviksprosent: Double?,
     val oppfyllerKravOmMinstelønn: Boolean?,
     val grunnbeløp: Int,
-    val medlemskapstatus: MedlemskapstatusDTO
+    val medlemskapstatus: MedlemskapstatusDTO,
+
 ) : IVilkårsgrunnlag
 
 internal class InfotrygdGrunnlag(
     override val skjæringstidspunkt: LocalDate,
     override val omregnetÅrsinntekt: Double?,
     override val sammenligningsgrunnlag: Double?,
-    override val inntekter: List<Arbeidsgiverinntekt>
+    override val inntekter: List<Arbeidsgiverinntekt>,
+    override val sykepengegrunnlag: Double
 ) : IVilkårsgrunnlag
 
 internal class InntektBuilder(private val inntekt: Inntekt) {
@@ -121,7 +125,8 @@ internal class VilkårsgrunnlagBuilder(
                     avviksprosent = avviksprosent,
                     oppfyllerKravOmMinstelønn = grunnlagsdata.harOpptjening,
                     grunnbeløp = grunnbeløp.årlig.toInt(),
-                    medlemskapstatus = medlemskapstatus
+                    medlemskapstatus = medlemskapstatus,
+                    sykepengegrunnlag = sykepengegrunnlag.sykepengegrunnlag
                 )
             )
         }
@@ -135,9 +140,10 @@ internal class VilkårsgrunnlagBuilder(
             vilkårsgrunnlag.putIfAbsent(
                 skjæringstidspunkt, InfotrygdGrunnlag(
                     skjæringstidspunkt = skjæringstidspunkt,
-                    omregnetÅrsinntekt = byggetSykepengegrunnlag.sykepengegrunnlag,
+                    omregnetÅrsinntekt = byggetSykepengegrunnlag.omregnetÅrsinntekt,
                     sammenligningsgrunnlag = null,
-                    inntekter = byggetSykepengegrunnlag.inntekterPerArbeidsgiver
+                    inntekter = byggetSykepengegrunnlag.inntekterPerArbeidsgiver,
+                    sykepengegrunnlag = byggetSykepengegrunnlag.sykepengegrunnlag
                 )
             )
         }

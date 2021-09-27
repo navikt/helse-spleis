@@ -16,7 +16,7 @@ internal class Sykepengegrunnlag(
         arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
         skjæringstidspunkt: LocalDate,
     ) : this(
-        minOf(arbeidsgiverInntektsopplysninger.inntekt(), Grunnbeløp.`6G`.beløp(skjæringstidspunkt)), 
+        minOf(arbeidsgiverInntektsopplysninger.inntekt(), Grunnbeløp.`6G`.beløp(skjæringstidspunkt)),
         arbeidsgiverInntektsopplysninger,
         arbeidsgiverInntektsopplysninger.inntekt()
     )
