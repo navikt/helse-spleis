@@ -499,6 +499,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     override fun utbetalingUtbetalt(
+        hendelseskontekst: Hendelseskontekst,
         id: UUID,
         type: Utbetaling.Utbetalingtype,
         periode: Periode,
@@ -514,6 +515,7 @@ internal class Arbeidsgiver private constructor(
         utbetalingstidslinje: Utbetalingstidslinje,
     ) {
         person.utbetalingUtbetalt(
+            hendelseskontekst,
             PersonObserver.UtbetalingUtbetaltEvent(
                 utbetalingId = id,
                 type = type.name,
@@ -535,6 +537,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     override fun utbetalingUtenUtbetaling(
+        hendelseskontekst: Hendelseskontekst,
         id: UUID,
         type: Utbetaling.Utbetalingtype,
         periode: Periode,
@@ -550,6 +553,7 @@ internal class Arbeidsgiver private constructor(
         utbetalingstidslinje: Utbetalingstidslinje,
     ) {
         person.utbetalingUtenUtbetaling(
+            hendelseskontekst,
             PersonObserver.UtbetalingUtbetaltEvent(
                 utbetalingId = id,
                 type = type.name,
@@ -571,6 +575,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     override fun utbetalingEndret(
+        hendelseskontekst: Hendelseskontekst,
         id: UUID,
         type: Utbetaling.Utbetalingtype,
         arbeidsgiverOppdrag: Oppdrag,
@@ -579,6 +584,7 @@ internal class Arbeidsgiver private constructor(
         nesteTilstand: Utbetaling.Tilstand
     ) {
         person.utbetalingEndret(
+            hendelseskontekst,
             PersonObserver.UtbetalingEndretEvent(
                 utbetalingId = id,
                 type = type.name,
@@ -591,6 +597,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     override fun utbetalingAnnullert(
+        hendelseskontekst: Hendelseskontekst,
         id: UUID,
         periode: Periode,
         fagsystemId: String,
@@ -599,6 +606,7 @@ internal class Arbeidsgiver private constructor(
         saksbehandlerIdent: String
     ) {
         person.annullert(
+            hendelseskontekst = hendelseskontekst,
             PersonObserver.UtbetalingAnnullertEvent(
                 fagsystemId = fagsystemId,
                 utbetalingId = id,

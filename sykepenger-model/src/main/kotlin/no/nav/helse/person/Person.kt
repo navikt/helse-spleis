@@ -209,7 +209,7 @@ class Person private constructor(
         avstemming.kontekst(this)
         avstemming.info("Avstemmer utbetalinger og vedtaksperioder")
         val result = Avstemmer(this).toMap()
-        observers.forEach { it.avstemt(result) }
+        observers.forEach { it.avstemt(avstemming.hendelseskontekst(), result) }
     }
 
     fun håndter(hendelse: OverstyrTidslinje) {
@@ -225,8 +225,8 @@ class Person private constructor(
         finnArbeidsgiver(hendelse).håndter(hendelse)
     }
 
-    fun annullert(event: PersonObserver.UtbetalingAnnullertEvent) {
-        observers.forEach { it.annullering(event) }
+    fun annullert(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetalingAnnullertEvent) {
+        observers.forEach { it.annullering(hendelseskontekst, event) }
     }
 
     internal fun overstyrUtkastRevurdering(hendelse: OverstyrTidslinje) {
@@ -265,8 +265,8 @@ class Person private constructor(
     }
 
     @Deprecated("Fjernes til fordel for utbetaling_utbetalt")
-    fun vedtaksperiodeUtbetalt(event: PersonObserver.UtbetaltEvent) {
-        observers.forEach { it.vedtaksperiodeUtbetalt(event) }
+    fun vedtaksperiodeUtbetalt(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetaltEvent) {
+        observers.forEach { it.vedtaksperiodeUtbetalt(hendelseskontekst, event) }
     }
 
     fun vedtaksperiodeEndret(aktivitetslogg: IAktivitetslogg, event: PersonObserver.VedtaksperiodeEndretEvent) {
@@ -296,24 +296,24 @@ class Person private constructor(
         observers.forEach { it.trengerIkkeInntektsmelding(hendelseskontekst, event) }
     }
 
-    internal fun utbetalingUtbetalt(event: PersonObserver.UtbetalingUtbetaltEvent) {
-        observers.forEach { it.utbetalingUtbetalt(event) }
+    internal fun utbetalingUtbetalt(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetalingUtbetaltEvent) {
+        observers.forEach { it.utbetalingUtbetalt(hendelseskontekst, event) }
     }
 
-    internal fun utbetalingUtenUtbetaling(event: PersonObserver.UtbetalingUtbetaltEvent) {
-        observers.forEach { it.utbetalingUtenUtbetaling(event) }
+    internal fun utbetalingUtenUtbetaling(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetalingUtbetaltEvent) {
+        observers.forEach { it.utbetalingUtenUtbetaling(hendelseskontekst, event) }
     }
 
-    internal fun utbetalingEndret(event: PersonObserver.UtbetalingEndretEvent) {
-        observers.forEach { it.utbetalingEndret(event) }
+    internal fun utbetalingEndret(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetalingEndretEvent) {
+        observers.forEach { it.utbetalingEndret(hendelseskontekst, event) }
     }
 
     internal fun vedtakFattet(hendelseskontekst: Hendelseskontekst, vedtakFattetEvent: PersonObserver.VedtakFattetEvent) {
         observers.forEach { it.vedtakFattet(hendelseskontekst, vedtakFattetEvent) }
     }
 
-    internal fun feriepengerUtbetalt(feriepengerUtbetaltEvent: PersonObserver.FeriepengerUtbetaltEvent) {
-        observers.forEach { it.feriepengerUtbetalt(feriepengerUtbetaltEvent) }
+    internal fun feriepengerUtbetalt(hendelseskontekst: Hendelseskontekst, feriepengerUtbetaltEvent: PersonObserver.FeriepengerUtbetaltEvent) {
+        observers.forEach { it.feriepengerUtbetalt(hendelseskontekst, feriepengerUtbetaltEvent) }
     }
 
     fun håndter(hendelse: AnnullerUtbetaling) {
@@ -532,7 +532,7 @@ class Person private constructor(
     }
 
     internal fun førerIkkeTilVidereBehandling(hendelse: PersonHendelse) {
-        observers.forEach { it.hendelseIkkeHåndtert(PersonObserver.HendelseIkkeHåndtertEvent(hendelse.meldingsreferanseId())) }
+        observers.forEach { it.hendelseIkkeHåndtert(hendelse.hendelseskontekst(), PersonObserver.HendelseIkkeHåndtertEvent(hendelse.meldingsreferanseId())) }
     }
 
     internal fun harArbeidsgivereMedOverlappendeUtbetaltePerioder(organisasjonsnummer: String, periode: Periode) =

@@ -1,5 +1,6 @@
 package no.nav.helse.utbetalingslinjer
 
+import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
@@ -8,6 +9,7 @@ import java.util.*
 
 internal interface UtbetalingObserver {
     fun utbetalingAnnullert(
+        hendelseskontekst: Hendelseskontekst,
         id: UUID,
         periode: Periode,
         fagsystemId: String,
@@ -17,6 +19,7 @@ internal interface UtbetalingObserver {
     )
 
     fun utbetalingUtbetalt(
+        hendelseskontekst: Hendelseskontekst,
         id: UUID,
         type: Utbetaling.Utbetalingtype,
         periode: Periode,
@@ -34,6 +37,7 @@ internal interface UtbetalingObserver {
     }
 
     fun utbetalingUtenUtbetaling(
+        hendelseskontekst: Hendelseskontekst,
         id: UUID,
         type: Utbetaling.Utbetalingtype,
         periode: Periode,
@@ -51,6 +55,7 @@ internal interface UtbetalingObserver {
     }
 
     fun utbetalingEndret(
+        hendelseskontekst: Hendelseskontekst,
         id: UUID,
         type: Utbetaling.Utbetalingtype,
         arbeidsgiverOppdrag: Oppdrag,

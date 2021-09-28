@@ -41,23 +41,23 @@ internal class TestObservatør : PersonObserver {
     fun avbruttePerioder() = avbruttEventer.size
     fun avbrutt(vedtaksperiodeId: UUID) = avbruttEventer.getValue(vedtaksperiodeId)
 
-    override fun avstemt(result: Map<String, Any>) {
+    override fun avstemt(hendelseskontekst: Hendelseskontekst, result: Map<String, Any>) {
         avstemming = result
     }
 
-    override fun utbetalingUtenUtbetaling(event: PersonObserver.UtbetalingUtbetaltEvent) {
+    override fun utbetalingUtenUtbetaling(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetalingUtbetaltEvent) {
         utbetalingUtenUtbetalingEventer.add(event)
     }
 
-    override fun utbetalingUtbetalt(event: PersonObserver.UtbetalingUtbetaltEvent) {
+    override fun utbetalingUtbetalt(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetalingUtbetaltEvent) {
         utbetalingMedUtbetalingEventer.add(event)
     }
 
-    override fun feriepengerUtbetalt(event: PersonObserver.FeriepengerUtbetaltEvent) {
+    override fun feriepengerUtbetalt(hendelseskontekst: Hendelseskontekst, event: PersonObserver.FeriepengerUtbetaltEvent) {
         feriepengerUtbetaltEventer.add(event)
     }
 
-    override fun utbetalingEndret(event: PersonObserver.UtbetalingEndretEvent) {
+    override fun utbetalingEndret(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetalingEndretEvent) {
         utbetaltEndretEventer.add(event)
     }
 
@@ -91,11 +91,11 @@ internal class TestObservatør : PersonObserver {
         inntektsmeldingReplayEventer.add(vedtaksperiodeId)
     }
 
-    override fun vedtaksperiodeUtbetalt(event: PersonObserver.UtbetaltEvent) {
+    override fun vedtaksperiodeUtbetalt(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetaltEvent) {
         utbetaltEventer.add(event)
     }
 
-    override fun annullering(event: PersonObserver.UtbetalingAnnullertEvent) {
+    override fun annullering(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetalingAnnullertEvent) {
         annulleringer.add(event)
     }
 

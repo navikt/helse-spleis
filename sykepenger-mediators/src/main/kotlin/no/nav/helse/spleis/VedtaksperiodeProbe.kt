@@ -21,7 +21,7 @@ object VedtaksperiodeProbe : PersonObserver {
         )
     }
 
-    override fun utbetalingEndret(event: PersonObserver.UtbetalingEndretEvent) {
+    override fun utbetalingEndret(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetalingEndretEvent) {
         log.info(
             "utbetaling endret {}, {}, {}",
             keyValue("utbetalingId", "${event.utbetalingId}"),

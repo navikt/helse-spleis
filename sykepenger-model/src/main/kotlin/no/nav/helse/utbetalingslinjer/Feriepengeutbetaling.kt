@@ -66,12 +66,14 @@ internal class Feriepengeutbetaling private constructor(
         }
 
         person.feriepengerUtbetalt(
+            utbetalingHendelse.hendelseskontekst(),
             PersonObserver.FeriepengerUtbetaltEvent(
                 arbeidsgiverOppdrag = oppdrag.toMap(),
             )
         )
 
         person.utbetalingEndret(
+            utbetalingHendelse.hendelseskontekst(),
             PersonObserver.UtbetalingEndretEvent(
                 utbetalingId = utbetalingId,
                 type = Utbetaling.Utbetalingtype.FERIEPENGER.name,

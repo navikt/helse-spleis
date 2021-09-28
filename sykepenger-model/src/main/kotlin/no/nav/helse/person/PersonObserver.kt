@@ -168,17 +168,17 @@ interface PersonObserver {
     fun vedtaksperiodeReberegnet(hendelseskontekst: Hendelseskontekst) {}
     fun vedtaksperiodeAvbrutt(hendelseskontekst: Hendelseskontekst, event: VedtaksperiodeAvbruttEvent) {}
     @Deprecated("Fjernes til fordel for utbetaling_utbetalt")
-    fun vedtaksperiodeUtbetalt(event: UtbetaltEvent) {}
+    fun vedtaksperiodeUtbetalt(hendelseskontekst: Hendelseskontekst, event: UtbetaltEvent) {}
     fun personEndret(hendelseskontekst: Hendelseskontekst) {}
     fun vedtaksperiodeIkkeFunnet(hendelseskontekst: Hendelseskontekst, vedtaksperiodeEvent: VedtaksperiodeIkkeFunnetEvent) {}
     fun manglerInntektsmelding(hendelseskontekst: Hendelseskontekst, event: ManglendeInntektsmeldingEvent) {}
     fun trengerIkkeInntektsmelding(hendelseskontekst: Hendelseskontekst, event: TrengerIkkeInntektsmeldingEvent) {}
-    fun utbetalingEndret(event: UtbetalingEndretEvent) {}
-    fun utbetalingUtbetalt(event: UtbetalingUtbetaltEvent) {}
-    fun utbetalingUtenUtbetaling(event: UtbetalingUtbetaltEvent) {}
-    fun feriepengerUtbetalt(event: FeriepengerUtbetaltEvent) {}
-    fun annullering(event: UtbetalingAnnullertEvent) {}
-    fun avstemt(result: Map<String, Any>) {}
-    fun hendelseIkkeHåndtert(event: HendelseIkkeHåndtertEvent) {}
+    fun utbetalingEndret(hendelseskontekst: Hendelseskontekst, event: UtbetalingEndretEvent) {}
+    fun utbetalingUtbetalt(hendelseskontekst: Hendelseskontekst, event: UtbetalingUtbetaltEvent) {}
+    fun utbetalingUtenUtbetaling(hendelseskontekst: Hendelseskontekst, event: UtbetalingUtbetaltEvent) {}
+    fun feriepengerUtbetalt(hendelseskontekst: Hendelseskontekst, event: FeriepengerUtbetaltEvent) {}
+    fun annullering(hendelseskontekst: Hendelseskontekst, event: UtbetalingAnnullertEvent) {}
+    fun avstemt(hendelseskontekst: Hendelseskontekst, result: Map<String, Any>) {}
+    fun hendelseIkkeHåndtert(hendelseskontekst: Hendelseskontekst, event: HendelseIkkeHåndtertEvent) {}
     fun vedtakFattet(hendelseskontekst: Hendelseskontekst, event: VedtakFattetEvent) {}
 }

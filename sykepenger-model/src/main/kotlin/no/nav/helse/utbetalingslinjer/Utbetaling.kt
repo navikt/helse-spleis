@@ -249,7 +249,7 @@ internal class Utbetaling private constructor(
         tilstand = neste
         oppdatert = LocalDateTime.now()
         observers.forEach {
-            it.utbetalingEndret(id, type, arbeidsgiverOppdrag, personOppdrag, forrigeTilstand, neste)
+            it.utbetalingEndret(hendelse.hendelseskontekst(), id, type, arbeidsgiverOppdrag, personOppdrag, forrigeTilstand, neste)
         }
         tilstand.entering(this, hendelse)
     }
@@ -500,6 +500,7 @@ internal class Utbetaling private constructor(
 
     // TODO: Fjerne når vi slutter å sende utbetalt-event fra vedtaksperiode d(-_-)b
     private fun avslutt(
+        hendelseskontekst: Hendelseskontekst,
         person: Person,
         periode: Periode,
         sykepengegrunnlag: Inntekt,
@@ -507,7 +508,7 @@ internal class Utbetaling private constructor(
         hendelseIder: Set<UUID>
     ) {
         val vurdering = checkNotNull(vurdering) { "Mangler vurdering" }
-        vurdering.ferdigstill(this, person, periode, sykepengegrunnlag, inntekt, hendelseIder)
+        vurdering.ferdigstill(hendelseskontekst, this, person, periode, sykepengegrunnlag, inntekt, hendelseIder)
     }
 
     private fun håndterKvittering(hendelse: UtbetalingHendelse) {
@@ -689,7 +690,7 @@ internal class Utbetaling private constructor(
     internal object GodkjentUtenUtbetaling : Tilstand {
 
         override fun entering(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
-            utbetaling.vurdering?.avsluttetUtenUtbetaling(utbetaling)
+            utbetaling.vurdering?.avsluttetUtenUtbetaling(hendelse.hendelseskontekst(), utbetaling)
             utbetaling.avsluttet = LocalDateTime.now()
         }
 
@@ -717,7 +718,7 @@ internal class Utbetaling private constructor(
             inntekt: Inntekt,
             hendelseIder: Set<UUID>
         ) {
-            utbetaling.avslutt(person, periode, sykepengegrunnlag, inntekt, hendelseIder)
+            utbetaling.avslutt(hendelse.hendelseskontekst(), person, periode, sykepengegrunnlag, inntekt, hendelseIder)
         }
     }
 
@@ -778,14 +779,14 @@ internal class Utbetaling private constructor(
 
     internal object Annullert : Tilstand {
         override fun entering(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
-            utbetaling.vurdering?.annullert(utbetaling, utbetaling.arbeidsgiverOppdrag)
+            utbetaling.vurdering?.annullert(hendelse.hendelseskontekst(), utbetaling, utbetaling.arbeidsgiverOppdrag)
             utbetaling.avsluttet = LocalDateTime.now()
         }
     }
 
     internal object Utbetalt : Tilstand {
         override fun entering(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
-            utbetaling.vurdering?.utbetalt(utbetaling)
+            utbetaling.vurdering?.utbetalt(hendelse.hendelseskontekst(), utbetaling)
             utbetaling.avsluttet = LocalDateTime.now()
         }
 
@@ -846,7 +847,7 @@ internal class Utbetaling private constructor(
             inntekt: Inntekt,
             hendelseIder: Set<UUID>
         ) {
-            utbetaling.avslutt(person, periode, sykepengegrunnlag, inntekt, hendelseIder)
+            utbetaling.avslutt(hendelse.hendelseskontekst(), person, periode, sykepengegrunnlag, inntekt, hendelseIder)
         }
     }
 
@@ -875,15 +876,16 @@ internal class Utbetaling private constructor(
             visitor.visitVurdering(this, ident, epost, tidspunkt, automatiskBehandling, godkjent)
         }
 
-        internal fun annullert(utbetaling: Utbetaling, oppdrag: Oppdrag) {
+        internal fun annullert(hendelseskontekst: Hendelseskontekst, utbetaling: Utbetaling, oppdrag: Oppdrag) {
             utbetaling.observers.forEach {
-                it.utbetalingAnnullert(utbetaling.id, utbetaling.periode, oppdrag.fagsystemId(), tidspunkt, epost, ident)
+                it.utbetalingAnnullert(hendelseskontekst, utbetaling.id, utbetaling.periode, oppdrag.fagsystemId(), tidspunkt, epost, ident)
             }
         }
 
-        internal fun utbetalt(utbetaling: Utbetaling) {
+        internal fun utbetalt(hendelseskontekst: Hendelseskontekst, utbetaling: Utbetaling) {
             utbetaling.observers.forEach {
                 it.utbetalingUtbetalt(
+                    hendelseskontekst,
                     utbetaling.id,
                     utbetaling.type,
                     utbetaling.periode,
@@ -901,9 +903,10 @@ internal class Utbetaling private constructor(
             }
         }
 
-        internal fun avsluttetUtenUtbetaling(utbetaling: Utbetaling) {
+        internal fun avsluttetUtenUtbetaling(hendelseskontekst: Hendelseskontekst, utbetaling: Utbetaling) {
             utbetaling.observers.forEach {
                 it.utbetalingUtenUtbetaling(
+                    hendelseskontekst,
                     utbetaling.id,
                     utbetaling.type,
                     utbetaling.periode,
@@ -934,6 +937,7 @@ internal class Utbetaling private constructor(
 
         @Deprecated("Fjernes til fordel for utbetaling_utbetalt")
         fun ferdigstill(
+            hendelseskontekst: Hendelseskontekst,
             utbetaling: Utbetaling,
             person: Person,
             periode: Periode,
@@ -942,6 +946,7 @@ internal class Utbetaling private constructor(
             hendelseIder: Set<UUID>
         ) {
             person.vedtaksperiodeUtbetalt(
+                hendelseskontekst,
                 tilUtbetaltEvent(
                     sykepengegrunnlag = sykepengegrunnlag,
                     inntekt = inntekt,
