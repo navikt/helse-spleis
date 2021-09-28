@@ -1,10 +1,10 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.antallMåneder
-import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.kilder
-import no.nav.helse.person.*
-import no.nav.helse.person.Periodetype.FORLENGELSE
-import no.nav.helse.person.Periodetype.INFOTRYGDFORLENGELSE
+import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.Person
+import no.nav.helse.person.PersonHendelse
+import no.nav.helse.person.Sykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Prosent.Companion.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT
@@ -21,21 +21,9 @@ class Inntektsvurdering(
     internal fun valider(
         aktivitetslogg: IAktivitetslogg,
         grunnlagForSykepengegrunnlag: Sykepengegrunnlag,
-        sammenligningsgrunnlag: Inntekt,
-        periodetype: Periodetype,
-        antallArbeidsgivereMedOverlappendeVedtaksperioder: Int
+        sammenligningsgrunnlag: Inntekt
     ): Boolean {
-
         if (inntekter.antallMåneder() > 12) aktivitetslogg.error("Forventer 12 eller færre inntektsmåneder")
-        if (inntekter.kilder(3) > antallArbeidsgivereMedOverlappendeVedtaksperioder) {
-            val melding =
-                "Brukeren har flere inntekter de siste tre måneder enn det som er brukt i sykepengegrunnlaget. Kontroller om brukeren har andre arbeidsforhold eller ytelser på sykmeldingstidspunktet som påvirker utbetalingen."
-            if (periodetype in listOf(INFOTRYGDFORLENGELSE, FORLENGELSE))
-                aktivitetslogg.info(melding)
-            else {
-                aktivitetslogg.warn(melding)
-            }
-        }
         if (sammenligningsgrunnlag <= Inntekt.INGEN) {
             aktivitetslogg.error("sammenligningsgrunnlaget er <= 0")
             return false

@@ -2,7 +2,6 @@ package no.nav.helse.person
 
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
-import no.nav.helse.person.Arbeidsgiver.Companion.antallArbeidsgivereMedOverlappendeVedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.antallMedVedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.forlengerIkkeBareAnnenArbeidsgiver
@@ -417,12 +416,6 @@ class Person private constructor(
 
     internal fun forlengerIkkeBareAnnenArbeidsgiver(arbeidsgiver: Arbeidsgiver, vedtaksperiode: Vedtaksperiode) =
         arbeidsgivere.forlengerIkkeBareAnnenArbeidsgiver(arbeidsgiver, vedtaksperiode)
-
-    internal fun harOverlappendePeriodeHosAnnenArbeidsgiver(vedtaksperiode: Vedtaksperiode) =
-        arbeidsgivere.antallArbeidsgivereMedOverlappendeVedtaksperioder(vedtaksperiode) > 1
-
-    internal fun antallArbeidsgivereMedOverlappendeVedtaksperioder(vedtaksperiode: Vedtaksperiode) =
-        arbeidsgivere.antallArbeidsgivereMedOverlappendeVedtaksperioder(vedtaksperiode)
 
     internal fun lagreDødsdato(dødsdato: LocalDate) {
         this.dødsdato = dødsdato

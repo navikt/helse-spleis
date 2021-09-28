@@ -460,8 +460,7 @@ internal class Vedtaksperiode private constructor(
             grunnlagForSykepengegrunnlag,
             sammenligningsgrunnlag ?: Inntekt.INGEN,
             skjæringstidspunkt,
-            periodetype(),
-            person.antallArbeidsgivereMedOverlappendeVedtaksperioder(this)
+            periodetype()
         )
         person.vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag, skjæringstidspunkt)
         if (vilkårsgrunnlag.hasErrorsOrWorse()) {

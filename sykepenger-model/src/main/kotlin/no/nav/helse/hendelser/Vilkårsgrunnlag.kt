@@ -34,15 +34,12 @@ class Vilkårsgrunnlag(
         grunnlagForSykepengegrunnlag: Sykepengegrunnlag,
         sammenligningsgrunnlag: Inntekt,
         skjæringstidspunkt: LocalDate,
-        periodetype: Periodetype,
-        antallArbeidsgivereMedOverlappendeVedtaksperioder: Int
+        periodetype: Periodetype
     ): IAktivitetslogg {
         val inntektsvurderingOk = inntektsvurdering.valider(
             this,
             grunnlagForSykepengegrunnlag,
-            sammenligningsgrunnlag,
-            periodetype,
-            antallArbeidsgivereMedOverlappendeVedtaksperioder
+            sammenligningsgrunnlag
         )
         val opptjeningvurderingOk = opptjeningvurdering.valider(this, skjæringstidspunkt)
         val medlemskapsvurderingOk = medlemskapsvurdering.valider(this, periodetype)

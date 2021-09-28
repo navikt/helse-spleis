@@ -1,9 +1,7 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Sykepengegrunnlag
-import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
@@ -15,7 +13,6 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.time.YearMonth
 
 internal class InntektsvurderingTest {
     private companion object {
@@ -51,53 +48,17 @@ internal class InntektsvurderingTest {
         assertTrue(validererOk(inntektsvurdering, sykepengegrunnlag(750.00.månedlig), INNTEKT))
     }
 
-    @Test
-    fun `flere organisasjoner siste 3 måneder gir warning`() {
-        val annenInntekt = "etAnnetOrgnr" to INNTEKT
-        assertTrue(validererOk(inntektsvurdering(inntekter(YearMonth.of(2017, 12), annenInntekt)), sykepengegrunnlag(), INNTEKT, 1))
-        assertTrue(aktivitetslogg.hasWarningsOrWorse())
-        assertTrue(validererOk(inntektsvurdering(inntekter(YearMonth.of(2017, 11), annenInntekt)), sykepengegrunnlag(), INNTEKT))
-        assertTrue(aktivitetslogg.hasWarningsOrWorse())
-        assertTrue(validererOk(inntektsvurdering(inntekter(YearMonth.of(2017, 10), annenInntekt)), sykepengegrunnlag(), INNTEKT))
-        assertTrue(aktivitetslogg.hasWarningsOrWorse())
-        assertTrue(validererOk(inntektsvurdering(inntekter(YearMonth.of(2017, 9), annenInntekt)), sykepengegrunnlag(), INNTEKT))
-        assertFalse(aktivitetslogg.hasWarningsOrWorse())
-        assertTrue(validererOk(inntektsvurdering(inntekter(YearMonth.of(2017, 12), annenInntekt)), sykepengegrunnlag(), INNTEKT, 2))
-        assertFalse(aktivitetslogg.hasWarningsOrWorse())
-    }
-
-    @Test
-    fun `Inntekter for flere arbeidsgivere enn arbeidsgivere med overlappende sykdom gir warning`() {
-        val annenInntekt = "etAnnetOrgnr" to INNTEKT
-        assertTrue(validererOk(inntektsvurdering(inntekter(YearMonth.of(2017, 12), annenInntekt)), sykepengegrunnlag(), INNTEKT))
-        assertTrue(aktivitetslogg.hasWarningsOrWorse())
-    }
-
-    private fun inntekter(periode: YearMonth, inntekt: Pair<String, Inntekt>) =
-        inntektperioderForSykepengegrunnlag {
-            1.januar(2017) til 1.desember(2017) inntekter {
-                ORGNR inntekt INNTEKT
-            }
-            periode.atDay(1) til periode.atDay(1) inntekter {
-                inntekt.first inntekt inntekt.second
-            }
-        }
-
     private fun validererOk(
         inntektsvurdering: Inntektsvurdering,
         grunnlagForSykepengegrunnlag: Sykepengegrunnlag,
-        sammenligningsgrunnlag: Inntekt,
-        antallArbeidsgivereMedOverlappendeVedtaksperioder: Int = 1
+        sammenligningsgrunnlag: Inntekt
     ): Boolean {
         aktivitetslogg = Aktivitetslogg()
         return inntektsvurdering.valider(
             aktivitetslogg,
             grunnlagForSykepengegrunnlag,
-            sammenligningsgrunnlag,
-            Periodetype.FØRSTEGANGSBEHANDLING,
-            antallArbeidsgivereMedOverlappendeVedtaksperioder
+            sammenligningsgrunnlag
         )
-
     }
 
     private fun sykepengegrunnlag(inntekt: Inntekt = INNTEKT) = Sykepengegrunnlag(

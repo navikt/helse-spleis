@@ -133,13 +133,6 @@ internal class Arbeidsgiver private constructor(
             if (arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode) != null) true
             else none { other -> other.finnSykeperiodeRettFør(vedtaksperiode) != null }
 
-        internal fun Iterable<Arbeidsgiver>.antallArbeidsgivereMedOverlappendeVedtaksperioder(vedtaksperiode: Vedtaksperiode) = this
-            .count { arbeidsgiver ->
-                arbeidsgiver
-                    .vedtaksperioder
-                    .any { it.periode().overlapperMed(vedtaksperiode.periode()) }
-            }
-
         internal fun Iterable<Arbeidsgiver>.harArbeidsgivereMedOverlappendeUtbetaltePerioder(orgnummer: String, periode: Periode) = this
             .filter { it.organisasjonsnummer != orgnummer }
             .any { it.vedtaksperioder.harOverlappendeUtbetaltePerioder(periode) }

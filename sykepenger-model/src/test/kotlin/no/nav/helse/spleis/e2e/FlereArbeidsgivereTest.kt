@@ -1720,7 +1720,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
                 }
             }
         ))
-        assertWarnings(a2.inspektør)
+        assertNoWarnings(a2.inspektør)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a2, inntektshistorikk = inntektshistorikk)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
@@ -1928,7 +1928,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
                     inntekter = inntektperioderForSammenligningsgrunnlag {
                         1.januar(2017) til 1.desember(2017) inntekter {
                             a1 inntekt INNTEKT
-                           }
+                        }
                         1.januar(2017) til 1.desember(2017) inntekter {
                             a2 inntekt INNTEKT
                         }
@@ -1995,7 +1995,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `En arbeidsgiver får warning hvis vi finner inntekter for flere arbeidsgivere de siste tre månedene`() {
+    fun `En arbeidsgiver får ikke warning hvis vi finner inntekter for flere arbeidsgivere de siste tre månedene`() {
         val periode = 1.januar(2021) til 31.januar(2021)
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
@@ -2015,11 +2015,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, a1)
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
 
-        assertWarnings(a1.inspektør)
-        assertTrue(
-            a1.inspektør.personLogg.toString()
-                .contains("Brukeren har flere inntekter de siste tre måneder enn det som er brukt i sykepengegrunnlaget. Kontroller om brukeren har andre arbeidsforhold eller ytelser på sykmeldingstidspunktet som påvirker utbetalingen.")
-        )
+        assertNoWarnings(a1.inspektør)
     }
 
     @Test
@@ -2045,13 +2041,19 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
                 listOf(
                     grunnlag(a1, 1.januar(2021), INNTEKT.repeat(3)),
                     grunnlag(a2, 1.januar(2021), 1000.månedlig.repeat(3))
-            )),
+                )
+            ),
             arbeidsforhold = listOf(Arbeidsforhold(a1, LocalDate.EPOCH, null), Arbeidsforhold(a2, LocalDate.EPOCH, null))
         )
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, a1)
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+
+        assertWarningTekst(
+            a1.inspektør,
+            "Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold"
+        )
 
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
@@ -2062,47 +2064,57 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, a2)
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
 
-        assertTrue(
-            a1.inspektør.personLogg.toString()
-                .contains("Brukeren har flere inntekter de siste tre måneder enn det som er brukt i sykepengegrunnlaget. Kontroller om brukeren har andre arbeidsforhold eller ytelser på sykmeldingstidspunktet som påvirker utbetalingen.")
-        )
-        assertTrue(
-            a2.inspektør.personLogg.toString()
-                .contains("Denne personen har en utbetaling for samme periode for en annen arbeidsgiver. Kontroller at beregningene for begge arbeidsgiverne er korrekte.")
+        assertWarningTekst(
+            a1.inspektør,
+            "Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold",
+            "Denne personen har en utbetaling for samme periode for en annen arbeidsgiver. Kontroller at beregningene for begge arbeidsgiverne er korrekte."
         )
     }
 
     @Test
-    fun `Første arbeidsgiver har blitt sendt til simulering før vi mottar sykmelding på neste arbeidsgiver`() {
+    fun `Første arbeidsgiver har blitt sendt til godkjenning før vi mottar sykmelding på neste arbeidsgiver`() {
         val periode = 1.januar(2021) til 31.januar(2021)
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterUtbetalingshistorikk(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021)), førsteFraværsdag = 1.januar(2021), orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1, inntektsvurdering = Inntektsvurdering(
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            orgnummer = a1,
+            inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2020) til 1.desember(2020) inntekter {
                     a1 inntekt INNTEKT
                     a2 inntekt 1000.månedlig
                 }
             }
-        ))
+            ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                listOf(
+                    grunnlag(a1, 1.januar(2021), INNTEKT.repeat(3)),
+                    grunnlag(a2, 1.januar(2021), 1000.månedlig.repeat(3))
+                )
+            ),
+            arbeidsforhold = listOf(Arbeidsforhold(a1, LocalDate.EPOCH, null), Arbeidsforhold(a2, LocalDate.EPOCH, null))
+        )
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+
+        assertWarningTekst(
+            a1.inspektør,
+            "Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold"
+        )
 
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
         håndterUtbetalingshistorikk(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a2)
         håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021)), førsteFraværsdag = 1.januar(2021), orgnummer = a2)
 
-        assertTrue(
-            a1.inspektør.personLogg.toString()
-                .contains("Brukeren har flere inntekter de siste tre måneder enn det som er brukt i sykepengegrunnlaget. Kontroller om brukeren har andre arbeidsforhold eller ytelser på sykmeldingstidspunktet som påvirker utbetalingen.")
-        )
-        assertTrue(
-            a2.inspektør.personLogg.toString()
-                .contains("Denne personen har en utbetaling for samme periode for en annen arbeidsgiver. Kontroller at beregningene for begge arbeidsgiverne er korrekte.")
+        assertWarningTekst(
+            a1.inspektør,
+            "Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold",
+            "Denne personen har en utbetaling for samme periode for en annen arbeidsgiver. Kontroller at beregningene for begge arbeidsgiverne er korrekte."
         )
     }
 
