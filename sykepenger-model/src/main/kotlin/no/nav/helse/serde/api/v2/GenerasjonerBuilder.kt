@@ -32,7 +32,7 @@ internal typealias FagsystemId = String
 internal class GenerasjonerBuilder(
     private val hendelser: List<HendelseDTO>,
     private val fødselsnummer: String,
-    private val vilkårsgrunnlagHistorikk: Map<VilkårsgrunnlagshistorikkId, IInnslag>
+    private val vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk
 ) : ArbeidsgiverVisitor {
 
     private val vedtaksperiodeAkkumulator = VedtaksperiodeAkkumulator()

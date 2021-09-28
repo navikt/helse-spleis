@@ -10,12 +10,11 @@ internal class VedtaksperiodeVarslerBuilder(
     private val vedtaksperiodeId: UUID,
     aktivitetsloggForPeriode: Aktivitetslogg,
     aktivitetsloggForVilkårsprøving: Aktivitetslogg,
-    vilkårsgrunnlag: IVilkårsgrunnlag?
+    vilkårsgrunnlagId: UUID?
 ) {
-    private val meldingsreferanseId = (vilkårsgrunnlag as? SpleisGrunnlag)?.meldingsreferanseId
     private val varslerForPeriode = PeriodeVarslerBuilder(aktivitetsloggForPeriode).build()
-    private val varslerForVilkårsprøving = meldingsreferanseId?.let {
-        VilkårsgrunnlagVarslerBuilder(meldingsreferanseId, vedtaksperiodeId, aktivitetsloggForVilkårsprøving).build()
+    private val varslerForVilkårsprøving = vilkårsgrunnlagId?.let {
+        VilkårsgrunnlagVarslerBuilder(it, vedtaksperiodeId, aktivitetsloggForVilkårsprøving).build()
     } ?: emptyList()
 
     internal fun build() = (varslerForPeriode + varslerForVilkårsprøving).distinctBy { it.melding }

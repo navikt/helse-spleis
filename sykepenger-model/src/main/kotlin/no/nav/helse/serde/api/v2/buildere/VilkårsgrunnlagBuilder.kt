@@ -77,21 +77,34 @@ internal class InntektBuilder(private val inntekt: Inntekt) {
     }
 }
 
+internal class IVilkårsgrunnlagHistorikk {
+    private val historikk = mutableMapOf<VilkårsgrunnlagHistorikkId, IInnslag>()
+
+    internal fun leggTil(vilkårsgrunnlagHistorikkId: UUID, innslag: IInnslag) {
+        historikk.putIfAbsent(vilkårsgrunnlagHistorikkId, innslag)
+    }
+
+    internal fun spleisgrunnlag(vilkårsgrunnlagHistorikkId: UUID, skjæringstidspunkt: LocalDate) =
+        historikk[vilkårsgrunnlagHistorikkId]?.vilkårsgrunnlag(skjæringstidspunkt) as? SpleisGrunnlag
+
+    internal fun toMap() = historikk.toMap() // TODO: DTO
+}
+
 internal class VilkårsgrunnlagBuilder(
     vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
     private val sammenligningsgrunnlagBuilder: OppsamletSammenligningsgrunnlagBuilder
 ) :
     VilkårsgrunnlagHistorikkVisitor {
-    private val historikk = mutableMapOf<VilkårsgrunnlagHistorikkId, IInnslag>()
+    private val historikk = IVilkårsgrunnlagHistorikk()
 
     init {
         vilkårsgrunnlagHistorikk.accept(this)
     }
 
-    fun build() = historikk.toMap()
+    fun build() = historikk
 
     override fun preVisitInnslag(innslag: VilkårsgrunnlagHistorikk.Innslag, id: UUID, opprettet: LocalDateTime) {
-        historikk.putIfAbsent(id, InnslagBuilder(innslag, sammenligningsgrunnlagBuilder).build())
+        historikk.leggTil(id, InnslagBuilder(innslag, sammenligningsgrunnlagBuilder).build())
     }
 
     internal class InnslagBuilder(

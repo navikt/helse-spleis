@@ -44,7 +44,8 @@ internal class Generasjoner(perioder: Tidslinjeperioder) {
         private fun finnPeriode(periode: Tidslinjeperiode) = perioder.find { it.erSammeVedtaksperiode(periode) }
         private fun inneholderPeriode(periode: Tidslinjeperiode) = finnPeriode(periode) != null
         private fun erFagsystemIdAnnullert(periode: BeregnetPeriode): Boolean = tidslinjeperioder.any { it.harSammeFagsystemId(periode) && it.erAnnullering() }
-        private fun harMinstÉnRevurdertPeriodeTidligereEnn(tidslinjeperiode: Tidslinjeperiode): Boolean = tidslinjeperioder.any { it.erRevurdering() && it.fom < tidslinjeperiode.fom }
+        private fun harMinstÉnRevurdertPeriodeTidligereEnn(tidslinjeperiode: Tidslinjeperiode): Boolean =
+            tidslinjeperioder.any { it.erRevurdering() && it.fom < tidslinjeperiode.fom }
 
         private fun finnKandidaterForSammenstilling(nesteGenerasjon: Generasjon): Pair<List<Tidslinjeperiode>, List<Tidslinjeperiode>> {
             return perioder.partition {
@@ -100,7 +101,7 @@ internal class Generasjoner(perioder: Tidslinjeperioder) {
 internal class Tidslinjeperioder(
     private val fødselsnummer: String,
     private val forkastetVedtaksperiodeIder: List<UUID>,
-    private val vilkårsgrunnlagHistorikk: Map<VilkårsgrunnlagshistorikkId, IInnslag>,
+    private val vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk,
     vedtaksperioder: List<IVedtaksperiode>,
     tidslinjeberegninger: Tidslinjebereginger
 ) {
@@ -145,11 +146,12 @@ internal class Tidslinjeperioder(
         erForkastet: Boolean
     ): BeregnetPeriode {
         val sammenslåttTidslinje = tidslinjeberegning.sammenslåttTidslinje(utbetaling.utbetalingstidslinje, periode.fom, periode.tom)
+        val meldingsreferanseId = vilkårsgrunnlagHistorikk.spleisgrunnlag(tidslinjeberegning.vilkårsgrunnlagshistorikkId, periode.skjæringstidspunkt)?.meldingsreferanseId
         val varsler = VedtaksperiodeVarslerBuilder(
             periode.vedtaksperiodeId,
             periode.aktivitetsloggForPeriode,
             periode.aktivitetsloggForVilkårsprøving,
-            vilkårsgrunnlagHistorikk[tidslinjeberegning.vilkårsgrunnlagshistorikkId]?.vilkårsgrunnlag(periode.skjæringstidspunkt)
+            meldingsreferanseId
         ).build()
         return BeregnetPeriode(
             vedtaksperiodeId = periode.vedtaksperiodeId,
