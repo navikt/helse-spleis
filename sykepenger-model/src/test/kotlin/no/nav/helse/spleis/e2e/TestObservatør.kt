@@ -16,7 +16,7 @@ internal class TestObservatør : PersonObserver {
     val utbetalingUtenUtbetalingEventer = mutableListOf<PersonObserver.UtbetalingUtbetaltEvent>()
     val utbetalingMedUtbetalingEventer = mutableListOf<PersonObserver.UtbetalingUtbetaltEvent>()
     val feriepengerUtbetaltEventer = mutableListOf<PersonObserver.FeriepengerUtbetaltEvent>()
-    val utbetaltEndretEventer = mutableListOf<PersonObserver.UtbetalingEndretEvent>()
+    val utbetaltEndretEventer = mutableListOf<ObservedEvent<PersonObserver.UtbetalingEndretEvent>>()
     val vedtakFattetEvent = mutableMapOf<UUID, PersonObserver.VedtakFattetEvent>()
 
     private lateinit var sisteVedtaksperiode: UUID
@@ -58,7 +58,7 @@ internal class TestObservatør : PersonObserver {
     }
 
     override fun utbetalingEndret(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetalingEndretEvent) {
-        utbetaltEndretEventer.add(event)
+        utbetaltEndretEventer.add(ObservedEvent(event, hendelseskontekst))
     }
 
     override fun vedtakFattet(hendelseskontekst: Hendelseskontekst, event: PersonObserver.VedtakFattetEvent) {
@@ -103,12 +103,20 @@ internal class TestObservatør : PersonObserver {
         avbruttEventer[hendelseskontekst.vedtaksperiodeId()] = event.gjeldendeTilstand
     }
 
-    private fun Hendelseskontekst.toMap() = mutableMapOf<String, String>().also { appendTo(it::set) }
+    companion object {
+        private fun Hendelseskontekst.toMap() = mutableMapOf<String, String>().also { appendTo(it::set) }
 
-    private fun Hendelseskontekst.vedtaksperiodeId(): UUID {
-        return UUID.fromString(toMap()["vedtaksperiodeId"])
-    }
-    private fun Hendelseskontekst.orgnummer(): String {
-        return toMap()["organisasjonsnummer"]!!
+        private fun Hendelseskontekst.vedtaksperiodeId(): UUID {
+            return UUID.fromString(toMap()["vedtaksperiodeId"])
+        }
+
+        private fun Hendelseskontekst.orgnummer(): String {
+            return toMap()["organisasjonsnummer"]!!
+        }
+
+        data class ObservedEvent<EventType>(val event: EventType, private val kontekst: Hendelseskontekst) {
+            fun vedtaksperiodeId() = kontekst.vedtaksperiodeId()
+            fun orgnummer() = kontekst.orgnummer()
+        }
     }
 }
