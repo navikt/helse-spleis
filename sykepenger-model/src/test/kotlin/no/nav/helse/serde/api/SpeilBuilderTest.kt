@@ -4,12 +4,14 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Dagtype.Feriedag
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
+import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.api.InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO
+import no.nav.helse.serde.api.v2.*
 import no.nav.helse.serde.mapping.SpeilDagtype
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.testhelpers.*

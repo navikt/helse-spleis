@@ -5,6 +5,8 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.*
 import no.nav.helse.serde.api.*
+import no.nav.helse.serde.api.v2.HendelseDTO
+import no.nav.helse.serde.api.v2.SøknadNavDTO
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling

@@ -2,6 +2,7 @@ package no.nav.helse.serde.api.v2.buildere
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.*
+import no.nav.helse.serde.api.v2.HendelseDTO
 import no.nav.helse.serde.api.v2.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -22,16 +23,20 @@ internal typealias FagsystemId = String
 
 // Besøker hele arbeidsgiver-treet
 internal class GenerasjonerBuilder(
-    private val hendelser: List<Hendelse>,
+    private val hendelser: List<HendelseDTO>,
     private val fødselsnummer: String,
-    private val vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk
+    private val vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk,
+    arbeidsgiver: Arbeidsgiver
 ) : ArbeidsgiverVisitor {
-
     private val vedtaksperiodeAkkumulator = VedtaksperiodeAkkumulator()
     private val forkastetVedtaksperiodeAkkumulator = ForkastetVedtaksperiodeAkkumulator()
     private val generasjonIderAkkumulator = GenerasjonIderAkkumulator()
     private val sykdomshistorikkAkkumulator = SykdomshistorikkAkkumulator()
     private val annulleringer = AnnulleringerAkkumulator()
+
+    init {
+        arbeidsgiver.accept(this)
+    }
 
     fun build(): List<Generasjon> {
         vedtaksperiodeAkkumulator.supplerMedAnnulleringer(annulleringer)

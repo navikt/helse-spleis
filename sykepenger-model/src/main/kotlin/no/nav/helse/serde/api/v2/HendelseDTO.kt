@@ -3,32 +3,32 @@ package no.nav.helse.serde.api.v2
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-interface Hendelse {
+interface HendelseDTO {
     val id: String
     val type: String
 
     companion object {
-        internal inline fun <reified T : Hendelse> List<Hendelse>.finn(): T? {
+        internal inline fun <reified T : HendelseDTO> List<HendelseDTO>.finn(): T? {
             return filterIsInstance<T>().firstOrNull()
         }
     }
 }
 
-data class Inntektsmelding(
+data class InntektsmeldingDTO(
     override val id: String,
     val mottattDato: LocalDateTime,
     val beregnetInntekt: Double
-) : Hendelse {
+) : HendelseDTO {
     override val type = "INNTEKTSMELDING"
 }
 
-data class SøknadNav(
+data class SøknadNavDTO(
     override val id: String,
     val fom: LocalDate,
     val tom: LocalDate,
     val rapportertdato: LocalDateTime,
     val sendtNav: LocalDateTime
-) : Hendelse {
+) : HendelseDTO {
     override val type = "SENDT_SØKNAD_NAV"
 
     internal fun søknadsfristOppfylt(): Boolean {
@@ -38,21 +38,21 @@ data class SøknadNav(
     }
 }
 
-data class SøknadArbeidsgiver(
+data class SøknadArbeidsgiverDTO(
     override val id: String,
     val fom: LocalDate,
     val tom: LocalDate,
     val rapportertdato: LocalDateTime,
     val sendtArbeidsgiver: LocalDateTime
-) : Hendelse {
+) : HendelseDTO {
     override val type = "SENDT_SØKNAD_ARBEIDSGIVER"
 }
 
-data class Sykmelding(
+data class SykmeldingDTO(
     override val id: String,
     val fom: LocalDate,
     val tom: LocalDate,
     val rapportertdato: LocalDateTime
-) : Hendelse {
+) : HendelseDTO {
     override val type = "NY_SØKNAD"
 }

@@ -3,6 +3,7 @@ package no.nav.helse.serde.api
 import no.nav.helse.person.Person
 import no.nav.helse.serde.AbstractBuilder
 import no.nav.helse.serde.api.builders.PersonBuilder
+import no.nav.helse.serde.api.v2.HendelseDTO
 import java.time.LocalDate
 import java.time.LocalDateTime
 

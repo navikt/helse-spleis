@@ -22,10 +22,10 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
-import no.nav.helse.serde.api.InntektsmeldingDTO as SerdeInntektsmeldingDTO
-import no.nav.helse.serde.api.SykmeldingDTO as SerdeSykmeldingDTO
-import no.nav.helse.serde.api.SøknadArbeidsgiverDTO as SerdeSøknadArbeidsgiverDTO
-import no.nav.helse.serde.api.SøknadNavDTO as SerdeSøknadNavDTO
+import no.nav.helse.serde.api.v2.InntektsmeldingDTO as SerdeInntektsmeldingDTO
+import no.nav.helse.serde.api.v2.SykmeldingDTO as SerdeSykmeldingDTO
+import no.nav.helse.serde.api.v2.SøknadArbeidsgiverDTO as SerdeSøknadArbeidsgiverDTO
+import no.nav.helse.serde.api.v2.SøknadNavDTO as SerdeSøknadNavDTO
 
 internal fun Application.spesialistApi(dataSource: DataSource, authProviderName: String) {
     val hendelseDao = HendelseDao(dataSource)

@@ -1,13 +1,11 @@
 package no.nav.helse.serde.api.v2.buildere
 
 import no.nav.helse.person.*
-import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.InntekthistorikkVisitor
-import no.nav.helse.person.Inntektshistorikk
-import no.nav.helse.person.PersonVisitor
-import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.serde.api.v2.Arbeidsgiverinntekt
+import no.nav.helse.serde.api.v2.InntekterFraAOrdningen
+import no.nav.helse.serde.api.v2.Inntektkilde
+import no.nav.helse.serde.api.v2.OmregnetÅrsinntekt
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
@@ -29,12 +27,10 @@ internal class OppsamletSammenligningsgrunnlagBuilder(person: Person) : PersonVi
     private class NyesteInnslag(
         private val sammenligningsgrunnlagDTO: Map<LocalDate, Double>
     ) {
-        fun sammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =
-            sammenligningsgrunnlagDTO[skjæringstidspunkt]
+        fun sammenligningsgrunnlag(skjæringstidspunkt: LocalDate) = sammenligningsgrunnlagDTO[skjæringstidspunkt]
     }
 
     private class SammenligningsgrunnlagBuilder(arbeidsgiver: Arbeidsgiver) : ArbeidsgiverVisitor {
-
         private var nyesteInnslag: NyesteInnslag? = null
 
         init {
@@ -42,14 +38,14 @@ internal class OppsamletSammenligningsgrunnlagBuilder(person: Person) : PersonVi
 
         }
 
+        fun build() = nyesteInnslag
+
         override fun preVisitInnslag(innslag: Inntektshistorikk.Innslag, id: UUID) {
             if (nyesteInnslag != null) return
             nyesteInnslag = NyesteInnslag(
                 InntektsopplysningBuilder(innslag).build()
             )
         }
-
-        fun build() = nyesteInnslag
     }
 
     private class InntektsopplysningBuilder(innslag: Inntektshistorikk.Innslag) : InntekthistorikkVisitor {
@@ -67,55 +63,57 @@ internal class OppsamletSammenligningsgrunnlagBuilder(person: Person) : PersonVi
             }
         }
     }
+}
 
-    private class InntekterFraAOrdningenBuilder(skattComposite: Inntektshistorikk.SkattComposite) : InntekthistorikkVisitor {
-        private val akkumulator = mutableListOf<InntekterFraAOrdningen>()
-
-        init {
-            skattComposite.accept(this)
-        }
-
-        fun build() = akkumulator.toList()
-
-        override fun visitSkattSammenligningsgrunnlag(
-            sammenligningsgrunnlag: Inntektshistorikk.Skatt.Sammenligningsgrunnlag,
-            dato: LocalDate,
-            hendelseId: UUID,
-            beløp: Inntekt,
-            måned: YearMonth,
-            type: Inntektshistorikk.Skatt.Inntekttype,
-            fordel: String,
-            beskrivelse: String,
-            tidsstempel: LocalDateTime
-        ) {
-            akkumulator.add(
-                InntekterFraAOrdningen(måned, InntektBuilder(beløp).build().månedlig)
-            )
-        }
+internal data class IArbeidsgiverinntekt(
+    val arbeidsgiver: String,
+    val omregnetÅrsinntekt: IOmregnetÅrsinntekt?,
+    val sammenligningsgrunnlag: Double? = null
+) {
+    internal fun toDTO(): Arbeidsgiverinntekt {
+        return Arbeidsgiverinntekt(
+            organisasjonsnummer = arbeidsgiver,
+            omregnetÅrsinntekt = omregnetÅrsinntekt?.toDTO(),
+            sammenligningsgrunnlag = sammenligningsgrunnlag
+        )
     }
 }
 
-internal data class Arbeidsgiverinntekt(
-    val arbeidsgiver: String,
-    val omregnetÅrsinntekt: OmregnetÅrsinntekt?,
-    val sammenligningsgrunnlag: Double? = null
-)
-
-internal data class OmregnetÅrsinntekt(
-    val kilde: Inntektkilde,
+internal data class IOmregnetÅrsinntekt(
+    val kilde: IInntektkilde,
     val beløp: Double,
     val månedsbeløp: Double,
-    val inntekterFraAOrdningen: List<InntekterFraAOrdningen>? = null //kun gyldig for A-ordningen
-)
-
-internal enum class Inntektkilde {
-    Saksbehandler, Inntektsmelding, Infotrygd, AOrdningen
+    val inntekterFraAOrdningen: List<IInntekterFraAOrdningen>? = null //kun gyldig for A-ordningen
+) {
+    internal fun toDTO(): OmregnetÅrsinntekt {
+        return OmregnetÅrsinntekt(
+            kilde = kilde.toDTO(),
+            beløp = beløp,
+            månedsbeløp = månedsbeløp,
+            inntekterFraAOrdningen = inntekterFraAOrdningen?.map { it.toDTO() }
+        )
+    }
 }
 
-internal data class InntekterFraAOrdningen(
+internal enum class IInntektkilde {
+    Saksbehandler, Inntektsmelding, Infotrygd, AOrdningen;
+
+    internal fun toDTO() = when (this) {
+        Saksbehandler -> Inntektkilde.Saksbehandler
+        Inntektsmelding -> Inntektkilde.Inntektsmelding
+        Infotrygd -> Inntektkilde.Infotrygd
+        AOrdningen -> Inntektkilde.AOrdningen
+    }
+}
+
+internal data class IInntekterFraAOrdningen(
     val måned: YearMonth,
     val sum: Double
-)
+) {
+    internal fun toDTO(): InntekterFraAOrdningen {
+        return InntekterFraAOrdningen(måned, sum)
+    }
+}
 
 
 

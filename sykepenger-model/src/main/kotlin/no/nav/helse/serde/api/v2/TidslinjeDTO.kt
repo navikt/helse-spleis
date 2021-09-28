@@ -4,7 +4,7 @@ import no.nav.helse.serde.api.BegrunnelseDTO
 import java.time.LocalDate
 import java.util.*
 
-internal data class SammenslåttDag(
+data class SammenslåttDag(
     val dagen: LocalDate,
     val sykdomstidslinjedagtype: SykdomstidslinjedagType,
     val utbetalingsdagtype: UtbetalingstidslinjeDagtype,

@@ -12,9 +12,11 @@ import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.serde.api.HendelseDTO
+import no.nav.helse.serde.api.v2.HendelseDTO
+import no.nav.helse.serde.api.v2.SøknadNavDTO
 import no.nav.helse.serde.api.serializePersonForSpeil
-import no.nav.helse.serde.api.v2.SøknadNav
+import no.nav.helse.serde.api.v2.InntektsmeldingDTO
+import no.nav.helse.serde.api.v2.SykmeldingDTO
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
@@ -41,7 +43,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         val MÅNEDLIG_INNTEKT = INNTEKT.reflection { _, månedlig, _, _ -> månedlig.toInt() }
     }
 
-    fun speilApi(hendelser: List<HendelseDTO> = emptyList()) = serializePersonForSpeil(person, hendelser)
+    fun speilApi(hendelser: List<HendelseDTO> = søknadDTOer + sykmeldingDTOer + inntektsmeldingDTOer) = serializePersonForSpeil(person, hendelser)
     protected lateinit var hendelselogg: IAktivitetslogg
     protected var forventetEndringTeller = 0
     private val sykmeldinger = mutableMapOf<UUID, Array<out Sykmeldingsperiode>>()
@@ -49,12 +51,31 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     private val inntektsmeldinger = mutableMapOf<UUID, () -> Inntektsmelding>()
     protected val søknadDTOer get() = søknader.map { (id, triple) ->
         val søknadsperiode = Søknad.Søknadsperiode.søknadsperiode(triple.third.toList())!!
-        SøknadNav(
+        SøknadNavDTO(
             id = id.toString(),
             fom = søknadsperiode.first(),
             tom = søknadsperiode.last(),
             rapportertdato = triple.first.atStartOfDay(),
             sendtNav = triple.first.atStartOfDay()
+        )
+    }
+
+    private val sykmeldingDTOer get() = sykmeldinger.map { (id, perioder) ->
+        val sykmeldingsperiode = Sykmeldingsperiode.periode(perioder.toList())!!
+        SykmeldingDTO(
+            id = id.toString(),
+            fom = sykmeldingsperiode.first(),
+            tom = sykmeldingsperiode.last(),
+            rapportertdato = sykmeldingsperiode.last().atStartOfDay()
+        )
+    }
+
+    private val inntektsmeldingDTOer get() = inntektsmeldinger.map { (id, inntektsmeldingGetter) ->
+        val im = inntektsmeldingGetter()
+        InntektsmeldingDTO(
+            id = id.toString(),
+            mottattDato = LocalDateTime.now(),
+            beregnetInntekt = im.beregnetInntekt.reflection { årlig, _, _, _ -> årlig }
         )
     }
 

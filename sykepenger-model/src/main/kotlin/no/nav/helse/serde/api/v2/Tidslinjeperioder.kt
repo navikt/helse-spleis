@@ -5,6 +5,7 @@ import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.AvsluttetUtenUtbetaling
+import no.nav.helse.serde.api.v2.HendelseDTO.Companion.finn
 import no.nav.helse.serde.api.SimuleringsdataDTO
 import no.nav.helse.serde.api.v2.Behandlingstype.UBEREGNET
 import no.nav.helse.serde.api.v2.Behandlingstype.VENTER
@@ -12,7 +13,6 @@ import no.nav.helse.serde.api.v2.Generasjoner.Generasjon.Companion.fjernErstatte
 import no.nav.helse.serde.api.v2.Generasjoner.Generasjon.Companion.sammenstillMedNeste
 import no.nav.helse.serde.api.v2.Generasjoner.Generasjon.Companion.sorterGenerasjoner
 import no.nav.helse.serde.api.v2.Generasjoner.Generasjon.Companion.toDTO
-import no.nav.helse.serde.api.v2.Hendelse.Companion.finn
 import no.nav.helse.serde.api.v2.Tidslinjebereginger.ITidslinjeberegning
 import no.nav.helse.serde.api.v2.buildere.BeregningId
 import no.nav.helse.serde.api.v2.buildere.IVilkårsgrunnlagHistorikk
@@ -182,7 +182,7 @@ internal class Tidslinjeperioder(
         periode: IVedtaksperiode,
         utbetaling: IUtbetaling,
         sammenslåttTidslinje: List<SammenslåttDag>,
-        hendelser: List<Hendelse>
+        hendelser: List<HendelseDTO>
     ): BeregnetPeriode.Vilkår {
         val sisteSykepengedag = sammenslåttTidslinje.sisteNavDag()?.dagen ?: periode.tom
         val sykepengedager = BeregnetPeriode.Sykepengedager(
@@ -195,7 +195,7 @@ internal class Tidslinjeperioder(
         val alder = Alder(fødselsnummer).let {
             BeregnetPeriode.Alder(it.alderPåDato(sisteSykepengedag), it.datoForØvreAldersgrense > sisteSykepengedag)
         }
-        val søknadsfrist = hendelser.finn<SøknadNav>()?.let {
+        val søknadsfrist = hendelser.finn<SøknadNavDTO>()?.let {
             BeregnetPeriode.Søknadsfrist(
                 sendtNav = it.sendtNav,
                 søknadFom = it.fom,
@@ -214,7 +214,7 @@ internal class IVedtaksperiode(
     val tom: LocalDate,
     val behandlingstype: Behandlingstype,
     val inntektskilde: Inntektskilde,
-    val hendelser: List<Hendelse>,
+    val hendelser: List<HendelseDTO>,
     val simuleringsdataDTO: SimuleringsdataDTO?,
     utbetalinger: List<IUtbetaling>,
     val periodetype: Periodetype,

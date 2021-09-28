@@ -10,12 +10,12 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-internal data class Generasjon(
+data class Generasjon(
     val id: UUID, // Runtime
     val perioder: List<Tidslinjeperiode>
 )
 
-internal enum class Behandlingstype {
+enum class Behandlingstype {
     // Perioder som aldri har blitt beregnet hos oss
     UBEREGNET,
     // Perioder som har blitt beregnet - dvs har fått en utbetaling av noe slag
@@ -24,7 +24,7 @@ internal enum class Behandlingstype {
     VENTER
 }
 
-internal interface Tidslinjeperiode {
+interface Tidslinjeperiode {
     // Brukes i Speil for å kunne korrelere tidslinje-komponenten og saksbildet. Trenger ikke være persistent på tvers av snapshots.
     val tidslinjeperiodeId: UUID
     val vedtaksperiodeId: UUID
@@ -41,7 +41,7 @@ internal interface Tidslinjeperiode {
     fun venter() = behandlingstype == VENTER
 }
 
-internal data class Utbetalingsinfo(
+data class Utbetalingsinfo(
     val inntekt: Int? = null,
     val utbetaling: Int? = null,
     val totalGrad: Double? = null
@@ -78,7 +78,7 @@ internal data class BeregnetPeriode(
     val skjæringstidspunkt: LocalDate,
     val maksdato: LocalDate,
     val utbetaling: Utbetaling,
-    val hendelser: List<Hendelse>,
+    val hendelser: List<HendelseDTO>,
     val simulering: SimuleringsdataDTO?,
     val vilkårsgrunnlagshistorikkId: UUID,
     val periodevilkår: Vilkår,

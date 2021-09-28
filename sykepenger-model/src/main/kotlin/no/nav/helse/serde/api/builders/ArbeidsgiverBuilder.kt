@@ -2,7 +2,7 @@ package no.nav.helse.serde.api.builders
 
 import no.nav.helse.person.*
 import no.nav.helse.serde.api.ArbeidsgiverDTO
-import no.nav.helse.serde.api.HendelseDTO
+import no.nav.helse.serde.api.v2.HendelseDTO
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import java.time.LocalDateTime

@@ -4,6 +4,9 @@ import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
 import no.nav.helse.serde.api.dto.UtbetalingshistorikkElementDTO
+import no.nav.helse.serde.api.v2.Generasjon
+import no.nav.helse.serde.api.v2.HendelseDTO
+import no.nav.helse.serde.api.v2.Vilkårsgrunnlag
 import no.nav.helse.serde.mapping.SpeilDagtype
 import no.nav.helse.serde.mapping.SpeilKildetype
 import java.time.LocalDate
@@ -227,48 +230,6 @@ enum class BegrunnelseDTO {
     EtterDødsdato,
     ManglerMedlemskap,
     ManglerOpptjening
-}
-
-interface HendelseDTO {
-    val id: String
-    val type: String
-}
-
-data class InntektsmeldingDTO(
-    override val id: String,
-    val mottattDato: LocalDateTime,
-    val beregnetInntekt: Double
-) : HendelseDTO {
-    override val type = "INNTEKTSMELDING"
-}
-
-data class SøknadNavDTO(
-    override val id: String,
-    val fom: LocalDate,
-    val tom: LocalDate,
-    val rapportertdato: LocalDateTime,
-    val sendtNav: LocalDateTime
-) : HendelseDTO {
-    override val type = "SENDT_SØKNAD_NAV"
-}
-
-data class SøknadArbeidsgiverDTO(
-    override val id: String,
-    val fom: LocalDate,
-    val tom: LocalDate,
-    val rapportertdato: LocalDateTime,
-    val sendtArbeidsgiver: LocalDateTime
-) : HendelseDTO {
-    override val type = "SENDT_SØKNAD_ARBEIDSGIVER"
-}
-
-data class SykmeldingDTO(
-    override val id: String,
-    val fom: LocalDate,
-    val tom: LocalDate,
-    val rapportertdato: LocalDateTime
-) : HendelseDTO {
-    override val type = "NY_SØKNAD"
 }
 
 enum class TilstandstypeDTO(private val visForkastet: Boolean = false) {
