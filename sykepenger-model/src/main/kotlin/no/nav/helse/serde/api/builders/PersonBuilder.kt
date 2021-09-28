@@ -5,6 +5,8 @@ import no.nav.helse.person.Person
 import no.nav.helse.serde.AbstractBuilder
 import no.nav.helse.serde.api.PersonDTO
 import no.nav.helse.serde.api.v2.HendelseDTO
+import no.nav.helse.serde.api.v2.buildere.OppsamletSammenligningsgrunnlagBuilder
+import no.nav.helse.serde.api.v2.buildere.VilkårsgrunnlagBuilder
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -24,12 +26,16 @@ internal class PersonBuilder(
 
         fun skalVises(orgnummer: String) = person.skjæringstidspunkter().any { person.harAktivtArbeidsforholdEllerInntekt(it, orgnummer) }
 
+        val sammenligningsgrunnlagBuilder = OppsamletSammenligningsgrunnlagBuilder(person)
+        val vilkårsgrunnlagHistorikk = VilkårsgrunnlagBuilder(person.vilkårsgrunnlagHistorikk, sammenligningsgrunnlagBuilder).build()
+
         return PersonDTO(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
-            arbeidsgivere = arbeidsgivere.map { it.build(hendelser) }.filter {
+            arbeidsgivere = arbeidsgivere.map { it.build(hendelser, fødselsnummer, vilkårsgrunnlagHistorikk) }.filter {
                 it.vedtaksperioder.isNotEmpty() || skalVises(it.organisasjonsnummer)
             },
+            vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk.toDTO(),
             inntektsgrunnlag = inntektshistorikkBuilder.build(),
             dødsdato = dødsdato,
             versjon = versjon

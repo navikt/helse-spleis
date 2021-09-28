@@ -56,3 +56,5 @@ spec:
     value: "true"
   - name: REVURDER_TIDLIGERE_PERIODE
     value: "true"
+  - name: SPEIL_API_V2
+    value: "true"

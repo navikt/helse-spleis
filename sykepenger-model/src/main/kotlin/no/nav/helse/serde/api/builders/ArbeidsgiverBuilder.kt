@@ -1,15 +1,18 @@
 package no.nav.helse.serde.api.builders
 
+import no.nav.helse.Toggles
 import no.nav.helse.person.*
 import no.nav.helse.serde.api.ArbeidsgiverDTO
 import no.nav.helse.serde.api.v2.HendelseDTO
+import no.nav.helse.serde.api.v2.buildere.GenerasjonerBuilder
+import no.nav.helse.serde.api.v2.buildere.IVilkårsgrunnlagHistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import java.time.LocalDateTime
 import java.util.*
 
 internal class ArbeidsgiverBuilder(
-    arbeidsgiver: Arbeidsgiver,
+    private val arbeidsgiver: Arbeidsgiver,
     vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
     private val id: UUID,
     private val organisasjonsnummer: String,
@@ -36,11 +39,12 @@ internal class ArbeidsgiverBuilder(
         byggerForkastedePerioder = true
     )
 
-    internal fun build(hendelser: List<HendelseDTO>) = ArbeidsgiverDTO(
+    internal fun build(hendelser: List<HendelseDTO>, fødselsnummer: String, vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk) = ArbeidsgiverDTO(
         organisasjonsnummer = organisasjonsnummer,
         id = id,
         vedtaksperioder = perioderBuilder.build(hendelser, utbetalinger) + forkastetPerioderBuilder.build(hendelser, utbetalinger).filter { it.tilstand.visesNårForkastet() },
-        utbetalingshistorikk = utbetalingshistorikkBuilder.build()
+        utbetalingshistorikk = utbetalingshistorikkBuilder.build(),
+        generasjoner = if (Toggles.SpeilApiV2.enabled) GenerasjonerBuilder(hendelser, fødselsnummer, vilkårsgrunnlagHistorikk, arbeidsgiver).build() else null
     )
 
     override fun preVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {

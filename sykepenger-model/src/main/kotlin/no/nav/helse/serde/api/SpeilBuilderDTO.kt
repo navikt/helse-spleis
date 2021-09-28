@@ -19,6 +19,7 @@ data class PersonDTO(
     val fødselsnummer: String,
     val arbeidsgivere: List<ArbeidsgiverDTO>,
     val inntektsgrunnlag: List<InntektsgrunnlagDTO>,
+    val vilkårsgrunnlagHistorikk: Map<UUID, Map<LocalDate, Vilkårsgrunnlag>>,
     val dødsdato: LocalDate?,
     val versjon: Int
 )
@@ -34,7 +35,8 @@ data class ArbeidsgiverDTO(
     val organisasjonsnummer: String,
     val id: UUID,
     val vedtaksperioder: List<VedtaksperiodeDTOBase>,
-    val utbetalingshistorikk: List<UtbetalingshistorikkElementDTO>
+    val utbetalingshistorikk: List<UtbetalingshistorikkElementDTO>,
+    val generasjoner: List<Generasjon>?
 )
 
 
