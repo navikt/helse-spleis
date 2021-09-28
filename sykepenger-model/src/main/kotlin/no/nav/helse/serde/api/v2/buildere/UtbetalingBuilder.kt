@@ -6,12 +6,12 @@ import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VedtaksperiodeVisitor
 import no.nav.helse.serde.api.SimuleringsdataDTO
 import no.nav.helse.serde.api.v2.IUtbetaling
-import no.nav.helse.serde.api.v2.UtbetalingDTO
+import no.nav.helse.serde.api.v2.Utbetaling
 import no.nav.helse.utbetalingslinjer.Oppdrag
-import no.nav.helse.utbetalingslinjer.Utbetaling
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.utbetalingslinjer.Utbetaling as InternUtbetaling
 
 // Besøker hele vedtaksperiode-treet
 internal class UtbetalingerBuilder(vedtaksperiode: Vedtaksperiode): VedtaksperiodeVisitor {
@@ -24,11 +24,11 @@ internal class UtbetalingerBuilder(vedtaksperiode: Vedtaksperiode): Vedtaksperio
     internal fun build() = utbetalinger.values.toList()
 
     override fun preVisitUtbetaling(
-        utbetaling: Utbetaling,
+        utbetaling: InternUtbetaling,
         id: UUID,
         beregningId: UUID,
-        type: Utbetaling.Utbetalingtype,
-        tilstand: Utbetaling.Tilstand,
+        type: InternUtbetaling.Utbetalingtype,
+        tilstand: InternUtbetaling.Tilstand,
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,
         arbeidsgiverNettoBeløp: Int,
@@ -43,7 +43,7 @@ internal class UtbetalingerBuilder(vedtaksperiode: Vedtaksperiode): Vedtaksperio
     }
 }
 
-internal class UtbetalingBuilder(utbetaling: Utbetaling): UtbetalingVisitor {
+internal class UtbetalingBuilder(utbetaling: InternUtbetaling): UtbetalingVisitor {
     private lateinit var utbetaling: IUtbetaling
 
     init {
@@ -53,11 +53,11 @@ internal class UtbetalingBuilder(utbetaling: Utbetaling): UtbetalingVisitor {
     internal fun build() = utbetaling
 
     override fun preVisitUtbetaling(
-        utbetaling: Utbetaling,
+        utbetaling: InternUtbetaling,
         id: UUID,
         beregningId: UUID,
-        type: Utbetaling.Utbetalingtype,
-        tilstand: Utbetaling.Tilstand,
+        type: InternUtbetaling.Utbetalingtype,
+        tilstand: InternUtbetaling.Tilstand,
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,
         arbeidsgiverNettoBeløp: Int,
@@ -88,23 +88,23 @@ internal class UtbetalingBuilder(utbetaling: Utbetaling): UtbetalingVisitor {
 }
 
 // Besøker hele utbetaling-treet
-internal class VurderingBuilder(utbetaling: Utbetaling): UtbetalingVisitor {
+internal class VurderingBuilder(utbetaling: InternUtbetaling): UtbetalingVisitor {
     init {
         utbetaling.accept(this)
     }
 
-    private var vurdering: UtbetalingDTO.VurderingDTO? = null
+    private var vurdering: Utbetaling.Vurdering? = null
     internal fun build() = vurdering
 
     override fun visitVurdering(
-        vurdering: Utbetaling.Vurdering,
+        vurdering: InternUtbetaling.Vurdering,
         ident: String,
         epost: String,
         tidspunkt: LocalDateTime,
         automatiskBehandling: Boolean,
         godkjent: Boolean
     ) {
-        this.vurdering = UtbetalingDTO.VurderingDTO(
+        this.vurdering = Utbetaling.Vurdering(
             godkjent = godkjent,
             tidsstempel = tidspunkt,
             automatisk = automatiskBehandling,
@@ -114,7 +114,7 @@ internal class VurderingBuilder(utbetaling: Utbetaling): UtbetalingVisitor {
 }
 
 // Besøker hele utbetaling-treet
-internal class OppdragBuilder(utbetaling: Utbetaling) : UtbetalingVisitor {
+internal class OppdragBuilder(utbetaling: InternUtbetaling) : UtbetalingVisitor {
     init {
         utbetaling.accept(this)
     }

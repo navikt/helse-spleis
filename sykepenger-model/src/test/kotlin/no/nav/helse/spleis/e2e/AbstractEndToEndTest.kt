@@ -13,8 +13,8 @@ import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.api.HendelseDTO
-import no.nav.helse.serde.api.SøknadNavDTO
 import no.nav.helse.serde.api.serializePersonForSpeil
+import no.nav.helse.serde.api.v2.SøknadNav
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
@@ -49,7 +49,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     private val inntektsmeldinger = mutableMapOf<UUID, () -> Inntektsmelding>()
     protected val søknadDTOer get() = søknader.map { (id, triple) ->
         val søknadsperiode = Søknad.Søknadsperiode.søknadsperiode(triple.third.toList())!!
-        SøknadNavDTO(
+        SøknadNav(
             id = id.toString(),
             fom = søknadsperiode.first(),
             tom = søknadsperiode.last(),

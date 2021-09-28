@@ -2,9 +2,10 @@ package no.nav.helse.serde.api.v2
 
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
-import no.nav.helse.serde.api.*
+import no.nav.helse.serde.api.AktivitetDTO
+import no.nav.helse.serde.api.SimuleringsdataDTO
 import no.nav.helse.serde.api.v2.Behandlingstype.VENTER
-import no.nav.helse.serde.mapping.SpeilDagtype
+import no.nav.helse.serde.api.v2.buildere.BeregningId
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -46,16 +47,6 @@ internal data class Utbetalingsinfo(
     val totalGrad: Double? = null
 )
 
-internal data class SammenslåttDag(
-    val dagen: LocalDate,
-    val sykdomstidslinjedagtype: SpeilDagtype,
-    val utbetalingsdagtype: TypeDataDTO,
-    val kilde: SykdomstidslinjedagDTO.KildeDTO,
-    val grad: Double? = null,
-    val utbetalingsinfo: Utbetalingsinfo? = null,
-    val begrunnelser: List<BegrunnelseDTO>? = null,
-)
-
 internal data class UberegnetPeriode(
     override val vedtaksperiodeId: UUID,
     override val fom: LocalDate,
@@ -86,13 +77,12 @@ internal data class BeregnetPeriode(
     val forbrukteSykedager: Int?,
     val skjæringstidspunkt: LocalDate,
     val maksdato: LocalDate,
-    val utbetalingDTO: UtbetalingDTO,
-    val hendelser: List<HendelseDTO>,
+    val utbetaling: Utbetaling,
+    val hendelser: List<Hendelse>,
     val simulering: SimuleringsdataDTO?,
     val vilkårsgrunnlagshistorikkId: UUID,
     val periodevilkår: Vilkår,
     val aktivitetslogg: List<AktivitetDTO>
-    //Lookup for vilkår(beregningId, skjæringstidspunkt), inntektsgrunnlag(beregningId, skjæringstidspunkt)
 ) : Tidslinjeperiode {
     override val tidslinjeperiodeId: UUID = UUID.randomUUID()
 
@@ -100,9 +90,9 @@ internal data class BeregnetPeriode(
     internal fun erRevurdering() = utbetalingstype == "REVURDERING"
     internal fun harSammeFagsystemId(other: BeregnetPeriode) = fagsystemId() == other.fagsystemId()
 
-    private fun fagsystemId() = utbetalingDTO.arbeidsgiverFagsystemId
-    val utbetalingstilstand = utbetalingDTO.status
-    val utbetalingstype = utbetalingDTO.type
+    private fun fagsystemId() = utbetaling.arbeidsgiverFagsystemId
+    val utbetalingstilstand = utbetaling.status
+    val utbetalingstype = utbetaling.type
 
     data class Vilkår(
         val sykepengedager: Sykepengedager,
@@ -131,17 +121,17 @@ internal data class BeregnetPeriode(
     )
 }
 
-data class UtbetalingDTO(
+data class Utbetaling(
     val type: String,
     val status: String,
     val arbeidsgiverNettoBeløp: Int,
     val personNettoBeløp: Int,
     val arbeidsgiverFagsystemId: String,
     val personFagsystemId: String,
-    val vurdering: VurderingDTO?
+    val vurdering: Vurdering?
 ) {
     fun erAnnullering() = type == "ANNULLERING"
-    data class VurderingDTO(
+    data class Vurdering(
         val godkjent: Boolean,
         val tidsstempel: LocalDateTime,
         val automatisk: Boolean,

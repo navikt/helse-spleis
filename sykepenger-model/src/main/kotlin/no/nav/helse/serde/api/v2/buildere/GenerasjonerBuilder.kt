@@ -1,14 +1,8 @@
-package no.nav.helse.serde.api.v2
+package no.nav.helse.serde.api.v2.buildere
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.*
-import no.nav.helse.serde.api.HendelseDTO
-import no.nav.helse.serde.api.v2.buildere.*
-import no.nav.helse.serde.api.v2.buildere.SimuleringBuilder
-import no.nav.helse.serde.api.v2.buildere.SykdomshistorikkBuilder
-import no.nav.helse.serde.api.v2.buildere.UtbetalingBuilder
-import no.nav.helse.serde.api.v2.buildere.UtbetalingerBuilder
-import no.nav.helse.serde.api.v2.buildere.VedtaksperiodeSykdomstidslinjeBuilder
+import no.nav.helse.serde.api.v2.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import java.time.LocalDate
@@ -18,19 +12,17 @@ import java.util.*
 internal data class GenerasjonIder(
     val beregningId: BeregningId,
     val sykdomshistorikkId: SykdomshistorikkId,
-    val inntektshistorikkId: InntektshistorikkId,
     val vilkårsgrunnlagshistorikkId: VilkårsgrunnlagshistorikkId
 )
 
 internal typealias BeregningId = UUID
 internal typealias SykdomshistorikkId = UUID
-internal typealias InntektshistorikkId = UUID
 internal typealias VilkårsgrunnlagshistorikkId = UUID
 internal typealias FagsystemId = String
 
 // Besøker hele arbeidsgiver-treet
 internal class GenerasjonerBuilder(
-    private val hendelser: List<HendelseDTO>,
+    private val hendelser: List<Hendelse>,
     private val fødselsnummer: String,
     private val vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk
 ) : ArbeidsgiverVisitor {
@@ -125,12 +117,11 @@ internal class GenerasjonerBuilder(
         inntektshistorikkInnslagId: UUID,
         vilkårsgrunnlagHistorikkInnslagId: UUID
     ) {
-        generasjonIderAkkumulator.leggTil(id, GenerasjonIder(id, sykdomshistorikkElementId, inntektshistorikkInnslagId, vilkårsgrunnlagHistorikkInnslagId))
+        generasjonIderAkkumulator.leggTil(id, GenerasjonIder(id, sykdomshistorikkElementId, vilkårsgrunnlagHistorikkInnslagId))
     }
 
     override fun preVisitSykdomshistorikkElement(element: Sykdomshistorikk.Element, id: UUID, hendelseId: UUID?, tidsstempel: LocalDateTime) {
-        val builder = SykdomshistorikkBuilder(id, element)
-        builder.build().also { (id, tidslinje) ->
+        SykdomshistorikkBuilder(id, element).build().also { (id, tidslinje) ->
             sykdomshistorikkAkkumulator.leggTil(id, tidslinje)
         }
     }

@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.*
 
-internal class VedtaksperiodeVarslerBuilderTest: AbstractEndToEndTest() {
+internal class PeriodeVarslerBuilderTest: AbstractEndToEndTest() {
 
     @Test
     fun `varsel på samme skjæringstidspunkt kopieres`() {

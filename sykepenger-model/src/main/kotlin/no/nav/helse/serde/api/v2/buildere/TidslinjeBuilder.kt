@@ -1,20 +1,13 @@
 package no.nav.helse.serde.api.v2.buildere
 
 import no.nav.helse.hendelser.*
-import no.nav.helse.person.SykdomshistorikkVisitor
-import no.nav.helse.person.SykdomstidslinjeVisitor
-import no.nav.helse.person.UtbetalingVisitor
-import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.person.VedtaksperiodeVisitor
+import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.Sykmelding
+import no.nav.helse.person.*
 import no.nav.helse.serde.PersonData
-import no.nav.helse.serde.api.*
-import no.nav.helse.serde.mapping.SpeilDagtype
-import no.nav.helse.serde.mapping.SpeilKildetype
+import no.nav.helse.serde.api.BegrunnelseDTO
+import no.nav.helse.serde.api.v2.*
 import no.nav.helse.sykdomstidslinje.*
-import no.nav.helse.sykdomstidslinje.Dag
-import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Økonomi
@@ -24,7 +17,7 @@ import kotlin.math.roundToInt
 
 // Besøker hele sykdomshistorikk-treet
 internal class VedtaksperiodeSykdomstidslinjeBuilder(vedtaksperiode: Vedtaksperiode): VedtaksperiodeVisitor {
-    private val sykdomstidslinje: MutableList<SykdomstidslinjedagDTO> = mutableListOf()
+    private val sykdomstidslinje: MutableList<Sykdomstidslinjedag> = mutableListOf()
     init {
         vedtaksperiode.accept(this)
     }
@@ -37,13 +30,13 @@ internal class VedtaksperiodeSykdomstidslinjeBuilder(vedtaksperiode: Vedtaksperi
 }
 
 internal class SykdomshistorikkBuilder(private val id: UUID, element: Sykdomshistorikk.Element) : SykdomshistorikkVisitor {
-    private val beregnetTidslinje: MutableList<SykdomstidslinjedagDTO> = mutableListOf()
+    private val beregnetTidslinje: MutableList<Sykdomstidslinjedag> = mutableListOf()
 
     init {
         element.accept(this)
     }
 
-    fun build(): Pair<UUID, List<SykdomstidslinjedagDTO>> = id to beregnetTidslinje.toList()
+    fun build(): Pair<UUID, List<Sykdomstidslinjedag>> = id to beregnetTidslinje.toList()
 
     override fun preVisitBeregnetSykdomstidslinje(tidslinje: Sykdomstidslinje) {
         this.beregnetTidslinje.addAll(SykdomstidslinjeBuilder(tidslinje).build())
@@ -52,7 +45,7 @@ internal class SykdomshistorikkBuilder(private val id: UUID, element: Sykdomshis
 }
 
 internal class SykdomstidslinjeBuilder(tidslinje: Sykdomstidslinje): SykdomstidslinjeVisitor {
-    private val tidslinje = mutableListOf<SykdomstidslinjedagDTO>()
+    private val tidslinje = mutableListOf<Sykdomstidslinjedag>()
     init {
         tidslinje.accept(this)
     }
@@ -113,10 +106,10 @@ internal class SykdomstidslinjeBuilder(tidslinje: Sykdomstidslinje): Sykdomstids
         leggTilDag(dag, dato, null, kilde)
 
     private fun leggTilDag(dag: Dag, dato: LocalDate, økonomi: Økonomi?, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
-        val dagDto = SykdomstidslinjedagDTO(
+        val dagDto = Sykdomstidslinjedag(
             dato,
             dag.toDagtypeDTO(),
-            SykdomstidslinjedagDTO.KildeDTO(kilde.toKildetypeDTO(), kilde.meldingsreferanseId()),
+            Sykdomstidslinjedag.SykdomstidslinjedagKilde(kilde.toKildetypeDTO(), kilde.meldingsreferanseId()),
             økonomi?.medData { grad, _, _, _, _, _, _, _, _ -> grad }
         )
 
@@ -124,32 +117,32 @@ internal class SykdomstidslinjeBuilder(tidslinje: Sykdomstidslinje): Sykdomstids
     }
 
     private fun SykdomstidslinjeHendelse.Hendelseskilde.toKildetypeDTO() = when {
-        erAvType(Inntektsmelding::class) -> SpeilKildetype.Inntektsmelding
-        erAvType(Søknad::class) -> SpeilKildetype.Søknad
-        erAvType(Sykmelding::class) -> SpeilKildetype.Sykmelding
-        erAvType(OverstyrTidslinje::class) -> SpeilKildetype.Saksbehandler
-        else -> SpeilKildetype.Ukjent
+        erAvType(Inntektsmelding::class) -> SykdomstidslinjedagKildetype.Inntektsmelding
+        erAvType(Søknad::class) -> SykdomstidslinjedagKildetype.Søknad
+        erAvType(Sykmelding::class) -> SykdomstidslinjedagKildetype.Sykmelding
+        erAvType(OverstyrTidslinje::class) -> SykdomstidslinjedagKildetype.Saksbehandler
+        else -> SykdomstidslinjedagKildetype.Ukjent
     }
 
     private fun Dag.toDagtypeDTO() = when (this) {
-        is Dag.Sykedag -> SpeilDagtype.SYKEDAG
-        is Dag.UkjentDag -> SpeilDagtype.ARBEIDSDAG
-        is Dag.Arbeidsdag -> SpeilDagtype.ARBEIDSDAG
-        is Dag.Arbeidsgiverdag -> SpeilDagtype.ARBEIDSGIVERDAG
-        is Dag.Feriedag -> SpeilDagtype.FERIEDAG
-        is Dag.FriskHelgedag -> SpeilDagtype.FRISK_HELGEDAG
-        is Dag.ArbeidsgiverHelgedag -> SpeilDagtype.ARBEIDSGIVERDAG
-        is Dag.ForeldetSykedag -> SpeilDagtype.FORELDET_SYKEDAG
-        is Dag.SykHelgedag -> SpeilDagtype.SYK_HELGEDAG
-        is Dag.Permisjonsdag -> SpeilDagtype.PERMISJONSDAG
-        is Dag.ProblemDag -> SpeilDagtype.UBESTEMTDAG
-        is Dag.AvslåttDag -> SpeilDagtype.AVSLÅTT
+        is Dag.Sykedag -> SykdomstidslinjedagType.SYKEDAG
+        is Dag.UkjentDag -> SykdomstidslinjedagType.ARBEIDSDAG
+        is Dag.Arbeidsdag -> SykdomstidslinjedagType.ARBEIDSDAG
+        is Dag.Arbeidsgiverdag -> SykdomstidslinjedagType.ARBEIDSGIVERDAG
+        is Dag.Feriedag -> SykdomstidslinjedagType.FERIEDAG
+        is Dag.FriskHelgedag -> SykdomstidslinjedagType.FRISK_HELGEDAG
+        is Dag.ArbeidsgiverHelgedag -> SykdomstidslinjedagType.ARBEIDSGIVERDAG
+        is Dag.ForeldetSykedag -> SykdomstidslinjedagType.FORELDET_SYKEDAG
+        is Dag.SykHelgedag -> SykdomstidslinjedagType.SYK_HELGEDAG
+        is Dag.Permisjonsdag -> SykdomstidslinjedagType.PERMISJONSDAG
+        is Dag.ProblemDag -> SykdomstidslinjedagType.UBESTEMTDAG
+        is Dag.AvslåttDag -> SykdomstidslinjedagType.AVSLÅTT
     }
 }
 
 // Besøker hele utbetaling-treet
 internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVisitor {
-    private val utbetalingstidslinje: MutableList<UtbetalingstidslinjedagDTO> = mutableListOf()
+    private val utbetalingstidslinje: MutableList<Utbetalingstidslinjedag> = mutableListOf()
 
     init {
         utbetaling.accept(this)
@@ -164,8 +157,8 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
     ) {
         økonomi.medAvrundetData { _, aktuellDagsinntekt ->
             utbetalingstidslinje.add(
-                UtbetalingsdagDTO(
-                    type = TypeDataDTO.Arbeidsdag,
+                Utbetalingsdag(
+                    type = UtbetalingstidslinjeDagtype.Arbeidsdag,
                     inntekt = aktuellDagsinntekt!!,
                     dato = dato
                 )
@@ -180,8 +173,8 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
     ) {
         økonomi.medAvrundetData { _, aktuellDagsinntekt ->
             utbetalingstidslinje.add(
-                UtbetalingsdagDTO(
-                    type = TypeDataDTO.ArbeidsgiverperiodeDag,
+                Utbetalingsdag(
+                    type = UtbetalingstidslinjeDagtype.ArbeidsgiverperiodeDag,
                     inntekt = aktuellDagsinntekt!!,
                     dato = dato
                 )
@@ -196,8 +189,8 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
     ) {
         økonomi.medData { grad, _, _, _, totalGrad, aktuellDagsinntekt, arbeidsgiverbeløp, _, _ ->
             utbetalingstidslinje.add(
-                NavDagDTO(
-                    type = TypeDataDTO.NavDag,
+                NavDag(
+                    type = UtbetalingstidslinjeDagtype.NavDag,
                     inntekt = aktuellDagsinntekt!!.roundToInt(),
                     dato = dato,
                     utbetaling = arbeidsgiverbeløp!!.roundToInt(),
@@ -215,8 +208,8 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
     ) {
         økonomi.medData { grad, _ ->
             utbetalingstidslinje.add(
-                UtbetalingsdagMedGradDTO(
-                    type = TypeDataDTO.NavHelgDag,
+                UtbetalingsdagMedGrad(
+                    type = UtbetalingstidslinjeDagtype.NavHelgDag,
                     inntekt = 0,   // Speil needs zero here
                     dato = dato,
                     grad = grad
@@ -231,8 +224,8 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
         økonomi: Økonomi
     ) {
         utbetalingstidslinje.add(
-            UtbetalingsdagDTO(
-                type = if (dato.erHelg()) TypeDataDTO.Helgedag else TypeDataDTO.Feriedag,
+            Utbetalingsdag(
+                type = if (dato.erHelg()) UtbetalingstidslinjeDagtype.Helgedag else UtbetalingstidslinjeDagtype.Feriedag,
                 inntekt = 0,    // Speil needs zero here
                 dato = dato
             )
@@ -245,8 +238,8 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
         økonomi: Økonomi
     ) {
         utbetalingstidslinje.add(
-            UtbetalingsdagDTO(
-                type = TypeDataDTO.UkjentDag,
+            Utbetalingsdag(
+                type = UtbetalingstidslinjeDagtype.UkjentDag,
                 inntekt = 0,    // Speil needs zero here
                 dato = dato
             )
@@ -259,8 +252,8 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
         økonomi: Økonomi
     ) {
         utbetalingstidslinje.add(
-            AvvistDagDTO(
-                type = TypeDataDTO.AvvistDag,
+            AvvistDag(
+                type = UtbetalingstidslinjeDagtype.AvvistDag,
                 inntekt = 0,    // Speil needs zero here
                 dato = dato,
                 begrunnelser = dag.begrunnelser.map { BegrunnelseDTO.valueOf(PersonData.UtbetalingstidslinjeData.BegrunnelseData.fraBegrunnelse(it).name) },
@@ -275,8 +268,8 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
         økonomi: Økonomi
     ) {
         utbetalingstidslinje.add(
-            UtbetalingsdagDTO(
-                type = TypeDataDTO.ForeldetDag,
+            Utbetalingsdag(
+                type = UtbetalingstidslinjeDagtype.ForeldetDag,
                 inntekt = 0,    // Speil needs zero here
                 dato = dato
             )

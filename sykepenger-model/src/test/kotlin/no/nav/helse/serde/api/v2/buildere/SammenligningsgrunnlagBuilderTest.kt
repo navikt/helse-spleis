@@ -12,7 +12,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
-internal class OppsamletSammenligningsgrunnlagBuilderTest : AbstractEndToEndTest() {
+internal class SammenligningsgrunnlagBuilderTest : AbstractEndToEndTest() {
 
     private companion object {
         private const val AG1 = "987654321"

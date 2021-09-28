@@ -1,6 +1,8 @@
 package no.nav.helse.serde.api.v2
 
-import no.nav.helse.serde.api.*
+import no.nav.helse.serde.api.v2.buildere.BeregningId
+import no.nav.helse.serde.api.v2.buildere.GenerasjonIder
+import no.nav.helse.serde.api.v2.buildere.VilkårsgrunnlagshistorikkId
 import java.time.LocalDate
 
 internal class Tidslinjebereginger(generasjonIder: List<GenerasjonIder>, sykdomshistorikkAkkumulator: SykdomshistorikkAkkumulator) {
@@ -15,7 +17,6 @@ internal class Tidslinjebereginger(generasjonIder: List<GenerasjonIder>, sykdoms
             ITidslinjeberegning(
                 it.beregningId,
                 sykdomstidslinje,
-                it.inntektshistorikkId,
                 it.vilkårsgrunnlagshistorikkId
             )
         }
@@ -27,35 +28,34 @@ internal class Tidslinjebereginger(generasjonIder: List<GenerasjonIder>, sykdoms
 
     internal class ITidslinjeberegning(
         internal val beregningId: BeregningId,
-        private val sykdomstidslinje: List<SykdomstidslinjedagDTO>,
-        internal val inntektshistorikkId: InntektshistorikkId,
+        private val sykdomstidslinje: List<Sykdomstidslinjedag>,
         internal val vilkårsgrunnlagshistorikkId: VilkårsgrunnlagshistorikkId
     ) {
-        fun sammenslåttTidslinje(utbetalingstidslinje: List<UtbetalingstidslinjedagDTO>, fom: LocalDate, tom: LocalDate): List<SammenslåttDag> {
+        fun sammenslåttTidslinje(utbetalingstidslinje: List<Utbetalingstidslinjedag>, fom: LocalDate, tom: LocalDate): List<SammenslåttDag> {
             return sykdomstidslinje
                 .subset(fom, tom)
                 .merge(utbetalingstidslinje)
         }
 
-        private fun List<SykdomstidslinjedagDTO>.subset(fom: LocalDate, tom: LocalDate) = this.filter { it.dagen in fom..tom }
+        private fun List<Sykdomstidslinjedag>.subset(fom: LocalDate, tom: LocalDate) = this.filter { it.dagen in fom..tom }
     }
 }
 
-internal fun List<SykdomstidslinjedagDTO>.merge(utbetalingstidslinje: List<UtbetalingstidslinjedagDTO>): List<SammenslåttDag> {
+internal fun List<Sykdomstidslinjedag>.merge(utbetalingstidslinje: List<Utbetalingstidslinjedag>): List<SammenslåttDag> {
 
-    fun utbetalingsinfo(utbetalingsdag: UtbetalingstidslinjedagDTO) = if (utbetalingsdag is NavDagDTO)
+    fun utbetalingsinfo(utbetalingsdag: Utbetalingstidslinjedag) = if (utbetalingsdag is NavDag)
         Utbetalingsinfo(utbetalingsdag.inntekt, utbetalingsdag.utbetaling, utbetalingsdag.totalGrad)
     else null
 
-    fun begrunnelser(utbetalingsdag: UtbetalingstidslinjedagDTO) =
-        if (utbetalingsdag is AvvistDagDTO) utbetalingsdag.begrunnelser else null
+    fun begrunnelser(utbetalingsdag: Utbetalingstidslinjedag) =
+        if (utbetalingsdag is AvvistDag) utbetalingsdag.begrunnelser else null
 
     return map { sykdomsdag ->
         val utbetalingsdag = utbetalingstidslinje.find { it.dato.isEqual(sykdomsdag.dagen) }
         SammenslåttDag(
             sykdomsdag.dagen,
             sykdomsdag.type,
-            utbetalingsdag?.type ?: TypeDataDTO.UkjentDag,
+            utbetalingsdag?.type ?: UtbetalingstidslinjeDagtype.UkjentDag,
             kilde = sykdomsdag.kilde,
             grad = sykdomsdag.grad,
             utbetalingsinfo = utbetalingsdag?.let { utbetalingsinfo(it) },

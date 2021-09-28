@@ -5,18 +5,17 @@ import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.AvsluttetUtenUtbetaling
-import no.nav.helse.serde.api.*
-import no.nav.helse.serde.api.HendelseDTO.Companion.finn
+import no.nav.helse.serde.api.SimuleringsdataDTO
 import no.nav.helse.serde.api.v2.Behandlingstype.UBEREGNET
 import no.nav.helse.serde.api.v2.Behandlingstype.VENTER
 import no.nav.helse.serde.api.v2.Generasjoner.Generasjon.Companion.fjernErstattede
 import no.nav.helse.serde.api.v2.Generasjoner.Generasjon.Companion.sammenstillMedNeste
 import no.nav.helse.serde.api.v2.Generasjoner.Generasjon.Companion.sorterGenerasjoner
 import no.nav.helse.serde.api.v2.Generasjoner.Generasjon.Companion.toDTO
+import no.nav.helse.serde.api.v2.Hendelse.Companion.finn
 import no.nav.helse.serde.api.v2.Tidslinjebereginger.ITidslinjeberegning
-import no.nav.helse.serde.api.v2.buildere.*
-import no.nav.helse.serde.api.v2.buildere.IInnslag
-import no.nav.helse.serde.api.v2.buildere.SpleisGrunnlag
+import no.nav.helse.serde.api.v2.buildere.BeregningId
+import no.nav.helse.serde.api.v2.buildere.IVilkårsgrunnlagHistorikk
 import no.nav.helse.serde.api.v2.buildere.VedtaksperiodeVarslerBuilder
 import no.nav.helse.utbetalingstidslinje.Alder
 import java.time.LocalDate
@@ -171,19 +170,19 @@ internal class Tidslinjeperioder(
             sammenslåttTidslinje = sammenslåttTidslinje,
             gjenståendeSykedager = utbetaling.gjenståendeSykedager,
             forbrukteSykedager = utbetaling.forbrukteSykedager,
-            utbetalingDTO = utbetaling.toDTO(),
+            utbetaling = utbetaling.toDTO(),
             vilkårsgrunnlagshistorikkId = tidslinjeberegning.vilkårsgrunnlagshistorikkId,
             aktivitetslogg = varsler
         )
     }
 
-    private fun List<SammenslåttDag>.sisteNavDag() = lastOrNull { it.utbetalingsdagtype == TypeDataDTO.NavDag }
+    private fun List<SammenslåttDag>.sisteNavDag() = lastOrNull { it.utbetalingsdagtype == UtbetalingstidslinjeDagtype.NavDag }
 
     private fun periodevilkår(
         periode: IVedtaksperiode,
         utbetaling: IUtbetaling,
         sammenslåttTidslinje: List<SammenslåttDag>,
-        hendelser: List<HendelseDTO>
+        hendelser: List<Hendelse>
     ): BeregnetPeriode.Vilkår {
         val sisteSykepengedag = sammenslåttTidslinje.sisteNavDag()?.dagen ?: periode.tom
         val sykepengedager = BeregnetPeriode.Sykepengedager(
@@ -196,7 +195,7 @@ internal class Tidslinjeperioder(
         val alder = Alder(fødselsnummer).let {
             BeregnetPeriode.Alder(it.alderPåDato(sisteSykepengedag), it.datoForØvreAldersgrense > sisteSykepengedag)
         }
-        val søknadsfrist = hendelser.finn<SøknadNavDTO>()?.let {
+        val søknadsfrist = hendelser.finn<SøknadNav>()?.let {
             BeregnetPeriode.Søknadsfrist(
                 sendtNav = it.sendtNav,
                 søknadFom = it.fom,
@@ -215,11 +214,11 @@ internal class IVedtaksperiode(
     val tom: LocalDate,
     val behandlingstype: Behandlingstype,
     val inntektskilde: Inntektskilde,
-    val hendelser: List<HendelseDTO>,
+    val hendelser: List<Hendelse>,
     val simuleringsdataDTO: SimuleringsdataDTO?,
     utbetalinger: List<IUtbetaling>,
     val periodetype: Periodetype,
-    val sykdomstidslinje: List<SykdomstidslinjedagDTO>,
+    val sykdomstidslinje: List<Sykdomstidslinjedag>,
     val oppdatert: LocalDateTime,
     val tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
     val skjæringstidspunkt: LocalDate,
@@ -242,7 +241,7 @@ internal class IVedtaksperiode(
 internal class IUtbetaling(
     val beregningId: BeregningId,
     val opprettet: LocalDateTime,
-    val utbetalingstidslinje: List<UtbetalingstidslinjedagDTO>,
+    val utbetalingstidslinje: List<Utbetalingstidslinjedag>,
     val maksdato: LocalDate,
     val gjenståendeSykedager: Int?,
     val forbrukteSykedager: Int?,
@@ -252,18 +251,18 @@ internal class IUtbetaling(
     private val personNettoBeløp: Int,
     private val arbeidsgiverFagsystemId: String,
     private val personFagsystemId: String,
-    private val vurderingDTO: UtbetalingDTO.VurderingDTO?
+    private val vurdering: Utbetaling.Vurdering?
 ) {
     fun fagsystemId() = arbeidsgiverFagsystemId
-    fun toDTO(): UtbetalingDTO {
-        return UtbetalingDTO(
+    fun toDTO(): Utbetaling {
+        return Utbetaling(
             type,
             tilstand,
             arbeidsgiverNettoBeløp,
             personNettoBeløp,
             arbeidsgiverFagsystemId,
             personFagsystemId,
-            vurderingDTO
+            vurdering
         )
     }
 }

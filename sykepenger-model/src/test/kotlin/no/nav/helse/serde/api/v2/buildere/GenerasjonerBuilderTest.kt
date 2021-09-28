@@ -1,4 +1,4 @@
-package no.nav.helse.serde.api.v2
+package no.nav.helse.serde.api.v2.buildere
 
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
@@ -6,8 +6,10 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.SøknadArbeidsgiver
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.arbeidsgiver
-import no.nav.helse.serde.api.v2.buildere.OppsamletSammenligningsgrunnlagBuilder
-import no.nav.helse.serde.api.v2.buildere.VilkårsgrunnlagBuilder
+import no.nav.helse.serde.api.v2.BeregnetPeriode
+import no.nav.helse.serde.api.v2.Generasjon
+import no.nav.helse.serde.api.v2.Tidslinjeperiode
+import no.nav.helse.serde.api.v2.UberegnetPeriode
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.februar
