@@ -6,6 +6,8 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.SøknadArbeidsgiver
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.arbeidsgiver
+import no.nav.helse.serde.api.v2.buildere.OppsamletSammenligningsgrunnlagBuilder
+import no.nav.helse.serde.api.v2.buildere.VilkårsgrunnlagBuilder
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.februar
@@ -22,7 +24,9 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     private val generasjoner get() = generasjoner()
 
     private fun generasjoner(): List<Generasjon> {
-        val generasjonerBuilder = GenerasjonerBuilder(søknadDTOer, UNG_PERSON_FNR_2018)
+        val sammenligningsgrunnlagBuilder = OppsamletSammenligningsgrunnlagBuilder(person)
+        val vilkårsgrunnlagHistorikk = VilkårsgrunnlagBuilder(person.vilkårsgrunnlagHistorikk, sammenligningsgrunnlagBuilder).build()
+        val generasjonerBuilder = GenerasjonerBuilder(søknadDTOer, UNG_PERSON_FNR_2018, vilkårsgrunnlagHistorikk)
         person.arbeidsgiver(ORGNUMMER).accept(generasjonerBuilder)
         return generasjonerBuilder.build()
     }

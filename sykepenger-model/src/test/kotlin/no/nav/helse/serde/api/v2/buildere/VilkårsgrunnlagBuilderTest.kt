@@ -52,7 +52,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         håndterYtelser()
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt = inntekt)
 
-        val vilkårsgrunnlagGenerasjoner = vilkårsgrunnlag.generasjoner()
+        val vilkårsgrunnlagGenerasjoner = vilkårsgrunnlag.build()
 
         val spleisgrunnlag = vilkårsgrunnlagGenerasjoner.første().vilkårsgrunnlagSpleis(1.januar)
 
@@ -75,7 +75,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
             lagInntektperioder(fom = 1.januar, inntekt = 21000.månedlig, orgnummer = AG2)
         }
 
-        val vilkårsgrunnlagGenerasjoner = vilkårsgrunnlag.generasjoner()
+        val vilkårsgrunnlagGenerasjoner = vilkårsgrunnlag.build()
         assertEquals(1, vilkårsgrunnlagGenerasjoner.size)
 
         val vilkårsgrunnlag = vilkårsgrunnlagGenerasjoner.første().vilkårsgrunnlagSpleis(1.januar)
@@ -99,7 +99,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
 
         val innslag = inspektør.vilkårsgrunnlagHistorikkInnslag()
 
-        val generasjoner = vilkårsgrunnlag.generasjoner()
+        val generasjoner = vilkårsgrunnlag.build()
         assertEquals(2, generasjoner.size)
 
         val førsteGenerasjon = requireNotNull(generasjoner[innslag.last().id]?.vilkårsgrunnlagSpleis(1.januar))
@@ -128,7 +128,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         håndterOverstyring(inntekt = 18000.månedlig, skjæringstidspunkt = 1.januar, orgnummer = AG1)
 
         val innslag = inspektør.vilkårsgrunnlagHistorikkInnslag()
-        val generasjoner = vilkårsgrunnlag.generasjoner()
+        val generasjoner = vilkårsgrunnlag.build()
         assertEquals(2, generasjoner.size)
 
         val førsteGenerasjon = requireNotNull(generasjoner[innslag.last().id]?.vilkårsgrunnlagSpleis(1.januar))
@@ -183,7 +183,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode, medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.VetIkke)
 
-        val generasjoner = vilkårsgrunnlag.generasjoner()
+        val generasjoner = vilkårsgrunnlag.build()
 
         val førsteGenerasjon = generasjoner.første().vilkårsgrunnlagSpleis(1.januar)
         assertSpleisVilkårsprøving(førsteGenerasjon, 372000.0, 93634, true, 0.0, MedlemskapstatusDTO.JA, 372000.0, 1.januar, 372000.0)
@@ -210,7 +210,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
-        val generasjoner = vilkårsgrunnlag.generasjoner()
+        val generasjoner = vilkårsgrunnlag.build()
 
         val førsteGenerasjon = generasjoner.første().vilkårsgrunnlagInfotrygd(skjæringstidspunkt)
         assertInfotrygdVilkårsprøving(førsteGenerasjon, skjæringstidspunkt, 480000.0)
@@ -261,7 +261,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
         håndterSimulering(1.vedtaksperiode, orgnummer = AG1)
 
-        val generasjon = vilkårsgrunnlag.generasjoner().første().vilkårsgrunnlagSpleis(1.januar)
+        val generasjon = vilkårsgrunnlag.build().første().vilkårsgrunnlagSpleis(1.januar)
         assertSpleisVilkårsprøving(generasjon, 756000.0, 93634, true, 0.0, MedlemskapstatusDTO.JA, 756000.0, 1.januar, 561804.0)
         assertEquals(2, generasjon.inntekter.size)
         val inntektAg1 = generasjon.inntekter.first { it.arbeidsgiver == AG1 }

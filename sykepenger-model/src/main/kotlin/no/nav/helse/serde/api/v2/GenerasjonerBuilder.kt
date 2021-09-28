@@ -3,6 +3,7 @@ package no.nav.helse.serde.api.v2
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.*
 import no.nav.helse.serde.api.HendelseDTO
+import no.nav.helse.serde.api.v2.buildere.*
 import no.nav.helse.serde.api.v2.buildere.SimuleringBuilder
 import no.nav.helse.serde.api.v2.buildere.SykdomshistorikkBuilder
 import no.nav.helse.serde.api.v2.buildere.UtbetalingBuilder
@@ -28,7 +29,11 @@ internal typealias VilkårsgrunnlagshistorikkId = UUID
 internal typealias FagsystemId = String
 
 // Besøker hele arbeidsgiver-treet
-internal class GenerasjonerBuilder(private val hendelser: List<HendelseDTO>, private val fødselsnummer: String) : ArbeidsgiverVisitor {
+internal class GenerasjonerBuilder(
+    private val hendelser: List<HendelseDTO>,
+    private val fødselsnummer: String,
+    private val vilkårsgrunnlagHistorikk: Map<VilkårsgrunnlagshistorikkId, IInnslag>
+) : ArbeidsgiverVisitor {
 
     private val vedtaksperiodeAkkumulator = VedtaksperiodeAkkumulator()
     private val forkastetVedtaksperiodeAkkumulator = ForkastetVedtaksperiodeAkkumulator()
@@ -42,6 +47,7 @@ internal class GenerasjonerBuilder(private val hendelser: List<HendelseDTO>, pri
         val tidslinjeperioder = Tidslinjeperioder(
             fødselsnummer,
             forkastetVedtaksperiodeAkkumulator.toList(),
+            vilkårsgrunnlagHistorikk,
             vedtaksperiodeAkkumulator.toList(),
             tidslinjebereginger
         )
@@ -70,6 +76,8 @@ internal class GenerasjonerBuilder(private val hendelser: List<HendelseDTO>, pri
         val sykdomstidslinje = VedtaksperiodeSykdomstidslinjeBuilder(vedtaksperiode).build()
         val utbetalinger = UtbetalingerBuilder(vedtaksperiode).build()
         val simulering = SimuleringBuilder(vedtaksperiode).build()
+        val aktivetsloggForPeriode = Vedtaksperiode.aktivitetsloggMedForegåendeUtenUtbetaling(vedtaksperiode)
+        val aktivitetsloggForVilkårsprøving = Vedtaksperiode.hentVilkårsgrunnlagAktiviteter(vedtaksperiode)
         vedtaksperiodeAkkumulator.leggTil(
             IVedtaksperiode(
                 id,
@@ -84,7 +92,9 @@ internal class GenerasjonerBuilder(private val hendelser: List<HendelseDTO>, pri
                 sykdomstidslinje = sykdomstidslinje,
                 tilstand = tilstand,
                 oppdatert = oppdatert,
-                skjæringstidspunkt = skjæringstidspunkt
+                skjæringstidspunkt = skjæringstidspunkt,
+                aktivitetsloggForPeriode = aktivetsloggForPeriode,
+                aktivitetsloggForVilkårsprøving = aktivitetsloggForVilkårsprøving
             )
         )
     }

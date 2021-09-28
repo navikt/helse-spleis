@@ -90,7 +90,8 @@ internal data class BeregnetPeriode(
     val hendelser: List<HendelseDTO>,
     val simulering: SimuleringsdataDTO?,
     val vilkårsgrunnlagshistorikkId: UUID,
-    val periodevilkår: Vilkår
+    val periodevilkår: Vilkår,
+    val aktivitetslogg: List<AktivitetDTO>
     //Lookup for vilkår(beregningId, skjæringstidspunkt), inntektsgrunnlag(beregningId, skjæringstidspunkt)
 ) : Tidslinjeperiode {
     override val tidslinjeperiodeId: UUID = UUID.randomUUID()

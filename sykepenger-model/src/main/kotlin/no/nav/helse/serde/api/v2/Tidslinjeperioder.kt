@@ -1,5 +1,6 @@
 package no.nav.helse.serde.api.v2
 
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Vedtaksperiode
@@ -13,6 +14,10 @@ import no.nav.helse.serde.api.v2.Generasjoner.Generasjon.Companion.sammenstillMe
 import no.nav.helse.serde.api.v2.Generasjoner.Generasjon.Companion.sorterGenerasjoner
 import no.nav.helse.serde.api.v2.Generasjoner.Generasjon.Companion.toDTO
 import no.nav.helse.serde.api.v2.Tidslinjebereginger.ITidslinjeberegning
+import no.nav.helse.serde.api.v2.buildere.*
+import no.nav.helse.serde.api.v2.buildere.IInnslag
+import no.nav.helse.serde.api.v2.buildere.SpleisGrunnlag
+import no.nav.helse.serde.api.v2.buildere.VedtaksperiodeVarslerBuilder
 import no.nav.helse.utbetalingstidslinje.Alder
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -95,6 +100,7 @@ internal class Generasjoner(perioder: Tidslinjeperioder) {
 internal class Tidslinjeperioder(
     private val fødselsnummer: String,
     private val forkastetVedtaksperiodeIder: List<UUID>,
+    private val vilkårsgrunnlagHistorikk: Map<VilkårsgrunnlagshistorikkId, IInnslag>,
     vedtaksperioder: List<IVedtaksperiode>,
     tidslinjeberegninger: Tidslinjebereginger
 ) {
@@ -139,6 +145,12 @@ internal class Tidslinjeperioder(
         erForkastet: Boolean
     ): BeregnetPeriode {
         val sammenslåttTidslinje = tidslinjeberegning.sammenslåttTidslinje(utbetaling.utbetalingstidslinje, periode.fom, periode.tom)
+        val varsler = VedtaksperiodeVarslerBuilder(
+            periode.vedtaksperiodeId,
+            periode.aktivitetsloggForPeriode,
+            periode.aktivitetsloggForVilkårsprøving,
+            vilkårsgrunnlagHistorikk[tidslinjeberegning.vilkårsgrunnlagshistorikkId]?.vilkårsgrunnlag(periode.skjæringstidspunkt)
+        ).build()
         return BeregnetPeriode(
             vedtaksperiodeId = periode.vedtaksperiodeId,
             beregningId = utbetaling.beregningId,
@@ -158,7 +170,8 @@ internal class Tidslinjeperioder(
             gjenståendeSykedager = utbetaling.gjenståendeSykedager,
             forbrukteSykedager = utbetaling.forbrukteSykedager,
             utbetalingDTO = utbetaling.toDTO(),
-            vilkårsgrunnlagshistorikkId = tidslinjeberegning.vilkårsgrunnlagshistorikkId
+            vilkårsgrunnlagshistorikkId = tidslinjeberegning.vilkårsgrunnlagshistorikkId,
+            aktivitetslogg = varsler
         )
     }
 
@@ -207,7 +220,9 @@ internal class IVedtaksperiode(
     val sykdomstidslinje: List<SykdomstidslinjedagDTO>,
     val oppdatert: LocalDateTime,
     val tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
-    val skjæringstidspunkt: LocalDate
+    val skjæringstidspunkt: LocalDate,
+    val aktivitetsloggForPeriode: Aktivitetslogg,
+    val aktivitetsloggForVilkårsprøving: Aktivitetslogg
 ) {
     val utbetalinger = utbetalinger.toMutableList()
 

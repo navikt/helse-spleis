@@ -57,6 +57,7 @@ internal class SpleisGrunnlag(
     val oppfyllerKravOmMinstelønn: Boolean?,
     val grunnbeløp: Int,
     val medlemskapstatus: MedlemskapstatusDTO,
+    val meldingsreferanseId: UUID?
 
 ) : IVilkårsgrunnlag
 
@@ -87,7 +88,7 @@ internal class VilkårsgrunnlagBuilder(
         vilkårsgrunnlagHistorikk.accept(this)
     }
 
-    fun generasjoner() = historikk.toMap()
+    fun build() = historikk.toMap()
 
     override fun preVisitInnslag(innslag: VilkårsgrunnlagHistorikk.Innslag, id: UUID, opprettet: LocalDateTime) {
         historikk.putIfAbsent(id, InnslagBuilder(innslag, sammenligningsgrunnlagBuilder).build())
@@ -126,7 +127,8 @@ internal class VilkårsgrunnlagBuilder(
                     oppfyllerKravOmMinstelønn = grunnlagsdata.harOpptjening,
                     grunnbeløp = grunnbeløp.årlig.toInt(),
                     medlemskapstatus = medlemskapstatus,
-                    sykepengegrunnlag = sykepengegrunnlag.sykepengegrunnlag
+                    sykepengegrunnlag = sykepengegrunnlag.sykepengegrunnlag,
+                    meldingsreferanseId = grunnlagsdata.meldingsreferanseId
                 )
             )
         }
