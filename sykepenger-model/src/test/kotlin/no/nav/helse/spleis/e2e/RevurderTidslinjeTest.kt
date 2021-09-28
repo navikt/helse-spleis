@@ -1316,4 +1316,61 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
         assertNotEquals(-44361, inspektør.utbetalinger.lastOrNull()?.arbeidsgiverOppdrag()?.nettoBeløp(), "Det ser ut som vi trekker tilbake hele januar og februar, her burde vi kun trekke tilbake feriedagene")
     }
+
+    @Test
+    @Disabled("Feilende test som illustrerer hva som skjer når saksbehandler sender en ny overstyring før forrige er gjennom tilstandsmaskinen")
+    fun `flere perioder ender i AVVENTER_HISTORIKK_REVURDERING på en gang`() {
+        nyttVedtak(1.januar, 31.januar)
+        forlengVedtak(1.februar, 28.februar)
+        forlengVedtak(1.mars, 31.mars)
+
+        håndterOverstyring((20.januar til 29.januar).map { manuellFeriedag(it) })
+        håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+
+        // Denne overstyringen kommer før den forrige er ferdig prossessert
+        håndterOverstyring((20.januar til 29.januar).map { manuellFeriedag(it) })
+
+        assertTilstander(1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING
+        )
+
+        assertTilstander(2.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_ARBEIDSGIVERE_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_ARBEIDSGIVERE_REVURDERING
+        )
+
+        assertTilstander(3.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_ARBEIDSGIVERE_REVURDERING,
+            // Ender feilaktig opp i AVVENTER_HISTORIKK_REVURDERING
+        )
+    }
 }
