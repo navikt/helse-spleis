@@ -1372,24 +1372,25 @@ internal class Vedtaksperiode private constructor(
                     arbeidsgiver.beregn(this, arbeidsgiverUtbetalinger, vedtaksperiode.periode)
                 }
                 onSuccess {
-                    tmpLog.accept(InfotrygdDeescalator(ytelser))
+                    tmpLog.accept(AktivitetsloggDeescalator(ytelser))
                     vedtaksperiode.forsøkRevurdering(arbeidsgiverUtbetalinger.tidslinjeEngine, ytelser)
                 }
             }
         }
 
         /*
+            Bakgrunn for Deescalator:
             Fordi vi ikke vil feile i revurdering om vi har errors fra validering av Infotrygdperioder
             samler vi opp alle validerings-meldinger i en egen logg som vi holder utenfor validering av resten av
             Ytelser, helt til vi vet at vi har lykkes.
 
-            Deretter oversetter vi alle valideringsmeldingene tilbake til Ytelser, men skriver om
+            Her kopierer vi alle valideringsmeldingene til hendelse, men skriver om
             alle Error til Warn, slik at vi 1) ikke feiler og 2) forteller saksbehandler om situasjonen.
         */
-        class InfotrygdDeescalator(private val ytelser: Ytelser): AktivitetsloggVisitor {
-            override fun visitInfo(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Info, melding: String, tidsstempel: String) = ytelser.info(melding)
-            override fun visitWarn(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Warn, melding: String, tidsstempel: String) = ytelser.warn(melding)
-            override fun visitError(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Error, melding: String, tidsstempel: String) = ytelser.warn(melding)
+        class AktivitetsloggDeescalator(private val hendelse: PersonHendelse): AktivitetsloggVisitor {
+            override fun visitInfo(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Info, melding: String, tidsstempel: String) = hendelse.info(melding)
+            override fun visitWarn(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Warn, melding: String, tidsstempel: String) = hendelse.warn(melding)
+            override fun visitError(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Error, melding: String, tidsstempel: String) = hendelse.warn(melding)
         }
     }
 
