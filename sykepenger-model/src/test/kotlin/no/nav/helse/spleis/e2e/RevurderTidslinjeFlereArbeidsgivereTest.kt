@@ -123,65 +123,55 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
 
     @Test
     fun `to AG - én periode på hver - én blir revurdert`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = aadvokatene)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = haandtverkerne)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = aadvokatene)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = aadvokatene)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = haandtverkerne)
-        håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
-            refusjon = Refusjon(null, 20000.månedlig, emptyList()),
-            orgnummer = aadvokatene
-        )
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = aadvokatene)
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
             refusjon = Refusjon(null, 20000.månedlig, emptyList()),
             orgnummer = haandtverkerne
         )
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
+            refusjon = Refusjon(null, 20000.månedlig, emptyList()),
+            orgnummer = aadvokatene
+        )
 
-        håndterYtelser(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = aadvokatene)
+        håndterYtelser(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = haandtverkerne)
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-            orgnummer = aadvokatene,
+            orgnummer = haandtverkerne,
             inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
                 1.januar(2017) til 1.desember(2017) inntekter {
-                    aadvokatene inntekt 20000.månedlig
                     haandtverkerne inntekt 20000.månedlig
+                    aadvokatene inntekt 20000.månedlig
                 }
             })
         )
-        håndterYtelser(1.vedtaksperiode, orgnummer = aadvokatene)
-        håndterSimulering(1.vedtaksperiode, orgnummer = aadvokatene)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = aadvokatene)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = aadvokatene)
-
         håndterYtelser(1.vedtaksperiode, orgnummer = haandtverkerne)
         håndterSimulering(1.vedtaksperiode, orgnummer = haandtverkerne)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = haandtverkerne)
         håndterUtbetalt(1.vedtaksperiode, orgnummer = haandtverkerne)
 
-        håndterOverstyring((20.januar til 22.januar).map { manuellFeriedag(it) }, orgnummer = aadvokatene)
         håndterYtelser(1.vedtaksperiode, orgnummer = aadvokatene)
         håndterSimulering(1.vedtaksperiode, orgnummer = aadvokatene)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = aadvokatene)
         håndterUtbetalt(1.vedtaksperiode, orgnummer = aadvokatene)
 
+        håndterOverstyring((20.januar til 22.januar).map { manuellFeriedag(it) }, orgnummer = haandtverkerne)
         håndterYtelser(1.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterSimulering(1.vedtaksperiode, orgnummer = haandtverkerne)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = haandtverkerne)
 
-        inspektør(aadvokatene) {
+        håndterYtelser(1.vedtaksperiode, orgnummer = aadvokatene)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = aadvokatene)
+
+        inspektør(haandtverkerne) {
             assertTilstander(
                 1.vedtaksperiode,
-                START,
-                MOTTATT_SYKMELDING_FERDIG_GAP,
-                AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-                AVVENTER_ARBEIDSGIVERE,
-                AVVENTER_HISTORIKK,
-                AVVENTER_VILKÅRSPRØVING,
-                AVVENTER_HISTORIKK,
-                AVVENTER_SIMULERING,
-                AVVENTER_GODKJENNING,
-                TIL_UTBETALING,
-                AVSLUTTET,
+                *TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(),
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
@@ -192,18 +182,10 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
             assertEquals(2, utbetalinger.filter { it.erAvsluttet() }.size)
         }
 
-        inspektør(haandtverkerne) {
+        inspektør(aadvokatene) {
             assertTilstander(
                 1.vedtaksperiode,
-                START,
-                MOTTATT_SYKMELDING_FERDIG_GAP,
-                AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-                AVVENTER_ARBEIDSGIVERE,
-                AVVENTER_HISTORIKK,
-                AVVENTER_SIMULERING,
-                AVVENTER_GODKJENNING,
-                TIL_UTBETALING,
-                AVSLUTTET,
+                *TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(false),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
@@ -216,67 +198,57 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
 
     @Test
     fun `to AG - to perioder på den ene der den siste er ufullstendig, én periode på den andre - én blir revurdert`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = aadvokatene)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = haandtverkerne)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = aadvokatene)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = aadvokatene)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = haandtverkerne)
-        håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
-            refusjon = Refusjon(null, 20000.månedlig, emptyList()),
-            orgnummer = aadvokatene
-        )
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = aadvokatene)
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
             refusjon = Refusjon(null, 20000.månedlig, emptyList()),
             orgnummer = haandtverkerne
         )
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
+            refusjon = Refusjon(null, 20000.månedlig, emptyList()),
+            orgnummer = aadvokatene
+        )
 
-        håndterYtelser(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = aadvokatene)
+        håndterYtelser(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = haandtverkerne)
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-            orgnummer = aadvokatene,
+            orgnummer = haandtverkerne,
             inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
                 1.januar(2017) til 1.desember(2017) inntekter {
-                    aadvokatene inntekt 20000.månedlig
                     haandtverkerne inntekt 20000.månedlig
+                    aadvokatene inntekt 20000.månedlig
                 }
             })
         )
-        håndterYtelser(1.vedtaksperiode, orgnummer = aadvokatene)
-        håndterSimulering(1.vedtaksperiode, orgnummer = aadvokatene)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = aadvokatene)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = aadvokatene)
-
         håndterYtelser(1.vedtaksperiode, orgnummer = haandtverkerne)
         håndterSimulering(1.vedtaksperiode, orgnummer = haandtverkerne)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = haandtverkerne)
         håndterUtbetalt(1.vedtaksperiode, orgnummer = haandtverkerne)
 
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = aadvokatene)
-
-        håndterOverstyring((20.januar til 22.januar).map { manuellFeriedag(it) }, orgnummer = aadvokatene)
         håndterYtelser(1.vedtaksperiode, orgnummer = aadvokatene)
         håndterSimulering(1.vedtaksperiode, orgnummer = aadvokatene)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = aadvokatene)
         håndterUtbetalt(1.vedtaksperiode, orgnummer = aadvokatene)
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = haandtverkerne)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = haandtverkerne)
 
-        inspektør(aadvokatene) {
+        håndterOverstyring((20.januar til 22.januar).map { manuellFeriedag(it) }, orgnummer = haandtverkerne)
+        håndterYtelser(1.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterSimulering(1.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = haandtverkerne)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = aadvokatene)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = aadvokatene)
+
+        inspektør(haandtverkerne) {
             assertTilstander(
                 1.vedtaksperiode,
-                START,
-                MOTTATT_SYKMELDING_FERDIG_GAP,
-                AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-                AVVENTER_ARBEIDSGIVERE,
-                AVVENTER_HISTORIKK,
-                AVVENTER_VILKÅRSPRØVING,
-                AVVENTER_HISTORIKK,
-                AVVENTER_SIMULERING,
-                AVVENTER_GODKJENNING,
-                TIL_UTBETALING,
-                AVSLUTTET,
+                *TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(),
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
@@ -294,18 +266,10 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
             assertEquals(2, utbetalinger.filter { it.erAvsluttet() }.size)
         }
 
-        inspektør(haandtverkerne) {
+        inspektør(aadvokatene) {
             assertTilstander(
                 1.vedtaksperiode,
-                START,
-                MOTTATT_SYKMELDING_FERDIG_GAP,
-                AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-                AVVENTER_ARBEIDSGIVERE,
-                AVVENTER_HISTORIKK,
-                AVVENTER_SIMULERING,
-                AVVENTER_GODKJENNING,
-                TIL_UTBETALING,
-                AVSLUTTET,
+                *TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(false),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
@@ -318,6 +282,133 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
 
     @Test
     fun `to AG - to perioder på hver - første periode blir revurdert på én AG og avventer godkjenning`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = haandtverkerne)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = aadvokatene)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = haandtverkerne)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = aadvokatene)
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
+            refusjon = Refusjon(null, 20000.månedlig, emptyList()),
+            orgnummer = haandtverkerne
+        )
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
+            refusjon = Refusjon(null, 20000.månedlig, emptyList()),
+            orgnummer = aadvokatene
+        )
+
+        håndterYtelser(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterVilkårsgrunnlag(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            orgnummer = haandtverkerne,
+            inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    haandtverkerne inntekt 20000.månedlig
+                    aadvokatene inntekt 20000.månedlig
+                }
+            })
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterSimulering(1.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = haandtverkerne)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = aadvokatene)
+        håndterSimulering(1.vedtaksperiode, orgnummer = aadvokatene)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = aadvokatene)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = aadvokatene)
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = haandtverkerne)
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = aadvokatene)
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = haandtverkerne)
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = aadvokatene)
+
+        håndterYtelser(vedtaksperiodeIdInnhenter = 2.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterYtelser(vedtaksperiodeIdInnhenter = 2.vedtaksperiode, orgnummer = aadvokatene)
+        håndterYtelser(vedtaksperiodeIdInnhenter = 2.vedtaksperiode, orgnummer = haandtverkerne)
+
+        håndterSimulering(2.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterUtbetalt(2.vedtaksperiode, orgnummer = haandtverkerne)
+
+        håndterYtelser(vedtaksperiodeIdInnhenter = 2.vedtaksperiode, orgnummer = aadvokatene)
+
+        håndterSimulering(2.vedtaksperiode, orgnummer = aadvokatene)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = aadvokatene)
+        håndterUtbetalt(2.vedtaksperiode, orgnummer = aadvokatene)
+
+        håndterOverstyring((20.januar til 22.januar).map { manuellFeriedag(it) }, orgnummer = haandtverkerne)
+        håndterYtelser(1.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterYtelser(1.vedtaksperiode, orgnummer = aadvokatene)
+        håndterYtelser(2.vedtaksperiode, orgnummer = haandtverkerne)
+
+        håndterSimulering(2.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterUtbetalt(2.vedtaksperiode, orgnummer = haandtverkerne)
+
+        håndterYtelser(2.vedtaksperiode, orgnummer = aadvokatene)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = aadvokatene)
+
+        inspektør(haandtverkerne) {
+            assertTilstander(
+                1.vedtaksperiode,
+                *TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(),
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_GJENNOMFØRT_REVURDERING,
+                AVSLUTTET
+            )
+            assertTilstander(
+                2.vedtaksperiode,
+                *TIL_AVSLUTTET_FORLENGELSE(),
+                AVVENTER_ARBEIDSGIVERE_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
+                AVSLUTTET
+            )
+            assertHasNoErrors()
+            assertEquals(2, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
+            assertEquals(2, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
+        }
+
+        inspektør(aadvokatene) {
+            assertTilstander(
+                1.vedtaksperiode,
+                *TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(false),
+                AVVENTER_ARBEIDSGIVERE_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_GJENNOMFØRT_REVURDERING,
+                AVSLUTTET
+            )
+            assertTilstander(
+                2.vedtaksperiode,
+                *TIL_AVSLUTTET_FORLENGELSE(false),
+                AVVENTER_ARBEIDSGIVERE_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                AVSLUTTET
+            )
+            assertHasNoErrors()
+            assertEquals(2, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
+            assertEquals(2, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
+        }
+    }
+
+    @Test
+    fun `kan ikke revurdere én AG hvis en annen AG er til godkjenning`() {
+        tilGodkjenning(1.januar, 31.januar, aadvokatene, haandtverkerne)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = aadvokatene)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = aadvokatene)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterSimulering(1.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterOverstyring((29.januar til 29.januar).map { manuellFeriedag(it) }, orgnummer = aadvokatene)
+        assertErrorTekst(inspektør(haandtverkerne), "Kan ikke overstyre en pågående behandling der én eller flere perioder er behandlet ferdig")
+    }
+
+    @Test
+    fun `to AG - to perioder på hver - én blir revurdert på én AG`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = aadvokatene)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = haandtverkerne)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = aadvokatene)
@@ -379,101 +470,47 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         håndterYtelser(2.vedtaksperiode, orgnummer = aadvokatene)
 
         håndterSimulering(2.vedtaksperiode, orgnummer = aadvokatene)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = aadvokatene)
-        håndterUtbetalt(2.vedtaksperiode, orgnummer = aadvokatene)
-
-        håndterYtelser(2.vedtaksperiode, orgnummer = haandtverkerne)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = haandtverkerne)
 
         inspektør(aadvokatene) {
             assertTilstander(
                 1.vedtaksperiode,
-                START,
-                MOTTATT_SYKMELDING_FERDIG_GAP,
-                AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-                AVVENTER_ARBEIDSGIVERE,
-                AVVENTER_HISTORIKK,
-                AVVENTER_VILKÅRSPRØVING,
-                AVVENTER_HISTORIKK,
-                AVVENTER_SIMULERING,
-                AVVENTER_GODKJENNING,
-                TIL_UTBETALING,
-                AVSLUTTET,
+                *TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(),
                 AVVENTER_HISTORIKK_REVURDERING,
-                AVVENTER_GJENNOMFØRT_REVURDERING,
-                AVSLUTTET
+                AVVENTER_GJENNOMFØRT_REVURDERING
             )
             assertTilstander(
                 2.vedtaksperiode,
-                START,
-                MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-                AVVENTER_HISTORIKK,
-                AVVENTER_ARBEIDSGIVERE,
-                AVVENTER_HISTORIKK,
-                AVVENTER_SIMULERING,
-                AVVENTER_GODKJENNING,
-                TIL_UTBETALING,
-                AVSLUTTET,
+                *TIL_AVSLUTTET_FORLENGELSE(),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
-                AVVENTER_GODKJENNING_REVURDERING,
-                TIL_UTBETALING,
-                AVSLUTTET
+                AVVENTER_GODKJENNING_REVURDERING
             )
             assertHasNoErrors()
-            assertEquals(2, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
-            assertEquals(2, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
+            assertEquals(1, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
+            assertEquals(1, ikkeUtbetalteUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
+            assertEquals(1, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
+            assertEquals(1, ikkeUtbetalteUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
         }
 
         inspektør(haandtverkerne) {
             assertTilstander(
                 1.vedtaksperiode,
-                START,
-                MOTTATT_SYKMELDING_FERDIG_GAP,
-                AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-                AVVENTER_ARBEIDSGIVERE,
-                AVVENTER_HISTORIKK,
-                AVVENTER_SIMULERING,
-                AVVENTER_GODKJENNING,
-                TIL_UTBETALING,
-                AVSLUTTET,
+                *TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(false),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
-                AVVENTER_GJENNOMFØRT_REVURDERING,
-                AVSLUTTET
+                AVVENTER_GJENNOMFØRT_REVURDERING
             )
             assertTilstander(
                 2.vedtaksperiode,
-                START,
-                MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-                AVVENTER_HISTORIKK,
-                AVVENTER_ARBEIDSGIVERE,
-                AVVENTER_HISTORIKK,
-                AVVENTER_SIMULERING,
-                AVVENTER_GODKJENNING,
-                TIL_UTBETALING,
-                AVSLUTTET,
-                AVVENTER_ARBEIDSGIVERE_REVURDERING,
-                AVVENTER_HISTORIKK_REVURDERING,
-                AVVENTER_GODKJENNING_REVURDERING,
-                AVSLUTTET
+                *TIL_AVSLUTTET_FORLENGELSE(false),
+                AVVENTER_ARBEIDSGIVERE_REVURDERING
             )
             assertHasNoErrors()
-            assertEquals(2, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
-            assertEquals(2, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
+            assertEquals(1, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
+            assertEquals(1, ikkeUtbetalteUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
+            assertEquals(1, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
+            assertEquals(1, ikkeUtbetalteUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
         }
-    }
-
-    @Test
-    fun `kan ikke revurdere én AG hvis en annen AG er til godkjenning`() {
-        tilGodkjenning(1.januar, 31.januar, aadvokatene, haandtverkerne)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = aadvokatene)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = aadvokatene)
-
-        håndterYtelser(1.vedtaksperiode, orgnummer = haandtverkerne)
-        håndterSimulering(1.vedtaksperiode, orgnummer = haandtverkerne)
-        håndterOverstyring((29.januar til 29.januar).map { manuellFeriedag(it) }, orgnummer = aadvokatene)
-        assertErrorTekst(inspektør(haandtverkerne), "Kan ikke overstyre en pågående behandling der én eller flere perioder er behandlet ferdig")
     }
 }
