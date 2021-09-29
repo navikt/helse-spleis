@@ -148,22 +148,26 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
 
     protected fun assertWarningTekst(inspektør: TestArbeidsgiverInspektør, vararg warnings: String) {
         val wantedWarnings = warnings.toMutableList()
+        val actualWarnings:MutableList<String> = mutableListOf()
         inspektør.personLogg.accept(object : AktivitetsloggVisitor {
             override fun visitWarn(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Warn, melding: String, tidsstempel: String) {
-                assertTrue(wantedWarnings.remove(melding), "fant ikke warning $melding")
+                wantedWarnings.remove(melding)
+                actualWarnings.add(melding)
             }
         })
-        assertTrue(wantedWarnings.isEmpty(), "forventede warnings mangler: $wantedWarnings")
+        assertTrue(wantedWarnings.isEmpty(), "forventede warnings mangler: $wantedWarnings, faktiske warnings: $actualWarnings")
     }
 
     protected fun assertErrorTekst(inspektør: TestArbeidsgiverInspektør, vararg errors: String) {
         val errorList = errors.toMutableList()
+        val actualErrors: MutableList<String> = mutableListOf()
         inspektør.personLogg.accept(object : AktivitetsloggVisitor {
             override fun visitError(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Error, melding: String, tidsstempel: String) {
-                assertTrue(errorList.remove(melding), "fant ikke error $melding")
+                errorList.remove(melding)
+                actualErrors.add(melding)
             }
         })
-        assertTrue(errorList.isEmpty(), "har ikke fått errors $errorList")
+        assertTrue(errorList.isEmpty(), "har ikke fått errors $errorList, faktiske errors: $actualErrors")
     }
 
     protected fun assertErrors(inspektør: TestArbeidsgiverInspektør) {

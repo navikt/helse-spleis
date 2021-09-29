@@ -727,42 +727,6 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Feil i validering av infotrygdhistorikk fører til feilet revurdering`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 17.januar)), førsteFraværsdag = 1.januar)
-        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterYtelser(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(24))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(24))
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode)
-
-        håndterOverstyring(listOf(manuellFeriedag(18.januar)))
-        håndterYtelser(
-            1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 20.januar, 100.prosent, 15000.daglig),
-            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, 15000.daglig, true)),
-            besvart = LocalDateTime.now()
-        )
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_SØKNAD_FERDIG_GAP,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET,
-            AVVENTER_HISTORIKK_REVURDERING,
-            REVURDERING_FEILET
-        )
-        assertWarn("Validering av ytelser ved revurdering feilet. Utbetalingen må annulleres", inspektør.personLogg)
-    }
-
-    @Test
     fun `Avslag fører til feilet revurdering`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 17.januar)), førsteFraværsdag = 1.januar)
@@ -839,18 +803,17 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 17.januar)), førsteFraværsdag = 1.januar)
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterYtelser(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(24))
+        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(24))
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode)
 
         håndterOverstyring(listOf(manuellFeriedag(18.januar)))
         håndterYtelser(
-            1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 20.januar, 100.prosent, 15000.daglig),
-            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, 15000.daglig, true)),
-            besvart = LocalDateTime.now()
+            1.vedtaksperiode,
+            foreldrepenger = 16.januar til 28.januar
         )
 
         håndterAnnullerUtbetaling()
@@ -1388,5 +1351,37 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterPåminnelse(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
         assertEquals(3, inspektør.antallEtterspurteBehov(1.vedtaksperiode, Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning))
+    }
+
+    @Test
+    fun `validering av infotrygdhistorikk i revurdering skal føre til en warning i stedet for en feilet revurdering`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(1. januar til 16.januar))
+        håndterYtelser(1.vedtaksperiode, besvart = LocalDateTime.now().minusYears(1))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode, besvart = LocalDateTime.now().minusYears(1))
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        håndterOverstyring((20.januar til 26.januar).map { manuellFeriedag(it) })
+
+        håndterYtelser(
+            1.vedtaksperiode,
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, 1000.daglig),
+            inntektshistorikk = listOf(
+                Inntektsopplysning(
+                    ORGNUMMER,
+                    17.januar, INNTEKT, true
+                )
+            )
+        )
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
+        assertWarningTekst(inspektør,
+            "Opplysninger fra Infotrygd har endret seg etter at vedtaket ble fattet. Undersøk om det er overlapp med periode fra Infotrygd.",
+            "Utbetaling i Infotrygd overlapper med vedtaksperioden"
+        )
     }
 }

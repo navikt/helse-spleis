@@ -1355,20 +1355,41 @@ internal class Vedtaksperiode private constructor(
             infotrygdhistorikk: Infotrygdhistorikk,
             arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger
         ) {
+            val tmpLog = Aktivitetslogg()
+            validation(tmpLog) {
+                onError {
+                    ytelser.warn("Opplysninger fra Infotrygd har endret seg etter at vedtaket ble fattet. Undersøk om det er overlapp med periode fra Infotrygd.")
+                }
+                valider { infotrygdhistorikk.valider(this, arbeidsgiver, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt) }
+            }
             validation(ytelser) {
                 onError {
                     ytelser.warn("Validering av ytelser ved revurdering feilet. Utbetalingen må annulleres")
                     vedtaksperiode.tilstand(ytelser, RevurderingFeilet)
                 }
-                valider { infotrygdhistorikk.valider(this, arbeidsgiver, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt) }
                 valider { ytelser.valider(vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt) }
                 valider("Feil ved kalkulering av utbetalingstidslinjer") {
                     arbeidsgiver.beregn(this, arbeidsgiverUtbetalinger, vedtaksperiode.periode)
                 }
                 onSuccess {
+                    tmpLog.accept(InfotrygdDeescalator(ytelser))
                     vedtaksperiode.forsøkRevurdering(arbeidsgiverUtbetalinger.tidslinjeEngine, ytelser)
                 }
             }
+        }
+
+        /*
+            Fordi vi ikke vil feile i revurdering om vi har errors fra validering av Infotrygdperioder
+            samler vi opp alle validerings-meldinger i en egen logg som vi holder utenfor validering av resten av
+            Ytelser, helt til vi vet at vi har lykkes.
+
+            Deretter oversetter vi alle valideringsmeldingene tilbake til Ytelser, men skriver om
+            alle Error til Warn, slik at vi 1) ikke feiler og 2) forteller saksbehandler om situasjonen.
+        */
+        class InfotrygdDeescalator(private val ytelser: Ytelser): AktivitetsloggVisitor {
+            override fun visitInfo(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Info, melding: String, tidsstempel: String) = ytelser.info(melding)
+            override fun visitWarn(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Warn, melding: String, tidsstempel: String) = ytelser.warn(melding)
+            override fun visitError(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Error, melding: String, tidsstempel: String) = ytelser.warn(melding)
         }
     }
 
