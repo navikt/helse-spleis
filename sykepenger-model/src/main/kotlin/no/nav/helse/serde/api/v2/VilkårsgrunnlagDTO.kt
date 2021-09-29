@@ -10,6 +10,12 @@ interface Vilkårsgrunnlag {
     val sammenligningsgrunnlag: Double?
     val sykepengegrunnlag: Double
     val inntekter: List<Arbeidsgiverinntekt>
+    val vilkårsgrunnlagtype: Vilkårsgrunnlagtype
+}
+
+enum class Vilkårsgrunnlagtype {
+    INFOTRYGD,
+    SPLEIS
 }
 
 data class SpleisVilkårsgrunnlag(
@@ -22,7 +28,9 @@ data class SpleisVilkårsgrunnlag(
     val oppfyllerKravOmMinstelønn: Boolean?,
     val grunnbeløp: Int,
     val medlemskapstatus: MedlemskapstatusDTO
-): Vilkårsgrunnlag
+): Vilkårsgrunnlag  {
+    override val vilkårsgrunnlagtype = Vilkårsgrunnlagtype.SPLEIS
+}
 
 data class InfotrygdVilkårsgrunnlag(
     override val skjæringstidspunkt: LocalDate,
@@ -30,7 +38,9 @@ data class InfotrygdVilkårsgrunnlag(
     override val sammenligningsgrunnlag: Double?,
     override val sykepengegrunnlag: Double,
     override val inntekter: List<Arbeidsgiverinntekt>
-): Vilkårsgrunnlag
+): Vilkårsgrunnlag {
+    override val vilkårsgrunnlagtype = Vilkårsgrunnlagtype.INFOTRYGD
+}
 
 data class Arbeidsgiverinntekt(
     val organisasjonsnummer: String,

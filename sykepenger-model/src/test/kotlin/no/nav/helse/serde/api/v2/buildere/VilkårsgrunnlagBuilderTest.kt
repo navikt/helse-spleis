@@ -282,6 +282,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         skjæringstidspunkt: LocalDate,
         omregnetÅrsinntekt: Double,
     ) {
+        assertEquals(Vilkårsgrunnlagtype.INFOTRYGD, vilkårsgrunnlag.vilkårsgrunnlagtype)
         assertEquals(skjæringstidspunkt, vilkårsgrunnlag.skjæringstidspunkt)
         assertNull(vilkårsgrunnlag.sammenligningsgrunnlag)
         assertEquals(omregnetÅrsinntekt, vilkårsgrunnlag.omregnetÅrsinntekt)
@@ -298,6 +299,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         skjæringstidspunkt: LocalDate,
         sykepengegrunnlag: Double
     ) {
+        assertEquals(Vilkårsgrunnlagtype.SPLEIS, vilkårsgrunnlag.vilkårsgrunnlagtype)
         assertEquals(sammenligningsgrunnlag, vilkårsgrunnlag.sammenligningsgrunnlag)
         assertEquals(grunnbeløp, vilkårsgrunnlag.grunnbeløp)
         assertEquals(oppfyllerKravOmMinstelønn, vilkårsgrunnlag.oppfyllerKravOmMinstelønn)
