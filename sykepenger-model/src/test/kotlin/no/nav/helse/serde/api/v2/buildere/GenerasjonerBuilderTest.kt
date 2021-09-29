@@ -44,6 +44,17 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `happy case med periode til godkjenning`() {
+        tilGodkjenning(1.januar, 31.januar, ORGNUMMER)
+
+        assertEquals(1, generasjoner.size)
+        assertEquals(1, generasjoner[0].perioder.size)
+        0.generasjon {
+            beregnetPeriode(0) er "Ubetalt" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31 forkastet false
+        }
+    }
+
+    @Test
     fun `happy case med to perioder`() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
