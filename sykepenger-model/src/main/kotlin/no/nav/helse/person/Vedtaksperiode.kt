@@ -1297,6 +1297,8 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.arbeidsgiver.gjenopptaRevurdering()
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
+
         override fun håndterRevurdertUtbetaling(vedtaksperiode: Vedtaksperiode, utbetaling: Utbetaling, hendelse: ArbeidstakerHendelse) {
             hendelse.info("Mottatt revurdert utbetaling fra en annen vedtaksperiode")
             vedtaksperiode.forkastUgyldigeUtbetalinger(hendelse)
