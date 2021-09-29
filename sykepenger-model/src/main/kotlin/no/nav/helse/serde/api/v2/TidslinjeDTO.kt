@@ -7,7 +7,7 @@ import java.util.*
 data class SammenslåttDag(
     val dagen: LocalDate,
     val sykdomstidslinjedagtype: SykdomstidslinjedagType,
-    val utbetalingsdagtype: UtbetalingstidslinjeDagtype,
+    val utbetalingstidslinjedagtype: UtbetalingstidslinjedagType,
     val kilde: Sykdomstidslinjedag.SykdomstidslinjedagKilde,
     val grad: Double? = null,
     val utbetalingsinfo: Utbetalingsinfo? = null,
@@ -43,11 +43,11 @@ data class Sykdomstidslinjedag(
 ) {
     data class SykdomstidslinjedagKilde(
         val type: SykdomstidslinjedagKildetype,
-        val kildeId: UUID
+        val id: UUID
     )
 }
 
-enum class UtbetalingstidslinjeDagtype {
+enum class UtbetalingstidslinjedagType {
     ArbeidsgiverperiodeDag,
     NavDag,
     NavHelgDag,
@@ -60,13 +60,13 @@ enum class UtbetalingstidslinjeDagtype {
 }
 
 interface Utbetalingstidslinjedag {
-    val type: UtbetalingstidslinjeDagtype
+    val type: UtbetalingstidslinjedagType
     val inntekt: Int
     val dato: LocalDate
 }
 
 data class NavDag(
-    override val type: UtbetalingstidslinjeDagtype = UtbetalingstidslinjeDagtype.NavDag,
+    override val type: UtbetalingstidslinjedagType = UtbetalingstidslinjedagType.NavDag,
     override val inntekt: Int,
     override val dato: LocalDate,
     val utbetaling: Int,
@@ -75,21 +75,22 @@ data class NavDag(
 ) : Utbetalingstidslinjedag
 
 data class AvvistDag(
-    override val type: UtbetalingstidslinjeDagtype = UtbetalingstidslinjeDagtype.AvvistDag,
+    override val type: UtbetalingstidslinjedagType = UtbetalingstidslinjedagType.AvvistDag,
     override val inntekt: Int,
     override val dato: LocalDate,
     val begrunnelser: List<BegrunnelseDTO>,
-    val grad: Double
+    val grad: Double,
+    val totalGrad: Double?
 ) : Utbetalingstidslinjedag
 
 data class Utbetalingsdag(
-    override val type: UtbetalingstidslinjeDagtype,
+    override val type: UtbetalingstidslinjedagType,
     override val inntekt: Int,
     override val dato: LocalDate
 ) : Utbetalingstidslinjedag
 
 data class UtbetalingsdagMedGrad(
-    override val type: UtbetalingstidslinjeDagtype,
+    override val type: UtbetalingstidslinjedagType,
     override val inntekt: Int,
     override val dato: LocalDate,
     val grad: Double

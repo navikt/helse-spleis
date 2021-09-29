@@ -158,7 +158,7 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
         økonomi.medAvrundetData { _, aktuellDagsinntekt ->
             utbetalingstidslinje.add(
                 Utbetalingsdag(
-                    type = UtbetalingstidslinjeDagtype.Arbeidsdag,
+                    type = UtbetalingstidslinjedagType.Arbeidsdag,
                     inntekt = aktuellDagsinntekt!!,
                     dato = dato
                 )
@@ -174,7 +174,7 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
         økonomi.medAvrundetData { _, aktuellDagsinntekt ->
             utbetalingstidslinje.add(
                 Utbetalingsdag(
-                    type = UtbetalingstidslinjeDagtype.ArbeidsgiverperiodeDag,
+                    type = UtbetalingstidslinjedagType.ArbeidsgiverperiodeDag,
                     inntekt = aktuellDagsinntekt!!,
                     dato = dato
                 )
@@ -190,7 +190,7 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
         økonomi.medData { grad, _, _, _, totalGrad, aktuellDagsinntekt, arbeidsgiverbeløp, _, _ ->
             utbetalingstidslinje.add(
                 NavDag(
-                    type = UtbetalingstidslinjeDagtype.NavDag,
+                    type = UtbetalingstidslinjedagType.NavDag,
                     inntekt = aktuellDagsinntekt!!.roundToInt(),
                     dato = dato,
                     utbetaling = arbeidsgiverbeløp!!.roundToInt(),
@@ -209,7 +209,7 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
         økonomi.medData { grad, _ ->
             utbetalingstidslinje.add(
                 UtbetalingsdagMedGrad(
-                    type = UtbetalingstidslinjeDagtype.NavHelgDag,
+                    type = UtbetalingstidslinjedagType.NavHelgDag,
                     inntekt = 0,   // Speil needs zero here
                     dato = dato,
                     grad = grad
@@ -225,7 +225,7 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
     ) {
         utbetalingstidslinje.add(
             Utbetalingsdag(
-                type = if (dato.erHelg()) UtbetalingstidslinjeDagtype.Helgedag else UtbetalingstidslinjeDagtype.Feriedag,
+                type = if (dato.erHelg()) UtbetalingstidslinjedagType.Helgedag else UtbetalingstidslinjedagType.Feriedag,
                 inntekt = 0,    // Speil needs zero here
                 dato = dato
             )
@@ -239,7 +239,7 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
     ) {
         utbetalingstidslinje.add(
             Utbetalingsdag(
-                type = UtbetalingstidslinjeDagtype.UkjentDag,
+                type = UtbetalingstidslinjedagType.UkjentDag,
                 inntekt = 0,    // Speil needs zero here
                 dato = dato
             )
@@ -251,15 +251,18 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        utbetalingstidslinje.add(
-            AvvistDag(
-                type = UtbetalingstidslinjeDagtype.AvvistDag,
-                inntekt = 0,    // Speil needs zero here
-                dato = dato,
-                begrunnelser = dag.begrunnelser.map { BegrunnelseDTO.valueOf(PersonData.UtbetalingstidslinjeData.BegrunnelseData.fraBegrunnelse(it).name) },
-                grad = 0.0 // Speil wants zero here
+        økonomi.medData { _, _, _, _, totalGrad, _, _, _, _ ->
+            utbetalingstidslinje.add(
+                AvvistDag(
+                    type = UtbetalingstidslinjedagType.AvvistDag,
+                    inntekt = 0, // Speil needs zero here
+                    dato = dato,
+                    begrunnelser = dag.begrunnelser.map { BegrunnelseDTO.valueOf(PersonData.UtbetalingstidslinjeData.BegrunnelseData.fraBegrunnelse(it).name) },
+                    grad = 0.0,  // Speil wants zero here
+                    totalGrad = totalGrad
+                )
             )
-        )
+        }
     }
 
     override fun visit(
@@ -269,7 +272,7 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
     ) {
         utbetalingstidslinje.add(
             Utbetalingsdag(
-                type = UtbetalingstidslinjeDagtype.ForeldetDag,
+                type = UtbetalingstidslinjedagType.ForeldetDag,
                 inntekt = 0,    // Speil needs zero here
                 dato = dato
             )

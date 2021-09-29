@@ -176,7 +176,7 @@ internal class Tidslinjeperioder(
         )
     }
 
-    private fun List<SammenslåttDag>.sisteNavDag() = lastOrNull { it.utbetalingsdagtype == UtbetalingstidslinjeDagtype.NavDag }
+    private fun List<SammenslåttDag>.sisteNavDag() = lastOrNull { it.utbetalingstidslinjedagtype == UtbetalingstidslinjedagType.NavDag }
 
     private fun periodevilkår(
         periode: IVedtaksperiode,
