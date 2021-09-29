@@ -1373,4 +1373,20 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             // Ender feilaktig opp i AVVENTER_HISTORIKK_REVURDERING
         )
     }
+
+    @Test
+    fun `Håndter påminnelser i alle tilstandene knyttet til en revurdering med en arbeidsgiver`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterOverstyring((25.januar til 26.januar).map { manuellFeriedag(it) })
+        håndterPåminnelse(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        assertEtterspurteYtelser(4, 1.vedtaksperiode)
+
+        håndterYtelser(1.vedtaksperiode)
+        håndterPåminnelse(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
+        assertEquals(3, inspektør.antallEtterspurteBehov(1.vedtaksperiode, Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering))
+
+        håndterSimulering(1.vedtaksperiode)
+        håndterPåminnelse(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
+        assertEquals(3, inspektør.antallEtterspurteBehov(1.vedtaksperiode, Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning))
+    }
 }
