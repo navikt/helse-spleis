@@ -1,8 +1,10 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
+import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.*
@@ -11,6 +13,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -275,7 +278,108 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
 
         assertEquals(552000.årlig, person.sykepengegrunnlag(1.januar))
         assertEquals(528000.årlig, person.sammenligningsgrunnlag(1.januar))
+    }
 
+    @Test
+    fun `To arbeidsgivere, kun én blir forlenget - Samme dagsats for forlengelsen og førstengelsen`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, orgnummer = a2)
+
+        val inntektsvurdering = Inntektsvurdering(
+            listOf(
+                sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(12)),
+                sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 35000.månedlig.repeat(12))
+            )
+        )
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1, inntektsvurdering = inntektsvurdering)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(2.vedtaksperiode, orgnummer = a1)
+
+        assertTilstand(a1, AVSLUTTET, vedtaksperiodeIndeks = 1)
+        assertTilstand(a1, AVSLUTTET, vedtaksperiodeIndeks = 2)
+        assertTilstand(a2, AVSLUTTET, vedtaksperiodeIndeks = 1)
+        assertEquals(1.januar, a1.inspektør.skjæringstidspunkt(1.vedtaksperiode))
+        assertEquals(1.januar, a1.inspektør.skjæringstidspunkt(2.vedtaksperiode))
+        assertEquals(1.januar, a2.inspektør.skjæringstidspunkt(1.vedtaksperiode))
+
+        val utbetalingslinje1 = a1.inspektør.utbetalingslinjer(0)
+        val utbetalingslinje2 = a1.inspektør.utbetalingslinjer(1)
+
+        assertNotEquals(utbetalingslinje1, utbetalingslinje2)
+        assertEquals(utbetalingslinje1.linjerUtenOpphør().last().beløp, utbetalingslinje2.linjerUtenOpphør().last().beløp)
+        assertEquals(utbetalingslinje1.fagsystemId(), utbetalingslinje2.fagsystemId())
+    }
+
+    //FIXME: Testnavn
+    @Test
+    fun `To arbeidsgivere gikk inn i en bar og vet om hverandre`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, orgnummer = a1)
+
+        val inntektsvurdering = Inntektsvurdering(
+            listOf(
+                sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(12)),
+                sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 35000.månedlig.repeat(12))
+            )
+        )
+        val ivForSykepengegrunnlag = InntektForSykepengegrunnlag(
+            listOf(
+                grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3)),
+                grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 35000.månedlig.repeat(3))
+            )
+        )
+        val arbeidsforhold = listOf(Arbeidsforhold(a1, LocalDate.EPOCH), Arbeidsforhold(a2, LocalDate.EPOCH))
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            orgnummer = a1,
+            inntektsvurdering = inntektsvurdering,
+            inntektsvurderingForSykepengegrunnlag = ivForSykepengegrunnlag,
+            arbeidsforhold = arbeidsforhold
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+
+        assertEquals(1, a1.inspektør.arbeidsgiverOppdrag.size)
+        assertEquals(0, a2.inspektør.arbeidsgiverOppdrag.size)
+
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
+
+
+        assertTilstand(a1, AVSLUTTET, vedtaksperiodeIndeks = 1)
+        assertTilstand(a2, AVSLUTTET, vedtaksperiodeIndeks = 1)
+
+        assertEquals(1, a1.inspektør.arbeidsgiverOppdrag.size)
+        assertEquals(1, a2.inspektør.arbeidsgiverOppdrag.size)
     }
 
     private fun nyPeriode(
@@ -291,7 +395,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         ).håndter(Person::håndter)
         søknad(
             UUID.randomUUID(),
-            Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent),
+            Sykdom(periode.start, periode.endInclusive, 100.prosent),
             orgnummer = orgnummer
         ).håndter(Person::håndter)
         inntektsmelding(

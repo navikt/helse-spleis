@@ -5,8 +5,6 @@ import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.Arbeidsgiver.Companion.antallMedVedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeidsgivere
-import no.nav.helse.person.Arbeidsgiver.Companion.forlengerIkkeBareAnnenArbeidsgiver
-import no.nav.helse.person.Arbeidsgiver.Companion.forlengerSammePeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSammenligningsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSykepengegrunnlagGammel
@@ -426,15 +424,6 @@ class Person private constructor(
         }
 
     internal fun nåværendeVedtaksperioder(filter: VedtaksperiodeFilter) = arbeidsgivere.nåværendeVedtaksperioder(filter).sorted()
-
-    /**
-     * Brukes i MVP for flere arbeidsgivere. Alle forlengelser hos alle arbeidsgivere må gjelde samme periode
-     * */
-    internal fun forlengerAlleArbeidsgivereSammePeriode(vedtaksperiode: Vedtaksperiode) =
-        arbeidsgivere.forlengerSammePeriode(vedtaksperiode)
-
-    internal fun forlengerIkkeBareAnnenArbeidsgiver(arbeidsgiver: Arbeidsgiver, vedtaksperiode: Vedtaksperiode) =
-        arbeidsgivere.forlengerIkkeBareAnnenArbeidsgiver(arbeidsgiver, vedtaksperiode)
 
     internal fun lagreDødsdato(dødsdato: LocalDate) {
         this.dødsdato = dødsdato

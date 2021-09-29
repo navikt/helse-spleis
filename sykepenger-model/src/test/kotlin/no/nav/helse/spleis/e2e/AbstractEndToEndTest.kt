@@ -1049,23 +1049,12 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         }
     }
 
-    protected fun forlengVedtak(fom: LocalDate, tom: LocalDate, vararg organisasjonsnummere: String) {
-        require(organisasjonsnummere.isNotEmpty()) { "Må inneholde minst ett organisasjonsnummer" }
-        organisasjonsnummere.forEach { håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent), orgnummer = it) }
-        organisasjonsnummere.forEach { håndterSøknad(Sykdom(fom, tom, 100.prosent), orgnummer = it) }
-        organisasjonsnummere.forEach { håndterYtelser(vedtaksperiodeIdInnhenter = { _ -> observatør.sisteVedtaksperiode(it) }, orgnummer = it) }
-
-        val (første, resten) = organisasjonsnummere.first() to organisasjonsnummere.drop(1)
-
-        første.let { organisasjonsnummer ->
-            val vedtaksperiodeIdInnhenter: IdInnhenter = { observatør.sisteVedtaksperiode(organisasjonsnummer) }
-            håndterYtelser(vedtaksperiodeIdInnhenter, orgnummer = organisasjonsnummer)
-            håndterSimulering(vedtaksperiodeIdInnhenter, orgnummer = organisasjonsnummer)
-            håndterUtbetalingsgodkjenning(vedtaksperiodeIdInnhenter, orgnummer = organisasjonsnummer)
-            håndterUtbetalt(vedtaksperiodeIdInnhenter, orgnummer = organisasjonsnummer)
-        }
-
-        resten.forEach { organisasjonsnummer ->
+    protected fun forlengVedtak(fom: LocalDate, tom: LocalDate, vararg organisasjonsnumre: String) {
+        require(organisasjonsnumre.isNotEmpty()) { "Må inneholde minst ett organisasjonsnummer" }
+        organisasjonsnumre.forEach { håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent), orgnummer = it) }
+        organisasjonsnumre.forEach { håndterSøknad(Sykdom(fom, tom, 100.prosent), orgnummer = it) }
+        organisasjonsnumre.forEach { håndterYtelser(vedtaksperiodeIdInnhenter = { _ -> observatør.sisteVedtaksperiode(it) }, orgnummer = it) }
+        organisasjonsnumre.forEach { organisasjonsnummer ->
             val vedtaksperiodeIdInnhenter: IdInnhenter = { observatør.sisteVedtaksperiode(organisasjonsnummer) }
             håndterYtelser(vedtaksperiodeIdInnhenter, orgnummer = organisasjonsnummer)
             håndterSimulering(vedtaksperiodeIdInnhenter, orgnummer = organisasjonsnummer)
@@ -1073,7 +1062,6 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             håndterUtbetalt(vedtaksperiodeIdInnhenter, orgnummer = organisasjonsnummer)
         }
     }
-
 
     protected fun nyttVedtak(
         fom: LocalDate,

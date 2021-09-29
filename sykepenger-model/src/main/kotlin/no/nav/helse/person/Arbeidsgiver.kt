@@ -131,10 +131,6 @@ internal class Arbeidsgiver private constructor(
             }
         }
 
-        internal fun Iterable<Arbeidsgiver>.forlengerIkkeBareAnnenArbeidsgiver(arbeidsgiver: Arbeidsgiver, vedtaksperiode: Vedtaksperiode) =
-            if (arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode) != null) true
-            else none { other -> other.finnSykeperiodeRettFør(vedtaksperiode) != null }
-
         internal fun Iterable<Arbeidsgiver>.harArbeidsgivereMedOverlappendeUtbetaltePerioder(orgnummer: String, periode: Periode) = this
             .filter { it.organisasjonsnummer != orgnummer }
             .any { it.vedtaksperioder.harOverlappendeUtbetaltePerioder(periode) }
