@@ -157,7 +157,7 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
     ) {
         økonomi.medAvrundetData { _, aktuellDagsinntekt ->
             utbetalingstidslinje.add(
-                Utbetalingsdag(
+                UtbetalingstidslinjedagUtenGrad(
                     type = UtbetalingstidslinjedagType.Arbeidsdag,
                     inntekt = aktuellDagsinntekt!!,
                     dato = dato
@@ -173,7 +173,7 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
     ) {
         økonomi.medAvrundetData { _, aktuellDagsinntekt ->
             utbetalingstidslinje.add(
-                Utbetalingsdag(
+                UtbetalingstidslinjedagUtenGrad(
                     type = UtbetalingstidslinjedagType.ArbeidsgiverperiodeDag,
                     inntekt = aktuellDagsinntekt!!,
                     dato = dato
@@ -208,7 +208,7 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
     ) {
         økonomi.medData { grad, _ ->
             utbetalingstidslinje.add(
-                UtbetalingsdagMedGrad(
+                UtbetalingstidslinjedagMedGrad(
                     type = UtbetalingstidslinjedagType.NavHelgDag,
                     inntekt = 0,   // Speil needs zero here
                     dato = dato,
@@ -224,7 +224,7 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
         økonomi: Økonomi
     ) {
         utbetalingstidslinje.add(
-            Utbetalingsdag(
+            UtbetalingstidslinjedagUtenGrad(
                 type = if (dato.erHelg()) UtbetalingstidslinjedagType.Helgedag else UtbetalingstidslinjedagType.Feriedag,
                 inntekt = 0,    // Speil needs zero here
                 dato = dato
@@ -238,7 +238,7 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
         økonomi: Økonomi
     ) {
         utbetalingstidslinje.add(
-            Utbetalingsdag(
+            UtbetalingstidslinjedagUtenGrad(
                 type = UtbetalingstidslinjedagType.UkjentDag,
                 inntekt = 0,    // Speil needs zero here
                 dato = dato
@@ -271,7 +271,7 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
         økonomi: Økonomi
     ) {
         utbetalingstidslinje.add(
-            Utbetalingsdag(
+            UtbetalingstidslinjedagUtenGrad(
                 type = UtbetalingstidslinjedagType.ForeldetDag,
                 inntekt = 0,    // Speil needs zero here
                 dato = dato

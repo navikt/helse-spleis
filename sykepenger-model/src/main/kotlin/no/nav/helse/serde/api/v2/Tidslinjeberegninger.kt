@@ -58,7 +58,7 @@ internal fun List<Sykdomstidslinjedag>.merge(utbetalingstidslinje: List<Utbetali
             utbetalingsdag?.type ?: UtbetalingstidslinjedagType.UkjentDag,
             kilde = sykdomsdag.kilde,
             grad = sykdomsdag.grad,
-            utbetalingsinfo = utbetalingsdag?.let { utbetalingsinfo(it) },
+            utbetalingsinfo = utbetalingsdag?.utbetalingsinfo(),
             begrunnelser = utbetalingsdag?.let { begrunnelser(it) }
         )
     }

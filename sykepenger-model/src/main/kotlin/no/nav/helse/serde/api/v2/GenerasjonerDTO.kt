@@ -86,13 +86,11 @@ internal data class BeregnetPeriode(
 ) : Tidslinjeperiode {
     override val tidslinjeperiodeId: UUID = UUID.randomUUID()
 
-    internal fun erAnnullering() = utbetalingstype == "ANNULLERING"
-    internal fun erRevurdering() = utbetalingstype == "REVURDERING"
+    internal fun erAnnullering() = utbetaling.type == "ANNULLERING"
+    internal fun erRevurdering() = utbetaling.type == "REVURDERING"
     internal fun harSammeFagsystemId(other: BeregnetPeriode) = fagsystemId() == other.fagsystemId()
 
     private fun fagsystemId() = utbetaling.arbeidsgiverFagsystemId
-    val utbetalingstilstand = utbetaling.status
-    val utbetalingstype = utbetaling.type
 
     data class Vilkår(
         val sykepengedager: Sykepengedager,

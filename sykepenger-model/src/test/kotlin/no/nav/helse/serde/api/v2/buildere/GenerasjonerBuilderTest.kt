@@ -655,12 +655,12 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     }
 
     private infix fun BeregnetPeriode.er(utbetalingstilstand: String): BeregnetPeriode {
-        assertEquals(utbetalingstilstand, this.utbetalingstilstand)
+        assertEquals(utbetalingstilstand, this.utbetaling.status)
         return this
     }
 
     private infix fun BeregnetPeriode.avType(type: String): BeregnetPeriode {
-        assertEquals(type, this.utbetalingstype)
+        assertEquals(type, this.utbetaling.type)
         return this
     }
 

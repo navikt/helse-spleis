@@ -63,6 +63,8 @@ interface Utbetalingstidslinjedag {
     val type: UtbetalingstidslinjedagType
     val inntekt: Int
     val dato: LocalDate
+
+    fun utbetalingsinfo(): Utbetalingsinfo? = null
 }
 
 data class NavDag(
@@ -72,7 +74,9 @@ data class NavDag(
     val utbetaling: Int,
     val grad: Double,
     val totalGrad: Double?
-) : Utbetalingstidslinjedag
+) : Utbetalingstidslinjedag {
+    override fun utbetalingsinfo() = Utbetalingsinfo(inntekt, utbetaling, totalGrad)
+}
 
 data class AvvistDag(
     override val type: UtbetalingstidslinjedagType = UtbetalingstidslinjedagType.AvvistDag,
@@ -81,15 +85,17 @@ data class AvvistDag(
     val begrunnelser: List<BegrunnelseDTO>,
     val grad: Double,
     val totalGrad: Double?
-) : Utbetalingstidslinjedag
+) : Utbetalingstidslinjedag {
+    override fun utbetalingsinfo() = Utbetalingsinfo(inntekt, null, totalGrad)
+}
 
-data class Utbetalingsdag(
+data class UtbetalingstidslinjedagUtenGrad(
     override val type: UtbetalingstidslinjedagType,
     override val inntekt: Int,
     override val dato: LocalDate
 ) : Utbetalingstidslinjedag
 
-data class UtbetalingsdagMedGrad(
+data class UtbetalingstidslinjedagMedGrad(
     override val type: UtbetalingstidslinjedagType,
     override val inntekt: Int,
     override val dato: LocalDate,
