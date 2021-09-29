@@ -315,6 +315,7 @@ internal class Vedtaksperiode private constructor(
         kontekst(hendelse)
         hendelse.info("Forkaster vedtaksperiode: %s", this.id.toString())
         if (årsak !== ERSTATTES && !erAvsluttet() && this.tilstand !is RevurderingFeilet) tilstand(hendelse, TilInfotrygd)
+        kontekst(hendelse)
         forkastUgyldigeUtbetalinger(hendelse)
         person.vedtaksperiodeAvbrutt(
             hendelse,

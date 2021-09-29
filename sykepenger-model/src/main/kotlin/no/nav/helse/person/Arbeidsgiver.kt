@@ -697,10 +697,10 @@ internal class Arbeidsgiver private constructor(
         filter: VedtaksperiodeFilter,
         årsak: ForkastetÅrsak
     ): List<Vedtaksperiode> {
-        hendelse.kontekst(this)
         return forkast(filter, årsak)
             .takeIf { it.isNotEmpty() }
             ?.also { perioder ->
+                hendelse.kontekst(this)
                 perioder
                     .forEach {
                         it.forkast(hendelse, årsak)

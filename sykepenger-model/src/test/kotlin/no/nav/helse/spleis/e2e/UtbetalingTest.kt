@@ -10,13 +10,11 @@ import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class UtbetalingTest : AbstractEndToEndTest() {
     val ANNET_ORGNUMMER = "foo"
 
-    @Disabled("Disablet imens vi løser problemet")
     @Test
     fun `Utbetaling enddret får rett organisasjonsnummer ved overlappende sykemelding`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
