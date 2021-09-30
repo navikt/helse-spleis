@@ -383,6 +383,10 @@ class Person private constructor(
         arbeidsgivere.forEach { it.søppelbøtte(hendelse, ALLE, ForkastetÅrsak.IKKE_STØTTET) }
     }
 
+    fun revurderingHarFeilet(event: IAktivitetslogg) {
+        arbeidsgivere.forEach { it.håndterRevurderingFeilet(event) }
+    }
+
     private fun finnEllerOpprettArbeidsgiver(hendelse: ArbeidstakerHendelse) =
         finnEllerOpprettArbeidsgiver(hendelse.organisasjonsnummer(), hendelse)
 

@@ -262,6 +262,10 @@ internal class Vedtaksperiode private constructor(
         tilstand.håndterTidligereUferdigPeriode(this, ny, hendelse)
     }
 
+    internal fun håndterRevurderingFeilet(event: IAktivitetslogg) {
+        tilstand.håndterRevurderingFeilet(this, event)
+    }
+
     private fun harSammeArbeidsgiverSom(vedtaksperiode: Vedtaksperiode) = vedtaksperiode.arbeidsgiver.organisasjonsnummer() == organisasjonsnummer
 
     private fun harUlikFagsystemId(other: Utbetaling) = utbetaling?.hørerSammen(other) == false
@@ -965,6 +969,7 @@ internal class Vedtaksperiode private constructor(
         fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {}
 
         fun håndterRevurdertUtbetaling(vedtaksperiode: Vedtaksperiode, utbetaling: Utbetaling, hendelse: ArbeidstakerHendelse) {}
+        fun håndterRevurderingFeilet(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {}
     }
 
     internal object Start : Vedtaksperiodetilstand {
@@ -1287,6 +1292,10 @@ internal class Vedtaksperiode private constructor(
                 AvventerHistorikkRevurdering
             )
         }
+
+        override fun håndterRevurderingFeilet(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            vedtaksperiode.tilstand(hendelse, RevurderingFeilet)
+        }
     }
 
     internal object AvventerGjennomførtRevurdering : Vedtaksperiodetilstand {
@@ -1332,6 +1341,10 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndterTidligereUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, AvventerArbeidsgivereRevurdering)
+        }
+
+        override fun håndterRevurderingFeilet(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            vedtaksperiode.tilstand(hendelse, RevurderingFeilet)
         }
     }
 
@@ -1381,6 +1394,10 @@ internal class Vedtaksperiode private constructor(
             }
         }
 
+        override fun håndterRevurderingFeilet(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            vedtaksperiode.tilstand(hendelse, RevurderingFeilet)
+        }
+
         override fun håndterTidligereTilstøtendeUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, AvventerArbeidsgivereRevurdering)
         }
@@ -1398,10 +1415,15 @@ internal class Vedtaksperiode private constructor(
             Her kopierer vi alle valideringsmeldingene til hendelse, men skriver om
             alle Error til Warn, slik at vi 1) ikke feiler og 2) forteller saksbehandler om situasjonen.
         */
-        class AktivitetsloggDeescalator(private val hendelse: PersonHendelse): AktivitetsloggVisitor {
-            override fun visitInfo(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Info, melding: String, tidsstempel: String) = hendelse.info(melding)
-            override fun visitWarn(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Warn, melding: String, tidsstempel: String) = hendelse.warn(melding)
-            override fun visitError(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Error, melding: String, tidsstempel: String) = hendelse.warn(melding)
+        class AktivitetsloggDeescalator(private val hendelse: PersonHendelse) : AktivitetsloggVisitor {
+            override fun visitInfo(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Info, melding: String, tidsstempel: String) =
+                hendelse.info(melding)
+
+            override fun visitWarn(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Warn, melding: String, tidsstempel: String) =
+                hendelse.warn(melding)
+
+            override fun visitError(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Error, melding: String, tidsstempel: String) =
+                hendelse.warn(melding)
         }
     }
 
@@ -1417,6 +1439,10 @@ internal class Vedtaksperiode private constructor(
             } else {
                 vedtaksperiode.tilstand(hendelse, RevurderingFeilet)
             }
+        }
+
+        override fun håndterRevurderingFeilet(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            vedtaksperiode.tilstand(hendelse, RevurderingFeilet)
         }
     }
 
@@ -1982,6 +2008,10 @@ internal class Vedtaksperiode private constructor(
         override fun håndterTidligereUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, AvventerArbeidsgivereRevurdering)
         }
+
+        override fun håndterRevurderingFeilet(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            vedtaksperiode.tilstand(hendelse, RevurderingFeilet)
+        }
     }
 
     internal object AvventerGodkjenning : Vedtaksperiodetilstand {
@@ -2144,6 +2174,10 @@ internal class Vedtaksperiode private constructor(
                 }
             )
         }
+
+        override fun håndterRevurderingFeilet(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            vedtaksperiode.tilstand(hendelse, RevurderingFeilet)
+        }
     }
 
     internal object AvventerArbeidsgivereRevurdering : Vedtaksperiodetilstand {
@@ -2162,6 +2196,10 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
             vedtaksperiode.person.overstyrUtkastRevurdering(hendelse)
+        }
+
+        override fun håndterRevurderingFeilet(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            vedtaksperiode.tilstand(hendelse, RevurderingFeilet)
         }
     }
 
@@ -2348,6 +2386,10 @@ internal class Vedtaksperiode private constructor(
 
     internal object RevurderingFeilet : Vedtaksperiodetilstand {
         override val type: TilstandType = REVURDERING_FEILET
+
+        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            vedtaksperiode.person.revurderingHarFeilet(hendelse)
+        }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
 
