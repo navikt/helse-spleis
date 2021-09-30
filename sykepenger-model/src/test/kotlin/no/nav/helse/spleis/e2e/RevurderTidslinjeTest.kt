@@ -1281,8 +1281,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    @Disabled("Feilende test som illustrerer hva som skjer når saksbehandler sender en ny overstyring før forrige er gjennom tilstandsmaskinen")
-    fun `flere perioder ender i AVVENTER_HISTORIKK_REVURDERING på en gang`() {
+    fun `Overstyring av utkast til revurdering sender senere perioder til AVVENTER_ARBEIDSGIVERE_REVURDERING`() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
         forlengVedtak(1.mars, 31.mars)
@@ -1292,7 +1291,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
 
         // Denne overstyringen kommer før den forrige er ferdig prossessert
-        håndterOverstyring((20.januar til 29.januar).map { manuellFeriedag(it) })
+        håndterOverstyring((30.januar til 31.januar).map { manuellFeriedag(it) })
 
         assertTilstander(1.vedtaksperiode,
             START,
@@ -1333,7 +1332,67 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET,
             AVVENTER_ARBEIDSGIVERE_REVURDERING,
-            // Ender feilaktig opp i AVVENTER_HISTORIKK_REVURDERING
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_ARBEIDSGIVERE_REVURDERING
+        )
+    }
+
+    @Test
+    fun `Overstyring av utkast til revurdering sender senere periode i AVVENTER_SIMULERING_REVURDERING til AVVENTER_ARBEIDSGIVERE_REVURDERING`() {
+        nyttVedtak(1.januar, 31.januar)
+        forlengVedtak(1.februar, 28.februar)
+        forlengVedtak(1.mars, 31.mars)
+
+        håndterOverstyring((20.januar til 29.januar).map { manuellFeriedag(it) })
+        håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterYtelser(3.vedtaksperiode)
+
+        // Denne overstyringen kommer før den forrige er ferdig prossessert
+        håndterOverstyring((30.januar til 31.januar).map { manuellFeriedag(it) })
+
+        assertTilstander(1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING
+        )
+
+        assertTilstander(2.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_ARBEIDSGIVERE_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_ARBEIDSGIVERE_REVURDERING
+        )
+
+        assertTilstander(3.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_ARBEIDSGIVERE_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_ARBEIDSGIVERE_REVURDERING
         )
     }
 
