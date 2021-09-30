@@ -263,6 +263,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndterRevurderingFeilet(event: IAktivitetslogg) {
+        event.kontekst(this)
         tilstand.håndterRevurderingFeilet(this, event)
     }
 

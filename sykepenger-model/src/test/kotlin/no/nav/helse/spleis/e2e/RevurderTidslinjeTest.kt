@@ -1467,28 +1467,8 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
         håndterYtelser(1.vedtaksperiode, foreldrepenger = 17.januar til 31.januar)
 
-        inspektør.vedtaksperioder(1.vedtaksperiode).accept(SkalVæreIRevurderingFeilet())
-        inspektør.vedtaksperioder(2.vedtaksperiode).accept(SkalVæreIRevurderingFeilet())
-        inspektør.vedtaksperioder(3.vedtaksperiode).accept(SkalVæreIRevurderingFeilet())
-    }
-
-    private class SkalVæreIRevurderingFeilet : VedtaksperiodeVisitor {
-        override fun preVisitVedtaksperiode(
-            vedtaksperiode: Vedtaksperiode,
-            id: UUID,
-            tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
-            opprettet: LocalDateTime,
-            oppdatert: LocalDateTime,
-            periode: Periode,
-            opprinneligPeriode: Periode,
-            skjæringstidspunkt: LocalDate,
-            periodetype: Periodetype,
-            forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-            hendelseIder: Set<UUID>,
-            inntektsmeldingInfo: InntektsmeldingInfo?,
-            inntektskilde: Inntektskilde
-        ) {
-            assertEquals(Vedtaksperiode.RevurderingFeilet, tilstand)
-        }
+        assertSisteTilstand(1.vedtaksperiode, REVURDERING_FEILET)
+        assertSisteTilstand(2.vedtaksperiode, REVURDERING_FEILET)
+        assertSisteTilstand(3.vedtaksperiode, REVURDERING_FEILET)
     }
 }
