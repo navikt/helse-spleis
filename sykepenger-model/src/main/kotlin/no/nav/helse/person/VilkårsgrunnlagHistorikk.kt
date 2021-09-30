@@ -11,7 +11,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-internal class VilkårsgrunnlagHistorikk(private val historikk: MutableList<Innslag>) {
+internal class VilkårsgrunnlagHistorikk private constructor(private val historikk: MutableList<Innslag>) {
 
     internal constructor() : this(mutableListOf())
 
