@@ -81,6 +81,17 @@ interface PersonObserver {
         }
     }
 
+    data class RevurderingAvvistEvent(
+        val fødselsnummer: String,
+        val errors: List<String>
+    ) {
+        fun toJsonMap(): Map<String, Any> =
+            mapOf(
+                "fødselsnummer" to fødselsnummer,
+                "errors" to errors
+            )
+    }
+
     data class ManglendeInntektsmeldingEvent(
         val fom: LocalDate,
         val tom: LocalDate
@@ -181,4 +192,5 @@ interface PersonObserver {
     fun avstemt(hendelseskontekst: Hendelseskontekst, result: Map<String, Any>) {}
     fun hendelseIkkeHåndtert(hendelseskontekst: Hendelseskontekst, event: HendelseIkkeHåndtertEvent) {}
     fun vedtakFattet(hendelseskontekst: Hendelseskontekst, event: VedtakFattetEvent) {}
+    fun revurderingAvvist(hendelseskontekst: Hendelseskontekst, event: RevurderingAvvistEvent) {}
 }

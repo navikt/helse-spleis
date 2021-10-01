@@ -1,9 +1,8 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.Hendelseskontekst
-import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.*
 import no.nav.helse.person.PersonObserver.VedtaksperiodeEndretEvent
-import no.nav.helse.person.TilstandType
 import org.junit.jupiter.api.fail
 import java.util.*
 
@@ -28,6 +27,8 @@ internal class TestObservatør : PersonObserver {
     val annulleringer = mutableListOf<PersonObserver.UtbetalingAnnullertEvent>()
     lateinit var avstemming: Map<String, Any>
     val inntektsmeldingReplayEventer = mutableListOf<UUID>()
+
+    val avvisteRevurderinger = mutableListOf<PersonObserver.RevurderingAvvistEvent>()
 
     fun hendelseider(vedtaksperiodeId: UUID) =
         vedtaksperiodeendringer[vedtaksperiodeId]?.last()?.hendelser ?: fail { "VedtaksperiodeId $vedtaksperiodeId har ingen hendelser tilknyttet" }
@@ -101,6 +102,10 @@ internal class TestObservatør : PersonObserver {
 
     override fun vedtaksperiodeAvbrutt(hendelseskontekst: Hendelseskontekst, event: PersonObserver.VedtaksperiodeAvbruttEvent) {
         avbruttEventer[hendelseskontekst.vedtaksperiodeId()] = event.gjeldendeTilstand
+    }
+
+    override fun revurderingAvvist(hendelseskontekst: Hendelseskontekst, event: PersonObserver.RevurderingAvvistEvent) {
+        avvisteRevurderinger.add(event)
     }
 
     companion object {

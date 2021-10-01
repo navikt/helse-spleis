@@ -213,10 +213,14 @@ class Person private constructor(
 
     fun håndter(hendelse: OverstyrTidslinje) {
         hendelse.kontekst(this)
-        if (!arbeidsgivere.kanOverstyres(hendelse)) {
-            return hendelse.error("Kan ikke overstyre en pågående behandling der én eller flere perioder er behandlet ferdig")
+        if (arbeidsgivere.kanOverstyres(hendelse)) {
+            finnArbeidsgiver(hendelse).håndter(hendelse)
+        } else {
+            hendelse.error("Kan ikke overstyre en pågående behandling der én eller flere perioder er behandlet ferdig")
         }
-        finnArbeidsgiver(hendelse).håndter(hendelse)
+        if (hendelse.hasErrorsOrWorse()) {
+            observers.forEach { it.revurderingAvvist(hendelse.hendelseskontekst(), hendelse.tilRevurderingAvvistEvent()) }
+        }
     }
 
     fun håndter(hendelse: OverstyrInntekt) {

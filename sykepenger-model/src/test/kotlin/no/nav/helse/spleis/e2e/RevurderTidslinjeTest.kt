@@ -17,9 +17,7 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle
-import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
 
 @TestInstance(Lifecycle.PER_CLASS)
 internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
@@ -1470,5 +1468,15 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, REVURDERING_FEILET)
         assertSisteTilstand(2.vedtaksperiode, REVURDERING_FEILET)
         assertSisteTilstand(3.vedtaksperiode, REVURDERING_FEILET)
+    }
+
+    @Test
+    fun `Om en revurdering blir stanses før den behandles så skal si fra at vi avviser den`() {
+        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(1.mars, 31.mars)
+
+        håndterOverstyring((31.januar til 2.mars).map { manuellFeriedag(it) })
+
+        assertEquals(1, observatør.avvisteRevurderinger.size)
     }
 }

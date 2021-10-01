@@ -220,6 +220,13 @@ internal class PersonMediator(
         ))
     }
 
+    override fun revurderingAvvist(hendelseskontekst: Hendelseskontekst, event: PersonObserver.RevurderingAvvistEvent) {
+        queueMessage(hendelseskontekst,
+           "revurdering_avvist",
+            JsonMessage.newMessage(event.toJsonMap())
+        )
+    }
+
     override fun vedtaksperiodeUtbetalt(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetaltEvent) {
         queueMessage(
             hendelseskontekst,
