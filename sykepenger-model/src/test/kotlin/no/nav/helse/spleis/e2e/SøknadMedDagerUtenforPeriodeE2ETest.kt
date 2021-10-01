@@ -86,7 +86,7 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
         assertWarningTekst(
             inspektør,
             "Søknaden inneholder Permisjonsdager utenfor sykdomsvindu",
-            "Permisjon oppgitt i perioden i søknaden. Vurder rett til sykepenger og korriger sykmeldingsperioden"
+            "Permisjon oppgitt i perioden i søknaden."
         )
         assertTilstander(
             1.vedtaksperiode,

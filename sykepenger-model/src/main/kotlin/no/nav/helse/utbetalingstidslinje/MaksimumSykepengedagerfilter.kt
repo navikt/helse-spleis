@@ -65,7 +65,7 @@ internal class MaksimumSykepengedagerfilter(
 
     internal fun beregnGrenser() {
         if (avvisteDatoer in periode)
-            aktivitetslogg.warn("Maks antall sykepengedager er nådd i perioden. Vurder å sende brev")
+            aktivitetslogg.warn("Maks antall sykepengedager er nådd i perioden. Vurder å sende vedtak fra Infotrygd")
         else
             aktivitetslogg.info("Maksimalt antall sykedager overskrides ikke i perioden")
     }

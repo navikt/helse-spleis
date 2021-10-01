@@ -803,11 +803,11 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         val vedtaksperiode = personDTO.arbeidsgivere.first().vedtaksperioder.last() as VedtaksperiodeDTO
         assertEquals(2, vedtaksperiode.aktivitetslogg.size)
         assertEquals(
-            "Utdanning oppgitt i perioden i søknaden. Vurder rett til sykepenger og korriger sykmeldingsperioden",
+            "Utdanning oppgitt i perioden i søknaden.",
             vedtaksperiode.aktivitetslogg[0].melding
         )
         assertEquals(
-            "Utenlandsopphold oppgitt i perioden i søknaden. Vurder rett til sykepenger og korriger sykmeldingperioden",
+            "Utenlandsopphold oppgitt i perioden i søknaden.",
             vedtaksperiode.aktivitetslogg[1].melding
         )
         assertNotEquals(vedtaksperiode.id, vedtaksperiode.aktivitetslogg[0].vedtaksperiodeId)
@@ -1214,6 +1214,8 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         val serialisertVedtaksperiode = serializePersonForSpeil(person).arbeidsgivere.single().vedtaksperioder.last() as VedtaksperiodeDTO
         assertTrue(serialisertVedtaksperiode.aktivitetslogg.any { it.melding == "Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag" })
     }
+    // Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag
+    // Inntekt under krav til minste sykepengegrunnlag. Vurder å sende vedtak fra Infotrygd
 
     @Test
     fun `Vedtaksperioder fra flere arbeidsgivere får samme vilkårsgrunnlag-warnings`() {

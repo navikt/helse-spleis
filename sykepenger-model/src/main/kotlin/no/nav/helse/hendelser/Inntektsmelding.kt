@@ -111,7 +111,7 @@ class Inntektsmelding(
 
     override fun valider(periode: Periode): IAktivitetslogg {
         refusjon.valider(this, periode, beregnetInntekt)
-        if (arbeidsgiverperioder.isEmpty()) warn("Inntektsmelding inneholder ikke arbeidsgiverperiode. Vurder om  arbeidsgiverperioden beregnes riktig")
+        if (arbeidsgiverperioder.isEmpty()) warn("Inntektsmeldingen mangler ikke arbeidsgiverperiode. Vurder om vilkårene for sykepenger er oppfylt, og om det skal være arbeidsgiverperiode")
         begrunnelseForReduksjonEllerIkkeUtbetalt?.takeIf(String::isNotBlank)?.also {
             warn(
                 "Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: %s. Vurder om dette har betydning for rett til sykepenger og beregning av arbeidsgiverperiode",
