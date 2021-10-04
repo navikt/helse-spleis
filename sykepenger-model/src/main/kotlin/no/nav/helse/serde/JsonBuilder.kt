@@ -1,5 +1,6 @@
 package no.nav.helse.serde
 
+import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.*
@@ -47,10 +48,10 @@ internal class JsonBuilder : AbstractBuilder() {
         person: Person,
         opprettet: LocalDateTime,
         aktørId: String,
-        fødselsnummer: String,
+        fødselsnummer: Fødselsnummer,
         dødsdato: LocalDate?
     ) {
-        personBuilder = PersonState(fødselsnummer, aktørId, opprettet, dødsdato)
+        personBuilder = PersonState(fødselsnummer.toString(), aktørId, opprettet, dødsdato)
         pushState(personBuilder)
     }
 
@@ -89,7 +90,7 @@ internal class JsonBuilder : AbstractBuilder() {
             person: Person,
             opprettet: LocalDateTime,
             aktørId: String,
-            fødselsnummer: String,
+            fødselsnummer: Fødselsnummer,
             dødsdato: LocalDate?
         ) {
             popState()

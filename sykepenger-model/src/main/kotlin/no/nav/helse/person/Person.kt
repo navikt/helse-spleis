@@ -364,7 +364,7 @@ class Person private constructor(
         infotrygdhistorikk.harBetalt(orgnummer, skjæringstidspunkt)
 
     internal fun accept(visitor: PersonVisitor) {
-        visitor.preVisitPerson(this, opprettet, aktørId, fødselsnummer.toString(), dødsdato)
+        visitor.preVisitPerson(this, opprettet, aktørId, fødselsnummer, dødsdato)
         visitor.visitPersonAktivitetslogg(aktivitetslogg)
         aktivitetslogg.accept(visitor)
         visitor.preVisitArbeidsgivere()
@@ -372,7 +372,7 @@ class Person private constructor(
         visitor.postVisitArbeidsgivere()
         infotrygdhistorikk.accept(visitor)
         vilkårsgrunnlagHistorikk.accept(visitor)
-        visitor.postVisitPerson(this, opprettet, aktørId, fødselsnummer.toString(), dødsdato)
+        visitor.postVisitPerson(this, opprettet, aktørId, fødselsnummer, dødsdato)
     }
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {

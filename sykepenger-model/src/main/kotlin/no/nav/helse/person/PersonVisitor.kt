@@ -1,5 +1,6 @@
 package no.nav.helse.person
 
+import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
@@ -24,11 +25,11 @@ import java.time.YearMonth
 import java.util.*
 
 internal interface PersonVisitor : ArbeidsgiverVisitor, AktivitetsloggVisitor, VilkårsgrunnlagHistorikkVisitor, InfotrygdhistorikkVisitor {
-    fun preVisitPerson(person: Person, opprettet: LocalDateTime, aktørId: String, fødselsnummer: String, dødsdato: LocalDate?) {}
+    fun preVisitPerson(person: Person, opprettet: LocalDateTime, aktørId: String, fødselsnummer: Fødselsnummer, dødsdato: LocalDate?) {}
     fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) {}
     fun preVisitArbeidsgivere() {}
     fun postVisitArbeidsgivere() {}
-    fun postVisitPerson(person: Person, opprettet: LocalDateTime, aktørId: String, fødselsnummer: String, dødsdato: LocalDate?) {}
+    fun postVisitPerson(person: Person, opprettet: LocalDateTime, aktørId: String, fødselsnummer: Fødselsnummer, dødsdato: LocalDate?) {}
 }
 
 internal interface InfotrygdhistorikkVisitor {

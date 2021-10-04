@@ -1,5 +1,6 @@
 package no.nav.helse.person
 
+import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
@@ -102,7 +103,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.postVisitAktivitetslogg(aktivitetslogg)
     }
 
-    override fun preVisitPerson(person: Person, opprettet: LocalDateTime, aktørId: String, fødselsnummer: String, dødsdato: LocalDate?) {
+    override fun preVisitPerson(person: Person, opprettet: LocalDateTime, aktørId: String, fødselsnummer: Fødselsnummer, dødsdato: LocalDate?) {
         delegatee.preVisitPerson(person, opprettet, aktørId, fødselsnummer, dødsdato)
     }
 
@@ -229,7 +230,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.postVisitInfotrygdhistorikk()
     }
 
-    override fun postVisitPerson(person: Person, opprettet: LocalDateTime, aktørId: String, fødselsnummer: String, dødsdato: LocalDate?) {
+    override fun postVisitPerson(person: Person, opprettet: LocalDateTime, aktørId: String, fødselsnummer: Fødselsnummer, dødsdato: LocalDate?) {
         delegatee.postVisitPerson(person, opprettet, aktørId, fødselsnummer, dødsdato)
     }
 

@@ -1,5 +1,6 @@
 package no.nav.helse.serde.api.builders
 
+import no.nav.helse.Fødselsnummer
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Person
 import no.nav.helse.serde.AbstractBuilder
@@ -57,7 +58,7 @@ internal class PersonBuilder(
         person: Person,
         opprettet: LocalDateTime,
         aktørId: String,
-        fødselsnummer: String,
+        fødselsnummer: Fødselsnummer,
         dødsdato: LocalDate?
     ) {
         popState()
