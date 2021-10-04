@@ -15,7 +15,7 @@ import java.util.*
 internal class PersonBuilder(
     builder: AbstractBuilder,
     private val person: Person,
-    private val fødselsnummer: String,
+    private val fødselsnummer: Fødselsnummer,
     private val aktørId: String,
     private val dødsdato: LocalDate?,
     private val versjon: Int
@@ -31,9 +31,9 @@ internal class PersonBuilder(
         val vilkårsgrunnlagHistorikk = VilkårsgrunnlagBuilder(person.vilkårsgrunnlagHistorikk, sammenligningsgrunnlagBuilder).build()
 
         return PersonDTO(
-            fødselsnummer = fødselsnummer,
+            fødselsnummer = fødselsnummer.toString(),
             aktørId = aktørId,
-            arbeidsgivere = arbeidsgivere.map { it.build(hendelser, fødselsnummer, vilkårsgrunnlagHistorikk) }.filter {
+            arbeidsgivere = arbeidsgivere.map { it.build(hendelser, fødselsnummer.toString(), vilkårsgrunnlagHistorikk) }.filter {
                 it.vedtaksperioder.isNotEmpty() || skalVises(it.organisasjonsnummer)
             },
             vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk.toDTO(),
@@ -49,7 +49,7 @@ internal class PersonBuilder(
         organisasjonsnummer: String
     ) {
         val arbeidsgiverBuilder =
-            ArbeidsgiverBuilder(arbeidsgiver, person.vilkårsgrunnlagHistorikk, id, organisasjonsnummer, fødselsnummer, inntektshistorikkBuilder)
+            ArbeidsgiverBuilder(arbeidsgiver, person.vilkårsgrunnlagHistorikk, id, organisasjonsnummer, fødselsnummer.toString(), inntektshistorikkBuilder)
         arbeidsgivere.add(arbeidsgiverBuilder)
         pushState(arbeidsgiverBuilder)
     }

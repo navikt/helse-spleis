@@ -34,7 +34,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : Abstract
         fødselsnummer: Fødselsnummer,
         dødsdato: LocalDate?
     ) {
-        personBuilder = PersonBuilder(this, person, fødselsnummer.toString(), aktørId, dødsdato, SNAPSHOT_VERSJON)
+        personBuilder = PersonBuilder(this, person, fødselsnummer, aktørId, dødsdato, SNAPSHOT_VERSJON)
         pushState(personBuilder)
     }
 }

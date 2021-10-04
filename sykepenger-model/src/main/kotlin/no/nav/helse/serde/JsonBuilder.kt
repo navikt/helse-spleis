@@ -51,14 +51,14 @@ internal class JsonBuilder : AbstractBuilder() {
         fødselsnummer: Fødselsnummer,
         dødsdato: LocalDate?
     ) {
-        personBuilder = PersonState(fødselsnummer.toString(), aktørId, opprettet, dødsdato)
+        personBuilder = PersonState(fødselsnummer, aktørId, opprettet, dødsdato)
         pushState(personBuilder)
     }
 
-    private class PersonState(fødselsnummer: String, aktørId: String, opprettet: LocalDateTime, dødsdato: LocalDate?) : BuilderState() {
+    private class PersonState(fødselsnummer: Fødselsnummer, aktørId: String, opprettet: LocalDateTime, dødsdato: LocalDate?) : BuilderState() {
         private val personMap = mutableMapOf<String, Any?>(
             "aktørId" to aktørId,
-            "fødselsnummer" to fødselsnummer,
+            "fødselsnummer" to fødselsnummer.toString(),
             "opprettet" to opprettet,
             "dødsdato" to dødsdato
         )
