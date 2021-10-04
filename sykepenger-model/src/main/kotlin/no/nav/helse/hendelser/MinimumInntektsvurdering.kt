@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.Fødselsnummer
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Sykepengegrunnlag
 import no.nav.helse.somFødselsnummer
@@ -9,11 +10,11 @@ import java.time.LocalDate
 
 internal fun validerMinimumInntekt(
     aktivitetslogg: IAktivitetslogg,
-    fødselsnummer: String,
+    fødselsnummer: Fødselsnummer,
     skjæringstidspunkt: LocalDate,
     grunnlagForSykepengegrunnlag: Sykepengegrunnlag,
 ): Boolean {
-    val alder = fødselsnummer.somFødselsnummer().alder()
+    val alder = fødselsnummer.alder()
     val minimumInntekt = alder.minimumInntekt(skjæringstidspunkt)
     val oppfylt = grunnlagForSykepengegrunnlag.grunnlagForSykepengegrunnlag > minimumInntekt
 

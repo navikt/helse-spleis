@@ -2,6 +2,7 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.hendelser.Arbeidsforhold.Companion.grupperArbeidsforholdPerOrgnummer
 import no.nav.helse.person.*
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.økonomi.Inntekt
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -43,7 +44,7 @@ class Vilkårsgrunnlag(
         )
         val opptjeningvurderingOk = opptjeningvurdering.valider(this, skjæringstidspunkt)
         val medlemskapsvurderingOk = medlemskapsvurdering.valider(this, periodetype)
-        val minimumInntektvurderingOk = validerMinimumInntekt(this, fødselsnummer, skjæringstidspunkt, grunnlagForSykepengegrunnlag)
+        val minimumInntektvurderingOk = validerMinimumInntekt(this, fødselsnummer.somFødselsnummer(), skjæringstidspunkt, grunnlagForSykepengegrunnlag)
 
         grunnlagsdata = VilkårsgrunnlagHistorikk.Grunnlagsdata(
             sykepengegrunnlag = grunnlagForSykepengegrunnlag,

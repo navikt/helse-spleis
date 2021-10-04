@@ -644,7 +644,7 @@ class Person private constructor(
         when (val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)) {
             is VilkårsgrunnlagHistorikk.Grunnlagsdata -> {
                 val harMinimumInntekt =
-                    validerMinimumInntekt(hendelse, fødselsnummer.toString(), hendelse.skjæringstidspunkt, grunnlagForSykepengegrunnlag)
+                    validerMinimumInntekt(hendelse, fødselsnummer, hendelse.skjæringstidspunkt, grunnlagForSykepengegrunnlag)
                 vilkårsgrunnlagHistorikk.lagre(
                     skjæringstidspunkt, grunnlag.kopierGrunnlagsdataMed(
                         sykepengegrunnlag = grunnlagForSykepengegrunnlag,
