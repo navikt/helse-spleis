@@ -14,6 +14,7 @@ import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.api.InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO
 import no.nav.helse.serde.api.v2.*
 import no.nav.helse.serde.mapping.SpeilDagtype
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -1612,7 +1613,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
 
     companion object {
         private const val aktørId = "12345"
-        private const val fnr = "12020052345"
+        private val fnr = "12020052345".somFødselsnummer()
         private const val orgnummer = "987654321"
         private const val orgnummer2 = "123456789"
         private lateinit var vedtaksperiodeId: IdInnhenter
@@ -1872,7 +1873,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             grad: Prosentdel = 100.prosent
         ) = Sykmelding(
             meldingsreferanseId = hendelseId,
-            fnr = fnr,
+            fnr = fnr.toString(),
             aktørId = aktørId,
             orgnummer = orgnummer,
             sykeperioder = listOf(Sykmeldingsperiode(fom, tom, grad)),
@@ -1896,7 +1897,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             andreInntektskilder: List<Søknad.Inntektskilde> = emptyList()
         ) = Søknad(
             meldingsreferanseId = hendelseId,
-            fnr = fnr,
+            fnr = fnr.toString(),
             aktørId = aktørId,
             orgnummer = orgnummer,
             perioder = listOf(Søknad.Søknadsperiode.Sykdom(fom, tom, grad)) + andrePerioder,
@@ -1920,7 +1921,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             sendtTilArbeidsgiver: LocalDateTime = tom.atStartOfDay()
         ) = SøknadArbeidsgiver(
             meldingsreferanseId = hendelseId,
-            fnr = fnr,
+            fnr = fnr.toString(),
             aktørId = aktørId,
             orgnummer = orgnummer,
             sykdomsperioder = listOf(SøknadArbeidsgiver.Sykdom(fom, tom, 100.prosent, 0.prosent)),
@@ -1947,7 +1948,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             meldingsreferanseId = hendelseId,
             refusjon = refusjon,
             orgnummer = orgnummer,
-            fødselsnummer = fnr,
+            fødselsnummer = fnr.toString(),
             aktørId = aktørId,
             førsteFraværsdag = fom,
             beregnetInntekt = beregnetInntekt,
@@ -1985,7 +1986,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeIdInnhenter(orgnummer).toString(),
             aktørId = aktørId,
-            fødselsnummer = fnr,
+            fødselsnummer = fnr.toString(),
             orgnummer = orgnummer,
             inntektsvurdering = inntektsvurdering,
             inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
@@ -2006,7 +2007,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             Ytelser(
                 meldingsreferanseId = hendelseId,
                 aktørId = aktørId,
-                fødselsnummer = fnr,
+                fødselsnummer = fnr.toString(),
                 organisasjonsnummer = orgnummer,
                 vedtaksperiodeId = vedtaksperiodeIdInnhenter(orgnummer).toString(),
                 utbetalingshistorikk = utbetalingshistorikk(
@@ -2061,7 +2062,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         ) = Utbetalingshistorikk(
             meldingsreferanseId = meldingsreferanseId,
             aktørId = aktørId,
-            fødselsnummer = fnr,
+            fødselsnummer = fnr.toString(),
             organisasjonsnummer = orgnummer,
             vedtaksperiodeId = vedtaksperiodeIdInnhenter(orgnummer).toString(),
             arbeidskategorikoder = emptyMap(),
@@ -2083,7 +2084,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             Utbetalingsgodkjenning(
                 meldingsreferanseId = UUID.randomUUID(),
                 aktørId = aktørId,
-                fødselsnummer = fnr,
+                fødselsnummer = fnr.toString(),
                 organisasjonsnummer = orgnummer,
                 utbetalingId = utbetalingID,
                 vedtaksperiodeId = vedtaksperiodeIdInnhenter(orgnummer).toString(),
@@ -2113,7 +2114,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeIdInnhenter(orgnummer).toString(),
             aktørId = aktørId,
-            fødselsnummer = fnr,
+            fødselsnummer = fnr.toString(),
             orgnummer = orgnummer,
             simuleringOK = simuleringOk,
             melding = "Hei Aron",
@@ -2159,7 +2160,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         private fun overføring(utbetalingFagsystemID: UtbetalingFagsystemID) = UtbetalingOverført(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = aktørId,
-            fødselsnummer = fnr,
+            fødselsnummer = fnr.toString(),
             orgnummer = orgnummer,
             fagsystemId = utbetalingFagsystemID.arbeidsgiversFagsystemId,
             utbetalingId = utbetalingFagsystemID.utbetalingId.toString(),
@@ -2179,7 +2180,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         private fun utbetalt(utbetalingFagsystemID: UtbetalingFagsystemID, orgnummer: String = this.orgnummer) = UtbetalingHendelse(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = aktørId,
-            fødselsnummer = fnr,
+            fødselsnummer = fnr.toString(),
             orgnummer = orgnummer,
             fagsystemId = utbetalingFagsystemID.arbeidsgiversFagsystemId,
             utbetalingId = utbetalingFagsystemID.utbetalingId.toString(),
@@ -2201,7 +2202,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         private fun annullering(fagsystemId: String) = AnnullerUtbetaling(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = aktørId,
-            fødselsnummer = fnr,
+            fødselsnummer = fnr.toString(),
             organisasjonsnummer = orgnummer,
             fagsystemId = fagsystemId,
             saksbehandlerIdent = "en_saksbehandler_ident",

@@ -16,6 +16,7 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Oppdrag
@@ -188,7 +189,7 @@ class JsonBuilderTest {
 
     private companion object {
         private const val aktørId = "12345"
-        private const val fnr = "12020052345"
+        private val fnr = "12020052345".somFødselsnummer()
         private const val orgnummer = "987654321"
         private lateinit var vedtaksperiodeId: String
         private lateinit var tilstand: TilstandType
@@ -526,7 +527,7 @@ class JsonBuilderTest {
             tom: LocalDate = 31.januar
         ) = Sykmelding(
             meldingsreferanseId = hendelseId,
-            fnr = fnr,
+            fnr = fnr.toString(),
             aktørId = aktørId,
             orgnummer = orgnummer,
             sykeperioder = listOf(Sykmeldingsperiode(fom, tom, 100.prosent)),
@@ -543,7 +544,7 @@ class JsonBuilderTest {
             andreInntektsKilder: List<Søknad.Inntektskilde> = emptyList()
         ) = Søknad(
             meldingsreferanseId = hendelseId,
-            fnr = fnr,
+            fnr = fnr.toString(),
             aktørId = aktørId,
             orgnummer = orgnummer,
             perioder = perioder,
@@ -563,7 +564,7 @@ class JsonBuilderTest {
             meldingsreferanseId = hendelseId,
             refusjon = refusjon,
             orgnummer = orgnummer,
-            fødselsnummer = fnr,
+            fødselsnummer = fnr.toString(),
             aktørId = aktørId,
             førsteFraværsdag = fom,
             beregnetInntekt = 31000.månedlig,
@@ -590,7 +591,7 @@ class JsonBuilderTest {
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeId,
             aktørId = aktørId,
-            fødselsnummer = fnr,
+            fødselsnummer = fnr.toString(),
             orgnummer = orgnummer,
             inntektsvurdering = Inntektsvurdering(inntektsvurdering),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektsvurderingForSykepengegrunnlag),
@@ -605,7 +606,7 @@ class JsonBuilderTest {
         ) = Utbetalingshistorikk(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = aktørId,
-            fødselsnummer = fnr,
+            fødselsnummer = fnr.toString(),
             organisasjonsnummer = orgnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             arbeidskategorikoder = emptyMap(),
@@ -626,13 +627,13 @@ class JsonBuilderTest {
             Ytelser(
                 meldingsreferanseId = hendelseId,
                 aktørId = aktørId,
-                fødselsnummer = fnr,
+                fødselsnummer = fnr.toString(),
                 organisasjonsnummer = orgnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
                 utbetalingshistorikk = Utbetalingshistorikk(
                     meldingsreferanseId = hendelseId,
                     aktørId = aktørId,
-                    fødselsnummer = fnr,
+                    fødselsnummer = fnr.toString(),
                     organisasjonsnummer = orgnummer,
                     vedtaksperiodeId = vedtaksperiodeId,
                     arbeidskategorikoder = emptyMap(),
@@ -686,7 +687,7 @@ class JsonBuilderTest {
             return UtbetalingshistorikkForFeriepenger(
                 meldingsreferanseId = UUID.randomUUID(),
                 aktørId = aktørId,
-                fødselsnummer = fnr,
+                fødselsnummer = fnr.toString(),
                 utbetalinger = utbetalinger,
                 feriepengehistorikk = feriepengehistorikk,
                 opptjeningsår = opptjeningsår,
@@ -700,7 +701,7 @@ class JsonBuilderTest {
         fun Person.utbetalingsgodkjenning(vedtaksperiodeId: String) = Utbetalingsgodkjenning(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = aktørId,
-            fødselsnummer = fnr,
+            fødselsnummer = fnr.toString(),
             organisasjonsnummer = orgnummer,
             utbetalingId = UUID.fromString(this.aktivitetslogg.behov().last { it.type == Behovtype.Godkjenning }.kontekst().getValue("utbetalingId")),
             vedtaksperiodeId = vedtaksperiodeId,
@@ -715,7 +716,7 @@ class JsonBuilderTest {
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeId,
             aktørId = aktørId,
-            fødselsnummer = fnr,
+            fødselsnummer = fnr.toString(),
             orgnummer = orgnummer,
             simuleringOK = true,
             melding = "Hei Aron",
@@ -725,7 +726,7 @@ class JsonBuilderTest {
         fun annullering(fagsystemId: String) = AnnullerUtbetaling(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = aktørId,
-            fødselsnummer = fnr,
+            fødselsnummer = fnr.toString(),
             organisasjonsnummer = orgnummer,
             saksbehandlerIdent = "Z999999",
             saksbehandlerEpost = "tbd@nav.no",
@@ -736,7 +737,7 @@ class JsonBuilderTest {
         fun Person.overføring() = UtbetalingOverført(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = aktørId,
-            fødselsnummer = fnr,
+            fødselsnummer = fnr.toString(),
             orgnummer = orgnummer,
             fagsystemId = utbetalingsliste.getValue(orgnummer).last().arbeidsgiverOppdrag().fagsystemId(),
             utbetalingId = this.aktivitetslogg.behov().last { it.type == Behovtype.Utbetaling }.kontekst().getValue("utbetalingId"),
@@ -747,7 +748,7 @@ class JsonBuilderTest {
         fun Person.utbetalt() = UtbetalingHendelse(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = aktørId,
-            fødselsnummer = fnr,
+            fødselsnummer = fnr.toString(),
             orgnummer = orgnummer,
             fagsystemId = utbetalingsliste.getValue(orgnummer).last().arbeidsgiverOppdrag().fagsystemId(),
             utbetalingId = this.aktivitetslogg.behov().last { it.type == Behovtype.Utbetaling }.kontekst().getValue("utbetalingId"),

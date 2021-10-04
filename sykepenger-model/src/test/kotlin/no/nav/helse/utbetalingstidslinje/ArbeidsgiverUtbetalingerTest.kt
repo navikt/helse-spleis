@@ -1,5 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.*
 import no.nav.helse.somFødselsnummer
@@ -24,8 +25,8 @@ internal class ArbeidsgiverUtbetalingerTest {
     private lateinit var aktivitetslogg: Aktivitetslogg
 
     private companion object {
-        const val UNG_PERSON_FNR_2018 = "12020052345"
-        const val PERSON_67_ÅR_FNR_2018 = "05015112345"
+        val UNG_PERSON_FNR_2018 = "12020052345".somFødselsnummer()
+        val PERSON_67_ÅR_FNR_2018 = "05015112345".somFødselsnummer()
         const val ORGNUMMER = "888888888"
     }
 
@@ -309,7 +310,7 @@ internal class ArbeidsgiverUtbetalingerTest {
     @Test
     fun `når personen fyller 67 og 248 dager er brukt opp`() {
         undersøke(
-            "01125112345",
+            "01125112345".somFødselsnummer(),
             16.AP,
             3.NAV,
             (49 * 2).HELG,
@@ -325,7 +326,7 @@ internal class ArbeidsgiverUtbetalingerTest {
     @Test
     fun `når personen fyller 70 skal det ikke utbetales sykepenger`() {
         undersøke(
-            "01024812345",
+            "01024812345".somFødselsnummer(),
             16.AP,
             3.NAV,
             2.HELG,
@@ -338,7 +339,7 @@ internal class ArbeidsgiverUtbetalingerTest {
     }
 
     private fun undersøke(
-        fnr: String,
+        fnr: Fødselsnummer,
         vararg utbetalingsdager: Utbetalingsdager,
         vilkårsgrunnlagElement: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement? = null
     ) {
@@ -347,7 +348,7 @@ internal class ArbeidsgiverUtbetalingerTest {
     }
 
     private fun undersøke(
-        fnr: String,
+        fnr: Fødselsnummer,
         arbeidsgiverTidslinje: Utbetalingstidslinje,
         historiskTidslinje: Utbetalingstidslinje,
         vilkårsgrunnlagElement: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement? = null
@@ -356,7 +357,7 @@ internal class ArbeidsgiverUtbetalingerTest {
         // seed arbeidsgiver med sykdomshistorikk
         person.håndter(Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
-            fnr = UNG_PERSON_FNR_2018,
+            fnr = UNG_PERSON_FNR_2018.toString(),
             aktørId = "",
             orgnummer = ORGNUMMER,
             sykeperioder = listOf(Sykmeldingsperiode(1.januar, 2.januar, 100.prosent)),
@@ -396,7 +397,7 @@ internal class ArbeidsgiverUtbetalingerTest {
             NormalArbeidstaker,
             mapOf(person.arbeidsgiver(ORGNUMMER) to IUtbetalingstidslinjeBuilder { _, _ -> arbeidsgiverTidslinje }),
             historiskTidslinje,
-            fnr.somFødselsnummer().alder(),
+            fnr.alder(),
             null,
             person.vilkårsgrunnlagHistorikk
         ).also {

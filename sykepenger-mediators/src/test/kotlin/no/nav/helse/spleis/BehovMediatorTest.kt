@@ -8,6 +8,7 @@ import io.mockk.mockk
 import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.somFødselsnummer
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -20,7 +21,7 @@ class BehovMediatorTest {
 
     private companion object {
         private const val aktørId = "aktørId"
-        private const val fødselsnummer = "fnr"
+        private const val fødselsnummer = "01010112345"
 
         private lateinit var behovMediator: BehovMediator
 
@@ -50,7 +51,7 @@ class BehovMediatorTest {
 
     @BeforeEach
     fun setup() {
-        person = Person(aktørId, fødselsnummer)
+        person = Person(aktørId, fødselsnummer.somFødselsnummer())
         aktivitetslogg = Aktivitetslogg()
         behovMediator = BehovMediator(testRapid, mockk(relaxed = true))
         messages.clear()
@@ -180,7 +181,7 @@ class BehovMediatorTest {
 
     private class TestHendelse(
         private val melding: String,
-        internal val logg: Aktivitetslogg
+        val logg: Aktivitetslogg
     ) : ArbeidstakerHendelse(UUID.randomUUID(), logg), Aktivitetskontekst {
 
         override fun aktørId(): String {

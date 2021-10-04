@@ -3,7 +3,7 @@ package no.nav.helse
 import no.nav.helse.utbetalingstidslinje.Alder
 import java.time.LocalDate
 
-internal class Fødselsnummer private constructor(private val value: String) {
+class Fødselsnummer private constructor(private val value: String) {
     private val individnummer = value.substring(6, 9).toInt()
     val fødselsdato = LocalDate.of(
         value.substring(4, 6).toInt().toYear(individnummer),
@@ -16,7 +16,7 @@ internal class Fødselsnummer private constructor(private val value: String) {
     override fun equals(other: Any?) = other is Fødselsnummer && this.value == other.value
 
     fun somLong() = value.toLong()
-    fun alder() = Alder(this)
+    internal fun alder() = Alder(this)
 
     private fun Int.toDay() = if (this > 40) this - 40 else this
     private fun Int.toYear(individnummer: Int): Int {
@@ -37,4 +37,4 @@ internal class Fødselsnummer private constructor(private val value: String) {
     }
 }
 
-internal fun String.somFødselsnummer() = Fødselsnummer.tilFødselsnummer(this)
+fun String.somFødselsnummer() = Fødselsnummer.tilFødselsnummer(this)

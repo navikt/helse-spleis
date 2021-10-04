@@ -6,6 +6,7 @@ import no.nav.helse.person.Periodetype.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.testhelpers.*
@@ -27,7 +28,7 @@ import java.util.*
 internal class HistoriePeriodetypeTest {
     private companion object {
         private const val aktørId = "aktørId"
-        private const val UNG_PERSON_FNR_2018 = "12020052345"
+        private val UNG_PERSON_FNR_2018 = "12020052345".somFødselsnummer()
         private const val AG1 = "AG1"
     }
     private lateinit var person: Person
@@ -39,7 +40,7 @@ internal class HistoriePeriodetypeTest {
         arbeidsgiver = Arbeidsgiver(person, AG1)
         person.håndter(Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
-            fnr = UNG_PERSON_FNR_2018,
+            fnr = UNG_PERSON_FNR_2018.toString(),
             aktørId = aktørId,
             orgnummer = AG1,
             sykeperioder = listOf(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent)),
@@ -156,7 +157,7 @@ internal class HistoriePeriodetypeTest {
         person.håndter(Utbetalingshistorikk(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = aktørId,
-            fødselsnummer = UNG_PERSON_FNR_2018,
+            fødselsnummer = UNG_PERSON_FNR_2018.toString(),
             organisasjonsnummer = AG1,
             vedtaksperiodeId = UUID.randomUUID().toString(),
             arbeidskategorikoder = emptyMap(),
@@ -187,7 +188,7 @@ internal class HistoriePeriodetypeTest {
         arbeidsgiver.oppdaterSykdom(object : SykdomstidslinjeHendelse(UUID.randomUUID(), LocalDateTime.now()) {
             override fun organisasjonsnummer() = AG1
             override fun aktørId() = aktørId
-            override fun fødselsnummer() = UNG_PERSON_FNR_2018
+            override fun fødselsnummer() = UNG_PERSON_FNR_2018.toString()
             override fun sykdomstidslinje() = Utbetalingstidslinje.konverter(utbetalingstidslinje)
             override fun valider(periode: Periode): IAktivitetslogg { return this }
             override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) {}
@@ -222,12 +223,12 @@ internal class HistoriePeriodetypeTest {
         )
         MaksimumUtbetaling(listOf(utbetalingstidslinje), Aktivitetslogg(), 1.januar).betal()
         arbeidsgiver.lagreUtbetalingstidslinjeberegning(arbeidsgiver.organisasjonsnummer(), utbetalingstidslinje)
-        val utbetaling = arbeidsgiver.lagUtbetaling(Aktivitetslogg(), UNG_PERSON_FNR_2018, LocalDate.MAX, 0, 0, utbetalingstidslinje.periode(), null)
+        val utbetaling = arbeidsgiver.lagUtbetaling(Aktivitetslogg(), UNG_PERSON_FNR_2018.toString(), LocalDate.MAX, 0, 0, utbetalingstidslinje.periode(), null)
         utbetaling.håndter(
             Utbetalingsgodkjenning(
                 meldingsreferanseId = UUID.randomUUID(),
                 aktørId = aktørId,
-                fødselsnummer = UNG_PERSON_FNR_2018,
+                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
                 organisasjonsnummer = arbeidsgiver.organisasjonsnummer(),
                 utbetalingId = utbetaling.id,
                 vedtaksperiodeId = UUID.randomUUID().toString(),
@@ -266,7 +267,7 @@ internal class HistoriePeriodetypeTest {
         arbeidsgiver.oppdaterSykdom(object : SykdomstidslinjeHendelse(UUID.randomUUID(), LocalDateTime.now()) {
             override fun organisasjonsnummer() = AG1
             override fun aktørId() = aktørId
-            override fun fødselsnummer() = UNG_PERSON_FNR_2018
+            override fun fødselsnummer() = UNG_PERSON_FNR_2018.toString()
             override fun sykdomstidslinje() = sykdomstidslinje
             override fun valider(periode: Periode): IAktivitetslogg { return this }
             override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) {}

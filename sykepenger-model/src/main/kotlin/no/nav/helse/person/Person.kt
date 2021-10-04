@@ -1,5 +1,6 @@
 package no.nav.helse.person
 
+import no.nav.helse.Fødselsnummer
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.Arbeidsgiver.Companion.antallMedVedtaksperioder
@@ -38,7 +39,7 @@ import kotlin.math.roundToInt
 
 class Person private constructor(
     private val aktørId: String,
-    private val fødselsnummer: String,
+    private val fødselsnummer: Fødselsnummer,
     private val arbeidsgivere: MutableList<Arbeidsgiver>,
     internal val aktivitetslogg: Aktivitetslogg,
     private val opprettet: LocalDateTime,
@@ -52,7 +53,7 @@ class Person private constructor(
 
     constructor(
         aktørId: String,
-        fødselsnummer: String
+        fødselsnummer: Fødselsnummer
     ) : this(aktørId, fødselsnummer, mutableListOf(), Aktivitetslogg(), LocalDateTime.now(), Infotrygdhistorikk(), VilkårsgrunnlagHistorikk(), null)
 
     private val observers = mutableListOf<PersonObserver>()
@@ -96,7 +97,7 @@ class Person private constructor(
         }
 
         val feriepengeberegner = Feriepengeberegner(
-            alder = fødselsnummer.somFødselsnummer().alder(),
+            alder = fødselsnummer.alder(),
             opptjeningsår = utbetalingshistorikk.opptjeningsår,
             utbetalingshistorikkForFeriepenger = utbetalingshistorikk,
             person = this
@@ -148,7 +149,7 @@ class Person private constructor(
                 )
             },
             infotrygdtidslinje = infotrygdhistorikk.utbetalingstidslinje(),
-            alder = fødselsnummer.somFødselsnummer().alder(),
+            alder = fødselsnummer.alder(),
             dødsdato = dødsdato,
             vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk
         )
@@ -288,7 +289,7 @@ class Person private constructor(
 
     fun inntektsmeldingReplay(vedtaksperiodeId: UUID) {
         observers.forEach {
-            it.inntektsmeldingReplay(fødselsnummer, vedtaksperiodeId)
+            it.inntektsmeldingReplay(fødselsnummer.toString(), vedtaksperiodeId)
         }
     }
 
@@ -363,7 +364,7 @@ class Person private constructor(
         infotrygdhistorikk.harBetalt(orgnummer, skjæringstidspunkt)
 
     internal fun accept(visitor: PersonVisitor) {
-        visitor.preVisitPerson(this, opprettet, aktørId, fødselsnummer, dødsdato)
+        visitor.preVisitPerson(this, opprettet, aktørId, fødselsnummer.toString(), dødsdato)
         visitor.visitPersonAktivitetslogg(aktivitetslogg)
         aktivitetslogg.accept(visitor)
         visitor.preVisitArbeidsgivere()
@@ -371,11 +372,11 @@ class Person private constructor(
         visitor.postVisitArbeidsgivere()
         infotrygdhistorikk.accept(visitor)
         vilkårsgrunnlagHistorikk.accept(visitor)
-        visitor.postVisitPerson(this, opprettet, aktørId, fødselsnummer, dødsdato)
+        visitor.postVisitPerson(this, opprettet, aktørId, fødselsnummer.toString(), dødsdato)
     }
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
-        return SpesifikkKontekst("Person", mapOf("fødselsnummer" to fødselsnummer, "aktørId" to aktørId))
+        return SpesifikkKontekst("Person", mapOf("fødselsnummer" to fødselsnummer.toString(), "aktørId" to aktørId))
     }
 
     private fun registrer(hendelse: PersonHendelse, melding: String) {
@@ -495,7 +496,7 @@ class Person private constructor(
 
     private fun arbeidsgivereMedSykdom() = arbeidsgivere.filter(Arbeidsgiver::harSykdom)
 
-    internal fun minimumInntekt(skjæringstidspunkt: LocalDate): Inntekt = fødselsnummer.somFødselsnummer().alder().minimumInntekt(skjæringstidspunkt)
+    internal fun minimumInntekt(skjæringstidspunkt: LocalDate): Inntekt = fødselsnummer.alder().minimumInntekt(skjæringstidspunkt)
 
     internal fun kunOvergangFraInfotrygd(vedtaksperiode: Vedtaksperiode) =
         Arbeidsgiver.kunOvergangFraInfotrygd(arbeidsgivere, vedtaksperiode)
@@ -509,7 +510,7 @@ class Person private constructor(
     }
 
     internal fun oppdaterHarMinimumInntekt(skjæringstidspunkt: LocalDate, grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata) {
-        val harMinimumInntekt = grunnlagForSykepengegrunnlagGammel(skjæringstidspunkt)?.let { it > fødselsnummer.somFødselsnummer().alder().minimumInntekt(skjæringstidspunkt) } ?: false
+        val harMinimumInntekt = grunnlagForSykepengegrunnlagGammel(skjæringstidspunkt)?.let { it > fødselsnummer.alder().minimumInntekt(skjæringstidspunkt) } ?: false
         val grunnlagsdataMedHarMinimumInntekt = grunnlagsdata.grunnlagsdataMedMinimumInntektsvurdering(harMinimumInntekt)
         vilkårsgrunnlagHistorikk.lagre(skjæringstidspunkt, grunnlagsdataMedHarMinimumInntekt)
     }
@@ -643,7 +644,7 @@ class Person private constructor(
         when (val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)) {
             is VilkårsgrunnlagHistorikk.Grunnlagsdata -> {
                 val harMinimumInntekt =
-                    validerMinimumInntekt(hendelse, fødselsnummer, hendelse.skjæringstidspunkt, grunnlagForSykepengegrunnlag)
+                    validerMinimumInntekt(hendelse, fødselsnummer.toString(), hendelse.skjæringstidspunkt, grunnlagForSykepengegrunnlag)
                 vilkårsgrunnlagHistorikk.lagre(
                     skjæringstidspunkt, grunnlag.kopierGrunnlagsdataMed(
                         sykepengegrunnlag = grunnlagForSykepengegrunnlag,

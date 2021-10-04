@@ -2,6 +2,7 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.*
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.spleis.e2e.TestArbeidsgiverInspektør
 import no.nav.helse.spleis.e2e.TestObservatør
 import no.nav.helse.testhelpers.*
@@ -30,7 +31,7 @@ internal class VilkårsgrunnlagTest {
 
     @BeforeEach
     fun setup() {
-        person = Person(aktørId, UNG_PERSON_FNR_2018)
+        person = Person(aktørId, UNG_PERSON_FNR_2018.somFødselsnummer())
         person.addObserver(observatør)
         person.håndter(sykmelding())
         person.håndter(søknad())

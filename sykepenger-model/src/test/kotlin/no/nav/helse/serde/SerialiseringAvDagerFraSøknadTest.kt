@@ -13,6 +13,7 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Person
 import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.testhelpers.april
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -81,7 +82,7 @@ internal class SerialiseringAvDagerFraSøknadTest {
     internal fun setup() {
         aktivitetslogg = Aktivitetslogg()
 
-        person = Person(aktørId, fnr).apply {
+        person = Person(aktørId, fnr.somFødselsnummer()).apply {
             håndter(sykmelding)
             håndter(søknad)
         }

@@ -1,5 +1,6 @@
 package no.nav.helse.person
 
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.spleis.e2e.TestArbeidsgiverInspektør
 import no.nav.helse.spleis.e2e.TestObservatør
 import org.junit.jupiter.api.BeforeEach
@@ -22,7 +23,7 @@ internal abstract class AbstractPersonTest {
 
     @BeforeEach
     internal fun createTestPerson() {
-        person = Person(AKTØRID, UNG_PERSON_FNR_2018)
+        person = Person(AKTØRID, UNG_PERSON_FNR_2018.somFødselsnummer())
         observatør = TestObservatør().also { person.addObserver(it) }
     }
 

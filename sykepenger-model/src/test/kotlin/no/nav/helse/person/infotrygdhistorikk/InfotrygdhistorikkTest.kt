@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.person.*
 import no.nav.helse.serde.PersonData
 import no.nav.helse.serde.PersonData.InfotrygdhistorikkElementData.Companion.tilModellObjekt
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
@@ -94,7 +95,7 @@ internal class InfotrygdhistorikkTest {
             oppdatert = tidsstempel,
             inntekter = emptyList()
         ))
-        historikk.addInntekter(Person("", ""), aktivitetslogg)
+        historikk.addInntekter(Person("", "01010112345".somFødselsnummer()), aktivitetslogg)
         historikk.tøm()
         assertTrue(historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato))
         assertTrue(aktivitetslogg.behov().isNotEmpty()) { aktivitetslogg.toString() }
@@ -108,7 +109,7 @@ internal class InfotrygdhistorikkTest {
             oppdatert = tidsstempel,
             inntekter = listOf(Inntektsopplysning("orgnr", 1.januar, 1000.daglig, true))
         ))
-        historikk.addInntekter(Person("", ""), aktivitetslogg)
+        historikk.addInntekter(Person("", "10101012345".somFødselsnummer()), aktivitetslogg)
         historikk.tøm()
         assertTrue(historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato))
         assertTrue(aktivitetslogg.behov().isNotEmpty()) { aktivitetslogg.toString() }
@@ -385,7 +386,7 @@ internal class InfotrygdhistorikkTest {
     }
 
     @Test
-    fun `skjæringstidspunkt`() {
+    fun skjæringstidspunkt() {
         historikk.oppdaterHistorikk(historikkelement(listOf(
             ArbeidsgiverUtbetalingsperiode("ag1", 5.januar,  10.januar, 100.prosent, 25000.månedlig),
             Friperiode(11.januar,  12.januar),
@@ -398,7 +399,7 @@ internal class InfotrygdhistorikkTest {
     }
 
     @Test
-    fun `skjæringstidspunkter`() {
+    fun skjæringstidspunkter() {
         historikk.oppdaterHistorikk(historikkelement(listOf(
             ArbeidsgiverUtbetalingsperiode("ag1", 5.januar,  10.januar, 100.prosent, 25000.månedlig),
             Friperiode(11.januar,  12.januar),

@@ -14,6 +14,7 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.person.Person
 import no.nav.helse.serde.serialize
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.spleis.config.AzureAdAppConfig
 import no.nav.helse.spleis.config.DataSourceConfiguration
 import no.nav.helse.spleis.config.KtorConfig
@@ -119,7 +120,7 @@ internal class RestApiTest {
         flyway.clean()
         flyway.migrate()
 
-        dataSource.lagrePerson(AKTØRID, UNG_PERSON_FNR_2018, Person(AKTØRID, UNG_PERSON_FNR_2018))
+        dataSource.lagrePerson(AKTØRID, UNG_PERSON_FNR_2018, Person(AKTØRID, UNG_PERSON_FNR_2018.somFødselsnummer()))
         dataSource.lagreHendelse(MELDINGSREFERANSE)
 
         teller.set(0)

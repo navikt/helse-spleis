@@ -5,6 +5,7 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonHendelse
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.db.LagrePersonDao
 import no.nav.helse.spleis.db.PersonRepository
@@ -194,7 +195,7 @@ internal class HendelseMediator(
             ?.deserialize { hendelseRepository.hentAlleHendelser(hendelse.fødselsnummer()) } ?:
             Person(
                 aktørId = hendelse.aktørId(),
-                fødselsnummer = hendelse.fødselsnummer()
+                fødselsnummer = hendelse.fødselsnummer().somFødselsnummer()
             )
     }
 

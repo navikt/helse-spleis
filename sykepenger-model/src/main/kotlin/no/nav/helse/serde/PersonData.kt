@@ -47,11 +47,12 @@ internal data class PersonData(
     private val arbeidsgivereliste = mutableListOf<Arbeidsgiver>()
     private val modelAktivitetslogg get() = aktivitetslogg?.konverterTilAktivitetslogg() ?: Aktivitetslogg()
 
+    //FIXME: Å bruke reflection for å finne konstruktør ødelegger hele greia med privat konstruktør.
     private val person = Person::class.primaryConstructor!!
         .apply { isAccessible = true }
         .call(
             aktørId,
-            fødselsnummer,
+            fødselsnummer.somFødselsnummer(),
             arbeidsgivereliste,
             modelAktivitetslogg,
             opprettet,

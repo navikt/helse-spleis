@@ -3,6 +3,7 @@ package no.nav.helse.person.infotrygdhistorikk
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.*
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
@@ -751,7 +752,7 @@ internal class InfotrygdhistorikkElementTest {
     @Test
     fun `element uten inntekter låses ikke`() {
         val element = historikkelement(inntekter = emptyList())
-        element.addInntekter(Person("", ""), aktivitetslogg)
+        element.addInntekter(Person("", "01010112345".somFødselsnummer()), aktivitetslogg)
         assertTrue(element.kanSlettes())
     }
 
@@ -762,7 +763,7 @@ internal class InfotrygdhistorikkElementTest {
                 Inntektsopplysning(ORGNUMMER, 1.januar, 1234.månedlig, true)
             )
         )
-        element.addInntekter(Person("", ""), aktivitetslogg)
+        element.addInntekter(Person("", "01010112345".somFødselsnummer()), aktivitetslogg)
         assertFalse(element.kanSlettes())
     }
 
@@ -816,7 +817,7 @@ internal class InfotrygdhistorikkElementTest {
         }
 
         override fun visit(
-            dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag,
+            dag: ArbeidsgiverperiodeDag,
             dato: LocalDate,
             økonomi: Økonomi
         ) {
@@ -833,7 +834,7 @@ internal class InfotrygdhistorikkElementTest {
         }
 
         override fun visit(
-            dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag,
+            dag: NavHelgDag,
             dato: LocalDate,
             økonomi: Økonomi
         ) {
@@ -841,7 +842,7 @@ internal class InfotrygdhistorikkElementTest {
         }
 
         override fun visit(
-            dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag,
+            dag: Arbeidsdag,
             dato: LocalDate,
             økonomi: Økonomi
         ) {
@@ -857,7 +858,7 @@ internal class InfotrygdhistorikkElementTest {
         }
 
         override fun visit(
-            dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag,
+            dag: AvvistDag,
             dato: LocalDate,
             økonomi: Økonomi
         ) {
@@ -865,7 +866,7 @@ internal class InfotrygdhistorikkElementTest {
         }
 
         override fun visit(
-            dag: Utbetalingstidslinje.Utbetalingsdag.ForeldetDag,
+            dag: ForeldetDag,
             dato: LocalDate,
             økonomi: Økonomi
         ) {
