@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.UtbetalingsdagVisitor
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.økonomi.Økonomi
@@ -232,7 +233,7 @@ internal class MaksimumSykepengedagerfilterTest {
     }
 
     private fun maksimumSykepengedagerfilter() = MaksimumSykepengedagerfilter(
-        Alder(UNG_PERSON_FNR_2018),
+        UNG_PERSON_FNR_2018.somFødselsnummer().alder(),
         NormalArbeidstaker,
         Periode(1.januar, 10.januar),
         Aktivitetslogg()
@@ -280,7 +281,7 @@ internal class MaksimumSykepengedagerfilterTest {
 
     private fun Utbetalingstidslinje.utbetalingsavgrenser(fnr: String, periode: Periode = Periode(1.januar, 31.desember), personTidslinje: Utbetalingstidslinje = Utbetalingstidslinje()): List<LocalDate> {
         MaksimumSykepengedagerfilter(
-            Alder(fnr),
+            fnr.somFødselsnummer().alder(),
             NormalArbeidstaker,
             periode,
             aktivitetslogg

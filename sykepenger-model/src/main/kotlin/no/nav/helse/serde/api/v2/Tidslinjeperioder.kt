@@ -17,6 +17,7 @@ import no.nav.helse.serde.api.v2.Tidslinjebereginger.ITidslinjeberegning
 import no.nav.helse.serde.api.v2.buildere.BeregningId
 import no.nav.helse.serde.api.v2.buildere.IVilkårsgrunnlagHistorikk
 import no.nav.helse.serde.api.v2.buildere.VedtaksperiodeVarslerBuilder
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.utbetalingstidslinje.Alder
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -192,7 +193,7 @@ internal class Tidslinjeperioder(
             utbetaling.gjenståendeSykedager,
             utbetaling.maksdato > sisteSykepengedag
         )
-        val alder = Alder(fødselsnummer).let {
+        val alder = fødselsnummer.somFødselsnummer().alder().let {
             BeregnetPeriode.Alder(it.alderPåDato(sisteSykepengedag), it.datoForØvreAldersgrense > sisteSykepengedag)
         }
         val søknadsfrist = hendelser.finn<SøknadNavDTO>()?.let {

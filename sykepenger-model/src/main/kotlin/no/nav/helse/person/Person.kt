@@ -20,6 +20,7 @@ import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.grunnlagForS
 import no.nav.helse.person.Vedtaksperiode.Companion.ALLE
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Alder
@@ -95,7 +96,7 @@ class Person private constructor(
         }
 
         val feriepengeberegner = Feriepengeberegner(
-            alder = Alder(fødselsnummer),
+            alder = fødselsnummer.somFødselsnummer().alder(),
             opptjeningsår = utbetalingshistorikk.opptjeningsår,
             utbetalingshistorikkForFeriepenger = utbetalingshistorikk,
             person = this
@@ -147,7 +148,7 @@ class Person private constructor(
                 )
             },
             infotrygdtidslinje = infotrygdhistorikk.utbetalingstidslinje(),
-            alder = Alder(fødselsnummer),
+            alder = fødselsnummer.somFødselsnummer().alder(),
             dødsdato = dødsdato,
             vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk
         )
@@ -494,7 +495,7 @@ class Person private constructor(
 
     private fun arbeidsgivereMedSykdom() = arbeidsgivere.filter(Arbeidsgiver::harSykdom)
 
-    internal fun minimumInntekt(skjæringstidspunkt: LocalDate): Inntekt = Alder(fødselsnummer).minimumInntekt(skjæringstidspunkt)
+    internal fun minimumInntekt(skjæringstidspunkt: LocalDate): Inntekt = fødselsnummer.somFødselsnummer().alder().minimumInntekt(skjæringstidspunkt)
 
     internal fun kunOvergangFraInfotrygd(vedtaksperiode: Vedtaksperiode) =
         Arbeidsgiver.kunOvergangFraInfotrygd(arbeidsgivere, vedtaksperiode)
@@ -508,7 +509,7 @@ class Person private constructor(
     }
 
     internal fun oppdaterHarMinimumInntekt(skjæringstidspunkt: LocalDate, grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata) {
-        val harMinimumInntekt = grunnlagForSykepengegrunnlagGammel(skjæringstidspunkt)?.let { it > Alder(fødselsnummer).minimumInntekt(skjæringstidspunkt) } ?: false
+        val harMinimumInntekt = grunnlagForSykepengegrunnlagGammel(skjæringstidspunkt)?.let { it > fødselsnummer.somFødselsnummer().alder().minimumInntekt(skjæringstidspunkt) } ?: false
         val grunnlagsdataMedHarMinimumInntekt = grunnlagsdata.grunnlagsdataMedMinimumInntektsvurdering(harMinimumInntekt)
         vilkårsgrunnlagHistorikk.lagre(skjæringstidspunkt, grunnlagsdataMedHarMinimumInntekt)
     }

@@ -2,6 +2,7 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.ArbeidsgiverVisitor
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.januar
@@ -14,7 +15,7 @@ import java.util.*
 
 internal class FeriepengeArbeidsgiverTest() : AbstractEndToEndTest() {
     private companion object {
-        private val alder = Alder(UNG_PERSON_FNR_2018)
+        private val alder = UNG_PERSON_FNR_2018.somFødselsnummer().alder()
     }
 
     private val feriepengeinspektør: Feriepengeinspektør get() = Feriepengeinspektør().apply { inspektør.arbeidsgiver.accept(this) }

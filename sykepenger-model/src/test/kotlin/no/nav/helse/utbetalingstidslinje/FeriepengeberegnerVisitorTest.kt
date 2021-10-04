@@ -3,6 +3,7 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.testhelpers.*
@@ -17,7 +18,7 @@ import java.util.*
 
 internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
     private companion object {
-        private val alder = Alder(UNG_PERSON_FNR_2018)
+        private val alder = UNG_PERSON_FNR_2018.somFødselsnummer().alder()
         private const val a1 = "456789123"
         private const val a2 = "789456213"
     }

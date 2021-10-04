@@ -7,6 +7,7 @@ import no.nav.helse.person.*
 import no.nav.helse.serde.api.*
 import no.nav.helse.serde.api.v2.HendelseDTO
 import no.nav.helse.serde.api.v2.SøknadNavDTO
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -192,7 +193,7 @@ internal class VedtaksperiodeBuilder(
 
     private fun buildVilkår(hendelser: List<HendelseDTO>): VilkårDTO {
         val sisteSykepengedagEllerSisteDagIPerioden = sykepengeperiode?.endInclusive ?: beregnetSykdomstidslinje.last().dagen
-        val personalder = Alder(fødselsnummer)
+        val personalder = fødselsnummer.somFødselsnummer().alder()
         val sykepengedager = SykepengedagerDTO(
             forbrukteSykedager = forbrukteSykedager,
             skjæringstidspunkt = skjæringstidspunkt,

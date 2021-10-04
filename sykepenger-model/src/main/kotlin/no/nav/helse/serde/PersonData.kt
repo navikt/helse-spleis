@@ -15,6 +15,7 @@ import no.nav.helse.serde.PersonData.VilkårsgrunnlagInnslagData.Companion.tilMo
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
 import no.nav.helse.serde.reflection.Inntektsopplysningskilde
 import no.nav.helse.serde.reflection.Utbetalingstatus
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -706,7 +707,7 @@ internal data class PersonData(
             }
 
             private fun createFeriepengeberegner(fødselsnummer: String): Feriepengeberegner {
-                val alder = Alder(fødselsnummer)
+                val alder = fødselsnummer.somFødselsnummer().alder()
                 return Feriepengeberegner::class.primaryConstructor!!
                     .apply { isAccessible = true }
                     .call(

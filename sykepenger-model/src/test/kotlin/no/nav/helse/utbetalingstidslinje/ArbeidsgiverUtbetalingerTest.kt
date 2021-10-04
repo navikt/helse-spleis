@@ -2,6 +2,7 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.*
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.økonomi.Inntekt
@@ -395,7 +396,7 @@ internal class ArbeidsgiverUtbetalingerTest {
             NormalArbeidstaker,
             mapOf(person.arbeidsgiver(ORGNUMMER) to IUtbetalingstidslinjeBuilder { _, _ -> arbeidsgiverTidslinje }),
             historiskTidslinje,
-            Alder(fnr),
+            fnr.somFødselsnummer().alder(),
             null,
             person.vilkårsgrunnlagHistorikk
         ).also {

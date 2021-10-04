@@ -1,10 +1,32 @@
 package no.nav.helse
 
-class Fødselsnummer private constructor(private val value: String) {
+import no.nav.helse.utbetalingstidslinje.Alder
+import java.time.LocalDate
+
+internal class Fødselsnummer private constructor(private val value: String) {
+    private val individnummer = value.substring(6, 9).toInt()
+    val fødselsdato = LocalDate.of(
+        value.substring(4, 6).toInt().toYear(individnummer),
+        value.substring(2, 4).toInt(),
+        value.substring(0, 2).toInt().toDay()
+    )
+
     override fun toString() = value
     override fun hashCode(): Int = value.hashCode()
     override fun equals(other: Any?) = other is Fødselsnummer && this.value == other.value
+
     fun somLong() = value.toLong()
+    fun alder() = Alder(this)
+
+    private fun Int.toDay() = if (this > 40) this - 40 else this
+    private fun Int.toYear(individnummer: Int): Int {
+        return this + when {
+            this in (54..99) && individnummer in (500..749) -> 1800
+            this in (0..99) && individnummer in (0..499) -> 1900
+            this in (40..99) && individnummer in (900..999) -> 1900
+            else -> 2000
+        }
+    }
 
     companion object {
         fun tilFødselsnummer(fnr: String): Fødselsnummer {
@@ -15,4 +37,4 @@ class Fødselsnummer private constructor(private val value: String) {
     }
 }
 
-fun String.somFødselsnummer() = Fødselsnummer.tilFødselsnummer(this)
+internal fun String.somFødselsnummer() = Fødselsnummer.tilFødselsnummer(this)

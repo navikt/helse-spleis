@@ -2,6 +2,7 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.testhelpers.april
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
@@ -13,9 +14,9 @@ import java.time.Year
 internal class FeriepengeberegnerTest {
     private companion object {
         private const val ORGNUMMER = "123456789"
-        private val UNG: Alder = Alder("01026000014")
+        private val UNG: Alder = "01026000014".somFødselsnummer().alder()
         private const val UNG_SATS = 0.102
-        private val GAMMEL: Alder = Alder("01025900065")
+        private val GAMMEL: Alder = "01025900065".somFødselsnummer().alder()
         private const val GAMMEL_SATS = 0.125
     }
 

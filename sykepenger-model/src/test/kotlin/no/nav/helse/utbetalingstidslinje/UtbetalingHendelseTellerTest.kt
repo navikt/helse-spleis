@@ -1,6 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
@@ -10,9 +11,9 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class UtbetalingHendelseTellerTest {
-    internal val UNG_PERSON_FNR_2018 = Alder("15010052345")
-    internal val PERSON_67_ÅR_FNR_2018 = Alder("15015112345")
-    internal val PERSON_70_ÅR_FNR_2018 = Alder("15014812345")
+    internal val UNG_PERSON_FNR_2018 = "15010052345".somFødselsnummer().alder()
+    internal val PERSON_67_ÅR_FNR_2018 = "15015112345".somFødselsnummer().alder()
+    internal val PERSON_70_ÅR_FNR_2018 = "15014812345".somFødselsnummer().alder()
     private lateinit var grense: UtbetalingTeller
 
     @Test
@@ -74,11 +75,11 @@ internal class UtbetalingHendelseTellerTest {
         assertEquals(21.mai, UNG_PERSON_FNR_2018, 243, 14.mai)
         assertEquals(22.mai, UNG_PERSON_FNR_2018, 242, 14.mai)
         assertEquals(28.desember, UNG_PERSON_FNR_2018, 1, 17.januar)
-        assertEquals(9.februar, Alder("12024812345"), 1, 17.januar)
-        assertEquals(22.januar, Alder("12024812345"), 57, 17.januar)
-        assertEquals(7.mai, Alder("12025112345"), 65, 17.januar)
-        assertEquals(12.februar, Alder("12025112345"), 247, 9.februar)
-        assertEquals(13.februar, Alder("12025112345"), 246, 9.februar)
+        assertEquals(9.februar, "12024812345".somFødselsnummer().alder(), 1, 17.januar)
+        assertEquals(22.januar, "12024812345".somFødselsnummer().alder(), 57, 17.januar)
+        assertEquals(7.mai, "12025112345".somFødselsnummer().alder(), 65, 17.januar)
+        assertEquals(12.februar, "12025112345".somFødselsnummer().alder(), 247, 9.februar)
+        assertEquals(13.februar, "12025112345".somFødselsnummer().alder(), 246, 9.februar)
 
     }
 
