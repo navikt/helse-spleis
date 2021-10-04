@@ -1214,8 +1214,6 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         val serialisertVedtaksperiode = serializePersonForSpeil(person).arbeidsgivere.single().vedtaksperioder.last() as VedtaksperiodeDTO
         assertTrue(serialisertVedtaksperiode.aktivitetslogg.any { it.melding == "Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag" })
     }
-    // Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag
-    // Inntekt under krav til minste sykepengegrunnlag. Vurder å sende vedtak fra Infotrygd
 
     @Test
     fun `Vedtaksperioder fra flere arbeidsgivere får samme vilkårsgrunnlag-warnings`() {
