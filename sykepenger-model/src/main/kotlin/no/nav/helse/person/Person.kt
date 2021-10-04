@@ -289,7 +289,7 @@ class Person private constructor(
 
     fun inntektsmeldingReplay(vedtaksperiodeId: UUID) {
         observers.forEach {
-            it.inntektsmeldingReplay(fødselsnummer.toString(), vedtaksperiodeId)
+            it.inntektsmeldingReplay(fødselsnummer, vedtaksperiodeId)
         }
     }
 

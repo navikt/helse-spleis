@@ -1,5 +1,6 @@
 package no.nav.helse.person
 
+import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Påminnelse
@@ -172,7 +173,7 @@ interface PersonObserver {
         val utbetalingId: UUID?
     )
 
-    fun inntektsmeldingReplay(fødselsnummer: String, vedtaksperiodeId: UUID) {}
+    fun inntektsmeldingReplay(fødselsnummer: Fødselsnummer, vedtaksperiodeId: UUID) {}
     fun vedtaksperiodePåminnet(hendelseskontekst: Hendelseskontekst, påminnelse: Påminnelse) {}
     fun vedtaksperiodeIkkePåminnet(hendelseskontekst: Hendelseskontekst, nåværendeTilstand: TilstandType) {}
     fun vedtaksperiodeEndret(hendelseskontekst: Hendelseskontekst, event: VedtaksperiodeEndretEvent) {}

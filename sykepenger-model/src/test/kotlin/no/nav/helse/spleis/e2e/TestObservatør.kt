@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.person.*
 import no.nav.helse.person.PersonObserver.VedtaksperiodeEndretEvent
@@ -88,7 +89,7 @@ internal class TestObservatør : PersonObserver {
         trengerIkkeInntektsmeldingVedtaksperioder.add(hendelseskontekst.vedtaksperiodeId())
     }
 
-    override fun inntektsmeldingReplay(fødselsnummer: String, vedtaksperiodeId: UUID) {
+    override fun inntektsmeldingReplay(fødselsnummer: Fødselsnummer, vedtaksperiodeId: UUID) {
         inntektsmeldingReplayEventer.add(vedtaksperiodeId)
     }
 

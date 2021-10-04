@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.Person
@@ -70,8 +71,8 @@ internal class PersonMediator(
         meldinger.add(Pakke(fødselsnummer, eventName, message))
     }
 
-    override fun inntektsmeldingReplay(fødselsnummer: String, vedtaksperiodeId: UUID) {
-        hendelseRepository.finnInntektsmeldinger(fødselsnummer).forEach { inntektsmelding ->
+    override fun inntektsmeldingReplay(fødselsnummer: Fødselsnummer, vedtaksperiodeId: UUID) {
+        hendelseRepository.finnInntektsmeldinger(fødselsnummer.toString()).forEach { inntektsmelding ->
             createReplayMessage(inntektsmelding, mapOf(
                 "@event_name" to "inntektsmelding_replay",
                 "vedtaksperiodeId" to vedtaksperiodeId
