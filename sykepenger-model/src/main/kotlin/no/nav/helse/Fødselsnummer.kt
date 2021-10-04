@@ -15,7 +15,7 @@ class Fødselsnummer private constructor(private val value: String) {
     override fun hashCode(): Int = value.hashCode()
     override fun equals(other: Any?) = other is Fødselsnummer && this.value == other.value
 
-    fun somLong() = value.toLong()
+    fun toLong() = value.toLong()
     internal fun alder() = Alder(this)
 
     private fun Int.toDay() = if (this > 40) this - 40 else this

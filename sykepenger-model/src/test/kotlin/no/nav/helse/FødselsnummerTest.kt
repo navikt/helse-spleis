@@ -11,7 +11,7 @@ class FødselsnummerTest {
     fun `to instanser av det samme fødselsnummeret er like`() {
         listOf("01010112345", "01030154321", "10101012345", "31122199999").forEach {
             assertEquals(it.somFødselsnummer(), it.somFødselsnummer())
-            assertEquals(it.somFødselsnummer().somLong(), it.somFødselsnummer().somLong())
+            assertEquals(it.somFødselsnummer().toLong(), it.somFødselsnummer().toLong())
             assertEquals(it.somFødselsnummer().hashCode(), it.somFødselsnummer().hashCode())
         }
     }
@@ -21,7 +21,7 @@ class FødselsnummerTest {
         val a = "01010112345"
         val b = "01010112346"
         assertNotEquals(a.somFødselsnummer(), b.somFødselsnummer())
-        assertNotEquals(a.somFødselsnummer().somLong(), b.somFødselsnummer().somLong())
+        assertNotEquals(a.somFødselsnummer().toLong(), b.somFødselsnummer().toLong())
         assertNotEquals(a.somFødselsnummer().hashCode(), b.somFødselsnummer().hashCode())
     }
 

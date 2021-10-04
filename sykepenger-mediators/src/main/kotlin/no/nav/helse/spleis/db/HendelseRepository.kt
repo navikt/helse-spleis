@@ -7,6 +7,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import no.nav.helse.Fødselsnummer
 import no.nav.helse.spleis.PostgresProbe
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.*
 import no.nav.helse.spleis.meldinger.model.*
@@ -29,7 +30,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         melding.lagreMelding(this)
     }
 
-    internal fun finnInntektsmeldinger(fnr: String): List<JsonNode> =
+    internal fun finnInntektsmeldinger(fnr: Fødselsnummer): List<JsonNode> =
         using(sessionOf(dataSource)) { session ->
             session.run(
                 queryOf(

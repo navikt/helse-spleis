@@ -72,7 +72,7 @@ internal class PersonMediator(
     }
 
     override fun inntektsmeldingReplay(fødselsnummer: Fødselsnummer, vedtaksperiodeId: UUID) {
-        hendelseRepository.finnInntektsmeldinger(fødselsnummer.toString()).forEach { inntektsmelding ->
+        hendelseRepository.finnInntektsmeldinger(fødselsnummer).forEach { inntektsmelding ->
             createReplayMessage(inntektsmelding, mapOf(
                 "@event_name" to "inntektsmelding_replay",
                 "vedtaksperiodeId" to vedtaksperiodeId
