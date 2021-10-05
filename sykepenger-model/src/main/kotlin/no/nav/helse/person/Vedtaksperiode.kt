@@ -1861,7 +1861,10 @@ internal class Vedtaksperiode private constructor(
             val periodetype = vedtaksperiode.periodetype()
             vedtaksperiode.skjæringstidspunktFraInfotrygd = person.skjæringstidspunkt(vedtaksperiode.periode)
             validation(ytelser) {
-                onError { vedtaksperiode.tilstand(ytelser, TilInfotrygd) }
+                onError {
+                    error("Kaster vedtaksperiode i tilstand 'AvventerHistorikk' ut til Infotrygd pga valideringsfeil")
+                    vedtaksperiode.tilstand(ytelser, TilInfotrygd)
+                }
                 valider { infotrygdhistorikk.valider(this, arbeidsgiver, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt) }
                 valider { ytelser.valider(vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt) }
                 validerHvis("Har ikke overgang for alle arbeidsgivere i Infotrygd", periodetype == OVERGANG_FRA_IT) {
