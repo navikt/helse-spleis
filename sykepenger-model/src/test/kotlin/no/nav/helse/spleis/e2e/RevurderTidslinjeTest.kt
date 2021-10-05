@@ -241,10 +241,6 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `to perioder - hele den eldste perioden blir sykedager`() {
-    } //???? Skal hele den først perioden være en søknad med bare ferie..?
-
-    @Test
     fun `kan ikke utvide perioden med sykedager`() {
         nyttVedtak(3.januar, 26.januar)
         håndterOverstyring((25.januar til 14.februar).map { manuellSykedag(it) })
@@ -270,11 +266,6 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
         assertEquals(Utbetaling.GodkjentUtenUtbetaling, inspektør.utbetalingtilstand(1))
     }
-
-    @Test
-    @Disabled
-    fun `forsøk på å flytte arbeidsgiverperioden`() {
-    } // Hvordan gjør man det?
 
     @Test
     fun `ferie i arbeidsgiverperiode`() {
@@ -1231,57 +1222,6 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
         håndterPåminnelse(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         assertEtterspurteYtelser(4, 1.vedtaksperiode)
-    }
-
-    @Test
-    @Disabled
-    fun `BUG Overstyring av utkast til revurdering der en av periodene som revurderes er i REVURDERING_FEILET fører til at vi opphører for mange perioder`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(1.januar til 16.januar))
-        håndterYtelser(1.vedtaksperiode, besvart = LocalDateTime.now().minusYears(1))
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode, besvart = LocalDateTime.now().minusYears(1))
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
-
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(1.februar, 28.februar, 100.prosent))
-        håndterYtelser(2.vedtaksperiode, besvart = LocalDateTime.now().minusYears(1))
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt(2.vedtaksperiode)
-
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
-        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(1.mars, 31.mars, 100.prosent))
-        håndterYtelser(3.vedtaksperiode, besvart = LocalDateTime.now().minusYears(1))
-        håndterSimulering(3.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
-        håndterUtbetalt(3.vedtaksperiode)
-
-        håndterOverstyring((20.januar til 26.januar).map { manuellFeriedag(it) })
-        håndterYtelser(
-            1.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 28.februar, 100.prosent, 1000.daglig),
-            inntektshistorikk = listOf(
-                Inntektsopplysning(
-                    ORGNUMMER,
-                    1.februar, INNTEKT, true
-                )
-            )
-        )
-        håndterYtelser(2.vedtaksperiode)
-        håndterOverstyring((27.januar til 29.januar).map { manuellFeriedag(it) })
-        håndterYtelser(1.vedtaksperiode)
-        håndterYtelser(3.vedtaksperiode)
-        håndterSimulering(3.vedtaksperiode)
-
-        assertNotEquals(
-            -44361,
-            inspektør.utbetalinger.lastOrNull()?.arbeidsgiverOppdrag()?.nettoBeløp(),
-            "Det ser ut som vi trekker tilbake hele januar og februar, her burde vi kun trekke tilbake feriedagene"
-        )
     }
 
     @Test
