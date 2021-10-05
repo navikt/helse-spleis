@@ -1532,7 +1532,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         )
     }
 
-    @Disabled
     @Test
     fun `To tilstøtende perioder, inntektsmelding 2 med arbeidsdager i starten`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 7.januar, 100.prosent))
@@ -1542,8 +1541,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             listOf(Periode(3.januar, 7.januar), Periode(15.januar, 20.januar), Periode(23.januar, 28.januar))
         )
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 7.januar, 100.prosent))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode)
 
         inspektør.also {
             assertNoErrors(it)
@@ -1551,9 +1548,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         }
         assertTilstander(
             1.vedtaksperiode,
-            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING
+            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_ARBEIDSGIVERSØKNAD_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING
         )
         assertTilstander(
             2.vedtaksperiode,
@@ -1827,32 +1822,21 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertEquals(24.juli(2020), inspektør.sisteMaksdato(1.vedtaksperiode))
     }
 
-    @Disabled
     @Test
     fun `Perioder hvor søknaden til vedtaksperiode 1 har dannet gap (friskmeldt) skal regnes som gap til påfølgende vedtaksperiode`() {
-        // Første periode slutter på arbeiddager, og neste periode blir feilaktig bli markert som en forlengelse
-        // Dette skyldes for at vi ikke sjekker for følgende arbeidsdager/ferie i slutten av forrige periode (som gjør at det egentlig skal være gap)
-        håndterSykmelding(Sykmeldingsperiode(9.juni, 30.juni, 100.prosent))
-        håndterSøknad(Sykdom(9.juni, 30.juni, 100.prosent), Arbeid(20.juni, 30.juni))
-        håndterUtbetalingshistorikk(
-            1.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 3.juni, 8.juni, 100.prosent, 15000.daglig)
-        )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(
-            1.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 3.juni, 8.juni, 100.prosent, 15000.daglig)
-        )
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.mai, 31.mai, 100.prosent, 1000.daglig)
+        val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.mai, INNTEKT, true))
+
+        håndterSykmelding(Sykmeldingsperiode(1.juni, 30.juni, 100.prosent))
+        håndterSøknad(Sykdom(1.juni, 30.juni, 100.prosent), Arbeid(20.juni, 30.juni))
+
+        håndterUtbetalingshistorikk(1.vedtaksperiode, historikk, inntektshistorikk = inntektshistorikk)
+        håndterYtelser()
+        håndterSimulering()
+        håndterUtbetalingsgodkjenning()
+        håndterUtbetalt()
 
         håndterSykmelding(Sykmeldingsperiode(1.juli, 31.juli, 100.prosent))
-        håndterSøknad(Sykdom(1.juli, 31.juli, 100.prosent))
-        håndterYtelser(
-            2.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 3.juni, 8.juni, 100.prosent, 15000.daglig)
-        )
 
         assertNoErrors(inspektør)
         assertTilstander(
@@ -1860,8 +1844,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -1872,32 +1854,22 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertTilstander(
             1,
             START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP
+            MOTTATT_SYKMELDING_FERDIG_GAP
         )
     }
 
-    @Disabled("Foreløpig usikkert hvordan vi skal håndere sammenhengende perioder fra IT, og hva vi skal gjøre med perioder som er helt utenfor alle sammenhengende perioder")
     @Test
     fun `Perioder hvor søknaden til vedtaksperiode 1 har dannet gap (friskmeldt) for hele perioden skal regnes som gap til påfølgende vedtaksperiode`() {
-        håndterSykmelding(Sykmeldingsperiode(9.juni, 30.juni, 100.prosent))
-        håndterSøknad(Sykdom(9.juni, 30.juni, 100.prosent), Arbeid(9.juni, 30.juni))
-        håndterYtelser(
-            1.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 3.juni, 8.juni, 100.prosent, 15000.daglig)
-        )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(
-            1.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 3.juni, 8.juni, 100.prosent, 15000.daglig)
-        )
+        val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.mai, 31.mai, 100.prosent, 1000.daglig)
+        val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.mai, INNTEKT, true))
+
+        håndterSykmelding(Sykmeldingsperiode(1.juni, 30.juni, 100.prosent))
+        håndterSøknad(Sykdom(1.juni, 30.juni, 100.prosent), Arbeid(1.juni, 30.juni))
+
+        håndterUtbetalingshistorikk(1.vedtaksperiode, historikk, inntektshistorikk = inntektshistorikk)
+        håndterYtelser()
 
         håndterSykmelding(Sykmeldingsperiode(1.juli, 31.juli, 100.prosent))
-        håndterSøknad(Sykdom(1.juli, 31.juli, 100.prosent))
-        håndterYtelser(
-            2.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 3.juni, 8.juni, 100.prosent, 15000.daglig)
-        )
 
         assertNoErrors(inspektør)
         assertTilstander(
@@ -1906,16 +1878,13 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
             AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
             AVSLUTTET_UTEN_UTBETALING
         )
 
         assertTilstander(
             1,
             START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP
+            MOTTATT_SYKMELDING_FERDIG_GAP
         )
     }
 
