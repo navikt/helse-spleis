@@ -17,7 +17,7 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
 
     internal fun build() = UtbetalingInfo
         .utbetalinger(utbetalingstidslinjeBuilders, utbetalingberegninger)
-        .mapNotNull { sykdomshistorikkElementBuilders.build(it.first, it.second) }
+        .mapNotNull { sykdomshistorikkElementBuilders.build(it.first, it.second, it.third) }
         .reversed()
 
     private data class UtbetalingInfo(
@@ -54,10 +54,12 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
             fun utbetalinger(
                 liste: List<UtbetalingInfo>,
                 utbetalingberegninger: Utbetalingberegninger
-            ): List<Pair<UUID, UtbetalingshistorikkElementDTO.UtbetalingDTO>> {
-                // Vi bruker en random UUID fordi en annullering ikke selv sitter på en beregningsId
+            ): List<Triple<UUID, UUID, UtbetalingshistorikkElementDTO.UtbetalingDTO>> {
+                // Vi bruker en random UUID fordi en annullering ikke selv sitter på en beregningId
+
                 return liste.map {
-                    (utbetalingberegninger.sykdomshistorikkelementId(it.beregningId) ?: UUID.randomUUID()) to it.utbetaling()
+                    val (sykdomshistorikkId, vilkårsgrunnlagHistorikkId) = utbetalingberegninger.historikkIder(it.beregningId)
+                    Triple(sykdomshistorikkId ?: UUID.randomUUID(), vilkårsgrunnlagHistorikkId ?: UUID.randomUUID(), it.utbetaling())
                 }
             }
         }
@@ -67,16 +69,18 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
         private val liste = mutableListOf<BeregningInfo>()
 
         fun add(beregningInfo: BeregningInfo) = liste.add(beregningInfo)
-        fun sykdomshistorikkelementId(beregningId: UUID) = BeregningInfo.sykdomshistorikkelementId(liste, beregningId)
+        fun historikkIder(beregningId: UUID) = BeregningInfo.historikkIder(liste, beregningId)
     }
 
     private class BeregningInfo(
         private val beregningId: UUID,
-        private val sykdomshistorikkElementId: UUID
+        private val sykdomshistorikkElementId: UUID,
+        private val vilkårsgrunnlagHistorikkInnslagId: UUID
     ) {
         companion object {
-            fun sykdomshistorikkelementId(beregningInfo: List<BeregningInfo>, beregningId: UUID) =
-                beregningInfo.firstOrNull { it.beregningId == beregningId }?.sykdomshistorikkElementId
+            fun historikkIder(beregningInfo: List<BeregningInfo>, beregningId: UUID) =
+                beregningInfo.firstOrNull { it.beregningId == beregningId }?.sykdomshistorikkElementId to
+                    beregningInfo.firstOrNull { it.beregningId == beregningId }?.vilkårsgrunnlagHistorikkInnslagId
         }
     }
 
@@ -138,7 +142,7 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
         inntektshistorikkInnslagId: UUID,
         vilkårsgrunnlagHistorikkInnslagId: UUID
     ) {
-        utbetalingberegninger.add(BeregningInfo(id, sykdomshistorikkElementId))
+        utbetalingberegninger.add(BeregningInfo(id, sykdomshistorikkElementId, vilkårsgrunnlagHistorikkInnslagId))
     }
 
     override fun preVisitSykdomshistorikkElement(element: Sykdomshistorikk.Element, id: UUID, hendelseId: UUID?, tidsstempel: LocalDateTime) {
@@ -153,13 +157,15 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
 
         companion object {
             fun List<SykdomshistorikkElementBuilder>.build(
-                historikkId: UUID,
+                sykdomshistorikkId: UUID,
+                vilkårsgrunnlagHistorikkId: UUID,
                 utbetaling: UtbetalingshistorikkElementDTO.UtbetalingDTO
             ): UtbetalingshistorikkElementDTO? {
-                return firstOrNull { it.id == historikkId }?.let {
+                return firstOrNull { it.id == sykdomshistorikkId }?.let {
                     UtbetalingshistorikkElementDTO(
                         hendelsetidslinje = it.hendelsetidslinje.build(),
                         beregnettidslinje = it.beregnettidslinje.build(),
+                        vilkårsgrunnlagHistorikkId = vilkårsgrunnlagHistorikkId,
                         tidsstempel = utbetaling.tidsstempel,
                         utbetaling = utbetaling
                     )
@@ -167,6 +173,7 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
                     UtbetalingshistorikkElementDTO(
                         hendelsetidslinje = emptyList(),
                         beregnettidslinje = emptyList(),
+                        vilkårsgrunnlagHistorikkId = vilkårsgrunnlagHistorikkId,
                         tidsstempel = utbetaling.tidsstempel,
                         utbetaling = utbetaling
                     )

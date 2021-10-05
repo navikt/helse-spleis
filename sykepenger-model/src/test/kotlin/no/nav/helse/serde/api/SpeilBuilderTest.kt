@@ -241,12 +241,14 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         val personDTO = speilApi()
         val tidslinje = personDTO.arbeidsgivere.first().utbetalingshistorikk.first()
         val utbetaling = inspektør.utbetalinger.first()
+        val vilkårsgrunnlagIder = inspektør.vilkårsgrunnlagHistorikkInnslag()
 
         assertEquals(1, personDTO.arbeidsgivere.first().utbetalingshistorikk.size)
         assertEquals(31, tidslinje.beregnettidslinje.size)
         assertEquals(31, tidslinje.hendelsetidslinje.size)
         assertEquals(31, tidslinje.utbetaling.utbetalingstidslinje.size)
 
+        assertEquals(vilkårsgrunnlagIder[0].id, personDTO.arbeidsgivere.first().utbetalingshistorikk[0].vilkårsgrunnlagHistorikkId)
         assertEquals("UTBETALT", tidslinje.utbetaling.status)
         assertEquals("UTBETALING", tidslinje.utbetaling.type)
         assertEquals(237, tidslinje.utbetaling.gjenståendeSykedager)
