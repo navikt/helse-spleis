@@ -3,6 +3,7 @@ package no.nav.helse.hendelser
 import no.nav.helse.person.*
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
@@ -20,7 +21,7 @@ class VedtaksperiodeTest {
     @Test
     fun `det skal sendes en melding til aktivitetsloggen når validering av perioder i AvventerHistorikk feiler`() {
         val tilstand = Vedtaksperiode.AvventerHistorikk
-        val person = Person("1234567891011", "12345678910")
+        val person = Person("1234567891011", "12101078910".somFødselsnummer())
         val arbeidsgiver = Arbeidsgiver(person, "1234567891011")
         val aktivitetslogg = Aktivitetslogg()
         val vedtskaperiode = vedtaksperiode(person, arbeidsgiver)
@@ -78,7 +79,7 @@ class VedtaksperiodeTest {
         NormalArbeidstaker,
         emptyMap(),
         Utbetalingstidslinje(),
-        Alder("04102112345"),
+        "04102112345".somFødselsnummer().alder(),
         null,
         VilkårsgrunnlagHistorikk()
     )
