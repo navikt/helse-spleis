@@ -228,6 +228,10 @@ class Person private constructor(
     fun håndter(hendelse: OverstyrInntekt) {
         hendelse.kontekst(this)
         finnArbeidsgiver(hendelse).håndter(hendelse)
+
+        if (hendelse.hasErrorsOrWorse()) {
+            observers.forEach { it.revurderingAvvist(hendelse.hendelseskontekst(), hendelse.tilRevurderingAvvistEvent()) }
+        }
     }
 
     fun annullert(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetalingAnnullertEvent) {

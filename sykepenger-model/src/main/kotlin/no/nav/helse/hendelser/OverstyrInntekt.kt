@@ -2,9 +2,9 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.Inntektshistorikk
+import no.nav.helse.person.PersonObserver
 import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 
 
@@ -25,4 +25,9 @@ class OverstyrInntekt(
         inntektshistorikk { addSaksbehandler(skjæringstidspunkt, meldingsreferanseId(), inntekt) }
     }
 
+    fun tilRevurderingAvvistEvent(): PersonObserver.RevurderingAvvistEvent =
+        PersonObserver.RevurderingAvvistEvent(
+            fødselsnummer = fødselsnummer,
+            errors = this.errorsAndWorse()
+        )
 }
