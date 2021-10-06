@@ -3204,4 +3204,30 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP
         )
     }
+
+    @Test
+    fun `det error-logges i aktivitetsloggen når validering av perioder i AvventerHistorikk feiler uten eksplisitt error-logging`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar(2021), 1.januar(2021), 100.prosent))
+        håndterSøknad(Sykdom(1.januar(2021), 1.januar(2021), 100.prosent))
+        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021)), førsteFraværsdag = 1.januar(2021))
+
+        håndterYtelser(1.vedtaksperiode)
+
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioderForSammenligningsgrunnlag {
+                1.januar(2020) til 1.desember(2020) inntekter {
+                    ORGNUMMER inntekt INNTEKT * 2 // 25 % avvik vs inntekt i inntektsmeldingen
+                }
+            }
+        ))
+        håndterSykmelding(Sykmeldingsperiode(2.januar(2021), 20.januar(2021), 100.prosent))
+        håndterSøknad(Sykdom(2.januar(2021), 20.januar(2021), 100.prosent))
+
+        håndterInntektsmeldingReplay(inntektsmeldingId, 2.vedtaksperiode(ORGNUMMER))
+
+        håndterYtelser(2.vedtaksperiode) // Feiler pga over 25 % avvik, men det mangler konkret error-logging
+
+        assertErrorTekst(inspektør, "Behandling av Ytelser feilet, årsak ukjent")
+    }
+
 }

@@ -901,7 +901,7 @@ internal class Vedtaksperiode private constructor(
             infotrygdhistorikk: Infotrygdhistorikk
         ) {
             validation(hendelse) {
-                onError { vedtaksperiode.tilstand(hendelse, TilInfotrygd) }
+                onValidationFailed { vedtaksperiode.tilstand(hendelse, TilInfotrygd) }
                 valider {
                     infotrygdhistorikk.validerOverlappende(
                         this,
@@ -1378,13 +1378,13 @@ internal class Vedtaksperiode private constructor(
         ) {
             val tmpLog = Aktivitetslogg()
             validation(tmpLog) {
-                onError {
+                onValidationFailed {
                     ytelser.warn("Opplysninger fra Infotrygd har endret seg etter at vedtaket ble fattet. Undersøk om det er overlapp med periode fra Infotrygd.")
                 }
                 valider { infotrygdhistorikk.valider(this, arbeidsgiver, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt) }
             }
             validation(ytelser) {
-                onError {
+                onValidationFailed {
                     ytelser.warn("Validering av ytelser ved revurdering feilet. Utbetalingen må annulleres")
                     vedtaksperiode.tilstand(ytelser, RevurderingFeilet)
                 }
@@ -1730,7 +1730,7 @@ internal class Vedtaksperiode private constructor(
             infotrygdhistorikk: Infotrygdhistorikk
         ) {
             validation(hendelse) {
-                onError { vedtaksperiode.tilstand(hendelse, TilInfotrygd) }
+                onValidationFailed { vedtaksperiode.tilstand(hendelse, TilInfotrygd) }
                 valider {
                     infotrygdhistorikk.validerOverlappende(
                         this,
@@ -1738,7 +1738,7 @@ internal class Vedtaksperiode private constructor(
                         vedtaksperiode.skjæringstidspunkt
                     )
                 }
-                onError { person.invaliderAllePerioder(hendelse, null) }
+                onValidationFailed { person.invaliderAllePerioder(hendelse, null) }
                 onSuccess {
                     if (arbeidsgiver.erForlengelse(vedtaksperiode.periode)) {
                         info("Oppdaget at perioden er en forlengelse")
@@ -1865,8 +1865,10 @@ internal class Vedtaksperiode private constructor(
             val periodetype = vedtaksperiode.periodetype()
             vedtaksperiode.skjæringstidspunktFraInfotrygd = person.skjæringstidspunkt(vedtaksperiode.periode)
             validation(ytelser) {
-                onError {
-                    error("Kaster vedtaksperiode i tilstand 'AvventerHistorikk' ut til Infotrygd pga valideringsfeil")
+                onValidationFailed { errorLogAlreadyDone ->
+                    if (!errorLogAlreadyDone) {
+                        error("Behandling av Ytelser feilet, årsak ukjent")
+                    }
                     vedtaksperiode.tilstand(ytelser, TilInfotrygd)
                 }
                 valider { infotrygdhistorikk.valider(this, arbeidsgiver, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt) }

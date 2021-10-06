@@ -22,7 +22,7 @@ internal class ValidationTest {
     fun success() {
         var success = false
         validation(TestHendelse(aktivitetslogg)) {
-            onError { fail("Uventet kall") }
+            onValidationFailed { fail("Uventet kall") }
             successBlock()
             onSuccess { success = true }
         }
@@ -33,7 +33,7 @@ internal class ValidationTest {
     fun failure() {
         var failure = false
         validation(TestHendelse(aktivitetslogg)) {
-            onError { failure = true }
+            onValidationFailed { failure = true }
             failureBlock()
             onSuccess { fail("Uventet kall") }
         }
