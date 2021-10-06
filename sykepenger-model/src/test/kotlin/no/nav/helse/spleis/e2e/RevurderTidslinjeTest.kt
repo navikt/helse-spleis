@@ -139,60 +139,6 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    @Disabled
-    fun `to perioder - hele den eldste perioden blir ferie`() {
-        nyttVedtak(3.januar, 26.januar)
-        forlengVedtak(27.januar, 14.februar)
-
-        håndterOverstyring((3.januar til 26.januar).map { manuellFeriedag(it) })
-        håndterYtelser(1.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt(2.vedtaksperiode)
-
-        assertTilstander(
-            0,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_SØKNAD_FERDIG_GAP,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET,
-            AVVENTER_HISTORIKK,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
-            AVSLUTTET
-        )
-
-        assertTilstander(
-            1,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET,
-            AVVENTER_ARBEIDSGIVERE_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING,
-            AVVENTER_SIMULERING_REVURDERING,
-            AVVENTER_GODKJENNING_REVURDERING,
-            TIL_UTBETALING,
-            AVSLUTTET,
-        )
-
-        assertEquals(3, inspektør.utbetalinger.size)
-        assertEquals(6, inspektør.forbrukteSykedager(0))
-        assertEquals(19, inspektør.forbrukteSykedager(1))
-        assertEquals(6, inspektør.forbrukteSykedager(2))
-
-    }
-
-    @Test
     fun `to perioder - hele den nyeste perioden blir ferie`() {
         nyttVedtak(3.januar, 26.januar)
         forlengVedtak(27.januar, 14.februar)
