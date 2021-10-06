@@ -189,7 +189,7 @@ internal class InntektsmeldingTest {
         inntektsmelding(
             listOf(Periode(1.januar, 3.januar)),
             refusjonOpphørsdato = 1.januar,
-            endringerIRefusjon = listOf(EndringIRefusjon(16.januar, 1000.månedlig))
+            endringerIRefusjon = listOf(EndringIRefusjon(1000.månedlig, 16.januar))
         )
         assertTrue(inntektsmelding.valider(Periode(2.januar, 10.januar)).hasErrorsOrWorse())
     }
@@ -199,7 +199,7 @@ internal class InntektsmeldingTest {
         inntektsmelding(
             listOf(Periode(1.januar, 3.januar)),
             refusjonOpphørsdato = 11.januar,
-            endringerIRefusjon = listOf(EndringIRefusjon(16.januar, 1000.månedlig))
+            endringerIRefusjon = listOf(EndringIRefusjon(1000.månedlig, 16.januar))
         )
         assertTrue(inntektsmelding.valider(Periode(2.januar, 10.januar)).hasErrorsOrWorse())
     }
@@ -209,7 +209,7 @@ internal class InntektsmeldingTest {
         inntektsmelding(
             listOf(Periode(1.januar, 3.januar)),
             refusjonOpphørsdato = 10.januar,
-            endringerIRefusjon = listOf(EndringIRefusjon(16.januar, 1000.månedlig))
+            endringerIRefusjon = listOf(EndringIRefusjon(1000.månedlig, 16.januar))
         )
         assertTrue(inntektsmelding.valider(Periode(2.januar, 10.januar)).hasErrorsOrWorse())
     }
@@ -219,7 +219,7 @@ internal class InntektsmeldingTest {
         inntektsmelding(
             listOf(Periode(1.januar, 3.januar)),
             refusjonOpphørsdato = 16.januar,
-            endringerIRefusjon = listOf(EndringIRefusjon(10.januar, 1000.månedlig))
+            endringerIRefusjon = listOf(EndringIRefusjon(1000.månedlig, 10.januar))
         )
         assertTrue(inntektsmelding.valider(Periode(2.januar, 10.januar)).hasErrorsOrWorse())
     }
@@ -422,7 +422,7 @@ internal class InntektsmeldingTest {
     ) {
         inntektsmelding = Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
-            refusjon = Inntektsmelding.Refusjon(refusjonOpphørsdato, refusjonBeløp, endringerIRefusjon),
+            refusjon = Inntektsmelding.Refusjon(refusjonBeløp, refusjonOpphørsdato, endringerIRefusjon),
             orgnummer = "88888888",
             fødselsnummer = "12020052345",
             aktørId = "100010101010",

@@ -1,10 +1,12 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companion.cacheRefusjon
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companion.endrerRefusjon
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companion.minOf
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Inntektshistorikk
+import no.nav.helse.person.Refusjonshistorikk
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
@@ -152,25 +154,53 @@ class Inntektsmelding(
 
     internal fun inntektenGjelderFor(periode: Periode) = sykdomstidslinje.sisteSkjæringstidspunkt() in periode
 
-    internal fun cacheRefusjon(arbeidsgiver: Arbeidsgiver){
+    internal fun cacheRefusjon(arbeidsgiver: Arbeidsgiver) {
         refusjon.cacheRefusjon(arbeidsgiver, beregnetInntekt, sykdomstidslinje.førsteDag())
     }
 
+    internal fun cacheRefusjon(refusjonshistorikk: Refusjonshistorikk) {
+        refusjon.cacheRefusjon(refusjonshistorikk, meldingsreferanseId(), førsteFraværsdag, arbeidsgiverperioder)
+    }
+
     class Refusjon(
-        private val opphørsdato: LocalDate?,
         private val beløp: Inntekt?,
+        private val opphørsdato: LocalDate?,
         private val endringerIRefusjon: List<EndringIRefusjon> = emptyList()
     ) {
         class EndringIRefusjon(
-            private val endringsdato: LocalDate,
-            private val beløp: Inntekt
-        ){
-            internal companion object{
+            private val beløp: Inntekt,
+            private val endringsdato: LocalDate
+        ) {
+            internal companion object {
                 internal fun List<EndringIRefusjon>.endrerRefusjon(periode: Periode) =
                     any { it.endringsdato in periode }
 
                 internal fun List<EndringIRefusjon>.minOf(opphørsdato: LocalDate?) =
                     (map { it.endringsdato } + opphørsdato).filterNotNull().minOrNull()
+
+                internal fun List<EndringIRefusjon>.cacheRefusjon(
+                    refusjonshistorikk: Refusjonshistorikk,
+                    meldingsreferanseId: UUID,
+                    førsteFraværsdag: LocalDate?,
+                    arbeidsgiverperioder: List<Periode>,
+                    beløp: Inntekt?,
+                    opphørsdato: LocalDate?
+                ) {
+                    refusjonshistorikk.leggTilRefusjon(
+                        Refusjonshistorikk.Refusjon(
+                            meldingsreferanseId = meldingsreferanseId,
+                            førsteFraværsdag = førsteFraværsdag,
+                            arbeidsgiverperioder = arbeidsgiverperioder,
+                            beløp = beløp,
+                            opphørsdato = opphørsdato,
+                            endringerIRefusjon = map {
+                                Refusjonshistorikk.Refusjon.EndringIRefusjon(
+                                    it.beløp, it.endringsdato
+                                )
+                            }
+                        )
+                    )
+                }
             }
         }
 
@@ -201,6 +231,15 @@ class Inntektsmelding(
                 if (beregnetInntekt != beløp) førsteDagIArbeidsgiverperioden
                 else endringerIRefusjon.minOf(opphørsdato)
             arbeidsgiver.cacheRefusjon(refusjonsopphørsdato)
+        }
+
+        internal fun cacheRefusjon(
+            refusjonshistorikk: Refusjonshistorikk,
+            meldingsreferanseId: UUID,
+            førsteFraværsdag: LocalDate?,
+            arbeidsgiverperioder: List<Periode>
+        ) {
+            endringerIRefusjon.cacheRefusjon(refusjonshistorikk, meldingsreferanseId, førsteFraværsdag, arbeidsgiverperioder, beløp, opphørsdato)
         }
     }
 }

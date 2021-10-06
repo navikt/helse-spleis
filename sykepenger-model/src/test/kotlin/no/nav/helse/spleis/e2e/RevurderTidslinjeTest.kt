@@ -1185,7 +1185,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         forlengVedtak(1.februar, 28.februar)
         forlengVedtak(1.mars, 31.mars)
         håndterSykmelding(Sykmeldingsperiode(1.april, 10.april, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Refusjon(2.april, INNTEKT))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Refusjon(INNTEKT, 2.april))
 
         håndterOverstyring((1..31).map { ManuellOverskrivingDag(it.mars, Dagtype.Feriedag) })
 

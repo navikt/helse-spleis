@@ -245,6 +245,13 @@ internal class JsonBuilder : AbstractBuilder() {
         }
 
 
+        override fun preVisitRefusjonshistorikk(refusjonshistorikk: Refusjonshistorikk) {
+            val historikk = mutableListOf<Map<String, Any?>>()
+            arbeidsgiverMap["refusjonshistorikk"] = historikk
+            pushState(RefusjonshistorikkState(historikk))
+        }
+
+
         override fun preVisitArbeidsforholdhistorikk(arbeidsforholdhistorikk: Arbeidsforholdhistorikk) {
             val historikk = mutableListOf<Map<String, Any?>>()
             arbeidsgiverMap["arbeidsforholdhistorikk"] = historikk
@@ -256,6 +263,46 @@ internal class JsonBuilder : AbstractBuilder() {
             id: UUID,
             organisasjonsnummer: String
         ) {
+            popState()
+        }
+    }
+
+    private class RefusjonshistorikkState(private val historikk: MutableList<Map<String, Any?>>) : BuilderState() {
+        private var endringerIRefusjon: MutableList<Map<String, Any?>> = mutableListOf()
+
+        override fun preVisitRefusjon(
+            meldingsreferanseId: UUID,
+            førsteFraværsdag: LocalDate?,
+            arbeidsgiverperioder: List<Periode>,
+            beløp: Inntekt?,
+            opphørsdato: LocalDate?,
+            endringerIRefusjon: List<Refusjonshistorikk.Refusjon.EndringIRefusjon>,
+            tidsstempel: LocalDateTime
+        ) {
+            this.endringerIRefusjon = mutableListOf()
+            historikk.add(
+                mapOf(
+                    "meldingsreferanseId" to meldingsreferanseId,
+                    "førsteFraværsdag" to førsteFraværsdag,
+                    "arbeidsgiverperioder" to arbeidsgiverperioder.map { mapOf("fom" to it.start, "tom" to it.endInclusive) },
+                    "beløp" to beløp?.reflection { _, månedlig, _, _ -> månedlig },
+                    "opphørsdato" to opphørsdato,
+                    "endringerIRefusjon" to this.endringerIRefusjon,
+                    "tidsstempel" to tidsstempel
+                )
+            )
+        }
+
+        override fun visitEndringIRefusjon(beløp: Inntekt, endringsdato: LocalDate) {
+            endringerIRefusjon.add(
+                mapOf(
+                    "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
+                    "endringsdato" to endringsdato
+                )
+            )
+        }
+
+        override fun postVisitRefusjonshistorikk(refusjonshistorikk: Refusjonshistorikk) {
             popState()
         }
     }

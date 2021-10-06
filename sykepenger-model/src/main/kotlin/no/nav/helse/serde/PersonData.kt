@@ -9,6 +9,8 @@ import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.*
 import no.nav.helse.person.infotrygdhistorikk.*
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.ArbeidsforholdhistorikkInnslagData.Companion.tilArbeidsforholdhistorikk
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.RefusjonData.Companion.parseRefusjon
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.RefusjonData.EndringIRefusjonData.Companion.parseEndringerIRefusjon
 import no.nav.helse.serde.PersonData.InfotrygdhistorikkElementData.Companion.tilModellObjekt
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.SykepengegrunnlagData.ArbeidsgiverInntektsopplysningData.Companion.parseArbeidsgiverInntektsopplysninger
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagInnslagData.Companion.tilModellObjekt
@@ -105,9 +107,9 @@ internal data class PersonData(
                 tidsstempel,
                 hendelseId,
                 arbeidsgiverutbetalingsperioder.map { it.parsePeriode() }
-                    + personutbetalingsperioder.map { it.parsePeriode() }
-                    + ferieperioder.map { it.parsePeriode() }
-                    + ukjenteperioder.map { it.parsePeriode() },
+                        + personutbetalingsperioder.map { it.parsePeriode() }
+                        + ferieperioder.map { it.parsePeriode() }
+                        + ukjenteperioder.map { it.parsePeriode() },
                 inntekter.map { it.parseInntektsopplysning() },
                 arbeidskategorikoder,
                 ugyldigePerioder,
@@ -261,7 +263,12 @@ internal data class PersonData(
             ) {
                 companion object {
                     internal fun List<ArbeidsgiverInntektsopplysningData>.parseArbeidsgiverInntektsopplysninger(): List<ArbeidsgiverInntektsopplysning> =
-                        map { ArbeidsgiverInntektsopplysning(it.orgnummer, ArbeidsgiverData.InntektsopplysningData.parseInntektsopplysningData(it.inntektsopplysning)) }
+                        map {
+                            ArbeidsgiverInntektsopplysning(
+                                it.orgnummer,
+                                ArbeidsgiverData.InntektsopplysningData.parseInntektsopplysningData(it.inntektsopplysning)
+                            )
+                        }
                 }
             }
 
@@ -356,6 +363,7 @@ internal data class PersonData(
         private val beregnetUtbetalingstidslinjer: List<BeregnetUtbetalingstidslinjeData>,
         private val feriepengeutbetalinger: List<FeriepengeutbetalingData> = emptyList(),
         private val refusjonOpphører: List<LocalDate?> = emptyList(),
+        private val refusjonshistorikk: List<RefusjonData> = emptyList(), //TODO: Emptylist frem til migrering av refusjonshistorikk er gjennomført. ETA 7.10.21
         private val arbeidsforholdhistorikk: List<ArbeidsforholdhistorikkInnslagData> = listOf()
     ) {
         private val modelInntekthistorikk = Inntektshistorikk().apply {
@@ -384,8 +392,8 @@ internal data class PersonData(
                 beregnetUtbetalingstidslinjer.map { it.tilBeregnetUtbetalingstidslinje() },
                 feriepengeutbetalinger.map { it.createFeriepengeutbetaling(fødselsnummer) },
                 refusjonOpphører,
+                refusjonshistorikk.parseRefusjon(),
                 arbeidsforholdhistorikk.tilArbeidsforholdhistorikk()
-
             )
 
             vedtaksperiodeliste.addAll(this.vedtaksperioder.map {
@@ -931,6 +939,48 @@ internal data class PersonData(
                     val id: String,
                     val navn: String
                 )
+            }
+        }
+
+        internal class RefusjonData(
+            private val meldingsreferanseId: UUID,
+            private val førsteFraværsdag: LocalDate?,
+            private val arbeidsgiverperioder: List<Periode>,
+            private val beløp: Double?,
+            private val opphørsdato: LocalDate?,
+            private val endringerIRefusjon: List<EndringIRefusjonData>,
+            private val tidsstempel: LocalDateTime
+        ) {
+            internal companion object {
+                internal fun List<RefusjonData>.parseRefusjon() = Refusjonshistorikk().apply {
+                    forEach {
+                        leggTilRefusjon(
+                            Refusjonshistorikk.Refusjon(
+                                meldingsreferanseId = it.meldingsreferanseId,
+                                førsteFraværsdag = it.førsteFraværsdag,
+                                arbeidsgiverperioder = it.arbeidsgiverperioder,
+                                beløp = it.beløp?.månedlig,
+                                opphørsdato = it.opphørsdato,
+                                endringerIRefusjon = it.endringerIRefusjon.parseEndringerIRefusjon(),
+                                tidsstempel = it.tidsstempel
+                            )
+                        )
+                    }
+                }
+            }
+
+            internal class EndringIRefusjonData(
+                private val beløp: Double,
+                private val endringsdato: LocalDate
+            ) {
+                internal companion object {
+                    internal fun List<EndringIRefusjonData>.parseEndringerIRefusjon() = map {
+                        Refusjonshistorikk.Refusjon.EndringIRefusjon(
+                            beløp = it.beløp.månedlig,
+                            endringsdato = it.endringsdato
+                        )
+                    }
+                }
             }
         }
 

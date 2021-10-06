@@ -207,7 +207,7 @@ internal class HistoriePeriodetypeTest {
         arbeidsgiver.addInntekt(
             inntektsmelding = Inntektsmelding(
                 meldingsreferanseId = UUID.randomUUID(),
-                refusjon = Inntektsmelding.Refusjon(null, 30000.månedlig),
+                refusjon = Inntektsmelding.Refusjon(30000.månedlig, null),
                 orgnummer = arbeidsgiver.organisasjonsnummer(),
                 fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018,
                 aktørId = AbstractPersonTest.AKTØRID,

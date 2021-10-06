@@ -14,8 +14,8 @@ internal open class InntektsmeldingMessage(packet: JsonMessage) : HendelseMessag
         opphørsdato = packet["refusjon.opphoersdato"].asOptionalLocalDate(),
         endringerIRefusjon = packet["endringIRefusjoner"].map {
             Inntektsmelding.Refusjon.EndringIRefusjon(
-                it.path("endringsdato").asLocalDate(),
-                it.path("beloep").asDouble().månedlig
+                it.path("beloep").asDouble().månedlig,
+                it.path("endringsdato").asLocalDate()
             )
         }
     )

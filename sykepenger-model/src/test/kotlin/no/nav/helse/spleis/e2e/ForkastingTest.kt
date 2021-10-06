@@ -129,7 +129,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
     @Test
     fun `refusjon opphører i perioden`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)), refusjon = Refusjon(14.januar, INNTEKT, emptyList()))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)), refusjon = Refusjon(INNTEKT, 14.januar, emptyList()))
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
             START,
@@ -144,7 +144,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             arbeidsgiverperioder = listOf(Periode(3.januar, 18.januar)),
-            refusjon = Refusjon(null, INNTEKT, listOf(Refusjon.EndringIRefusjon(14.januar, INNTEKT / 2)))
+            refusjon = Refusjon(INNTEKT, null, listOf(Refusjon.EndringIRefusjon(INNTEKT / 2, 14.januar)))
         )
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,

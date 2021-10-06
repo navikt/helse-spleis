@@ -1176,7 +1176,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         ).also { (søknad, _) -> person.håndter(søknad) }
         inntektsmelding(
             fom = fom,
-            refusjon = Inntektsmelding.Refusjon(opphørsdato = null, beløp = 1000.månedlig, endringerIRefusjon = emptyList()),
+            refusjon = Inntektsmelding.Refusjon(beløp = 1000.månedlig, opphørsdato = null, endringerIRefusjon = emptyList()),
             beregnetInntekt = 1000.månedlig
         ).also { (inntektsmelding, _) -> person.håndter(inntektsmelding) }
         person.håndter(Companion.ytelser(vedtaksperiodeIdInnhenter = vedtaksperiodeId))
@@ -1239,7 +1239,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             inntektsmelding(
                 orgnummer = orgnummer,
                 fom = fom,
-                refusjon = Inntektsmelding.Refusjon(opphørsdato = null, beløp = 1000.månedlig, endringerIRefusjon = emptyList()),
+                refusjon = Inntektsmelding.Refusjon(beløp = 1000.månedlig, opphørsdato = null, endringerIRefusjon = emptyList()),
                 beregnetInntekt = 1000.månedlig
             ).first
         )
@@ -1247,7 +1247,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             inntektsmelding(
                 orgnummer = orgnummer2,
                 fom = fom,
-                refusjon = Inntektsmelding.Refusjon(opphørsdato = null, beløp = 1000.månedlig, endringerIRefusjon = emptyList()),
+                refusjon = Inntektsmelding.Refusjon(beløp = 1000.månedlig, opphørsdato = null, endringerIRefusjon = emptyList()),
                 beregnetInntekt = 1000.månedlig
             ).first
         )
@@ -1324,7 +1324,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             inntektsmelding(
                 orgnummer = orgnummer,
                 fom = fom,
-                refusjon = Inntektsmelding.Refusjon(opphørsdato = null, beløp = 31000.månedlig, endringerIRefusjon = emptyList()),
+                refusjon = Inntektsmelding.Refusjon(beløp = 31000.månedlig, opphørsdato = null, endringerIRefusjon = emptyList()),
                 beregnetInntekt = 31000.månedlig
             ).first
         )
@@ -1332,7 +1332,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             inntektsmelding(
                 orgnummer = orgnummer2,
                 fom = fom,
-                refusjon = Inntektsmelding.Refusjon(opphørsdato = null, beløp = 31000.månedlig, endringerIRefusjon = emptyList()),
+                refusjon = Inntektsmelding.Refusjon(beløp = 31000.månedlig, opphørsdato = null, endringerIRefusjon = emptyList()),
                 beregnetInntekt = 31000.månedlig
             ).first
         )
@@ -1940,8 +1940,8 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             hendelseId: UUID = UUID.randomUUID(),
             fom: LocalDate,
             refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(
-                opphørsdato = null,
                 beløp = 31000.månedlig,
+                opphørsdato = null,
                 endringerIRefusjon = emptyList()
             ),
             beregnetInntekt: Inntekt = 31000.månedlig,

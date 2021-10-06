@@ -1318,7 +1318,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         )
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
-            refusjon = Refusjon(15.januar, INNTEKT, emptyList())
+            refusjon = Refusjon(INNTEKT, 15.januar, emptyList())
         )
         assertTilstander(
             1.vedtaksperiode,
@@ -2931,7 +2931,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             arbeidsgiverperioder = arbeidsgiverperioder,
             førsteFraværsdag = 1.januar(2021),
             beregnetInntekt = 1000.månedlig,
-            refusjon = Refusjon(null, 1000.månedlig, emptyList())
+            refusjon = Refusjon(1000.månedlig, null, emptyList())
         )
 
         håndterYtelser(1.vedtaksperiode)
@@ -3190,7 +3190,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         val inntektsmeldingUUID = håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             beregnetInntekt = 26000.månedlig,
-            refusjon = Refusjon(null, 16000.månedlig)
+            refusjon = Refusjon(16000.månedlig, null)
         )
 
         håndterSykmelding(Sykmeldingsperiode(1.mai, 30.mai, 100.prosent))

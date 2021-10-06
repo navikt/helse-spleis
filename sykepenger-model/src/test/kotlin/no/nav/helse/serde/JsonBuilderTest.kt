@@ -320,7 +320,7 @@ class JsonBuilderTest {
                         hendelseId = søknadhendelseId
                     )
                 )
-                håndter(inntektsmelding(fom = 1.januar, refusjon = Inntektsmelding.Refusjon(4.januar, 31000.månedlig, emptyList())))
+                håndter(inntektsmelding(fom = 1.januar, refusjon = Inntektsmelding.Refusjon(31000.månedlig, 4.januar, emptyList())))
             }
 
         fun personMedInfotrygdForlengelse(søknadhendelseId: UUID = UUID.randomUUID()): Person {
@@ -559,7 +559,7 @@ class JsonBuilderTest {
             hendelseId: UUID = UUID.randomUUID(),
             fom: LocalDate,
             perioder: List<Periode> = listOf(Periode(fom, fom.plusDays(15))),
-            refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(null, 31000.månedlig, emptyList())
+            refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList())
         ) = Inntektsmelding(
             meldingsreferanseId = hendelseId,
             refusjon = refusjon,

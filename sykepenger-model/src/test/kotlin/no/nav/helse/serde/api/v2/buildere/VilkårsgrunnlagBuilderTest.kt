@@ -229,7 +229,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             førsteFraværsdag = 1.januar,
-            refusjon = Refusjon(null, 31000.månedlig, emptyList()),
+            refusjon = Refusjon(31000.månedlig, null, emptyList()),
             orgnummer = AG1
         )
 

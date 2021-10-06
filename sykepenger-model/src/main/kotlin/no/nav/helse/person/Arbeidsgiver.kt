@@ -45,6 +45,7 @@ internal class Arbeidsgiver private constructor(
     private val beregnetUtbetalingstidslinjer: MutableList<Utbetalingstidslinjeberegning>,
     private val feriepengeutbetalinger: MutableList<Feriepengeutbetaling>,
     private val refusjonOpphører: MutableList<LocalDate?>,
+    private val refusjonshistorikk: Refusjonshistorikk,
     private val arbeidsforholdhistorikk: Arbeidsforholdhistorikk
 ) : Aktivitetskontekst, UtbetalingObserver {
     internal constructor(person: Person, organisasjonsnummer: String) : this(
@@ -59,6 +60,7 @@ internal class Arbeidsgiver private constructor(
         beregnetUtbetalingstidslinjer = mutableListOf(),
         feriepengeutbetalinger = mutableListOf(),
         refusjonOpphører = mutableListOf(),
+        refusjonshistorikk = Refusjonshistorikk(),
         arbeidsforholdhistorikk = Arbeidsforholdhistorikk()
     )
 
@@ -202,6 +204,7 @@ internal class Arbeidsgiver private constructor(
         visitor.preVisitFeriepengeutbetalinger(feriepengeutbetalinger)
         feriepengeutbetalinger.forEach { it.accept(visitor) }
         visitor.postVisitFeriepengeutbetalinger(feriepengeutbetalinger)
+        refusjonshistorikk.accept(visitor)
         arbeidsforholdhistorikk.accept(visitor)
         visitor.postVisitArbeidsgiver(this, id, organisasjonsnummer)
 
@@ -352,6 +355,7 @@ internal class Arbeidsgiver private constructor(
     internal fun håndter(inntektsmelding: Inntektsmelding, vedtaksperiodeId: UUID? = null) {
         inntektsmelding.kontekst(this)
         inntektsmelding.cacheRefusjon(this)
+        inntektsmelding.cacheRefusjon(refusjonshistorikk)
         trimTidligereBehandletDager(inntektsmelding)
         if (vedtaksperiodeId != null) {
             if (!énHarHåndtert(inntektsmelding) { håndter(inntektsmelding, vedtaksperiodeId) })
@@ -1008,6 +1012,7 @@ internal class Arbeidsgiver private constructor(
                 beregnetUtbetalingstidslinjer: List<Utbetalingstidslinjeberegning>,
                 feriepengeutbetalinger: List<Feriepengeutbetaling>,
                 refusjonOpphører: List<LocalDate?>,
+                refusjonshistorikk: Refusjonshistorikk,
                 arbeidsforholdhistorikk: Arbeidsforholdhistorikk
             ) = Arbeidsgiver(
                 person,
@@ -1021,6 +1026,7 @@ internal class Arbeidsgiver private constructor(
                 beregnetUtbetalingstidslinjer.toMutableList(),
                 feriepengeutbetalinger.toMutableList(),
                 refusjonOpphører.toMutableList(),
+                refusjonshistorikk,
                 arbeidsforholdhistorikk
             )
         }

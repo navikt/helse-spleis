@@ -200,7 +200,7 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
     ) =
         Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
-            refusjon = Inntektsmelding.Refusjon(null, beregnetInntekt, emptyList()),
+            refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
             orgnummer = ORGNUMMER,
             fødselsnummer = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",

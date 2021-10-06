@@ -79,7 +79,7 @@ internal interface InfotrygdhistorikkVisitor {
     fun postVisitInfotrygdhistorikk() {}
 }
 
-internal interface FeriepengeutbetalingsperiodeVisitor{
+internal interface FeriepengeutbetalingsperiodeVisitor {
     fun visitPersonutbetalingsperiode(orgnr: String, periode: Periode, beløp: Int, utbetalt: LocalDate) {}
     fun visitArbeidsgiverutbetalingsperiode(orgnr: String, periode: Periode, beløp: Int, utbetalt: LocalDate) {}
 }
@@ -95,7 +95,9 @@ internal interface VilkårsgrunnlagHistorikkVisitor : InntekthistorikkVisitor {
         infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag,
         skjæringstidspunkt: LocalDate,
         sykepengegrunnlag: Sykepengegrunnlag
-    ) {}
+    ) {
+    }
+
     fun postVisitInfotrygdVilkårsgrunnlag(skjæringstidspunkt: LocalDate, infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag) {}
     fun preVisitSykepengegrunnlag(sykepengegrunnlag1: Sykepengegrunnlag, sykepengegrunnlag: Inntekt, grunnlagForSykepengegrunnlag: Inntekt) {}
     fun postVisitSykepengegrunnlag(sykepengegrunnlag1: Sykepengegrunnlag, sykepengegrunnlag: Inntekt, grunnlagForSykepengegrunnlag: Inntekt) {}
@@ -104,7 +106,7 @@ internal interface VilkårsgrunnlagHistorikkVisitor : InntekthistorikkVisitor {
 }
 
 internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, SykdomshistorikkVisitor, VedtaksperiodeVisitor, UtbetalingVisitor,
-    UtbetalingstidslinjeberegningVisitor, FeriepengeutbetalingVisitor, ArbeidsforholdhistorikkVisitor {
+    UtbetalingstidslinjeberegningVisitor, FeriepengeutbetalingVisitor, RefusjonshistorikkVisitor, ArbeidsforholdhistorikkVisitor {
     fun preVisitArbeidsgiver(
         arbeidsgiver: Arbeidsgiver,
         id: UUID,
@@ -148,7 +150,8 @@ internal interface FeriepengeutbetalingVisitor : OppdragVisitor {
         feriepengedager: List<Feriepengeberegner.UtbetaltDag>,
         opptjeningsår: Year,
         utbetalteDager: List<Feriepengeberegner.UtbetaltDag>
-    ) {}
+    ) {
+    }
 
     fun preVisitUtbetaleDager() {}
     fun postVisitUtbetaleDager() {}
@@ -186,7 +189,8 @@ internal interface UtbetalingstidslinjeberegningVisitor {
         sykdomshistorikkElementId: UUID,
         inntektshistorikkInnslagId: UUID,
         vilkårsgrunnlagHistorikkInnslagId: UUID
-    ) {}
+    ) {
+    }
 }
 
 internal interface VedtaksperiodeVisitor : UtbetalingVisitor, SykdomstidslinjeVisitor, UtbetalingsdagVisitor {
@@ -378,6 +382,34 @@ internal interface SykdomstidslinjeVisitor {
     fun postVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: MutableList<Periode>) {}
 }
 
+internal interface RefusjonshistorikkVisitor {
+    fun preVisitRefusjonshistorikk(refusjonshistorikk: Refusjonshistorikk) {}
+    fun preVisitRefusjon(
+        meldingsreferanseId: UUID,
+        førsteFraværsdag: LocalDate?,
+        arbeidsgiverperioder: List<Periode>,
+        beløp: Inntekt?,
+        opphørsdato: LocalDate?,
+        endringerIRefusjon: List<Refusjonshistorikk.Refusjon.EndringIRefusjon>,
+        tidsstempel: LocalDateTime
+    ) {
+    }
+
+    fun visitEndringIRefusjon(beløp: Inntekt, endringsdato: LocalDate) {}
+    fun postVisitRefusjon(
+        meldingsreferanseId: UUID,
+        førsteFraværsdag: LocalDate?,
+        arbeidsgiverperioder: List<Periode>,
+        beløp: Inntekt?,
+        opphørsdato: LocalDate?,
+        endringerIRefusjon: List<Refusjonshistorikk.Refusjon.EndringIRefusjon>,
+        tidsstempel: LocalDateTime
+    ) {
+    }
+
+    fun postVisitRefusjonshistorikk(refusjonshistorikk: Refusjonshistorikk) {}
+}
+
 internal interface ArbeidsforholdhistorikkVisitor {
     fun preVisitArbeidsforholdhistorikk(arbeidsforholdhistorikk: Arbeidsforholdhistorikk) {}
     fun postVisitArbeidsforholdhistorikk(arbeidsforholdhistorikk: Arbeidsforholdhistorikk) {}
@@ -497,7 +529,9 @@ internal interface UtbetalingVisitor : UtbetalingsdagVisitor, OppdragVisitor {
         tidspunkt: LocalDateTime,
         automatiskBehandling: Boolean,
         godkjent: Boolean
-    ) {}
+    ) {
+    }
+
     fun postVisitUtbetaling(
         utbetaling: Utbetaling,
         id: UUID,

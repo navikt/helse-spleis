@@ -171,7 +171,7 @@ internal class InfotrygdInntektsopplysningTest {
         arbeidsgiverperioder: List<Periode> = listOf(1.januar til 16.januar)
     ) = Inntektsmelding(
         meldingsreferanseId = UUID.randomUUID(),
-        refusjon = Inntektsmelding.Refusjon(null, INNTEKT, emptyList()),
+        refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()),
         orgnummer = ORGNR,
         fødselsnummer = "fnr",
         aktørId = "aktør",

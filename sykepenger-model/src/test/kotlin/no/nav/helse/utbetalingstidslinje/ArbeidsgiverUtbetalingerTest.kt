@@ -378,7 +378,7 @@ internal class ArbeidsgiverUtbetalingerTest {
         person.arbeidsgiver(ORGNUMMER).addInntekt(
             inntektsmelding = Inntektsmelding(
                 meldingsreferanseId = UUID.randomUUID(),
-                refusjon = Inntektsmelding.Refusjon(null, 30000.månedlig),
+                refusjon = Inntektsmelding.Refusjon(30000.månedlig, null),
                 orgnummer = ORGNUMMER,
                 fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018,
                 aktørId = AbstractPersonTest.AKTØRID,

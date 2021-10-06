@@ -798,6 +798,42 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         )
     }
 
+    override fun preVisitRefusjonshistorikk(refusjonshistorikk: Refusjonshistorikk) {
+        delegatee.preVisitRefusjonshistorikk(refusjonshistorikk)
+    }
+
+    override fun preVisitRefusjon(
+        meldingsreferanseId: UUID,
+        førsteFraværsdag: LocalDate?,
+        arbeidsgiverperioder: List<Periode>,
+        beløp: Inntekt?,
+        opphørsdato: LocalDate?,
+        endringerIRefusjon: List<Refusjonshistorikk.Refusjon.EndringIRefusjon>,
+        tidsstempel: LocalDateTime
+    ) {
+        delegatee.preVisitRefusjon(meldingsreferanseId, førsteFraværsdag, arbeidsgiverperioder, beløp, opphørsdato, endringerIRefusjon, tidsstempel)
+    }
+
+    override fun visitEndringIRefusjon(beløp: Inntekt, endringsdato: LocalDate) {
+        delegatee.visitEndringIRefusjon(beløp, endringsdato)
+    }
+
+    override fun postVisitRefusjon(
+        meldingsreferanseId: UUID,
+        førsteFraværsdag: LocalDate?,
+        arbeidsgiverperioder: List<Periode>,
+        beløp: Inntekt?,
+        opphørsdato: LocalDate?,
+        endringerIRefusjon: List<Refusjonshistorikk.Refusjon.EndringIRefusjon>,
+        tidsstempel: LocalDateTime
+    ) {
+        delegatee.postVisitRefusjon(meldingsreferanseId, førsteFraværsdag, arbeidsgiverperioder, beløp, opphørsdato, endringerIRefusjon, tidsstempel)
+    }
+
+    override fun postVisitRefusjonshistorikk(refusjonshistorikk: Refusjonshistorikk) {
+        delegatee.postVisitRefusjonshistorikk(refusjonshistorikk)
+    }
+
     override fun preVisitArbeidsforholdhistorikk(arbeidsforholdhistorikk: Arbeidsforholdhistorikk) {
         delegatee.preVisitArbeidsforholdhistorikk(arbeidsforholdhistorikk)
     }

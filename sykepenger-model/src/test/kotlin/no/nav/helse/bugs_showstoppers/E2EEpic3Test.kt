@@ -1074,7 +1074,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(
             1.vedtaksperiode, listOf(
                 Periode(1.januar, 16.januar)
-            ), førsteFraværsdag = 1.januar, refusjon = Refusjon(null, INNTEKT, emptyList())
+            ), førsteFraværsdag = 1.januar, refusjon = Refusjon(INNTEKT, null, emptyList())
         )
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(
@@ -1115,7 +1115,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(
             1.vedtaksperiode, listOf(
                 Periode(1.januar, 16.januar)
-            ), førsteFraværsdag = 1.januar, refusjon = Refusjon(null, INNTEKT, emptyList())
+            ), førsteFraværsdag = 1.januar, refusjon = Refusjon(INNTEKT, null, emptyList())
         )
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(
@@ -1156,7 +1156,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(
             2.vedtaksperiode, listOf(
                 Periode(1.januar(2020), 16.januar(2020))
-            ), førsteFraværsdag = 1.januar(2020), refusjon = Refusjon(null, INNTEKT, emptyList())
+            ), førsteFraværsdag = 1.januar(2020), refusjon = Refusjon(INNTEKT, null, emptyList())
         )
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(
@@ -1211,7 +1211,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(
             1.vedtaksperiode, listOf(
                 Periode(1.januar, 16.januar)
-            ), førsteFraværsdag = 1.januar, refusjon = Refusjon(null, INNTEKT, emptyList())
+            ), førsteFraværsdag = 1.januar, refusjon = Refusjon(INNTEKT, null, emptyList())
         )
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(
@@ -1248,7 +1248,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(
             2.vedtaksperiode, listOf(
                 Periode(1.januar(2020), 16.januar(2020))
-            ), førsteFraværsdag = 1.januar(2020), refusjon = Refusjon(null, INNTEKT, emptyList())
+            ), førsteFraværsdag = 1.januar(2020), refusjon = Refusjon(INNTEKT, null, emptyList())
         )
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(
@@ -1348,7 +1348,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(
             2.vedtaksperiode, listOf(
                 Periode(1.januar(2020), 16.januar(2020))
-            ), førsteFraværsdag = 1.januar(2020), refusjon = Refusjon(null, INNTEKT, emptyList())
+            ), førsteFraværsdag = 1.januar(2020), refusjon = Refusjon(INNTEKT, null, emptyList())
         )
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(
@@ -1406,7 +1406,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(
             1.vedtaksperiode, listOf(
                 Periode(1.januar, 16.januar)
-            ), førsteFraværsdag = 1.januar, refusjon = Refusjon(null, INNTEKT, emptyList())
+            ), førsteFraværsdag = 1.januar, refusjon = Refusjon(INNTEKT, null, emptyList())
         )
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(
@@ -1468,7 +1468,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(
             3.vedtaksperiode, listOf(
                 Periode(1.januar(2020), 16.januar(2020))
-            ), førsteFraværsdag = 1.januar(2020), refusjon = Refusjon(null, INNTEKT, emptyList())
+            ), førsteFraværsdag = 1.januar(2020), refusjon = Refusjon(INNTEKT, null, emptyList())
         )
         håndterYtelser(3.vedtaksperiode)
         håndterVilkårsgrunnlag(
@@ -1526,7 +1526,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             1.vedtaksperiode,
             listOf(Periode(16.mars(2020), 31.mars(2020))),
             førsteFraværsdag = 16.mars(2020),
-            refusjon = Refusjon(null, INNTEKT, emptyList())
+            refusjon = Refusjon(INNTEKT, null, emptyList())
         )
         håndterSøknad(Sykdom(15.mars(2020), 8.april(2020), 100.prosent))
         håndterYtelser(1.vedtaksperiode)

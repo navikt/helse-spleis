@@ -40,7 +40,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(Periode(periodeA1.start, periodeA1.start.plusDays(15))),
             førsteFraværsdag = periodeA1.start,
             beregnetInntekt = 30000.månedlig,
-            refusjon = Refusjon(null, 30000.månedlig, emptyList()),
+            refusjon = Refusjon(30000.månedlig, null, emptyList()),
             orgnummer = a1
         )
         person.håndter(ytelser(1.vedtaksperiode, orgnummer = a1, inntektshistorikk = emptyList()))
@@ -69,7 +69,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(Periode(periodeA2.start, periodeA2.start.plusDays(15))),
             førsteFraværsdag = periodeA2.start,
             beregnetInntekt = 10000.månedlig,
-            refusjon = Refusjon(null, 10000.månedlig, emptyList()),
+            refusjon = Refusjon(10000.månedlig, null, emptyList()),
             orgnummer = a2
 
         )
@@ -84,7 +84,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(15.januar til 28.januar, 2.februar til 3.februar),
             førsteFraværsdag = 2.februar,
             beregnetInntekt = 30000.månedlig,
-            refusjon = Refusjon(null, 30000.månedlig, emptyList()),
+            refusjon = Refusjon(30000.månedlig, null, emptyList()),
             orgnummer = a1
         )
         person.håndter(ytelser(1.vedtaksperiode, orgnummer = a1, inntektshistorikk = emptyList()))
@@ -119,7 +119,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
                 arbeidsgiverperioder = listOf(15.januar til 28.januar, 2.februar til 3.februar),
                 beregnetInntekt = 30000.månedlig,
                 førsteFraværsdag = 2.februar,
-                refusjon = Refusjon(null, 30000.månedlig, emptyList()),
+                refusjon = Refusjon(30000.månedlig, null, emptyList()),
                 orgnummer = a1
             )
         )
@@ -150,7 +150,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
                 arbeidsgiverperioder = listOf(Periode(periodeA2.start, periodeA2.start.plusDays(15))),
                 beregnetInntekt = 10000.månedlig,
                 førsteFraværsdag = periodeA2.start,
-                refusjon = Refusjon(null, 10000.månedlig, emptyList()),
+                refusjon = Refusjon(10000.månedlig, null, emptyList()),
                 orgnummer = a2
             )
         )
