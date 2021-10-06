@@ -19,11 +19,10 @@ internal class CreateØkonomiTest {
 
     @Test
     fun `opprette bare prosenter`() {
-        val data = sykdomstidslinjedag(79.5, 66.67)
+        val data = sykdomstidslinjedag(79.5)
         createØkonomi(data).also { økonomi ->
             økonomi.medData { grad, arbeidsgiverBetalingProsent, dekningsgrunnlag, _, _, aktuellDagsinntekt, _, _, _ ->
                 assertEquals(79.5, grad)
-                assertEquals(66.67, arbeidsgiverBetalingProsent)
                 assertNull(dekningsgrunnlag)
                 assertNull(aktuellDagsinntekt)
             }
@@ -35,20 +34,19 @@ internal class CreateØkonomiTest {
 
     @Test
     fun `opprette med bare inntekt`() {
-        val data = utbetalingsdag(79.5, 66.67, 1500.0, 1199.6)
+        val data = utbetalingsdag(80.0, 420.0, 1500.0, 1199.6)
         createØkonomi(data).also { økonomi ->
-            økonomi.medData {
-                    grad,
-                    arbeidsgiverBetalingProsent,
-                    dekningsgrunnlag,
-                    _,
-                    _,
-                    aktuellDagsinntekt,
-                    arbeidsgiverbeløp,
-                    personbeløp,
-                    er6GBegrenset ->
-                assertEquals(79.5, grad)
-                assertEquals(66.67, arbeidsgiverBetalingProsent)
+            økonomi.medData { grad,
+                              arbeidsgiverRefusjonsbeløp,
+                              dekningsgrunnlag,
+                              _,
+                              _,
+                              aktuellDagsinntekt,
+                              arbeidsgiverbeløp,
+                              personbeløp,
+                              er6GBegrenset ->
+                assertEquals(80.0, grad)
+                assertEquals(420.0, arbeidsgiverRefusjonsbeløp)
                 assertEquals(1500.0, aktuellDagsinntekt)
                 assertEquals(1199.6, dekningsgrunnlag)
                 assertNull(arbeidsgiverbeløp)
@@ -63,20 +61,19 @@ internal class CreateØkonomiTest {
 
     @Test
     fun `har betalinger`() {
-        val data = utbetalingsdag(79.5, 66.67, 1500.0, 1199.6, 640.0, 320.0, null, true)
+        val data = utbetalingsdag(79.5, 420.0, 1500.0, 1199.6, 640.0, 320.0, null, true)
         createØkonomi(data).also { økonomi ->
-            økonomi.medData {
-                    grad,
-                    arbeidsgiverBetalingProsent,
-                    dekningsgrunnlag,
-                    _,
-                    _,
-                    aktuellDagsinntekt,
-                    arbeidsgiverbeløp,
-                    personbeløp,
-                    er6GBegrenset ->
+            økonomi.medData { grad,
+                              arbeidsgiverRefusjon,
+                              dekningsgrunnlag,
+                              _,
+                              _,
+                              aktuellDagsinntekt,
+                              arbeidsgiverbeløp,
+                              personbeløp,
+                              er6GBegrenset ->
                 assertEquals(79.5, grad)
-                assertEquals(66.67, arbeidsgiverBetalingProsent)
+                assertEquals(420.0, arbeidsgiverRefusjon)
                 assertEquals(1500.0, aktuellDagsinntekt)
                 assertEquals(1199.6, dekningsgrunnlag)
                 assertEquals(640.0, arbeidsgiverbeløp)
@@ -91,7 +88,7 @@ internal class CreateØkonomiTest {
 
     private fun utbetalingsdag(
         grad: Double,
-        arbeidsgiverBetalingProsent: Double,
+        arbeidsgiverRefusjonsbeløp: Double?,
         aktuellDagsinntekt: Double,
         dekningsgrunnlag: Double,
         arbeidsgiverbeløp: Double? = null,
@@ -107,7 +104,7 @@ internal class CreateØkonomiTest {
         null,
         null,
         grad,
-        arbeidsgiverBetalingProsent,
+        arbeidsgiverRefusjonsbeløp,
         arbeidsgiverbeløp,
         personbeløp,
         er6GBegrenset
@@ -115,25 +112,18 @@ internal class CreateØkonomiTest {
 
     private fun sykdomstidslinjedag(
         grad: Double,
-        arbeidsgiverBetalingProsent: Double,
-        aktuellDagsinntekt: Double? = null,
-        dekningsgrunnlag: Double? = null,
-        arbeidsgiverbeløp: Int? = null,
-        personbeløp: Int? = null,
-        er6GBegrenset: Boolean = false,
-        totalGrad: Double? = null
     ) = PersonData.ArbeidsgiverData.SykdomstidslinjeData.DagData(
         PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG,
         PersonData.ArbeidsgiverData.SykdomstidslinjeData.KildeData("type", UUID.randomUUID(), 1.januar.atStartOfDay()),
         grad,
-        arbeidsgiverBetalingProsent,
-        aktuellDagsinntekt,
-        dekningsgrunnlag,
         null,
-        totalGrad,
-        arbeidsgiverbeløp,
-        personbeløp,
-        er6GBegrenset,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        false,
         null
     )
 

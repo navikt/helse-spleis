@@ -168,7 +168,7 @@ internal class Utbetalingstidslinje private constructor(
 
     internal fun kunFridager() =
         this.utbetalingsdager.all {
-                it is NavHelgDag ||
+            it is NavHelgDag ||
                 it is Fridag
         }
 
@@ -227,10 +227,14 @@ internal class Utbetalingstidslinje private constructor(
         if (periode == periode()) return this
         return Utbetalingstidslinje(utbetalingsdager.filter { it.dato in periode }.toMutableList())
     }
+
     internal fun kutt(sisteDato: LocalDate) = subset(LocalDate.MIN til sisteDato)
 
     internal operator fun get(dato: LocalDate) =
-        if (isEmpty() || dato !in periode()) UkjentDag(dato, Økonomi.ikkeBetalt().inntekt(Inntekt.INGEN, skjæringstidspunkt = dato))
+        if (isEmpty() || dato !in periode()) UkjentDag(
+            dato,
+            Økonomi.ikkeBetalt().inntekt(Inntekt.INGEN, skjæringstidspunkt = dato)
+        )
         else utbetalingsdager.first { it.dato == dato }
 
     override fun toString(): String {
@@ -304,8 +308,10 @@ internal class Utbetalingstidslinje private constructor(
         internal class ArbeidsgiverperiodeDag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
             override val prioritet = 30
             override fun accept(visitor: UtbetalingsdagVisitor) = økonomi.accept(visitor, this, dato)
-            override fun serialiseringstype(): PersonData.UtbetalingstidslinjeData.TypeData = PersonData.UtbetalingstidslinjeData.TypeData.ArbeidsgiverperiodeDag
+            override fun serialiseringstype(): PersonData.UtbetalingstidslinjeData.TypeData =
+                PersonData.UtbetalingstidslinjeData.TypeData.ArbeidsgiverperiodeDag
         }
+
         abstract fun serialiseringstype(): PersonData.UtbetalingstidslinjeData.TypeData
         internal open fun toMap() = mutableMapOf<String, Any?>(
             "type" to serialiseringstype()
@@ -375,6 +381,7 @@ internal class Utbetalingstidslinje private constructor(
             ).apply {
                 putAll(økonomi.toMap())
             }
+
             override fun serialiseringstype(): PersonData.UtbetalingstidslinjeData.TypeData = PersonData.UtbetalingstidslinjeData.TypeData.AvvistDag
         }
 

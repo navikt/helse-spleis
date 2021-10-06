@@ -59,7 +59,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
                 }
             }
 
-    private fun finnInntekt(skjæringstidspunkt: LocalDate, dato: LocalDate): Inntektshistorikk.Inntektsopplysning?{
+    private fun finnInntekt(skjæringstidspunkt: LocalDate, dato: LocalDate): Inntektshistorikk.Inntektsopplysning? {
         return inntektPerSkjæringstidspunkt?.get(skjæringstidspunkt)
             ?: inntektPerSkjæringstidspunkt?.entries?.firstOrNull { (key) -> key in skjæringstidspunkt..dato }?.value
     }
@@ -69,8 +69,14 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
 
     private fun Økonomi.inntektIfNotNull(dato: LocalDate) =
         inntektForDatoOrNull(dato)
-            ?.let { (skjæringstidspunkt, inntekt) -> inntekt(inntekt, inntekt.dekningsgrunnlag(arbeidsgiverRegler), skjæringstidspunkt) }
-            ?: inntekt(INGEN, skjæringstidspunkt = dato)
+            ?.let { (skjæringstidspunkt, inntekt) ->
+                inntekt(
+                    aktuellDagsinntekt = inntekt,
+                    dekningsgrunnlag = inntekt.dekningsgrunnlag(arbeidsgiverRegler),
+                    skjæringstidspunkt = skjæringstidspunkt
+                )
+            }
+            ?: inntekt(aktuellDagsinntekt = INGEN, dekningsgrunnlag = INGEN, skjæringstidspunkt = dato)
 
     override fun result(sykdomstidslinje: Sykdomstidslinje, periode: Periode): Utbetalingstidslinje {
         sykdomstidslinje.fremTilOgMed(periode.endInclusive).accept(this)
@@ -140,7 +146,13 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
 
     private fun addForeldetDag(dagen: LocalDate, økonomi: Økonomi) {
         val (skjæringstidspunkt, inntekt) = inntektForDato(dagen)
-        tidslinje.addForeldetDag(dagen, økonomi.inntekt(inntekt, inntekt.dekningsgrunnlag(arbeidsgiverRegler), skjæringstidspunkt))
+        tidslinje.addForeldetDag(
+            dagen, økonomi.inntekt(
+                aktuellDagsinntekt = inntekt,
+                dekningsgrunnlag = inntekt.dekningsgrunnlag(arbeidsgiverRegler),
+                skjæringstidspunkt = skjæringstidspunkt
+            )
+        )
     }
 
     private fun addArbeidsgiverdag(dato: LocalDate) {
@@ -149,12 +161,22 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
 
     private fun addNAVdag(dato: LocalDate, økonomi: Økonomi) {
         val (skjæringstidspunkt, inntekt) = inntektForDato(dato)
-        tidslinje.addNAVdag(dato, økonomi.inntekt(inntekt, inntekt.dekningsgrunnlag(arbeidsgiverRegler), skjæringstidspunkt))
+        tidslinje.addNAVdag(
+            dato,
+            økonomi.inntekt(
+                aktuellDagsinntekt = inntekt,
+                dekningsgrunnlag = inntekt.dekningsgrunnlag(arbeidsgiverRegler),
+                skjæringstidspunkt = skjæringstidspunkt
+            )
+        )
     }
 
     private fun addNAVHelgedag(dato: LocalDate, økonomi: Økonomi) {
         val skjæringstidspunkt = inntektForDatoOrNull(dato)?.let { (skjæringstidspunkt) -> skjæringstidspunkt } ?: dato
-        tidslinje.addHelg(dato, økonomi.inntekt(INGEN, skjæringstidspunkt = skjæringstidspunkt))
+        tidslinje.addHelg(
+            dato,
+            økonomi.inntekt(aktuellDagsinntekt = INGEN, dekningsgrunnlag = INGEN, skjæringstidspunkt = skjæringstidspunkt)
+        )
     }
 
     private fun addArbeidsdag(dato: LocalDate) {

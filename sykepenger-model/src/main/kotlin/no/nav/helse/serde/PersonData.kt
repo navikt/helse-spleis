@@ -21,8 +21,11 @@ import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.*
-import no.nav.helse.utbetalingstidslinje.*
+import no.nav.helse.utbetalingstidslinje.Begrunnelse
+import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.*
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
@@ -562,7 +565,7 @@ internal data class PersonData(
                 private val type: JsonDagType,
                 private val kilde: KildeData,
                 private val grad: Double,
-                private val arbeidsgiverBetalingProsent: Double,
+                private val arbeidsgiverRefusjonsbeløp: Double?,
                 private val aktuellDagsinntekt: Double?,
                 private val dekningsgrunnlag: Double?,
                 private val skjæringstidspunkt: LocalDate?,
@@ -589,13 +592,13 @@ internal data class PersonData(
                         .apply { isAccessible = true }
                         .call(
                             grad.prosent,
-                            arbeidsgiverBetalingProsent.prosent,
-                            aktuellDagsinntekt,
-                            dekningsgrunnlag,
+                            arbeidsgiverRefusjonsbeløp?.daglig,
+                            aktuellDagsinntekt?.daglig,
+                            dekningsgrunnlag?.daglig,
                             skjæringstidspunkt,
                             totalGrad?.prosent,
-                            arbeidsgiverbeløp,
-                            personbeløp,
+                            arbeidsgiverbeløp?.daglig,
+                            personbeløp?.daglig,
                             er6GBegrenset,
                             Økonomi.Tilstand.KunGrad
                         )
@@ -1163,7 +1166,7 @@ internal data class PersonData(
             private val begrunnelse: BegrunnelseData?,
             private val begrunnelser: List<BegrunnelseData>?,
             private val grad: Double?,
-            private val arbeidsgiverBetalingProsent: Double?,
+            private val arbeidsgiverRefusjonsbeløp: Double?,
             private val arbeidsgiverbeløp: Double?,
             private val personbeløp: Double?,
             private val er6GBegrenset: Boolean?
@@ -1177,7 +1180,7 @@ internal data class PersonData(
                     .apply { isAccessible = true }
                     .call(
                         grad?.prosent,
-                        arbeidsgiverBetalingProsent?.prosent,
+                        arbeidsgiverRefusjonsbeløp?.daglig,
                         aktuellDagsinntekt.daglig,
                         dekningsgrunnlag.daglig,
                         skjæringstidspunkt,

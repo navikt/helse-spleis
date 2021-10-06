@@ -9,7 +9,6 @@ import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
-import no.nav.helse.økonomi.Inntekt.Companion.konverter
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import java.time.LocalDate
@@ -17,7 +16,7 @@ import kotlin.math.roundToInt
 
 internal class Økonomi private constructor(
     private val grad: Prosentdel,
-    private val arbeidsgiverBetalingProsent: Prosentdel,
+    private var arbeidsgiverRefusjonsbeløp: Inntekt? = null,
     private val aktuellDagsinntekt: Inntekt? = null,
     private val dekningsgrunnlag: Inntekt? = null,
     private val skjæringstidspunkt: LocalDate? = null,
@@ -32,8 +31,8 @@ internal class Økonomi private constructor(
         internal val arbeidsgiverBeløp = { økonomi: Økonomi -> økonomi.arbeidsgiverbeløp!! }
         internal val personBeløp = { økonomi: Økonomi -> økonomi.personbeløp!! }
 
-        internal fun sykdomsgrad(grad: Prosentdel, arbeidsgiverBetalingProsent: Prosentdel = 100.prosent) =
-            Økonomi(grad, arbeidsgiverBetalingProsent)
+        internal fun sykdomsgrad(grad: Prosentdel) =
+            Økonomi(grad)
 
         internal fun ikkeBetalt() = sykdomsgrad(0.prosent)
 
@@ -71,7 +70,7 @@ internal class Økonomi private constructor(
                 økonomiList,
                 total,
                 budsjett,
-            ){ it.personbeløp!! }
+            ) { it.personbeløp!! }
 
             beregningsresultat.forEach { it.økonomi.personbeløp = it.utbetalingEtterAvrunding() }
 
@@ -161,13 +160,18 @@ internal class Økonomi private constructor(
             tilstand.inntekt(this, aktuellDagsinntekt, it, skjæringstidspunkt)
         }
 
+    internal fun arbeidsgiverRefusjon(beløp: Inntekt): Økonomi {
+        arbeidsgiverRefusjonsbeløp = beløp
+        return this
+    }
+
     internal fun lås() = tilstand.lås(this)
 
     internal fun låsOpp() = tilstand.låsOpp(this)
 
     internal fun toMap() = mutableMapOf<String, Any>().also { map ->
         medData { grad,
-                  arbeidsgiverBetalingProsent,
+                  arbeidsgiverRefusjonsbeløp,
                   dekningsgrunnlag,
                   skjæringstidspunkt,
                   totalGrad,
@@ -176,7 +180,7 @@ internal class Økonomi private constructor(
                   personbeløp,
                   er6GBegrenset ->
             map["grad"] = grad
-            map["arbeidsgiverBetalingProsent"] = arbeidsgiverBetalingProsent
+            map.compute("arbeidsgiverRefusjonsbeløp") { _, _ -> arbeidsgiverRefusjonsbeløp }
             map.compute("skjæringstidspunkt") { _, _ -> skjæringstidspunkt }
             map.compute("totalGrad") { _, _ -> totalGrad }
             map.compute("dekningsgrunnlag") { _, _ -> dekningsgrunnlag }
@@ -192,7 +196,7 @@ internal class Økonomi private constructor(
     internal fun <R> medAvrundetData(
         block: (
             grad: Int,
-            arbeidsgiverBetalingProsent: Int,
+            arbeidsgiverRefusjonsbeløp: Int?,
             dekningsgrunnlag: Int?,
             aktuellDagsinntekt: Int?,
             arbeidsgiverbeløp: Int?,
@@ -201,7 +205,7 @@ internal class Økonomi private constructor(
         ) -> R
     ) =
         medData { grad: Double,
-                  arbeidsgiverBetalingProsent: Double,
+                  arbeidsgiverRefusjonsbeløp: Double?,
                   dekningsgrunnlag: Double?,
                   _: LocalDate?,
                   _: Double?,
@@ -211,7 +215,7 @@ internal class Økonomi private constructor(
                   er6GBegrenset: Boolean? ->
             block(
                 grad.roundToInt(),
-                arbeidsgiverBetalingProsent.roundToInt(),
+                arbeidsgiverRefusjonsbeløp?.roundToInt(),
                 dekningsgrunnlag?.roundToInt(),
                 aktuellDagsinntekt?.roundToInt(),
                 arbeidsgiverbeløp?.roundToInt(),
@@ -220,9 +224,9 @@ internal class Økonomi private constructor(
             )
         }
 
-    internal fun <R>  medData(block: (grad: Double, aktuellDagsinntekt: Double?) -> R) =
+    internal fun <R> medData(block: (grad: Double, aktuellDagsinntekt: Double?) -> R) =
         medData { grad: Double,
-                  _: Double,
+                  _: Double?,
                   _: Double?,
                   _: LocalDate?,
                   _: Double?,
@@ -235,7 +239,7 @@ internal class Økonomi private constructor(
 
     internal fun medAvrundetData(block: (Int, Int?) -> Unit) {
         medAvrundetData { grad: Int,
-                          _: Int,
+                          _: Int?,
                           _: Int?,
                           aktuellDagsinntekt: Int?,
                           _: Int?,
@@ -246,24 +250,26 @@ internal class Økonomi private constructor(
     }
 
     private fun <R> medDataFraBeløp(lambda: MedØkonomiData<R>) = lambda(
-            grad.toDouble(),
-            arbeidsgiverBetalingProsent.toDouble(),
-            dekningsgrunnlag!!.reflection { _, _, daglig, _ -> daglig },
-            skjæringstidspunkt,
-            totalGrad?.toDouble(),
-            aktuellDagsinntekt!!.reflection { _, _, daglig, _ -> daglig },
-            arbeidsgiverbeløp!!.reflection { _, _, daglig, _ -> daglig },
-            personbeløp!!.reflection { _, _, daglig, _ -> daglig },
-            er6GBegrenset)
+        grad.toDouble(),
+        arbeidsgiverRefusjonsbeløp?.reflection { _, _, daglig, _ -> daglig },
+        dekningsgrunnlag!!.reflection { _, _, daglig, _ -> daglig },
+        skjæringstidspunkt,
+        totalGrad?.toDouble(),
+        aktuellDagsinntekt!!.reflection { _, _, daglig, _ -> daglig },
+        arbeidsgiverbeløp!!.reflection { _, _, daglig, _ -> daglig },
+        personbeløp!!.reflection { _, _, daglig, _ -> daglig },
+        er6GBegrenset
+    )
 
     private fun <R> medDataFraInntekt(lambda: MedØkonomiData<R>) = lambda(
-            grad.toDouble(),
-            arbeidsgiverBetalingProsent.toDouble(),
-            dekningsgrunnlag!!.reflection { _, _, daglig, _ -> daglig },
-            skjæringstidspunkt,
-            totalGrad?.toDouble(),
-            aktuellDagsinntekt!!.reflection { _, _, daglig, _ -> daglig },
-            null, null, null)
+        grad.toDouble(),
+        arbeidsgiverRefusjonsbeløp?.reflection { _, _, daglig, _ -> daglig },
+        dekningsgrunnlag!!.reflection { _, _, daglig, _ -> daglig },
+        skjæringstidspunkt,
+        totalGrad?.toDouble(),
+        aktuellDagsinntekt!!.reflection { _, _, daglig, _ -> daglig },
+        null, null, null
+    )
 
     private fun grad() = tilstand.grad(this)
 
@@ -273,38 +279,9 @@ internal class Økonomi private constructor(
 
     private fun _betal() {
         val total = dekningsgrunnlag!! * grad().ratio()
-        (total * arbeidsgiverBetalingProsent.ratio()).also {
-            arbeidsgiverbeløp = it
-            personbeløp = total - arbeidsgiverbeløp!!
-        }
+        arbeidsgiverbeløp = arbeidsgiverRefusjonsbeløp?.coerceAtMost(total) ?: total
+        personbeløp = (total - arbeidsgiverbeløp!!).coerceAtLeast(INGEN)
     }
-
-    private fun prosentMap(): Map<String, Any> = mapOf(
-        "grad" to grad.toDouble(),   // Must use instance value here
-        "arbeidsgiverBetalingProsent" to arbeidsgiverBetalingProsent.toDouble()
-    )
-
-    private fun inntektMap(): Map<String, Double> = mapOf(
-        "dekningsgrunnlag" to dekningsgrunnlag!!,
-        "aktuellDagsinntekt" to aktuellDagsinntekt!!
-    ).konverter()
-
-    private fun prosentIntMap(): Map<String, Int> = mapOf(
-        "grad" to grad.roundToInt(),   // Must use instance value here
-        "arbeidsgiverBetalingProsent" to arbeidsgiverBetalingProsent.roundToInt()
-    )
-
-    private fun inntektIntMap(): Map<String, Int> = inntektMap().mapValues { it.value.roundToInt() }
-
-    private fun utbetalingMap() =
-        mapOf(
-            "arbeidsgiverbeløp" to arbeidsgiverbeløp!!,
-            "personbeløp" to personbeløp!!
-        )
-            .konverter()
-            .mapValues { it.value.roundToInt() }
-            .toMutableMap<String, Any>()
-            .also { it["er6GBegrenset"] = er6GBegrenset!! }
 
     internal fun accept(visitor: UtbetalingsdagVisitor, dag: NavDag, dato: LocalDate) =
         visitor.visit(dag, dato, this)
@@ -365,7 +342,7 @@ internal class Økonomi private constructor(
 
         internal open fun grad(økonomi: Økonomi) = økonomi.grad
 
-        internal abstract fun <R> medData(økonomi: Økonomi, lambda: MedØkonomiData<R>):R
+        internal abstract fun <R> medData(økonomi: Økonomi, lambda: MedØkonomiData<R>): R
 
         internal open fun inntekt(
             økonomi: Økonomi,
@@ -399,13 +376,19 @@ internal class Økonomi private constructor(
                 aktuellDagsinntekt: Inntekt,
                 dekningsgrunnlag: Inntekt,
                 skjæringstidspunkt: LocalDate?
-            ) = Økonomi(økonomi.grad, økonomi.arbeidsgiverBetalingProsent, aktuellDagsinntekt, dekningsgrunnlag, skjæringstidspunkt)
-                    .also { other -> other.tilstand = HarInntekt }
+            ) = Økonomi(
+                grad = økonomi.grad,
+                arbeidsgiverRefusjonsbeløp = økonomi.arbeidsgiverRefusjonsbeløp,
+                aktuellDagsinntekt = aktuellDagsinntekt,
+                dekningsgrunnlag = dekningsgrunnlag,
+                skjæringstidspunkt = skjæringstidspunkt
+            )
+                .also { other -> other.tilstand = HarInntekt }
 
             override fun lås(økonomi: Økonomi) = økonomi
 
             override fun <R> medData(økonomi: Økonomi, lambda: MedØkonomiData<R>) =
-                lambda(økonomi.grad.toDouble(), økonomi.arbeidsgiverBetalingProsent.toDouble(), null, null, null, null, null, null, null)
+                lambda(økonomi.grad.toDouble(), null, null, null, null, null, null, null, null)
         }
 
         internal object HarInntekt : Tilstand() {
@@ -483,13 +466,15 @@ internal fun List<Økonomi>.erUnderInntekstgrensen(
 internal fun List<Økonomi>.er6GBegrenset() = Økonomi.er6GBegrenset(this)
 
 internal fun interface MedØkonomiData<R> {
-    operator fun invoke(grad: Double,
-                              arbeidsgiverBetalingProsent: Double,
-                              dekningsgrunnlag: Double?,
-                              skjæringstidspunkt: LocalDate?,
-                              totalGrad: Double?,
-                              aktuellDagsinntekt: Double?,
-                              arbeidsgiverbeløp: Double?,
-                              personbeløp: Double?,
-                              er6GBegrenset: Boolean?): R
+    operator fun invoke(
+        grad: Double,
+        arbeidsgiverRefusjonsbeløp: Double?,
+        dekningsgrunnlag: Double?,
+        skjæringstidspunkt: LocalDate?,
+        totalGrad: Double?,
+        aktuellDagsinntekt: Double?,
+        arbeidsgiverbeløp: Double?,
+        personbeløp: Double?,
+        er6GBegrenset: Boolean?
+    ): R
 }
