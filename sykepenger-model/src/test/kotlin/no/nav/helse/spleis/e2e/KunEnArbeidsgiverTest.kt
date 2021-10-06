@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.PersonObserver
@@ -2929,8 +2930,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             arbeidsgiverperioder = arbeidsgiverperioder,
             førsteFraværsdag = 1.januar(2021),
-            refusjon = Refusjon(null, 1000.månedlig, emptyList()),
-            beregnetInntekt = 1000.månedlig
+            beregnetInntekt = 1000.månedlig,
+            refusjon = Refusjon(null, 1000.månedlig, emptyList())
         )
 
         håndterYtelser(1.vedtaksperiode)

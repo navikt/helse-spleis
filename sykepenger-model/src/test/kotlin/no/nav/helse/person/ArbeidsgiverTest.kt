@@ -24,7 +24,7 @@ internal class ArbeidsgiverTest {
             meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(
                 opphørsdato = null,
-                inntekt = 12000.månedlig
+                beløp = 12000.månedlig
             ),
             orgnummer = ORGNUMMER,
             fødselsnummer = "fnr",

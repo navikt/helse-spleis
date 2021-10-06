@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.SøknadArbeidsgiver.Sykdom
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.Inntektskilde.FLERE_ARBEIDSGIVERE
@@ -37,8 +38,8 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         nyPeriode(1.januar til 31.januar, a1)
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(periodeA1.start, periodeA1.start.plusDays(15))),
-            beregnetInntekt = 30000.månedlig,
             førsteFraværsdag = periodeA1.start,
+            beregnetInntekt = 30000.månedlig,
             refusjon = Refusjon(null, 30000.månedlig, emptyList()),
             orgnummer = a1
         )
@@ -66,8 +67,8 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         nyPeriode(periodeA2, a2)
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(periodeA2.start, periodeA2.start.plusDays(15))),
-            beregnetInntekt = 10000.månedlig,
             førsteFraværsdag = periodeA2.start,
+            beregnetInntekt = 10000.månedlig,
             refusjon = Refusjon(null, 10000.månedlig, emptyList()),
             orgnummer = a2
 
@@ -82,9 +83,9 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(15.januar til 28.januar, 2.februar til 3.februar),
             førsteFraværsdag = 2.februar,
+            beregnetInntekt = 30000.månedlig,
             refusjon = Refusjon(null, 30000.månedlig, emptyList()),
-            orgnummer = a1,
-            beregnetInntekt = 30000.månedlig
+            orgnummer = a1
         )
         person.håndter(ytelser(1.vedtaksperiode, orgnummer = a1, inntektshistorikk = emptyList()))
         person.håndter(vilkårsgrunnlag(
@@ -1494,7 +1495,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.januar(2021) til 3.januar(2021), 6.januar(2021) til 18.januar(2021)),
             førsteFraværsdag = 6.januar(2021),
-            refusjon = Refusjon(null, 1000.månedlig, emptyList()),
+            beregnetInntekt = 1000.månedlig,
             orgnummer = a2
         )
         assertTilstand(a1, AVVENTER_HISTORIKK)
@@ -2183,12 +2184,12 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
-            refusjon = Refusjon(null, 20000.månedlig, emptyList()),
+            beregnetInntekt = 20000.månedlig,
             orgnummer = a1
         )
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
-            refusjon = Refusjon(null, 20000.månedlig, emptyList()),
+            beregnetInntekt = 20000.månedlig,
             orgnummer = a2
         )
 

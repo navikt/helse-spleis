@@ -32,6 +32,7 @@ internal open class InntektsmeldingerRiver(
         }
         message.requireArray("endringIRefusjoner") {
             require("endringsdato", JsonNode::asLocalDate)
+            requireKey("beloep")
         }
         message.require("mottattDato", JsonNode::asLocalDateTime)
         message.interestedIn("foersteFravaersdag", JsonNode::asLocalDate)

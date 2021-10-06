@@ -1,5 +1,7 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companion.endrerRefusjon
+import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companion.minOf
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Inntektshistorikk
@@ -156,9 +158,21 @@ class Inntektsmelding(
 
     class Refusjon(
         private val opphørsdato: LocalDate?,
-        private val inntekt: Inntekt?,
-        private val endringerIRefusjon: List<LocalDate> = emptyList()
+        private val beløp: Inntekt?,
+        private val endringerIRefusjon: List<EndringIRefusjon> = emptyList()
     ) {
+        class EndringIRefusjon(
+            private val endringsdato: LocalDate,
+            private val beløp: Inntekt
+        ){
+            internal companion object{
+                internal fun List<EndringIRefusjon>.endrerRefusjon(periode: Periode) =
+                    any { it.endringsdato in periode }
+
+                internal fun List<EndringIRefusjon>.minOf(opphørsdato: LocalDate?) =
+                    (map { it.endringsdato } + opphørsdato).filterNotNull().minOrNull()
+            }
+        }
 
         internal fun valider(
             aktivitetslogg: IAktivitetslogg,
@@ -166,8 +180,8 @@ class Inntektsmelding(
             beregnetInntekt: Inntekt
         ): IAktivitetslogg {
             when {
-                inntekt == null -> aktivitetslogg.error("Arbeidsgiver forskutterer ikke (krever ikke refusjon)")
-                inntekt != beregnetInntekt -> aktivitetslogg.error("Inntektsmelding inneholder beregnet inntekt og refusjon som avviker med hverandre")
+                beløp == null -> aktivitetslogg.error("Arbeidsgiver forskutterer ikke (krever ikke refusjon)")
+                beløp != beregnetInntekt -> aktivitetslogg.error("Inntektsmelding inneholder beregnet inntekt og refusjon som avviker med hverandre")
                 opphørerRefusjon(periode) -> aktivitetslogg.error("Arbeidsgiver opphører refusjon i perioden")
                 opphørsdato != null -> aktivitetslogg.error("Arbeidsgiver opphører refusjon")
                 endrerRefusjon(periode) -> aktivitetslogg.error("Arbeidsgiver endrer refusjon i perioden")
@@ -180,12 +194,12 @@ class Inntektsmelding(
             opphørsdato?.let { it in periode } ?: false
 
         private fun endrerRefusjon(periode: Periode) =
-            endringerIRefusjon.any { it in periode }
+            endringerIRefusjon.endrerRefusjon(periode)
 
         internal fun cacheRefusjon(arbeidsgiver: Arbeidsgiver, beregnetInntekt: Inntekt, førsteDagIArbeidsgiverperioden: LocalDate) {
             val refusjonsopphørsdato =
-                if (beregnetInntekt != inntekt) førsteDagIArbeidsgiverperioden
-                else (endringerIRefusjon + opphørsdato).filterNotNull().minOrNull()
+                if (beregnetInntekt != beløp) førsteDagIArbeidsgiverperioden
+                else endringerIRefusjon.minOf(opphørsdato)
             arbeidsgiver.cacheRefusjon(refusjonsopphørsdato)
         }
     }

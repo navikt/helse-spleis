@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -484,8 +485,8 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             førsteFraværsdag = 1.januar,
-            orgnummer = ag1,
-            refusjon = Refusjon(null, 31000.månedlig, emptyList())
+            refusjon = Refusjon(null, 31000.månedlig, emptyList()),
+            orgnummer = ag1
         )
 
         val inntekter = listOf(

@@ -10,11 +10,16 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 internal open class InntektsmeldingMessage(packet: JsonMessage) : HendelseMessage(packet) {
     override val fødselsnummer = packet["arbeidstakerFnr"].asText()
     private val refusjon = Inntektsmelding.Refusjon(
-        inntekt = packet["refusjon.beloepPrMnd"].takeUnless(JsonNode::isMissingOrNull)?.asDouble()?.månedlig,
+        beløp = packet["refusjon.beloepPrMnd"].takeUnless(JsonNode::isMissingOrNull)?.asDouble()?.månedlig,
         opphørsdato = packet["refusjon.opphoersdato"].asOptionalLocalDate(),
-        endringerIRefusjon = packet["endringIRefusjoner"].map { it.path("endringsdato").asLocalDate() }
+        endringerIRefusjon = packet["endringIRefusjoner"].map {
+            Inntektsmelding.Refusjon.EndringIRefusjon(
+                it.path("endringsdato").asLocalDate(),
+                it.path("beloep").asDouble().månedlig
+            )
+        }
     )
-    private val arbeidsforholdId = packet["arbeidsforholdId"].takeIf (JsonNode::isTextual)?.asText()
+    private val arbeidsforholdId = packet["arbeidsforholdId"].takeIf(JsonNode::isTextual)?.asText()
     private val orgnummer = packet["virksomhetsnummer"].asText()
     private val aktørId = packet["arbeidstakerAktorId"].asText()
     private val mottatt = packet["mottattDato"].asLocalDateTime()
@@ -25,20 +30,21 @@ internal open class InntektsmeldingMessage(packet: JsonMessage) : HendelseMessag
         packet["begrunnelseForReduksjonEllerIkkeUtbetalt"].takeIf(JsonNode::isTextual)?.asText()
     private val harOpphørAvNaturalytelser = packet["opphoerAvNaturalytelser"].size() > 0
 
-    protected val inntektsmelding get() = Inntektsmelding(
-        meldingsreferanseId = this.id,
-        refusjon = refusjon,
-        orgnummer = orgnummer,
-        fødselsnummer = fødselsnummer,
-        aktørId = aktørId,
-        førsteFraværsdag = førsteFraværsdag,
-        beregnetInntekt = beregnetInntekt.månedlig,
-        arbeidsgiverperioder = arbeidsgiverperioder,
-        arbeidsforholdId = arbeidsforholdId,
-        begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-        harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
-        mottatt = mottatt
-    )
+    protected val inntektsmelding
+        get() = Inntektsmelding(
+            meldingsreferanseId = this.id,
+            refusjon = refusjon,
+            orgnummer = orgnummer,
+            fødselsnummer = fødselsnummer,
+            aktørId = aktørId,
+            førsteFraværsdag = førsteFraværsdag,
+            beregnetInntekt = beregnetInntekt.månedlig,
+            arbeidsgiverperioder = arbeidsgiverperioder,
+            arbeidsforholdId = arbeidsforholdId,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+            harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
+            mottatt = mottatt
+        )
 
     override fun behandle(mediator: IHendelseMediator) {
         mediator.behandle(this, inntektsmelding)

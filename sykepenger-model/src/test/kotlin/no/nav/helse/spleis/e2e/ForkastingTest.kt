@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.testhelpers.*
@@ -19,7 +20,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 23.februar, 100.prosent))
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar,  31.januar, 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, INNTEKT),
             inntektshistorikk = emptyList()
         )
         assertTrue(inspektør.utbetalinger.isEmpty())
@@ -128,12 +129,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
     @Test
     fun `refusjon opphører i perioden`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
-        håndterInntektsmeldingMedValidering(
-            1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)), refusjon = Refusjon(
-                14.januar,
-                INNTEKT, emptyList()
-            )
-        )
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)), refusjon = Refusjon(14.januar, INNTEKT, emptyList()))
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
             START,
@@ -146,10 +142,9 @@ internal class ForkastingTest : AbstractEndToEndTest() {
     fun `refusjon endres i perioden`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(
-            1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)), refusjon = Refusjon(
-                null,
-                INNTEKT, listOf(14.januar)
-            )
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            arbeidsgiverperioder = listOf(Periode(3.januar, 18.januar)),
+            refusjon = Refusjon(null, INNTEKT, listOf(Refusjon.EndringIRefusjon(14.januar, INNTEKT / 2)))
         )
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,

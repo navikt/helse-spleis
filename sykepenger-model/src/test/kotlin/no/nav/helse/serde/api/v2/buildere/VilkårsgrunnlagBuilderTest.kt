@@ -2,6 +2,7 @@ package no.nav.helse.serde.api.v2.buildere
 
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.api.MedlemskapstatusDTO
@@ -50,7 +51,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `har en generasjon med vilkårsgrunnlag for periode til godkjenning`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Refusjon(null, inntekt = inntekt))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntekt)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         håndterYtelser()
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt = inntekt)
@@ -228,8 +229,8 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             førsteFraværsdag = 1.januar,
-            orgnummer = AG1,
-            refusjon = Refusjon(null, 31000.månedlig, emptyList())
+            refusjon = Refusjon(null, 31000.månedlig, emptyList()),
+            orgnummer = AG1
         )
 
         val inntekter = listOf(

@@ -3,11 +3,9 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.testhelpers.*
-import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
 @Suppress("UNCHECKED_CAST")
 internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {

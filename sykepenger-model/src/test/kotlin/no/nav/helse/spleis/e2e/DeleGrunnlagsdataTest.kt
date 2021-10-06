@@ -295,7 +295,11 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
     fun `når vilkårsgrunnlag mangler sjekk på minimum inntekt gjøres denne sjekken - søknad arbeidsgiver`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(1.januar, 16.januar, 100.prosent))
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)), refusjon = Refusjon(null, 1000.månedlig, emptyList()))
+        håndterInntektsmeldingMedValidering(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
+            beregnetInntekt = 1000.månedlig
+        )
 
         val vilkårsgrunnlagElement = VilkårsgrunnlagHistorikk.Grunnlagsdata(
             sykepengegrunnlag = sykepengegrunnlag(1000.månedlig, listOf(
@@ -338,7 +342,11 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
     fun `når vilkårsgrunnlag mangler sjekk på minimum inntekt gjøres denne sjekken`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 16.januar, 100.prosent))
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)), refusjon = Refusjon(null, 1000.månedlig, emptyList()))
+        håndterInntektsmeldingMedValidering(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
+            beregnetInntekt = 1000.månedlig
+        )
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, 1000.månedlig)
         val vilkårsgrunnlagElement = VilkårsgrunnlagHistorikk.Grunnlagsdata(

@@ -6,7 +6,10 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.TilstandType.*
-import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.desember
+import no.nav.helse.testhelpers.februar
+import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
+import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -30,12 +33,12 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = haandtverkerne)
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
-            refusjon = Refusjon(null, 20000.månedlig, emptyList()),
+            beregnetInntekt = 20000.månedlig,
             orgnummer = aadvokatene
         )
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
-            refusjon = Refusjon(null, 20000.månedlig, emptyList()),
+            beregnetInntekt = 20000.månedlig,
             orgnummer = haandtverkerne
         )
 
@@ -129,12 +132,12 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = aadvokatene)
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
-            refusjon = Refusjon(null, 20000.månedlig, emptyList()),
+            beregnetInntekt = 20000.månedlig,
             orgnummer = haandtverkerne
         )
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
-            refusjon = Refusjon(null, 20000.månedlig, emptyList()),
+            beregnetInntekt = 20000.månedlig,
             orgnummer = aadvokatene
         )
 
@@ -204,12 +207,12 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = aadvokatene)
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
-            refusjon = Refusjon(null, 20000.månedlig, emptyList()),
+            beregnetInntekt = 20000.månedlig,
             orgnummer = haandtverkerne
         )
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
-            refusjon = Refusjon(null, 20000.månedlig, emptyList()),
+            beregnetInntekt = 20000.månedlig,
             orgnummer = aadvokatene
         )
 
@@ -288,12 +291,12 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = aadvokatene)
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
-            refusjon = Refusjon(null, 20000.månedlig, emptyList()),
+            beregnetInntekt = 20000.månedlig,
             orgnummer = haandtverkerne
         )
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
-            refusjon = Refusjon(null, 20000.månedlig, emptyList()),
+            beregnetInntekt = 20000.månedlig,
             orgnummer = aadvokatene
         )
 
@@ -415,12 +418,12 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = haandtverkerne)
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
-            refusjon = Refusjon(null, 20000.månedlig, emptyList()),
+            beregnetInntekt = 20000.månedlig,
             orgnummer = aadvokatene
         )
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
-            refusjon = Refusjon(null, 20000.månedlig, emptyList()),
+            beregnetInntekt = 20000.månedlig,
             orgnummer = haandtverkerne
         )
 

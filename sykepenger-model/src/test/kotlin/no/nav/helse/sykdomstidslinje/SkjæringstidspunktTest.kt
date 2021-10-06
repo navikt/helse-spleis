@@ -394,12 +394,11 @@ internal class SkjæringstidspunktTest {
 
     private fun inntektsmelding(
         arbeidsgiverperioder: List<Periode>,
-        ferieperioder: List<Periode> = emptyList(),
         refusjonBeløp: Inntekt = INNTEKT_PR_MÅNED,
         beregnetInntekt: Inntekt = INNTEKT_PR_MÅNED,
         førsteFraværsdag: LocalDate = 1.januar,
-        refusjonOpphørsdato: LocalDate = 31.desember,  // Employer paid
-        endringerIRefusjon: List<LocalDate> = emptyList()
+        refusjonOpphørsdato: LocalDate = 31.desember,
+        endringerIRefusjon: List<Inntektsmelding.Refusjon.EndringIRefusjon> = emptyList()
     ): Inntektsmelding {
         return Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),

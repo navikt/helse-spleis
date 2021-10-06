@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.person.Inntektshistorikk.Skatt.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -27,8 +28,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             førsteFraværsdag = 1.januar,
-            orgnummer = a1,
-            refusjon = Refusjon(null, 31000.månedlig, emptyList())
+            refusjon = Refusjon(null, 31000.månedlig, emptyList()),
+            orgnummer = a1
         )
 
         val inntekter = listOf(
@@ -76,8 +77,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.mars til 16.mars),
             førsteFraværsdag = 1.mars,
-            orgnummer = a1,
-            refusjon = Refusjon(null, 10000.månedlig, emptyList())
+            beregnetInntekt = 10000.månedlig,
+            orgnummer = a1
         )
         val inntekter = listOf(
             grunnlag(
@@ -127,8 +128,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             førsteFraværsdag = 1.januar,
-            orgnummer = a1,
-            refusjon = Refusjon(null, 31000.månedlig, emptyList())
+            refusjon = Refusjon(null, 31000.månedlig, emptyList()),
+            orgnummer = a1
         )
 
         val inntekter = listOf(
@@ -171,8 +172,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             førsteFraværsdag = 1.januar,
-            orgnummer = a1,
-            refusjon = Refusjon(null, 31000.månedlig, emptyList())
+            refusjon = Refusjon(null, 31000.månedlig, emptyList()),
+            orgnummer = a1
         )
 
         val inntekter = listOf(
@@ -218,8 +219,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.mars til 16.mars),
             førsteFraværsdag = 1.mars,
-            orgnummer = a1,
-            refusjon = Refusjon(null, 30000.månedlig, emptyList())
+            beregnetInntekt = 30000.månedlig,
+            orgnummer = a1
         )
 
         val inntekter = listOf(
@@ -269,8 +270,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.mars til 16.mars),
             førsteFraværsdag = 1.mars,
-            orgnummer = a1,
-            refusjon = Refusjon(null, 30000.månedlig, emptyList())
+            beregnetInntekt = 30000.månedlig,
+            orgnummer = a1
         )
 
         val inntekter = listOf(
@@ -318,8 +319,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.mars til 16.mars),
             førsteFraværsdag = 1.mars,
-            orgnummer = a1,
-            refusjon = Refusjon(null, 30000.månedlig, emptyList())
+            beregnetInntekt = 30000.månedlig,
+            orgnummer = a1
         )
 
         val inntekter = listOf(
@@ -375,8 +376,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.mars til 16.mars),
             førsteFraværsdag = 1.mars,
-            orgnummer = a1,
-            refusjon = Refusjon(null, 10000.månedlig, emptyList())
+            beregnetInntekt = 10000.månedlig,
+            orgnummer = a1
         )
         val inntekter = listOf(
             grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 10000.månedlig.repeat(3))
@@ -493,8 +494,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             førsteFraværsdag = 1.januar,
-            orgnummer = a1,
-            refusjon = Refusjon(null, 30000.månedlig, emptyList())
+            beregnetInntekt = 30000.månedlig,
+            orgnummer = a1
         )
 
         val inntekter = listOf(
@@ -550,8 +551,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             førsteFraværsdag = 1.januar,
-            orgnummer = a1,
-            refusjon = Refusjon(null, 30000.månedlig, emptyList())
+            beregnetInntekt = 30000.månedlig,
+            orgnummer = a1
         )
 
         val inntekter = listOf(

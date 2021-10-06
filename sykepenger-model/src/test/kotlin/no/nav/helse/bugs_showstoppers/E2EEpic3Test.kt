@@ -1,6 +1,7 @@
 package no.nav.helse.bugs_showstoppers
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.TilstandType.*
@@ -1300,9 +1301,10 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(
-            1.vedtaksperiode, listOf(
-                Periode(1.januar, 16.januar)
-            ), førsteFraværsdag = 1.januar, refusjon = Refusjon(null, lavInntekt, emptyList())
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
+            førsteFraværsdag = 1.januar,
+            beregnetInntekt = lavInntekt
         )
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(

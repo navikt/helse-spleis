@@ -4,7 +4,6 @@ import no.nav.helse.Toggles
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
-import no.nav.helse.person.Person
 import no.nav.helse.person.vilkår.Etterlevelse
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent

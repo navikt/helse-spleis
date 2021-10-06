@@ -12,11 +12,11 @@ import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.serde.api.v2.HendelseDTO
-import no.nav.helse.serde.api.v2.SøknadNavDTO
 import no.nav.helse.serde.api.serializePersonForSpeil
+import no.nav.helse.serde.api.v2.HendelseDTO
 import no.nav.helse.serde.api.v2.InntektsmeldingDTO
 import no.nav.helse.serde.api.v2.SykmeldingDTO
+import no.nav.helse.serde.api.v2.SøknadNavDTO
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
@@ -241,22 +241,22 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         vedtaksperiodeIdInnhenter: IdInnhenter,
         arbeidsgiverperioder: List<Periode>,
         førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOfOrNull { it.start } ?: 1.januar,
-        refusjon: Refusjon = Refusjon(null, INNTEKT, emptyList()),
-        beregnetInntekt: Inntekt = refusjon.inntekt,
+        beregnetInntekt: Inntekt = INNTEKT,
+        refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(null, beregnetInntekt, emptyList()),
         orgnummer: String = ORGNUMMER,
         fnr: String = UNG_PERSON_FNR_2018,
     ): UUID {
         assertIkkeEtterspurt(Inntektsmelding::class, Behovtype.InntekterForSammenligningsgrunnlag, vedtaksperiodeIdInnhenter, orgnummer)
-        return håndterInntektsmelding(arbeidsgiverperioder, førsteFraværsdag, refusjon, beregnetInntekt = beregnetInntekt, orgnummer = orgnummer, fnr = fnr)
+        return håndterInntektsmelding(arbeidsgiverperioder, førsteFraværsdag, beregnetInntekt = beregnetInntekt, refusjon, orgnummer = orgnummer, fnr = fnr)
     }
 
     protected fun håndterInntektsmelding(
         arbeidsgiverperioder: List<Periode>,
         førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOfOrNull { it.start } ?: 1.januar,
-        refusjon: Refusjon = Refusjon(null, INNTEKT, emptyList()),
+        beregnetInntekt: Inntekt = INNTEKT,
+        refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(null, beregnetInntekt, emptyList()),
         orgnummer: String = ORGNUMMER,
         id: UUID = UUID.randomUUID(),
-        beregnetInntekt: Inntekt = refusjon.inntekt,
         harOpphørAvNaturalytelser: Boolean = false,
         arbeidsforholdId: String? = null,
         fnr: String = UNG_PERSON_FNR_2018,
@@ -274,12 +274,6 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         ).håndter(Person::håndter)
         return id
     }
-
-    data class Refusjon(
-        internal val opphørsdato: LocalDate?,
-        internal val inntekt: Inntekt,
-        internal val endringerIRefusjon: List<LocalDate> = emptyList()
-    )
 
     protected fun håndterInntektsmeldingReplay(
         inntektsmeldingId: UUID,
@@ -738,7 +732,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         arbeidsgiverperioder: List<Periode>,
         beregnetInntekt: Inntekt = INNTEKT,
         førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOfOrNull { it.start } ?: 1.januar,
-        refusjon: Refusjon = Refusjon(null, beregnetInntekt, emptyList()),
+        refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(null, beregnetInntekt, emptyList()),
         orgnummer: String = ORGNUMMER,
         harOpphørAvNaturalytelser: Boolean = false,
         arbeidsforholdId: String? = null,
@@ -747,7 +741,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         val inntektsmeldinggenerator = {
             Inntektsmelding(
                 meldingsreferanseId = id,
-                refusjon = Inntektsmelding.Refusjon(refusjon.opphørsdato, refusjon.inntekt, refusjon.endringerIRefusjon),
+                refusjon = refusjon,
                 orgnummer = orgnummer,
                 fødselsnummer = fnr,
                 aktørId = AKTØRID,
@@ -980,7 +974,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         organisasjonsnummere.forEach {
             håndterInntektsmelding(
                 arbeidsgiverperioder = listOf(Periode(fom, fom.plusDays(15))),
-                refusjon = Refusjon(null, 20000.månedlig, emptyList()),
+                beregnetInntekt = 20000.månedlig,
                 orgnummer = it
             )
         }
@@ -1025,7 +1019,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         organisasjonsnummere.forEach {
             håndterInntektsmelding(
                 arbeidsgiverperioder = listOf(Periode(fom, fom.plusDays(15))),
-                refusjon = Refusjon(null, 20000.månedlig, emptyList()),
+                beregnetInntekt = 20000.månedlig,
                 orgnummer = it
             )
         }

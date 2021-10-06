@@ -28,8 +28,8 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.mars til 16.mars),
             førsteFraværsdag = 1.mars,
-            orgnummer = a1,
-            refusjon = Refusjon(null, 10000.månedlig, emptyList())
+            beregnetInntekt = 10000.månedlig,
+            orgnummer = a1
         )
         val grunnlagForSykepengegrunnlag = listOf(
             grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 10000.månedlig.repeat(3)),
@@ -62,8 +62,8 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.mars til 16.mars),
             førsteFraværsdag = 1.mars,
-            orgnummer = a1,
-            refusjon = Refusjon(null, 10000.månedlig, emptyList())
+            beregnetInntekt = 10000.månedlig,
+            orgnummer = a1
         )
         val inntekter = listOf(
             grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 10000.månedlig.repeat(3)),
@@ -109,8 +109,8 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             førsteFraværsdag = 1.januar,
-            orgnummer = a1,
-            refusjon = Refusjon(null, 10000.månedlig, emptyList())
+            beregnetInntekt = 10000.månedlig,
+            orgnummer = a1
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
@@ -151,8 +151,8 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.mars til 16.mars),
             førsteFraværsdag = 1.mars,
-            orgnummer = a1,
-            refusjon = Refusjon(null, 10000.månedlig, emptyList())
+            beregnetInntekt = 10000.månedlig,
+            orgnummer = a1
         )
         val inntekter1 = listOf(
             grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 10000.månedlig.repeat(3))
@@ -196,8 +196,8 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.juli(2021) til 16.juli(2021)),
             førsteFraværsdag = 1.juli(2021),
-            orgnummer = a1,
-            refusjon = Refusjon(null, 30000.månedlig, emptyList())
+            beregnetInntekt = 30000.månedlig,
+            orgnummer = a1
         )
         val inntekter = listOf(
             grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3))
@@ -277,8 +277,8 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.mars(2017) til 16.mars(2017)),
             førsteFraværsdag = 1.mars(2017),
-            orgnummer = a1,
-            refusjon = Refusjon(null, 30000.månedlig, emptyList())
+            beregnetInntekt = 30000.månedlig,
+            orgnummer = a1
         )
         val inntekterA1 = listOf(
             grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 35000.månedlig.repeat(3))
@@ -306,8 +306,8 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.mars til 16.mars),
             førsteFraværsdag = 1.mars,
-            orgnummer = a2,
-            refusjon = Refusjon(null, 30000.månedlig, emptyList())
+            beregnetInntekt = 30000.månedlig,
+            orgnummer = a2
         )
         val inntekterA2 = listOf(
             grunnlag(a2, finnSkjæringstidspunkt(a2, 1.vedtaksperiode), 35000.månedlig.repeat(3))
@@ -349,8 +349,8 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.mars til 16.mars),
             førsteFraværsdag = 1.mars,
-            orgnummer = a1,
-            refusjon = Refusjon(null, 10000.månedlig, emptyList())
+            beregnetInntekt = 10000.månedlig,
+            orgnummer = a1
         )
         val inntekter1 = listOf(grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 10000.månedlig.repeat(3)))
         val arbeidsforhold1 = listOf(
@@ -378,8 +378,8 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             førsteFraværsdag = 1.januar,
-            orgnummer = a1,
-            refusjon = Refusjon(null, 11400.månedlig)
+            beregnetInntekt = 11400.månedlig,
+            orgnummer = a1
         )
 
         val arbeidsforhold1 = listOf(
@@ -413,8 +413,8 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.mars til 16.mars),
             førsteFraværsdag = 1.mars,
-            orgnummer = a1,
-            refusjon = Refusjon(null, 11400.månedlig)
+            beregnetInntekt = 11400.månedlig,
+            orgnummer = a1
         )
 
         val arbeidsforhold2 = listOf(
@@ -450,8 +450,8 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(2.februar til 17.februar),
             førsteFraværsdag = 2.februar,
-            orgnummer = a2,
-            refusjon = Refusjon(null, 45000.månedlig)
+            beregnetInntekt = 45000.månedlig,
+            orgnummer = a2
         )
 
 
@@ -576,8 +576,8 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             førsteFraværsdag = 1.januar,
-            orgnummer = a1,
-            refusjon = Refusjon(null, INNTEKT)
+            beregnetInntekt = INNTEKT,
+            orgnummer = a1
         )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)

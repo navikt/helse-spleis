@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.sykdomstidslinje.Dag.*
@@ -188,7 +189,7 @@ internal class InntektsmeldingTest {
         inntektsmelding(
             listOf(Periode(1.januar, 3.januar)),
             refusjonOpphørsdato = 1.januar,
-            endringerIRefusjon = listOf(16.januar)
+            endringerIRefusjon = listOf(EndringIRefusjon(16.januar, 1000.månedlig))
         )
         assertTrue(inntektsmelding.valider(Periode(2.januar, 10.januar)).hasErrorsOrWorse())
     }
@@ -198,7 +199,7 @@ internal class InntektsmeldingTest {
         inntektsmelding(
             listOf(Periode(1.januar, 3.januar)),
             refusjonOpphørsdato = 11.januar,
-            endringerIRefusjon = listOf(16.januar)
+            endringerIRefusjon = listOf(EndringIRefusjon(16.januar, 1000.månedlig))
         )
         assertTrue(inntektsmelding.valider(Periode(2.januar, 10.januar)).hasErrorsOrWorse())
     }
@@ -208,7 +209,7 @@ internal class InntektsmeldingTest {
         inntektsmelding(
             listOf(Periode(1.januar, 3.januar)),
             refusjonOpphørsdato = 10.januar,
-            endringerIRefusjon = listOf(16.januar)
+            endringerIRefusjon = listOf(EndringIRefusjon(16.januar, 1000.månedlig))
         )
         assertTrue(inntektsmelding.valider(Periode(2.januar, 10.januar)).hasErrorsOrWorse())
     }
@@ -218,7 +219,7 @@ internal class InntektsmeldingTest {
         inntektsmelding(
             listOf(Periode(1.januar, 3.januar)),
             refusjonOpphørsdato = 16.januar,
-            endringerIRefusjon = listOf(10.januar)
+            endringerIRefusjon = listOf(EndringIRefusjon(10.januar, 1000.månedlig))
         )
         assertTrue(inntektsmelding.valider(Periode(2.januar, 10.januar)).hasErrorsOrWorse())
     }
@@ -415,7 +416,7 @@ internal class InntektsmeldingTest {
         beregnetInntekt: Inntekt = 1000.månedlig,
         førsteFraværsdag: LocalDate? = 1.januar,
         refusjonOpphørsdato: LocalDate? = null,
-        endringerIRefusjon: List<LocalDate> = emptyList(),
+        endringerIRefusjon: List<EndringIRefusjon> = emptyList(),
         arbeidsforholdId: String? = null,
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null
     ) {
