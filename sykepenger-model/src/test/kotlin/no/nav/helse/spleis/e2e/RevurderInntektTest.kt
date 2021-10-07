@@ -294,7 +294,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             TilstandType.AVVENTER_HISTORIKK_REVURDERING
         )
 
-        assertWarningTekst(inspektør, "Har mer enn 25 % avvik")
+        assertWarningTekst(inspektør, "Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.")
         assertEquals(1, inspektør.utbetalinger.size)
     }
 
@@ -319,7 +319,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             TilstandType.AVVENTER_HISTORIKK_REVURDERING
         )
 
-        assertWarningTekst(inspektør, "Har mer enn 25 % avvik")
+        assertWarningTekst(inspektør, "Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.")
         assertEquals(1, inspektør.utbetalinger.size)
     }
 
@@ -352,7 +352,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         assertEquals(2, inspektør.utbetalinger.size)
         assertEquals(-15741, utbetalingTilRevurdering.arbeidsgiverOppdrag().nettoBeløp())
 
-        assertWarningTekst(inspektør, "Har mer enn 25 % avvik", "Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag")
+        assertWarningTekst(inspektør, "Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.", "Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag")
         assertFalse(utbetalingTilRevurdering.utbetalingstidslinje().harUtbetalinger())
     }
 
