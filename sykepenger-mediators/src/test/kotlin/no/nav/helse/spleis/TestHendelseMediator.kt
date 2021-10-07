@@ -45,6 +45,8 @@ internal class TestHendelseMediator : IHendelseMediator {
         private set
     internal var lestOverstyrTidslinje = false
         private set
+    internal var lestOverstyrInntekt = false
+        private set
     internal var lestReplayHendelser = false
         private set
     internal var lestEtterbetaling = false
@@ -154,6 +156,10 @@ internal class TestHendelseMediator : IHendelseMediator {
 
     override fun behandle(message: OverstyrTidslinjeMessage, overstyrTidslinje: OverstyrTidslinje) {
         lestOverstyrTidslinje = true
+    }
+
+    override fun behandle(message: OverstyrInntektMessage, overstyrInntekt: OverstyrInntekt) {
+        lestOverstyrInntekt = true
     }
 
     override fun behandle(message: EtterbetalingMessage, grunnbeløpsregulering: Grunnbeløpsregulering) {

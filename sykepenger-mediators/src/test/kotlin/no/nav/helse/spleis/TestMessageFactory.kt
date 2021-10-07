@@ -744,6 +744,17 @@ internal class TestMessageFactory(
             ))
     }
 
+    fun lagOverstyringInntekt(inntekt: Double, skjæringstidspunkt: LocalDate): String {
+        return nyHendelse(
+            "overstyr_inntekt", mutableMapOf(
+                "aktørId" to aktørId,
+                "fødselsnummer" to fødselsnummer,
+                "organisasjonsnummer" to organisasjonsnummer,
+                "månedligInntekt" to inntekt,
+                "skjæringstidspunkt" to skjæringstidspunkt
+            ))
+    }
+
     private fun nyHendelse(navn: String, hendelse: Map<String, Any>) =
         JsonMessage.newMessage(nyHendelse(navn) + hendelse).toJson()
 

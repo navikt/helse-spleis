@@ -366,6 +366,10 @@ internal abstract class AbstractEndToEndMediatorTest {
         testRapid.sendTestMessage(meldingsfabrikk.lagOverstyringTidslinje(dager))
     }
 
+    protected fun sendOverstyringInntekt(inntekt: Double, skjæringstidspunkt: LocalDate) {
+        testRapid.sendTestMessage(meldingsfabrikk.lagOverstyringInntekt(inntekt, skjæringstidspunkt))
+    }
+
     protected fun assertUtbetalingtype(utbetalingIndeks: Int, type: String) {
         assertEquals(
             type,

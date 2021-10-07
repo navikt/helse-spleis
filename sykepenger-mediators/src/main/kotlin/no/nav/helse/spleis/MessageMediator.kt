@@ -45,6 +45,7 @@ internal class MessageMediator(
             OverstyrTidlinjeRiver(it, this)
             EtterbetalingerRiver(it, this)
             EtterbetalingerRiverMedHistorikk(it, this)
+            OverstyrInntektRiver(it, this)
         }
     }
 

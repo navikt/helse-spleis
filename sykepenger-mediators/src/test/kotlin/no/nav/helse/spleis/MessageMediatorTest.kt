@@ -9,6 +9,7 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.spleis.meldinger.TestRapid
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
+import no.nav.helse.testhelpers.januar
 import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -144,6 +145,12 @@ internal class MessageMediatorTest {
     fun avstemming() {
         testRapid.sendTestMessage(meldingsfabrikk.lagAvstemming())
         assertTrue(hendelseMediator.lestAvstemming)
+    }
+
+    @Test
+    fun `Håndterer overstyr_inntekt`() {
+        testRapid.sendTestMessage(meldingsfabrikk.lagOverstyringInntekt(30000.0, 1.januar))
+        assertTrue(hendelseMediator.lestOverstyrInntekt)
     }
 
     @BeforeEach

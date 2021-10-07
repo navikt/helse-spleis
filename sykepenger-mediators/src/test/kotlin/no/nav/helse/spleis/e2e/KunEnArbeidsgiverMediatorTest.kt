@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggles
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
@@ -176,7 +177,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun `overstyring fra saksbehandler fører til tilstandsendring`() {
+    fun `overstyring av tidslinje fra saksbehandler fører til tilstandsendring`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
@@ -204,6 +205,41 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             "AVVENTER_GODKJENNING",
             "TIL_UTBETALING"
         )
+    }
+
+    @Test
+    fun `overstyring av inntekt fra saksbehandler fører til tilstandsendring`() {
+        Toggles.RevurderInntekt.enable {
+            sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
+            sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)))
+            sendInntektsmelding(0, listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 3.januar)
+            sendYtelser(0)
+            sendVilkårsgrunnlag(0)
+            sendYtelser(0)
+            sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
+            sendOverstyringInntekt(33000.0, 1.januar)
+            sendVilkårsgrunnlag(0)
+            sendYtelser(0)
+            sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
+            sendUtbetalingsgodkjenning(0, true)
+            assertUtbetalingTilstander(0, "IKKE_UTBETALT", "FORKASTET")
+            assertUtbetalingTilstander(1, "IKKE_UTBETALT", "GODKJENT", "SENDT")
+            assertTilstander(
+                0,
+                "MOTTATT_SYKMELDING_FERDIG_GAP",
+                "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+                "AVVENTER_HISTORIKK",
+                "AVVENTER_VILKÅRSPRØVING",
+                "AVVENTER_HISTORIKK",
+                "AVVENTER_SIMULERING",
+                "AVVENTER_GODKJENNING",
+                "AVVENTER_VILKÅRSPRØVING",
+                "AVVENTER_HISTORIKK",
+                "AVVENTER_SIMULERING",
+                "AVVENTER_GODKJENNING",
+                "TIL_UTBETALING"
+            )
+        }
     }
 
     @Test

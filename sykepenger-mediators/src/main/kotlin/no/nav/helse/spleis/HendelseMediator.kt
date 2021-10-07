@@ -172,6 +172,13 @@ internal class HendelseMediator(
         }
     }
 
+    override fun behandle(message: OverstyrInntektMessage, overstyrInntekt: OverstyrInntekt) {
+        håndter(message, overstyrInntekt) {person ->
+            HendelseProbe.onOverstyrInntekt()
+            person.håndter(overstyrInntekt)
+        }
+    }
+
     override fun behandle(message: EtterbetalingMessage, grunnbeløpsregulering: Grunnbeløpsregulering) {
         håndter(message, grunnbeløpsregulering) { person ->
             person.håndter(grunnbeløpsregulering)
@@ -231,5 +238,6 @@ internal interface IHendelseMediator {
     fun behandle(message: AnnulleringMessage, annullerUtbetaling: AnnullerUtbetaling)
     fun behandle(message: AvstemmingMessage, avstemming: Avstemming)
     fun behandle(message: OverstyrTidslinjeMessage, overstyrTidslinje: OverstyrTidslinje)
+    fun behandle(message: OverstyrInntektMessage, overstyrInntekt: OverstyrInntekt)
     fun behandle(message: EtterbetalingMessage, grunnbeløpsregulering: Grunnbeløpsregulering)
 }

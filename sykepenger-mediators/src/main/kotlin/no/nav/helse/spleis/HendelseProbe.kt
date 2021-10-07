@@ -80,6 +80,10 @@ object HendelseProbe {
         tell("OverstyrTidslinje")
     }
 
+    fun onOverstyrInntekt() {
+        tell("OverstyrInntekt")
+    }
+
     private fun tell(navn: String) {
         hendelseCounter.labels(navn).inc()
     }
