@@ -9,6 +9,7 @@ import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.sykdomstidslinje.Dag.Companion.default
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
+import no.nav.helse.sykdomstidslinje.Dag.Companion.sykmeldingSkrevet
 import no.nav.helse.sykdomstidslinje.Dag.Companion.toDatoDagMap
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
@@ -17,6 +18,7 @@ import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit.DAYS
 import java.util.*
 import java.util.stream.Collectors.toMap
@@ -278,6 +280,8 @@ internal class Sykdomstidslinje private constructor(
                 }
         } ?: "Tom tidslinje"
     }
+
+    internal fun sykmeldingSkrevet(): LocalDateTime = dager.sykmeldingSkrevet()
 
     internal companion object {
 

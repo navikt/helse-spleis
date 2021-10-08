@@ -868,6 +868,26 @@ internal class Vedtaksperiode private constructor(
         fun håndterTidligereTilstøtendeUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {}
 
         fun håndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
+            overlappendeSykmeldingIkkeStøttet(vedtaksperiode, sykmelding)
+        }
+
+        fun håndterOverlappendeSykmelding(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
+            if (!Toggles.OverlappendeSykmelding.enabled) return overlappendeSykmeldingIkkeStøttet(vedtaksperiode, sykmelding)
+            check(
+                vedtaksperiode.tilstand in setOf(
+                    MottattSykmeldingFerdigGap, MottattSykmeldingUferdigGap, MottattSykmeldingFerdigForlengelse, MottattSykmeldingUferdigForlengelse
+                )
+            )
+            if (!sykmelding.opprinneligPeriodeErLik(vedtaksperiode.sykmeldingsperiode)) return overlappendeSykmeldingIkkeStøttet(vedtaksperiode, sykmelding)
+            if (vedtaksperiode.arbeidsgiver.erSykmeldingSkrevetSenereEnnAndre(sykmelding, vedtaksperiode.hendelseIder)) {
+                sykmelding.warn("Mottatt en sykmelding som er skrevet tidligere enn den som er lagt til grunn, vurder sykmeldingene og gjør eventuelle justeringer")
+            } else {
+                vedtaksperiode.oppdaterHistorikk(sykmelding)
+                sykmelding.warn("Korrigert sykmelding er lagt til grunn - kontroller dagene i sykmeldingsperioden")
+            }
+        }
+
+        fun overlappendeSykmeldingIkkeStøttet(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
             sykmelding.overlappIkkeStøttet(vedtaksperiode.periode)
             if (!kanForkastes) return
             vedtaksperiode.tilstand(sykmelding, TilInfotrygd)
@@ -1077,6 +1097,10 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.tilstand(hendelse, MottattSykmeldingUferdigForlengelse)
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
+            håndterOverlappendeSykmelding(vedtaksperiode, sykmelding)
+        }
+
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             if (!vedtaksperiode.person.forlengerAlleArbeidsgivereSammePeriode(vedtaksperiode)) return vedtaksperiode.person.invaliderAllePerioder(
                 søknad, "Invaliderer alle perioder for flere arbeidsgivere fordi forlengelser hos alle arbeidsgivere ikke gjelder samme periode"
@@ -1105,6 +1129,10 @@ internal class Vedtaksperiode private constructor(
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: IAktivitetslogg) {}
         override fun håndterTidligereUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {}
         override fun håndterTidligereTilstøtendeUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {}
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
+            håndterOverlappendeSykmelding(vedtaksperiode, sykmelding)
+        }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             if (!vedtaksperiode.person.forlengerAlleArbeidsgivereSammePeriode(vedtaksperiode)) return vedtaksperiode.person.invaliderAllePerioder(
@@ -1152,6 +1180,10 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.tilstand(hendelse, MottattSykmeldingUferdigForlengelse)
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
+            håndterOverlappendeSykmelding(vedtaksperiode, sykmelding)
+        }
+
         override fun håndter(
             vedtaksperiode: Vedtaksperiode,
             inntektsmelding: Inntektsmelding
@@ -1184,6 +1216,10 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndterTidligereTilstøtendeUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, MottattSykmeldingUferdigForlengelse)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
+            håndterOverlappendeSykmelding(vedtaksperiode, sykmelding)
         }
 
         override fun håndter(

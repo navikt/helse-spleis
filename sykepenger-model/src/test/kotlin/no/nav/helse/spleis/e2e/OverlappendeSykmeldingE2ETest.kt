@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@Disabled("Avventer støtte for overlappende sykmeldinger")
 internal class OverlappendeSykmeldingE2ETest : AbstractEndToEndTest() {
 
     @BeforeAll
@@ -26,6 +25,7 @@ internal class OverlappendeSykmeldingE2ETest : AbstractEndToEndTest() {
         Toggles.OverlappendeSykmelding.pop()
     }
 
+    @Disabled("Avventer støtte for overlappende sykmeldinger")
     @Test
     fun `sykmelding overlapper i starten av eksisterende periode (out of order)`() {
         håndterSykmelding(Sykmeldingsperiode(10.januar, 25.januar, 100.prosent))
@@ -37,6 +37,7 @@ internal class OverlappendeSykmeldingE2ETest : AbstractEndToEndTest() {
         assertEquals(3.januar til 9.januar, inspektør.periode(2.vedtaksperiode))
     }
 
+    @Disabled("Avventer støtte for overlappende sykmeldinger")
     @Test
     fun `sykmelding overlapper på slutten av eksisterende periode`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 15.januar, 100.prosent))
@@ -48,6 +49,7 @@ internal class OverlappendeSykmeldingE2ETest : AbstractEndToEndTest() {
         assertEquals(10.januar til 25.januar, inspektør.periode(2.vedtaksperiode))
     }
 
+    @Disabled("Avventer støtte for overlappende sykmeldinger")
     @Test
     fun `sykmelding overlapper på slutten av eksisterende periode - sykmelding skrevet samme dag - out of order`() {
         val sykmeldingSkrevet = 3.januar.atStartOfDay()
@@ -56,6 +58,7 @@ internal class OverlappendeSykmeldingE2ETest : AbstractEndToEndTest() {
         // TODO: avklare situasjonen
     }
 
+    @Disabled("Avventer støtte for overlappende sykmeldinger")
     @Test
     fun `sykmelding overlapper på slutten av eksisterende periode - sykmelding skrevet samme dag`() {
         val sykmeldingSkrevet = 3.januar.atStartOfDay()
@@ -64,19 +67,7 @@ internal class OverlappendeSykmeldingE2ETest : AbstractEndToEndTest() {
         // TODO: avklare situasjonen
     }
 
-    @Test
-    fun `sykmelding overlapper perfekt`() {
-        val sykmeldingSkrevet = 3.januar.atStartOfDay()
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 15.januar, 90.prosent), sykmeldingSkrevet = sykmeldingSkrevet)
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 15.januar, 100.prosent), sykmeldingSkrevet = sykmeldingSkrevet)
-        assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
-        assertEquals(3.januar til 15.januar, inspektør.periode(1.vedtaksperiode))
-        SykdomstidslinjeInspektør(inspektør.sykdomstidslinje).also { sykdomstidslinjeInspektør ->
-            assertTrue(sykdomstidslinjeInspektør.grader.all { it.value == 90 })
-        }
-    }
-
+    @Disabled("Avventer støtte for overlappende sykmeldinger")
     @Test
     fun `sykmelding overlapper inni eksisterende`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 15.januar, 100.prosent))
@@ -89,6 +80,7 @@ internal class OverlappendeSykmeldingE2ETest : AbstractEndToEndTest() {
         }
     }
 
+    @Disabled("Avventer støtte for overlappende sykmeldinger")
     @Test
     fun `sykmelding strekker seg både lengre tilbake og lengre frem i tid`() {
         håndterSykmelding(Sykmeldingsperiode(4.januar, 12.januar, 100.prosent))
@@ -100,6 +92,7 @@ internal class OverlappendeSykmeldingE2ETest : AbstractEndToEndTest() {
         }
     }
 
+    @Disabled("Avventer støtte for overlappende sykmeldinger")
     @Test
     fun `sykmelding overlapper med flere`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 4.januar, 100.prosent))
@@ -108,6 +101,7 @@ internal class OverlappendeSykmeldingE2ETest : AbstractEndToEndTest() {
         // TODO: Avklare ønsket resultat - forkaste alt?
     }
 
+    @Disabled("Avventer støtte for overlappende sykmeldinger")
     @Test
     fun `sykmelding overlapper med to perioder - lager forlengelse`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 4.januar, 100.prosent))
@@ -116,6 +110,7 @@ internal class OverlappendeSykmeldingE2ETest : AbstractEndToEndTest() {
         // TODO: Avklare ønsket resultat - forkaste alt?
     }
 
+    @Disabled("Avventer støtte for overlappende sykmeldinger")
     @Test
     fun `sykmelding overlapper i begynnelsen - lager forlengelse`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 4.januar, 100.prosent))
@@ -124,6 +119,7 @@ internal class OverlappendeSykmeldingE2ETest : AbstractEndToEndTest() {
         // TODO: Avklare ønsket resultat - forkaste alt?
     }
 
+    @Disabled("Avventer støtte for overlappende sykmeldinger")
     @Test
     fun `sykmelding overlapper i slutten - lager forlengelse`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 4.januar, 100.prosent))
@@ -132,6 +128,7 @@ internal class OverlappendeSykmeldingE2ETest : AbstractEndToEndTest() {
         // TODO: Avklare ønsket resultat - forkaste alt?
     }
 
+    @Disabled("Avventer støtte for overlappende sykmeldinger")
     @Test
     fun `nyere sykmelding overskriver gammel`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 15.januar, 100.prosent), sykmeldingSkrevet = 3.januar.atStartOfDay())
@@ -142,6 +139,7 @@ internal class OverlappendeSykmeldingE2ETest : AbstractEndToEndTest() {
         }
     }
 
+    @Disabled("Avventer støtte for overlappende sykmeldinger")
     @Test
     fun `søknad for eldre sykmeldinger overskriver ikke nyere sykmelding`() {
         val sykmelding1Skrevet = 3.januar.atStartOfDay()
@@ -166,6 +164,7 @@ internal class OverlappendeSykmeldingE2ETest : AbstractEndToEndTest() {
         }
     }
 
+    @Disabled("Avventer støtte for overlappende sykmeldinger")
     @Test
     fun `søknad for nyere sykmelding overskriver eldre sykmelding`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 15.januar, 100.prosent))

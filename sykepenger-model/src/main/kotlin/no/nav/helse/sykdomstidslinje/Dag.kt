@@ -1,10 +1,12 @@
 package no.nav.helse.sykdomstidslinje
 
+import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.serde.PersonData
 import no.nav.helse.økonomi.Økonomi
 import java.time.DayOfWeek.*
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 internal typealias BesteStrategy = (Dag, Dag) -> Dag
 
@@ -40,6 +42,11 @@ internal sealed class Dag(
 
     companion object {
         internal fun Collection<Dag>.toDatoDagMap(): Map<LocalDate, Dag> = this.associateBy { it.dato }
+
+        internal fun Map<LocalDate, Dag>.sykmeldingSkrevet(): LocalDateTime {
+            check(all { it.value.kommerFra(Sykmelding::class) })
+            return values.first().kilde.tidsstempel()
+        }
 
         internal val default: BesteStrategy = { venstre: Dag, høyre: Dag ->
             require(venstre.dato == høyre.dato) { "Støtter kun sammenlikning av dager med samme dato" }

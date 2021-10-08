@@ -1,12 +1,12 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.person.PersonHendelse
 import no.nav.helse.person.SykdomshistorikkVisitor
+import no.nav.helse.sykdomstidslinje.Sykdomshistorikk.Element.Companion.erSykmeldingenDenSistSkrevne
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk.Element.Companion.nyesteId
 import no.nav.helse.tournament.Dagturnering
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
 import java.time.LocalDateTime
 import java.util.*
 
@@ -48,6 +48,7 @@ internal class Sykdomshistorikk private constructor(
         if (!harSykdom()) return
         elementer.add(0, Element.empty)
     }
+
     internal fun fjernDager(periode: Periode): Sykdomstidslinje {
         // TODO: Remove size == 0 whenever migration is done
         if (size == 0 || sykdomstidslinje().length() == 0) return sykdomstidslinje()
@@ -72,6 +73,9 @@ internal class Sykdomshistorikk private constructor(
             sykdomstidslinje().merge(hendelseSykdomstidslinje, Dagturnering.TURNERING::beste)
         return tidslinje.also { it.valider(hendelse) }
     }
+
+    internal fun erSykmeldingenDenSistSkrevne(sykmelding: Sykmelding, hendelseIder: Set<UUID>): Boolean =
+        elementer.erSykmeldingenDenSistSkrevne(sykmelding, hendelseIder)
 
     internal class Element private constructor(
         private val id: UUID = UUID.randomUUID(),
@@ -133,8 +137,14 @@ internal class Sykdomshistorikk private constructor(
             internal fun opprettReset(
                 historikk: Sykdomshistorikk,
                 periode: Periode
-            ) : Element {
+            ): Element {
                 return Element(beregnetSykdomstidslinje = historikk.sykdomstidslinje().trim(periode))
+            }
+
+            internal fun List<Element>.erSykmeldingenDenSistSkrevne(sykmelding: Sykmelding, hendelseIder: Set<UUID>): Boolean {
+                return filter { it.hendelseId in hendelseIder }.any {
+                    it.hendelseSykdomstidslinje.sykmeldingSkrevet() > sykmelding.sykdomstidslinje().sykmeldingSkrevet()
+                }
             }
         }
     }

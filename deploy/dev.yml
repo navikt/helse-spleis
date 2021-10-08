@@ -60,3 +60,5 @@ spec:
     value: "true"
   - name: SPEIL_API_V2
     value: "true"
+  - name: EN_TIL_EN_OVERLAPPENDE_SYKMELDING
+    value: "true"
