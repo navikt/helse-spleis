@@ -129,7 +129,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, orgnummer = ag1)
 
         håndterOverstyring(inntekt = 33000.månedlig, "ag1", 1.januar)
-        Assertions.assertEquals(1, observatør.avvisteRevurderinger.size)
+        assertEquals(1, observatør.avvisteRevurderinger.size)
         assertErrorTekst(inspektør, "Forespurt overstyring av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
     }
 
@@ -173,7 +173,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, orgnummer = ag1)
 
         håndterOverstyring(32000.månedlig, ag1, 1.januar)
-        Assertions.assertEquals(1, observatør.avvisteRevurderinger.size)
+        assertEquals(1, observatør.avvisteRevurderinger.size)
         assertErrorTekst(inspektør, "Forespurt overstyring av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
     }
 
@@ -275,4 +275,62 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
             TilstandType.AVVENTER_GODKJENNING_REVURDERING
         )
     }
+
+    @Test
+    fun `skal kunne overstyre inntekt i utkast til revurdering ved revurdering av tidslinje`() {
+        nyttVedtak(1.januar, 31.januar)
+        forlengVedtak(1.februar, 28.februar)
+
+        håndterOverstyring((20.januar til 29.januar).map { manuellFeriedag(it) })
+        håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+
+        håndterOverstyring(inntekt = 20000.månedlig, skjæringstidspunkt = 1.januar)
+        håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+
+        // 23075 = round((20000 * 12) / 260) * 25 (25 nav-dager i januar + februar 2018)
+        assertEquals(23075, inspektør.utbetalinger.last().arbeidsgiverOppdrag().totalbeløp())
+        assertEquals("SSSSSHH SSSSSHH SSSSSFF FFFFFFF FSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString().trim())
+        assertEquals("PPPPPPP PPPPPPP PPNNNFF FFFFFFF FNNNNHH NNNNNHH NNNNNHH NNNNNHH NNN", inspektør.sisteUtbetalingUtbetalingstidslinje().toString().trim())
+
+        assertTilstander(1.vedtaksperiode,
+            TilstandType.START,
+            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
+            TilstandType.AVVENTER_SØKNAD_FERDIG_GAP,
+            TilstandType.AVVENTER_HISTORIKK,
+            TilstandType.AVVENTER_VILKÅRSPRØVING,
+            TilstandType.AVVENTER_HISTORIKK,
+            TilstandType.AVVENTER_SIMULERING,
+            TilstandType.AVVENTER_GODKJENNING,
+            TilstandType.TIL_UTBETALING,
+            TilstandType.AVSLUTTET,
+            TilstandType.AVVENTER_HISTORIKK_REVURDERING,
+            TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING,
+            TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING,
+            TilstandType.AVVENTER_HISTORIKK_REVURDERING,
+            TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
+        )
+
+        assertTilstander(2.vedtaksperiode,
+            TilstandType.START,
+            TilstandType.MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+            TilstandType.AVVENTER_HISTORIKK,
+            TilstandType.AVVENTER_SIMULERING,
+            TilstandType.AVVENTER_GODKJENNING,
+            TilstandType.TIL_UTBETALING,
+            TilstandType.AVSLUTTET,
+            TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING,
+            TilstandType.AVVENTER_HISTORIKK_REVURDERING,
+            TilstandType.AVVENTER_SIMULERING_REVURDERING,
+            TilstandType.AVVENTER_GODKJENNING_REVURDERING,
+            TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING,
+            TilstandType.AVVENTER_HISTORIKK_REVURDERING,
+            TilstandType.AVVENTER_SIMULERING_REVURDERING,
+            TilstandType.AVVENTER_GODKJENNING_REVURDERING
+        )
+    }
+
 }
