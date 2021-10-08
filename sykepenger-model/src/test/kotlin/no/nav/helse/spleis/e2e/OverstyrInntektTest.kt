@@ -9,6 +9,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -173,5 +174,45 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         håndterOverstyring(32000.månedlig, ag1, 1.januar)
         Assertions.assertEquals(1, observatør.avvisteRevurderinger.size)
         assertErrorTekst(inspektør, "Forespurt overstyring av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
+    }
+
+    @Test
+    fun `skal kunne overstyre inntekt i utkast til revurdering`() {
+        nyttVedtak(1.januar, 31.januar)
+
+        håndterOverstyring(inntekt = 20000.månedlig, skjæringstidspunkt = 1.januar)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+
+        // 10153 = round((20000 * 12) / 260) * 11 (11 nav-dager i januar 2018)
+        assertEquals(10153, inspektør.utbetalinger.last().arbeidsgiverOppdrag().totalbeløp())
+
+        håndterOverstyring(inntekt = 25000.månedlig, skjæringstidspunkt = 1.januar)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+
+        // 12694 = round((25000 * 12) / 260) * 11 (11 nav-dager i januar)
+        assertEquals(12694, inspektør.utbetalinger.last().arbeidsgiverOppdrag().totalbeløp())
+
+        assertTilstander(1.vedtaksperiode,
+            TilstandType.START,
+            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
+            TilstandType.AVVENTER_SØKNAD_FERDIG_GAP,
+            TilstandType.AVVENTER_HISTORIKK,
+            TilstandType.AVVENTER_VILKÅRSPRØVING,
+            TilstandType.AVVENTER_HISTORIKK,
+            TilstandType.AVVENTER_SIMULERING,
+            TilstandType.AVVENTER_GODKJENNING,
+            TilstandType.TIL_UTBETALING,
+            TilstandType.AVSLUTTET,
+            TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING,
+            TilstandType.AVVENTER_HISTORIKK_REVURDERING,
+            TilstandType.AVVENTER_SIMULERING_REVURDERING,
+            TilstandType.AVVENTER_GODKJENNING_REVURDERING,
+            TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING,
+            TilstandType.AVVENTER_HISTORIKK_REVURDERING,
+            TilstandType.AVVENTER_SIMULERING_REVURDERING,
+            TilstandType.AVVENTER_GODKJENNING_REVURDERING
+            )
     }
 }

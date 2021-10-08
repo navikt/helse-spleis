@@ -241,6 +241,11 @@ class Person private constructor(
         igangsettRevurdering(hendelse, førstePeriode)
     }
 
+    internal fun overstyrUtkastRevurdering(hendelse: OverstyrInntekt) {
+        val førstePeriode = finnArbeidsgiver(hendelse).førstePeriodeTilRevurdering(hendelse)
+        igangsettRevurdering(hendelse, førstePeriode)
+    }
+
     internal fun igangsettRevurdering(hendelse: OverstyrTidslinje, vedtaksperiode: Vedtaksperiode) {
         arbeidsgivere.forEach {
             it.startRevurderingForAlleBerørtePerioder(hendelse, vedtaksperiode)

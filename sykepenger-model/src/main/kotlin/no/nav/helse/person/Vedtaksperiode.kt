@@ -2159,12 +2159,24 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.tilstand(hendelse, AvventerHistorikkRevurdering)
         }
 
+        override fun revurder(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
+            vedtaksperiode.arbeidsgiver.addInntekt(hendelse)
+            vedtaksperiode.tilstand(hendelse, AvventerVilkårsprøvingRevurdering)
+            vedtaksperiode.tilstand.håndter(vedtaksperiode, hendelse)
+        }
+
         override fun håndterTidligereTilstøtendeUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, AvventerArbeidsgivereRevurdering)
         }
 
         override fun håndterTidligereUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, AvventerArbeidsgivereRevurdering)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
+            if (Toggles.RevurderInntekt.enabled) {
+                vedtaksperiode.person.overstyrUtkastRevurdering(hendelse)
+            }
         }
 
         override fun håndter(
