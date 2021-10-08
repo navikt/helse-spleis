@@ -1177,7 +1177,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `overstyre periode som etterfølges av forkastede perioder`() {
+    fun `revurdere periode som etterfølges av forkastede perioder`() {
         // Fremprovoserer et case hvor det at inntektsmeldingen kaster ut etterfølgende perioder fjerner låsene i sykdomshistorikken. Da kræsjer revurderingen
         // fordi vi forsøker å låse opp perioder som ikke er låste.
 
@@ -1202,16 +1202,6 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         )
     }
 
-    private fun assertEtterspurteYtelser(expected: Int, vedtaksperiodeIdInnhenter: IdInnhenter) {
-        assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger))
-        assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Pleiepenger))
-        assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Omsorgspenger))
-        assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Opplæringspenger))
-        assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger))
-        assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Dagpenger))
-        assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Institusjonsopphold))
-        assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Dødsinfo))
-    }
 
     @Test
     fun `etterspør ytelser ved påminnelser i avventer_historikk_revurdering`() {
@@ -1223,128 +1213,6 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
         håndterPåminnelse(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         assertEtterspurteYtelser(4, 1.vedtaksperiode)
-    }
-
-    @Test
-    fun `Overstyring av utkast til revurdering sender senere perioder til AVVENTER_ARBEIDSGIVERE_REVURDERING`() {
-        nyttVedtak(1.januar, 31.januar)
-        forlengVedtak(1.februar, 28.februar)
-        forlengVedtak(1.mars, 31.mars)
-
-        håndterOverstyring((20.januar til 29.januar).map { manuellFeriedag(it) })
-        håndterYtelser(1.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
-
-        // Denne overstyringen kommer før den forrige er ferdig prossessert
-        håndterOverstyring((30.januar til 31.januar).map { manuellFeriedag(it) })
-
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_SØKNAD_FERDIG_GAP,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET,
-            AVVENTER_HISTORIKK_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING
-        )
-
-        assertTilstander(
-            2.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET,
-            AVVENTER_ARBEIDSGIVERE_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
-            AVVENTER_ARBEIDSGIVERE_REVURDERING
-        )
-
-        assertTilstander(
-            3.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET,
-            AVVENTER_ARBEIDSGIVERE_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING,
-            AVVENTER_ARBEIDSGIVERE_REVURDERING
-        )
-    }
-
-    @Test
-    fun `Overstyring av utkast til revurdering sender senere periode i AVVENTER_SIMULERING_REVURDERING til AVVENTER_ARBEIDSGIVERE_REVURDERING`() {
-        nyttVedtak(1.januar, 31.januar)
-        forlengVedtak(1.februar, 28.februar)
-        forlengVedtak(1.mars, 31.mars)
-
-        håndterOverstyring((20.januar til 29.januar).map { manuellFeriedag(it) })
-        håndterYtelser(1.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
-        håndterYtelser(3.vedtaksperiode)
-
-        // Denne overstyringen kommer før den forrige er ferdig prossessert
-        håndterOverstyring((30.januar til 31.januar).map { manuellFeriedag(it) })
-
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_SØKNAD_FERDIG_GAP,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET,
-            AVVENTER_HISTORIKK_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING
-        )
-
-        assertTilstander(
-            2.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET,
-            AVVENTER_ARBEIDSGIVERE_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
-            AVVENTER_ARBEIDSGIVERE_REVURDERING
-        )
-
-        assertTilstander(
-            3.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET,
-            AVVENTER_ARBEIDSGIVERE_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING,
-            AVVENTER_SIMULERING_REVURDERING,
-            AVVENTER_ARBEIDSGIVERE_REVURDERING
-        )
     }
 
     @Test
@@ -1412,7 +1280,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Om en revurdering blir stanses før den behandles så skal si fra at vi avviser den`() {
+    fun `Om en revurdering blir stanset før den behandles så skal vi si fra at vi avviser den`() {
         nyttVedtak(1.januar, 31.januar)
         nyttVedtak(1.mars, 31.mars)
 
@@ -1420,4 +1288,83 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
         assertEquals(1, observatør.avvisteRevurderinger.size)
     }
+
+    @Test
+    fun `revurderer siste utbetalte periode`() {
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(2.januar, 18.januar)), førsteFraværsdag = 2.januar)
+        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode)
+        håndterOverstyring(listOf(manuellSykedag(26.januar, 80)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        assertEquals(Utbetaling.Utbetalt, inspektør.utbetalingtilstand(0))
+        assertEquals(Utbetaling.Sendt, inspektør.utbetalingtilstand(1))
+        assertEquals(inspektør.utbetaling(0).arbeidsgiverOppdrag().fagsystemId(), inspektør.utbetaling(1).arbeidsgiverOppdrag().fagsystemId())
+        inspektør.utbetaling(1).arbeidsgiverOppdrag().also { oppdrag ->
+            assertEquals(2, oppdrag.size)
+            assertEquals(18.januar, oppdrag[0].fom)
+            assertEquals(25.januar, oppdrag[0].tom)
+            assertEquals(100.0, oppdrag[0].grad)
+
+            assertEquals(26.januar, oppdrag[1].fom)
+            assertEquals(26.januar, oppdrag[1].tom)
+            assertEquals(80.0, oppdrag[1].grad)
+        }
+    }
+
+    @Test
+    fun `revurderer siste utbetalte periode i en forlengelse med bare ferie og permisjon`() {
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(2.januar, 18.januar)), førsteFraværsdag = 2.januar)
+        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(29.januar, 23.februar, 100.prosent))
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
+        håndterUtbetalt(2.vedtaksperiode)
+
+        håndterOverstyring((29.januar til 15.februar).map { manuellFeriedag(it) } + (16.februar til 23.februar).map { manuellPermisjonsdag(it) })
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        assertEquals(Utbetaling.Utbetalt, inspektør.utbetalingtilstand(0))
+        assertEquals(Utbetaling.Utbetalt, inspektør.utbetalingtilstand(1))
+        assertEquals(Utbetaling.Sendt, inspektør.utbetalingtilstand(2))
+        assertEquals(inspektør.utbetaling(1).arbeidsgiverOppdrag().fagsystemId(), inspektør.utbetaling(2).arbeidsgiverOppdrag().fagsystemId())
+        inspektør.utbetaling(2).arbeidsgiverOppdrag().also { oppdrag ->
+            assertEquals(1, oppdrag.size)
+            assertEquals(18.januar, oppdrag[0].fom)
+            assertEquals(26.januar, oppdrag[0].tom)
+            assertTrue(oppdrag[0].erForskjell())
+            assertEquals(100.0, oppdrag[0].grad)
+        }
+    }
+
+    private fun assertEtterspurteYtelser(expected: Int, vedtaksperiodeIdInnhenter: IdInnhenter) {
+        assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger))
+        assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Pleiepenger))
+        assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Omsorgspenger))
+        assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Opplæringspenger))
+        assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger))
+        assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Dagpenger))
+        assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Institusjonsopphold))
+        assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Dødsinfo))
+    }
+
+
 }
