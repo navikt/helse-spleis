@@ -56,6 +56,42 @@ internal class EnTilEnOverlappendeSykmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `sykmelding nr 2 har lik grad som sykmelding nr 1`() {
+        val sykmeldingSkrevet = 3.januar.atStartOfDay()
+        håndterSykmelding(
+            Sykmeldingsperiode(3.januar, 15.januar, 90.prosent),
+            Sykmeldingsperiode(16.januar, 20.januar, 40.prosent),
+            sykmeldingSkrevet = sykmeldingSkrevet
+        )
+        håndterSykmelding(
+            Sykmeldingsperiode(3.januar, 15.januar, 90.prosent),
+            Sykmeldingsperiode(16.januar, 20.januar, 40.prosent),
+            sykmeldingSkrevet = sykmeldingSkrevet.plusHours(1)
+        )
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertEquals(3.januar til 20.januar, inspektør.periode(1.vedtaksperiode))
+        assertNoWarnings(inspektør)
+    }
+
+    @Test
+    fun `sykmelding nr 2 har ulik grad som sykmelding nr 1`() {
+        val sykmeldingSkrevet = 3.januar.atStartOfDay()
+        håndterSykmelding(
+            Sykmeldingsperiode(3.januar, 15.januar, 90.prosent),
+            Sykmeldingsperiode(16.januar, 20.januar, 40.prosent),
+            sykmeldingSkrevet = sykmeldingSkrevet
+        )
+        håndterSykmelding(
+            Sykmeldingsperiode(3.januar, 16.januar, 90.prosent),
+            Sykmeldingsperiode(17.januar, 20.januar, 40.prosent),
+            sykmeldingSkrevet = sykmeldingSkrevet.plusHours(1)
+        )
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertEquals(3.januar til 20.januar, inspektør.periode(1.vedtaksperiode))
+        assertWarningTekst(inspektør, "Korrigert sykmelding er lagt til grunn - kontroller dagene i sykmeldingsperioden")
+    }
+
+    @Test
     fun `støtter ikke overlapp inni`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 15.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(4.januar, 15.januar, 100.prosent))

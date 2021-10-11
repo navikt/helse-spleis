@@ -22,6 +22,7 @@ import no.nav.helse.person.ForlengelseFraInfotrygd.*
 import no.nav.helse.person.Periodetype.*
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
+import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -32,6 +33,7 @@ import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerfilter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
+import no.nav.helse.økonomi.Økonomi
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -879,12 +881,33 @@ internal class Vedtaksperiode private constructor(
                 )
             )
             if (!sykmelding.opprinneligPeriodeErLik(vedtaksperiode.sykmeldingsperiode)) return overlappendeSykmeldingIkkeStøttet(vedtaksperiode, sykmelding)
+
             if (vedtaksperiode.arbeidsgiver.erSykmeldingSkrevetSenereEnnAndre(sykmelding, vedtaksperiode.hendelseIder)) {
                 sykmelding.warn("Mottatt en sykmelding som er skrevet tidligere enn den som er lagt til grunn, vurder sykmeldingene og gjør eventuelle justeringer")
             } else {
+                if (inneholderForskjelligeGraderinger(vedtaksperiode, sykmelding)) {
+                    sykmelding.warn("Korrigert sykmelding er lagt til grunn - kontroller dagene i sykmeldingsperioden")
+                }
                 vedtaksperiode.oppdaterHistorikk(sykmelding)
-                sykmelding.warn("Korrigert sykmelding er lagt til grunn - kontroller dagene i sykmeldingsperioden")
             }
+        }
+
+        private fun graderFraSykomstidslinje(sykdomstidslinje: Sykdomstidslinje): List<Double> {
+            val grader = mutableListOf<Double>()
+            sykdomstidslinje.map { dag ->
+                dag.accept(object : SykdomstidslinjeVisitor {
+                    override fun visitDag(dag: Dag.Sykedag, dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+                        økonomi.medData { grad, _ -> grader.add(grad) }
+                    }
+                })
+            }
+            return grader
+        }
+
+        private fun inneholderForskjelligeGraderinger(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding): Boolean {
+            val graderEksisterendeSykmelding = graderFraSykomstidslinje(vedtaksperiode.sykdomstidslinje)
+            val graderNySykmelding = graderFraSykomstidslinje(sykmelding.sykdomstidslinje())
+            return graderEksisterendeSykmelding != graderNySykmelding
         }
 
         fun overlappendeSykmeldingIkkeStøttet(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
