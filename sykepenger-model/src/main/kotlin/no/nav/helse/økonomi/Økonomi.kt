@@ -161,9 +161,11 @@ internal class Økonomi private constructor(
         }
 
     internal fun arbeidsgiverRefusjon(beløp: Inntekt): Økonomi {
-        arbeidsgiverRefusjonsbeløp = beløp
+        arbeidsgiverRefusjonsbeløp = beløp.coerceAtMost(aktuellDagsinntekt!!)
         return this
     }
+
+    internal fun settFullArbeidsgiverRefusjon() = arbeidsgiverRefusjon(aktuellDagsinntekt!!)
 
     internal fun lås() = tilstand.lås(this)
 

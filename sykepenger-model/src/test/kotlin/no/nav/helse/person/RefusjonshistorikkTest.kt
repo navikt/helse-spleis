@@ -6,12 +6,11 @@ import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.util.*
-import kotlin.NoSuchElementException
 
 internal class RefusjonshistorikkTest {
 
@@ -19,10 +18,7 @@ internal class RefusjonshistorikkTest {
     fun `hente refusjon basert på utbetalingsperiode`() {
         val refusjonshistorikk = Refusjonshistorikk()
         val refusjon = refusjon(1.januar til 16.januar)
-        refusjonshistorikk.leggTilRefusjon(
-            refusjon
-        )
-
+        refusjonshistorikk.leggTilRefusjon(refusjon)
         assertSame(refusjon, refusjonshistorikk.finnRefusjon(1.januar til 31.januar))
     }
 
@@ -33,7 +29,6 @@ internal class RefusjonshistorikkTest {
         val refusjon2 = refusjon(2.februar til 15.februar)
         refusjonshistorikk.leggTilRefusjon(refusjon1)
         refusjonshistorikk.leggTilRefusjon(refusjon2)
-
         assertSame(refusjon2, refusjonshistorikk.finnRefusjon(2.februar til 5.februar))
     }
 
@@ -44,8 +39,7 @@ internal class RefusjonshistorikkTest {
         val refusjon2 = refusjon(2.februar til 10.februar)
         refusjonshistorikk.leggTilRefusjon(refusjon1)
         refusjonshistorikk.leggTilRefusjon(refusjon2)
-
-        assertThrows<NoSuchElementException> { refusjonshistorikk.finnRefusjon(3.mars til 5.mars) }
+        assertNull(refusjonshistorikk.finnRefusjon(3.mars til 5.mars))
     }
 
     @Test
@@ -53,7 +47,6 @@ internal class RefusjonshistorikkTest {
         val refusjonshistorikk = Refusjonshistorikk()
         val refusjon1 = refusjon(1.januar til 5.januar, 15.januar til 20.januar, 25.januar til 29.januar)
         refusjonshistorikk.leggTilRefusjon(refusjon1)
-
         assertSame(refusjon1, refusjonshistorikk.finnRefusjon(25.januar til 31.januar))
     }
 
@@ -67,7 +60,7 @@ internal class RefusjonshistorikkTest {
         refusjonshistorikk.leggTilRefusjon(refusjon1)
         refusjonshistorikk.leggTilRefusjon(refusjon2)
         assertSame(refusjon1, refusjonshistorikk.finnRefusjon(1.januar til 31.januar))
-        assertThrows<NoSuchElementException> { refusjonshistorikk.finnRefusjon(1.mars til 20.mars) }
+        assertNull(refusjonshistorikk.finnRefusjon(1.mars til 20.mars))
     }
 
     @Test

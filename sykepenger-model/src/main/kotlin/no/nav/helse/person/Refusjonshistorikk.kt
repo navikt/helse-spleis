@@ -23,7 +23,7 @@ internal class Refusjonshistorikk {
         visitor.postVisitRefusjonshistorikk(this)
     }
 
-    internal fun finnRefusjon(periode: Periode): Refusjon {
+    internal fun finnRefusjon(periode: Periode): Refusjon? {
         return refusjoner.refusjonSomTrefferFørsteFraværsdag(periode) ?: refusjoner.overlapperMedArbreidsgiverperiode(periode)
     }
 
@@ -40,9 +40,9 @@ internal class Refusjonshistorikk {
             internal fun MutableList<Refusjon>.leggTilRefusjon(refusjon: Refusjon) {
                 if (refusjon.meldingsreferanseId !in map { it.meldingsreferanseId }) add(refusjon)
             }
-            internal fun Iterable<Refusjon>.overlapperMedArbreidsgiverperiode(periode: Periode) : Refusjon {
+            internal fun Iterable<Refusjon>.overlapperMedArbreidsgiverperiode(periode: Periode) : Refusjon? {
                 val utvidetPeriode = periode.start.minusDays(16) til periode.endInclusive
-                return first { refusjon ->
+                return firstOrNull { refusjon ->
                     refusjon.arbeidsgiverperioder.any { it.overlapperMed(utvidetPeriode) }
                 }
             }
@@ -50,6 +50,8 @@ internal class Refusjonshistorikk {
                 refusjon.førsteFraværsdag ?: refusjon.arbeidsgiverperioder.maxOf { it.start } in periode
             }
         }
+
+        internal fun beløp(dag: LocalDate) = beløp
 
         internal fun accept(visitor: RefusjonshistorikkVisitor) {
             visitor.preVisitRefusjon(
