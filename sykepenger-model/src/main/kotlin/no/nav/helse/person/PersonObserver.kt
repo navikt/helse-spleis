@@ -160,7 +160,8 @@ interface PersonObserver {
     )
 
     data class HendelseIkkeHåndtertEvent(
-        val hendelseId: UUID
+        val hendelseId: UUID,
+        val årsaker: List<String>
     )
 
     data class VedtakFattetEvent(

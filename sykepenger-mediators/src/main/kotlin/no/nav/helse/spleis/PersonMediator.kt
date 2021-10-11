@@ -316,7 +316,10 @@ internal class PersonMediator(
 
     override fun hendelseIkkeHåndtert(hendelseskontekst: Hendelseskontekst, event: PersonObserver.HendelseIkkeHåndtertEvent) {
         queueMessage(hendelseskontekst, "hendelse_ikke_håndtert", JsonMessage.newMessage(
-            mapOf("hendelseId" to event.hendelseId)
+            mapOf(
+                "hendelseId" to event.hendelseId,
+                "årsaker" to event.årsaker
+            )
         ))
     }
 

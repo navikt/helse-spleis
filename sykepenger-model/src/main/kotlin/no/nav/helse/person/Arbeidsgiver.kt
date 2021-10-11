@@ -340,7 +340,7 @@ internal class Arbeidsgiver private constructor(
                 håndter(hendelse) { nyPeriode(ny, hendelse) }
             }
         }
-        if (hendelse.hasErrorsOrWorse()) person.førerIkkeTilVidereBehandling(hendelse)
+        if (hendelse.hasErrorsOrWorse()) person.emitHendelseIkkeHåndtert(hendelse)
         finalize(hendelse)
     }
 

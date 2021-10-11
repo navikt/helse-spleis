@@ -541,8 +541,17 @@ class Person private constructor(
         return aktiviteter
     }
 
-    internal fun førerIkkeTilVidereBehandling(hendelse: PersonHendelse) {
-        observers.forEach { it.hendelseIkkeHåndtert(hendelse.hendelseskontekst(), PersonObserver.HendelseIkkeHåndtertEvent(hendelse.meldingsreferanseId())) }
+    internal fun emitHendelseIkkeHåndtert(hendelse: PersonHendelse) {
+        val errorMeldinger = mutableListOf<String>()
+        aktivitetslogg.accept(object : AktivitetsloggVisitor {
+            override fun visitError(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Error, melding: String, tidsstempel: String) {
+                errorMeldinger.add(melding)
+            }
+        })
+        observers.forEach { it.hendelseIkkeHåndtert(
+            hendelse.hendelseskontekst(),
+            PersonObserver.HendelseIkkeHåndtertEvent(hendelse.meldingsreferanseId(), errorMeldinger)
+        ) }
     }
 
     internal fun harArbeidsgivereMedOverlappendeUtbetaltePerioder(organisasjonsnummer: String, periode: Periode) =
