@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.person.Refusjonshistorikk.Refusjon.Companion.leggTilRefusjon
 import no.nav.helse.person.Refusjonshistorikk.Refusjon.Companion.overlapperMedArbreidsgiverperiode
 import no.nav.helse.person.Refusjonshistorikk.Refusjon.Companion.refusjonSomTrefferFørsteFraværsdag
+import no.nav.helse.person.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.beløp
 import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -32,7 +33,7 @@ internal class Refusjonshistorikk {
         private val førsteFraværsdag: LocalDate?,
         private val arbeidsgiverperioder: List<Periode>,
         private val beløp: Inntekt?,
-        private val opphørsdato: LocalDate?,
+        private val sisteRefusjonsdag: LocalDate?,
         private val endringerIRefusjon: List<EndringIRefusjon>,
         private val tidsstempel: LocalDateTime = LocalDateTime.now()
     ) {
@@ -46,12 +47,21 @@ internal class Refusjonshistorikk {
                     refusjon.arbeidsgiverperioder.any { it.overlapperMed(utvidetPeriode) }
                 }
             }
+            private fun Refusjon.utledetFørsteFraværsdag() = førsteFraværsdag ?: arbeidsgiverperioder.maxOf { it.start }
+
             internal fun Iterable<Refusjon>.refusjonSomTrefferFørsteFraværsdag(periode: Periode) = firstOrNull { refusjon ->
-                refusjon.førsteFraværsdag ?: refusjon.arbeidsgiverperioder.maxOf { it.start } in periode
+                refusjon.utledetFørsteFraværsdag() in periode
             }
+
         }
 
-        internal fun beløp(dag: LocalDate) = beløp
+        internal fun beløp(dag: LocalDate, aktivitetslogg: IAktivitetslogg) : Inntekt {
+            if (dag < utledetFørsteFraværsdag()) {
+                aktivitetslogg.severe("Har ikke opplysninger om refusjon på den aktuelle dagen")
+            }
+            if (sisteRefusjonsdag != null && dag > sisteRefusjonsdag) return Inntekt.INGEN
+            return endringerIRefusjon.beløp(dag) ?: beløp ?: Inntekt.INGEN
+        }
 
         internal fun accept(visitor: RefusjonshistorikkVisitor) {
             visitor.preVisitRefusjon(
@@ -59,7 +69,7 @@ internal class Refusjonshistorikk {
                 førsteFraværsdag,
                 arbeidsgiverperioder,
                 beløp,
-                opphørsdato,
+                sisteRefusjonsdag,
                 endringerIRefusjon,
                 tidsstempel
             )
@@ -69,7 +79,7 @@ internal class Refusjonshistorikk {
                 førsteFraværsdag,
                 arbeidsgiverperioder,
                 beløp,
-                opphørsdato,
+                sisteRefusjonsdag,
                 endringerIRefusjon,
                 tidsstempel
             )
@@ -79,6 +89,10 @@ internal class Refusjonshistorikk {
             private val beløp: Inntekt,
             private val endringsdato: LocalDate
         ){
+            internal companion object {
+                internal fun List<EndringIRefusjon>.beløp(dag: LocalDate) = sortedBy { it.endringsdato }.lastOrNull { dag >= it.endringsdato }?.beløp
+            }
+
             internal fun accept(visitor: RefusjonshistorikkVisitor){
                 visitor.visitEndringIRefusjon(beløp, endringsdato)
             }

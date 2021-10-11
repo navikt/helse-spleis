@@ -88,7 +88,7 @@ internal class RefusjonsgjødslerTest {
             førsteFraværsdag = førsteFraværsdag,
             arbeidsgiverperioder = listOf(førsteFraværsdag til førsteFraværsdag.plusDays(15)),
             beløp = beløp,
-            opphørsdato = null,
+            sisteRefusjonsdag = null,
             endringerIRefusjon = emptyList()
         )
 

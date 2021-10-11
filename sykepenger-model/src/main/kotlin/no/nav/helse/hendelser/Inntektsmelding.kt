@@ -184,7 +184,7 @@ class Inntektsmelding(
                     førsteFraværsdag: LocalDate?,
                     arbeidsgiverperioder: List<Periode>,
                     beløp: Inntekt?,
-                    opphørsdato: LocalDate?
+                    sisteRefusjonsdag: LocalDate?
                 ) {
                     refusjonshistorikk.leggTilRefusjon(
                         Refusjonshistorikk.Refusjon(
@@ -192,7 +192,7 @@ class Inntektsmelding(
                             førsteFraværsdag = førsteFraværsdag,
                             arbeidsgiverperioder = arbeidsgiverperioder,
                             beløp = beløp,
-                            opphørsdato = opphørsdato,
+                            sisteRefusjonsdag = sisteRefusjonsdag,
                             endringerIRefusjon = map {
                                 Refusjonshistorikk.Refusjon.EndringIRefusjon(
                                     it.beløp, it.endringsdato

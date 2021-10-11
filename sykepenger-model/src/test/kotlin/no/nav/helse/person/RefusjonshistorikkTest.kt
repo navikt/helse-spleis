@@ -84,7 +84,7 @@ internal class RefusjonshistorikkTest {
         førsteFraværsdag = førsteFraværsdag,
         arbeidsgiverperioder = arbeidsgiverperiode.toList(),
         beløp = 31000.månedlig,
-        opphørsdato = null,
+        sisteRefusjonsdag = null,
         endringerIRefusjon = emptyList()
     )
 }

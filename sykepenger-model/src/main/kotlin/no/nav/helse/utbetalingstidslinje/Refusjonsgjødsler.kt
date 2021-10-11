@@ -2,7 +2,6 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Refusjonshistorikk
-import no.nav.helse.økonomi.Inntekt
 
 internal class Refusjonsgjødsler(
     private val tidslinjer: List<Utbetalingstidslinje>,
@@ -15,7 +14,7 @@ internal class Refusjonsgjødsler(
             tidslinje.forEach { utbetalingsdag ->
                 when (refusjon) {
                     null -> utbetalingsdag.økonomi.settFullArbeidsgiverRefusjon()
-                    else -> utbetalingsdag.økonomi.arbeidsgiverRefusjon(refusjon.beløp(utbetalingsdag.dato) ?: Inntekt.INGEN)
+                    else -> utbetalingsdag.økonomi.arbeidsgiverRefusjon(refusjon.beløp(utbetalingsdag.dato, aktivitetslogg))
                 }
             }
         }

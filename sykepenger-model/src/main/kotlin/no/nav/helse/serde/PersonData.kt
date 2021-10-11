@@ -960,7 +960,7 @@ internal data class PersonData(
                                 førsteFraværsdag = it.førsteFraværsdag,
                                 arbeidsgiverperioder = it.arbeidsgiverperioder,
                                 beløp = it.beløp?.månedlig,
-                                opphørsdato = it.opphørsdato,
+                                sisteRefusjonsdag = it.opphørsdato,
                                 endringerIRefusjon = it.endringerIRefusjon.parseEndringerIRefusjon(),
                                 tidsstempel = it.tidsstempel
                             )
