@@ -545,7 +545,10 @@ class Person private constructor(
         val errorMeldinger = mutableListOf<String>()
         aktivitetslogg.accept(object : AktivitetsloggVisitor {
             override fun visitError(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Error, melding: String, tidsstempel: String) {
-                errorMeldinger.add(melding)
+                kontekster.mapNotNull { it.kontekstMap["meldingsreferanseId"] }
+                    .map(UUID::fromString)
+                    .filter { it == hendelse.meldingsreferanseId() }
+                    .also { errorMeldinger.add(melding) }
             }
         })
         observers.forEach { it.hendelseIkkeHåndtert(
