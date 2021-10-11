@@ -198,7 +198,7 @@ internal class HendelseMediator(
     }
 
     private fun person(hendelse: PersonHendelse): Person {
-        return personRepository.hentPerson(hendelse.fødselsnummer())
+        return personRepository.hentPerson(hendelse.fødselsnummer().somFødselsnummer())
             ?.deserialize { hendelseRepository.hentAlleHendelser(hendelse.fødselsnummer().somFødselsnummer()) } ?:
             Person(
                 aktørId = hendelse.aktørId(),

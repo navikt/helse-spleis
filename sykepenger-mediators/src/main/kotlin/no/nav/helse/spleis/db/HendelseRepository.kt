@@ -42,7 +42,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
             )
         }
 
-    internal fun lagreMelding(melding: HendelseMessage, fødselsnummer: String, meldingId: UUID, json: String) {
+    internal fun lagreMelding(melding: HendelseMessage, fødselsnummer: Fødselsnummer, meldingId: UUID, json: String) {
         val meldingtype = meldingstype(melding) ?: return
         using(sessionOf(dataSource)) { session ->
             session.run(
