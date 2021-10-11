@@ -22,16 +22,6 @@ internal class SykmeldingHendelseTest : AbstractPersonTest() {
     }
 
     @Test
-    fun `En ny Sykmelding er ugyldig`() {
-        person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent)))
-        person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent)))
-        assertTrue(inspektør.personLogg.hasErrorsOrWorse())
-        assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteTilstand(1.vedtaksperiode))
-        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
-    }
-
-    @Test
     fun `To søknader uten overlapp`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent)))
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 10.januar, 100.prosent)))

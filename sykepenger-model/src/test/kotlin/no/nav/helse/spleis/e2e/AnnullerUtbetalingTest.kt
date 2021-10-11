@@ -463,7 +463,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         // lag en periode
         nyttVedtak(1.januar, 31.januar)
         // prøv å forkast, ikke klar det
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 20.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 19.februar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(1.februar, 20.februar, 100.prosent))
         assertTrue(inspektør.periodeErIkkeForkastet(1.vedtaksperiode))
         assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))

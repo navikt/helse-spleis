@@ -73,7 +73,7 @@ internal class PingPongTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(1.januar, 16.januar, 100.prosent))
 
-        håndterSykmelding(Sykmeldingsperiode(17.januar, 27.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(17.januar, 26.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(17.januar, 27.januar, 100.prosent))
 
         håndterInntektsmelding(listOf(1.januar til 16.januar))
@@ -93,7 +93,7 @@ internal class PingPongTest : AbstractEndToEndTest() {
     @Test
     fun `spleis - infotrygd - spleis --- inntekt kommer fra første periode`() {
         nyttVedtak(20.desember(2017), 16.januar)
-        håndterSykmelding(Sykmeldingsperiode(17.januar, 27.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(17.januar, 26.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(17.januar, 27.januar, 100.prosent))
 
         håndterInntektsmelding(listOf(20.desember(2017) til 5.januar))

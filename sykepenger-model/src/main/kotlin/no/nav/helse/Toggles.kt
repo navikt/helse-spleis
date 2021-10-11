@@ -42,7 +42,7 @@ abstract class Toggles internal constructor(enabled: Boolean = false, private va
 
     object OppretteVedtaksperioderVedSøknad : Toggles(true)
     object RebregnUtbetalingVedHistorikkendring : Toggles()
-    object OverlappendeSykmelding : Toggles("EN_TIL_EN_OVERLAPPENDE_SYKMELDING")
+    object OverlappendeSykmelding : Toggles(true)
     object SendFeriepengeOppdrag: Toggles(false)
     object RevurderInntekt: Toggles("REVURDER_INNTEKT")
     object DatoRangeJson : Toggles(true)
