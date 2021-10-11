@@ -78,6 +78,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         is AnnulleringMessage -> KANSELLER_UTBETALING
         is EtterbetalingMessage -> GRUNNBELØPSREGULERING
         is OverstyrTidslinjeMessage -> OVERSTYRTIDSLINJE
+        is OverstyrInntektMessage -> OVERSTYRINNTEKT
         is UtbetalingsgrunnlagMessage -> UTBETALINGSGRUNNLAG
         is UtbetalingshistorikkForFeriepengerMessage -> null //TODO: Skal lagres som UTBETALINGSHISTORIKK_FOR_FERIEPENGER
         is AvstemmingMessage,
@@ -92,7 +93,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
             session.run(
                 queryOf(
                     "SELECT melding_id,data FROM melding WHERE fnr = ? AND melding_type IN (?, ?, ?, ?, ?)",
-                    fødselsnummer.toLong(), NY_SØKNAD.name, SENDT_SØKNAD_ARBEIDSGIVER.name, SENDT_SØKNAD_NAV.name, INNTEKTSMELDING.name, OVERSTYRTIDSLINJE.name
+                    fødselsnummer.toLong(), NY_SØKNAD.name, SENDT_SØKNAD_ARBEIDSGIVER.name, SENDT_SØKNAD_NAV.name, INNTEKTSMELDING.name, OVERSTYRTIDSLINJE.name, OVERSTYRINNTEKT.name
                 ).map {
                     UUID.fromString(it.string("melding_id")) to it.string("data")
                 }.asList).toMap()
@@ -107,6 +108,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         PÅMINNELSE,
         PERSONPÅMINNELSE,
         OVERSTYRTIDSLINJE,
+        OVERSTYRINNTEKT,
         UTBETALINGPÅMINNELSE,
         YTELSER,
         UTBETALINGSGRUNNLAG,
