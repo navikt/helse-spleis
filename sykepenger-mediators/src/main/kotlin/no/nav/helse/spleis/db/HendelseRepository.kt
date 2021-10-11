@@ -88,7 +88,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         else -> null.also { log.warn("ukjent meldingstype ${melding::class.simpleName}: melding lagres ikke") }
     }
 
-    internal fun hentAlleHendelser(fødselsnummer: String): Map<UUID, String> {
+    internal fun hentAlleHendelser(fødselsnummer: Fødselsnummer): Map<UUID, String> {
         return using(sessionOf(dataSource)) { session ->
             session.run(
                 queryOf(
