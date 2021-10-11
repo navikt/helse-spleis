@@ -1,5 +1,6 @@
 package no.nav.helse.serde.api.v2.buildere
 
+import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.*
 import no.nav.helse.serde.api.v2.HendelseDTO
@@ -24,7 +25,7 @@ internal typealias FagsystemId = String
 // Besøker hele arbeidsgiver-treet
 internal class GenerasjonerBuilder(
     private val hendelser: List<HendelseDTO>,
-    private val fødselsnummer: String,
+    private val fødselsnummer: Fødselsnummer,
     private val vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk,
     arbeidsgiver: Arbeidsgiver
 ) : ArbeidsgiverVisitor {

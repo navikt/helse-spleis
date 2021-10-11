@@ -1,5 +1,6 @@
 package no.nav.helse.serde.api.v2
 
+import no.nav.helse.Fødselsnummer
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
@@ -99,7 +100,7 @@ internal class Generasjoner(perioder: Tidslinjeperioder) {
 }
 
 internal class Tidslinjeperioder(
-    private val fødselsnummer: String,
+    private val fødselsnummer: Fødselsnummer,
     private val forkastetVedtaksperiodeIder: List<UUID>,
     private val vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk,
     vedtaksperioder: List<IVedtaksperiode>,
@@ -193,7 +194,7 @@ internal class Tidslinjeperioder(
             utbetaling.gjenståendeSykedager,
             utbetaling.maksdato > sisteSykepengedag
         )
-        val alder = fødselsnummer.somFødselsnummer().alder().let {
+        val alder = fødselsnummer.alder().let {
             BeregnetPeriode.Alder(it.alderPåDato(sisteSykepengedag), it.datoForØvreAldersgrense > sisteSykepengedag)
         }
         val søknadsfrist = hendelser.finn<SøknadNavDTO>()?.let {

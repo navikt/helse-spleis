@@ -10,6 +10,7 @@ import no.nav.helse.serde.api.v2.BeregnetPeriode
 import no.nav.helse.serde.api.v2.Generasjon
 import no.nav.helse.serde.api.v2.Tidslinjeperiode
 import no.nav.helse.serde.api.v2.UberegnetPeriode
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.februar
@@ -28,7 +29,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     private fun generasjoner(): List<Generasjon> {
         val sammenligningsgrunnlagBuilder = OppsamletSammenligningsgrunnlagBuilder(person)
         val vilkårsgrunnlagHistorikk = VilkårsgrunnlagBuilder(person.vilkårsgrunnlagHistorikk, sammenligningsgrunnlagBuilder).build()
-        val generasjonerBuilder = GenerasjonerBuilder(søknadDTOer, UNG_PERSON_FNR_2018, vilkårsgrunnlagHistorikk, person.arbeidsgiver(ORGNUMMER))
+        val generasjonerBuilder = GenerasjonerBuilder(søknadDTOer, UNG_PERSON_FNR_2018.somFødselsnummer(), vilkårsgrunnlagHistorikk, person.arbeidsgiver(ORGNUMMER))
         return generasjonerBuilder.build()
     }
 
