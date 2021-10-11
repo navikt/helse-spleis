@@ -142,7 +142,7 @@ internal class Sykdomshistorikk private constructor(
             }
 
             internal fun List<Element>.erSykmeldingenDenSistSkrevne(sykmelding: Sykmelding, hendelseIder: Set<UUID>): Boolean {
-                return filter { it.hendelseId in hendelseIder }.any {
+                return filter { it.hendelseId in hendelseIder }.none {
                     it.hendelseSykdomstidslinje.sykmeldingSkrevet() > sykmelding.sykdomstidslinje().sykmeldingSkrevet()
                 }
             }

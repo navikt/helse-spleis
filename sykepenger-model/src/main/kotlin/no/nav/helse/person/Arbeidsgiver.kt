@@ -998,7 +998,7 @@ internal class Arbeidsgiver private constructor(
         "refusjonOpphører" to refusjonOpphører
     )
 
-    internal fun erSykmeldingSkrevetSenereEnnAndre(sykmelding: Sykmelding, hendelseIder: Set<UUID>): Boolean =
+    internal fun erSykmeldingenDenSistSkrevne(sykmelding: Sykmelding, hendelseIder: Set<UUID>): Boolean =
         sykdomshistorikk.erSykmeldingenDenSistSkrevne(sykmelding, hendelseIder)
 
     internal class JsonRestorer private constructor() {
