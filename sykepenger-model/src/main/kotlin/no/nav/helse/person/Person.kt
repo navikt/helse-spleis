@@ -545,16 +545,21 @@ class Person private constructor(
         val errorMeldinger = mutableListOf<String>()
         aktivitetslogg.accept(object : AktivitetsloggVisitor {
             override fun visitError(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Error, melding: String, tidsstempel: String) {
-                kontekster.mapNotNull { it.kontekstMap["meldingsreferanseId"] }
-                    .map(UUID::fromString)
-                    .filter { it == hendelse.meldingsreferanseId() }
-                    .also { errorMeldinger.add(melding) }
+                if (kontekster
+                        .mapNotNull { it.kontekstMap["meldingsreferanseId"] }
+                        .map(UUID::fromString)
+                        .contains(hendelse.meldingsreferanseId())
+                ) {
+                    errorMeldinger.add(melding)
+                }
             }
         })
-        observers.forEach { it.hendelseIkkeHåndtert(
-            hendelse.hendelseskontekst(),
-            PersonObserver.HendelseIkkeHåndtertEvent(hendelse.meldingsreferanseId(), errorMeldinger)
-        ) }
+        observers.forEach {
+            it.hendelseIkkeHåndtert(
+                hendelse.hendelseskontekst(),
+                PersonObserver.HendelseIkkeHåndtertEvent(hendelse.meldingsreferanseId(), errorMeldinger)
+            )
+        }
     }
 
     internal fun harArbeidsgivereMedOverlappendeUtbetaltePerioder(organisasjonsnummer: String, periode: Periode) =
