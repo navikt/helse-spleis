@@ -887,6 +887,8 @@ internal class Vedtaksperiode private constructor(
             } else {
                 if (inneholderForskjelligeGraderinger(vedtaksperiode, sykmelding)) {
                     sykmelding.warn("Korrigert sykmelding er lagt til grunn - kontroller dagene i sykmeldingsperioden")
+                } else {
+                    sykmelding.info("Ny sykmelding med like graderinger er lagt til grunn")
                 }
                 vedtaksperiode.oppdaterHistorikk(sykmelding)
             }
