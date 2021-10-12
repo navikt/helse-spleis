@@ -1,17 +1,18 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Refusjonshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
-import no.nav.helse.testhelpers.U
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
@@ -66,7 +67,28 @@ internal class RefusjonsgjødslerTest {
         assertTrue(aktivitetslogg.hasWarningsOrWorse())
     }
 
+    @Disabled
+    @Test
+    fun `Utbetalingstidslinje med flere sammenhengende sykdomsperioder henter riktig refusjon for perioden`() {
+        resetSeed(1.februar)
+        val utbetalingstidslinje = (16.U + 10.S + 2.A + 10.S).utbetalingstidslinje(
+            inntektsopplysning(1.februar, 2308.daglig) + inntektsopplysning(2.mars, 2500.daglig)
+        )
+        val refusjonsgjødsler = Refusjonsgjødsler(
+            tidslinje = utbetalingstidslinje, refusjonshistorikk =
+            refusjonshistorikk(refusjon(1.februar, 2308.daglig), refusjon(1.mars, 2500.daglig))
+        )
+        val aktivitetslogg = Aktivitetslogg()
+        refusjonsgjødsler.gjødsle(aktivitetslogg)
+        assertRefusjonArbeidsgiver(utbetalingstidslinje[1.februar til 27.februar], 2308.0)
+        assertRefusjonArbeidsgiver(utbetalingstidslinje[28.februar til 1.mars], 0.0)
+        assertRefusjonArbeidsgiver(utbetalingstidslinje[2.mars til 12.mars], 2500.0)
+        assertTrue(aktivitetslogg.hasWarningsOrWorse())
+    }
+
     private companion object {
+
+        operator fun Iterable<Utbetalingstidslinje.Utbetalingsdag>.get(periode: Periode) = filter { it.dato in periode }
 
         private fun assertRefusjonArbeidsgiver(utbetalingstidslinje: Iterable<Utbetalingstidslinje.Utbetalingsdag>, forventetUkedagbeløp: Double) {
             utbetalingstidslinje.forEach { utbetalingsdag ->
@@ -77,7 +99,7 @@ internal class RefusjonsgjødslerTest {
             }
         }
 
-        private fun refusjonshistorikk(vararg refusjoner: Refusjonshistorikk.Refusjon) : Refusjonshistorikk {
+        private fun refusjonshistorikk(vararg refusjoner: Refusjonshistorikk.Refusjon): Refusjonshistorikk {
             val refusjonshistorikk = Refusjonshistorikk()
             refusjoner.forEach { refusjonshistorikk.leggTilRefusjon(it) }
             return refusjonshistorikk
@@ -92,16 +114,17 @@ internal class RefusjonsgjødslerTest {
             endringerIRefusjon = emptyList()
         )
 
-        private fun Økonomi.arbeidsgiverRefusjonsbeløp() = medData { _, arbeidsgiverRefusjonsbeløp, _, _, _, _, _, _, _ ->  arbeidsgiverRefusjonsbeløp }
+        private fun Økonomi.arbeidsgiverRefusjonsbeløp() = medData { _, arbeidsgiverRefusjonsbeløp, _, _, _, _, _, _, _ -> arbeidsgiverRefusjonsbeløp }
         private fun Økonomi.aktuellDagsinntekt() = medData { _, _, _, _, _, aktuellDagsinntekt, _, _, _ -> aktuellDagsinntekt }
 
         private fun inntektsopplysning(skjæringstidspunkt: LocalDate, inntekt: Inntekt) = mapOf(
             skjæringstidspunkt to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), inntekt)
         )
+
         private fun Sykdomstidslinje.utbetalingstidslinje(
             inntektsopplysning: Map<LocalDate, Inntektshistorikk.Inntektsopplysning?>,
             strategi: Forlengelsestrategi = Forlengelsestrategi.Ingen
-        ) : Utbetalingstidslinje {
+        ): Utbetalingstidslinje {
             val tidslinje = UtbetalingstidslinjeBuilder(
                 skjæringstidspunkter = inntektsopplysning.keys.toList(),
                 inntektPerSkjæringstidspunkt = inntektsopplysning
