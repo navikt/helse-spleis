@@ -9,6 +9,7 @@ import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
@@ -520,5 +521,34 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterOverstyring(32000.månedlig, ag1, 1.januar)
         assertEquals(1, observatør.avvisteRevurderinger.size)
         assertErrorTekst(inspektør, "Forespurt overstyring av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
+    }
+
+    @Test
+    fun `Ved revurdering av inntekt til under krav til minste sykepengegrunnlag skal utbetaling opphøres`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, beregnetInntekt = 50000.årlig)
+        håndterYtelser(1.vedtaksperiode)
+        val inntekter = listOf(grunnlag(ORGNUMMER, 1.januar, 50000.årlig.repeat(3)))
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+                listOf(
+                    sammenligningsgrunnlag(ORGNUMMER, 1.januar, 50000.årlig.repeat(12)),
+                )
+            ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter)
+        )
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        håndterOverstyring(46000.årlig, skjæringstidspunkt = 1.januar) // da havner vi under greia
+        håndterYtelser(1.vedtaksperiode)
+
+        val utbetalinger = inspektør.utbetalinger
+        assertEquals(1, utbetalinger.map { it.arbeidsgiverOppdrag().fagsystemId() }.toSet().size)
+        assertEquals(utbetalinger.first().arbeidsgiverOppdrag().nettoBeløp(), -1 * utbetalinger.last().arbeidsgiverOppdrag().nettoBeløp())
+        assertEquals(2, utbetalinger.size)
     }
 }
