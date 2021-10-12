@@ -26,6 +26,7 @@ import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harId
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
@@ -712,7 +713,7 @@ internal class Vedtaksperiode private constructor(
             forbrukteSykedager = engineForTimeline.forbrukteSykedager(),
             gjenståendeSykedager = engineForTimeline.gjenståendeSykedager(),
             periode = periode,
-            forrige = utbetaling
+            forrige = utbetalinger.aktive().lastOrNull()
         ).also {
             utbetalinger.add(it)
             arbeidsgiver.fordelRevurdertUtbetaling(hendelse, utbetaling())

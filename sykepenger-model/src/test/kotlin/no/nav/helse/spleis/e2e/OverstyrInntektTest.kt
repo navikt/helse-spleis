@@ -7,10 +7,11 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -333,4 +334,82 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         )
     }
 
+    @Test
+    fun `Ved overstyring av inntekt til under krav til minste sykepengegrunnlag skal vi lage en utbetaling uten utbetaling`() {
+        val OverMinstegrense = 50000.årlig
+        val UnderMinstegrense = 46000.årlig
+
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, beregnetInntekt = OverMinstegrense)
+        håndterYtelser(1.vedtaksperiode)
+        val inntekter = listOf(grunnlag(ORGNUMMER, 1.januar, OverMinstegrense.repeat(3)))
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+                listOf(
+                    sammenligningsgrunnlag(ORGNUMMER, 1.januar, OverMinstegrense.repeat(12)),
+                )
+            ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter)
+        )
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+
+        håndterOverstyring(UnderMinstegrense, skjæringstidspunkt = 1.januar) // da havner vi under greia
+
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+                listOf(
+                    sammenligningsgrunnlag(ORGNUMMER, 1.januar, OverMinstegrense.repeat(12)),
+                )
+            ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter)
+        )
+        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+
+        val utbetalinger = inspektør.utbetalinger
+        assertEquals(2, utbetalinger.size)
+        assertEquals(0, utbetalinger.last().arbeidsgiverOppdrag().nettoBeløp())
+        assertTrue(utbetalinger.last().erAvsluttet())
+        assertTrue(utbetalinger.first().erForkastet())
+    }
+
+    @Test
+    fun `Ved overstyring av revurderging av inntekt til under krav til minste sykepengegrunnlag skal vi opphøre den opprinnelige utbetalingen`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, beregnetInntekt = 50000.årlig)
+        håndterYtelser(1.vedtaksperiode)
+        val inntekter = listOf(grunnlag(ORGNUMMER, 1.januar, 50000.årlig.repeat(3)))
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+                listOf(
+                    sammenligningsgrunnlag(ORGNUMMER, 1.januar, 50000.årlig.repeat(12)),
+                )
+            ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter)
+        )
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        håndterOverstyring(48000.årlig, skjæringstidspunkt = 1.januar)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+
+        håndterOverstyring(46000.årlig, skjæringstidspunkt = 1.januar) // da havner vi under greia
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        val utbetalinger = inspektør.utbetalinger
+        assertTrue(utbetalinger[0].erUtbetalt())
+        assertTrue(utbetalinger[1].erForkastet())
+        assertTrue(utbetalinger[2].erUtbetalt())
+        assertEquals(utbetalinger.first().arbeidsgiverOppdrag().nettoBeløp(), -1 * utbetalinger.last().arbeidsgiverOppdrag().nettoBeløp())
+        assertEquals(1, utbetalinger.map { it.arbeidsgiverOppdrag().fagsystemId() }.toSet().size)
+    }
 }
