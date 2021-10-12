@@ -1,6 +1,6 @@
 package no.nav.helse.person.vilkår
 
-import no.nav.helse.hendelser.Periode.Companion.merge
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.person.AktivitetsloggVisitor
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.person.vilkår.Etterlevelse.TidslinjegrunnlagVisitor.Periode.Companion.dager
@@ -92,7 +92,7 @@ class Etterlevelse {
                     "gjenståendeSykedager" to gjenståendeSykedager,
                     "forbrukteSykedager" to forbrukteSykedager,
                     "maksdato" to maksdato,
-                    "avvisteDager" to avvisteDager.merge()
+                    "avvisteDager" to avvisteDager.grupperSammenhengendePerioder()
                 )
             )
         )

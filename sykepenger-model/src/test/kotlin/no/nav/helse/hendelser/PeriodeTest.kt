@@ -1,6 +1,6 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.hendelser.Periode.Companion.merge
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.slutterEtter
 import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions.*
@@ -165,12 +165,12 @@ internal class PeriodeTest {
 
     @Test
     fun `slår sammen dager`() {
-        assertTrue(emptyList<LocalDate>().merge().isEmpty())
-        assertEquals(listOf(1.januar til 1.januar), listOf(1.januar, 1.januar).merge())
-        assertEquals(listOf(1.januar til 1.januar), listOf(1.januar).merge())
-        assertEquals(listOf(1.januar til 2.januar), listOf(2.januar, 1.januar).merge())
-        assertEquals(listOf(1.januar til 1.januar, 3.januar til 3.januar), listOf(1.januar, 3.januar).merge())
-        assertEquals(listOf(1.januar til 5.januar, 8.januar til 8.januar), listOf(1.januar, 2.januar, 3.januar, 4.januar, 5.januar, 8.januar).merge())
+        assertTrue(emptyList<LocalDate>().grupperSammenhengendePerioder().isEmpty())
+        assertEquals(listOf(1.januar til 1.januar), listOf(1.januar, 1.januar).grupperSammenhengendePerioder())
+        assertEquals(listOf(1.januar til 1.januar), listOf(1.januar).grupperSammenhengendePerioder())
+        assertEquals(listOf(1.januar til 2.januar), listOf(2.januar, 1.januar).grupperSammenhengendePerioder())
+        assertEquals(listOf(1.januar til 1.januar, 3.januar til 3.januar), listOf(1.januar, 3.januar).grupperSammenhengendePerioder())
+        assertEquals(listOf(1.januar til 5.januar, 8.januar til 8.januar), listOf(1.januar, 2.januar, 3.januar, 4.januar, 5.januar, 8.januar).grupperSammenhengendePerioder())
     }
 
     @Test

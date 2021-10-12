@@ -46,7 +46,7 @@ abstract class Infotrygdperiode(fom: LocalDate, tom: LocalDate) : Periode(fom, t
                     if (nesteDag.dayOfWeek == DayOfWeek.FRIDAY) acc + (0..2L).map { nesteDag.plusDays(it) }
                     else acc + nesteDag
                 }
-                .merge()
+                .grupperSammenhengendePerioder()
                 .mapNotNull { periode ->
                     periode.firstOrNull {
                         it in this.filterIsInstance<Utbetalingsperiode>().flatten()

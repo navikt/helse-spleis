@@ -1,7 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Periode.Companion.merge
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.SykepengedagerOppbrukt
@@ -60,7 +60,7 @@ internal class MaksimumSykepengedagerfilter(
                 maksdato(),
                 avvisteDatoer.filter { sakensStartdato <= it }
             )
-        Utbetalingstidslinje.avvis(tidslinjer, avvisteDatoer.merge(), periode, listOf(SykepengedagerOppbrukt))
+        Utbetalingstidslinje.avvis(tidslinjer, avvisteDatoer.grupperSammenhengendePerioder(), periode, listOf(SykepengedagerOppbrukt))
     }
 
     internal fun beregnGrenser() {
