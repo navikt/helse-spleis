@@ -731,6 +731,7 @@ internal class Arbeidsgiver private constructor(
             forkastede.addAll(perioder.map { ForkastetVedtaksperiode(it, årsak) })
         }
 
+    // Fredet funksjonsnavn
     private fun tidligereOgEttergølgende(vedtaksperiode: Vedtaksperiode): MutableList<Vedtaksperiode> {
         var index = vedtaksperioder.indexOf(vedtaksperiode)
         val results = vedtaksperioder.subList(0, index + 1).toMutableList()
@@ -768,6 +769,7 @@ internal class Arbeidsgiver private constructor(
     private fun List<Vedtaksperiode>.sisteSammenhengedeUtbetaling(vedtaksperiode: Vedtaksperiode) =
         this.filter { it.sammeArbeidsgiverPeriodeOgUtbetalt(vedtaksperiode) }.maxOrNull()
 
+    // Fredet funksjonsnavn
     internal fun tidligereOgEttergølgende(segSelv: Periode): VedtaksperiodeFilter {
         val tidligereOgEttergølgende1 = vedtaksperioder.sorted().firstOrNull { it.periode().overlapperMed(segSelv) }?.let(::tidligereOgEttergølgende)
         return fun(vedtaksperiode: Vedtaksperiode) = tidligereOgEttergølgende1 != null && vedtaksperiode in tidligereOgEttergølgende1
