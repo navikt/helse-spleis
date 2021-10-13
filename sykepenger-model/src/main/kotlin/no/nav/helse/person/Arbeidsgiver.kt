@@ -45,7 +45,7 @@ internal class Arbeidsgiver private constructor(
     private val beregnetUtbetalingstidslinjer: MutableList<Utbetalingstidslinjeberegning>,
     private val feriepengeutbetalinger: MutableList<Feriepengeutbetaling>,
     private val refusjonOpphører: MutableList<LocalDate?>,
-    private val refusjonshistorikk: Refusjonshistorikk,
+    internal val refusjonshistorikk: Refusjonshistorikk,
     private val arbeidsforholdhistorikk: Arbeidsforholdhistorikk
 ) : Aktivitetskontekst, UtbetalingObserver {
     internal constructor(person: Person, organisasjonsnummer: String) : this(

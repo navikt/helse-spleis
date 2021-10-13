@@ -1080,9 +1080,10 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         grad: Prosentdel = 100.prosent,
         førsteFraværsdag: LocalDate = fom,
         orgnummer: String = ORGNUMMER,
+        refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()),
         inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, fom) }
     ) {
-        val id = tilGodkjent(fom, tom, grad, førsteFraværsdag, orgnummer = orgnummer, inntekterBlock = inntekterBlock)
+        val id = tilGodkjent(fom, tom, grad, førsteFraværsdag, orgnummer = orgnummer, refusjon = refusjon, inntekterBlock = inntekterBlock)
         håndterUtbetalt({ id }, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT, orgnummer = orgnummer)
     }
 
@@ -1092,9 +1093,10 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         grad: Prosentdel,
         førsteFraværsdag: LocalDate,
         orgnummer: String = ORGNUMMER,
+        refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()),
         inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, fom) }
     ): UUID {
-        val id = tilGodkjenning(fom, tom, grad, førsteFraværsdag, orgnummer = orgnummer, inntekterBlock = inntekterBlock)
+        val id = tilGodkjenning(fom, tom, grad, førsteFraværsdag, orgnummer = orgnummer, refusjon = refusjon, inntekterBlock = inntekterBlock)
         håndterUtbetalingsgodkjenning({ id }, true, orgnummer = orgnummer)
         return id
     }
@@ -1105,9 +1107,10 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         grad: Prosentdel,
         førsteFraværsdag: LocalDate,
         orgnummer: String = ORGNUMMER,
+        refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()),
         inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, fom) }
     ): UUID {
-        val id = tilYtelser(fom, tom, grad, førsteFraværsdag, orgnummer = orgnummer, inntekterBlock = inntekterBlock)
+        val id = tilYtelser(fom, tom, grad, førsteFraværsdag, orgnummer = orgnummer, refusjon = refusjon, inntekterBlock = inntekterBlock)
         håndterSimulering({ id }, orgnummer = orgnummer)
         return id
     }
@@ -1123,10 +1126,11 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         grad: Prosentdel,
         førsteFraværsdag: LocalDate,
         orgnummer: String = ORGNUMMER,
+        refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()),
         inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, fom) },
         inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag = InntektForSykepengegrunnlag(
             inntekter = inntektperioderForSykepengegrunnlag {
-                fom.minusMonths(3) til fom.minusMonths(1) inntekter { // TODO: riktig datoer?
+                fom.minusMonths(3) til fom.minusMonths(1) inntekter {
                     orgnummer inntekt INNTEKT
                 }
             }
@@ -1138,7 +1142,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             id,
             listOf(Periode(fom, fom.plusDays(15))),
             førsteFraværsdag = førsteFraværsdag,
-            orgnummer = orgnummer
+            orgnummer = orgnummer,
+            refusjon = refusjon
         )
         håndterSøknadMedValidering(id, Sykdom(fom, tom, grad), orgnummer = orgnummer)
         håndterYtelser(id, orgnummer = orgnummer)
