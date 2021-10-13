@@ -51,15 +51,15 @@ internal interface IVilkårsgrunnlag {
 
 internal class ISpleisGrunnlag(
     override val skjæringstidspunkt: LocalDate,
-    override val omregnetÅrsinntekt: Double?,
-    override val sammenligningsgrunnlag: Double?,
+    override val omregnetÅrsinntekt: Double,
+    override val sammenligningsgrunnlag: Double,
     override val inntekter: List<IArbeidsgiverinntekt>,
     override val sykepengegrunnlag: Double,
     val avviksprosent: Double?,
-    val oppfyllerKravOmMinstelønn: Boolean?,
     val grunnbeløp: Int,
     val meldingsreferanseId: UUID?,
     val antallOpptjeningsdagerErMinst: Int,
+    val oppfyllerKravOmMinstelønn: Boolean,
     val oppfyllerKravOmOpptjening: Boolean,
     val oppfyllerKravOmMedlemskap: Boolean?
 ) : IVilkårsgrunnlag {
@@ -168,13 +168,13 @@ internal class VilkårsgrunnlagBuilder(
                     omregnetÅrsinntekt = sykepengegrunnlag.omregnetÅrsinntekt,
                     sammenligningsgrunnlag = sammenligningsgrunnlag.årlig,
                     inntekter = sykepengegrunnlag.inntekterPerArbeidsgiver,
+                    sykepengegrunnlag = sykepengegrunnlag.sykepengegrunnlag,
                     avviksprosent = avviksprosent,
                     grunnbeløp = grunnbeløp.årlig.toInt(),
-                    sykepengegrunnlag = sykepengegrunnlag.sykepengegrunnlag,
                     meldingsreferanseId = grunnlagsdata.meldingsreferanseId,
                     antallOpptjeningsdagerErMinst = grunnlagsdata.antallOpptjeningsdagerErMinst,
-                    oppfyllerKravOmOpptjening = grunnlagsdata.harOpptjening,
                     oppfyllerKravOmMinstelønn = sykepengegrunnlag.sykepengegrunnlag > minimumInntekt.årlig,
+                    oppfyllerKravOmOpptjening = grunnlagsdata.harOpptjening,
                     oppfyllerKravOmMedlemskap = oppfyllerKravOmMedlemskap
                 )
             )

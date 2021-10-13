@@ -59,7 +59,16 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         val spleisgrunnlag = vilkårsgrunnlagGenerasjoner.første().vilkårsgrunnlagSpleis(1.januar)
 
         assertSpleisVilkårsprøving(
-            spleisgrunnlag, 480000.0, 93634, true, 0.0, 480000.0, 1.januar, 480000.0, true, true
+            vilkårsgrunnlag = spleisgrunnlag,
+            sammenligningsgrunnlag = 480000.0,
+            grunnbeløp = 93634,
+            avviksprosent = 0.0,
+            omregnetÅrsinntekt = 480000.0,
+            skjæringstidspunkt = 1.januar,
+            sykepengegrunnlag = 480000.0,
+            oppfyllerKravOmMinstelønn = true,
+            oppfyllerKravOmOpptjening = true,
+            oppfyllerKravOmMedlemskap = true
         )
 
         assertEquals(
@@ -81,7 +90,18 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         assertEquals(1, vilkårsgrunnlagGenerasjoner.size)
 
         val vilkårsgrunnlag = vilkårsgrunnlagGenerasjoner.første().vilkårsgrunnlagSpleis(1.januar)
-        assertSpleisVilkårsprøving(vilkårsgrunnlag, 480000.0, 93634, true, 0.0, 480000.0, 1.januar, 480000.0, true, true)
+        assertSpleisVilkårsprøving(
+            vilkårsgrunnlag = vilkårsgrunnlag,
+            sammenligningsgrunnlag = 480000.0,
+            grunnbeløp = 93634,
+            avviksprosent = 0.0,
+            omregnetÅrsinntekt = 480000.0,
+            skjæringstidspunkt = 1.januar,
+            sykepengegrunnlag = 480000.0,
+            oppfyllerKravOmMinstelønn = true,
+            oppfyllerKravOmOpptjening = true,
+            oppfyllerKravOmMedlemskap = true
+        )
 
         assertEquals(2, vilkårsgrunnlag.inntekter.size)
         val inntektAg1 = vilkårsgrunnlag.inntekter.first { it.organisasjonsnummer == AG1 }
@@ -105,14 +125,36 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         assertEquals(2, generasjoner.size)
 
         val førsteGenerasjon = requireNotNull(generasjoner[innslag.last().id]?.vilkårsgrunnlagSpleis(1.januar))
-        assertSpleisVilkårsprøving(førsteGenerasjon, 372000.0, 93634, true, 0.0, 372000.0, 1.januar, 372000.0, true, true)
+        assertSpleisVilkårsprøving(
+            vilkårsgrunnlag = førsteGenerasjon,
+            sammenligningsgrunnlag = 372000.0,
+            grunnbeløp = 93634,
+            avviksprosent = 0.0,
+            omregnetÅrsinntekt = 372000.0,
+            skjæringstidspunkt = 1.januar,
+            sykepengegrunnlag = 372000.0,
+            oppfyllerKravOmMinstelønn = true,
+            oppfyllerKravOmOpptjening = true,
+            oppfyllerKravOmMedlemskap = true
+        )
         assertEquals(1, førsteGenerasjon.inntekter.size)
         val inntekt = førsteGenerasjon.inntekter.first()
         assertEquals(372000.0, inntekt.sammenligningsgrunnlag)
         assertEquals(372000.0, inntekt.omregnetÅrsinntekt?.beløp)
 
         val andreGenerasjon = requireNotNull(generasjoner[innslag.first().id]?.vilkårsgrunnlagSpleis(1.januar))
-        assertSpleisVilkårsprøving(andreGenerasjon, 372000.0, 93634, true, 12.9, 420000.0, 1.januar, 420000.0, true, true)
+        assertSpleisVilkårsprøving(
+            vilkårsgrunnlag = andreGenerasjon,
+            sammenligningsgrunnlag = 372000.0,
+            grunnbeløp = 93634,
+            avviksprosent = 12.9,
+            omregnetÅrsinntekt = 420000.0,
+            skjæringstidspunkt = 1.januar,
+            sykepengegrunnlag = 420000.0,
+            oppfyllerKravOmMinstelønn = true,
+            oppfyllerKravOmOpptjening = true,
+            oppfyllerKravOmMedlemskap = true
+        )
         assertEquals(1, andreGenerasjon.inntekter.size)
         val inntekt2 = andreGenerasjon.inntekter.first()
         assertEquals(372000.0, inntekt2.sammenligningsgrunnlag)
@@ -134,7 +176,18 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         assertEquals(2, generasjoner.size)
 
         val førsteGenerasjon = requireNotNull(generasjoner[innslag.last().id]?.vilkårsgrunnlagSpleis(1.januar))
-        assertSpleisVilkårsprøving(førsteGenerasjon, 480000.0, 93634, true, 0.0, 480000.0, 1.januar, 480000.0, true, true)
+        assertSpleisVilkårsprøving(
+            vilkårsgrunnlag = førsteGenerasjon,
+            sammenligningsgrunnlag = 480000.0,
+            grunnbeløp = 93634,
+            avviksprosent = 0.0,
+            omregnetÅrsinntekt = 480000.0,
+            skjæringstidspunkt = 1.januar,
+            sykepengegrunnlag = 480000.0,
+            oppfyllerKravOmMinstelønn = true,
+            oppfyllerKravOmOpptjening = true,
+            oppfyllerKravOmMedlemskap = true
+        )
 
         assertEquals(2, førsteGenerasjon.inntekter.size)
         val inntektAg1 = førsteGenerasjon.inntekter.first { it.organisasjonsnummer == AG1 }
@@ -158,7 +211,18 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         )
 
         val andreGenerasjon = requireNotNull(generasjoner[innslag.first().id]?.vilkårsgrunnlagSpleis(1.januar))
-        assertSpleisVilkårsprøving(andreGenerasjon, 480000.0, 93634, true, 5.3, 456000.0, 1.januar, 456000.0, true, true)
+        assertSpleisVilkårsprøving(
+            vilkårsgrunnlag = andreGenerasjon,
+            sammenligningsgrunnlag = 480000.0,
+            grunnbeløp = 93634,
+            avviksprosent = 5.3,
+            omregnetÅrsinntekt = 456000.0,
+            skjæringstidspunkt = 1.januar,
+            sykepengegrunnlag = 456000.0,
+            oppfyllerKravOmMinstelønn = true,
+            oppfyllerKravOmOpptjening = true,
+            oppfyllerKravOmMedlemskap = true
+        )
 
         assertEquals(2, andreGenerasjon.inntekter.size)
         val inntekt2Ag1 = andreGenerasjon.inntekter.first { it.organisasjonsnummer == AG1 }
@@ -188,13 +252,35 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         val generasjoner = vilkårsgrunnlag.build().toDTO()
 
         val førsteGenerasjon = generasjoner.første().vilkårsgrunnlagSpleis(1.januar)
-        assertSpleisVilkårsprøving(førsteGenerasjon, 372000.0, 93634, true, 0.0, 372000.0, 1.januar, 372000.0, true, true)
+        assertSpleisVilkårsprøving(
+            vilkårsgrunnlag = førsteGenerasjon,
+            sammenligningsgrunnlag = 372000.0,
+            grunnbeløp = 93634,
+            avviksprosent = 0.0,
+            omregnetÅrsinntekt = 372000.0,
+            skjæringstidspunkt = 1.januar,
+            sykepengegrunnlag = 372000.0,
+            oppfyllerKravOmMinstelønn = true,
+            oppfyllerKravOmOpptjening = true,
+            oppfyllerKravOmMedlemskap = true
+        )
         assertEquals(1, førsteGenerasjon.inntekter.size)
         val inntekt = førsteGenerasjon.inntekter.first()
         assertInntekt(inntekt, ORGNUMMER, 372000.0, 372000.0, Inntektkilde.Inntektsmelding, 31000.0)
 
         val andreGenerasjon = generasjoner.første().vilkårsgrunnlagSpleis(1.mars)
-        assertSpleisVilkårsprøving(andreGenerasjon, 372000.0, 93634, true, 0.0, 372000.0, 1.mars, 372000.0, true, null)
+        assertSpleisVilkårsprøving(
+            vilkårsgrunnlag = andreGenerasjon,
+            sammenligningsgrunnlag = 372000.0,
+            grunnbeløp = 93634,
+            avviksprosent = 0.0,
+            omregnetÅrsinntekt = 372000.0,
+            skjæringstidspunkt = 1.mars,
+            sykepengegrunnlag = 372000.0,
+            oppfyllerKravOmMinstelønn = true,
+            oppfyllerKravOmOpptjening = true,
+            oppfyllerKravOmMedlemskap = null
+        )
         assertEquals(1, førsteGenerasjon.inntekter.size)
         val inntekt2 = førsteGenerasjon.inntekter.first()
         assertEquals(inntekt, inntekt2)
@@ -259,7 +345,18 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, orgnummer = AG1)
 
         val generasjon = vilkårsgrunnlag.build().toDTO().første().vilkårsgrunnlagSpleis(1.januar)
-        assertSpleisVilkårsprøving(generasjon, 756000.0, 93634, true, 0.0, 756000.0, 1.januar, 561804.0, true, true)
+        assertSpleisVilkårsprøving(
+            vilkårsgrunnlag = generasjon,
+            sammenligningsgrunnlag = 756000.0,
+            grunnbeløp = 93634,
+            avviksprosent = 0.0,
+            omregnetÅrsinntekt = 756000.0,
+            skjæringstidspunkt = 1.januar,
+            sykepengegrunnlag = 561804.0,
+            oppfyllerKravOmMinstelønn = true,
+            oppfyllerKravOmOpptjening = true,
+            oppfyllerKravOmMedlemskap = true
+        )
         assertEquals(2, generasjon.inntekter.size)
         val inntektAg1 = generasjon.inntekter.first { it.organisasjonsnummer == AG1 }
         assertInntekt(
@@ -292,11 +389,11 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         vilkårsgrunnlag: SpleisVilkårsgrunnlag,
         sammenligningsgrunnlag: Double,
         grunnbeløp: Int,
-        oppfyllerKravOmMinstelønn: Boolean,
         avviksprosent: Double,
         omregnetÅrsinntekt: Double,
         skjæringstidspunkt: LocalDate,
         sykepengegrunnlag: Double,
+        oppfyllerKravOmMinstelønn: Boolean,
         oppfyllerKravOmOpptjening: Boolean,
         oppfyllerKravOmMedlemskap: Boolean?,
     ) {

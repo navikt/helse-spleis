@@ -19,15 +19,15 @@ enum class Vilkårsgrunnlagtype {
 
 data class SpleisVilkårsgrunnlag(
     override val skjæringstidspunkt: LocalDate,
-    override val omregnetÅrsinntekt: Double?,
-    override val sammenligningsgrunnlag: Double?,
+    override val omregnetÅrsinntekt: Double,
+    override val sammenligningsgrunnlag: Double,
     override val sykepengegrunnlag: Double,
     override val inntekter: List<Arbeidsgiverinntekt>,
     val avviksprosent: Double?,
-    val oppfyllerKravOmMinstelønn: Boolean?,
     val grunnbeløp: Int,
     val antallOpptjeningsdagerErMinst: Int,
     val opptjeningFra: LocalDate,
+    val oppfyllerKravOmMinstelønn: Boolean,
     val oppfyllerKravOmOpptjening: Boolean,
     val oppfyllerKravOmMedlemskap: Boolean?
 ) : Vilkårsgrunnlag  {
