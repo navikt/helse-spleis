@@ -687,4 +687,7 @@ class Person private constructor(
 
     internal fun harRelevanteArbeidsforholdForFlereArbeidsgivere(skjæringstidspunkt: LocalDate) =
         arbeidsgivere.harRelevanteArbeidsforholdForFlereArbeidsgivere(skjæringstidspunkt)
+
+    fun tidligerePeriodeErFlereArbeidsgivere(skjæringstidspunkt: LocalDate, organisasjonsnummer: String) =
+        arbeidsgivere.finn(organisasjonsnummer)?.tidligerePeriodeErFlereArbeidsgivere(skjæringstidspunkt) ?: false
 }
