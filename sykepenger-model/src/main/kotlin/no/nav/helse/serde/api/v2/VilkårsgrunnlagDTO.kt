@@ -1,6 +1,5 @@
 package no.nav.helse.serde.api.v2
 
-import no.nav.helse.serde.api.MedlemskapstatusDTO
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -27,8 +26,11 @@ data class SpleisVilkårsgrunnlag(
     val avviksprosent: Double?,
     val oppfyllerKravOmMinstelønn: Boolean?,
     val grunnbeløp: Int,
-    val medlemskapstatus: MedlemskapstatusDTO
-): Vilkårsgrunnlag  {
+    val antallOpptjeningsdagerErMinst: Int,
+    val opptjeningFra: LocalDate,
+    val oppfyllerKravOmOpptjening: Boolean,
+    val oppfyllerKravOmMedlemskap: Boolean?
+) : Vilkårsgrunnlag  {
     override val vilkårsgrunnlagtype = Vilkårsgrunnlagtype.SPLEIS
 }
 
@@ -38,7 +40,7 @@ data class InfotrygdVilkårsgrunnlag(
     override val sammenligningsgrunnlag: Double?,
     override val sykepengegrunnlag: Double,
     override val inntekter: List<Arbeidsgiverinntekt>
-): Vilkårsgrunnlag {
+) : Vilkårsgrunnlag {
     override val vilkårsgrunnlagtype = Vilkårsgrunnlagtype.INFOTRYGD
 }
 

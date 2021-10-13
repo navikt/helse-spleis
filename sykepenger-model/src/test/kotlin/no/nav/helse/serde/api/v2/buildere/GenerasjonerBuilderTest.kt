@@ -28,7 +28,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
     private fun generasjoner(): List<Generasjon> {
         val sammenligningsgrunnlagBuilder = OppsamletSammenligningsgrunnlagBuilder(person)
-        val vilkårsgrunnlagHistorikk = VilkårsgrunnlagBuilder(person.vilkårsgrunnlagHistorikk, sammenligningsgrunnlagBuilder).build()
+        val vilkårsgrunnlagHistorikk = VilkårsgrunnlagBuilder(person, sammenligningsgrunnlagBuilder).build()
         val generasjonerBuilder = GenerasjonerBuilder(søknadDTOer, UNG_PERSON_FNR_2018.somFødselsnummer(), vilkårsgrunnlagHistorikk, person.arbeidsgiver(ORGNUMMER))
         return generasjonerBuilder.build()
     }

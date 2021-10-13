@@ -28,7 +28,7 @@ internal class PersonBuilder(
         fun skalVises(orgnummer: String) = person.skjæringstidspunkter().any { person.harAktivtArbeidsforholdEllerInntekt(it, orgnummer) }
 
         val sammenligningsgrunnlagBuilder = OppsamletSammenligningsgrunnlagBuilder(person)
-        val vilkårsgrunnlagHistorikk = VilkårsgrunnlagBuilder(person.vilkårsgrunnlagHistorikk, sammenligningsgrunnlagBuilder).build()
+        val vilkårsgrunnlagHistorikk = VilkårsgrunnlagBuilder(person, sammenligningsgrunnlagBuilder).build()
 
         return PersonDTO(
             fødselsnummer = fødselsnummer.toString(),
