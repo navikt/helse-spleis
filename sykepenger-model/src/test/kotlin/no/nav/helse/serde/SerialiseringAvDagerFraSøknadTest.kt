@@ -67,7 +67,7 @@ internal class SerialiseringAvDagerFraSøknadTest {
         val json2 = jsonBuilder2.toString()
 
         assertEquals(json, json2)
-        assertDeepEquals(person, result)
+        assertJsonEquals(person, result)
     }
 
     private val aktørId = "12345"

@@ -1,11 +1,5 @@
 package no.nav.helse.serde
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.fasterxml.jackson.annotation.PropertyAccessor
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.*
@@ -33,28 +27,6 @@ import java.util.*
 
 class JsonBuilderTest {
 
-    private val objectMapper = jacksonObjectMapper()
-        .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-        .setMixIns(
-            mutableMapOf(
-                Arbeidsgiver::class.java to ArbeidsgiverMixin::class.java,
-                Vedtaksperiode::class.java to VedtaksperiodeMixin::class.java,
-                Utbetaling::class.java to UtbetalingMixin::class.java,
-            )
-        )
-        .setVisibility(PropertyAccessor.GETTER, JsonAutoDetect.Visibility.NONE)
-        .registerModule(JavaTimeModule())
-
-    @JsonIgnoreProperties("person")
-    private class ArbeidsgiverMixin
-
-    @JsonIgnoreProperties("person", "arbeidsgiver")
-    private class VedtaksperiodeMixin
-
-    @JsonIgnoreProperties("observers", "forrigeHendelse")
-    private class UtbetalingMixin
-
     @Test
     fun `gjenoppbygd Person skal være lik opprinnelig Person - The Jackson Way`() {
         val person = person()
@@ -67,14 +39,13 @@ class JsonBuilderTest {
         assertJsonEquals(person, personPost)
     }
 
-    private fun assertJsonEquals(expected: Any, actual: Any) {
-        val expectedJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(expected)
-        val actualJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(actual)
-        assertEquals(expectedJson, actualJson)
+    @Test
+    fun `gjenoppbygd Person skal være lik opprinnelig Person`() {
+        testSerialiseringAvPerson(person())
     }
 
     @Test
-    fun `gjenoppbygd Person skal være lik opprinnelig Person`() {
+    fun `gjenoppbygd Person skal være lik opprinnelig Person med RefusjonPerDag på`() = Toggles.RefusjonPerDag.enable {
         testSerialiseringAvPerson(person())
     }
 
@@ -158,7 +129,7 @@ class JsonBuilderTest {
             result.accept(jsonBuilder2)
             val json2 = jsonBuilder2.toString()
 
-            objectMapper.readTree(json).also {
+            serdeObjectMapper.readTree(json).also {
                 assertFalse(it.path("arbeidsgivere").first().hasNonNull("ferieutbetalinger"))
             }
             assertEquals(json, json2)
@@ -179,12 +150,12 @@ class JsonBuilderTest {
         result.accept(jsonBuilder2)
         val json2 = jsonBuilder2.toString()
 
-        objectMapper.readTree(json).also {
+        serdeObjectMapper.readTree(json).also {
             assertTrue(it.hasNonNull("skjemaVersjon"))
             assertEquals(SerialisertPerson.gjeldendeVersjon(), it["skjemaVersjon"].intValue())
         }
         assertEquals(json, json2)
-        assertDeepEquals(person, result)
+        assertJsonEquals(person, result)
     }
 
     private companion object {
