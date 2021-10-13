@@ -12,9 +12,9 @@ import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle
@@ -1299,6 +1299,51 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             assertTrue(oppdrag[0].erForskjell())
             assertEquals(100.0, oppdrag[0].grad)
         }
+    }
+
+    @Test
+    fun `oppdager nye utbetalte dager fra infotrygd i revurderingen`() {
+        /* Hvis vi oppdager nye betalte sykedager når vi slår opp i infotrygdhistorikk vil vi i dag feile fordi vi ikke lagerer nye inntekter i samme slengen.
+           Dette skjer typisk hvis saksbehandler manuelt har utbetalt eldre perioder på et tidspunkt etter siste utbetaling i vårt system. Løsningen er å også
+           lagre inntekter fra infotrygd når vi går igjennom revurderingstilstandene. */
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterYtelser(1.vedtaksperiode, besvart = 31.januar.atStartOfDay())
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode, besvart = 31.januar.atStartOfDay())
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        håndterOverstyring(overstyringsdager = listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
+
+        håndterYtelser(
+            1.vedtaksperiode,
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.november(2017), 30.november(2017), 100.prosent, 32000.månedlig),
+            inntektshistorikk = listOf(
+                Inntektsopplysning(
+                    orgnummer = ORGNUMMER, sykepengerFom = 1.november, 32000.månedlig, refusjonTilArbeidsgiver = true
+                )
+            )
+        )
+
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_HISTORIKK_REVURDERING,
+            REVURDERING_FEILET,
+            message = "Dette tåler vi når vi lagerer inntekten vi oppdager i infotrygd i revurderingen",
+        )
     }
 
     private fun assertEtterspurteYtelser(expected: Int, vedtaksperiodeIdInnhenter: IdInnhenter) {
