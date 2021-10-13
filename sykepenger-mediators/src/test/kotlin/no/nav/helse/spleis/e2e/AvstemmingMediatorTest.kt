@@ -30,7 +30,7 @@ internal class AvstemmingMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100))
         sendNySøknad(SoknadsperiodeDTO(fom = 1.april, tom = 30.april, sykmeldingsgrad = 100))
         sendSøknad(2, listOf(SoknadsperiodeDTO(fom = 1.april, tom = 30.april, sykmeldingsgrad = 100)))
-        sendInntektsmelding(2, listOf(Periode(fom = 1.april, tom = 18.april)), førsteFraværsdag = 1.april)
+        sendInntektsmelding(2, listOf(Periode(fom = 1.april, tom = 16.april)), førsteFraværsdag = 1.april)
         sendYtelserUtenSykepengehistorikk(2)
         sendVilkårsgrunnlag(2,
             inntekter = (4.rangeTo(12).map { YearMonth.of(2017, it) to 31000.00 } + 1.rangeTo(3).map { YearMonth.of(2018, it) to 31000.00 })

@@ -27,5 +27,6 @@ internal class Refusjonsgjødsler(
         .map(Utbetalingstidslinje.Utbetalingsdag::dato)
         .grupperSammenhengendePerioder()
         .map(utbetalingstidslinje::subset)
+        .map(Utbetalingstidslinje::trimLedendeFridager)
         .filter(Utbetalingstidslinje::harUtbetalinger)
 }

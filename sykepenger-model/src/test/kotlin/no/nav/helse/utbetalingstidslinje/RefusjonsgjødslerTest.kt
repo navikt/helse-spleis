@@ -112,6 +112,25 @@ internal class RefusjonsgjødslerTest {
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
+    @Test
+    fun `Utbetalingstidslinje hvor dagen før en arbeidsgiverperiode er en fridag`() {
+        val utbetalingstidslinje = (8.U + 26.opphold + 16.U + 2.S).utbetalingstidslinje(
+            inntektsopplysning(4.februar, 2308.daglig)
+        )
+        val refusjonsgjødsler = Refusjonsgjødsler(
+            tidslinje = utbetalingstidslinje,
+            refusjonshistorikk = refusjonshistorikk(
+                refusjon(
+                    førsteFraværsdag = 4.februar,
+                    beløp = 2308.daglig,
+                    arbeidsgiverperioder = listOf(4.februar til 19.februar)
+                )
+            )
+        )
+        val aktivitetslogg = Aktivitetslogg()
+        assertDoesNotThrow { refusjonsgjødsler.gjødsle(aktivitetslogg) }
+    }
+
     private companion object {
 
         operator fun Iterable<Utbetalingstidslinje.Utbetalingsdag>.get(periode: Periode) = filter { it.dato in periode }

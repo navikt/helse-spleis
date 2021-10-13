@@ -197,6 +197,8 @@ internal class Utbetalingstidslinje private constructor(
         return subset(første til last { it !is UkjentDag }.dato)
     }
 
+    internal fun trimLedendeFridager() = Utbetalingstidslinje(dropWhile { it is Fridag }.toMutableList())
+
     private fun utvide(tidligsteDato: LocalDate, sisteDato: LocalDate) =
         Utbetalingstidslinje().apply {
             val original = this@Utbetalingstidslinje
