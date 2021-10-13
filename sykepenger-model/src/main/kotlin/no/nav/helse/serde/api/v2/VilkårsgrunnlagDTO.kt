@@ -5,7 +5,7 @@ import java.time.YearMonth
 
 interface Vilkårsgrunnlag {
     val skjæringstidspunkt: LocalDate
-    val omregnetÅrsinntekt: Double?
+    val omregnetÅrsinntekt: Double
     val sammenligningsgrunnlag: Double?
     val sykepengegrunnlag: Double
     val inntekter: List<Arbeidsgiverinntekt>
@@ -36,7 +36,7 @@ data class SpleisVilkårsgrunnlag(
 
 data class InfotrygdVilkårsgrunnlag(
     override val skjæringstidspunkt: LocalDate,
-    override val omregnetÅrsinntekt: Double?,
+    override val omregnetÅrsinntekt: Double,
     override val sammenligningsgrunnlag: Double?,
     override val sykepengegrunnlag: Double,
     override val inntekter: List<Arbeidsgiverinntekt>

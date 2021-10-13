@@ -42,7 +42,7 @@ internal class IInntekt(
 
 internal interface IVilkårsgrunnlag {
     val skjæringstidspunkt: LocalDate
-    val omregnetÅrsinntekt: Double?
+    val omregnetÅrsinntekt: Double
     val sammenligningsgrunnlag: Double?
     val sykepengegrunnlag: Double
     val inntekter: List<IArbeidsgiverinntekt>
@@ -83,7 +83,7 @@ internal class ISpleisGrunnlag(
 
 internal class IInfotrygdGrunnlag(
     override val skjæringstidspunkt: LocalDate,
-    override val omregnetÅrsinntekt: Double?,
+    override val omregnetÅrsinntekt: Double,
     override val sammenligningsgrunnlag: Double?,
     override val inntekter: List<IArbeidsgiverinntekt>,
     override val sykepengegrunnlag: Double
