@@ -3,10 +3,13 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
+import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.UtbetalingVisitor
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.*
+import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
@@ -17,6 +20,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.*
 
 internal class RevurderInntektTest : AbstractEndToEndTest() {
 
@@ -550,5 +555,57 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         assertEquals(1, utbetalinger.map { it.arbeidsgiverOppdrag().fagsystemId() }.toSet().size)
         assertEquals(utbetalinger.first().arbeidsgiverOppdrag().nettoBeløp(), -1 * utbetalinger.last().arbeidsgiverOppdrag().nettoBeløp())
         assertEquals(2, utbetalinger.size)
+    }
+
+    @Test
+    fun `fun experiment - revurder inntekt til under krav til minste sykepengegrunnlag slik at utbetaling opphører, og så revurder igjen til over krav til minste sykepengegrunnlag`() {
+        val OverMinstegrense = 50000.årlig
+        val UnderMinstegrense = 46000.årlig
+
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, beregnetInntekt = OverMinstegrense)
+        håndterYtelser(1.vedtaksperiode)
+        val inntekter = listOf(grunnlag(ORGNUMMER, 1.januar, OverMinstegrense.repeat(3)))
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+                listOf(
+                    sammenligningsgrunnlag(ORGNUMMER, 1.januar, OverMinstegrense.repeat(12)),
+                )
+            ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter)
+        )
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        håndterOverstyring(UnderMinstegrense, skjæringstidspunkt = 1.januar)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        håndterOverstyring(OverMinstegrense, skjæringstidspunkt = 1.januar)
+        håndterYtelser(1.vedtaksperiode)
+
+        val utbetalinger = inspektør.utbetalinger
+        utbetalinger.last().arbeidsgiverOppdrag().skalHaEndringskode(Endringskode.NY, "Denne skal egentlig være ENDR når vi har fikset produksjonskoden.")
+        utbetalinger.last().arbeidsgiverOppdrag().skalBareHaLinjerMedStatus(Endringskode.NY)
+    }
+}
+
+private fun Oppdrag.skalHaEndringskode(kode: Endringskode, message: String = "") = accept(UtbetalingSkalHaEndringskode(kode, message))
+private fun Oppdrag.skalBareHaLinjerMedStatus(kode: Endringskode) = accept(UtbetalingslinjerSkalHaEndringskode(kode))
+
+private class UtbetalingSkalHaEndringskode(private val ønsketEndringskode: Endringskode, private val message: String = ""): OppdragVisitor {
+    override fun preVisitOppdrag(oppdrag: Oppdrag, totalBeløp: Int, nettoBeløp: Int, tidsstempel: LocalDateTime, endringskode: Endringskode) {
+        assertEquals(ønsketEndringskode, endringskode, message)
+    }
+}
+
+private class UtbetalingslinjerSkalHaEndringskode(private val ønsketEndringskode: Endringskode): OppdragVisitor {
+    override fun visitUtbetalingslinje(linje: Utbetalingslinje, fom: LocalDate, tom: LocalDate, satstype: Satstype, beløp: Int?, aktuellDagsinntekt: Int?, grad: Double?, delytelseId: Int, refDelytelseId: Int?, refFagsystemId: String?, endringskode: Endringskode, datoStatusFom: LocalDate?, klassekode: Klassekode) {
+        assertEquals(ønsketEndringskode, endringskode)
     }
 }
