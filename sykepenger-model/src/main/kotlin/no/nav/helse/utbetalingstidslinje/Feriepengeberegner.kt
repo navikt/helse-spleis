@@ -216,7 +216,7 @@ internal class Feriepengeberegner(
                 annullertUtbetaling = tilstand == Utbetaling.Annullert
             }
 
-            override fun preVisitOppdrag(oppdrag: Oppdrag, totalBeløp: Int, nettoBeløp: Int, tidsstempel: LocalDateTime) {
+            override fun preVisitOppdrag(oppdrag: Oppdrag, totalBeløp: Int, nettoBeløp: Int, tidsstempel: LocalDateTime, endringskode: Endringskode) {
                 if (utbetaltUtbetaling || annullertUtbetaling) {
                     utbetalteDagerForOppdrag = mutableListOf()
                     utbetalteDagerForFagsystemId[oppdrag.fagsystemId()] = utbetalteDagerForOppdrag

@@ -554,7 +554,8 @@ internal interface OppdragVisitor {
         oppdrag: Oppdrag,
         totalBeløp: Int,
         nettoBeløp: Int,
-        tidsstempel: LocalDateTime
+        tidsstempel: LocalDateTime,
+        endringskode: Endringskode
     ) {
     }
 

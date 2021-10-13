@@ -11,7 +11,6 @@ import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
-import kotlin.streams.toList
 
 internal class Oppdrag private constructor(
     private val mottaker: String,
@@ -56,7 +55,7 @@ internal class Oppdrag private constructor(
         this(mottaker, fagområde, sisteArbeidsgiverdag = null)
 
     internal fun accept(visitor: OppdragVisitor) {
-        visitor.preVisitOppdrag(this, totalbeløp(), nettoBeløp, tidsstempel)
+        visitor.preVisitOppdrag(this, totalbeløp(), nettoBeløp, tidsstempel, endringskode)
         linjer.forEach { it.accept(visitor) }
         visitor.postVisitOppdrag(this, totalbeløp(), nettoBeløp, tidsstempel)
     }

@@ -311,7 +311,8 @@ internal class UtbetalingTest {
             oppdrag: Oppdrag,
             totalBeløp: Int,
             nettoBeløp: Int,
-            tidsstempel: LocalDateTime
+            tidsstempel: LocalDateTime,
+            endringskode: Endringskode
         ) {
             fagsystemIder.add(oppdrag.fagsystemId())
             this.nettoBeløp.add(nettoBeløp)

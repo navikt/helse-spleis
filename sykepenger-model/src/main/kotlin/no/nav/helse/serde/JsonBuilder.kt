@@ -16,6 +16,7 @@ import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
+import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -335,7 +336,8 @@ internal class JsonBuilder : AbstractBuilder() {
             oppdrag: Oppdrag,
             totalBeløp: Int,
             nettoBeløp: Int,
-            tidsstempel: LocalDateTime
+            tidsstempel: LocalDateTime,
+            endringskode: Endringskode
         ) {
             ferieutbetalingMap["oppdrag"] = oppdrag.toMap()
         }

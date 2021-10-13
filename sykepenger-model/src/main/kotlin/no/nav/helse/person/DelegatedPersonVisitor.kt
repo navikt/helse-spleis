@@ -758,8 +758,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         )
     }
 
-    override fun preVisitOppdrag(oppdrag: Oppdrag, totalBeløp: Int, nettoBeløp: Int, tidsstempel: LocalDateTime) {
-        delegatee.preVisitOppdrag(oppdrag, totalBeløp, nettoBeløp, tidsstempel)
+    override fun preVisitOppdrag(oppdrag: Oppdrag, totalBeløp: Int, nettoBeløp: Int, tidsstempel: LocalDateTime, endringskode: Endringskode) {
+        delegatee.preVisitOppdrag(oppdrag, totalBeløp, nettoBeløp, tidsstempel, endringskode)
     }
 
     override fun postVisitOppdrag(oppdrag: Oppdrag, totalBeløp: Int, nettoBeløp: Int, tidsstempel: LocalDateTime) {
