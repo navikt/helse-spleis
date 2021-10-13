@@ -9,11 +9,11 @@ internal class Refusjonsgjødsler(
     private val refusjonshistorikk: Refusjonshistorikk
 ) {
     internal fun gjødsle(aktivitetslogg: IAktivitetslogg) {
-        sammenhengendeUtbetalingsperioder(tidslinje).forEach { sammenhengendePeriode ->
-            val refusjon = refusjonshistorikk.finnRefusjon(sammenhengendePeriode)
+        sammenhengendeUtbetalingsperioder(tidslinje).forEach { utbetalingsperiode ->
+            val refusjon = refusjonshistorikk.finnRefusjon(utbetalingsperiode.periode())
             if (refusjon == null) aktivitetslogg.warn("Fant ikke refusjon for perioden. Defaulter til 100%% refusjon. placeholder") // TODO: Spør voksne om tekst
 
-            tidslinje.subset(sammenhengendePeriode).forEach { utbetalingsdag ->
+            utbetalingsperiode.forEach { utbetalingsdag ->
                 when (refusjon) {
                     null -> utbetalingsdag.økonomi.settFullArbeidsgiverRefusjon()
                     else -> utbetalingsdag.økonomi.arbeidsgiverRefusjon(refusjon.beløp(utbetalingsdag.dato, aktivitetslogg))
@@ -24,7 +24,8 @@ internal class Refusjonsgjødsler(
 
     private fun sammenhengendeUtbetalingsperioder(utbetalingstidslinje: Utbetalingstidslinje) = utbetalingstidslinje
         .filter { it !is Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag && it !is Utbetalingstidslinje.Utbetalingsdag.UkjentDag }
-        .map { it.dato }
+        .map(Utbetalingstidslinje.Utbetalingsdag::dato)
         .grupperSammenhengendePerioder()
-        .filter { utbetalingstidslinje.subset(it).harUtbetalinger() }
+        .map(utbetalingstidslinje::subset)
+        .filter(Utbetalingstidslinje::harUtbetalinger)
 }
