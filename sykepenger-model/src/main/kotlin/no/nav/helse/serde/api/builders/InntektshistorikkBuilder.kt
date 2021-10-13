@@ -187,7 +187,7 @@ internal class InntektshistorikkBuilder(private val person: Person) {
                             måned = måned,
                             sum = beløp.sum()
                         )
-                    }
+                    }.sortedByDescending { it.måned }
             )
         }
     }

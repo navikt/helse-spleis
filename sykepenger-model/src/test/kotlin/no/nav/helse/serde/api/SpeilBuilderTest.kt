@@ -1467,7 +1467,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         assertEquals(listOf(a1, a2, a3, a4), personDto.arbeidsgivere.map { it.organisasjonsnummer })
         assertEquals(listOf(a1, a2, a3, a4), personDto.inntektsgrunnlag.single().inntekter.map { it.arbeidsgiver })
         assertEquals(3, inntekterFraAordningen.size)
-        assertEquals(listOf(31000.0, 32000.0, 33000.0), inntekterFraAordningen.map { it.sum })
+        assertEquals(listOf(33000.0, 32000.0, 31000.0), inntekterFraAordningen.map { it.sum })
     }
 
     private fun <T> Collection<T>.assertOnNonEmptyCollection(func: (T) -> Unit) {
