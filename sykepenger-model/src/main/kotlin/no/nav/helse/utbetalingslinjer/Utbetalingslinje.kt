@@ -28,6 +28,8 @@ internal class Utbetalingslinje internal constructor(
 
     override operator fun iterator() = periode.iterator()
 
+    override fun toString() = "$fom til $tom $endringskode $grad"
+
     internal fun accept(visitor: OppdragVisitor) {
         visitor.visitUtbetalingslinje(
             this,

@@ -146,23 +146,23 @@ internal class Oppdrag private constructor(
             sisteArbeidsgiverdag = sisteArbeidsgiverdag
         )
 
-    internal fun minus(other: Oppdrag, aktivitetslogg: IAktivitetslogg): Oppdrag {
-        val tidligere = other.utenOpphørLinjer()
+    internal fun minus(eldre: Oppdrag, aktivitetslogg: IAktivitetslogg): Oppdrag {
+        val eldreUtenOpphør = eldre.utenOpphørLinjer()
         return when {
-            tidligere.isEmpty() || this !in other ->
+            eldreUtenOpphør.isEmpty() || this !in eldre ->
                 this
             this.isEmpty() ->
-                deleteAll(tidligere)
-            this.førstedato > tidligere.førstedato -> {
+                deleteAll(eldre)
+            this.førstedato > eldre.førstedato -> {
                 aktivitetslogg.warn("Utbetaling opphører tidligere utbetaling. Kontroller simuleringen")
-                deleted(tidligere)
+                deleted(eldre)
             }
-            this.førstedato < tidligere.førstedato -> {
+            this.førstedato < eldre.førstedato -> {
                 aktivitetslogg.warn("Utbetaling fra og med dato er endret. Kontroller simuleringen")
-                appended(tidligere)
+                appended(eldre)
             }
-            this.førstedato == tidligere.førstedato ->
-                ghosted(tidligere, aktivitetslogg = aktivitetslogg)
+            this.førstedato == eldreUtenOpphør.førstedato ->
+                ghosted(eldreUtenOpphør, aktivitetslogg = aktivitetslogg)
             else -> throw IllegalArgumentException("uventet utbetalingslinje forhold")
         }
     }

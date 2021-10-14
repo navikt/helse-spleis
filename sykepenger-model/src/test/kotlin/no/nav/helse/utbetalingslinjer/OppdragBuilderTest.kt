@@ -250,6 +250,56 @@ internal class OppdragBuilderTest {
     }
 
     @Test
+    fun `prøv å minus til å tryne`() {
+        val original = opprett(1.januar til 31.januar er NAVDAGER)
+        val nyere = opprett(
+            6.januar til 15.januar er NAVDAGER,
+            16.januar til 20.januar er FRI,
+            21.januar til 31.januar er NAVDAGER,
+            startdato = 6.januar
+        ).minus(original, Aktivitetslogg())
+
+        nyere.apply {
+            assertLinje(0, 6.januar, 15.januar, delytelseId = 2, refDelytelseId = 1)
+        }
+    }
+
+    @Test
+    fun `prøv å minus til å tryne take two`() {
+        val original = opprett(2.januar til 31.januar er NAVDAGER, startdato = 2.januar)
+        val ny = opprett(
+            6.januar til 15.januar er NAVDAGER,
+            16.januar til 20.januar er FRI,
+            21.januar til 31.januar er NAVDAGER,
+            startdato = 6.januar
+        ).minus(original, Aktivitetslogg())
+        val nyere = opprett(
+            3.januar til 15.januar er NAVDAGER,
+            16.januar til 20.januar er FRI,
+            21.januar til 31.januar er NAVDAGER,
+            startdato = 3.januar
+        ).minus(ny, Aktivitetslogg())
+    }
+
+    @Test
+    fun `prøv å minus til å tryne take three`() {
+        // må skrive testen sånn av vi får en opphørslinje på `ny`.
+        val original = opprett(5.januar til 31.januar er NAVDAGER, startdato = 5.januar)
+        val ny = opprett(
+            5.januar til 15.januar er NAVDAGER,
+            16.januar til 20.januar er FRI,
+            21.januar til 31.januar er NAVDAGER,
+            startdato = 5.januar
+        ).minus(original, Aktivitetslogg())
+        val nyere = opprett(
+            2.januar til 15.januar er NAVDAGER,
+            16.januar til 20.januar er FRI,
+            21.januar til 31.januar er NAVDAGER,
+            startdato = 2.januar
+        ).minus(ny, Aktivitetslogg())
+    }
+
+    @Test
     fun `Endring i utbetaling pga grad`() {
         val oppdrag = opprett(
             1.januar til 3.januar er NAVDAGER medBeløp 1500 medGrad 100.0,
