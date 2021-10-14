@@ -11,7 +11,7 @@ internal class Refusjonsgjødsler(
     internal fun gjødsle(aktivitetslogg: IAktivitetslogg) {
         sammenhengendeUtbetalingsperioder(tidslinje).forEach { utbetalingsperiode ->
             val refusjon = refusjonshistorikk.finnRefusjon(utbetalingsperiode.periode())
-            if (refusjon == null) aktivitetslogg.warn("Fant ikke refusjon for perioden. Defaulter til 100%% refusjon. placeholder") // TODO: Spør voksne om tekst
+            if (refusjon == null) aktivitetslogg.warn("Fant ikke refusjon for perioden. Defaulter til full refusjon.") // TODO: Spør voksne om tekst
 
             utbetalingsperiode.forEach { utbetalingsdag ->
                 when (refusjon) {
