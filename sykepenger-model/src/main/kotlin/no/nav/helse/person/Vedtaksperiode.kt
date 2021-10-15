@@ -1969,6 +1969,7 @@ internal class Vedtaksperiode private constructor(
                         // Må gjøres frem til 1.oktober 2021. Etter denne datoen kan denne koden slettes,
                         // fordi da vil vi ikke ha noen forlengelser til perioder som har harMinimumInntekt = null til behandling lenger.
                         person.oppdaterHarMinimumInntekt(vedtaksperiode.skjæringstidspunkt, vilkårsgrunnlag)
+                        sikkerLogg.info("Vi antar at det ikke finnes forlengelser til perioder som har harMinimumInntekt = null lenger")
                     }
                 }
                 valider {
