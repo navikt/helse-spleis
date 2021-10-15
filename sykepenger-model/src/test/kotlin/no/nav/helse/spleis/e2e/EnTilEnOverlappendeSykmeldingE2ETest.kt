@@ -15,16 +15,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class EnTilEnOverlappendeSykmeldingE2ETest : AbstractEndToEndTest() {
 
-    @BeforeAll
-    fun setup() {
-        Toggles.OverlappendeSykmelding.enable()
-    }
-
-    @AfterAll
-    fun teardown() {
-        Toggles.OverlappendeSykmelding.pop()
-    }
-
     @Test
     fun `sykmelding nr 2 overlapper perfekt - leses inn i samme rekkefølge som de ble skrevet`() {
         val sykmeldingSkrevet = 3.januar.atStartOfDay()

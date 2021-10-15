@@ -875,7 +875,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun håndterOverlappendeSykmelding(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
-            if (!Toggles.OverlappendeSykmelding.enabled) return overlappendeSykmeldingIkkeStøttet(vedtaksperiode, sykmelding)
             check(
                 vedtaksperiode.tilstand in setOf(
                     MottattSykmeldingFerdigGap, MottattSykmeldingUferdigGap, MottattSykmeldingFerdigForlengelse, MottattSykmeldingUferdigForlengelse
