@@ -558,7 +558,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `fun experiment - revurder inntekt til under krav til minste sykepengegrunnlag slik at utbetaling opphører, og så revurder igjen til over krav til minste sykepengegrunnlag`() {
+    fun `revurder inntekt til under krav til minste sykepengegrunnlag slik at utbetaling opphører, og så revurder igjen til over krav til minste sykepengegrunnlag`() {
         val OverMinstegrense = 50000.årlig
         val UnderMinstegrense = 46000.årlig
 
@@ -590,7 +590,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
 
         val utbetalinger = inspektør.utbetalinger
-        utbetalinger.last().arbeidsgiverOppdrag().skalHaEndringskode(Endringskode.NY, "Denne skal egentlig være ENDR når vi har fikset produksjonskoden.")
+        utbetalinger.last().arbeidsgiverOppdrag().skalHaEndringskode(Endringskode.ENDR)
         utbetalinger.last().arbeidsgiverOppdrag().skalBareHaLinjerMedStatus(Endringskode.NY)
     }
 }

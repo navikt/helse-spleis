@@ -64,12 +64,10 @@ internal class Oppdrag private constructor(
     internal fun fagområde() = fagområde
     internal fun fagsystemId() = fagsystemId
 
-    internal operator fun contains(other: Oppdrag) =
-        this.tilhører(other) || this.overlapperMed(other)
-    private fun tilhører(other: Oppdrag) =
-        this.fagsystemId == other.fagsystemId && this.fagområde == other.fagområde
-    private fun overlapperMed(other: Oppdrag) =
-        maxOf(this.førstedato, other.førstedato) <= minOf(this.sistedato, other.sistedato)
+    internal operator fun contains(other: Oppdrag) = this.tilhører(other) || this.overlapperMed(other)
+
+    private fun tilhører(other: Oppdrag) = this.fagsystemId == other.fagsystemId && this.fagområde == other.fagområde
+    private fun overlapperMed(other: Oppdrag) = maxOf(this.førstedato, other.førstedato) <= minOf(this.sistedato, other.sistedato)
 
     internal fun overfør(
         aktivitetslogg: IAktivitetslogg,
@@ -149,10 +147,8 @@ internal class Oppdrag private constructor(
     internal fun minus(eldre: Oppdrag, aktivitetslogg: IAktivitetslogg): Oppdrag {
         val eldreUtenOpphør = eldre.utenOpphørLinjer()
         return when {
-            eldreUtenOpphør.isEmpty() || this !in eldre ->
-                this
-            this.isEmpty() ->
-                deleteAll(eldre)
+            eldre.isEmpty() || this !in eldre -> this
+            this.isEmpty() -> deleteAll(eldre)
             this.førstedato > eldre.førstedato -> {
                 aktivitetslogg.warn("Utbetaling opphører tidligere utbetaling. Kontroller simuleringen")
                 deleted(eldre)
@@ -161,8 +157,11 @@ internal class Oppdrag private constructor(
                 aktivitetslogg.warn("Utbetaling fra og med dato er endret. Kontroller simuleringen")
                 appended(eldre)
             }
-            this.førstedato == eldreUtenOpphør.førstedato ->
-                ghosted(eldreUtenOpphør, aktivitetslogg = aktivitetslogg)
+            eldreUtenOpphør.isNotEmpty() && this.førstedato == eldreUtenOpphør.førstedato -> erstatt(eldreUtenOpphør, aktivitetslogg = aktivitetslogg)
+            this.førstedato == eldre.førstedato -> {
+                aktivitetslogg.warn("Utbetalingen erstatter et tidligere opphørt oppdrag. Kontroller simuleringen")
+                erstatt(eldre, aktivitetslogg = aktivitetslogg)
+            }
             else -> throw IllegalArgumentException("uventet utbetalingslinje forhold")
         }
     }
@@ -182,12 +181,12 @@ internal class Oppdrag private constructor(
     private lateinit var sisteLinjeITidligereOppdrag: Utbetalingslinje
     private lateinit var linkTo: Utbetalingslinje
 
-    private fun ghosted(tidligere: Oppdrag, linkTo: Utbetalingslinje = tidligere.last(), aktivitetslogg: IAktivitetslogg) =
-        this.also { nåværende ->
+    private fun erstatt(avtroppendeOppdrag: Oppdrag, linkTo: Utbetalingslinje = avtroppendeOppdrag.last(), aktivitetslogg: IAktivitetslogg) =
+        this.also { påtroppendeOppdrag ->
             this.linkTo = linkTo
-            nåværende.kobleTil(tidligere)
-            nåværende.kopierLikeLinjer(tidligere, aktivitetslogg)
-            nåværende.håndterLengreNåværende(tidligere)
+            påtroppendeOppdrag.kobleTil(avtroppendeOppdrag)
+            påtroppendeOppdrag.kopierLikeLinjer(avtroppendeOppdrag, aktivitetslogg)
+            påtroppendeOppdrag.håndterLengreNåværende(avtroppendeOppdrag)
         }
 
     private fun deleted(tidligere: Oppdrag) = this.also { nåværende ->
