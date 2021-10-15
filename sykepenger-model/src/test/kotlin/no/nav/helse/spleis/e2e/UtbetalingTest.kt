@@ -16,7 +16,7 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
     val ANNET_ORGNUMMER = "foo"
 
     @Test
-    fun `Utbetaling enddret får rett organisasjonsnummer ved overlappende sykemelding`() {
+    fun `Utbetaling endret får rett organisasjonsnummer ved overlappende sykemelding`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
@@ -31,10 +31,9 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
-
+        håndterSykmelding(Sykmeldingsperiode(2.februar, 28.februar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
 
-        håndterSykmelding(Sykmeldingsperiode(2.februar, 28.februar, 100.prosent))
         assertEquals(ORGNUMMER, observatør.utbetaltEndretEventer.single().orgnummer())
     }
 }

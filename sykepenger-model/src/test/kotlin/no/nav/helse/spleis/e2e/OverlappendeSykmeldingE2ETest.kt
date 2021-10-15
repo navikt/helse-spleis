@@ -67,7 +67,6 @@ internal class OverlappendeSykmeldingE2ETest : AbstractEndToEndTest() {
         // TODO: avklare situasjonen
     }
 
-    @Disabled("Avventer støtte for overlappende sykmeldinger")
     @Test
     fun `sykmelding overlapper inni eksisterende`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 15.januar, 100.prosent))

@@ -880,7 +880,7 @@ internal class Vedtaksperiode private constructor(
                     MottattSykmeldingFerdigGap, MottattSykmeldingUferdigGap, MottattSykmeldingFerdigForlengelse, MottattSykmeldingUferdigForlengelse
                 )
             )
-            if (!sykmelding.opprinneligPeriodeErLik(vedtaksperiode.sykmeldingsperiode)) return overlappendeSykmeldingIkkeStøttet(vedtaksperiode, sykmelding)
+            if (!vedtaksperiode.sykmeldingsperiode.inneholder(sykmelding.periode())) return overlappendeSykmeldingIkkeStøttet(vedtaksperiode, sykmelding)
 
             if (!vedtaksperiode.arbeidsgiver.erSykmeldingenDenSistSkrevne(sykmelding, vedtaksperiode.hendelseIder)) {
                 sykmelding.warn("Mottatt en sykmelding som er skrevet tidligere enn den som er lagt til grunn, vurder sykmeldingene og gjør eventuelle justeringer")

@@ -82,14 +82,6 @@ internal class EnTilEnOverlappendeSykmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `støtter ikke overlapp inni`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 15.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(4.januar, 15.januar, 100.prosent))
-        assertErrors(inspektør)
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
-    }
-
-    @Test
     fun `støtter en til en overlapp for ferdig forlengelse`() {
         nyttVedtak(3.januar, 20.januar, 100.prosent)
         håndterSykmelding(Sykmeldingsperiode(21.januar, 25.januar, 100.prosent))

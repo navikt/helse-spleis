@@ -54,7 +54,6 @@ abstract class SykdomstidslinjeHendelse(
     internal abstract fun sykdomstidslinje(): Sykdomstidslinje
 
     internal fun erRelevant(other: Periode) = !trimmetForbi() && erRelevantMed(other)
-    internal fun opprinneligPeriodeErLik(other: Periode) = nesteFom == null && periode() == other
 
     protected open fun erRelevantMed(other: Periode) = periode().overlapperMed(other)
 
