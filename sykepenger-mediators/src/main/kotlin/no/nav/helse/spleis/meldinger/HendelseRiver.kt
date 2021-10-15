@@ -5,6 +5,7 @@ import no.nav.helse.rapids_rivers.*
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.withMDC
+import org.slf4j.LoggerFactory
 import java.util.*
 
 internal abstract class HendelseRiver(rapidsConnection: RapidsConnection, private val messageMediator: IMessageMediator) : River.PacketValidation {
@@ -37,12 +38,21 @@ internal abstract class HendelseRiver(rapidsConnection: RapidsConnection, privat
                 "melding_type" to eventName,
                 "melding_id" to packet["@id"].asText()
             )) {
-                messageMediator.onRecognizedMessage(createMessage(packet), context)
+                try {
+                    messageMediator.onRecognizedMessage(createMessage(packet), context)
+                } catch (e: Exception) {
+                    sikkerLogg.error("Klarte ikke å lese melding, innhold: ${packet.toJson()}", e)
+                    throw e
+                }
             }
         }
 
         override fun onError(problems: MessageProblems, context: MessageContext) {
             messageMediator.onRiverError(riverName, problems, context)
         }
+    }
+
+    companion object {
+        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     }
 }
