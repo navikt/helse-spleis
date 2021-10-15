@@ -2,9 +2,7 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Inntektshistorikk
-import no.nav.helse.person.Refusjonshistorikk
+import no.nav.helse.person.*
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt
@@ -12,6 +10,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
@@ -131,6 +130,27 @@ internal class RefusjonsgjødslerTest {
         assertDoesNotThrow { refusjonsgjødsler.gjødsle(aktivitetslogg) }
     }
 
+    @Disabled
+    @Test
+    fun `Logger i aktivitetsloggen når vi bruker '16 dagers hopp'`() {
+        val utbetalingstidslinje = (8.U + 26.opphold + 16.U + 2.S).utbetalingstidslinje(
+            inntektsopplysning(4.februar, 2308.daglig)
+        )
+        val refusjonsgjødsler = Refusjonsgjødsler(
+            tidslinje = utbetalingstidslinje,
+            refusjonshistorikk = refusjonshistorikk(
+                refusjon(
+                    førsteFraværsdag = 4.februar,
+                    beløp = 2308.daglig,
+                    arbeidsgiverperioder = listOf(4.februar til 19.februar)
+                )
+            )
+        )
+        val aktivitetslogg = Aktivitetslogg()
+        assertDoesNotThrow { refusjonsgjødsler.gjødsle(aktivitetslogg) }
+        assertEquals(listOf("Fant refusjon ved å gå 16 dager tilbake fra første utbetalingsdag i utbetalingstidslinjen"), aktivitetslogg.infoMeldinger())
+    }
+
     private companion object {
 
         operator fun Iterable<Utbetalingstidslinje.Utbetalingsdag>.get(periode: Periode) = filter { it.dato in periode }
@@ -182,6 +202,18 @@ internal class RefusjonsgjødslerTest {
             tidslinje.windowed(2).forEach { (forrige, neste) ->
                 assertTrue(neste.dato > forrige.dato) { "Rekkefølgen er ikke riktig: ${neste.dato} skal være nyere enn ${forrige.dato}" }
             }
+        }
+
+        fun Aktivitetslogg.infoMeldinger(): List<String> {
+            val meldinger = mutableListOf<String>()
+
+            accept(object : AktivitetsloggVisitor {
+                override fun visitInfo(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Info, melding: String, tidsstempel: String) {
+                    meldinger.add(melding)
+                }
+            })
+
+            return meldinger
         }
     }
 }

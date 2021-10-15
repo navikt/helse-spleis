@@ -3,7 +3,7 @@ package no.nav.helse.person
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Refusjonshistorikk.Refusjon.Companion.leggTilRefusjon
-import no.nav.helse.person.Refusjonshistorikk.Refusjon.Companion.overlapperMedArbreidsgiverperiode
+import no.nav.helse.person.Refusjonshistorikk.Refusjon.Companion.overlapperMedArbeidsgiverperiode
 import no.nav.helse.person.Refusjonshistorikk.Refusjon.Companion.refusjonSomTrefferFørsteFraværsdag
 import no.nav.helse.person.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.beløp
 import no.nav.helse.økonomi.Inntekt
@@ -25,7 +25,7 @@ internal class Refusjonshistorikk {
     }
 
     internal fun finnRefusjon(periode: Periode): Refusjon? {
-        return refusjoner.refusjonSomTrefferFørsteFraværsdag(periode) ?: refusjoner.overlapperMedArbreidsgiverperiode(periode)
+        return refusjoner.refusjonSomTrefferFørsteFraværsdag(periode) ?: refusjoner.overlapperMedArbeidsgiverperiode(periode)
     }
 
     internal class Refusjon(
@@ -41,12 +41,13 @@ internal class Refusjonshistorikk {
             internal fun MutableList<Refusjon>.leggTilRefusjon(refusjon: Refusjon) {
                 if (refusjon.meldingsreferanseId !in map { it.meldingsreferanseId }) add(refusjon)
             }
-            internal fun Iterable<Refusjon>.overlapperMedArbreidsgiverperiode(periode: Periode) : Refusjon? {
+            internal fun Iterable<Refusjon>.overlapperMedArbeidsgiverperiode(periode: Periode) : Refusjon? {
                 val utvidetPeriode = periode.start.minusDays(16) til periode.endInclusive
                 return firstOrNull { refusjon ->
                     refusjon.arbeidsgiverperioder.any { it.overlapperMed(utvidetPeriode) }
                 }
             }
+
             private fun Refusjon.utledetFørsteFraværsdag() = førsteFraværsdag ?: arbeidsgiverperioder.maxOf { it.start }
 
             internal fun Iterable<Refusjon>.refusjonSomTrefferFørsteFraværsdag(periode: Periode) = firstOrNull { refusjon ->
