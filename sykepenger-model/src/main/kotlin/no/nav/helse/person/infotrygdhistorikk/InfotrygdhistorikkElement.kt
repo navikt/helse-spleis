@@ -164,7 +164,7 @@ internal class InfotrygdhistorikkElement private constructor(
             .map { it.utbetalingstidslinje() }
             .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
 
-    private fun utbetalingstidslinje(organisasjonsnummer: String) =
+    internal fun utbetalingstidslinje(organisasjonsnummer: String) =
         perioder
             .filter { it.gjelder(organisasjonsnummer) }
             .map { it.utbetalingstidslinje() }

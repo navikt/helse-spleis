@@ -671,6 +671,8 @@ internal class Arbeidsgiver private constructor(
         return Utbetaling.sykdomstidslinje(utbetalinger, sykdomstidslinje)
     }
 
+    internal fun infotrygdUtbetalingstidslinje() = person.infotrygdUtbetalingstidslinje(organisasjonsnummer)
+
     internal fun tidligsteDato(): LocalDate {
         return sykdomstidslinje().førsteDag()
     }
@@ -768,6 +770,7 @@ internal class Arbeidsgiver private constructor(
 
     private fun List<Vedtaksperiode>.sisteSammenhengedeUtbetaling(vedtaksperiode: Vedtaksperiode) =
         this.filter { it.sammeArbeidsgiverPeriodeOgUtbetalt(vedtaksperiode) }.maxOrNull()
+
 
     // Fredet funksjonsnavn
     internal fun tidligereOgEttergølgende(segSelv: Periode): VedtaksperiodeFilter {

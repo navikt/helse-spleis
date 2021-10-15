@@ -13,7 +13,6 @@ import no.nav.helse.testhelpers.mars
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class DelvisRefusjonTest : AbstractEndToEndTest() {
@@ -73,7 +72,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         assertFalse(inspektør.warnings.contains("Fant ikke refusjon for perioden. Defaulter til full refusjon."))
     }
 
-    @Disabled
+
     @Test
     fun `Finner refusjon ved forlengelse fra Infotrygd`() = Toggles.RefusjonPerDag.enable {
         håndterInntektsmelding(listOf(1.januar til 16.januar))

@@ -37,7 +37,7 @@ internal class ArbeidsgiverUtbetalinger(
         }
         if(Toggles.RefusjonPerDag.enabled) {
             arbeidsgivere.forEach{ (arbeidsgiver, tidslinje) ->
-                Refusjonsgjødsler(tidslinje, arbeidsgiver.refusjonshistorikk).gjødsle(aktivitetslogg)
+                Refusjonsgjødsler(tidslinje + arbeidsgiver.infotrygdUtbetalingstidslinje(), arbeidsgiver.refusjonshistorikk).gjødsle(aktivitetslogg)
             }
         }
         MaksimumUtbetaling(tidslinjer, aktivitetslogg, virkningsdato).betal()

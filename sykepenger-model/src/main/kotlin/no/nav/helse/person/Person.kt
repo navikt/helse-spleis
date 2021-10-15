@@ -690,4 +690,6 @@ class Person private constructor(
 
     fun tidligerePeriodeErFlereArbeidsgivere(skjæringstidspunkt: LocalDate, organisasjonsnummer: String) =
         arbeidsgivere.finn(organisasjonsnummer)?.tidligerePeriodeErFlereArbeidsgivere(skjæringstidspunkt) ?: false
+
+    internal fun infotrygdUtbetalingstidslinje(organisasjonsnummer: String) = infotrygdhistorikk.utbetalingstidslinje(organisasjonsnummer)
 }
