@@ -415,12 +415,12 @@ internal class Utbetaling private constructor(
             forrige: Oppdrag?
         ): Oppdrag {
             val tidligere = forrige ?: sisteAktive
-            val result = OppdragBuilder(tidslinje, organisasjonsnummer, SykepengerRefusjon, sisteDato, forrige?.fagsystemId()).result()
+            val historieløstOppdrag = OppdragBuilder(tidslinje, organisasjonsnummer, SykepengerRefusjon, sisteDato, forrige?.fagsystemId()).result()
             val oppdrag = tidligere?.let {
-                result.minus(tidligere, aktivitetslogg)
+                historieløstOppdrag.minus(tidligere, aktivitetslogg)
             }?.also {
                 if (tidligere.fagsystemId() == it.fagsystemId()) it.nettoBeløp(tidligere)
-            } ?: result
+            } ?: historieløstOppdrag
 
             aktivitetslogg.info(
                 if (oppdrag.isEmpty()) "Ingen utbetalingslinjer bygget"

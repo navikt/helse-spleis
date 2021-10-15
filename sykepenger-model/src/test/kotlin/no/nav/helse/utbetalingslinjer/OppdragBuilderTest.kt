@@ -3,6 +3,7 @@ package no.nav.helse.utbetalingslinjer
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Endringskode.*
@@ -12,6 +13,7 @@ import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 internal class OppdragBuilderTest {
 
@@ -250,53 +252,28 @@ internal class OppdragBuilderTest {
     }
 
     @Test
-    fun `prøv å minus til å tryne`() {
+    fun `det funker å forlenge et oppdrag hvor vi har opphørt alle linjer`() {
         val original = opprett(1.januar til 31.januar er NAVDAGER)
-        val nyere = opprett(
+        val endret = opprett(
+            1.januar til 5.januar er FRI,
             6.januar til 15.januar er NAVDAGER,
             16.januar til 20.januar er FRI,
-            21.januar til 31.januar er NAVDAGER,
-            startdato = 6.januar
+            21.januar til 31.januar er NAVDAGER
         ).minus(original, Aktivitetslogg())
 
-        nyere.apply {
-            assertLinje(0, 6.januar, 15.januar, delytelseId = 2, refDelytelseId = 1)
+        endret.apply {
+            (0 until size).forEach { println(this[it]) }
+            accept(AssertAtOppdragErENDR)
+            assertLinje(0, 1.januar, 31.januar, delytelseId = 1, refDelytelseId = null, datoStatusFom = 1.januar, endringskode = ENDR, refFagsystemId = null)
+            assertLinje(1, 6.januar, 15.januar, delytelseId = 2, refDelytelseId = 1, datoStatusFom = null, endringskode = NY)
+            assertLinje(2, 21.januar, 31.januar, delytelseId = 3, refDelytelseId = 2, datoStatusFom = null, endringskode = NY)
         }
     }
 
-    @Test
-    fun `prøv å minus til å tryne take two`() {
-        val original = opprett(2.januar til 31.januar er NAVDAGER, startdato = 2.januar)
-        val ny = opprett(
-            6.januar til 15.januar er NAVDAGER,
-            16.januar til 20.januar er FRI,
-            21.januar til 31.januar er NAVDAGER,
-            startdato = 6.januar
-        ).minus(original, Aktivitetslogg())
-        val nyere = opprett(
-            3.januar til 15.januar er NAVDAGER,
-            16.januar til 20.januar er FRI,
-            21.januar til 31.januar er NAVDAGER,
-            startdato = 3.januar
-        ).minus(ny, Aktivitetslogg())
-    }
-
-    @Test
-    fun `prøv å minus til å tryne take three`() {
-        // må skrive testen sånn av vi får en opphørslinje på `ny`.
-        val original = opprett(5.januar til 31.januar er NAVDAGER, startdato = 5.januar)
-        val ny = opprett(
-            5.januar til 15.januar er NAVDAGER,
-            16.januar til 20.januar er FRI,
-            21.januar til 31.januar er NAVDAGER,
-            startdato = 5.januar
-        ).minus(original, Aktivitetslogg())
-        val nyere = opprett(
-            2.januar til 15.januar er NAVDAGER,
-            16.januar til 20.januar er FRI,
-            21.januar til 31.januar er NAVDAGER,
-            startdato = 2.januar
-        ).minus(ny, Aktivitetslogg())
+    object AssertAtOppdragErENDR: OppdragVisitor {
+        override fun preVisitOppdrag(oppdrag: Oppdrag, totalBeløp: Int, nettoBeløp: Int, tidsstempel: LocalDateTime, endringskode: Endringskode) {
+            assertEquals(ENDR, endringskode)
+        }
     }
 
     @Test
