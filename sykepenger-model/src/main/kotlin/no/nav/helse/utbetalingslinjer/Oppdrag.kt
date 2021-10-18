@@ -145,26 +145,40 @@ internal class Oppdrag private constructor(
         )
 
     internal fun minus(eldre: Oppdrag, aktivitetslogg: IAktivitetslogg): Oppdrag {
-        val eldreUtenOpphør = eldre.utenOpphørLinjer()
         return when {
-            eldre.isEmpty() || this !in eldre -> this
-            this.isEmpty() -> deleteAll(eldre)
-            this.førstedato > eldre.førstedato -> {
+            harIngenKoblingTilTidligereOppdrag(eldre) -> this
+            erTomt() -> deleteAll(eldre)
+            fomHarFlyttetSegFremover(eldre) -> {
                 aktivitetslogg.warn("Utbetaling opphører tidligere utbetaling. Kontroller simuleringen")
                 deleted(eldre)
             }
-            this.førstedato < eldre.førstedato -> {
+            fomHarFlyttetSegBakover(eldre) -> {
                 aktivitetslogg.warn("Utbetaling fra og med dato er endret. Kontroller simuleringen")
                 appended(eldre)
             }
-            eldreUtenOpphør.isNotEmpty() && this.førstedato == eldreUtenOpphør.førstedato -> erstatt(eldreUtenOpphør, aktivitetslogg = aktivitetslogg)
-            this.førstedato == eldre.førstedato -> {
-                aktivitetslogg.warn("Utbetalingen erstatter et tidligere opphørt oppdrag. Kontroller simuleringen")
-                erstatt(eldre, aktivitetslogg = aktivitetslogg)
-            }
-            else -> throw IllegalArgumentException("uventet utbetalingslinje forhold")
+            else -> erstatt2electricBoogaloo(eldre, aktivitetslogg = aktivitetslogg)
         }
     }
+
+    // Vi ønsker ikke å forlenge en annullering, eller et oppdrag vi ikke overlapper eller har samme fagsystemId som
+    private fun harIngenKoblingTilTidligereOppdrag(eldre: Oppdrag) = eldre.isEmpty() || this !in eldre
+
+    // Dette er synonymt med en annullering fordi måten vi genererer en annullering er å sende inn et oppdrag uten linjer
+    private fun erTomt() = this.isEmpty()
+
+    // Vi har oppdaget utbetalingsdager tidligere i tidslinjen
+    private fun fomHarFlyttetSegBakover(eldre: Oppdrag) = this.førstedato < eldre.førstedato
+
+    // Vi har endret tidligere utbetalte dager til ikke-utbetalte dager i starten av tidslinjen
+    private fun fomHarFlyttetSegFremover(eldre: Oppdrag) = this.førstedato > eldre.førstedato
+
+    private fun erstatterTidligereOppdragMedKunOpphørteLinjer(eldre: Oppdrag) =
+        harSammeFørstedato(eldre)
+
+    private fun erstatterTidligereOppdragMedLinjer(eldre: Oppdrag) =
+        eldre.utenOpphørLinjer().isNotEmpty() && harSammeFørstedato(eldre.utenOpphørLinjer())
+
+    private fun harSammeFørstedato(eldre: Oppdrag) = this.førstedato == eldre.førstedato
 
     private fun deleteAll(tidligere: Oppdrag) = this.also { nåværende ->
         nåværende.kobleTil(tidligere)
@@ -188,6 +202,19 @@ internal class Oppdrag private constructor(
             påtroppendeOppdrag.kopierLikeLinjer(avtroppendeOppdrag, aktivitetslogg)
             påtroppendeOppdrag.håndterLengreNåværende(avtroppendeOppdrag)
         }
+
+    private fun erstatt2electricBoogaloo(
+        avtroppendeOppdrag: Oppdrag,
+        aktivitetslogg: IAktivitetslogg
+    ): Oppdrag {
+        return if (erstatterTidligereOppdragMedLinjer(avtroppendeOppdrag)) {
+            erstatt(avtroppendeOppdrag.utenOpphørLinjer(), aktivitetslogg = aktivitetslogg)
+        } else if (erstatterTidligereOppdragMedKunOpphørteLinjer(avtroppendeOppdrag)) {
+            erstatt(avtroppendeOppdrag, aktivitetslogg = aktivitetslogg)
+        } else {
+            throw IllegalArgumentException()
+        }
+    }
 
     private fun deleted(tidligere: Oppdrag) = this.also { nåværende ->
         val deletion = nåværende.deletionLinje(tidligere)
