@@ -154,7 +154,7 @@ internal class V116LeggTilRefusjonshistorikkTest {
                     "tom": "2021-10-15"
                 }
             ],
-            "foersteFravaersdag": ${førsteFraværsdag?.let { "\"$it\"" }},
+            ${førsteFraværsdag?.let { """"foersteFravaersdag": "$førsteFraværsdag",""" }?:""}
             "mottattDato": "2021-10-15T15:10:58.961689",
             "@id": "$meldingsreferanseId",
             "@event_name": "inntektsmelding",
