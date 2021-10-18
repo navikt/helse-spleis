@@ -156,7 +156,7 @@ internal class Oppdrag private constructor(
                 aktivitetslogg.warn("Utbetaling fra og med dato er endret. Kontroller simuleringen")
                 appended(eldre)
             }
-            else -> erstatt2electricBoogaloo(eldre, aktivitetslogg = aktivitetslogg)
+            else -> erstatt(eldre, aktivitetslogg = aktivitetslogg)
         }
     }
 
@@ -171,14 +171,6 @@ internal class Oppdrag private constructor(
 
     // Vi har endret tidligere utbetalte dager til ikke-utbetalte dager i starten av tidslinjen
     private fun fomHarFlyttetSegFremover(eldre: Oppdrag) = this.førstedato > eldre.førstedato
-
-    private fun erstatterTidligereOppdragMedKunOpphørteLinjer(eldre: Oppdrag) =
-        harSammeFørstedato(eldre)
-
-    private fun erstatterTidligereOppdragMedLinjer(eldre: Oppdrag) =
-        eldre.utenOpphørLinjer().isNotEmpty() && harSammeFørstedato(eldre.utenOpphørLinjer())
-
-    private fun harSammeFørstedato(eldre: Oppdrag) = this.førstedato == eldre.førstedato
 
     private fun deleteAll(tidligere: Oppdrag) = this.also { nåværende ->
         nåværende.kobleTil(tidligere)
@@ -202,19 +194,6 @@ internal class Oppdrag private constructor(
             påtroppendeOppdrag.kopierLikeLinjer(avtroppendeOppdrag, aktivitetslogg)
             påtroppendeOppdrag.håndterLengreNåværende(avtroppendeOppdrag)
         }
-
-    private fun erstatt2electricBoogaloo(
-        avtroppendeOppdrag: Oppdrag,
-        aktivitetslogg: IAktivitetslogg
-    ): Oppdrag {
-        return if (erstatterTidligereOppdragMedLinjer(avtroppendeOppdrag)) {
-            erstatt(avtroppendeOppdrag.utenOpphørLinjer(), aktivitetslogg = aktivitetslogg)
-        } else if (erstatterTidligereOppdragMedKunOpphørteLinjer(avtroppendeOppdrag)) {
-            erstatt(avtroppendeOppdrag, aktivitetslogg = aktivitetslogg)
-        } else {
-            throw IllegalArgumentException()
-        }
-    }
 
     private fun deleted(tidligere: Oppdrag) = this.also { nåværende ->
         val deletion = nåværende.deletionLinje(tidligere)
@@ -246,7 +225,7 @@ internal class Oppdrag private constructor(
     private fun kopierLikeLinjer(tidligere: Oppdrag, aktivitetslogg: IAktivitetslogg) {
         tilstand = if (tidligere.sistedato > this.sistedato) Slett() else Identisk()
         sisteLinjeITidligereOppdrag = tidligere.last()
-        this.zip(tidligere).forEach { (a, b) -> tilstand.håndterForskjell(a, b, aktivitetslogg) }
+        this.zip(tidligere.utenOpphørLinjer()).forEach { (a, b) -> tilstand.håndterForskjell(a, b, aktivitetslogg) }
     }
 
     private fun håndterLengreNåværende(tidligere: Oppdrag) {
