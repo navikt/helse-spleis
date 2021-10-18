@@ -22,10 +22,10 @@ internal class V116LeggTilRefusjonshistorikk : JsonMigration(version = 116) {
             arbeidsgiverInntektsmeldinger.forEach { arbeidsgiverInntektsmelding ->
                 refusjonshistorikk.addObject()
                     .put("meldingsreferanseId", arbeidsgiverInntektsmelding["@id"].asText())
-                    .put("førsteFraværsdag", arbeidsgiverInntektsmelding["foersteFravaersdag"].asText())
+                    .put("førsteFraværsdag", arbeidsgiverInntektsmelding["foersteFravaersdag"].takeUnless { it.isNull }?.asText())
                     .set<ObjectNode>("arbeidsgiverperioder", arbeidsgiverInntektsmelding["arbeidsgiverperioder"].deepCopy<ObjectNode>())
-                    .put("beløp", arbeidsgiverInntektsmelding["refusjon"]["beloepPrMnd"].asDouble())
-                    .put("sisteRefusjonsdag", arbeidsgiverInntektsmelding["refusjon"]["opphoersdato"].asText())
+                    .put("beløp", arbeidsgiverInntektsmelding["refusjon"]["beloepPrMnd"].takeUnless { it.isNull }?.asDouble())
+                    .put("sisteRefusjonsdag", arbeidsgiverInntektsmelding["refusjon"]["opphoersdato"].takeUnless { it.isNull }?.asText())
                     .set<ObjectNode>("endringerIRefusjon", arbeidsgiverInntektsmelding["endringIRefusjoner"].deepCopy<ArrayNode>().onEach { endring ->
                         endring as ObjectNode
                         endring.put("beløp", endring.remove("beloep").asDouble())
