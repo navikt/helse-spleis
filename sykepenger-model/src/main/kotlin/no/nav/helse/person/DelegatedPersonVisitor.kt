@@ -807,11 +807,11 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         førsteFraværsdag: LocalDate?,
         arbeidsgiverperioder: List<Periode>,
         beløp: Inntekt?,
-        opphørsdato: LocalDate?,
+        sisteRefusjonsdag: LocalDate?,
         endringerIRefusjon: List<Refusjonshistorikk.Refusjon.EndringIRefusjon>,
         tidsstempel: LocalDateTime
     ) {
-        delegatee.preVisitRefusjon(meldingsreferanseId, førsteFraværsdag, arbeidsgiverperioder, beløp, opphørsdato, endringerIRefusjon, tidsstempel)
+        delegatee.preVisitRefusjon(meldingsreferanseId, førsteFraværsdag, arbeidsgiverperioder, beløp, sisteRefusjonsdag, endringerIRefusjon, tidsstempel)
     }
 
     override fun visitEndringIRefusjon(beløp: Inntekt, endringsdato: LocalDate) {
@@ -823,11 +823,11 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         førsteFraværsdag: LocalDate?,
         arbeidsgiverperioder: List<Periode>,
         beløp: Inntekt?,
-        opphørsdato: LocalDate?,
+        sisteRefusjonsdag: LocalDate?,
         endringerIRefusjon: List<Refusjonshistorikk.Refusjon.EndringIRefusjon>,
         tidsstempel: LocalDateTime
     ) {
-        delegatee.postVisitRefusjon(meldingsreferanseId, førsteFraværsdag, arbeidsgiverperioder, beløp, opphørsdato, endringerIRefusjon, tidsstempel)
+        delegatee.postVisitRefusjon(meldingsreferanseId, førsteFraværsdag, arbeidsgiverperioder, beløp, sisteRefusjonsdag, endringerIRefusjon, tidsstempel)
     }
 
     override fun postVisitRefusjonshistorikk(refusjonshistorikk: Refusjonshistorikk) {

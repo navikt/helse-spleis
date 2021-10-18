@@ -363,7 +363,7 @@ internal data class PersonData(
         private val beregnetUtbetalingstidslinjer: List<BeregnetUtbetalingstidslinjeData>,
         private val feriepengeutbetalinger: List<FeriepengeutbetalingData> = emptyList(),
         private val refusjonOpphører: List<LocalDate?> = emptyList(),
-        private val refusjonshistorikk: List<RefusjonData> = emptyList(), //TODO: Emptylist frem til migrering av refusjonshistorikk er gjennomført. ETA 7.10.21
+        private val refusjonshistorikk: List<RefusjonData>,
         private val arbeidsforholdhistorikk: List<ArbeidsforholdhistorikkInnslagData> = listOf()
     ) {
         private val modelInntekthistorikk = Inntektshistorikk().apply {
@@ -947,7 +947,7 @@ internal data class PersonData(
             private val førsteFraværsdag: LocalDate?,
             private val arbeidsgiverperioder: List<Periode>,
             private val beløp: Double?,
-            private val opphørsdato: LocalDate?,
+            private val sisteRefusjonsdag: LocalDate?,
             private val endringerIRefusjon: List<EndringIRefusjonData>,
             private val tidsstempel: LocalDateTime
         ) {
@@ -960,7 +960,7 @@ internal data class PersonData(
                                 førsteFraværsdag = it.førsteFraværsdag,
                                 arbeidsgiverperioder = it.arbeidsgiverperioder,
                                 beløp = it.beløp?.månedlig,
-                                sisteRefusjonsdag = it.opphørsdato,
+                                sisteRefusjonsdag = it.sisteRefusjonsdag,
                                 endringerIRefusjon = it.endringerIRefusjon.parseEndringerIRefusjon(),
                                 tidsstempel = it.tidsstempel
                             )

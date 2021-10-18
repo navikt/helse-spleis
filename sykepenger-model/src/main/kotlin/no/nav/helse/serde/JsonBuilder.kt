@@ -276,7 +276,7 @@ internal class JsonBuilder : AbstractBuilder() {
             førsteFraværsdag: LocalDate?,
             arbeidsgiverperioder: List<Periode>,
             beløp: Inntekt?,
-            opphørsdato: LocalDate?,
+            sisteRefusjonsdag: LocalDate?,
             endringerIRefusjon: List<Refusjonshistorikk.Refusjon.EndringIRefusjon>,
             tidsstempel: LocalDateTime
         ) {
@@ -287,7 +287,7 @@ internal class JsonBuilder : AbstractBuilder() {
                     "førsteFraværsdag" to førsteFraværsdag,
                     "arbeidsgiverperioder" to arbeidsgiverperioder.map { mapOf("fom" to it.start, "tom" to it.endInclusive) },
                     "beløp" to beløp?.reflection { _, månedlig, _, _ -> månedlig },
-                    "opphørsdato" to opphørsdato,
+                    "sisteRefusjonsdag" to sisteRefusjonsdag,
                     "endringerIRefusjon" to this.endringerIRefusjon,
                     "tidsstempel" to tidsstempel
                 )

@@ -389,7 +389,7 @@ internal interface RefusjonshistorikkVisitor {
         førsteFraværsdag: LocalDate?,
         arbeidsgiverperioder: List<Periode>,
         beløp: Inntekt?,
-        opphørsdato: LocalDate?,
+        sisteRefusjonsdag: LocalDate?,
         endringerIRefusjon: List<Refusjonshistorikk.Refusjon.EndringIRefusjon>,
         tidsstempel: LocalDateTime
     ) {
@@ -401,7 +401,7 @@ internal interface RefusjonshistorikkVisitor {
         førsteFraværsdag: LocalDate?,
         arbeidsgiverperioder: List<Periode>,
         beløp: Inntekt?,
-        opphørsdato: LocalDate?,
+        sisteRefusjonsdag: LocalDate?,
         endringerIRefusjon: List<Refusjonshistorikk.Refusjon.EndringIRefusjon>,
         tidsstempel: LocalDateTime
     ) {
