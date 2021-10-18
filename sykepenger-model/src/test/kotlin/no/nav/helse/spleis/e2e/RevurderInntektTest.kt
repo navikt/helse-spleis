@@ -5,7 +5,6 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.person.TilstandType
-import no.nav.helse.person.UtbetalingVisitor
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.*
@@ -21,7 +20,6 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
 
 internal class RevurderInntektTest : AbstractEndToEndTest() {
 
@@ -590,13 +588,29 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
 
         val utbetalinger = inspektør.utbetalinger
-        utbetalinger.last().arbeidsgiverOppdrag().skalHaEndringskode(Endringskode.ENDR)
-        utbetalinger.last().arbeidsgiverOppdrag().skalBareHaLinjerMedStatus(Endringskode.NY)
+        var opprinneligFagsystemId: String?
+        utbetalinger[0].arbeidsgiverOppdrag().apply {
+            skalHaEndringskode(Endringskode.NY)
+            opprinneligFagsystemId = fagsystemId()
+            assertEquals(1, size)
+            first().assertUtbetalingslinje(Endringskode.NY, 1, null, null)
+        }
+        utbetalinger[1].arbeidsgiverOppdrag().apply {
+            skalHaEndringskode(Endringskode.ENDR)
+            assertEquals(opprinneligFagsystemId, fagsystemId())
+            assertEquals(1, size)
+            first().assertUtbetalingslinje(Endringskode.ENDR, 1, null, null, ønsketDatoStatusFom = 17.januar)
+        }
+        utbetalinger[2].arbeidsgiverOppdrag().apply {
+            skalHaEndringskode(Endringskode.ENDR)
+            assertEquals(opprinneligFagsystemId, fagsystemId())
+            assertEquals(1, size)
+            first().assertUtbetalingslinje(Endringskode.NY, 2, 1, fagsystemId())
+        }
     }
 }
 
 private fun Oppdrag.skalHaEndringskode(kode: Endringskode, message: String = "") = accept(UtbetalingSkalHaEndringskode(kode, message))
-private fun Oppdrag.skalBareHaLinjerMedStatus(kode: Endringskode) = accept(UtbetalingslinjerSkalHaEndringskode(kode))
 
 private class UtbetalingSkalHaEndringskode(private val ønsketEndringskode: Endringskode, private val message: String = ""): OppdragVisitor {
     override fun preVisitOppdrag(oppdrag: Oppdrag, totalBeløp: Int, nettoBeløp: Int, tidsstempel: LocalDateTime, endringskode: Endringskode) {
@@ -604,8 +618,35 @@ private class UtbetalingSkalHaEndringskode(private val ønsketEndringskode: Endr
     }
 }
 
-private class UtbetalingslinjerSkalHaEndringskode(private val ønsketEndringskode: Endringskode): OppdragVisitor {
-    override fun visitUtbetalingslinje(linje: Utbetalingslinje, fom: LocalDate, tom: LocalDate, satstype: Satstype, beløp: Int?, aktuellDagsinntekt: Int?, grad: Double?, delytelseId: Int, refDelytelseId: Int?, refFagsystemId: String?, endringskode: Endringskode, datoStatusFom: LocalDate?, klassekode: Klassekode) {
-        assertEquals(ønsketEndringskode, endringskode)
+private fun Utbetalingslinje.assertUtbetalingslinje(
+    ønsketEndringskode: Endringskode,
+    ønsketDelytelseId: Int,
+    ønsketRefDelytelseId: Int? = null,
+    ønsketRefFagsystemId: String? = null,
+    ønsketDatoStatusFom: LocalDate? = null
+) {
+    val visitor = object : OppdragVisitor {
+        override fun visitUtbetalingslinje(
+            linje: Utbetalingslinje,
+            fom: LocalDate,
+            tom: LocalDate,
+            satstype: Satstype,
+            beløp: Int?,
+            aktuellDagsinntekt: Int?,
+            grad: Double?,
+            delytelseId: Int,
+            refDelytelseId: Int?,
+            refFagsystemId: String?,
+            endringskode: Endringskode,
+            datoStatusFom: LocalDate?,
+            klassekode: Klassekode
+        ) {
+            assertEquals(ønsketEndringskode, endringskode)
+            assertEquals(ønsketDelytelseId, delytelseId)
+            assertEquals(ønsketRefDelytelseId, refDelytelseId)
+            assertEquals(ønsketRefFagsystemId, refFagsystemId)
+            assertEquals(ønsketDatoStatusFom, datoStatusFom)
+        }
     }
+    accept(visitor)
 }

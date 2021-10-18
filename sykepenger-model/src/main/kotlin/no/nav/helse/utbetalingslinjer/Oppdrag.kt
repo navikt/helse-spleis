@@ -195,6 +195,15 @@ internal class Oppdrag private constructor(
             påtroppendeOppdrag.håndterLengreNåværende(avtroppendeOppdrag)
         }
 
+    private fun erstatt(avtroppendeOppdrag: Oppdrag, aktivitetslogg: IAktivitetslogg): Oppdrag {
+        return if (avtroppendeOppdrag.utenOpphørLinjer().isEmpty()) {
+            erstatt(avtroppendeOppdrag, avtroppendeOppdrag.last(), aktivitetslogg)
+        } else {
+            val avtroppendeUtenOpphør = avtroppendeOppdrag.utenOpphørLinjer()
+            erstatt(avtroppendeUtenOpphør, avtroppendeUtenOpphør.last(), aktivitetslogg)
+        }
+    }
+
     private fun deleted(tidligere: Oppdrag) = this.also { nåværende ->
         val deletion = nåværende.deletionLinje(tidligere)
         nåværende.appended(tidligere)
@@ -225,7 +234,7 @@ internal class Oppdrag private constructor(
     private fun kopierLikeLinjer(tidligere: Oppdrag, aktivitetslogg: IAktivitetslogg) {
         tilstand = if (tidligere.sistedato > this.sistedato) Slett() else Identisk()
         sisteLinjeITidligereOppdrag = tidligere.last()
-        this.zip(tidligere.utenOpphørLinjer()).forEach { (a, b) -> tilstand.håndterForskjell(a, b, aktivitetslogg) }
+        this.zip(tidligere).forEach { (a, b) -> tilstand.håndterForskjell(a, b, aktivitetslogg) }
     }
 
     private fun håndterLengreNåværende(tidligere: Oppdrag) {
