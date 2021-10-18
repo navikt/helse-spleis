@@ -10,7 +10,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
@@ -130,25 +129,25 @@ internal class RefusjonsgjødslerTest {
         assertDoesNotThrow { refusjonsgjødsler.gjødsle(aktivitetslogg) }
     }
 
-    @Disabled
     @Test
     fun `Logger i aktivitetsloggen når vi bruker '16 dagers hopp'`() {
-        val utbetalingstidslinje = (8.U + 26.opphold + 16.U + 2.S).utbetalingstidslinje(
-            inntektsopplysning(4.februar, 2308.daglig)
+        val utbetalingstidslinje = (31.opphold + 15.S).utbetalingstidslinje(
+            inntektsopplysning(1.februar, 2308.daglig),
+            strategi = { true }
         )
         val refusjonsgjødsler = Refusjonsgjødsler(
             tidslinje = utbetalingstidslinje,
             refusjonshistorikk = refusjonshistorikk(
                 refusjon(
-                    førsteFraværsdag = 4.februar,
+                    førsteFraværsdag = 1.januar,
                     beløp = 2308.daglig,
-                    arbeidsgiverperioder = listOf(4.februar til 19.februar)
+                    arbeidsgiverperioder = listOf(1.januar til 16.januar)
                 )
             )
         )
         val aktivitetslogg = Aktivitetslogg()
         assertDoesNotThrow { refusjonsgjødsler.gjødsle(aktivitetslogg) }
-        assertEquals(listOf("Fant refusjon ved å gå 16 dager tilbake fra første utbetalingsdag i utbetalingstidslinjen"), aktivitetslogg.infoMeldinger())
+        assertEquals(listOf("Fant refusjon ved å gå 16 dager tilbake fra første utbetalingsdag i sammenhengende utbetaling"), aktivitetslogg.infoMeldinger())
     }
 
     private companion object {
