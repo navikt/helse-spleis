@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.Toggles
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companion.cacheRefusjon
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companion.endrerRefusjon
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companion.minOf
@@ -212,10 +213,10 @@ class Inntektsmelding(
             when {
                 beløp == null -> aktivitetslogg.error("Arbeidsgiver forskutterer ikke (krever ikke refusjon)")
                 beløp != beregnetInntekt -> aktivitetslogg.error("Inntektsmelding inneholder beregnet inntekt og refusjon som avviker med hverandre")
-                opphørerRefusjon(periode) -> aktivitetslogg.error("Arbeidsgiver opphører refusjon i perioden")
-                opphørsdato != null -> aktivitetslogg.error("Arbeidsgiver opphører refusjon")
-                endrerRefusjon(periode) -> aktivitetslogg.error("Arbeidsgiver endrer refusjon i perioden")
-                endringerIRefusjon.isNotEmpty() -> aktivitetslogg.error("Arbeidsgiver har endringer i refusjon")
+                opphørerRefusjon(periode) && !Toggles.RefusjonPerDag.enabled -> aktivitetslogg.error("Arbeidsgiver opphører refusjon i perioden")
+                opphørsdato != null && !Toggles.RefusjonPerDag.enabled -> aktivitetslogg.error("Arbeidsgiver opphører refusjon")
+                endrerRefusjon(periode) && !Toggles.RefusjonPerDag.enabled -> aktivitetslogg.error("Arbeidsgiver endrer refusjon i perioden")
+                endringerIRefusjon.isNotEmpty() && !Toggles.RefusjonPerDag.enabled -> aktivitetslogg.error("Arbeidsgiver har endringer i refusjon")
             }
             return aktivitetslogg
         }

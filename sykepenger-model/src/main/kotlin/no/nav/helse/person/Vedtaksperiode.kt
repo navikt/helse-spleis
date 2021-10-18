@@ -162,7 +162,7 @@ internal class Vedtaksperiode private constructor(
         val overlapper = overlapperMed(inntektsmelding) && (other == null || other == id)
         return overlapper.also {
             if (it) hendelseIder.add(inntektsmelding.meldingsreferanseId())
-            if (arbeidsgiver.harRefusjonOpphørt(periode.endInclusive) && !erAvsluttet()) {
+            if (!Toggles.RefusjonPerDag.enabled && arbeidsgiver.harRefusjonOpphørt(periode.endInclusive) && !erAvsluttet()) {
                 kontekst(inntektsmelding)
                 inntektsmelding.error("Refusjon opphører i perioden")
                 inntektsmelding.trimLeft(periode.endInclusive)
