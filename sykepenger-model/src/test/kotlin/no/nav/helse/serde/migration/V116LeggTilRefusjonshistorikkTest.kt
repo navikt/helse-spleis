@@ -99,12 +99,34 @@ internal class V116LeggTilRefusjonshistorikkTest {
         assertEquals(expected, migrert)
     }
 
+    @Test
+    fun `første fraværsdag, opphørsdato og beløp ikke satt`() {
+        val migrert = migrer(originalOptionalFelt) {
+            mapOf(meldingsreferanseId1 to inntektsmelding(
+                virksomhetsnummer = organisasjonsnummer1,
+                meldingsreferanseId = meldingsreferanseId1,
+                refusjonsbeløp = null,
+                opphørsdato = null,
+                førsteFraværsdag = null
+            ))
+        }
+
+        val expected = toNode(expectedOptionalFelt)
+
+        assertEquals(expected, migrert)
+    }
+
     private fun toNode(json: String) = serdeObjectMapper.readTree(json)
 
     private fun migrer(json: String, meldingSupplier: MeldingerSupplier) = listOf(V116LeggTilRefusjonshistorikk()).migrate(toNode(json), meldingSupplier)
 
     @Language("JSON")
-    private fun inntektsmelding(virksomhetsnummer: String?, meldingsreferanseId: UUID) = """
+    private fun inntektsmelding(
+        virksomhetsnummer: String?,
+        meldingsreferanseId: UUID,
+        refusjonsbeløp: Double? = beløp,
+        opphørsdato: LocalDate? = sisteRefusjonsdag,
+        førsteFraværsdag: LocalDate? = Companion.førsteFraværsdag) = """
         {
             "inntektsmeldingId": "innteksmeldingId",
             "arbeidstakerFnr": "20046913337",
@@ -117,8 +139,8 @@ internal class V116LeggTilRefusjonshistorikkTest {
             "arbeidsforholdId": null,
             "beregnetInntekt": "1.00",
             "refusjon": {
-                "beloepPrMnd": "$beløp",
-                "opphoersdato": "$sisteRefusjonsdag"
+                "beloepPrMnd": ${refusjonsbeløp?.let { "\"$it\"" }},
+                "opphoersdato": ${opphørsdato?.let { "\"$it\"" }}
             },
             "endringIRefusjoner": ${endringerIRefusjon.map { it.kontraktformat() }},
             "opphoerAvNaturalytelser": [],
@@ -132,7 +154,7 @@ internal class V116LeggTilRefusjonshistorikkTest {
                     "tom": "2021-10-15"
                 }
             ],
-            "foersteFravaersdag": "$førsteFraværsdag",
+            "foersteFravaersdag": ${førsteFraværsdag?.let { "\"$it\"" }},
             "mottattDato": "2021-10-15T15:10:58.961689",
             "@id": "$meldingsreferanseId",
             "@event_name": "inntektsmelding",
@@ -337,5 +359,57 @@ internal class V116LeggTilRefusjonshistorikkTest {
         ],
         "skjemaVersjon": 116
     }
+    """
+
+    @Language("JSON")
+    private val originalOptionalFelt = """{
+        "fødselsnummer": "20046913337",
+        "arbeidsgivere": [
+            {
+                "organisasjonsnummer": "$organisasjonsnummer1"
+            },
+            {
+                "organisasjonsnummer": "$organisasjonsnummer2"
+            }
+        ],
+        "skjemaVersjon": 115
+    }
+    """
+
+    @Language("JSON")
+    private val expectedOptionalFelt = """{
+    "fødselsnummer": "20046913337",
+    "arbeidsgivere": [
+        {
+            "organisasjonsnummer": "987654321",
+            "refusjonshistorikk": [
+                {
+                    "meldingsreferanseId": "a7bed8ec-c54e-4477-aad1-c385d4fbd32d",
+                    "førsteFraværsdag": null,
+                    "arbeidsgiverperioder": [
+                        {
+                            "fom": "2018-01-01",
+                            "tom": "2018-01-16"
+                        }
+                    ],
+                    "beløp": null,
+                    "sisteRefusjonsdag": null,
+                    "endringerIRefusjon": [
+                        {
+                            "endringsdato": "2018-01-22",
+                            "beløp": 30000.0
+                        }
+                    ],
+                    "tidsstempel": "2021-10-15T15:11:01.262131"
+                }
+            ]
+        },
+        {
+            "organisasjonsnummer": "987654322",
+            "refusjonshistorikk": []
+        }
+    ],
+    "skjemaVersjon": 116
+}
     """
 }
