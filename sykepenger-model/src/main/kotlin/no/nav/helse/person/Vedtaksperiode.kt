@@ -1833,7 +1833,7 @@ internal class Vedtaksperiode private constructor(
 
     internal object AvventerVilkårsprøving : Vedtaksperiodetilstand {
         override val type = AVVENTER_VILKÅRSPRØVING
-        override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime) = tilstandsendringstidspunkt.plusDays(1)
+        override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime) = tilstandsendringstidspunkt.plusDays(5)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.trengerVilkårsgrunnlag(hendelse)
