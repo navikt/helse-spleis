@@ -12,7 +12,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-const val WARN_FORLENGER_OPPHØRT_OPPDRAG:String = "Utbetalingen forlenger et tidligere oppdrag som opphørte alle utbetalte dager."
+const val WARN_FORLENGER_OPPHØRT_OPPDRAG = "Utbetalingen forlenger et tidligere oppdrag som opphørte alle utbetalte dager. Sjekk simuleringen."
 
 internal class Oppdrag private constructor(
     private val mottaker: String,
