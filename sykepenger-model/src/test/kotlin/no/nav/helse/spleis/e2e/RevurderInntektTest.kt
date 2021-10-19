@@ -607,6 +607,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             assertEquals(1, size)
             first().assertUtbetalingslinje(Endringskode.NY, 2, 1, fagsystemId())
         }
+        assertWarningTekst(inspektør, WARN_FORLENGER_OPPHØRT_OPPDRAG)
     }
 }
 

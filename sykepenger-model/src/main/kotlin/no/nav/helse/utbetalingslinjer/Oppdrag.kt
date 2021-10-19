@@ -12,6 +12,8 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
+const val WARN_FORLENGER_OPPHØRT_OPPDRAG:String = "Utbetalingen forlenger et tidligere oppdrag som opphørte alle utbetalte dager."
+
 internal class Oppdrag private constructor(
     private val mottaker: String,
     private val fagområde: Fagområde,
@@ -197,6 +199,7 @@ internal class Oppdrag private constructor(
 
     private fun erstatt(avtroppendeOppdrag: Oppdrag, aktivitetslogg: IAktivitetslogg): Oppdrag {
         return if (avtroppendeOppdrag.utenOpphørLinjer().isEmpty()) {
+            aktivitetslogg.warn(WARN_FORLENGER_OPPHØRT_OPPDRAG)
             erstatt(avtroppendeOppdrag, avtroppendeOppdrag.last(), aktivitetslogg)
         } else {
             val avtroppendeUtenOpphør = avtroppendeOppdrag.utenOpphørLinjer()
