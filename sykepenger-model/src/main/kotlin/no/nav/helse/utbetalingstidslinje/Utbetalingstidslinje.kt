@@ -174,6 +174,8 @@ internal class Utbetalingstidslinje private constructor(
 
     internal fun harUtbetalinger() = sykepengeperiode() != null
 
+    internal fun harBrukerutbetalinger() = any { it.økonomi.harPersonbeløp() }
+
     internal fun plus(
         other: Utbetalingstidslinje,
         plusstrategy: (Utbetalingsdag, Utbetalingsdag) -> Utbetalingsdag

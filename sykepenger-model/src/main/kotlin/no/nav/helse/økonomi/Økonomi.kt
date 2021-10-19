@@ -279,6 +279,8 @@ internal class Økonomi private constructor(
 
     internal fun er6GBegrenset() = tilstand.er6GBegrenset(this)
 
+    internal fun harPersonbeløp() = personbeløp!! > INGEN
+
     private fun _betal() {
         val total = dekningsgrunnlag!! * grad().ratio()
         arbeidsgiverbeløp = arbeidsgiverRefusjonsbeløp?.coerceAtMost(total) ?: total

@@ -664,6 +664,7 @@ internal class Vedtaksperiode private constructor(
         val ingenUtbetaling = !utbetaling().harUtbetalinger()
         val kunArbeidsgiverdager = utbetalingstidslinje.kunArbeidsgiverdager()
         val ingenWarnings = !person.aktivitetslogg.logg(this).hasWarningsOrWorse()
+        val harBrukerutbetaling = utbetalingstidslinje.harBrukerutbetalinger()
 
         when {
             ingenUtbetaling && kunArbeidsgiverdager && ingenWarnings -> {
@@ -679,6 +680,9 @@ internal class Vedtaksperiode private constructor(
                     else
                         hendelse.info("""Saken oppfyller krav for behandling, settes til "Avventer godkjenning" fordi ingenting skal utbetales""")
                 }
+            }
+            harBrukerutbetaling -> {
+                person.invaliderAllePerioder(hendelse, "Utbetalingstidslinje inneholder brukerutbetaling")
             }
             else -> {
                 loggHvisForlengelse(hendelse)
