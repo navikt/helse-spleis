@@ -25,12 +25,6 @@ import java.time.LocalDateTime
 import java.util.*
 
 internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
-    private companion object {
-        private const val a1 = "arbeidsgiver 1"
-        private const val a2 = "arbeidsgiver 2"
-        private const val a3 = "arbeidsgiver 3"
-        private const val a4 = "arbeidsgiver 4"
-    }
 
     @Test
     fun `Sammenligningsgrunnlag for flere arbeidsgivere`() {

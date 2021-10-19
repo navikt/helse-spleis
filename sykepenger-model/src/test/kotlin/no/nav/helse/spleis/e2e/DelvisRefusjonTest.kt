@@ -5,9 +5,9 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.til
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -70,7 +70,6 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             håndterUtbetalt(1.vedtaksperiode)
             assertFalse(inspektør.warnings.contains("Fant ikke refusjon for perioden. Defaulter til full refusjon."))
         }
-
 
     @Test
     fun `Finner refusjon ved forlengelse fra Infotrygd`() = Toggles.RefusjonPerDag.enable {
@@ -240,6 +239,53 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
 
         assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, 1.januar til 24.januar)
         assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 0, 25.januar til 31.januar)
+    }
+
+    @Test
+    fun `flere arbeidsgivere hvor en arbeidsgiver har utbetalingsdag og en annen har arbeidsdag`() = Toggles.RefusjonPerDag.enable {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(11.januar, 31.januar, 100.prosent), orgnummer = a2)
+
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(11.januar, 31.januar, 100.prosent), orgnummer = a2)
+
+        håndterInntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), orgnummer = a1)
+        assertTilstand(orgnummer = a1, tilstand = AVVENTER_ARBEIDSGIVERE)
+        assertTilstand(orgnummer = a2, tilstand = AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+
+        håndterInntektsmelding(arbeidsgiverperioder = listOf(11.januar til 26.januar), orgnummer = a2)
+        assertTilstand(orgnummer = a1, tilstand = AVVENTER_HISTORIKK)
+        assertTilstand(orgnummer = a2, tilstand = AVVENTER_ARBEIDSGIVERE)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            orgnummer = a1,
+            inntektsvurdering = Inntektsvurdering(
+                listOf(
+                    sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(12)),
+                    sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(12))
+                )
+            ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                listOf(
+                    grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3)),
+                    grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3))
+                )
+            )
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        assertTilstand(orgnummer = a1, tilstand = AVSLUTTET)
+        assertTilstand(orgnummer = a2, tilstand = AVVENTER_HISTORIKK)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
+        assertTilstand(orgnummer = a2, tilstand = AVSLUTTET)
     }
 
     private fun assertUtbetalingsbeløp(

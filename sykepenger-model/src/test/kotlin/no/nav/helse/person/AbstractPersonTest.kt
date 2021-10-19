@@ -12,6 +12,11 @@ internal abstract class AbstractPersonTest {
         const val UNG_PERSON_FNR_2018 = "12020052345"
         const val AKTØRID = "42"
         const val ORGNUMMER = "987654321"
+
+        const val a1 = ORGNUMMER
+        const val a2 = "654321987"
+        const val a3 = "321987654"
+        const val a4 = "456789123"
     }
 
     protected lateinit var person: Person
