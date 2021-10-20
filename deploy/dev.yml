@@ -54,8 +54,6 @@ spec:
     value: postgresql/preprod-fss/
   - name: REVURDER_UTBETALT_PERIODE_TOGGLE
     value: "true"
-  - name: REVURDER_INNTEKT
-    value: "true"
   - name: REVURDER_TIDLIGERE_PERIODE
     value: "true"
   - name: SPEIL_API_V2

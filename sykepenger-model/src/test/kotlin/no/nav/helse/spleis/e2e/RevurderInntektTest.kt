@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.person.OppdragVisitor
@@ -13,25 +12,13 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 internal class RevurderInntektTest : AbstractEndToEndTest() {
-
-    @BeforeEach
-    fun setup() {
-        Toggles.RevurderInntekt.enable()
-    }
-
-    @AfterEach
-    fun tearDown() {
-        Toggles.RevurderInntekt.pop()
-    }
 
     @Test
     fun `revurder inntekt happy case`() {

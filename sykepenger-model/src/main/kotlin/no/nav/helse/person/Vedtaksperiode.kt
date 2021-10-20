@@ -900,7 +900,7 @@ internal class Vedtaksperiode private constructor(
 
         private fun graderFraSykomstidslinje(sykdomstidslinje: Sykdomstidslinje): List<Double> {
             val grader = mutableListOf<Double>()
-            sykdomstidslinje.forEach{ dag ->
+            sykdomstidslinje.forEach { dag ->
                 dag.accept(object : SykdomstidslinjeVisitor {
                     override fun visitDag(dag: Dag.Sykedag, dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
                         økonomi.medData { grad, _ -> grader.add(grad) }
@@ -1406,9 +1406,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
-            if (Toggles.RevurderInntekt.enabled) {
-                vedtaksperiode.person.overstyrUtkastRevurdering(hendelse)
-            }
+            vedtaksperiode.person.overstyrUtkastRevurdering(hendelse)
         }
 
         override fun revurder(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
@@ -2013,7 +2011,7 @@ internal class Vedtaksperiode private constructor(
                         person.loggTilfelleAvFlereArbeidsgivereMedSkatteinntekt(vedtaksperiode.skjæringstidspunkt)
                         ytelser.warn("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold")
                     }
-                    if(person.tidligerePeriodeErFlereArbeidsgivere(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.arbeidsgiver.organisasjonsnummer())) {
+                    if (person.tidligerePeriodeErFlereArbeidsgivere(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.arbeidsgiver.organisasjonsnummer())) {
                         vedtaksperiode.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE
                     }
                     vedtaksperiode.forsøkUtbetaling(arbeidsgiverUtbetalinger2.tidslinjeEngine, ytelser)
@@ -2172,10 +2170,8 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
-            if (Toggles.RevurderInntekt.enabled) {
-                vedtaksperiode.arbeidsgiver.addInntekt(hendelse)
-                vedtaksperiode.tilstand(hendelse, AvventerVilkårsprøving)
-            }
+            vedtaksperiode.arbeidsgiver.addInntekt(hendelse)
+            vedtaksperiode.tilstand(hendelse, AvventerVilkårsprøving)
         }
     }
 
@@ -2241,9 +2237,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
-            if (Toggles.RevurderInntekt.enabled) {
-                vedtaksperiode.person.overstyrUtkastRevurdering(hendelse)
-            }
+            vedtaksperiode.person.overstyrUtkastRevurdering(hendelse)
         }
 
         override fun revurder(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
@@ -2457,12 +2451,10 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
-            if (Toggles.RevurderInntekt.enabled) {
-                if (vedtaksperiode.person.kanRevurdereInntekt(hendelse.skjæringstidspunkt)) {
-                    vedtaksperiode.person.igangsettRevurdering(hendelse, vedtaksperiode)
-                } else {
-                    hendelse.error("Kan ikke revurdere inntekt, da vi mangler datagrunnlag på skjæringstidspunktet")
-                }
+            if (vedtaksperiode.person.kanRevurdereInntekt(hendelse.skjæringstidspunkt)) {
+                vedtaksperiode.person.igangsettRevurdering(hendelse, vedtaksperiode)
+            } else {
+                hendelse.error("Kan ikke revurdere inntekt, da vi mangler datagrunnlag på skjæringstidspunktet")
             }
         }
 

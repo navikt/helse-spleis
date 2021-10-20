@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.TilstandType
@@ -325,7 +324,6 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
 
     @Test
     fun `skal kunne overstyre dagtype i utkast til revurdering ved revurdering av inntekt`() {
-        Toggles.RevurderInntekt.enable {
             nyttVedtak(1.januar, 31.januar)
             forlengVedtak(1.februar, 28.februar)
 
@@ -380,5 +378,4 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
                 TilstandType.AVVENTER_GODKJENNING_REVURDERING
             )
         }
-    }
 }

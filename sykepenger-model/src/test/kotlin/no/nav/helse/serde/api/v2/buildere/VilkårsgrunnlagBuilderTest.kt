@@ -37,16 +37,6 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
     private val primitivInntekt = 40000.0
     private val inntekt = primitivInntekt.månedlig
 
-    @BeforeEach
-    fun before() {
-        Toggles.RevurderInntekt.enable()
-    }
-
-    @AfterEach
-    fun after() {
-        Toggles.RevurderInntekt.disable()
-    }
-
     @Test
     fun `har en generasjon med vilkårsgrunnlag for periode til godkjenning`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
