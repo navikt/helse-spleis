@@ -386,30 +386,30 @@ internal class UtbetalingslinjeForskjellTest {
             1.februar to 5.februar
         ), revised)
 
-        assertEquals(1.januar, revised[0].fom)
-        assertEquals(5.januar, revised[0].tom)
+        assertEquals(1.januar, revised[0].førstedato())
+        assertEquals(5.januar, revised[0].sistedato())
         assertEquals(UEND, revised[0].endringskode)
-        assertNull(revised[0].datoStatusFom)
+        assertFalse(revised[0] is Opphørslinje)
         assertEquals(1, revised[0].id)
         assertNull(revised[0].refId)
 
-        assertEquals(8.januar, revised[1].fom)
-        assertEquals(13.januar, revised[1].tom)
+        assertEquals(8.januar, revised[1].førstedato())
+        assertEquals(13.januar, revised[1].sistedato())
         assertEquals(UEND, revised[1].endringskode)
-        assertNull(revised[1].datoStatusFom)
+        assertFalse(revised[1] is Opphørslinje)
         assertEquals(revised[0].id + 1, revised[1].id)
         assertEquals(revised[0].id, revised[1].refId)
 
-        assertEquals(23.januar, revised[2].fom)
-        assertEquals(26.januar, revised[2].tom)
+        assertEquals(23.januar, revised[2].førstedato())
+        assertEquals(26.januar, revised[2].sistedato())
         assertEquals(ENDR, revised[2].endringskode)
-        assertNull(revised[2].datoStatusFom)
+        assertFalse(revised[2] is Opphørslinje)
         assertEquals(revised[1].id + 1, revised[2].id)
         assertNull(revised[2].refId)
 
-        assertEquals(1.februar, revised[3].fom)
-        assertEquals(5.februar, revised[3].tom)
-        assertNull(revised[3].datoStatusFom)
+        assertEquals(1.februar, revised[3].førstedato())
+        assertEquals(5.februar, revised[3].sistedato())
+        assertFalse(revised[3] is Opphørslinje)
         assertEquals(NY, revised[3].endringskode)
         assertEquals(revised[2].id + 1, revised[3].id)
         assertEquals(revised[2].id, revised[3].refId)
@@ -810,7 +810,7 @@ internal class UtbetalingslinjeForskjellTest {
 
         val actual = new - original
 
-        assertNotNull(actual[0].datoStatusFom)
+        assertNotNull((actual[0] as Opphørslinje).datoStatusFom)
         assertNotEquals(original[0].hashCode(), actual[0].hashCode())
     }
 
@@ -819,70 +819,69 @@ internal class UtbetalingslinjeForskjellTest {
 
     private val Oppdrag.endringskode get() = this.get<Endringskode>("endringskode")
 
-    private val Utbetalingslinje.endringskode get() = this.get<Endringskode>("endringskode")
+    private val Oppdragslinje.endringskode get() = this.get<Endringskode>("endringskode")
 
-    private val Utbetalingslinje.id get() = this.get<Int>("delytelseId")
+    private val Oppdragslinje.id get() = this.get<Int>("delytelseId")
 
-    private val Utbetalingslinje.refId get() = this.get<Int?>("refDelytelseId")
+    private val Oppdragslinje.refId get() = this.get<Int?>("refDelytelseId")
 
     private val Oppdrag.fagsystemId get() = this.get<String>("fagsystemId")
 
-    private val Utbetalingslinje.datoStatusFom get() = this.get<LocalDate?>("datoStatusFom")
+    private val Opphørslinje.datoStatusFom get() = this.get<LocalDate?>("datoStatusFom")
 
     private fun assertUtbetalinger(expected: Oppdrag, actual: Oppdrag) {
         assertEquals(expected.size, actual.size, "Utbetalingslinjer er i forskjellige størrelser")
         (expected zip actual).forEach { (a, b) ->
-            assertEquals(a.fom, b.fom, "fom stemmer ikke overens")
-            assertEquals(a.tom, b.tom, "tom stemmer ikke overens")
-            assertEquals(a.beløp, b.beløp, "dagsats stemmer ikke overens")
-            assertEquals(a.grad, b.grad, "grad stemmer ikke overens")
+            assertEquals(a.periode, b.periode, "periodene stemmer ikke overens")
+            assertEquals(a.beløp(), b.beløp(), "dagsats stemmer ikke overens")
+            assertTrue(a.harSammeGrad(b), "grad stemmer ikke overens")
         }
     }
 
     private fun linjer(vararg linjer: TestUtbetalingslinje, other: Oppdrag? = null) =
         Oppdrag(ORGNUMMER, SykepengerRefusjon, linjer.map { it.asUtbetalingslinje() }, fagsystemId = other?.fagsystemId() ?: genererUtbetalingsreferanse(UUID.randomUUID()), sisteArbeidsgiverdag = 31.desember(2017)).also { oppdrag ->
             oppdrag.zipWithNext { a, b -> b.kobleTil(a) }
-            oppdrag.forEach { if(it.refId != null) it.refFagsystemId = oppdrag.fagsystemId() }
+            oppdrag.forEach { if(it.refId != null) it.refererTil(oppdrag.fagsystemId()) }
         }
 
-    private fun linjer(vararg linjer: Utbetalingslinje) =
+    private fun linjer(vararg linjer: Oppdragslinje) =
         Oppdrag(ORGNUMMER, SykepengerRefusjon, linjer.toList(), sisteArbeidsgiverdag = 31.desember(2017)).also { oppdrag ->
             oppdrag.zipWithNext { a, b -> b.kobleTil(a) }
-            oppdrag.forEach { if(it.refId != null) it.refFagsystemId = oppdrag.fagsystemId() }
+            oppdrag.forEach { if(it.refId != null) it.refererTil(oppdrag.fagsystemId()) }
         }
 
-    private fun assertUendretLinje(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje? = null) {
+    private fun assertUendretLinje(nåværende: Oppdragslinje, tidligere: Oppdragslinje? = null) {
         assertEquals(UEND, nåværende.endringskode)
         assertLink(nåværende, tidligere)
     }
 
-    private fun assertNyLinje(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje?) {
+    private fun assertNyLinje(nåværende: Oppdragslinje, tidligere: Oppdragslinje?) {
         assertEquals(NY, nåværende.endringskode)
-        assertNull(nåværende.datoStatusFom)
+        assertFalse(nåværende is Opphørslinje)
         assertLink(nåværende, tidligere)
     }
 
-    private fun assertOpphør(nåværende: Utbetalingslinje, datoStatusFom: LocalDate, tidligere: Utbetalingslinje) {
+    private fun assertOpphør(nåværende: Oppdragslinje, datoStatusFom: LocalDate, tidligere: Oppdragslinje) {
         assertEndretLinje(nåværende, tidligere)
-        assertEquals(datoStatusFom, nåværende.datoStatusFom)
+        assertEquals(datoStatusFom, (nåværende as Opphørslinje).datoStatusFom)
     }
 
-    private fun assertEndretLinje(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje) {
+    private fun assertEndretLinje(nåværende: Oppdragslinje, tidligere: Oppdragslinje) {
         assertEquals(ENDR, nåværende.endringskode)
         assertEquals(nåværende.id, tidligere.id)
         assertNull(nåværende.refId)
-        assertNull(nåværende.refFagsystemId)
+        assertTrue(nåværende.manglerReferanse())
     }
 
-    private fun assertLink(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje?) {
+    private fun assertLink(nåværende: Oppdragslinje, tidligere: Oppdragslinje?) {
         if (tidligere == null) {
             assertNull(nåværende.refId)
-            return assertNull(nåværende.refFagsystemId)
+            return assertTrue(nåværende.manglerReferanse())
         }
 
         assertEquals(tidligere.id + 1, nåværende.id)
         assertEquals(tidligere.id, nåværende.refId)
-        assertNotNull(nåværende.refFagsystemId)
+        assertFalse(nåværende.manglerReferanse())
     }
 
     private inner class TestUtbetalingslinje(
@@ -892,19 +891,19 @@ internal class UtbetalingslinjeForskjellTest {
         private var grad: Double = 100.0
         private var dagsats = 1200
 
-        internal infix fun grad(percentage: Number): TestUtbetalingslinje {
+        infix fun grad(percentage: Number): TestUtbetalingslinje {
             grad = percentage.toDouble()
             return this
         }
 
-        internal infix fun dagsats(amount: Int): TestUtbetalingslinje {
+        infix fun dagsats(amount: Int): TestUtbetalingslinje {
             dagsats = amount
             return this
         }
 
-        internal infix fun forskjell(other: Oppdrag) = this.asUtbetalingslinjer() - other
+        infix fun forskjell(other: Oppdrag) = this.asUtbetalingslinjer() - other
 
-        internal fun asUtbetalingslinje() = Utbetalingslinje(fom, tom, Satstype.DAG, dagsats, dagsats, grad)
+        fun asUtbetalingslinje() = Oppdragslinje.lagOppdragslinje(fom, tom, Satstype.DAG, dagsats, dagsats, grad)
 
         private fun asUtbetalingslinjer() = linjer(asUtbetalingslinje())
     }

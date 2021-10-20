@@ -149,7 +149,7 @@ internal class Feriepengeutbetaling private constructor(
                 mottaker = orgnummer,
                 fagområde = Fagområde.SykepengerRefusjon,
                 linjer = listOf(
-                    Utbetalingslinje(
+                    Oppdragslinje.lagOppdragslinje(
                         fom = utbetalingshistorikkForFeriepenger.opptjeningsår.plusYears(1).atMonth(Month.MAY).atDay(1),
                         tom = utbetalingshistorikkForFeriepenger.opptjeningsår.plusYears(1).atMonth(Month.MAY).atEndOfMonth(),
                         satstype = Satstype.ENG,

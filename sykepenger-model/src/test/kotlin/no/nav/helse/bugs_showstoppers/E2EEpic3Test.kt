@@ -711,11 +711,11 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         inspektør.also {
             assertEquals(1, it.arbeidsgiverOppdrag[0].size)
-            assertEquals(17.januar(2020), it.arbeidsgiverOppdrag[0].first().fom)
-            assertEquals(31.januar(2020), it.arbeidsgiverOppdrag[0].first().tom)
+            assertEquals(17.januar(2020), it.arbeidsgiverOppdrag[0].first().førstedato())
+            assertEquals(31.januar(2020), it.arbeidsgiverOppdrag[0].first().sistedato())
             assertEquals(1, it.arbeidsgiverOppdrag[1].size)
-            assertEquals(17.januar(2020), it.arbeidsgiverOppdrag[1].first().fom)
-            assertEquals(28.februar(2020), it.arbeidsgiverOppdrag[1].first().tom)
+            assertEquals(17.januar(2020), it.arbeidsgiverOppdrag[1].first().førstedato())
+            assertEquals(28.februar(2020), it.arbeidsgiverOppdrag[1].first().sistedato())
         }
     }
 

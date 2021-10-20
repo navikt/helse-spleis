@@ -335,9 +335,9 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
 
         val a2Linje = inspektør(a2).utbetalinger.last().arbeidsgiverOppdrag().last()
-        assertEquals(17.mars, a2Linje.fom)
-        assertEquals(31.mars, a2Linje.tom)
-        assertEquals(692, a2Linje.beløp)
+        assertEquals(17.mars, a2Linje.førstedato())
+        assertEquals(31.mars, a2Linje.sistedato())
+        assertEquals(692, a2Linje.beløp())
 
         assertNoWarnings(inspektør(a2))
     }
@@ -480,9 +480,9 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         val utbetaling = inspektør(a2).utbetalinger.single()
         val linje = utbetaling.arbeidsgiverOppdrag().linjerUtenOpphør().single()
         assertEquals(100.0, utbetaling.utbetalingstidslinje()[20.februar].økonomi.medData { _, _, _, _, totalGrad, _, _, _, _ -> totalGrad })
-        assertEquals(2077, linje.beløp) // Ikke cappet på 6G, siden personen ikke jobber hos a1 ved dette skjæringstidspunktet
-        assertEquals(18.februar, linje.fom)
-        assertEquals(20.februar, linje.tom)
+        assertEquals(2077, linje.beløp()) // Ikke cappet på 6G, siden personen ikke jobber hos a1 ved dette skjæringstidspunktet
+        assertEquals(18.februar, linje.førstedato())
+        assertEquals(20.februar, linje.sistedato())
     }
 
     @Test

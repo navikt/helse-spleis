@@ -11,6 +11,7 @@ import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
 import no.nav.helse.utbetalingslinjer.OppdragBuilderTest.Dagtype
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -335,21 +336,21 @@ internal class OppdragBuilderTest {
         fom: LocalDate,
         tom: LocalDate,
         refFagsystemId: String? = this.fagsystemId(),
-        sats: Int? = this[index].beløp,
-        grad: Double? = this[index].grad,
+        sats: Int? = this[index].beløp(),
+        grad: Double? = this[index]["grad"],
         delytelseId: Int = this[index]["delytelseId"],
         refDelytelseId: Int? = this[index]["refDelytelseId"],
         datoStatusFom: LocalDate? = null,
         endringskode: Endringskode = this[index]["endringskode"]
     ) {
-        assertEquals(fom, this[index].fom)
-        assertEquals(tom, this[index].tom)
-        assertEquals(grad, this[index].grad)
-        assertEquals(sats, this[index].beløp)
+        assertEquals(fom, this[index].førstedato())
+        assertEquals(tom, this[index].sistedato())
+        assertTrue(this[index].harSammeGrad(grad!!))
+        assertEquals(sats, this[index].beløp())
         assertEquals(delytelseId, this[index]["delytelseId"])
         assertEquals(refDelytelseId, this[index].get<Int?>("refDelytelseId"))
-        assertEquals(refFagsystemId, this[index].refFagsystemId)
-        assertEquals(datoStatusFom, this[index].get<LocalDate?>("datoStatusFom"))
+        assertEquals(refFagsystemId, this[index]["refFagsystemId"])
+        if (this[index] is Opphørslinje) assertEquals(datoStatusFom, this[index].get<LocalDate?>("datoStatusFom"))
         assertEquals(endringskode, this[index].get<Endringskode?>("endringskode"))
     }
 
@@ -359,10 +360,10 @@ internal class OppdragBuilderTest {
         val oppdrag = opprett(2.NAV, gapDay, 2.NAV, 2.HELG, 3.NAV)
 
         assertEquals(2, oppdrag.size)
-        assertEquals(1.januar, oppdrag.first().fom)
-        assertEquals(2.januar, oppdrag.first().tom)
-        assertEquals(4.januar, oppdrag.last().fom)
-        assertEquals(10.januar, oppdrag.last().tom)
+        assertEquals(1.januar, oppdrag.first().førstedato())
+        assertEquals(2.januar, oppdrag.first().sistedato())
+        assertEquals(4.januar, oppdrag.last().førstedato())
+        assertEquals(10.januar, oppdrag.last().sistedato())
     }
 
     private fun opprett(vararg dager: Utbetalingsdager, sisteDato: LocalDate? = null, startdato: LocalDate = 1.januar): Oppdrag {

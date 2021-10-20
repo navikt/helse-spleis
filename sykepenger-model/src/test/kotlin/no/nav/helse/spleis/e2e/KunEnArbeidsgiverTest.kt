@@ -992,7 +992,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
 
         inspektør.also {
-            assertEquals(3.januar, it.arbeidsgiverOppdrag[0][0].fom)
+            assertEquals(3.januar, it.arbeidsgiverOppdrag[0][0].førstedato())
         }
     }
 

@@ -61,9 +61,9 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
 
         val a1Linje = inspektør(a1).utbetalinger.last().arbeidsgiverOppdrag().single()
-        assertEquals(17.januar, a1Linje.fom)
-        assertEquals(15.mars, a1Linje.tom)
-        assertEquals(1063, a1Linje.beløp)
+        assertEquals(17.januar, a1Linje.førstedato())
+        assertEquals(15.mars, a1Linje.sistedato())
+        assertEquals(1063, a1Linje.beløp())
         assertEquals(
             Inntektskilde.FLERE_ARBEIDSGIVERE,
             inspektør(a1).inntektskilde(1.vedtaksperiode)
@@ -158,9 +158,9 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
 
         val a1Linje = inspektør(a1).utbetalinger.last().arbeidsgiverOppdrag().single()
-        assertEquals(17.januar, a1Linje.fom)
-        assertEquals(15.mars, a1Linje.tom)
-        assertEquals(1431, a1Linje.beløp)
+        assertEquals(17.januar, a1Linje.førstedato())
+        assertEquals(15.mars, a1Linje.sistedato())
+        assertEquals(1431, a1Linje.beløp())
         assertEquals(Inntektskilde.EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(1.vedtaksperiode))
 
     }
@@ -204,9 +204,9 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
 
         val a1Linje = inspektør(a1).utbetalinger.last().arbeidsgiverOppdrag().single()
-        assertEquals(17.januar, a1Linje.fom)
-        assertEquals(15.mars, a1Linje.tom)
-        assertEquals(1431, a1Linje.beløp)
+        assertEquals(17.januar, a1Linje.førstedato())
+        assertEquals(15.mars, a1Linje.sistedato())
+        assertEquals(1431, a1Linje.beløp())
         assertEquals(Inntektskilde.EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(1.vedtaksperiode))
 
     }
@@ -254,9 +254,9 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
 
         val a1Linje = inspektør(a1).utbetalinger.last().arbeidsgiverOppdrag().last()
-        assertEquals(17.mars, a1Linje.fom)
-        assertEquals(31.mars, a1Linje.tom)
-        assertEquals(997, a1Linje.beløp)
+        assertEquals(17.mars, a1Linje.førstedato())
+        assertEquals(31.mars, a1Linje.sistedato())
+        assertEquals(997, a1Linje.beløp())
 
         assertTrue(inspektør(a2).utbetalinger.isEmpty())
         assertEquals(Inntektskilde.FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
@@ -304,9 +304,9 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
 
         val a1Linje = inspektør(a1).utbetalinger.last().arbeidsgiverOppdrag().last()
-        assertEquals(17.mars, a1Linje.fom)
-        assertEquals(31.mars, a1Linje.tom)
-        assertEquals(499, a1Linje.beløp)
+        assertEquals(17.mars, a1Linje.førstedato())
+        assertEquals(31.mars, a1Linje.sistedato())
+        assertEquals(499, a1Linje.beløp())
 
         assertTrue(inspektør(a2).utbetalinger.isEmpty())
     }
@@ -361,9 +361,9 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterUtbetalt(2.vedtaksperiode, orgnummer = a1)
 
         val a1Linje = inspektør(a1).utbetalinger.last().arbeidsgiverOppdrag().single()
-        assertEquals(17.mars, a1Linje.fom)
-        assertEquals(30.april, a1Linje.tom)
-        assertEquals(997, a1Linje.beløp)
+        assertEquals(17.mars, a1Linje.førstedato())
+        assertEquals(30.april, a1Linje.sistedato())
+        assertEquals(997, a1Linje.beløp())
 
         assertTrue(inspektør(a2).utbetalinger.isEmpty())
         assertEquals(Inntektskilde.FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
@@ -458,7 +458,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
-        assertEquals(1431, inspektør(a1).arbeidsgiverOppdrag.last().first().beløp)
+        assertEquals(1431, inspektør(a1).arbeidsgiverOppdrag.last().first().beløp())
     }
 
     @Test

@@ -224,7 +224,7 @@ internal class Feriepengeberegner(
             }
 
             override fun visitUtbetalingslinje(
-                linje: Utbetalingslinje,
+                linje: Oppdragslinje,
                 fom: LocalDate,
                 tom: LocalDate,
                 satstype: Satstype,

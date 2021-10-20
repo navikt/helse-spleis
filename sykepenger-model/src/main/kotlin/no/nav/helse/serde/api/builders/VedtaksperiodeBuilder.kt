@@ -473,12 +473,7 @@ internal class VedtaksperiodeBuilder(
                 oppdragStrategy(utbetaling).fagsystemId() == fagsystemId
             }?.let { utbetaling ->
                 val linjer = oppdragStrategy(utbetaling).linjerUtenOpphør().map { linje ->
-                    UtbetalingerDTO.UtbetalingslinjeDTO(
-                        fom = linje.fom,
-                        tom = linje.tom,
-                        dagsats = linje.beløp!!,
-                        grad = linje.grad!!
-                    )
+                    linje.tilDTO()
                 }
                 UtbetalingerDTO.UtbetalingDTO(linjer, fagsystemId)
             }

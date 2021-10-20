@@ -65,10 +65,10 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         }
 
         sjekkAt(TestOppdragInspektør(inspektør.arbeidsgiverOppdrag[1])) {
-            assertEquals(19.januar, linjer[0].fom)
-            assertEquals(26.januar, linjer[0].tom)
-            assertEquals(19.januar, linjer[0].datoStatusFom())
-            assertTrue(linjer[0].erOpphør())
+            assertEquals(19.januar, linjer[0].førstedato())
+            assertEquals(26.januar, linjer[0].sistedato())
+            assertTrue(linjer[0] is Opphørslinje)
+            assertEquals(19.januar, (linjer[0] as Opphørslinje).datoStatusFom())
         }
 
         sjekkAt(inspektør.personLogg.behov().last()) {
@@ -477,7 +477,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
     private inner class TestOppdragInspektør(oppdrag: Oppdrag) : OppdragVisitor {
         val oppdrag = mutableListOf<Oppdrag>()
-        val linjer = mutableListOf<Utbetalingslinje>()
+        val linjer = mutableListOf<Oppdragslinje>()
         val endringskoder = mutableListOf<Endringskode>()
         val fagsystemIder = mutableListOf<String?>()
         val refFagsystemIder = mutableListOf<String?>()
@@ -498,7 +498,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         }
 
         override fun visitUtbetalingslinje(
-            linje: Utbetalingslinje,
+            linje: Oppdragslinje,
             fom: LocalDate,
             tom: LocalDate,
             satstype: Satstype,

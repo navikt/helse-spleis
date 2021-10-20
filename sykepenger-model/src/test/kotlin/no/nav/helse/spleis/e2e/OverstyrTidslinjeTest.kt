@@ -9,8 +9,7 @@ import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*
@@ -101,9 +100,9 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
 
         assertEquals(3, inspektør.utbetalinger.last().arbeidsgiverOppdrag().size)
-        assertEquals(21.januar, inspektør.utbetalinger.last().arbeidsgiverOppdrag()[0].tom)
-        assertEquals(30.0, inspektør.utbetalinger.last().arbeidsgiverOppdrag()[1].grad)
-        assertEquals(23.januar, inspektør.utbetalinger.last().arbeidsgiverOppdrag()[2].fom)
+        assertEquals(21.januar, inspektør.utbetalinger.last().arbeidsgiverOppdrag()[0].sistedato())
+        assertTrue(inspektør.utbetalinger.last().arbeidsgiverOppdrag()[1].harSammeGrad(30.0))
+        assertEquals(23.januar, inspektør.utbetalinger.last().arbeidsgiverOppdrag()[2].førstedato())
     }
 
     @Test
@@ -123,8 +122,8 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
 
         assertEquals(2, inspektør.utbetalinger.last().arbeidsgiverOppdrag().size)
-        assertEquals(21.januar, inspektør.utbetalinger.last().arbeidsgiverOppdrag()[0].tom)
-        assertEquals(23.januar, inspektør.utbetalinger.last().arbeidsgiverOppdrag()[1].fom)
+        assertEquals(21.januar, inspektør.utbetalinger.last().arbeidsgiverOppdrag()[0].sistedato())
+        assertEquals(23.januar, inspektør.utbetalinger.last().arbeidsgiverOppdrag()[1].førstedato())
     }
 
     @Test
@@ -144,8 +143,8 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
 
         assertEquals(2, inspektør.utbetalinger.last().arbeidsgiverOppdrag().size)
-        assertEquals(21.januar, inspektør.utbetalinger.last().arbeidsgiverOppdrag()[0].tom)
-        assertEquals(24.januar, inspektør.utbetalinger.last().arbeidsgiverOppdrag()[1].fom)
+        assertEquals(21.januar, inspektør.utbetalinger.last().arbeidsgiverOppdrag()[0].sistedato())
+        assertEquals(24.januar, inspektør.utbetalinger.last().arbeidsgiverOppdrag()[1].førstedato())
     }
 
     @Test

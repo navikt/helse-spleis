@@ -17,13 +17,13 @@ const val WARN_FORLENGER_OPPHØRT_OPPDRAG = "Utbetalingen forlenger et tidligere
 internal class Oppdrag private constructor(
     private val mottaker: String,
     private val fagområde: Fagområde,
-    private val linjer: MutableList<Utbetalingslinje>,
+    private val linjer: MutableList<Oppdragslinje>,
     private var fagsystemId: String,
     private var endringskode: Endringskode,
     private val sisteArbeidsgiverdag: LocalDate?,
     private var nettoBeløp: Int = linjer.sumOf { it.totalbeløp() },
     private val tidsstempel: LocalDateTime
-) : MutableList<Utbetalingslinje> by linjer {
+) : MutableList<Oppdragslinje> by linjer {
     internal companion object {
         internal fun periode(vararg oppdrag: Oppdrag): Periode {
             return oppdrag
@@ -34,13 +34,13 @@ internal class Oppdrag private constructor(
         }
     }
 
-    internal val førstedato get() = linjer.firstOrNull()?.let { it.datoStatusFom() ?: it.fom } ?: LocalDate.MIN
-    internal val sistedato get() = linjer.lastOrNull()?.tom ?: LocalDate.MIN
+    internal val førstedato get() = linjer.firstOrNull()?.førstedato() ?: LocalDate.MIN
+    internal val sistedato get() = linjer.lastOrNull()?.sistedato() ?: LocalDate.MIN
 
     internal constructor(
         mottaker: String,
         fagområde: Fagområde,
-        linjer: List<Utbetalingslinje> = listOf(),
+        linjer: List<Oppdragslinje> = listOf(),
         fagsystemId: String = genererUtbetalingsreferanse(UUID.randomUUID()),
         sisteArbeidsgiverdag: LocalDate?
     ) : this(
@@ -107,11 +107,11 @@ internal class Oppdrag private constructor(
     internal fun sammenlignMed(simulering: Simulering) =
         simulering.valider(utenUendretLinjer())
 
-    private fun utenUendretLinjer() = kopierMed(filter(Utbetalingslinje::erForskjell))
+    private fun utenUendretLinjer() = kopierMed(filter(Oppdragslinje::erForskjell))
 
     private fun utenOpphørLinjer() = kopierMed(linjerUtenOpphør())
 
-    internal fun linjerUtenOpphør() = filter { !it.erOpphør() }
+    internal fun linjerUtenOpphør() = filterNot { it is Opphørslinje }
 
     internal fun erForskjelligFra(resultat: Simulering.SimuleringResultat): Boolean {
         return dagSatser().zip(dagSatser(resultat, førstedato, sistedato)).any { (oppdrag, simulering) ->
@@ -119,7 +119,7 @@ internal class Oppdrag private constructor(
         }
     }
 
-    private fun dagSatser() = linjerUtenOpphør().flatMap { linje -> linje.dager().map { it to linje.beløp } }
+    private fun dagSatser() = linjerUtenOpphør().flatMap { linje -> linje.dagSatser() }
 
     private fun dagSatser(resultat: Simulering.SimuleringResultat, fom: LocalDate, tom: LocalDate) =
         resultat.perioder.flatMap {
@@ -176,7 +176,7 @@ internal class Oppdrag private constructor(
 
     private fun deleteAll(tidligere: Oppdrag) = this.also { nåværende ->
         nåværende.kobleTil(tidligere)
-        linjer.add(tidligere.last().opphørslinje(tidligere.first().fom))
+        linjer.add(tidligere.last().opphørslinje(tidligere.first().førstedato()))
     }
 
     private fun appended(tidligere: Oppdrag) = this.also { nåværende ->
@@ -186,10 +186,10 @@ internal class Oppdrag private constructor(
     }
 
     private lateinit var tilstand: Tilstand
-    private lateinit var sisteLinjeITidligereOppdrag: Utbetalingslinje
-    private lateinit var linkTo: Utbetalingslinje
+    private lateinit var sisteLinjeITidligereOppdrag: Oppdragslinje
+    private lateinit var linkTo: Oppdragslinje
 
-    private fun erstatt(avtroppendeOppdrag: Oppdrag, linkTo: Utbetalingslinje = avtroppendeOppdrag.last(), aktivitetslogg: IAktivitetslogg) =
+    private fun erstatt(avtroppendeOppdrag: Oppdrag, linkTo: Oppdragslinje = avtroppendeOppdrag.last(), aktivitetslogg: IAktivitetslogg) =
         this.also { påtroppendeOppdrag ->
             this.linkTo = linkTo
             påtroppendeOppdrag.kobleTil(avtroppendeOppdrag)
@@ -213,9 +213,9 @@ internal class Oppdrag private constructor(
         nåværende.add(0, deletion)
     }
 
-    private fun opphørTidligereLinjeOgOpprettNy(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje, aktivitetslogg: IAktivitetslogg) {
+    private fun opphørTidligereLinjeOgOpprettNy(nåværende: Oppdragslinje, tidligere: Oppdragslinje, aktivitetslogg: IAktivitetslogg) {
         linkTo = tidligere
-        add(this.indexOf(nåværende), tidligere.opphørslinje(tidligere.fom))
+        add(this.indexOf(nåværende), tidligere.opphørslinje(tidligere.førstedato()))
         nåværende.kobleTil(linkTo)
         tilstand = Ny()
         aktivitetslogg.warn("Endrer tidligere oppdrag. Kontroller simuleringen.")
@@ -224,7 +224,7 @@ internal class Oppdrag private constructor(
     private fun deletionLinje(tidligere: Oppdrag) =
         tidligere.last().opphørslinje(tidligere.førstedato)
 
-    private fun kopierMed(linjer: List<Utbetalingslinje>) = Oppdrag(
+    private fun kopierMed(linjer: List<Oppdragslinje>) = Oppdrag(
         mottaker,
         fagområde,
         linjer.toMutableList(),
@@ -250,11 +250,11 @@ internal class Oppdrag private constructor(
 
     private fun kobleTil(tidligere: Oppdrag) {
         this.fagsystemId = tidligere.fagsystemId
-        this.forEach { it.refFagsystemId = tidligere.fagsystemId }
+        this.forEach { it.refererTil(tidligere.fagsystemId) }
         this.endringskode = Endringskode.ENDR
     }
 
-    private fun håndterUlikhet(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje, aktivitetslogg: IAktivitetslogg) {
+    private fun håndterUlikhet(nåværende: Oppdragslinje, tidligere: Oppdragslinje, aktivitetslogg: IAktivitetslogg) {
         when {
             nåværende.kanEndreEksisterendeLinje(tidligere, sisteLinjeITidligereOppdrag) -> nåværende.endreEksisterendeLinje(tidligere)
             nåværende.skalOpphøreOgErstatte(tidligere, sisteLinjeITidligereOppdrag) -> opphørTidligereLinjeOgOpprettNy(nåværende, tidligere, aktivitetslogg)
@@ -262,7 +262,7 @@ internal class Oppdrag private constructor(
         }
     }
 
-    private fun opprettNyLinje(nåværende: Utbetalingslinje) {
+    private fun opprettNyLinje(nåværende: Oppdragslinje) {
         nåværende.kobleTil(linkTo)
         linkTo = nåværende
         tilstand = Ny()
@@ -291,11 +291,11 @@ internal class Oppdrag private constructor(
     )
 
     private interface Tilstand {
-        fun håndterForskjell(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje, aktivitetslogg: IAktivitetslogg)
+        fun håndterForskjell(nåværende: Oppdragslinje, tidligere: Oppdragslinje, aktivitetslogg: IAktivitetslogg)
     }
 
     private inner class Identisk : Tilstand {
-        override fun håndterForskjell(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje, aktivitetslogg: IAktivitetslogg) {
+        override fun håndterForskjell(nåværende: Oppdragslinje, tidligere: Oppdragslinje, aktivitetslogg: IAktivitetslogg) {
             when (nåværende == tidligere) {
                 true -> nåværende.markerUendret(tidligere)
                 false -> håndterUlikhet(nåværende, tidligere, aktivitetslogg)
@@ -304,7 +304,7 @@ internal class Oppdrag private constructor(
     }
 
     private inner class Slett : Tilstand {
-        override fun håndterForskjell(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje, aktivitetslogg: IAktivitetslogg) {
+        override fun håndterForskjell(nåværende: Oppdragslinje, tidligere: Oppdragslinje, aktivitetslogg: IAktivitetslogg) {
             if (nåværende == tidligere) {
                 if (nåværende == last()) return nåværende.kobleTil(linkTo)
                 return nåværende.markerUendret(tidligere)
@@ -314,7 +314,7 @@ internal class Oppdrag private constructor(
     }
 
     private inner class Ny : Tilstand {
-        override fun håndterForskjell(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje, aktivitetslogg: IAktivitetslogg) {
+        override fun håndterForskjell(nåværende: Oppdragslinje, tidligere: Oppdragslinje, aktivitetslogg: IAktivitetslogg) {
             nåværende.kobleTil(linkTo)
             linkTo = nåværende
         }

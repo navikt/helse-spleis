@@ -1137,10 +1137,8 @@ internal data class PersonData(
         private val datoStatusFom: LocalDate?
     ) {
 
-        internal fun konverterTilUtbetalingslinje(): Utbetalingslinje = Utbetalingslinje::class.primaryConstructor!!
-            .apply { isAccessible = true }
-            .call(
-                fom,
+        internal fun konverterTilUtbetalingslinje(): Oppdragslinje =
+            Oppdragslinje.lagOppdragslinje(fom,
                 tom,
                 Satstype.valueOf(satstype),
                 sats,

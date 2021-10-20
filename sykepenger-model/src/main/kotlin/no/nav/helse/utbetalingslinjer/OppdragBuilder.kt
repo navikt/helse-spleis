@@ -18,7 +18,7 @@ internal class OppdragBuilder(
     fagsystemId: String? = null
 ) : UtbetalingsdagVisitor {
     private val fagsystemId = fagsystemId ?: genererUtbetalingsreferanse(UUID.randomUUID())
-    private val arbeisdsgiverLinjer = mutableListOf<Utbetalingslinje>()
+    private val arbeisdsgiverLinjer = mutableListOf<Oppdragslinje>()
     private var tilstand: Tilstand = MellomLinjer()
     private var sisteArbeidsgiverdag: LocalDate? = null
 
@@ -27,9 +27,9 @@ internal class OppdragBuilder(
     }
 
     internal fun result(): Oppdrag {
-        arbeisdsgiverLinjer.removeAll { it.beløp == null }
+        arbeisdsgiverLinjer.removeAll { it.manglerBeløp() }
         arbeisdsgiverLinjer.zipWithNext { a, b -> b.kobleTil(a) }
-        arbeisdsgiverLinjer.firstOrNull()?.refFagsystemId = null
+        arbeisdsgiverLinjer.firstOrNull()?.refererTil(null)
         return Oppdrag(mottaker, fagområde, arbeisdsgiverLinjer, fagsystemId, sisteArbeidsgiverdag)
     }
 
@@ -46,7 +46,7 @@ internal class OppdragBuilder(
     ) {
         økonomi.medData { grad, aktuellDagsinntekt ->
             if (arbeisdsgiverLinjer.isEmpty()) return@medData tilstand.nyLinje(dag, dato, grad, aktuellDagsinntekt!!)
-            if (grad == linje.grad && (linje.beløp == null || linje.beløp == fagområde.beløp(dag.økonomi)))
+            if (linje.harSammeGrad(grad) && (linje.manglerBeløp() || linje.harSammeBeløp(fagområde, dag)))
                 tilstand.betalingsdag(dag, dato, grad, aktuellDagsinntekt!!)
             else
                 tilstand.nyLinje(dag, dato, grad, aktuellDagsinntekt!!)
@@ -59,7 +59,7 @@ internal class OppdragBuilder(
         økonomi: Økonomi
     ) {
         økonomi.medData { grad, _ ->
-            if (arbeisdsgiverLinjer.isEmpty() || grad != linje.grad)
+            if (arbeisdsgiverLinjer.isEmpty() || !linje.harSammeGrad(grad))
                 tilstand.nyLinje(dag, dato, grad)
             else
                 tilstand.helgedag(dag, dato, grad)
@@ -110,14 +110,14 @@ internal class OppdragBuilder(
     private fun addLinje(dag: Utbetalingsdag, dato: LocalDate, grad: Double, aktuellDagsinntekt: Double) {
         arbeisdsgiverLinjer.add(
             0,
-            Utbetalingslinje(
-                dato,
-                dato,
-                Satstype.DAG,
-                fagområde.beløp(dag.økonomi),
-                aktuellDagsinntekt.roundToInt(),
-                grad,
-                fagsystemId
+            Oppdragslinje.lagOppdragslinje(
+                fom = dato,
+                tom = dato,
+                satstype = Satstype.DAG,
+                beløp = fagområde.beløp(dag.økonomi),
+                aktuellDagsinntekt = aktuellDagsinntekt.roundToInt(),
+                grad = grad,
+                refFagsystemId = fagsystemId
             )
         )
     }
@@ -126,7 +126,7 @@ internal class OppdragBuilder(
     private fun addLinje(dato: LocalDate, grad: Double) {
         arbeisdsgiverLinjer.add(
             0,
-            Utbetalingslinje(dato, dato, Satstype.DAG, null, 0, grad, fagsystemId)
+            Oppdragslinje.lagOppdragslinje(dato, dato, Satstype.DAG, null, 0, grad, fagsystemId)
         )
     }
 
@@ -217,7 +217,7 @@ internal class OppdragBuilder(
             grad: Double,
             aktuellDagsinntekt: Double
         ) {
-            linje.fom = dag.dato
+            linje.flyttStart(dag.dato)
         }
 
         override fun nyLinje(
@@ -234,7 +234,7 @@ internal class OppdragBuilder(
             dato: LocalDate,
             grad: Double
         ) {
-            linje.fom = dag.dato
+            linje.flyttStart(dag.dato)
         }
 
         override fun nyLinje(
@@ -258,9 +258,9 @@ internal class OppdragBuilder(
             grad: Double,
             aktuellDagsinntekt: Double
         ) {
-            linje.beløp = fagområde.beløp(dag.økonomi)
-            linje.aktuellDagsinntekt = aktuellDagsinntekt.roundToInt() //Needs to be changed for self employed
-            linje.fom = dag.dato
+            linje.endreBeløp(fagområde.beløp(dag.økonomi))
+            linje.endreAktuellDagsinntekt(aktuellDagsinntekt.roundToInt()) //Needs to be changed for self employed
+            linje.flyttStart(dag.dato)
             tilstand = LinjeMedSats()
         }
 
@@ -279,7 +279,7 @@ internal class OppdragBuilder(
             dato: LocalDate,
             grad: Double
         ) {
-            linje.fom = dag.dato
+            linje.flyttStart(dag.dato)
         }
 
         override fun nyLinje(

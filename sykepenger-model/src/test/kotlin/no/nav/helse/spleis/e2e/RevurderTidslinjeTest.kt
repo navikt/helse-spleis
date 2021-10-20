@@ -10,6 +10,7 @@ import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.testhelpers.*
+import no.nav.helse.utbetalingslinjer.Opphørslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -306,7 +307,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         val revurdering = inspektør.utbetaling(2)
         assertNoErrors(inspektør)
         assertEquals(2, revurdering.arbeidsgiverOppdrag().size)
-        assertEquals(19.januar, revurdering.arbeidsgiverOppdrag()[0].datoStatusFom())
+        assertEquals(19.januar, (revurdering.arbeidsgiverOppdrag()[0] as Opphørslinje).datoStatusFom())
         assertEquals(23.januar til 26.januar, revurdering.arbeidsgiverOppdrag()[1].periode)
     }
 
@@ -1255,13 +1256,13 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         assertEquals(inspektør.utbetaling(0).arbeidsgiverOppdrag().fagsystemId(), inspektør.utbetaling(1).arbeidsgiverOppdrag().fagsystemId())
         inspektør.utbetaling(1).arbeidsgiverOppdrag().also { oppdrag ->
             assertEquals(2, oppdrag.size)
-            assertEquals(18.januar, oppdrag[0].fom)
-            assertEquals(25.januar, oppdrag[0].tom)
-            assertEquals(100.0, oppdrag[0].grad)
+            assertEquals(18.januar, oppdrag[0].førstedato())
+            assertEquals(25.januar, oppdrag[0].sistedato())
+            assertTrue(oppdrag[0].harSammeGrad(100.0))
 
-            assertEquals(26.januar, oppdrag[1].fom)
-            assertEquals(26.januar, oppdrag[1].tom)
-            assertEquals(80.0, oppdrag[1].grad)
+            assertEquals(26.januar, oppdrag[1].førstedato())
+            assertEquals(26.januar, oppdrag[1].sistedato())
+            assertTrue(oppdrag[1].harSammeGrad(80.0))
         }
     }
 
@@ -1294,10 +1295,10 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         assertEquals(inspektør.utbetaling(1).arbeidsgiverOppdrag().fagsystemId(), inspektør.utbetaling(2).arbeidsgiverOppdrag().fagsystemId())
         inspektør.utbetaling(2).arbeidsgiverOppdrag().also { oppdrag ->
             assertEquals(1, oppdrag.size)
-            assertEquals(18.januar, oppdrag[0].fom)
-            assertEquals(26.januar, oppdrag[0].tom)
+            assertEquals(18.januar, oppdrag[0].førstedato())
+            assertEquals(26.januar, oppdrag[0].sistedato())
             assertTrue(oppdrag[0].erForskjell())
-            assertEquals(100.0, oppdrag[0].grad)
+            assertTrue(oppdrag[0].harSammeGrad(100.0))
         }
     }
 

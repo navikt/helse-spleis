@@ -319,7 +319,7 @@ internal class UtbetalingTest {
         }
 
         override fun visitUtbetalingslinje(
-            linje: Utbetalingslinje,
+            linje: Oppdragslinje,
             fom: LocalDate,
             tom: LocalDate,
             satstype: Satstype,

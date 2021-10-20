@@ -561,7 +561,7 @@ internal interface OppdragVisitor {
     }
 
     fun visitUtbetalingslinje(
-        linje: Utbetalingslinje,
+        linje: Oppdragslinje,
         fom: LocalDate,
         tom: LocalDate,
         satstype: Satstype,

@@ -254,7 +254,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
             linjer.forEachIndexed { linjeNr, linje ->
                 val forventetBeløp = forventetSkjæringstidspunkt.elementAtOrElse(linjeNr) { forventetSkjæringstidspunkt.last() }
                     .let { Grunnbeløp.`6G`.beløp(it) }
-                assertEquals(forventetBeløp.rundTilDaglig(),linje.beløp!!.daglig) { "Feil beløp for linje ${linje.fom} - ${linje.tom}" }
+                assertEquals(forventetBeløp.rundTilDaglig(),linje.beløp()!!.daglig) { "Feil beløp for linje ${linje.førstedato()} - ${linje.sistedato()}" }
             }
         }
     }

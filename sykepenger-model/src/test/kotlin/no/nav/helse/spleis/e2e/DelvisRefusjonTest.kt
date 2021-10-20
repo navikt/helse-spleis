@@ -27,7 +27,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar, refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()))
 
         assertTrue(inspektør.utbetalinger.last().arbeidsgiverOppdrag().isNotEmpty())
-        inspektør.utbetalinger.last().arbeidsgiverOppdrag().forEach { assertEquals(1431, it.beløp) }
+        inspektør.utbetalinger.last().arbeidsgiverOppdrag().forEach { assertEquals(1431, it.beløp()) }
         assertTrue(inspektør.utbetalinger.last().personOppdrag().isEmpty())
         assertUtbetalingsbeløp(1.vedtaksperiode, 0, 1431, subset = 1.januar til 16.januar)
         assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, subset = 17.januar til 31.januar)
@@ -79,7 +79,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar, refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()))
 
         assertTrue(inspektør.utbetalinger.last().arbeidsgiverOppdrag().isNotEmpty())
-        inspektør.utbetalinger.last().arbeidsgiverOppdrag().forEach { assertEquals(1431, it.beløp) }
+        inspektør.utbetalinger.last().arbeidsgiverOppdrag().forEach { assertEquals(1431, it.beløp()) }
         assertTrue(inspektør.utbetalinger.last().personOppdrag().isEmpty())
 
         inspektør.utbetalingstidslinjer(1.vedtaksperiode).forEach {
@@ -197,7 +197,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
 
 
         assertTrue(inspektør.utbetalinger.last().arbeidsgiverOppdrag().isNotEmpty())
-        inspektør.utbetalinger.last().arbeidsgiverOppdrag().forEach { assertEquals(1431, it.beløp) }
+        inspektør.utbetalinger.last().arbeidsgiverOppdrag().forEach { assertEquals(1431, it.beløp()) }
         assertTrue(inspektør.utbetalinger.last().personOppdrag().isEmpty())
         assertUtbetalingsbeløp(2.vedtaksperiode, 0, 1431, subset = 1.mars til 16.mars)
         assertUtbetalingsbeløp(2.vedtaksperiode, 1431, 1431, subset = 17.mars til 31.mars)
@@ -297,7 +297,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         )
 
         assertTrue(inspektør.utbetalinger.last().arbeidsgiverOppdrag().isNotEmpty())
-        inspektør.utbetalinger.last().arbeidsgiverOppdrag().forEach { assertEquals(1431, it.beløp) }
+        inspektør.utbetalinger.last().arbeidsgiverOppdrag().forEach { assertEquals(1431, it.beløp()) }
         assertTrue(inspektør.utbetalinger.last().personOppdrag().isEmpty())
 
         assertUtbetalingsbeløp(1.vedtaksperiode, 0, 1431, 1.januar til 16.januar)

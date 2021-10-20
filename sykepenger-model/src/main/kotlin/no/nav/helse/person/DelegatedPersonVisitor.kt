@@ -768,7 +768,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
     }
 
     override fun visitUtbetalingslinje(
-        linje: Utbetalingslinje,
+        linje: Oppdragslinje,
         fom: LocalDate,
         tom: LocalDate,
         satstype: Satstype,

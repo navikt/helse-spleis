@@ -704,7 +704,7 @@ private class UtbetalingSkalHaEndringskode(private val ønsketEndringskode: Endr
     }
 }
 
-private fun Utbetalingslinje.assertUtbetalingslinje(
+private fun Oppdragslinje.assertUtbetalingslinje(
     ønsketEndringskode: Endringskode,
     ønsketDelytelseId: Int,
     ønsketRefDelytelseId: Int? = null,
@@ -713,7 +713,7 @@ private fun Utbetalingslinje.assertUtbetalingslinje(
 ) {
     val visitor = object : OppdragVisitor {
         override fun visitUtbetalingslinje(
-            linje: Utbetalingslinje,
+            linje: Oppdragslinje,
             fom: LocalDate,
             tom: LocalDate,
             satstype: Satstype,

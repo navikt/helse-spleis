@@ -10,10 +10,7 @@ import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.testhelpers.SykdomstidslinjeInspektør
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
-import no.nav.helse.utbetalingslinjer.Endringskode
-import no.nav.helse.utbetalingslinjer.Klassekode
-import no.nav.helse.utbetalingslinjer.Satstype
-import no.nav.helse.utbetalingslinjer.Utbetalingslinje
+import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -109,7 +106,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         object : OppdragVisitor {
             var grad: Double? = null
             override fun visitUtbetalingslinje(
-                linje: Utbetalingslinje,
+                linje: Oppdragslinje,
                 fom: LocalDate,
                 tom: LocalDate,
                 satstype: Satstype,

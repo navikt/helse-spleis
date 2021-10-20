@@ -57,13 +57,13 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         assertNotEquals(første.fagsystemId(), siste.fagsystemId())
         første.linjerUtenOpphør().also { linjer ->
             assertEquals(1, linjer.size)
-            assertEquals(30.mai, linjer.first().fom)
-            assertEquals(23.juni, linjer.first().tom)
+            assertEquals(30.mai, linjer.first().førstedato())
+            assertEquals(23.juni, linjer.first().sistedato())
         }
         siste.linjerUtenOpphør().also { linjer ->
             assertEquals(1, linjer.size)
-            assertEquals(13.juli, linjer.last().fom)
-            assertEquals(31.juli, linjer.last().tom)
+            assertEquals(13.juli, linjer.last().førstedato())
+            assertEquals(31.juli, linjer.last().sistedato())
         }
     }
 
@@ -119,8 +119,8 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         assertEquals(andre.fagsystemId(), siste.fagsystemId())
         siste.linjerUtenOpphør().also { linjer ->
             assertEquals(1, linjer.size)
-            assertEquals(13.juli, linjer.last().fom)
-            assertEquals(31.august, linjer.last().tom)
+            assertEquals(13.juli, linjer.last().førstedato())
+            assertEquals(31.august, linjer.last().sistedato())
         }
     }
 
@@ -167,13 +167,13 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         assertNotEquals(første.fagsystemId(), siste.fagsystemId())
         første.linjerUtenOpphør().also { linjer ->
             assertEquals(1, linjer.size)
-            assertEquals(1.februar, linjer.first().fom)
-            assertEquals(28.februar, linjer.first().tom)
+            assertEquals(1.februar, linjer.first().førstedato())
+            assertEquals(28.februar, linjer.first().sistedato())
         }
         siste.linjerUtenOpphør().also { linjer ->
             assertEquals(1, linjer.size)
-            assertEquals(1.mai, linjer.last().fom)
-            assertEquals(31.mai, linjer.last().tom)
+            assertEquals(1.mai, linjer.last().førstedato())
+            assertEquals(31.mai, linjer.last().sistedato())
         }
     }
 
@@ -214,8 +214,8 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         val siste = inspektør.utbetalinger.last().arbeidsgiverOppdrag()
         siste.linjerUtenOpphør().also { linjer ->
             assertEquals(1, linjer.size)
-            assertEquals(11.april, linjer.last().fom)
-            assertEquals(30.april, linjer.last().tom)
+            assertEquals(11.april, linjer.last().førstedato())
+            assertEquals(30.april, linjer.last().sistedato())
         }
     }
 
@@ -264,13 +264,13 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         assertNotEquals(første.fagsystemId(), siste.fagsystemId())
         første.linjerUtenOpphør().also { linjer ->
             assertEquals(1, linjer.size)
-            assertEquals(17.april, linjer.first().fom)
-            assertEquals(30.april, linjer.first().tom)
+            assertEquals(17.april, linjer.first().førstedato())
+            assertEquals(30.april, linjer.first().sistedato())
         }
         siste.linjerUtenOpphør().also { linjer ->
             assertEquals(1, linjer.size)
-            assertEquals(30.mai, linjer.first().fom)
-            assertEquals(30.juni, linjer.first().tom)
+            assertEquals(30.mai, linjer.first().førstedato())
+            assertEquals(30.juni, linjer.first().sistedato())
         }
     }
 
@@ -327,8 +327,8 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         assertEquals(andre.fagsystemId(), siste.fagsystemId())
         siste.linjerUtenOpphør().also { linjer ->
             assertEquals(1, linjer.size)
-            assertEquals(30.mai, linjer.first().fom)
-            assertEquals(31.juli, linjer.first().tom)
+            assertEquals(30.mai, linjer.first().førstedato())
+            assertEquals(31.juli, linjer.first().sistedato())
         }
     }
 

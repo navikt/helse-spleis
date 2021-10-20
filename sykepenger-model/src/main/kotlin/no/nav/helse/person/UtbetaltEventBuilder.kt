@@ -132,7 +132,7 @@ private class UtbetaltEventBuilder(
     }
 
     override fun visitUtbetalingslinje(
-        linje: Utbetalingslinje,
+        linje: Oppdragslinje,
         fom: LocalDate,
         tom: LocalDate,
         satstype: Satstype,
@@ -146,17 +146,10 @@ private class UtbetaltEventBuilder(
         datoStatusFom: LocalDate?,
         klassekode: Klassekode
     ) {
-        if (linje.erOpphør()) return
-        utbetalingslinjer.add(
-            UtbetaltEvent.Utbetalt.Utbetalingslinje(
-                fom = fom,
-                tom = tom,
-                sats = dagsats,
-                beløp = beløp!!,
-                grad = grad!!,
-                sykedager = linje.stønadsdager()
-            )
-        )
+        when(linje) {
+            is Utbetalingslinje -> utbetalingslinjer.add(UtbetaltEvent.Utbetalt.Utbetalingslinje(fom = fom, tom = tom, sats = dagsats, beløp = beløp!!, grad = grad!!, sykedager = linje.stønadsdager()))
+            is Opphørslinje -> return
+        }
     }
 
     fun finnIkkeUtbetalteDager(utbetalingstidslinje: Utbetalingstidslinje): List<UtbetaltEvent.IkkeUtbetaltDag> {
