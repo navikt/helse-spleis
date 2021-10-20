@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.spleis.TestMessageFactory.*
+import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.november
 import no.nav.inntektsmeldingkontrakt.Periode
@@ -233,6 +234,63 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
             "AVVENTER_HISTORIKK",
             "TIL_INFOTRYGD"
+        )
+    }
+
+    @Test
+    fun `Marker ikke historiske ferieperioder som ugyldig basert på utbetalingsgrad`() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 9.januar, tom = 31.januar, sykmeldingsgrad = 100))
+        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 9.januar, tom = 31.januar, sykmeldingsgrad = 100)))
+
+        val historikk = listOf(UtbetalingshistorikkTestdata(
+            fom = 1.januar,
+            tom = 8.januar,
+            arbeidskategorikode = "01",
+            utbetalteSykeperioder = listOf(
+                UtbetalingshistorikkTestdata.UtbetaltSykeperiode(
+                    fom = 1.desember(2017),
+                    tom = 5.desember(2017),
+                    dagsats = 1400.0,
+                    typekode = "5",
+                    utbetalingsgrad = "100",
+                    organisasjonsnummer = ORGNUMMER
+                ),
+                UtbetalingshistorikkTestdata.UtbetaltSykeperiode(
+                    fom = 6.desember(2017),
+                    tom = 10.desember(2017),
+                    dagsats = 1400.0,
+                    typekode = "9",
+                    utbetalingsgrad = "",
+                    organisasjonsnummer = ORGNUMMER
+                ),
+                UtbetalingshistorikkTestdata.UtbetaltSykeperiode(
+                    fom = 11.desember(2017),
+                    tom = 24.desember(2017),
+                    dagsats = 1400.0,
+                    typekode = "5",
+                    utbetalingsgrad = "100",
+                    organisasjonsnummer = ORGNUMMER
+                ),
+            ),
+            inntektsopplysninger = listOf(
+                UtbetalingshistorikkTestdata.Inntektsopplysninger(
+                    sykepengerFom = 1.desember(2017),
+                    inntekt = 36000.0,
+                    organisasjonsnummer = ORGNUMMER,
+                    refusjonTilArbeidsgiver = true
+                )
+            )
+        ))
+
+        sendInntektsmelding(0, listOf(Periode(fom = 9.januar, tom = 25.januar)), førsteFraværsdag = 9.januar)
+        sendYtelser(0, sykepengehistorikk = historikk)
+
+        assertTilstander(
+            0,
+            "MOTTATT_SYKMELDING_FERDIG_GAP",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVVENTER_HISTORIKK",
+            "AVVENTER_VILKÅRSPRØVING"
         )
     }
 }

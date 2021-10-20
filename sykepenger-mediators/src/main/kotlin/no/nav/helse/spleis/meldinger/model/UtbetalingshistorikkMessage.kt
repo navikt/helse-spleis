@@ -84,11 +84,19 @@ internal class UtbetalingshistorikkMessage(packet: JsonMessage) : BehovMessage(p
         }
 
     private fun erGyldigPeriode(node: JsonNode): Boolean {
-        val utbetalingsGrad = node["utbetalingsGrad"].asInt()
-        return utbetalingsGrad > 0 && erGyldigTidsperiode(node)
+        return if (erUtbetalingsperiode(node)) {
+            harGyldigUtbetalingsgrad(node) && harGyldigTidsintervall(node)
+        } else harGyldigTidsintervall(node)
     }
 
-    private fun erGyldigTidsperiode(node: JsonNode): Boolean {
+    private fun harGyldigUtbetalingsgrad(node: JsonNode): Boolean {
+        val utbetalingsGrad = node["utbetalingsGrad"].asInt()
+        return utbetalingsGrad > 0
+    }
+
+    private fun erUtbetalingsperiode(node: JsonNode) = node["typeKode"].asText() in listOf("0", "1", "5", "6")
+
+    private fun harGyldigTidsintervall(node: JsonNode): Boolean {
         val fom = node["fom"].asOptionalLocalDate()
         val tom = node["tom"].asOptionalLocalDate()
         return fom != null && tom != null && tom >= fom
