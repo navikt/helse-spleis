@@ -105,7 +105,7 @@ internal class RefusjonshistorikkTest {
         val aktivitetslogg = Aktivitetslogg()
         refusjonshistorikk.leggTilRefusjon(refusjon)
         assertSame(refusjon, refusjonshistorikk.finnRefusjon(4.januar til 31.januar, aktivitetslogg = aktivitetslogg))
-        assertEquals(listOf("Fant refusjon ved å sjekke om førstefraværsdag er i sammenhengende utbetaling"), aktivitetslogg.infoMeldinger())
+        assertEquals(listOf("Fant refusjon ved å sjekke om første fraværsdag er i sammenhengende utbetaling"), aktivitetslogg.infoMeldinger())
     }
 
     @Test

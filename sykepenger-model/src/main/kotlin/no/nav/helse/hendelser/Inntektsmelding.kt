@@ -212,7 +212,7 @@ class Inntektsmelding(
         ): IAktivitetslogg {
             when {
                 beløp == null -> aktivitetslogg.error("Arbeidsgiver forskutterer ikke (krever ikke refusjon)")
-                beløp != beregnetInntekt -> aktivitetslogg.error("Inntektsmelding inneholder beregnet inntekt og refusjon som avviker med hverandre")
+                beløp != beregnetInntekt && !Toggles.RefusjonPerDag.enabled -> aktivitetslogg.error("Inntektsmelding inneholder beregnet inntekt og refusjon som avviker med hverandre")
                 opphørerRefusjon(periode) && !Toggles.RefusjonPerDag.enabled -> aktivitetslogg.error("Arbeidsgiver opphører refusjon i perioden")
                 opphørsdato != null && !Toggles.RefusjonPerDag.enabled -> aktivitetslogg.error("Arbeidsgiver opphører refusjon")
                 endrerRefusjon(periode) && !Toggles.RefusjonPerDag.enabled -> aktivitetslogg.error("Arbeidsgiver endrer refusjon i perioden")

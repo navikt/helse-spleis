@@ -36,6 +36,43 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `Full refusjon til en arbeidsgiver med forlengelse og opphørsdato treffer ferie`() = Toggles.RefusjonPerDag.enable {
+        nyttVedtak(1.januar, 31.januar, refusjon = Inntektsmelding.Refusjon(INNTEKT, 27.februar, emptyList()))
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(27.februar, 28.februar))
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING)
+        assertTrue(inspektør.utbetalinger.last().arbeidsgiverOppdrag().isNotEmpty())
+        inspektør.utbetalinger.last().arbeidsgiverOppdrag().forEach { assertEquals(1431, it.beløp) }
+        assertTrue(inspektør.utbetalinger.last().personOppdrag().isEmpty())
+        assertUtbetalingsbeløp(2.vedtaksperiode, 1431, 1431, subset = 1.februar til 26.februar)
+        assertUtbetalingsbeløp(2.vedtaksperiode, 0, 1431, subset = 27.februar til 27.februar)
+        assertUtbetalingsbeløp(2.vedtaksperiode, 0, 0, subset = 28.februar til 28.februar)
+    }
+
+    @Test
+    fun `Refusjonsbeløpet er forskjellig fra beregnet inntekt i inntektsmeldingen`() = Toggles.RefusjonPerDag.enable {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 30000.månedlig, refusjon = Inntektsmelding.Refusjon(25000.månedlig, null, emptyList()))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        assertForkastetPeriodeTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            TIL_INFOTRYGD
+        )
+    }
+
+    @Test
     fun `Full refusjon til en arbeidsgiver med RefusjonPerDag av`() = Toggles.RefusjonPerDag.disable {
         nyttVedtak(1.januar, 31.januar, refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()))
 
@@ -55,7 +92,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
 
     @Test
     fun `Arbeidsgiverperiode tilstøter Infotrygd`() =
-        Toggles.RefusjonPerDag.enable { //TODO (Holder det å sjekke 1 dag tilbake i tid isteden for 16? [RefusjonsHistorikk.kt:45])
+        Toggles.RefusjonPerDag.enable {
             håndterInntektsmelding(listOf(1.januar til 16.januar))
 
             håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))

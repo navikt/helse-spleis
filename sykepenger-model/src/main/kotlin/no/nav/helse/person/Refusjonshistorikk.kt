@@ -56,7 +56,7 @@ internal class Refusjonshistorikk {
 
             internal fun Iterable<Refusjon>.somTrefferFørsteFraværsdag(periode: Periode, aktivitetslogg: IAktivitetslogg) = firstOrNull { refusjon ->
                 refusjon.utledetFørsteFraværsdag() in periode
-            }?.also { aktivitetslogg.info("Fant refusjon ved å sjekke om førstefraværsdag er i sammenhengende utbetaling") }
+            }?.also { aktivitetslogg.info("Fant refusjon ved å sjekke om første fraværsdag er i sammenhengende utbetaling") }
 
             internal fun Iterable<Refusjon>.somTilstøterArbeidsgiverperiode(periode: Periode, aktivitetslogg: IAktivitetslogg) = firstOrNull { refusjon ->
                 refusjon.arbeidsgiverperioder.maxByOrNull { it.endInclusive }?.erRettFør(periode) ?: false

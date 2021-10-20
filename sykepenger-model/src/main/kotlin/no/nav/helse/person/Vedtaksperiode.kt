@@ -1101,7 +1101,7 @@ internal class Vedtaksperiode private constructor(
             }
 
             return when {
-                forlengelse && refusjonOpphørt -> TilInfotrygd.also { hendelse.error("Refusjon er opphørt.") }
+                forlengelse && refusjonOpphørt && !Toggles.RefusjonPerDag.enabled -> TilInfotrygd.also { hendelse.error("Refusjon er opphørt.") }
                 forlengelse && ferdig -> ferdigForlengelse
                 forlengelse && !ferdig -> uferdigForlengelse
                 !forlengelse && ferdig -> ferdigGap
