@@ -293,7 +293,7 @@ internal class InfotrygdhistorikkTest {
 
     @Test
     fun `hensyntar ikke ugyldige perioder i overlapp-validering`() {
-        historikk.oppdaterHistorikk(historikkelement(ugyldigePerioder = listOf(1.januar to null)))
+        historikk.oppdaterHistorikk(historikkelement(ugyldigePerioder = listOf(UgyldigPeriode(1.januar, null, 100))))
         assertTrue(historikk.validerOverlappende(aktivitetslogg, 1.januar til 31.januar, 1.januar))
     }
 
@@ -448,7 +448,7 @@ internal class InfotrygdhistorikkTest {
         perioder: List<Infotrygdperiode> = emptyList(),
         inntekter: List<Inntektsopplysning> = emptyList(),
         arbeidskategorikoder: Map<String, LocalDate> = emptyMap(),
-        ugyldigePerioder: List<Pair<LocalDate?, LocalDate?>> = emptyList(),
+        ugyldigePerioder: List<UgyldigPeriode> = emptyList(),
         hendelseId: UUID = UUID.randomUUID(),
         harStatslønn: Boolean = false,
         oppdatert: LocalDateTime = LocalDateTime.now()

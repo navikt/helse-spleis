@@ -194,6 +194,47 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
             "AVVENTER_SIMULERING"
         )
     }
+
+    @Test
+    fun `Utbetalingsgrad 000 fører til ugyldig utbetalingsperiode i sykepengehistorikken`() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+
+        val historikk = listOf(UtbetalingshistorikkTestdata(
+            fom = 1.januar,
+            tom = 2.januar,
+            arbeidskategorikode = "01",
+            utbetalteSykeperioder = listOf(
+                UtbetalingshistorikkTestdata.UtbetaltSykeperiode(
+                    fom = 1.januar,
+                    tom = 2.januar,
+                    dagsats = 1400.0,
+                    typekode = "5",
+                    utbetalingsgrad = "000",
+                    organisasjonsnummer = ORGNUMMER
+                )
+            ),
+            inntektsopplysninger = listOf(
+                UtbetalingshistorikkTestdata.Inntektsopplysninger(
+                    sykepengerFom = 1.januar,
+                    inntekt = 36000.0,
+                    organisasjonsnummer = ORGNUMMER,
+                    refusjonTilArbeidsgiver = true
+                )
+            )
+        ))
+
+        sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendYtelser(0, sykepengehistorikk = historikk)
+
+        assertTilstander(
+            0,
+            "MOTTATT_SYKMELDING_FERDIG_GAP",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVVENTER_HISTORIKK",
+            "TIL_INFOTRYGD"
+        )
+    }
 }
 
 

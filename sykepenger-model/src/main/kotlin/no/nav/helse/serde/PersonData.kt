@@ -87,7 +87,7 @@ internal data class PersonData(
         private val ukjenteperioder: List<UkjentperiodeData>,
         private val inntekter: List<InntektsopplysningData>,
         private val arbeidskategorikoder: Map<String, LocalDate>,
-        private val ugyldigePerioder: List<Pair<LocalDate?, LocalDate?>>,
+        private val ugyldigePerioder: List<UgyldigPeriode>,
         private val harStatslønn: Boolean,
         private val oppdatert: LocalDateTime,
         private val lagretInntekter: Boolean,

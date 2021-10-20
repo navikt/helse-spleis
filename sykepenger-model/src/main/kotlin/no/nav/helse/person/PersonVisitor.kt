@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
+import no.nav.helse.person.infotrygdhistorikk.UgyldigPeriode
 import no.nav.helse.person.infotrygdhistorikk.UkjentInfotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.sykdomstidslinje.Dag.*
@@ -63,7 +64,7 @@ internal interface InfotrygdhistorikkVisitor {
     }
 
     fun postVisitInfotrygdhistorikkInntektsopplysninger() {}
-    fun visitUgyldigePerioder(ugyldigePerioder: List<Pair<LocalDate?, LocalDate?>>) {}
+    fun visitUgyldigePerioder(ugyldigePerioder: List<UgyldigPeriode>) {}
     fun visitInfotrygdhistorikkArbeidskategorikoder(arbeidskategorikoder: Map<String, LocalDate>) {}
     fun postVisitInfotrygdhistorikkElement(
         id: UUID,

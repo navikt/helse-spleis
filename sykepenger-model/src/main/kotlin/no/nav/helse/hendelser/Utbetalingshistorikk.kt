@@ -2,10 +2,7 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
-import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
-import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.person.infotrygdhistorikk.*
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -20,7 +17,7 @@ class Utbetalingshistorikk(
     harStatslønn: Boolean,
     perioder: List<Infotrygdperiode>,
     inntektshistorikk: List<Inntektsopplysning>,
-    ugyldigePerioder: List<Pair<LocalDate?, LocalDate?>>,
+    ugyldigePerioder: List<UgyldigPeriode>,
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg(),
     besvart: LocalDateTime
 ) : ArbeidstakerHendelse(meldingsreferanseId, aktivitetslogg) {

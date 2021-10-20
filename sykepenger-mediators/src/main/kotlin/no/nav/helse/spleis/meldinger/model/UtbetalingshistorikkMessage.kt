@@ -55,10 +55,11 @@ internal class UtbetalingshistorikkMessage(packet: JsonMessage) : BehovMessage(p
     private val ugyldigePerioder = packet["@løsning.${Sykepengehistorikk.name}"]
         .flatMap { it.path("utbetalteSykeperioder") }
         .filterNot(::erGyldigPeriode)
-        .mapNotNull { utbetaling ->
+        .map { utbetaling ->
             val fom = utbetaling["fom"].asOptionalLocalDate()
             val tom = utbetaling["tom"].asOptionalLocalDate()
-            if (fom == null || tom == null || fom > tom) fom to tom else null
+            val utbetalingsGrad = utbetaling["utbetalingsGrad"].asInt()
+            UgyldigPeriode(fom, tom, utbetalingsGrad)
         }
 
     private val arbeidskategorikoder: Map<String, LocalDate> = packet["@løsning.${Sykepengehistorikk.name}"]
@@ -83,6 +84,11 @@ internal class UtbetalingshistorikkMessage(packet: JsonMessage) : BehovMessage(p
         }
 
     private fun erGyldigPeriode(node: JsonNode): Boolean {
+        val utbetalingsGrad = node["utbetalingsGrad"].asInt()
+        return utbetalingsGrad > 0 && erGyldigTidsperiode(node)
+    }
+
+    private fun erGyldigTidsperiode(node: JsonNode): Boolean {
         val fom = node["fom"].asOptionalLocalDate()
         val tom = node["tom"].asOptionalLocalDate()
         return fom != null && tom != null && tom >= fom

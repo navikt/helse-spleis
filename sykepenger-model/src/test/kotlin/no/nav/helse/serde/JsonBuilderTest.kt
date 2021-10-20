@@ -10,6 +10,7 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.person.infotrygdhistorikk.UgyldigPeriode
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
@@ -139,6 +140,9 @@ class JsonBuilderTest {
     @Test
     fun `Skal serialisere ukjentdager på sykdomstidslinjen til ghost`() =
             testSerialiseringAvPerson(personMedGhost())
+
+    @Test
+    fun `Serialisering av ugyldig periode i infotrygdhistorikk`() = testSerialiseringAvPerson(personMedUgyldigPeriodeIHistorikken())
 
     private fun testSerialiseringAvPerson(person: Person) {
         val jsonBuilder = JsonBuilder()
@@ -315,6 +319,28 @@ class JsonBuilderTest {
                 fangeUtbetalinger()
                 håndter(overføring())
                 håndter(utbetalt())
+            }
+        }
+
+        fun personMedUgyldigPeriodeIHistorikken(søknadhendelseId: UUID = UUID.randomUUID()): Person {
+            val refusjoner = listOf(ArbeidsgiverUtbetalingsperiode(orgnummer, 1.desember(2017), 24.desember(2017), 100.prosent, 31000.månedlig))
+            val inntektshistorikk = listOf(Inntektsopplysning(orgnummer, 1.desember(2017), 31000.månedlig, true))
+            val ugyldigePerioder = listOf(UgyldigPeriode(1.mai(2017), 20.mai(2017), 0), UgyldigPeriode(1.februar(2017), 31.januar(2017), 100))
+            return Person(aktørId, fnr).apply {
+                håndter(sykmelding(fom = 1.januar, tom = 31.januar))
+                fangeVedtaksperiode()
+                håndter(søknad(fom = 1.januar, tom = 31.januar, hendelseId = søknadhendelseId))
+                håndter(utbetalingshistorikk(refusjoner, inntektshistorikk, ugyldigePerioder))
+                håndter(
+                    ytelser(
+                        hendelseId = søknadhendelseId,
+                        vedtaksperiodeId = vedtaksperiodeId,
+                        inntektshistorikk = listOf(Inntektsopplysning(orgnummer, 1.desember(2017), 31000.månedlig, true)),
+                        utbetalinger = refusjoner,
+                        ugyldigePerioder = ugyldigePerioder
+                    )
+                )
+                håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
             }
         }
 
@@ -573,7 +599,8 @@ class JsonBuilderTest {
 
         fun utbetalingshistorikk(
             utbetalinger: List<Infotrygdperiode> = emptyList(),
-            inntektsopplysning: List<Inntektsopplysning> = emptyList()
+            inntektsopplysning: List<Inntektsopplysning> = emptyList(),
+            ugyldigePerioder: List<UgyldigPeriode> = emptyList()
         ) = Utbetalingshistorikk(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = aktørId,
@@ -584,7 +611,7 @@ class JsonBuilderTest {
             harStatslønn = false,
             perioder = utbetalinger,
             inntektshistorikk = inntektsopplysning,
-            ugyldigePerioder = emptyList(),
+            ugyldigePerioder = ugyldigePerioder,
             besvart = LocalDateTime.now()
         )
 
@@ -593,7 +620,8 @@ class JsonBuilderTest {
             vedtaksperiodeId: String,
             dødsdato: LocalDate? = null,
             inntektshistorikk: List<Inntektsopplysning> = emptyList(),
-            utbetalinger: List<Infotrygdperiode> = emptyList()
+            utbetalinger: List<Infotrygdperiode> = emptyList(),
+            ugyldigePerioder: List<UgyldigPeriode> = emptyList()
         ) = Aktivitetslogg().let {
             Ytelser(
                 meldingsreferanseId = hendelseId,
@@ -611,7 +639,7 @@ class JsonBuilderTest {
                     harStatslønn = false,
                     perioder = utbetalinger,
                     inntektshistorikk = inntektshistorikk,
-                    ugyldigePerioder = emptyList(),
+                    ugyldigePerioder = ugyldigePerioder,
                     aktivitetslogg = it,
                     besvart = LocalDateTime.now()
                 ),

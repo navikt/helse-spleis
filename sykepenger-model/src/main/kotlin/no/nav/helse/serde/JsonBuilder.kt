@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.*
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
+import no.nav.helse.person.infotrygdhistorikk.UgyldigPeriode
 import no.nav.helse.person.infotrygdhistorikk.UkjentInfotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.serde.api.builders.BuilderState
@@ -461,7 +462,7 @@ internal class JsonBuilder : AbstractBuilder() {
         private val ukjenteperioder = mutableListOf<Map<String, LocalDate>>()
         private val inntekter = mutableListOf<Map<String, Any?>>()
         private val arbeidskategorikoder = mutableMapOf<String, LocalDate>()
-        private val ugyldigePerioder = mutableListOf<Pair<LocalDate?, LocalDate?>>()
+        private val ugyldigePerioder = mutableListOf<Map<String, Any?>>()
 
         init {
             element["id"] = id
@@ -542,8 +543,8 @@ internal class JsonBuilder : AbstractBuilder() {
             this.arbeidskategorikoder.putAll(arbeidskategorikoder)
         }
 
-        override fun visitUgyldigePerioder(ugyldigePerioder: List<Pair<LocalDate?, LocalDate?>>) {
-            this.ugyldigePerioder.addAll(ugyldigePerioder)
+        override fun visitUgyldigePerioder(ugyldigePerioder: List<UgyldigPeriode>) {
+            this.ugyldigePerioder.addAll(ugyldigePerioder.map { it.toMap() })
         }
 
         override fun postVisitInfotrygdhistorikkElement(

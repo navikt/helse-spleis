@@ -5,6 +5,7 @@ import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.person.infotrygdhistorikk.UgyldigPeriode
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -14,7 +15,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -71,7 +71,7 @@ internal class YtelserHendelseTest : AbstractEndToEndTest() {
 
     @Test
     fun `ugyldig utbetalinghistorikk etter inntektsmelding kaster perioden ut`() {
-        håndterYtelser(ugyldigePerioder = listOf(null to null))
+        håndterYtelser(ugyldigePerioder = listOf(UgyldigPeriode(null, null, null)))
         assertEquals(TIL_INFOTRYGD, inspektør.sisteTilstand(1.vedtaksperiode))
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
     }
@@ -123,7 +123,7 @@ internal class YtelserHendelseTest : AbstractEndToEndTest() {
         inntektshistorikk: List<Inntektsopplysning> = emptyList(),
         foreldrepengeytelse: Periode? = null,
         svangerskapsytelse: Periode? = null,
-        ugyldigePerioder: List<Pair<LocalDate?, LocalDate?>> = emptyList()
+        ugyldigePerioder: List<UgyldigPeriode> = emptyList()
     ) : Ytelser {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
@@ -154,7 +154,7 @@ internal class YtelserHendelseTest : AbstractEndToEndTest() {
         person.håndter(
             ytelser(
                 vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-                ugyldigePerioder = listOf(null to null),
+                ugyldigePerioder = listOf(UgyldigPeriode(null, null, null)),
                 foreldrepengeYtelse = null,
                 svangerskapYtelse = null
             )
@@ -167,7 +167,7 @@ internal class YtelserHendelseTest : AbstractEndToEndTest() {
         inntektshistorikk: List<Inntektsopplysning> = emptyList(),
         foreldrepengeYtelse: Periode? = null,
         svangerskapYtelse: Periode? = null,
-        ugyldigePerioder: List<Pair<LocalDate?, LocalDate?>> = emptyList()
+        ugyldigePerioder: List<UgyldigPeriode> = emptyList()
     ) = Aktivitetslogg().let {
         val meldingsreferanseId = UUID.randomUUID()
         Ytelser(

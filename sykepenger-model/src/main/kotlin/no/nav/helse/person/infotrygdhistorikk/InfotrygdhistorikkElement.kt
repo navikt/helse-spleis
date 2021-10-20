@@ -22,7 +22,7 @@ internal class InfotrygdhistorikkElement private constructor(
     perioder: List<Infotrygdperiode>,
     private val inntekter: List<Inntektsopplysning>,
     private val arbeidskategorikoder: Map<String, LocalDate>,
-    private val ugyldigePerioder: List<Pair<LocalDate?, LocalDate?>>,
+    private val ugyldigePerioder: List<UgyldigPeriode>,
     private val harStatslønn: Boolean,
     private var oppdatert: LocalDateTime,
     private var lagretInntekter: Boolean,
@@ -42,7 +42,7 @@ internal class InfotrygdhistorikkElement private constructor(
             perioder: List<Infotrygdperiode>,
             inntekter: List<Inntektsopplysning>,
             arbeidskategorikoder: Map<String, LocalDate>,
-            ugyldigePerioder: List<Pair<LocalDate?, LocalDate?>>,
+            ugyldigePerioder: List<UgyldigPeriode>,
             harStatslønn: Boolean
         ) =
             InfotrygdhistorikkElement(
@@ -126,12 +126,8 @@ internal class InfotrygdhistorikkElement private constructor(
     }
 
     private fun validerUgyldigePerioder(aktivitetslogg: IAktivitetslogg) {
-        ugyldigePerioder.forEach { (fom,  tom) ->
-            val tekst = when {
-                fom == null || tom == null -> "mangler fom- eller tomdato"
-                fom > tom -> "fom er nyere enn tom"
-                else -> null
-            }
+        ugyldigePerioder.forEach { ugyldigPeriode ->
+            val tekst = ugyldigPeriode.feiltekst()
             aktivitetslogg.error("Det er en ugyldig utbetalingsperiode i Infotrygd%s", tekst?.let { " ($it)" } ?: "")
         }
     }

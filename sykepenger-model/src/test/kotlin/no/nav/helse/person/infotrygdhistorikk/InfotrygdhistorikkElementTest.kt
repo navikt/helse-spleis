@@ -50,7 +50,7 @@ internal class InfotrygdhistorikkElementTest {
         val arbeidskategorikoder = mapOf(
             "01" to 1.januar
         )
-        val ugyldigePerioder = listOf(1.januar to 1.januar)
+        val ugyldigePerioder = listOf(UgyldigPeriode(1.januar, 1.januar, 100))
         assertEquals(historikkelement().hashCode(), historikkelement().hashCode())
         assertEquals(historikkelement(), historikkelement())
         assertNotEquals(historikkelement().hashCode(), historikkelement(perioder).hashCode())
@@ -568,7 +568,7 @@ internal class InfotrygdhistorikkElementTest {
         )
         val element = historikkelement(
             perioder = utbetalinger,
-            ugyldigePerioder = listOf(5.januar to 5.januar)
+            ugyldigePerioder = listOf(UgyldigPeriode(5.januar, 5.januar, 100))
         )
 
         assertFalse(element.valider(aktivitetslogg, Periodetype.FØRSTEGANGSBEHANDLING, Periode(1.mars, 1.mars), 1.mars))
@@ -783,7 +783,7 @@ internal class InfotrygdhistorikkElementTest {
         perioder: List<Infotrygdperiode> = emptyList(),
         inntekter: List<Inntektsopplysning> = emptyList(),
         arbeidskategorikoder: Map<String, LocalDate> = emptyMap(),
-        ugyldigePerioder: List<Pair<LocalDate?, LocalDate?>> = emptyList(),
+        ugyldigePerioder: List<UgyldigPeriode> = emptyList(),
         hendelseId: UUID = UUID.randomUUID(),
         harStatslønn: Boolean = false,
         oppdatert: LocalDateTime = LocalDateTime.now()
