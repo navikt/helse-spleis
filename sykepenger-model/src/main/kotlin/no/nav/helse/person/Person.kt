@@ -469,8 +469,8 @@ class Person private constructor(
         vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)?.sykepengegrunnlag()
 
 
-    internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
-        Sykepengegrunnlag(arbeidsgivere.grunnlagForSykepengegrunnlag(skjæringstidspunkt), skjæringstidspunkt)
+    internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, aktivitetslogg: IAktivitetslogg) =
+        Sykepengegrunnlag(arbeidsgivere.grunnlagForSykepengegrunnlag(skjæringstidspunkt), skjæringstidspunkt, aktivitetslogg)
 
     internal fun grunnlagForSykepengegrunnlagForInfotrygd(skjæringstidspunkt: LocalDate, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden: LocalDate) =
         Sykepengegrunnlag(arbeidsgivere.grunnlagForSykepengegrunnlag(skjæringstidspunkt, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden))
@@ -641,7 +641,7 @@ class Person private constructor(
 
     internal fun vilkårsprøvEtterNyInntekt(hendelse: OverstyrInntekt, kompenseringsdatoForManglendeSkjæringstidspunktIInfotrygd: LocalDate) {
         val skjæringstidspunkt = hendelse.skjæringstidspunkt
-        val grunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag(skjæringstidspunkt)
+        val grunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag(skjæringstidspunkt, hendelse)
         val sammenligningsgrunnlag = sammenligningsgrunnlag(skjæringstidspunkt)
             ?: hendelse.severe("Fant ikke sammenligningsgrunnlag for skjæringstidspunkt: ${skjæringstidspunkt}. Kan ikke revurdere inntekt.")
         val avviksprosent = grunnlagForSykepengegrunnlag.avviksprosent(sammenligningsgrunnlag)

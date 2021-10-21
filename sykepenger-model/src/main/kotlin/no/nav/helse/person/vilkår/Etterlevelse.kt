@@ -18,8 +18,7 @@ class Etterlevelse {
         resultater.forEach { it.accept(visitor) }
     }
 
-    fun `§2`(oppfylt: Boolean) {
-    }
+    fun `§2`(oppfylt: Boolean) {}
 
     fun `§8-2 ledd 1`(
         oppfylt: Boolean,
@@ -43,6 +42,8 @@ class Etterlevelse {
         )
     }
 
+    fun `§8-3 ledd 1`(oppfylt: Boolean) {}
+
     fun `§8-3 ledd 2`(
         oppfylt: Boolean,
         skjæringstidspunkt: LocalDate,
@@ -64,6 +65,11 @@ class Etterlevelse {
             )
         )
     }
+
+    fun `§8-10 ledd 2`(oppfylt: Boolean, funnetRelevant: Boolean, maks: Inntekt, skjæringstidspunkt: LocalDate, grunnlagForSykepengegrunnlag: Inntekt) {}
+
+    //TODO: Hvordan skal denne kunne legges inn???
+    fun `§8-10 ledd 3`(oppfylt: Boolean) {}
 
     internal fun `§8-12 ledd 1`(
         oppfylt: Boolean,

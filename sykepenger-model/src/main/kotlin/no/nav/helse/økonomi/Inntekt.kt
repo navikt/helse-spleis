@@ -18,6 +18,7 @@ class Inntekt private constructor(private val årlig: Double) : Comparable<Innte
     }
 
     companion object {
+        //8-10 ledd 3
         private const val ARBEIDSDAGER_PER_ÅR = 260
 
         internal fun vektlagtGjennomsnitt(parene: List<Pair<Prosentdel, Inntekt>>): Prosentdel {
