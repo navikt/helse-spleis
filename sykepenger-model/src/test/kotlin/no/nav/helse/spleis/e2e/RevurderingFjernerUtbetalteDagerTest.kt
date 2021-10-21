@@ -39,7 +39,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode)
         forlengVedtak(24.april(2021), 7.mai(2021))
 
-        håndterOverstyring((26.april(2021) til 27.april(2021)).map { manuellFeriedag(it) })
+        håndterOverstyrTidslinje((26.april(2021) til 27.april(2021)).map { manuellFeriedag(it) })
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
@@ -81,7 +81,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode)
         forlengVedtak(24.april(2021), 7.mai(2021))
 
-        håndterOverstyring((26.april(2021) til 27.april(2021)).map { manuellFeriedag(it) })
+        håndterOverstyrTidslinje((26.april(2021) til 27.april(2021)).map { manuellFeriedag(it) })
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
@@ -121,7 +121,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode)
         forlengVedtak(24.april(2021), 7.mai(2021))
 
-        håndterOverstyring((26.april(2021) til 27.april(2021)).map { manuellFeriedag(it) })
+        håndterOverstyrTidslinje((26.april(2021) til 27.april(2021)).map { manuellFeriedag(it) })
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
@@ -167,7 +167,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode)
 
-        håndterOverstyring((24.april(2021) til 30.april(2021)).map { manuellFeriedag(it) })
+        håndterOverstyrTidslinje((24.april(2021) til 30.april(2021)).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -208,7 +208,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode)
 
-        håndterOverstyring((17.april(2021) til 23.april(2021)).map { manuellFeriedag(it) })
+        håndterOverstyrTidslinje((17.april(2021) til 23.april(2021)).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -249,7 +249,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode)
 
-        håndterOverstyring((17.april(2021) til 23.april(2021)).map { manuellFeriedag(it) })
+        håndterOverstyrTidslinje((17.april(2021) til 23.april(2021)).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -302,7 +302,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
             Søknad.Søknadsperiode.Sykdom(24.april(2021), 15.mai(2021), 100.prosent)
         )
 
-        håndterOverstyring((17.april(2021) til 23.april(2021)).map { manuellFeriedag(it) })
+        håndterOverstyrTidslinje((17.april(2021) til 23.april(2021)).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -355,7 +355,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         )
         håndterYtelser(2.vedtaksperiode) // 2. periode har beregnet utbetalingen sin som en forlengelse
 
-        håndterOverstyring((17.april(2021) til 23.april(2021)).map { manuellFeriedag(it) })
+        håndterOverstyrTidslinje((17.april(2021) til 23.april(2021)).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -401,7 +401,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode)
 
-        håndterOverstyring((17.april(2021) til 20.april(2021)).map { manuellFeriedag(it) })
+        håndterOverstyrTidslinje((17.april(2021) til 20.april(2021)).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)

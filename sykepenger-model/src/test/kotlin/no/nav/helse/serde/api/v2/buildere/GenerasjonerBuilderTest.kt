@@ -82,7 +82,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `periode blir revurdert`() {
         nyttVedtak(1.januar, 31.januar)
-        håndterOverstyring((29.januar til 31.januar).map { manuellFeriedag(it) })
+        håndterOverstyrTidslinje((29.januar til 31.januar).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
 
         assertEquals(2, generasjoner.size)
@@ -103,7 +103,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
 
-        håndterOverstyring((27.februar til 28.februar).map { manuellFeriedag(it) })
+        håndterOverstyrTidslinje((27.februar til 28.februar).map { manuellFeriedag(it) })
         håndterYtelser(2.vedtaksperiode)
 
         assertEquals(2, generasjoner.size)
@@ -126,7 +126,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
 
-        håndterOverstyring((29.januar til 31.januar).map { manuellFeriedag(it) })
+        håndterOverstyrTidslinje((29.januar til 31.januar).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
 
@@ -150,13 +150,13 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
 
-        håndterOverstyring((29.januar til 31.januar).map { manuellFeriedag(it) })
+        håndterOverstyrTidslinje((29.januar til 31.januar).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt(2.vedtaksperiode)
-        håndterOverstyring((29.januar til 31.januar).map { manuellSykedag(it) })
+        håndterOverstyrTidslinje((29.januar til 31.januar).map { manuellSykedag(it) })
         håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
 
@@ -186,20 +186,20 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
 
-        håndterOverstyring((29.januar til 31.januar).map { manuellFeriedag(it) })
+        håndterOverstyrTidslinje((29.januar til 31.januar).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt(2.vedtaksperiode)
-        håndterOverstyring((29.januar til 31.januar).map { manuellSykedag(it) })
+        håndterOverstyrTidslinje((29.januar til 31.januar).map { manuellSykedag(it) })
         håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt(2.vedtaksperiode)
 
-        håndterOverstyring((27.februar til 28.februar).map { manuellSykedag(it) })
+        håndterOverstyrTidslinje((27.februar til 28.februar).map { manuellSykedag(it) })
         håndterYtelser(2.vedtaksperiode)
 
         assertEquals(4, generasjoner.size)
@@ -234,7 +234,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         nyttVedtak(2.februar, 28.februar)
 
-        håndterOverstyring((27.februar til 28.februar).map { manuellFeriedag(it) })
+        håndterOverstyrTidslinje((27.februar til 28.februar).map { manuellFeriedag(it) })
         håndterYtelser(2.vedtaksperiode)
 
         assertEquals(2, generasjoner.size)
@@ -338,7 +338,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
 
-        håndterOverstyring((29.januar til 31.januar).map { manuellFeriedag(it) })
+        håndterOverstyrTidslinje((29.januar til 31.januar).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -368,7 +368,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
 
-        håndterOverstyring((29.januar til 31.januar).map { manuellFeriedag(it) })
+        håndterOverstyrTidslinje((29.januar til 31.januar).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -376,7 +376,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterUtbetalt(2.vedtaksperiode)
 
         forlengVedtak(1.mars, 31.mars)
-        håndterOverstyring((1.mars til 31.mars).map { manuellFeriedag(it) })
+        håndterOverstyrTidslinje((1.mars til 31.mars).map { manuellFeriedag(it) })
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
@@ -450,7 +450,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt(2.vedtaksperiode)
 
-        håndterOverstyring((13.februar til 14.februar).map { manuellFeriedag(it) })
+        håndterOverstyrTidslinje((13.februar til 14.februar).map { manuellFeriedag(it) })
         håndterYtelser(2.vedtaksperiode)
 
         assertEquals(2, generasjoner.size)
@@ -488,7 +488,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
 
-        håndterOverstyring((29.januar til 31.januar).map { manuellFeriedag(it) })
+        håndterOverstyrTidslinje((29.januar til 31.januar).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
 
         assertEquals(2, generasjoner.size)
@@ -559,7 +559,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     fun `får riktig vilkår per periode ved revurdering av siste periode`() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
-        håndterOverstyring((27.februar til 28.februar).map { manuellFeriedag(it) })
+        håndterOverstyrTidslinje((27.februar til 28.februar).map { manuellFeriedag(it) })
         håndterYtelser(2.vedtaksperiode)
 
         0.generasjon {
@@ -584,7 +584,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     fun `får riktig vilkår per periode ved revurdering av første periode`() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
-        håndterOverstyring((30.januar til 31.januar).map { manuellFeriedag(it) })
+        håndterOverstyrTidslinje((30.januar til 31.januar).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
 

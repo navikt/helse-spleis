@@ -3,7 +3,7 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.person.OppdragVisitor
-import no.nav.helse.person.TilstandType
+import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.*
@@ -26,7 +26,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
 
         val tidligereInntektInnslagId = inspektør.inntektInspektør.sisteInnslag?.innslagId
 
-        håndterOverstyring(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar)
+        håndterOverstyrInntekt(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -34,22 +34,22 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
 
         assertTilstander(
             0,
-            TilstandType.START,
-            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
-            TilstandType.AVVENTER_SØKNAD_FERDIG_GAP,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_VILKÅRSPRØVING,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_SIMULERING,
-            TilstandType.AVVENTER_GODKJENNING,
-            TilstandType.TIL_UTBETALING,
-            TilstandType.AVSLUTTET,
-            TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING,
-            TilstandType.AVVENTER_HISTORIKK_REVURDERING,
-            TilstandType.AVVENTER_SIMULERING_REVURDERING,
-            TilstandType.AVVENTER_GODKJENNING_REVURDERING,
-            TilstandType.TIL_UTBETALING,
-            TilstandType.AVSLUTTET,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_VILKÅRSPRØVING_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING,
+            TIL_UTBETALING,
+            AVSLUTTET,
         )
 
         assertEquals(15741, inspektør.utbetalinger.first().arbeidsgiverOppdrag().nettoBeløp())
@@ -72,14 +72,14 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     @Test
     fun `revurder inntekt flere ganger`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
-        håndterOverstyring(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar)
+        håndterOverstyrInntekt(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar)
 
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode)
 
-        håndterOverstyring(inntekt = 31000.månedlig, skjæringstidspunkt = 1.januar)
+        håndterOverstyrInntekt(inntekt = 31000.månedlig, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -97,20 +97,20 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     @Test
     fun `revurder inntekt ukjent skjæringstidspunkt`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
-        håndterOverstyring(inntekt = 32000.månedlig, skjæringstidspunkt = 2.januar)
+        håndterOverstyrInntekt(inntekt = 32000.månedlig, skjæringstidspunkt = 2.januar)
 
         assertTilstander(
             0,
-            TilstandType.START,
-            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
-            TilstandType.AVVENTER_SØKNAD_FERDIG_GAP,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_VILKÅRSPRØVING,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_SIMULERING,
-            TilstandType.AVVENTER_GODKJENNING,
-            TilstandType.TIL_UTBETALING,
-            TilstandType.AVSLUTTET,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
         )
 
         assertEquals(1, inspektør.utbetalinger.size)
@@ -121,34 +121,34 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
         nyttVedtak(1.mars, 31.mars, 100.prosent)
 
-        håndterOverstyring(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar)
+        håndterOverstyrInntekt(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar)
 
         assertTilstander(
             0,
-            TilstandType.START,
-            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
-            TilstandType.AVVENTER_SØKNAD_FERDIG_GAP,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_VILKÅRSPRØVING,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_SIMULERING,
-            TilstandType.AVVENTER_GODKJENNING,
-            TilstandType.TIL_UTBETALING,
-            TilstandType.AVSLUTTET,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
         )
 
         assertTilstander(
             1,
-            TilstandType.START,
-            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
-            TilstandType.AVVENTER_SØKNAD_FERDIG_GAP,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_VILKÅRSPRØVING,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_SIMULERING,
-            TilstandType.AVVENTER_GODKJENNING,
-            TilstandType.TIL_UTBETALING,
-            TilstandType.AVSLUTTET,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
         )
 
         assertEquals(2, inspektør.utbetalinger.size)
@@ -169,7 +169,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt(2.vedtaksperiode)
 
-        håndterOverstyring(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar)
+        håndterOverstyrInntekt(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar)
 
         håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
@@ -179,41 +179,41 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
 
         assertTilstander(
             0,
-            TilstandType.START,
-            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
-            TilstandType.AVVENTER_SØKNAD_FERDIG_GAP,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_VILKÅRSPRØVING,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_SIMULERING,
-            TilstandType.AVVENTER_GODKJENNING,
-            TilstandType.TIL_UTBETALING,
-            TilstandType.AVSLUTTET,
-            TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING,
-            TilstandType.AVVENTER_HISTORIKK_REVURDERING,
-            TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING,
-            TilstandType.AVSLUTTET,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_VILKÅRSPRØVING_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVSLUTTET,
 
         )
 
         assertTilstander(
             1,
-            TilstandType.START,
-            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
-            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_VILKÅRSPRØVING,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_SIMULERING,
-            TilstandType.AVVENTER_GODKJENNING,
-            TilstandType.TIL_UTBETALING,
-            TilstandType.AVSLUTTET,
-            TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING,
-            TilstandType.AVVENTER_HISTORIKK_REVURDERING,
-            TilstandType.AVVENTER_SIMULERING_REVURDERING,
-            TilstandType.AVVENTER_GODKJENNING_REVURDERING,
-            TilstandType.TIL_UTBETALING,
-            TilstandType.AVSLUTTET,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_ARBEIDSGIVERE_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING,
+            TIL_UTBETALING,
+            AVSLUTTET,
         )
 
         assertEquals(3, inspektør.utbetalinger.filter { it.erUtbetalt() }.size)
@@ -233,33 +233,34 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt(2.vedtaksperiode)
 
-        håndterOverstyring(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar)
+        håndterOverstyrInntekt(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar)
 
         assertTilstander(
             0,
-            TilstandType.START,
-            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
-            TilstandType.AVVENTER_SØKNAD_FERDIG_GAP,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_VILKÅRSPRØVING,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_SIMULERING,
-            TilstandType.AVVENTER_GODKJENNING,
-            TilstandType.TIL_UTBETALING,
-            TilstandType.AVSLUTTET)
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
+        )
 
         assertTilstander(
             1,
-            TilstandType.START,
-            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
-            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_VILKÅRSPRØVING,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_SIMULERING,
-            TilstandType.AVVENTER_GODKJENNING,
-            TilstandType.TIL_UTBETALING,
-            TilstandType.AVSLUTTET
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
         )
         assertErrorTekst(inspektør, "Kan kun revurdere siste skjæringstidspunkt")
     }
@@ -267,22 +268,22 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     @Test
     fun `revurder inntekt avvik over 25 prosent reduksjon`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
-        håndterOverstyring(inntekt = 7000.månedlig, skjæringstidspunkt = 1.januar)
+        håndterOverstyrInntekt(inntekt = 7000.månedlig, skjæringstidspunkt = 1.januar)
 
         assertTilstander(
             0,
-            TilstandType.START,
-            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
-            TilstandType.AVVENTER_SØKNAD_FERDIG_GAP,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_VILKÅRSPRØVING,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_SIMULERING,
-            TilstandType.AVVENTER_GODKJENNING,
-            TilstandType.TIL_UTBETALING,
-            TilstandType.AVSLUTTET,
-            TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING,
-            TilstandType.AVVENTER_HISTORIKK_REVURDERING
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_VILKÅRSPRØVING_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING
         )
 
         assertWarningTekst(inspektør, "Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.")
@@ -292,22 +293,22 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     @Test
     fun `revurder inntekt avvik over 25 prosent økning`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
-        håndterOverstyring(inntekt = 70000.månedlig, skjæringstidspunkt = 1.januar)
+        håndterOverstyrInntekt(inntekt = 70000.månedlig, skjæringstidspunkt = 1.januar)
 
         assertTilstander(
             0,
-            TilstandType.START,
-            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
-            TilstandType.AVVENTER_SØKNAD_FERDIG_GAP,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_VILKÅRSPRØVING,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_SIMULERING,
-            TilstandType.AVVENTER_GODKJENNING,
-            TilstandType.TIL_UTBETALING,
-            TilstandType.AVSLUTTET,
-            TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING,
-            TilstandType.AVVENTER_HISTORIKK_REVURDERING
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_VILKÅRSPRØVING_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING
         )
 
         assertWarningTekst(inspektør, "Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.")
@@ -317,26 +318,26 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     @Test
     fun `revurder inntekt ny inntekt under en halv G`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
-        håndterOverstyring(inntekt = 3000.månedlig, skjæringstidspunkt = 1.januar)
+        håndterOverstyrInntekt(inntekt = 3000.månedlig, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         assertTilstander(
             0,
-            TilstandType.START,
-            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
-            TilstandType.AVVENTER_SØKNAD_FERDIG_GAP,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_VILKÅRSPRØVING,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_SIMULERING,
-            TilstandType.AVVENTER_GODKJENNING,
-            TilstandType.TIL_UTBETALING,
-            TilstandType.AVSLUTTET,
-            TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING,
-            TilstandType.AVVENTER_HISTORIKK_REVURDERING,
-            TilstandType.AVVENTER_SIMULERING_REVURDERING,
-            TilstandType.AVVENTER_GODKJENNING_REVURDERING
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_VILKÅRSPRØVING_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING
         )
 
         val utbetalingTilRevurdering = inspektør.utbetalinger.last()
@@ -374,29 +375,29 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode)
 
         forlengVedtak(1.juli(2020), 30.juli(2020))
-        håndterOverstyring(inntekt = 35000.månedlig, skjæringstidspunkt = 18.mars(2020))
+        håndterOverstyrInntekt(inntekt = 35000.månedlig, skjæringstidspunkt = 18.mars(2020))
 
         assertTilstander(
             0,
-            TilstandType.START,
-            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
-            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_SIMULERING,
-            TilstandType.AVVENTER_GODKJENNING,
-            TilstandType.TIL_UTBETALING,
-            TilstandType.AVSLUTTET,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
         )
 
         assertTilstander(
             1,
-            TilstandType.START,
-            TilstandType.MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_SIMULERING,
-            TilstandType.AVVENTER_GODKJENNING,
-            TilstandType.TIL_UTBETALING,
-            TilstandType.AVSLUTTET,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
         )
         assertErrors(inspektør)
     }
@@ -430,7 +431,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
         forlengVedtak(1.februar, 28.februar)
 
-        håndterOverstyring(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar)
+        håndterOverstyrInntekt(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar)
 
         håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
@@ -461,7 +462,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     @Test
     fun `avviser revurdering av inntekt for saker med flere arbeidsgivere`() {
         nyeVedtak(1.januar, 31.januar, "ag1", "ag2")
-        håndterOverstyring(inntekt = 32000.månedlig, "ag1", 1.januar)
+        håndterOverstyrInntekt(inntekt = 32000.månedlig, "ag1", 1.januar)
 
         assertEquals(1, observatør.avvisteRevurderinger.size)
         assertErrorTekst(inspektør, "Forespurt overstyring av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
@@ -508,7 +509,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = ag1)
         håndterUtbetalt(1.vedtaksperiode, orgnummer = ag1)
 
-        håndterOverstyring(32000.månedlig, ag1, 1.januar)
+        håndterOverstyrInntekt(32000.månedlig, ag1, 1.januar)
         assertEquals(1, observatør.avvisteRevurderinger.size)
         assertErrorTekst(inspektør, "Forespurt overstyring av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
     }
@@ -533,7 +534,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(1.vedtaksperiode)
 
-        håndterOverstyring(46000.årlig, skjæringstidspunkt = 1.januar) // da havner vi under greia
+        håndterOverstyrInntekt(46000.årlig, skjæringstidspunkt = 1.januar) // da havner vi under greia
         håndterYtelser(1.vedtaksperiode)
 
         val utbetalinger = inspektør.utbetalinger
@@ -565,13 +566,13 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(1.vedtaksperiode)
 
-        håndterOverstyring(UnderMinstegrense, skjæringstidspunkt = 1.januar)
+        håndterOverstyrInntekt(UnderMinstegrense, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(1.vedtaksperiode)
 
-        håndterOverstyring(OverMinstegrense, skjæringstidspunkt = 1.januar)
+        håndterOverstyrInntekt(OverMinstegrense, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
 
         val utbetalinger = inspektør.utbetalinger

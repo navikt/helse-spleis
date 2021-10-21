@@ -19,7 +19,7 @@ internal class OverstyrUtkastTilRevurderingTest: AbstractEndToEndTest() {
         forlengVedtak(1.februar, 28.februar)
         forlengVedtak(1.mars, 31.mars)
 
-        håndterOverstyring((28.januar til 15.februar).map { manuellFeriedag(it) })
+        håndterOverstyrTidslinje((28.januar til 15.februar).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
@@ -80,10 +80,10 @@ internal class OverstyrUtkastTilRevurderingTest: AbstractEndToEndTest() {
     @Test
     fun `overstyr utkast til revurdering av periode`() {
         nyttVedtak(1.januar, 31.januar)
-        håndterOverstyring((28.januar til 31.januar).map { manuellFeriedag(it) })
+        håndterOverstyrTidslinje((28.januar til 31.januar).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterOverstyring((29.januar til 29.januar).map { manuellSykedag(it) })
+        håndterOverstyrTidslinje((29.januar til 29.januar).map { manuellSykedag(it) })
         håndterYtelser(1.vedtaksperiode)
 
         val utbetalingstidslinje = inspektør.sisteUtbetalingUtbetalingstidslinje()
@@ -116,11 +116,11 @@ internal class OverstyrUtkastTilRevurderingTest: AbstractEndToEndTest() {
     fun `overstyr dager i andre periode i pågående revurdering`() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
-        håndterOverstyring((28.januar til 31.januar).map { manuellFeriedag(it) })
+        håndterOverstyrTidslinje((28.januar til 31.januar).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
-        håndterOverstyring((1.februar til 2.februar).map { manuellFeriedag(it) })
+        håndterOverstyrTidslinje((1.februar til 2.februar).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -184,13 +184,13 @@ internal class OverstyrUtkastTilRevurderingTest: AbstractEndToEndTest() {
         forlengVedtak(1.februar, 28.februar)
         forlengVedtak(1.mars, 31.mars)
 
-        håndterOverstyring((28.januar til 31.januar).map { manuellFeriedag(it) })
+        håndterOverstyrTidslinje((28.januar til 31.januar).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
 
-        håndterOverstyring((1.februar til 2.februar).map { manuellFeriedag(it) })
+        håndterOverstyrTidslinje((1.februar til 2.februar).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
@@ -271,11 +271,11 @@ internal class OverstyrUtkastTilRevurderingTest: AbstractEndToEndTest() {
     fun `revurder tidligere periode når det finnes en periode til revurdering`() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
-        håndterOverstyring((1.februar til 2.februar).map { manuellFeriedag(it) })
+        håndterOverstyrTidslinje((1.februar til 2.februar).map { manuellFeriedag(it) })
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
 
-        håndterOverstyring((29.januar til 30.januar).map { manuellFeriedag(it) })
+        håndterOverstyrTidslinje((29.januar til 30.januar).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)

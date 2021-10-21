@@ -23,7 +23,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
 
         assertInntektForDato(INNTEKT, fom, inspektør)
 
-        håndterOverstyring(inntekt = overstyrtInntekt, orgnummer = ORGNUMMER, skjæringstidspunkt = fom)
+        håndterOverstyrInntekt(inntekt = overstyrtInntekt, orgnummer = ORGNUMMER, skjæringstidspunkt = fom)
 
         assertTilstander(1.vedtaksperiode,
             TilstandType.START,
@@ -66,7 +66,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         val overstyrtInntekt = INNTEKT*1.40
         tilGodkjenning(fom, 31.januar(2021), 100.prosent, fom)
 
-        håndterOverstyring(inntekt = overstyrtInntekt, orgnummer = ORGNUMMER, skjæringstidspunkt = fom)
+        håndterOverstyrInntekt(inntekt = overstyrtInntekt, orgnummer = ORGNUMMER, skjæringstidspunkt = fom)
 
         håndterVilkårsgrunnlag(1.vedtaksperiode)
 
@@ -116,7 +116,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = ag1)
         håndterSimulering(1.vedtaksperiode, orgnummer = ag1)
 
-        håndterOverstyring(inntekt = 33000.månedlig, "ag1", 1.januar)
+        håndterOverstyrInntekt(inntekt = 33000.månedlig, "ag1", 1.januar)
         assertEquals(1, observatør.avvisteRevurderinger.size)
         assertErrorTekst(inspektør, "Forespurt overstyring av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
     }
@@ -160,7 +160,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = ag1)
         håndterSimulering(1.vedtaksperiode, orgnummer = ag1)
 
-        håndterOverstyring(32000.månedlig, ag1, 1.januar)
+        håndterOverstyrInntekt(32000.månedlig, ag1, 1.januar)
         assertEquals(1, observatør.avvisteRevurderinger.size)
         assertErrorTekst(inspektør, "Forespurt overstyring av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
     }
@@ -169,14 +169,14 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
     fun `skal kunne overstyre inntekt i utkast til revurdering`() {
         nyttVedtak(1.januar, 31.januar)
 
-        håndterOverstyring(inntekt = 20000.månedlig, skjæringstidspunkt = 1.januar)
+        håndterOverstyrInntekt(inntekt = 20000.månedlig, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         // 10153 = round((20000 * 12) / 260) * 11 (11 nav-dager i januar 2018)
         assertEquals(10153, inspektør.utbetalinger.last().arbeidsgiverOppdrag().totalbeløp())
 
-        håndterOverstyring(inntekt = 25000.månedlig, skjæringstidspunkt = 1.januar)
+        håndterOverstyrInntekt(inntekt = 25000.månedlig, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
@@ -210,7 +210,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
 
-        håndterOverstyring(inntekt = 20000.månedlig, skjæringstidspunkt = 1.januar)
+        håndterOverstyrInntekt(inntekt = 20000.månedlig, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -218,7 +218,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         // 28613 = round((20000 * 12) / 260) * 31 (31 nav-dager i januar + februar 2018)
         assertEquals(28613, inspektør.utbetalinger.last().arbeidsgiverOppdrag().totalbeløp())
 
-        håndterOverstyring(inntekt = 25000.månedlig, skjæringstidspunkt = 1.januar)
+        håndterOverstyrInntekt(inntekt = 25000.månedlig, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -269,12 +269,12 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
 
-        håndterOverstyring((20.januar til 29.januar).map { manuellFeriedag(it) })
+        håndterOverstyrTidslinje((20.januar til 29.januar).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
 
-        håndterOverstyring(inntekt = 20000.månedlig, skjæringstidspunkt = 1.januar)
+        håndterOverstyrInntekt(inntekt = 20000.månedlig, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -342,7 +342,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
-        håndterOverstyring(UnderMinstegrense, skjæringstidspunkt = 1.januar) // da havner vi under greia
+        håndterOverstyrInntekt(UnderMinstegrense, skjæringstidspunkt = 1.januar)
 
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
@@ -382,11 +382,11 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(1.vedtaksperiode)
 
-        håndterOverstyring(48000.årlig, skjæringstidspunkt = 1.januar)
+        håndterOverstyrInntekt(48000.årlig, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
-        håndterOverstyring(46000.årlig, skjæringstidspunkt = 1.januar) // da havner vi under greia
+        håndterOverstyrInntekt(46000.årlig, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)

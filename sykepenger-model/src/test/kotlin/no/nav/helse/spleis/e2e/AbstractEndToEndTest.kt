@@ -552,7 +552,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         ).håndter(Person::håndter)
     }
 
-    protected fun håndterOverstyring(
+    protected fun håndterOverstyrInntekt(
         inntekt: Inntekt = 31000.månedlig,
         orgnummer: String = ORGNUMMER,
         skjæringstidspunkt: LocalDate
@@ -567,7 +567,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         ).håndter(Person::håndter)
     }
 
-    protected fun håndterOverstyring(
+    protected fun håndterOverstyrTidslinje(
         overstyringsdager: List<ManuellOverskrivingDag> = listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag, 100)),
         orgnummer: String = ORGNUMMER
     ) {
@@ -1563,7 +1563,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     protected fun manuellPermisjonsdag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Permisjonsdag)
     protected fun manuellFeriedag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Feriedag)
     protected fun manuellSykedag(dato: LocalDate, grad: Int = 100) = ManuellOverskrivingDag(dato, Dagtype.Sykedag, grad)
-    protected fun håndterOverstyringSykedag(periode: Periode) = håndterOverstyring(periode.map { manuellSykedag(it) })
+    protected fun håndterOverstyringSykedag(periode: Periode) = håndterOverstyrTidslinje(periode.map { manuellSykedag(it) })
     protected fun manuellArbeidsgiverdag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Egenmeldingsdag)
 
     inline fun <reified R : Utbetalingsdag> assertUtbetalingsdag(dag: Utbetalingsdag, expectedDagtype: KClass<R>, expectedTotalgrad: Double = 100.0) {

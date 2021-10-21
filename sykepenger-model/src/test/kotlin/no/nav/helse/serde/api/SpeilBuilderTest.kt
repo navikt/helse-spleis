@@ -202,7 +202,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     fun `annullerer feilet revurdering`() {
         nyttVedtak(1.januar, 31.januar)
 
-        håndterOverstyring()
+        håndterOverstyrTidslinje()
         håndterYtelser()
         håndterSimulering(simuleringOK = false)
         håndterAnnullerUtbetaling()
@@ -221,7 +221,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `kan mappe perioder som har beregning men står i avsluttet uten utbetaling`() {
         tilGodkjenning(1.januar, 19.januar, 100.prosent, 1.januar)
-        håndterOverstyring(
+        håndterOverstyrTidslinje(
             listOf(
                 ManuellOverskrivingDag(17.januar, Feriedag),
                 ManuellOverskrivingDag(18.januar, Feriedag),
@@ -707,7 +707,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
-        håndterOverstyring() // Overstyring forkaster utbetaling og sender periode tilbake
+        håndterOverstyrTidslinje() // Overstyring forkaster utbetaling og sender periode tilbake
 
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)

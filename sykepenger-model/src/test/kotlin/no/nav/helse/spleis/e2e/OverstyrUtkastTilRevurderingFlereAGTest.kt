@@ -22,13 +22,13 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
         nyeVedtak(1.januar, 31.januar, AG1, AG2)
         forlengVedtak(1.februar, 28.februar, AG1, AG2)
 
-        håndterOverstyring((29.januar til 29.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
+        håndterOverstyrTidslinje((29.januar til 29.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
         håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
         håndterYtelser(1.vedtaksperiode, orgnummer = AG2)
         håndterYtelser(2.vedtaksperiode, orgnummer = AG1)
         håndterSimulering(2.vedtaksperiode, orgnummer = AG1)
 
-        håndterOverstyring((30.januar til 31.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
+        håndterOverstyrTidslinje((30.januar til 31.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
         håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
         håndterYtelser(1.vedtaksperiode, orgnummer = AG2)
         håndterYtelser(2.vedtaksperiode, orgnummer = AG1)
@@ -104,13 +104,13 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
         nyeVedtak(1.januar, 31.januar, AG1, AG2)
         forlengVedtak(1.februar, 28.februar, AG1, AG2)
 
-        håndterOverstyring((29.januar til 31.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
+        håndterOverstyrTidslinje((29.januar til 31.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
         håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
         håndterYtelser(1.vedtaksperiode, orgnummer = AG2)
         håndterYtelser(2.vedtaksperiode, orgnummer = AG1)
         håndterSimulering(2.vedtaksperiode, orgnummer = AG1)
 
-        håndterOverstyring((30.januar til 31.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
+        håndterOverstyrTidslinje((30.januar til 31.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
 
         inspektør(AG1) {
             assertNoErrors(this)
@@ -155,13 +155,13 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
         nyeVedtak(1.januar, 31.januar, AG1, AG2)
         forlengVedtak(1.februar, 28.februar, AG1, AG2)
 
-        håndterOverstyring((29.januar til 29.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
+        håndterOverstyrTidslinje((29.januar til 29.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
         håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
         håndterYtelser(1.vedtaksperiode, orgnummer = AG2)
         håndterYtelser(2.vedtaksperiode, orgnummer = AG1)
         håndterSimulering(2.vedtaksperiode, orgnummer = AG1)
 
-        håndterOverstyring((30.januar til 31.januar).map { manuellFeriedag(it) }, orgnummer = AG2)
+        håndterOverstyrTidslinje((30.januar til 31.januar).map { manuellFeriedag(it) }, orgnummer = AG2)
         håndterYtelser(1.vedtaksperiode, orgnummer = AG2)
 
         inspektør(AG1) {
@@ -217,13 +217,13 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
         nyeVedtak(1.januar, 31.januar, AG1, AG2)
         forlengVedtak(1.februar, 28.februar, AG1, AG2)
 
-        håndterOverstyring((29.januar til 31.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
+        håndterOverstyrTidslinje((29.januar til 31.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
         håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
         håndterYtelser(1.vedtaksperiode, orgnummer = AG2)
         håndterYtelser(2.vedtaksperiode, orgnummer = AG1)
         håndterSimulering(2.vedtaksperiode, orgnummer = AG1)
 
-        håndterOverstyring((1.februar til 2.februar).map { manuellFeriedag(it) }, orgnummer = AG2)
+        håndterOverstyrTidslinje((1.februar til 2.februar).map { manuellFeriedag(it) }, orgnummer = AG2)
         håndterYtelser(1.vedtaksperiode, orgnummer = AG2)
         håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
         håndterYtelser(1.vedtaksperiode, orgnummer = AG2)
@@ -293,7 +293,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
         nyeVedtak(1.januar, 31.januar, AG1, AG2)
         forlengVedtak(1.februar, 28.februar, AG1, AG2)
 
-        håndterOverstyring((29.januar til 31.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
+        håndterOverstyrTidslinje((29.januar til 31.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
         håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
         håndterYtelser(1.vedtaksperiode, orgnummer = AG2)
         håndterYtelser(2.vedtaksperiode, orgnummer = AG1)
@@ -301,7 +301,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = AG1)
         håndterUtbetalt(2.vedtaksperiode, orgnummer = AG1)
 
-        håndterOverstyring((1.februar til 2.februar).map { manuellFeriedag(it) }, orgnummer = AG2)
+        håndterOverstyrTidslinje((1.februar til 2.februar).map { manuellFeriedag(it) }, orgnummer = AG2)
         inspektør(AG1) {
             assertTilstander(
                 1.vedtaksperiode,
@@ -344,7 +344,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
         nyeVedtak(1.januar, 31.januar, AG1, AG2)
         forlengVedtak(1.februar, 28.februar, AG1, AG2)
 
-        håndterOverstyring((29.januar til 31.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
+        håndterOverstyrTidslinje((29.januar til 31.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
         håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
         håndterYtelser(1.vedtaksperiode, orgnummer = AG2)
         håndterYtelser(2.vedtaksperiode, orgnummer = AG1)
@@ -352,7 +352,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = AG1)
         håndterUtbetalt(2.vedtaksperiode, orgnummer = AG1)
 
-        håndterOverstyring((1.februar til 2.februar).map { manuellFeriedag(it) }, orgnummer = AG1)
+        håndterOverstyrTidslinje((1.februar til 2.februar).map { manuellFeriedag(it) }, orgnummer = AG1)
         inspektør(AG1) {
             assertErrorTekst(this, "Kan ikke overstyre en pågående behandling der én eller flere perioder er behandlet ferdig")
             assertTilstander(

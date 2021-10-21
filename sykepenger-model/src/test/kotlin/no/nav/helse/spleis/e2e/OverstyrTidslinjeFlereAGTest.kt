@@ -19,7 +19,7 @@ internal class OverstyrTidslinjeFlereAGTest : AbstractEndToEndTest() {
 
         håndterYtelser(1.vedtaksperiode, orgnummer = AG2)
         håndterSimulering(1.vedtaksperiode, orgnummer = AG2)
-        håndterOverstyring((29.januar til 29.januar).map { manuellFeriedag(it) }, orgnummer = AG2)
+        håndterOverstyrTidslinje((29.januar til 29.januar).map { manuellFeriedag(it) }, orgnummer = AG2)
         assertErrorTekst(inspektør(AG2), "Kan ikke overstyre en pågående behandling der én eller flere perioder er behandlet ferdig")
     }
 }

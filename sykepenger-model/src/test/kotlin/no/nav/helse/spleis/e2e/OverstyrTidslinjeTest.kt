@@ -26,7 +26,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterOverstyring(listOf(manuellSykedag(2.januar), manuellArbeidsgiverdag(24.januar), manuellFeriedag(25.januar)))
+        håndterOverstyrTidslinje(listOf(manuellSykedag(2.januar), manuellArbeidsgiverdag(24.januar), manuellFeriedag(25.januar)))
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         assertEquals(Utbetaling.Forkastet, inspektør.utbetalingtilstand(0))
     }
@@ -40,7 +40,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterOverstyring(listOf(manuellSykedag(2.januar), manuellArbeidsgiverdag(24.januar), manuellFeriedag(25.januar)))
+        håndterOverstyrTidslinje(listOf(manuellSykedag(2.januar), manuellArbeidsgiverdag(24.januar), manuellFeriedag(25.januar)))
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -59,7 +59,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterOverstyring(listOf(manuellArbeidsgiverdag(18.januar)))
+        håndterOverstyrTidslinje(listOf(manuellArbeidsgiverdag(18.januar)))
         assertEquals(Utbetaling.Forkastet, inspektør.utbetalingtilstand(0))
         assertNotEquals(TilstandType.AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
 
@@ -93,7 +93,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterOverstyring(listOf(manuellSykedag(22.januar, 30)))
+        håndterOverstyrTidslinje(listOf(manuellSykedag(22.januar, 30)))
 
         assertNotEquals(TilstandType.AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
 
@@ -115,7 +115,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterOverstyring(listOf(manuellSykedag(22.januar, 0)))
+        håndterOverstyrTidslinje(listOf(manuellSykedag(22.januar, 0)))
 
         assertNotEquals(TilstandType.AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
 
@@ -136,7 +136,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterOverstyring(listOf(manuellFeriedag(22.januar), manuellPermisjonsdag(23.januar)))
+        håndterOverstyrTidslinje(listOf(manuellFeriedag(22.januar), manuellPermisjonsdag(23.januar)))
 
         assertNotEquals(TilstandType.AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
 
@@ -157,7 +157,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterOverstyring(listOf(manuellFeriedag(26.januar)))
+        håndterOverstyrTidslinje(listOf(manuellFeriedag(26.januar)))
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -205,12 +205,12 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         forlengVedtak(1.februar, 28.februar)
         forlengVedtak(1.mars, 31.mars)
 
-        håndterOverstyring((20.januar til 29.januar).map { manuellFeriedag(it) })
+        håndterOverstyrTidslinje((20.januar til 29.januar).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
 
         // Denne overstyringen kommer før den forrige er ferdig prossessert
-        håndterOverstyring((30.januar til 31.januar).map { manuellFeriedag(it) })
+        håndterOverstyrTidslinje((30.januar til 31.januar).map { manuellFeriedag(it) })
 
         assertTilstander(
             1.vedtaksperiode,
@@ -265,13 +265,13 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         forlengVedtak(1.februar, 28.februar)
         forlengVedtak(1.mars, 31.mars)
 
-        håndterOverstyring((20.januar til 29.januar).map { manuellFeriedag(it) })
+        håndterOverstyrTidslinje((20.januar til 29.januar).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
 
         // Denne overstyringen kommer før den forrige er ferdig prossessert
-        håndterOverstyring((30.januar til 31.januar).map { manuellFeriedag(it) })
+        håndterOverstyrTidslinje((30.januar til 31.januar).map { manuellFeriedag(it) })
 
         assertTilstander(
             1.vedtaksperiode,
@@ -327,12 +327,12 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
             nyttVedtak(1.januar, 31.januar)
             forlengVedtak(1.februar, 28.februar)
 
-            håndterOverstyring(inntekt = 20000.månedlig, skjæringstidspunkt = 1.januar)
+            håndterOverstyrInntekt(inntekt = 20000.månedlig, skjæringstidspunkt = 1.januar)
             håndterYtelser(1.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
 
-            håndterOverstyring((20.januar til 29.januar).map { manuellFeriedag(it) })
+            håndterOverstyrTidslinje((20.januar til 29.januar).map { manuellFeriedag(it) })
             håndterYtelser(1.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)

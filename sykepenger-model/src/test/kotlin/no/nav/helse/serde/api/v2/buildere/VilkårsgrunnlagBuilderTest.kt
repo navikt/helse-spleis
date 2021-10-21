@@ -1,6 +1,5 @@
 package no.nav.helse.serde.api.v2.buildere
 
-import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -13,10 +12,8 @@ import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
@@ -105,7 +102,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `revurdering av inntekt`() {
         nyttVedtak(1.januar, 31.januar)
-        håndterOverstyring(inntekt = 35000.månedlig, skjæringstidspunkt = 1.januar)
+        håndterOverstyrInntekt(inntekt = 35000.månedlig, skjæringstidspunkt = 1.januar)
         håndterYtelser()
         håndterSimulering()
 
@@ -159,7 +156,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
             lagInntektperioder(fom = 1.januar, inntekt = 21000.månedlig, orgnummer = AG2)
         }
 
-        håndterOverstyring(inntekt = 18000.månedlig, skjæringstidspunkt = 1.januar, orgnummer = AG1)
+        håndterOverstyrInntekt(inntekt = 18000.månedlig, skjæringstidspunkt = 1.januar, orgnummer = AG1)
 
         val innslag = inspektør.vilkårsgrunnlagHistorikkInnslag()
         val generasjoner = vilkårsgrunnlag.build().toDTO()

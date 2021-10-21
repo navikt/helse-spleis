@@ -2714,7 +2714,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         assertEquals(null, inspektør.sykdomshistorikkDagTeller[Dag.Feriedag::class])
 
-        håndterOverstyring(listOf(ManuellOverskrivingDag(14.januar(2021), Dagtype.Feriedag)))
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(14.januar(2021), Dagtype.Feriedag)))
 
         assertEquals(1, inspektør.sykdomshistorikkDagTeller[Dag.Feriedag::class])
     }

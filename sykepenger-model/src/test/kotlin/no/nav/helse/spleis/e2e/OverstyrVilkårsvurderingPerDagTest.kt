@@ -12,7 +12,7 @@ internal class OverstyrVilkårsvurderingPerDagTest : AbstractEndToEndTest() {
     fun `saksbehandler legger til avviste utenlandsdager`() {
         nyttVedtak(1.januar, 31.januar)
 
-        håndterOverstyring(listOf(ManuellOverskrivingDag(22.januar, Dagtype.Avslått)))
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(22.januar, Dagtype.Avslått)))
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
