@@ -640,7 +640,7 @@ internal class Arbeidsgiver private constructor(
     internal fun håndter(hendelse: OverstyrInntekt) {
         hendelse.kontekst(this)
         vedtaksperioder
-            .firstOrNull { it.gjelder(hendelse.skjæringstidspunkt) }
+            .firstOrNull { it.harUtbetalingstidslinje() && it.gjelder(hendelse.skjæringstidspunkt) }
             ?.håndter(hendelse)
         finalize(hendelse)
     }

@@ -597,6 +597,103 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         }
         assertWarningTekst(inspektør, WARN_FORLENGER_OPPHØRT_OPPDRAG)
     }
+
+    @Test
+    fun `revurdering av inntekt delegeres til den første perioden som har en utbetalingstidslinje - arbeidsgiversøknad først`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 15.januar, 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(1.januar, 15.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(16.januar, 15.februar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(16.januar, 15.februar, 100.prosent))
+        håndterInntektsmelding(
+            listOf(Periode(1.januar, 16.januar))
+        )
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt(2.vedtaksperiode)
+
+        håndterOverstyrInntekt(skjæringstidspunkt = 1.januar)
+        håndterYtelser(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVSLUTTET_UTEN_UTBETALING
+        )
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_VILKÅRSPRØVING_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING,
+            AVSLUTTET
+        )
+    }
+
+    @Test
+    fun `revurdering av inntekt delegeres til den første perioden som har en utbetalingstidslinje - periode uten utbetaling først`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(1.januar, 31.januar))
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt(2.vedtaksperiode)
+
+        håndterOverstyrInntekt(skjæringstidspunkt = 1.januar)
+        håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt(2.vedtaksperiode)
+
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVSLUTTET_UTEN_UTBETALING,
+            AVVENTER_VILKÅRSPRØVING_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVSLUTTET_UTEN_UTBETALING
+        )
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_ARBEIDSGIVERE_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING,
+            AVSLUTTET
+        )
+    }
 }
 
 private fun Oppdrag.skalHaEndringskode(kode: Endringskode, message: String = "") = accept(UtbetalingSkalHaEndringskode(kode, message))

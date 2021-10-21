@@ -283,9 +283,11 @@ internal class Vedtaksperiode private constructor(
 
         kontekst(hendelse)
 
-        if (harSammeArbeidsgiverSom(revurdert) && harUlikFagsystemId(revurdert.utbetaling())) {
-            hendelse.error("Periode ligger senere i tid og har annen fagsystemid enn periode som skal revurderes. Blokkerer revurdering")
-            return
+        if (revurdert.tilstand != AvsluttetUtenUtbetaling) {
+            if (harSammeArbeidsgiverSom(revurdert) && harUlikFagsystemId(revurdert.utbetaling())) {
+                hendelse.error("Periode ligger senere i tid og har annen fagsystemid enn periode som skal revurderes. Blokkerer revurdering")
+                return
+            }
         }
 
         if (revurdert.skjæringstidspunkt != this.skjæringstidspunkt && this.erUtbetalt()) {
@@ -310,6 +312,8 @@ internal class Vedtaksperiode private constructor(
         this.sykdomstidslinje.erRettFør(other.sykdomstidslinje) && this.tilstand == AvsluttetUtenUtbetaling
 
     private fun harSykeperiodeRettFør() = arbeidsgiver.finnSykeperiodeRettFør(this) != null
+
+    internal fun harUtbetalingstidslinje() = utbetalingstidslinje.isNotEmpty()
 
     internal fun gjelder(skjæringstidspunkt: LocalDate) = this.skjæringstidspunkt == skjæringstidspunkt
 
@@ -1386,9 +1390,17 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
-            if (vedtaksperiode.utbetaling().erAvsluttet()) {
-                gjenopptaBehandling.info("Går til avsluttet fordi revurdering er fullført via en annen vedtaksperiode")
-                vedtaksperiode.tilstand(gjenopptaBehandling, Avsluttet)
+            val ingenUtbetaling = !vedtaksperiode.utbetaling().harUtbetalinger()
+            val kunArbeidsgiverdager = vedtaksperiode.utbetalingstidslinje.kunArbeidsgiverdager()
+            when {
+                ingenUtbetaling && kunArbeidsgiverdager -> {
+                    gjenopptaBehandling.info("Går til avsluttet uten utbetaling fordi revurdering er fullført via en annen vedtaksperiode")
+                    vedtaksperiode.tilstand(gjenopptaBehandling, AvsluttetUtenUtbetaling)
+                }
+                vedtaksperiode.utbetaling().erAvsluttet() -> {
+                    gjenopptaBehandling.info("Går til avsluttet fordi revurdering er fullført via en annen vedtaksperiode")
+                    vedtaksperiode.tilstand(gjenopptaBehandling, Avsluttet)
+                }
             }
         }
 
@@ -2418,6 +2430,19 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
             hendelse.info("Overstyrer ikke en vedtaksperiode som er avsluttet uten utbetaling")
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
+            if (vedtaksperiode.person.kanRevurdereInntekt(hendelse.skjæringstidspunkt)) {
+                vedtaksperiode.person.igangsettRevurdering(hendelse, vedtaksperiode)
+            } else {
+                hendelse.error("Kan ikke revurdere inntekt, da vi mangler datagrunnlag på skjæringstidspunktet")
+            }
+        }
+
+        override fun revurder(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
+            vedtaksperiode.tilstand(hendelse, AvventerVilkårsprøvingRevurdering)
+            vedtaksperiode.tilstand.håndter(vedtaksperiode, hendelse)
         }
     }
 
