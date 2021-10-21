@@ -27,7 +27,7 @@ internal sealed class Oppdragslinje(protected var fom: LocalDate,
     fun endreAktuellDagsinntekt(nyAktuellDagsinntekt: Int) { aktuellDagsinntekt = nyAktuellDagsinntekt }
     override operator fun iterator() = periode.iterator()
     fun flyttStart(nyFom: LocalDate) { this.fom = nyFom}
-    internal fun totalbeløp() = beløp?.let { if (klassekode == RefusjonFeriepengerIkkeOpplysningspliktig) it else it * stønadsdager() } ?: 0
+    open fun totalbeløp() = beløp?.let { if (klassekode == RefusjonFeriepengerIkkeOpplysningspliktig) it else it * stønadsdager() } ?: 0
     internal fun dager() = fom.datesUntil(tom.plusDays(1)).filter { !it.erHelg() }.toList()
     internal fun kobleTil(other: Oppdragslinje) {
         this.delytelseId = other.delytelseId + 1
@@ -180,6 +180,7 @@ internal class Opphørslinje internal constructor(
     override fun førstedato(): LocalDate = datoStatusFom
     fun datoStatusFom() = datoStatusFom
     override fun stønadsdager() = 0
+    override fun totalbeløp() = 0
 
     override fun equals(other: Any?) = other is Opphørslinje && this.equals(other)
 
