@@ -43,7 +43,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING)
         assertTrue(inspektør.utbetalinger.last().arbeidsgiverOppdrag().isNotEmpty())
-        inspektør.utbetalinger.last().arbeidsgiverOppdrag().forEach { assertEquals(1431, it.beløp) }
+        inspektør.utbetalinger.last().arbeidsgiverOppdrag().forEach { assertEquals(1431, it.beløp()) }
         assertTrue(inspektør.utbetalinger.last().personOppdrag().isEmpty())
         assertUtbetalingsbeløp(2.vedtaksperiode, 1431, 1431, subset = 1.februar til 26.februar)
         assertUtbetalingsbeløp(2.vedtaksperiode, 0, 1431, subset = 27.februar til 27.februar)
