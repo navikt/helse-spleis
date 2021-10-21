@@ -283,7 +283,8 @@ internal class Økonomi private constructor(
 
     private fun _betal() {
         val total = dekningsgrunnlag!! * grad().ratio()
-        arbeidsgiverbeløp = arbeidsgiverRefusjonsbeløp?.coerceAtMost(total) ?: total
+        val gradertArbeidsgiverRefusjonsbeløp = arbeidsgiverRefusjonsbeløp?.let { it * grad().ratio() }
+        arbeidsgiverbeløp = gradertArbeidsgiverRefusjonsbeløp?.coerceAtMost(total) ?: total
         personbeløp = (total - arbeidsgiverbeløp!!).coerceAtLeast(INGEN)
     }
 

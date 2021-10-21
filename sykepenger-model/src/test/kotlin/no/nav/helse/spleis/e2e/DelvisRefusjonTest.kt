@@ -16,6 +16,7 @@ import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
+import no.nav.helse.testhelpers.november
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -106,7 +107,28 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt(1.vedtaksperiode)
-            assertFalse(inspektør.warnings.contains("Fant ikke refusjon for perioden. Defaulter til full refusjon."))
+            assertEquals(0, inspektør.warnings.size)
+            assertFalse(inspektør.warnings.contains("Fant ikke refusjonsgrad for perioden. Undersøk før du utbetaler."))
+        }
+
+    @Test
+    fun `Arbeidsgiverperiode tilstøter ikke Infotrygd`() =
+        Toggles.RefusjonPerDag.enable {
+            håndterInntektsmelding(listOf(1.november(2017) til 16.november(2017)))
+
+            håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+            håndterUtbetalingshistorikk(
+                1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
+                    Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true)
+                )
+            )
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt(1.vedtaksperiode)
+            assertEquals(1, inspektør.warnings.size)
+            assertTrue(inspektør.warnings.contains("Fant ikke refusjonsgrad for perioden. Undersøk før du utbetaler."))
         }
 
     @Test
@@ -127,7 +149,8 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(1.vedtaksperiode)
-        assertFalse(inspektør.warnings.contains("Fant ikke refusjon for perioden. Defaulter til full refusjon."))
+        assertEquals(0, inspektør.warnings.size)
+        assertFalse(inspektør.warnings.contains("Fant ikke refusjonsgrad for perioden. Undersøk før du utbetaler."))
     }
 
     @Test
@@ -556,6 +579,29 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
                 orgnummer = a2
             )
         }
+
+    @Test
+    fun `gradert sykmelding med en arbeidsgiver`() = Toggles.RefusjonPerDag.enable {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 50.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent))
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            refusjon = Inntektsmelding.Refusjon(INNTEKT/2, null, emptyList())
+        )
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        assertForkastetPeriodeTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            TIL_INFOTRYGD
+        )
+    }
 
     private fun assertUtbetalingsbeløp(
         vedtaksperiodeIdInnhenter: IdInnhenter,
