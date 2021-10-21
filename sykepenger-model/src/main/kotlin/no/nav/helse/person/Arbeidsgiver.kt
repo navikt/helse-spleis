@@ -768,9 +768,6 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
-    private fun List<Vedtaksperiode>.sisteSammenhengedeUtbetaling(vedtaksperiode: Vedtaksperiode) =
-        this.filter { it.sammeArbeidsgiverPeriodeOgUtbetalt(vedtaksperiode) }.maxOrNull()
-
 
     // Fredet funksjonsnavn
     internal fun tidligereOgEttergølgende(segSelv: Periode): VedtaksperiodeFilter {
