@@ -86,12 +86,7 @@ internal class MaksimumSykepengedagerfilter(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        if (dato >= alder.datoForØvreAldersgrense) {
-            aktivitetslogg.etterlevelse.`§8-3 ledd 1`(false)
-            state(State.ØvreAldersgrense)
-        } else {
-            betalbarDager[dato] = dag
-        }
+        betalbarDager[dato] = dag
         state.betalbarDag(this, dato)
     }
 
@@ -260,10 +255,5 @@ internal class MaksimumSykepengedagerfilter(
             }
         }
 
-        object ØvreAldersgrense : State() {
-            override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
-                avgrenser.avvisteDatoer.add(dagen)
-            }
-        }
     }
 }

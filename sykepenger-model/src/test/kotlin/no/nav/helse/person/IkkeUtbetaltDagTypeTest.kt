@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test
 
 internal class IkkeUtbetaltDagTypeTest {
     @Test
-    fun `alle typer IkkeUtbetaltDag dag skal ligge i spre-gosys`() {
+    fun `spre-gosys og Flex skal kjenne til alle typer IkkeUtbetaltDag`() {
         val ikkeUtbetaltDagerSomSpreGosysKjennerTil = listOf(
             "AvvistDag",
             "Fridag",
@@ -27,7 +27,7 @@ Enum-verdiene brukes her: https://github.com/navikt/helse-spre/blob/d10087e5ab37
     }
 
     @Test
-    fun `alle begrunnelser for avvist dag skal ligge i spre-gosys`() {
+    fun `spre-gosys og Flex skal kjenne til alle begrunnelser for avvist dag`() {
         val begrunnelserSomSpreGosysKjennerTil = listOf(
             "SykepengedagerOppbrukt",
             "MinimumInntekt",
@@ -35,7 +35,8 @@ Enum-verdiene brukes her: https://github.com/navikt/helse-spre/blob/d10087e5ab37
             "MinimumSykdomsgrad",
             "ManglerOpptjening",
             "ManglerMedlemskap",
-            "EtterDødsdato"
+            "EtterDødsdato",
+            "Over70",
         )
         IkkeUtbetaltDag.Begrunnelse.values().forEach { begrunnelse ->
             assertTrue(begrunnelserSomSpreGosysKjennerTil.contains(begrunnelse.name)) {

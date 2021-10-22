@@ -47,7 +47,7 @@ internal class UtbetalingTeller private constructor(
     }
 
     internal fun maksdato(sisteUtbetalingsdag: LocalDate) =
-        beregnGjenståendeSykedager(sisteUtbetalingsdag).let { (_, maksdato) -> maksdato }
+        beregnGjenståendeSykedager(minOf(alder.sisteVirkedagFørFylte70år, sisteUtbetalingsdag)).let { (_, maksdato) -> maksdato }
 
     internal fun forbrukteDager() = betalteDager
 

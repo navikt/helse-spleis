@@ -9,7 +9,9 @@ import java.time.temporal.ChronoUnit.YEARS
 
 internal class Alder(fødselsnummer: Fødselsnummer) {
     private val fødselsdato = fødselsnummer.fødselsdato
-    internal val datoForØvreAldersgrense = fødselsdato.plusYears(70).trimHelg()
+    internal val søttiårsdagen = fødselsdato.plusYears(70)
+    internal val datoForØvreAldersgrense = søttiårsdagen.trimHelg()
+    internal val sisteVirkedagFørFylte70år = datoForØvreAldersgrense.minusDays(1)
     internal val redusertYtelseAlder = fødselsdato.plusYears(67)
     private val forhøyetInntektskravAlder = fødselsdato.plusYears(67)
 

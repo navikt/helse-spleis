@@ -413,6 +413,7 @@ internal sealed class Begrunnelse(private val avvisstrategi: (Utbetalingsdag) ->
     object EgenmeldingUtenforArbeidsgiverperiode : Begrunnelse()
     object MinimumSykdomsgrad : Begrunnelse()
     object EtterDødsdato : Begrunnelse(inklNavHelg)
+    object Over70 : Begrunnelse(inklNavHelg) // TODO helg?
     object ManglerOpptjening : Begrunnelse()
     object ManglerMedlemskap : Begrunnelse()
 

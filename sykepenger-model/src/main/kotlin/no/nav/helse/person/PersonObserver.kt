@@ -77,7 +77,8 @@ interface PersonObserver {
                 MinimumSykdomsgrad,
                 EtterDødsdato,
                 ManglerMedlemskap,
-                ManglerOpptjening
+                ManglerOpptjening,
+                Over70,
             }
         }
     }

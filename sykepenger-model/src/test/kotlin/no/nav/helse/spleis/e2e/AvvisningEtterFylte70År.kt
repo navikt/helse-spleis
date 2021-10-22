@@ -1,0 +1,184 @@
+package no.nav.helse.spleis.e2e
+
+import ch.qos.logback.classic.Logger
+import ch.qos.logback.classic.spi.ILoggingEvent
+import ch.qos.logback.core.read.ListAppender
+import no.nav.helse.Toggles
+import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.til
+import no.nav.helse.person.Person
+import no.nav.helse.person.TilstandType.*
+import no.nav.helse.somFødselsnummer
+import no.nav.helse.testhelpers.desember
+import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.juli
+import no.nav.helse.testhelpers.mars
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.slf4j.LoggerFactory
+
+internal class AvvisningEtterFylte70År : AbstractEndToEndTest() {
+    private val logCollector = ListAppender<ILoggingEvent>()
+
+    init {
+        (LoggerFactory.getLogger("tjenestekall") as Logger).addAppender(logCollector)
+        logCollector.start()
+    }
+
+    companion object {
+        private val FYLLER_70_TIENDE_JANUAR = "10014812345".somFødselsnummer()
+        private val FYLLER_70_FJORTENDE_JANUAR = "14014812345".somFødselsnummer()
+        private val FYLLER_70_TOOGTYVENDE_JANUAR = "22014812345".somFødselsnummer()
+    }
+
+    @BeforeEach
+    fun setUp() {
+        logCollector.list.clear()
+        Toggles.SendFeriepengeOppdrag.enable()
+    }
+
+    @AfterEach
+    fun tearDown() {
+        Toggles.SendFeriepengeOppdrag.pop()
+    }
+
+    @Test
+    fun `Person over 70 får alle dager etter AGP avvist med Over70 som begrunnelse`() {
+        person = Person(AKTØRID, FYLLER_70_TIENDE_JANUAR)
+        observatør = TestObservatør().also { person.addObserver(it) }
+
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+
+        val avvisteDager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == "AvvistDag"}
+        val arbeidsgiverperiodedager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == "ArbeidsgiverperiodeDag"}
+        val navDager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == "NavDag"}
+        val navHelgedager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == "NavHelgDag"}
+
+        assertEquals(15, avvisteDager.size)
+        assertEquals(16, arbeidsgiverperiodedager.size)
+        assertEquals(0, navDager.size)
+        assertEquals(0, navHelgedager.size)
+        assertTilstander(1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_GODKJENNING,
+            AVSLUTTET
+        )
+    }
+
+    @Test
+    fun `Får ikke plutselig penger igjen etter 26 uker hvis over 70 år`() {
+        person = Person(AKTØRID, FYLLER_70_TIENDE_JANUAR)
+        observatør = TestObservatør().also { person.addObserver(it) }
+
+        håndterSykmelding(Sykmeldingsperiode(20.desember(2017), 9.januar, 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(20.desember(2017), 9.januar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterInntektsmelding(listOf(20.desember(2017) til 4.januar))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        håndterSykmelding(Sykmeldingsperiode(11.juli, 31.juli, 100.prosent))
+        håndterSøknadMedValidering(2.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(11.juli, 31.juli, 100.prosent))
+        håndterUtbetalingshistorikk(2.vedtaksperiode)
+        håndterInntektsmelding(listOf(11.juli til 26.juli))
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+
+        val avvisteDager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == "AvvistDag"}
+        val arbeidsgiverperiodedager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == "ArbeidsgiverperiodeDag"}
+
+        assertEquals(5, avvisteDager.size)
+        assertEquals(16 + 16, arbeidsgiverperiodedager.size)
+        assertTrue(avvisteDager.all { it.begrunnelser == listOf("Over70") })
+        assertTrue(arbeidsgiverperiodedager.all { it.begrunnelser == null })
+    }
+
+    @Test
+    fun `Maksdato settes til dagen før 70årsdagen uavhengig av opptjente sykedager dersom person fyller 70 i perioden`() {
+        person = Person(AKTØRID, FYLLER_70_TIENDE_JANUAR)
+        observatør = TestObservatør().also { person.addObserver(it) }
+
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+
+        assertEquals(9.januar, inspektør.sisteMaksdato(1.vedtaksperiode))
+    }
+
+    @Test
+    fun `Maksdato settes til dagen før 70årsdagen også for perioder etter fylte 70`() {
+        person = Person(AKTØRID, FYLLER_70_TIENDE_JANUAR)
+        observatør = TestObservatør().also { person.addObserver(it) }
+
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.mars til 16.mars))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+
+        assertEquals(9.januar, inspektør.sisteMaksdato(1.vedtaksperiode))
+    }
+
+    @Test
+    fun `Maksdato settes til virkedagen før 70årsdagen hvis bursdagen er på en søndag`() {
+        person = Person(AKTØRID, FYLLER_70_FJORTENDE_JANUAR)
+        observatør = TestObservatør().also { person.addObserver(it) }
+
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+
+        assertEquals(12.januar, inspektør.sisteMaksdato(1.vedtaksperiode))
+    }
+
+    @Test
+    fun `Maksdato settes til virkedagen før 70årsdagen hvis bursdagen er på en mandag`() {
+        person = Person(AKTØRID, FYLLER_70_TOOGTYVENDE_JANUAR)
+        observatør = TestObservatør().also { person.addObserver(it) }
+
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+
+        assertEquals(19.januar, inspektør.sisteMaksdato(1.vedtaksperiode))
+    }
+}

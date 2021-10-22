@@ -179,6 +179,7 @@ private class UtbetaltEventBuilder(
                 Begrunnelse.EtterDødsdato -> UtbetaltEvent.IkkeUtbetaltDag.Begrunnelse.EtterDødsdato
                 Begrunnelse.ManglerMedlemskap -> UtbetaltEvent.IkkeUtbetaltDag.Begrunnelse.ManglerMedlemskap
                 Begrunnelse.ManglerOpptjening -> UtbetaltEvent.IkkeUtbetaltDag.Begrunnelse.ManglerOpptjening
+                Begrunnelse.Over70 -> UtbetaltEvent.IkkeUtbetaltDag.Begrunnelse.Over70
             }
         }
 
