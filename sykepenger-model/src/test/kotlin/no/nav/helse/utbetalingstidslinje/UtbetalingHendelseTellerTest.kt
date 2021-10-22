@@ -69,21 +69,20 @@ internal class UtbetalingHendelseTellerTest {
     }
 
     @Test
-    fun `maksdato`() {
-        assertEquals(15.mai, UNG_PERSON_FNR_2018, 248, 15.mai)
-        assertEquals(18.mai, UNG_PERSON_FNR_2018, 244, 14.mai)
-        assertEquals(21.mai, UNG_PERSON_FNR_2018, 243, 14.mai)
-        assertEquals(22.mai, UNG_PERSON_FNR_2018, 242, 14.mai)
-        assertEquals(28.desember, UNG_PERSON_FNR_2018, 1, 17.januar)
-        assertEquals(9.februar, "12024812345".somFødselsnummer().alder(), 1, 17.januar)
-        assertEquals(22.januar, "12024812345".somFødselsnummer().alder(), 57, 17.januar)
-        assertEquals(7.mai, "12025112345".somFødselsnummer().alder(), 65, 17.januar)
-        assertEquals(12.februar, "12025112345".somFødselsnummer().alder(), 247, 9.februar)
-        assertEquals(13.februar, "12025112345".somFødselsnummer().alder(), 246, 9.februar)
-
+    fun maksdato() {
+        undersøke(15.mai, UNG_PERSON_FNR_2018, 248, 15.mai)
+        undersøke(18.mai, UNG_PERSON_FNR_2018, 244, 14.mai)
+        undersøke(21.mai, UNG_PERSON_FNR_2018, 243, 14.mai)
+        undersøke(22.mai, UNG_PERSON_FNR_2018, 242, 14.mai)
+        undersøke(28.desember, UNG_PERSON_FNR_2018, 1, 17.januar)
+        undersøke(9.februar, "12024812345".somFødselsnummer().alder(), 1, 17.januar)
+        undersøke(22.januar, "12024812345".somFødselsnummer().alder(), 57, 17.januar)
+        undersøke(7.mai, "12025112345".somFødselsnummer().alder(), 65, 17.januar)
+        undersøke(12.februar, "12025112345".somFødselsnummer().alder(), 247, 9.februar)
+        undersøke(13.februar, "12025112345".somFødselsnummer().alder(), 246, 9.februar)
     }
 
-    private fun assertEquals(expected: LocalDate, alder: Alder, dager: Int, sisteUtbetalingsdag: LocalDate) {
+    private fun undersøke(expected: LocalDate, alder: Alder, dager: Int, sisteUtbetalingsdag: LocalDate) {
         grense(alder, dager, sisteUtbetalingsdag.minusDays(dager.toLong() - 1))
         assertEquals(expected, grense.maksdato(sisteUtbetalingsdag))
     }
