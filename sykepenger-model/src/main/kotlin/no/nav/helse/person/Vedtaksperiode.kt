@@ -662,15 +662,15 @@ internal class Vedtaksperiode private constructor(
             (andreVedtaksperioder + this)
                 .filter { this.periode.overlapperMed(it.periode) }
                 .forEach { it.lagUtbetaling(engineForTimeline, hendelse) }
-            høstingsresultater(hendelse)
+            høstingsresultater(hendelse, andreVedtaksperioder)
         } else tilstand(hendelse, AvventerArbeidsgivere)
     }
 
-    private fun høstingsresultater(hendelse: ArbeidstakerHendelse) {
+    private fun høstingsresultater(hendelse: ArbeidstakerHendelse, andreVedtaksperioder: List<Vedtaksperiode>) {
         val ingenUtbetaling = !utbetaling().harUtbetalinger()
         val kunArbeidsgiverdager = utbetalingstidslinje.kunArbeidsgiverdager()
         val ingenWarnings = !person.aktivitetslogg.logg(this).hasWarningsOrWorse()
-        val harBrukerutbetaling = utbetalingstidslinje.harBrukerutbetalinger()
+        val harBrukerutbetaling = utbetalingstidslinje.harBrukerutbetalinger() || andreVedtaksperioder.any { it.utbetalingstidslinje.harBrukerutbetalinger() }
 
         when {
             ingenUtbetaling && kunArbeidsgiverdager && ingenWarnings -> {
