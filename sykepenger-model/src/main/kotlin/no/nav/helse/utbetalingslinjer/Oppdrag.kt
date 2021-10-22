@@ -135,10 +135,10 @@ internal class Oppdrag private constructor(
         }
 
     internal fun annuller(aktivitetslogg: IAktivitetslogg): Oppdrag {
-        return emptied().minus(this, aktivitetslogg)
+        return somAnnullering().minus(this, aktivitetslogg)
     }
 
-    private fun emptied(): Oppdrag =
+    private fun somAnnullering(): Oppdrag =
         Oppdrag(
             mottaker = mottaker,
             fagområde = fagområde,
@@ -149,7 +149,7 @@ internal class Oppdrag private constructor(
     internal fun minus(eldre: Oppdrag, aktivitetslogg: IAktivitetslogg): Oppdrag {
         return when {
             harIngenKoblingTilTidligereOppdrag(eldre) -> this
-            erTomt() -> deleteAll(eldre)
+            erAnnulleringsoppdrag() -> deleteAll(eldre)
             fomHarFlyttetSegFremover(eldre) -> {
                 aktivitetslogg.warn("Utbetaling opphører tidligere utbetaling. Kontroller simuleringen")
                 deleted(eldre)
@@ -165,8 +165,8 @@ internal class Oppdrag private constructor(
     // Vi ønsker ikke å forlenge en annullering, eller et oppdrag vi ikke overlapper eller har samme fagsystemId som
     private fun harIngenKoblingTilTidligereOppdrag(eldre: Oppdrag) = eldre.isEmpty() || this !in eldre
 
-    // Dette er synonymt med en annullering fordi måten vi genererer en annullering er å sende inn et oppdrag uten linjer
-    private fun erTomt() = this.isEmpty()
+    // Tomt oppdrag er synonymt med en annullering fordi måten vi genererer en annullering er å sende inn et oppdrag uten linjer
+    private fun erAnnulleringsoppdrag() = this.isEmpty()
 
     // Vi har oppdaget utbetalingsdager tidligere i tidslinjen
     private fun fomHarFlyttetSegBakover(eldre: Oppdrag) = this.førstedato < eldre.førstedato
