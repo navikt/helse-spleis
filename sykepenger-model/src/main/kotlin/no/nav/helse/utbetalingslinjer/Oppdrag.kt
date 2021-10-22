@@ -109,9 +109,9 @@ internal class Oppdrag private constructor(
 
     private fun utenUendretLinjer() = kopierMed(filter(Oppdragslinje::erForskjell))
 
-    private fun utenOpphørLinjer() = kopierMed(linjerUtenOpphør())
+    private fun utenOpphørLinjer() = kopierMed(filterIsInstance<Utbetalingslinje>())
 
-    internal fun linjerUtenOpphør() = filterNot { it is Opphørslinje }
+    internal fun linjerUtenOpphør() = filterIsInstance<Utbetalingslinje>()
 
     internal fun erForskjelligFra(resultat: Simulering.SimuleringResultat): Boolean {
         return dagSatser().zip(dagSatser(resultat, førstedato, sistedato)).any { (oppdrag, simulering) ->
