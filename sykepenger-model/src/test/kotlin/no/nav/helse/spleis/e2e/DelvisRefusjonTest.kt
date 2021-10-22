@@ -1,11 +1,8 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Toggles
-import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.IdInnhenter
@@ -57,7 +54,11 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     fun `Refusjonsbeløpet er forskjellig fra beregnet inntekt i inntektsmeldingen`() = Toggles.RefusjonPerDag.enable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 30000.månedlig, refusjon = Inntektsmelding.Refusjon(25000.månedlig, null, emptyList()))
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            beregnetInntekt = 30000.månedlig,
+            refusjon = Inntektsmelding.Refusjon(25000.månedlig, null, emptyList())
+        )
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -586,7 +587,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent))
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            refusjon = Inntektsmelding.Refusjon(INNTEKT/2, null, emptyList())
+            refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null, emptyList())
         )
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -598,6 +599,91 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            TIL_INFOTRYGD
+        )
+    }
+
+    @Test
+    fun `korrigerende inntektsmelding endrer på refusjonsbeløp`() = Toggles.RefusjonPerDag.enable {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 50.prosent))
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList())
+        )
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null, emptyList())
+        )
+        håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        assertForkastetPeriodeTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            TIL_INFOTRYGD
+        )
+    }
+
+    @Test
+    fun `korrigerende inntektsmelding endrer på refusjonsbeløp med infotrygdforlengelse`() = Toggles.RefusjonPerDag.enable {
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList())
+        )
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null, emptyList())
+        )
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 50.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 50.prosent))
+        håndterUtbetalingshistorikk(
+            1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 50.prosent, INNTEKT / 2),
+            inntektshistorikk = listOf(
+                Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true)
+            )
+        )
+        håndterYtelser(1.vedtaksperiode)
+        assertForkastetPeriodeTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            TIL_INFOTRYGD
+        )
+    }
+
+    @Test
+    fun `korrigerende inntektsmelding endrer på refusjonsbeløp med infotrygdforlengelse og gap`() = Toggles.RefusjonPerDag.enable {
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList())
+        )
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null, emptyList())
+        )
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 50.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 50.prosent))
+        håndterUtbetalingshistorikk(
+            1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 18.januar, 31.januar, 50.prosent, INNTEKT / 2),
+            inntektshistorikk = listOf(
+                Inntektsopplysning(ORGNUMMER, 18.januar, INNTEKT, true)
+            )
+        )
+        håndterYtelser(1.vedtaksperiode)
+        assertForkastetPeriodeTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
             AVVENTER_HISTORIKK,
             TIL_INFOTRYGD
         )

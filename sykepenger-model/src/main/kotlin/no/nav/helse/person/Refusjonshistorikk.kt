@@ -49,16 +49,16 @@ internal class Refusjonshistorikk {
 
             internal fun Iterable<Refusjon>.somOverlapperMedArbeidsgiverperiode(periode: Periode, aktivitetslogg: IAktivitetslogg): Refusjon? {
                 val utvidetPeriode = periode.start.minusDays(16) til periode.endInclusive
-                return firstOrNull { refusjon ->
+                return lastOrNull { refusjon ->
                     refusjon.arbeidsgiverperioder.any { it.overlapperMed(utvidetPeriode) }
                 }?.also { aktivitetslogg.info("Fant refusjon ved å gå 16 dager tilbake fra første utbetalingsdag i sammenhengende utbetaling") }
             }
 
-            internal fun Iterable<Refusjon>.somTrefferFørsteFraværsdag(periode: Periode, aktivitetslogg: IAktivitetslogg) = firstOrNull { refusjon ->
+            internal fun Iterable<Refusjon>.somTrefferFørsteFraværsdag(periode: Periode, aktivitetslogg: IAktivitetslogg) = lastOrNull { refusjon ->
                 refusjon.utledetFørsteFraværsdag() in periode
             }?.also { aktivitetslogg.info("Fant refusjon ved å sjekke om første fraværsdag er i sammenhengende utbetaling") }
 
-            internal fun Iterable<Refusjon>.somTilstøterArbeidsgiverperiode(periode: Periode, aktivitetslogg: IAktivitetslogg) = firstOrNull { refusjon ->
+            internal fun Iterable<Refusjon>.somTilstøterArbeidsgiverperiode(periode: Periode, aktivitetslogg: IAktivitetslogg) = lastOrNull { refusjon ->
                 refusjon.arbeidsgiverperioder.maxByOrNull { it.endInclusive }?.erRettFør(periode) ?: false
             }?.also { aktivitetslogg.info("Fant refusjon ved å finne tilstøtende arbeidsgiverperiode for første utbetalingsdag i sammenhengende utbetaling") }
         }
