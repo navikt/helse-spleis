@@ -102,7 +102,7 @@ internal class Oppdrag private constructor(
         nettoBeløp = this.totalbeløp() - tidligere.totalbeløp()
     }
 
-    internal fun harUtbetalinger() = utenUendretLinjer().isNotEmpty()
+    internal fun harUtbetalinger() = any(Oppdragslinje::erForskjell)
 
     internal fun sammenlignMed(simulering: Simulering) =
         simulering.valider(utenUendretLinjer())
