@@ -640,7 +640,7 @@ internal class Arbeidsgiver private constructor(
     internal fun håndter(hendelse: OverstyrInntekt) {
         hendelse.kontekst(this)
         vedtaksperioder
-            .firstOrNull { it.harUtbetalingstidslinje() && it.gjelder(hendelse.skjæringstidspunkt) }
+            .firstOrNull { it.kanHåndtereOverstyring(hendelse) }
             ?.håndter(hendelse)
         finalize(hendelse)
     }
@@ -767,7 +767,6 @@ internal class Arbeidsgiver private constructor(
             addSaksbehandler(hendelse.skjæringstidspunkt, hendelse.meldingsreferanseId(), hendelse.inntekt)
         }
     }
-
 
     // Fredet funksjonsnavn
     internal fun tidligereOgEttergølgende(segSelv: Periode): VedtaksperiodeFilter {

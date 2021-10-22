@@ -313,7 +313,9 @@ internal class Vedtaksperiode private constructor(
 
     private fun harSykeperiodeRettFør() = arbeidsgiver.finnSykeperiodeRettFør(this) != null
 
-    internal fun harUtbetalingstidslinje() = utbetalingstidslinje.isNotEmpty()
+    internal fun kanHåndtereOverstyring(hendelse: OverstyrInntekt): Boolean {
+        return utbetalingstidslinje.isNotEmpty() && gjelder(hendelse.skjæringstidspunkt)
+    }
 
     internal fun gjelder(skjæringstidspunkt: LocalDate) = this.skjæringstidspunkt == skjæringstidspunkt
 
