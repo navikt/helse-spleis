@@ -1424,7 +1424,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun revurder(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
-            vedtaksperiode.arbeidsgiver.addInntekt(hendelse)
             vedtaksperiode.tilstand(hendelse, AvventerVilkårsprøvingRevurdering)
             vedtaksperiode.tilstand.håndter(vedtaksperiode, hendelse)
         }
@@ -1527,6 +1526,7 @@ internal class Vedtaksperiode private constructor(
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime = LocalDateTime.MAX
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
+            vedtaksperiode.person.nyInntekt(hendelse)
             vedtaksperiode.person.vilkårsprøvEtterNyInntekt(hendelse, vedtaksperiode.periode.start)
             if (!hendelse.hasErrorsOrWorse()) {
                 vedtaksperiode.tilstand(hendelse, AvventerHistorikkRevurdering)
@@ -2255,7 +2255,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun revurder(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
-            vedtaksperiode.arbeidsgiver.addInntekt(hendelse)
             vedtaksperiode.tilstand(hendelse, AvventerVilkårsprøvingRevurdering)
             vedtaksperiode.tilstand.håndter(vedtaksperiode, hendelse)
         }

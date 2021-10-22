@@ -762,10 +762,6 @@ internal class Arbeidsgiver private constructor(
             hendelse.info("Revurdering blokkeres, gjenopptar behandling")
             return gjenopptaBehandling()
         }
-
-        inntektshistorikk {
-            addSaksbehandler(hendelse.skjæringstidspunkt, hendelse.meldingsreferanseId(), hendelse.inntekt)
-        }
     }
 
     // Fredet funksjonsnavn

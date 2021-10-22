@@ -236,6 +236,8 @@ class Person private constructor(
         observers.forEach { it.annullering(hendelseskontekst, event) }
     }
 
+    internal fun nyInntekt(hendelse: OverstyrInntekt) = finnArbeidsgiver(hendelse).addInntekt(hendelse)
+
     internal fun overstyrUtkastRevurdering(hendelse: OverstyrTidslinje) {
         val førstePeriode = finnArbeidsgiver(hendelse).førstePeriodeTilRevurdering(hendelse)
         igangsettRevurdering(hendelse, førstePeriode)

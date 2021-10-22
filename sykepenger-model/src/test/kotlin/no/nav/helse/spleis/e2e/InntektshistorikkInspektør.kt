@@ -36,6 +36,10 @@ internal class InntektshistorikkInspektør(arbeidsgiver: Arbeidsgiver) : Arbeids
     }
 
     val antallInnslag get() = innslag.size
+    internal fun antallOpplysinger(
+        vararg kilder: Kilde = Kilde.values(),
+        element: (List<Innslag>) -> Innslag = { it.last() }
+    ) = element(innslag.reversed()).opplysninger.filter { it.kilde in kilder }.size
     internal val sisteInnslag get() = innslag.firstOrNull()
 
     internal fun grunnlagForSykepengegrunnlag(dato: LocalDate) = inntektshistorikk.grunnlagForSykepengegrunnlagGammel(dato)
