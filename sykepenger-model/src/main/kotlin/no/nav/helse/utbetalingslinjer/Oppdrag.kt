@@ -93,7 +93,7 @@ internal class Oppdrag private constructor(
         )
     }
 
-    internal fun totalbeløp() = linjerUtenOpphør().sumOf { it.totalbeløp() }
+    internal fun totalbeløp() = sumOf { it.totalbeløp() }
     internal fun stønadsdager() = sumOf { it.stønadsdager() }
 
     internal fun nettoBeløp() = nettoBeløp
