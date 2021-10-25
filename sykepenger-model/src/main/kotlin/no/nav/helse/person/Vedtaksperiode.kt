@@ -670,7 +670,6 @@ internal class Vedtaksperiode private constructor(
         val ingenUtbetaling = !utbetaling().harUtbetalinger()
         val kunArbeidsgiverdager = utbetalingstidslinje.kunArbeidsgiverdager()
         val ingenWarnings = !person.aktivitetslogg.logg(this).hasWarningsOrWorse()
-        val harBrukerutbetaling = utbetalingstidslinje.harBrukerutbetalinger() || andreVedtaksperioder.any { it.utbetalingstidslinje.harBrukerutbetalinger() }
 
         when {
             ingenUtbetaling && kunArbeidsgiverdager && ingenWarnings -> {
@@ -698,6 +697,9 @@ internal class Vedtaksperiode private constructor(
             }
         }
     }
+
+    private fun harBrukerutbetaling(andreVedtaksperioder: List<Vedtaksperiode>) =
+        utbetalingstidslinje.harBrukerutbetalinger() || andreVedtaksperioder.any { it.utbetalingstidslinje.harBrukerutbetalinger() }
 
     private fun forsøkRevurdering(engineForTimeline: MaksimumSykepengedagerfilter, hendelse: ArbeidstakerHendelse) {
         engineForTimeline.beregnGrenser()
@@ -735,13 +737,18 @@ internal class Vedtaksperiode private constructor(
         when {
             !andreVedtaksperioder.erKlareTilGodkjenning() -> tilstand(hendelse, AvventerArbeidsgivereRevurdering)
             !arbeidsgiver.alleAndrePerioderErKlare(this) -> tilstand(hendelse, AvventerGjennomførtRevurdering)
-            else -> høstingsresultaterRevurdering(hendelse)
+            else -> høstingsresultaterRevurdering(hendelse, andreVedtaksperioder)
         }
     }
 
-    private fun høstingsresultaterRevurdering(hendelse: ArbeidstakerHendelse) {
+    private fun høstingsresultaterRevurdering(hendelse: ArbeidstakerHendelse, andreVedtaksperioder: List<Vedtaksperiode>) {
         hendelse.info("Videresender utbetaling til alle vedtaksperioder innenfor samme fagsystemid som er til revurdering")
         when {
+            harBrukerutbetaling(andreVedtaksperioder) -> {
+                tilstand(hendelse, RevurderingFeilet) {
+                    hendelse.error("""Saken inneholder brukerutbetalinger etter revurdering, settes til "Revurdering feilet"""")
+                }
+            }
             !utbetaling().harUtbetalinger() && utbetalingstidslinje.kunArbeidsgiverdager() && !person.aktivitetslogg.logg(this).hasWarningsOrWorse() -> {
                 tilstand(hendelse, AvsluttetUtenUtbetaling) {
                     hendelse.info("""Saken inneholder ingen utbetalingsdager for Nav og avluttes""")
