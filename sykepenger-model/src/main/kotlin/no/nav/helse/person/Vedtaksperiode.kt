@@ -672,6 +672,9 @@ internal class Vedtaksperiode private constructor(
         val ingenWarnings = !person.aktivitetslogg.logg(this).hasWarningsOrWorse()
 
         when {
+            harBrukerutbetaling(andreVedtaksperioder) -> {
+                person.invaliderAllePerioder(hendelse, "Utbetalingstidslinje inneholder brukerutbetaling")
+            }
             ingenUtbetaling && kunArbeidsgiverdager && ingenWarnings -> {
                 tilstand(hendelse, AvsluttetUtenUtbetaling) {
                     hendelse.info("""Saken inneholder ingen utbetalingsdager for Nav og avluttes""")
@@ -685,9 +688,6 @@ internal class Vedtaksperiode private constructor(
                     else
                         hendelse.info("""Saken oppfyller krav for behandling, settes til "Avventer godkjenning" fordi ingenting skal utbetales""")
                 }
-            }
-            harBrukerutbetaling -> {
-                person.invaliderAllePerioder(hendelse, "Utbetalingstidslinje inneholder brukerutbetaling")
             }
             else -> {
                 loggHvisForlengelse(hendelse)
