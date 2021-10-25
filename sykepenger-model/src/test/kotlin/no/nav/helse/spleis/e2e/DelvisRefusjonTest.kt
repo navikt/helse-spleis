@@ -740,22 +740,4 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         )
 
     }
-
-    private fun assertUtbetalingsbeløp(
-        vedtaksperiodeIdInnhenter: IdInnhenter,
-        forventetArbeidsgiverbeløp: Int,
-        forventetArbeidsgiverRefusjonsbeløp: Int,
-        subset: Periode? = null,
-        orgnummer: String = ORGNUMMER
-    ) {
-        val utbetalingstidslinje = inspektør(orgnummer).utbetalingstidslinjer(vedtaksperiodeIdInnhenter).let { subset?.let(it::subset) ?: it }
-
-        utbetalingstidslinje.filterNot { it.dato.erHelg() }.forEach {
-            it.økonomi.medAvrundetData { _, arbeidsgiverRefusjonsbeløp, _, _, arbeidsgiverbeløp, personbeløp, _ ->
-                assertEquals(forventetArbeidsgiverbeløp, arbeidsgiverbeløp)
-                assertEquals(forventetArbeidsgiverRefusjonsbeløp, arbeidsgiverRefusjonsbeløp)
-                assertEquals(0, personbeløp)
-            }
-        }
-    }
 }

@@ -18,6 +18,7 @@ import no.nav.helse.serde.api.v2.InntektsmeldingDTO
 import no.nav.helse.serde.api.v2.SykmeldingDTO
 import no.nav.helse.serde.api.v2.SøknadNavDTO
 import no.nav.helse.serde.reflection.Utbetalingstatus
+import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt
@@ -1572,6 +1573,24 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
                 assertEquals(expectedTotalgrad, totalGrad)
             }
             assertEquals(it::class, expectedDagtype)
+        }
+    }
+
+    protected fun assertUtbetalingsbeløp(
+        vedtaksperiodeIdInnhenter: IdInnhenter,
+        forventetArbeidsgiverbeløp: Int,
+        forventetArbeidsgiverRefusjonsbeløp: Int,
+        subset: Periode? = null,
+        orgnummer: String = ORGNUMMER
+    ) {
+        val utbetalingstidslinje = inspektør(orgnummer).utbetalingstidslinjer(vedtaksperiodeIdInnhenter).let { subset?.let(it::subset) ?: it }
+
+        utbetalingstidslinje.filterNot { it.dato.erHelg() }.forEach {
+            it.økonomi.medAvrundetData { _, arbeidsgiverRefusjonsbeløp, _, _, arbeidsgiverbeløp, personbeløp, _ ->
+                assertEquals(forventetArbeidsgiverbeløp, arbeidsgiverbeløp)
+                assertEquals(forventetArbeidsgiverRefusjonsbeløp, arbeidsgiverRefusjonsbeløp)
+                assertEquals(0, personbeløp)
+            }
         }
     }
 
