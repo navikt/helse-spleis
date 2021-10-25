@@ -103,6 +103,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         fun sykepengegrunnlag(): Inntekt
         fun grunnlagForSykepengegrunnlag(): Inntekt
         fun inntektsopplysningPerArbeidsgiver(): Map<String, Inntektshistorikk.Inntektsopplysning>
+        fun gjelderFlereArbeidsgivere(): Boolean
     }
 
     internal class Grunnlagsdata(
@@ -132,6 +133,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         override fun grunnlagForSykepengegrunnlag() = sykepengegrunnlag.grunnlagForSykepengegrunnlag
 
         override fun inntektsopplysningPerArbeidsgiver() = sykepengegrunnlag.inntektsopplysningPerArbeidsgiver()
+        override fun gjelderFlereArbeidsgivere() = inntektsopplysningPerArbeidsgiver().size > 1
 
         internal fun grunnlagsdataMedMinimumInntektsvurdering(minimumInntektVurdering: Boolean) = Grunnlagsdata(
             sykepengegrunnlag = sykepengegrunnlag,
@@ -183,6 +185,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         override fun grunnlagForSykepengegrunnlag() = sykepengegrunnlag.grunnlagForSykepengegrunnlag
 
         override fun inntektsopplysningPerArbeidsgiver() = sykepengegrunnlag.inntektsopplysningPerArbeidsgiver()
+        override fun gjelderFlereArbeidsgivere() = inntektsopplysningPerArbeidsgiver().size > 1
 
     }
 }

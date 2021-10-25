@@ -995,9 +995,6 @@ internal class Arbeidsgiver private constructor(
         "refusjonOpphører" to refusjonOpphører
     )
 
-    fun tidligerePeriodeErFlereArbeidsgivere(skjæringstidspunkt: LocalDate) =
-        vedtaksperioder.any { it.gjelder(skjæringstidspunkt) && it.inntektskilde() == Inntektskilde.FLERE_ARBEIDSGIVERE }
-
     internal fun erSykmeldingenDenSistSkrevne(sykmelding: Sykmelding, hendelseIder: Set<UUID>): Boolean =
         sykdomshistorikk.erSykmeldingenDenSistSkrevne(sykmelding, hendelseIder)
 
