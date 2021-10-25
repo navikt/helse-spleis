@@ -15,6 +15,7 @@ internal class Sykdomsgradfilter(
         val avvisteDager = Utbetalingstidslinje.periode(tidslinjer).filter { dato ->
             Økonomi.totalSykdomsgrad(tidslinjer.map { it[dato].økonomi }).erUnderGrensen()
         }
+        aktivitetslogg.etterlevelse.`§8-13 ledd 1`(oppfylt = avvisteDager.isEmpty())
         if (Utbetalingstidslinje.avvis(tidslinjer, avvisteDager.grupperSammenhengendePerioder(), periode, listOf(Begrunnelse.MinimumSykdomsgrad)))
             return aktivitetslogg.warn("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %%. Vurder å sende vedtaksbrev fra Infotrygd")
         aktivitetslogg.info("Ingen avviste dager på grunn av 20 %% samlet sykdomsgrad-regel for denne perioden")

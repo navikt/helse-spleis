@@ -127,6 +127,14 @@ class Etterlevelse {
         )
     }
 
+    fun `§8-13 ledd 1`(oppfylt: Boolean) {}
+
+    fun `§8-16 ledd 1`(oppfylt: Boolean) {} // Én gang, med periode over hvilke dager vi har satt dekningsgrad
+
+    fun `§8-17 ledd 1 bokstav a`(oppfylt: Boolean) {}
+
+    fun `§8-17 ledd 2`(oppfylt: Boolean) {} //Legges inn på ferie/permisjonsdager i utbetalingstidslinje, med periodene av ferie/permisjon som input
+
     fun `§8-30 ledd 2`(
         oppfylt: Boolean,
         maksimaltTillattAvvikPåÅrsinntekt: Prosent,
