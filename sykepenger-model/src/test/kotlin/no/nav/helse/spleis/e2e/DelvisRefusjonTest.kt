@@ -132,7 +132,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt(1.vedtaksperiode)
             assertEquals(0, inspektør.warnings.size)
-            assertFalse(inspektør.warnings.contains("Fant ikke refusjonsgrad for perioden. Undersøk før du utbetaler."))
+            assertFalse(inspektør.warnings.contains("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler."))
         }
 
     @Test
@@ -152,7 +152,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt(1.vedtaksperiode)
             assertEquals(1, inspektør.warnings.size)
-            assertTrue(inspektør.warnings.contains("Fant ikke refusjonsgrad for perioden. Undersøk før du utbetaler."))
+            assertTrue(inspektør.warnings.contains("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler."))
         }
 
     @Test
@@ -174,7 +174,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(1.vedtaksperiode)
         assertEquals(0, inspektør.warnings.size)
-        assertFalse(inspektør.warnings.contains("Fant ikke refusjonsgrad for perioden. Undersøk før du utbetaler."))
+        assertFalse(inspektør.warnings.contains("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler."))
     }
 
     @Test
