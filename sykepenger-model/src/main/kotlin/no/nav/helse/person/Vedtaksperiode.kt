@@ -1136,9 +1136,12 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            inntektsmelding.trimLeft(vedtaksperiode.periode.endInclusive)
-            if (vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)?.inntektsmeldingInfo?.id == inntektsmelding.meldingsreferanseId()) return
-            inntektsmelding.warn("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
+            if (vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)?.inntektsmeldingInfo?.id != inntektsmelding.meldingsreferanseId()){
+                inntektsmelding.warn("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
+            }
+            vedtaksperiode.håndterInntektsmelding(inntektsmelding) {
+                vedtaksperiode.tilstand(inntektsmelding, AvventerSøknadFerdigForlengelse)
+            }
         }
     }
 

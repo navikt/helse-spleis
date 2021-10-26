@@ -1,16 +1,19 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggles
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.SøknadArbeidsgiver
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.SykdomstidslinjeInspektør
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.oktober
+import no.nav.helse.testhelpers.september
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class EnTilEnOverlappendeSykmeldingE2ETest : AbstractEndToEndTest() {
@@ -121,5 +124,17 @@ internal class EnTilEnOverlappendeSykmeldingE2ETest : AbstractEndToEndTest() {
         }
         assertNoErrors(inspektør)
         assertWarningTekst(inspektør, "Korrigert sykmelding er lagt til grunn - kontroller dagene i sykmeldingsperioden")
+    }
+
+    @Test
+    fun `mottar inntektsmelding før sykemelding nummer 2 kommer` () {
+        håndterSykmelding(Sykmeldingsperiode(27.september, 3.oktober, 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(27.september, 3.oktober, 100.prosent))
+
+        håndterSykmelding(Sykmeldingsperiode(4.oktober, 8.oktober, 100.prosent))
+        håndterInntektsmelding(listOf(Periode(27.september, 12.oktober)))
+        håndterSykmelding(Sykmeldingsperiode(4.oktober, 8.oktober, 100.prosent))
+        assertEquals(2, inspektør.vedtaksperiodeTeller)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_SØKNAD_FERDIG_FORLENGELSE, TIL_INFOTRYGD)
     }
 }
