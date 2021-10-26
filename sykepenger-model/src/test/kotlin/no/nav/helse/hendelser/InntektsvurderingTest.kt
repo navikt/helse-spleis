@@ -24,7 +24,7 @@ internal class InntektsvurderingTest {
 
     @Test
     fun `ugyldige verdier`() {
-        assertFalse(validererOk(inntektsvurdering(emptyList()), sykepengegrunnlag(INGEN), INGEN))
+        assertFalse(validererOk(inntektsvurdering(emptyList()), sykepengegrunnlag(INGEN), INGEN, 1))
         assertFalse(
             validererOk(
                 inntektsvurdering(
@@ -33,7 +33,7 @@ internal class InntektsvurderingTest {
                             ORGNR inntekt INGEN
                         }
                     }
-                ), sykepengegrunnlag(INGEN), INGEN
+                ), sykepengegrunnlag(INGEN), INGEN, 1
             )
         )
     }
@@ -41,23 +41,25 @@ internal class InntektsvurderingTest {
     @Test
     fun `skal kunne beregne avvik mellom innmeldt lønn fra inntektsmelding og lønn fra inntektskomponenten`() {
         val inntektsvurdering = inntektsvurdering()
-        assertFalse(validererOk(inntektsvurdering, sykepengegrunnlag(1250.01.månedlig), INNTEKT))
-        assertFalse(validererOk(inntektsvurdering, sykepengegrunnlag(749.99.månedlig), INNTEKT))
-        assertTrue(validererOk(inntektsvurdering, sykepengegrunnlag(1000.00.månedlig), INNTEKT))
-        assertTrue(validererOk(inntektsvurdering, sykepengegrunnlag(1250.00.månedlig), INNTEKT))
-        assertTrue(validererOk(inntektsvurdering, sykepengegrunnlag(750.00.månedlig), INNTEKT))
+        assertFalse(validererOk(inntektsvurdering, sykepengegrunnlag(1250.01.månedlig), INNTEKT, 1))
+        assertFalse(validererOk(inntektsvurdering, sykepengegrunnlag(749.99.månedlig), INNTEKT, 1))
+        assertTrue(validererOk(inntektsvurdering, sykepengegrunnlag(1000.00.månedlig), INNTEKT, 1))
+        assertTrue(validererOk(inntektsvurdering, sykepengegrunnlag(1250.00.månedlig), INNTEKT, 1))
+        assertTrue(validererOk(inntektsvurdering, sykepengegrunnlag(750.00.månedlig), INNTEKT, 1))
     }
 
     private fun validererOk(
         inntektsvurdering: Inntektsvurdering,
         grunnlagForSykepengegrunnlag: Sykepengegrunnlag,
-        sammenligningsgrunnlag: Inntekt
+        sammenligningsgrunnlag: Inntekt,
+        antallArbeidsgivereFraAareg: Int
     ): Boolean {
         aktivitetslogg = Aktivitetslogg()
         return inntektsvurdering.valider(
             aktivitetslogg,
             grunnlagForSykepengegrunnlag,
-            sammenligningsgrunnlag
+            sammenligningsgrunnlag,
+            antallArbeidsgivereFraAareg
         )
     }
 

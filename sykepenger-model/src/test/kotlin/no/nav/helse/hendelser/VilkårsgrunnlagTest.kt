@@ -128,7 +128,7 @@ internal class VilkårsgrunnlagTest {
             Arbeidsforhold("ORGNR1", 1.januar, 14.januar),
             Arbeidsforhold("ORGNR2", 15.januar, null)
         ))
-        vilkårsgrunnlag.valider(sykepengegrunnlag(), INNTEKT, 31.januar, Periodetype.FØRSTEGANGSBEHANDLING)
+        vilkårsgrunnlag.valider(sykepengegrunnlag(), INNTEKT, 31.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
 
         assertFalse(vilkårsgrunnlag.hasWarningsOrWorse())
     }

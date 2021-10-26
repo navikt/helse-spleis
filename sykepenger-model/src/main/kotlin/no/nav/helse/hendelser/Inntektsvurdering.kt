@@ -1,6 +1,7 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.antallMåneder
+import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.kilder
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonHendelse
@@ -21,9 +22,13 @@ class Inntektsvurdering(
     internal fun valider(
         aktivitetslogg: IAktivitetslogg,
         grunnlagForSykepengegrunnlag: Sykepengegrunnlag,
-        sammenligningsgrunnlag: Inntekt
+        sammenligningsgrunnlag: Inntekt,
+        antallArbeidsgivereFraAareg: Int,
     ): Boolean {
         if (inntekter.antallMåneder() > 12) aktivitetslogg.error("Forventer 12 eller færre inntektsmåneder")
+        if (inntekter.kilder(3) > antallArbeidsgivereFraAareg) {
+            aktivitetslogg.warn("Bruker har flere inntektskilder de siste tre månedene enn arbeidsforhold som er oppdaget i Aa-registeret.")
+        }
         if (sammenligningsgrunnlag <= Inntekt.INGEN) {
             aktivitetslogg.error("sammenligningsgrunnlaget er <= 0")
             return false

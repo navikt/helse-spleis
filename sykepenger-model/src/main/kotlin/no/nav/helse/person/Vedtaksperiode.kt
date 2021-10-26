@@ -480,6 +480,7 @@ internal class Vedtaksperiode private constructor(
             grunnlagForSykepengegrunnlag,
             sammenligningsgrunnlag ?: Inntekt.INGEN,
             skjæringstidspunkt,
+            person.antallArbeidsgivereMedAktivtArbeidsforhold(skjæringstidspunkt),
             periodetype()
         )
         person.vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag, skjæringstidspunkt)

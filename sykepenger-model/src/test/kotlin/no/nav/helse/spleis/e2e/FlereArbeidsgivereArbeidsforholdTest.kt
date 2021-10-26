@@ -9,7 +9,8 @@ import no.nav.helse.serde.reflection.castAsMap
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
@@ -634,8 +635,8 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
 
-        assertTrue(a1.inspektør.personLogg.hasWarningsOrWorse())
-        assertWarn("todo", inspektør(a1).personLogg)
+        assertWarn("Bruker har flere inntektskilder de siste tre månedene enn arbeidsforhold som er oppdaget i Aa-registeret.", inspektør(a1).personLogg)
+        assertTilstand(a1, TilstandType.AVSLUTTET)
     }
 
     fun arbeidsgivere(): List<String> {

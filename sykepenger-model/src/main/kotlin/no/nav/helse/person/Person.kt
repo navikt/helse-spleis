@@ -614,6 +614,8 @@ class Person private constructor(
     private fun arbeidsgivereMedAktiveArbeidsforhold(skjæringstidspunkt: LocalDate): List<Arbeidsgiver> =
         arbeidsgivere.filter { it.harAktivtArbeidsforhold(skjæringstidspunkt) }
 
+    internal fun antallArbeidsgivereMedAktivtArbeidsforhold(skjæringstidspunkt: LocalDate) = arbeidsgivereMedAktiveArbeidsforhold(skjæringstidspunkt).size
+
     internal fun harVedtaksperiodeForArbeidsgiverMedUkjentArbeidsforhold(skjæringstidspunkt: LocalDate) =
         arbeidsgivere.any { it.harVedtaksperiodeMedUkjentArbeidsforhold(skjæringstidspunkt) }
 
