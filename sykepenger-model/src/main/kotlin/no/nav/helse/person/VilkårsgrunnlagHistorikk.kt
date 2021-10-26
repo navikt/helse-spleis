@@ -101,6 +101,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         fun isOk(): Boolean
         fun accept(skjæringstidspunkt: LocalDate, vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor)
         fun sykepengegrunnlag(): Inntekt
+        fun grunnlagsBegrensning(): Sykepengegrunnlag.Begrensning
         fun grunnlagForSykepengegrunnlag(): Inntekt
         fun inntektsopplysningPerArbeidsgiver(): Map<String, Inntektshistorikk.Inntektsopplysning>
         fun gjelderFlereArbeidsgivere(): Boolean
@@ -130,6 +131,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         }
 
         override fun sykepengegrunnlag() = sykepengegrunnlag.sykepengegrunnlag
+        override fun grunnlagsBegrensning() = sykepengegrunnlag.begrensning
         override fun grunnlagForSykepengegrunnlag() = sykepengegrunnlag.grunnlagForSykepengegrunnlag
 
         override fun inntektsopplysningPerArbeidsgiver() = sykepengegrunnlag.inntektsopplysningPerArbeidsgiver()
@@ -179,8 +181,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             vilkårsgrunnlagHistorikkVisitor.postVisitInfotrygdVilkårsgrunnlag(skjæringstidspunkt, this)
         }
 
-        override fun sykepengegrunnlag() =
-            sykepengegrunnlag.sykepengegrunnlag
+        override fun sykepengegrunnlag() = sykepengegrunnlag.sykepengegrunnlag
+        override fun grunnlagsBegrensning() = sykepengegrunnlag.begrensning
 
         override fun grunnlagForSykepengegrunnlag() = sykepengegrunnlag.grunnlagForSykepengegrunnlag
 

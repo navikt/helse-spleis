@@ -3,6 +3,7 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.*
 import no.nav.helse.person.Periodetype.*
+import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
@@ -277,6 +278,7 @@ internal class HistoriePeriodetypeTest {
     private fun sykepengegrunnlag(inntekt: Inntekt) = Sykepengegrunnlag(
         arbeidsgiverInntektsopplysninger = listOf(),
         sykepengegrunnlag = inntekt,
-        grunnlagForSykepengegrunnlag = inntekt
+        grunnlagForSykepengegrunnlag = inntekt,
+        begrensning = ER_IKKE_6G_BEGRENSET
     )
 }

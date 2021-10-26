@@ -3,13 +3,15 @@ package no.nav.helse.person
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.inntekt
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.inntektsopplysningPerArbeidsgiver
+import no.nav.helse.person.Sykepengegrunnlag.Begrensning.*
 import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
 
 internal class Sykepengegrunnlag(
     internal val sykepengegrunnlag: Inntekt,
     private val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
-    internal val grunnlagForSykepengegrunnlag: Inntekt
+    internal val grunnlagForSykepengegrunnlag: Inntekt,
+    internal val begrensning: Begrensning
 ) {
     private companion object {
         private fun sykepengegrunnlag(inntekt: Inntekt, skjæringstidspunkt: LocalDate, aktivitetslogg: IAktivitetslogg): Inntekt {
@@ -43,7 +45,8 @@ internal class Sykepengegrunnlag(
     ) : this(
         sykepengegrunnlag(arbeidsgiverInntektsopplysninger.inntekt(), skjæringstidspunkt, aktivitetslogg),
         arbeidsgiverInntektsopplysninger,
-        arbeidsgiverInntektsopplysninger.inntekt()
+        arbeidsgiverInntektsopplysninger.inntekt(),
+        if (arbeidsgiverInntektsopplysninger.inntekt() > Grunnbeløp.`6G`.beløp(skjæringstidspunkt)) ER_6G_BEGRENSET else ER_IKKE_6G_BEGRENSET
     )
 
     constructor(
@@ -51,16 +54,21 @@ internal class Sykepengegrunnlag(
     ) : this(
         arbeidsgiverInntektsopplysninger.inntekt(),
         arbeidsgiverInntektsopplysninger,
-        arbeidsgiverInntektsopplysninger.inntekt()
+        arbeidsgiverInntektsopplysninger.inntekt(),
+        VURDERT_I_INFOTRYGD
     )
 
     internal fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {
-        vilkårsgrunnlagHistorikkVisitor.preVisitSykepengegrunnlag(this, sykepengegrunnlag, grunnlagForSykepengegrunnlag)
+        vilkårsgrunnlagHistorikkVisitor.preVisitSykepengegrunnlag(this, sykepengegrunnlag, grunnlagForSykepengegrunnlag, begrensning)
         arbeidsgiverInntektsopplysninger.forEach { it.accept(vilkårsgrunnlagHistorikkVisitor) }
-        vilkårsgrunnlagHistorikkVisitor.postVisitSykepengegrunnlag(this, sykepengegrunnlag, grunnlagForSykepengegrunnlag)
+        vilkårsgrunnlagHistorikkVisitor.postVisitSykepengegrunnlag(this, sykepengegrunnlag, grunnlagForSykepengegrunnlag, begrensning)
     }
 
     internal fun avviksprosent(sammenligningsgrunnlag: Inntekt) = grunnlagForSykepengegrunnlag.avviksprosent(sammenligningsgrunnlag)
     internal fun inntektsopplysningPerArbeidsgiver(): Map<String, Inntektshistorikk.Inntektsopplysning> =
         arbeidsgiverInntektsopplysninger.inntektsopplysningPerArbeidsgiver()
+
+    enum class Begrensning {
+        ER_6G_BEGRENSET, ER_IKKE_6G_BEGRENSET, VURDERT_I_INFOTRYGD
+    }
 }

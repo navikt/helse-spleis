@@ -3,6 +3,7 @@ package no.nav.helse.utbetalingslinjer
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.godkjenning
+import no.nav.helse.person.Sykepengegrunnlag.Begrensning.*
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -192,11 +193,13 @@ internal class Utbetaling private constructor(
         hendelseIder: Set<UUID>,
         skjæringstidspunkt: LocalDate,
         sykepengegrunnlag: Inntekt,
-        grunnlagForSykepengegrunnlag: Map<String, Double>,
-        inntekt: Inntekt
+        grunnlagForSykepengegrunnlag: Inntekt,
+        grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Inntekt>,
+        inntekt: Inntekt,
+        begrensning: Sykepengegrunnlag.Begrensning?
     ) {
         hendelse.kontekst(this)
-        tilstand.vedtakFattet(this, hendelse, person, vedtaksperiodeId, periode, hendelseIder, skjæringstidspunkt, sykepengegrunnlag, grunnlagForSykepengegrunnlag, inntekt)
+        tilstand.vedtakFattet(this, hendelse, person, vedtaksperiodeId, periode, hendelseIder, skjæringstidspunkt, sykepengegrunnlag, grunnlagForSykepengegrunnlag, grunnlagForSykepengegrunnlagPerArbeidsgiver, inntekt, begrensning)
     }
 
     // TODO: fjerne når gamle "utbetalt"-event er borte
@@ -268,11 +271,13 @@ internal class Utbetaling private constructor(
             hendelseIder: Set<UUID>,
             skjæringstidspunkt: LocalDate,
             sykepengegrunnlag: Inntekt,
-            grunnlagForSykepengegrunnlag: Map<String, Double>,
-            inntekt: Inntekt
+            grunnlagForSykepengegrunnlag: Inntekt,
+            grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Inntekt>,
+            inntekt: Inntekt,
+            begrensning: Sykepengegrunnlag.Begrensning?
         ) {
-            utbetaling?.vedtakFattet(hendelse, person, vedtaksperiodeId, periode, hendelseIder, skjæringstidspunkt, sykepengegrunnlag, grunnlagForSykepengegrunnlag, inntekt)
-                ?: sendVedtakFattet(hendelse.hendelseskontekst(), utbetaling, person, periode, hendelseIder, skjæringstidspunkt, sykepengegrunnlag, grunnlagForSykepengegrunnlag, inntekt)
+            utbetaling?.vedtakFattet(hendelse, person, vedtaksperiodeId, periode, hendelseIder, skjæringstidspunkt, sykepengegrunnlag, grunnlagForSykepengegrunnlag, grunnlagForSykepengegrunnlagPerArbeidsgiver, inntekt, begrensning)
+                ?: sendVedtakFattet(hendelse.hendelseskontekst(), utbetaling, person, periode, hendelseIder, skjæringstidspunkt, sykepengegrunnlag, grunnlagForSykepengegrunnlag, grunnlagForSykepengegrunnlagPerArbeidsgiver, inntekt, begrensning)
         }
 
         private fun sendVedtakFattet(
@@ -283,17 +288,26 @@ internal class Utbetaling private constructor(
             hendelseIder: Set<UUID>,
             skjæringstidspunkt: LocalDate,
             sykepengegrunnlag: Inntekt,
-            grunnlagForSykepengegrunnlag: Map<String, Double>,
-            inntekt: Inntekt
+            grunnlagForSykepengegrunnlag: Inntekt,
+            grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Inntekt>,
+            inntekt: Inntekt,
+            begrensning: Sykepengegrunnlag.Begrensning?
         ) {
             person.vedtakFattet(hendelseskontekst, PersonObserver.VedtakFattetEvent(
                 periode,
                 hendelseIder,
                 skjæringstidspunkt,
                 sykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
-                grunnlagForSykepengegrunnlag,
+                grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
+                grunnlagForSykepengegrunnlagPerArbeidsgiver.mapValues { (_, inntekt) -> inntekt.reflection { årlig, _, _, _ -> årlig} },
                 inntekt.reflection { _, månedlig, _, _ -> månedlig },
-                utbetaling?.id
+                utbetaling?.id,
+                when (begrensning) {
+                    ER_6G_BEGRENSET -> "ER_6G_BEGRENSET"
+                    ER_IKKE_6G_BEGRENSET -> "ER_IKKE_6G_BEGRENSET"
+                    VURDERT_I_INFOTRYGD -> "VURDERT_I_INFOTRYGD"
+                    else -> "VET_IKKE"
+                }
             ))
         }
 
@@ -611,8 +625,10 @@ internal class Utbetaling private constructor(
             hendelseIder: Set<UUID>,
             skjæringstidspunkt: LocalDate,
             sykepengegrunnlag: Inntekt,
-            grunnlagForSykepengegrunnlag: Map<String, Double>,
-            inntekt: Inntekt
+            grunnlagForSykepengegrunnlag: Inntekt,
+            grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Inntekt>,
+            inntekt: Inntekt,
+            begrensning: Sykepengegrunnlag.Begrensning?
         ) {}
 
         fun avslutt(
@@ -644,12 +660,14 @@ internal class Utbetaling private constructor(
             hendelseIder: Set<UUID>,
             skjæringstidspunkt: LocalDate,
             sykepengegrunnlag: Inntekt,
-            grunnlagForSykepengegrunnlag: Map<String, Double>,
-            inntekt: Inntekt
+            grunnlagForSykepengegrunnlag: Inntekt,
+            grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Inntekt>,
+            inntekt: Inntekt,
+            begrensning: Sykepengegrunnlag.Begrensning?
         ) {
             check(!utbetaling.harUtbetalinger()) { "Kan ikke lukkes når utbetaling har utbetalinger" }
             godkjenn(utbetaling, hendelse, Vurdering.automatiskGodkjent)
-            sendVedtakFattet(hendelse.hendelseskontekst(), utbetaling, person, periode, hendelseIder, skjæringstidspunkt, sykepengegrunnlag, grunnlagForSykepengegrunnlag, inntekt)
+            sendVedtakFattet(hendelse.hendelseskontekst(), utbetaling, person, periode, hendelseIder, skjæringstidspunkt, sykepengegrunnlag, grunnlagForSykepengegrunnlag, grunnlagForSykepengegrunnlagPerArbeidsgiver, inntekt, begrensning)
         }
 
         override fun godkjenn(utbetaling: Utbetaling, hendelse: IAktivitetslogg, vurdering: Vurdering) {
@@ -703,10 +721,12 @@ internal class Utbetaling private constructor(
             hendelseIder: Set<UUID>,
             skjæringstidspunkt: LocalDate,
             sykepengegrunnlag: Inntekt,
-            grunnlagForSykepengegrunnlag: Map<String, Double>,
-            inntekt: Inntekt
+            grunnlagForSykepengegrunnlag: Inntekt,
+            grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Inntekt>,
+            inntekt: Inntekt,
+            begrensning: Sykepengegrunnlag.Begrensning?
         ) {
-            sendVedtakFattet(hendelse.hendelseskontekst(), utbetaling, person, periode, hendelseIder, skjæringstidspunkt, sykepengegrunnlag, grunnlagForSykepengegrunnlag, inntekt)
+            sendVedtakFattet(hendelse.hendelseskontekst(), utbetaling, person, periode, hendelseIder, skjæringstidspunkt, sykepengegrunnlag, grunnlagForSykepengegrunnlag, grunnlagForSykepengegrunnlagPerArbeidsgiver, inntekt, begrensning)
         }
 
         override fun avslutt(
@@ -832,10 +852,12 @@ internal class Utbetaling private constructor(
             hendelseIder: Set<UUID>,
             skjæringstidspunkt: LocalDate,
             sykepengegrunnlag: Inntekt,
-            grunnlagForSykepengegrunnlag: Map<String, Double>,
-            inntekt: Inntekt
+            grunnlagForSykepengegrunnlag: Inntekt,
+            grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Inntekt>,
+            inntekt: Inntekt,
+            begrensning: Sykepengegrunnlag.Begrensning?
         ) {
-            sendVedtakFattet(hendelse.hendelseskontekst(), utbetaling, person, periode, hendelseIder, skjæringstidspunkt, sykepengegrunnlag, grunnlagForSykepengegrunnlag, inntekt)
+            sendVedtakFattet(hendelse.hendelseskontekst(), utbetaling, person, periode, hendelseIder, skjæringstidspunkt, sykepengegrunnlag, grunnlagForSykepengegrunnlag, grunnlagForSykepengegrunnlagPerArbeidsgiver, inntekt, begrensning)
         }
 
         override fun avslutt(

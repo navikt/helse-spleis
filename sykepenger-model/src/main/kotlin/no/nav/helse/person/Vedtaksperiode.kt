@@ -473,7 +473,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag, nesteTilstand: Vedtaksperiodetilstand) {
         vilkårsgrunnlag.lagreInntekter(person, skjæringstidspunkt)
-        val grunnlagForSykepengegrunnlag = person.grunnlagForSykepengegrunnlag(skjæringstidspunkt, vilkårsgrunnlag)
+        val grunnlagForSykepengegrunnlag = person.beregnSykepengegrunnlag(skjæringstidspunkt, vilkårsgrunnlag)
         val sammenligningsgrunnlag = person.sammenligningsgrunnlag(skjæringstidspunkt)
 
         vilkårsgrunnlag.valider(
@@ -557,7 +557,9 @@ internal class Vedtaksperiode private constructor(
 
     private fun vedtakFattet(hendelse: IAktivitetslogg) {
         val sykepengegrunnlag = person.sykepengegrunnlag(skjæringstidspunkt) ?: Inntekt.INGEN
-        val grunnlagForSykepengegrunnlag = person.grunnlagForSykepengegrunnlagPerArbeidsgiver(skjæringstidspunkt)
+        val grunnlagForSykepengegrunnlag = person.grunnlagForSykepengegrunnlag(skjæringstidspunkt) ?: Inntekt.INGEN
+        val begrensning = person.grunnlagsBegrensning(skjæringstidspunkt)
+        val grunnlagForSykepengegrunnlagPerArbeidsgiver = person.grunnlagForSykepengegrunnlagPerArbeidsgiver(skjæringstidspunkt) ?: emptyMap()
         Utbetaling.vedtakFattet(
             utbetaling,
             hendelse,
@@ -568,7 +570,9 @@ internal class Vedtaksperiode private constructor(
             skjæringstidspunkt,
             sykepengegrunnlag,
             grunnlagForSykepengegrunnlag,
-            inntekt() ?: Inntekt.INGEN
+            grunnlagForSykepengegrunnlagPerArbeidsgiver.mapValues { (_, inntektsopplysning) -> inntektsopplysning.grunnlagForSykepengegrunnlag() },
+            inntekt() ?: Inntekt.INGEN,
+            begrensning
         )
     }
 
@@ -1957,7 +1961,7 @@ internal class Vedtaksperiode private constructor(
                         vedtaksperiode.skjæringstidspunkt,
                         periodetype,
                         person.vilkårsgrunnlagHistorikk
-                    ) { person.grunnlagForSykepengegrunnlagForInfotrygd(it, vedtaksperiode.periode.start) }
+                    ) { person.beregnSykepengegrunnlagForInfotrygd(it, vedtaksperiode.periode.start) }
                 }
                 onSuccess {
                     val vilkårsgrunnlag = person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt)

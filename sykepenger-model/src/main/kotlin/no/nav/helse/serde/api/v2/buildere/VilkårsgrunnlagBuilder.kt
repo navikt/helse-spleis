@@ -212,7 +212,12 @@ internal class VilkårsgrunnlagBuilder(
 
             fun build() = ISykepengegrunnlag(inntekterPerArbeidsgiver.toList(), sykepengegrunnlag.årlig, sykepengegrunnlag.daglig, omregnetÅrsinntekt)
 
-            override fun preVisitSykepengegrunnlag(sykepengegrunnlag1: Sykepengegrunnlag, sykepengegrunnlag: Inntekt, grunnlagForSykepengegrunnlag: Inntekt) {
+            override fun preVisitSykepengegrunnlag(
+                sykepengegrunnlag1: Sykepengegrunnlag,
+                sykepengegrunnlag: Inntekt,
+                grunnlagForSykepengegrunnlag: Inntekt,
+                begrensning: Sykepengegrunnlag.Begrensning
+            ) {
                 this.sykepengegrunnlag = InntektBuilder(sykepengegrunnlag).build()
                 this.omregnetÅrsinntekt = InntektBuilder(grunnlagForSykepengegrunnlag).build().årlig
             }

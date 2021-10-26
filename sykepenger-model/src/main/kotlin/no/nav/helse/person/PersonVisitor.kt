@@ -100,8 +100,18 @@ internal interface VilkårsgrunnlagHistorikkVisitor : InntekthistorikkVisitor {
     }
 
     fun postVisitInfotrygdVilkårsgrunnlag(skjæringstidspunkt: LocalDate, infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag) {}
-    fun preVisitSykepengegrunnlag(sykepengegrunnlag1: Sykepengegrunnlag, sykepengegrunnlag: Inntekt, grunnlagForSykepengegrunnlag: Inntekt) {}
-    fun postVisitSykepengegrunnlag(sykepengegrunnlag1: Sykepengegrunnlag, sykepengegrunnlag: Inntekt, grunnlagForSykepengegrunnlag: Inntekt) {}
+    fun preVisitSykepengegrunnlag(
+        sykepengegrunnlag1: Sykepengegrunnlag,
+        sykepengegrunnlag: Inntekt,
+        grunnlagForSykepengegrunnlag: Inntekt,
+        begrensning: Sykepengegrunnlag.Begrensning
+    ) {}
+    fun postVisitSykepengegrunnlag(
+        sykepengegrunnlag1: Sykepengegrunnlag,
+        sykepengegrunnlag: Inntekt,
+        grunnlagForSykepengegrunnlag: Inntekt,
+        begrensning: Sykepengegrunnlag.Begrensning
+    ) {}
     fun preVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {}
     fun postVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {}
 }

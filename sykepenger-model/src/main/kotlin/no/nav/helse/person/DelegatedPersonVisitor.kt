@@ -55,12 +55,22 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.postVisitInfotrygdVilkårsgrunnlag(skjæringstidspunkt, infotrygdVilkårsgrunnlag)
     }
 
-    override fun preVisitSykepengegrunnlag(sykepengegrunnlag1: Sykepengegrunnlag, sykepengegrunnlag: Inntekt, grunnlagForSykepengegrunnlag: Inntekt) {
-        delegatee.preVisitSykepengegrunnlag(sykepengegrunnlag1, sykepengegrunnlag, grunnlagForSykepengegrunnlag)
+    override fun preVisitSykepengegrunnlag(
+        sykepengegrunnlag1: Sykepengegrunnlag,
+        sykepengegrunnlag: Inntekt,
+        grunnlagForSykepengegrunnlag: Inntekt,
+        begrensning: Sykepengegrunnlag.Begrensning
+    ) {
+        delegatee.preVisitSykepengegrunnlag(sykepengegrunnlag1, sykepengegrunnlag, grunnlagForSykepengegrunnlag, begrensning)
     }
 
-    override fun postVisitSykepengegrunnlag(sykepengegrunnlag1: Sykepengegrunnlag, sykepengegrunnlag: Inntekt, grunnlagForSykepengegrunnlag: Inntekt) {
-        delegatee.postVisitSykepengegrunnlag(sykepengegrunnlag1, sykepengegrunnlag, grunnlagForSykepengegrunnlag)
+    override fun postVisitSykepengegrunnlag(
+        sykepengegrunnlag1: Sykepengegrunnlag,
+        sykepengegrunnlag: Inntekt,
+        grunnlagForSykepengegrunnlag: Inntekt,
+        begrensning: Sykepengegrunnlag.Begrensning
+    ) {
+        delegatee.postVisitSykepengegrunnlag(sykepengegrunnlag1, sykepengegrunnlag, grunnlagForSykepengegrunnlag, begrensning)
     }
 
     override fun preVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {

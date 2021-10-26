@@ -3,6 +3,7 @@ package no.nav.helse.person.infotrygdhistorikk
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.*
+import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -802,7 +803,8 @@ internal class InfotrygdhistorikkElementTest {
         Sykepengegrunnlag(
             arbeidsgiverInntektsopplysninger = listOf(),
             sykepengegrunnlag = inntekt,
-            grunnlagForSykepengegrunnlag = inntekt
+            grunnlagForSykepengegrunnlag = inntekt,
+            begrensning = ER_IKKE_6G_BEGRENSET
         )
     }
 

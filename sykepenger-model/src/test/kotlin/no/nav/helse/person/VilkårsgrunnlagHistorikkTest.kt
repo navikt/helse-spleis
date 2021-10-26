@@ -1,6 +1,7 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -378,14 +379,16 @@ internal class VilkårsgrunnlagHistorikkTest {
         Sykepengegrunnlag(
             arbeidsgiverInntektsopplysninger = listOf(),
             sykepengegrunnlag = inntekt,
-            grunnlagForSykepengegrunnlag = inntekt
+            grunnlagForSykepengegrunnlag = inntekt,
+            begrensning = ER_IKKE_6G_BEGRENSET
         )
 
     private fun sykepengegrunnlagFor(inntekt: Inntekt): (LocalDate) -> Sykepengegrunnlag = {
         Sykepengegrunnlag(
             arbeidsgiverInntektsopplysninger = listOf(),
             sykepengegrunnlag = inntekt,
-            grunnlagForSykepengegrunnlag = inntekt
+            grunnlagForSykepengegrunnlag = inntekt,
+            begrensning = ER_IKKE_6G_BEGRENSET
         )
     }
 }

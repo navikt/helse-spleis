@@ -6,7 +6,7 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.person.Arbeidsgiver.Companion.antallMedVedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSammenligningsgrunnlag
-import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSykepengegrunnlag
+import no.nav.helse.person.Arbeidsgiver.Companion.beregnSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSykepengegrunnlagGammel
 import no.nav.helse.person.Arbeidsgiver.Companion.harArbeidsgivereMedOverlappendeUtbetaltePerioder
 import no.nav.helse.person.Arbeidsgiver.Companion.harGrunnlagForSykepengegrunnlag
@@ -15,7 +15,6 @@ import no.nav.helse.person.Arbeidsgiver.Companion.harRelevanteArbeidsforholdForF
 import no.nav.helse.person.Arbeidsgiver.Companion.kanOverstyres
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.relevanteArbeidsforhold
-import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.grunnlagForSykepengegrunnlagPerArbeidsgiver
 import no.nav.helse.person.Vedtaksperiode.Companion.ALLE
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -459,15 +458,20 @@ class Person private constructor(
     internal fun sykepengegrunnlag(skjæringstidspunkt: LocalDate) =
         vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)?.sykepengegrunnlag()
 
+    internal fun grunnlagsBegrensning(skjæringstidspunkt: LocalDate) =
+        vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)?.grunnlagsBegrensning()
 
-    internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, aktivitetslogg: IAktivitetslogg) =
-        Sykepengegrunnlag(arbeidsgivere.grunnlagForSykepengegrunnlag(skjæringstidspunkt), skjæringstidspunkt, aktivitetslogg)
+    internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
+        vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)?.grunnlagForSykepengegrunnlag()
 
-    internal fun grunnlagForSykepengegrunnlagForInfotrygd(skjæringstidspunkt: LocalDate, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden: LocalDate) =
-        Sykepengegrunnlag(arbeidsgivere.grunnlagForSykepengegrunnlag(skjæringstidspunkt, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden))
+    internal fun beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate, aktivitetslogg: IAktivitetslogg) =
+        Sykepengegrunnlag(arbeidsgivere.beregnSykepengegrunnlag(skjæringstidspunkt), skjæringstidspunkt, aktivitetslogg)
+
+    internal fun beregnSykepengegrunnlagForInfotrygd(skjæringstidspunkt: LocalDate, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden: LocalDate) =
+        Sykepengegrunnlag(arbeidsgivere.beregnSykepengegrunnlag(skjæringstidspunkt, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden))
 
     internal fun grunnlagForSykepengegrunnlagPerArbeidsgiver(skjæringstidspunkt: LocalDate) =
-        arbeidsgivere.grunnlagForSykepengegrunnlag(skjæringstidspunkt).grunnlagForSykepengegrunnlagPerArbeidsgiver()
+        vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)?.inntektsopplysningPerArbeidsgiver()
 
     internal fun sammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =
         arbeidsgivere.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt)
@@ -634,7 +638,7 @@ class Person private constructor(
 
     internal fun vilkårsprøvEtterNyInntekt(hendelse: OverstyrInntekt, kompenseringsdatoForManglendeSkjæringstidspunktIInfotrygd: LocalDate) {
         val skjæringstidspunkt = hendelse.skjæringstidspunkt
-        val grunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag(skjæringstidspunkt, hendelse)
+        val grunnlagForSykepengegrunnlag = beregnSykepengegrunnlag(skjæringstidspunkt, hendelse)
         val sammenligningsgrunnlag = sammenligningsgrunnlag(skjæringstidspunkt)
             ?: hendelse.severe("Fant ikke sammenligningsgrunnlag for skjæringstidspunkt: ${skjæringstidspunkt}. Kan ikke revurdere inntekt.")
         val avviksprosent = grunnlagForSykepengegrunnlag.avviksprosent(sammenligningsgrunnlag)

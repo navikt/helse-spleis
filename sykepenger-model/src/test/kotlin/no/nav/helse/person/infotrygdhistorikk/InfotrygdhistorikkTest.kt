@@ -2,6 +2,7 @@ package no.nav.helse.person.infotrygdhistorikk
 
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.*
+import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.serde.PersonData
 import no.nav.helse.serde.PersonData.InfotrygdhistorikkElementData.Companion.tilModellObjekt
 import no.nav.helse.somFødselsnummer
@@ -491,7 +492,8 @@ internal class InfotrygdhistorikkTest {
         Sykepengegrunnlag(
             arbeidsgiverInntektsopplysninger = listOf(),
             sykepengegrunnlag = inntekt,
-            grunnlagForSykepengegrunnlag = inntekt
+            grunnlagForSykepengegrunnlag = inntekt,
+            begrensning = ER_IKKE_6G_BEGRENSET
         )
     }
 }

@@ -8,6 +8,7 @@ import no.nav.helse.person.ForlengelseFraInfotrygd.JA
 import no.nav.helse.person.ForlengelseFraInfotrygd.NEI
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Sykepengegrunnlag
+import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -444,6 +445,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
     private fun sykepengegrunnlag(inntekt: Inntekt, arbeidsgiverInntektsopplysning: List<ArbeidsgiverInntektsopplysning> = listOf()) = Sykepengegrunnlag(
         arbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysning,
         sykepengegrunnlag = inntekt,
-        grunnlagForSykepengegrunnlag = inntekt
+        grunnlagForSykepengegrunnlag = inntekt,
+        begrensning = ER_IKKE_6G_BEGRENSET
     )
 }

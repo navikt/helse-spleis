@@ -2,6 +2,7 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Sykepengegrunnlag
+import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
@@ -66,7 +67,8 @@ internal class InntektsvurderingTest {
     private fun sykepengegrunnlag(inntekt: Inntekt = INNTEKT) = Sykepengegrunnlag(
         arbeidsgiverInntektsopplysninger = listOf(),
         sykepengegrunnlag = inntekt,
-        grunnlagForSykepengegrunnlag = inntekt
+        grunnlagForSykepengegrunnlag = inntekt,
+        begrensning = ER_IKKE_6G_BEGRENSET
     )
 
     private fun inntektsvurdering(

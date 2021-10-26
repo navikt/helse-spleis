@@ -635,13 +635,20 @@ internal class JsonBuilder : AbstractBuilder() {
     }
 
     class SykepengegrunnlagState(private val sykepengegrunnlag: MutableMap<String, Any>) : BuilderState() {
-        override fun preVisitSykepengegrunnlag(sykepengegrunnlag1: Sykepengegrunnlag, sykepengegrunnlag: Inntekt, grunnlagForSykepengegrunnlag: Inntekt) {
+        override fun preVisitSykepengegrunnlag(
+            sykepengegrunnlag1: Sykepengegrunnlag,
+            sykepengegrunnlag: Inntekt,
+            grunnlagForSykepengegrunnlag: Inntekt,
+            begrensning: Sykepengegrunnlag.Begrensning
+        ) {
             val arbeidsgiverInntektsopplysninger = mutableListOf<Map<String, Any>>()
+
             this.sykepengegrunnlag.putAll(
                 mapOf(
                     "sykepengegrunnlag" to sykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
                     "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
-                    "arbeidsgiverInntektsopplysninger" to arbeidsgiverInntektsopplysninger
+                    "arbeidsgiverInntektsopplysninger" to arbeidsgiverInntektsopplysninger,
+                    "begrensning" to begrensning
                 )
             )
 
@@ -709,7 +716,12 @@ internal class JsonBuilder : AbstractBuilder() {
             pushState(InntektsendringState(skatteopplysninger))
         }
 
-        override fun postVisitSykepengegrunnlag(sykepengegrunnlag1: Sykepengegrunnlag, sykepengegrunnlag: Inntekt, grunnlagForSykepengegrunnlag: Inntekt) {
+        override fun postVisitSykepengegrunnlag(
+            sykepengegrunnlag1: Sykepengegrunnlag,
+            sykepengegrunnlag: Inntekt,
+            grunnlagForSykepengegrunnlag: Inntekt,
+            begrensning: Sykepengegrunnlag.Begrensning
+        ) {
             popState()
         }
 

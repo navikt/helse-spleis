@@ -85,7 +85,7 @@ internal class Arbeidsgiver private constructor(
         internal fun List<Arbeidsgiver>.antallMedVedtaksperioder(skjæringstidspunkt: LocalDate) =
             this.count { arbeidsgiver -> arbeidsgiver.vedtaksperioder.any { vedtaksperiode -> vedtaksperiode.gjelder(skjæringstidspunkt) } }
 
-        internal fun List<Arbeidsgiver>.grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, periodeStart: LocalDate) =
+        internal fun List<Arbeidsgiver>.beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate, periodeStart: LocalDate) =
             fold(emptyList<ArbeidsgiverInntektsopplysning>()) { inntektsopplysninger, arbeidsgiver ->
                 val inntektsopplysning = arbeidsgiver.inntektshistorikk.grunnlagForSykepengegrunnlag(
                     skjæringstidspunkt,
@@ -95,7 +95,7 @@ internal class Arbeidsgiver private constructor(
                 else inntektsopplysninger + ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, inntektsopplysning)
             }
 
-        internal fun List<Arbeidsgiver>.grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
+        internal fun List<Arbeidsgiver>.beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
             this.mapNotNull { arbeidsgiver ->
                 arbeidsgiver.inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt)
                     ?.let { ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, it) }
