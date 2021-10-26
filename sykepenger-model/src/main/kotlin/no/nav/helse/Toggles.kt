@@ -40,6 +40,18 @@ abstract class Toggles internal constructor(enabled: Boolean = false, private va
         }
     }
 
+    internal operator fun plus(toggle: Toggles) = listOf(this, toggle)
+    internal companion object {
+        internal fun Iterable<Toggles>.enable(block: () -> Unit) {
+            forEach(Toggles::enable)
+            try {
+                block()
+            } finally {
+                forEach(Toggles::pop)
+            }
+        }
+    }
+
     object OppretteVedtaksperioderVedSøknad : Toggles(true)
     object RebregnUtbetalingVedHistorikkendring : Toggles()
     object OverlappendeSykmelding : Toggles(true)
@@ -48,4 +60,5 @@ abstract class Toggles internal constructor(enabled: Boolean = false, private va
     object Etterlevelse: Toggles()
     object SpeilApiV2: Toggles("SPEIL_API_V2")
     object RefusjonPerDag: Toggles("REFUSJON_PER_DAG",false)
+    object RevurdereInntektMedFlereArbeidsgivere: Toggles(false)
 }

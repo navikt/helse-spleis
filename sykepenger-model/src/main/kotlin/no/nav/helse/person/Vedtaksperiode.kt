@@ -252,7 +252,8 @@ internal class Vedtaksperiode private constructor(
             hendelse.error("Forespurt overstyring av inntekt hvor skjæringstidspunktet ligger i infotrygd")
             return
         }
-        if (inntektskilde == Inntektskilde.FLERE_ARBEIDSGIVERE) {
+
+        if (!Toggles.RevurdereInntektMedFlereArbeidsgivere.enabled && inntektskilde == Inntektskilde.FLERE_ARBEIDSGIVERE) {
             hendelse.error("Forespurt overstyring av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
             return
         }
