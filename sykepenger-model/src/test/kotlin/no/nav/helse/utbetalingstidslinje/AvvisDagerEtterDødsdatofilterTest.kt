@@ -53,7 +53,6 @@ internal class AvvisDagerEtterDødsdatofilterTest {
             tidslinjeOf(16.AP, 5.NAV),
             tidslinjeOf(16.AP, 5.NAV)
         )
-        println(Utbetalingstidslinje.periode(tidslinjer))
         val periode = Periode(1.januar, 21.januar)
         undersøke(tidslinjer, 1.januar, periode)
         assertEquals(5, UtbetalingstidslinjeInspektør(tidslinjer.first()).avvistDagTeller)

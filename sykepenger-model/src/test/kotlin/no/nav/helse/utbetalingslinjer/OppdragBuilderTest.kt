@@ -262,7 +262,6 @@ internal class OppdragBuilderTest {
         ).minus(original, Aktivitetslogg())
 
         endret.apply {
-            (0 until size).forEach { println(this[it]) }
             accept(AssertAtOppdragErENDR)
             assertLinje(0, 1.januar, 31.januar, delytelseId = 1, refDelytelseId = null, datoStatusFom = 1.januar, endringskode = ENDR, refFagsystemId = null)
             assertLinje(1, 6.januar, 15.januar, delytelseId = 2, refDelytelseId = 1, datoStatusFom = null, endringskode = NY)

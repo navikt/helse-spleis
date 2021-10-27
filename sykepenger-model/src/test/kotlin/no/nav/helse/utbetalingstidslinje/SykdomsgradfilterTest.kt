@@ -46,7 +46,6 @@ internal class SykdomsgradfilterTest {
     @Test
     fun `ikke warning når de avviste dagene gjelder forrige arbeidsgiverperiode`() {
         val tidslinjer = listOf(tidslinjeOf(16.AP, 5.NAV(1200, 19.0), 20.ARB, 16.AP, 10.NAV))
-        println(Utbetalingstidslinje.periode(tidslinjer))
         val periode = Periode(11.februar, 9.mars)
         undersøke(tidslinjer, periode)
         assertEquals(32, inspektør.arbeidsgiverperiodeDagTeller)
