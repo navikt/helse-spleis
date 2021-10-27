@@ -38,13 +38,13 @@ internal class Inntektshistorikk {
     internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, dato: LocalDate): Inntektsopplysning? =
         grunnlagForSykepengegrunnlag(skjæringstidspunkt) ?: skjæringstidspunkt
             .takeIf { it <= dato }
-            ?.let { historikk.firstOrNull()?.grunnlagForSykepengegrunnlagFraInfotrygd(it til dato) }?.first
+            ?.let { historikk.firstOrNull()?.grunnlagForSykepengegrunnlagFraInfotrygd(it til dato) }
 
     internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate): Inntektsopplysning? =
-        historikk.firstOrNull()?.grunnlagForSykepengegrunnlag(skjæringstidspunkt)?.first
+        historikk.firstOrNull()?.grunnlagForSykepengegrunnlag(skjæringstidspunkt)
 
     internal fun grunnlagForSammenligningsgrunnlag(dato: LocalDate): Inntektsopplysning? =
-        historikk.firstOrNull()?.grunnlagForSammenligningsgrunnlag(dato)?.first
+        historikk.firstOrNull()?.grunnlagForSammenligningsgrunnlag(dato)
 
     internal fun sykepengegrunnlagKommerFraSkatt(skjæringstidspunkt: LocalDate) =
         grunnlagForSykepengegrunnlag(skjæringstidspunkt).let { it == null || it is SkattComposite }
@@ -74,21 +74,18 @@ internal class Inntektshistorikk {
             }
         }
 
-        @Deprecated("Skriv om slik at vi kun har grunnlagForSykepengegrunnlag som returnerer inntektsopplysning")
         internal fun grunnlagForSykepengegrunnlag(dato: LocalDate) =
             inntekter
                 .sorted()
                 .mapNotNull { it.grunnlagForSykepengegrunnlag(dato) }
                 .firstOrNull()
 
-        @Deprecated("Skriv om slik at vi kun har grunnlagForSammenligningsgrunnlag som returnerer inntektsopplysning")
         internal fun grunnlagForSammenligningsgrunnlag(dato: LocalDate) =
             inntekter
                 .sorted()
                 .mapNotNull { it.grunnlagForSammenligningsgrunnlag(dato) }
                 .firstOrNull()
 
-        @Deprecated("Skriv om slik at vi kun har grunnlagForSykepengegrunnlag som returnerer inntektsopplysning")
         internal fun grunnlagForSykepengegrunnlagFraInfotrygd(periode: Periode) =
             inntekter
                 .filterIsInstance<Infotrygd>()
@@ -105,11 +102,9 @@ internal class Inntektshistorikk {
         val dato: LocalDate
         val prioritet: Int
         fun accept(visitor: InntekthistorikkVisitor)
-        @Deprecated("Skriv om slik at vi kun har grunnlagForSykepengegrunnlag som returnerer inntektsopplysning")
-        fun grunnlagForSykepengegrunnlag(dato: LocalDate): Pair<Inntektsopplysning, Inntekt>? = null
+        fun grunnlagForSykepengegrunnlag(dato: LocalDate): Inntektsopplysning? = null
         fun grunnlagForSykepengegrunnlag(): Inntekt
-        @Deprecated("Skriv om slik at vi kun har grunnlagForSammenligningsgrunnlag som returnerer inntektsopplysning")
-        fun grunnlagForSammenligningsgrunnlag(dato: LocalDate): Pair<Inntektsopplysning, Inntekt>? = null
+        fun grunnlagForSammenligningsgrunnlag(dato: LocalDate): Inntektsopplysning? = null
         fun grunnlagForSammenligningsgrunnlag(): Inntekt
         fun skalErstattesAv(other: Inntektsopplysning): Boolean
         override fun compareTo(other: Inntektsopplysning) =
@@ -131,7 +126,7 @@ internal class Inntektshistorikk {
             visitor.visitSaksbehandler(this, dato, hendelseId, beløp, tidsstempel)
         }
 
-        override fun grunnlagForSykepengegrunnlag(dato: LocalDate) = takeIf { it.dato == dato }?.let { it to it.beløp }
+        override fun grunnlagForSykepengegrunnlag(dato: LocalDate) = takeIf { it.dato == dato }
         override fun grunnlagForSykepengegrunnlag(): Inntekt = beløp
 
         override fun grunnlagForSammenligningsgrunnlag(): Inntekt = error("Saksbehandler har ikke grunnlag for sammenligningsgrunnlag")
@@ -162,10 +157,10 @@ internal class Inntektshistorikk {
             visitor.visitInfotrygd(this, dato, hendelseId, beløp, tidsstempel)
         }
 
-        override fun grunnlagForSykepengegrunnlag(dato: LocalDate) = takeIf { it.dato == dato }?.let { it to it.beløp }
+        override fun grunnlagForSykepengegrunnlag(dato: LocalDate) = takeIf { it.dato == dato }
         override fun grunnlagForSykepengegrunnlag(): Inntekt = beløp
 
-        internal fun grunnlagForSykepengegrunnlag(periode: Periode) = takeIf { it.dato in periode }?.let { it to it.beløp }
+        internal fun grunnlagForSykepengegrunnlag(periode: Periode) = takeIf { it.dato in periode }
 
         override fun grunnlagForSammenligningsgrunnlag(): Inntekt = error("Infotrygd har ikke grunnlag for sammenligningsgrunnlag")
 
@@ -195,7 +190,7 @@ internal class Inntektshistorikk {
             visitor.visitInntektsmelding(this, dato, hendelseId, beløp, tidsstempel)
         }
 
-        override fun grunnlagForSykepengegrunnlag(dato: LocalDate) = takeIf { it.dato == dato }?.let { it to it.beløp }
+        override fun grunnlagForSykepengegrunnlag(dato: LocalDate) = takeIf { it.dato == dato }
         override fun grunnlagForSykepengegrunnlag(): Inntekt = beløp
 
         override fun grunnlagForSammenligningsgrunnlag(): Inntekt = error("Inntektsmelding har ikke grunnlag for sammenligningsgrunnlag")
@@ -231,13 +226,7 @@ internal class Inntektshistorikk {
         }
 
         override fun grunnlagForSykepengegrunnlag(dato: LocalDate) =
-            inntektsopplysninger
-                .mapNotNull { it.grunnlagForSykepengegrunnlag(dato) }
-                .takeIf { it.isNotEmpty() }
-                ?.map { (_, sum) -> sum }
-                ?.summer()
-                ?.div(3)
-                ?.let { this to it }
+            takeIf { inntektsopplysninger.any { it.grunnlagForSykepengegrunnlag(dato) != null } }
 
         override fun grunnlagForSykepengegrunnlag() =
             inntektsopplysninger
@@ -247,13 +236,7 @@ internal class Inntektshistorikk {
                 .div(3)
 
         override fun grunnlagForSammenligningsgrunnlag(dato: LocalDate) =
-            inntektsopplysninger
-                .mapNotNull { it.grunnlagForSammenligningsgrunnlag(dato) }
-                .takeIf { it.isNotEmpty() }
-                ?.map { (_, sum) -> sum }
-                ?.summer()
-                ?.div(12)
-                ?.let { this to it }
+            takeIf { inntektsopplysninger.any { it.grunnlagForSammenligningsgrunnlag(dato) != null } }
 
         override fun grunnlagForSammenligningsgrunnlag(): Inntekt =
             inntektsopplysninger
@@ -262,7 +245,7 @@ internal class Inntektshistorikk {
                 .summer()
                 .div(12)
 
-        internal fun sammenligningsgrunnlag() = grunnlagForSammenligningsgrunnlag(dato)?.second
+        internal fun sammenligningsgrunnlag() = grunnlagForSammenligningsgrunnlag(dato)?.grunnlagForSammenligningsgrunnlag()
 
         override fun skalErstattesAv(other: Inntektsopplysning): Boolean =
             this.inntektsopplysninger.any { it.skalErstattesAv(other) }
@@ -324,7 +307,7 @@ internal class Inntektshistorikk {
             }
 
             override fun grunnlagForSykepengegrunnlag(dato: LocalDate) =
-                takeIf { this.dato == dato && måned.isWithinRangeOf(dato, 3) }?.let { it to it.beløp }
+                takeIf { this.dato == dato && måned.isWithinRangeOf(dato, 3) }
 
             override fun grunnlagForSykepengegrunnlag(): Inntekt = beløp
 
@@ -362,7 +345,7 @@ internal class Inntektshistorikk {
             }
 
             override fun grunnlagForSammenligningsgrunnlag(dato: LocalDate) =
-                takeIf { this.dato == dato && måned.isWithinRangeOf(dato, 12) }?.let { it to it.beløp }
+                takeIf { this.dato == dato && måned.isWithinRangeOf(dato, 12) }
 
             override fun grunnlagForSammenligningsgrunnlag(): Inntekt = beløp
 
