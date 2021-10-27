@@ -3,6 +3,7 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Refusjonshistorikk
+import no.nav.helse.person.Refusjonshistorikk.Refusjon.Companion.utledetFørsteFraværsdag
 
 internal class Refusjonsgjødsler(
     private val tidslinje: Utbetalingstidslinje,
@@ -16,7 +17,7 @@ internal class Refusjonsgjødsler(
             utbetalingsperiode.forEach { utbetalingsdag ->
                 when (refusjon) {
                     null -> utbetalingsdag.økonomi.settFullArbeidsgiverRefusjon()
-                    else -> utbetalingsdag.økonomi.arbeidsgiverRefusjon(refusjon.beløp(utbetalingsdag.dato, aktivitetslogg))
+                    else -> if (utbetalingsdag.dato >= refusjon.utledetFørsteFraværsdag()) utbetalingsdag.økonomi.arbeidsgiverRefusjon(refusjon.beløp(utbetalingsdag.dato, aktivitetslogg))
                 }
             }
         }

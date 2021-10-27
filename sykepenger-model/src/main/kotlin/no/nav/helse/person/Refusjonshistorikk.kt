@@ -45,22 +45,27 @@ internal class Refusjonshistorikk {
                 if (refusjon.meldingsreferanseId !in map { it.meldingsreferanseId }) add(refusjon)
             }
 
-            private fun Refusjon.utledetFørsteFraværsdag() = førsteFraværsdag ?: arbeidsgiverperioder.maxOf { it.start }
+            internal fun Refusjon.utledetFørsteFraværsdag() = førsteFraværsdag ?: arbeidsgiverperioder.maxOf { it.start }
+
+            private fun Iterable<Refusjon>.nyesteMedFraværFørUtbetaling(førsteUtbetalingsdag: LocalDate) =
+                filter { it.utledetFørsteFraværsdag() < førsteUtbetalingsdag }.maxByOrNull { it.tidsstempel }
 
             internal fun Iterable<Refusjon>.somOverlapperMedArbeidsgiverperiode(periode: Periode, aktivitetslogg: IAktivitetslogg): Refusjon? {
                 val utvidetPeriode = periode.start.minusDays(16) til periode.endInclusive
-                return lastOrNull { refusjon ->
+                return filter { refusjon ->
                     refusjon.arbeidsgiverperioder.any { it.overlapperMed(utvidetPeriode) }
-                }?.also { aktivitetslogg.info("Fant refusjon ved å gå 16 dager tilbake fra første utbetalingsdag i sammenhengende utbetaling") }
+                }.nyesteMedFraværFørUtbetaling(periode.start)
+                    ?.also { aktivitetslogg.info("Fant refusjon ved å gå 16 dager tilbake fra første utbetalingsdag i sammenhengende utbetaling") }
             }
 
             internal fun Iterable<Refusjon>.somTrefferFørsteFraværsdag(periode: Periode, aktivitetslogg: IAktivitetslogg) = lastOrNull { refusjon ->
                 refusjon.utledetFørsteFraværsdag() in periode
             }?.also { aktivitetslogg.info("Fant refusjon ved å sjekke om første fraværsdag er i sammenhengende utbetaling") }
 
-            internal fun Iterable<Refusjon>.somTilstøterArbeidsgiverperiode(periode: Periode, aktivitetslogg: IAktivitetslogg) = lastOrNull { refusjon ->
+            internal fun Iterable<Refusjon>.somTilstøterArbeidsgiverperiode(periode: Periode, aktivitetslogg: IAktivitetslogg) = filter { refusjon ->
                 refusjon.arbeidsgiverperioder.maxByOrNull { it.endInclusive }?.erRettFør(periode) ?: false
-            }?.also { aktivitetslogg.info("Fant refusjon ved å finne tilstøtende arbeidsgiverperiode for første utbetalingsdag i sammenhengende utbetaling") }
+            }.nyesteMedFraværFørUtbetaling(periode.start)
+                ?.also { aktivitetslogg.info("Fant refusjon ved å finne tilstøtende arbeidsgiverperiode for første utbetalingsdag i sammenhengende utbetaling") }
         }
 
         internal fun beløp(dag: LocalDate, aktivitetslogg: IAktivitetslogg): Inntekt {
