@@ -776,7 +776,7 @@ internal class InfotrygdhistorikkElementTest {
                 Inntektsopplysning(ORGNUMMER, 1.januar, 4321.månedlig, true),
             ), inntektshistorikk, UUID.randomUUID()
         )
-        assertEquals(1234.månedlig, inntektshistorikk.grunnlagForSykepengegrunnlagGammel(1.januar))
+        assertEquals(1234.månedlig, inntektshistorikk.grunnlagForSykepengegrunnlag(1.januar)?.grunnlagForSykepengegrunnlag())
     }
 
     private fun historikkelement(

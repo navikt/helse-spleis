@@ -42,7 +42,7 @@ internal class InntektshistorikkInspektør(arbeidsgiver: Arbeidsgiver) : Arbeids
     ) = element(innslag.reversed()).opplysninger.filter { it.kilde in kilder }.size
     internal val sisteInnslag get() = innslag.firstOrNull()
 
-    internal fun grunnlagForSykepengegrunnlag(dato: LocalDate) = inntektshistorikk.grunnlagForSykepengegrunnlagGammel(dato)
+    internal fun grunnlagForSykepengegrunnlag(dato: LocalDate) = inntektshistorikk.grunnlagForSykepengegrunnlag(dato)
 
     internal fun grunnlagForSammenligningsgrunnlag(dato: LocalDate) = inntektshistorikk.grunnlagForSammenligningsgrunnlag(dato)
 

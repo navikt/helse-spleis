@@ -54,8 +54,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a2)
 
-        assertEquals(31000.månedlig, inspektør(a1).inntektInspektør.grunnlagForSykepengegrunnlag(1.mars))
-        assertEquals(20000.månedlig, inspektør(a2).inntektInspektør.grunnlagForSykepengegrunnlag(1.mars))
+        assertEquals(31000.månedlig, inspektør(a1).inntektInspektør.grunnlagForSykepengegrunnlag(1.mars)?.grunnlagForSykepengegrunnlag())
+        assertEquals(20000.månedlig, inspektør(a2).inntektInspektør.grunnlagForSykepengegrunnlag(1.mars)?.grunnlagForSykepengegrunnlag())
 
     }
 
@@ -104,8 +104,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a2)
 
-        assertEquals(30000.månedlig, inspektør(a1).inntektInspektør.grunnlagForSykepengegrunnlag(1.mars))
-        assertEquals(18000.månedlig, inspektør(a2).inntektInspektør.grunnlagForSykepengegrunnlag(1.mars))
+        assertEquals(30000.månedlig, inspektør(a1).inntektInspektør.grunnlagForSykepengegrunnlag(1.mars)?.grunnlagForSykepengegrunnlag())
+        assertEquals(18000.månedlig, inspektør(a2).inntektInspektør.grunnlagForSykepengegrunnlag(1.mars)?.grunnlagForSykepengegrunnlag())
 
     }
 
@@ -145,8 +145,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a2)
 
-        assertEquals(31000.månedlig, inspektør(a1).inntektInspektør.grunnlagForSykepengegrunnlag(1.mars))
-        assertEquals(21000.månedlig, inspektør(a2).inntektInspektør.grunnlagForSykepengegrunnlag(1.mars))
+        assertEquals(31000.månedlig, inspektør(a1).inntektInspektør.grunnlagForSykepengegrunnlag(1.mars)?.grunnlagForSykepengegrunnlag())
+        assertEquals(21000.månedlig, inspektør(a2).inntektInspektør.grunnlagForSykepengegrunnlag(1.mars)?.grunnlagForSykepengegrunnlag())
     }
 
     @Test

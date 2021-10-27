@@ -103,8 +103,9 @@ internal class Arbeidsgiver private constructor(
 
         @Deprecated("Kan denne fjernes?")
         internal fun List<Arbeidsgiver>.grunnlagForSykepengegrunnlagGammel(skjæringstidspunkt: LocalDate) =
-            this.mapNotNull { it.inntektshistorikk.grunnlagForSykepengegrunnlagGammel(skjæringstidspunkt) }
+            this.mapNotNull { it.inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt) }
                 .takeIf { it.isNotEmpty() }
+                ?.map(Inntektshistorikk.Inntektsopplysning::grunnlagForSykepengegrunnlag)
                 ?.summer()
 
         internal fun List<Arbeidsgiver>.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =
@@ -113,7 +114,7 @@ internal class Arbeidsgiver private constructor(
                 ?.summer()
 
         internal fun List<Arbeidsgiver>.harGrunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
-            filter { it.inntektshistorikk.grunnlagForSykepengegrunnlagGammel(skjæringstidspunkt) != null }
+            filter { it.inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt) != null }
 
         internal fun List<Arbeidsgiver>.harNødvendigInntekt(skjæringstidspunkt: LocalDate) =
             this.all { it.vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt).harNødvendigInntekt() }
@@ -676,7 +677,7 @@ internal class Arbeidsgiver private constructor(
     internal fun fjernDager(periode: Periode) = sykdomshistorikk.fjernDager(periode)
 
     internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, periodeStart: LocalDate) =
-        inntektshistorikk.grunnlagForSykepengegrunnlagGammel(skjæringstidspunkt, periodeStart)
+        inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periodeStart)?.grunnlagForSykepengegrunnlag()
 
     internal fun addInntekt(inntektsmelding: Inntektsmelding, skjæringstidspunkt: LocalDate) {
         inntektsmelding.addInntekt(inntektshistorikk, skjæringstidspunkt)

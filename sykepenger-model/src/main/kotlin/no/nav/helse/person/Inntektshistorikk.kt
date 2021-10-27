@@ -35,19 +35,11 @@ internal class Inntektshistorikk {
 
     internal fun nyesteId() = historikk.nyesteId()
 
-    @Deprecated("Skriv om slik at vi kun har grunnlagForSykepengegrunnlag som returnerer inntektsopplysning")
-    internal fun grunnlagForSykepengegrunnlagGammel(skjæringstidspunkt: LocalDate, dato: LocalDate): Inntekt? =
-        grunnlagForSykepengegrunnlagMedMetadata(skjæringstidspunkt, dato)?.second
-
     internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, dato: LocalDate): Inntektsopplysning? =
         grunnlagForSykepengegrunnlagMedMetadata(skjæringstidspunkt, dato)?.first
 
     internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate): Inntektsopplysning? =
         grunnlagForSykepengegrunnlagMedMetadata(skjæringstidspunkt)?.first
-
-    @Deprecated("Skriv om slik at vi kun har grunnlagForSykepengegrunnlag som returnerer inntektsopplysning")
-    internal fun grunnlagForSykepengegrunnlagGammel(dato: LocalDate): Inntekt? =
-        grunnlagForSykepengegrunnlagMedMetadata(dato)?.second
 
     @Deprecated("Skriv om slik at vi kun har grunnlagForSykepengegrunnlag som returnerer inntektsopplysning")
     internal fun grunnlagForSykepengegrunnlagMedMetadata(skjæringstidspunkt: LocalDate, dato: LocalDate): Pair<Inntektsopplysning, Inntekt>? =
@@ -71,10 +63,13 @@ internal class Inntektshistorikk {
     internal fun grunnlagForSammenligningsgrunnlagMedMetadata(dato: LocalDate): Pair<Inntektsopplysning, Inntekt>? =
         historikk.firstOrNull()?.grunnlagForSammenligningsgrunnlag(dato)
 
-    internal fun sykepengegrunnlagKommerFraSkatt(skjæringstidspunkt: LocalDate) = grunnlagForSykepengegrunnlagMedMetadata(skjæringstidspunkt)?.first.let { it == null || it is SkattComposite }
-    internal fun harGrunnlagForSykepengegrunnlag(dato: LocalDate) =  grunnlagForSykepengegrunnlagGammel(dato) != null
+    internal fun sykepengegrunnlagKommerFraSkatt(skjæringstidspunkt: LocalDate) =
+        grunnlagForSykepengegrunnlagMedMetadata(skjæringstidspunkt)?.first.let { it == null || it is SkattComposite }
+
+    internal fun harGrunnlagForSykepengegrunnlag(dato: LocalDate) = this.grunnlagForSykepengegrunnlag(dato) != null
     private fun harGrunnlagForSammenligningsgrunnlag(dato: LocalDate) = grunnlagForSammenligningsgrunnlag(dato) != null
-    internal fun harGrunnlagForSykepengegrunnlagEllerSammenligningsgrunnlag(dato: LocalDate) = harGrunnlagForSykepengegrunnlag(dato) || harGrunnlagForSammenligningsgrunnlag(dato)
+    internal fun harGrunnlagForSykepengegrunnlagEllerSammenligningsgrunnlag(dato: LocalDate) =
+        harGrunnlagForSykepengegrunnlag(dato) || harGrunnlagForSammenligningsgrunnlag(dato)
 
     internal class Innslag(private val id: UUID) {
         private val inntekter = mutableListOf<Inntektsopplysning>()
@@ -221,7 +216,7 @@ internal class Inntektshistorikk {
             "dato" to dato,
             "hendelseId" to hendelseId,
             "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
-            "kilde" to  Inntektsopplysningskilde.INNTEKTSMELDING,
+            "kilde" to Inntektsopplysningskilde.INNTEKTSMELDING,
             "tidsstempel" to tidsstempel
         )
     }
@@ -251,8 +246,8 @@ internal class Inntektshistorikk {
 
         override fun grunnlagForSykepengegrunnlag() =
             inntektsopplysninger
-                .map { it.grunnlagForSykepengegrunnlag() }
-                .map { sum -> sum }
+                .filter { it.erRelevant(3) }
+                .map(Skatt::grunnlagForSykepengegrunnlag)
                 .summer()
                 .div(3)
 
@@ -288,6 +283,8 @@ internal class Inntektshistorikk {
             PENSJON_ELLER_TRYGD,
             YTELSE_FRA_OFFENTLIGE
         }
+
+        internal fun erRelevant(måneder: Long) = måned.isWithinRangeOf(dato, måneder)
 
         internal class Sykepengegrunnlag(
             dato: LocalDate,
@@ -326,6 +323,7 @@ internal class Inntektshistorikk {
 
             override fun grunnlagForSykepengegrunnlag(dato: LocalDate) =
                 takeIf { this.dato == dato && måned.isWithinRangeOf(dato, 3) }?.let { it to it.beløp }
+
             override fun grunnlagForSykepengegrunnlag(): Inntekt = beløp
 
             override fun skalErstattesAv(other: Inntektsopplysning) =
@@ -367,7 +365,8 @@ internal class Inntektshistorikk {
             override fun skalErstattesAv(other: Inntektsopplysning) =
                 other is Sammenligningsgrunnlag && this.dato == other.dato
         }
-        internal fun toMap(kilde: Inntektsopplysningskilde): Map<String, Any?> =mapOf(
+
+        internal fun toMap(kilde: Inntektsopplysningskilde): Map<String, Any?> = mapOf(
             "dato" to dato,
             "hendelseId" to hendelseId,
             "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },

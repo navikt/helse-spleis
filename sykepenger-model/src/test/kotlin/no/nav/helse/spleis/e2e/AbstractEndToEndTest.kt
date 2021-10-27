@@ -1246,7 +1246,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     }
 
     protected fun assertInntektForDato(forventetInntekt: Inntekt?, dato: LocalDate, inspektør: TestArbeidsgiverInspektør) {
-        assertEquals(forventetInntekt, inspektør.inntektInspektør.grunnlagForSykepengegrunnlag(dato))
+        assertEquals(forventetInntekt, inspektør.inntektInspektør.grunnlagForSykepengegrunnlag(dato)?.grunnlagForSykepengegrunnlag())
     }
 
     protected fun <T : PersonHendelse> T.håndter(håndter: Person.(T) -> Unit): T {
