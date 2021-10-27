@@ -52,7 +52,8 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             orgnummer = a1
         )
 
-        assertNoWarnings(a1.inspektør)
+        assertFalse(a1.inspektør.personLogg.toString().contains("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold"))
+        assertWarn( "Bruker har flere inntektskilder de siste tre månedene enn arbeidsforhold som er oppdaget i Aa-registeret.", a1.inspektør.personLogg)
     }
 
     @Test

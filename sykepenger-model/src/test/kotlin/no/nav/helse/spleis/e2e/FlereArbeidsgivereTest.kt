@@ -16,8 +16,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -1417,7 +1416,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `En arbeidsgiver får ikke warning hvis vi finner inntekter for flere arbeidsgivere de siste tre månedene`() {
+    fun `En arbeidsgiver med inntekter fra flere arbeidsgivere de siste tre månedene - får ikke warning om at det er flere arbeidsgivere, får warning om at det er flere inntektskilder enn arbeidsforhold`() {
         val periode = 1.januar(2021) til 31.januar(2021)
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
@@ -1437,7 +1436,8 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, a1)
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
 
-        assertNoWarnings(a1.inspektør)
+        assertWarningTekst(a1.inspektør, "Bruker har flere inntektskilder de siste tre månedene enn arbeidsforhold som er oppdaget i Aa-registeret.")
+        assertFalse(a1.inspektør.personLogg.toString().contains("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold"))
     }
 
     @Test
