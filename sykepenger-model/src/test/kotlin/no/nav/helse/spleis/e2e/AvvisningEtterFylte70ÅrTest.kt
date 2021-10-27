@@ -22,7 +22,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 
-internal class AvvisningEtterFylte70År : AbstractEndToEndTest() {
+internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
     private val logCollector = ListAppender<ILoggingEvent>()
 
     init {
