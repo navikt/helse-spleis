@@ -90,7 +90,7 @@ internal class InntektshistorikkTest {
         assertEquals(2, inspektør.inntektTeller.size)
         assertEquals(30, inspektør.inntektTeller.first())
         assertEquals(17, inspektør.inntektTeller.last())
-        assertEquals(254000.årlig, historikk.grunnlagForSammenligningsgrunnlag(31.desember(2017)))
+        assertEquals(254000.årlig, historikk.grunnlagForSammenligningsgrunnlag(31.desember(2017))?.grunnlagForSammenligningsgrunnlag())
     }
 
     @Test
@@ -119,7 +119,7 @@ internal class InntektshistorikkTest {
         assertEquals(2, inspektør.inntektTeller.size)
         assertEquals(30, inspektør.inntektTeller.first())
         assertEquals(17, inspektør.inntektTeller.last())
-        assertEquals(258000.årlig, historikk.grunnlagForSammenligningsgrunnlag(1.januar))
+        assertEquals(258000.årlig, historikk.grunnlagForSammenligningsgrunnlag(1.januar)?.grunnlagForSammenligningsgrunnlag())
     }
 
     @Test
@@ -266,7 +266,7 @@ internal class InntektshistorikkTest {
             }.forEach { it.lagreInntekter(historikk, 1.januar, meldingsreferanseId) }
         }
         assertEquals(13, inspektør.inntektTeller.first())
-        assertEquals(INNTEKT, historikk.grunnlagForSammenligningsgrunnlag(1.januar(2018)))
+        assertEquals(INNTEKT, historikk.grunnlagForSammenligningsgrunnlag(1.januar(2018))?.grunnlagForSammenligningsgrunnlag())
     }
 
     @Test

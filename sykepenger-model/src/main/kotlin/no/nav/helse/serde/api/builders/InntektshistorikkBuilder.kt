@@ -63,9 +63,9 @@ internal class InntektshistorikkBuilder(private val person: Person) {
         orgnummer: String,
         inntektshistorikk: Inntektshistorikk
     ): InntektsgrunnlagDTO.ArbeidsgiverinntektDTO {
-        val sammenligningsgrunnlagDTO = inntektshistorikk.grunnlagForSammenligningsgrunnlagMedMetadata(skjæringstidspunkt)
-            ?.let { (sammenligningsgrunnlagsopplysning, sammenligningsgrunnlag) ->
-                SammenligningsgrunnlagVisitor(sammenligningsgrunnlagsopplysning, sammenligningsgrunnlag).sammenligningsgrunnlagDTO
+        val sammenligningsgrunnlagDTO = inntektshistorikk.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt)
+            ?.let { sammenligningsgrunnlagsopplysning ->
+                SammenligningsgrunnlagVisitor(sammenligningsgrunnlagsopplysning, sammenligningsgrunnlagsopplysning.grunnlagForSammenligningsgrunnlag()).sammenligningsgrunnlagDTO
             }
         return InntektsgrunnlagDTO.ArbeidsgiverinntektDTO(
             orgnummer,
@@ -97,9 +97,9 @@ internal class InntektshistorikkBuilder(private val person: Person) {
 
         override fun postVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {
             val sammenligningsgrunnlagDTO =
-                inntektshistorikk[orgnummer]?.grunnlagForSammenligningsgrunnlagMedMetadata(skjæringstidspunkt)
-                    ?.let { (sammenligningsgrunnlagsopplysning, sammenligningsgrunnlag) ->
-                        SammenligningsgrunnlagVisitor(sammenligningsgrunnlagsopplysning, sammenligningsgrunnlag).sammenligningsgrunnlagDTO
+                inntektshistorikk[orgnummer]?.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt)
+                    ?.let { sammenligningsgrunnlagsopplysning ->
+                        SammenligningsgrunnlagVisitor(sammenligningsgrunnlagsopplysning, sammenligningsgrunnlagsopplysning.grunnlagForSammenligningsgrunnlag()).sammenligningsgrunnlagDTO
                     }
 
             arbeidsgiverInntektDTO.add(
