@@ -118,6 +118,18 @@ internal class RefusjonshistorikkTest {
         assertEquals(listOf("Fant refusjon ved å gå 16 dager tilbake fra første utbetalingsdag i sammenhengende utbetaling"), aktivitetslogg.infoMeldinger())
     }
 
+    @Test
+    fun `Finner riktig refusjon for periode med samme arbeidsgiverperiode men nytt skjæringstidspunkt`() {
+        // Gjelder når vi finner refusjon ut ifra tilstøtende eller 16 dagers gap
+        val refusjon1 = refusjon(1.januar til 16.januar, førsteFraværsdag = 1.januar)
+        val refusjon2 = refusjon(1.januar til 16.januar, førsteFraværsdag = 1.februar)
+        val refusjonshistorikk = Refusjonshistorikk()
+        val aktivitetslogg = Aktivitetslogg()
+        refusjonshistorikk.leggTilRefusjon(refusjon1)
+        refusjonshistorikk.leggTilRefusjon(refusjon2)
+        assertSame(refusjon1, refusjonshistorikk.finnRefusjon(17.januar til 20.januar, aktivitetslogg))
+    }
+
     private fun refusjon(vararg arbeidsgiverperiode: Periode, meldingsreferanseId: UUID = UUID.randomUUID(), førsteFraværsdag: LocalDate? = arbeidsgiverperiode.maxOf { it.start }) = Refusjonshistorikk.Refusjon(
         meldingsreferanseId = meldingsreferanseId,
         førsteFraværsdag = førsteFraværsdag,

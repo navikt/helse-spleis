@@ -365,6 +365,7 @@ internal class ArbeidsgiverUtbetalingerTest {
             sykmeldingSkrevet = 1.januar.atStartOfDay(),
             mottatt = 1.januar.atStartOfDay()
         ))
+
         person.vilkårsgrunnlagHistorikk.lagre(1.januar, vilkårsgrunnlagElement ?: VilkårsgrunnlagHistorikk.Grunnlagsdata(
             sykepengegrunnlag = sykepengegrunnlag(30000.månedlig),
             sammenligningsgrunnlag = 30000.månedlig,
@@ -376,7 +377,8 @@ internal class ArbeidsgiverUtbetalingerTest {
             vurdertOk = true,
             meldingsreferanseId = UUID.randomUUID()
         ))
-        person.arbeidsgiver(ORGNUMMER).addInntekt(
+
+        person.håndter(
             inntektsmelding = Inntektsmelding(
                 meldingsreferanseId = UUID.randomUUID(),
                 refusjon = Inntektsmelding.Refusjon(30000.månedlig, null),
@@ -390,8 +392,7 @@ internal class ArbeidsgiverUtbetalingerTest {
                 begrunnelseForReduksjonEllerIkkeUtbetalt = null,
                 harOpphørAvNaturalytelser = false,
                 mottatt = LocalDateTime.now()
-            ),
-            skjæringstidspunkt = 1.januar
+            )
         )
         aktivitetslogg = Aktivitetslogg()
         ArbeidsgiverUtbetalinger(

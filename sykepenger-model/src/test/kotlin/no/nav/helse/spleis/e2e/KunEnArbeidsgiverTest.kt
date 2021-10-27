@@ -2403,7 +2403,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(11.november(2020), 11.november(2020), 100.prosent))
         håndterSøknad(Sykdom(11.november(2020), 11.november(2020), 100.prosent))
-        håndterInntektsmelding(listOf(Periode(18.august(2020), 2.september(2020))), 11.november(2020))
+        håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(18.august(2020), 2.september(2020))), førsteFraværsdag = 11.november(2020))
         håndterYtelser(3.vedtaksperiode)
         håndterVilkårsgrunnlag(3.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
