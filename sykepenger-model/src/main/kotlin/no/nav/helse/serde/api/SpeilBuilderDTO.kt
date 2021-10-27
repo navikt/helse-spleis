@@ -231,7 +231,8 @@ enum class BegrunnelseDTO {
     MinimumSykdomsgrad,
     EtterDødsdato,
     ManglerMedlemskap,
-    ManglerOpptjening
+    ManglerOpptjening,
+    Over70,
 }
 
 enum class TilstandstypeDTO(private val visForkastet: Boolean = false) {
