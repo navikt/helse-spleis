@@ -21,8 +21,8 @@ internal class AvstemmingTest : AbstractEndToEndTest() {
     fun `avstemmer`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 2.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(1.januar, 3.januar, 100.prosent))
-        nyttVedtak(4.januar, 26.januar, 100.prosent, 4.januar)
-        nyttVedtak(1.mars, 31.mars, 100.prosent, 4.januar)
+        nyttVedtak(4.januar, 26.januar, 100.prosent)
+        nyttVedtak(1.mars, 31.mars, 100.prosent)
         tilYtelser(1.mai, 30.mai, 100.prosent, 1.mai)
         val avstemming = Avstemming(
             meldingsreferanseId = UUID.randomUUID(),

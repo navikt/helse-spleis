@@ -9,10 +9,7 @@ import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.testhelpers.desember
-import no.nav.helse.testhelpers.februar
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.mars
+import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -152,6 +149,7 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
 
     @Test
     fun `periode etter en periode med ferie - opphav i Infotrygd`() {
+        håndterInntektsmelding(listOf(15.november(2017) til 30.november(2017)))
         val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.desember(2017), 31.desember(2017), 100.prosent, INNTEKT)
         val inntektshistorikk = listOf(
             Inntektsopplysning(ORGNUMMER, 1.desember(2017), INNTEKT, true)

@@ -1141,7 +1141,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
                 }
             }
         ))
-        assertNoWarnings(a2.inspektør)
+        assertNoWarnings(1.vedtaksperiode, a2)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a2, inntektshistorikk = inntektshistorikk)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)

@@ -45,7 +45,8 @@ internal class Refusjonshistorikk {
                 if (refusjon.meldingsreferanseId !in map { it.meldingsreferanseId }) add(refusjon)
             }
 
-            internal fun Refusjon.utledetFørsteFraværsdag() = førsteFraværsdag ?: arbeidsgiverperioder.maxOf { it.start }
+            private fun Refusjon.utledetFørsteFraværsdag() = førsteFraværsdag ?: arbeidsgiverperioder.maxOf { it.start }
+            internal fun Refusjon.førsteDagIArbeidsgiverperioden() = arbeidsgiverperioder.minOfOrNull { it.start } ?: førsteFraværsdag!!
 
             private fun Iterable<Refusjon>.nyesteMedFraværFørUtbetaling(førsteUtbetalingsdag: LocalDate) =
                 filter { it.utledetFørsteFraværsdag() < førsteUtbetalingsdag }.maxByOrNull { it.tidsstempel }
@@ -69,7 +70,7 @@ internal class Refusjonshistorikk {
         }
 
         internal fun beløp(dag: LocalDate, aktivitetslogg: IAktivitetslogg): Inntekt {
-            if (dag < utledetFørsteFraværsdag()) {
+            if (dag < førsteDagIArbeidsgiverperioden()) {
                 aktivitetslogg.severe("Har ikke opplysninger om refusjon på den aktuelle dagen")
             }
             if (sisteRefusjonsdag != null && dag > sisteRefusjonsdag) return Inntekt.INGEN

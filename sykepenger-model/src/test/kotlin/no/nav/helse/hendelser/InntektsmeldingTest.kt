@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.Toggles
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntektshistorikk
@@ -175,7 +176,7 @@ internal class InntektsmeldingTest {
     }
 
     @Test
-    fun `inntektsmelding med refusjon beløp != beregnetInntekt er ikke gyldig`() {
+    fun `inntektsmelding med refusjon beløp != beregnetInntekt er ikke gyldig`() = Toggles.RefusjonPerDag.disable {
         inntektsmelding(
             emptyList(),
             refusjonBeløp = 999999.månedlig,
@@ -185,7 +186,7 @@ internal class InntektsmeldingTest {
     }
 
     @Test
-    fun `refusjon opphører før perioden`() {
+    fun `refusjon opphører før perioden`() = Toggles.RefusjonPerDag.disable {
         inntektsmelding(
             listOf(Periode(1.januar, 3.januar)),
             refusjonOpphørsdato = 1.januar,
@@ -195,7 +196,7 @@ internal class InntektsmeldingTest {
     }
 
     @Test
-    fun `refusjon opphører etter perioden`() {
+    fun `refusjon opphører etter perioden`() = Toggles.RefusjonPerDag.disable {
         inntektsmelding(
             listOf(Periode(1.januar, 3.januar)),
             refusjonOpphørsdato = 11.januar,
@@ -205,7 +206,7 @@ internal class InntektsmeldingTest {
     }
 
     @Test
-    fun `refusjon opphører i perioden`() {
+    fun `refusjon opphører i perioden`() = Toggles.RefusjonPerDag.disable {
         inntektsmelding(
             listOf(Periode(1.januar, 3.januar)),
             refusjonOpphørsdato = 10.januar,
@@ -215,7 +216,7 @@ internal class InntektsmeldingTest {
     }
 
     @Test
-    fun `endring i refusjon i perioden`() {
+    fun `endring i refusjon i perioden`() = Toggles.RefusjonPerDag.disable {
         inntektsmelding(
             listOf(Periode(1.januar, 3.januar)),
             refusjonOpphørsdato = 16.januar,
