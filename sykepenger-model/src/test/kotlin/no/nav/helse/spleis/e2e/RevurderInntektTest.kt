@@ -716,10 +716,11 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         nyttVedtak(1.mars, 31.mars)
         forlengVedtak(1.april, 30.april)
         val overstyrInntektHendelseId = UUID.randomUUID()
+        håndterOverstyrInntekt(skjæringstidspunkt = 1.mars, meldingsreferanseId = overstyrInntektHendelseId)
+
         assertHarIkkeHendelseIder(1.vedtaksperiode, overstyrInntektHendelseId)
         assertHarHendelseIder(2.vedtaksperiode, overstyrInntektHendelseId)
         assertHarHendelseIder(3.vedtaksperiode, overstyrInntektHendelseId)
-        håndterOverstyrInntekt(skjæringstidspunkt = 1.mars, meldingsreferanseId = overstyrInntektHendelseId)
     }
 }
 

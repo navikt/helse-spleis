@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.januar
@@ -43,10 +44,13 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
 
     @Test
     fun `alle perioder for alle arbeidsgivere med aktuelt skjæringstidspunkt skal ha hendelseIden`() {
-        nyeVedtak(1.januar, 31.januar, AG1, AG2)
-        val hendelseId = UUID.randomUUID()
-        håndterOverstyrInntekt(orgnummer = AG1, skjæringstidspunkt = 1.januar, meldingsreferanseId = hendelseId)
-        assertHarHendelseIder(1.vedtaksperiode, hendelseId, orgnummer = AG1)
-        assertHarHendelseIder(1.vedtaksperiode, hendelseId, orgnummer = AG2)
+        Toggles.RevurdereInntektMedFlereArbeidsgivere.enable {
+            nyeVedtak(1.januar, 31.januar, AG1, AG2)
+            val hendelseId = UUID.randomUUID()
+            håndterOverstyrInntekt(orgnummer = AG1, skjæringstidspunkt = 1.januar, meldingsreferanseId = hendelseId)
+
+            assertHarHendelseIder(1.vedtaksperiode, hendelseId, orgnummer = AG1)
+            assertHarHendelseIder(1.vedtaksperiode, hendelseId, orgnummer = AG2)
+        }
     }
 }

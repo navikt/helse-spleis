@@ -257,7 +257,8 @@ internal class Vedtaksperiode private constructor(
             hendelse.error("Forespurt overstyring av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
             return
         }
-        hendelseIder.add(hendelse.meldingsreferanseId())
+
+        person.loggførHendelsesreferanse(hendelse.skjæringstidspunkt, hendelse.meldingsreferanseId())
         tilstand.håndter(this, hendelse)
     }
 
@@ -2214,6 +2215,8 @@ internal class Vedtaksperiode private constructor(
         val merge = this.sykdomstidslinje.merge(ferie)
         return merge.harProblemdager()
     }
+
+    fun loggførHendelsesreferanse(meldingsreferanseId: UUID) = hendelseIder.add(meldingsreferanseId)
 
     internal object AvventerGodkjenningRevurdering : Vedtaksperiodetilstand {
         override val type = AVVENTER_GODKJENNING_REVURDERING
