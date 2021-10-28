@@ -17,6 +17,7 @@ internal class V114LagreSykepengegrunnlag : JsonMigration(version = 114) {
 
         internal fun genererSykepengegrunnlag(vilkårsgrunnlag: ObjectNode, person: ObjectNode) {
             val skjæringstidspunkt = vilkårsgrunnlag["skjæringstidspunkt"].asText()
+            val vilkårsgrunnlagtype = vilkårsgrunnlag["type"].asText()
             val sykepengegrunnlag = vilkårsgrunnlag.with("sykepengegrunnlag")
 
             sykepengegrunnlag.put("sykepengegrunnlag", 0.0)
@@ -26,7 +27,13 @@ internal class V114LagreSykepengegrunnlag : JsonMigration(version = 114) {
 
 
             val grunnlagForSykepengegrunnlag = person["arbeidsgivere"].sumOf { arbeidsgiver ->
-                leggTilArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysninger, arbeidsgiver as ObjectNode, skjæringstidspunkt, person["fødselsnummer"].asText())
+                leggTilArbeidsgiverInntektsopplysning(
+                    arbeidsgiverInntektsopplysninger,
+                    arbeidsgiver as ObjectNode,
+                    skjæringstidspunkt,
+                    person["fødselsnummer"].asText(),
+                    vilkårsgrunnlagtype
+                )
             } * 12
             val sykepengegrunnlag2 = minOf(grunnlagForSykepengegrunnlag, Grunnbeløp.`6G`.beløp(LocalDate.parse(skjæringstidspunkt)).reflection { årlig, _, _, _ -> årlig })
 
@@ -34,8 +41,14 @@ internal class V114LagreSykepengegrunnlag : JsonMigration(version = 114) {
             sykepengegrunnlag.put("grunnlagForSykepengegrunnlag", grunnlagForSykepengegrunnlag)
         }
 
-        private fun leggTilArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysninger: ArrayNode, arbeidsgiver: ObjectNode, skjæringstidspunkt: String, fnr: String): Double {
-            val inntektsopplysning = finnInntektsopplysning(arbeidsgiver["inntektshistorikk"], skjæringstidspunkt)
+        private fun leggTilArbeidsgiverInntektsopplysning(
+            arbeidsgiverInntektsopplysninger: ArrayNode,
+            arbeidsgiver: ObjectNode,
+            skjæringstidspunkt: String,
+            fnr: String,
+            vilkårsgrunnlagtype: String
+        ): Double {
+            val inntektsopplysning = finnInntektsopplysning(arbeidsgiver["inntektshistorikk"], skjæringstidspunkt, vilkårsgrunnlagtype)
 
             if (inntektsopplysning != null) {
                 val arbeidsgiverInntektsopplysning = arbeidsgiverInntektsopplysninger.addObject()
@@ -53,9 +66,10 @@ internal class V114LagreSykepengegrunnlag : JsonMigration(version = 114) {
             .sumOf { it["beløp"].asDouble() }
             .div(3)
 
-        private fun finnInntektsopplysning(inntektshistorikk: JsonNode, skjæringstidspunkt: String): JsonNode? =
+        private fun finnInntektsopplysning(inntektshistorikk: JsonNode, skjæringstidspunkt: String, vilkårsgrunnlagtype: String): JsonNode? =
             inntektshistorikk.firstOrNull()
                 ?.get("inntektsopplysninger")
+                ?.filter { vilkårsgrunnlagtype != "Infotrygd" || "INFOTRYGD" == it["kilde"]?.asText() }
                 ?.filterNot { it.has("skatteopplysninger") && it["skatteopplysninger"].first()["kilde"].asText() == "SKATT_SAMMENLIGNINGSGRUNNLAG" }
                 ?.filter {
                     skjæringstidspunkt == if (it.has("skatteopplysninger")) it["skatteopplysninger"].first()["dato"].asText() else it["dato"].asText()
