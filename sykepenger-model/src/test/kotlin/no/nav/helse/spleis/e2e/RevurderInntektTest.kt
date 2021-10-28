@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.*
 
 internal class RevurderInntektTest : AbstractEndToEndTest() {
 
@@ -697,6 +698,28 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING_REVURDERING,
             AVSLUTTET
         )
+    }
+
+    @Test
+    fun `Alle perioder med aktuelt skjæringstidspunkt skal være stemplet med hendelseId`() {
+        nyttVedtak(1.januar, 31.januar)
+        forlengVedtak(1.februar, 28.februar)
+        val overstyrInntektHendelseId = UUID.randomUUID()
+        håndterOverstyrInntekt(skjæringstidspunkt = 1.januar, meldingsreferanseId = overstyrInntektHendelseId)
+        assertHarHendelseIder(1.vedtaksperiode, overstyrInntektHendelseId)
+        assertHarHendelseIder(2.vedtaksperiode, overstyrInntektHendelseId)
+    }
+
+    @Test
+    fun `Kun perioder med aktuelt skjæringstidspunkt skal være stemplet med hendelseId`() {
+        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(1.mars, 31.mars)
+        forlengVedtak(1.april, 30.april)
+        val overstyrInntektHendelseId = UUID.randomUUID()
+        assertHarIkkeHendelseIder(1.vedtaksperiode, overstyrInntektHendelseId)
+        assertHarHendelseIder(2.vedtaksperiode, overstyrInntektHendelseId)
+        assertHarHendelseIder(3.vedtaksperiode, overstyrInntektHendelseId)
+        håndterOverstyrInntekt(skjæringstidspunkt = 1.mars, meldingsreferanseId = overstyrInntektHendelseId)
     }
 }
 

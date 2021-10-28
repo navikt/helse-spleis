@@ -6,6 +6,7 @@ import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.util.*
 
 internal class RevurderInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
     private companion object {
@@ -38,5 +39,14 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
         håndterOverstyrInntekt(orgnummer = AG1, skjæringstidspunkt = 1.januar)
         assertEquals(1, inspektør(AG1).inntektInspektør.antallOpplysinger(Kilde.SAKSBEHANDLER))
         assertEquals(0, inspektør(AG2).inntektInspektør.antallOpplysinger(Kilde.SAKSBEHANDLER))
+    }
+
+    @Test
+    fun `alle perioder for alle arbeidsgivere med aktuelt skjæringstidspunkt skal ha hendelseIden`() {
+        nyeVedtak(1.januar, 31.januar, AG1, AG2)
+        val hendelseId = UUID.randomUUID()
+        håndterOverstyrInntekt(orgnummer = AG1, skjæringstidspunkt = 1.januar, meldingsreferanseId = hendelseId)
+        assertHarHendelseIder(1.vedtaksperiode, hendelseId, orgnummer = AG1)
+        assertHarHendelseIder(1.vedtaksperiode, hendelseId, orgnummer = AG2)
     }
 }

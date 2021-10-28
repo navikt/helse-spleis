@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle
 import java.time.LocalDateTime
+import java.util.*
 
 @TestInstance(Lifecycle.PER_CLASS)
 internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
@@ -1344,6 +1345,19 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             REVURDERING_FEILET,
             message = "Dette tåler vi når vi lagerer inntekten vi oppdager i infotrygd i revurderingen",
         )
+    }
+
+    @Test
+    fun `Kun periode berørt av endringene skal ha hendelseIden`() {
+        nyttVedtak(1.januar, 31.januar)
+        forlengVedtak(1.februar, 28.februar)
+        val hendelseId = UUID.randomUUID()
+        håndterOverstyrTidslinje(
+            meldingsreferanseId = hendelseId,
+            overstyringsdager = (30.januar til 31.januar).map { ManuellOverskrivingDag(it, Dagtype.Feriedag) }
+        )
+        assertHarHendelseIder(1.vedtaksperiode, hendelseId)
+        assertHarIkkeHendelseIder(2.vedtaksperiode, hendelseId)
     }
 
     private fun assertEtterspurteYtelser(expected: Int, vedtaksperiodeIdInnhenter: IdInnhenter) {

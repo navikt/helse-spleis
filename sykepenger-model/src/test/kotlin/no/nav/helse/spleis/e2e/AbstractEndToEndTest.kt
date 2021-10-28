@@ -580,10 +580,11 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     protected fun håndterOverstyrInntekt(
         inntekt: Inntekt = 31000.månedlig,
         orgnummer: String = ORGNUMMER,
-        skjæringstidspunkt: LocalDate
+        skjæringstidspunkt: LocalDate,
+        meldingsreferanseId: UUID = UUID.randomUUID()
     ) {
         OverstyrInntekt(
-            meldingsreferanseId = UUID.randomUUID(),
+            meldingsreferanseId = meldingsreferanseId,
             fødselsnummer = UNG_PERSON_FNR_2018,
             aktørId = AKTØRID,
             organisasjonsnummer = orgnummer,
@@ -594,10 +595,11 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
 
     protected fun håndterOverstyrTidslinje(
         overstyringsdager: List<ManuellOverskrivingDag> = listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag, 100)),
-        orgnummer: String = ORGNUMMER
+        orgnummer: String = ORGNUMMER,
+        meldingsreferanseId: UUID = UUID.randomUUID()
     ) {
         OverstyrTidslinje(
-            meldingsreferanseId = UUID.randomUUID(),
+            meldingsreferanseId = meldingsreferanseId,
             fødselsnummer = UNG_PERSON_FNR_2018,
             aktørId = AKTØRID,
             organisasjonsnummer = orgnummer,
@@ -1349,6 +1351,22 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             hendelseIder.toSet(),
             inspektør(orgnummer).hendelseIder(vedtaksperiodeIndeks.vedtaksperiode)
         )
+    }
+
+    protected fun assertHarHendelseIder(
+        vedtaksperiodeIdInnhenter: IdInnhenter,
+        vararg hendelseIder: UUID,
+        orgnummer: String = ORGNUMMER
+    ) {
+        assertTrue(inspektør(orgnummer).hendelseIder(vedtaksperiodeIdInnhenter).containsAll(hendelseIder.toList())) { "Perioden inneholder ikke alle hendelseidene" }
+    }
+
+    protected fun assertHarIkkeHendelseIder(
+        vedtaksperiodeIdInnhenter: IdInnhenter,
+        vararg hendelseIder: UUID,
+        orgnummer: String = ORGNUMMER
+    ) {
+        assertTrue(inspektør(orgnummer).hendelseIder(vedtaksperiodeIdInnhenter).none { it in hendelseIder.toList() }) { "Perioden inneholder ikke alle hendelseidene" }
     }
 
     protected fun assertTilstand(
