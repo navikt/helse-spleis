@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -61,15 +62,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode)
-
-        håndterInntektsmelding(
-            listOf(Periode(1.november(2020), 16.november(2020))),
-            førsteFraværsdag = 1.november(2020), refusjon = Refusjon(INNTEKT, 6.desember(2020), emptyList())
-        )
-
-        håndterSykmelding(Sykmeldingsperiode(21.november(2020), 10.desember(2020), 100.prosent))
-        håndterSøknad(Sykdom(21.november(2020), 10.desember(2020), 100.prosent))
-
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -83,11 +75,31 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET
         )
-        assertForkastetPeriodeTilstander(
-            2.vedtaksperiode,
-            START,
-            TIL_INFOTRYGD
+
+        håndterInntektsmelding(
+            listOf(Periode(1.november(2020), 16.november(2020))),
+            førsteFraværsdag = 1.november(2020), refusjon = Refusjon(INNTEKT, 6.desember(2020), emptyList())
         )
+
+        håndterSykmelding(Sykmeldingsperiode(21.november(2020), 10.desember(2020), 100.prosent))
+        håndterSøknad(Sykdom(21.november(2020), 10.desember(2020), 100.prosent))
+
+        if (Toggles.RefusjonPerDag.enabled) {
+            håndterYtelser(2.vedtaksperiode)
+            assertForkastetPeriodeTilstander(
+                2.vedtaksperiode,
+                START,
+                MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+                AVVENTER_HISTORIKK,
+                TIL_INFOTRYGD
+            )
+        } else {
+            assertForkastetPeriodeTilstander(
+                2.vedtaksperiode,
+                START,
+                TIL_INFOTRYGD
+            )
+        }
     }
 
     @Test
@@ -154,14 +166,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode)
-
-        håndterSykmelding(Sykmeldingsperiode(21.november(2020), 10.desember(2020), 100.prosent))
-        håndterInntektsmelding(
-            listOf(Periode(1.november(2020), 16.november(2020))),
-            førsteFraværsdag = 1.november(2020), refusjon = Refusjon(INNTEKT, 6.desember(2020), emptyList())
-        )
-        håndterSøknad(Sykdom(21.november(2020), 10.desember(2020), 100.prosent))
-
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -175,12 +179,30 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET
         )
-        assertForkastetPeriodeTilstander(
-            2.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-            TIL_INFOTRYGD
+
+        håndterSykmelding(Sykmeldingsperiode(21.november(2020), 10.desember(2020), 100.prosent))
+        håndterInntektsmelding(
+            listOf(Periode(1.november(2020), 16.november(2020))),
+            førsteFraværsdag = 1.november(2020), refusjon = Refusjon(INNTEKT, 6.desember(2020), emptyList())
         )
+        håndterSøknad(Sykdom(21.november(2020), 10.desember(2020), 100.prosent))
+        if (Toggles.RefusjonPerDag.enabled) {
+            håndterYtelser(2.vedtaksperiode)
+            assertForkastetPeriodeTilstander(
+                2.vedtaksperiode,
+                START,
+                MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+                AVVENTER_HISTORIKK,
+                TIL_INFOTRYGD
+            )
+        } else {
+            assertForkastetPeriodeTilstander(
+                2.vedtaksperiode,
+                START,
+                MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+                TIL_INFOTRYGD
+            )
+        }
     }
 
     @Test
@@ -235,14 +257,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode)
-
-        håndterSykmelding(Sykmeldingsperiode(21.november(2020), 10.desember(2020), 100.prosent))
-        håndterInntektsmelding(
-            listOf(Periode(1.november(2020), 16.november(2020))),
-            førsteFraværsdag = 1.november(2020), refusjon = Refusjon(INNTEKT, 1.november(2020), emptyList())
-        )
-        håndterSøknad(Sykdom(21.november(2020), 10.desember(2020), 100.prosent))
-
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -256,14 +270,33 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET
         )
-        assertForkastetPeriodeTilstander(
-            2.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-            TIL_INFOTRYGD
+
+        håndterSykmelding(Sykmeldingsperiode(21.november(2020), 10.desember(2020), 100.prosent))
+        håndterInntektsmelding(
+            listOf(Periode(1.november(2020), 16.november(2020))),
+            førsteFraværsdag = 1.november(2020), refusjon = Refusjon(INNTEKT, 1.november(2020), emptyList())
         )
+        håndterSøknad(Sykdom(21.november(2020), 10.desember(2020), 100.prosent))
+        if (Toggles.RefusjonPerDag.enabled) {
+            håndterYtelser(2.vedtaksperiode)
+            assertForkastetPeriodeTilstander(
+                2.vedtaksperiode,
+                START,
+                MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+                AVVENTER_HISTORIKK,
+                TIL_INFOTRYGD
+            )
+        } else {
+            assertForkastetPeriodeTilstander(
+                2.vedtaksperiode,
+                START,
+                MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+                TIL_INFOTRYGD
+            )
+        }
     }
 
+    // Dette er ingen overgang fra infotrygd, er ikke det litt merkelig⁉
     @Test
     fun `Opphør i refusjon kommer før overgang fra infotrygd vet den er overgang`() {
         håndterSykmelding(Sykmeldingsperiode(1.november(2020), 20.november(2020), 100.prosent))
@@ -323,16 +356,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode)
-
-        håndterSykmelding(Sykmeldingsperiode(21.november(2020), 10.desember(2020), 100.prosent))
-        håndterInntektsmelding(
-            listOf(Periode(1.november(2020), 16.november(2020))),
-            førsteFraværsdag = 1.november(2020),
-            beregnetInntekt = INNTEKT,
-            refusjon = Refusjon(INGEN, null, emptyList())
-        )
-        håndterSøknad(Sykdom(21.november(2020), 10.desember(2020), 100.prosent))
-
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -346,12 +369,32 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET
         )
-        assertForkastetPeriodeTilstander(
-            2.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-            TIL_INFOTRYGD
+
+        håndterSykmelding(Sykmeldingsperiode(21.november(2020), 10.desember(2020), 100.prosent))
+        håndterInntektsmelding(
+            listOf(Periode(1.november(2020), 16.november(2020))),
+            førsteFraværsdag = 1.november(2020),
+            beregnetInntekt = INNTEKT,
+            refusjon = Refusjon(INGEN, null, emptyList())
         )
+        håndterSøknad(Sykdom(21.november(2020), 10.desember(2020), 100.prosent))
+        if (Toggles.RefusjonPerDag.enabled) {
+            håndterYtelser(2.vedtaksperiode)
+            assertForkastetPeriodeTilstander(
+                2.vedtaksperiode,
+                START,
+                MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+                AVVENTER_HISTORIKK,
+                TIL_INFOTRYGD
+            )
+        } else {
+            assertForkastetPeriodeTilstander(
+                2.vedtaksperiode,
+                START,
+                MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+                TIL_INFOTRYGD
+            )
+        }
     }
 
     @Test
@@ -394,12 +437,23 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET
         )
-        assertForkastetPeriodeTilstander(
-            2.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-            TIL_INFOTRYGD
-        )
+        if (Toggles.RefusjonPerDag.enabled) {
+            håndterYtelser(2.vedtaksperiode)
+            assertForkastetPeriodeTilstander(
+                2.vedtaksperiode,
+                START,
+                MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+                AVVENTER_HISTORIKK,
+                TIL_INFOTRYGD
+            )
+        } else {
+            assertForkastetPeriodeTilstander(
+                2.vedtaksperiode,
+                START,
+                MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+                TIL_INFOTRYGD
+            )
+        }
     }
 
     @Test

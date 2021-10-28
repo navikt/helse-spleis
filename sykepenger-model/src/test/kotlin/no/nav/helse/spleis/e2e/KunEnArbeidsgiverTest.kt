@@ -368,6 +368,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     // TODO: er denne testen relevant? Vi sender ikke med arbeidsgiverinfo for forlengelser
     @Test
     fun `fremtidig test av utbetalingstidslinjeBuilder, historikk fra flere arbeidsgivere`() {
+        håndterInntektsmelding(listOf(11.juli(2020) til 26.juli(2020)), refusjon = Refusjon(2077.daglig, null))
         håndterSykmelding(Sykmeldingsperiode(20.september(2020), 19.oktober(2020), 100.prosent))
         håndterSøknadMedValidering(
             1.vedtaksperiode,
@@ -387,8 +388,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
 
         inspektør.also {
-            assertNoErrors(it)
-            assertFalse(it.personLogg.hasWarningsOrWorse())
+            assertNoErrors(1.vedtaksperiode)
+            assertNoWarnings(1.vedtaksperiode)
             assertActivities(it)
             assertInntektForDato(45000.månedlig, 27.juli(2020), it)
             assertEquals(2, it.sykdomshistorikk.size)
@@ -1861,6 +1862,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
     @Test
     fun `Perioder hvor søknaden til vedtaksperiode 1 har dannet gap (friskmeldt) for hele perioden skal regnes som gap til påfølgende vedtaksperiode`() {
+        håndterInntektsmelding(listOf(16.april til 30.april))
         val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.mai, 31.mai, 100.prosent, 1000.daglig)
         val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.mai, INNTEKT, true))
 
@@ -1872,7 +1874,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.juli, 31.juli, 100.prosent))
 
-        assertNoErrors(inspektør)
+        assertNoWarnings(1.vedtaksperiode)
+        assertNoErrors(1.vedtaksperiode)
         assertTilstander(
             0,
             START,
@@ -3139,7 +3142,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(1.vedtaksperiode)
 
-        assertNoWarnings(inspektør)
+        assertNoWarnings(1.vedtaksperiode)
     }
 
     @Test

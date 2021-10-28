@@ -416,6 +416,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(
             2.vedtaksperiode, Sykdom(22.januar, 10.februar, 100.prosent)
         )
+        // TODO: Hva gjør vi her? Vi burde ha en inntektsmelding for 15. desember og inntektsmeldingen som er sendt inn i testen gir ikke egentlig mening?
         håndterUtbetalingshistorikk(
             2.vedtaksperiode,
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 15.desember(2017), 21.januar, 100.prosent, 1000.daglig),

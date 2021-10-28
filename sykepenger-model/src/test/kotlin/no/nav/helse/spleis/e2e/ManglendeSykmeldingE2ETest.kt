@@ -197,7 +197,7 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `uten perioder fra før med refusjon opphørt`() {
+    fun `uten perioder fra før med refusjon opphørt`() = Toggles.RefusjonPerDag.disable {
         val inntektsmeldingId = håndterInntektsmelding(listOf(3.januar til 18.januar), refusjon = Refusjon(INNTEKT, 18.januar, emptyList()))
         håndterSøknad(Sykdom(3.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingReplay(inntektsmeldingId, 1.vedtaksperiode(ORGNUMMER))
@@ -292,7 +292,7 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `forkastet uferdig forlengelse foran med refusjon opphørt`() {
+    fun `forkastet uferdig forlengelse foran med refusjon opphørt`() = Toggles.RefusjonPerDag.disable {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 24.januar, 100.prosent))
         val inntektsmeldingId = håndterInntektsmelding(listOf(3.januar til 18.januar), refusjon = Refusjon(INNTEKT, 25.januar, emptyList()))
         håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent))
@@ -302,7 +302,7 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `uferdig forlengelse foran med refusjon opphørt`() {
+    fun `uferdig forlengelse foran med refusjon opphørt`() = Toggles.RefusjonPerDag.disable {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 24.januar, 100.prosent))
         håndterInntektsmelding(listOf(3.januar til 18.januar))
         håndterInntektsmelding(listOf(3.januar til 18.januar), refusjon = Refusjon(INNTEKT, 25.januar, emptyList()))
@@ -342,7 +342,7 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `ferdig forlengelse foran med refusjon opphørt`() {
+    fun `ferdig forlengelse foran med refusjon opphørt`() = Toggles.RefusjonPerDag.disable {
         nyttVedtak(3.januar, 20.januar)
         håndterInntektsmelding(listOf(3.januar til 18.januar), refusjon = Refusjon(INNTEKT, 21.januar, emptyList()))
         håndterSøknad(Sykdom(21.januar, 31.januar, 100.prosent))
@@ -350,7 +350,7 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `ferdig gap foran med refusjon opphørt`() {
+    fun `ferdig gap foran med refusjon opphørt`() = Toggles.RefusjonPerDag.disable {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(3.januar, 20.januar, 100.prosent))
         håndterInntektsmelding(listOf(3.januar til 18.januar), refusjon = Refusjon(INNTEKT, 21.januar, emptyList()))

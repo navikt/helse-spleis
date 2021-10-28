@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
@@ -131,7 +132,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `forlengelsesperiode der refusjon opphører - med søknad for forkastet periode`() {
+    fun `forlengelsesperiode der refusjon opphører - med søknad for forkastet periode`() = Toggles.RefusjonPerDag.disable {
         håndterSykmelding(Sykmeldingsperiode(13.mars(2020), 29.mars(2020), 100.prosent))
         håndterInntektsmeldingMedValidering(
             1.vedtaksperiode,
@@ -165,7 +166,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `forlengelsesperiode der refusjon opphører`() {
+    fun `forlengelsesperiode der refusjon opphører`() = Toggles.RefusjonPerDag.disable {
         håndterSykmelding(Sykmeldingsperiode(13.mars(2020), 29.mars(2020), 100.prosent))
         håndterInntektsmeldingMedValidering(
             1.vedtaksperiode,

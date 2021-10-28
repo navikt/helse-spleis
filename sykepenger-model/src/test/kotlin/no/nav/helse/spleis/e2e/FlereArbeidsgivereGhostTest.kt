@@ -463,6 +463,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
     @Test
     fun `Overgang fra infotrygd skal ikke få ghost warning selv om vi har lagret skatteinntekter i en gammel versjon av spleis`() {
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
 
@@ -483,7 +484,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
-        assertNoWarnings(a1.inspektør)
+        assertNoWarnings(1.vedtaksperiode, a1)
+        assertNoErrors(1.vedtaksperiode, a1)
     }
 
     @Test

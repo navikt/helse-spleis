@@ -87,7 +87,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
 
     @Test
     fun `Infotrygdforlengelse av arbeidsgiver som ikke finnes i aareg, kan utbetales uten warning`() {
-
+        håndterInntektsmelding(listOf(17.januar til 31.januar), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
 
@@ -100,7 +100,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
 
         assertTilstand(a1, TilstandType.AVSLUTTET)
-        assertNoWarnings(inspektør(a1))
+        assertNoWarnings(1.vedtaksperiode, a1)
     }
 
     @Test
@@ -133,6 +133,12 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a2)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a2)
 
+        håndterInntektsmelding(
+            listOf(29.januar til 13.februar),
+            beregnetInntekt = 10000.månedlig,
+            orgnummer = a2
+        )
+
         val utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(a2, 14.februar, 28.februar, 100.prosent, 10000.månedlig))
         val inntektshistorikk = listOf(Inntektsopplysning(a2, 14.februar, 10000.månedlig, true))
         håndterUtbetalingshistorikk(1.vedtaksperiode, utbetalinger = utbetalinger, inntektshistorikk, orgnummer = a2)
@@ -142,7 +148,10 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
 
         assertTilstand(a2, TilstandType.AVSLUTTET)
-        assertNoWarnings(inspektør(a2))
+        assertNoWarnings(1.vedtaksperiode, a1)
+        assertNoErrors(1.vedtaksperiode, a1)
+        assertNoWarnings(1.vedtaksperiode, a2)
+        assertNoErrors(1.vedtaksperiode, a2)
     }
 
     @Test

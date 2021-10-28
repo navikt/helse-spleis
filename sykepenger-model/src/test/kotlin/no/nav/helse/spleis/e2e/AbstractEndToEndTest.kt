@@ -147,7 +147,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         assertTrue(inspektør.personLogg.hasWarningsOrWorse(), inspektør.personLogg.toString())
     }
 
-    protected fun assertNoWarnings(idInnhenter: IdInnhenter, orgnummer: String) {
+    protected fun assertNoWarnings(idInnhenter: IdInnhenter, orgnummer: String = ORGNUMMER) {
         val warnings = mutableListOf<String>()
         inspektør.personLogg.accept(object : AktivitetsloggVisitor {
             override fun visitWarn(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Warn, melding: String, tidsstempel: String) {
@@ -157,6 +157,18 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             }
         })
         assertTrue(warnings.isEmpty(), "forventet ingen warnings for orgnummer $orgnummer. Warnings:\n${warnings.joinToString("\n")}")
+    }
+
+    protected fun assertNoErrors(idInnhenter: IdInnhenter, orgnummer: String = ORGNUMMER) {
+        val errors = mutableListOf<String>()
+        inspektør.personLogg.accept(object : AktivitetsloggVisitor {
+            override fun visitError(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Error, melding: String, tidsstempel: String) {
+                if (kontekster.any { it.kontekstMap["vedtaksperiodeId"] == idInnhenter(orgnummer).toString() }) {
+                    errors.add(melding)
+                }
+            }
+        })
+        assertTrue(errors.isEmpty(), "forventet ingen errors for orgnummer $orgnummer. Errors:\n${errors.joinToString("\n")}")
     }
 
     protected fun assertWarningTekst(inspektør: TestArbeidsgiverInspektør, vararg warnings: String) {

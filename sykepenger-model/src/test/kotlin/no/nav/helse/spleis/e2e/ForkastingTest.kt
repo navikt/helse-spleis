@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.person.TilstandType.*
@@ -130,12 +131,29 @@ internal class ForkastingTest : AbstractEndToEndTest() {
     fun `refusjon opphører i perioden`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)), refusjon = Refusjon(INNTEKT, 14.januar, emptyList()))
-        assertForkastetPeriodeTilstander(
-            1.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            TIL_INFOTRYGD
-        )
+        if (Toggles.RefusjonPerDag.enabled) {
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
+            håndterYtelser(1.vedtaksperiode)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            assertForkastetPeriodeTilstander(
+                1.vedtaksperiode,
+                START,
+                MOTTATT_SYKMELDING_FERDIG_GAP,
+                AVVENTER_SØKNAD_FERDIG_GAP,
+                AVVENTER_HISTORIKK,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                TIL_INFOTRYGD
+            )
+        } else {
+            assertForkastetPeriodeTilstander(
+                1.vedtaksperiode,
+                START,
+                MOTTATT_SYKMELDING_FERDIG_GAP,
+                TIL_INFOTRYGD
+            )
+        }
     }
 
     @Test
@@ -146,12 +164,29 @@ internal class ForkastingTest : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(Periode(3.januar, 18.januar)),
             refusjon = Refusjon(INNTEKT, null, listOf(Refusjon.EndringIRefusjon(INNTEKT / 2, 14.januar)))
         )
-        assertForkastetPeriodeTilstander(
-            1.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            TIL_INFOTRYGD
-        )
+        if (Toggles.RefusjonPerDag.enabled) {
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
+            håndterYtelser(1.vedtaksperiode)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            assertForkastetPeriodeTilstander(
+                1.vedtaksperiode,
+                START,
+                MOTTATT_SYKMELDING_FERDIG_GAP,
+                AVVENTER_SØKNAD_FERDIG_GAP,
+                AVVENTER_HISTORIKK,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                TIL_INFOTRYGD
+            )
+        } else {
+            assertForkastetPeriodeTilstander(
+                1.vedtaksperiode,
+                START,
+                MOTTATT_SYKMELDING_FERDIG_GAP,
+                TIL_INFOTRYGD
+            )
+        }
     }
 
     @Test
