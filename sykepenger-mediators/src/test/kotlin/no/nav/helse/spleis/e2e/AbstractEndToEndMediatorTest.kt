@@ -250,7 +250,7 @@ internal abstract class AbstractEndToEndMediatorTest {
 
     protected fun sendUtbetalingshistorikk(
         vedtaksperiodeIndeks: Int,
-        sykepengehistorikk: List<UtbetalingshistorikkTestdata>? = emptyList()
+        sykepengehistorikk: List<UtbetalingshistorikkTestdata> = emptyList()
     ) {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Sykepengehistorikk))
         testRapid.sendTestMessage(

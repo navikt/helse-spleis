@@ -146,14 +146,12 @@ internal class TestMessageFactory(
         return nyHendelse("inntektsmelding", inntektsmelding.toMap())
     }
 
-    fun lagUtbetalingshistorikk(vedtaksperiodeId: UUID, tilstand: TilstandType, sykepengehistorikk: List<UtbetalingshistorikkTestdata>? = emptyList()): String {
+    fun lagUtbetalingshistorikk(vedtaksperiodeId: UUID, tilstand: TilstandType, sykepengehistorikk: List<UtbetalingshistorikkTestdata> = emptyList()): String {
         return lagBehovMedLøsning(
             vedtaksperiodeId = vedtaksperiodeId,
             tilstand = tilstand,
             behov = listOf("Sykepengehistorikk"),
-            løsninger = mapOf(
-                "Sykepengehistorikk" to emptyList<Any>()
-            )
+            løsninger = sykepengehistorikk.toJson()
         )
     }
 

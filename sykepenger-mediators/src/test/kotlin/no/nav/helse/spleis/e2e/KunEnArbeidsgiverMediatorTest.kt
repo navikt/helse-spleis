@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.inntektsmeldingkontrakt.Naturalytelse
 import no.nav.inntektsmeldingkontrakt.OpphoerAvNaturalytelse
 import no.nav.inntektsmeldingkontrakt.Periode
@@ -216,6 +217,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
+        sendInntektsmelding(listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar, beregnetInntekt = 33000.0)
         sendOverstyringInntekt(33000.0, 1.januar)
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
