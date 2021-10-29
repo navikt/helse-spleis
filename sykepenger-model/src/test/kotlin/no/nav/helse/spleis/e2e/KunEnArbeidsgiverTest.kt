@@ -3128,6 +3128,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
     @Test
     fun `Skal ikke få warning for opptjening av sykedager etter nådd maksdato for irrelevante perioder`() {
+        // Gir det noe mening å sette refusjonsbeløp når det kun er infotrygd-utbetalinger?
         håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020), 100.prosent))
         håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent))
         håndterInntektsmelding(listOf(1.januar(2020) til 16.januar(2020)))

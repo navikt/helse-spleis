@@ -102,6 +102,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `revurdering av inntekt`() {
         nyttVedtak(1.januar, 31.januar)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 35000.månedlig, refusjon = Refusjon(35000.månedlig, null, emptyList()))
         håndterOverstyrInntekt(inntekt = 35000.månedlig, skjæringstidspunkt = 1.januar)
         håndterYtelser()
         håndterSimulering()

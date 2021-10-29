@@ -225,20 +225,33 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         )
         håndterSimulering(1.vedtaksperiode)
 
-
-        assertForkastetPeriodeTilstander(
-            1.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_SØKNAD_FERDIG_GAP,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            TIL_INFOTRYGD
-        )
+        if (Toggles.RefusjonPerDag.enabled) {
+            assertTilstander(
+                1.vedtaksperiode,
+                START,
+                MOTTATT_SYKMELDING_FERDIG_GAP,
+                AVVENTER_SØKNAD_FERDIG_GAP,
+                AVVENTER_HISTORIKK,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_GODKJENNING
+            )
+            assertWarningTekst(inspektør, "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
+        } else {
+            assertForkastetPeriodeTilstander(
+                1.vedtaksperiode,
+                START,
+                MOTTATT_SYKMELDING_FERDIG_GAP,
+                AVVENTER_SØKNAD_FERDIG_GAP,
+                AVVENTER_HISTORIKK,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                TIL_INFOTRYGD
+            )
+        }
     }
-
 
     @Test
     fun `Opphør i refusjon i første periode som kommer mens forlengelse er i play kaster forlengelsen`() {
@@ -296,9 +309,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         }
     }
 
-    // Dette er ingen overgang fra infotrygd, er ikke det litt merkelig⁉
     @Test
-    fun `Opphør i refusjon kommer før overgang fra infotrygd vet den er overgang`() {
+    fun `Opphør i refusjon kommer før overgang fra infotrygd vet den er overgang`() = Toggles.RefusjonPerDag.disable {
         håndterSykmelding(Sykmeldingsperiode(1.november(2020), 20.november(2020), 100.prosent))
         håndterSøknad(Sykdom(1.november(2020), 20.november(2020), 100.prosent))
         håndterInntektsmelding(
@@ -316,25 +328,19 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Inntektsmelding med opphør i refusjon`() {
+    fun `Inntektsmelding med opphør i refusjon`() = Toggles.RefusjonPerDag.disable {
         håndterSykmelding(Sykmeldingsperiode(1.november(2020), 20.november(2020), 100.prosent))
         håndterSøknad(Sykdom(1.november(2020), 20.november(2020), 100.prosent))
         håndterInntektsmelding(
             listOf(Periode(1.november(2020), 16.november(2020))),
             førsteFraværsdag = 1.november(2020), refusjon = Refusjon(INNTEKT, 18.november(2020), emptyList())
         )
-        håndterYtelser(1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
 
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
             TIL_INFOTRYGD
         )
     }
@@ -846,10 +852,12 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             beregnetInntekt = 30000.månedlig,
             refusjon = Refusjon(25000.månedlig, null, emptyList())
         )
-        håndterYtelser(3.vedtaksperiode)
-        håndterVilkårsgrunnlag(3.vedtaksperiode)
-        håndterYtelser(3.vedtaksperiode)
 
+        if (Toggles.RefusjonPerDag.enabled) {
+            håndterYtelser(3.vedtaksperiode)
+            håndterVilkårsgrunnlag(3.vedtaksperiode)
+            håndterYtelser(3.vedtaksperiode)
+        }
 
         assertFalse(inspektør.periodeErForkastet(1.vedtaksperiode))
         assertFalse(inspektør.periodeErForkastet(2.vedtaksperiode))
