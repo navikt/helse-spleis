@@ -1,5 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Refusjonshistorikk
@@ -8,10 +9,12 @@ internal class Refusjonsgjødsler(
     private val tidslinje: Utbetalingstidslinje,
     private val refusjonshistorikk: Refusjonshistorikk
 ) {
-    internal fun gjødsle(aktivitetslogg: IAktivitetslogg) {
+    internal fun gjødsle(aktivitetslogg: IAktivitetslogg, periode: Periode) {
         sammenhengendeUtbetalingsperioder(tidslinje).forEach { utbetalingsperiode ->
             val refusjon = refusjonshistorikk.finnRefusjon(utbetalingsperiode.periode(), aktivitetslogg)
-            if (refusjon == null) aktivitetslogg.warn("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.")
+            if (refusjon == null && utbetalingsperiode.periode().overlapperMed(periode)) {
+                aktivitetslogg.warn("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.")
+            }
 
             utbetalingsperiode.forEach { utbetalingsdag ->
                 when (refusjon) {

@@ -148,6 +148,16 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     }
 
     protected fun assertNoWarnings(idInnhenter: IdInnhenter, orgnummer: String = ORGNUMMER) {
+        val warnings = collectWarnings(idInnhenter, orgnummer)
+        assertTrue(warnings.isEmpty(), "forventet ingen warnings for orgnummer $orgnummer. Warnings:\n${warnings.joinToString("\n")}")
+    }
+
+    protected fun assertWarning(idInnhenter: IdInnhenter, orgnummer: String = ORGNUMMER, warning: String) {
+        val warnings = collectWarnings(idInnhenter, orgnummer)
+        assertTrue(warnings.contains(warning), "fant ikke forventet warning for $orgnummer. Warnings:\n${warnings.joinToString("\n")}")
+    }
+
+    private fun collectWarnings(idInnhenter: IdInnhenter, orgnummer: String): MutableList<String> {
         val warnings = mutableListOf<String>()
         inspektør.personLogg.accept(object : AktivitetsloggVisitor {
             override fun visitWarn(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Warn, melding: String, tidsstempel: String) {
@@ -156,7 +166,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
                 }
             }
         })
-        assertTrue(warnings.isEmpty(), "forventet ingen warnings for orgnummer $orgnummer. Warnings:\n${warnings.joinToString("\n")}")
+        return warnings
     }
 
     protected fun assertNoErrors(idInnhenter: IdInnhenter, orgnummer: String = ORGNUMMER) {

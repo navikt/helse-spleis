@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
+import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
@@ -762,5 +763,120 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             orgnummer = a2
         )
 
+    }
+
+    @Test
+    fun `en overgang fra Infotrygd uten inntektsmelding`() = Toggles.RefusjonPerDag.enable {
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 10.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 10.februar, 100.prosent))
+
+        håndterUtbetalingshistorikk(
+            1.vedtaksperiode,
+            inntektshistorikk = listOf(
+                Inntektsopplysning(orgnummer = ORGNUMMER, sykepengerFom = 17.januar, inntekt = INNTEKT, refusjonTilArbeidsgiver = true)
+            ),
+            utbetalinger = arrayOf(
+                ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, INNTEKT)
+            )
+        )
+
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        assertWarning(1.vedtaksperiode, ORGNUMMER, "Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.")
+    }
+
+    @Test
+    fun `en forlengelse av overgang fra Infotrygd uten inntektsmelding`() = Toggles.RefusjonPerDag.enable {
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 10.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 10.februar, 100.prosent))
+
+        håndterUtbetalingshistorikk(
+            1.vedtaksperiode,
+            inntektshistorikk = listOf(
+                Inntektsopplysning(orgnummer = ORGNUMMER, sykepengerFom = 17.januar, inntekt = INNTEKT, refusjonTilArbeidsgiver = true)
+            ),
+            utbetalinger = arrayOf(
+                ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, INNTEKT)
+            )
+        )
+
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        forlengVedtak(11.februar, 28.februar)
+
+        assertWarning(1.vedtaksperiode, ORGNUMMER, "Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.")
+        assertWarning(2.vedtaksperiode, ORGNUMMER, "Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.")
+    }
+
+    @Test
+    fun `førstegangsbehandling i Spleis etter en overgang fra Infotrygd uten inntektsmelding `() = Toggles.RefusjonPerDag.enable {
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 10.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 10.februar, 100.prosent))
+
+        håndterUtbetalingshistorikk(
+            1.vedtaksperiode,
+            inntektshistorikk = listOf(
+                Inntektsopplysning(orgnummer = ORGNUMMER, sykepengerFom = 17.januar, inntekt = INNTEKT, refusjonTilArbeidsgiver = true)
+            ),
+            utbetalinger = arrayOf(
+                ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, INNTEKT)
+            )
+        )
+
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        nyttVedtak(1.mars, 31.mars)
+
+        assertWarning(1.vedtaksperiode, ORGNUMMER, "Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.")
+        assertNoWarnings(2.vedtaksperiode, ORGNUMMER)
+    }
+
+    @Test
+    fun `to arbeidsgivere, en av dem mangler refusjon, begge får warning`() = Toggles.RefusjonPerDag.enable {
+        håndterInntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 10.februar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 10.februar, 100.prosent), orgnummer = a2)
+
+        håndterSøknad(Sykdom(1.februar, 10.februar, 100.prosent), orgnummer = a1)
+
+        håndterUtbetalingshistorikk(
+            1.vedtaksperiode,
+            orgnummer = a1,
+            inntektshistorikk = listOf(
+                Inntektsopplysning(orgnummer = a1, sykepengerFom = 17.januar, inntekt = INNTEKT, refusjonTilArbeidsgiver = true),
+                Inntektsopplysning(orgnummer = a2, sykepengerFom = 17.januar, inntekt = INNTEKT, refusjonTilArbeidsgiver = true)
+            ),
+            utbetalinger = arrayOf(
+                ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar, 100.prosent, INNTEKT),
+                ArbeidsgiverUtbetalingsperiode(a2, 17.januar, 31.januar, 100.prosent, INNTEKT)
+            )
+        )
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSøknad(Sykdom(1.februar, 10.februar, 100.prosent), orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
+
+        assertWarning(1.vedtaksperiode, a1, "Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.")
+        assertWarning(1.vedtaksperiode, a2, "Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.")
     }
 }

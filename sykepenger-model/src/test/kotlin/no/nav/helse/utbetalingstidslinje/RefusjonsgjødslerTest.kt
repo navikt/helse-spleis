@@ -26,7 +26,7 @@ internal class RefusjonsgjødslerTest {
         val utbetalingstidslinje = (16.U + 10.S).utbetalingstidslinje(inntektsopplysning(1.januar, 2862.daglig))
         val refusjonsgjødsler = Refusjonsgjødsler(tidslinje = utbetalingstidslinje, refusjonshistorikk = refusjonshistorikk(refusjon(1.januar, 1431.daglig)))
         val aktivitetslogg = Aktivitetslogg()
-        refusjonsgjødsler.gjødsle(aktivitetslogg)
+        refusjonsgjødsler.gjødsle(aktivitetslogg, 1.januar til 26.januar)
         assertRefusjonArbeidsgiver(utbetalingstidslinje, 1431.0)
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
@@ -36,7 +36,7 @@ internal class RefusjonsgjødslerTest {
         val utbetalingstidslinje = (16.U + 10.S).utbetalingstidslinje(inntektsopplysning(1.januar, 1431.daglig))
         val refusjonsgjødsler = Refusjonsgjødsler(tidslinje = utbetalingstidslinje, refusjonshistorikk = refusjonshistorikk(refusjon(1.januar, null)))
         val aktivitetslogg = Aktivitetslogg()
-        refusjonsgjødsler.gjødsle(aktivitetslogg)
+        refusjonsgjødsler.gjødsle(aktivitetslogg, 1.januar til 26.januar)
         assertRefusjonArbeidsgiver(utbetalingstidslinje, 0.0)
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
@@ -48,7 +48,7 @@ internal class RefusjonsgjødslerTest {
         val utbetalingstidslinje = (16.U + 10.S).utbetalingstidslinje(inntektsopplysning(1.februar, 2308.daglig))
         val refusjonsgjødsler = Refusjonsgjødsler(tidslinje = utbetalingstidslinje, refusjonshistorikk = refusjonshistorikk(refusjon(1.februar, 1154.daglig)))
         val aktivitetslogg = Aktivitetslogg()
-        refusjonsgjødsler.gjødsle(aktivitetslogg)
+        refusjonsgjødsler.gjødsle(aktivitetslogg, 1.februar til 26.februar)
         assertRefusjonArbeidsgiver(utbetalingstidslinje, 1154.0)
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
@@ -59,7 +59,7 @@ internal class RefusjonsgjødslerTest {
         val utbetalingstidslinje = (16.U + 10.S).utbetalingstidslinje(inntektsopplysning(1.februar, 2308.daglig))
         val refusjonsgjødsler = Refusjonsgjødsler(tidslinje = utbetalingstidslinje, refusjonshistorikk = refusjonshistorikk())
         val aktivitetslogg = Aktivitetslogg()
-        refusjonsgjødsler.gjødsle(aktivitetslogg)
+        refusjonsgjødsler.gjødsle(aktivitetslogg, 1.februar til 26.februar)
         // Helger i arbeidsgiverperioden har inntekt
         assertRefusjonArbeidsgiver(utbetalingstidslinje[1.februar til 16.februar], 2308.0)
         assertRefusjonArbeidsgiver(utbetalingstidslinje[17.februar til 18.februar], 0.0)
@@ -80,7 +80,7 @@ internal class RefusjonsgjødslerTest {
             refusjonshistorikk = refusjonshistorikk(refusjon(1.februar, 2308.daglig), refusjon(1.mars, 2500.daglig))
         )
         val aktivitetslogg = Aktivitetslogg()
-        refusjonsgjødsler.gjødsle(aktivitetslogg)
+        refusjonsgjødsler.gjødsle(aktivitetslogg, 1.mars til 10.mars)
         assertRefusjonArbeidsgiver(utbetalingstidslinje[1.februar til 26.februar], 2308.0)
         assertRefusjonArbeidsgiver(utbetalingstidslinje[27.februar til 28.februar], null)
         assertRefusjonArbeidsgiver(utbetalingstidslinje[1.mars til 10.mars], 2500.0)
@@ -104,7 +104,7 @@ internal class RefusjonsgjødslerTest {
             )
         )
         val aktivitetslogg = Aktivitetslogg()
-        refusjonsgjødsler.gjødsle(aktivitetslogg)
+        refusjonsgjødsler.gjødsle(aktivitetslogg, 1.februar til 28.februar)
         assertRefusjonArbeidsgiver(utbetalingstidslinje[1.februar til 18.februar], null)
         assertRefusjonArbeidsgiver(utbetalingstidslinje[19.februar til 28.februar], 2308.0)
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
@@ -126,7 +126,7 @@ internal class RefusjonsgjødslerTest {
             )
         )
         val aktivitetslogg = Aktivitetslogg()
-        assertDoesNotThrow { refusjonsgjødsler.gjødsle(aktivitetslogg) }
+        assertDoesNotThrow { refusjonsgjødsler.gjødsle(aktivitetslogg, 4.februar til 21.februar) }
     }
 
     @Test
@@ -146,8 +146,50 @@ internal class RefusjonsgjødslerTest {
             )
         )
         val aktivitetslogg = Aktivitetslogg()
-        assertDoesNotThrow { refusjonsgjødsler.gjødsle(aktivitetslogg) }
+        assertDoesNotThrow { refusjonsgjødsler.gjødsle(aktivitetslogg, 1.februar til 15.februar) }
         assertEquals(listOf("Fant refusjon ved å gå 16 dager tilbake fra første utbetalingsdag i sammenhengende utbetaling"), aktivitetslogg.infoMeldinger())
+    }
+
+    @Test
+    fun `Warning når vi mangler refusjon innenfor vedtaksperioden`() {
+        val utbetaling = (59.S).utbetalingstidslinje(
+            inntektsopplysning(1.januar, 690.daglig)
+        )
+
+        val gjødsler = Refusjonsgjødsler(
+            tidslinje = utbetaling,
+            refusjonshistorikk = refusjonshistorikk()
+        )
+
+        val aktivitetslogg = Aktivitetslogg()
+        gjødsler.gjødsle(aktivitetslogg, 1.februar til 28.februar)
+        assertEquals(listOf("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler."), aktivitetslogg.warningMeldinger())
+    }
+
+    @Test
+    fun `Ingen warnings når du mangler refusjon utenom vedtaksperioden`() {
+        resetSeed(1.januar(2017))
+        val infotrygdUtbetaling = (31.S).utbetalingstidslinje(
+            inntektsopplysning(1.januar(2017), 690.daglig)
+        )
+        resetSeed()
+        val spleisUtbetaling = (31.S).utbetalingstidslinje(
+            inntektsopplysning(1.januar, 420.daglig)
+        )
+
+        val gjødsler = Refusjonsgjødsler(
+            tidslinje = infotrygdUtbetaling + spleisUtbetaling,
+            refusjonshistorikk = refusjonshistorikk(
+                refusjon(
+                    førsteFraværsdag = 1.januar,
+                    beløp = 420.daglig,
+                    arbeidsgiverperioder = listOf(1.januar til 16.januar)
+                )
+            )
+        )
+        val aktivitetslogg = Aktivitetslogg()
+        gjødsler.gjødsle(aktivitetslogg, 1.januar til 31.januar)
+        assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
     private companion object {
@@ -208,6 +250,18 @@ internal class RefusjonsgjødslerTest {
 
             accept(object : AktivitetsloggVisitor {
                 override fun visitInfo(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Info, melding: String, tidsstempel: String) {
+                    meldinger.add(melding)
+                }
+            })
+
+            return meldinger
+        }
+
+        fun Aktivitetslogg.warningMeldinger(): List<String> {
+            val meldinger = mutableListOf<String>()
+
+            accept(object : AktivitetsloggVisitor {
+                override fun visitWarn(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Warn, melding: String, tidsstempel: String) {
                     meldinger.add(melding)
                 }
             })

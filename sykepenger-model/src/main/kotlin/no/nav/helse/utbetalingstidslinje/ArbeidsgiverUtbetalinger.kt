@@ -36,9 +36,12 @@ internal class ArbeidsgiverUtbetalinger(
         tidslinjeEngine = MaksimumSykepengedagerfilter(alder, regler, periode, aktivitetslogg).also {
             it.filter(tidslinjer, infotrygdtidslinje.kutt(periode.endInclusive))
         }
-        if(Toggles.RefusjonPerDag.enabled) {
-            arbeidsgivere.forEach{ (arbeidsgiver, tidslinje) ->
-                Refusjonsgjødsler(tidslinje + arbeidsgiver.infotrygdUtbetalingstidslinje(), arbeidsgiver.refusjonshistorikk).gjødsle(aktivitetslogg)
+        if (Toggles.RefusjonPerDag.enabled) {
+            arbeidsgivere.forEach { (arbeidsgiver, tidslinje) ->
+                Refusjonsgjødsler(
+                    tidslinje = tidslinje + arbeidsgiver.infotrygdUtbetalingstidslinje(),
+                    refusjonshistorikk = arbeidsgiver.refusjonshistorikk
+                ).gjødsle(aktivitetslogg, periode)
             }
         }
         MaksimumUtbetaling(tidslinjer, aktivitetslogg, virkningsdato).betal()
