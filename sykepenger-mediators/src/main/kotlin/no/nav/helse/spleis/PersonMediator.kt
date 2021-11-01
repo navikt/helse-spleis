@@ -213,7 +213,9 @@ internal class PersonMediator(
                 "hendelser" to event.hendelseIder,
                 "skjæringstidspunkt" to event.skjæringstidspunkt,
                 "sykepengegrunnlag" to event.sykepengegrunnlag,
+                "grunnlagForSykepengegrunnlag" to event.grunnlagForSykepengegrunnlag,
                 "grunnlagForSykepengegrunnlagPerArbeidsgiver" to event.grunnlagForSykepengegrunnlagPerArbeidsgiver,
+                "begrensning" to event.sykepengegrunnlagsbegrensning,
                 "inntekt" to event.inntekt
             ).apply {
                 event.utbetalingId?.let { this["utbetalingId"] = it }
