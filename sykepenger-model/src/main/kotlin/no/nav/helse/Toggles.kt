@@ -6,6 +6,7 @@ abstract class Toggles internal constructor(enabled: Boolean = false, private va
     private val states = mutableListOf(enabled)
 
     val enabled get() = states.last()
+    val disabled get() = !enabled
 
     fun enable() {
         if (force) return

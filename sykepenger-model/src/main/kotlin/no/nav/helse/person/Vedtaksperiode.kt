@@ -162,7 +162,7 @@ internal class Vedtaksperiode private constructor(
         val overlapper = overlapperMed(inntektsmelding) && (other == null || other == id)
         return overlapper.also {
             if (it) hendelseIder.add(inntektsmelding.meldingsreferanseId())
-            if (!Toggles.RefusjonPerDag.enabled && arbeidsgiver.harRefusjonOpphørt(periode.endInclusive) && !erAvsluttet()) {
+            if (Toggles.RefusjonPerDag.disabled && arbeidsgiver.harRefusjonOpphørt(periode.endInclusive) && !erAvsluttet()) {
                 kontekst(inntektsmelding)
                 inntektsmelding.error("Refusjon opphører i perioden")
                 inntektsmelding.trimLeft(periode.endInclusive)
@@ -253,7 +253,7 @@ internal class Vedtaksperiode private constructor(
             return
         }
 
-        if (!Toggles.RevurdereInntektMedFlereArbeidsgivere.enabled && inntektskilde == Inntektskilde.FLERE_ARBEIDSGIVERE) {
+        if (Toggles.RevurdereInntektMedFlereArbeidsgivere.disabled && inntektskilde == Inntektskilde.FLERE_ARBEIDSGIVERE) {
             hendelse.error("Forespurt overstyring av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
             return
         }
@@ -1102,7 +1102,7 @@ internal class Vedtaksperiode private constructor(
             val refusjonOpphørt = vedtaksperiode.arbeidsgiver.harRefusjonOpphørt(vedtaksperiode.periode.endInclusive)
 
             return when {
-                forlengelse && refusjonOpphørt && !Toggles.RefusjonPerDag.enabled -> TilInfotrygd.also { hendelse.error("Refusjon er opphørt.") }
+                forlengelse && refusjonOpphørt && Toggles.RefusjonPerDag.disabled -> TilInfotrygd.also { hendelse.error("Refusjon er opphørt.") }
                 forlengelse && ferdig -> ferdigForlengelse
                 forlengelse && !ferdig -> uferdigForlengelse
                 !forlengelse && ferdig -> ferdigGap

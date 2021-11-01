@@ -212,13 +212,13 @@ class Inntektsmelding(
             beregnetInntekt: Inntekt
         ): IAktivitetslogg {
             when {
-                (beløp == null || beløp <= Inntekt.INGEN) && !Toggles.RefusjonPerDag.enabled -> aktivitetslogg.error("Arbeidsgiver forskutterer ikke (krever ikke refusjon)")
                 beregnetInntekt <= Inntekt.INGEN -> aktivitetslogg.error("Inntektsmelding inneholder ikke beregnet inntekt")
-                beløp != beregnetInntekt && !Toggles.RefusjonPerDag.enabled -> aktivitetslogg.error("Inntektsmelding inneholder beregnet inntekt og refusjon som avviker med hverandre")
-                opphørerRefusjon(periode) && !Toggles.RefusjonPerDag.enabled -> aktivitetslogg.error("Arbeidsgiver opphører refusjon i perioden")
-                opphørsdato != null && !Toggles.RefusjonPerDag.enabled -> aktivitetslogg.error("Arbeidsgiver opphører refusjon")
-                endrerRefusjon(periode) && !Toggles.RefusjonPerDag.enabled -> aktivitetslogg.error("Arbeidsgiver endrer refusjon i perioden")
-                endringerIRefusjon.isNotEmpty() && !Toggles.RefusjonPerDag.enabled -> aktivitetslogg.error("Arbeidsgiver har endringer i refusjon")
+                Toggles.RefusjonPerDag.disabled && (beløp == null || beløp <= Inntekt.INGEN) -> aktivitetslogg.error("Arbeidsgiver forskutterer ikke (krever ikke refusjon)")
+                Toggles.RefusjonPerDag.disabled && beløp != beregnetInntekt -> aktivitetslogg.error("Inntektsmelding inneholder beregnet inntekt og refusjon som avviker med hverandre")
+                Toggles.RefusjonPerDag.disabled && opphørerRefusjon(periode) -> aktivitetslogg.error("Arbeidsgiver opphører refusjon i perioden")
+                Toggles.RefusjonPerDag.disabled && opphørsdato != null -> aktivitetslogg.error("Arbeidsgiver opphører refusjon")
+                Toggles.RefusjonPerDag.disabled && endrerRefusjon(periode) -> aktivitetslogg.error("Arbeidsgiver endrer refusjon i perioden")
+                Toggles.RefusjonPerDag.disabled && endringerIRefusjon.isNotEmpty() -> aktivitetslogg.error("Arbeidsgiver har endringer i refusjon")
             }
             return aktivitetslogg
         }
