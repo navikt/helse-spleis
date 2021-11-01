@@ -687,5 +687,5 @@ class Person private constructor(
 
     internal fun infotrygdUtbetalingstidslinje(organisasjonsnummer: String) = infotrygdhistorikk.utbetalingstidslinje(organisasjonsnummer)
 
-    internal fun loggførHendelsesreferanse(skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID) = arbeidsgivere.forEach { it.loggførHendelsesreferanse(skjæringstidspunkt, meldingsreferanseId) }
+    internal fun loggførHendelsesreferanse(orgnummer: String, skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID) = arbeidsgivere.forEach { it.loggførHendelsesreferanse(orgnummer, skjæringstidspunkt, meldingsreferanseId) }
 }

@@ -258,7 +258,7 @@ internal class Vedtaksperiode private constructor(
             return
         }
 
-        person.loggførHendelsesreferanse(hendelse.skjæringstidspunkt, hendelse.meldingsreferanseId())
+        hendelse.loggførHendelsesreferanse(person)
         tilstand.håndter(this, hendelse)
     }
 

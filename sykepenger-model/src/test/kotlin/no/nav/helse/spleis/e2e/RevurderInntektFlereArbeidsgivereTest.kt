@@ -1,7 +1,10 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Toggles
-import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.til
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -50,7 +53,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
             håndterOverstyrInntekt(orgnummer = AG1, skjæringstidspunkt = 1.januar, meldingsreferanseId = hendelseId)
 
             assertHarHendelseIder(1.vedtaksperiode, hendelseId, orgnummer = AG1)
-            assertHarHendelseIder(1.vedtaksperiode, hendelseId, orgnummer = AG2)
+            assertHarIkkeHendelseIder(1.vedtaksperiode, hendelseId, orgnummer = AG2)
         }
     }
 }

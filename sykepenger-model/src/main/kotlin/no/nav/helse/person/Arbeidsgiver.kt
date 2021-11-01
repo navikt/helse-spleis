@@ -996,7 +996,10 @@ internal class Arbeidsgiver private constructor(
     internal fun erSykmeldingenDenSistSkrevne(sykmelding: Sykmelding, hendelseIder: Set<UUID>): Boolean =
         sykdomshistorikk.erSykmeldingenDenSistSkrevne(sykmelding, hendelseIder)
 
-    fun loggførHendelsesreferanse(skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID) = vedtaksperioder.filter { it.gjelder(skjæringstidspunkt) }.forEach { it.loggførHendelsesreferanse(meldingsreferanseId) }
+    fun loggførHendelsesreferanse(organisasjonsnummer: String, skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID) {
+        if (this.organisasjonsnummer != organisasjonsnummer) return
+        vedtaksperioder.filter { it.gjelder(skjæringstidspunkt) }.forEach { it.loggførHendelsesreferanse(meldingsreferanseId) }
+    }
 
     internal class JsonRestorer private constructor() {
         internal companion object {
