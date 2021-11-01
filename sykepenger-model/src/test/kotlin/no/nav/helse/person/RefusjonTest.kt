@@ -39,11 +39,8 @@ internal class RefusjonTest {
         val refusjon = refusjon(endringerIRefusjon = emptyList(), førsteFraværsdag = null, arbeidsgiverperioder = listOf(2.januar til 3.januar, 5.januar til 7.januar))
         val aktivitetslogg = Aktivitetslogg()
 
+        assertEquals(31000.månedlig, refusjon.beløp(3.januar, aktivitetslogg))
         assertEquals(31000.månedlig, refusjon.beløp(5.januar, aktivitetslogg))
-        assertFalse(aktivitetslogg.hasErrorsOrWorse())
-
-        assertThrows<Aktivitetslogg.AktivitetException> { refusjon.beløp(3.januar, aktivitetslogg) }
-        assertTrue(aktivitetslogg.hasErrorsOrWorse())
     }
 
     @Test

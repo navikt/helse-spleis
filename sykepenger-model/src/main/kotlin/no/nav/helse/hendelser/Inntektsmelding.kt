@@ -212,8 +212,8 @@ class Inntektsmelding(
             beregnetInntekt: Inntekt
         ): IAktivitetslogg {
             when {
-                beløp == null -> aktivitetslogg.error("Arbeidsgiver forskutterer ikke (krever ikke refusjon)")
-                beløp > beregnetInntekt -> aktivitetslogg.error("Inntektsmelding inneholder beregnet inntekt som er mindre enn refusjonsbeløpet") // TODO: Er det rett å legge til denne begrensningen?
+                (beløp == null || beløp <= Inntekt.INGEN) && !Toggles.RefusjonPerDag.enabled -> aktivitetslogg.error("Arbeidsgiver forskutterer ikke (krever ikke refusjon)")
+                beregnetInntekt <= Inntekt.INGEN -> aktivitetslogg.error("Inntektsmelding inneholder ikke beregnet inntekt")
                 beløp != beregnetInntekt && !Toggles.RefusjonPerDag.enabled -> aktivitetslogg.error("Inntektsmelding inneholder beregnet inntekt og refusjon som avviker med hverandre")
                 opphørerRefusjon(periode) && !Toggles.RefusjonPerDag.enabled -> aktivitetslogg.error("Arbeidsgiver opphører refusjon i perioden")
                 opphørsdato != null && !Toggles.RefusjonPerDag.enabled -> aktivitetslogg.error("Arbeidsgiver opphører refusjon")
