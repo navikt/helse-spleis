@@ -48,7 +48,7 @@ internal class V114LagreSykepengegrunnlag : JsonMigration(version = 114) {
             fnr: String,
             vilkårsgrunnlagtype: String
         ): Double {
-            val inntektsopplysning = finnInntektsopplysning(arbeidsgiver["inntektshistorikk"], skjæringstidspunkt, vilkårsgrunnlagtype)
+            val inntektsopplysning = finnInntektsopplysning(arbeidsgiver["inntektshistorikk"], skjæringstidspunkt, vilkårsgrunnlagtype, arbeidsgiver["vedtaksperioder"] as ArrayNode)
 
             if (inntektsopplysning != null) {
                 val arbeidsgiverInntektsopplysning = arbeidsgiverInntektsopplysninger.addObject()
@@ -66,13 +66,21 @@ internal class V114LagreSykepengegrunnlag : JsonMigration(version = 114) {
             .sumOf { it["beløp"].asDouble() }
             .div(3)
 
-        private fun finnInntektsopplysning(inntektshistorikk: JsonNode, skjæringstidspunkt: String, vilkårsgrunnlagtype: String): JsonNode? =
+        private fun finnInntektsmelding(inntektsopplysning: JsonNode, vedtaksperioder: ArrayNode, skjæringstidspunkt: String) : Boolean {
+            val inntektsmeldingId = vedtaksperioder
+                .filter { it["skjæringstidspunkt"].asText() == skjæringstidspunkt }
+                .firstOrNull { it["tilstand"].asText() == "AVSLUTTET" }?.get("inntektsmeldingInfo")?.get("id") ?: return false
+
+            return inntektsopplysning["id"].asText() == inntektsmeldingId.asText()
+        }
+
+        private fun finnInntektsopplysning(inntektshistorikk: JsonNode, skjæringstidspunkt: String, vilkårsgrunnlagtype: String, vedtaksperioder: ArrayNode): JsonNode? =
             inntektshistorikk.firstOrNull()
                 ?.get("inntektsopplysninger")
                 ?.filter { vilkårsgrunnlagtype != "Infotrygd" || "INFOTRYGD" == it["kilde"]?.asText() }
                 ?.filterNot { it.has("skatteopplysninger") && it["skatteopplysninger"].first()["kilde"].asText() == "SKATT_SAMMENLIGNINGSGRUNNLAG" }
                 ?.filter {
-                    skjæringstidspunkt == if (it.has("skatteopplysninger")) it["skatteopplysninger"].first()["dato"].asText() else it["dato"].asText()
+                    skjæringstidspunkt == finnDato(it) || finnInntektsmelding(it, vedtaksperioder, skjæringstidspunkt)
                 }?.maxByOrNull {
                     when (if (it.has("skatteopplysninger")) it["skatteopplysninger"].first()["kilde"].asText() else it["kilde"].asText()) {
                         "SAKSBEHANDLER" -> 100
@@ -90,6 +98,9 @@ internal class V114LagreSykepengegrunnlag : JsonMigration(version = 114) {
                         dato > skjæringstidspunkt
                     }
                     ?.takeIf { it.has("kilde") && it["kilde"].asText() == "INFOTRYGD" }
+
+        private fun finnDato(inntektsopplysning: JsonNode) =
+            if (inntektsopplysning.has("skatteopplysninger")) inntektsopplysning["skatteopplysninger"].first()["dato"].asText() else inntektsopplysning["dato"].asText()
 
     }
 
