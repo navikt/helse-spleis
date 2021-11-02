@@ -3,6 +3,7 @@ package no.nav.helse.serde.migration
 import no.nav.helse.serde.serdeObjectMapper
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 
 internal class V114LagreSykepengegrunnlagTest {
@@ -94,6 +95,13 @@ internal class V114LagreSykepengegrunnlagTest {
                         }
                         ]
                     }
+                ],
+                "vedtaksperioder": [
+                    {
+                        "inntektsmeldingInfo": null,
+                        "tilstand": "AVSLUTTET",
+                        "skjæringstidspunkt": "2017-12-01"
+                    }
                 ]
             }
         ],
@@ -175,7 +183,14 @@ internal class V114LagreSykepengegrunnlagTest {
                         }
                     ]
                 }
-            ]
+            ],
+            "vedtaksperioder": [
+                    {
+                        "inntektsmeldingInfo": null,
+                        "tilstand": "AVSLUTTET",
+                        "skjæringstidspunkt": "2017-12-01"
+                    }
+                ]
         }
     ],
     "vilkårsgrunnlagHistorikk": [
@@ -248,6 +263,13 @@ internal class V114LagreSykepengegrunnlagTest {
                         }
                     ]
                 }
+            ],
+            "vedtaksperioder": [
+                {
+                    "inntektsmeldingInfo": null,
+                    "tilstand": "AVSLUTTET",
+                    "skjæringstidspunkt": "2017-12-01"
+                }
             ]
         }
     ],
@@ -298,6 +320,13 @@ internal class V114LagreSykepengegrunnlagTest {
                             "tidsstempel": "2021-08-25T14:50:58.248396"
                         }
                     ]
+                }
+            ],
+            "vedtaksperioder": [
+                {
+                    "inntektsmeldingInfo": null,
+                    "tilstand": "AVSLUTTET",
+                    "skjæringstidspunkt": "2017-12-01"
                 }
             ]
         }
@@ -384,6 +413,13 @@ internal class V114LagreSykepengegrunnlagTest {
                         }
                     ]
                 }
+            ],
+            "vedtaksperioder": [
+                {
+                    "inntektsmeldingInfo": null,
+                    "tilstand": "AVSLUTTET",
+                    "skjæringstidspunkt": "2017-12-01"
+                }
             ]
         },
         {
@@ -432,7 +468,8 @@ internal class V114LagreSykepengegrunnlagTest {
                         }
                     ]
                 }
-            ]
+            ],
+            "vedtaksperioder": []
         }
     ],
     "vilkårsgrunnlagHistorikk": [
@@ -483,7 +520,14 @@ internal class V114LagreSykepengegrunnlagTest {
                         }
                     ]
                 }
-            ]
+            ],
+            "vedtaksperioder": [
+                    {
+                        "inntektsmeldingInfo": null,
+                        "tilstand": "AVSLUTTET",
+                        "skjæringstidspunkt": "2017-12-01"
+                    }
+                ]
         },
         {
             "organisasjonsnummer": "654321987",
@@ -531,7 +575,8 @@ internal class V114LagreSykepengegrunnlagTest {
                         }
                     ]
                 }
-            ]
+            ],
+            "vedtaksperioder": []
         }
     ],
     "vilkårsgrunnlagHistorikk": [
@@ -980,7 +1025,17 @@ internal class V114LagreSykepengegrunnlagTest {
                             }
                         ]
                     }
+                ],
+                "vedtaksperioder": [
+                    {
+                        "inntektsmeldingInfo": {
+                            "id": "518938a9-a856-4c3a-a238-a5fe4f4abcde"
+                        },
+                        "tilstand": "AVSLUTTET",
+                        "skjæringstidspunkt": "2019-06-01"
+                    }
                 ]
+
             },
              {
                 "organisasjonsnummer": "999999999",
@@ -1173,7 +1228,8 @@ internal class V114LagreSykepengegrunnlagTest {
                             }
                         ]
                     }
-                ]
+                ],
+                "vedtaksperioder": []
             }
         ],
         "vilkårsgrunnlagHistorikk": [
@@ -1587,7 +1643,16 @@ internal class V114LagreSykepengegrunnlagTest {
                         }
                     ]
                 }
-            ]
+            ],
+            "vedtaksperioder": [
+                    {
+                        "inntektsmeldingInfo": {
+                            "id": "518938a9-a856-4c3a-a238-a5fe4f4abcde"
+                        },
+                        "tilstand": "AVSLUTTET",
+                        "skjæringstidspunkt": "2019-06-01"
+                    }
+                ]
         },
         {
             "organisasjonsnummer": "999999999",
@@ -1780,7 +1845,8 @@ internal class V114LagreSykepengegrunnlagTest {
                         }
                     ]
                 }
-            ]
+            ],
+            "vedtaksperioder": []
         }
     ],
     "vilkårsgrunnlagHistorikk": [
@@ -1876,6 +1942,7 @@ internal class V114LagreSykepengegrunnlagTest {
     "skjemaVersjon": 114
 }"""
 
+
     @Language("JSON")
     private val personMedRartSkjæringstidspunktFraIMOriginal = """
 {
@@ -1898,9 +1965,9 @@ internal class V114LagreSykepengegrunnlagTest {
                         },
                         {
                             "id": "3efad503-7a37-4a07-bdfc-a1a35d988334",
-                            "hendelseId": "e1f84076-c00b-4403-9357-c726c12e5477",
                             "skatteopplysninger": [
                                 {
+                                    "hendelseId": "e1f84076-c00b-4403-9357-c726c12e5477",
                                     "dato": "2018-01-01",
                                     "beløp": 31000.0,
                                     "kilde": "SKATT_SYKEPENGEGRUNNLAG",
@@ -1908,6 +1975,7 @@ internal class V114LagreSykepengegrunnlagTest {
                                     "type": "LØNNSINNTEKT"
                                 },
                                 {
+                                    "hendelseId": "e1f84076-c00b-4403-9357-c726c12e5477",
                                     "dato": "2018-01-01",
                                     "beløp": 31000.0,
                                     "kilde": "SKATT_SYKEPENGEGRUNNLAG",
@@ -1915,6 +1983,7 @@ internal class V114LagreSykepengegrunnlagTest {
                                     "type": "LØNNSINNTEKT"
                                 },
                                 {
+                                    "hendelseId": "e1f84076-c00b-4403-9357-c726c12e5477",
                                     "dato": "2018-01-01",
                                     "beløp": 31000.0,
                                     "kilde": "SKATT_SYKEPENGEGRUNNLAG",
@@ -1974,6 +2043,7 @@ internal class V114LagreSykepengegrunnlagTest {
                     "inntektsopplysninger": [
                         {
                             "id": "04c3395e-c70c-4e58-9e99-b985ab4138b7",
+                            "hendelseId": "abf3b3d9-e3ae-4bd3-a685-8b0575961006",
                             "dato": "2018-01-02",
                             "beløp": 31000.0,
                             "kilde": "INNTEKTSMELDING"
@@ -1982,6 +2052,7 @@ internal class V114LagreSykepengegrunnlagTest {
                             "id": "3efad503-7a37-4a07-bdfc-a1a35d988334",
                             "skatteopplysninger": [
                                 {
+                                    "hendelseId": "e1f84076-c00b-4403-9357-c726c12e5477",
                                     "dato": "2018-01-01",
                                     "beløp": 31000.0,
                                     "kilde": "SKATT_SYKEPENGEGRUNNLAG",
@@ -1989,6 +2060,7 @@ internal class V114LagreSykepengegrunnlagTest {
                                     "type": "LØNNSINNTEKT"
                                 },
                                 {
+                                    "hendelseId": "e1f84076-c00b-4403-9357-c726c12e5477",
                                     "dato": "2018-01-01",
                                     "beløp": 31000.0,
                                     "kilde": "SKATT_SYKEPENGEGRUNNLAG",
@@ -1996,6 +2068,7 @@ internal class V114LagreSykepengegrunnlagTest {
                                     "type": "LØNNSINNTEKT"
                                 },
                                 {
+                                    "hendelseId": "e1f84076-c00b-4403-9357-c726c12e5477",
                                     "dato": "2018-01-01",
                                     "beløp": 31000.0,
                                     "kilde": "SKATT_SYKEPENGEGRUNNLAG",
@@ -2040,14 +2113,13 @@ internal class V114LagreSykepengegrunnlagTest {
                                 "orgnummer": "987654321",
                                 "inntektsopplysning": {
                                     "id": "04c3395e-c70c-4e58-9e99-b985ab4138b7",
-                                    "dato": "2018-01-01",
                                     "hendelseId": "abf3b3d9-e3ae-4bd3-a685-8b0575961006",
+                                    "dato": "2018-01-02",
                                     "beløp": 31000.0,
                                     "kilde": "INNTEKTSMELDING"
                                 }
                             }
-                        ],
-                        "begrensning": "ER_IKKE_6G_BEGRENSET"
+                        ]
                     }
                 }
             ]

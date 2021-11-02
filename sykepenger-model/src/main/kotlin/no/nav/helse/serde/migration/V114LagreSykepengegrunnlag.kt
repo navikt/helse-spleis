@@ -71,7 +71,9 @@ internal class V114LagreSykepengegrunnlag : JsonMigration(version = 114) {
                 .filter { it["skjæringstidspunkt"].asText() == skjæringstidspunkt }
                 .firstOrNull { it["tilstand"].asText() == "AVSLUTTET" }?.get("inntektsmeldingInfo")?.get("id") ?: return false
 
-            return inntektsopplysning["id"].asText() == inntektsmeldingId.asText()
+            val hendelseId = inntektsopplysning["hendelseId"] ?: return false
+
+            return hendelseId.asText() == inntektsmeldingId.asText()
         }
 
         private fun finnInntektsopplysning(inntektshistorikk: JsonNode, skjæringstidspunkt: String, vilkårsgrunnlagtype: String, vedtaksperioder: ArrayNode): JsonNode? =
