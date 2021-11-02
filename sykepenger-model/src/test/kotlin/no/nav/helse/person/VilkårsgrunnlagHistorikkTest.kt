@@ -5,6 +5,7 @@ import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -307,7 +308,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag1, 10.januar)
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag2, 1.januar)
         val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 3.NAV, 2.HELG, 5.NAV)
-        vilkårsgrunnlagHistorikk.avvisUtbetalingsdagerMedBegrunnelse(listOf(utbetalingstidslinjeMedNavDager))
+        vilkårsgrunnlagHistorikk.avvisUtbetalingsdagerMedBegrunnelse(listOf(utbetalingstidslinjeMedNavDager), "20043769969".somFødselsnummer().alder())
         assertEquals(8, utbetalingstidslinjeMedNavDager.filterIsInstance<Utbetalingstidslinje.Utbetalingsdag.NavDag>().size)
     }
 
@@ -343,12 +344,12 @@ internal class VilkårsgrunnlagHistorikkTest {
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag1, 10.januar)
         vilkårsgrunnlagHistorikk.lagre(1.januar, VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(sykepengegrunnlag(10000.månedlig)))
         val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 3.NAV, 2.HELG, 5.NAV)
-        vilkårsgrunnlagHistorikk.avvisUtbetalingsdagerMedBegrunnelse(listOf(utbetalingstidslinjeMedNavDager))
+        vilkårsgrunnlagHistorikk.avvisUtbetalingsdagerMedBegrunnelse(listOf(utbetalingstidslinjeMedNavDager), "20043769969".somFødselsnummer().alder())
         assertEquals(8, utbetalingstidslinjeMedNavDager.filterIsInstance<Utbetalingstidslinje.Utbetalingsdag.NavDag>().size)
     }
 
     @Test
-    fun `Avslår vilkår for minimum inntekt med riktig begrunnelse`() {
+    fun `Avslår vilkår for minimum inntekt med riktig begrunnelse for personer under 67 år`() {
         val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
         val vilkårsgrunnlag = Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
@@ -367,12 +368,46 @@ internal class VilkårsgrunnlagHistorikkTest {
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
         assertFalse(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!.isOk())
         val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 3.NAV, 2.HELG, 5.NAV)
-        vilkårsgrunnlagHistorikk.avvisUtbetalingsdagerMedBegrunnelse(listOf(utbetalingstidslinjeMedNavDager))
-        assertEquals(
-            8,
-            utbetalingstidslinjeMedNavDager.filterIsInstance<Utbetalingstidslinje.Utbetalingsdag.AvvistDag>()
-                .filter { it.begrunnelser.size == 1 && it.begrunnelser.first() == Begrunnelse.MinimumInntekt }.size
+        vilkårsgrunnlagHistorikk.avvisUtbetalingsdagerMedBegrunnelse(listOf(utbetalingstidslinjeMedNavDager), "20043769969".somFødselsnummer().alder())
+        utbetalingstidslinjeMedNavDager.filterIsInstance<Utbetalingstidslinje.Utbetalingsdag.AvvistDag>().let { avvisteDager ->
+            assertEquals(8, avvisteDager.size)
+            avvisteDager.forEach {
+                assertEquals(1, it.begrunnelser.size)
+                assertEquals(Begrunnelse.MinimumInntekt, it.begrunnelser.first())
+            }
+        }
+    }
+
+    @Test
+    fun `Avslår vilkår for minimum inntekt med riktig begrunnelse for dem mellom 67 og 70`() {
+        val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
+        val fødselsnummer = "01015036963".somFødselsnummer()
+        val vilkårsgrunnlag = Vilkårsgrunnlag(
+            meldingsreferanseId = UUID.randomUUID(),
+            vedtaksperiodeId = UUID.randomUUID().toString(),
+            aktørId = "AKTØR_ID",
+            fødselsnummer = fødselsnummer.toString(),
+            orgnummer = "ORGNUMMER",
+            inntektsvurdering = Inntektsvurdering(emptyList()),
+            opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
+            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),
+            arbeidsforhold = arbeidsforhold
         )
+        vilkårsgrunnlag.valider(sykepengegrunnlag(10.månedlig), 10.månedlig, 1.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
+        vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag, 1.januar)
+        assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
+        assertFalse(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!.isOk())
+        val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 3.NAV, 2.HELG, 5.NAV)
+        vilkårsgrunnlagHistorikk.avvisUtbetalingsdagerMedBegrunnelse(listOf(utbetalingstidslinjeMedNavDager), fødselsnummer.alder())
+
+        utbetalingstidslinjeMedNavDager.filterIsInstance<Utbetalingstidslinje.Utbetalingsdag.AvvistDag>().let { avvisteDager ->
+            assertEquals(8, avvisteDager.size)
+            avvisteDager.forEach {
+                assertEquals(1, it.begrunnelser.size)
+                assertEquals(Begrunnelse.MinimumInntektOver67, it.begrunnelser.first())
+            }
+        }
     }
 
     private fun sykepengegrunnlag(inntekt: Inntekt) =

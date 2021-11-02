@@ -227,6 +227,7 @@ data class SimuleringsdataDTO(
 enum class BegrunnelseDTO {
     SykepengedagerOppbrukt,
     MinimumInntekt,
+    MinimumInntektOver67,
     EgenmeldingUtenforArbeidsgiverperiode,
     MinimumSykdomsgrad,
     EtterDødsdato,

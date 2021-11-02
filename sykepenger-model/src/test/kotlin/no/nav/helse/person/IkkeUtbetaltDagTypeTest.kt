@@ -31,6 +31,8 @@ Enum-verdiene brukes her: https://github.com/navikt/helse-spre/blob/d10087e5ab37
         val begrunnelserSomSpreGosysKjennerTil = listOf(
             "SykepengedagerOppbrukt",
             "MinimumInntekt",
+            "SykepengedagerOppbruktOver67",
+            "MinimumInntektOver67",
             "EgenmeldingUtenforArbeidsgiverperiode",
             "MinimumSykdomsgrad",
             "ManglerOpptjening",

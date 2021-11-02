@@ -1169,6 +1169,7 @@ internal data class PersonData(
         enum class BegrunnelseData {
             SykepengedagerOppbrukt,
             MinimumInntekt,
+            MinimumInntektOver67,
             EgenmeldingUtenforArbeidsgiverperiode,
             MinimumSykdomsgrad,
             EtterDødsdato,
@@ -1181,6 +1182,7 @@ internal data class PersonData(
                 MinimumSykdomsgrad -> Begrunnelse.MinimumSykdomsgrad
                 EgenmeldingUtenforArbeidsgiverperiode -> Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode
                 MinimumInntekt -> Begrunnelse.MinimumInntekt
+                MinimumInntektOver67 -> Begrunnelse.MinimumInntektOver67
                 EtterDødsdato -> Begrunnelse.EtterDødsdato
                 ManglerMedlemskap -> Begrunnelse.ManglerMedlemskap
                 ManglerOpptjening -> Begrunnelse.ManglerOpptjening
@@ -1193,6 +1195,7 @@ internal data class PersonData(
                     is Begrunnelse.MinimumSykdomsgrad -> MinimumSykdomsgrad
                     is Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode -> EgenmeldingUtenforArbeidsgiverperiode
                     is Begrunnelse.MinimumInntekt -> MinimumInntekt
+                    is Begrunnelse.MinimumInntektOver67 -> MinimumInntektOver67
                     is Begrunnelse.EtterDødsdato -> EtterDødsdato
                     is Begrunnelse.ManglerMedlemskap -> ManglerMedlemskap
                     is Begrunnelse.ManglerOpptjening -> ManglerOpptjening

@@ -410,6 +410,7 @@ internal sealed class Begrunnelse(private val avvisstrategi: (Utbetalingsdag) ->
 
     object SykepengedagerOppbrukt : Begrunnelse()
     object MinimumInntekt : Begrunnelse()
+    object MinimumInntektOver67 : Begrunnelse()
     object EgenmeldingUtenforArbeidsgiverperiode : Begrunnelse()
     object MinimumSykdomsgrad : Begrunnelse()
     object EtterDødsdato : Begrunnelse(inklNavHelg)

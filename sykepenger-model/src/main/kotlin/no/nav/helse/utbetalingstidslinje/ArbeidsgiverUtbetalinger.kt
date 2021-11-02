@@ -32,7 +32,7 @@ internal class ArbeidsgiverUtbetalinger(
         Sykdomsgradfilter(tidslinjer, periode, aktivitetslogg).filter()
         AvvisDagerEtterDødsdatofilter(tidslinjer, periode, dødsdato, aktivitetslogg).filter()
         AvvisDagerEtterFylte70ÅrFilter(tidslinjer, periode, alder, aktivitetslogg).filter()
-        vilkårsgrunnlagHistorikk.avvisUtbetalingsdagerMedBegrunnelse(tidslinjer)
+        vilkårsgrunnlagHistorikk.avvisUtbetalingsdagerMedBegrunnelse(tidslinjer, alder)
         tidslinjeEngine = MaksimumSykepengedagerfilter(alder, regler, periode, aktivitetslogg).also {
             it.filter(tidslinjer, infotrygdtidslinje.kutt(periode.endInclusive))
         }

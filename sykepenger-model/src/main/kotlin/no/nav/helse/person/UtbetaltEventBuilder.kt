@@ -174,6 +174,7 @@ private class UtbetaltEventBuilder(
             private fun mapBegrunnelser(begrunnelser: List<Begrunnelse>): List<UtbetaltEvent.IkkeUtbetaltDag.Begrunnelse> = begrunnelser.map {when (it) {
                 Begrunnelse.SykepengedagerOppbrukt -> UtbetaltEvent.IkkeUtbetaltDag.Begrunnelse.SykepengedagerOppbrukt
                 Begrunnelse.MinimumInntekt -> UtbetaltEvent.IkkeUtbetaltDag.Begrunnelse.MinimumInntekt
+                Begrunnelse.MinimumInntektOver67 -> UtbetaltEvent.IkkeUtbetaltDag.Begrunnelse.MinimumInntektOver67
                 Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode -> UtbetaltEvent.IkkeUtbetaltDag.Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode
                 Begrunnelse.MinimumSykdomsgrad -> UtbetaltEvent.IkkeUtbetaltDag.Begrunnelse.MinimumSykdomsgrad
                 Begrunnelse.EtterDødsdato -> UtbetaltEvent.IkkeUtbetaltDag.Begrunnelse.EtterDødsdato

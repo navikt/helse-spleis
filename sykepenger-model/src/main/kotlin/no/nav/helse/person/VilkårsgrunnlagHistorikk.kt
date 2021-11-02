@@ -3,6 +3,7 @@ package no.nav.helse.person
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.Innslag.Companion.sisteId
+import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
@@ -37,11 +38,11 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
     internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) = historikk.firstOrNull()?.vilkårsgrunnlagFor(skjæringstidspunkt)
 
-    internal fun avvisUtbetalingsdagerMedBegrunnelse(tidslinjer: List<Utbetalingstidslinje>) {
-        Utbetalingstidslinje.avvis(tidslinjer, finnBegrunnelser())
+    internal fun avvisUtbetalingsdagerMedBegrunnelse(tidslinjer: List<Utbetalingstidslinje>, alder: Alder) {
+        Utbetalingstidslinje.avvis(tidslinjer, finnBegrunnelser(alder))
     }
 
-    private fun finnBegrunnelser(): Map<LocalDate, List<Begrunnelse>> = historikk.firstOrNull()?.finnBegrunnelser() ?: emptyMap()
+    private fun finnBegrunnelser(alder: Alder): Map<LocalDate, List<Begrunnelse>> = historikk.firstOrNull()?.finnBegrunnelser(alder) ?: emptyMap()
 
     internal fun inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver() = historikk.firstOrNull()?.inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver()
 
@@ -71,20 +72,23 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 ?.let { vilkårsgrunnlag[it] }
                 ?.takeIf { it is InfotrygdVilkårsgrunnlag }
 
-        internal fun finnBegrunnelser(): Map<LocalDate, List<Begrunnelse>> {
+        internal fun finnBegrunnelser(alder: Alder): Map<LocalDate, List<Begrunnelse>> {
             val begrunnelserForSkjæringstidspunkt = mutableMapOf<LocalDate, List<Begrunnelse>>()
             vilkårsgrunnlag.forEach { (skjæringstidspunkt, vilkårsgrunnlagElement) ->
                 if (vilkårsgrunnlagElement is Grunnlagsdata && !vilkårsgrunnlagElement.isOk()) {
                     val begrunnelser = mutableListOf<Begrunnelse>()
 
                     if (vilkårsgrunnlagElement.medlemskapstatus == Medlemskapsvurdering.Medlemskapstatus.Nei) begrunnelser.add(Begrunnelse.ManglerMedlemskap)
-                    if (vilkårsgrunnlagElement.harMinimumInntekt == false) begrunnelser.add(Begrunnelse.MinimumInntekt)
+                    if (vilkårsgrunnlagElement.harMinimumInntekt == false) begrunnelser.add(begrunnelseForMinimumInntekt(alder, skjæringstidspunkt))
                     if (!vilkårsgrunnlagElement.harOpptjening) begrunnelser.add(Begrunnelse.ManglerOpptjening)
                     begrunnelserForSkjæringstidspunkt[skjæringstidspunkt] = begrunnelser
                 }
             }
             return begrunnelserForSkjæringstidspunkt
         }
+
+        private fun begrunnelseForMinimumInntekt(alder: Alder, skjæringstidspunkt: LocalDate) =
+            if (alder.forhøyetInntektskrav(skjæringstidspunkt)) Begrunnelse.MinimumInntektOver67 else Begrunnelse.MinimumInntekt
 
         internal fun inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver() =
             vilkårsgrunnlag.mapValues { (_, vilkårsgrunnlagElement) ->
