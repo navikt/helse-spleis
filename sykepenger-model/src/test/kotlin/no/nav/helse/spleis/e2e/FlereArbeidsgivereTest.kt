@@ -1775,4 +1775,13 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertEquals(31000.00 * 12, observatør.vedtakFattetEvent[1.vedtaksperiode(a1)]?.grunnlagForSykepengegrunnlagPerArbeidsgiver?.get(a1))
         assertEquals(12000.00, observatør.vedtakFattetEvent[1.vedtaksperiode(a1)]?.grunnlagForSykepengegrunnlagPerArbeidsgiver?.get(a2))
     }
+
+    @Test
+    fun `Beregning av utbetaling over flere arbeidsgivere hvor en arbeidsgiver ikke har utbetaling`() {
+        // Oppretter en arbeidsgiverperiode tilbake i tid som ikke skal ha utbetaling
+        håndterSykmelding(Sykmeldingsperiode(1.januar(2017), 16.januar(2017), 100.prosent), orgnummer = a2)
+        håndterSøknadArbeidsgiver(Sykdom(1.januar(2017), 16.januar(2017), 100.prosent), orgnummer = a2)
+
+        assertDoesNotThrow { nyttVedtak(1.januar, 31.januar, orgnummer = a1) }
+    }
 }

@@ -292,7 +292,12 @@ internal class Arbeidsgiver private constructor(
 
     internal fun lagreUtbetalingstidslinjeberegning(organisasjonsnummer: String, utbetalingstidslinje: Utbetalingstidslinje) {
         val sykdomshistorikkId = sykdomshistorikk.nyesteId()
-        val inntektshistorikkId = inntektshistorikk.nyesteId()
+        val inntektshistorikkId = if (inntektshistorikk.isNotEmpty()) {
+            inntektshistorikk.nyesteId()
+        } else {
+            require(!utbetalingstidslinje.harUtbetalinger()) { "Arbeidsgiver har utbetaling, men vi finner ikke inntektshistorikk" }
+            Inntektshistorikk.NULLUUID
+        }
         val vilkårsgrunnlagHistorikkId = person.nyesteIdForVilkårsgrunnlagHistorikk()
         beregnetUtbetalingstidslinjer.add(
             Utbetalingstidslinjeberegning(sykdomshistorikkId, inntektshistorikkId, vilkårsgrunnlagHistorikkId, organisasjonsnummer, utbetalingstidslinje)

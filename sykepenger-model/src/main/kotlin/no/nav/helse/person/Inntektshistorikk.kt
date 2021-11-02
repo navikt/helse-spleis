@@ -23,6 +23,10 @@ internal class Inntektshistorikk {
         get() = (historikk.firstOrNull()?.clone() ?: Innslag(UUID.randomUUID()))
             .also { historikk.add(0, it) }
 
+    internal companion object {
+        val NULLUUID = UUID.fromString("00000000-0000-0000-0000-000000000000")
+    }
+
     internal operator fun invoke(block: AppendMode.() -> Unit) {
         appender(AppendMode, block)
     }
@@ -34,6 +38,8 @@ internal class Inntektshistorikk {
     }
 
     internal fun nyesteId() = historikk.nyesteId()
+
+    internal fun isNotEmpty() = historikk.isNotEmpty()
 
     internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, dato: LocalDate): Inntektsopplysning? =
         grunnlagForSykepengegrunnlag(skjæringstidspunkt) ?: skjæringstidspunkt
