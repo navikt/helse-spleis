@@ -971,7 +971,14 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             ArbeidsgiverUtbetalingsperiode(orgnr2, 20.januar(2021), 26.januar(2021), 100.prosent, inntekt)
         )
 
-        person.håndter(utbetalingshistorikk(vedtaksperiodeIdInnhenter = vedtaksperiodeId1, utbetalinger = utbetalinger, orgnummer = orgnr1, inntektshistorikk = inntektshistorikk))
+        person.håndter(
+            utbetalingshistorikk(
+                vedtaksperiodeIdInnhenter = vedtaksperiodeId1,
+                utbetalinger = utbetalinger,
+                orgnummer = orgnr1,
+                inntektshistorikk = inntektshistorikk
+            )
+        )
         person.håndter(
             Companion.ytelser(
                 vedtaksperiodeIdInnhenter = vedtaksperiodeId1,
@@ -981,7 +988,14 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             )
         )
         person.håndter(søknad(orgnummer = orgnr2, fom = periode.start, tom = periode.endInclusive, grad = 100.prosent).first)
-        person.håndter(utbetalingshistorikk(vedtaksperiodeIdInnhenter = vedtaksperiodeId2, utbetalinger = utbetalinger, orgnummer = orgnr2, inntektshistorikk = inntektshistorikk))
+        person.håndter(
+            utbetalingshistorikk(
+                vedtaksperiodeIdInnhenter = vedtaksperiodeId2,
+                utbetalinger = utbetalinger,
+                orgnummer = orgnr2,
+                inntektshistorikk = inntektshistorikk
+            )
+        )
         person.håndter(
             Companion.ytelser(
                 vedtaksperiodeIdInnhenter = vedtaksperiodeId2,
@@ -1082,7 +1096,14 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             ArbeidsgiverUtbetalingsperiode(orgnr2, 20.januar(2021), 26.januar(2021), 100.prosent, inntekt)
         )
 
-        person.håndter(utbetalingshistorikk(vedtaksperiodeIdInnhenter = vedtaksperiodeId1, utbetalinger = utbetalinger, orgnummer = orgnr1, inntektshistorikk = inntektshistorikk))
+        person.håndter(
+            utbetalingshistorikk(
+                vedtaksperiodeIdInnhenter = vedtaksperiodeId1,
+                utbetalinger = utbetalinger,
+                orgnummer = orgnr1,
+                inntektshistorikk = inntektshistorikk
+            )
+        )
         person.håndter(
             Companion.ytelser(
                 vedtaksperiodeIdInnhenter = vedtaksperiodeId1,
@@ -1092,7 +1113,14 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             )
         )
         person.håndter(søknad(orgnummer = orgnr2, fom = periode.start, tom = periode.endInclusive, grad = 100.prosent).first)
-        person.håndter(utbetalingshistorikk(vedtaksperiodeIdInnhenter = vedtaksperiodeId2, utbetalinger = utbetalinger, orgnummer = orgnr2, inntektshistorikk = inntektshistorikk))
+        person.håndter(
+            utbetalingshistorikk(
+                vedtaksperiodeIdInnhenter = vedtaksperiodeId2,
+                utbetalinger = utbetalinger,
+                orgnummer = orgnr2,
+                inntektshistorikk = inntektshistorikk
+            )
+        )
         person.håndter(
             Companion.ytelser(
                 vedtaksperiodeIdInnhenter = vedtaksperiodeId2,
@@ -1180,11 +1208,16 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             beregnetInntekt = 1000.månedlig
         ).also { (inntektsmelding, _) -> person.håndter(inntektsmelding) }
         person.håndter(Companion.ytelser(vedtaksperiodeIdInnhenter = vedtaksperiodeId))
-        person.håndter(Companion.vilkårsgrunnlag(vedtaksperiodeIdInnhenter = vedtaksperiodeId, inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
-            1.januar(2017) til 1.desember(2017) inntekter {
-                orgnummer inntekt 1000.månedlig
-            }
-        })))
+        person.håndter(
+            Companion.vilkårsgrunnlag(
+                vedtaksperiodeIdInnhenter = vedtaksperiodeId,
+                inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
+                    1.januar(2017) til 1.desember(2017) inntekter {
+                        orgnummer inntekt 1000.månedlig
+                    }
+                })
+            )
+        )
         person.håndter(Companion.ytelser(vedtaksperiodeIdInnhenter = vedtaksperiodeId))
         person.håndter(
             Companion.utbetalingsgodkjenning(
@@ -1301,6 +1334,99 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         assertTrue((vedtaksperioder.first() as VedtaksperiodeDTO).aktivitetslogg.any { it.melding == "Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag" })
         assertTrue((vedtaksperioder.last() as VedtaksperiodeDTO).aktivitetslogg.any { it.melding == "Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag" })
 
+    }
+
+    @Test
+    fun `Akkumulerer inntekter fra a-orningen pr måned`() {
+        val fom = 1.januar
+        val tom = 31.januar
+        val person = Person(aktørId, fnr)
+        person.håndter(sykmelding(orgnummer = orgnummer, fom = fom, tom = tom).first)
+        val vedtaksperiodeId1 = person.collectVedtaksperiodeIder(orgnummer).last()
+        person.håndter(
+            søknad(
+                hendelseId = UUID.randomUUID(),
+                fom = fom,
+                tom = tom,
+                sendtSøknad = fom.plusDays(1).atStartOfDay()
+            ).first
+        )
+        person.håndter(
+            inntektsmelding(
+                orgnummer = orgnummer,
+                fom = fom,
+                refusjon = Inntektsmelding.Refusjon(beløp = 1000.månedlig, opphørsdato = null, endringerIRefusjon = emptyList()),
+                beregnetInntekt = 1000.månedlig
+            ).first
+        )
+
+        person.håndter(
+            Companion.ytelser(
+                vedtaksperiodeIdInnhenter = vedtaksperiodeId1,
+                orgnummer = orgnummer
+            )
+        )
+
+        person.håndter(
+            Companion.vilkårsgrunnlag(
+                vedtaksperiodeIdInnhenter = vedtaksperiodeId1,
+                inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
+                    1.januar(2017) til 1.desember(2017) inntekter {
+                        orgnummer inntekt 1000.månedlig
+                        orgnummer2 inntekt 600.månedlig
+                        orgnummer2 inntekt 400.månedlig
+                    }
+                }),
+                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektperioderForSykepengegrunnlag {
+                    1.oktober(2017) til 1.desember(2017) inntekter {
+                        orgnummer inntekt 1000.månedlig
+                        orgnummer2 inntekt 600.månedlig
+                        orgnummer2 inntekt 400.månedlig
+                    }
+                }),
+                arbeidsforhold = listOf(Arbeidsforhold(orgnummer, LocalDate.EPOCH), Arbeidsforhold(orgnummer2, LocalDate.EPOCH)),
+                orgnummer = orgnummer
+            )
+        )
+
+        person.håndter(
+            Companion.ytelser(
+                vedtaksperiodeIdInnhenter = vedtaksperiodeId1,
+                orgnummer = orgnummer
+            )
+        )
+
+        person.håndter(
+            Companion.utbetalingsgodkjenning(
+                vedtaksperiodeIdInnhenter = vedtaksperiodeId1,
+                automatiskBehandling = false,
+                aktivitetslogg = person.aktivitetslogg
+            )
+        )
+
+        val personForSpeil = serializePersonForSpeil(person)
+        val inntekterFraAOrdningenFraVilkårsgrunnlag = personForSpeil
+            .vilkårsgrunnlagHistorikk
+            .values
+            .first()
+            .values
+            .first()
+            .inntekter
+            .first { it.organisasjonsnummer == orgnummer2 }
+            .omregnetÅrsinntekt!!
+            .inntekterFraAOrdningen!!
+        assertEquals(3, inntekterFraAOrdningenFraVilkårsgrunnlag.size)
+        assertTrue(inntekterFraAOrdningenFraVilkårsgrunnlag.all { it.sum == 1000.0 })
+
+        val inntekterFraAOrdningenFraInntektsgrunnlag = personForSpeil
+            .inntektsgrunnlag
+            .first()
+            .inntekter
+            .first { it.arbeidsgiver == orgnummer2 }
+            .omregnetÅrsinntekt!!
+            .inntekterFraAOrdningen!!
+        assertEquals(3, inntekterFraAOrdningenFraInntektsgrunnlag.size)
+        assertTrue(inntekterFraAOrdningenFraInntektsgrunnlag.all { it.sum == 1000.0 })
     }
 
     @Test

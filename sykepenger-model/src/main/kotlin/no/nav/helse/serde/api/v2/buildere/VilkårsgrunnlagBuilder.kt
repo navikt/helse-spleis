@@ -286,14 +286,14 @@ internal class VilkårsgrunnlagBuilder(
             }
 
             private class SkattBuilder(skattComposite: SkattComposite) : VilkårsgrunnlagHistorikkVisitor {
-                val inntekt = InntektBuilder(skattComposite.grunnlagForSykepengegrunnlag()).build()
-                val inntekterFraAOrdningen = mutableListOf<IInntekterFraAOrdningen>()
+                private val inntekt = InntektBuilder(skattComposite.grunnlagForSykepengegrunnlag()).build()
+                private val inntekterFraAOrdningen = mutableMapOf<YearMonth, Double>()
 
                 init {
                     skattComposite.accept(this)
                 }
 
-                fun build() = inntekt to inntekterFraAOrdningen.toList()
+                fun build() = inntekt to inntekterFraAOrdningen.map { (måned, sum) -> IInntekterFraAOrdningen(måned, sum) }
 
                 override fun visitSkattSykepengegrunnlag(
                     sykepengegrunnlag: Skatt.Sykepengegrunnlag,
@@ -307,7 +307,7 @@ internal class VilkårsgrunnlagBuilder(
                     tidsstempel: LocalDateTime
                 ) {
                     val inntekt = InntektBuilder(beløp).build()
-                    inntekterFraAOrdningen.add(IInntekterFraAOrdningen(måned, inntekt.månedlig))
+                    inntekterFraAOrdningen.merge(måned, inntekt.månedlig, Double::plus)
                 }
             }
         }
