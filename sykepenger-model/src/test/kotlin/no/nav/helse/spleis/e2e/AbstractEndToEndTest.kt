@@ -153,7 +153,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         assertTrue(warnings.isEmpty(), "forventet ingen warnings for orgnummer $orgnummer. Warnings:\n${warnings.joinToString("\n")}")
     }
 
-    protected fun assertWarning(idInnhenter: IdInnhenter, orgnummer: String = ORGNUMMER, warning: String) {
+    protected fun assertWarning(idInnhenter: IdInnhenter, warning: String, orgnummer: String = ORGNUMMER) {
         val warnings = collectWarnings(idInnhenter, orgnummer)
         assertTrue(warnings.contains(warning), "fant ikke forventet warning for $orgnummer. Warnings:\n${warnings.joinToString("\n")}")
     }

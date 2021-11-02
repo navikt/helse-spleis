@@ -7,14 +7,11 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.testhelpers.februar
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.mars
-import no.nav.helse.testhelpers.november
+import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
@@ -785,7 +782,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(1.vedtaksperiode)
 
-        assertWarning(1.vedtaksperiode, ORGNUMMER, "Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.")
+        assertWarning(1.vedtaksperiode, "Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", ORGNUMMER)
     }
 
     @Test
@@ -810,8 +807,8 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
 
         forlengVedtak(11.februar, 28.februar)
 
-        assertWarning(1.vedtaksperiode, ORGNUMMER, "Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.")
-        assertWarning(2.vedtaksperiode, ORGNUMMER, "Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.")
+        assertWarning(1.vedtaksperiode, "Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", ORGNUMMER)
+        assertWarning(2.vedtaksperiode, "Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", ORGNUMMER)
     }
 
     @Test
@@ -836,7 +833,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
 
         nyttVedtak(1.mars, 31.mars)
 
-        assertWarning(1.vedtaksperiode, ORGNUMMER, "Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.")
+        assertWarning(1.vedtaksperiode, "Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", ORGNUMMER)
         assertNoWarnings(2.vedtaksperiode, ORGNUMMER)
     }
 
@@ -876,7 +873,29 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
 
-        assertWarning(1.vedtaksperiode, a1, "Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.")
-        assertWarning(1.vedtaksperiode, a2, "Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.")
+        assertWarning(1.vedtaksperiode, "Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", a1)
+        assertWarning(1.vedtaksperiode, "Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", a2)
+    }
+
+    @Test
+    fun `Får warning om vi forsøker å finne refusjonsbeløp for en dag før første dag i arbeidsgiverperioden`() = Toggles.RefusjonPerDag.enable {
+        håndterSykmelding(Sykmeldingsperiode(22.januar, 31.januar, 100.prosent))
+        // Inntektsmelding blir ikke brukt ettersom det er forlengelse fra Infotrygd.
+        // Når vi ser etter refusjon for Infotrygdperioden finner vi alikevel frem til denne inntektsmeldingen og forsøker å finne
+        // refusjonsbeløp på 1-5.Januar som er før arbeidsgiverperioden
+        håndterInntektsmelding(listOf(Periode(6.januar, 21.januar)))
+        håndterSøknad(Sykdom(22.januar, 31.januar, 100.prosent))
+        håndterUtbetalingshistorikk(
+            1.vedtaksperiode,
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 21.januar, 100.prosent, 1000.daglig),
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
+        )
+
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        assertWarning(1.vedtaksperiode, "Har ikke opplysninger om refusjon på den aktuelle dagen")
     }
 }

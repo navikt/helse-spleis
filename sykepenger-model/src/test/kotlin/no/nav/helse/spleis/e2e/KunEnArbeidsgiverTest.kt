@@ -851,7 +851,10 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `første fraværsdato fra inntektsmelding er ulik utregnet første fraværsdato`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)), 4.januar)
-        inspektør.also { assertTrue(it.personLogg.hasWarningsOrWorse()) }
+        assertWarning(
+            1.vedtaksperiode,
+            "Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode."
+        )
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP)
     }
 

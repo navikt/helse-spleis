@@ -71,7 +71,7 @@ internal class Refusjonshistorikk {
 
         internal fun beløp(dag: LocalDate, aktivitetslogg: IAktivitetslogg): Inntekt {
             if (dag < førsteDagIArbeidsgiverperioden()) {
-                aktivitetslogg.severe("Har ikke opplysninger om refusjon på den aktuelle dagen")
+                aktivitetslogg.warn("Har ikke opplysninger om refusjon på den aktuelle dagen") // TODO: Endre på teksten
             }
             if (sisteRefusjonsdag != null && dag > sisteRefusjonsdag) return Inntekt.INGEN
             return endringerIRefusjon.beløp(dag) ?: beløp ?: Inntekt.INGEN

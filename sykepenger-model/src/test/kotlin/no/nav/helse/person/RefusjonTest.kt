@@ -7,7 +7,6 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.util.*
 
@@ -30,8 +29,8 @@ internal class RefusjonTest {
     fun `hente refusjonsbeløp for dag før første fraværsdag`() {
         val refusjon = refusjon(endringerIRefusjon = emptyList())
         val aktivitetslogg = Aktivitetslogg()
-        assertThrows<Aktivitetslogg.AktivitetException> { refusjon.beløp(1.januar.minusDays(1), aktivitetslogg) }
-        assertTrue(aktivitetslogg.hasErrorsOrWorse())
+        refusjon.beløp(1.januar.minusDays(1), aktivitetslogg)
+        assertTrue(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test

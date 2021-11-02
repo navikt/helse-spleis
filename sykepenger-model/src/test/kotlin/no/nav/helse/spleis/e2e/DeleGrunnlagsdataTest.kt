@@ -101,7 +101,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
         val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, 15000.daglig)
-        val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.januar(2018), INNTEKT, true));
+        val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.januar(2018), INNTEKT, true))
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk, inntektshistorikk = inntekter)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -416,7 +416,6 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(
             2.vedtaksperiode, Sykdom(22.januar, 10.februar, 100.prosent)
         )
-        // TODO: Hva gjør vi her? Vi burde ha en inntektsmelding for 15. desember og inntektsmeldingen som er sendt inn i testen gir ikke egentlig mening?
         håndterUtbetalingshistorikk(
             2.vedtaksperiode,
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 15.desember(2017), 21.januar, 100.prosent, 1000.daglig),
