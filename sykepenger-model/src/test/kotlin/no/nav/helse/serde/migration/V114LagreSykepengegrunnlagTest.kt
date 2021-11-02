@@ -33,6 +33,21 @@ internal class V114LagreSykepengegrunnlagTest {
         assertEquals(toNode(personMedRartSkjæringstidspunktFraIMExpected), migrer(personMedRartSkjæringstidspunktFraIMOriginal))
     }
 
+    @Test
+    fun `Tre inntektsmeldinger, IM som er lagt til grunn på vedtaksperioden er den midterste og ligger ikke på skjæringstidspunkt - velger riktig`() {
+        assertEquals(toNode(personMedTreIMExpected), migrer(personMedTreIMOriginal))
+    }
+
+    @Test
+    fun `Forkastede vedtaksperioder`() {
+        fail<Unit>("Denne er ikke implementert. Er ikke det litt merkelig?")
+    }
+
+    @Test
+    fun `Ulik fom skal ikke ha IM`() {
+        fail<Unit>("Husk å lage denne da")
+    }
+
     private fun toNode(json: String) = serdeObjectMapper.readTree(json)
 
     private fun migrer(json: String) = listOf(V114LagreSykepengegrunnlag()).migrate(toNode(json))
@@ -1942,10 +1957,8 @@ internal class V114LagreSykepengegrunnlagTest {
     "skjemaVersjon": 114
 }"""
 
-
     @Language("JSON")
-    private val personMedRartSkjæringstidspunktFraIMOriginal = """
-{
+    private val personMedRartSkjæringstidspunktFraIMOriginal = """{
     "aktørId": "42",
     "fødselsnummer": "12020052345",
     "arbeidsgivere": [
@@ -2126,6 +2139,161 @@ internal class V114LagreSykepengegrunnlagTest {
         }
     ],
     "skjemaVersjon": 114
+}
+    """
+
+    @Language("JSON")
+    private val personMedTreIMOriginal = """
+{
+    "aktørId": "42",
+    "fødselsnummer": "12020052345",
+    "arbeidsgivere": [
+        {
+            "organisasjonsnummer": "987654321",
+            "id": "04bd638d-6bb6-4d19-addc-c02572dec4de",
+            "inntektshistorikk": [
+                {
+                    "id": "72a147a2-ca02-4616-9c08-b3e9c0fc2670",
+                    "inntektsopplysninger": [
+                        {
+                            "id": "2fd33523-c4ad-4a0b-9e4a-3efff12cf31a",
+                            "hendelseId": "2608e59e-95bf-446b-ada5-afd863e4edb6",
+                            "dato": "2018-01-01",
+                            "beløp": 31000.0,
+                            "kilde": "INNTEKTSMELDING"
+                        },
+                        {
+                            "id": "04c3395e-c70c-4e58-9e99-b985ab4138b7",
+                            "hendelseId": "abf3b3d9-e3ae-4bd3-a685-8b0575961006",
+                            "dato": "2018-01-02",
+                            "beløp": 31000.0,
+                            "kilde": "INNTEKTSMELDING"
+                        },
+                        {
+                            "id": "216fa7f8-ff50-45e4-8f62-178082c15305",
+                            "hendelseId": "802e44e9-97b8-42aa-8207-2e88e3208321",
+                            "dato": "2018-01-01",
+                            "beløp": 31000.0,
+                            "kilde": "INNTEKTSMELDING"
+                        }
+                    ]
+                }
+            ],
+            "vedtaksperioder": [
+                {
+                    "inntektsmeldingInfo": {
+                        "id": "abf3b3d9-e3ae-4bd3-a685-8b0575961006"
+                    },
+                    "tilstand": "AVSLUTTET",
+                    "skjæringstidspunkt": "2018-01-01"
+                },
+                {
+                    "inntektsmeldingInfo": {
+                        "id": "518938a9-a856-4c3a-a238-a5fe4f4020d7"
+                    },
+                    "tilstand": "AVVENTER_SØKNAD_FERDIG_FORLENGELSE",
+                    "skjæringstidspunkt": "2018-01-01"
+                }
+            ]
+        }
+    ],
+    "vilkårsgrunnlagHistorikk": [
+        {
+            "id": "0354f216-fa7b-4fcd-9ebd-d9732354f8a7",
+            "vilkårsgrunnlag": [
+                {
+                    "skjæringstidspunkt": "2018-01-01",
+                    "type": "Vilkårsprøving"
+                }
+            ]
+        }
+    ],
+    "skjemaVersjon": 113
+}
+    """
+    @Language("JSON")
+    private val personMedTreIMExpected = """
+{
+    "aktørId": "42",
+    "fødselsnummer": "12020052345",
+    "arbeidsgivere": [
+        {
+            "organisasjonsnummer": "987654321",
+            "id": "04bd638d-6bb6-4d19-addc-c02572dec4de",
+            "inntektshistorikk": [
+                {
+                    "id": "72a147a2-ca02-4616-9c08-b3e9c0fc2670",
+                    "inntektsopplysninger": [
+                        {
+                            "id": "2fd33523-c4ad-4a0b-9e4a-3efff12cf31a",
+                            "hendelseId": "2608e59e-95bf-446b-ada5-afd863e4edb6",
+                            "dato": "2018-01-01",
+                            "beløp": 31000.0,
+                            "kilde": "INNTEKTSMELDING"
+                        },
+                        {
+                            "id": "04c3395e-c70c-4e58-9e99-b985ab4138b7",
+                            "hendelseId": "abf3b3d9-e3ae-4bd3-a685-8b0575961006",
+                            "dato": "2018-01-02",
+                            "beløp": 31000.0,
+                            "kilde": "INNTEKTSMELDING"
+                        },
+                        {
+                            "id": "216fa7f8-ff50-45e4-8f62-178082c15305",
+                            "hendelseId": "802e44e9-97b8-42aa-8207-2e88e3208321",
+                            "dato": "2018-01-01",
+                            "beløp": 31000.0,
+                            "kilde": "INNTEKTSMELDING"
+                        }
+                    ]
+                }
+            ],
+            "vedtaksperioder": [
+                {
+                    "inntektsmeldingInfo": {
+                        "id": "abf3b3d9-e3ae-4bd3-a685-8b0575961006"
+                    },
+                    "tilstand": "AVSLUTTET",
+                    "skjæringstidspunkt": "2018-01-01"
+                },
+                {
+                    "inntektsmeldingInfo": {
+                        "id": "518938a9-a856-4c3a-a238-a5fe4f4020d7"
+                    },
+                    "tilstand": "AVVENTER_SØKNAD_FERDIG_FORLENGELSE",
+                    "skjæringstidspunkt": "2018-01-01"
+                }
+            ]
+        }
+    ],
+    "vilkårsgrunnlagHistorikk": [
+        {
+            "id": "0354f216-fa7b-4fcd-9ebd-d9732354f8a7",
+            "vilkårsgrunnlag": [
+                {
+                    "skjæringstidspunkt": "2018-01-01",
+                    "type": "Vilkårsprøving",
+                    "sykepengegrunnlag": {
+                        "sykepengegrunnlag": 372000.0,
+                        "grunnlagForSykepengegrunnlag": 372000.0,
+                        "arbeidsgiverInntektsopplysninger": [
+                            {
+                                "orgnummer": "987654321",
+                                "inntektsopplysning": {
+                                    "id": "04c3395e-c70c-4e58-9e99-b985ab4138b7",
+                                    "hendelseId": "abf3b3d9-e3ae-4bd3-a685-8b0575961006",
+                                    "dato": "2018-01-02",
+                                    "beløp": 31000.0,
+                                    "kilde": "INNTEKTSMELDING"
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ],
+    "skjemaVersjon": 113
 }
     """
 }
