@@ -426,7 +426,16 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndterInntektsmelding(hendelse: Inntektsmelding, hvisInntektGjelder: Vedtaksperiodetilstand, hvisInntektIkkeGjelder: Vedtaksperiodetilstand) {
         håndterInntektsmelding(hendelse) {
-            tilstand(hendelse, if (hendelse.inntektenGjelderFor(skjæringstidspunkt til periode.endInclusive)) hvisInntektGjelder else hvisInntektIkkeGjelder)
+            val nyTilstand = if (hendelse.inntektenGjelderFor(skjæringstidspunkt til periode.endInclusive)) hvisInntektGjelder else hvisInntektIkkeGjelder
+            if (!alleAndreAvventerArbeidsgivere()) {
+                hendelse.validerMuligBrukerutbetaling()
+            }
+
+            if (hendelse.hasErrorsOrWorse()) {
+                person.invaliderAllePerioder(hendelse, null)
+            } else {
+                tilstand(hendelse, nyTilstand)
+            }
         }
     }
 
@@ -587,14 +596,16 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun overlappendeVedtaksperioder() = person.nåværendeVedtaksperioder(IKKE_FERDIG_BEHANDLET).filter { periode.overlapperMed(it.periode) }
-    private fun Iterable<Vedtaksperiode>.alleAndreAvventerArbeidsgivere() =
+    private fun Iterable<Vedtaksperiode>.kanGåTilNesteTilstand() =
         first() == this@Vedtaksperiode && drop(1).all { it.tilstand == AvventerArbeidsgivere }
+
+    private fun alleAndreAvventerArbeidsgivere() = overlappendeVedtaksperioder().all { it == this || it.tilstand == AvventerArbeidsgivere }
 
     private fun forberedMuligUtbetaling(vilkårsgrunnlag: Vilkårsgrunnlag) {
         val overlappendeVedtaksperioder = overlappendeVedtaksperioder()
         håndter(
             vilkårsgrunnlag, when {
-                overlappendeVedtaksperioder.alleAndreAvventerArbeidsgivere() -> AvventerHistorikk
+                overlappendeVedtaksperioder.kanGåTilNesteTilstand() -> AvventerHistorikk
                 else -> AvventerArbeidsgivere
             }
         )
@@ -608,7 +619,7 @@ internal class Vedtaksperiode private constructor(
         val overlappendeVedtaksperioder = overlappendeVedtaksperioder()
         håndterInntektsmelding(
             inntektsmelding, when {
-                overlappendeVedtaksperioder.alleAndreAvventerArbeidsgivere() -> AvventerHistorikk
+                overlappendeVedtaksperioder.kanGåTilNesteTilstand() -> AvventerHistorikk
                 else -> AvventerArbeidsgivere
             },
             AvsluttetUtenUtbetaling

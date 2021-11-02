@@ -164,6 +164,12 @@ class Inntektsmelding(
         refusjon.cacheRefusjon(refusjonshistorikk, meldingsreferanseId(), førsteFraværsdag, arbeidsgiverperioder)
     }
 
+    internal fun validerMuligBrukerutbetaling() {
+        if (Toggles.RefusjonPerDag.enabled) {
+            refusjon.validerMuligBrukerutbetaling(this, beregnetInntekt)
+        }
+    }
+
     class Refusjon(
         private val beløp: Inntekt?,
         private val opphørsdato: LocalDate?,
@@ -221,6 +227,18 @@ class Inntektsmelding(
                 Toggles.RefusjonPerDag.disabled && endringerIRefusjon.isNotEmpty() -> aktivitetslogg.error("Arbeidsgiver har endringer i refusjon")
             }
             return aktivitetslogg
+        }
+
+        internal fun validerMuligBrukerutbetaling(
+            aktivitetslogg: IAktivitetslogg,
+            beregnetInntekt: Inntekt
+        ) {
+            when {
+                (beløp == null || beløp <= Inntekt.INGEN) -> aktivitetslogg.error("Arbeidsgiver forskutterer ikke (krever ikke refusjon)")
+                beløp != beregnetInntekt -> aktivitetslogg.error("Inntektsmelding inneholder beregnet inntekt og refusjon som avviker med hverandre")
+                opphørsdato != null -> aktivitetslogg.error("Arbeidsgiver opphører refusjon")
+                endringerIRefusjon.isNotEmpty() -> aktivitetslogg.error("Arbeidsgiver har endringer i refusjon")
+            }
         }
 
         private fun opphørerRefusjon(periode: Periode) =

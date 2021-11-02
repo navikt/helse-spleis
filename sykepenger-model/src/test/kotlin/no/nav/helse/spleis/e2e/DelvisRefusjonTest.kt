@@ -8,7 +8,10 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.februar
+import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.mars
+import no.nav.helse.testhelpers.november
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -897,5 +900,111 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode)
 
         assertWarning(1.vedtaksperiode, "Har ikke opplysninger om refusjon på den aktuelle dagen")
+    }
+
+    @Test
+    fun `to arbeidsgivere, om første har opphør i refusjon kastes begge ut`() = Toggles.RefusjonPerDag.enable {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1, refusjon = Inntektsmelding.Refusjon(INNTEKT, 30.januar, emptyList()))
+        assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
+        assertError(1.vedtaksperiode, "Arbeidsgiver opphører refusjon", a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
+        assertSisteForkastetPeriodeTilstand(a2, 1.vedtaksperiode, TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `to arbeidsgivere, om første har endring i refusjon kastes begge ut`() = Toggles.RefusjonPerDag.enable {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            orgnummer = a1,
+            refusjon = Inntektsmelding.Refusjon(INNTEKT, null, listOf(EndringIRefusjon(INNTEKT/2, 30.januar)))
+        )
+        assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
+        assertError(1.vedtaksperiode, "Arbeidsgiver har endringer i refusjon", a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
+        assertSisteForkastetPeriodeTilstand(a2, 1.vedtaksperiode, TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `to arbeidsgivere, om første refunderer delvis kastes begge ut`() = Toggles.RefusjonPerDag.enable {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            orgnummer = a1,
+            refusjon = Inntektsmelding.Refusjon(INNTEKT/2, null, emptyList())
+        )
+        assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
+        assertError(1.vedtaksperiode, "Inntektsmelding inneholder beregnet inntekt og refusjon som avviker med hverandre", a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
+        assertSisteForkastetPeriodeTilstand(a2, 1.vedtaksperiode, TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `to arbeidsgivere, om første ikke refunderer`() = Toggles.RefusjonPerDag.enable {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            orgnummer = a1,
+            refusjon = Inntektsmelding.Refusjon(INGEN, null, emptyList())
+        )
+        assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
+        assertError(1.vedtaksperiode, "Arbeidsgiver forskutterer ikke (krever ikke refusjon)", a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
+        assertSisteForkastetPeriodeTilstand(a2, 1.vedtaksperiode, TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `to arbeidsgivere, hvor den andre har opphør i refusjon`() = Toggles.RefusjonPerDag.enable {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2, refusjon = Inntektsmelding.Refusjon(INNTEKT, 15.januar, emptyList()))
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode, orgnummer = a1, inntektsvurdering = Inntektsvurdering(
+                listOf(
+                    sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(12)),
+                    sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(12))
+                )
+            )
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+
+        assertForkastetPeriodeTilstander(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_ARBEIDSGIVERE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            TIL_INFOTRYGD,
+            orgnummer = a1
+        )
+        assertForkastetPeriodeTilstander(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_ARBEIDSGIVERE,
+            TIL_INFOTRYGD,
+            orgnummer = a2
+        )
     }
 }
