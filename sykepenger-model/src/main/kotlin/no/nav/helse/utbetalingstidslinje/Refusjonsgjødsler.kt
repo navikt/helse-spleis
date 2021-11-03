@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Refusjonshistorikk
+import org.slf4j.LoggerFactory
 
 internal class Refusjonsgjødsler(
     private val tidslinje: Utbetalingstidslinje,
@@ -19,6 +20,7 @@ internal class Refusjonsgjødsler(
 
                 if (refusjon?.erFørFørsteDagIArbeidsgiverperioden(utbetalingsperiode.periode().start) == true) {
                     aktivitetslogg.info("Refusjon gjelder ikke for hele utbetalingsperioden")
+                    sikkerLogg.info("Refusjon gjelder ikke for hele utbetalingsperioden. Meldingsreferanse:${refusjon.meldingsreferanseId}, Utbetalingsperiode:${utbetalingsperiode.periode()}")
                 }
             }
 
@@ -38,4 +40,8 @@ internal class Refusjonsgjødsler(
         .map(utbetalingstidslinje::subset)
         .map(Utbetalingstidslinje::trimLedendeFridager)
         .filter(Utbetalingstidslinje::harUtbetalinger)
+
+    private companion object {
+        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
+    }
 }

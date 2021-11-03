@@ -32,7 +32,7 @@ internal class Refusjonshistorikk {
     }
 
     internal class Refusjon(
-        private val meldingsreferanseId: UUID,
+        internal val meldingsreferanseId: UUID,
         private val førsteFraværsdag: LocalDate?,
         private val arbeidsgiverperioder: List<Periode>,
         private val beløp: Inntekt?,
