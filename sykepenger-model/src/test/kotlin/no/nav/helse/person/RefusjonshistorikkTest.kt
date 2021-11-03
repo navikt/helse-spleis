@@ -10,6 +10,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 internal class RefusjonshistorikkTest {
@@ -143,13 +144,24 @@ internal class RefusjonshistorikkTest {
         assertSame(refusjon2, refusjonshistorikk.finnRefusjon(17.januar til 20.januar, aktivitetslogg))
     }
 
-    private fun refusjon(vararg arbeidsgiverperiode: Periode, meldingsreferanseId: UUID = UUID.randomUUID(), førsteFraværsdag: LocalDate? = arbeidsgiverperiode.maxOf { it.start }) = Refusjonshistorikk.Refusjon(
+    @Test
+    fun `Finner nyeste refusjon hvor første fraværsdag er i perioden`() {
+        val refusjon1 = refusjon(1.januar til 31.januar, tidsstempel = LocalDateTime.now().plusSeconds(1))
+        val refusjon2 = refusjon(1.januar til 31.januar, tidsstempel = LocalDateTime.now())
+        val refusjonshistorikk = Refusjonshistorikk()
+        refusjonshistorikk.leggTilRefusjon(refusjon1)
+        refusjonshistorikk.leggTilRefusjon(refusjon2)
+        assertSame(refusjon1, refusjonshistorikk.finnRefusjon(1.januar til 31.januar, Aktivitetslogg()))
+    }
+
+    private fun refusjon(vararg arbeidsgiverperiode: Periode, meldingsreferanseId: UUID = UUID.randomUUID(), førsteFraværsdag: LocalDate? = arbeidsgiverperiode.maxOf { it.start }, tidsstempel: LocalDateTime = LocalDateTime.now()) = Refusjonshistorikk.Refusjon(
         meldingsreferanseId = meldingsreferanseId,
         førsteFraværsdag = førsteFraværsdag,
         arbeidsgiverperioder = arbeidsgiverperiode.toList(),
         beløp = 31000.månedlig,
         sisteRefusjonsdag = null,
-        endringerIRefusjon = emptyList()
+        endringerIRefusjon = emptyList(),
+        tidsstempel = tidsstempel
     )
 
     private fun Aktivitetslogg.infoMeldinger(): List<String> {
