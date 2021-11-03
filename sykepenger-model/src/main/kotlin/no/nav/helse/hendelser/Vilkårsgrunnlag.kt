@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Arbeidsforhold.Companion.grupperArbeidsforholdPerOrgnummer
 import no.nav.helse.person.*
 import no.nav.helse.somFødselsnummer
@@ -12,7 +13,7 @@ class Vilkårsgrunnlag(
     meldingsreferanseId: UUID,
     private val vedtaksperiodeId: String,
     private val aktørId: String,
-    private val fødselsnummer: String,
+    private val fødselsnummer: Fødselsnummer,
     private val orgnummer: String,
     private val inntektsvurdering: Inntektsvurdering,
     private val opptjeningvurdering: Opptjeningvurdering,
@@ -28,7 +29,7 @@ class Vilkårsgrunnlag(
     internal fun erRelevant(other: UUID) = other.toString() == vedtaksperiodeId
 
     override fun aktørId() = aktørId
-    override fun fødselsnummer() = fødselsnummer
+    override fun fødselsnummer() = fødselsnummer.toString()
     override fun organisasjonsnummer() = orgnummer
 
     internal fun valider(
@@ -46,7 +47,7 @@ class Vilkårsgrunnlag(
         )
         val opptjeningvurderingOk = opptjeningvurdering.valider(this, skjæringstidspunkt)
         val medlemskapsvurderingOk = medlemskapsvurdering.valider(this, periodetype)
-        val minimumInntektvurderingOk = validerMinimumInntekt(this, fødselsnummer.somFødselsnummer(), skjæringstidspunkt, grunnlagForSykepengegrunnlag)
+        val minimumInntektvurderingOk = validerMinimumInntekt(this, fødselsnummer, skjæringstidspunkt, grunnlagForSykepengegrunnlag)
 
         grunnlagsdata = VilkårsgrunnlagHistorikk.Grunnlagsdata(
             sykepengegrunnlag = grunnlagForSykepengegrunnlag,

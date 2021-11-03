@@ -18,6 +18,7 @@ import no.nav.helse.serde.api.v2.InntektsmeldingDTO
 import no.nav.helse.serde.api.v2.SykmeldingDTO
 import no.nav.helse.serde.api.v2.SøknadNavDTO
 import no.nav.helse.serde.reflection.Utbetalingstatus
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
@@ -810,7 +811,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeIdInnhenter(orgnummer).toString(),
             aktørId = AKTØRID,
-            fødselsnummer = fnr,
+            fødselsnummer = fnr.somFødselsnummer(),
             orgnummer = orgnummer,
             inntektsvurdering = inntektsvurdering,
             inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,

@@ -21,7 +21,7 @@ import java.util.*
 internal class VilkårsgrunnlagTest {
     private companion object {
         private const val aktørId = "123"
-        private const val UNG_PERSON_FNR_2018 = "12020052345"
+        private val UNG_PERSON_FNR_2018 = "12020052345".somFødselsnummer()
         private const val orgnummer = "345"
         private val INNTEKT = 30000.0.månedlig
     }
@@ -32,7 +32,7 @@ internal class VilkårsgrunnlagTest {
 
     @BeforeEach
     fun setup() {
-        person = Person(aktørId, UNG_PERSON_FNR_2018.somFødselsnummer())
+        person = Person(aktørId, UNG_PERSON_FNR_2018)
         person.addObserver(observatør)
         person.håndter(sykmelding())
         person.håndter(søknad())
@@ -220,7 +220,7 @@ internal class VilkårsgrunnlagTest {
 
     private fun sykmelding() = Sykmelding(
         meldingsreferanseId = UUID.randomUUID(),
-        fnr = UNG_PERSON_FNR_2018,
+        fnr = UNG_PERSON_FNR_2018.toString(),
         aktørId = aktørId,
         orgnummer = orgnummer,
         sykeperioder = listOf(Sykmeldingsperiode(16.januar, 30.januar, 100.prosent)),
@@ -230,7 +230,7 @@ internal class VilkårsgrunnlagTest {
 
     private fun søknad() = Søknad(
         meldingsreferanseId = UUID.randomUUID(),
-        fnr = UNG_PERSON_FNR_2018,
+        fnr = UNG_PERSON_FNR_2018.toString(),
         aktørId = aktørId,
         orgnummer = orgnummer,
         perioder = listOf(Søknad.Søknadsperiode.Sykdom(16.januar, 30.januar, 100.prosent)),
@@ -246,7 +246,7 @@ internal class VilkårsgrunnlagTest {
             meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()),
             orgnummer = orgnummer,
-            fødselsnummer = UNG_PERSON_FNR_2018,
+            fødselsnummer = UNG_PERSON_FNR_2018.toString(),
             aktørId = aktørId,
             førsteFraværsdag = 1.januar,
             beregnetInntekt = INNTEKT,
@@ -259,13 +259,13 @@ internal class VilkårsgrunnlagTest {
     private fun ytelser() = Ytelser(
         meldingsreferanseId = UUID.randomUUID(),
         aktørId = aktørId,
-        fødselsnummer = UNG_PERSON_FNR_2018,
+        fødselsnummer = UNG_PERSON_FNR_2018.toString(),
         organisasjonsnummer = orgnummer,
         vedtaksperiodeId = vedtaksperiodeId(),
         utbetalingshistorikk = Utbetalingshistorikk(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = aktørId,
-            fødselsnummer = UNG_PERSON_FNR_2018,
+            fødselsnummer = UNG_PERSON_FNR_2018.toString(),
             organisasjonsnummer = orgnummer,
             vedtaksperiodeId = vedtaksperiodeId(),
             arbeidskategorikoder = emptyMap(),

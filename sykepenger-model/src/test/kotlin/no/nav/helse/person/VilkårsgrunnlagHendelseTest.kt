@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -223,7 +224,7 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = "${1.vedtaksperiode(ORGNUMMER)}",
             aktørId = "aktørId",
-            fødselsnummer = UNG_PERSON_FNR_2018,
+            fødselsnummer = UNG_PERSON_FNR_2018.somFødselsnummer(),
             orgnummer = ORGNUMMER,
             inntektsvurdering = Inntektsvurdering(inntekter),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),

@@ -1988,7 +1988,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeIdInnhenter(orgnummer).toString(),
             aktørId = aktørId,
-            fødselsnummer = fnr.toString(),
+            fødselsnummer = fnr,
             orgnummer = orgnummer,
             inntektsvurdering = inntektsvurdering,
             inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,

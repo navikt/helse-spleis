@@ -7,6 +7,7 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -426,7 +427,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeIdInnhenter(orgnummer).toString(),
             aktørId = AKTØRID,
-            fødselsnummer = UNG_PERSON_FNR_2018,
+            fødselsnummer = UNG_PERSON_FNR_2018.somFødselsnummer(),
             orgnummer = orgnummer,
             inntektsvurdering = Inntektsvurdering(
                 inntekter = inntekter

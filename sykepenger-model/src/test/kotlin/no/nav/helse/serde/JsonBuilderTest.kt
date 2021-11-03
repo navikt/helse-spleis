@@ -588,7 +588,7 @@ class JsonBuilderTest {
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeId,
             aktørId = aktørId,
-            fødselsnummer = fnr.toString(),
+            fødselsnummer = fnr,
             orgnummer = orgnummer,
             inntektsvurdering = Inntektsvurdering(inntektsvurdering),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektsvurderingForSykepengegrunnlag),
