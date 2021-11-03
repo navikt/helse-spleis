@@ -234,10 +234,10 @@ class Inntektsmelding(
             beregnetInntekt: Inntekt
         ) {
             when {
-                (beløp == null || beløp <= Inntekt.INGEN) -> aktivitetslogg.error("Arbeidsgiver forskutterer ikke (krever ikke refusjon)")
-                beløp != beregnetInntekt -> aktivitetslogg.error("Inntektsmelding inneholder beregnet inntekt og refusjon som avviker med hverandre")
-                opphørsdato != null -> aktivitetslogg.error("Arbeidsgiver opphører refusjon")
-                endringerIRefusjon.isNotEmpty() -> aktivitetslogg.error("Arbeidsgiver har endringer i refusjon")
+                (beløp == null || beløp <= Inntekt.INGEN) -> aktivitetslogg.error("Arbeidsgiver forskutterer ikke (mistenker brukerutbetaling ved flere arbeidsgivere)")
+                beløp != beregnetInntekt -> aktivitetslogg.error("Inntektsmelding inneholder beregnet inntekt og refusjon som avviker med hverandre (mistenker brukerutbetaling ved flere arbeidsgivere)")
+                opphørsdato != null -> aktivitetslogg.error("Arbeidsgiver opphører refusjon (mistenker brukerutbetaling ved flere arbeidsgivere)")
+                endringerIRefusjon.isNotEmpty() -> aktivitetslogg.error("Arbeidsgiver har endringer i refusjon (mistenker brukerutbetaling ved flere arbeidsgivere)")
             }
         }
 

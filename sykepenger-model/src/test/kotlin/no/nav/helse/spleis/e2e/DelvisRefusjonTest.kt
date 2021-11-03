@@ -881,7 +881,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Får warning om vi forsøker å finne refusjonsbeløp for en dag før første dag i arbeidsgiverperioden`() = Toggles.RefusjonPerDag.enable {
+    fun `Finner refusjon fra feil inntektsmelding ved Infotrygdforlengelse`() = Toggles.RefusjonPerDag.enable {
         håndterSykmelding(Sykmeldingsperiode(22.januar, 31.januar, 100.prosent))
         // Inntektsmelding blir ikke brukt ettersom det er forlengelse fra Infotrygd.
         // Når vi ser etter refusjon for Infotrygdperioden finner vi alikevel frem til denne inntektsmeldingen og forsøker å finne
@@ -899,7 +899,66 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(1.vedtaksperiode)
 
-        assertWarning(1.vedtaksperiode, "Har ikke opplysninger om refusjon på den aktuelle dagen")
+        assertInfo(1.vedtaksperiode, "Refusjon gjelder ikke for hele utbetalingsperioden")
+    }
+
+    @Test
+    fun `Første utbetalte dag er før første fraværsdag`() = Toggles.RefusjonPerDag.enable {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(), førsteFraværsdag = 17.januar)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        assertInfo(1.vedtaksperiode, "Refusjon gjelder ikke for hele utbetalingsperioden")
+        assertWarning(1.vedtaksperiode, "Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.")
+    }
+
+    @Test
+    fun `Korrigerende inntektsmelding med feil skjæringstidspunkt går til manuell behandling på grunn av warning`() = Toggles.RefusjonPerDag.enable {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(emptyList(), førsteFraværsdag = 17.januar)
+
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        assertInfo(1.vedtaksperiode, "Refusjon gjelder ikke for hele utbetalingsperioden")
+        assertWarning(1.vedtaksperiode, "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
+    }
+
+    @Test
+    fun `arbeidsgiver sender unødvendig inntektsmelding ved forlengelse før sykmelding`() = Toggles.RefusjonPerDag.enable {
+        // Etter diskusjon med Morten ble vi enige om at vi ikke trenger warning på en forlengelse hvor inntektsmelding kom før sykmelding.
+        // Om ny inntektsmelding fører til brukerutbetalinger vil dette bli oppdaget og sendt til Infotrygd senere
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        håndterInntektsmelding(emptyList(), førsteFraværsdag = 1.februar)
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterYtelser(2.vedtaksperiode)
+
+        assertNoWarnings(1.vedtaksperiode)
+        assertNoWarnings(2.vedtaksperiode)
+        assertInfo(2.vedtaksperiode, "Refusjon gjelder ikke for hele utbetalingsperioden")
     }
 
     @Test
@@ -910,7 +969,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1, refusjon = Inntektsmelding.Refusjon(INNTEKT, 30.januar, emptyList()))
         assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
-        assertError(1.vedtaksperiode, "Arbeidsgiver opphører refusjon", a1)
+        assertError(1.vedtaksperiode, "Arbeidsgiver opphører refusjon (mistenker brukerutbetaling ved flere arbeidsgivere)", a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
         assertSisteForkastetPeriodeTilstand(a2, 1.vedtaksperiode, TIL_INFOTRYGD)
     }
@@ -927,7 +986,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             refusjon = Inntektsmelding.Refusjon(INNTEKT, null, listOf(EndringIRefusjon(INNTEKT/2, 30.januar)))
         )
         assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
-        assertError(1.vedtaksperiode, "Arbeidsgiver har endringer i refusjon", a1)
+        assertError(1.vedtaksperiode, "Arbeidsgiver har endringer i refusjon (mistenker brukerutbetaling ved flere arbeidsgivere)", a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
         assertSisteForkastetPeriodeTilstand(a2, 1.vedtaksperiode, TIL_INFOTRYGD)
     }
@@ -944,7 +1003,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             refusjon = Inntektsmelding.Refusjon(INNTEKT/2, null, emptyList())
         )
         assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
-        assertError(1.vedtaksperiode, "Inntektsmelding inneholder beregnet inntekt og refusjon som avviker med hverandre", a1)
+        assertError(1.vedtaksperiode, "Inntektsmelding inneholder beregnet inntekt og refusjon som avviker med hverandre (mistenker brukerutbetaling ved flere arbeidsgivere)", a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
         assertSisteForkastetPeriodeTilstand(a2, 1.vedtaksperiode, TIL_INFOTRYGD)
     }
@@ -961,7 +1020,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             refusjon = Inntektsmelding.Refusjon(INGEN, null, emptyList())
         )
         assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
-        assertError(1.vedtaksperiode, "Arbeidsgiver forskutterer ikke (krever ikke refusjon)", a1)
+        assertError(1.vedtaksperiode, "Arbeidsgiver forskutterer ikke (mistenker brukerutbetaling ved flere arbeidsgivere)", a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
         assertSisteForkastetPeriodeTilstand(a2, 1.vedtaksperiode, TIL_INFOTRYGD)
     }

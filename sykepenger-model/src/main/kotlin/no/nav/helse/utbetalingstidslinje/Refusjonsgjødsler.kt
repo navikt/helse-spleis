@@ -12,14 +12,20 @@ internal class Refusjonsgjødsler(
     internal fun gjødsle(aktivitetslogg: IAktivitetslogg, periode: Periode) {
         sammenhengendeUtbetalingsperioder(tidslinje).forEach { utbetalingsperiode ->
             val refusjon = refusjonshistorikk.finnRefusjon(utbetalingsperiode.periode(), aktivitetslogg)
-            if (refusjon == null && utbetalingsperiode.periode().overlapperMed(periode)) {
-                aktivitetslogg.warn("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.")
+            if (utbetalingsperiode.periode().overlapperMed(periode)) {
+                if (refusjon == null) {
+                    aktivitetslogg.warn("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.")
+                }
+
+                if (refusjon?.erFørFørsteDagIArbeidsgiverperioden(utbetalingsperiode.periode().start) == true) {
+                    aktivitetslogg.info("Refusjon gjelder ikke for hele utbetalingsperioden")
+                }
             }
 
             utbetalingsperiode.forEach { utbetalingsdag ->
                 when (refusjon) {
                     null -> utbetalingsdag.økonomi.settFullArbeidsgiverRefusjon()
-                    else -> utbetalingsdag.økonomi.arbeidsgiverRefusjon(refusjon.beløp(utbetalingsdag.dato, aktivitetslogg))
+                    else -> utbetalingsdag.økonomi.arbeidsgiverRefusjon(refusjon.beløp(utbetalingsdag.dato))
                 }
             }
         }

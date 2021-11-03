@@ -192,6 +192,47 @@ internal class RefusjonsgjødslerTest {
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
+    @Test
+    fun `Utbetalingsperiode inneholder dager før første dag i arbeidsgiverperioden fører til infomelding`() {
+        val gjødsler = Refusjonsgjødsler(
+            tidslinje = (31.S).utbetalingstidslinje(
+                inntektsopplysning(1.januar, 690.daglig)
+            ),
+            refusjonshistorikk = refusjonshistorikk(refusjon(
+                arbeidsgiverperioder = emptyList(),
+                førsteFraværsdag = 17.januar,
+                beløp = 690.daglig
+            ))
+        )
+        val aktivitetslogg = Aktivitetslogg()
+        gjødsler.gjødsle(aktivitetslogg, 1.januar til 31.januar)
+        assertEquals(1, aktivitetslogg.infoMeldinger().count { it == "Refusjon gjelder ikke for hele utbetalingsperioden" })
+    }
+
+    @Test
+    fun `Legger ikke til ny infomelding ved nye førstegangsbehandlinger`() {
+        val gjødsler = Refusjonsgjødsler(
+            tidslinje = (31.S + 28.opphold + 31.S).utbetalingstidslinje(
+                inntektsopplysning(1.januar, 690.daglig) + inntektsopplysning(1.mars, 690.daglig)
+            ),
+            refusjonshistorikk = refusjonshistorikk(
+                refusjon(
+                    arbeidsgiverperioder = emptyList(),
+                    førsteFraværsdag = 17.januar,
+                    beløp = 690.daglig
+                ),
+                refusjon(
+                    arbeidsgiverperioder = emptyList(),
+                    førsteFraværsdag = 1.mars,
+                    beløp = 690.daglig
+                )
+            )
+        )
+        val aktivitetslogg = Aktivitetslogg()
+        gjødsler.gjødsle(aktivitetslogg, 1.mars til 31.mars)
+        assertEquals(0, aktivitetslogg.infoMeldinger().count { it == "Refusjon gjelder ikke for hele utbetalingsperioden" })
+    }
+
     private companion object {
 
         operator fun Iterable<Utbetalingstidslinje.Utbetalingsdag>.get(periode: Periode) = filter { it.dato in periode }

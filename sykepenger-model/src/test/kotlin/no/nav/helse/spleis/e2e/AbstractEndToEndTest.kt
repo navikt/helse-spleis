@@ -170,6 +170,23 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         return warnings
     }
 
+    protected fun assertInfo(idInnhenter: IdInnhenter, forventet: String, orgnummer: String = ORGNUMMER) {
+        val info = collectInfo(idInnhenter, orgnummer)
+        assertEquals(1, info.count { it == forventet }, "fant ikke ett tilfelle av info for $orgnummer. Info:\n${info.joinToString("\n")}")
+    }
+
+    private fun collectInfo(idInnhenter: IdInnhenter, orgnummer: String): MutableList<String> {
+        val info = mutableListOf<String>()
+        inspektør.personLogg.accept(object : AktivitetsloggVisitor {
+            override fun visitInfo(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Info, melding: String, tidsstempel: String) {
+                if (kontekster.any { it.kontekstMap["vedtaksperiodeId"] == idInnhenter(orgnummer).toString() }) {
+                    info.add(melding)
+                }
+            }
+        })
+        return info
+    }
+
     protected fun assertError(idInnhenter: IdInnhenter, error: String, orgnummer: String = ORGNUMMER) {
         val errors = collectErrors(idInnhenter, orgnummer)
         assertTrue(errors.contains(error), "fant ikke forventet error for $orgnummer. Errors:\n${errors.joinToString("\n")}")

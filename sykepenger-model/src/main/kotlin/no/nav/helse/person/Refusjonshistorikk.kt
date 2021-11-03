@@ -69,10 +69,9 @@ internal class Refusjonshistorikk {
                 ?.also { aktivitetslogg.info("Fant refusjon ved å finne tilstøtende arbeidsgiverperiode for første utbetalingsdag i sammenhengende utbetaling") }
         }
 
-        internal fun beløp(dag: LocalDate, aktivitetslogg: IAktivitetslogg): Inntekt {
-            if (dag < førsteDagIArbeidsgiverperioden()) {
-                aktivitetslogg.warn("Har ikke opplysninger om refusjon på den aktuelle dagen") // TODO: Endre på teksten
-            }
+        internal fun erFørFørsteDagIArbeidsgiverperioden(dag: LocalDate) = dag < førsteDagIArbeidsgiverperioden()
+
+        internal fun beløp(dag: LocalDate): Inntekt {
             if (sisteRefusjonsdag != null && dag > sisteRefusjonsdag) return Inntekt.INGEN
             return endringerIRefusjon.beløp(dag) ?: beløp ?: Inntekt.INGEN
         }
