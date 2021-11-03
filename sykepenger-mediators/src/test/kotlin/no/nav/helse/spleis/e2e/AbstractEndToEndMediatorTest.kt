@@ -13,6 +13,7 @@ import no.nav.helse.spleis.TestMessageFactory.*
 import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.db.LagrePersonDao
 import no.nav.helse.spleis.db.PersonPostgresRepository
+import no.nav.helse.spleis.e2e.SpleisDataSource.migratedDb
 import no.nav.helse.spleis.meldinger.TestRapid
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.testhelpers.januar
@@ -49,7 +50,7 @@ internal abstract class AbstractEndToEndMediatorTest {
 
     @BeforeAll
     internal fun setupAll() {
-        dataSource = PostgresDatabase.start().connection()
+        dataSource = migratedDb
 
         hendelseMediator = HendelseMediator(
             rapidsConnection = testRapid,
@@ -67,7 +68,7 @@ internal abstract class AbstractEndToEndMediatorTest {
 
     @BeforeEach
     internal fun setupEach() {
-        PostgresDatabase.reset()
+        resetDatabase()
         testRapid.reset()
     }
 

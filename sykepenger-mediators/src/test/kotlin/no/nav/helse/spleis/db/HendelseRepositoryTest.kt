@@ -6,7 +6,8 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.db.TestMessages.NySøknad
-import no.nav.helse.spleis.e2e.PostgresDatabase
+import no.nav.helse.spleis.e2e.SpleisDataSource.migratedDb
+import no.nav.helse.spleis.e2e.resetDatabase
 import no.nav.helse.spleis.meldinger.SøknadRiver
 import no.nav.helse.spleis.meldinger.TestMessageMediator
 import no.nav.helse.spleis.meldinger.TestRapid
@@ -25,11 +26,11 @@ class HendelseRepositoryTest {
 
     @BeforeAll
     internal fun setupAll() {
-        dataSource = PostgresDatabase.start().connection()
+        dataSource = migratedDb
     }
     @BeforeEach
     internal fun setupEach() {
-        PostgresDatabase.reset()
+        resetDatabase()
     }
 
     @Test
