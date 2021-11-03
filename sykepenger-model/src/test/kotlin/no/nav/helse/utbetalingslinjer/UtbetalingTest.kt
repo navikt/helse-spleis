@@ -90,15 +90,17 @@ internal class UtbetalingTest {
         val første = opprettUtbetaling(tidslinje, sisteDato = 21.januar)
         val andre = opprettUtbetaling(tidslinje, første, 28.januar)
         val tredje = opprettUtbetaling(tidslinje, andre, 2.februar)
-        val annullering = tredje.annuller(AnnullerUtbetaling(UUID.randomUUID(), "", "", "", tredje.arbeidsgiverOppdrag().fagsystemId(), "", "", LocalDateTime.now())) ?: fail {
-            "Klarte ikke lage annullering"
-        }
+        val annullering =
+            tredje.annuller(AnnullerUtbetaling(UUID.randomUUID(), "", "", "", tredje.arbeidsgiverOppdrag().fagsystemId(), "", "", LocalDateTime.now()))
+                ?: fail {
+                    "Klarte ikke lage annullering"
+                }
         assertEquals(17.januar til 2.februar, annullering.periode)
         assertEquals(17.januar, annullering.arbeidsgiverOppdrag().førstedato)
     }
 
     @Test
-    fun nettoBeløp(){
+    fun nettoBeløp() {
         val tidslinje = tidslinjeOf(5.NAV, 2.HELG, 4.NAV)
         beregnUtbetalinger(tidslinje)
         val første = opprettUtbetaling(tidslinje, sisteDato = 7.januar)
@@ -124,9 +126,10 @@ internal class UtbetalingTest {
         val første = opprettUtbetaling(tidslinje.kutt(19.januar(2020)))
         val andre = opprettUtbetaling(tidslinje.kutt(24.januar(2020)), tidligere = første)
         val tredje = opprettUtbetaling(tidslinje.kutt(18.februar(2020)), tidligere = andre)
-        val andreAnnullert = andre.annuller(AnnullerUtbetaling(UUID.randomUUID(), "", "", "", andre.arbeidsgiverOppdrag().fagsystemId(), "", "", LocalDateTime.now())) ?: fail {
-            "Klarte ikke lage annullering"
-        }
+        val andreAnnullert =
+            andre.annuller(AnnullerUtbetaling(UUID.randomUUID(), "", "", "", andre.arbeidsgiverOppdrag().fagsystemId(), "", "", LocalDateTime.now())) ?: fail {
+                "Klarte ikke lage annullering"
+            }
         godkjenn(andreAnnullert)
 
         assertEquals(listOf(andre, tredje), listOf(tredje, andre, første).aktive())
@@ -221,12 +224,76 @@ internal class UtbetalingTest {
         assertEquals(andre.arbeidsgiverOppdrag().fagsystemId(), inspektør.refFagsystemId(2))
     }
 
+    @Test
+    fun `utbetalingOverført som ikke treffer på fagsystemId`() {
+        val (utbetaling, utbetalingId) = opprettGodkjentUtbetaling()
+        utbetaling.håndter(utbetalingOverført(utbetalingId, "feil fagsystemId"))
+        assertEquals(Utbetaling.Sendt, UtbetalingsInspektør(utbetaling).tilstand)
+    }
+
+    @Test
+    fun `utbetalingOverført som treffer på arbeidsgiverFagsystemId`() {
+        val (utbetaling, utbetalingId) = opprettGodkjentUtbetaling()
+        val fagsystemId = utbetaling.arbeidsgiverOppdrag().fagsystemId()
+        utbetaling.håndter(utbetalingOverført(utbetalingId, fagsystemId))
+        assertEquals(Utbetaling.Overført, UtbetalingsInspektør(utbetaling).tilstand)
+    }
+
+    @Test
+    fun `utbetalingOverført som treffer på brukerFagsystemId`() {
+        val (utbetaling, utbetalingId) = opprettGodkjentUtbetaling()
+        val fagsystemId = utbetaling.personOppdrag().fagsystemId()
+        utbetaling.håndter(utbetalingOverført(utbetalingId, fagsystemId))
+        assertEquals(Utbetaling.Overført, UtbetalingsInspektør(utbetaling).tilstand)
+    }
+
+    @Test
+    fun `utbetalingOverført som bommer på utbetalingId`() {
+        val (utbetaling, _) = opprettGodkjentUtbetaling()
+        val fagsystemId = utbetaling.personOppdrag().fagsystemId()
+        utbetaling.håndter(utbetalingOverført(UUID.randomUUID(), fagsystemId))
+        assertEquals(Utbetaling.Sendt, UtbetalingsInspektør(utbetaling).tilstand)
+    }
+
+    @Test
+    fun `utbetalingHendelse som treffer på brukeroppdraget`() {
+        val (utbetaling, utbetalingId) = opprettGodkjentUtbetaling()
+        val fagsystemId = utbetaling.personOppdrag().fagsystemId()
+        utbetaling.håndter(utbetalingOverført(UUID.randomUUID(), fagsystemId))
+        utbetaling.håndter(utbetalingHendelse(utbetalingId, fagsystemId))
+        assertEquals(Utbetaling.Utbetalt, UtbetalingsInspektør(utbetaling).tilstand)
+    }
+
     private fun beregnUtbetalinger(vararg tidslinjer: Utbetalingstidslinje) =
         MaksimumUtbetaling(
             listOf(*tidslinjer),
             aktivitetslogg,
             1.januar
         ).betal()
+
+    private fun opprettGodkjentUtbetaling(
+        tidslinje: Utbetalingstidslinje = tidslinjeOf(16.AP, 5.NAV),
+        sisteDato: LocalDate = tidslinje.periode().endInclusive,
+        fødselsnummer: String = UNG_PERSON_FNR_2018,
+        orgnummer: String = ORGNUMMER,
+        aktivitetslogg: Aktivitetslogg = this.aktivitetslogg
+    ) = beregnUtbetalinger(tidslinje)
+        .let {
+            Utbetaling.lagUtbetaling(
+                emptyList(),
+                fødselsnummer,
+                UUID.randomUUID(),
+                orgnummer,
+                tidslinje,
+                sisteDato,
+                aktivitetslogg,
+                LocalDate.MAX,
+                100,
+                148
+            )
+        }
+        .also { godkjenn(it) }
+        .let { it to UtbetalingsInspektør(it).utbetalingId }
 
     private fun opprettUtbetaling(
         tidslinje: Utbetalingstidslinje,
@@ -249,18 +316,21 @@ internal class UtbetalingTest {
     ).also { utbetaling ->
         var utbetalingId: String = ""
         godkjenn(utbetaling).also {
-            utbetalingId = it.behov().first { it.type == Behovtype.Utbetaling }.kontekst()["utbetalingId"] ?: throw IllegalStateException("Finner ikke utbetalingId i: ${it.behov().first { it.type == Behovtype.Utbetaling }.kontekst()}")
+            utbetalingId = it.behov().first { it.type == Behovtype.Utbetaling }.kontekst()["utbetalingId"]
+                ?: throw IllegalStateException("Finner ikke utbetalingId i: ${it.behov().first { it.type == Behovtype.Utbetaling }.kontekst()}")
         }
-        utbetaling.håndter(UtbetalingOverført(
-            meldingsreferanseId = UUID.randomUUID(),
-            aktørId = "ignore",
-            fødselsnummer = "ignore",
-            orgnummer = "ignore",
-            fagsystemId = utbetaling.arbeidsgiverOppdrag().fagsystemId(),
-            utbetalingId = utbetalingId,
-            avstemmingsnøkkel = 123456L,
-            overføringstidspunkt = LocalDateTime.now()
-        ))
+        utbetaling.håndter(
+            UtbetalingOverført(
+                meldingsreferanseId = UUID.randomUUID(),
+                aktørId = "ignore",
+                fødselsnummer = "ignore",
+                orgnummer = "ignore",
+                fagsystemId = utbetaling.arbeidsgiverOppdrag().fagsystemId(),
+                utbetalingId = utbetalingId,
+                avstemmingsnøkkel = 123456L,
+                overføringstidspunkt = LocalDateTime.now()
+            )
+        )
         utbetaling.håndter(
             UtbetalingHendelse(
                 meldingsreferanseId = UUID.randomUUID(),
@@ -347,4 +417,55 @@ internal class UtbetalingTest {
         fun totalBeløp(indeks: Int) = totalBeløp.elementAt(indeks)
         fun nettoBeløp(indeks: Int) = nettoBeløp.elementAt(indeks)
     }
+
+    class UtbetalingsInspektør(utbetaling: Utbetaling) : UtbetalingVisitor {
+        lateinit var utbetalingId: UUID
+        lateinit var tilstand: Utbetaling.Tilstand
+
+        init {
+            utbetaling.accept(this)
+        }
+
+        override fun preVisitUtbetaling(
+            utbetaling: Utbetaling,
+            id: UUID,
+            beregningId: UUID,
+            type: Utbetaling.Utbetalingtype,
+            tilstand: Utbetaling.Tilstand,
+            tidsstempel: LocalDateTime,
+            oppdatert: LocalDateTime,
+            arbeidsgiverNettoBeløp: Int,
+            personNettoBeløp: Int,
+            maksdato: LocalDate,
+            forbrukteSykedager: Int?,
+            gjenståendeSykedager: Int?
+        ) {
+            utbetalingId = id
+            this.tilstand = tilstand
+        }
+    }
+
+    private fun utbetalingOverført(utbetalingId: UUID, fagsystemId: String) = UtbetalingOverført(
+        meldingsreferanseId = UUID.randomUUID(),
+        aktørId = "ignore",
+        fødselsnummer = "ignore",
+        orgnummer = "ignore",
+        fagsystemId = fagsystemId,
+        utbetalingId = utbetalingId.toString(),
+        avstemmingsnøkkel = 123456L,
+        overføringstidspunkt = LocalDateTime.now()
+    )
+
+    private fun utbetalingHendelse(utbetalingId: UUID, fagsystemId: String) = UtbetalingHendelse(
+        meldingsreferanseId = UUID.randomUUID(),
+        aktørId = "ignore",
+        fødselsnummer = "ignore",
+        orgnummer = "ignore",
+        fagsystemId = fagsystemId,
+        utbetalingId = utbetalingId.toString(),
+        status = AKSEPTERT,
+        melding = "hei",
+        avstemmingsnøkkel = 123456L,
+        overføringstidspunkt = LocalDateTime.now()
+    )
 }

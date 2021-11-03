@@ -137,14 +137,14 @@ internal class Utbetaling private constructor(
     }
 
     internal fun håndter(utbetaling: UtbetalingHendelse) {
-        if (!utbetaling.erRelevant(arbeidsgiverOppdrag.fagsystemId(), id)) return
+        if (!utbetaling.erRelevant(arbeidsgiverOppdrag.fagsystemId(), personOppdrag.fagsystemId(), id)) return
         if (harHåndtert(utbetaling)) return
         utbetaling.kontekst(this)
         tilstand.kvittér(this, utbetaling)
     }
 
     internal fun håndter(utbetalingOverført: UtbetalingOverført) {
-        if (!utbetalingOverført.erRelevant(arbeidsgiverOppdrag.fagsystemId(), id)) return
+        if (!utbetalingOverført.erRelevant(arbeidsgiverOppdrag.fagsystemId(), personOppdrag.fagsystemId(), id)) return
         if (harHåndtert(utbetalingOverført)) return
         utbetalingOverført.kontekst(this)
         tilstand.overført(this, utbetalingOverført)
@@ -176,7 +176,7 @@ internal class Utbetaling private constructor(
     }
 
     internal fun gjelderFor(hendelse: UtbetalingHendelse) =
-        hendelse.erRelevant(arbeidsgiverOppdrag.fagsystemId(), id)
+        hendelse.erRelevant(arbeidsgiverOppdrag.fagsystemId(), personOppdrag.fagsystemId(), id)
 
     internal fun gjelderFor(hendelse: Utbetalingsgodkjenning) =
         hendelse.erRelevant(id)

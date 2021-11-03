@@ -31,8 +31,8 @@ class UtbetalingHendelse(
     internal fun skalForsøkesIgjen() = status == FEIL
 
     internal fun erRelevant(fagsystemId: String) = this.fagsystemId == fagsystemId
-    internal fun erRelevant(fagsystemId: String, utbetalingId: UUID) =
-        erRelevant(fagsystemId) && this.utbetalingId == utbetalingId.toString()
+    internal fun erRelevant(arbeidsgiverFagsystemId: String, personFagsystemId: String, utbetalingId: UUID) =
+        (erRelevant(arbeidsgiverFagsystemId) || erRelevant(personFagsystemId)) && this.utbetalingId == utbetalingId.toString()
 
     enum class Oppdragstatus {
         OVERFØRT,

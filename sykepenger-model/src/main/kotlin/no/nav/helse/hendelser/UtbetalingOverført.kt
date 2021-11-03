@@ -19,7 +19,8 @@ class UtbetalingOverført(
     override fun fødselsnummer() = fødselsnummer
     override fun organisasjonsnummer() = orgnummer
 
-    internal fun erRelevant(fagsystemId: String, utbetalingId: UUID) =
-        erRelevant(fagsystemId) && this.utbetalingId == utbetalingId.toString()
+    internal fun erRelevant(arbeidsgiverFagsystemId: String, personFagsystemId: String, utbetalingId: UUID) =
+        (erRelevant(arbeidsgiverFagsystemId) || erRelevant(personFagsystemId)) && this.utbetalingId == utbetalingId.toString()
+
     private fun erRelevant(fagsystemId: String) = fagsystemId == this.fagsystemId
 }
