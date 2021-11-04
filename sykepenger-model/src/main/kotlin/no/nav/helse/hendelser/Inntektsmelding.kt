@@ -219,14 +219,19 @@ class Inntektsmelding(
         ): IAktivitetslogg {
             when {
                 beregnetInntekt <= Inntekt.INGEN -> aktivitetslogg.error("Inntektsmelding inneholder ikke beregnet inntekt")
-                Toggles.RefusjonPerDag.disabled && (beløp == null || beløp <= Inntekt.INGEN) -> aktivitetslogg.error("Arbeidsgiver forskutterer ikke (krever ikke refusjon)")
-                Toggles.RefusjonPerDag.disabled && beløp != beregnetInntekt -> aktivitetslogg.error("Inntektsmelding inneholder beregnet inntekt og refusjon som avviker med hverandre")
-                Toggles.RefusjonPerDag.disabled && opphørerRefusjon(periode) -> aktivitetslogg.error("Arbeidsgiver opphører refusjon i perioden")
-                Toggles.RefusjonPerDag.disabled && opphørsdato != null -> aktivitetslogg.error("Arbeidsgiver opphører refusjon")
-                Toggles.RefusjonPerDag.disabled && endrerRefusjon(periode) -> aktivitetslogg.error("Arbeidsgiver endrer refusjon i perioden")
-                Toggles.RefusjonPerDag.disabled && endringerIRefusjon.isNotEmpty() -> aktivitetslogg.error("Arbeidsgiver har endringer i refusjon")
+                (beløp == null || beløp <= Inntekt.INGEN) -> aktivitetslogg.refusjonsLogg("Arbeidsgiver forskutterer ikke (krever ikke refusjon)")
+                beløp != beregnetInntekt -> aktivitetslogg.refusjonsLogg("Inntektsmelding inneholder beregnet inntekt og refusjon som avviker med hverandre")
+                opphørerRefusjon(periode) -> aktivitetslogg.refusjonsLogg("Arbeidsgiver opphører refusjon i perioden")
+                opphørsdato != null -> aktivitetslogg.refusjonsLogg("Arbeidsgiver opphører refusjon")
+                endrerRefusjon(periode) -> aktivitetslogg.refusjonsLogg("Arbeidsgiver endrer refusjon i perioden")
+                endringerIRefusjon.isNotEmpty() -> aktivitetslogg.refusjonsLogg("Arbeidsgiver har endringer i refusjon")
             }
             return aktivitetslogg
+        }
+
+        private fun IAktivitetslogg.refusjonsLogg(melding: String) {
+            if (Toggles.RefusjonPerDag.enabled) info("Ville tidligere bli kastet ut på grunn av refusjon: $melding")
+            else error(melding)
         }
 
         internal fun validerMuligBrukerutbetaling(
