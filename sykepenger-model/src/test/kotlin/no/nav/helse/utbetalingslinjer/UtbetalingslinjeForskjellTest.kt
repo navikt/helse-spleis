@@ -221,6 +221,17 @@ internal class UtbetalingslinjeForskjellTest {
     }
 
     @Test
+    fun `trekke tilbake siste linje`() {
+        val original = linjer(1.januar to 2.januar, 4.januar to 5.januar)
+        val recalculated = linjer(1.januar to 2.januar)
+        val actual = recalculated - original
+        assertUtbetalinger(linjer(
+            1.januar to 2.januar
+        ), actual)
+        assertNyLinje(actual[0], original.last())
+    }
+
+    @Test
     fun `splitte opp linjer - ikke utvide oppdragets lengde`() {
         val original = linjer(1.januar to 5.januar)
         val recalculated = linjer(1.januar to 2.januar, 4.januar to 5.januar)
