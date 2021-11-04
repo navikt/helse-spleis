@@ -402,7 +402,10 @@ internal class Utbetaling private constructor(
             utbetalinger: List<Utbetaling>,
             hendelse: Grunnbeløpsregulering
         ): Utbetaling? {
-            val sisteUtbetalte = utbetalinger.aktive().lastOrNull { hendelse.erRelevant(it.arbeidsgiverOppdrag.fagsystemId()) } ?: return null.also {
+            val sisteUtbetalte = utbetalinger.aktive().lastOrNull {
+                hendelse.erRelevant(it.arbeidsgiverOppdrag.fagsystemId()) ||
+                hendelse.erRelevant(it.personOppdrag.fagsystemId())
+            } ?: return null.also {
                 hendelse.info("Fant ingen utbetalte utbetalinger. Dette betyr trolig at fagsystemiden er annullert.")
             }
             if (!sisteUtbetalte.utbetalingstidslinje.er6GBegrenset()) {

@@ -1,11 +1,8 @@
 package no.nav.helse.utbetalingslinjer
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.utbetaling.*
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse.Oppdragstatus.AKSEPTERT
-import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
-import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
-import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
-import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.UtbetalingVisitor
@@ -18,6 +15,7 @@ import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -268,6 +266,26 @@ internal class UtbetalingTest {
         assertEquals(Utbetaling.Utbetalt, UtbetalingsInspektør(utbetaling).tilstand)
     }
 
+    @Disabled("Påbegynt test for å finne personoppdrag til g-regulering")
+    @Test
+    fun `g-regulering skal treffe personOppdrag`() {
+        val (utbetalingMedPersonOppdragMatch, _) = opprettGodkjentUtbetaling()
+        val personFagsystemId = utbetalingMedPersonOppdragMatch.personOppdrag().fagsystemId()
+        val arbeidsgiverFagsystemId = utbetalingMedPersonOppdragMatch.arbeidsgiverOppdrag().fagsystemId()
+        val (utbetalingUtenMatch, _) = opprettGodkjentUtbetaling()
+        val utbetalinger = listOf(utbetalingUtenMatch, utbetalingMedPersonOppdragMatch)
+
+        val funnetArbeidsgiverUtbetaling = Utbetaling.finnUtbetalingForJustering(utbetalinger, arbeidsgiverFagsystemId.gRegulering())
+        assertEquals(utbetalingMedPersonOppdragMatch, funnetArbeidsgiverUtbetaling, "Fant ikke arbeidsgiverutbetaling")
+
+        val funnetUtbetaling = Utbetaling.finnUtbetalingForJustering(utbetalinger, personFagsystemId.gRegulering())
+        assertEquals(utbetalingMedPersonOppdragMatch, funnetUtbetaling, "Fant ikke personutbetaling")
+
+        assertNull(Utbetaling.finnUtbetalingForJustering(utbetalinger, "somethingrandom".gRegulering()))
+    }
+
+    private fun String.gRegulering() = Grunnbeløpsregulering(UUID.randomUUID(), "", "", "", LocalDate.now(), this)
+
     private fun beregnUtbetalinger(vararg tidslinjer: Utbetalingstidslinje) =
         MaksimumUtbetaling(
             listOf(*tidslinjer),
@@ -281,7 +299,7 @@ internal class UtbetalingTest {
         fødselsnummer: String = UNG_PERSON_FNR_2018,
         orgnummer: String = ORGNUMMER,
         aktivitetslogg: Aktivitetslogg = this.aktivitetslogg
-    ) = beregnUtbetalinger(tidslinje)
+    ): Pair<Utbetaling, UUID> = beregnUtbetalinger(tidslinje)
         .let {
             Utbetaling.lagUtbetaling(
                 emptyList(),
