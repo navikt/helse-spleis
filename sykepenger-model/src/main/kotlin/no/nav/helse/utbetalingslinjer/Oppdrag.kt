@@ -162,10 +162,15 @@ internal class Oppdrag private constructor(
                 aktivitetslogg.warn("Utbetaling fra og med dato er endret. Kontroller simuleringen")
                 kjørFrem(eldre)
             }
-            else -> erstatt(eldre, aktivitetslogg = aktivitetslogg)
+            eldre.ingenUtbetalteDager() -> {
+                aktivitetslogg.warn(WARN_FORLENGER_OPPHØRT_OPPDRAG)
+                kjørFrem(eldre)
+            }
+            else -> erstatt(eldre.kopierUtenOpphørslinjer(), eldre.kopierUtenOpphørslinjer().last(), aktivitetslogg)
         }
     }
 
+    private fun ingenUtbetalteDager() = linjerUtenOpphør().isEmpty()
 
     private fun harIngenKoblingTilTidligereOppdrag(eldre: Oppdrag) = eldre.isEmpty() || this !in eldre
 
@@ -207,16 +212,6 @@ internal class Oppdrag private constructor(
             påtroppendeOppdrag.kopierLikeLinjer(avtroppendeOppdrag, aktivitetslogg)
             påtroppendeOppdrag.håndterLengreNåværende(avtroppendeOppdrag)
         }
-
-    private fun erstatt(avtroppendeOppdrag: Oppdrag, aktivitetslogg: IAktivitetslogg): Oppdrag {
-        return if (avtroppendeOppdrag.kopierUtenOpphørslinjer().isEmpty()) {
-            aktivitetslogg.warn(WARN_FORLENGER_OPPHØRT_OPPDRAG)
-            erstatt(avtroppendeOppdrag, avtroppendeOppdrag.last(), aktivitetslogg)
-        } else {
-            val avtroppendeUtenOpphør = avtroppendeOppdrag.kopierUtenOpphørslinjer()
-            erstatt(avtroppendeUtenOpphør, avtroppendeUtenOpphør.last(), aktivitetslogg)
-        }
-    }
 
     // når man oppretter en NY linje vil Oppdragsystemet IKKE ta stilling til periodene FØR.
     // Man må derfor eksplisitt opphøre evt. perioder tidligere, som i praksis vil medføre at
