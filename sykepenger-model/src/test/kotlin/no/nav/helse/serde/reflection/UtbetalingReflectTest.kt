@@ -1,9 +1,9 @@
 package no.nav.helse.serde.reflection
 
-import no.nav.helse.hendelser.AnnullerUtbetaling
-import no.nav.helse.hendelser.UtbetalingHendelse
-import no.nav.helse.hendelser.UtbetalingOverført
-import no.nav.helse.hendelser.Utbetalingsgodkjenning
+import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
+import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
+import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
+import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.testhelpers.FRI
 import no.nav.helse.testhelpers.NAV
@@ -105,7 +105,8 @@ internal class UtbetalingReflectTest {
                     utbetalingId = utbetalingId,
                     avstemmingsnøkkel = 123456L,
                     overføringstidspunkt = LocalDateTime.now()
-                ))
+                )
+            )
             utbetaling.håndter(
                 UtbetalingHendelse(
                     meldingsreferanseId = UUID.randomUUID(),
@@ -206,7 +207,8 @@ internal class UtbetalingReflectTest {
                     utbetalingId = utbetalingId,
                     avstemmingsnøkkel = 123456L,
                     overføringstidspunkt = LocalDateTime.now()
-                ))
+                )
+            )
             utbetaling.håndter(
                 UtbetalingHendelse(
                     meldingsreferanseId = UUID.randomUUID(),

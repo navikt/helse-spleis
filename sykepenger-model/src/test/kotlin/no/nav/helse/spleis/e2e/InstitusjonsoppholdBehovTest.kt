@@ -5,7 +5,7 @@ import no.nav.helse.hendelser.Institusjonsopphold.Institusjonsoppholdsperiode
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.UtbetalingHendelse
+import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.person.TilstandType
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.februar

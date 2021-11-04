@@ -1,6 +1,6 @@
 package no.nav.helse.utbetalingslinjer
 
-import no.nav.helse.hendelser.UtbetalingHendelse
+import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.person.*
 import no.nav.helse.serde.reflection.Utbetalingstatus

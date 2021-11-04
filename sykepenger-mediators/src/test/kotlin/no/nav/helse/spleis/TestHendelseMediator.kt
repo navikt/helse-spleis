@@ -1,6 +1,7 @@
 package no.nav.helse.spleis
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.utbetaling.*
 import no.nav.helse.spleis.meldinger.model.*
 
 internal class TestHendelseMediator : IHendelseMediator {

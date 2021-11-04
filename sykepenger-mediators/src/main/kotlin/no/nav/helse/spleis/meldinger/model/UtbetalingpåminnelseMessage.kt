@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.meldinger.model
 
-import no.nav.helse.hendelser.Utbetalingpåminnelse
+import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.serde.reflection.Utbetalingstatus

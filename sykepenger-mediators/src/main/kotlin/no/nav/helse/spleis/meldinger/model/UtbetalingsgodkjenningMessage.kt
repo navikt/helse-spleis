@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.meldinger.model
 
-import no.nav.helse.hendelser.Utbetalingsgodkjenning
+import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDateTime

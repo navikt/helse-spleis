@@ -1,6 +1,7 @@
 package no.nav.helse.utbetalingslinjer
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.utbetaling.*
 import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.godkjenning
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.*

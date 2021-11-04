@@ -1,4 +1,4 @@
-package no.nav.helse.hendelser
+package no.nav.helse.hendelser.utbetaling
 
 import no.nav.helse.person.ArbeidstakerHendelse
 import java.time.LocalDateTime

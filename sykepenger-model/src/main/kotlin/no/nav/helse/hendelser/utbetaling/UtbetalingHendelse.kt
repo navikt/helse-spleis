@@ -1,6 +1,6 @@
-package no.nav.helse.hendelser
+package no.nav.helse.hendelser.utbetaling
 
-import no.nav.helse.hendelser.UtbetalingHendelse.Oppdragstatus.*
+import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse.Oppdragstatus.*
 import no.nav.helse.person.ArbeidstakerHendelse
 import java.time.LocalDateTime
 import java.util.*

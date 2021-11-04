@@ -2,7 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.UtbetalingHendelse.Oppdragstatus.AKSEPTERT
+import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse.Oppdragstatus.AKSEPTERT
 import no.nav.helse.person.TilstandType
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Endringskode

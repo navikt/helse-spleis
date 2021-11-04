@@ -1,6 +1,7 @@
 package no.nav.helse.spleis
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.utbetaling.*
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonHendelse

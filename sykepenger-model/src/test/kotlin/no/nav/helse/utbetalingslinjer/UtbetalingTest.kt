@@ -1,7 +1,11 @@
 package no.nav.helse.utbetalingslinjer
 
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.UtbetalingHendelse.Oppdragstatus.AKSEPTERT
+import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse.Oppdragstatus.AKSEPTERT
+import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
+import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
+import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
+import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.UtbetalingVisitor

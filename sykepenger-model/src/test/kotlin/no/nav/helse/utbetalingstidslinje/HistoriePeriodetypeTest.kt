@@ -1,6 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.*
 import no.nav.helse.person.Periodetype.*
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
@@ -238,7 +239,8 @@ internal class HistoriePeriodetypeTest {
                 utbetalingGodkjent = true,
                 godkjenttidspunkt = LocalDateTime.now(),
                 automatiskBehandling = true
-            ))
+            )
+        )
     }
 
     private val Utbetaling.id: UUID get() {

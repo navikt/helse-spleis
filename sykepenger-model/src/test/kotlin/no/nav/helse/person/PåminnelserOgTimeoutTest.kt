@@ -2,6 +2,8 @@ package no.nav.helse.person
 
 import no.nav.helse.etterspurteBehov
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
+import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode

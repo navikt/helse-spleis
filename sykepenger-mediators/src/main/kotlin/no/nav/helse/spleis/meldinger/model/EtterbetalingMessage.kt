@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.meldinger.model
 
-import no.nav.helse.hendelser.Grunnbeløpsregulering
+import no.nav.helse.hendelser.utbetaling.Grunnbeløpsregulering
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
 import no.nav.helse.rapids_rivers.JsonMessage

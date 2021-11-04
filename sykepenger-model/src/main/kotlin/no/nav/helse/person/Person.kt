@@ -3,6 +3,7 @@ package no.nav.helse.person
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.utbetaling.*
 import no.nav.helse.person.Arbeidsgiver.Companion.antallMedVedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSammenligningsgrunnlag

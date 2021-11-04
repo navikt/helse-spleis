@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.utbetaling.*
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.Vedtaksperiode.*
 import no.nav.helse.person.Vedtaksperiode.Companion.ALLE

@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.hendelser.AnnullerUtbetaling
+import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.spleis.IHendelseMediator
 
