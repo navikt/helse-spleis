@@ -230,7 +230,7 @@ class Inntektsmelding(
         }
 
         private fun IAktivitetslogg.refusjonsLogg(melding: String) {
-            if (Toggles.RefusjonPerDag.enabled) info("Ville tidligere bli kastet ut på grunn av refusjon: $melding")
+            if (Toggles.RefusjonPerDag.enabled) info("Ville tidligere blitt kastet ut på grunn av refusjon: $melding")
             else error(melding)
         }
 

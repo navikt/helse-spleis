@@ -172,7 +172,7 @@ internal class Vedtaksperiode private constructor(
                     arbeidsgiver.søppelbøtte(inntektsmelding, SENERE_INCLUSIVE(this), IKKE_STØTTET)
                     return@also
                 } else {
-                    inntektsmelding.info("Ville tidligere bli kastet ut på grunn av refusjon: Refusjon opphører i perioden")
+                    inntektsmelding.info("Ville tidligere blitt kastet ut på grunn av refusjon: Refusjon opphører i perioden")
                 }
             }
             if (!it) return@also inntektsmelding.trimLeft(periode.endInclusive)
@@ -694,14 +694,19 @@ internal class Vedtaksperiode private constructor(
         val ingenUtbetaling = !utbetaling().harUtbetalinger()
         val kunArbeidsgiverdager = utbetalingstidslinje.kunArbeidsgiverdager()
         val ingenWarnings = !person.aktivitetslogg.logg(this).hasWarningsOrWorse()
+        val harBrukerutbetaling = harBrukerutbetaling(andreVedtaksperioder)
+
+        if (!harBrukerutbetaling && villeTidligereBlittKastetUtPåGrunnAvRefusjon()) {
+            hendelse.info("Behandlet en vedtaksperiode som tidligere ville blitt kastet ut på grunn av refusjon")
+        }
 
         when {
-            harBrukerutbetaling(andreVedtaksperioder) -> {
+            harBrukerutbetaling -> {
                 person.invaliderAllePerioder(hendelse, "Utbetalingstidslinje inneholder brukerutbetaling")
             }
             ingenUtbetaling && kunArbeidsgiverdager && ingenWarnings -> {
                 tilstand(hendelse, AvsluttetUtenUtbetaling) {
-                    hendelse.info("""Saken inneholder ingen utbetalingsdager for Nav og avluttes""")
+                    hendelse.info("""Saken inneholder ingen utbetalingsdager for Nav og avsluttes""")
                 }
             }
             ingenUtbetaling -> {
@@ -720,6 +725,16 @@ internal class Vedtaksperiode private constructor(
                 }
             }
         }
+    }
+
+    private fun villeTidligereBlittKastetUtPåGrunnAvRefusjon() : Boolean {
+        val meldinger = mutableListOf<String>()
+        person.aktivitetslogg.logg(this).accept(object : AktivitetsloggVisitor {
+            override fun visitInfo(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Info, melding: String, tidsstempel: String) {
+                meldinger.add(melding)
+            }
+        })
+        return meldinger.any { it.startsWith("Ville tidligere blitt kastet ut på grunn av refusjon:") }
     }
 
     private fun harBrukerutbetaling(andreVedtaksperioder: List<Vedtaksperiode>) =
@@ -775,7 +790,7 @@ internal class Vedtaksperiode private constructor(
             }
             !utbetaling().harUtbetalinger() && utbetalingstidslinje.kunArbeidsgiverdager() && !person.aktivitetslogg.logg(this).hasWarningsOrWorse() -> {
                 tilstand(hendelse, AvsluttetUtenUtbetaling) {
-                    hendelse.info("""Saken inneholder ingen utbetalingsdager for Nav og avluttes""")
+                    hendelse.info("""Saken inneholder ingen utbetalingsdager for Nav og avsluttes""")
                 }
             }
             !utbetaling().harUtbetalinger() -> {
@@ -1120,7 +1135,7 @@ internal class Vedtaksperiode private constructor(
             val refusjonOpphørt = vedtaksperiode.arbeidsgiver.harRefusjonOpphørt(vedtaksperiode.periode.endInclusive)
 
             if (forlengelse && refusjonOpphørt && Toggles.RefusjonPerDag.enabled) {
-                hendelse.info("Ville tidligere bli kastet ut på grunn av refusjon: Refusjon er opphørt.")
+                hendelse.info("Ville tidligere blitt kastet ut på grunn av refusjon: Refusjon er opphørt.")
             }
 
             return when {

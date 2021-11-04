@@ -436,7 +436,7 @@ internal class InntektsmeldingTest {
             .toMap()["aktiviteter"]
             .castAsList<Map<String, Any>>()
             .map { it["melding"] }
-            .contains("Ville tidligere bli kastet ut på grunn av refusjon: $melding")
+            .contains("Ville tidligere blitt kastet ut på grunn av refusjon: $melding")
         )
     }
 

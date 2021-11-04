@@ -1069,13 +1069,19 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.desember(2017) til 16.desember(2017)), refusjon = Inntektsmelding.Refusjon(INNTEKT, 17.desember(2017), emptyList()))
-        assertInfo(1.vedtaksperiode, "Ville tidligere bli kastet ut på grunn av refusjon: Refusjon opphører i perioden")
+        assertInfo(1.vedtaksperiode, "Ville tidligere blitt kastet ut på grunn av refusjon: Refusjon opphører i perioden")
     }
 
     @Test
     fun `Vi logger info om vi tidligere ville kastet ut på grunn av refusjon ved forlengelse`() = Toggles.RefusjonPerDag.enable {
         nyttVedtak(1.januar, 31.januar, refusjon = Inntektsmelding.Refusjon(INNTEKT, 15.februar, emptyList()))
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        assertInfo(2.vedtaksperiode, "Ville tidligere bli kastet ut på grunn av refusjon: Refusjon er opphørt.")
+        assertInfo(2.vedtaksperiode, "Ville tidligere blitt kastet ut på grunn av refusjon: Refusjon er opphørt.")
+    }
+
+    @Test
+    fun `Vi logger info om vi tidligere ville kastet ut på grunn av opphør av refusjon frem i tid`() = Toggles.RefusjonPerDag.enable {
+        nyttVedtak(1.januar, 31.januar, refusjon = Inntektsmelding.Refusjon(INNTEKT, 15.februar, emptyList()))
+        assertInfo(1.vedtaksperiode, "Behandlet en vedtaksperiode som tidligere ville blitt kastet ut på grunn av refusjon")
     }
 }
