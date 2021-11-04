@@ -6,7 +6,8 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.testhelpers.*
-import no.nav.helse.utbetalingslinjer.Endringskode.*
+import no.nav.helse.utbetalingslinjer.Endringskode.ENDR
+import no.nav.helse.utbetalingslinjer.Endringskode.NY
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
 import no.nav.helse.utbetalingslinjer.OppdragBuilderTest.Dagtype
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
@@ -245,9 +246,8 @@ internal class OppdragBuilderTest {
         oppdragTilUtbetaling4.apply {
             //Gammel opphørslinje er filtrert vekk
             assertLinje(0, 1.januar, 18.januar, delytelseId = 1, refDelytelseId = null, refFagsystemId = null)
-            assertLinje(1, 24.januar, 29.januar, delytelseId = 3, refDelytelseId = 2, endringskode = UEND, datoStatusFom = null, sats = 1100)
-            assertLinje(2, 30.januar, 3.februar, delytelseId = 4, refDelytelseId = null, endringskode = ENDR, datoStatusFom = 30.januar, refFagsystemId = null) //Opphører linje som har blitt overskrevet av nytt oppdrag
-            assertLinje(3, 1.februar, 3.februar, delytelseId = 5, refDelytelseId = 4, endringskode = NY, sats = 520, grad = 40.0)
+            assertLinje(1, 24.januar, 29.januar, delytelseId = 5, refDelytelseId = 4, endringskode = NY, datoStatusFom = null, sats = 1100)
+            assertLinje(2, 1.februar, 3.februar, delytelseId = 6, refDelytelseId = 5, endringskode = NY, sats = 520, grad = 40.0)
         }
     }
 

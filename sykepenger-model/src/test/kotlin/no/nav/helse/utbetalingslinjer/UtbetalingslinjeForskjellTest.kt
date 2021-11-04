@@ -232,6 +232,56 @@ internal class UtbetalingslinjeForskjellTest {
     }
 
     @Test
+    fun `endre fom på siste linje`() {
+        val original = linjer(24.januar to 29.januar, 30.januar to 3.februar)
+        val recalculated =  linjer(24.januar to 29.januar, 1.februar to 3.februar)
+        val actual = recalculated - original
+        assertUtbetalinger(linjer(
+            24.januar to 29.januar,
+            30.januar to 3.februar,
+            1.februar to 3.februar
+        ), actual)
+        assertUendretLinje(actual[0])
+        assertOpphør(actual[1], 30.januar, original.last())
+        assertNyLinje(actual[2], actual[1])
+    }
+
+    @Test
+    fun `endrer fom på siste linje når forrige oppdrag har endret linje med opphør`() {
+        val oppdrag1 = linjer(1.januar to 18.januar)
+        val originalUtvidet = linjer(1.januar to 18.januar, 20.januar to 26.januar)
+        val oppdrag2 = originalUtvidet - oppdrag1
+
+        val oppdrag2EndretSåUtvidet = linjer(1.januar to 18.januar, 24.januar to 29.januar, 30.januar to 3.februar)
+        val oppdrag3 = oppdrag2EndretSåUtvidet - oppdrag2
+
+        val oppdrag3EndretSisteFom = linjer(1.januar to 18.januar, 24.januar to 29.januar, 1.februar to 3.februar)
+        val oppdrag4 = oppdrag3EndretSisteFom - oppdrag3
+
+        assertUtbetalinger(linjer(
+            1.januar to 18.januar,
+            20.januar to 26.januar,
+            24.januar to 29.januar,
+            30.januar to 3.februar
+        ), oppdrag3)
+
+        assertUendretLinje(oppdrag3[0])
+        assertOpphør(oppdrag3[1], 20.januar, oppdrag2.last())
+        assertNyLinje(oppdrag3[2], oppdrag3[1])
+        assertNyLinje(oppdrag3[3], oppdrag3[2])
+
+        assertUtbetalinger(linjer(
+            1.januar to 18.januar,
+            24.januar to 29.januar,
+            1.februar to 3.februar
+        ), oppdrag4)
+
+        assertUendretLinje(oppdrag4[0])
+        assertNyLinje(oppdrag4[1], oppdrag3.last())
+        assertNyLinje(oppdrag4[2], oppdrag4[1])
+    }
+
+    @Test
     fun `splitte opp linjer - ikke utvide oppdragets lengde`() {
         val original = linjer(1.januar to 5.januar)
         val recalculated = linjer(1.januar to 2.januar, 4.januar to 5.januar)
@@ -458,7 +508,7 @@ internal class UtbetalingslinjeForskjellTest {
 
     @Test
     fun `dagsats endres`() {
-        val original = linjer(1.januar to 5.januar)
+        val original = linjer(1.januar to 5.januar dagsats 500)
         val recalculated = linjer(1.januar to 5.januar dagsats 1000, 15.januar to 19.januar)
         val actual = recalculated - original
         assertUtbetalinger(recalculated, actual)

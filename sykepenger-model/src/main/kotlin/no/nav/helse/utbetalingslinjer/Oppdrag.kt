@@ -166,7 +166,8 @@ internal class Oppdrag private constructor(
                 aktivitetslogg.warn(WARN_FORLENGER_OPPHØRT_OPPDRAG)
                 kjørFrem(eldre)
             }
-            else -> erstatt(eldre.kopierUtenOpphørslinjer(), eldre.kopierUtenOpphørslinjer().last(), aktivitetslogg)
+            // fom er lik, men endring kan oppstå overalt ellers
+            else -> endre(eldre, aktivitetslogg)
         }
     }
 
@@ -205,9 +206,14 @@ internal class Oppdrag private constructor(
     private lateinit var sisteLinjeITidligereOppdrag: Utbetalingslinje
     private lateinit var linkTo: Utbetalingslinje
 
-    private fun erstatt(avtroppendeOppdrag: Oppdrag, linkTo: Utbetalingslinje = avtroppendeOppdrag.last(), aktivitetslogg: IAktivitetslogg) =
+    // forsøker så langt det lar seg gjøre å endre _siste_ linje, dersom mulig *)
+    // ellers lager den NY linjer fra og med linja før endringen oppstod
+    // *) en linje kan endres dersom "tom"-dato eller grad er eneste forskjell
+    //    ulik dagsats eller fom-dato medfører enten at linjen får status OPPH, eller at man overskriver
+    //    ved å sende NY linjer
+    private fun endre(avtroppendeOppdrag: Oppdrag, aktivitetslogg: IAktivitetslogg) =
         this.also { påtroppendeOppdrag ->
-            this.linkTo = linkTo
+            this.linkTo = avtroppendeOppdrag.last()
             påtroppendeOppdrag.kobleTil(avtroppendeOppdrag)
             påtroppendeOppdrag.kopierLikeLinjer(avtroppendeOppdrag, aktivitetslogg)
             påtroppendeOppdrag.håndterLengreNåværende(avtroppendeOppdrag)
