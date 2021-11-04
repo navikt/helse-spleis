@@ -186,6 +186,12 @@ internal class InfotrygdhistorikkElement private constructor(
             .maxOfOrNull { it.endInclusive }
     }
 
+    internal fun førsteSykepengedagISenestePeriode(orgnummer: String): LocalDate? {
+        return perioder.filterIsInstance<Utbetalingsperiode>()
+            .filter { it.gjelder(orgnummer) }
+            .maxOfOrNull { it.start }
+    }
+
     internal fun oppfrisket(cutoff: LocalDateTime) =
         oppdatert > cutoff
 

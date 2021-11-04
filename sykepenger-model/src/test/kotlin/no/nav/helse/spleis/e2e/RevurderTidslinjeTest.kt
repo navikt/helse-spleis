@@ -1212,6 +1212,39 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `warning dersom det er utbetalt en periode i Infotrygd etter perioden som revurderes nå`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(1.januar til 16.januar))
+        håndterYtelser(1.vedtaksperiode, besvart = LocalDateTime.now().minusYears(1))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode, besvart = LocalDateTime.now().minusYears(1))
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        håndterOverstyrTidslinje((20.januar til 26.januar).map { manuellFeriedag(it) })
+
+        håndterYtelser(
+            1.vedtaksperiode,
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 28.februar, 100.prosent, 1000.daglig),
+            inntektshistorikk = listOf(
+                Inntektsopplysning(
+                    ORGNUMMER,
+                    1.februar, INNTEKT, true
+                )
+            )
+        )
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
+        assertWarningTekst(
+            inspektør,
+            "Opplysninger fra Infotrygd har endret seg etter at vedtaket ble fattet. Undersøk om det er overlapp med periode fra Infotrygd.",
+            "Det er utbetalt en periode i Infotrygd etter perioden du skal revurdere nå. Undersøk at antall forbrukte dager og grunnlag i Infotrygd er riktig"
+        )
+    }
+
+    @Test
     fun `Om en periode havner i RevurderingFeilet så skal alle sammenhengende perioder havne i RevurderingFeilet`() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)

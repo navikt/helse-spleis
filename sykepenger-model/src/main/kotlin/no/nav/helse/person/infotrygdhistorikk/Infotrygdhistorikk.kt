@@ -99,6 +99,11 @@ internal class Infotrygdhistorikk private constructor(
         return siste.sisteSykepengedag(orgnummer)
     }
 
+    internal fun førsteSykepengedagISenestePeriode(orgnummer: String): LocalDate? {
+        if (!harHistorikk()) return null
+        return siste.førsteSykepengedagISenestePeriode(orgnummer)
+    }
+
     internal fun lagreVilkårsgrunnlag(skjæringstidspunkt: LocalDate, periodetype: Periodetype, vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk, sykepengegrunnlagFor: (skjæringstidspunkt: LocalDate) -> Sykepengegrunnlag) {
         if (!harHistorikk()) return
         if (vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) != null) return
