@@ -266,7 +266,6 @@ internal class UtbetalingTest {
         assertEquals(Utbetaling.Utbetalt, UtbetalingsInspektør(utbetaling).tilstand)
     }
 
-    @Disabled("Påbegynt test for å finne personoppdrag til g-regulering")
     @Test
     fun `g-regulering skal treffe personOppdrag`() {
         val (utbetalingMedPersonOppdragMatch, _) = opprettGodkjentUtbetaling()
@@ -294,7 +293,7 @@ internal class UtbetalingTest {
         ).betal()
 
     private fun opprettGodkjentUtbetaling(
-        tidslinje: Utbetalingstidslinje = tidslinjeOf(16.AP, 5.NAV),
+        tidslinje: Utbetalingstidslinje = tidslinjeOf(16.AP, 5.NAV(3000)),
         sisteDato: LocalDate = tidslinje.periode().endInclusive,
         fødselsnummer: String = UNG_PERSON_FNR_2018,
         orgnummer: String = ORGNUMMER,
