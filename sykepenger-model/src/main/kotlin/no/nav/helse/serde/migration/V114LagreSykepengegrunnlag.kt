@@ -47,7 +47,13 @@ internal class V114LagreSykepengegrunnlag : JsonMigration(version = 114) {
             fnr: String,
             vilkårsgrunnlagtype: String
         ): Double {
-            val inntektsopplysning = finnInntektsopplysning(arbeidsgiver["inntektshistorikk"], skjæringstidspunkt, vilkårsgrunnlagtype, arbeidsgiver["vedtaksperioder"] as ArrayNode)
+            val inntektsopplysning = finnInntektsopplysning(
+                inntektshistorikk = arbeidsgiver["inntektshistorikk"],
+                skjæringstidspunkt = skjæringstidspunkt,
+                vilkårsgrunnlagtype = vilkårsgrunnlagtype,
+                vedtaksperioder = arbeidsgiver["vedtaksperioder"] as ArrayNode,
+                forkastedeVedtaksperioder = (arbeidsgiver["forkastede"] as ArrayNode).map { it["vedtaksperiode"] }
+            )
 
             if (inntektsopplysning != null) {
                 val arbeidsgiverInntektsopplysning = arbeidsgiverInntektsopplysninger.addObject()
@@ -61,7 +67,7 @@ internal class V114LagreSykepengegrunnlag : JsonMigration(version = 114) {
             return 0.0
         }
 
-        private fun finnInntektsmelding(inntektsopplysning: JsonNode, vedtaksperioder: ArrayNode, skjæringstidspunkt: String): Boolean {
+        private fun finnInntektsmelding(inntektsopplysning: JsonNode, vedtaksperioder: Iterable<JsonNode>, skjæringstidspunkt: String): Boolean {
             val inntektsmeldingId = vedtaksperioder
                 .firstOrNull { it["fom"].asText() == skjæringstidspunkt }
                 ?.get("inntektsmeldingInfo")?.get("id") ?: return false
@@ -75,7 +81,8 @@ internal class V114LagreSykepengegrunnlag : JsonMigration(version = 114) {
             inntektshistorikk: JsonNode,
             skjæringstidspunkt: String,
             vilkårsgrunnlagtype: String,
-            vedtaksperioder: ArrayNode
+            vedtaksperioder: Iterable<JsonNode>,
+            forkastedeVedtaksperioder: Iterable<JsonNode>
         ): JsonNode? {
             val inntektsopplysninger = inntektshistorikk.firstOrNull()?.get("inntektsopplysninger") as ArrayNode? ?: return null
 
@@ -85,6 +92,7 @@ internal class V114LagreSykepengegrunnlag : JsonMigration(version = 114) {
 
             return finnSaksbehandlerInntektsopplysning(inntektsopplysninger, skjæringstidspunkt)
                 ?: finnInntektsmeldingInntektsopplysningFraVedtaksperiode(inntektsopplysninger, skjæringstidspunkt, vedtaksperioder)
+                ?: finnInntektsmeldingInntektsopplysningFraVedtaksperiode(inntektsopplysninger, skjæringstidspunkt, forkastedeVedtaksperioder)
                 ?: finnInntektsmeldingInntektsopplysningFraSkjæringstidspunkt(inntektsopplysninger, skjæringstidspunkt)
                 ?: finnSykepengegrunnlagInntektsopplysning(inntektsopplysninger, skjæringstidspunkt)
         }
@@ -100,7 +108,7 @@ internal class V114LagreSykepengegrunnlag : JsonMigration(version = 114) {
         private fun finnInntektsmeldingInntektsopplysningFraVedtaksperiode(
             inntektsopplysninger: ArrayNode,
             skjæringstidspunkt: String,
-            vedtaksperioder: ArrayNode
+            vedtaksperioder: Iterable<JsonNode>
         ) = inntektsopplysninger
             .filter { "INNTEKTSMELDING" == it["kilde"]?.asText() }
             .firstOrNull { finnInntektsmelding(it, vedtaksperioder, skjæringstidspunkt) }

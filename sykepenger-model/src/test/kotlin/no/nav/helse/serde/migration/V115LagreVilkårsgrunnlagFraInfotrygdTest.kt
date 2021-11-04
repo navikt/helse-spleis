@@ -73,7 +73,9 @@ internal class V115LagreVilkårsgrunnlagFraInfotrygdTest {
                             }
                         ]
                     }
-                ]
+                ],
+                "vedtaksperioder": [],
+                "forkastede": []
             }
         ],
         "vilkårsgrunnlagHistorikk": [
@@ -182,7 +184,9 @@ internal class V115LagreVilkårsgrunnlagFraInfotrygdTest {
                             }
                         ]
                     }
-                ]
+                ],
+                "vedtaksperioder": [],
+                "forkastede": []
             }
         ],
         "vilkårsgrunnlagHistorikk": [

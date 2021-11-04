@@ -1,0 +1,96 @@
+{
+    "aktørId": "42",
+    "fødselsnummer": "12020052345",
+    "arbeidsgivere": [
+        {
+            "organisasjonsnummer": "987654321",
+            "id": "3a2c64b5-05d7-4545-914f-a650c482e2e6",
+            "inntektshistorikk": [
+                {
+                    "id": "610bb536-d945-4677-98a3-fea79ac2bf42",
+                    "inntektsopplysninger": [
+                        {
+                            "id": "b999cb54-3709-46bf-ab2e-29df0f7d5688",
+                            "dato": "2021-01-02",
+                            "hendelseId": "b40c17a5-c5d9-4291-85b4-b772a7b4709a",
+                            "beløp": 31000.0,
+                            "kilde": "INNTEKTSMELDING"
+                        },
+                        {
+                            "id": "54d9b48a-93d1-420c-8e30-1a40ba14e681",
+                            "skatteopplysninger": [
+                                {
+                                    "dato": "2021-01-01",
+                                    "hendelseId": "98afdb8b-752c-4552-91da-85dc493f6e4f",
+                                    "beløp": 31000.0,
+                                    "kilde": "SKATT_SYKEPENGEGRUNNLAG"
+                                },
+                                {
+                                    "dato": "2021-01-01",
+                                    "hendelseId": "98afdb8b-752c-4552-91da-85dc493f6e4f",
+                                    "beløp": 31000.0,
+                                    "kilde": "SKATT_SYKEPENGEGRUNNLAG"
+                                },
+                                {
+                                    "dato": "2021-01-01",
+                                    "hendelseId": "98afdb8b-752c-4552-91da-85dc493f6e4f",
+                                    "beløp": 31000.0,
+                                    "kilde": "SKATT_SYKEPENGEGRUNNLAG"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "vedtaksperioder": [],
+            "forkastede": [
+                {
+                    "årsak": "IKKE_STØTTET",
+                    "vedtaksperiode": {
+                        "fom": "2021-01-01",
+                        "tom": "2021-01-31",
+                        "hendelseIder": [
+                            "db962d4f-8b85-42d0-8559-8ab862b3e5c0",
+                            "88d79643-0475-422e-8f93-664683a06592",
+                            "b40c17a5-c5d9-4291-85b4-b772a7b4709a"
+                        ],
+                        "id": "1c491982-8dad-4a9a-ae07-2112bfa8ec37",
+                        "tilstand": "AVSLUTTET",
+                        "inntektsmeldingInfo": {
+                            "id": "b40c17a5-c5d9-4291-85b4-b772a7b4709a"
+                        },
+                        "skjæringstidspunkt": "2021-01-01"
+                    }
+                }
+            ]
+        }
+    ],
+    "vilkårsgrunnlagHistorikk": [
+        {
+            "id": "26f527d9-b4d9-4b94-88ac-e539110f35bb",
+            "vilkårsgrunnlag": [
+                {
+                    "skjæringstidspunkt": "2021-01-01",
+                    "type": "Vilkårsprøving",
+                    "sykepengegrunnlag": {
+                        "sykepengegrunnlag": 372000.0,
+                        "grunnlagForSykepengegrunnlag": 372000.0,
+                        "arbeidsgiverInntektsopplysninger": [
+                            {
+                                "orgnummer": "987654321",
+                                "inntektsopplysning": {
+                                    "id": "b999cb54-3709-46bf-ab2e-29df0f7d5688",
+                                    "dato": "2021-01-02",
+                                    "hendelseId": "b40c17a5-c5d9-4291-85b4-b772a7b4709a",
+                                    "beløp": 31000.0,
+                                    "kilde": "INNTEKTSMELDING"
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ],
+    "skjemaVersjon": 114
+}

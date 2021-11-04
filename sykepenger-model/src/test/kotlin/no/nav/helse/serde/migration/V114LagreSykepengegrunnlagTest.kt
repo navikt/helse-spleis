@@ -1,56 +1,49 @@
 package no.nav.helse.serde.migration
 
-import no.nav.helse.serde.serdeObjectMapper
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 
-internal class V114LagreSykepengegrunnlagTest {
+internal class V114LagreSykepengegrunnlagTest : MigrationTest(V114LagreSykepengegrunnlag()) {
 
     @Test
     fun `Sykepengegrunnlag lagres riktig for flere arbeidsgivere, en med inntektsmelding og med inntekter fra skatt`() {
-        assertEquals(toNode(expected), migrer(original))
+        assertMigrationRaw(expected, original)
     }
 
     @Test
     fun `Sykepengegrunnlag lagres riktig for person med IT-historikk`() {
-        assertEquals(toNode(personOvergangFraITExpected), migrer(personOvergangFraITOriginal))
+        assertMigrationRaw(personOvergangFraITExpected, personOvergangFraITOriginal)
     }
 
     @Test
     fun `Én arbeidsgiver med IT-historikk og én med skatteopplysninger - vilkårsgrunnlaget skal kun legge IT-historikken til grunn ved Infotrygd-vilkårsgrunnlag`() {
-        assertEquals(toNode(personOvergangFraITMedSkatteopplysningerExpected), migrer(personOvergangFraITMedSkatteopplysningerOriginal))
+        assertMigrationRaw(personOvergangFraITMedSkatteopplysningerExpected, personOvergangFraITMedSkatteopplysningerOriginal)
     }
 
     @Test
     fun `Migrerer riktig for overgang fra infotrygd med dato ulikt skjæringstidspunkt og manglende inntektsopplysning for vilkårsgrunnlag`() {
-        assertEquals(toNode(personMedRartSkjæringstidspunktFraITExpected), migrer(personMedRartSkjæringstidspunktFraITOriginal))
+        assertMigrationRaw(personMedRartSkjæringstidspunktFraITExpected, personMedRartSkjæringstidspunktFraITOriginal)
     }
 
     @Test
     fun `Inntektsopplysning fra inntektsmelding med dato ulik fra skjæringstidspunkt prioriteres over skatteopplysning`() {
-        assertEquals(toNode(personMedRartSkjæringstidspunktFraIMExpected), migrer(personMedRartSkjæringstidspunktFraIMOriginal))
+        assertMigrationRaw(personMedRartSkjæringstidspunktFraIMExpected, personMedRartSkjæringstidspunktFraIMOriginal)
     }
 
     @Test
     fun `Tre inntektsmeldinger, IM som er lagt til grunn på vedtaksperioden er den midterste og ligger ikke på skjæringstidspunkt - velger riktig`() {
-        assertEquals(toNode(personMedTreIMExpected), migrer(personMedTreIMOriginal))
+        assertMigrationRaw(personMedTreIMExpected, personMedTreIMOriginal)
     }
 
     @Test
     fun `Flere arbeidsgivere med ulik fom skal bruke IM fra tidligste fom og skatteopplysninger fra seneste fom`() {
-        assertEquals(toNode(personMedFlereAGUlikFomExpected), migrer(personMedFlereAGUlikFomOriginal))
+        assertMigrationRaw(personMedFlereAGUlikFomExpected, personMedFlereAGUlikFomOriginal)
     }
 
     @Test
     fun `Forkastede vedtaksperioder`() {
-        fail<Unit>("Denne er ikke implementert. Er ikke det litt merkelig?")
+        assertMigration("/migrations/114/forkastedeVedtaksperioderExpected.json", "/migrations/114/forkastedeVedtaksperioderOriginal.json")
     }
-
-    private fun toNode(json: String) = serdeObjectMapper.readTree(json)
-
-    private fun migrer(json: String) = listOf(V114LagreSykepengegrunnlag()).migrate(toNode(json))
 
     @Language("JSON")
     private val personMedRartSkjæringstidspunktFraITOriginal = """{
@@ -111,6 +104,7 @@ internal class V114LagreSykepengegrunnlagTest {
                         ]
                     }
                 ],
+                "forkastede": [],
                 "vedtaksperioder": [
                     {
                         "inntektsmeldingInfo": null,
@@ -200,6 +194,7 @@ internal class V114LagreSykepengegrunnlagTest {
                     ]
                 }
             ],
+            "forkastede": [],
             "vedtaksperioder": [
                     {
                         "inntektsmeldingInfo": null,
@@ -281,6 +276,7 @@ internal class V114LagreSykepengegrunnlagTest {
                     ]
                 }
             ],
+            "forkastede": [],
             "vedtaksperioder": [
                 {
                     "inntektsmeldingInfo": null,
@@ -340,6 +336,7 @@ internal class V114LagreSykepengegrunnlagTest {
                     ]
                 }
             ],
+            "forkastede":[],
             "vedtaksperioder": [
                 {
                     "inntektsmeldingInfo": null,
@@ -433,6 +430,7 @@ internal class V114LagreSykepengegrunnlagTest {
                     ]
                 }
             ],
+            "forkastede": [],
             "vedtaksperioder": [
                 {
                     "inntektsmeldingInfo": null,
@@ -489,6 +487,7 @@ internal class V114LagreSykepengegrunnlagTest {
                     ]
                 }
             ],
+            "forkastede": [],
             "vedtaksperioder": []
         }
     ],
@@ -541,6 +540,7 @@ internal class V114LagreSykepengegrunnlagTest {
                     ]
                 }
             ],
+            "forkastede": [],
             "vedtaksperioder": [
                     {
                         "inntektsmeldingInfo": null,
@@ -597,6 +597,7 @@ internal class V114LagreSykepengegrunnlagTest {
                     ]
                 }
             ],
+            "forkastede": [],
             "vedtaksperioder": []
         }
     ],
@@ -1047,6 +1048,7 @@ internal class V114LagreSykepengegrunnlagTest {
                         ]
                     }
                 ],
+                "forkastede": [],
                 "vedtaksperioder": [
                     {
                         "inntektsmeldingInfo": {
@@ -1251,6 +1253,7 @@ internal class V114LagreSykepengegrunnlagTest {
                         ]
                     }
                 ],
+                "forkastede": [],
                 "vedtaksperioder": []
             }
         ],
@@ -1666,6 +1669,7 @@ internal class V114LagreSykepengegrunnlagTest {
                     ]
                 }
             ],
+            "forkastede": [],
             "vedtaksperioder": [
                     {
                         "inntektsmeldingInfo": {
@@ -1869,6 +1873,7 @@ internal class V114LagreSykepengegrunnlagTest {
                     ]
                 }
             ],
+            "forkastede": [],
             "vedtaksperioder": []
         }
     ],
@@ -2016,6 +2021,7 @@ internal class V114LagreSykepengegrunnlagTest {
                     ]
                 }
             ],
+            "forkastede": [],
             "vedtaksperioder": [
                 {
                     "inntektsmeldingInfo": {
@@ -2103,6 +2109,7 @@ internal class V114LagreSykepengegrunnlagTest {
                     ]
                 }
             ],
+            "forkastede": [],
             "vedtaksperioder": [
                 {
                     "inntektsmeldingInfo": {
@@ -2191,6 +2198,7 @@ internal class V114LagreSykepengegrunnlagTest {
                     ]
                 }
             ],
+            "forkastede": [],
             "vedtaksperioder": [
                 {
                     "inntektsmeldingInfo": {
@@ -2263,6 +2271,7 @@ internal class V114LagreSykepengegrunnlagTest {
                     ]
                 }
             ],
+            "forkastede": [],
             "vedtaksperioder": [
                 {
                     "inntektsmeldingInfo": {
@@ -2360,6 +2369,7 @@ internal class V114LagreSykepengegrunnlagTest {
                     ]
                 }
             ],
+            "forkastede": [],
             "vedtaksperioder": [
                 {
                     "fom": "2018-03-01",
@@ -2413,6 +2423,7 @@ internal class V114LagreSykepengegrunnlagTest {
                     ]
                 }
             ],
+            "forkastede": [],
             "vedtaksperioder": [
                 {
                     "fom": "2018-03-05",
@@ -2489,6 +2500,7 @@ internal class V114LagreSykepengegrunnlagTest {
                             ]
                         }
                     ],
+                    "forkastede": [],
                     "vedtaksperioder": [
                         {
                             "fom": "2018-03-01",
@@ -2542,6 +2554,7 @@ internal class V114LagreSykepengegrunnlagTest {
                             ]
                         }
                     ],
+                    "forkastede": [],
                     "vedtaksperioder": [
                         {
                             "fom": "2018-03-05",
