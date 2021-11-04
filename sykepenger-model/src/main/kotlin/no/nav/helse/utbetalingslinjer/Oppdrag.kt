@@ -78,7 +78,7 @@ internal class Oppdrag private constructor(
     ) {
         utbetaling(
             aktivitetslogg = aktivitetslogg,
-            oppdrag = utenUendretLinjer(),
+            oppdrag = kopierKunLinjerMedEndring(),
             maksdato = maksdato,
             saksbehandler = saksbehandler
         )
@@ -87,7 +87,7 @@ internal class Oppdrag private constructor(
     internal fun simuler(aktivitetslogg: IAktivitetslogg, maksdato: LocalDate, saksbehandler: String) {
         simulering(
             aktivitetslogg = aktivitetslogg,
-            oppdrag = utenUendretLinjer(),
+            oppdrag = kopierKunLinjerMedEndring(),
             maksdato = maksdato,
             saksbehandler = saksbehandler
         )
@@ -105,11 +105,11 @@ internal class Oppdrag private constructor(
     internal fun harUtbetalinger() = any(Utbetalingslinje::erForskjell)
 
     internal fun sammenlignMed(simulering: Simulering) =
-        simulering.valider(utenUendretLinjer())
+        simulering.valider(kopierKunLinjerMedEndring())
 
-    private fun utenUendretLinjer() = kopierMed(filter(Utbetalingslinje::erForskjell))
+    private fun kopierKunLinjerMedEndring() = kopierMed(filter(Utbetalingslinje::erForskjell))
 
-    private fun utenOpphørLinjer() = kopierMed(linjerUtenOpphør())
+    private fun kopierUtenOpphørslinjer() = kopierMed(linjerUtenOpphør())
 
     internal fun linjerUtenOpphør() = filter { !it.erOpphør() }
 
@@ -135,10 +135,10 @@ internal class Oppdrag private constructor(
         }
 
     internal fun annuller(aktivitetslogg: IAktivitetslogg): Oppdrag {
-        return somAnnullering().minus(this, aktivitetslogg)
+        return tomtOppdrag().minus(this, aktivitetslogg)
     }
 
-    private fun somAnnullering(): Oppdrag =
+    private fun tomtOppdrag(): Oppdrag =
         Oppdrag(
             mottaker = mottaker,
             fagområde = fagområde,
@@ -148,25 +148,28 @@ internal class Oppdrag private constructor(
 
     internal fun minus(eldre: Oppdrag, aktivitetslogg: IAktivitetslogg): Oppdrag {
         return when {
+            // Vi ønsker ikke å forlenge et oppdrag vi ikke overlapper med, eller et tomt oppdrag
             harIngenKoblingTilTidligereOppdrag(eldre) -> this
-            erAnnulleringsoppdrag() -> deleteAll(eldre)
+            // om man trekker fra et utbetalt oppdrag med et tomt oppdrag medfører det et oppdrag som opphører (les: annullerer) hele fagsystemIDen
+            erTomt() -> annulleringsoppdrag(eldre)
+            // "fom" kan flytte seg fremover i tid dersom man, eksempelvis, revurderer en utbetalt periode til å starte med ikke-utbetalte dager (f.eks. ferie)
             fomHarFlyttetSegFremover(eldre) -> {
                 aktivitetslogg.warn("Utbetaling opphører tidligere utbetaling. Kontroller simuleringen")
-                deleted(eldre)
+                returførOgKjørFrem(eldre)
             }
+            // utbetaling kan endres til å starte tidligere, eksempelvis via revurdering der feriedager egentlig er sykedager
             fomHarFlyttetSegBakover(eldre) -> {
                 aktivitetslogg.warn("Utbetaling fra og med dato er endret. Kontroller simuleringen")
-                appended(eldre)
+                kjørFrem(eldre)
             }
             else -> erstatt(eldre, aktivitetslogg = aktivitetslogg)
         }
     }
 
-    // Vi ønsker ikke å forlenge en annullering, eller et oppdrag vi ikke overlapper eller har samme fagsystemId som
+
     private fun harIngenKoblingTilTidligereOppdrag(eldre: Oppdrag) = eldre.isEmpty() || this !in eldre
 
-    // Tomt oppdrag er synonymt med en annullering fordi måten vi genererer en annullering er å sende inn et oppdrag uten linjer
-    private fun erAnnulleringsoppdrag() = this.isEmpty()
+    private fun erTomt() = this.isEmpty()
 
     // Vi har oppdaget utbetalingsdager tidligere i tidslinjen
     private fun fomHarFlyttetSegBakover(eldre: Oppdrag) = this.førstedato < eldre.førstedato
@@ -174,12 +177,20 @@ internal class Oppdrag private constructor(
     // Vi har endret tidligere utbetalte dager til ikke-utbetalte dager i starten av tidslinjen
     private fun fomHarFlyttetSegFremover(eldre: Oppdrag) = this.førstedato > eldre.førstedato
 
-    private fun deleteAll(tidligere: Oppdrag) = this.also { nåværende ->
+    // man opphører (annullerer) et annet oppdrag ved å lage en opphørslinje som dekker hele perioden som er utbetalt
+    private fun annulleringsoppdrag(tidligere: Oppdrag) = this.also { nåværende ->
         nåværende.kobleTil(tidligere)
         linjer.add(tidligere.last().opphørslinje(tidligere.first().fom))
     }
 
-    private fun appended(tidligere: Oppdrag) = this.also { nåværende ->
+    // når man oppretter en NY linje med dato-intervall "(a, b)" vil oppdragsystemet
+    // automatisk opphøre alle eventuelle linjer med fom > b.
+    //
+    // Eksempel:
+    // Oppdrag 1: 5. januar til 31. januar (linje 1)
+    // Oppdrag 2: 1. januar til 10. januar
+    // Fordi linje "1. januar - 10. januar" opprettes som NY, medfører dette at oppdragsystemet opphører 11. januar til 31. januar automatisk
+    private fun kjørFrem(tidligere: Oppdrag) = this.also { nåværende ->
         nåværende.kobleTil(tidligere)
         nåværende.first().kobleTil(tidligere.last())
         nåværende.zipWithNext { a, b -> b.kobleTil(a) }
@@ -198,18 +209,21 @@ internal class Oppdrag private constructor(
         }
 
     private fun erstatt(avtroppendeOppdrag: Oppdrag, aktivitetslogg: IAktivitetslogg): Oppdrag {
-        return if (avtroppendeOppdrag.utenOpphørLinjer().isEmpty()) {
+        return if (avtroppendeOppdrag.kopierUtenOpphørslinjer().isEmpty()) {
             aktivitetslogg.warn(WARN_FORLENGER_OPPHØRT_OPPDRAG)
             erstatt(avtroppendeOppdrag, avtroppendeOppdrag.last(), aktivitetslogg)
         } else {
-            val avtroppendeUtenOpphør = avtroppendeOppdrag.utenOpphørLinjer()
+            val avtroppendeUtenOpphør = avtroppendeOppdrag.kopierUtenOpphørslinjer()
             erstatt(avtroppendeUtenOpphør, avtroppendeUtenOpphør.last(), aktivitetslogg)
         }
     }
 
-    private fun deleted(tidligere: Oppdrag) = this.also { nåværende ->
-        val deletion = nåværende.deletionLinje(tidligere)
-        nåværende.appended(tidligere)
+    // når man oppretter en NY linje vil Oppdragsystemet IKKE ta stilling til periodene FØR.
+    // Man må derfor eksplisitt opphøre evt. perioder tidligere, som i praksis vil medføre at
+    // oppdraget kjøres tilbake, så fremover
+    private fun returførOgKjørFrem(tidligere: Oppdrag) = this.also { nåværende ->
+        val deletion = nåværende.opphørOppdrag(tidligere)
+        nåværende.kjørFrem(tidligere)
         nåværende.add(0, deletion)
     }
 
@@ -221,7 +235,7 @@ internal class Oppdrag private constructor(
         aktivitetslogg.warn("Endrer tidligere oppdrag. Kontroller simuleringen.")
     }
 
-    private fun deletionLinje(tidligere: Oppdrag) =
+    private fun opphørOppdrag(tidligere: Oppdrag) =
         tidligere.last().opphørslinje(tidligere.førstedato)
 
     private fun kopierMed(linjer: List<Utbetalingslinje>) = Oppdrag(
@@ -296,10 +310,8 @@ internal class Oppdrag private constructor(
 
     private inner class Identisk : Tilstand {
         override fun håndterForskjell(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje, aktivitetslogg: IAktivitetslogg) {
-            when (nåværende == tidligere) {
-                true -> nåværende.markerUendret(tidligere)
-                false -> håndterUlikhet(nåværende, tidligere, aktivitetslogg)
-            }
+            if (nåværende == tidligere) return nåværende.markerUendret(tidligere)
+            håndterUlikhet(nåværende, tidligere, aktivitetslogg)
         }
     }
 
