@@ -1,9 +1,6 @@
 package no.nav.helse.person
 
 
-import no.nav.helse.Appender
-import no.nav.helse.AppenderFeature
-import no.nav.helse.appender
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Inntektshistorikk.Innslag.Companion.nyesteId
@@ -28,7 +25,7 @@ internal class Inntektshistorikk {
     }
 
     internal operator fun invoke(block: AppendMode.() -> Unit) {
-        appender(AppendMode, block)
+        AppendMode.append(this, block)
     }
 
     internal fun accept(visitor: InntekthistorikkVisitor) {
@@ -375,9 +372,9 @@ internal class Inntektshistorikk {
         )
     }
 
-    internal class AppendMode private constructor(private val innslag: Innslag) : Appender {
-        companion object : AppenderFeature<Inntektshistorikk, AppendMode> {
-            override fun append(a: Inntektshistorikk, appender: AppendMode.() -> Unit) {
+    internal class AppendMode private constructor(private val innslag: Innslag) {
+        companion object {
+            fun append(a: Inntektshistorikk, appender: AppendMode.() -> Unit) {
                 AppendMode(a.innslag).apply(appender).apply {
                     skatt.takeIf { it.isNotEmpty() }?.also { add(SkattComposite(UUID.randomUUID(), it)) }
                 }
@@ -445,10 +442,9 @@ internal class Inntektshistorikk {
         }
     }
 
-    internal class RestoreJsonMode private constructor(private val inntektshistorikk: Inntektshistorikk) :
-        Appender {
-        companion object : AppenderFeature<Inntektshistorikk, RestoreJsonMode> {
-            override fun append(a: Inntektshistorikk, appender: RestoreJsonMode.() -> Unit) {
+    internal class RestoreJsonMode private constructor(private val inntektshistorikk: Inntektshistorikk) {
+        companion object {
+            fun append(a: Inntektshistorikk, appender: RestoreJsonMode.() -> Unit) {
                 RestoreJsonMode(a).apply(appender)
             }
         }

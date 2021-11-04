@@ -1,7 +1,6 @@
 package no.nav.helse.serde
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped
-import no.nav.helse.appender
 import no.nav.helse.hendelser.Arbeidsforhold
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
@@ -455,7 +454,7 @@ internal data class PersonData(
                     inntekter: List<InntektshistorikkInnslagData>,
                     inntektshistorikk: Inntektshistorikk
                 ) {
-                    inntektshistorikk.appender(Inntektshistorikk.RestoreJsonMode) {
+                    Inntektshistorikk.RestoreJsonMode.append(inntektshistorikk) {
                         inntekter.reversed().forEach {
                             innslag(it.id) {
                                 InntektsopplysningData.parseInntekter(it.inntektsopplysninger, this)
