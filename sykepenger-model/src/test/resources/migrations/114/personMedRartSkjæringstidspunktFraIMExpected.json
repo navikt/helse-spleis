@@ -1,0 +1,102 @@
+
+{
+    "aktørId": "42",
+    "fødselsnummer": "12020052345",
+    "arbeidsgivere": [
+        {
+            "organisasjonsnummer": "987654321",
+            "id": "04bd638d-6bb6-4d19-addc-c02572dec4de",
+            "inntektshistorikk": [
+                {
+                    "id": "72a147a2-ca02-4616-9c08-b3e9c0fc2670",
+                    "inntektsopplysninger": [
+                        {
+                            "id": "04c3395e-c70c-4e58-9e99-b985ab4138b7",
+                            "hendelseId": "abf3b3d9-e3ae-4bd3-a685-8b0575961006",
+                            "dato": "2018-01-02",
+                            "beløp": 31000.0,
+                            "kilde": "INNTEKTSMELDING"
+                        },
+                        {
+                            "id": "3efad503-7a37-4a07-bdfc-a1a35d988334",
+                            "skatteopplysninger": [
+                                {
+                                    "hendelseId": "e1f84076-c00b-4403-9357-c726c12e5477",
+                                    "dato": "2018-01-01",
+                                    "beløp": 31000.0,
+                                    "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                                    "måned": "2017-10",
+                                    "type": "LØNNSINNTEKT"
+                                },
+                                {
+                                    "hendelseId": "e1f84076-c00b-4403-9357-c726c12e5477",
+                                    "dato": "2018-01-01",
+                                    "beløp": 31000.0,
+                                    "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                                    "måned": "2017-11",
+                                    "type": "LØNNSINNTEKT"
+                                },
+                                {
+                                    "hendelseId": "e1f84076-c00b-4403-9357-c726c12e5477",
+                                    "dato": "2018-01-01",
+                                    "beløp": 31000.0,
+                                    "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                                    "måned": "2017-12",
+                                    "type": "LØNNSINNTEKT"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "forkastede": [],
+            "vedtaksperioder": [
+                {
+                    "inntektsmeldingInfo": {
+                        "id": "abf3b3d9-e3ae-4bd3-a685-8b0575961006"
+                    },
+                    "tilstand": "AVSLUTTET",
+                    "skjæringstidspunkt": "2018-01-01",
+                    "fom": "2018-01-01"
+                },
+                {
+                    "inntektsmeldingInfo": {
+                        "id": "518938a9-a856-4c3a-a238-a5fe4f4020d7"
+                    },
+                    "tilstand": "AVVENTER_SØKNAD_FERDIG_FORLENGELSE",
+                    "skjæringstidspunkt": "2018-01-01",
+                    "fom":  "2018-01-01"
+                }
+            ]
+        }
+    ],
+    "vilkårsgrunnlagHistorikk": [
+        {
+            "id": "0354f216-fa7b-4fcd-9ebd-d9732354f8a7",
+            "vilkårsgrunnlag": [
+                {
+                    "skjæringstidspunkt": "2018-01-01",
+                    "type": "Vilkårsprøving",
+                    "sykepengegrunnlag": {
+                        "sykepengegrunnlag": 372000.0,
+                        "grunnlagForSykepengegrunnlag": 372000.0,
+                        "arbeidsgiverInntektsopplysninger": [
+                            {
+                                "orgnummer": "987654321",
+                                "inntektsopplysning": {
+                                    "id": "04c3395e-c70c-4e58-9e99-b985ab4138b7",
+                                    "hendelseId": "abf3b3d9-e3ae-4bd3-a685-8b0575961006",
+                                    "dato": "2018-01-02",
+                                    "beløp": 31000.0,
+                                    "kilde": "INNTEKTSMELDING"
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ],
+    "skjemaVersjon": 114
+}
+    
