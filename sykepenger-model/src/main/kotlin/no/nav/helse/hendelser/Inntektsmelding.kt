@@ -145,7 +145,7 @@ class Inntektsmelding(
             warn("Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.")
         }
 
-        Inntektshistorikk.AppendMode.append(inntektshistorikk) {
+        inntektshistorikk.append {
             addInntektsmelding(
                 skjæringstidspunkt,
                 meldingsreferanseId(),

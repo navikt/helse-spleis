@@ -98,7 +98,7 @@ internal abstract class HistorieTest {
 
     protected fun beregn(orgnr: String, periode: Periode, vararg inntektsdatoer: LocalDate, regler: ArbeidsgiverRegler = NormalArbeidstaker): Utbetalingstidslinje {
         val inntektshistorikk = Inntektshistorikk()
-        inntektshistorikk {
+        inntektshistorikk.append {
             inntektsdatoer.forEach {
                 addInntektsmelding(it, UUID.randomUUID(), 25000.månedlig)
             }

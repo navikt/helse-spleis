@@ -449,7 +449,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         person.lagreArbeidsforhold(a1, listOf(Arbeidsforhold(a1, LocalDate.EPOCH)), person.aktivitetslogg, 17.januar)
         person.lagreArbeidsforhold(a2, listOf(Arbeidsforhold(a2, LocalDate.EPOCH)), person.aktivitetslogg, 17.januar)
 
-        inspektør(a2).inntektInspektør.inntektshistorikk {
+        inspektør(a2).inntektInspektør.inntektshistorikk.append {
             val hendelseId = UUID.randomUUID()
             addSkattSykepengegrunnlag(17.januar, hendelseId, INNTEKT, YearMonth.of(2017, 12), LØNNSINNTEKT, "fordel", "beskrivelse")
             addSkattSykepengegrunnlag(17.januar, hendelseId, INNTEKT, YearMonth.of(2017, 11), LØNNSINNTEKT, "fordel", "beskrivelse")
@@ -475,7 +475,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         person.lagreArbeidsforhold(a1, listOf(Arbeidsforhold(a1, LocalDate.EPOCH)), person.aktivitetslogg, 17.januar)
         person.lagreArbeidsforhold(a2, listOf(Arbeidsforhold(a2, LocalDate.EPOCH)), person.aktivitetslogg, 17.januar)
 
-        inspektør(a2).inntektInspektør.inntektshistorikk {
+        inspektør(a2).inntektInspektør.inntektshistorikk.append {
             val hendelseId = UUID.randomUUID()
             addSkattSykepengegrunnlag(17.januar, hendelseId, INNTEKT, YearMonth.of(2017, 12), LØNNSINNTEKT, "fordel", "beskrivelse")
             addSkattSykepengegrunnlag(17.januar, hendelseId, INNTEKT, YearMonth.of(2017, 11), LØNNSINNTEKT, "fordel", "beskrivelse")

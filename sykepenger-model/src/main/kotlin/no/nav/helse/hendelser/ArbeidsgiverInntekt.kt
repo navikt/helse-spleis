@@ -140,7 +140,7 @@ class ArbeidsgiverInntekt(
                 skjæringstidspunkt: LocalDate,
                 meldingsreferanseId: UUID
             ) {
-                inntektshistorikk {
+                inntektshistorikk.append {
                     inntekter.forEach {
                         it.lagreInntekter(this, skjæringstidspunkt, meldingsreferanseId)
                     }

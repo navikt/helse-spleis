@@ -454,7 +454,7 @@ internal data class PersonData(
                     inntekter: List<InntektshistorikkInnslagData>,
                     inntektshistorikk: Inntektshistorikk
                 ) {
-                    Inntektshistorikk.RestoreJsonMode.append(inntektshistorikk) {
+                    inntektshistorikk.restore {
                         inntekter.reversed().forEach {
                             innslag(it.id) {
                                 InntektsopplysningData.parseInntekter(it.inntektsopplysninger, this)

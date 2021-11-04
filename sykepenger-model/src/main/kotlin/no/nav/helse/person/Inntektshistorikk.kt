@@ -21,11 +21,7 @@ internal class Inntektshistorikk {
             .also { historikk.add(0, it) }
 
     internal companion object {
-        val NULLUUID = UUID.fromString("00000000-0000-0000-0000-000000000000")
-    }
-
-    internal operator fun invoke(block: AppendMode.() -> Unit) {
-        AppendMode.append(this, block)
+        internal val NULLUUID: UUID = UUID.fromString("00000000-0000-0000-0000-000000000000")
     }
 
     internal fun accept(visitor: InntekthistorikkVisitor) {
@@ -372,13 +368,14 @@ internal class Inntektshistorikk {
         )
     }
 
-    internal class AppendMode private constructor(private val innslag: Innslag) {
-        companion object {
-            fun append(a: Inntektshistorikk, appender: AppendMode.() -> Unit) {
-                AppendMode(a.innslag).apply(appender).apply {
-                    skatt.takeIf { it.isNotEmpty() }?.also { add(SkattComposite(UUID.randomUUID(), it)) }
-                }
-            }
+    internal fun append(block: AppendMode.() -> Unit) {
+        AppendMode(innslag).append(block)
+    }
+
+    internal class AppendMode(private val innslag: Innslag) {
+        internal fun append(appender: AppendMode.() -> Unit) {
+            apply(appender)
+            skatt.takeIf { it.isNotEmpty() }?.also { add(SkattComposite(UUID.randomUUID(), it)) }
         }
 
         private val tidsstempel = LocalDateTime.now()
@@ -402,18 +399,7 @@ internal class Inntektshistorikk {
             fordel: String,
             beskrivelse: String
         ) =
-            skatt.add(
-                Skatt.Sykepengegrunnlag(
-                    dato,
-                    hendelseId,
-                    beløp,
-                    måned,
-                    type,
-                    fordel,
-                    beskrivelse,
-                    tidsstempel
-                )
-            )
+            skatt.add(Skatt.Sykepengegrunnlag(dato, hendelseId, beløp, måned, type, fordel, beskrivelse, tidsstempel))
 
         internal fun addSkattSammenligningsgrunnlag(
             dato: LocalDate,
@@ -424,31 +410,18 @@ internal class Inntektshistorikk {
             fordel: String,
             beskrivelse: String
         ) =
-            skatt.add(
-                Skatt.Sammenligningsgrunnlag(
-                    dato,
-                    hendelseId,
-                    beløp,
-                    måned,
-                    type,
-                    fordel,
-                    beskrivelse,
-                    tidsstempel
-                )
-            )
+            skatt.add(Skatt.Sammenligningsgrunnlag(dato, hendelseId, beløp, måned, type, fordel, beskrivelse, tidsstempel))
 
         private fun add(opplysning: Inntektsopplysning) {
             innslag.add(opplysning)
         }
     }
 
-    internal class RestoreJsonMode private constructor(private val inntektshistorikk: Inntektshistorikk) {
-        companion object {
-            fun append(a: Inntektshistorikk, appender: RestoreJsonMode.() -> Unit) {
-                RestoreJsonMode(a).apply(appender)
-            }
-        }
+    internal fun restore(block: RestoreJsonMode.() -> Unit) {
+        RestoreJsonMode(this).apply(block)
+    }
 
+    internal class RestoreJsonMode(private val inntektshistorikk: Inntektshistorikk) {
         internal fun innslag(innslagId: UUID, block: InnslagAppender.() -> Unit) {
             Innslag(innslagId).also { InnslagAppender(it).apply(block) }.also { inntektshistorikk.historikk.add(0, it) }
         }

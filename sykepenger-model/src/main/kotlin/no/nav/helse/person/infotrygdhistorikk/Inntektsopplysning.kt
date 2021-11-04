@@ -66,7 +66,7 @@ class Inntektsopplysning private constructor(
         }
 
         fun lagreInntekter(list: List<Inntektsopplysning>, inntektshistorikk: Inntektshistorikk, hendelseId: UUID) {
-            inntektshistorikk {
+            inntektshistorikk.append {
                 list.reversed().forEach { it.addInntekt(this, hendelseId) }
             }
         }

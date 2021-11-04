@@ -23,7 +23,7 @@ class OverstyrInntekt(
     override fun organisasjonsnummer() = organisasjonsnummer
 
     internal fun addInntekt(inntektshistorikk: Inntektshistorikk) {
-        inntektshistorikk { addSaksbehandler(skjæringstidspunkt, meldingsreferanseId(), inntekt) }
+        inntektshistorikk.append { addSaksbehandler(skjæringstidspunkt, meldingsreferanseId(), inntekt) }
     }
 
     internal fun tilRevurderingAvvistEvent(): PersonObserver.RevurderingAvvistEvent =

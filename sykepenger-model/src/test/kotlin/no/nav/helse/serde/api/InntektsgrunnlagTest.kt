@@ -49,7 +49,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
 
         val builder = InntektshistorikkBuilder(person)
         FinnInntektshistorikk(person, builder).also {
-            (it.inntektshistorikk.getValue(ORGNUMMER)) {
+            (it.inntektshistorikk.getValue(ORGNUMMER)).append {
                 addSaksbehandler(1.januar, UUID.randomUUID(), INNTEKT)
             }
         }
