@@ -164,12 +164,16 @@ internal class Vedtaksperiode private constructor(
         val overlapper = overlapperMed(inntektsmelding) && (other == null || other == id)
         return overlapper.also {
             if (it) hendelseIder.add(inntektsmelding.meldingsreferanseId())
-            if (Toggles.RefusjonPerDag.disabled && arbeidsgiver.harRefusjonOpphørt(periode.endInclusive) && !erAvsluttet()) {
+            if (arbeidsgiver.harRefusjonOpphørt(periode.endInclusive) && !erAvsluttet()) {
                 kontekst(inntektsmelding)
-                inntektsmelding.error("Refusjon opphører i perioden")
-                inntektsmelding.trimLeft(periode.endInclusive)
-                arbeidsgiver.søppelbøtte(inntektsmelding, SENERE_INCLUSIVE(this), IKKE_STØTTET)
-                return@also
+                if (Toggles.RefusjonPerDag.disabled) {
+                    inntektsmelding.error("Refusjon opphører i perioden")
+                    inntektsmelding.trimLeft(periode.endInclusive)
+                    arbeidsgiver.søppelbøtte(inntektsmelding, SENERE_INCLUSIVE(this), IKKE_STØTTET)
+                    return@also
+                } else {
+                    inntektsmelding.info("Ville tidligere bli kastet ut på grunn av refusjon: Refusjon opphører i perioden")
+                }
             }
             if (!it) return@also inntektsmelding.trimLeft(periode.endInclusive)
             kontekst(inntektsmelding)
@@ -1114,6 +1118,10 @@ internal class Vedtaksperiode private constructor(
             val forlengelse = periodeRettFør != null
             val ferdig = vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode)
             val refusjonOpphørt = vedtaksperiode.arbeidsgiver.harRefusjonOpphørt(vedtaksperiode.periode.endInclusive)
+
+            if (forlengelse && refusjonOpphørt && Toggles.RefusjonPerDag.enabled) {
+                hendelse.info("Ville tidligere bli kastet ut på grunn av refusjon: Refusjon er opphørt.")
+            }
 
             return when {
                 forlengelse && refusjonOpphørt && Toggles.RefusjonPerDag.disabled -> TilInfotrygd.also { hendelse.error("Refusjon er opphørt.") }

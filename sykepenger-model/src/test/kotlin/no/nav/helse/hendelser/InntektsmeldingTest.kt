@@ -414,7 +414,7 @@ internal class InntektsmeldingTest {
     }
 
     @Test
-    fun `logger info om at vi tidligere ville kastet ut inntektmeldinger på grunn av refusjon`() {
+    fun `logger info om at vi tidligere ville kastet ut inntektmeldinger på grunn av refusjon`() = Toggles.RefusjonPerDag.enable {
         val arbeidsgiverperioder = listOf(1.januar til 16.januar)
         inntektsmelding(arbeidsgiverperioder, refusjonBeløp = INGEN)
         assertMelding("Arbeidsgiver forskutterer ikke (krever ikke refusjon)")

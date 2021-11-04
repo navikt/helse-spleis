@@ -8,10 +8,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.testhelpers.februar
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.mars
-import no.nav.helse.testhelpers.november
+import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -1065,5 +1062,20 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             TIL_INFOTRYGD,
             orgnummer = a2
         )
+    }
+
+    @Test
+    fun `Vi logger info om vi tidligere ville kastet ut på grunn av refusjon i en inntektsmelding som bommer`() = Toggles.RefusjonPerDag.enable {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.desember(2017) til 16.desember(2017)), refusjon = Inntektsmelding.Refusjon(INNTEKT, 17.desember(2017), emptyList()))
+        assertInfo(1.vedtaksperiode, "Ville tidligere bli kastet ut på grunn av refusjon: Refusjon opphører i perioden")
+    }
+
+    @Test
+    fun `Vi logger info om vi tidligere ville kastet ut på grunn av refusjon ved forlengelse`() = Toggles.RefusjonPerDag.enable {
+        nyttVedtak(1.januar, 31.januar, refusjon = Inntektsmelding.Refusjon(INNTEKT, 15.februar, emptyList()))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        assertInfo(2.vedtaksperiode, "Ville tidligere bli kastet ut på grunn av refusjon: Refusjon er opphørt.")
     }
 }
