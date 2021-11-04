@@ -11,7 +11,6 @@ internal class V114LagreSykepengegrunnlag : JsonMigration(version = 114) {
 
     override val description: String = "Beregne og lagre sykepengegrunnlag for alle vilkårsgrunnlagelementert"
 
-
     companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
@@ -62,21 +61,85 @@ internal class V114LagreSykepengegrunnlag : JsonMigration(version = 114) {
             return 0.0
         }
 
-        private fun beregnBeløpFraSkatt(skatteopplysninger: ArrayNode) = skatteopplysninger
-            .sumOf { it["beløp"].asDouble() }
-            .div(3)
-
-        private fun finnInntektsmelding(inntektsopplysning: JsonNode, vedtaksperioder: ArrayNode, skjæringstidspunkt: String) : Boolean {
+        private fun finnInntektsmelding(inntektsopplysning: JsonNode, vedtaksperioder: ArrayNode, skjæringstidspunkt: String): Boolean {
             val inntektsmeldingId = vedtaksperioder
-                .filter { it["skjæringstidspunkt"].asText() == skjæringstidspunkt }
-                .firstOrNull { it["tilstand"].asText() == "AVSLUTTET" }?.get("inntektsmeldingInfo")?.get("id") ?: return false
+                .firstOrNull { it["fom"].asText() == skjæringstidspunkt }
+                ?.get("inntektsmeldingInfo")?.get("id") ?: return false
 
             val hendelseId = inntektsopplysning["hendelseId"] ?: return false
 
             return hendelseId.asText() == inntektsmeldingId.asText()
         }
 
-        private fun finnInntektsopplysning(inntektshistorikk: JsonNode, skjæringstidspunkt: String, vilkårsgrunnlagtype: String, vedtaksperioder: ArrayNode): JsonNode? =
+        private fun finnInntektsopplysning(
+            inntektshistorikk: JsonNode,
+            skjæringstidspunkt: String,
+            vilkårsgrunnlagtype: String,
+            vedtaksperioder: ArrayNode
+        ): JsonNode? {
+            val inntektsopplysninger = inntektshistorikk.firstOrNull()?.get("inntektsopplysninger") as ArrayNode? ?: return null
+
+            if(vilkårsgrunnlagtype == "Infotrygd") {
+                return finnInfotrygdInntektsopplysning(inntektsopplysninger, skjæringstidspunkt) ?: finnNærmesteInntektsopplysningEtterSkjæringstidspunkt(inntektsopplysninger, skjæringstidspunkt)
+            }
+
+            return finnSaksbehandlerInntektsopplysning(inntektsopplysninger, skjæringstidspunkt)
+                ?: finnInntektsmeldingInntektsopplysningFraVedtaksperiode(inntektsopplysninger, skjæringstidspunkt, vedtaksperioder)
+                ?: finnInntektsmeldingInntektsopplysningFraSkjæringstidspunkt(inntektsopplysninger, skjæringstidspunkt)
+                ?: finnSykepengegrunnlagInntektsopplysning(inntektsopplysninger, skjæringstidspunkt)
+        }
+
+        private fun finnSaksbehandlerInntektsopplysning(inntektsopplysninger: ArrayNode, skjæringstidspunkt: String) = inntektsopplysninger
+            .filter { "SAKSBEHANDLER" == it["kilde"]?.asText() }
+            .firstOrNull { skjæringstidspunkt == it["dato"]?.asText()  }
+
+        private fun finnInfotrygdInntektsopplysning(inntektsopplysninger: ArrayNode, skjæringstidspunkt: String) = inntektsopplysninger
+            .filter { "INFOTRYGD" == it["kilde"]?.asText() }
+            .firstOrNull { skjæringstidspunkt == it["dato"]?.asText()  }
+
+        private fun finnInntektsmeldingInntektsopplysningFraVedtaksperiode(
+            inntektsopplysninger: ArrayNode,
+            skjæringstidspunkt: String,
+            vedtaksperioder: ArrayNode
+        ) = inntektsopplysninger
+            .filter { "INNTEKTSMELDING" == it["kilde"]?.asText() }
+            .firstOrNull { finnInntektsmelding(it, vedtaksperioder, skjæringstidspunkt) }
+
+        private fun finnInntektsmeldingInntektsopplysningFraSkjæringstidspunkt(
+            inntektsopplysninger: ArrayNode,
+            skjæringstidspunkt: String,
+        ) = inntektsopplysninger
+            .filter { "INNTEKTSMELDING" == it["kilde"]?.asText() }
+            .firstOrNull { skjæringstidspunkt == it["dato"]?.asText()  }
+
+        private fun finnSykepengegrunnlagInntektsopplysning(
+            inntektsopplysninger: ArrayNode,
+            skjæringstidspunkt: String,
+        ) = inntektsopplysninger
+            .filter { it.has("skatteopplysninger") && it["skatteopplysninger"].first()["kilde"].asText() == "SKATT_SYKEPENGEGRUNNLAG" }
+            .firstOrNull { skjæringstidspunkt == it["skatteopplysninger"].first()["dato"].asText() }
+
+        private fun finnNærmesteInntektsopplysningEtterSkjæringstidspunkt(inntektsopplysninger: ArrayNode, skjæringstidspunkt: String) = inntektsopplysninger
+            .sortedBy { if (it.has("skatteopplysninger")) it["skatteopplysninger"].first()["dato"].asText() else it["dato"].asText() }
+            .firstOrNull {
+                val dato = if (it.has("skatteopplysninger")) it["skatteopplysninger"].first()["dato"].asText() else it["dato"].asText()
+                dato > skjæringstidspunkt
+            }
+            ?.takeIf { it.has("kilde") && it["kilde"].asText() == "INFOTRYGD" }
+
+        private fun finnDato(inntektsopplysning: JsonNode) =
+            if (inntektsopplysning.has("skatteopplysninger")) inntektsopplysning["skatteopplysninger"].first()["dato"].asText() else inntektsopplysning["dato"].asText()
+
+        private fun beregnBeløpFraSkatt(skatteopplysninger: ArrayNode) = skatteopplysninger
+            .sumOf { it["beløp"].asDouble() }
+            .div(3)
+
+        private fun finnInntektsopplysningGammal(
+            inntektshistorikk: JsonNode,
+            skjæringstidspunkt: String,
+            vilkårsgrunnlagtype: String,
+            vedtaksperioder: ArrayNode
+        ): JsonNode? =
             inntektshistorikk.firstOrNull()
                 ?.get("inntektsopplysninger")
                 ?.filter { vilkårsgrunnlagtype != "Infotrygd" || "INFOTRYGD" == it["kilde"]?.asText() }
@@ -92,18 +155,14 @@ internal class V114LagreSykepengegrunnlag : JsonMigration(version = 114) {
                         else -> 0
                     }
                 } ?:
-                inntektshistorikk.firstOrNull()
-                    ?.get("inntektsopplysninger")
-                    ?.sortedBy { if(it.has("skatteopplysninger")) it["skatteopplysninger"].first()["dato"].asText() else it["dato"].asText() }
-                    ?.firstOrNull {
-                        val dato =  if(it.has("skatteopplysninger")) it["skatteopplysninger"].first()["dato"].asText() else it["dato"].asText()
-                        dato > skjæringstidspunkt
-                    }
-                    ?.takeIf { it.has("kilde") && it["kilde"].asText() == "INFOTRYGD" }
-
-        private fun finnDato(inntektsopplysning: JsonNode) =
-            if (inntektsopplysning.has("skatteopplysninger")) inntektsopplysning["skatteopplysninger"].first()["dato"].asText() else inntektsopplysning["dato"].asText()
-
+            inntektshistorikk.firstOrNull()
+                ?.get("inntektsopplysninger")
+                ?.sortedBy { if(it.has("skatteopplysninger")) it["skatteopplysninger"].first()["dato"].asText() else it["dato"].asText() }
+                ?.firstOrNull {
+                    val dato =  if(it.has("skatteopplysninger")) it["skatteopplysninger"].first()["dato"].asText() else it["dato"].asText()
+                    dato > skjæringstidspunkt
+                }
+                ?.takeIf { it.has("kilde") && it["kilde"].asText() == "INFOTRYGD" }
     }
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {

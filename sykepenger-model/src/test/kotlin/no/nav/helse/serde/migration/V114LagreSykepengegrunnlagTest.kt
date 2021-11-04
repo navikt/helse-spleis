@@ -39,13 +39,13 @@ internal class V114LagreSykepengegrunnlagTest {
     }
 
     @Test
-    fun `Forkastede vedtaksperioder`() {
-        fail<Unit>("Denne er ikke implementert. Er ikke det litt merkelig?")
+    fun `Flere arbeidsgivere med ulik fom skal bruke IM fra tidligste fom og skatteopplysninger fra seneste fom`() {
+        assertEquals(toNode(personMedFlereAGUlikFomExpected), migrer(personMedFlereAGUlikFomOriginal))
     }
 
     @Test
-    fun `Ulik fom skal ikke ha IM`() {
-        fail<Unit>("Husk å lage denne da")
+    fun `Forkastede vedtaksperioder`() {
+        fail<Unit>("Denne er ikke implementert. Er ikke det litt merkelig?")
     }
 
     private fun toNode(json: String) = serdeObjectMapper.readTree(json)
@@ -115,7 +115,8 @@ internal class V114LagreSykepengegrunnlagTest {
                     {
                         "inntektsmeldingInfo": null,
                         "tilstand": "AVSLUTTET",
-                        "skjæringstidspunkt": "2017-12-01"
+                        "skjæringstidspunkt": "2017-12-01",
+                        "fom": "2017-12-01"
                     }
                 ]
             }
@@ -203,7 +204,8 @@ internal class V114LagreSykepengegrunnlagTest {
                     {
                         "inntektsmeldingInfo": null,
                         "tilstand": "AVSLUTTET",
-                        "skjæringstidspunkt": "2017-12-01"
+                        "skjæringstidspunkt": "2017-12-01",
+                        "fom": "2017-12-01"
                     }
                 ]
         }
@@ -283,7 +285,8 @@ internal class V114LagreSykepengegrunnlagTest {
                 {
                     "inntektsmeldingInfo": null,
                     "tilstand": "AVSLUTTET",
-                    "skjæringstidspunkt": "2017-12-01"
+                    "skjæringstidspunkt": "2017-12-01",
+                    "fom": "2017-12-01"
                 }
             ]
         }
@@ -341,7 +344,8 @@ internal class V114LagreSykepengegrunnlagTest {
                 {
                     "inntektsmeldingInfo": null,
                     "tilstand": "AVSLUTTET",
-                    "skjæringstidspunkt": "2017-12-01"
+                    "skjæringstidspunkt": "2017-12-01",
+                    "fom": "2017-12-01"
                 }
             ]
         }
@@ -433,7 +437,8 @@ internal class V114LagreSykepengegrunnlagTest {
                 {
                     "inntektsmeldingInfo": null,
                     "tilstand": "AVSLUTTET",
-                    "skjæringstidspunkt": "2017-12-01"
+                    "skjæringstidspunkt": "2017-12-01",
+                    "fom": "2017-12-01"
                 }
             ]
         },
@@ -540,7 +545,8 @@ internal class V114LagreSykepengegrunnlagTest {
                     {
                         "inntektsmeldingInfo": null,
                         "tilstand": "AVSLUTTET",
-                        "skjæringstidspunkt": "2017-12-01"
+                        "skjæringstidspunkt": "2017-12-01",
+                        "fom": "2017-12-01"
                     }
                 ]
         },
@@ -1047,7 +1053,8 @@ internal class V114LagreSykepengegrunnlagTest {
                             "id": "518938a9-a856-4c3a-a238-a5fe4f4abcde"
                         },
                         "tilstand": "AVSLUTTET",
-                        "skjæringstidspunkt": "2019-06-01"
+                        "skjæringstidspunkt": "2019-06-01",
+                        "fom": "2019-06-01"
                     }
                 ]
 
@@ -1665,7 +1672,8 @@ internal class V114LagreSykepengegrunnlagTest {
                             "id": "518938a9-a856-4c3a-a238-a5fe4f4abcde"
                         },
                         "tilstand": "AVSLUTTET",
-                        "skjæringstidspunkt": "2019-06-01"
+                        "skjæringstidspunkt": "2019-06-01",
+                        "fom": "2019-06-01"
                     }
                 ]
         },
@@ -2014,14 +2022,16 @@ internal class V114LagreSykepengegrunnlagTest {
                         "id": "abf3b3d9-e3ae-4bd3-a685-8b0575961006"
                     },
                     "tilstand": "AVSLUTTET",
-                    "skjæringstidspunkt": "2018-01-01"
+                    "skjæringstidspunkt": "2018-01-01",
+                    "fom": "2018-01-01"
                 },
                 {
                     "inntektsmeldingInfo": {
                         "id": "518938a9-a856-4c3a-a238-a5fe4f4020d7"
                     },
                     "tilstand": "AVVENTER_SØKNAD_FERDIG_FORLENGELSE",
-                    "skjæringstidspunkt": "2018-01-01"
+                    "skjæringstidspunkt": "2018-01-01",
+                    "fom": "2018-01-01"
                 }
             ]
         }
@@ -2099,14 +2109,16 @@ internal class V114LagreSykepengegrunnlagTest {
                         "id": "abf3b3d9-e3ae-4bd3-a685-8b0575961006"
                     },
                     "tilstand": "AVSLUTTET",
-                    "skjæringstidspunkt": "2018-01-01"
+                    "skjæringstidspunkt": "2018-01-01",
+                    "fom": "2018-01-01"
                 },
                 {
                     "inntektsmeldingInfo": {
                         "id": "518938a9-a856-4c3a-a238-a5fe4f4020d7"
                     },
                     "tilstand": "AVVENTER_SØKNAD_FERDIG_FORLENGELSE",
-                    "skjæringstidspunkt": "2018-01-01"
+                    "skjæringstidspunkt": "2018-01-01",
+                    "fom":  "2018-01-01"
                 }
             ]
         }
@@ -2144,7 +2156,7 @@ internal class V114LagreSykepengegrunnlagTest {
 
     @Language("JSON")
     private val personMedTreIMOriginal = """
-{
+    {
     "aktørId": "42",
     "fødselsnummer": "12020052345",
     "arbeidsgivere": [
@@ -2185,14 +2197,16 @@ internal class V114LagreSykepengegrunnlagTest {
                         "id": "abf3b3d9-e3ae-4bd3-a685-8b0575961006"
                     },
                     "tilstand": "AVSLUTTET",
-                    "skjæringstidspunkt": "2018-01-01"
+                    "skjæringstidspunkt": "2018-01-01",
+                    "fom": "2018-01-01"
                 },
                 {
                     "inntektsmeldingInfo": {
                         "id": "518938a9-a856-4c3a-a238-a5fe4f4020d7"
                     },
                     "tilstand": "AVVENTER_SØKNAD_FERDIG_FORLENGELSE",
-                    "skjæringstidspunkt": "2018-01-01"
+                    "skjæringstidspunkt": "2018-01-01",
+                    "fom": "2018-01-01"
                 }
             ]
         }
@@ -2211,6 +2225,7 @@ internal class V114LagreSykepengegrunnlagTest {
     "skjemaVersjon": 113
 }
     """
+
     @Language("JSON")
     private val personMedTreIMExpected = """
 {
@@ -2254,14 +2269,16 @@ internal class V114LagreSykepengegrunnlagTest {
                         "id": "abf3b3d9-e3ae-4bd3-a685-8b0575961006"
                     },
                     "tilstand": "AVSLUTTET",
-                    "skjæringstidspunkt": "2018-01-01"
+                    "skjæringstidspunkt": "2018-01-01",
+                    "fom": "2018-01-01"
                 },
                 {
                     "inntektsmeldingInfo": {
                         "id": "518938a9-a856-4c3a-a238-a5fe4f4020d7"
                     },
                     "tilstand": "AVVENTER_SØKNAD_FERDIG_FORLENGELSE",
-                    "skjæringstidspunkt": "2018-01-01"
+                    "skjæringstidspunkt": "2018-01-01",
+                    "fom": "2018-01-01"
                 }
             ]
         }
@@ -2293,8 +2310,309 @@ internal class V114LagreSykepengegrunnlagTest {
             ]
         }
     ],
+    "skjemaVersjon": 114
+}
+    """
+
+    @Language("JSON")
+    private val personMedFlereAGUlikFomOriginal = """
+    {
+    "aktørId": "42",
+    "fødselsnummer": "12020052345",
+    "arbeidsgivere": [
+        {
+            "organisasjonsnummer": "arbeidsgiver 1",
+            "id": "760c9862-effb-4118-9c4f-bbf8c14d82f1",
+            "inntektshistorikk": [
+                {
+                    "id": "c528ae2d-290e-4288-b1f0-48334bff2364",
+                    "inntektsopplysninger": [
+                        {
+                            "id": "11136c9c-eb2f-4375-9fa7-b0660d51f43a",
+                            "dato": "2018-03-01",
+                            "hendelseId": "42820dc5-f5dc-4b8d-87a4-d79af3f05fb7",
+                            "beløp": 31000.0,
+                            "kilde": "INNTEKTSMELDING"
+                        },
+                        {
+                            "id": "713e06cc-0ced-4007-864a-6d17ae6ead04",
+                            "skatteopplysninger": [
+                                {
+                                    "dato": "2018-03-01",
+                                    "hendelseId": "2ab35a04-3d59-4d20-964d-03cb8aef1f44",
+                                    "beløp": 31000.0,
+                                    "kilde": "SKATT_SYKEPENGEGRUNNLAG"
+                                },
+                                {
+                                    "dato": "2018-03-01",
+                                    "hendelseId": "2ab35a04-3d59-4d20-964d-03cb8aef1f44",
+                                    "beløp": 31000.0,
+                                    "kilde": "SKATT_SYKEPENGEGRUNNLAG"
+                                },
+                                {
+                                    "dato": "2018-03-01",
+                                    "hendelseId": "2ab35a04-3d59-4d20-964d-03cb8aef1f44",
+                                    "beløp": 31000.0,
+                                    "kilde": "SKATT_SYKEPENGEGRUNNLAG"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "vedtaksperioder": [
+                {
+                    "fom": "2018-03-01",
+                    "tom": "2018-03-31",
+                    "inntektsmeldingInfo": {
+                        "id": "42820dc5-f5dc-4b8d-87a4-d79af3f05fb7",
+                        "arbeidsforholdId": null
+                    },
+                    "skjæringstidspunkt": "2018-03-01",
+                    "tilstand": "AVVENTER_SIMULERING"
+                }
+            ]
+        },
+        {
+            "organisasjonsnummer": "arbeidsgiver 2",
+            "id": "4a92d598-76e6-4e5d-bbb5-7158cb48ed01",
+            "inntektshistorikk": [
+                {
+                    "id": "7233eb3b-6e48-4c38-9cb2-6c05cde5df9a",
+                    "inntektsopplysninger": [
+                        {
+                            "id": "ada6c855-411f-46b3-ba38-53821a290967",
+                            "dato": "2018-03-05",
+                            "hendelseId": "9cd523e1-7d82-46ad-92d2-534b68850b7a",
+                            "beløp": 31000.0,
+                            "kilde": "INNTEKTSMELDING"
+                        },
+                        {
+                            "id": "3c8c8fb2-1334-480b-af72-c1bc942fc140",
+                            "skatteopplysninger": [
+                                {
+                                    "dato": "2018-03-01",
+                                    "hendelseId": "2ab35a04-3d59-4d20-964d-03cb8aef1f44",
+                                    "beløp": 20000.0,
+                                    "kilde": "SKATT_SYKEPENGEGRUNNLAG"
+                                },
+                                {
+                                    "dato": "2018-03-01",
+                                    "hendelseId": "2ab35a04-3d59-4d20-964d-03cb8aef1f44",
+                                    "beløp": 20000.0,
+                                    "kilde": "SKATT_SYKEPENGEGRUNNLAG"
+                                },
+                                {
+                                    "dato": "2018-03-01",
+                                    "hendelseId": "2ab35a04-3d59-4d20-964d-03cb8aef1f44",
+                                    "beløp": 20000.0,
+                                    "kilde": "SKATT_SYKEPENGEGRUNNLAG"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "vedtaksperioder": [
+                {
+                    "fom": "2018-03-05",
+                    "tom": "2018-03-31",
+                    "id": "b0c9ec99-a0b1-45eb-bfcc-79d2ff12f24e",
+                    "inntektsmeldingInfo": {
+                        "id": "9cd523e1-7d82-46ad-92d2-534b68850b7a",
+                        "arbeidsforholdId": null
+                    },
+                    "skjæringstidspunkt": "2018-03-01",
+                    "tilstand": "AVVENTER_SIMULERING"
+                }
+            ]
+        }
+    ],
+    "vilkårsgrunnlagHistorikk": [
+        {
+            "id": "16778676-e315-45ea-aaec-122e59914447",
+            "vilkårsgrunnlag": [
+                {
+                    "skjæringstidspunkt": "2018-03-01",
+                    "type": "Vilkårsprøving",
+                    "meldingsreferanseId": "2ab35a04-3d59-4d20-964d-03cb8aef1f44"
+                }
+            ]
+        }
+    ],
     "skjemaVersjon": 113
 }
+    """
+    @Language("JSON")
+    private val personMedFlereAGUlikFomExpected = """
+        {
+            "aktørId": "42",
+            "fødselsnummer": "12020052345",
+            "arbeidsgivere": [
+                {
+                    "organisasjonsnummer": "arbeidsgiver 1",
+                    "id": "760c9862-effb-4118-9c4f-bbf8c14d82f1",
+                    "inntektshistorikk": [
+                        {
+                            "id": "c528ae2d-290e-4288-b1f0-48334bff2364",
+                            "inntektsopplysninger": [
+                                {
+                                    "id": "11136c9c-eb2f-4375-9fa7-b0660d51f43a",
+                                    "dato": "2018-03-01",
+                                    "hendelseId": "42820dc5-f5dc-4b8d-87a4-d79af3f05fb7",
+                                    "beløp": 31000.0,
+                                    "kilde": "INNTEKTSMELDING"
+                                },
+                                {
+                                    "id": "713e06cc-0ced-4007-864a-6d17ae6ead04",
+                                    "skatteopplysninger": [
+                                        {
+                                            "dato": "2018-03-01",
+                                            "hendelseId": "2ab35a04-3d59-4d20-964d-03cb8aef1f44",
+                                            "beløp": 31000.0,
+                                            "kilde": "SKATT_SYKEPENGEGRUNNLAG"
+                                        },
+                                        {
+                                            "dato": "2018-03-01",
+                                            "hendelseId": "2ab35a04-3d59-4d20-964d-03cb8aef1f44",
+                                            "beløp": 31000.0,
+                                            "kilde": "SKATT_SYKEPENGEGRUNNLAG"
+                                        },
+                                        {
+                                            "dato": "2018-03-01",
+                                            "hendelseId": "2ab35a04-3d59-4d20-964d-03cb8aef1f44",
+                                            "beløp": 31000.0,
+                                            "kilde": "SKATT_SYKEPENGEGRUNNLAG"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "vedtaksperioder": [
+                        {
+                            "fom": "2018-03-01",
+                            "tom": "2018-03-31",
+                            "inntektsmeldingInfo": {
+                                "id": "42820dc5-f5dc-4b8d-87a4-d79af3f05fb7",
+                                "arbeidsforholdId": null
+                            },
+                            "skjæringstidspunkt": "2018-03-01",
+                            "tilstand": "AVVENTER_SIMULERING"
+                        }
+                    ]
+                },
+                {
+                    "organisasjonsnummer": "arbeidsgiver 2",
+                    "id": "4a92d598-76e6-4e5d-bbb5-7158cb48ed01",
+                    "inntektshistorikk": [
+                        {
+                            "id": "7233eb3b-6e48-4c38-9cb2-6c05cde5df9a",
+                            "inntektsopplysninger": [
+                                {
+                                    "id": "ada6c855-411f-46b3-ba38-53821a290967",
+                                    "dato": "2018-03-05",
+                                    "hendelseId": "9cd523e1-7d82-46ad-92d2-534b68850b7a",
+                                    "beløp": 31000.0,
+                                    "kilde": "INNTEKTSMELDING"
+                                },
+                                {
+                                    "id": "3c8c8fb2-1334-480b-af72-c1bc942fc140",
+                                    "skatteopplysninger": [
+                                        {
+                                            "dato": "2018-03-01",
+                                            "hendelseId": "2ab35a04-3d59-4d20-964d-03cb8aef1f44",
+                                            "beløp": 20000.0,
+                                            "kilde": "SKATT_SYKEPENGEGRUNNLAG"
+                                        },
+                                        {
+                                            "dato": "2018-03-01",
+                                            "hendelseId": "2ab35a04-3d59-4d20-964d-03cb8aef1f44",
+                                            "beløp": 20000.0,
+                                            "kilde": "SKATT_SYKEPENGEGRUNNLAG"
+                                        },
+                                        {
+                                            "dato": "2018-03-01",
+                                            "hendelseId": "2ab35a04-3d59-4d20-964d-03cb8aef1f44",
+                                            "beløp": 20000.0,
+                                            "kilde": "SKATT_SYKEPENGEGRUNNLAG"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "vedtaksperioder": [
+                        {
+                            "fom": "2018-03-05",
+                            "tom": "2018-03-31",
+                            "id": "b0c9ec99-a0b1-45eb-bfcc-79d2ff12f24e",
+                            "inntektsmeldingInfo": {
+                                "id": "9cd523e1-7d82-46ad-92d2-534b68850b7a",
+                                "arbeidsforholdId": null
+                            },
+                            "skjæringstidspunkt": "2018-03-01",
+                            "tilstand": "AVVENTER_SIMULERING"
+                        }
+                    ]
+                }
+            ],
+            "vilkårsgrunnlagHistorikk": [
+                {
+                    "id": "16778676-e315-45ea-aaec-122e59914447",
+                    "vilkårsgrunnlag": [
+                        {
+                            "skjæringstidspunkt": "2018-03-01",
+                            "type": "Vilkårsprøving",
+                            "sykepengegrunnlag": {
+                                "sykepengegrunnlag": 561804.0,
+                                "grunnlagForSykepengegrunnlag": 612000.0,
+                                "arbeidsgiverInntektsopplysninger": [
+                                    {
+                                        "orgnummer": "arbeidsgiver 1",
+                                        "inntektsopplysning": {
+                                            "id": "11136c9c-eb2f-4375-9fa7-b0660d51f43a",
+                                            "dato": "2018-03-01",
+                                            "hendelseId": "42820dc5-f5dc-4b8d-87a4-d79af3f05fb7",
+                                            "beløp": 31000.0,
+                                            "kilde": "INNTEKTSMELDING"
+                                        }
+                                    },
+                                    {
+                                        "orgnummer": "arbeidsgiver 2",
+                                        "inntektsopplysning": {
+                                            "id": "3c8c8fb2-1334-480b-af72-c1bc942fc140",
+                                            "skatteopplysninger": [
+                                                {
+                                                    "dato": "2018-03-01",
+                                                    "hendelseId": "2ab35a04-3d59-4d20-964d-03cb8aef1f44",
+                                                    "beløp": 20000.0,
+                                                    "kilde": "SKATT_SYKEPENGEGRUNNLAG"
+                                                },
+                                                {
+                                                    "dato": "2018-03-01",
+                                                    "hendelseId": "2ab35a04-3d59-4d20-964d-03cb8aef1f44",
+                                                    "beløp": 20000.0,
+                                                    "kilde": "SKATT_SYKEPENGEGRUNNLAG"
+                                                },
+                                                {
+                                                    "dato": "2018-03-01",
+                                                    "hendelseId": "2ab35a04-3d59-4d20-964d-03cb8aef1f44",
+                                                    "beløp": 20000.0,
+                                                    "kilde": "SKATT_SYKEPENGEGRUNNLAG"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ]
+                            },
+                            "meldingsreferanseId": "2ab35a04-3d59-4d20-964d-03cb8aef1f44"
+                        }
+                    ]
+                }
+            ],
+            "skjemaVersjon": 114
+        }
     """
 }
 
