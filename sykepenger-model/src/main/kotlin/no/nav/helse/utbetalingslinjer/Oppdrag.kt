@@ -12,7 +12,8 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-const val WARN_FORLENGER_OPPHØRT_OPPDRAG = "Utbetalingen forlenger et tidligere oppdrag som opphørte alle utbetalte dager. Sjekk simuleringen."
+internal const val WARN_FORLENGER_OPPHØRT_OPPDRAG = "Utbetalingen forlenger et tidligere oppdrag som opphørte alle utbetalte dager. Sjekk simuleringen."
+internal const val WARN_OPPDRAG_FOM_ENDRET = "Utbetaling fra og med dato er endret. Kontroller simuleringen"
 
 internal class Oppdrag private constructor(
     private val mottaker: String,
@@ -153,21 +154,21 @@ internal class Oppdrag private constructor(
             // om man trekker fra et utbetalt oppdrag med et tomt oppdrag medfører det et oppdrag som opphører (les: annullerer) hele fagsystemIDen
             erTomt() -> annulleringsoppdrag(eldre)
             // "fom" kan flytte seg fremover i tid dersom man, eksempelvis, revurderer en utbetalt periode til å starte med ikke-utbetalte dager (f.eks. ferie)
-            fomHarFlyttetSegFremover(eldre) -> {
-                aktivitetslogg.warn("Utbetaling opphører tidligere utbetaling. Kontroller simuleringen")
-                returførOgKjørFrem(eldre)
-            }
-            // utbetaling kan endres til å starte tidligere, eksempelvis via revurdering der feriedager egentlig er sykedager
-            fomHarFlyttetSegBakover(eldre) -> {
-                aktivitetslogg.warn("Utbetaling fra og med dato er endret. Kontroller simuleringen")
-                kjørFrem(eldre)
-            }
             eldre.ingenUtbetalteDager() -> {
                 aktivitetslogg.warn(WARN_FORLENGER_OPPHØRT_OPPDRAG)
                 kjørFrem(eldre)
             }
+            fomHarFlyttetSegFremover(eldre.kopierUtenOpphørslinjer()) -> {
+                aktivitetslogg.warn("Utbetaling opphører tidligere utbetaling. Kontroller simuleringen")
+                returførOgKjørFrem(eldre.kopierUtenOpphørslinjer())
+            }
+            // utbetaling kan endres til å starte tidligere, eksempelvis via revurdering der feriedager egentlig er sykedager
+            fomHarFlyttetSegBakover(eldre.kopierUtenOpphørslinjer()) -> {
+                aktivitetslogg.warn(WARN_OPPDRAG_FOM_ENDRET)
+                kjørFrem(eldre.kopierUtenOpphørslinjer())
+            }
             // fom er lik, men endring kan oppstå overalt ellers
-            else -> endre(eldre, aktivitetslogg)
+            else -> endre(eldre.kopierUtenOpphørslinjer(), aktivitetslogg)
         }
     }
 
