@@ -40,7 +40,7 @@ allprojects {
         testImplementation("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")
         testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
 
-        testImplementation("com.opentable.components:otj-pg-embedded:0.13.4")
+        testImplementation("org.testcontainers:postgresql:1.16.2")
     }
 
     tasks {

@@ -3,7 +3,6 @@ package no.nav.helse.spleis
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.stubFor
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import io.ktor.http.*
@@ -24,10 +23,8 @@ import org.flywaydb.core.Flyway
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.TestInstance.Lifecycle
-import org.junit.jupiter.api.io.TempDir
+import org.testcontainers.containers.PostgreSQLContainer
 import java.net.Socket
-import java.nio.file.Path
-import java.sql.Connection
 import java.util.*
 import java.util.concurrent.TimeUnit.SECONDS
 import java.util.concurrent.atomic.AtomicInteger
@@ -41,8 +38,7 @@ internal class RestApiTest {
         private const val AKTØRID = "42"
     }
 
-    private lateinit var embeddedPostgres: EmbeddedPostgres
-    private lateinit var postgresConnection: Connection
+    private val postgres = PostgreSQLContainer<Nothing>("postgres:13")
     private lateinit var dataSource: DataSource
     private lateinit var flyway: Flyway
 
@@ -54,12 +50,8 @@ internal class RestApiTest {
     private val teller = AtomicInteger()
 
     @BeforeAll
-    internal fun `start embedded environment`(@TempDir postgresPath: Path) {
-        embeddedPostgres = EmbeddedPostgres.builder()
-            .setOverrideWorkingDirectory(postgresPath.toFile())
-            .setDataDirectory(postgresPath.resolve("datadir"))
-            .start()
-        postgresConnection = embeddedPostgres.postgresDatabase.connection
+    internal fun `start embedded environment`() {
+        postgres.start()
 
         //Stub ID provider (for authentication of REST endpoints)
         wireMockServer.start()
@@ -80,7 +72,9 @@ internal class RestApiTest {
         appBaseUrl = "http://localhost:$randomPort"
 
         dataSource = HikariDataSource(HikariConfig().apply {
-            this.jdbcUrl = embeddedPostgres.getJdbcUrl("postgres", "postgres")
+            jdbcUrl = postgres.jdbcUrl
+            username = postgres.username
+            password = postgres.password
             maximumPoolSize = 3
             minimumIdle = 1
             idleTimeout = 10001
@@ -99,7 +93,9 @@ internal class RestApiTest {
                 configurationUrl = "${wireMockServer.baseUrl()}/config"
             ),
             DataSourceConfiguration(
-                jdbcUrl = embeddedPostgres.getJdbcUrl("postgres", "postgres")
+                jdbcUrl = postgres.jdbcUrl,
+                databaseUsername = postgres.username,
+                databasePassword = postgres.password
             ),
             teller
         )
@@ -111,8 +107,7 @@ internal class RestApiTest {
     internal fun `stop embedded environment`() {
         app.stop(1000L, 1000L)
         wireMockServer.stop()
-        postgresConnection.close()
-        embeddedPostgres.close()
+        postgres.stop()
     }
 
     @BeforeEach
