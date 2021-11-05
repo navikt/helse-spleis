@@ -83,6 +83,8 @@ class PersonUtbetalingsperiode(
         visitor.visitInfotrygdhistorikkPersonUtbetalingsperiode(orgnr, this, grad, inntekt)
     }
 
+    override fun harBrukerutbetaling() = true
+
     override fun equals(other: Any?): Boolean {
         if (other !is PersonUtbetalingsperiode) return false
         return this.orgnr == other.orgnr && this.start == other.start && this.grad == other.grad && this.inntekt == other.inntekt

@@ -6,8 +6,8 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.utbetaling.*
 import no.nav.helse.person.Arbeidsgiver.Companion.antallMedVedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeidsgivere
-import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSammenligningsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnSykepengegrunnlag
+import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSammenligningsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSykepengegrunnlagGammel
 import no.nav.helse.person.Arbeidsgiver.Companion.harArbeidsgivereMedOverlappendeUtbetaltePerioder
 import no.nav.helse.person.Arbeidsgiver.Companion.harGrunnlagForSykepengegrunnlag
@@ -144,7 +144,7 @@ class Person private constructor(
                     builder = it.builder(regler, skjæringstidspunkter, vilkårsgrunnlagHistorikk.inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver())
                 )
             },
-            infotrygdtidslinje = infotrygdhistorikk.utbetalingstidslinje(),
+            infotrygdhistorikk = infotrygdhistorikk,
             alder = fødselsnummer.alder(),
             dødsdato = dødsdato,
             vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk

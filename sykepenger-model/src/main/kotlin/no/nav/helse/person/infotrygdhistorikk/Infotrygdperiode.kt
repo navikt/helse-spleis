@@ -56,5 +56,11 @@ abstract class Infotrygdperiode(fom: LocalDate, tom: LocalDate) : Periode(fom, t
             if (!inntekter.harInntekterFor(førsteUtbetalingsdager)) aktivitetslogg.error("Mangler inntekt for første utbetalingsdag i en av infotrygdperiodene: $førsteUtbetalingsdager")
         }
 
+        internal fun Iterable<Infotrygdperiode>.harBrukerutbetalingFor(periode: Periode) = this
+            .filter { it.overlapperMed(periode) }
+            .any(Infotrygdperiode::harBrukerutbetaling)
+
     }
+
+    protected open fun harBrukerutbetaling() = false
 }

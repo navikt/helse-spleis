@@ -5,12 +5,13 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
+import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import java.time.LocalDate
 
 internal class ArbeidsgiverUtbetalinger(
     private val regler: ArbeidsgiverRegler,
     private val arbeidsgivere: Map<Arbeidsgiver, IUtbetalingstidslinjeBuilder>,
-    private val infotrygdtidslinje: Utbetalingstidslinje,
+    private val infotrygdhistorikk: Infotrygdhistorikk,
     private val alder: Alder,
     private val dødsdato: LocalDate?,
     private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
@@ -34,13 +35,14 @@ internal class ArbeidsgiverUtbetalinger(
         AvvisDagerEtterFylte70ÅrFilter(tidslinjer, periode, alder, aktivitetslogg).filter()
         vilkårsgrunnlagHistorikk.avvisUtbetalingsdagerMedBegrunnelse(tidslinjer, alder)
         tidslinjeEngine = MaksimumSykepengedagerfilter(alder, regler, periode, aktivitetslogg).also {
-            it.filter(tidslinjer, infotrygdtidslinje.kutt(periode.endInclusive))
+            it.filter(tidslinjer, infotrygdhistorikk.utbetalingstidslinje().kutt(periode.endInclusive))
         }
         if (Toggles.RefusjonPerDag.enabled) {
             arbeidsgivere.forEach { (arbeidsgiver, tidslinje) ->
                 Refusjonsgjødsler(
                     tidslinje = tidslinje + arbeidsgiver.infotrygdUtbetalingstidslinje(),
-                    refusjonshistorikk = arbeidsgiver.refusjonshistorikk
+                    refusjonshistorikk = arbeidsgiver.refusjonshistorikk,
+                    infotrygdhistorikk = infotrygdhistorikk
                 ).gjødsle(aktivitetslogg, periode)
             }
         }

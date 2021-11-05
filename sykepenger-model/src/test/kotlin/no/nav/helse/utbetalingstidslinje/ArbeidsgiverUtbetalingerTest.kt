@@ -4,6 +4,9 @@ import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.*
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
+import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
+import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
+import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
@@ -356,27 +359,31 @@ internal class ArbeidsgiverUtbetalingerTest {
     ) {
         val person = Person("aktørid", fnr)
         // seed arbeidsgiver med sykdomshistorikk
-        person.håndter(Sykmelding(
-            meldingsreferanseId = UUID.randomUUID(),
-            fnr = UNG_PERSON_FNR_2018.toString(),
-            aktørId = "",
-            orgnummer = ORGNUMMER,
-            sykeperioder = listOf(Sykmeldingsperiode(1.januar, 2.januar, 100.prosent)),
-            sykmeldingSkrevet = 1.januar.atStartOfDay(),
-            mottatt = 1.januar.atStartOfDay()
-        ))
+        person.håndter(
+            Sykmelding(
+                meldingsreferanseId = UUID.randomUUID(),
+                fnr = UNG_PERSON_FNR_2018.toString(),
+                aktørId = "",
+                orgnummer = ORGNUMMER,
+                sykeperioder = listOf(Sykmeldingsperiode(1.januar, 2.januar, 100.prosent)),
+                sykmeldingSkrevet = 1.januar.atStartOfDay(),
+                mottatt = 1.januar.atStartOfDay()
+            )
+        )
 
-        person.vilkårsgrunnlagHistorikk.lagre(1.januar, vilkårsgrunnlagElement ?: VilkårsgrunnlagHistorikk.Grunnlagsdata(
-            sykepengegrunnlag = sykepengegrunnlag(30000.månedlig),
-            sammenligningsgrunnlag = 30000.månedlig,
-            avviksprosent = Prosent.prosent(0.0),
-            antallOpptjeningsdagerErMinst = 28,
-            harOpptjening = true,
-            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-            harMinimumInntekt = true,
-            vurdertOk = true,
-            meldingsreferanseId = UUID.randomUUID()
-        ))
+        person.vilkårsgrunnlagHistorikk.lagre(
+            1.januar, vilkårsgrunnlagElement ?: VilkårsgrunnlagHistorikk.Grunnlagsdata(
+                sykepengegrunnlag = sykepengegrunnlag(30000.månedlig),
+                sammenligningsgrunnlag = 30000.månedlig,
+                avviksprosent = Prosent.prosent(0.0),
+                antallOpptjeningsdagerErMinst = 28,
+                harOpptjening = true,
+                medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+                harMinimumInntekt = true,
+                vurdertOk = true,
+                meldingsreferanseId = UUID.randomUUID()
+            )
+        )
 
         person.håndter(
             inntektsmelding = Inntektsmelding(
@@ -395,15 +402,33 @@ internal class ArbeidsgiverUtbetalingerTest {
             )
         )
         aktivitetslogg = Aktivitetslogg()
+
+        val infotrygdhistorikk = Infotrygdhistorikk().apply {
+            this.oppdaterHistorikk(
+                InfotrygdhistorikkElement.opprett(
+                    oppdatert = LocalDateTime.now(),
+                    hendelseId = UUID.randomUUID(),
+                    perioder = listOf(object : Infotrygdperiode(historiskTidslinje.periode().start, historiskTidslinje.periode().endInclusive) {
+                        override fun accept(visitor: InfotrygdhistorikkVisitor) {}
+                        override fun utbetalingstidslinje() = historiskTidslinje
+                    }),
+                    inntekter = emptyList(),
+                    arbeidskategorikoder = emptyMap(),
+                    ugyldigePerioder = emptyList(),
+                    harStatslønn = false
+                )
+            )
+        }
+
         ArbeidsgiverUtbetalinger(
             NormalArbeidstaker,
             mapOf(person.arbeidsgiver(ORGNUMMER) to IUtbetalingstidslinjeBuilder { _, _ -> arbeidsgiverTidslinje }),
-            historiskTidslinje,
+            infotrygdhistorikk,
             fnr.alder(),
             null,
             person.vilkårsgrunnlagHistorikk
         ).also {
-            it.beregn(aktivitetslogg, "88888888", Periode(1.januar, 31.desember(2019)),)
+            it.beregn(aktivitetslogg, "88888888", Periode(1.januar, 31.desember(2019)))
             it.tidslinjeEngine.beregnGrenser()
             maksdato = it.tidslinjeEngine.maksdato()
             gjenståendeSykedager = it.tidslinjeEngine.gjenståendeSykedager()

@@ -2,6 +2,7 @@ package no.nav.helse.person.infotrygdhistorikk
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.*
+import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.harBrukerutbetalingFor
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.validerInntektForPerioder
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning.Companion.lagreVilkårsgrunnlag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
@@ -245,4 +246,6 @@ internal class InfotrygdhistorikkElement private constructor(
     internal fun harEndretHistorikk(utbetaling: Utbetaling): Boolean {
         return utbetaling.erEldreEnn(tidsstempel)
     }
+
+    internal fun harBrukerutbetalingerFor(periode: Periode) = perioder.harBrukerutbetalingFor(periode)
 }

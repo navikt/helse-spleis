@@ -148,6 +148,11 @@ internal class Infotrygdhistorikk private constructor(
 
     private fun harHistorikk() = elementer.isNotEmpty()
 
+    internal fun harBrukerutbetalingerFor(periode: Periode): Boolean {
+        if(!harHistorikk()) return false
+        return siste.harBrukerutbetalingerFor(periode)
+    }
+
 
     private inner class Infotrygdhistorikkdekoratør(
         private val builder: UtbetalingstidslinjeBuilder,
