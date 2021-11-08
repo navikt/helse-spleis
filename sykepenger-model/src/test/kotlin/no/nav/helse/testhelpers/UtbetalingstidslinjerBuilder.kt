@@ -3,6 +3,7 @@ package no.nav.helse.testhelpers
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
@@ -40,11 +41,12 @@ internal fun Int.AP(dekningsgrunnlag: Int) = Utbetalingsdager(
 )
 
 internal val Int.NAV get() = this.NAV(1200)
-internal fun Int.NAV(dekningsgrunnlag: Number, grad: Number = 100.0) = Utbetalingsdager(
+internal fun Int.NAV(dekningsgrunnlag: Number, grad: Number = 100.0, refusjonsbeløp: Number = dekningsgrunnlag) = Utbetalingsdager(
     antallDager = this,
     addDagFun = Utbetalingstidslinje::addNAVdag,
     dekningsgrunnlag = dekningsgrunnlag,
-    grad = grad
+    grad = grad,
+    arbeidsgiverbeløp = refusjonsbeløp
 )
 
 internal val Int.ARB get() = this.ARB(1200)

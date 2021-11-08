@@ -7,7 +7,6 @@ import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Endringskode.*
-import no.nav.helse.utbetalingslinjer.Fagområde.Sykepenger
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
 import no.nav.helse.utbetalingslinjer.OppdragBuilderTest.Dagtype
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
@@ -167,7 +166,16 @@ internal class OppdragBuilderTest {
         val oppdragTilUtbetaling3 = oppdragskladd3.minus(oppdragTilUtbetaling2, Aktivitetslogg())
 
         oppdragTilUtbetaling3.assertLinje(0, 1.januar, 18.januar, delytelseId = 1, refDelytelseId = null, refFagsystemId = null)
-        oppdragTilUtbetaling3.assertLinje(1, 20.januar, 26.januar, delytelseId = 2, refDelytelseId = null, endringskode = ENDR, datoStatusFom = 20.januar, refFagsystemId = null)
+        oppdragTilUtbetaling3.assertLinje(
+            1,
+            20.januar,
+            26.januar,
+            delytelseId = 2,
+            refDelytelseId = null,
+            endringskode = ENDR,
+            datoStatusFom = 20.januar,
+            refFagsystemId = null
+        )
         oppdragTilUtbetaling3.assertLinje(2, 24.januar, 28.januar, delytelseId = 3, refDelytelseId = 2, endringskode = NY)
         oppdragTilUtbetaling3.assertLinje(3, 29.januar, 2.februar, delytelseId = 4, refDelytelseId = 3, endringskode = NY)
     }
@@ -191,7 +199,7 @@ internal class OppdragBuilderTest {
             1.februar til 2.februar er FRI,
             3.februar til 5.februar er NAVDAGER medBeløp 1400,
             startdato = 5.januar
-            )
+        )
 
         val oppdragTilUtbetaling = oppdragUtenStartenAvFebruar.minus(originaltOppdrag, Aktivitetslogg())
         assertEquals(2, originaltOppdrag.size)
@@ -199,11 +207,27 @@ internal class OppdragBuilderTest {
 
         originaltOppdrag.apply {
             assertLinje(0, 10.januar, 31.januar, delytelseId = 1, refDelytelseId = null, endringskode = NY, refFagsystemId = null)
-            assertLinje(1, 1.februar, 5.februar, delytelseId = 2, refDelytelseId = 1, endringskode = NY, refFagsystemId = fagsystemId()) //Opphører linje som har blitt overskrevet av nytt oppdrag
+            assertLinje(
+                1,
+                1.februar,
+                5.februar,
+                delytelseId = 2,
+                refDelytelseId = 1,
+                endringskode = NY,
+                refFagsystemId = fagsystemId()
+            ) //Opphører linje som har blitt overskrevet av nytt oppdrag
         }
         oppdragTilUtbetaling.apply {
             assertLinje(0, 5.januar, 31.januar, delytelseId = 3, refDelytelseId = 2, endringskode = NY, refFagsystemId = fagsystemId())
-            assertLinje(1, 3.februar, 5.februar, delytelseId = 4, refDelytelseId = 3, endringskode = NY, refFagsystemId = fagsystemId()) //Opphører linje som har blitt overskrevet av nytt oppdrag
+            assertLinje(
+                1,
+                3.februar,
+                5.februar,
+                delytelseId = 4,
+                refDelytelseId = 3,
+                endringskode = NY,
+                refFagsystemId = fagsystemId()
+            ) //Opphører linje som har blitt overskrevet av nytt oppdrag
         }
     }
 
@@ -238,7 +262,16 @@ internal class OppdragBuilderTest {
 
         oppdragTilUtbetaling3.apply {
             assertLinje(0, 1.januar, 18.januar, delytelseId = 1, refDelytelseId = null, refFagsystemId = null)
-            assertLinje(1, 20.januar, 26.januar, delytelseId = 2, refDelytelseId = null, endringskode = ENDR, datoStatusFom = 20.januar, refFagsystemId = null) //Opphører linje som har blitt overskrevet av nytt oppdrag
+            assertLinje(
+                1,
+                20.januar,
+                26.januar,
+                delytelseId = 2,
+                refDelytelseId = null,
+                endringskode = ENDR,
+                datoStatusFom = 20.januar,
+                refFagsystemId = null
+            ) //Opphører linje som har blitt overskrevet av nytt oppdrag
             assertLinje(2, 24.januar, 29.januar, delytelseId = 3, refDelytelseId = 2, endringskode = NY)
             assertLinje(3, 30.januar, 3.februar, delytelseId = 4, refDelytelseId = 3, endringskode = NY, sats = 520, grad = 40.0)
         }
@@ -247,7 +280,17 @@ internal class OppdragBuilderTest {
             //Gammel opphørslinje er filtrert vekk
             assertLinje(0, 1.januar, 18.januar, delytelseId = 1, refDelytelseId = null, refFagsystemId = null)
             assertLinje(1, 24.januar, 29.januar, delytelseId = 3, refDelytelseId = 2, endringskode = UEND, datoStatusFom = null, sats = 1100)
-            assertLinje(2, 30.januar, 3.februar, delytelseId = 4, refDelytelseId = null, refFagsystemId = null, endringskode = ENDR, datoStatusFom = 30.januar, sats = 520)
+            assertLinje(
+                2,
+                30.januar,
+                3.februar,
+                delytelseId = 4,
+                refDelytelseId = null,
+                refFagsystemId = null,
+                endringskode = ENDR,
+                datoStatusFom = 30.januar,
+                sats = 520
+            )
             assertLinje(3, 1.februar, 3.februar, delytelseId = 5, refDelytelseId = 4, endringskode = NY, sats = 520, grad = 40.0)
         }
     }
@@ -270,7 +313,7 @@ internal class OppdragBuilderTest {
         }
     }
 
-    object AssertAtOppdragErENDR: OppdragVisitor {
+    object AssertAtOppdragErENDR : OppdragVisitor {
         override fun preVisitOppdrag(oppdrag: Oppdrag, totalBeløp: Int, nettoBeløp: Int, tidsstempel: LocalDateTime, endringskode: Endringskode) {
             assertEquals(ENDR, endringskode)
         }
@@ -354,6 +397,14 @@ internal class OppdragBuilderTest {
         assertEquals(1, oppdrag.size)
     }
 
+    @Test
+    fun `personoppdrag`() {
+        val oppdrag = opprett(16.AP, 15.NAV(refusjonsbeløp = 0, dekningsgrunnlag = 1200), fagområde = Fagområde.Sykepenger)
+        assertEquals(1, oppdrag.size)
+        assertEquals(Fagområde.Sykepenger, oppdrag.fagområde())
+        oppdrag.assertLinje(0, 17.januar, 31.januar, null, 1200, 100.0, endringskode = NY)
+    }
+
     private fun Oppdrag.assertLinje(
         index: Int,
         fom: LocalDate,
@@ -389,15 +440,15 @@ internal class OppdragBuilderTest {
         assertEquals(10.januar, oppdrag.last().tom)
     }
 
-    private fun tilArbeidsgiver(vararg dager: Utbetalingsdager, sisteDato: LocalDate? = null, startdato: LocalDate = 1.januar): Oppdrag {
-        return opprett(dager = dager, sisteDato, startdato, fagområde = SykepengerRefusjon)
-    }
+    private fun tilArbeidsgiver(vararg dager: Utbetalingsdager, sisteDato: LocalDate? = null, startdato: LocalDate = 1.januar): Oppdrag =
+        opprett(dager = dager, sisteDato, startdato, fagområde = SykepengerRefusjon)
 
-    private fun tilSykmeldte(vararg dager: Utbetalingsdager, sisteDato: LocalDate? = null, startdato: LocalDate = 1.januar): Oppdrag {
-        return opprett(dager = dager, sisteDato, startdato, fagområde = Sykepenger)
-    }
+    private fun tilSykmeldte(vararg dager: Utbetalingsdager, sisteDato: LocalDate? = null, startdato: LocalDate = 1.januar): Oppdrag =
+        opprett(dager = dager, sisteDato, startdato, fagområde = Fagområde.Sykepenger)
 
-    private fun opprett(vararg dager: Utbetalingsdager, sisteDato: LocalDate? = null, startdato: LocalDate = 1.januar, fagområde: Fagområde): Oppdrag {
+    private fun opprett(
+        vararg dager: Utbetalingsdager, sisteDato: LocalDate? = null, startdato: LocalDate = 1.januar, fagområde: Fagområde
+    ): Oppdrag {
         val tidslinje = tidslinjeOf(*dager, startDato = startdato)
         MaksimumUtbetaling(
             listOf(tidslinje),
@@ -425,5 +476,5 @@ internal class OppdragBuilderTest {
     }
 
     private val NAVDAGER = Dagtype { periode -> periode.count().NAVv2 }
-    private val FRI = Dagtype { periode ->  periode.count().FRIv2 }
+    private val FRI = Dagtype { periode -> periode.count().FRIv2 }
 }
