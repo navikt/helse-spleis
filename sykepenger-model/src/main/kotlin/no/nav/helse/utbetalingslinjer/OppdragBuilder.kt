@@ -1,5 +1,6 @@
 package no.nav.helse.utbetalingslinjer
 
+import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
@@ -26,12 +27,19 @@ internal class OppdragBuilder(
         tidslinje.kutt(sisteDato).reverse().accept(this)
     }
 
-    internal fun result(): Oppdrag {
+    internal fun nyttOppdrag(): Oppdrag {
         arbeisdsgiverLinjer.removeAll { it.beløp == null || it.beløp == 0 }
         arbeisdsgiverLinjer.zipWithNext { a, b -> b.kobleTil(a) }
         arbeisdsgiverLinjer.firstOrNull()?.refFagsystemId = null
         return Oppdrag(mottaker, fagområde, arbeisdsgiverLinjer, fagsystemId, sisteArbeidsgiverdag)
     }
+
+    internal fun oppdragBasertPåTidligere(tidligere: Oppdrag, aktivitetslogg: IAktivitetslogg) =
+        nyttOppdrag()
+            .minus(tidligere, aktivitetslogg)
+            .also {
+                if (tidligere.fagsystemId() == it.fagsystemId()) it.nettoBeløp(tidligere)
+            }
 
     private val linje get() = arbeisdsgiverLinjer.first()
 

@@ -424,6 +424,28 @@ internal class Utbetaling private constructor(
 
         internal fun List<Utbetaling>.kronologisk() = this.sortedBy { it.tidsstempel }
 
+        private fun byggOppdrag(
+            sisteAktive: Oppdrag?,
+            organisasjonsnummer: String,
+            tidslinje: Utbetalingstidslinje,
+            sisteDato: LocalDate,
+            aktivitetslogg: IAktivitetslogg,
+            forrige: Oppdrag?,
+            fagområde: Fagområde
+        ): Oppdrag {
+            val tidligere = forrige ?: sisteAktive
+            val historieløstOppdrag = OppdragBuilder(tidslinje, organisasjonsnummer, fagområde, sisteDato, forrige?.fagsystemId())
+            val oppdrag = tidligere?.let {
+                historieløstOppdrag.oppdragBasertPåTidligere(tidligere, aktivitetslogg)
+            } ?: historieløstOppdrag.nyttOppdrag()
+
+            aktivitetslogg.info(
+                if (oppdrag.isEmpty()) "Ingen utbetalingslinjer bygget"
+                else "Utbetalingslinjer bygget vellykket"
+            )
+            return oppdrag
+        }
+
         private fun byggArbeidsgiveroppdrag(
             sisteAktive: Oppdrag?,
             organisasjonsnummer: String,
@@ -431,22 +453,7 @@ internal class Utbetaling private constructor(
             sisteDato: LocalDate,
             aktivitetslogg: IAktivitetslogg,
             forrige: Oppdrag?
-        ): Oppdrag {
-            val tidligere = forrige ?: sisteAktive
-            val historieløstOppdrag = OppdragBuilder(tidslinje, organisasjonsnummer, SykepengerRefusjon, sisteDato, forrige?.fagsystemId()).result()
-            val oppdrag = tidligere?.let {
-                historieløstOppdrag.minus(tidligere, aktivitetslogg)
-            }?.also {
-                if (tidligere.fagsystemId() == it.fagsystemId()) it.nettoBeløp(tidligere)
-            } ?: historieløstOppdrag
-
-            aktivitetslogg.info(
-                if (oppdrag.isEmpty()) "Ingen utbetalingslinjer bygget"
-                else "Utbetalingslinjer bygget vellykket"
-            )
-
-            return oppdrag
-        }
+        ) = byggOppdrag(sisteAktive, organisasjonsnummer, tidslinje, sisteDato, aktivitetslogg, forrige, SykepengerRefusjon)
 
         @Suppress("UNUSED_PARAMETER")
         private fun byggPersonoppdrag(        // TODO("To be completed when payments to employees is supported")
