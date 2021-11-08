@@ -402,7 +402,7 @@ internal class OppdragBuilderTest {
         val oppdrag = opprett(16.AP, 15.NAV(refusjonsbeløp = 0, dekningsgrunnlag = 1200), fagområde = Fagområde.Sykepenger)
         assertEquals(1, oppdrag.size)
         assertEquals(Fagområde.Sykepenger, oppdrag.fagområde())
-        oppdrag.assertLinje(0, 17.januar, 31.januar, null, 1200, 100.0, endringskode = NY)
+        oppdrag.assertLinje(0, 17.januar, 31.januar, null, sats=1200, grad = 100.0, endringskode = NY)
     }
 
     private fun Oppdrag.assertLinje(
@@ -410,22 +410,52 @@ internal class OppdragBuilderTest {
         fom: LocalDate,
         tom: LocalDate,
         refFagsystemId: String? = this.fagsystemId(),
-        sats: Int? = this[index].beløp,
-        grad: Double? = this[index].grad,
-        delytelseId: Int = this[index]["delytelseId"],
-        refDelytelseId: Int? = this[index]["refDelytelseId"],
-        datoStatusFom: LocalDate? = null,
-        endringskode: Endringskode = this[index]["endringskode"]
+        bean: UtbetalingslinjeAsJavaBean = UtbetalingslinjeAsJavaBean(this[index]),
+        sats: Int? = bean.beløp,
+        grad: Double? = bean.grad,
+        delytelseId: Int = bean.delytelseId,
+        refDelytelseId: Int? = bean.refDelytelseId,
+        datoStatusFom: LocalDate? = bean.datoStatusFom,
+        endringskode: Endringskode = bean.endringskode
     ) {
-        assertEquals(fom, this[index].fom)
-        assertEquals(tom, this[index].tom)
-        assertEquals(grad, this[index].grad)
-        assertEquals(sats, this[index].beløp)
-        assertEquals(delytelseId, this[index]["delytelseId"])
-        assertEquals(refDelytelseId, this[index].get<Int?>("refDelytelseId"))
-        assertEquals(refFagsystemId, this[index].refFagsystemId)
-        assertEquals(datoStatusFom, this[index].get<LocalDate?>("datoStatusFom"))
-        assertEquals(endringskode, this[index].get<Endringskode?>("endringskode"))
+        AssertThatLine(this[index], fom, tom, refFagsystemId, sats, grad, delytelseId, refDelytelseId, datoStatusFom, endringskode)
+    }
+
+    private class UtbetalingslinjeAsJavaBean(actual: Utbetalingslinje): OppdragVisitor {
+        var beløp: Int? = null
+        var grad: Double? = null
+        var delytelseId: Int = -1
+        var refDelytelseId: Int? = null
+        var datoStatusFom: LocalDate? = null
+        var endringskode: Endringskode = NY
+        init {
+            actual.accept(this)
+        }
+        override fun visitUtbetalingslinje(linje: Utbetalingslinje, fom: LocalDate, tom: LocalDate, satstype: Satstype, beløp: Int?, aktuellDagsinntekt: Int?, grad: Double?, delytelseId: Int, refDelytelseId: Int?, refFagsystemId: String?, endringskode: Endringskode, datoStatusFom: LocalDate?, klassekode: Klassekode) {
+            this.beløp = beløp
+            this.grad = grad
+            this.delytelseId = delytelseId
+            this.refDelytelseId = refDelytelseId
+            this.datoStatusFom = datoStatusFom
+            this.endringskode = endringskode
+        }
+    }
+
+    private class AssertThatLine(actual: Utbetalingslinje, private val expectedFOM: LocalDate, private val expectedTOM: LocalDate, private val expectedRefFagsystemId: String?, private val expectedBeløp: Int?, private val expectedGrad: Double?, private val expectedDelytelseId: Int, private val expectedRefDelytelseId: Int?, private val expectedDatoStatusFom: LocalDate? = null, private val expectedEndringskode: Endringskode): OppdragVisitor {
+        init {
+            actual.accept(this)
+        }
+        override fun visitUtbetalingslinje(linje: Utbetalingslinje, fom: LocalDate, tom: LocalDate, satstype: Satstype, beløp: Int?, aktuellDagsinntekt: Int?, grad: Double?, delytelseId: Int, refDelytelseId: Int?, refFagsystemId: String?, endringskode: Endringskode, datoStatusFom: LocalDate?, klassekode: Klassekode) {
+            assertEquals(fom, expectedFOM)
+            assertEquals(tom, expectedTOM)
+            assertEquals(grad, expectedGrad)
+            assertEquals(beløp, expectedBeløp)
+            assertEquals(delytelseId, expectedDelytelseId)
+            assertEquals(refDelytelseId, expectedRefDelytelseId)
+            assertEquals(refFagsystemId, expectedRefFagsystemId)
+            assertEquals(datoStatusFom, expectedDatoStatusFom)
+            assertEquals(endringskode, expectedEndringskode)
+        }
     }
 
     private val Oppdrag.sisteArbeidsgiverdag get() = this.get<LocalDate?>("sisteArbeidsgiverdag")
