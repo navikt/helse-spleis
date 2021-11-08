@@ -9,10 +9,16 @@ internal enum class Fagområde(
     private val linjerStrategy: (Utbetaling) -> Oppdrag,
     private val beløpStrategy: (Økonomi) -> Int
 ) {
-    SykepengerRefusjon("SPREF", Utbetaling::arbeidsgiverOppdrag, reflectedArbeidsgiverBeløp),
-    Sykepenger("SP", Utbetaling::personOppdrag, reflectedPersonBeløp);
+    SykepengerRefusjon("SPREF", Utbetaling::arbeidsgiverOppdrag, reflectedArbeidsgiverBeløp) {
+        override fun klassekode(): Klassekode = Klassekode.RefusjonIkkeOpplysningspliktig
+    },
+    Sykepenger("SP", Utbetaling::personOppdrag, reflectedPersonBeløp) {
+        override fun klassekode(): Klassekode = Klassekode.SykepengerArbeidstakerOrdinær
+    };
 
     override fun toString() = verdi
+
+    abstract fun klassekode(): Klassekode
 
     internal fun beløp(økonomi: Økonomi) =
         beløpStrategy(økonomi)

@@ -106,7 +106,7 @@ internal class OppdragBuilderTest {
         val oppdrag = tilArbeidsgiver(2.NAV, 2.AP, 2.NAV, 2.HELG, 2.AP, 3.NAV)
 
         assertEquals(1, oppdrag.size)
-        oppdrag.assertLinje(0, 11.januar, 13.januar, null)
+        oppdrag.assertLinje(0, 11.januar, 13.januar, null, klassekode = Klassekode.RefusjonIkkeOpplysningspliktig)
         assertEquals(10.januar, oppdrag.sisteArbeidsgiverdag)
     }
 
@@ -398,11 +398,11 @@ internal class OppdragBuilderTest {
     }
 
     @Test
-    fun personoppdrag() {
-        val oppdrag = opprett(16.AP, 15.NAV(refusjonsbeløp = 0, dekningsgrunnlag = 1200), fagområde = Fagområde.Sykepenger)
+    fun `oppretter personoppdrag`() {
+        val oppdrag = tilSykmeldte(16.AP, 15.NAV.medRefusjon(0))
         assertEquals(1, oppdrag.size)
         assertEquals(Fagområde.Sykepenger, oppdrag.fagområde())
-        oppdrag.assertLinje(0, 17.januar, 31.januar, null, 1200, 100.0, endringskode = NY)
+        oppdrag.assertLinje(0, 17.januar, 31.januar, null, 1200, 100.0, endringskode = NY, klassekode = Klassekode.SykepengerArbeidstakerOrdinær)
     }
 
     private fun Oppdrag.assertLinje(
@@ -415,7 +415,8 @@ internal class OppdragBuilderTest {
         delytelseId: Int = this[index]["delytelseId"],
         refDelytelseId: Int? = this[index]["refDelytelseId"],
         datoStatusFom: LocalDate? = null,
-        endringskode: Endringskode = this[index]["endringskode"]
+        endringskode: Endringskode = this[index]["endringskode"],
+        klassekode: Klassekode = this[index]["klassekode"]
     ) {
         assertEquals(fom, this[index].fom)
         assertEquals(tom, this[index].tom)
@@ -426,6 +427,7 @@ internal class OppdragBuilderTest {
         assertEquals(refFagsystemId, this[index].refFagsystemId)
         assertEquals(datoStatusFom, this[index].get<LocalDate?>("datoStatusFom"))
         assertEquals(endringskode, this[index].get<Endringskode?>("endringskode"))
+        assertEquals(klassekode, this[index].get<Klassekode>("klassekode"))
     }
 
     private val Oppdrag.sisteArbeidsgiverdag get() = this.get<LocalDate?>("sisteArbeidsgiverdag")

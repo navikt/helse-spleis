@@ -117,7 +117,8 @@ internal class OppdragBuilder(
                 fagområde.beløp(dag.økonomi),
                 aktuellDagsinntekt.roundToInt(),
                 grad,
-                fagsystemId
+                fagsystemId,
+                klassekode = fagområde.klassekode()
             )
         )
     }
