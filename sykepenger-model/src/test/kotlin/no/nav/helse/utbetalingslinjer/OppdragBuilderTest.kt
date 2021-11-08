@@ -398,7 +398,7 @@ internal class OppdragBuilderTest {
     }
 
     @Test
-    fun `personoppdrag`() {
+    fun personoppdrag() {
         val oppdrag = opprett(16.AP, 15.NAV(refusjonsbeløp = 0, dekningsgrunnlag = 1200), fagområde = Fagområde.Sykepenger)
         assertEquals(1, oppdrag.size)
         assertEquals(Fagområde.Sykepenger, oppdrag.fagområde())
