@@ -259,7 +259,7 @@ internal class OppdragBuilder(
             aktuellDagsinntekt: Double
         ) {
             linje.beløp = fagområde.beløp(dag.økonomi)
-            linje.aktuellDagsinntekt = aktuellDagsinntekt.roundToInt() //Needs to be changed for self employed
+            linje.aktuellDagsinntekt = aktuellDagsinntekt.roundToInt()
             linje.fom = dag.dato
             tilstand = LinjeMedSats()
         }
