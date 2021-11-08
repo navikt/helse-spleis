@@ -7,9 +7,9 @@ class Organisasjonsnummer private constructor(private val value: String) {
     fun somLong() = value.toLong()
 
     companion object {
-        fun tilOrganisasjonsnummer(fnr: String): Organisasjonsnummer {
-            if (fnr.length == 9 && alleTegnErSiffer(fnr)) return Organisasjonsnummer(fnr)
-            else throw RuntimeException("$fnr er ikke et gyldig organisasjonsnummer")
+        fun tilOrganisasjonsnummer(orgnummer: String): Organisasjonsnummer {
+            if (orgnummer.length == 9 && alleTegnErSiffer(orgnummer)) return Organisasjonsnummer(orgnummer)
+            else throw RuntimeException("$orgnummer er ikke et gyldig organisasjonsnummer")
         }
         private fun alleTegnErSiffer(string: String) = string.matches(Regex("\\d*"))
     }
