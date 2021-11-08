@@ -1,8 +1,7 @@
 package no.nav.helse.spleis.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsforholdV2
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlag
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.asLocalDate
@@ -20,6 +19,7 @@ internal class UtbetalingsgrunnlagRiver(
 
     override fun validate(message: JsonMessage) {
         message.requireKey("vedtaksperiodeId", "tilstand")
+        message.forbid("@løsning.${Medlemskap.name}")
         message.requireArray("@løsning.${InntekterForSykepengegrunnlag.name}") {
             require("årMåned", JsonNode::asYearMonth)
             requireArray("inntektsliste") {
