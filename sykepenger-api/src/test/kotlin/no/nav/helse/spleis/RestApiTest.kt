@@ -11,6 +11,11 @@ import io.ktor.server.engine.*
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import no.nav.helse.Toggles
+import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Sykmelding
+import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.person.Person
 import no.nav.helse.serde.serialize
 import no.nav.helse.somFødselsnummer
@@ -18,13 +23,18 @@ import no.nav.helse.spleis.config.AzureAdAppConfig
 import no.nav.helse.spleis.config.DataSourceConfiguration
 import no.nav.helse.spleis.config.KtorConfig
 import no.nav.helse.spleis.dao.HendelseDao
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.awaitility.Awaitility.await
 import org.flywaydb.core.Flyway
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.testcontainers.containers.PostgreSQLContainer
 import java.net.Socket
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.TimeUnit.SECONDS
 import java.util.concurrent.atomic.AtomicInteger
@@ -33,7 +43,8 @@ import javax.sql.DataSource
 @TestInstance(Lifecycle.PER_CLASS)
 internal class RestApiTest {
     private companion object {
-        private const val UNG_PERSON_FNR_2018 = "12020052345"
+        private const val UNG_PERSON_FNR = "12020052345"
+        private const val ORGNUMMER = "987654321"
         private val MELDINGSREFERANSE = UUID.randomUUID()
         private const val AKTØRID = "42"
     }
@@ -115,7 +126,38 @@ internal class RestApiTest {
         flyway.clean()
         flyway.migrate()
 
-        dataSource.lagrePerson(AKTØRID, UNG_PERSON_FNR_2018, Person(AKTØRID, UNG_PERSON_FNR_2018.somFødselsnummer()))
+        val fom = LocalDate.of(2018, 9, 10)
+        val tom = fom.plusDays(16)
+        val sykeperioder = listOf(Sykmeldingsperiode(fom, tom, 100.prosent))
+        val sykmelding = Sykmelding(
+            meldingsreferanseId = UUID.randomUUID(),
+            fnr = "fnr",
+            aktørId = "aktørId",
+            orgnummer = ORGNUMMER,
+            sykeperioder = sykeperioder,
+            sykmeldingSkrevet = fom.atStartOfDay(),
+            mottatt = tom.atStartOfDay()
+        )
+        val inntektsmelding = Inntektsmelding(
+            meldingsreferanseId = UUID.randomUUID(),
+            refusjon = Inntektsmelding.Refusjon(
+                beløp = 12000.månedlig,
+                opphørsdato = null
+            ),
+            orgnummer = ORGNUMMER,
+            fødselsnummer = "fnr",
+            aktørId = "aktørId",
+            førsteFraværsdag = LocalDate.of(2018, 1, 1),
+            beregnetInntekt = 12000.månedlig,
+            arbeidsgiverperioder = listOf(Periode(LocalDate.of(2018, 9, 10), LocalDate.of(2018, 9, 10).plusDays(16))),
+            arbeidsforholdId = null,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = null,
+            mottatt = LocalDateTime.now()
+        )
+        val person = Person(AKTØRID, UNG_PERSON_FNR.somFødselsnummer())
+        person.håndter(sykmelding)
+        person.håndter(inntektsmelding)
+        dataSource.lagrePerson(AKTØRID, UNG_PERSON_FNR, person)
         dataSource.lagreHendelse(MELDINGSREFERANSE)
 
         teller.set(0)
@@ -136,7 +178,7 @@ internal class RestApiTest {
     private fun DataSource.lagreHendelse(
         meldingsReferanse: UUID,
         meldingstype: HendelseDao.Meldingstype = HendelseDao.Meldingstype.INNTEKTSMELDING,
-        fødselsnummer: String = UNG_PERSON_FNR_2018,
+        fødselsnummer: String = UNG_PERSON_FNR,
         data: String = "{}"
     ) {
         using(sessionOf(this)) {
@@ -154,12 +196,12 @@ internal class RestApiTest {
 
     @Test
     fun `hent person`() {
-        "/api/person-snapshot".httpGet(HttpStatusCode.OK, mapOf("fnr" to UNG_PERSON_FNR_2018))
+        "/api/person-snapshot".httpGet(HttpStatusCode.OK, mapOf("fnr" to UNG_PERSON_FNR))
     }
 
     @Test
     fun `hent personJson med fnr`() {
-        "/api/person-json".httpGet(HttpStatusCode.OK, mapOf("fnr" to UNG_PERSON_FNR_2018))
+        "/api/person-json".httpGet(HttpStatusCode.OK, mapOf("fnr" to UNG_PERSON_FNR))
     }
 
     @Test
@@ -177,16 +219,114 @@ internal class RestApiTest {
         "/api/hendelse-json/${MELDINGSREFERANSE}".httpGet(HttpStatusCode.OK)
     }
 
+    @Test
+    fun `tester person-resolver`() {
+        Toggles.SpeilApiV2.enable()
+
+        val query = """
+            {
+                person(fnr: ${UNG_PERSON_FNR.toLong()}) {
+                    aktorId,
+                    fodselsnummer,
+                    arbeidsgivere {
+                        organisasjonsnummer,
+                        id,
+                        generasjoner {
+                            id,
+                            perioder {
+                                id,
+                                fom,
+                                tom,
+                                behandlingstype,
+                                periodetype,
+                                inntektskilde,
+                                erForkastet,
+                                opprettet
+                            }
+                        }
+                    },
+                    dodsdato,
+                    versjon
+                }
+            }
+        """.trimIndent()
+
+        "/graphql".httpPost(
+            body = """
+                {
+                    "query": "$query"
+                }
+            """.trimIndent()
+        ) {
+            this
+        }
+
+        Toggles.SpeilApiV2.disable()
+    }
+
+    @Test
+    fun `tester perioder-resolver`() {
+        Toggles.SpeilApiV2.enable()
+
+        val query = """
+            {
+                perioder(fnr: ${UNG_PERSON_FNR.toLong()}, orgnr: \"$ORGNUMMER\", generasjonsindeks: 0) {
+                    fom,
+                    tom
+                }
+            }
+        """.trimIndent()
+
+        "/graphql".httpPost(
+            body = """
+                {
+                    "query": "$query"
+                }
+            """.trimIndent()
+        ) {
+            this
+        }
+
+        Toggles.SpeilApiV2.disable()
+    }
+
+    private fun createToken() = jwtStub.createTokenFor(
+        subject = "en_saksbehandler_ident",
+        groups = listOf("sykepenger-saksbehandler-gruppe"),
+        audience = "spleis_azure_ad_app_id"
+    )
+
+    private fun String.httpPost(
+        expectedStatus: HttpStatusCode = HttpStatusCode.OK,
+        headers: Map<String, String> = emptyMap(),
+        body: String = "",
+        testBlock: String.() -> Unit = {}
+    ) {
+        val token = createToken()
+
+        val connection = appBaseUrl.handleRequest(HttpMethod.Get, this) {
+            doOutput = true
+            setRequestProperty(Authorization, "Bearer $token")
+            setRequestProperty("Content-Type", "application/json")
+            setRequestProperty("Accept", "application/json")
+            headers.forEach { (key, value) ->
+                setRequestProperty(key, value)
+            }
+
+            val input = body.toByteArray(Charsets.UTF_8)
+            outputStream.write(input, 0, input.size)
+        }
+
+        assertEquals(expectedStatus.value, connection.responseCode)
+        connection.responseBody.testBlock()
+    }
+
     private fun String.httpGet(
         expectedStatus: HttpStatusCode = HttpStatusCode.OK,
         headers: Map<String, String> = emptyMap(),
         testBlock: String.() -> Unit = {}
     ) {
-        val token = jwtStub.createTokenFor(
-            subject = "en_saksbehandler_ident",
-            groups = listOf("sykepenger-saksbehandler-gruppe"),
-            audience = "spleis_azure_ad_app_id"
-        )
+        val token = createToken()
 
         val connection = appBaseUrl.handleRequest(HttpMethod.Get, this,
             builder = {

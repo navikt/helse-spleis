@@ -47,7 +47,7 @@ data class Utbetalingsinfo(
     val totalGrad: Double? = null
 )
 
-internal data class UberegnetPeriode(
+data class UberegnetPeriode(
     override val vedtaksperiodeId: UUID,
     override val fom: LocalDate,
     override val tom: LocalDate,
@@ -62,7 +62,7 @@ internal data class UberegnetPeriode(
 }
 
 // Dekker datagrunnlaget vi trenger for å populere både pølsen og _hele_ saksbildet
-internal data class BeregnetPeriode(
+data class BeregnetPeriode(
     override val vedtaksperiodeId: UUID,
     override val fom: LocalDate,
     override val tom: LocalDate,

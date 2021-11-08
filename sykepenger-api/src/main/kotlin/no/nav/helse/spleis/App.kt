@@ -1,5 +1,6 @@
 package no.nav.helse.spleis
 
+import com.apurebase.kgraphql.GraphQL
 import com.fasterxml.jackson.core.util.DefaultIndenter
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
 import com.fasterxml.jackson.databind.SerializationFeature
@@ -61,6 +62,7 @@ internal fun createApp(ktorConfig: KtorConfig, azureConfig: AzureAdAppConfig, da
             val dataSource = dataSourceConfiguration.getDataSource(DataSourceConfiguration.Role.ReadOnly)
             spesialistApi(dataSource, API_SERVICE)
             spannerApi(dataSource, API_SERVICE)
+            installGraphQLApi(dataSource, API_SERVICE)
         }
     })
 

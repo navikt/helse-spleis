@@ -8,6 +8,7 @@ val jacksonVersion = "2.12.5"
 val junitJupiterVersion = "5.7.2"
 val kotliqueryVersion = "1.3.1"
 val vaultJdbcVersion = "1.3.9"
+val kGraphQLVersion = "0.17.14"
 
 allprojects {
     group = "no.nav.helse"
@@ -35,6 +36,9 @@ allprojects {
         implementation("no.nav:vault-jdbc:$vaultJdbcVersion")
         implementation("com.github.seratch:kotliquery:$kotliqueryVersion")
         implementation("org.flywaydb:flyway-core:$flywayVersion")
+
+        implementation("com.apurebase:kgraphql:$kGraphQLVersion")
+        implementation("com.apurebase:kgraphql-ktor:$kGraphQLVersion")
 
         testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
         testImplementation("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")

@@ -9,23 +9,14 @@ import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.util.pipeline.*
-import no.nav.helse.person.Person
-import no.nav.helse.serde.api.PersonDTO
-import no.nav.helse.serde.api.hendelseReferanserForPerson
-import no.nav.helse.serde.api.serializePersonForSpeil
 import no.nav.helse.serde.serialize
-import no.nav.helse.spleis.HendelseDTO.*
 import no.nav.helse.spleis.dao.HendelseDao
-import no.nav.helse.spleis.dao.HendelseDao.Meldingstype.*
 import no.nav.helse.spleis.dao.PersonDao
+import no.nav.helse.spleis.dto.håndterPerson
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
-import no.nav.helse.serde.api.v2.InntektsmeldingDTO as SerdeInntektsmeldingDTO
-import no.nav.helse.serde.api.v2.SykmeldingDTO as SerdeSykmeldingDTO
-import no.nav.helse.serde.api.v2.SøknadArbeidsgiverDTO as SerdeSøknadArbeidsgiverDTO
-import no.nav.helse.serde.api.v2.SøknadNavDTO as SerdeSøknadNavDTO
 
 internal fun Application.spesialistApi(dataSource: DataSource, authProviderName: String) {
     val hendelseDao = HendelseDao(dataSource)
@@ -86,57 +77,6 @@ private fun PipelineContext<Unit, ApplicationCall>.fnr(personDao: PersonDao): Lo
     val aktorid = call.request.header("aktorId")?.toLong() ?: throw BadRequestException("Mangler fnr eller aktorId i headers")
     return personDao.hentFødselsnummer(aktorid) ?: throw NotFoundException("Fant ikke aktør-ID")
 }
-
-private fun håndterPerson(person: Person, hendelseDao: HendelseDao): PersonDTO {
-    val hendelseReferanser = hendelseReferanserForPerson(person)
-    val hendelser = hendelseDao.hentHendelser(hendelseReferanser).map { (type, hendelseJson) ->
-        when (type) {
-            NY_SØKNAD -> NySøknadDTO(objectMapper.readTree(hendelseJson))
-            SENDT_SØKNAD_NAV -> SendtSøknadNavDTO(objectMapper.readTree(hendelseJson))
-            SENDT_SØKNAD_ARBEIDSGIVER -> SendtSøknadArbeidsgiverDTO(objectMapper.readTree(hendelseJson))
-            INNTEKTSMELDING -> InntektsmeldingDTO(objectMapper.readTree(hendelseJson))
-        }
-    }.mapHendelseDTO()
-    return serializePersonForSpeil(person, hendelser)
-}
-
-private fun List<HendelseDTO>.mapHendelseDTO() = map {
-    when (it) {
-        is NySøknadDTO -> mapNySøknad(it)
-        is SendtSøknadNavDTO -> mapSendtSøknad(it)
-        is SendtSøknadArbeidsgiverDTO -> mapSendtSøknad(it)
-        is InntektsmeldingDTO -> mapInntektsmelding(it)
-    }
-}
-
-private fun mapSendtSøknad(sendtSøknadNavDTO: SendtSøknadNavDTO) = SerdeSøknadNavDTO(
-    sendtSøknadNavDTO.hendelseId,
-    sendtSøknadNavDTO.fom,
-    sendtSøknadNavDTO.tom,
-    sendtSøknadNavDTO.rapportertdato,
-    sendtSøknadNavDTO.sendtNav
-)
-
-private fun mapSendtSøknad(sendtSøknadArbeidsgiverDTO: SendtSøknadArbeidsgiverDTO) = SerdeSøknadArbeidsgiverDTO(
-    sendtSøknadArbeidsgiverDTO.hendelseId,
-    sendtSøknadArbeidsgiverDTO.fom,
-    sendtSøknadArbeidsgiverDTO.tom,
-    sendtSøknadArbeidsgiverDTO.rapportertdato,
-    sendtSøknadArbeidsgiverDTO.sendtArbeidsgiver
-)
-
-private fun mapNySøknad(nySøknadDTO: NySøknadDTO) = SerdeSykmeldingDTO(
-    nySøknadDTO.hendelseId,
-    nySøknadDTO.fom,
-    nySøknadDTO.tom,
-    nySøknadDTO.rapportertdato
-)
-
-private fun mapInntektsmelding(inntektsmeldingDTO: InntektsmeldingDTO) = SerdeInntektsmeldingDTO(
-    inntektsmeldingDTO.hendelseId,
-    inntektsmeldingDTO.mottattDato,
-    inntektsmeldingDTO.beregnetInntekt.toDouble()
-)
 
 sealed class HendelseDTO(val type: String, val hendelseId: String) {
 
