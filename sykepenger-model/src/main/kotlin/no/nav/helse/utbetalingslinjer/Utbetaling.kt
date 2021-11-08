@@ -81,8 +81,8 @@ internal class Utbetaling private constructor(
     ) : this(
         beregningId,
         utbetalingstidslinje.kutt(sisteDato),
-        buildArb(sisteAktive?.arbeidsgiverOppdrag, organisasjonsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, forrige?.arbeidsgiverOppdrag),
-        buildPerson(fødselsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, emptyList()),
+        byggArbeidsgiveroppdrag(sisteAktive?.arbeidsgiverOppdrag, organisasjonsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, forrige?.arbeidsgiverOppdrag),
+        byggPersonoppdrag(fødselsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, emptyList()),
         type,
         maksdato,
         forbrukteSykedager,
@@ -424,7 +424,7 @@ internal class Utbetaling private constructor(
 
         internal fun List<Utbetaling>.kronologisk() = this.sortedBy { it.tidsstempel }
 
-        private fun buildArb(
+        private fun byggArbeidsgiveroppdrag(
             sisteAktive: Oppdrag?,
             organisasjonsnummer: String,
             tidslinje: Utbetalingstidslinje,
@@ -449,7 +449,7 @@ internal class Utbetaling private constructor(
         }
 
         @Suppress("UNUSED_PARAMETER")
-        private fun buildPerson(        // TODO("To be completed when payments to employees is supported")
+        private fun byggPersonoppdrag(        // TODO("To be completed when payments to employees is supported")
             fødselsnummer: String,
             tidslinje: Utbetalingstidslinje,
             sisteDato: LocalDate,
