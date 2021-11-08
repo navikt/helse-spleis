@@ -247,5 +247,5 @@ internal class InfotrygdhistorikkElement private constructor(
         return utbetaling.erEldreEnn(tidsstempel)
     }
 
-    internal fun harBrukerutbetalingerFor(periode: Periode) = perioder.harBrukerutbetalingFor(periode)
+    internal fun harBrukerutbetalingerFor(organisasjonsnummer: String, periode: Periode) = perioder.harBrukerutbetalingFor(organisasjonsnummer, periode)
 }

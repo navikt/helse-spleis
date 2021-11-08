@@ -413,22 +413,57 @@ internal class InfotrygdhistorikkTest {
     }
 
     @Test
-    internal fun `har endret historikk når historikk er tom`() {
+    fun `har endret historikk når historikk er tom`() {
         assertFalse(historikk.harEndretHistorikk(utbetaling()))
     }
 
     @Test
-    internal fun `har endret historikk dersom utbetaling er eldre enn siste element`() {
+    fun `har endret historikk dersom utbetaling er eldre enn siste element`() {
         val utbetaling = utbetaling().also { Thread.sleep(100) }
         historikk.oppdaterHistorikk(historikkelement())
         assertTrue(historikk.harEndretHistorikk(utbetaling))
     }
 
     @Test
-    internal fun `har ikke endret historikk dersom utbetaling er nyere enn siste element`() {
+    fun `har ikke endret historikk dersom utbetaling er nyere enn siste element`() {
         historikk.oppdaterHistorikk(historikkelement())
         val utbetaling = utbetaling()
         assertFalse(historikk.harEndretHistorikk(utbetaling))
+    }
+
+    @Test
+    fun `har brukerutbetaling for arbeidsgiveren i perioden`() {
+        historikk.oppdaterHistorikk(historikkelement(listOf(
+            PersonUtbetalingsperiode("ag1", 10.januar,  20.januar, 100.prosent, 25000.månedlig)
+        )))
+        assertTrue(historikk.harBrukerutbetalingerFor("ag1", 5.januar til 15.januar))
+    }
+
+    @Test
+    fun `har ikke brukerutbetaling i perioden`() {
+        historikk.oppdaterHistorikk(historikkelement(listOf(
+            PersonUtbetalingsperiode("ag1", 10.januar,  20.januar, 100.prosent, 25000.månedlig)
+        )))
+        assertFalse(historikk.harBrukerutbetalingerFor("ag1", 5.januar til 9.januar))
+        assertFalse(historikk.harBrukerutbetalingerFor("ag1", 21.januar til 31.januar))
+    }
+
+    @Test
+    fun `har ikke brukerutbetaling for arbeidsgiveren`() {
+        historikk.oppdaterHistorikk(historikkelement(listOf(
+            PersonUtbetalingsperiode("ag1", 10.januar,  20.januar, 100.prosent, 25000.månedlig)
+        )))
+        assertFalse(historikk.harBrukerutbetalingerFor("ag2", 10.januar til 20.januar))
+    }
+
+    @Test
+    fun `har ikke brukerutbetaling i historikken`() {
+        historikk.oppdaterHistorikk(historikkelement(listOf(
+            ArbeidsgiverUtbetalingsperiode("ag1", 10.januar,  12.januar, 100.prosent, 25000.månedlig),
+            Friperiode(13.januar,  15.januar),
+            UkjentInfotrygdperiode(16.januar, 18.januar)
+        )))
+        assertFalse(historikk.harBrukerutbetalingerFor("ag1", 10.januar til 18.januar))
     }
 
     private fun utbetaling() = Utbetaling.lagUtbetaling(
