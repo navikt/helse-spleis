@@ -22,8 +22,7 @@ internal class V114LagreSykepengegrunnlag : JsonMigration(version = 114) {
             sykepengegrunnlag.put("sykepengegrunnlag", 0.0)
             sykepengegrunnlag.put("grunnlagForSykepengegrunnlag", 0.0)
 
-            val arbeidsgiverInntektsopplysninger = sykepengegrunnlag.withArray("arbeidsgiverInntektsopplysninger")
-
+            val arbeidsgiverInntektsopplysninger = sykepengegrunnlag.putArray("arbeidsgiverInntektsopplysninger")
 
             val grunnlagForSykepengegrunnlag = person["arbeidsgivere"].sumOf { arbeidsgiver ->
                 leggTilArbeidsgiverInntektsopplysning(

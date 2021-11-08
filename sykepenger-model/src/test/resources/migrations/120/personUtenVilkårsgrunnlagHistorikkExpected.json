@@ -1,0 +1,13 @@
+{
+    "fødselsnummer": "04206913337",
+    "arbeidsgivere": [
+        {
+            "organisasjonsnummer": "987654321",
+            "inntektshistorikk": [],
+            "forkastede": [],
+            "vedtaksperioder": []
+        }
+    ],
+    "vilkårsgrunnlagHistorikk": [],
+    "skjemaVersjon": 120
+}

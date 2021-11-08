@@ -1,0 +1,258 @@
+{
+    "aktørId": "12345",
+    "fødselsnummer": "12020052345",
+    "arbeidsgivere": [
+        {
+            "organisasjonsnummer": "987654321",
+            "inntektshistorikk": [
+                {
+                    "id": "e661625f-c9f2-4fe4-a510-03ec7f594567",
+                    "inntektsopplysninger": [
+                        {
+                            "id": "43deb542-fe01-4613-b247-eef6eb56bf8f",
+                            "skatteopplysninger": [
+                                {
+                                    "dato": "2021-09-21",
+                                    "hendelseId": "9d321a1e-7759-497c-811c-0d37b97f9556",
+                                    "beløp": 31000.0,
+                                    "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                                    "måned": "2021-08"
+                                },
+                                {
+                                    "dato": "2021-09-21",
+                                    "hendelseId": "9d321a1e-7759-497c-811c-0d37b97f9556",
+                                    "beløp": 31000.0,
+                                    "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                                    "måned": "2021-07"
+                                },
+                                {
+                                    "dato": "2021-09-21",
+                                    "hendelseId": "9d321a1e-7759-497c-811c-0d37b97f9556",
+                                    "beløp": 31000.0,
+                                    "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                                    "måned": "2021-06"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "15abfcab-d6ae-428d-9b9f-4d0445cabcde",
+                            "dato": "2021-09-21",
+                            "hendelseId": "518938a9-a856-4c3a-a238-a5fe4f4abcde",
+                            "beløp": 31000.0,
+                            "kilde": "INNTEKTSMELDING"
+                        },
+                        {
+                            "id": "db77a702-eeff-4e8c-a592-c20f53bf6787",
+                            "dato": "2019-06-02",
+                            "hendelseId": "11b90b64-8467-448b-b4d5-75e6bebfc549",
+                            "beløp": 31000.0,
+                            "kilde": "INNTEKTSMELDING"
+                        },
+                        {
+                            "id": "fc8e7179-5d63-46ce-a5bf-ec42313ff123",
+                            "skatteopplysninger": [
+                                {
+                                    "dato": "2019-06-01",
+                                    "hendelseId": "ae957631-0f86-4703-907c-320950c96aaa",
+                                    "beløp": 31000.0,
+                                    "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                                    "måned": "2019-05"
+                                },
+                                {
+                                    "dato": "2019-06-01",
+                                    "hendelseId": "ae957631-0f86-4703-907c-320950c96aaa",
+                                    "beløp": 31000.0,
+                                    "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                                    "måned": "2019-04"
+                                },
+                                {
+                                    "dato": "2019-06-01",
+                                    "hendelseId": "ae957631-0f86-4703-907c-320950c96aaa",
+                                    "beløp": 31000.0,
+                                    "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                                    "måned": "2019-03"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "forkastede": [],
+            "vedtaksperioder": [
+                {
+                    "inntektsmeldingInfo": {
+                        "id": "518938a9-a856-4c3a-a238-a5fe4f4abcde"
+                    },
+                    "tilstand": "AVSLUTTET",
+                    "skjæringstidspunkt": "2021-09-21",
+                    "fom": "2021-09-21"
+                },
+                {
+                    "inntektsmeldingInfo": {
+                        "id": "11b90b64-8467-448b-b4d5-75e6bebfc549"
+                    },
+                    "tilstand": "AVSLUTTET",
+                    "skjæringstidspunkt": "2019-06-01",
+                    "fom": "2019-06-01"
+                }
+            ]
+        }
+    ],
+    "vilkårsgrunnlagHistorikk": [
+        {
+            "opprettet": "2021-09-21T13:33:13.364413",
+            "vilkårsgrunnlag": [
+                {
+                    "meldingsreferanseId": "933d24c4-7eb3-4ba3-b331-5041cc077da6",
+                    "skjæringstidspunkt": "2021-09-21",
+                    "type": "Vilkårsprøving",
+                    "sykepengegrunnlag": {
+                        "sykepengegrunnlag": 372000.0,
+                        "grunnlagForSykepengegrunnlag": 372000.0,
+                        "arbeidsgiverInntektsopplysninger": [
+                            {
+                                "orgnummer": "987654321",
+                                "inntektsopplysning": {
+                                    "id": "43deb542-fe01-4613-b247-eef6eb56bf8f",
+                                    "skatteopplysninger": [
+                                        {
+                                            "dato": "2021-09-21",
+                                            "hendelseId": "9d321a1e-7759-497c-811c-0d37b97f9556",
+                                            "beløp": 31000.0,
+                                            "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                                            "måned": "2021-08"
+                                        },
+                                        {
+                                            "dato": "2021-09-21",
+                                            "hendelseId": "9d321a1e-7759-497c-811c-0d37b97f9556",
+                                            "beløp": 31000.0,
+                                            "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                                            "måned": "2021-07"
+                                        },
+                                        {
+                                            "dato": "2021-09-21",
+                                            "hendelseId": "9d321a1e-7759-497c-811c-0d37b97f9556",
+                                            "beløp": 31000.0,
+                                            "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                                            "måned": "2021-06"
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "meldingsreferanseId": "8cdd44f5-621c-4c16-aa94-71cd5232bfd2",
+                    "skjæringstidspunkt": "2019-06-01",
+                    "type": "Vilkårsprøving",
+                    "sykepengegrunnlag": {
+                        "sykepengegrunnlag": 372000.0,
+                        "grunnlagForSykepengegrunnlag": 372000.0,
+                        "arbeidsgiverInntektsopplysninger": [
+                            {
+                                "orgnummer": "987654321",
+                                "inntektsopplysning": {
+                                    "id": "fc8e7179-5d63-46ce-a5bf-ec42313ff123",
+                                    "skatteopplysninger": [
+                                        {
+                                            "dato": "2019-06-01",
+                                            "hendelseId": "ae957631-0f86-4703-907c-320950c96aaa",
+                                            "beløp": 31000.0,
+                                            "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                                            "tidsstempel": "2021-08-24T13:33:13.395239",
+                                            "måned": "2019-05",
+                                            "type": "LØNNSINNTEKT",
+                                            "fordel": "juicy fordel",
+                                            "beskrivelse": "juicy beskrivelse"
+                                        },
+                                        {
+                                            "dato": "2019-06-01",
+                                            "hendelseId": "ae957631-0f86-4703-907c-320950c96aaa",
+                                            "beløp": 31000.0,
+                                            "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                                            "tidsstempel": "2021-08-24T13:33:13.395239",
+                                            "måned": "2019-04",
+                                            "type": "LØNNSINNTEKT",
+                                            "fordel": "juicy fordel",
+                                            "beskrivelse": "juicy beskrivelse"
+                                        },
+                                        {
+                                            "dato": "2019-06-01",
+                                            "hendelseId": "ae957631-0f86-4703-907c-320950c96aaa",
+                                            "beløp": 31000.0,
+                                            "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                                            "tidsstempel": "2021-08-24T13:33:13.395239",
+                                            "måned": "2019-03",
+                                            "type": "LØNNSINNTEKT",
+                                            "fordel": "juicy fordel",
+                                            "beskrivelse": "juicy beskrivelse"
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "opprettet": "2021-08-07T13:33:13.364413",
+            "vilkårsgrunnlag": [
+                {
+                    "meldingsreferanseId": "8cdd44f5-621c-4c16-aa94-71cd5232bfd2",
+                    "skjæringstidspunkt": "2019-06-01",
+                    "type": "Vilkårsprøving",
+                    "sykepengegrunnlag": {
+                        "sykepengegrunnlag": 372000.0,
+                        "grunnlagForSykepengegrunnlag": 372000.0,
+                        "arbeidsgiverInntektsopplysninger": [
+                            {
+                                "orgnummer": "987654321",
+                                "inntektsopplysning": {
+                                    "id": "fc8e7179-5d63-46ce-a5bf-ec42313ff123",
+                                    "skatteopplysninger": [
+                                        {
+                                            "dato": "2019-06-01",
+                                            "hendelseId": "ae957631-0f86-4703-907c-320950c96aaa",
+                                            "beløp": 31000.0,
+                                            "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                                            "tidsstempel": "2021-08-24T13:33:13.395239",
+                                            "måned": "2019-05",
+                                            "type": "LØNNSINNTEKT",
+                                            "fordel": "juicy fordel",
+                                            "beskrivelse": "juicy beskrivelse"
+                                        },
+                                        {
+                                            "dato": "2019-06-01",
+                                            "hendelseId": "ae957631-0f86-4703-907c-320950c96aaa",
+                                            "beløp": 31000.0,
+                                            "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                                            "tidsstempel": "2021-08-24T13:33:13.395239",
+                                            "måned": "2019-04",
+                                            "type": "LØNNSINNTEKT",
+                                            "fordel": "juicy fordel",
+                                            "beskrivelse": "juicy beskrivelse"
+                                        },
+                                        {
+                                            "dato": "2019-06-01",
+                                            "hendelseId": "ae957631-0f86-4703-907c-320950c96aaa",
+                                            "beløp": 31000.0,
+                                            "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                                            "tidsstempel": "2021-08-24T13:33:13.395239",
+                                            "måned": "2019-03",
+                                            "type": "LØNNSINNTEKT",
+                                            "fordel": "juicy fordel",
+                                            "beskrivelse": "juicy beskrivelse"
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ],
+    "skjemaVersjon": 119
+}

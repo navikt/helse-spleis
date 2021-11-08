@@ -1,0 +1,132 @@
+{
+    "aktørId": "12345",
+    "fødselsnummer": "12020052345",
+    "arbeidsgivere": [
+        {
+            "organisasjonsnummer": "987654321",
+            "inntektshistorikk": [
+                {
+                    "id": "e661625f-c9f2-4fe4-a510-03ec7f594567",
+                    "inntektsopplysninger": [
+                        {
+                            "id": "fc8e7179-5d63-46ce-a5bf-ec42313ff123",
+                            "skatteopplysninger": [
+                                {
+                                    "dato": "2019-06-01",
+                                    "hendelseId": "ae957631-0f86-4703-907c-320950c96aaa",
+                                    "beløp": 31000.0,
+                                    "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                                    "tidsstempel": "2021-08-24T13:33:13.395239",
+                                    "måned": "2019-05",
+                                    "type": "LØNNSINNTEKT",
+                                    "fordel": "juicy fordel",
+                                    "beskrivelse": "juicy beskrivelse"
+                                },
+                                {
+                                    "dato": "2019-06-01",
+                                    "hendelseId": "ae957631-0f86-4703-907c-320950c96aaa",
+                                    "beløp": 31000.0,
+                                    "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                                    "tidsstempel": "2021-08-24T13:33:13.395239",
+                                    "måned": "2019-04",
+                                    "type": "LØNNSINNTEKT",
+                                    "fordel": "juicy fordel",
+                                    "beskrivelse": "juicy beskrivelse"
+                                },
+                                {
+                                    "dato": "2019-06-01",
+                                    "hendelseId": "ae957631-0f86-4703-907c-320950c96aaa",
+                                    "beløp": 31000.0,
+                                    "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                                    "tidsstempel": "2021-08-24T13:33:13.395239",
+                                    "måned": "2019-03",
+                                    "type": "LØNNSINNTEKT",
+                                    "fordel": "juicy fordel",
+                                    "beskrivelse": "juicy beskrivelse"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "15abfcab-d6ae-428d-9b9f-4d0445cabcde",
+                            "dato": "2019-06-02",
+                            "hendelseId": "518938a9-a856-4c3a-a238-a5fe4f4abcde",
+                            "beløp": 31000.0,
+                            "kilde": "INNTEKTSMELDING"
+                        }
+                    ]
+                }
+            ],
+            "forkastede": [],
+            "vedtaksperioder": [
+                    {
+                        "inntektsmeldingInfo": {
+                            "id": "518938a9-a856-4c3a-a238-a5fe4f4abcde"
+                        },
+                        "tilstand": "AVSLUTTET",
+                        "skjæringstidspunkt": "2019-06-01",
+                        "fom": "2019-06-01"
+                    }
+                ]
+        }
+    ],
+    "vilkårsgrunnlagHistorikk": [
+        {
+            "opprettet": "2021-08-24T13:33:13.364413",
+            "vilkårsgrunnlag": [
+                {
+                    "meldingsreferanseId": "7a57111c-4cea-4fc4-bfb3-d7cdc9493660",
+                    "skjæringstidspunkt": "2019-06-01",
+                    "type": "Vilkårsprøving",
+                    "sykepengegrunnlag": {
+                        "sykepengegrunnlag": 372000.0,
+                        "grunnlagForSykepengegrunnlag": 372000.0,
+                        "arbeidsgiverInntektsopplysninger": [
+                            {
+                                "orgnummer": "987654321",
+                                "inntektsopplysning": {
+                                    "id": "fc8e7179-5d63-46ce-a5bf-ec42313ff123",
+                                    "skatteopplysninger": [
+                                        {
+                                            "dato": "2019-06-01",
+                                            "hendelseId": "ae957631-0f86-4703-907c-320950c96aaa",
+                                            "beløp": 31000.0,
+                                            "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                                            "tidsstempel": "2021-08-24T13:33:13.395239",
+                                            "måned": "2019-05",
+                                            "type": "LØNNSINNTEKT",
+                                            "fordel": "juicy fordel",
+                                            "beskrivelse": "juicy beskrivelse"
+                                        },
+                                        {
+                                            "dato": "2019-06-01",
+                                            "hendelseId": "ae957631-0f86-4703-907c-320950c96aaa",
+                                            "beløp": 31000.0,
+                                            "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                                            "tidsstempel": "2021-08-24T13:33:13.395239",
+                                            "måned": "2019-04",
+                                            "type": "LØNNSINNTEKT",
+                                            "fordel": "juicy fordel",
+                                            "beskrivelse": "juicy beskrivelse"
+                                        },
+                                        {
+                                            "dato": "2019-06-01",
+                                            "hendelseId": "ae957631-0f86-4703-907c-320950c96aaa",
+                                            "beløp": 31000.0,
+                                            "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                                            "tidsstempel": "2021-08-24T13:33:13.395239",
+                                            "måned": "2019-03",
+                                            "type": "LØNNSINNTEKT",
+                                            "fordel": "juicy fordel",
+                                            "beskrivelse": "juicy beskrivelse"
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ],
+    "skjemaVersjon": 119
+}
