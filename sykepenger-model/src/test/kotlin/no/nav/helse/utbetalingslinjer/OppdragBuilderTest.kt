@@ -7,6 +7,7 @@ import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Endringskode.*
+import no.nav.helse.utbetalingslinjer.Fagområde.Sykepenger
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
 import no.nav.helse.utbetalingslinjer.OppdragBuilderTest.Dagtype
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
@@ -23,7 +24,7 @@ internal class OppdragBuilderTest {
 
     @Test
     fun `konverter enkel Utbetalingstidslinje til Utbetalingslinjer`() {
-        val oppdrag = opprett(1.AP, 4.NAV, 2.HELG, 3.NAV)
+        val oppdrag = tilArbeidsgiver(1.AP, 4.NAV, 2.HELG, 3.NAV)
 
         assertEquals(1, oppdrag.size)
         assertEquals(7, oppdrag.antallDager)
@@ -32,7 +33,7 @@ internal class OppdragBuilderTest {
 
     @Test
     fun `helg ved start og slutt i perioden utelates ikke`() {
-        val oppdrag = opprett(1.AP, 1.HELG(1200), 5.NAV(1200), 2.HELG(1200))
+        val oppdrag = tilArbeidsgiver(1.AP, 1.HELG(1200), 5.NAV(1200), 2.HELG(1200))
 
         assertEquals(1, oppdrag.size)
         assertEquals(6, oppdrag.antallDager)
@@ -41,35 +42,35 @@ internal class OppdragBuilderTest {
 
     @Test
     fun `kun helgedager`() {
-        val oppdrag = opprett(1.AP, 2.HELG)
+        val oppdrag = tilArbeidsgiver(1.AP, 2.HELG)
         assertEquals(0, oppdrag.antallDager)
         assertEquals(0, oppdrag.size)
     }
 
     @Test
     fun `kun arbeidsdag`() {
-        val oppdrag = opprett(2.ARB)
+        val oppdrag = tilArbeidsgiver(2.ARB)
 
         assertEquals(0, oppdrag.size)
     }
 
     @Test
     fun `Blanding av dagtyper`() {
-        val oppdrag = opprett(4.FRI, 2.NAV, 4.FRI, 2.HELG, 4.FRI)
+        val oppdrag = tilArbeidsgiver(4.FRI, 2.NAV, 4.FRI, 2.HELG, 4.FRI)
 
         assertEquals(1, oppdrag.size)
     }
 
     @Test
     fun `kun helge- og fridager`() {
-        val oppdrag = opprett(4.FRI, 2.HELG, 4.FRI, 2.HELG, 4.FRI)
+        val oppdrag = tilArbeidsgiver(4.FRI, 2.HELG, 4.FRI, 2.HELG, 4.FRI)
 
         assertEquals(0, oppdrag.size)
     }
 
     @Test
     fun `gap-dag som første og siste dag i perioden`() {
-        val oppdrag = opprett(1.ARB, 3.NAV, 1.ARB)
+        val oppdrag = tilArbeidsgiver(1.ARB, 3.NAV, 1.ARB)
 
         assertEquals(1, oppdrag.size)
         oppdrag.assertLinje(0, 2.januar, 4.januar, null)
@@ -77,7 +78,7 @@ internal class OppdragBuilderTest {
 
     @Test
     fun `grad endres i løpet av helgen`() {
-        val oppdrag = opprett(5.NAV(1500), 1.HELG(1500), 1.HELG(1500, 80.0), 5.NAV(1500, 80.0))
+        val oppdrag = tilArbeidsgiver(5.NAV(1500), 1.HELG(1500), 1.HELG(1500, 80.0), 5.NAV(1500, 80.0))
 
         assertEquals(2, oppdrag.size)
         oppdrag.assertLinje(0, 1.januar, 6.januar, null, sats = 1500, grad = 100.0)
@@ -94,7 +95,7 @@ internal class OppdragBuilderTest {
 
     @Test
     fun `Utbetalingslinjer genereres kun fra dagen etter siste AGP-dag`() {
-        val oppdrag = opprett(2.NAV, 2.AP, 2.NAV, 2.HELG, 3.NAV)
+        val oppdrag = tilArbeidsgiver(2.NAV, 2.AP, 2.NAV, 2.HELG, 3.NAV)
 
         assertEquals(1, oppdrag.size)
         oppdrag.assertLinje(0, 5.januar, 11.januar, null)
@@ -103,7 +104,7 @@ internal class OppdragBuilderTest {
 
     @Test
     fun `Utbetalingslinjer genereres kun fra dagen etter siste AGP-dag 2`() {
-        val oppdrag = opprett(2.NAV, 2.AP, 2.NAV, 2.HELG, 2.AP, 3.NAV)
+        val oppdrag = tilArbeidsgiver(2.NAV, 2.AP, 2.NAV, 2.HELG, 2.AP, 3.NAV)
 
         assertEquals(1, oppdrag.size)
         oppdrag.assertLinje(0, 11.januar, 13.januar, null)
@@ -112,7 +113,7 @@ internal class OppdragBuilderTest {
 
     @Test
     fun `Endring i sats`() {
-        val oppdrag = opprett(3.NAV(1200), 2.NAV(1500), 2.HELG, 2.NAV(1500))
+        val oppdrag = tilArbeidsgiver(3.NAV(1200), 2.NAV(1500), 2.HELG, 2.NAV(1500))
 
         assertEquals(2, oppdrag.size)
         oppdrag.assertLinje(0, 1.januar, 3.januar, null, sats = 1200)
@@ -121,16 +122,16 @@ internal class OppdragBuilderTest {
 
     @Test
     fun `dager som ikke lenger skal utbetales skal opphøres`() {
-        val oppdragTilUtbetaling1 = opprett(
+        val oppdragTilUtbetaling1 = tilArbeidsgiver(
             1.januar til 18.januar er NAVDAGER,
             19.januar er FRI
         )
-        val oppdragskladd2 = opprett(
+        val oppdragskladd2 = tilArbeidsgiver(
             1.januar til 18.januar er NAVDAGER,
             19.januar er FRI,
             20.januar til 27.januar er NAVDAGER
         )
-        val oppdragskladd3 = opprett(
+        val oppdragskladd3 = tilArbeidsgiver(
             1.januar til 18.januar er NAVDAGER,
             19.januar til 23.januar er FRI,
             24.januar til 28.januar er NAVDAGER
@@ -151,16 +152,16 @@ internal class OppdragBuilderTest {
 
     @Test
     fun `dager som ikke lenger skal utbetales skal opphøres 2`() {
-        val oppdragTilUtbetaling1 = opprett(
+        val oppdragTilUtbetaling1 = tilArbeidsgiver(
             1.januar til 18.januar er NAVDAGER,
             19.januar er FRI
         )
-        val oppdragskladd2 = opprett(
+        val oppdragskladd2 = tilArbeidsgiver(
             1.januar til 18.januar er NAVDAGER,
             19.januar er FRI,
             20.januar til 26.januar er NAVDAGER
         )
-        val oppdragskladd3 = opprett(18.NAV, 1.FRI, 2.HELG, 2.FRI, 5.NAV(1100), 5.NAV(1300, 40.0))
+        val oppdragskladd3 = tilArbeidsgiver(18.NAV, 1.FRI, 2.HELG, 2.FRI, 5.NAV(1100), 5.NAV(1300, 40.0))
 
         val oppdragTilUtbetaling2 = oppdragskladd2.minus(oppdragTilUtbetaling1, Aktivitetslogg())
         val oppdragTilUtbetaling3 = oppdragskladd3.minus(oppdragTilUtbetaling2, Aktivitetslogg())
@@ -180,12 +181,12 @@ internal class OppdragBuilderTest {
          * Så blir dagene etter X implisitt opphørt av oppdragssystemet
          */
 
-        val originaltOppdrag = opprett(
+        val originaltOppdrag = tilArbeidsgiver(
             10.januar til 31.januar er NAVDAGER,
             1.februar til 5.februar er NAVDAGER medBeløp 1400,
             startdato = 10.januar
         )
-        val oppdragUtenStartenAvFebruar = opprett(
+        val oppdragUtenStartenAvFebruar = tilArbeidsgiver(
             5.januar til 31.januar er NAVDAGER,
             1.februar til 2.februar er FRI,
             3.februar til 5.februar er NAVDAGER medBeløp 1400,
@@ -208,22 +209,22 @@ internal class OppdragBuilderTest {
 
     @Test
     fun `dager som ikke lenger skal utbetales skal opphøres 3`() {
-        val oppdragTilUtbetaling1 = opprett(
+        val oppdragTilUtbetaling1 = tilArbeidsgiver(
             1.januar til 18.januar er NAVDAGER,
             19.januar til 19.januar er FRI
         )
-        val oppdragskladd2 = opprett(
+        val oppdragskladd2 = tilArbeidsgiver(
             1.januar til 18.januar er NAVDAGER,
             19.januar til 19.januar er FRI,
             20.januar til 26.januar er NAVDAGER
         )
-        val oppdragskladd3 = opprett(
+        val oppdragskladd3 = tilArbeidsgiver(
             1.januar til 18.januar er NAVDAGER,
             19.januar til 23.januar er FRI,
             24.januar til 29.januar er NAVDAGER medBeløp 1100,
             30.januar til 3.februar er NAVDAGER medBeløp 1300 medGrad 40.0
         )
-        val oppdragskladd4 = opprett(
+        val oppdragskladd4 = tilArbeidsgiver(
             1.januar til 18.januar er NAVDAGER,
             19.januar til 23.januar er FRI,
             24.januar til 29.januar er NAVDAGER medBeløp 1100,
@@ -253,8 +254,8 @@ internal class OppdragBuilderTest {
 
     @Test
     fun `det funker å forlenge et oppdrag hvor vi har opphørt alle linjer`() {
-        val original = opprett(1.januar til 31.januar er NAVDAGER)
-        val endret = opprett(
+        val original = tilArbeidsgiver(1.januar til 31.januar er NAVDAGER)
+        val endret = tilArbeidsgiver(
             1.januar til 5.januar er FRI,
             6.januar til 15.januar er NAVDAGER,
             16.januar til 20.januar er FRI,
@@ -277,7 +278,7 @@ internal class OppdragBuilderTest {
 
     @Test
     fun `Endring i utbetaling pga grad`() {
-        val oppdrag = opprett(
+        val oppdrag = tilArbeidsgiver(
             1.januar til 3.januar er NAVDAGER medBeløp 1500 medGrad 100.0,
             4.januar til 9.januar er NAVDAGER medBeløp 1500 medGrad 60.0
         )
@@ -289,7 +290,7 @@ internal class OppdragBuilderTest {
 
     @Test
     fun `Endring i utbetaling pga grad og inntekt, der utbetalingsbeløpet blir likt`() {
-        val oppdrag = opprett(
+        val oppdrag = tilArbeidsgiver(
             1.januar til 3.januar er NAVDAGER medBeløp 1500 medGrad 100.0,
             4.januar til 5.januar er NAVDAGER medBeløp 1875 medGrad 80.0,
             6.januar til 9.januar er NAVDAGER medBeløp 1500 medGrad 80.0
@@ -311,7 +312,7 @@ internal class OppdragBuilderTest {
 
     @Test
     fun `Endring i sykdomsgrad`() {
-        val oppdrag = opprett(
+        val oppdrag = tilArbeidsgiver(
             1.januar til 3.januar er NAVDAGER medGrad 100.0 medBeløp 1500,
             4.januar til 9.januar er NAVDAGER medGrad 80.0 medBeløp 1500,
         )
@@ -323,10 +324,34 @@ internal class OppdragBuilderTest {
 
     @Test
     fun `Utbetalingslinje kan starte og ende på helgedag`() {
-        val oppdrag = opprett(1.AP, 1.FRI, 1.HELG, 5.NAV, 2.HELG)
+        val oppdrag = tilArbeidsgiver(1.AP, 1.FRI, 1.HELG, 5.NAV, 2.HELG)
 
         assertEquals(1, oppdrag.size)
         oppdrag.assertLinje(0, 3.januar, 10.januar, null)
+    }
+
+    @Test
+    fun `Utbetalingstidslinje med utbetalingsdager der arbeidsgiverbeløp er 0 skal ikke generere linje i arbeidsgiveroppdrag`() {
+        val oppdrag = tilArbeidsgiver(1.januar til 31.januar er NAVDAGER medGrad 100.0 medRefusjon 0)
+        assertEquals(0, oppdrag.size)
+    }
+
+    @Test
+    fun `Utbetalingstidslinje med utbetalingsdager med full refusjon skal ikke generere linje i personoppdrag`() {
+        val oppdrag = tilSykmeldte(1.januar til 31.januar er NAVDAGER medGrad 100.0 medBeløp 1200 medRefusjon 1200)
+        assertEquals(0, oppdrag.size)
+    }
+
+    @Test
+    fun `Utbetalingstidslinje med delvis refusjon medfører et oppdrag til sykmeldte med en linje`() {
+        val oppdrag = tilSykmeldte(1.januar til 31.januar er NAVDAGER medGrad 100.0 medBeløp 1200 medRefusjon 600)
+        assertEquals(1, oppdrag.size)
+    }
+
+    @Test
+    fun `Utbetalingstidslinje med delvis refusjon medfører et oppdrag til arbeidsgiver med en linje`() {
+        val oppdrag = tilArbeidsgiver(1.januar til 31.januar er NAVDAGER medGrad 100.0 medBeløp 1200 medRefusjon 600)
+        assertEquals(1, oppdrag.size)
     }
 
     private fun Oppdrag.assertLinje(
@@ -355,7 +380,7 @@ internal class OppdragBuilderTest {
     private val Oppdrag.sisteArbeidsgiverdag get() = this.get<LocalDate?>("sisteArbeidsgiverdag")
 
     private fun assertNyLinjeVedGap(gapDay: Utbetalingsdager) {
-        val oppdrag = opprett(2.NAV, gapDay, 2.NAV, 2.HELG, 3.NAV)
+        val oppdrag = tilArbeidsgiver(2.NAV, gapDay, 2.NAV, 2.HELG, 3.NAV)
 
         assertEquals(2, oppdrag.size)
         assertEquals(1.januar, oppdrag.first().fom)
@@ -364,7 +389,15 @@ internal class OppdragBuilderTest {
         assertEquals(10.januar, oppdrag.last().tom)
     }
 
-    private fun opprett(vararg dager: Utbetalingsdager, sisteDato: LocalDate? = null, startdato: LocalDate = 1.januar): Oppdrag {
+    private fun tilArbeidsgiver(vararg dager: Utbetalingsdager, sisteDato: LocalDate? = null, startdato: LocalDate = 1.januar): Oppdrag {
+        return opprett(dager = dager, sisteDato, startdato, fagområde = SykepengerRefusjon)
+    }
+
+    private fun tilSykmeldte(vararg dager: Utbetalingsdager, sisteDato: LocalDate? = null, startdato: LocalDate = 1.januar): Oppdrag {
+        return opprett(dager = dager, sisteDato, startdato, fagområde = Sykepenger)
+    }
+
+    private fun opprett(vararg dager: Utbetalingsdager, sisteDato: LocalDate? = null, startdato: LocalDate = 1.januar, fagområde: Fagområde): Oppdrag {
         val tidslinje = tidslinjeOf(*dager, startDato = startdato)
         MaksimumUtbetaling(
             listOf(tidslinje),
@@ -374,7 +407,7 @@ internal class OppdragBuilderTest {
         return OppdragBuilder(
             tidslinje,
             ORGNUMMER,
-            SykepengerRefusjon,
+            fagområde,
             sisteDato ?: tidslinje.periode().endInclusive
         ).result()
     }
@@ -385,6 +418,7 @@ internal class OppdragBuilderTest {
     private infix fun LocalDate.er(dagtype: Dagtype) = dagtype.dager(this til this)
     private infix fun Utbetalingsdager.medBeløp(beløp: Int) = this.copyWith(beløp = beløp)
     private infix fun Utbetalingsdager.medGrad(grad: Double) = this.copyWith(grad = grad)
+    private infix fun Utbetalingsdager.medRefusjon(beløp: Int) = this.copyWith(arbeidsgiverbeløp = beløp)
 
     private fun interface Dagtype {
         fun dager(periode: Periode): Utbetalingsdager

@@ -18,13 +18,13 @@ internal fun tidslinjeOf(
     skjæringstidspunkter: List<LocalDate> = listOf(startDato)
 ) = Utbetalingstidslinje().apply {
     val skjæringstidspunkt = { dato: LocalDate -> skjæringstidspunkter.filter { dato >= it }.maxOrNull() ?: dato }
-    utbetalingsdager.fold(startDato) { startDato, (antallDager, utbetalingsdag, helgedag, dekningsgrunnlag, grad) ->
+    utbetalingsdager.fold(startDato) { startDato, (antallDager, utbetalingsdag, helgedag, dekningsgrunnlag, grad, arbeidsgiverbeløp) ->
         var dato = startDato
         repeat(antallDager) {
             if (helgedag != null && dato.erHelg()) {
-                this.helgedag(dato, Økonomi.sykdomsgrad(grad.prosent).inntekt(dekningsgrunnlag.daglig, skjæringstidspunkt = skjæringstidspunkt(dato)))
+                this.helgedag(dato, Økonomi.sykdomsgrad(grad.prosent).arbeidsgiverRefusjon(arbeidsgiverbeløp.daglig).inntekt(dekningsgrunnlag.daglig, skjæringstidspunkt = skjæringstidspunkt(dato)))
             } else {
-                this.utbetalingsdag(dato, Økonomi.sykdomsgrad(grad.prosent).inntekt(dekningsgrunnlag.daglig, skjæringstidspunkt = skjæringstidspunkt(dato)))
+                this.utbetalingsdag(dato, Økonomi.sykdomsgrad(grad.prosent).arbeidsgiverRefusjon(arbeidsgiverbeløp.daglig).inntekt(dekningsgrunnlag.daglig, skjæringstidspunkt = skjæringstidspunkt(dato)))
             }
             dato = dato.plusDays(1)
         }
@@ -151,13 +151,15 @@ internal data class Utbetalingsdager(
     val addDagFun: Utbetalingstidslinje.(LocalDate, Økonomi) -> Unit,
     val addHelgFun: (Utbetalingstidslinje.(LocalDate, Økonomi) -> Unit)? = null,
     val dekningsgrunnlag: Number = 1200,
-    val grad: Number = 0.0
+    val grad: Number = 0.0,
+    val arbeidsgiverbeløp: Number = dekningsgrunnlag
 ) {
-    internal fun copyWith(beløp: Number? = null, grad: Number? = null) = Utbetalingsdager(
+    internal fun copyWith(beløp: Number? = null, grad: Number? = null, arbeidsgiverbeløp: Number? = null) = Utbetalingsdager(
         antallDager = this.antallDager,
         addDagFun = this.addDagFun,
         addHelgFun = this.addHelgFun,
         dekningsgrunnlag = beløp.takeIf { it != null } ?: this.dekningsgrunnlag,
+        arbeidsgiverbeløp = arbeidsgiverbeløp.takeIf { it != null } ?: beløp ?: this.dekningsgrunnlag,
         grad = grad.takeIf { it != null } ?: this.grad
     )
 }
