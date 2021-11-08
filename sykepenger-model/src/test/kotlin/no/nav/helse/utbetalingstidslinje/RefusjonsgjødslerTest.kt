@@ -4,15 +4,21 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.*
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
+import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
+import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
+import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 internal class RefusjonsgjødslerTest {
@@ -226,24 +232,79 @@ internal class RefusjonsgjødslerTest {
     }
 
     @Test
-    fun `vi prøver!`() {
+    fun `legger ikke på error når brukerutbetalinger i infotrygd ikke overlapper med perioden`() {
         val gjødsler = refusjonsgjødsler(
-            (31.S).utbetalingstidslinje(
-                inntektsopplysning(1.januar, 690.daglig)
-            ), refusjonshistorikk()
+            utbetalingstidslinje = (31.S).utbetalingstidslinje(inntektsopplysning(1.januar, 690.daglig)),
+            refusjonshistorikk = refusjonshistorikk(),
+            infotrygdhistorikk = infotrygdhistorikk(listOf(PersonUtbetalingsperiode(ORGNUMMER, 1.desember(2017), 31.desember(2017), 100.prosent, 10000.månedlig))),
+            organisasjonsnummer = ORGNUMMER
         )
         val aktivitetslogg = Aktivitetslogg()
         gjødsler.gjødsle(aktivitetslogg, 1.januar til 31.januar)
-        assertEquals(1, aktivitetslogg.errorMeldinger().count { it == "Finner ikke informasjon om refusjon i inntektsmelding og personen har brukerutbetaling" })
+        assertEquals(
+            0,
+            aktivitetslogg.errorMeldinger().count { it == "Finner ikke informasjon om refusjon i inntektsmelding og personen har brukerutbetaling" })
+    }
+
+    @Test
+    fun `legger ikke på error når brukerutbetalinger i infotrygd ikke er for samme arbeidsgiver`() {
+        val gjødsler = refusjonsgjødsler(
+            utbetalingstidslinje = (31.S).utbetalingstidslinje(inntektsopplysning(1.januar, 690.daglig)),
+            refusjonshistorikk = refusjonshistorikk(),
+            infotrygdhistorikk = infotrygdhistorikk(listOf(PersonUtbetalingsperiode("987654321", 1.januar, 10.januar, 100.prosent, 10000.månedlig))),
+            organisasjonsnummer = ORGNUMMER
+        )
+        val aktivitetslogg = Aktivitetslogg()
+        gjødsler.gjødsle(aktivitetslogg, 1.januar til 31.januar)
+        assertEquals(
+            0,
+            aktivitetslogg.errorMeldinger().count { it == "Finner ikke informasjon om refusjon i inntektsmelding og personen har brukerutbetaling" })
+    }
+
+    @Test
+    fun `legger på error når brukerutbetalinger i infotrygd overlapper med perioden`() {
+        val gjødsler = refusjonsgjødsler(
+            utbetalingstidslinje = (31.S).utbetalingstidslinje(inntektsopplysning(1.januar, 690.daglig)),
+            refusjonshistorikk = refusjonshistorikk(),
+            infotrygdhistorikk = infotrygdhistorikk(listOf(PersonUtbetalingsperiode(ORGNUMMER, 1.januar, 10.januar, 100.prosent, 10000.månedlig))),
+            organisasjonsnummer = ORGNUMMER
+        )
+        val aktivitetslogg = Aktivitetslogg()
+        gjødsler.gjødsle(aktivitetslogg, 1.januar til 31.januar)
+        assertEquals(
+            1,
+            aktivitetslogg.errorMeldinger().count { it == "Finner ikke informasjon om refusjon i inntektsmelding og personen har brukerutbetaling" })
+    }
+
+    private fun infotrygdhistorikk(utbetalingsperioder: List<Infotrygdperiode>) = Infotrygdhistorikk().apply {
+        this.oppdaterHistorikk(
+            InfotrygdhistorikkElement.opprett(
+                oppdatert = LocalDateTime.now(),
+                hendelseId = UUID.randomUUID(),
+                perioder = utbetalingsperioder,
+                inntekter = emptyList(),
+                arbeidskategorikoder = emptyMap(),
+                ugyldigePerioder = emptyList(),
+                harStatslønn = false
+            )
+        )
     }
 
     private fun refusjonsgjødsler(
         utbetalingstidslinje: Utbetalingstidslinje,
         refusjonshistorikk: Refusjonshistorikk,
-        infotrygdhistorikk: Infotrygdhistorikk = Infotrygdhistorikk()
-    ) = Refusjonsgjødsler(tidslinje = utbetalingstidslinje, refusjonshistorikk = refusjonshistorikk, infotrygdhistorikk = infotrygdhistorikk)
+        infotrygdhistorikk: Infotrygdhistorikk = Infotrygdhistorikk(),
+        organisasjonsnummer: String = ORGNUMMER
+    ) = Refusjonsgjødsler(
+        tidslinje = utbetalingstidslinje,
+        refusjonshistorikk = refusjonshistorikk,
+        infotrygdhistorikk = infotrygdhistorikk,
+        organisasjonsnummer = organisasjonsnummer
+    )
 
     private companion object {
+
+        private const val ORGNUMMER = "123456789"
 
         operator fun Iterable<Utbetalingstidslinje.Utbetalingsdag>.get(periode: Periode) = filter { it.dato in periode }
 

@@ -408,10 +408,7 @@ internal class ArbeidsgiverUtbetalingerTest {
                 InfotrygdhistorikkElement.opprett(
                     oppdatert = LocalDateTime.now(),
                     hendelseId = UUID.randomUUID(),
-                    perioder = listOf(object : Infotrygdperiode(historiskTidslinje.periode().start, historiskTidslinje.periode().endInclusive) {
-                        override fun accept(visitor: InfotrygdhistorikkVisitor) {}
-                        override fun utbetalingstidslinje() = historiskTidslinje
-                    }),
+                    perioder = historiskTidslinje.takeIf(Utbetalingstidslinje::isNotEmpty)?.let { listOf(infotrygdperiodeMockMed(it)) } ?: emptyList(),
                     inntekter = emptyList(),
                     arbeidskategorikoder = emptyMap(),
                     ugyldigePerioder = emptyList(),
@@ -436,6 +433,12 @@ internal class ArbeidsgiverUtbetalingerTest {
         }
         inspektør = UtbetalingstidslinjeInspektør(person.arbeidsgiver(ORGNUMMER).nåværendeTidslinje())
     }
+
+    private fun infotrygdperiodeMockMed(historiskTidslinje: Utbetalingstidslinje) =
+        object : Infotrygdperiode(historiskTidslinje.periode().start, historiskTidslinje.periode().endInclusive) {
+            override fun accept(visitor: InfotrygdhistorikkVisitor) {}
+            override fun utbetalingstidslinje() = historiskTidslinje
+        }
 
     private fun sykepengegrunnlag(inntekt: Inntekt) = Sykepengegrunnlag(
         arbeidsgiverInntektsopplysninger = listOf(),

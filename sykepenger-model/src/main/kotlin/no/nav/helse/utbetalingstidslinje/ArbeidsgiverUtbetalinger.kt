@@ -42,7 +42,8 @@ internal class ArbeidsgiverUtbetalinger(
                 Refusjonsgjødsler(
                     tidslinje = tidslinje + arbeidsgiver.infotrygdUtbetalingstidslinje(),
                     refusjonshistorikk = arbeidsgiver.refusjonshistorikk,
-                    infotrygdhistorikk = infotrygdhistorikk
+                    infotrygdhistorikk = infotrygdhistorikk,
+                    organisasjonsnummer = arbeidsgiver.organisasjonsnummer()
                 ).gjødsle(aktivitetslogg, periode)
             }
         }
