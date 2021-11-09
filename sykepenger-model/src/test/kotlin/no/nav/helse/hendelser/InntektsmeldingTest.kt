@@ -2,8 +2,8 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon
+import no.nav.helse.hentInfo
 import no.nav.helse.person.*
-import no.nav.helse.serde.reflection.castAsList
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
@@ -433,9 +433,7 @@ internal class InntektsmeldingTest {
     private fun assertMelding(melding: String, periode: Periode = 1.januar til 31.januar) {
         assertTrue(inntektsmelding
             .valider(periode)
-            .toMap()["aktiviteter"]
-            .castAsList<Map<String, Any>>()
-            .map { it["melding"] }
+            .hentInfo()
             .contains("Ville tidligere blitt kastet ut på grunn av refusjon: $melding")
         )
     }

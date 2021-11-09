@@ -3,6 +3,7 @@ package no.nav.helse
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.TilstandType
+import no.nav.helse.serde.reflection.castAsList
 import java.util.*
 
 internal fun IAktivitetslogg.antallEtterspurteBehov(vedtaksperiodeId: UUID, behov: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
@@ -36,3 +37,12 @@ inline fun <reified T> IAktivitetslogg.etterspurtBehov(vedtaksperiodeId: UUID, b
         .filter { it.kontekst()["vedtaksperiodeId"] == vedtaksperiodeId.toString() }
         .first { it.type == behov }.detaljer()[felt] as T?
 }
+
+private fun IAktivitetslogg.hent(alvorlighetsgrad: String) = toMap()["aktiviteter"]
+    .castAsList<Map<String, Any>>()
+    .filter { it["alvorlighetsgrad"] == alvorlighetsgrad }
+    .map { it["melding"] }
+    .mapNotNull { it.toString() }
+
+internal fun IAktivitetslogg.hentWarnings() = hent("WARN")
+internal fun IAktivitetslogg.hentInfo() = hent("INFO")
