@@ -701,8 +701,8 @@ internal class Vedtaksperiode private constructor(
         }
 
         when {
-            harBrukerutbetaling -> {
-                person.invaliderAllePerioder(hendelse, "Utbetalingstidslinje inneholder brukerutbetaling")
+            Toggles.LageBrukerutbetaling.kanIkkeFortsette(hendelse, utbetaling(), harBrukerutbetaling) -> {
+                person.invaliderAllePerioder(hendelse, "Kan ikke fortsette på grunn av manglende funksjonalitet for utbetaling til bruker")
             }
             ingenUtbetaling && kunArbeidsgiverdager && ingenWarnings -> {
                 tilstand(hendelse, AvsluttetUtenUtbetaling) {

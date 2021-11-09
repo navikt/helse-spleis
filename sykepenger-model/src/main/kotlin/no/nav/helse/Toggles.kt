@@ -67,10 +67,9 @@ abstract class Toggles internal constructor(enabled: Boolean = false, private va
     object RevurdereInntektMedFlereArbeidsgivere: Toggles(false)
 
     internal object LageBrukerutbetaling: Toggles(false) {
-        fun kanIkkeFortsette(aktivitetslogg: IAktivitetslogg, utbetaling: Utbetaling?): Boolean {
-            if (utbetaling == null) return false
-            if (disabled) return false
-            if (utbetaling.harDelvisRefusjon()) aktivitetslogg.error("Støtter ikke brukerutbetaling med delvis refusjon")
+        fun kanIkkeFortsette(aktivitetslogg: IAktivitetslogg, utbetaling: Utbetaling, harBrukerutbetaling: Boolean): Boolean {
+            if (disabled && harBrukerutbetaling) aktivitetslogg.error("Utbetalingstidslinje inneholder brukerutbetaling")
+            else if (enabled && utbetaling.harDelvisRefusjon()) aktivitetslogg.error("Støtter ikke brukerutbetaling med delvis refusjon")
             return aktivitetslogg.hasErrorsOrWorse()
         }
     }
