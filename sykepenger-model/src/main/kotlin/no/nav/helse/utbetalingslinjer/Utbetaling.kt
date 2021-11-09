@@ -432,19 +432,7 @@ internal class Utbetaling private constructor(
             aktivitetslogg: IAktivitetslogg,
             forrige: Oppdrag?,
             fagområde: Fagområde
-        ): Oppdrag {
-            val tidligere = forrige ?: sisteAktive
-            val historieløstOppdrag = OppdragBuilder(tidslinje, organisasjonsnummer, fagområde, sisteDato, forrige?.fagsystemId())
-            val oppdrag = tidligere?.let {
-                historieløstOppdrag.oppdragBasertPåTidligere(tidligere, aktivitetslogg)
-            } ?: historieløstOppdrag.nyttOppdrag()
-
-            aktivitetslogg.info(
-                if (oppdrag.isEmpty()) "Ingen utbetalingslinjer bygget"
-                else "Utbetalingslinjer bygget vellykket"
-            )
-            return oppdrag
-        }
+        ): Oppdrag = OppdragBuilder(tidslinje, organisasjonsnummer, fagområde, sisteDato, forrige?.fagsystemId()).build(forrige ?: sisteAktive, aktivitetslogg)
 
         private fun byggArbeidsgiveroppdrag(
             sisteAktive: Oppdrag?,

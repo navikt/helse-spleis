@@ -462,7 +462,7 @@ internal class OppdragBuilderTest {
             ORGNUMMER,
             fagområde,
             sisteDato ?: tidslinje.periode().endInclusive
-        ).nyttOppdrag()
+        ).build(null, Aktivitetslogg())
     }
 
     private val Oppdrag.antallDager get() = this.sumOf { it.dager().size }
