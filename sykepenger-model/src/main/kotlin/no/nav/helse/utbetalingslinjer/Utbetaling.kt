@@ -570,7 +570,7 @@ internal class Utbetaling private constructor(
         "maksdato" to maksdato,
         "forbrukteSykedager" to forbrukteSykedager,
         "gjenståendeSykedager" to gjenståendeSykedager,
-        "vurdering" to vurdering?.let { vurdering!!.toMap_plz_noMoreReflection() },
+        "vurdering" to vurdering?.toMap(),
         "overføringstidspunkt" to overføringstidspunkt,
         "avstemmingsnøkkel" to avstemmingsnøkkel,
         "avsluttet" to avsluttet,
@@ -999,7 +999,7 @@ internal class Utbetaling private constructor(
             )
         }
 
-        internal fun toMap_plz_noMoreReflection() = mapOf(
+        internal fun toMap() = mapOf(
             "godkjent" to godkjent,
             "ident" to ident,
             "epost" to epost,
