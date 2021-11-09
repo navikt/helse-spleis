@@ -603,7 +603,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun overlappendeVedtaksperioder() = person.nåværendeVedtaksperioder(IKKE_FERDIG_BEHANDLET).filter { periode.overlapperMed(it.periode) }
     private fun Iterable<Vedtaksperiode>.kanGåTilNesteTilstand() =
-        first() == this@Vedtaksperiode && drop(1).all { it.tilstand == AvventerArbeidsgivere }
+            first() == this@Vedtaksperiode && drop(1).all { it.tilstand == AvventerArbeidsgivere }
 
     private fun alleAndreAvventerArbeidsgivere() = overlappendeVedtaksperioder().all { it == this || it.tilstand == AvventerArbeidsgivere }
 
@@ -2642,16 +2642,19 @@ internal class Vedtaksperiode private constructor(
 
         internal fun List<Vedtaksperiode>.harInntekt() = any { it.harInntekt() }
 
-        internal fun overlapperMedForkastet(forkastede: Iterable<Vedtaksperiode>, hendelse: SykdomstidslinjeHendelse) {
+        internal fun overlapperMedForkastet(forkastede: Iterable<Vedtaksperiode>, sykmelding: Sykmelding) {
             forkastede
-                .filter { it.periode.overlapperMed(hendelse.periode()) }
+                .filter { it.periode.overlapperMed(sykmelding.periode()) }
                 .forEach {
-                    hendelse.error("${hendelse.kilde} overlapper med forkastet vedtaksperiode")
-                    hendelse.info("${hendelse.kilde} overlapper med forkastet vedtaksperiode ${it.id}, hendelse sykmeldingsperiode: ${hendelse.periode()}, vedtaksperiode sykmeldingsperiode: ${it.periode}")
+                    sykmelding.error("${sykmelding.kilde} overlapper med forkastet vedtaksperiode")
+                    sykmelding.info("${sykmelding.kilde} overlapper med forkastet vedtaksperiode ${it.id}, hendelse sykmeldingsperiode: ${sykmelding.periode()}, vedtaksperiode sykmeldingsperiode: ${it.periode}")
                 }
         }
 
-        internal fun overlapperMedForkastet(aktive: Iterable<Vedtaksperiode>, forkastede: Iterable<Vedtaksperiode>, inntektsmelding: Inntektsmelding) {
+        internal fun sjekkOmOverlapperMedForkastet(forkastede: Iterable<Vedtaksperiode>, inntektsmelding: Inntektsmelding) =
+            forkastede.any { it.periode.overlapperMed(inntektsmelding.periode()) }
+
+        internal fun trimTidligereBehandletDager(aktive: Iterable<Vedtaksperiode>, forkastede: Iterable<Vedtaksperiode>, inntektsmelding: Inntektsmelding) {
             forkastede
                 .map { it.periode }
                 .filterNot { forkastet -> aktive.any { aktiv -> forkastet.overlapperMed(aktiv.periode) } }

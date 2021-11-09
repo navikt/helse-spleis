@@ -366,8 +366,13 @@ internal class Arbeidsgiver private constructor(
                 return inntektsmelding.info("Vedtaksperiode overlapper ikke med replayet Inntektsmelding")
             inntektsmelding.info("Replayer inntektsmelding til påfølgende perioder som overlapper.")
         }
-        if (!noenHarHåndtert(inntektsmelding, Vedtaksperiode::håndter) && vedtaksperiodeId == null)
+        if (!noenHarHåndtert(inntektsmelding, Vedtaksperiode::håndter) && vedtaksperiodeId == null) {
             inntektsmelding.error("Forventet ikke inntektsmelding. Har nok ikke mottatt sykmelding")
+            if (ForkastetVedtaksperiode.sjekkOmOverlapperMedForkastet(forkastede, inntektsmelding))
+                inntektsmelding.info("Forkastet vedtaksperiode overlapper med uforventet inntektsmelding")
+            else
+                inntektsmelding.info("Ingen forkastede vedtaksperioder overlapper med uforventet inntektsmelding")
+        }
 
         finalize(inntektsmelding)
     }
@@ -930,7 +935,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     private fun trimTidligereBehandletDager(hendelse: Inntektsmelding) {
-        ForkastetVedtaksperiode.overlapperMedForkastet(vedtaksperioder, forkastede, hendelse)
+        ForkastetVedtaksperiode.trimTidligereBehandletDager(vedtaksperioder, forkastede, hendelse)
     }
 
     internal fun harDagUtenSøknad(periode: Periode) =

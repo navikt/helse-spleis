@@ -1,8 +1,8 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import java.util.*
 
 internal class ForkastetVedtaksperiode(
@@ -18,12 +18,15 @@ internal class ForkastetVedtaksperiode(
     internal companion object {
         private fun Iterable<ForkastetVedtaksperiode>.perioder() = map { it.vedtaksperiode }
 
-        internal fun overlapperMedForkastet(forkastede: Iterable<ForkastetVedtaksperiode>, hendelse: SykdomstidslinjeHendelse) {
-            Vedtaksperiode.overlapperMedForkastet(forkastede.perioder(), hendelse)
+        internal fun overlapperMedForkastet(forkastede: Iterable<ForkastetVedtaksperiode>, sykmelding: Sykmelding) {
+            Vedtaksperiode.overlapperMedForkastet(forkastede.perioder(), sykmelding)
         }
 
-        internal fun overlapperMedForkastet(aktive: Iterable<Vedtaksperiode>, forkastede: Iterable<ForkastetVedtaksperiode>, inntektsmelding: Inntektsmelding) {
-            Vedtaksperiode.overlapperMedForkastet(aktive, forkastede.perioder(), inntektsmelding)
+        internal fun sjekkOmOverlapperMedForkastet(forkastede: Iterable<ForkastetVedtaksperiode>, inntektsmelding: Inntektsmelding) =
+            Vedtaksperiode.sjekkOmOverlapperMedForkastet(forkastede.perioder(), inntektsmelding)
+
+        internal fun trimTidligereBehandletDager(aktive: Iterable<Vedtaksperiode>, forkastede: Iterable<ForkastetVedtaksperiode>, inntektsmelding: Inntektsmelding) {
+            Vedtaksperiode.trimTidligereBehandletDager(aktive, forkastede.perioder(), inntektsmelding)
         }
 
         internal fun finnForkastetSykeperiodeRettFør(forkastede: Iterable<ForkastetVedtaksperiode>, other: Vedtaksperiode) =
