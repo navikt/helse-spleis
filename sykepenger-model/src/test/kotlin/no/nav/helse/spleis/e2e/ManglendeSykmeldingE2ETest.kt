@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Toggles
-import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -197,14 +196,6 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `uten perioder fra før med refusjon opphørt`() = Toggles.RefusjonPerDag.disable {
-        val inntektsmeldingId = håndterInntektsmelding(listOf(3.januar til 18.januar), refusjon = Refusjon(INNTEKT, 18.januar, emptyList()))
-        håndterSøknad(Sykdom(3.januar, 31.januar, 100.prosent))
-        håndterInntektsmeldingReplay(inntektsmeldingId, 1.vedtaksperiode(ORGNUMMER))
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, TIL_INFOTRYGD)
-    }
-
-    @Test
     fun `uferdig gap foran uten inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent))
@@ -292,26 +283,6 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `forkastet uferdig forlengelse foran med refusjon opphørt`() = Toggles.RefusjonPerDag.disable {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 24.januar, 100.prosent))
-        val inntektsmeldingId = håndterInntektsmelding(listOf(3.januar til 18.januar), refusjon = Refusjon(INNTEKT, 25.januar, emptyList()))
-        håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent))
-        håndterInntektsmeldingReplay(inntektsmeldingId, 2.vedtaksperiode(ORGNUMMER))
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, TIL_INFOTRYGD)
-    }
-
-    @Test
-    fun `uferdig forlengelse foran med refusjon opphørt`() = Toggles.RefusjonPerDag.disable {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 24.januar, 100.prosent))
-        håndterInntektsmelding(listOf(3.januar til 18.januar))
-        håndterInntektsmelding(listOf(3.januar til 18.januar), refusjon = Refusjon(INNTEKT, 25.januar, emptyList()))
-        håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent))
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
-    }
-
-    @Test
     fun `ferdig forlengelse foran uten inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 10.januar, 100.prosent))
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(3.januar, 10.januar, 100.prosent))
@@ -339,25 +310,6 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
         )
         håndterSøknad(Sykdom(11.januar, 31.januar, 100.prosent))
         assertTilstander(2.vedtaksperiode, START, AVVENTER_HISTORIKK)
-    }
-
-    @Test
-    fun `ferdig forlengelse foran med refusjon opphørt`() = Toggles.RefusjonPerDag.disable {
-        nyttVedtak(3.januar, 20.januar)
-        håndterInntektsmelding(listOf(3.januar til 18.januar), refusjon = Refusjon(INNTEKT, 21.januar, emptyList()))
-        håndterSøknad(Sykdom(21.januar, 31.januar, 100.prosent))
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
-    }
-
-    @Test
-    fun `ferdig gap foran med refusjon opphørt`() = Toggles.RefusjonPerDag.disable {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 20.januar, 100.prosent))
-        håndterSøknad(Sykdom(3.januar, 20.januar, 100.prosent))
-        håndterInntektsmelding(listOf(3.januar til 18.januar), refusjon = Refusjon(INNTEKT, 21.januar, emptyList()))
-        håndterSykmelding(Sykmeldingsperiode(21.januar, 24.januar, 100.prosent))
-        håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent))
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
     }
 
     @Test

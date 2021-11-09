@@ -1,6 +1,5 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.Toggles
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companion.cacheRefusjon
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companion.endrerRefusjon
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companion.minOf
@@ -165,9 +164,7 @@ class Inntektsmelding(
     }
 
     internal fun validerMuligBrukerutbetaling() {
-        if (Toggles.RefusjonPerDag.enabled) {
-            refusjon.validerMuligBrukerutbetaling(this, beregnetInntekt)
-        }
+        refusjon.validerMuligBrukerutbetaling(this, beregnetInntekt)
     }
 
     class Refusjon(
@@ -230,8 +227,7 @@ class Inntektsmelding(
         }
 
         private fun IAktivitetslogg.refusjonsLogg(melding: String) {
-            if (Toggles.RefusjonPerDag.enabled) info("Ville tidligere blitt kastet ut på grunn av refusjon: $melding")
-            else error(melding)
+            info("Ville tidligere blitt kastet ut på grunn av refusjon: $melding")
         }
 
         internal fun validerMuligBrukerutbetaling(

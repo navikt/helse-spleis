@@ -50,11 +50,6 @@ class JsonBuilderTest {
     }
 
     @Test
-    fun `gjenoppbygd Person skal være lik opprinnelig Person med RefusjonPerDag på`() = Toggles.RefusjonPerDag.enable {
-        testSerialiseringAvPerson(person())
-    }
-
-    @Test
     fun `ingen betalingsperson`() {
         testSerialiseringAvPerson(ingenBetalingsperson())
     }

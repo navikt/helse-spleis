@@ -1,6 +1,5 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.Toggles
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.IAktivitetslogg
@@ -37,15 +36,13 @@ internal class ArbeidsgiverUtbetalinger(
         tidslinjeEngine = MaksimumSykepengedagerfilter(alder, regler, periode, aktivitetslogg).also {
             it.filter(tidslinjer, infotrygdhistorikk.utbetalingstidslinje().kutt(periode.endInclusive))
         }
-        if (Toggles.RefusjonPerDag.enabled) {
-            arbeidsgivere.forEach { (arbeidsgiver, tidslinje) ->
-                Refusjonsgjødsler(
-                    tidslinje = tidslinje + arbeidsgiver.infotrygdUtbetalingstidslinje(),
-                    refusjonshistorikk = arbeidsgiver.refusjonshistorikk,
-                    infotrygdhistorikk = infotrygdhistorikk,
-                    organisasjonsnummer = arbeidsgiver.organisasjonsnummer()
-                ).gjødsle(aktivitetslogg, periode)
-            }
+        arbeidsgivere.forEach { (arbeidsgiver, tidslinje) ->
+            Refusjonsgjødsler(
+                tidslinje = tidslinje + arbeidsgiver.infotrygdUtbetalingstidslinje(),
+                refusjonshistorikk = arbeidsgiver.refusjonshistorikk,
+                infotrygdhistorikk = infotrygdhistorikk,
+                organisasjonsnummer = arbeidsgiver.organisasjonsnummer()
+            ).gjødsle(aktivitetslogg, periode)
         }
         MaksimumUtbetaling(tidslinjer, aktivitetslogg, virkningsdato).betal()
     }

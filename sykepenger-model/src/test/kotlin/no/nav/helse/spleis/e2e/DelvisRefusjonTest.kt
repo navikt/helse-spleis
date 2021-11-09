@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
@@ -9,7 +8,6 @@ import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.*
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -20,7 +18,7 @@ import org.junit.jupiter.api.Test
 internal class DelvisRefusjonTest : AbstractEndToEndTest() {
 
     @Test
-    fun `Full refusjon til en arbeidsgiver med RefusjonPerDag på`() = Toggles.RefusjonPerDag.enable {
+    fun `Full refusjon til en arbeidsgiver med RefusjonPerDag på`() {
         nyttVedtak(1.januar, 31.januar, refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()))
 
         assertTrue(inspektør.utbetalinger.last().arbeidsgiverOppdrag().isNotEmpty())
@@ -31,7 +29,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Full refusjon til en arbeidsgiver med forlengelse og opphørsdato treffer ferie`() = Toggles.RefusjonPerDag.enable {
+    fun `Full refusjon til en arbeidsgiver med forlengelse og opphørsdato treffer ferie`() {
         nyttVedtak(1.januar, 31.januar, refusjon = Inntektsmelding.Refusjon(INNTEKT, 27.februar, emptyList()))
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
@@ -48,7 +46,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Refusjonsbeløpet er forskjellig fra beregnet inntekt i inntektsmeldingen`() = Toggles.RefusjonPerDag.enable {
+    fun `Refusjonsbeløpet er forskjellig fra beregnet inntekt i inntektsmeldingen`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(
@@ -72,7 +70,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `arbeidsgiver refunderer ikke`() = Toggles.RefusjonPerDag.enable {
+    fun `arbeidsgiver refunderer ikke`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(
@@ -96,26 +94,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Full refusjon til en arbeidsgiver med RefusjonPerDag av`() = Toggles.RefusjonPerDag.disable {
-        nyttVedtak(1.januar, 31.januar, refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()))
-
-        assertTrue(inspektør.utbetalinger.last().arbeidsgiverOppdrag().isNotEmpty())
-        inspektør.utbetalinger.last().arbeidsgiverOppdrag().forEach { assertEquals(1431, it.beløp) }
-        assertTrue(inspektør.utbetalinger.last().personOppdrag().isEmpty())
-
-        inspektør.utbetalingstidslinjer(1.vedtaksperiode).forEach {
-            it.økonomi.medAvrundetData { _, arbeidsgiverRefusjonsbeløp, _, _, arbeidsgiverbeløp, personbeløp, _ ->
-                val forventetArbeidsgiverbeløp = if (it is Utbetalingstidslinje.Utbetalingsdag.NavDag) 1431 else 0
-                assertEquals(forventetArbeidsgiverbeløp, arbeidsgiverbeløp)
-                assertEquals(null, arbeidsgiverRefusjonsbeløp)
-                assertEquals(0, personbeløp)
-            }
-        }
-    }
-
-    @Test
-    fun `Arbeidsgiverperiode tilstøter Infotrygd`() =
-        Toggles.RefusjonPerDag.enable {
+    fun `Arbeidsgiverperiode tilstøter Infotrygd`() {
             håndterInntektsmelding(listOf(1.januar til 16.januar))
 
             håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
@@ -134,8 +113,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         }
 
     @Test
-    fun `Arbeidsgiverperiode tilstøter ikke Infotrygd`() =
-        Toggles.RefusjonPerDag.enable {
+    fun `Arbeidsgiverperiode tilstøter ikke Infotrygd`() {
             håndterInntektsmelding(listOf(1.november(2017) til 16.november(2017)))
 
             håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
@@ -154,7 +132,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         }
 
     @Test
-    fun `Finner refusjon ved forlengelse fra Infotrygd`() = Toggles.RefusjonPerDag.enable {
+    fun `Finner refusjon ved forlengelse fra Infotrygd`() {
         håndterInntektsmelding(listOf(1.januar til 16.januar))
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
@@ -176,7 +154,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `ikke kast ut vedtaksperiode når tidligere vedtaksperiode har opphør i refusjon`() = Toggles.RefusjonPerDag.enable {
+    fun `ikke kast ut vedtaksperiode når tidligere vedtaksperiode har opphør i refusjon`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(
@@ -225,7 +203,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `kast ut vedtaksperiode når refusjonopphører`() = Toggles.RefusjonPerDag.enable {
+    fun `kast ut vedtaksperiode når refusjonopphører`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(
@@ -248,7 +226,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `kast ut vedtaksperiode ved endring i refusjon`() = Toggles.RefusjonPerDag.enable {
+    fun `kast ut vedtaksperiode ved endring i refusjon`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(
@@ -271,7 +249,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `kaster ikke ut vedtaksperiode hvor endring i refusjon er etter perioden`() = Toggles.RefusjonPerDag.enable {
+    fun `kaster ikke ut vedtaksperiode hvor endring i refusjon er etter perioden`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(
@@ -296,7 +274,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `ikke kast ut vedtaksperiode ved ferie i slutten av perioden`() = Toggles.RefusjonPerDag.enable {
+    fun `ikke kast ut vedtaksperiode ved ferie i slutten av perioden`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(25.januar, 31.januar))
         håndterInntektsmelding(
@@ -327,8 +305,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `to arbeidsgivere med ulik fom hvor den første har utbetalingsdager før arbeisdgiverperioden til den andre, ingen felles utbetalingsdager`() =
-        Toggles.RefusjonPerDag.enable {
+    fun `to arbeidsgivere med ulik fom hvor den første har utbetalingsdager før arbeisdgiverperioden til den andre, ingen felles utbetalingsdager`() {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
             håndterSykmelding(Sykmeldingsperiode(21.januar, 10.februar, 100.prosent), orgnummer = a2)
 
@@ -419,8 +396,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         }
 
     @Test
-    fun `to arbeidsgivere med ulik fom hvor den første har utbetalingsdager før arbeisdgiverperioden til den andre`() =
-        Toggles.RefusjonPerDag.enable {
+    fun `to arbeidsgivere med ulik fom hvor den første har utbetalingsdager før arbeisdgiverperioden til den andre`() {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 10.februar, 100.prosent), orgnummer = a1)
             håndterSykmelding(Sykmeldingsperiode(21.januar, 10.februar, 100.prosent), orgnummer = a2)
 
@@ -504,8 +480,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         }
 
     @Test
-    fun `to arbeidsgivere med ulik fom hvor den andre har utbetalingsdager før arbeidsgiverperioden til den første`() =
-        Toggles.RefusjonPerDag.enable {
+    fun `to arbeidsgivere med ulik fom hvor den andre har utbetalingsdager før arbeidsgiverperioden til den første`() {
             håndterSykmelding(Sykmeldingsperiode(21.januar, 10.februar, 100.prosent), orgnummer = a1)
             håndterSykmelding(Sykmeldingsperiode(1.januar, 10.februar, 100.prosent), orgnummer = a2)
 
@@ -603,7 +578,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         }
 
     @Test
-    fun `gradert sykmelding med en arbeidsgiver`() = Toggles.RefusjonPerDag.enable {
+    fun `gradert sykmelding med en arbeidsgiver`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 50.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent))
         håndterInntektsmelding(
@@ -626,7 +601,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `korrigerende inntektsmelding endrer på refusjonsbeløp`() = Toggles.RefusjonPerDag.enable {
+    fun `korrigerende inntektsmelding endrer på refusjonsbeløp`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 50.prosent))
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
@@ -653,7 +628,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `korrigerende inntektsmelding endrer på refusjonsbeløp med infotrygdforlengelse`() = Toggles.RefusjonPerDag.enable {
+    fun `korrigerende inntektsmelding endrer på refusjonsbeløp med infotrygdforlengelse`() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList())
@@ -682,7 +657,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `korrigerende inntektsmelding endrer på refusjonsbeløp med infotrygdforlengelse og gap`() = Toggles.RefusjonPerDag.enable {
+    fun `korrigerende inntektsmelding endrer på refusjonsbeløp med infotrygdforlengelse og gap`() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList())
@@ -711,7 +686,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `to arbeidsgivere hvor andre arbeidsgiver har brukerutbetaling kaster ut alle perioder på personen`() = Toggles.RefusjonPerDag.enable {
+    fun `to arbeidsgivere hvor andre arbeidsgiver har brukerutbetaling kaster ut alle perioder på personen`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
@@ -763,7 +738,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `en overgang fra Infotrygd uten inntektsmelding`() = Toggles.RefusjonPerDag.enable {
+    fun `en overgang fra Infotrygd uten inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 10.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 10.februar, 100.prosent))
 
@@ -786,7 +761,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `en forlengelse av overgang fra Infotrygd uten inntektsmelding`() = Toggles.RefusjonPerDag.enable {
+    fun `en forlengelse av overgang fra Infotrygd uten inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 10.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 10.februar, 100.prosent))
 
@@ -812,7 +787,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `førstegangsbehandling i Spleis etter en overgang fra Infotrygd uten inntektsmelding `() = Toggles.RefusjonPerDag.enable {
+    fun `førstegangsbehandling i Spleis etter en overgang fra Infotrygd uten inntektsmelding `() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 10.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 10.februar, 100.prosent))
 
@@ -838,7 +813,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `to arbeidsgivere, en av dem mangler refusjon, begge får warning`() = Toggles.RefusjonPerDag.enable {
+    fun `to arbeidsgivere, en av dem mangler refusjon, begge får warning`() {
         håndterInntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), orgnummer = a1)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 10.februar, 100.prosent), orgnummer = a1)
@@ -878,7 +853,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Finner refusjon fra feil inntektsmelding ved Infotrygdforlengelse`() = Toggles.RefusjonPerDag.enable {
+    fun `Finner refusjon fra feil inntektsmelding ved Infotrygdforlengelse`() {
         håndterSykmelding(Sykmeldingsperiode(22.januar, 31.januar, 100.prosent))
         // Inntektsmelding blir ikke brukt ettersom det er forlengelse fra Infotrygd.
         // Når vi ser etter refusjon for Infotrygdperioden finner vi alikevel frem til denne inntektsmeldingen og forsøker å finne
@@ -900,7 +875,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Første utbetalte dag er før første fraværsdag`() = Toggles.RefusjonPerDag.enable {
+    fun `Første utbetalte dag er før første fraværsdag`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(), førsteFraværsdag = 17.januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
@@ -917,7 +892,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Korrigerende inntektsmelding med feil skjæringstidspunkt går til manuell behandling på grunn av warning`() = Toggles.RefusjonPerDag.enable {
+    fun `Korrigerende inntektsmelding med feil skjæringstidspunkt går til manuell behandling på grunn av warning`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
@@ -935,7 +910,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `arbeidsgiver sender unødvendig inntektsmelding ved forlengelse før sykmelding`() = Toggles.RefusjonPerDag.enable {
+    fun `arbeidsgiver sender unødvendig inntektsmelding ved forlengelse før sykmelding`() {
         // Etter diskusjon med Morten ble vi enige om at vi ikke trenger warning på en forlengelse hvor inntektsmelding kom før sykmelding.
         // Om ny inntektsmelding fører til brukerutbetalinger vil dette bli oppdaget og sendt til Infotrygd senere
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
@@ -959,7 +934,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `to arbeidsgivere, om første har opphør i refusjon kastes begge ut`() = Toggles.RefusjonPerDag.enable {
+    fun `to arbeidsgivere, om første har opphør i refusjon kastes begge ut`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
@@ -972,7 +947,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `to arbeidsgivere, om første har endring i refusjon kastes begge ut`() = Toggles.RefusjonPerDag.enable {
+    fun `to arbeidsgivere, om første har endring i refusjon kastes begge ut`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
@@ -989,7 +964,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `to arbeidsgivere, om første refunderer delvis kastes begge ut`() = Toggles.RefusjonPerDag.enable {
+    fun `to arbeidsgivere, om første refunderer delvis kastes begge ut`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
@@ -1006,7 +981,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `to arbeidsgivere, om første ikke refunderer`() = Toggles.RefusjonPerDag.enable {
+    fun `to arbeidsgivere, om første ikke refunderer`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
@@ -1023,7 +998,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `to arbeidsgivere, hvor den andre har opphør i refusjon`() = Toggles.RefusjonPerDag.enable {
+    fun `to arbeidsgivere, hvor den andre har opphør i refusjon`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
@@ -1065,7 +1040,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Vi logger info om vi tidligere ville kastet ut på grunn av refusjon i en inntektsmelding som bommer`() = Toggles.RefusjonPerDag.enable {
+    fun `Vi logger info om vi tidligere ville kastet ut på grunn av refusjon i en inntektsmelding som bommer`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.desember(2017) til 16.desember(2017)), refusjon = Inntektsmelding.Refusjon(INNTEKT, 17.desember(2017), emptyList()))
@@ -1073,14 +1048,14 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Vi logger info om vi tidligere ville kastet ut på grunn av refusjon ved forlengelse`() = Toggles.RefusjonPerDag.enable {
+    fun `Vi logger info om vi tidligere ville kastet ut på grunn av refusjon ved forlengelse`() {
         nyttVedtak(1.januar, 31.januar, refusjon = Inntektsmelding.Refusjon(INNTEKT, 15.februar, emptyList()))
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         assertInfo(2.vedtaksperiode, "Ville tidligere blitt kastet ut på grunn av refusjon: Refusjon er opphørt.")
     }
 
     @Test
-    fun `Vi logger info om vi tidligere ville kastet ut på grunn av opphør av refusjon frem i tid`() = Toggles.RefusjonPerDag.enable {
+    fun `Vi logger info om vi tidligere ville kastet ut på grunn av opphør av refusjon frem i tid`() {
         nyttVedtak(1.januar, 31.januar, refusjon = Inntektsmelding.Refusjon(INNTEKT, 15.februar, emptyList()))
         assertInfo(1.vedtaksperiode, "Behandlet en vedtaksperiode som tidligere ville blitt kastet ut på grunn av refusjon")
     }

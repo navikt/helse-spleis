@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Toggles
-import no.nav.helse.Toggles.Companion.enable
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.januar
@@ -13,7 +12,7 @@ import org.junit.jupiter.api.Test
 internal class DelvisRefusjonRevurderingTest : AbstractEndToEndTest() {
 
     @Test
-    fun `korrigerende inntektsmelding med halvering av inntekt setter riktig refusjonsbeløp fra nyeste inntektsmelding`() = Toggles.RefusjonPerDag.enable {
+    fun `korrigerende inntektsmelding med halvering av inntekt setter riktig refusjonsbeløp fra nyeste inntektsmelding`()  {
         nyttVedtak(1.januar, 31.januar, 100.prosent, refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()))
         assertUtbetalingsbeløp(1.vedtaksperiode, 0, 1431, subset = 1.januar til 16.januar)
         assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, subset = 17.januar til 31.januar)
@@ -35,7 +34,7 @@ internal class DelvisRefusjonRevurderingTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `overstyring av inntekt med økning av inntekt uten nytt refusjonsbeløp`() = Toggles.RefusjonPerDag.enable {
+    fun `overstyring av inntekt med økning av inntekt uten nytt refusjonsbeløp`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent, refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()))
         assertUtbetalingsbeløp(1.vedtaksperiode, 0, 1431, subset = 1.januar til 16.januar)
         assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, subset = 17.januar til 31.januar)
@@ -63,7 +62,7 @@ internal class DelvisRefusjonRevurderingTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `overstyring av inntekt med nedjustering av inntekt uten nytt refusjonsbeløp`() = Toggles.RefusjonPerDag.enable {
+    fun `overstyring av inntekt med nedjustering av inntekt uten nytt refusjonsbeløp`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent, refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()))
         assertUtbetalingsbeløp(1.vedtaksperiode, 0, 1431, subset = 1.januar til 16.januar)
         assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, subset = 17.januar til 31.januar)
@@ -80,7 +79,7 @@ internal class DelvisRefusjonRevurderingTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `to arbeidsgivere hvor inntekten på den ene senkes slik at den andre arbeidsgiveren får brukerutbetalinger`() = (Toggles.RefusjonPerDag + Toggles.RevurdereInntektMedFlereArbeidsgivere).enable {
+    fun `to arbeidsgivere hvor inntekten på den ene senkes slik at den andre arbeidsgiveren får brukerutbetalinger`() = Toggles.RevurdereInntektMedFlereArbeidsgivere.enable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
 

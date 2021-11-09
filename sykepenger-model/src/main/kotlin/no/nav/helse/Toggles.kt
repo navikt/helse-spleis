@@ -63,7 +63,6 @@ abstract class Toggles internal constructor(enabled: Boolean = false, private va
     object DatoRangeJson : Toggles(true)
     object Etterlevelse: Toggles()
     object SpeilApiV2: Toggles("SPEIL_API_V2")
-    object RefusjonPerDag: Toggles("REFUSJON_PER_DAG",true)
     object RevurdereInntektMedFlereArbeidsgivere: Toggles(false)
 
     internal object LageBrukerutbetaling: Toggles(false) {

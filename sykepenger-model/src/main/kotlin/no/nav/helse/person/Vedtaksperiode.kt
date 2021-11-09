@@ -166,14 +166,7 @@ internal class Vedtaksperiode private constructor(
             if (it) hendelseIder.add(inntektsmelding.meldingsreferanseId())
             if (arbeidsgiver.harRefusjonOpphørt(periode.endInclusive) && !erAvsluttet()) {
                 kontekst(inntektsmelding)
-                if (Toggles.RefusjonPerDag.disabled) {
-                    inntektsmelding.error("Refusjon opphører i perioden")
-                    inntektsmelding.trimLeft(periode.endInclusive)
-                    arbeidsgiver.søppelbøtte(inntektsmelding, SENERE_INCLUSIVE(this), IKKE_STØTTET)
-                    return@also
-                } else {
-                    inntektsmelding.info("Ville tidligere blitt kastet ut på grunn av refusjon: Refusjon opphører i perioden")
-                }
+                inntektsmelding.info("Ville tidligere blitt kastet ut på grunn av refusjon: Refusjon opphører i perioden")
             }
             if (!it) return@also inntektsmelding.trimLeft(periode.endInclusive)
             kontekst(inntektsmelding)
@@ -727,7 +720,7 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    private fun villeTidligereBlittKastetUtPåGrunnAvRefusjon() : Boolean {
+    private fun villeTidligereBlittKastetUtPåGrunnAvRefusjon(): Boolean {
         val meldinger = mutableListOf<String>()
         person.aktivitetslogg.logg(this).accept(object : AktivitetsloggVisitor {
             override fun visitInfo(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Info, melding: String, tidsstempel: String) {
@@ -860,7 +853,7 @@ internal class Vedtaksperiode private constructor(
         sykdomstidslinje = arbeidsgiver.fjernDager(opprinneligPeriodeFom til nyPeriodeFom.minusDays(1)).subset(periode)
     }
 
-    private fun validerSenerePerioderIInfotrygd(infotrygdhistorikk: Infotrygdhistorikk) : Boolean {
+    private fun validerSenerePerioderIInfotrygd(infotrygdhistorikk: Infotrygdhistorikk): Boolean {
         val sisteYtelseFom = infotrygdhistorikk.førsteSykepengedagISenestePeriode(organisasjonsnummer) ?: return true
         return sisteYtelseFom < periode.endInclusive
     }
@@ -1139,12 +1132,11 @@ internal class Vedtaksperiode private constructor(
             val ferdig = vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode)
             val refusjonOpphørt = vedtaksperiode.arbeidsgiver.harRefusjonOpphørt(vedtaksperiode.periode.endInclusive)
 
-            if (forlengelse && refusjonOpphørt && Toggles.RefusjonPerDag.enabled) {
+            if (forlengelse && refusjonOpphørt) {
                 hendelse.info("Ville tidligere blitt kastet ut på grunn av refusjon: Refusjon er opphørt.")
             }
 
             return when {
-                forlengelse && refusjonOpphørt && Toggles.RefusjonPerDag.disabled -> TilInfotrygd.also { hendelse.error("Refusjon er opphørt.") }
                 forlengelse && ferdig -> ferdigForlengelse
                 forlengelse && !ferdig -> uferdigForlengelse
                 !forlengelse && ferdig -> ferdigGap
@@ -1184,7 +1176,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            if (vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)?.inntektsmeldingInfo?.id != inntektsmelding.meldingsreferanseId()){
+            if (vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)?.inntektsmeldingInfo?.id != inntektsmelding.meldingsreferanseId()) {
                 inntektsmelding.warn("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
             }
             vedtaksperiode.håndterInntektsmelding(inntektsmelding) {
@@ -1498,7 +1490,11 @@ internal class Vedtaksperiode private constructor(
                 onValidationFailed {
                     ytelser.warn("Opplysninger fra Infotrygd har endret seg etter at vedtaket ble fattet. Undersøk om det er overlapp med periode fra Infotrygd.")
                 }
-                valider ("Det er utbetalt en periode i Infotrygd etter perioden du skal revurdere nå. Undersøk at antall forbrukte dager og grunnlag i Infotrygd er riktig") { vedtaksperiode.validerSenerePerioderIInfotrygd(infotrygdhistorikk) }
+                valider("Det er utbetalt en periode i Infotrygd etter perioden du skal revurdere nå. Undersøk at antall forbrukte dager og grunnlag i Infotrygd er riktig") {
+                    vedtaksperiode.validerSenerePerioderIInfotrygd(
+                        infotrygdhistorikk
+                    )
+                }
                 valider { infotrygdhistorikk.valider(this, arbeidsgiver, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt) }
             }
             validation(ytelser) {
@@ -1988,7 +1984,7 @@ internal class Vedtaksperiode private constructor(
                     }
                     vedtaksperiode.tilstand(ytelser, TilInfotrygd)
                 }
-                valider ("Det er utbetalt en senere periode i Infotrygd") { vedtaksperiode.validerSenerePerioderIInfotrygd(infotrygdhistorikk) }
+                valider("Det er utbetalt en senere periode i Infotrygd") { vedtaksperiode.validerSenerePerioderIInfotrygd(infotrygdhistorikk) }
                 onSuccess {
                     vedtaksperiode.fjernArbeidsgiverperiodeVedOverlappMedIT(infotrygdhistorikk)
                     vedtaksperiode.skjæringstidspunktFraInfotrygd = person.skjæringstidspunkt(vedtaksperiode.periode)

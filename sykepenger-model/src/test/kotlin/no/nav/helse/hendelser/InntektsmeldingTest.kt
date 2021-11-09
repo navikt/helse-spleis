@@ -1,9 +1,9 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.Toggles
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon
 import no.nav.helse.hentInfo
-import no.nav.helse.person.*
+import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
@@ -175,56 +175,6 @@ internal class InntektsmeldingTest {
         inntektsmelding(emptyList(), førsteFraværsdag = 2.januar)
 
         assertEquals(Periode(2.januar, 2.januar), inntektsmelding.sykdomstidslinje().periode())
-    }
-
-    @Test
-    fun `inntektsmelding med refusjon beløp != beregnetInntekt er ikke gyldig`() = Toggles.RefusjonPerDag.disable {
-        inntektsmelding(
-            emptyList(),
-            refusjonBeløp = 999999.månedlig,
-            beregnetInntekt = 10000.månedlig
-        )
-        assertTrue(inntektsmelding.valider(Periode(1.januar, 31.januar)).hasErrorsOrWorse())
-    }
-
-    @Test
-    fun `refusjon opphører før perioden`() = Toggles.RefusjonPerDag.disable {
-        inntektsmelding(
-            listOf(Periode(1.januar, 3.januar)),
-            refusjonOpphørsdato = 1.januar,
-            endringerIRefusjon = listOf(EndringIRefusjon(1000.månedlig, 16.januar))
-        )
-        assertTrue(inntektsmelding.valider(Periode(2.januar, 10.januar)).hasErrorsOrWorse())
-    }
-
-    @Test
-    fun `refusjon opphører etter perioden`() = Toggles.RefusjonPerDag.disable {
-        inntektsmelding(
-            listOf(Periode(1.januar, 3.januar)),
-            refusjonOpphørsdato = 11.januar,
-            endringerIRefusjon = listOf(EndringIRefusjon(1000.månedlig, 16.januar))
-        )
-        assertTrue(inntektsmelding.valider(Periode(2.januar, 10.januar)).hasErrorsOrWorse())
-    }
-
-    @Test
-    fun `refusjon opphører i perioden`() = Toggles.RefusjonPerDag.disable {
-        inntektsmelding(
-            listOf(Periode(1.januar, 3.januar)),
-            refusjonOpphørsdato = 10.januar,
-            endringerIRefusjon = listOf(EndringIRefusjon(1000.månedlig, 16.januar))
-        )
-        assertTrue(inntektsmelding.valider(Periode(2.januar, 10.januar)).hasErrorsOrWorse())
-    }
-
-    @Test
-    fun `endring i refusjon i perioden`() = Toggles.RefusjonPerDag.disable {
-        inntektsmelding(
-            listOf(Periode(1.januar, 3.januar)),
-            refusjonOpphørsdato = 16.januar,
-            endringerIRefusjon = listOf(EndringIRefusjon(1000.månedlig, 10.januar))
-        )
-        assertTrue(inntektsmelding.valider(Periode(2.januar, 10.januar)).hasErrorsOrWorse())
     }
 
     @Test
@@ -414,7 +364,7 @@ internal class InntektsmeldingTest {
     }
 
     @Test
-    fun `logger info om at vi tidligere ville kastet ut inntektmeldinger på grunn av refusjon`() = Toggles.RefusjonPerDag.enable {
+    fun `logger info om at vi tidligere ville kastet ut inntektmeldinger på grunn av refusjon`() {
         val arbeidsgiverperioder = listOf(1.januar til 16.januar)
         inntektsmelding(arbeidsgiverperioder, refusjonBeløp = INGEN)
         assertMelding("Arbeidsgiver forskutterer ikke (krever ikke refusjon)")

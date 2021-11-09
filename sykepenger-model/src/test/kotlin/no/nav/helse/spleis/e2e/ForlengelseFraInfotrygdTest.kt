@@ -1,8 +1,6 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
@@ -130,71 +128,6 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING
         )
         assertEquals(ForlengelseFraInfotrygd.NEI, inspektør.forlengelseFraInfotrygd(2.vedtaksperiode))
-    }
-
-    @Test
-    fun `forlengelsesperiode der refusjon opphører - med søknad for forkastet periode`() = Toggles.RefusjonPerDag.disable {
-        håndterSykmelding(Sykmeldingsperiode(13.mars(2020), 29.mars(2020), 100.prosent))
-        håndterInntektsmeldingMedValidering(
-            1.vedtaksperiode,
-            listOf(Periode(13.mars(2020), 28.mars(2020))),
-            førsteFraværsdag = 13.mars(2020),
-            refusjon = Refusjon(INNTEKT, 31.mars(2020), emptyList())
-        )
-        håndterSykmelding(Sykmeldingsperiode(30.mars(2020), 14.april(2020), 100.prosent))
-        håndterSøknad(Sykdom(13.mars(2020), 29.mars(2020), 100.prosent))
-        håndterSøknad(Sykdom(30.mars(2020), 14.april(2020), 100.prosent))
-        håndterUtbetalingshistorikk(
-            3.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 13.mars(2020), 29.mars(2020), 100.prosent, 1000.daglig),
-            inntektshistorikk = listOf(
-                Inntektsopplysning(
-                    ORGNUMMER,
-                    13.mars(2020), INNTEKT, true, 31.mars(2020)
-                )
-            )
-        )
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(
-            2.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
-            AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
-            TIL_INFOTRYGD
-        )
-        assertForkastetPeriodeTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, TIL_INFOTRYGD)
-    }
-
-    @Test
-    fun `forlengelsesperiode der refusjon opphører`() = Toggles.RefusjonPerDag.disable {
-        håndterSykmelding(Sykmeldingsperiode(13.mars(2020), 29.mars(2020), 100.prosent))
-        håndterInntektsmeldingMedValidering(
-            1.vedtaksperiode,
-            listOf(Periode(13.mars(2020), 28.mars(2020))),
-            førsteFraværsdag = 13.mars(2020),
-            refusjon = Refusjon(INNTEKT, 31.mars(2020), emptyList())
-        )
-        håndterSykmelding(Sykmeldingsperiode(30.mars(2020), 14.april(2020), 100.prosent))
-        håndterSøknad(Sykdom(30.mars(2020), 14.april(2020), 100.prosent))
-        håndterUtbetalingshistorikk(
-            2.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 13.mars(2020), 29.mars(2020), 100.prosent, 1000.daglig),
-            inntektshistorikk = listOf(
-                Inntektsopplysning(
-                    ORGNUMMER,
-                    13.mars(2020), INNTEKT, true, 31.mars(2020)
-                )
-            )
-        )
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(
-            2.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            TIL_INFOTRYGD
-        )
     }
 
     @Test
