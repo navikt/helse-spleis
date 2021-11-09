@@ -211,7 +211,9 @@ class Søknad(
         private val type: String
     ) {
         fun valider(aktivitetslogg: IAktivitetslogg) {
-            if (type != "ANDRE_ARBEIDSFORHOLD") {
+            if (type == "ANNET") {
+                aktivitetslogg.warn("Det er oppgitt annen inntektskilde i søknaden. Vurder inntekt.")
+            } else if (type != "ANDRE_ARBEIDSFORHOLD") {
                 aktivitetslogg.error("Søknaden inneholder andre inntektskilder enn ANDRE_ARBEIDSFORHOLD")
             }
         }

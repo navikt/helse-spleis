@@ -2,6 +2,8 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
+import no.nav.helse.hentErrors
+import no.nav.helse.hentWarnings
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.testhelpers.desember
@@ -10,7 +12,6 @@ import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mai
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDateTime
@@ -24,12 +25,6 @@ internal class SøknadTest {
     }
 
     private lateinit var søknad: Søknad
-    private lateinit var aktivitetslogg: Aktivitetslogg
-
-    @BeforeEach
-    internal fun setup() {
-        aktivitetslogg = Aktivitetslogg()
-    }
 
     @Test
     fun `søknad med bare sykdom`() {
@@ -128,7 +123,7 @@ internal class SøknadTest {
     @Test
     fun `egenmelding ligger langt utenfor sykdomsvindu`() {
         søknad(Sykdom(5.januar, 12.januar, 100.prosent), Egenmelding(19.desember(2017), 20.desember(2017)))
-        assertFalse(søknad.valider(EN_PERIODE).hasErrorsOrWorse()) { aktivitetslogg.toString() }
+        assertFalse(søknad.valider(EN_PERIODE).hasErrorsOrWorse())
         assertEquals(8, søknad.sykdomstidslinje().count())
     }
 
@@ -222,6 +217,21 @@ internal class SøknadTest {
         assertEquals(1, søknad.kontekster().size)
         assertTrue(søknad.hasWarningsOrWorse())
         assertFalse(søknad.hasErrorsOrWorse())
+    }
+
+    @Test
+    fun `inntektskilde med type ANNET skal gi warning istedenfor error`() {
+        søknad(Sykdom(1.januar, 31.januar, 100.prosent), andreInntektskilder = listOf(Søknad.Inntektskilde(true, "ANNET")))
+        søknad.valider(EN_PERIODE)
+        assertTrue(søknad.hentWarnings().contains("Det er oppgitt annen inntektskilde i søknaden. Vurder inntekt."))
+        assertTrue(søknad.hentErrors().isEmpty())
+    }
+
+    @Test
+    fun `inntektskilde med type FRILANSER skal gi error`() {
+        søknad(Sykdom(1.januar, 31.januar, 100.prosent), andreInntektskilder = listOf(Søknad.Inntektskilde(true, "FRILANSER")))
+        søknad.valider(EN_PERIODE)
+        assertTrue(søknad.hentErrors().contains("Søknaden inneholder andre inntektskilder enn ANDRE_ARBEIDSFORHOLD"))
     }
 
     private fun søknad(vararg perioder: Søknadsperiode, andreInntektskilder: List<Søknad.Inntektskilde> = emptyList(), permittert: Boolean = false, merknaderFraSykmelding: List<Søknad.Merknad> = emptyList()) {

@@ -44,5 +44,6 @@ private fun IAktivitetslogg.hent(alvorlighetsgrad: String) = toMap()["aktivitete
     .map { it["melding"] }
     .mapNotNull { it.toString() }
 
+internal fun IAktivitetslogg.hentErrors() = hent("ERROR")
 internal fun IAktivitetslogg.hentWarnings() = hent("WARN")
 internal fun IAktivitetslogg.hentInfo() = hent("INFO")
