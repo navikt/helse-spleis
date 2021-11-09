@@ -19,7 +19,7 @@ internal class OppdragBuilder(
     fagsystemId: String? = null
 ) : UtbetalingsdagVisitor {
     private val fagsystemId = fagsystemId ?: genererUtbetalingsreferanse(UUID.randomUUID())
-    private val arbeisdsgiverLinjer = mutableListOf<Utbetalingslinje>()
+    private val utbetalingslinjer = mutableListOf<Utbetalingslinje>()
     private var tilstand: Tilstand = MellomLinjer()
     private var sisteArbeidsgiverdag: LocalDate? = null
 
@@ -38,10 +38,20 @@ internal class OppdragBuilder(
     }
 
     private fun nyttOppdrag(): Oppdrag {
-        arbeisdsgiverLinjer.removeAll { it.beløp == null || it.beløp == 0 }
-        arbeisdsgiverLinjer.zipWithNext { a, b -> b.kobleTil(a) }
-        arbeisdsgiverLinjer.firstOrNull()?.refFagsystemId = null
-        return Oppdrag(mottaker, fagområde, arbeisdsgiverLinjer, fagsystemId, sisteArbeidsgiverdag)
+        fjernLinjerUtenUtbetalingsdager()
+        kjedeSammenLinjer()
+        return Oppdrag(mottaker, fagområde, utbetalingslinjer, fagsystemId, sisteArbeidsgiverdag)
+    }
+
+    private fun fjernLinjerUtenUtbetalingsdager() {
+        utbetalingslinjer.removeAll { it.beløp == null || it.beløp == 0 }
+    }
+    private fun kjedeSammenLinjer() {
+        utbetalingslinjer.zipWithNext { a, b -> b.kobleTil(a) }
+        førsteLinjeSkalIkkePekePåAndreLinjer()
+    }
+    private fun førsteLinjeSkalIkkePekePåAndreLinjer() {
+        utbetalingslinjer.firstOrNull()?.refFagsystemId = null
     }
 
     private fun oppdragBasertPåTidligere(tidligere: Oppdrag, aktivitetslogg: IAktivitetslogg) =
@@ -51,7 +61,7 @@ internal class OppdragBuilder(
                 if (tidligere.fagsystemId() == it.fagsystemId()) it.nettoBeløp(tidligere)
             }
 
-    private val linje get() = arbeisdsgiverLinjer.first()
+    private val linje get() = utbetalingslinjer.first()
 
     override fun visit(dag: UkjentDag, dato: LocalDate, økonomi: Økonomi) {
         tilstand = Avsluttet
@@ -63,7 +73,7 @@ internal class OppdragBuilder(
         økonomi: Økonomi
     ) {
         økonomi.medData { grad, aktuellDagsinntekt ->
-            if (arbeisdsgiverLinjer.isEmpty()) return@medData tilstand.nyLinje(dag, dato, grad, aktuellDagsinntekt!!)
+            if (utbetalingslinjer.isEmpty()) return@medData tilstand.nyLinje(dag, dato, grad, aktuellDagsinntekt!!)
             if (grad == linje.grad && (linje.beløp == null || linje.beløp == fagområde.beløp(dag.økonomi)))
                 tilstand.betalingsdag(dag, dato, grad, aktuellDagsinntekt!!)
             else
@@ -77,7 +87,7 @@ internal class OppdragBuilder(
         økonomi: Økonomi
     ) {
         økonomi.medData { grad, _ ->
-            if (arbeisdsgiverLinjer.isEmpty() || grad != linje.grad)
+            if (utbetalingslinjer.isEmpty() || grad != linje.grad)
                 tilstand.nyLinje(dag, dato, grad)
             else
                 tilstand.helgedag(dag, dato, grad)
@@ -126,7 +136,7 @@ internal class OppdragBuilder(
     }
 
     private fun addLinje(dag: Utbetalingsdag, dato: LocalDate, grad: Double, aktuellDagsinntekt: Double) {
-        arbeisdsgiverLinjer.add(
+        utbetalingslinjer.add(
             0,
             Utbetalingslinje(
                 dato,
@@ -143,7 +153,7 @@ internal class OppdragBuilder(
 
 
     private fun addLinje(dato: LocalDate, grad: Double) {
-        arbeisdsgiverLinjer.add(
+        utbetalingslinjer.add(
             0,
             Utbetalingslinje(dato, dato, Satstype.DAG, null, 0, grad, fagsystemId)
         )
