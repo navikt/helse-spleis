@@ -1,6 +1,9 @@
 package no.nav.helse.utbetalingslinjer
 
-import no.nav.helse.hendelser.*
+import no.nav.helse.Toggles
+import no.nav.helse.hendelser.Hendelseskontekst
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.utbetaling.*
 import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.godkjenning
@@ -89,6 +92,15 @@ internal class Utbetaling private constructor(
         gjenståendeSykedager
     )
 
+    init {
+        if (Toggles.LageBrukerutbetaling.disabled) {
+            // slår ut når begge har linjer
+            check(arbeidsgiverOppdrag.isEmpty() || personOppdrag.isEmpty()) {
+                "Manglende støtte: Kan ikke støtte både arbeidsgiver- og personoppdrag uten at Delvis refusjon er skrudd på: arbeidsgiverlinjer: ${arbeidsgiverOppdrag.size}, personlinjer: ${personOppdrag.size}"
+            }
+        }
+    }
+
     private val oppdragsperiode = Oppdrag.periode(arbeidsgiverOppdrag, personOppdrag)
     internal val periode get() = oppdragsperiode.oppdaterTom(utbetalingstidslinje.periode())
 
@@ -150,6 +162,8 @@ internal class Utbetaling private constructor(
         utbetalingOverført.kontekst(this)
         tilstand.overført(this, utbetalingOverført)
     }
+
+    internal fun harDelvisRefusjon() = arbeidsgiverOppdrag.isNotEmpty() && personOppdrag.isNotEmpty()
 
     internal fun simuler(hendelse: IAktivitetslogg) {
         hendelse.kontekst(this)
@@ -259,6 +273,7 @@ internal class Utbetaling private constructor(
     }
 
     internal companion object {
+
         val log: Logger = LoggerFactory.getLogger("Utbetaling")
 
         private const val systemident = "SPLEIS"
@@ -426,13 +441,13 @@ internal class Utbetaling private constructor(
 
         private fun byggOppdrag(
             sisteAktive: Oppdrag?,
-            organisasjonsnummer: String,
+            mottaker: String,
             tidslinje: Utbetalingstidslinje,
             sisteDato: LocalDate,
             aktivitetslogg: IAktivitetslogg,
             forrige: Oppdrag?,
             fagområde: Fagområde
-        ): Oppdrag = OppdragBuilder(tidslinje, organisasjonsnummer, fagområde, sisteDato, forrige?.fagsystemId()).build(forrige ?: sisteAktive, aktivitetslogg)
+        ): Oppdrag = OppdragBuilder(tidslinje, mottaker, fagområde, sisteDato, forrige?.fagsystemId()).build(forrige ?: sisteAktive, aktivitetslogg)
 
         private fun byggArbeidsgiveroppdrag(
             sisteAktive: Oppdrag?,
@@ -443,14 +458,16 @@ internal class Utbetaling private constructor(
             forrige: Oppdrag?
         ) = byggOppdrag(sisteAktive, organisasjonsnummer, tidslinje, sisteDato, aktivitetslogg, forrige, SykepengerRefusjon)
 
-        @Suppress("UNUSED_PARAMETER")
-        private fun byggPersonoppdrag(        // TODO("To be completed when payments to employees is supported")
+        private fun byggPersonoppdrag(
             fødselsnummer: String,
             tidslinje: Utbetalingstidslinje,
             sisteDato: LocalDate,
             aktivitetslogg: IAktivitetslogg,
             utbetalinger: List<Utbetaling>
-        ) = Oppdrag(fødselsnummer, Sykepenger)
+        ): Oppdrag {
+            if (Toggles.LageBrukerutbetaling.disabled) return Oppdrag(fødselsnummer, Sykepenger)
+            return byggOppdrag(null, fødselsnummer, tidslinje, sisteDato, aktivitetslogg, null, Sykepenger)
+        }
 
         internal fun List<Utbetaling>.aktive() =
             this.groupBy { it.arbeidsgiverOppdrag.fagsystemId() }
@@ -477,7 +494,6 @@ internal class Utbetaling private constructor(
             aktive()
                 .map { it.utbetalingstidslinje }
                 .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
-
         internal fun List<Utbetaling>.harId(id: UUID) = any { it.id == id }
     }
 
@@ -560,7 +576,6 @@ internal class Utbetaling private constructor(
         "avsluttet" to avsluttet,
         "oppdatert" to oppdatert
     )
-
     internal fun fagsystemIder() = listOf(arbeidsgiverOppdrag.fagsystemId(), personOppdrag.fagsystemId())
 
     internal interface Tilstand {

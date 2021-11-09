@@ -1,5 +1,8 @@
 package no.nav.helse
 
+import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.utbetalingslinjer.Utbetaling
+
 abstract class Toggles internal constructor(enabled: Boolean = false, private val force: Boolean = false) {
     private constructor(key: String, default: Boolean = false) : this(System.getenv()[key]?.toBoolean() ?: default)
 
@@ -62,4 +65,13 @@ abstract class Toggles internal constructor(enabled: Boolean = false, private va
     object SpeilApiV2: Toggles("SPEIL_API_V2")
     object RefusjonPerDag: Toggles("REFUSJON_PER_DAG",true)
     object RevurdereInntektMedFlereArbeidsgivere: Toggles(false)
+
+    internal object LageBrukerutbetaling: Toggles(false) {
+        fun kanIkkeFortsette(aktivitetslogg: IAktivitetslogg, utbetaling: Utbetaling?): Boolean {
+            if (utbetaling == null) return false
+            if (disabled) return false
+            if (utbetaling.harDelvisRefusjon()) aktivitetslogg.error("Støtter ikke brukerutbetaling med delvis refusjon")
+            return aktivitetslogg.hasErrorsOrWorse()
+        }
+    }
 }
