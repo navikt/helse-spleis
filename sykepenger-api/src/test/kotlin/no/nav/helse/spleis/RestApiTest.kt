@@ -11,7 +11,6 @@ import io.ktor.server.engine.*
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.Toggles
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmelding
@@ -27,7 +26,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.awaitility.Awaitility.await
 import org.flywaydb.core.Flyway
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.TestInstance.Lifecycle
@@ -219,107 +217,11 @@ internal class RestApiTest {
         "/api/hendelse-json/${MELDINGSREFERANSE}".httpGet(HttpStatusCode.OK)
     }
 
-    @Test
-    fun `tester person-resolver`() {
-        Toggles.SpeilApiV2.enable()
-
-        val query = """
-            {
-                person(fnr: ${UNG_PERSON_FNR.toLong()}) {
-                    aktorId,
-                    fodselsnummer,
-                    arbeidsgivere {
-                        organisasjonsnummer,
-                        id,
-                        generasjoner {
-                            id,
-                            perioder {
-                                id,
-                                fom,
-                                tom,
-                                behandlingstype,
-                                periodetype,
-                                inntektskilde,
-                                erForkastet,
-                                opprettet
-                            }
-                        }
-                    },
-                    dodsdato,
-                    versjon
-                }
-            }
-        """.trimIndent()
-
-        "/graphql".httpPost(
-            body = """
-                {
-                    "query": "$query"
-                }
-            """.trimIndent()
-        ) {
-            this
-        }
-
-        Toggles.SpeilApiV2.disable()
-    }
-
-    @Test
-    fun `tester perioder-resolver`() {
-        Toggles.SpeilApiV2.enable()
-
-        val query = """
-            {
-                perioder(fnr: ${UNG_PERSON_FNR.toLong()}, orgnr: \"$ORGNUMMER\", generasjonsindeks: 0) {
-                    fom,
-                    tom
-                }
-            }
-        """.trimIndent()
-
-        "/graphql".httpPost(
-            body = """
-                {
-                    "query": "$query"
-                }
-            """.trimIndent()
-        ) {
-            this
-        }
-
-        Toggles.SpeilApiV2.disable()
-    }
-
     private fun createToken() = jwtStub.createTokenFor(
         subject = "en_saksbehandler_ident",
         groups = listOf("sykepenger-saksbehandler-gruppe"),
         audience = "spleis_azure_ad_app_id"
     )
-
-    private fun String.httpPost(
-        expectedStatus: HttpStatusCode = HttpStatusCode.OK,
-        headers: Map<String, String> = emptyMap(),
-        body: String = "",
-        testBlock: String.() -> Unit = {}
-    ) {
-        val token = createToken()
-
-        val connection = appBaseUrl.handleRequest(HttpMethod.Get, this) {
-            doOutput = true
-            setRequestProperty(Authorization, "Bearer $token")
-            setRequestProperty("Content-Type", "application/json")
-            setRequestProperty("Accept", "application/json")
-            headers.forEach { (key, value) ->
-                setRequestProperty(key, value)
-            }
-
-            val input = body.toByteArray(Charsets.UTF_8)
-            outputStream.write(input, 0, input.size)
-        }
-
-        assertEquals(expectedStatus.value, connection.responseCode)
-        connection.responseBody.testBlock()
-    }
 
     private fun String.httpGet(
         expectedStatus: HttpStatusCode = HttpStatusCode.OK,

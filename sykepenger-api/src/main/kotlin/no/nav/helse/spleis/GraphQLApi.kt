@@ -128,8 +128,8 @@ fun mapTidslinjeperiode(periode: Tidslinjeperiode) =
     }
 
 internal fun SchemaBuilder.personSchema(personDao: PersonDao, hendelseDao: HendelseDao) {
-    query("perioder") {
-        resolver { fnr: Long, orgnr: String, generasjonsindeks: Int ->
+    query("generasjon") {
+        resolver { fnr: Long, orgnr: String, indeks: Int ->
             personDao.hentPersonFraFnr(fnr)
                 ?.deserialize { hendelseDao.hentAlleHendelser(fnr) }
                 ?.let { håndterPerson(it, hendelseDao) }
@@ -137,7 +137,7 @@ internal fun SchemaBuilder.personSchema(personDao: PersonDao, hendelseDao: Hende
                     person.arbeidsgivere
                         .firstOrNull { it.organisasjonsnummer == orgnr }
                         ?.let { arbeidsgiver ->
-                            arbeidsgiver.generasjoner?.get(generasjonsindeks)
+                            arbeidsgiver.generasjoner?.get(indeks)
                                 ?.let { it.perioder }
                                 ?.map { periode -> mapTidslinjeperiode(periode) }
                         }

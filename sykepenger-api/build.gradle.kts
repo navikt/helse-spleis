@@ -24,6 +24,7 @@ dependencies {
     testImplementation("com.github.tomakehurst:wiremock-jre8:$wireMockVersion") {
         exclude(group = "junit")
     }
+    testImplementation("io.mockk:mockk:1.12.0")
 
 }
 
