@@ -321,16 +321,22 @@ internal class Arbeidsgiver private constructor(
     internal fun håndter(søknad: Søknad) {
         korrigerFerieIForkant(søknad)
         if (Toggles.OppretteVedtaksperioderVedSøknad.enabled) return håndterEllerOpprettVedtaksperiode(søknad, Vedtaksperiode::håndter)
-        søknad.kontekst(this)
-        noenHarHåndtert(søknad, Vedtaksperiode::håndter, "Forventet ikke søknad. Har nok ikke mottatt sykmelding")
-        finalize(søknad)
+        håndterSøknad(søknad, Vedtaksperiode::håndter)
     }
 
     internal fun håndter(søknad: SøknadArbeidsgiver) {
         if (Toggles.OppretteVedtaksperioderVedSøknad.enabled) return håndterEllerOpprettVedtaksperiode(søknad, Vedtaksperiode::håndter)
-        søknad.kontekst(this)
-        noenHarHåndtert(søknad, Vedtaksperiode::håndter, "Forventet ikke søknad til arbeidsgiver. Har nok ikke mottatt sykmelding")
-        finalize(søknad)
+        håndterSøknad(søknad, Vedtaksperiode::håndter)
+    }
+
+    private fun <Hendelse : SykdomstidslinjeHendelse> håndterSøknad(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean) {
+        hendelse.kontekst(this)
+        if (!noenHarHåndtert(hendelse, håndterer,"Forventet ikke ${hendelse.kilde}. Har nok ikke mottatt sykmelding")) {
+            if (hendelse.forGammel()) hendelse.error("Forventet ikke ${hendelse.kilde}. Søknaden er for gammel.")
+            if (Utbetaling.harBetalt(utbetalinger, hendelse.periode())) hendelse.error("Perioden til ${hendelse.kilde} overlapper med tidligere utbetaling.")
+        }
+        if (hendelse.hasErrorsOrWorse()) person.emitHendelseIkkeHåndtert(hendelse)
+        finalize(hendelse)
     }
 
     private fun <Hendelse : SykdomstidslinjeHendelse> håndterEllerOpprettVedtaksperiode(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean) {
@@ -941,9 +947,10 @@ internal class Arbeidsgiver private constructor(
     internal fun harDagUtenSøknad(periode: Periode) =
         sykdomstidslinje().harDagUtenSøknad(periode)
 
-    private fun <Hendelse : IAktivitetslogg> noenHarHåndtert(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean, errortekst: String) {
-        if (noenHarHåndtert(hendelse, håndterer)) return
+    private fun <Hendelse : IAktivitetslogg> noenHarHåndtert(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean, errortekst: String): Boolean {
+        if (noenHarHåndtert(hendelse, håndterer)) return true
         hendelse.error(errortekst)
+        return false
     }
 
     private fun <Hendelse : IAktivitetslogg> håndter(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Unit) {

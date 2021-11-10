@@ -45,7 +45,7 @@ internal class IkkeHåndtertHendelseTest: AbstractEndToEndMediatorTest() {
         val hendelseIkkeHåndtert = testRapid.inspektør.siste("hendelse_ikke_håndtert")
         assertNotNull(hendelseIkkeHåndtert)
         assertEquals(
-            listOf("Søknaden kan ikke være eldre enn avskjæringsdato", "Forventet ikke Søknad. Oppretter ikke vedtaksperiode."),
+            listOf("Forventet ikke Søknad. Har nok ikke mottatt sykmelding", "Søknaden kan ikke være eldre enn avskjæringsdato", "Forventet ikke Søknad. Søknaden er for gammel."),
             hendelseIkkeHåndtert["årsaker"].toList().map { it.textValue() }
         )
     }
