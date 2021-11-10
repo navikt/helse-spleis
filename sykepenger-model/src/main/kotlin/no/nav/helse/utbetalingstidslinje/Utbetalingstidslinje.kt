@@ -19,6 +19,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 import java.time.DayOfWeek
 import java.time.LocalDate
+import kotlin.reflect.KClass
 
 /**
  * Forstår utbetalingsforpliktelser for en bestemt arbeidsgiver
@@ -66,8 +67,12 @@ internal class Utbetalingstidslinje private constructor(
             tidslinjer.forEach { it.avvis(begrunnelserForSkjæringstidspunkt) }
         }
 
-        fun avvis(tidslinjer: List<Utbetalingstidslinje>, avvistePerioder: List<Periode>, periode: Periode, begrunnelser: List<Begrunnelse>) =
-            tidslinjer.count { it.avvis(avvistePerioder, periode, begrunnelser) } > 0
+        fun avvis(tidslinjer: List<Utbetalingstidslinje>, avvistePerioder: List<Periode>, periode: Periode, begrunnelser: List<Begrunnelse>): Boolean {
+            tidslinjer.apply {
+                forEach { it.avvis(avvistePerioder, begrunnelser) }
+                return flatMap { tidslinje -> tidslinje.subset(periode) }.any { it is AvvistDag}
+            }
+        }
     }
 
     internal fun er6GBegrenset(): Boolean {
@@ -82,18 +87,11 @@ internal class Utbetalingstidslinje private constructor(
         visitor.postVisit(this)
     }
 
-    private fun avvis(avvisteDatoer: List<Periode>, periode: Periode, begrunnelser: List<Begrunnelse>): Boolean {
-        var result = false
-        utbetalingsdager.forEachIndexed { index, utbetalingsdag ->
-            result = avvis(avvisteDatoer, periode, index, utbetalingsdag, begrunnelser) || result
+    private fun avvis(avvisteDatoer: List<Periode>, begrunnelser: List<Begrunnelse>) {
+        utbetalingsdager.replaceAll {
+            if (it.dato !in avvisteDatoer) it
+            else it.avvis(begrunnelser) ?: it
         }
-        return result
-    }
-
-    private fun avvis(avvisteDatoer: List<Periode>, periode: Periode, index: Int, utbetalingsdag: Utbetalingsdag, begrunnelser: List<Begrunnelse>): Boolean {
-        if (utbetalingsdag.dato !in avvisteDatoer) return false
-        utbetalingsdager[index] = (utbetalingsdag.avvis(begrunnelser) ?: return false)
-        return utbetalingsdag.dato in periode
     }
 
     private fun avvis(begrunnelserForSkjæringstidspunkt: Map<LocalDate, List<Begrunnelse>>) {
@@ -301,7 +299,7 @@ internal class Utbetalingstidslinje private constructor(
         override fun toString() = "${this.javaClass.simpleName} ($dato) ${økonomi.medData { grad, _ -> grad }} %"
 
         internal fun avvis(begrunnelser: List<Begrunnelse>) = begrunnelser
-            .filter { it.avvis(this) }
+            .filter { it.skalAvvises(this) }
             .takeIf(List<*>::isNotEmpty)
             ?.let(::avvisDag)
 
@@ -404,22 +402,18 @@ internal class Utbetalingstidslinje private constructor(
     }
 }
 
-internal sealed class Begrunnelse(private val avvisstrategi: (Utbetalingsdag) -> Boolean = navdager) {
+internal sealed class Begrunnelse(private val dagtyperSomAvvises: List<KClass<out Utbetalingsdag>> = listOf(NavDag::class)) {
 
-    internal fun avvis(utbetalingsdag: Utbetalingsdag) = utbetalingsdag is AvvistDag || avvisstrategi(utbetalingsdag)
+    internal fun skalAvvises(utbetalingsdag: Utbetalingsdag) = utbetalingsdag is AvvistDag || utbetalingsdag::class in dagtyperSomAvvises
 
     object SykepengedagerOppbrukt : Begrunnelse()
     object MinimumInntekt : Begrunnelse()
     object MinimumInntektOver67 : Begrunnelse()
     object EgenmeldingUtenforArbeidsgiverperiode : Begrunnelse()
     object MinimumSykdomsgrad : Begrunnelse()
-    object EtterDødsdato : Begrunnelse(inklNavHelg)
-    object Over70 : Begrunnelse(inklNavHelg) // TODO helg?
+    object EtterDødsdato : Begrunnelse(listOf(NavDag::class, NavHelgDag::class))
+    object Over70 : Begrunnelse(listOf(NavDag::class, NavHelgDag::class))
     object ManglerOpptjening : Begrunnelse()
     object ManglerMedlemskap : Begrunnelse()
 
-    private companion object {
-        private val navdager = { dag: Utbetalingsdag -> dag is NavDag }
-        private val inklNavHelg = { dag: Utbetalingsdag -> dag is NavDag || dag is NavHelgDag }
-    }
 }

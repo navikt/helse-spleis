@@ -12,14 +12,14 @@ internal class BegrunnelseTest {
 
     @Test
     fun `dødsdato avviser ukedager og helger`() {
-        assertTrue(Begrunnelse.EtterDødsdato.avvis(NavDag(1.januar, økonomi)))
-        assertTrue(Begrunnelse.EtterDødsdato.avvis(NavHelgDag(1.januar, økonomi)))
+        assertTrue(Begrunnelse.EtterDødsdato.skalAvvises(NavDag(1.januar, økonomi)))
+        assertTrue(Begrunnelse.EtterDødsdato.skalAvvises(NavHelgDag(1.januar, økonomi)))
     }
 
     @Test
     fun `MinimumSykdomsgrad avviser ikke helg`() {
-        assertTrue(Begrunnelse.MinimumSykdomsgrad.avvis(NavDag(1.januar, økonomi)))
-        assertFalse(Begrunnelse.MinimumSykdomsgrad.avvis(NavHelgDag(1.januar, økonomi)))
+        assertTrue(Begrunnelse.MinimumSykdomsgrad.skalAvvises(NavDag(1.januar, økonomi)))
+        assertFalse(Begrunnelse.MinimumSykdomsgrad.skalAvvises(NavHelgDag(1.januar, økonomi)))
     }
 
     @Test
