@@ -1,4 +1,4 @@
-package no.nav.helse.spleis
+package no.nav.helse.spleis.graphql
 
 import com.apurebase.kgraphql.GraphQL
 import com.apurebase.kgraphql.schema.dsl.SchemaBuilder
@@ -6,9 +6,10 @@ import io.ktor.application.*
 import io.ktor.auth.*
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
-import no.nav.helse.serde.api.v2.Behandlingstype
-import no.nav.helse.serde.api.v2.BeregnetPeriode
-import no.nav.helse.serde.api.v2.Tidslinjeperiode
+import no.nav.helse.serde.api.AktivitetDTO
+import no.nav.helse.serde.api.BegrunnelseDTO
+import no.nav.helse.serde.api.v2.*
+import no.nav.helse.serde.api.v2.Sykdomstidslinjedag.SykdomstidslinjedagKilde
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.dao.PersonDao
 import no.nav.helse.spleis.dto.håndterPerson
@@ -18,114 +19,6 @@ import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.*
 import javax.sql.DataSource
-
-data class GraphQLPerson(
-    val aktorId: String,
-    val fodselsnummer: String,
-    val arbeidsgivere: List<GraphQLArbeidsgiver>,
-    val dodsdato: LocalDate?,
-    val versjon: Int
-)
-
-data class GraphQLArbeidsgiver(
-    val organisasjonsnummer: String,
-    val id: UUID,
-    val generasjoner: List<GraphQLGenerasjon>
-)
-
-data class GraphQLGenerasjon(
-    val id: UUID,
-    val perioder: List<GraphQLTidslinjeperiode>
-)
-
-interface GraphQLTidslinjeperiode {
-    val id: UUID
-    val fom: LocalDate
-    val tom: LocalDate
-
-    //    val tidslinje: List<GraphQLDag>
-    val behandlingstype: Behandlingstype
-    val periodetype: Periodetype
-    val inntektskilde: Inntektskilde
-    val erForkastet: Boolean
-    val opprettet: LocalDateTime
-}
-
-data class GraphQLUberegnetPeriode(
-    override val fom: LocalDate,
-    override val tom: LocalDate,
-//    override val tidslinje: List<GraphQLDag>,
-    override val behandlingstype: Behandlingstype,
-    override val periodetype: Periodetype,
-    override val inntektskilde: Inntektskilde,
-    override val erForkastet: Boolean,
-    override val opprettet: LocalDateTime
-) : GraphQLTidslinjeperiode {
-    override val id: UUID = UUID.randomUUID()
-}
-
-data class GraphQLBeregnetPeriode(
-    override val fom: LocalDate,
-    override val tom: LocalDate,
-//    override val tidslinje: List<GraphQLDag>,
-    override val behandlingstype: Behandlingstype,
-    override val periodetype: Periodetype,
-    override val inntektskilde: Inntektskilde,
-    override val erForkastet: Boolean,
-    override val opprettet: LocalDateTime,
-    val beregningId: UUID,
-    val gjenstaendeSykedager: Int?,
-    val forbrukteSykedager: Int?,
-    val skjaeringstidspunkt: LocalDate,
-    val maksdato: LocalDate,
-//    val utbetaling:
-//    val hendelser:
-//    val simulering:
-    val vilkarsgrunnlaghistorikkId: UUID,
-//    val periodevilkår:
-//    val aktivitetslogg:
-) : GraphQLTidslinjeperiode {
-    override val id: UUID = UUID.randomUUID()
-}
-
-data class GraphQLDag(
-    val dato: LocalDate
-)
-
-fun mapTidslinjeperiode(periode: Tidslinjeperiode) =
-    when (periode) {
-        is BeregnetPeriode -> GraphQLBeregnetPeriode(
-            fom = periode.fom,
-            tom = periode.tom,
-//          tidslinje = emptyList(), // periode.sammenslåttTidslinje,
-            behandlingstype = periode.behandlingstype,
-            periodetype = periode.periodetype,
-            inntektskilde = periode.inntektskilde,
-            erForkastet = periode.erForkastet,
-            opprettet = periode.opprettet,
-            beregningId = periode.beregningId,
-            gjenstaendeSykedager = periode.gjenståendeSykedager,
-            forbrukteSykedager = periode.forbrukteSykedager,
-            skjaeringstidspunkt = periode.skjæringstidspunkt,
-            maksdato = periode.maksdato,
-            vilkarsgrunnlaghistorikkId = periode.vilkårsgrunnlagshistorikkId
-            //    val utbetaling:
-            //    val hendelser:
-            //    val simulering:
-            //    val periodevilkår:
-            //    val aktivitetslogg:
-        )
-        else -> GraphQLUberegnetPeriode(
-            fom = periode.fom,
-            tom = periode.tom,
-//                                                    tidslinje = emptyList(), // periode.sammenslåttTidslinje,
-            behandlingstype = periode.behandlingstype,
-            periodetype = periode.periodetype,
-            inntektskilde = periode.inntektskilde,
-            erForkastet = periode.erForkastet,
-            opprettet = periode.opprettet
-        )
-    }
 
 internal fun SchemaBuilder.personSchema(personDao: PersonDao, hendelseDao: HendelseDao) {
     query("generasjon") {
@@ -137,8 +30,7 @@ internal fun SchemaBuilder.personSchema(personDao: PersonDao, hendelseDao: Hende
                     person.arbeidsgivere
                         .firstOrNull { it.organisasjonsnummer == orgnr }
                         ?.let { arbeidsgiver ->
-                            arbeidsgiver.generasjoner?.get(indeks)
-                                ?.let { it.perioder }
+                            arbeidsgiver.generasjoner?.get(indeks)?.perioder
                                 ?.map { periode -> mapTidslinjeperiode(periode) }
                         }
                 } ?: emptyList()
@@ -175,10 +67,29 @@ internal fun SchemaBuilder.personSchema(personDao: PersonDao, hendelseDao: Hende
 
     type<GraphQLPerson>()
     type<GraphQLArbeidsgiver>()
+    type<GraphQLTidslinjeperiode>()
+    type<GraphQLBeregnetPeriode>()
+    type<GraphQLUberegnetPeriode>()
+    type<GraphQLUtbetaling>()
 
     enum<Behandlingstype>()
     enum<Inntektskilde>()
     enum<Periodetype>()
+    enum<SykdomstidslinjedagType>()
+    enum<UtbetalingstidslinjedagType>()
+    enum<SykdomstidslinjedagKildetype>()
+    enum<GraphQLHendelsetype>()
+    enum<BegrunnelseDTO>()
+
+    type<SykdomstidslinjedagKilde>()
+    type<GraphQLHendelse>()
+    type<GraphQLInntektsmelding>()
+    type<GraphQLSoknadNav>()
+    type<GraphQLSoknadArbeidsgiver>()
+    type<GraphQLSykmelding>()
+    type<GraphQLSimulering>()
+    type<AktivitetDTO>()
+    type<Utbetalingsinfo>()
 
     stringScalar<UUID> {
         deserialize = { uuid: String -> UUID.fromString(uuid) }

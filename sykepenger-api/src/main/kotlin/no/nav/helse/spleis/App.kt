@@ -1,6 +1,5 @@
 package no.nav.helse.spleis
 
-import com.apurebase.kgraphql.GraphQL
 import com.fasterxml.jackson.core.util.DefaultIndenter
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
 import com.fasterxml.jackson.databind.SerializationFeature
@@ -17,6 +16,7 @@ import no.nav.helse.spleis.config.ApplicationConfiguration
 import no.nav.helse.spleis.config.AzureAdAppConfig
 import no.nav.helse.spleis.config.DataSourceConfiguration
 import no.nav.helse.spleis.config.KtorConfig
+import no.nav.helse.spleis.graphql.installGraphQLApi
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
 import java.util.*
