@@ -220,7 +220,6 @@ internal class UtbetalingTest {
     }
 
     @Test
-    @Disabled
     fun `overføre utbetaling med null refusjon`() {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 0))
         beregnUtbetalinger(tidslinje)

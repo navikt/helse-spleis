@@ -15,6 +15,7 @@ import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 
@@ -83,6 +84,7 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
     }
 
     @Test
+    @Disabled
     fun `utbetaling med 0 refusjon til arbeidsgiver`() {
         Toggles.LageBrukerutbetaling.enable {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))

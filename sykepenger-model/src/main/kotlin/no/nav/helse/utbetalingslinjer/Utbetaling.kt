@@ -525,6 +525,7 @@ internal class Utbetaling private constructor(
 
     private fun overfør(hendelse: IAktivitetslogg) {
         vurdering?.overfør(hendelse, arbeidsgiverOppdrag, maksdato.takeUnless { type == Utbetalingtype.ANNULLERING })
+        vurdering?.overfør(hendelse, personOppdrag, maksdato.takeUnless { type == Utbetalingtype.ANNULLERING })
     }
 
     // TODO: Fjerne når vi slutter å sende utbetalt-event fra vedtaksperiode d(-_-)b

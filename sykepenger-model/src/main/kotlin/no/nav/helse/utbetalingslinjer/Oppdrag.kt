@@ -77,6 +77,7 @@ internal class Oppdrag private constructor(
         maksdato: LocalDate?,
         saksbehandler: String
     ) {
+        if (!harUtbetalinger()) return aktivitetslogg.info("Overfører ikke oppdrag uten endring for fagområde=$fagområde med fagsystemId=$fagsystemId")
         utbetaling(
             aktivitetslogg = aktivitetslogg,
             oppdrag = kopierKunLinjerMedEndring(),
@@ -86,6 +87,7 @@ internal class Oppdrag private constructor(
     }
 
     internal fun simuler(aktivitetslogg: IAktivitetslogg, maksdato: LocalDate, saksbehandler: String) {
+        if (!harUtbetalinger()) return aktivitetslogg.info("Simulerer ikke oppdrag uten endring fagområde=$fagområde med fagsystemId=$fagsystemId")
         simulering(
             aktivitetslogg = aktivitetslogg,
             oppdrag = kopierKunLinjerMedEndring(),
