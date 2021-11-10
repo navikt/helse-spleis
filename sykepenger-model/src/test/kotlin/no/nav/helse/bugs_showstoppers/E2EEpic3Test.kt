@@ -509,24 +509,24 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
     @Test
     fun `sykmeldinger som overlapper`() {
-        håndterSykmelding(Sykmeldingsperiode(15.januar(2020), 30.januar(2020), 100.prosent)) // sykmelding A, part 1 (1.vedtaksperiode)
-        håndterSykmelding(Sykmeldingsperiode(31.januar(2020), 15.februar(2020), 100.prosent)) // sykmelding A, part 2 (2.vedtaksperiode)
+        håndterSykmelding(Sykmeldingsperiode(15.januar(2020), 30.januar(2020), 100.prosent)) // sykmelding A, part 1
+        håndterSykmelding(Sykmeldingsperiode(31.januar(2020), 15.februar(2020), 100.prosent)) // sykmelding A, part 2
         håndterSykmelding(Sykmeldingsperiode(16.januar(2020), 31.januar(2020), 100.prosent)) // sykmelding B
         håndterSykmelding(Sykmeldingsperiode(1.februar(2020), 16.februar(2020), 100.prosent)) // sykmelding C
-        håndterSøknad(Sykdom(16.januar(2020), 31.januar(2020), 100.prosent)) // -> sykmelding B (3.vedtaksperiode)
-        håndterSøknad(Sykdom(1.februar(2020), 16.februar(2020), 100.prosent)) // sykmelding C (4.vedtaksperiode)
+        håndterSøknad(Sykdom(16.januar(2020), 31.januar(2020), 100.prosent)) // -> sykmelding B
+        håndterSøknad(Sykdom(1.februar(2020), 16.februar(2020), 100.prosent)) // sykmelding C
         håndterSøknad(Sykdom(31.januar(2020), 15.februar(2020), 100.prosent)) // sykmelding A, part 2
-        håndterSykmelding(Sykmeldingsperiode(18.februar(2020), 8.mars(2020), 100.prosent)) // sykmelding D (5.vedtaksperiode)
-        assertEquals(5, inspektør.vedtaksperiodeTeller)
+        håndterSykmelding(Sykmeldingsperiode(18.februar(2020), 8.mars(2020), 100.prosent)) // sykmelding D
+        assertEquals(3, inspektør.vedtaksperiodeTeller)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, TIL_INFOTRYGD)
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(15.januar(2020), 30.januar(2020))),
             førsteFraværsdag = 15.januar(2020)
         ) // does not currently affect anything, that should change with revurdering
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(4.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, TIL_INFOTRYGD)
-        assertTilstander(5.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
     }
 
     @Test
@@ -1641,26 +1641,38 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
     @Test
     fun `uønskede ukjente dager`() {
-        håndterSykmelding(Sykmeldingsperiode(18.august(2020), 6.september(2020), 100.prosent)) // 1.vedtaksperiode
+        håndterSykmelding(Sykmeldingsperiode(18.august(2020), 6.september(2020), 100.prosent))
         håndterSøknad(Sykdom(18.august(2020), 6.september(2020), 100.prosent))
 
-        håndterSykmelding(Sykmeldingsperiode(20.august(2020), 13.september(2020), 100.prosent)) // Denne fører til forkasting
-        håndterSøknad(Sykdom(20.august(2020), 13.september(2020), 100.prosent)) // 2.vedtaksperiode
+        håndterSykmelding(Sykmeldingsperiode(20.august(2020), 13.september(2020), 100.prosent)) // Denne blir ignorert
+        håndterSøknad(Sykdom(20.august(2020), 13.september(2020), 100.prosent))
 
-        håndterSykmelding(Sykmeldingsperiode(14.september(2020), 20.september(2020), 100.prosent)) // 3.vedtaksperiode
+        håndterSykmelding(
+            Sykmeldingsperiode(
+                14.september(2020),
+                20.september(2020),
+                100.prosent
+            )
+        ) // Dette fører til ukjent-dager i sykdomshistorikken mellom 6.9. og 14.9.
         håndterSøknad(Sykdom(14.september(2020), 20.september(2020), 100.prosent))
 
-        // Må gjøre serde for å få gjenskapt at ukjent-dager blir *instansiert* i sykdomshistorikken
-        person = SerialisertPerson(person.serialize().json).deserialize()
+        person =
+            SerialisertPerson(person.serialize().json).deserialize() // Må gjøre serde for å få gjenskapt at ukjent-dager blir *instansiert* i sykdomshistorikken
+
+        håndterPåminnelse(
+            1.vedtaksperiode,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            LocalDateTime.now().minusDays(200)
+        ) // Etter forkast ble det liggende igjen ukjent-dager forrest i sykdomstidslinjen
 
         håndterUtbetalingshistorikk(
             2.vedtaksperiode,
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 27.juli(2020), 13.september(2020), 100.prosent, 1000.daglig),
             inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 27.juli(2020), INNTEKT, true))
         )
-        assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
-        assertTrue(inspektør.periodeErForkastet(3.vedtaksperiode))
-        assertEquals(0, inspektør.sykdomstidslinje.count())
+        håndterYtelser(2.vedtaksperiode)
+
+        assertEquals(40, 248 - inspektør.gjenståendeSykedager(2.vedtaksperiode))
     }
 
     @Test
@@ -1753,6 +1765,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         // greier å deserialisere eksisterende infotrygdhistorikk riktig
         håndterUtbetalingshistorikkUtenValidering()
 
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
         håndterPåminnelse(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE) // trigger henting av infotrygdhistorikk
         håndterUtbetalingshistorikk(
@@ -1764,6 +1777,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         assertTilstander(
             2.vedtaksperiode,
             START,
+            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
             AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE,
             AVVENTER_HISTORIKK
         )

@@ -36,7 +36,11 @@ internal class TestMessageFactory(
         private fun Inntektsmelding.toMap(): Map<String, Any> = objectMapper.convertValue(this)
     }
 
-    fun lagNySøknad(vararg perioder: SoknadsperiodeDTO, orgnummer: String = organisasjonsnummer): String {
+    fun lagNySøknad(
+        vararg perioder: SoknadsperiodeDTO,
+        orgnummer: String = organisasjonsnummer,
+        opprettet: LocalDateTime = perioder.minOfOrNull { it.fom!! }!!.atStartOfDay()
+    ): String {
         val fom = perioder.minOfOrNull { it.fom!! }!!
         val nySøknad = SykepengesoknadDTO(
             status = SoknadsstatusDTO.NY,
@@ -56,7 +60,7 @@ internal class TestMessageFactory(
             opprettet = fom.plusMonths(3)?.atStartOfDay(),
             sykmeldingSkrevet = fom.atStartOfDay()
         )
-        return nyHendelse("ny_søknad", mapOf("@opprettet" to fom.atStartOfDay()) + nySøknad.toMap())
+        return nyHendelse("ny_søknad", mapOf("@opprettet" to opprettet) + nySøknad.toMap())
     }
 
     fun lagSøknadArbeidsgiver(

@@ -124,7 +124,6 @@ abstract class Toggle internal constructor(enabled: Boolean = false, private val
         }
     }
 
-    object OppretteVedtaksperioderVedSøknad : Toggle(true)
     object RebregnUtbetalingVedHistorikkendring : Toggle()
     object OverlappendeSykmelding : Toggle(true)
     object SendFeriepengeOppdrag : Toggle(false)

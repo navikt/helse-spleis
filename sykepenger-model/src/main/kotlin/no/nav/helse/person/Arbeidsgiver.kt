@@ -309,7 +309,17 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(sykmelding: Sykmelding) {
         ForkastetVedtaksperiode.overlapperMedForkastet(forkastede, sykmelding)
-        håndterEllerOpprettVedtaksperiode(sykmelding, Vedtaksperiode::håndter)
+        if (!sykmelding.forGammel() && !sykmelding.hasErrorsOrWorse()) {
+            if (!noenHarHåndtert(sykmelding, Vedtaksperiode::håndter)) {
+                if (!sykmelding.hasErrorsOrWorse()) {
+                    sykmelding.info("Lager ny vedtaksperiode")
+                    val ny = nyVedtaksperiode(sykmelding).also { it.håndter(sykmelding) }
+                    håndter(sykmelding) { nyPeriode(ny, sykmelding) }
+                }
+            }
+        }
+        if (sykmelding.hasErrorsOrWorse()) person.emitHendelseIkkeHåndtert(sykmelding)
+        finalize(sykmelding)
     }
 
     private fun korrigerFerieIForkant(søknad: Søknad) {
@@ -322,30 +332,16 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(søknad: Søknad) {
         korrigerFerieIForkant(søknad)
-        if (Toggle.OppretteVedtaksperioderVedSøknad.enabled) return håndterEllerOpprettVedtaksperiode(søknad, Vedtaksperiode::håndter)
-        søknad.kontekst(this)
-        noenHarHåndtert(søknad, Vedtaksperiode::håndter, "Forventet ikke søknad. Har nok ikke mottatt sykmelding")
-        finalize(søknad)
+        håndterSøknad(søknad, Vedtaksperiode::håndter)
     }
 
     internal fun håndter(søknad: SøknadArbeidsgiver) {
-        if (Toggle.OppretteVedtaksperioderVedSøknad.enabled) return håndterEllerOpprettVedtaksperiode(søknad, Vedtaksperiode::håndter)
-        søknad.kontekst(this)
-        noenHarHåndtert(søknad, Vedtaksperiode::håndter, "Forventet ikke søknad til arbeidsgiver. Har nok ikke mottatt sykmelding")
-        finalize(søknad)
+        håndterSøknad(søknad, Vedtaksperiode::håndter)
     }
 
-    private fun <Hendelse : SykdomstidslinjeHendelse> håndterEllerOpprettVedtaksperiode(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean) {
+    private fun <Hendelse : SykdomstidslinjeHendelse> håndterSøknad(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean) {
         hendelse.kontekst(this)
-        if (!noenHarHåndtert(hendelse, håndterer)) {
-            if (hendelse.forGammel()) hendelse.error("Forventet ikke ${hendelse.kilde}. Oppretter ikke vedtaksperiode.")
-            if (Utbetaling.harBetalt(utbetalinger, hendelse.periode())) hendelse.error("Periode overlapper med tidligere utbetaling.")
-            if (!hendelse.hasErrorsOrWorse()) {
-                hendelse.info("Lager ny vedtaksperiode pga. ${hendelse.kilde}")
-                val ny = nyVedtaksperiode(hendelse).also { håndterer(it, hendelse) }
-                håndter(hendelse) { nyPeriode(ny, hendelse) }
-            }
-        }
+        noenHarHåndtert(hendelse, håndterer, "Forventet ikke ${hendelse.kilde}. Har nok ikke mottatt sykmelding")
         if (hendelse.hasErrorsOrWorse()) person.emitHendelseIkkeHåndtert(hendelse)
         finalize(hendelse)
     }
@@ -789,7 +785,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun overlappendePerioder(hendelse: SykdomstidslinjeHendelse) = vedtaksperioder.filter { hendelse.erRelevant(it.periode()) }
 
-    private fun nyVedtaksperiode(hendelse: SykdomstidslinjeHendelse): Vedtaksperiode {
+    private fun nyVedtaksperiode(hendelse: Sykmelding): Vedtaksperiode {
         return Vedtaksperiode(
             person = person,
             arbeidsgiver = this,

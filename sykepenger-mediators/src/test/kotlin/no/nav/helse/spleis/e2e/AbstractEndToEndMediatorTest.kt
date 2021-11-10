@@ -72,8 +72,12 @@ internal abstract class AbstractEndToEndMediatorTest {
         testRapid.reset()
     }
 
-    protected fun sendNySøknad(vararg perioder: SoknadsperiodeDTO, orgnummer: String = ORGNUMMER) {
-        testRapid.sendTestMessage(meldingsfabrikk.lagNySøknad(*perioder, orgnummer = orgnummer))
+    protected fun sendNySøknad(
+        vararg perioder: SoknadsperiodeDTO,
+        orgnummer: String = ORGNUMMER,
+        meldingOpprettet: LocalDateTime = perioder.minOfOrNull { it.fom!! }!!.atStartOfDay()
+    ) {
+        testRapid.sendTestMessage(meldingsfabrikk.lagNySøknad(*perioder, orgnummer = orgnummer, opprettet = meldingOpprettet))
     }
 
     protected fun sendSøknad(
