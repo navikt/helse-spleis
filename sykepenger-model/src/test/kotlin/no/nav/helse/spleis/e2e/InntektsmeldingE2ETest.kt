@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -899,5 +900,21 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE,
             TIL_INFOTRYGD
         )
+    }
+
+    @Test
+    fun `om arbeidsgiverperioden fra IM treffer ikke første vedtaksperiodens burde den fortsatt bli håndtert dersom forlengelsen treffes`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 7.januar, 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(1.januar, 7.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(8.januar, 20.januar, 100.prosent))
+        håndterSøknad(Sykdom(8.januar, 20.januar, 100.prosent))
+        håndterInntektsmelding(listOf(8.januar til 23.januar), førsteFraværsdag = 8.januar)
+        assertEquals(8.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        assertNoErrors(2.vedtaksperiode)
+        assertTrue(inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inntektsopplysningPerArbeidsgiver()?.values?.single() is Inntektshistorikk.Inntektsmelding)
     }
 }

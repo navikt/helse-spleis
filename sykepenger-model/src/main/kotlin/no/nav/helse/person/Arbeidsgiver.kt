@@ -686,6 +686,8 @@ internal class Arbeidsgiver private constructor(
         return sykdomstidslinje().førsteDag()
     }
 
+    internal fun finnSammenhengendePeriode(skjæringstidspunkt: LocalDate) = vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt)
+
     internal fun fjernDager(periode: Periode) = sykdomshistorikk.fjernDager(periode)
 
     internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, periodeStart: LocalDate) =

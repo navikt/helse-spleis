@@ -161,7 +161,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(inntektsmelding: Inntektsmelding, other: UUID? = null): Boolean {
-        val overlapper = overlapperMed(inntektsmelding) && (other == null || other == id)
+        val overlapper = overlapperMedSammenhengende(inntektsmelding) && (other == null || other == id)
         return overlapper.also {
             if (it) hendelseIder.add(inntektsmelding.meldingsreferanseId())
             if (arbeidsgiver.harRefusjonOpphørt(periode.endInclusive) && !erAvsluttet()) {
@@ -384,6 +384,10 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun overlapperMed(hendelse: SykdomstidslinjeHendelse) = hendelse.erRelevant(this.periode)
+
+    private fun overlapperMedSammenhengende(inntektsmelding: Inntektsmelding): Boolean {
+        return inntektsmelding.erRelevant(arbeidsgiver.finnSammenhengendePeriode(skjæringstidspunkt).periode())
+    }
 
     private fun tilstand(
         event: IAktivitetslogg,
@@ -2683,6 +2687,12 @@ internal class Vedtaksperiode private constructor(
 
         internal fun List<Vedtaksperiode>.iderMedUtbetaling(utbetalingId: UUID) =
             filter { it.utbetalinger.harId(utbetalingId) }.map { it.id }
+
+        internal fun List<Vedtaksperiode>.periode(): Periode {
+            val fom = minOf { it.periode.start }
+            val tom = maxOf { it.periode.endInclusive }
+            return Periode(fom, tom)
+        }
     }
 }
 
