@@ -425,6 +425,12 @@ internal class InfotrygdhistorikkTest {
     }
 
     @Test
+    fun `har ikke endret historikk om ugyldige perioder er lik`() {
+        assertTrue(historikk.oppdaterHistorikk(historikkelement(ugyldigePerioder = listOf(UgyldigPeriode(1.januar, 1.januar, 100)))))
+        assertFalse(historikk.oppdaterHistorikk(historikkelement(ugyldigePerioder = listOf(UgyldigPeriode(1.januar, 1.januar, 100)))))
+    }
+
+    @Test
     fun `har ikke endret historikk dersom utbetaling er nyere enn siste element`() {
         historikk.oppdaterHistorikk(historikkelement())
         val utbetaling = utbetaling()

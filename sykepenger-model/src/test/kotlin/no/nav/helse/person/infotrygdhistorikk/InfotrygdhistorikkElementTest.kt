@@ -75,6 +75,14 @@ internal class InfotrygdhistorikkElementTest {
     }
 
     @Test
+    fun `lik ugyldig periode`() {
+        val element1 = historikkelement(ugyldigePerioder = listOf(UgyldigPeriode(1.januar, 1.januar, 100)))
+        val identiskElement = historikkelement(ugyldigePerioder = listOf(UgyldigPeriode(1.januar, 1.januar, 100)))
+        assertEquals(element1, identiskElement)
+        assertEquals(element1.hashCode(), identiskElement.hashCode())
+    }
+
+    @Test
     fun `like perioder`() {
         val ferie = Friperiode(1.januar, 31.januar)
         val ukjent = UkjentInfotrygdperiode(1.januar, 31.januar)

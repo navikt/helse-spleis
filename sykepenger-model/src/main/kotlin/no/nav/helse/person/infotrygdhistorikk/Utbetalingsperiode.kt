@@ -98,7 +98,7 @@ class UgyldigPeriode(
     val tom: LocalDate?,
     val utbetalingsgrad: Int?
 ) {
-    fun feiltekst() = when {
+    internal fun feiltekst() = when {
             fom == null || tom == null -> "mangler fom- eller tomdato"
             fom > tom -> "fom er nyere enn tom"
             utbetalingsgrad == null -> "utbetalingsgrad mangler"
@@ -106,7 +106,14 @@ class UgyldigPeriode(
             else -> null
         }
 
-    fun toMap() = mapOf<String, Any?>(
+    override fun equals(other: Any?): Boolean {
+        if (other !is UgyldigPeriode) return false
+        return this.fom == other.fom && this.tom == other.tom && this.utbetalingsgrad == other.utbetalingsgrad
+    }
+
+    override fun hashCode() = Objects.hash(fom, tom, utbetalingsgrad)
+
+    internal fun toMap() = mapOf<String, Any?>(
         "fom" to fom,
         "tom" to tom,
         "utbetalingsgrad" to utbetalingsgrad
