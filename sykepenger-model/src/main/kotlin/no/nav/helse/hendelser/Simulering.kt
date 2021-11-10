@@ -1,6 +1,7 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import java.time.LocalDate
 import java.util.*
@@ -11,10 +12,14 @@ class Simulering(
     private val aktørId: String,
     private val fødselsnummer: String,
     private val orgnummer: String,
+    private val fagsystemId: String,
+    fagområde: String,
     private val simuleringOK: Boolean,
     private val melding: String,
     internal val simuleringResultat: SimuleringResultat?
 ) : ArbeidstakerHendelse(meldingsreferanseId) {
+
+    private val fagområde = Fagområde.from(fagområde)
 
     internal fun erRelevant(other: UUID) = other.toString() == vedtaksperiodeId
 
@@ -23,6 +28,8 @@ class Simulering(
     override fun organisasjonsnummer() = orgnummer
 
     internal fun valider(oppdrag: Oppdrag) = this.apply {
+        if (!oppdrag.erRelevant(fagsystemId, fagområde)) return@apply
+
         if (!simuleringOK) {
             info("Feil under simulering", melding)
             error("Feil under simulering")

@@ -197,7 +197,9 @@ internal class Utbetaling private constructor(
         hendelse.erRelevant(id)
 
     internal fun valider(simulering: Simulering): IAktivitetslogg {
-        return arbeidsgiverOppdrag.sammenlignMed(simulering)
+        arbeidsgiverOppdrag.sammenlignMed(simulering)
+        personOppdrag.sammenlignMed(simulering)
+        return simulering
     }
 
     private fun vedtakFattet(

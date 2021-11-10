@@ -1248,6 +1248,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = orgnummer,
+            fagsystemId = inspektør(orgnummer).sisteBehov(Behovtype.Simulering).detaljer().getValue("fagsystemId") as String,
+            fagområde = inspektør(orgnummer).sisteBehov(Behovtype.Simulering).detaljer().getValue("fagområde") as String,
             simuleringOK = simuleringOK,
             melding = "",
             simuleringResultat = SimuleringResultat(

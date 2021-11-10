@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
@@ -84,10 +85,10 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
         fødselsnummer = UNG_PERSON_FNR_2018,
         organisasjonsnummer = ORGNUMMER,
         utbetalingId = UUID.fromString(
-            inspektør.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning).kontekst()["utbetalingId"] ?: throw IllegalStateException(
+            inspektør.sisteBehov(Behovtype.Godkjenning).kontekst()["utbetalingId"] ?: throw IllegalStateException(
                 "Finner ikke utbetalingId i: ${
                     inspektør.sisteBehov(
-                        Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning
+                        Behovtype.Godkjenning
                     ).kontekst()
                 }"
             )
@@ -249,6 +250,8 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = ORGNUMMER,
+            fagsystemId = inspektør.sisteBehov(Behovtype.Simulering).detaljer().getValue("fagsystemId") as String,
+            fagområde = inspektør.sisteBehov(Behovtype.Simulering).detaljer().getValue("fagområde") as String,
             simuleringOK = true,
             melding = "",
             simuleringResultat = null

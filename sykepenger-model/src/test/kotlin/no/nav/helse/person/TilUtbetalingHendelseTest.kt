@@ -364,6 +364,8 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = ORGNUMMER,
+            fagsystemId = hendelse.behov().first { it.type == Behovtype.Simulering }.detaljer().getValue("fagsystemId") as String,
+            fagområde = hendelse.behov().first { it.type == Behovtype.Simulering }.detaljer().getValue("fagområde") as String,
             simuleringOK = true,
             melding = "",
             simuleringResultat = null

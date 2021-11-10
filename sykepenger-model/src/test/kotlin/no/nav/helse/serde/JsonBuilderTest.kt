@@ -16,6 +16,7 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.infotrygdhistorikk.UgyldigPeriode
 import no.nav.helse.somFødselsnummer
+import no.nav.helse.spleis.e2e.TestArbeidsgiverInspektør
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Oppdrag
@@ -330,16 +331,6 @@ class JsonBuilderTest {
                 fangeVedtaksperiode()
                 håndter(søknad(fom = 1.januar, tom = 31.januar, hendelseId = søknadhendelseId))
                 håndter(utbetalingshistorikk(refusjoner, inntektshistorikk, ugyldigePerioder))
-                håndter(
-                    ytelser(
-                        hendelseId = søknadhendelseId,
-                        vedtaksperiodeId = vedtaksperiodeId,
-                        inntektshistorikk = listOf(Inntektsopplysning(orgnummer, 1.desember(2017), 31000.månedlig, true)),
-                        utbetalinger = refusjoner,
-                        ugyldigePerioder = ugyldigePerioder
-                    )
-                )
-                håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
             }
         }
 
@@ -599,7 +590,8 @@ class JsonBuilderTest {
         fun utbetalingshistorikk(
             utbetalinger: List<Infotrygdperiode> = emptyList(),
             inntektsopplysning: List<Inntektsopplysning> = emptyList(),
-            ugyldigePerioder: List<UgyldigPeriode> = emptyList()
+            ugyldigePerioder: List<UgyldigPeriode> = emptyList(),
+            besvart: LocalDateTime = LocalDateTime.now()
         ) = Utbetalingshistorikk(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = aktørId,
@@ -611,7 +603,7 @@ class JsonBuilderTest {
             perioder = utbetalinger,
             inntektshistorikk = inntektsopplysning,
             ugyldigePerioder = ugyldigePerioder,
-            besvart = LocalDateTime.now()
+            besvart = besvart
         )
 
         fun ytelser(
@@ -710,12 +702,14 @@ class JsonBuilderTest {
             automatiskBehandling = false,
         )
 
-        fun simulering(vedtaksperiodeId: String) = Simulering(
+        fun Person.simulering(vedtaksperiodeId: String) = Simulering(
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeId,
             aktørId = aktørId,
             fødselsnummer = fnr.toString(),
             orgnummer = orgnummer,
+            fagsystemId = TestArbeidsgiverInspektør(this, orgnummer).sisteBehov(Behovtype.Simulering).detaljer().getValue("fagsystemId") as String,
+            fagområde = TestArbeidsgiverInspektør(this, orgnummer).sisteBehov(Behovtype.Simulering).detaljer().getValue("fagområde") as String,
             simuleringOK = true,
             melding = "Hei Aron",
             simuleringResultat = null

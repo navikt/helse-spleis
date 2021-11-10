@@ -219,6 +219,8 @@ abstract class AbstractObservableTest {
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR,
             orgnummer = orgnummer,
+            fagsystemId = "fagsystemID",
+            fagområde = "SPREF",
             simuleringOK = simuleringOK,
             melding = "",
             simuleringResultat = Simulering.SimuleringResultat(

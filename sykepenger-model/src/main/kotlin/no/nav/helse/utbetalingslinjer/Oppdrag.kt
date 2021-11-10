@@ -107,6 +107,9 @@ internal class Oppdrag private constructor(
 
     internal fun harUtbetalinger() = any(Utbetalingslinje::erForskjell)
 
+    internal fun erRelevant(fagsystemId: String, fagområde: Fagområde) =
+        this.fagsystemId == fagsystemId && this.fagområde == fagområde
+
     internal fun sammenlignMed(simulering: Simulering) =
         simulering.valider(kopierKunLinjerMedEndring())
 
@@ -204,9 +207,9 @@ internal class Oppdrag private constructor(
         nåværende.first().kobleTil(tidligere.last())
         nåværende.zipWithNext { a, b -> b.kobleTil(a) }
     }
-
     private lateinit var tilstand: Tilstand
     private lateinit var sisteLinjeITidligereOppdrag: Utbetalingslinje
+
     private lateinit var linkTo: Utbetalingslinje
 
     // forsøker så langt det lar seg gjøre å endre _siste_ linje, dersom mulig *)

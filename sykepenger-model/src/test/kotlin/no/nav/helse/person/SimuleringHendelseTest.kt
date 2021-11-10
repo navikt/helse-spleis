@@ -200,6 +200,8 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = ORGNUMMER,
+            fagsystemId = hendelse.behov().first { it.type == Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering }.detaljer().getValue("fagsystemId") as String,
+            fagområde = hendelse.behov().first { it.type == Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering }.detaljer().getValue("fagområde") as String,
             simuleringOK = simuleringOK,
             melding = "",
             simuleringResultat = if (!simuleringOK) null else Simulering.SimuleringResultat(

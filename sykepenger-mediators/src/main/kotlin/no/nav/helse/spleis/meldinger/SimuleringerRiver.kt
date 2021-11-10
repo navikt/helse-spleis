@@ -16,6 +16,8 @@ internal class SimuleringerRiver(
     override fun validate(message: JsonMessage) {
         message.requireKey("vedtaksperiodeId", "tilstand")
         message.requireKey("@løsning.${Simulering.name}.status")
+        message.requireKey("Simulering.fagsystemId")
+        message.requireKey("Simulering.fagområde")
         message.require("@løsning.${Simulering.name}") { løsning ->
             message.require("@løsning.${Simulering.name}.status") {
                 SimuleringMessage.Simuleringstatus.valueOf(it.asText())

@@ -929,7 +929,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             håndter(Companion.vilkårsgrunnlag(vedtaksperiodeIdInnhenter = vedtaksperiodeId))
             håndter(Companion.ytelser(vedtaksperiodeIdInnhenter = vedtaksperiodeId))
             fangeUtbetalinger()
-            håndter(Companion.simulering(vedtaksperiodeIdInnhenter = vedtaksperiodeId))
+            håndter(simulering(vedtaksperiodeIdInnhenter = vedtaksperiodeId))
         }
 
         val forlengelsePersonDTO = serializePersonForSpeil(person, hendelserForForlengelse)
@@ -1016,7 +1016,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
                 orgnummer = orgnr1
             )
         )
-        person.håndter(Companion.simulering(vedtaksperiodeId1, orgnummer = orgnr1))
+        person.håndter(person.simulering(vedtaksperiodeId1, orgnummer = orgnr1))
 
         val navdagDTO = serializePersonForSpeil(person)
             .arbeidsgivere.first()
@@ -1037,7 +1037,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         person.håndter(Companion.ytelser(vedtaksperiodeIdInnhenter = vedtaksperiodeId))
         person.håndter(Companion.vilkårsgrunnlag(vedtaksperiodeIdInnhenter = vedtaksperiodeId))
         person.håndter(Companion.ytelser(vedtaksperiodeIdInnhenter = vedtaksperiodeId))
-        person.håndter(Companion.simulering(vedtaksperiodeIdInnhenter = vedtaksperiodeId))
+        person.håndter(person.simulering(vedtaksperiodeIdInnhenter = vedtaksperiodeId))
         val utbetalingFagsystemId = person.collectUtbetalingFagsystemIDer().first()
         person.håndter(Companion.utbetalingsgodkjenning(vedtaksperiodeIdInnhenter = vedtaksperiodeId, utbetalingID = utbetalingFagsystemId.utbetalingId))
         person.håndter(overføring(utbetalingFagsystemID = utbetalingFagsystemId))
@@ -1062,7 +1062,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         person.håndter(Companion.ytelser(vedtaksperiodeIdInnhenter = vedtaksperiodeId))
         person.håndter(Companion.vilkårsgrunnlag(vedtaksperiodeIdInnhenter = vedtaksperiodeId))
         person.håndter(Companion.ytelser(vedtaksperiodeIdInnhenter = vedtaksperiodeId))
-        person.håndter(Companion.simulering(vedtaksperiodeIdInnhenter = vedtaksperiodeId))
+        person.håndter(person.simulering(vedtaksperiodeIdInnhenter = vedtaksperiodeId))
         val utbetalingFagsystemId = person.collectUtbetalingFagsystemIDer().first()
         person.håndter(Companion.utbetalingsgodkjenning(vedtaksperiodeIdInnhenter = vedtaksperiodeId, utbetalingID = utbetalingFagsystemId.utbetalingId))
         person.håndter(overføring(utbetalingFagsystemID = utbetalingFagsystemId))
@@ -1141,7 +1141,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
                 orgnummer = orgnr1
             )
         )
-        person.håndter(Companion.simulering(vedtaksperiodeId1, orgnummer = orgnr1))
+        person.håndter(person.simulering(vedtaksperiodeId1, orgnummer = orgnr1))
 
         val vedtaksperiode = serializePersonForSpeil(person)
             .arbeidsgivere.first()
@@ -1487,7 +1487,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             )
         )
         person.håndter(
-            simulering(
+            person.simulering(
                 vedtaksperiodeIdInnhenter = vedtaksperiodeId1,
                 orgnummer = orgnummer
             )
@@ -1509,7 +1509,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             )
         )
         person.håndter(
-            simulering(
+            person.simulering(
                 vedtaksperiodeIdInnhenter = vedtaksperiodeId2,
                 orgnummer = orgnummer2
             )
@@ -1584,7 +1584,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             )
         )
         person.håndter(Companion.ytelser(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = a1))
-        person.håndter(Companion.simulering(1.vedtaksperiode, orgnummer = a1))
+        person.håndter(person.simulering(1.vedtaksperiode, orgnummer = a1))
         person.håndter(Companion.utbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1, aktivitetslogg = person.aktivitetslogg))
         person.fangeUtbetalinger()
         person.håndter(utbetalt(person.aktivitetslogg, orgnummer = a1))
@@ -1628,7 +1628,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             håndter(Companion.vilkårsgrunnlag(vedtaksperiodeIdInnhenter = vedtaksperiodeId))
             håndter(Companion.ytelser(vedtaksperiodeIdInnhenter = vedtaksperiodeId))
             fangeUtbetalinger()
-            håndter(Companion.simulering(vedtaksperiodeIdInnhenter = vedtaksperiodeId))
+            håndter(simulering(vedtaksperiodeIdInnhenter = vedtaksperiodeId))
             håndter(Companion.utbetalingsgodkjenning(vedtaksperiodeIdInnhenter = vedtaksperiodeId, aktivitetslogg = this@run.aktivitetslogg))
             håndter(overføring(this@run.aktivitetslogg))
             håndter(utbetalt(this@run.aktivitetslogg))
@@ -1649,7 +1649,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             håndter(Companion.vilkårsgrunnlag(vedtaksperiodeIdInnhenter = vedtaksperiodeId))
             håndter(Companion.ytelser(vedtaksperiodeIdInnhenter = vedtaksperiodeId))
             fangeUtbetalinger()
-            håndter(Companion.simulering(vedtaksperiodeIdInnhenter = vedtaksperiodeId))
+            håndter(simulering(vedtaksperiodeIdInnhenter = vedtaksperiodeId))
             håndter(Companion.utbetalingsgodkjenning(vedtaksperiodeIdInnhenter = vedtaksperiodeId, aktivitetslogg = this@run.aktivitetslogg))
             håndter(overføring(this@run.aktivitetslogg))
             håndter(utbetalt(this@run.aktivitetslogg))
@@ -1783,7 +1783,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
                     håndter(Companion.vilkårsgrunnlag(vedtaksperiodeIdInnhenter = vedtaksperiodeId))
                     håndter(Companion.ytelser(vedtaksperiodeIdInnhenter = vedtaksperiodeId))
                     fangeUtbetalinger()
-                    håndter(Companion.simulering(vedtaksperiodeIdInnhenter = vedtaksperiodeId))
+                    håndter(simulering(vedtaksperiodeIdInnhenter = vedtaksperiodeId))
                     Companion.utbetalingsgodkjenning(
                         vedtaksperiodeIdInnhenter = vedtaksperiodeId,
                         automatiskBehandling = automatiskBehandling,
@@ -1817,7 +1817,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
                         håndter(Companion.vilkårsgrunnlag(vedtaksperiodeIdInnhenter = vedtaksperiodeId))
                         håndter(Companion.ytelser(vedtaksperiodeIdInnhenter = vedtaksperiodeId))
                         fangeUtbetalinger()
-                        håndter(Companion.simulering(vedtaksperiodeIdInnhenter = vedtaksperiodeId))
+                        håndter(simulering(vedtaksperiodeIdInnhenter = vedtaksperiodeId))
                         Companion.utbetalingsgodkjenning(vedtaksperiodeIdInnhenter = vedtaksperiodeId, aktivitetslogg = this@run.aktivitetslogg).also {
                             håndter(it)
                             if (it.behov().any { behov -> behov.type == Behovtype.Utbetaling }) {
@@ -1854,7 +1854,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
                     håndter(Companion.ytelser(vedtaksperiodeIdInnhenter = vedtaksperiodeId))
                     håndter(Companion.vilkårsgrunnlag(vedtaksperiodeIdInnhenter = vedtaksperiodeId))
                     håndter(Companion.ytelser(vedtaksperiodeIdInnhenter = vedtaksperiodeId))
-                    håndter(Companion.simulering(vedtaksperiodeIdInnhenter = vedtaksperiodeId))
+                    håndter(simulering(vedtaksperiodeIdInnhenter = vedtaksperiodeId))
                     håndter(Companion.utbetalingsgodkjenning(vedtaksperiodeIdInnhenter = vedtaksperiodeId, aktivitetslogg = this@run.aktivitetslogg))
                     fangeUtbetalinger()
                     håndter(overføring(this@run.aktivitetslogg))
@@ -1903,7 +1903,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
                     håndter(Companion.ytelser(vedtaksperiodeIdInnhenter = vedtaksperiodeId))
                     håndter(Companion.vilkårsgrunnlag(vedtaksperiodeIdInnhenter = vedtaksperiodeId))
                     håndter(Companion.ytelser(vedtaksperiodeIdInnhenter = vedtaksperiodeId))
-                    håndter(Companion.simulering(vedtaksperiodeIdInnhenter = vedtaksperiodeId))
+                    håndter(simulering(vedtaksperiodeIdInnhenter = vedtaksperiodeId))
                     håndter(Companion.utbetalingsgodkjenning(vedtaksperiodeIdInnhenter = vedtaksperiodeId, aktivitetslogg = this@run.aktivitetslogg))
                     fangeUtbetalinger()
                     håndter(overføring(this@run.aktivitetslogg))
@@ -2242,12 +2242,14 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         )
 
 
-        private fun simulering(vedtaksperiodeIdInnhenter: IdInnhenter, orgnummer: String = Companion.orgnummer, simuleringOk: Boolean = true) = Simulering(
+        private fun Person.simulering(vedtaksperiodeIdInnhenter: IdInnhenter, orgnummer: String = Companion.orgnummer, simuleringOk: Boolean = true) = Simulering(
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeIdInnhenter(orgnummer).toString(),
             aktørId = aktørId,
             fødselsnummer = fnr.toString(),
             orgnummer = orgnummer,
+            fagsystemId = this.aktivitetslogg.behov().first { it.type == Behovtype.Simulering }.detaljer().getValue("fagsystemId") as String,
+            fagområde = this.aktivitetslogg.behov().first { it.type == Behovtype.Simulering }.detaljer().getValue("fagområde") as String,
             simuleringOK = simuleringOk,
             melding = "Hei Aron",
             simuleringResultat = simuleringResultat()

@@ -15,6 +15,8 @@ internal class SimuleringMessage(packet: JsonMessage) : BehovMessage(packet) {
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
     private val aktørId = packet["aktørId"].asText()
 
+    private val fagsystemId = packet["Simulering.fagsystemId"].asText()
+    private val fagområde = packet["Simulering.fagområde"].asText()
     private val status = valueOf(packet["@løsning.${Behovtype.Simulering.name}.status"].asText())
     private val simuleringOK = status == OK
     private val melding = packet["@løsning.${Behovtype.Simulering.name}.feilmelding"].asText()
@@ -71,6 +73,8 @@ internal class SimuleringMessage(packet: JsonMessage) : BehovMessage(packet) {
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             orgnummer = organisasjonsnummer,
+            fagsystemId = fagsystemId,
+            fagområde = fagområde,
             simuleringOK = simuleringOK,
             melding = melding,
             simuleringResultat = simuleringResultat

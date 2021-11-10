@@ -2,6 +2,7 @@ package no.nav.helse.utbetalingslinjer
 
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.testhelpers.januar
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -57,6 +58,16 @@ internal class OppdragTest {
         val aktivitetslogg = Aktivitetslogg()
         oppdrag.overfør(aktivitetslogg, 1.januar, "Sara Saksbehandler")
         assertTrue(aktivitetslogg.behov().isEmpty())
+    }
+
+    @Test
+    fun `er relevant`() {
+        val fagsystemId = "a"
+        val fagområde = Fagområde.SykepengerRefusjon
+        val oppdrag = Oppdrag("mottaker", fagområde, fagsystemId = fagsystemId, sisteArbeidsgiverdag = 1.januar)
+        assertTrue(oppdrag.erRelevant(fagsystemId, fagområde))
+        assertFalse(oppdrag.erRelevant(fagsystemId, Fagområde.Sykepenger))
+        assertFalse(oppdrag.erRelevant("b", fagområde))
     }
 
     @Test

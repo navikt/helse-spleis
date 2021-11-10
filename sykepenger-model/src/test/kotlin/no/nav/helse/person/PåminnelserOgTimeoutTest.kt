@@ -322,6 +322,8 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = ORGNUMMER,
+            fagsystemId = inspektør(ORGNUMMER).sisteBehov(Behovtype.Simulering).detaljer().getValue("fagsystemId") as String,
+            fagområde = inspektør(ORGNUMMER).sisteBehov(Behovtype.Simulering).detaljer().getValue("fagområde") as String,
             simuleringOK = true,
             melding = "",
             simuleringResultat = Simulering.SimuleringResultat(

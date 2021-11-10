@@ -497,6 +497,8 @@ internal class TestMessageFactory(
             tilstand = tilstand,
             løsninger = mapOf(
                 "Simulering" to mapOf(
+                    "fagsystemId" to "fagsystemid",
+                    "fagområde" to "SPREF",
                     "status" to status.name,
                     "feilmelding" to if (status == SimuleringMessage.Simuleringstatus.OK) null else "FEIL I SIMULERING",
                     "simulering" to if (status != SimuleringMessage.Simuleringstatus.OK) null else mapOf(
@@ -537,6 +539,12 @@ internal class TestMessageFactory(
                             )
                         )
                     )
+                )
+            ),
+            ekstraFelter = mapOf(
+                "Simulering" to mapOf(
+                    "fagsystemId" to "fagsystemid",
+                    "fagområde" to "SPREF"
                 )
             )
         )
