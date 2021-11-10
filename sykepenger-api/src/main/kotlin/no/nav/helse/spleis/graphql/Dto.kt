@@ -7,12 +7,15 @@ import no.nav.helse.serde.api.BegrunnelseDTO
 import no.nav.helse.serde.api.v2.*
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.*
 
 data class GraphQLPerson(
     val aktorId: String,
     val fodselsnummer: String,
     val arbeidsgivere: List<GraphQLArbeidsgiver>,
+    val inntektsgrunnlag: List<GraphQLInntektsgrunnlag>,
+    // vilkarsgrunnlaghistorikk
     val dodsdato: LocalDate?,
     val versjon: Int
 )
@@ -214,3 +217,45 @@ data class GraphQLDag(
     val utbetalingsinfo: Utbetalingsinfo?,
     val begrunnelser: List<BegrunnelseDTO>?
 )
+
+data class GraphQLInntektsgrunnlag(
+    val skjaeringstidspunkt: LocalDate,
+    val sykepengegrunnlag: Double?,
+    val omregnetArsinntekt: Double?,
+    val sammenligningsgrunnlag: Double?,
+    val avviksprosent: Double?,
+    val maksUtbetalingPerDag: Double?,
+    val inntekter: List<Arbeidsgiverinntekt>,
+    val oppfyllerKravOmMinstelonn: Boolean?,
+    val grunnbelop: Int
+) {
+    data class InntekterFraAOrdningen(
+        val maned: YearMonth,
+        val sum: Double
+    )
+
+    data class Arbeidsgiverinntekt(
+        val arbeidsgiver: String,
+        val omregnetArsinntekt: OmregnetArsinntekt?,
+        val sammenligningsgrunnlag: Sammenligningsgrunnlag?
+    ) {
+        data class OmregnetArsinntekt(
+            val kilde: Kilde,
+            val belop: Double,
+            val manedsbelop: Double,
+            val inntekterFraAOrdningen: List<InntekterFraAOrdningen>?
+        ) {
+            enum class Kilde {
+                Saksbehandler,
+                Inntektsmelding,
+                Infotrygd,
+                AOrdningen
+            }
+        }
+
+        data class Sammenligningsgrunnlag(
+            val belop: Double,
+            val inntekterFraAOrdningen: List<InntekterFraAOrdningen>
+        )
+    }
+}

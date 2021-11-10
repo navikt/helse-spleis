@@ -42,11 +42,11 @@ internal fun SchemaBuilder.personSchema(personDao: PersonDao, hendelseDao: Hende
             personDao.hentPersonFraFnr(fnr)
                 ?.deserialize { hendelseDao.hentAlleHendelser(fnr) }
                 ?.let { håndterPerson(it, hendelseDao) }
-                ?.let {
+                ?.let { person ->
                     GraphQLPerson(
-                        aktorId = it.aktørId,
-                        fodselsnummer = it.fødselsnummer,
-                        arbeidsgivere = it.arbeidsgivere.map { arbeidsgiver ->
+                        aktorId = person.aktørId,
+                        fodselsnummer = person.fødselsnummer,
+                        arbeidsgivere = person.arbeidsgivere.map { arbeidsgiver ->
                             GraphQLArbeidsgiver(
                                 organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
                                 id = arbeidsgiver.id,
@@ -58,8 +58,9 @@ internal fun SchemaBuilder.personSchema(personDao: PersonDao, hendelseDao: Hende
                                 } ?: emptyList()
                             )
                         },
-                        dodsdato = it.dødsdato,
-                        versjon = it.versjon
+                        inntektsgrunnlag = person.inntektsgrunnlag.map { inntektsgrunnlag -> mapInntektsgrunnlag(inntektsgrunnlag) },
+                        dodsdato = person.dødsdato,
+                        versjon = person.versjon
                     )
                 }
         }
@@ -71,6 +72,13 @@ internal fun SchemaBuilder.personSchema(personDao: PersonDao, hendelseDao: Hende
     type<GraphQLBeregnetPeriode>()
     type<GraphQLUberegnetPeriode>()
     type<GraphQLUtbetaling>()
+    type<GraphQLHendelse>()
+    type<GraphQLInntektsmelding>()
+    type<GraphQLSoknadNav>()
+    type<GraphQLSoknadArbeidsgiver>()
+    type<GraphQLSykmelding>()
+    type<GraphQLSimulering>()
+    type<GraphQLInntektsgrunnlag>()
 
     enum<Behandlingstype>()
     enum<Inntektskilde>()
@@ -80,14 +88,9 @@ internal fun SchemaBuilder.personSchema(personDao: PersonDao, hendelseDao: Hende
     enum<SykdomstidslinjedagKildetype>()
     enum<GraphQLHendelsetype>()
     enum<BegrunnelseDTO>()
+    enum<GraphQLInntektsgrunnlag.Arbeidsgiverinntekt.OmregnetArsinntekt.Kilde>()
 
     type<SykdomstidslinjedagKilde>()
-    type<GraphQLHendelse>()
-    type<GraphQLInntektsmelding>()
-    type<GraphQLSoknadNav>()
-    type<GraphQLSoknadArbeidsgiver>()
-    type<GraphQLSykmelding>()
-    type<GraphQLSimulering>()
     type<AktivitetDTO>()
     type<Utbetalingsinfo>()
 

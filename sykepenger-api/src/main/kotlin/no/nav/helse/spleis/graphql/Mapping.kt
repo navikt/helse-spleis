@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.graphql
 
+import no.nav.helse.serde.api.InntektsgrunnlagDTO
 import no.nav.helse.serde.api.SimuleringsdataDTO
 import no.nav.helse.serde.api.v2.*
 
@@ -123,7 +124,7 @@ private fun mapPeriodevilkår(vilkår: BeregnetPeriode.Vilkår) = GraphQLBeregne
     }
 )
 
-fun mapTidslinjeperiode(periode: Tidslinjeperiode) =
+internal fun mapTidslinjeperiode(periode: Tidslinjeperiode) =
     when (periode) {
         is BeregnetPeriode -> GraphQLBeregnetPeriode(
             fom = periode.fom,
@@ -157,3 +158,48 @@ fun mapTidslinjeperiode(periode: Tidslinjeperiode) =
             opprettet = periode.opprettet
         )
     }
+
+internal fun mapInntektsgrunnlag(inntektsgrunnlag: InntektsgrunnlagDTO) = GraphQLInntektsgrunnlag(
+    skjaeringstidspunkt = inntektsgrunnlag.skjæringstidspunkt,
+    sykepengegrunnlag = inntektsgrunnlag.sykepengegrunnlag,
+    omregnetArsinntekt = inntektsgrunnlag.omregnetÅrsinntekt,
+    sammenligningsgrunnlag = inntektsgrunnlag.sammenligningsgrunnlag,
+    avviksprosent = inntektsgrunnlag.avviksprosent,
+    maksUtbetalingPerDag = inntektsgrunnlag.maksUtbetalingPerDag,
+    inntekter = inntektsgrunnlag.inntekter.map { inntekt ->
+        GraphQLInntektsgrunnlag.Arbeidsgiverinntekt(
+            arbeidsgiver = inntekt.arbeidsgiver,
+            omregnetArsinntekt = inntekt.omregnetÅrsinntekt?.let { årsinntekt ->
+                GraphQLInntektsgrunnlag.Arbeidsgiverinntekt.OmregnetArsinntekt(
+                    kilde = when (årsinntekt.kilde) {
+                        InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.Saksbehandler -> GraphQLInntektsgrunnlag.Arbeidsgiverinntekt.OmregnetArsinntekt.Kilde.Saksbehandler
+                        InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.Inntektsmelding -> GraphQLInntektsgrunnlag.Arbeidsgiverinntekt.OmregnetArsinntekt.Kilde.Inntektsmelding
+                        InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.Infotrygd -> GraphQLInntektsgrunnlag.Arbeidsgiverinntekt.OmregnetArsinntekt.Kilde.Infotrygd
+                        InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.AOrdningen -> GraphQLInntektsgrunnlag.Arbeidsgiverinntekt.OmregnetArsinntekt.Kilde.AOrdningen
+                    },
+                    belop = årsinntekt.beløp,
+                    manedsbelop = årsinntekt.månedsbeløp,
+                    inntekterFraAOrdningen = årsinntekt.inntekterFraAOrdningen?.map {
+                        GraphQLInntektsgrunnlag.InntekterFraAOrdningen(
+                            maned = it.måned,
+                            sum = it.sum
+                        )
+                    }
+                )
+            },
+            sammenligningsgrunnlag = inntekt.sammenligningsgrunnlag?.let { sammenligningsgrunnlag ->
+                GraphQLInntektsgrunnlag.Arbeidsgiverinntekt.Sammenligningsgrunnlag(
+                    belop = sammenligningsgrunnlag.beløp,
+                    inntekterFraAOrdningen = sammenligningsgrunnlag.inntekterFraAOrdningen.map {
+                        GraphQLInntektsgrunnlag.InntekterFraAOrdningen(
+                            maned = it.måned,
+                            sum = it.sum
+                        )
+                    }
+                )
+            }
+        )
+    },
+    oppfyllerKravOmMinstelonn = inntektsgrunnlag.oppfyllerKravOmMinstelønn,
+    grunnbelop = inntektsgrunnlag.grunnbeløp
+)

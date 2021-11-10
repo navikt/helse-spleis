@@ -4,10 +4,10 @@ import no.nav.helse.Toggles
 import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.person.Person
 import no.nav.helse.somFødselsnummer
-import no.nav.helse.spleis.graphql.GraphQLPerson
 import no.nav.helse.spleis.testhelpers.ApiTestServer
 import no.nav.helse.spleis.testhelpers.TestObservatør
 import org.junit.jupiter.api.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.TestInstance.Lifecycle
 import java.time.LocalDateTime
 import java.util.*
@@ -19,6 +19,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
 
     @BeforeAll
     internal fun setupServer() {
+        Toggles.SpeilApiV2.enable()
         testServer = ApiTestServer()
         testServer.start()
     }
@@ -26,6 +27,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
     @AfterAll
     internal fun tearDownServer() {
         testServer.tearDown()
+        Toggles.SpeilApiV2.disable()
     }
 
     @BeforeEach
@@ -79,9 +81,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
     }
 
     @Test
-    fun `tester person-resolver`() {
-        Toggles.SpeilApiV2.enable()
-
+    fun `person med person-resolver`() {
         val query = """
             {
                 person(fnr: ${UNG_PERSON_FNR.toLong()}) {
@@ -118,6 +118,11 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                                 erForkastet,
                                 opprettet,
                                 ... on GraphQLBeregnetPeriode {
+                                    beregningId,
+                                    gjenstaendeSykedager,
+                                    forbrukteSykedager,
+                                    skjaeringstidspunkt,
+                                    maksdato,
                                     utbetaling {
                                         type,
                                         status,
@@ -173,6 +178,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                                             }
                                         }
                                     },
+                                    vilkarsgrunnlaghistorikkId,
                                     periodevilkar {
                                         sykepengedager {
                                             skjaeringstidspunkt,
@@ -202,6 +208,9 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                             }
                         }
                     },
+                    inntektsgrunnlag {
+                        sykepengegrunnlag
+                    },
                     dodsdato,
                     versjon
                 }
@@ -210,22 +219,231 @@ internal class GraphQLApiTest : AbstractObservableTest() {
 
         testServer.httpPost(
             path = "/graphql",
-            body = """
-                {
-                    "query": "$query"
-                }
-            """.trimIndent()
+            body = """{"query": "$query"}"""
         ) {
-            this
+            objectMapper.readTree(this).get("data").get("person").let { person ->
+                assertEquals(6, person.size())
+            }
         }
+    }
 
-        Toggles.SpeilApiV2.disable()
+    @Test
+    fun `arbeidsgivere med person-resolver`() {
+        val query = """
+            {
+                person(fnr: ${UNG_PERSON_FNR.toLong()}) {
+                    arbeidsgivere {
+                        organisasjonsnummer,
+                        id,
+                        generasjoner {
+                            id,
+                        }
+                    }
+                }
+            }
+        """.trimIndent()
+
+        testServer.httpPost(
+            path = "/graphql",
+            body = """{"query": "$query"}"""
+        ) {
+            objectMapper.readTree(this).get("data").get("person").get("arbeidsgivere").let { arbeidsgivere ->
+                assertEquals(1, arbeidsgivere.size())
+                assertEquals(3, arbeidsgivere.get(0).size())
+            }
+        }
+    }
+
+    @Test
+    fun `inntektsgrunnlag med person-resolver`() {
+        val query = """
+            {
+                person(fnr: ${UNG_PERSON_FNR.toLong()}) {
+                    inntektsgrunnlag {
+                        skjaeringstidspunkt,
+                        sykepengegrunnlag,
+                        omregnetArsinntekt,
+                        sammenligningsgrunnlag,
+                        avviksprosent,
+                        maksUtbetalingPerDag,
+                        inntekter {
+                            arbeidsgiver,
+                            omregnetArsinntekt {
+                                kilde,
+                                belop,
+                                manedsbelop,
+                                inntekterFraAOrdningen {
+                                    maned,
+                                    sum
+                                }
+                            },
+                            sammenligningsgrunnlag {
+                                belop,
+                                inntekterFraAOrdningen {
+                                    maned,
+                                    sum
+                                }
+                            }
+                        },
+                        oppfyllerKravOmMinstelonn,
+                        grunnbelop
+                    }
+                }
+            }
+        """.trimIndent()
+
+        testServer.httpPost(
+            path = "/graphql",
+            body = """{"query": "$query"}"""
+        ) {
+            objectMapper.readTree(this).get("data").get("person").get("inntektsgrunnlag").let { inntektsgrunnlag ->
+                assertEquals(1, inntektsgrunnlag.size())
+                assertEquals(9, inntektsgrunnlag.get(0).size())
+            }
+        }
+    }
+
+    @Test
+    fun `generasjoner med person-resolver`() {
+        val query = """
+            {
+                person(fnr: ${UNG_PERSON_FNR.toLong()}) {
+                    arbeidsgivere {
+                        generasjoner {
+                            id,
+                            perioder {
+                                id,
+                                fom,
+                                tom,
+                                tidslinje {
+                                    dato,
+                                    sykdomsdagtype,
+                                    utbetalingsdagtype,
+                                    kilde {
+                                        type,
+                                        id
+                                    },
+                                    grad,
+                                    utbetalingsinfo {
+                                        inntekt,
+                                        utbetaling,
+                                        totalGrad
+                                    },
+                                    begrunnelser
+                                }
+                                behandlingstype,
+                                periodetype,
+                                inntektskilde,
+                                erForkastet,
+                                opprettet,
+                                ... on GraphQLBeregnetPeriode {
+                                    beregningId,
+                                    gjenstaendeSykedager,
+                                    forbrukteSykedager,
+                                    skjaeringstidspunkt,
+                                    maksdato,
+                                    utbetaling {
+                                        type,
+                                        status,
+                                        arbeidsgiverNettoBelop,
+                                        personNettoBelop,
+                                        arbeidsgiverFagsystemId,
+                                        personFagsystemId
+                                    },
+                                    hendelser {
+                                        id,
+                                        type,
+                                        ... on GraphQLInntektsmelding {
+                                            mottattDato,
+                                            beregnetInntekt
+                                        }
+                                        ... on GraphQLSoknadNav {
+                                            fom,
+                                            tom,
+                                            rapportertDato,
+                                            sendtNav
+                                        }
+                                        ... on GraphQLSykmelding {
+                                            fom,
+                                            tom,
+                                            rapportertDato
+                                        }
+                                    },
+                                    simulering {
+                                        totalbelop,
+                                        perioder {
+                                            fom,
+                                            tom,
+                                            utbetalinger {
+                                                utbetalesTilId,
+                                                utbetalesTilNavn,
+                                                forfall,
+                                                feilkonto,
+                                                detaljer {
+                                                    faktiskFom,
+                                                    faktiskTom,
+                                                    konto,
+                                                    belop,
+                                                    tilbakeforing,
+                                                    sats,
+                                                    typeSats,
+                                                    antallSats,
+                                                    uforegrad,
+                                                    klassekode,
+                                                    klassekodeBeskrivelse,
+                                                    utbetalingstype,
+                                                    refunderesOrgNr
+                                                }
+                                            }
+                                        }
+                                    },
+                                    vilkarsgrunnlaghistorikkId,
+                                    periodevilkar {
+                                        sykepengedager {
+                                            skjaeringstidspunkt,
+                                            maksdato,
+                                            forbrukteSykedager,
+                                            gjenstaendeSykedager,
+                                            oppfylt
+                                        },
+                                        alder {
+                                            alderSisteSykedag,
+                                            oppfylt
+                                        },
+                                        soknadsfrist {
+                                            sendtNav,
+                                            soknadFom,
+                                            soknadTom,
+                                            oppfylt
+                                        }
+                                    },
+                                    aktivitetslogg {
+                                        vedtaksperiodeId,
+                                        alvorlighetsgrad,
+                                        melding,
+                                        tidsstempel
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        """.trimIndent()
+
+        testServer.httpPost(
+            path = "/graphql",
+            body = """{"query": "$query"}"""
+        ) {
+            objectMapper.readTree(this).get("data").get("person").get("arbeidsgivere").get(0).get("generasjoner").get(0).let { generasjon ->
+                assertEquals(2, generasjon.size())
+                assertEquals(1, generasjon.get("perioder").size())
+            }
+        }
     }
 
     @Test
     fun `tester generasjon-resolver`() {
-        Toggles.SpeilApiV2.enable()
-
         val query = """
             {
                 generasjon(fnr: ${UNG_PERSON_FNR.toLong()}, orgnr: \"$ORGNUMMER\", indeks: 0) {
@@ -237,16 +455,10 @@ internal class GraphQLApiTest : AbstractObservableTest() {
 
         testServer.httpPost(
             path = "/graphql",
-            body = """
-                {
-                    "query": "$query"
-                }
-            """.trimIndent()
+            body = """{"query": "$query"}"""
         ) {
             this
         }
-
-        Toggles.SpeilApiV2.disable()
     }
 
 }
