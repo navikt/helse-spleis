@@ -1,6 +1,7 @@
 package no.nav.helse.utbetalingslinjer
 
-import no.nav.helse.hendelser.*
+import no.nav.helse.Toggles
+import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.*
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse.Oppdragstatus.AKSEPTERT
 import no.nav.helse.person.Aktivitetslogg
@@ -198,6 +199,57 @@ internal class UtbetalingTest {
     }
 
     @Test
+    fun `delvis refusjon`() {
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600))
+        beregnUtbetalinger(tidslinje)
+        Toggles.LageBrukerutbetaling.enable {
+            val utbetaling = opprettUtbetaling(tidslinje)
+            assertTrue(utbetaling.harDelvisRefusjon())
+        }
+    }
+
+    @Test
+    fun `null refusjon`() {
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 0))
+        beregnUtbetalinger(tidslinje)
+        Toggles.LageBrukerutbetaling.enable {
+            val utbetaling = opprettUtbetaling(tidslinje)
+            assertFalse(utbetaling.harDelvisRefusjon())
+            assertTrue(utbetaling.harUtbetalinger())
+        }
+    }
+
+    @Test
+    @Disabled
+    fun `overføre utbetaling med null refusjon`() {
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 0))
+        beregnUtbetalinger(tidslinje)
+        Toggles.LageBrukerutbetaling.enable {
+            val utbetaling = opprettUbetaltUtbetaling(tidslinje)
+            val hendelselogg = godkjenn(utbetaling)
+            val utbetalingsbehov = hendelselogg.behov().filter { it.type == Behovtype.Utbetaling }
+            assertEquals(1, utbetalingsbehov.size) { "Forventer bare ett utbetalingsbehov" }
+            assertEquals(Fagområde.Sykepenger.verdi, utbetalingsbehov.first().detaljer().getValue("fagområde"))
+        }
+    }
+
+    @Test
+    @Disabled
+    fun `overføre utbetaling med delvis refusjon`() {
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600))
+        beregnUtbetalinger(tidslinje)
+        Toggles.LageBrukerutbetaling.enable {
+            val utbetaling = opprettUbetaltUtbetaling(tidslinje)
+            val hendelselogg = godkjenn(utbetaling)
+            val utbetalingsbehov = hendelselogg.behov().filter { it.type == Behovtype.Utbetaling }
+            assertEquals(2, utbetalingsbehov.size) { "Forventer to utbetalingsbehov" }
+            val fagområder = utbetalingsbehov.map { it.detaljer().getValue("fagområde") as String }
+            assertTrue(Fagområde.Sykepenger.verdi in fagområder)
+            assertTrue(Fagområde.SykepengerRefusjon.verdi in fagområder)
+        }
+    }
+
+    @Test
     fun `tre utbetalinger`() {
         val tidslinje = tidslinjeOf(
             16.AP, 1.NAV, 2.HELG, 5.NAV(1200, 50.0), 2.HELG, 5.NAV,
@@ -285,12 +337,13 @@ internal class UtbetalingTest {
 
     private fun String.gRegulering() = Grunnbeløpsregulering(UUID.randomUUID(), "", "", "", LocalDate.now(), this)
 
-    private fun beregnUtbetalinger(vararg tidslinjer: Utbetalingstidslinje) =
+    private fun beregnUtbetalinger(tidslinje: Utbetalingstidslinje) = tidslinje.also {
         MaksimumUtbetaling(
-            listOf(*tidslinjer),
+            listOf(tidslinje),
             aktivitetslogg,
             1.januar
         ).betal()
+    }
 
     private fun opprettGodkjentUtbetaling(
         tidslinje: Utbetalingstidslinje = tidslinjeOf(16.AP, 5.NAV(3000)),
@@ -298,25 +351,11 @@ internal class UtbetalingTest {
         fødselsnummer: String = UNG_PERSON_FNR_2018,
         orgnummer: String = ORGNUMMER,
         aktivitetslogg: Aktivitetslogg = this.aktivitetslogg
-    ): Pair<Utbetaling, UUID> = beregnUtbetalinger(tidslinje)
-        .let {
-            Utbetaling.lagUtbetaling(
-                emptyList(),
-                fødselsnummer,
-                UUID.randomUUID(),
-                orgnummer,
-                tidslinje,
-                sisteDato,
-                aktivitetslogg,
-                LocalDate.MAX,
-                100,
-                148
-            )
-        }
+    ): Pair<Utbetaling, UUID> = opprettUbetaltUtbetaling(beregnUtbetalinger(tidslinje), null, sisteDato, fødselsnummer, orgnummer, aktivitetslogg)
         .also { godkjenn(it) }
         .let { it to UtbetalingsInspektør(it).utbetalingId }
 
-    private fun opprettUtbetaling(
+    private fun opprettUbetaltUtbetaling(
         tidslinje: Utbetalingstidslinje,
         tidligere: Utbetaling? = null,
         sisteDato: LocalDate = tidslinje.periode().endInclusive,
@@ -334,7 +373,16 @@ internal class UtbetalingTest {
         LocalDate.MAX,
         100,
         148
-    ).also { utbetaling ->
+    )
+
+    private fun opprettUtbetaling(
+        tidslinje: Utbetalingstidslinje,
+        tidligere: Utbetaling? = null,
+        sisteDato: LocalDate = tidslinje.periode().endInclusive,
+        fødselsnummer: String = UNG_PERSON_FNR_2018,
+        orgnummer: String = ORGNUMMER,
+        aktivitetslogg: Aktivitetslogg = this.aktivitetslogg
+    ) = opprettUbetaltUtbetaling(tidslinje, tidligere, sisteDato, fødselsnummer, orgnummer, aktivitetslogg).also { utbetaling ->
         var utbetalingId: String = ""
         godkjenn(utbetaling).also {
             utbetalingId = it.behov().first { it.type == Behovtype.Utbetaling }.kontekst()["utbetalingId"]
