@@ -168,7 +168,7 @@ internal class Vedtaksperiode private constructor(
                 kontekst(inntektsmelding)
                 inntektsmelding.info("Ville tidligere blitt kastet ut på grunn av refusjon: Refusjon opphører i perioden")
             }
-            if (!it) return@also inntektsmelding.trimLeft(periode.endInclusive)
+            if (!it) return@also inntektsmelding.trimLeft(periode.endInclusive) // TODO("https://trello.com/c/tEKdR2Co")
             kontekst(inntektsmelding)
             tilstand.håndter(this, inntektsmelding)
         }

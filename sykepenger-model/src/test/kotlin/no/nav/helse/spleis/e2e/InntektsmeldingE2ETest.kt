@@ -917,4 +917,37 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertNoErrors(2.vedtaksperiode)
         assertTrue(inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inntektsopplysningPerArbeidsgiver()?.values?.single() is Inntektshistorikk.Inntektsmelding)
     }
+
+    @Disabled("https://trello.com/c/tEKdR2Co")
+    @Test
+    fun `Håndterer ikke inntektsmelding to ganger ved replay - hvor vi har en tidligere periode og gap`() {
+        // Ved en tidligere periode resettes trimming av inntektsmelding og vi ender med å håndtere samme inntektsmelding flere ganger i en vedtaksperiode
+        nyttVedtak(1.januar(2017), 31.januar(2017))
+
+        val inntektsmeldingId = håndterInntektsmelding(listOf(10.januar til 25.januar), førsteFraværsdag = 10.januar)
+        håndterSykmelding(Sykmeldingsperiode(10.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(10.januar, 31.januar, 100.prosent))
+        håndterInntektsmeldingReplay(inntektsmeldingId, 2.vedtaksperiode(ORGNUMMER))
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+
+        assertNoWarnings(2.vedtaksperiode)
+    }
+
+    @Test
+    fun `Håndterer ikke inntektsmelding to ganger ved replay`() {
+        // Happy case av testen med navn: Håndterer ikke inntektsmelding to ganger ved replay - hvor vi har en tidligere periode og gap
+        val inntektsmeldingId = håndterInntektsmelding(listOf(10.januar til 25.januar), førsteFraværsdag = 10.januar)
+        håndterSykmelding(Sykmeldingsperiode(10.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(10.januar, 31.januar, 100.prosent))
+        håndterInntektsmeldingReplay(inntektsmeldingId, 1.vedtaksperiode(ORGNUMMER))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+
+        assertNoWarnings(1.vedtaksperiode)
+    }
 }
