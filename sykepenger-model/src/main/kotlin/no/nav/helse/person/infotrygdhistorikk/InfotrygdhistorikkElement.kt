@@ -127,10 +127,7 @@ internal class InfotrygdhistorikkElement private constructor(
     }
 
     private fun validerUgyldigePerioder(aktivitetslogg: IAktivitetslogg) {
-        ugyldigePerioder.forEach { ugyldigPeriode ->
-            val tekst = ugyldigPeriode.feiltekst()
-            aktivitetslogg.error("Det er en ugyldig utbetalingsperiode i Infotrygd%s", tekst?.let { " ($it)" } ?: "")
-        }
+        ugyldigePerioder.forEach { ugyldigPeriode -> ugyldigPeriode.valider(aktivitetslogg)}
     }
 
     private fun validerStatslønn(aktivitetslogg: IAktivitetslogg, periodetype: Periodetype) {

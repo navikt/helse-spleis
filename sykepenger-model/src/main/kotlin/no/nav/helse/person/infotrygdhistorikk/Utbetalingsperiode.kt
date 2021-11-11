@@ -98,7 +98,11 @@ data class UgyldigPeriode(
     private val tom: LocalDate?,
     private val utbetalingsgrad: Int?
 ) {
-    internal fun feiltekst() = when {
+    internal fun valider(aktivitetslogg: IAktivitetslogg) {
+        aktivitetslogg.error("Det er en ugyldig utbetalingsperiode i Infotrygd%s", feiltekst()?.let { " ($it)" } ?: "")
+    }
+
+    private fun feiltekst() = when {
             fom == null || tom == null -> "mangler fom- eller tomdato"
             fom > tom -> "fom er nyere enn tom"
             utbetalingsgrad == null -> "utbetalingsgrad mangler"
