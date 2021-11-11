@@ -496,7 +496,7 @@ internal class Vedtaksperiode private constructor(
             person.antallArbeidsgivereMedAktivtArbeidsforhold(skjæringstidspunkt),
             periodetype()
         )
-        person.vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag, skjæringstidspunkt)
+        person.vilkårsgrunnlagHistorikk.lagre(skjæringstidspunkt, vilkårsgrunnlag)
         if (vilkårsgrunnlag.hasErrorsOrWorse()) {
             return person.invaliderAllePerioder(vilkårsgrunnlag, "Feil i vilkårsgrunnlag")
         }
@@ -600,7 +600,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun overlappendeVedtaksperioder() = person.nåværendeVedtaksperioder(IKKE_FERDIG_BEHANDLET).filter { periode.overlapperMed(it.periode) }
     private fun Iterable<Vedtaksperiode>.kanGåTilNesteTilstand() =
-            first() == this@Vedtaksperiode && drop(1).all { it.tilstand == AvventerArbeidsgivere }
+        first() == this@Vedtaksperiode && drop(1).all { it.tilstand == AvventerArbeidsgivere }
 
     private fun alleAndreAvventerArbeidsgivere() = overlappendeVedtaksperioder().all { it == this || it.tilstand == AvventerArbeidsgivere }
 
@@ -2008,6 +2008,12 @@ internal class Vedtaksperiode private constructor(
                         periodetype,
                         person.vilkårsgrunnlagHistorikk
                     ) { person.beregnSykepengegrunnlagForInfotrygd(it, vedtaksperiode.periode.start) }
+                }
+                validerHvis(
+                    "Forventer minst ett sykepengegrunnlag som er fra inntektsmelding eller Infotrygd",
+                    person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt) == null
+                ) {
+                    person.minstEttSykepengegrunnlagSomIkkeKommerFraSkatt(vedtaksperiode.skjæringstidspunkt)
                 }
                 onSuccess {
                     val vilkårsgrunnlag = person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt)

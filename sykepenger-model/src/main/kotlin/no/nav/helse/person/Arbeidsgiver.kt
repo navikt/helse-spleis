@@ -120,7 +120,9 @@ internal class Arbeidsgiver private constructor(
 
         internal fun List<Arbeidsgiver>.harNødvendigInntekt(skjæringstidspunkt: LocalDate) =
             this.all { it.vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt).harNødvendigInntekt() }
-                && any { !it.grunnlagForSykepengegrunnlagKommerFraSkatt(skjæringstidspunkt) }
+
+        internal fun List<Arbeidsgiver>.minstEttSykepengegrunnlagSomIkkeKommerFraSkatt(skjæringstidspunkt: LocalDate) =
+            any { !it.grunnlagForSykepengegrunnlagKommerFraSkatt(skjæringstidspunkt) }
 
         /**
          * Brukes i MVP for flere arbeidsgivere. Alle forlengelser hos alle arbeidsgivere må gjelde samme periode

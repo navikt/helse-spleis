@@ -14,6 +14,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.harGrunnlagForSykepengegrunnla
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntekt
 import no.nav.helse.person.Arbeidsgiver.Companion.harRelevanteArbeidsforholdForFlereArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.kanOverstyres
+import no.nav.helse.person.Arbeidsgiver.Companion.minstEttSykepengegrunnlagSomIkkeKommerFraSkatt
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.relevanteArbeidsforhold
 import no.nav.helse.person.Vedtaksperiode.Companion.ALLE
@@ -494,6 +495,8 @@ class Person private constructor(
         ) != null
 
     internal fun harNødvendigInntekt(skjæringstidspunkt: LocalDate) = arbeidsgivere.harNødvendigInntekt(skjæringstidspunkt)
+
+    internal fun minstEttSykepengegrunnlagSomIkkeKommerFraSkatt(skjæringstidspunkt: LocalDate) = arbeidsgivere.minstEttSykepengegrunnlagSomIkkeKommerFraSkatt(skjæringstidspunkt)
 
     internal fun harFlereArbeidsgivereMedSykdom() = arbeidsgivereMedSykdom().count() > 1
 

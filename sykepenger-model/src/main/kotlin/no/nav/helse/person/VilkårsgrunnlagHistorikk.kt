@@ -26,9 +26,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         visitor.postVisitVilkårsgrunnlagHistorikk()
     }
 
-    internal fun lagre(vilkårsgrunnlag: Vilkårsgrunnlag, skjæringstidspunkt: LocalDate) {
-        innslag.add(skjæringstidspunkt, vilkårsgrunnlag.grunnlagsdata())
-    }
+    internal fun lagre(skjæringstidspunkt: LocalDate, vilkårsgrunnlag: Vilkårsgrunnlag) = lagre(skjæringstidspunkt, vilkårsgrunnlag.grunnlagsdata())
 
     internal fun lagre(skjæringstidspunkt: LocalDate, grunnlagselement: VilkårsgrunnlagElement) {
         innslag.add(skjæringstidspunkt, grunnlagselement)

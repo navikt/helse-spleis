@@ -48,7 +48,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(sykepengegrunnlag(10000.månedlig), 10000.månedlig, 1.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
-        historikk.lagre(vilkårsgrunnlag, 1.januar)
+        historikk.lagre(1.januar, vilkårsgrunnlag)
         assertNotNull(historikk.vilkårsgrunnlagFor(1.januar))
         assertTrue(historikk.vilkårsgrunnlagFor(1.januar)!!.isOk())
         assertEquals(1, inspektør.vilkårsgrunnlagTeller[0])
@@ -84,11 +84,11 @@ internal class VilkårsgrunnlagHistorikkTest {
         vilkårsgrunnlag1.valider(sykepengegrunnlag(10000.månedlig), 10000.månedlig, 1.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
         vilkårsgrunnlag2.valider(sykepengegrunnlag(10000.månedlig), 10000.månedlig, 1.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
 
-        historikk.lagre(vilkårsgrunnlag1, 1.januar)
+        historikk.lagre(1.januar, vilkårsgrunnlag1)
         assertNotNull(historikk.vilkårsgrunnlagFor(1.januar))
         assertTrue(historikk.vilkårsgrunnlagFor(1.januar)!!.isOk())
 
-        historikk.lagre(vilkårsgrunnlag2, 1.januar)
+        historikk.lagre(1.januar, vilkårsgrunnlag2)
         assertNotNull(historikk.vilkårsgrunnlagFor(1.januar))
         assertFalse(historikk.vilkårsgrunnlagFor(1.januar)!!.isOk())
 
@@ -111,8 +111,8 @@ internal class VilkårsgrunnlagHistorikkTest {
             arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(sykepengegrunnlag(10000.månedlig), 10000.månedlig, 1.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
-        historikk.lagre(vilkårsgrunnlag, 1.januar)
-        historikk.lagre(vilkårsgrunnlag, 4.januar)
+        historikk.lagre(1.januar, vilkårsgrunnlag)
+        historikk.lagre(4.januar, vilkårsgrunnlag)
         assertEquals(1, inspektør.vilkårsgrunnlagTeller[1])
         assertEquals(2, inspektør.vilkårsgrunnlagTeller[0])
     }
@@ -148,7 +148,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         }
         vilkårsgrunnlag.valider(sykepengegrunnlag(10000.månedlig), 10000.månedlig, 1.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
 
-        historikk.lagre(vilkårsgrunnlag, 1.januar)
+        historikk.lagre(1.januar, vilkårsgrunnlag)
         infotrygdhistorikk.lagreVilkårsgrunnlag(4.januar, Periodetype.OVERGANG_FRA_IT, historikk, sykepengegrunnlagFor(INGEN))
         assertEquals(1, inspektør.vilkårsgrunnlagTeller[1])
         assertEquals(2, inspektør.vilkårsgrunnlagTeller[0])
@@ -170,7 +170,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(sykepengegrunnlag(10000.månedlig), 10000.månedlig, 1.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
-        vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag, 1.januar)
+        vilkårsgrunnlagHistorikk.lagre(1.januar, vilkårsgrunnlag)
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
         assertTrue(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!.isOk())
     }
@@ -191,7 +191,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(sykepengegrunnlag(10000.månedlig), 10000.månedlig, 1.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
-        vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag, 1.januar)
+        vilkårsgrunnlagHistorikk.lagre(1.januar, vilkårsgrunnlag)
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
         assertFalse(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!.isOk())
     }
@@ -305,8 +305,8 @@ internal class VilkårsgrunnlagHistorikkTest {
             arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag2.valider(sykepengegrunnlag(10000.månedlig), 10000.månedlig, 1.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
-        vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag1, 10.januar)
-        vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag2, 1.januar)
+        vilkårsgrunnlagHistorikk.lagre(10.januar, vilkårsgrunnlag1)
+        vilkårsgrunnlagHistorikk.lagre(1.januar, vilkårsgrunnlag2)
         val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 3.NAV, 2.HELG, 5.NAV)
         vilkårsgrunnlagHistorikk.avvisUtbetalingsdagerMedBegrunnelse(listOf(utbetalingstidslinjeMedNavDager), "20043769969".somFødselsnummer().alder())
         assertEquals(8, utbetalingstidslinjeMedNavDager.filterIsInstance<Utbetalingstidslinje.Utbetalingsdag.NavDag>().size)
@@ -341,7 +341,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag2.valider(sykepengegrunnlag(10000.månedlig), 10000.månedlig, 1.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
-        vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag1, 10.januar)
+        vilkårsgrunnlagHistorikk.lagre(10.januar, vilkårsgrunnlag1)
         vilkårsgrunnlagHistorikk.lagre(1.januar, VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(sykepengegrunnlag(10000.månedlig)))
         val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 3.NAV, 2.HELG, 5.NAV)
         vilkårsgrunnlagHistorikk.avvisUtbetalingsdagerMedBegrunnelse(listOf(utbetalingstidslinjeMedNavDager), "20043769969".somFødselsnummer().alder())
@@ -364,7 +364,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(sykepengegrunnlag(10.månedlig), 10.månedlig, 1.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
-        vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag, 1.januar)
+        vilkårsgrunnlagHistorikk.lagre(1.januar, vilkårsgrunnlag)
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
         assertFalse(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!.isOk())
         val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 3.NAV, 2.HELG, 5.NAV)
@@ -395,7 +395,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(sykepengegrunnlag(10.månedlig), 10.månedlig, 1.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
-        vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag, 1.januar)
+        vilkårsgrunnlagHistorikk.lagre(1.januar, vilkårsgrunnlag)
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
         assertFalse(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!.isOk())
         val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 3.NAV, 2.HELG, 5.NAV)
