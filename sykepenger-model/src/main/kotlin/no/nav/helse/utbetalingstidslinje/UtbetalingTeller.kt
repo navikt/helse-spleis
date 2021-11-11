@@ -28,7 +28,7 @@ internal class UtbetalingTeller private constructor(
     internal fun dekrementer(dato: LocalDate) {
         if (dato < fom) return
         betalteDager = max(0, betalteDager - 1)
-        if (dato.isAfter(alder.redusertYtelseAlder)) gammelpersonDager = max(0, gammelpersonDager - 1)
+        // gammelpersonDager kan ikke bli mer enn tre år gamle innen man fyller 70
     }
 
     internal fun resett(dato: LocalDate) {

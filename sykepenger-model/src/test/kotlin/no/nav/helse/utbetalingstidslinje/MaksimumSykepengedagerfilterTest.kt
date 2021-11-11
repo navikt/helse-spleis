@@ -173,7 +173,7 @@ internal class MaksimumSykepengedagerfilterTest {
         assertEquals(listOf(3.januar(2022), 14.januar(2022)), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
     }
 
-    @Test fun `skyvevindu på 3 år legger til dager`() {
+    @Test fun `sykepengedager eldre enn tre år teller ikke lenger som forbrukte dager`() {
         val tidslinje = tilbakevendendeSykdom(1.NAV, 3.ARB, 5.NAV, 1.NAV)
         assertEquals(listOf(10.januar(2022)), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
     }
