@@ -58,3 +58,5 @@ spec:
     value: "true"
   - name: SPEIL_API_V2
     value: "true"
+  - name: LAGE_BRUKERUTBETALING
+    value: "true"

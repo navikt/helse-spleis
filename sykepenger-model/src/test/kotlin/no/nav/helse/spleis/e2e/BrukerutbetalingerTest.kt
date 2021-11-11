@@ -84,7 +84,6 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
     }
 
     @Test
-    @Disabled
     fun `utbetaling med 0 refusjon til arbeidsgiver`() {
         Toggles.LageBrukerutbetaling.enable {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))

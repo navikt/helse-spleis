@@ -75,7 +75,7 @@ abstract class Toggles internal constructor(enabled: Boolean = false, private va
     object SpeilApiV2 : Toggles("SPEIL_API_V2")
     object RevurdereInntektMedFlereArbeidsgivere : Toggles(false)
 
-    internal object LageBrukerutbetaling : Toggles(false) {
+    internal object LageBrukerutbetaling : Toggles("LAGE_BRUKERUTBETALING") {
         fun kanIkkeFortsette(aktivitetslogg: IAktivitetslogg, utbetaling: Utbetaling, harBrukerutbetaling: Boolean): Boolean {
             if (disabled && harBrukerutbetaling) aktivitetslogg.error("Utbetalingstidslinje inneholder brukerutbetaling")
             else if (enabled && utbetaling.harDelvisRefusjon()) aktivitetslogg.error("Støtter ikke brukerutbetaling med delvis refusjon")
