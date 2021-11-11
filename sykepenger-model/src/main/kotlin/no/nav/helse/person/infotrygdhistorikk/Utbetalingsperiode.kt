@@ -93,10 +93,10 @@ class PersonUtbetalingsperiode(
     override fun hashCode() = Objects.hash(orgnr, start, endInclusive, grad, inntekt, this::class)
 }
 
-class UgyldigPeriode(
-    val fom: LocalDate?,
-    val tom: LocalDate?,
-    val utbetalingsgrad: Int?
+data class UgyldigPeriode(
+    private val fom: LocalDate?,
+    private val tom: LocalDate?,
+    private val utbetalingsgrad: Int?
 ) {
     internal fun feiltekst() = when {
             fom == null || tom == null -> "mangler fom- eller tomdato"
@@ -105,13 +105,6 @@ class UgyldigPeriode(
             utbetalingsgrad <= 0 -> "utbetalingsgrad er mindre eller lik 0"
             else -> null
         }
-
-    override fun equals(other: Any?): Boolean {
-        if (other !is UgyldigPeriode) return false
-        return this.fom == other.fom && this.tom == other.tom && this.utbetalingsgrad == other.utbetalingsgrad
-    }
-
-    override fun hashCode() = Objects.hash(fom, tom, utbetalingsgrad)
 
     internal fun toMap() = mapOf<String, Any?>(
         "fom" to fom,
