@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.ForventetFeil
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -918,7 +919,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertTrue(inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inntektsopplysningPerArbeidsgiver()?.values?.single() is Inntektshistorikk.Inntektsmelding)
     }
 
-    @Disabled("https://trello.com/c/tEKdR2Co")
+    @ForventetFeil("https://trello.com/c/tEKdR2Co")
     @Test
     fun `Håndterer ikke inntektsmelding to ganger ved replay - hvor vi har en tidligere periode og gap`() {
         // Ved en tidligere periode resettes trimming av inntektsmelding og vi ender med å håndtere samme inntektsmelding flere ganger i en vedtaksperiode

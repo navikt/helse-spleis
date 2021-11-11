@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.ForventetFeil
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
@@ -2505,7 +2506,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertTrue(inspektør.sykdomstidslinje[27.oktober(2020)] is Dag.Arbeidsgiverdag)
     }
 
-    @Disabled("https://trello.com/c/pY0WYUC0")
+    @ForventetFeil("https://trello.com/c/pY0WYUC0")
     @Test
     fun `Avventer inntektsmelding venter faktisk på inntektsmelding, går ikke videre før inntektsmelding kommer`() {
         håndterSykmelding(Sykmeldingsperiode(28.oktober(2020), 8.november(2020), 100.prosent))
