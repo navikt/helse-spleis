@@ -45,9 +45,19 @@ abstract class Toggles internal constructor(enabled: Boolean = false, private va
     }
 
     internal operator fun plus(toggle: Toggles) = listOf(this, toggle)
+
     internal companion object {
         internal fun Iterable<Toggles>.enable(block: () -> Unit) {
             forEach(Toggles::enable)
+            try {
+                block()
+            } finally {
+                forEach(Toggles::pop)
+            }
+        }
+
+        internal fun Iterable<Toggles>.disable(block: () -> Unit) {
+            forEach(Toggles::disable)
             try {
                 block()
             } finally {
@@ -59,13 +69,13 @@ abstract class Toggles internal constructor(enabled: Boolean = false, private va
     object OppretteVedtaksperioderVedSøknad : Toggles(true)
     object RebregnUtbetalingVedHistorikkendring : Toggles()
     object OverlappendeSykmelding : Toggles(true)
-    object SendFeriepengeOppdrag: Toggles(false)
+    object SendFeriepengeOppdrag : Toggles(false)
     object DatoRangeJson : Toggles(true)
-    object Etterlevelse: Toggles()
-    object SpeilApiV2: Toggles("SPEIL_API_V2")
-    object RevurdereInntektMedFlereArbeidsgivere: Toggles(false)
+    object Etterlevelse : Toggles()
+    object SpeilApiV2 : Toggles("SPEIL_API_V2")
+    object RevurdereInntektMedFlereArbeidsgivere : Toggles(false)
 
-    internal object LageBrukerutbetaling: Toggles(false) {
+    internal object LageBrukerutbetaling : Toggles(false) {
         fun kanIkkeFortsette(aktivitetslogg: IAktivitetslogg, utbetaling: Utbetaling, harBrukerutbetaling: Boolean): Boolean {
             if (disabled && harBrukerutbetaling) aktivitetslogg.error("Utbetalingstidslinje inneholder brukerutbetaling")
             else if (enabled && utbetaling.harDelvisRefusjon()) aktivitetslogg.error("Støtter ikke brukerutbetaling med delvis refusjon")

@@ -1,5 +1,7 @@
 package no.nav.helse
 
+import no.nav.helse.Toggles.Companion.disable
+import no.nav.helse.Toggles.Companion.enable
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -116,5 +118,114 @@ internal class TogglesTest {
         assertTrue(toggle.enabled)
         toggle.pop()
         assertFalse(toggle.enabled)
+    }
+
+    @Test
+    fun `Disabled is the same as not enabled`() {
+        prepareToggle(enabled = false, force = false)
+        assertFalse(toggle.enabled)
+        assertTrue(toggle.disabled)
+        toggle.enable {
+            assertTrue(toggle.enabled)
+            assertFalse(toggle.disabled)
+        }
+        assertFalse(toggle.enabled)
+        assertTrue(toggle.disabled)
+    }
+
+    @Test
+    fun `enable multiple toggles`() {
+        val toggle1 = object : Toggles(enabled = false, force = false) {}
+        val toggle2 = object : Toggles(enabled = false, force = false) {}
+        val toggle3 = object : Toggles(enabled = false, force = false) {}
+
+        assertFalse(toggle1.enabled)
+        assertFalse(toggle2.enabled)
+        assertFalse(toggle3.enabled)
+
+        var blittKjørt = false
+        (toggle1 + toggle2 + toggle3).enable {
+            blittKjørt = true
+            assertTrue(toggle1.enabled)
+            assertTrue(toggle2.enabled)
+            assertTrue(toggle3.enabled)
+        }
+        assertTrue(blittKjørt)
+
+        assertFalse(toggle1.enabled)
+        assertFalse(toggle2.enabled)
+        assertFalse(toggle3.enabled)
+    }
+
+    @Test
+    fun `disable multiple toggles`() {
+        val toggle1 = object : Toggles(enabled = true, force = false) {}
+        val toggle2 = object : Toggles(enabled = true, force = false) {}
+        val toggle3 = object : Toggles(enabled = true, force = false) {}
+
+        assertFalse(toggle1.disabled)
+        assertFalse(toggle2.disabled)
+        assertFalse(toggle3.disabled)
+
+        var blittKjørt = false
+        (toggle1 + toggle2 + toggle3).disable {
+            blittKjørt = true
+            assertTrue(toggle1.disabled)
+            assertTrue(toggle2.disabled)
+            assertTrue(toggle3.disabled)
+        }
+        assertTrue(blittKjørt)
+
+        assertFalse(toggle1.disabled)
+        assertFalse(toggle2.disabled)
+        assertFalse(toggle3.disabled)
+    }
+
+    @Test
+    fun `enable multiple toggles - keep disabled when forced`() {
+        val toggle1 = object : Toggles(enabled = false, force = false) {}
+        val toggle2 = object : Toggles(enabled = false, force = true) {}
+        val toggle3 = object : Toggles(enabled = false, force = false) {}
+
+        assertFalse(toggle1.enabled)
+        assertFalse(toggle2.enabled)
+        assertFalse(toggle3.enabled)
+
+        var blittKjørt = false
+        (toggle1 + toggle2 + toggle3).enable {
+            blittKjørt = true
+            assertTrue(toggle1.enabled)
+            assertFalse(toggle2.enabled)
+            assertTrue(toggle3.enabled)
+        }
+        assertTrue(blittKjørt)
+
+        assertFalse(toggle1.enabled)
+        assertFalse(toggle2.enabled)
+        assertFalse(toggle3.enabled)
+    }
+
+    @Test
+    fun `disable multiple toggles - keep enabled when forced`() {
+        val toggle1 = object : Toggles(enabled = true, force = true) {}
+        val toggle2 = object : Toggles(enabled = true, force = false) {}
+        val toggle3 = object : Toggles(enabled = true, force = true) {}
+
+        assertFalse(toggle1.disabled)
+        assertFalse(toggle2.disabled)
+        assertFalse(toggle3.disabled)
+
+        var blittKjørt = false
+        (toggle1 + toggle2 + toggle3).disable {
+            blittKjørt = true
+            assertFalse(toggle1.disabled)
+            assertTrue(toggle2.disabled)
+            assertFalse(toggle3.disabled)
+        }
+        assertTrue(blittKjørt)
+
+        assertFalse(toggle1.disabled)
+        assertFalse(toggle2.disabled)
+        assertFalse(toggle3.disabled)
     }
 }
