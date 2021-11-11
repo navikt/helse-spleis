@@ -85,7 +85,7 @@ internal class Utbetaling private constructor(
         beregningId,
         utbetalingstidslinje.kutt(sisteDato),
         byggArbeidsgiveroppdrag(sisteAktive?.arbeidsgiverOppdrag, organisasjonsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, forrige?.arbeidsgiverOppdrag),
-        byggPersonoppdrag(fødselsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, emptyList()),
+        byggPersonoppdrag(sisteAktive?.personOppdrag, fødselsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, forrige?.personOppdrag),
         type,
         maksdato,
         forbrukteSykedager,
@@ -461,14 +461,15 @@ internal class Utbetaling private constructor(
         ) = byggOppdrag(sisteAktive, organisasjonsnummer, tidslinje, sisteDato, aktivitetslogg, forrige, SykepengerRefusjon)
 
         private fun byggPersonoppdrag(
+            sisteAktive: Oppdrag?,
             fødselsnummer: String,
             tidslinje: Utbetalingstidslinje,
             sisteDato: LocalDate,
             aktivitetslogg: IAktivitetslogg,
-            utbetalinger: List<Utbetaling>
+            forrige: Oppdrag?
         ): Oppdrag {
             if (Toggles.LageBrukerutbetaling.disabled) return Oppdrag(fødselsnummer, Sykepenger)
-            return byggOppdrag(null, fødselsnummer, tidslinje, sisteDato, aktivitetslogg, null, Sykepenger)
+            return byggOppdrag(sisteAktive, fødselsnummer, tidslinje, sisteDato, aktivitetslogg, forrige, Sykepenger)
         }
 
         internal fun List<Utbetaling>.aktive() =

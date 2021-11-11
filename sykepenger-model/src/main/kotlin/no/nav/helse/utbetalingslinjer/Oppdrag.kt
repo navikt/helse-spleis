@@ -154,6 +154,7 @@ internal class Oppdrag private constructor(
 
     internal fun minus(eldre: Oppdrag, aktivitetslogg: IAktivitetslogg): Oppdrag {
         return when {
+            eldre.isEmpty() -> this.also { this.fagsystemId = eldre.fagsystemId }
             // Vi ønsker ikke å forlenge et oppdrag vi ikke overlapper med, eller et tomt oppdrag
             harIngenKoblingTilTidligereOppdrag(eldre) -> this
             // om man trekker fra et utbetalt oppdrag med et tomt oppdrag medfører det et oppdrag som opphører (les: annullerer) hele fagsystemIDen

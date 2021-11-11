@@ -83,12 +83,12 @@ internal class UtbetalingslinjeForskjellTest {
     }
 
     @Test
-    fun `tomme utbetalingslinjer fungerer som Null Object Utbetalingslinjer`() {
+    fun `overtar fagsystemId fra et tomt oppdrag`() {
         val original = tomtOppdrag()
         val recalculated = linjer(5.februar to 9.februar)
         val actual = recalculated - original
         assertUtbetalinger(linjer(5.februar to 9.februar), actual)
-        assertNotEquals(original.fagsystemId, actual.fagsystemId)
+        assertEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(NY, actual.endringskode)
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }

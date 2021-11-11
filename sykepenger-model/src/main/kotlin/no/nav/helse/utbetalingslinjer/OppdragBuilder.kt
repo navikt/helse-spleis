@@ -27,14 +27,19 @@ internal class OppdragBuilder(
         tidslinje.kutt(sisteDato).reverse().accept(this)
     }
 
-    internal fun build(tidligere: Oppdrag?, aktivitetslogg: IAktivitetslogg) = when (tidligere) {
-        null -> nyttOppdrag()
-        else -> oppdragBasertPåTidligere(tidligere, aktivitetslogg)
-    }.also {
-        aktivitetslogg.info(
-            if (it.isEmpty()) "Ingen utbetalingslinjer bygget"
-            else "Utbetalingslinjer bygget vellykket"
-        )
+    internal fun build(tidligere: Oppdrag?, aktivitetslogg: IAktivitetslogg): Oppdrag {
+        val oppdrag = nyttOppdrag()
+        return when (tidligere) {
+            null -> oppdrag
+            else -> oppdrag.minus(tidligere, aktivitetslogg).also {
+                if (tidligere.fagsystemId() == it.fagsystemId()) it.nettoBeløp(tidligere)
+            }
+        }.also {
+            aktivitetslogg.info(
+                if (it.isEmpty()) "Ingen utbetalingslinjer bygget"
+                else "Utbetalingslinjer bygget vellykket"
+            )
+        }
     }
 
     private fun nyttOppdrag(): Oppdrag {
@@ -56,10 +61,7 @@ internal class OppdragBuilder(
 
     private fun oppdragBasertPåTidligere(tidligere: Oppdrag, aktivitetslogg: IAktivitetslogg) =
         nyttOppdrag()
-            .minus(tidligere, aktivitetslogg)
-            .also {
-                if (tidligere.fagsystemId() == it.fagsystemId()) it.nettoBeløp(tidligere)
-            }
+
 
     private val linje get() = utbetalingslinjer.first()
 
