@@ -14,11 +14,11 @@ import java.time.LocalDate
 import java.util.*
 
 abstract class Utbetalingsperiode(
-    private val orgnr: String,
+    protected val orgnr: String,
     fom: LocalDate,
     tom: LocalDate,
-    private val grad: Prosentdel,
-    private val inntekt: Inntekt
+    protected val grad: Prosentdel,
+    protected val inntekt: Inntekt
 ) : Infotrygdperiode(fom, tom) {
     override fun sykdomstidslinje(kilde: SykdomstidslinjeHendelse.Hendelseskilde): Sykdomstidslinje {
         return Sykdomstidslinje.sykedager(start, endInclusive, grad, kilde)
@@ -47,50 +47,32 @@ abstract class Utbetalingsperiode(
     override fun gjelder(orgnummer: String) = orgnummer == this.orgnr
     override fun utbetalingEtter(orgnumre: List<String>, dato: LocalDate) =
         start >= dato && this.orgnr !in orgnumre
-}
-
-class ArbeidsgiverUtbetalingsperiode(
-    private val orgnr: String,
-    fom: LocalDate,
-    tom: LocalDate,
-    private val grad: Prosentdel,
-    inntekt: Inntekt
-) : Utbetalingsperiode(orgnr, fom, tom, grad, inntekt.rundTilDaglig()) {
-    private val inntekt = inntekt.rundTilDaglig()
-
-    override fun accept(visitor: InfotrygdhistorikkVisitor) {
-        visitor.visitInfotrygdhistorikkArbeidsgiverUtbetalingsperiode(orgnr, this, grad, inntekt)
-    }
 
     override fun equals(other: Any?): Boolean {
-        if (other !is ArbeidsgiverUtbetalingsperiode) return false
+        if (!super.equals(other)) return false
+        other as Utbetalingsperiode
         return this.orgnr == other.orgnr && this.start == other.start && this.grad == other.grad && this.inntekt == other.inntekt
     }
 
     override fun hashCode() = Objects.hash(orgnr, start, endInclusive, grad, inntekt, this::class)
 }
 
-class PersonUtbetalingsperiode(
-    private val orgnr: String,
-    fom: LocalDate,
-    tom: LocalDate,
-    private val grad: Prosentdel,
-    inntekt: Inntekt
-) : Utbetalingsperiode(orgnr, fom, tom, grad, inntekt) {
-    private val inntekt = inntekt.rundTilDaglig()
+class ArbeidsgiverUtbetalingsperiode(orgnr: String, fom: LocalDate, tom: LocalDate, grad: Prosentdel, inntekt: Inntekt) :
+    Utbetalingsperiode(orgnr, fom, tom, grad, inntekt.rundTilDaglig()) {
+
+    override fun accept(visitor: InfotrygdhistorikkVisitor) {
+        visitor.visitInfotrygdhistorikkArbeidsgiverUtbetalingsperiode(orgnr, this, grad, inntekt)
+    }
+}
+
+class PersonUtbetalingsperiode(orgnr: String, fom: LocalDate, tom: LocalDate, grad: Prosentdel, inntekt: Inntekt) :
+    Utbetalingsperiode(orgnr, fom, tom, grad, inntekt.rundTilDaglig()) {
 
     override fun accept(visitor: InfotrygdhistorikkVisitor) {
         visitor.visitInfotrygdhistorikkPersonUtbetalingsperiode(orgnr, this, grad, inntekt)
     }
 
     override fun harBrukerutbetaling() = true
-
-    override fun equals(other: Any?): Boolean {
-        if (other !is PersonUtbetalingsperiode) return false
-        return this.orgnr == other.orgnr && this.start == other.start && this.grad == other.grad && this.inntekt == other.inntekt
-    }
-
-    override fun hashCode() = Objects.hash(orgnr, start, endInclusive, grad, inntekt, this::class)
 }
 
 data class UgyldigPeriode(
@@ -103,12 +85,12 @@ data class UgyldigPeriode(
     }
 
     private fun feiltekst() = when {
-            fom == null || tom == null -> "mangler fom- eller tomdato"
-            fom > tom -> "fom er nyere enn tom"
-            utbetalingsgrad == null -> "utbetalingsgrad mangler"
-            utbetalingsgrad <= 0 -> "utbetalingsgrad er mindre eller lik 0"
-            else -> null
-        }
+        fom == null || tom == null -> "mangler fom- eller tomdato"
+        fom > tom -> "fom er nyere enn tom"
+        utbetalingsgrad == null -> "utbetalingsgrad mangler"
+        utbetalingsgrad <= 0 -> "utbetalingsgrad er mindre eller lik 0"
+        else -> null
+    }
 
     internal fun toMap() = mapOf<String, Any?>(
         "fom" to fom,
