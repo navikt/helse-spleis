@@ -44,7 +44,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
 
     @AfterAll
     fun afterAllTests() {
-        Toggles.SpeilApiV2.disable()
+        Toggles.SpeilApiV2.pop()
     }
 
     @Test

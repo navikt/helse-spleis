@@ -27,7 +27,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
     @AfterAll
     internal fun tearDownServer() {
         testServer.tearDown()
-        Toggles.SpeilApiV2.disable()
+        Toggles.SpeilApiV2.pop()
     }
 
     @BeforeEach
@@ -456,10 +456,6 @@ internal class GraphQLApiTest : AbstractObservableTest() {
         testServer.httpPost(
             path = "/graphql",
             body = """{"query": "$query"}"""
-        ) {
-            this
-        }
+        )
     }
-
 }
-
