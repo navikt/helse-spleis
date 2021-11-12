@@ -193,7 +193,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         assertTrue(errors.contains(error), "fant ikke forventet error for $orgnummer. Errors:\n${errors.joinToString("\n")}")
     }
 
-    private fun collectErrors(idInnhenter: IdInnhenter, orgnummer: String): MutableList<String> {
+    protected fun collectErrors(idInnhenter: IdInnhenter, orgnummer: String): MutableList<String> {
         val errors = mutableListOf<String>()
         inspektør.personLogg.accept(object : AktivitetsloggVisitor {
             override fun visitError(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Error, melding: String, tidsstempel: String) {

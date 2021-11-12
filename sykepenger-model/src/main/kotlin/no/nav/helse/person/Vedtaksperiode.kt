@@ -498,7 +498,7 @@ internal class Vedtaksperiode private constructor(
         )
         person.vilkårsgrunnlagHistorikk.lagre(skjæringstidspunkt, vilkårsgrunnlag)
         if (vilkårsgrunnlag.hasErrorsOrWorse()) {
-            return person.invaliderAllePerioder(vilkårsgrunnlag, "Feil i vilkårsgrunnlag")
+            return person.invaliderAllePerioder(vilkårsgrunnlag, null)
         }
         vilkårsgrunnlag.info("Vilkårsgrunnlag vurdert")
         tilstand(vilkårsgrunnlag, nesteTilstand)

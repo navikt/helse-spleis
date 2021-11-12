@@ -29,10 +29,6 @@ class Inntektsvurdering(
         if (inntekter.kilder(3) > antallArbeidsgivereFraAareg) {
             aktivitetslogg.warn("Bruker har flere inntektskilder de siste tre månedene enn arbeidsforhold som er oppdaget i Aa-registeret.")
         }
-        if (sammenligningsgrunnlag <= Inntekt.INGEN) {
-            aktivitetslogg.error("sammenligningsgrunnlaget er <= 0")
-            return false
-        }
         grunnlagForSykepengegrunnlag.avviksprosent(sammenligningsgrunnlag).also { avvik ->
             avviksprosent = avvik
             val akseptabeltAvvik = avvik <= MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT
