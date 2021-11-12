@@ -74,7 +74,7 @@ data class NavDag(
     val utbetaling: Int,
     val personbeløp: Int,
     val arbeidsgiverbeløp: Int,
-    val refusjonsbeløp: Int,
+    val refusjonsbeløp: Int?,
     val grad: Double,
     val totalGrad: Double?
 ) : Utbetalingstidslinjedag {

@@ -60,7 +60,7 @@ internal class UtbetalingstidslinjeBuilder(
                     utbetaling = arbeidsgiverbeløp!!.roundToInt(),
                     arbeidsgiverbeløp = arbeidsgiverbeløp.roundToInt(),
                     personbeløp = personbeløp!!.roundToInt(),
-                    refusjonsbeløp = arbeidsgiverRefusjonsbeløp!!.roundToInt(),
+                    refusjonsbeløp = arbeidsgiverRefusjonsbeløp?.roundToInt(),
                     grad = grad,
                     totalGrad = totalGrad
                 )
