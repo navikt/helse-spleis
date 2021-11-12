@@ -21,8 +21,8 @@ internal class UtbetalingstidslinjeBuilder(
     ) {
         økonomi.medAvrundetData { _, aktuellDagsinntekt ->
             utbetalingstidslinjeMap.add(
-                UtbetalingsdagDTO(
-                    type = TypeDataDTO.Arbeidsdag,
+                IkkeUtbetaltDagDTO(
+                    type = DagtypeDTO.Arbeidsdag,
                     inntekt = aktuellDagsinntekt!!,
                     dato = dato
                 )
@@ -37,8 +37,8 @@ internal class UtbetalingstidslinjeBuilder(
     ) {
         økonomi.medAvrundetData { _, aktuellDagsinntekt ->
             utbetalingstidslinjeMap.add(
-                UtbetalingsdagDTO(
-                    type = TypeDataDTO.ArbeidsgiverperiodeDag,
+                IkkeUtbetaltDagDTO(
+                    type = DagtypeDTO.ArbeidsgiverperiodeDag,
                     inntekt = aktuellDagsinntekt!!,
                     dato = dato
                 )
@@ -51,13 +51,16 @@ internal class UtbetalingstidslinjeBuilder(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        økonomi.medData { grad, _, _, _, totalGrad, aktuellDagsinntekt, arbeidsgiverbeløp, _, _ ->
+        økonomi.medData { grad, arbeidsgiverRefusjonsbeløp, _, _, totalGrad, aktuellDagsinntekt, arbeidsgiverbeløp, personbeløp, _ ->
             utbetalingstidslinjeMap.add(
                 NavDagDTO(
-                    type = TypeDataDTO.NavDag,
+                    type = DagtypeDTO.NavDag,
                     inntekt = aktuellDagsinntekt!!.roundToInt(),
                     dato = dato,
                     utbetaling = arbeidsgiverbeløp!!.roundToInt(),
+                    arbeidsgiverbeløp = arbeidsgiverbeløp.roundToInt(),
+                    personbeløp = personbeløp!!.roundToInt(),
+                    refusjonsbeløp = arbeidsgiverRefusjonsbeløp!!.roundToInt(),
                     grad = grad,
                     totalGrad = totalGrad
                 )
@@ -72,8 +75,8 @@ internal class UtbetalingstidslinjeBuilder(
     ) {
         økonomi.medData { grad, _ ->
             utbetalingstidslinjeMap.add(
-                UtbetalingsdagMedGradDTO(
-                    type = TypeDataDTO.NavHelgDag,
+                NavHelgedagDTO(
+                    type = DagtypeDTO.NavHelgDag,
                     inntekt = 0,   // Speil needs zero here
                     dato = dato,
                     grad = grad
@@ -88,8 +91,8 @@ internal class UtbetalingstidslinjeBuilder(
         økonomi: Økonomi
     ) {
         utbetalingstidslinjeMap.add(
-            UtbetalingsdagDTO(
-                type = if (dato.erHelg()) TypeDataDTO.Helgedag else TypeDataDTO.Feriedag,
+            IkkeUtbetaltDagDTO(
+                type = if (dato.erHelg()) DagtypeDTO.Helgedag else DagtypeDTO.Feriedag,
                 inntekt = 0,    // Speil needs zero here
                 dato = dato
             )
@@ -102,8 +105,8 @@ internal class UtbetalingstidslinjeBuilder(
         økonomi: Økonomi
     ) {
         utbetalingstidslinjeMap.add(
-            UtbetalingsdagDTO(
-                type = TypeDataDTO.UkjentDag,
+            IkkeUtbetaltDagDTO(
+                type = DagtypeDTO.UkjentDag,
                 inntekt = 0,    // Speil needs zero here
                 dato = dato
             )
@@ -117,7 +120,7 @@ internal class UtbetalingstidslinjeBuilder(
     ) {
         utbetalingstidslinjeMap.add(
             AvvistDagDTO(
-                type = TypeDataDTO.AvvistDag,
+                type = DagtypeDTO.AvvistDag,
                 inntekt = 0,    // Speil needs zero here
                 dato = dato,
                 begrunnelser = dag.begrunnelser.map { BegrunnelseDTO.valueOf(PersonData.UtbetalingstidslinjeData.BegrunnelseData.fraBegrunnelse(it).name) },
@@ -132,8 +135,8 @@ internal class UtbetalingstidslinjeBuilder(
         økonomi: Økonomi
     ) {
         utbetalingstidslinjeMap.add(
-            UtbetalingsdagDTO(
-                type = TypeDataDTO.ForeldetDag,
+            IkkeUtbetaltDagDTO(
+                type = DagtypeDTO.ForeldetDag,
                 inntekt = 0,    // Speil needs zero here
                 dato = dato
             )

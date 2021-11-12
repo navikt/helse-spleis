@@ -126,8 +126,8 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
 
         val utbetalingstidslinje = vedtaksperiode.utbetalingstidslinje
         assertEquals(31, utbetalingstidslinje.size)
-        assertEquals(TypeDataDTO.ArbeidsgiverperiodeDag, utbetalingstidslinje.first().type)
-        assertEquals(TypeDataDTO.NavDag, utbetalingstidslinje.last().type)
+        assertEquals(DagtypeDTO.ArbeidsgiverperiodeDag, utbetalingstidslinje.first().type)
+        assertEquals(DagtypeDTO.NavDag, utbetalingstidslinje.last().type)
         assertEquals(100.0, (utbetalingstidslinje.last() as NavDagDTO).grad)
 
         assertEquals(15741, vedtaksperiode.totalbeløpArbeidstaker)
@@ -386,10 +386,10 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
 
         val vedtaksperiode = personDTO.arbeidsgivere.first().vedtaksperioder.first() as VedtaksperiodeDTO
         val utbetalingstidslinje = vedtaksperiode.utbetalingstidslinje
-        assertEquals(TypeDataDTO.ArbeidsgiverperiodeDag, utbetalingstidslinje.first().type)
-        assertEquals(TypeDataDTO.ArbeidsgiverperiodeDag, utbetalingstidslinje[15].type)
-        assertEquals(TypeDataDTO.ForeldetDag, utbetalingstidslinje[16].type)
-        assertEquals(TypeDataDTO.ForeldetDag, utbetalingstidslinje.last().type)
+        assertEquals(DagtypeDTO.ArbeidsgiverperiodeDag, utbetalingstidslinje.first().type)
+        assertEquals(DagtypeDTO.ArbeidsgiverperiodeDag, utbetalingstidslinje[15].type)
+        assertEquals(DagtypeDTO.ForeldetDag, utbetalingstidslinje[16].type)
+        assertEquals(DagtypeDTO.ForeldetDag, utbetalingstidslinje.last().type)
 
         val sykdomstidslinje = vedtaksperiode.sykdomstidslinje
         assertEquals(SpeilDagtype.FORELDET_SYKEDAG, sykdomstidslinje.first().type)
@@ -680,7 +680,11 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         Toggles.LageBrukerutbetaling.enable {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
             håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
-            håndterInntektsmelding(refusjon = Inntektsmelding.Refusjon(0.månedlig, null), førsteFraværsdag = 1.januar, arbeidsgiverperioder = listOf(1.januar til 16.januar))
+            håndterInntektsmelding(
+                refusjon = Inntektsmelding.Refusjon(0.månedlig, null),
+                førsteFraværsdag = 1.januar,
+                arbeidsgiverperioder = listOf(1.januar til 16.januar)
+            )
             håndterYtelser()
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser()
@@ -689,11 +693,40 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             håndterUtbetalt()
 
             val personDTO = speilApi()
+            val utbetalingstidslinje = personDTO.arbeidsgivere[0].utbetalingshistorikk[0].utbetaling.utbetalingstidslinje
+
             assertEquals(0, (personDTO.arbeidsgivere[0].vedtaksperioder[0] as VedtaksperiodeDTO).utbetalinger.arbeidsgiverUtbetaling?.linjer?.size)
             assertEquals(1, (personDTO.arbeidsgivere[0].vedtaksperioder[0] as VedtaksperiodeDTO).utbetalinger.personUtbetaling?.linjer?.size)
 
-            assertEquals(0,personDTO.arbeidsgivere[0].utbetalingshistorikk[0].utbetaling.arbeidsgiverNettoBeløp)
-            assertEquals(15741,personDTO.arbeidsgivere[0].utbetalingshistorikk[0].utbetaling.personNettoBeløp)
+            utbetalingstidslinje.filterIsInstance<IkkeUtbetaltDagDTO>().let {
+                it.forEach { arbeidsgiverperiodedag ->
+                    assertEquals(1431, arbeidsgiverperiodedag.inntekt)
+                    assertEquals(DagtypeDTO.ArbeidsgiverperiodeDag, arbeidsgiverperiodedag.type)
+                }
+                assertEquals(16, it.size)
+            }
+
+            utbetalingstidslinje.filterIsInstance<NavDagDTO>().let {
+                it.forEach { navdag ->
+                    assertEquals(DagtypeDTO.NavDag, navdag.type)
+                    assertEquals(0, navdag.utbetaling)
+                    assertEquals(0, navdag.arbeidsgiverbeløp)
+                    assertEquals(1431, navdag.personbeløp)
+                    assertEquals(0, navdag.refusjonsbeløp)
+                }
+                assertEquals(11, it.size)
+            }
+
+            utbetalingstidslinje.filterIsInstance<NavHelgedagDTO>().let {
+                it.forEach { navhelgedag ->
+                    assertEquals(DagtypeDTO.NavHelgDag, navhelgedag.type)
+                    assertEquals(100.0, navhelgedag.grad)
+                }
+                assertEquals(4, it.size)
+            }
+
+            assertEquals(0, personDTO.arbeidsgivere[0].utbetalingshistorikk[0].utbetaling.arbeidsgiverNettoBeløp)
+            assertEquals(15741, personDTO.arbeidsgivere[0].utbetalingshistorikk[0].utbetaling.personNettoBeløp)
         }
     }
 
@@ -2264,18 +2297,19 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         )
 
 
-        private fun Person.simulering(vedtaksperiodeIdInnhenter: IdInnhenter, orgnummer: String = Companion.orgnummer, simuleringOk: Boolean = true) = Simulering(
-            meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = vedtaksperiodeIdInnhenter(orgnummer).toString(),
-            aktørId = aktørId,
-            fødselsnummer = fnr.toString(),
-            orgnummer = orgnummer,
-            fagsystemId = this.aktivitetslogg.behov().first { it.type == Behovtype.Simulering }.detaljer().getValue("fagsystemId") as String,
-            fagområde = this.aktivitetslogg.behov().first { it.type == Behovtype.Simulering }.detaljer().getValue("fagområde") as String,
-            simuleringOK = simuleringOk,
-            melding = "Hei Aron",
-            simuleringResultat = simuleringResultat()
-        )
+        private fun Person.simulering(vedtaksperiodeIdInnhenter: IdInnhenter, orgnummer: String = Companion.orgnummer, simuleringOk: Boolean = true) =
+            Simulering(
+                meldingsreferanseId = UUID.randomUUID(),
+                vedtaksperiodeId = vedtaksperiodeIdInnhenter(orgnummer).toString(),
+                aktørId = aktørId,
+                fødselsnummer = fnr.toString(),
+                orgnummer = orgnummer,
+                fagsystemId = this.aktivitetslogg.behov().first { it.type == Behovtype.Simulering }.detaljer().getValue("fagsystemId") as String,
+                fagområde = this.aktivitetslogg.behov().first { it.type == Behovtype.Simulering }.detaljer().getValue("fagområde") as String,
+                simuleringOK = simuleringOk,
+                melding = "Hei Aron",
+                simuleringResultat = simuleringResultat()
+            )
 
         private fun simuleringResultat() = Simulering.SimuleringResultat(
             totalbeløp = 9999,

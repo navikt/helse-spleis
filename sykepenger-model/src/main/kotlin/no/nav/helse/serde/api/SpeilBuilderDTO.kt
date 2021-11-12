@@ -124,48 +124,51 @@ data class SykdomstidslinjedagDTO(
 }
 
 interface UtbetalingstidslinjedagDTO {
-    val type: TypeDataDTO
+    val type: DagtypeDTO
     val inntekt: Int
     val dato: LocalDate
 }
 
 data class NavDagDTO(
-    override val type: TypeDataDTO = TypeDataDTO.NavDag,
+    override val type: DagtypeDTO = DagtypeDTO.NavDag,
     override val inntekt: Int,
     override val dato: LocalDate,
     val utbetaling: Int,
+    val personbeløp: Int,
+    val arbeidsgiverbeløp: Int,
+    val refusjonsbeløp: Int,
     val grad: Double,
     val totalGrad: Double?
 ) : UtbetalingstidslinjedagDTO
 
 data class AvvistDagDTO(
-    override val type: TypeDataDTO = TypeDataDTO.AvvistDag,
+    override val type: DagtypeDTO = DagtypeDTO.AvvistDag,
     override val inntekt: Int,
     override val dato: LocalDate,
     val begrunnelser: List<BegrunnelseDTO>,
     val grad: Double
 ) : UtbetalingstidslinjedagDTO
 
-data class UtbetalingsdagDTO(
-    override val type: TypeDataDTO,
+data class IkkeUtbetaltDagDTO(
+    override val type: DagtypeDTO,
     override val inntekt: Int,
     override val dato: LocalDate
 ) : UtbetalingstidslinjedagDTO
 
-data class UtbetalingsdagMedGradDTO(
-    override val type: TypeDataDTO,
+data class NavHelgedagDTO(
+    override val type: DagtypeDTO,
     override val inntekt: Int,
     override val dato: LocalDate,
     val grad: Double
 ) : UtbetalingstidslinjedagDTO
 
 data class UfullstendigVedtaksperiodedagDTO(
-    override val type: TypeDataDTO,
+    override val type: DagtypeDTO,
     override val dato: LocalDate,
     override val inntekt: Int = 0
 ) : UtbetalingstidslinjedagDTO
 
-enum class TypeDataDTO {
+enum class DagtypeDTO {
     ArbeidsgiverperiodeDag,
     NavDag,
     NavHelgDag,

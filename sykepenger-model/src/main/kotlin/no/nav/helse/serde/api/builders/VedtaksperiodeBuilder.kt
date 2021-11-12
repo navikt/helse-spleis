@@ -12,7 +12,6 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.kronologisk
-import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
@@ -179,14 +178,14 @@ internal class VedtaksperiodeBuilder(
             .subset(periode)
             .map {
                 val type = when (it) {
-                    is Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag -> TypeDataDTO.ArbeidsgiverperiodeDag
-                    is Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag -> TypeDataDTO.Arbeidsdag
-                    is Utbetalingstidslinje.Utbetalingsdag.AvvistDag -> TypeDataDTO.AvvistDag
-                    is Utbetalingstidslinje.Utbetalingsdag.Fridag -> TypeDataDTO.Feriedag
-                    is Utbetalingstidslinje.Utbetalingsdag.ForeldetDag -> TypeDataDTO.ForeldetDag
-                    is Utbetalingstidslinje.Utbetalingsdag.UkjentDag -> TypeDataDTO.UkjentDag
-                    is Utbetalingstidslinje.Utbetalingsdag.NavDag -> TypeDataDTO.NavDag
-                    is Utbetalingstidslinje.Utbetalingsdag.NavHelgDag -> TypeDataDTO.ArbeidsgiverperiodeDag
+                    is Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag -> DagtypeDTO.ArbeidsgiverperiodeDag
+                    is Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag -> DagtypeDTO.Arbeidsdag
+                    is Utbetalingstidslinje.Utbetalingsdag.AvvistDag -> DagtypeDTO.AvvistDag
+                    is Utbetalingstidslinje.Utbetalingsdag.Fridag -> DagtypeDTO.Feriedag
+                    is Utbetalingstidslinje.Utbetalingsdag.ForeldetDag -> DagtypeDTO.ForeldetDag
+                    is Utbetalingstidslinje.Utbetalingsdag.UkjentDag -> DagtypeDTO.UkjentDag
+                    is Utbetalingstidslinje.Utbetalingsdag.NavDag -> DagtypeDTO.NavDag
+                    is Utbetalingstidslinje.Utbetalingsdag.NavHelgDag -> DagtypeDTO.ArbeidsgiverperiodeDag
                 }
                 UfullstendigVedtaksperiodedagDTO(type = type, dato = it.dato)
             }
