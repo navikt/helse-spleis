@@ -5,7 +5,7 @@ import no.nav.helse.serde.api.v2.buildere.GenerasjonIder
 import no.nav.helse.serde.api.v2.buildere.VilkårsgrunnlagshistorikkId
 import java.time.LocalDate
 
-internal class Tidslinjebereginger(generasjonIder: List<GenerasjonIder>, sykdomshistorikkAkkumulator: SykdomshistorikkAkkumulator) {
+internal class Tidslinjeberegninger(generasjonIder: List<GenerasjonIder>, sykdomshistorikkAkkumulator: SykdomshistorikkAkkumulator) {
     private val beregninger: List<ITidslinjeberegning> = lagTidslinjeberegninger(generasjonIder, sykdomshistorikkAkkumulator)
 
     private fun lagTidslinjeberegninger(

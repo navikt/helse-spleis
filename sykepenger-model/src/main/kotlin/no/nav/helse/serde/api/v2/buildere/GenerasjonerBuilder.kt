@@ -41,13 +41,13 @@ internal class GenerasjonerBuilder(
 
     fun build(): List<Generasjon> {
         vedtaksperiodeAkkumulator.supplerMedAnnulleringer(annulleringer)
-        val tidslinjebereginger = Tidslinjebereginger(generasjonIderAkkumulator.toList(), sykdomshistorikkAkkumulator)
+        val tidslinjeberegninger = Tidslinjeberegninger(generasjonIderAkkumulator.toList(), sykdomshistorikkAkkumulator)
         val tidslinjeperioder = Tidslinjeperioder(
             fødselsnummer,
             forkastetVedtaksperiodeAkkumulator.toList(),
             vilkårsgrunnlagHistorikk,
             vedtaksperiodeAkkumulator.toList(),
-            tidslinjebereginger
+            tidslinjeberegninger
         )
         return Generasjoner(tidslinjeperioder).build()
     }

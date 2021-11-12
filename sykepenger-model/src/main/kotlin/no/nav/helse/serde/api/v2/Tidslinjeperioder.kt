@@ -14,12 +14,10 @@ import no.nav.helse.serde.api.v2.Generasjoner.Generasjon.Companion.fjernErstatte
 import no.nav.helse.serde.api.v2.Generasjoner.Generasjon.Companion.sammenstillMedNeste
 import no.nav.helse.serde.api.v2.Generasjoner.Generasjon.Companion.sorterGenerasjoner
 import no.nav.helse.serde.api.v2.Generasjoner.Generasjon.Companion.toDTO
-import no.nav.helse.serde.api.v2.Tidslinjebereginger.ITidslinjeberegning
+import no.nav.helse.serde.api.v2.Tidslinjeberegninger.ITidslinjeberegning
 import no.nav.helse.serde.api.v2.buildere.BeregningId
 import no.nav.helse.serde.api.v2.buildere.IVilkårsgrunnlagHistorikk
 import no.nav.helse.serde.api.v2.buildere.VedtaksperiodeVarslerBuilder
-import no.nav.helse.somFødselsnummer
-import no.nav.helse.utbetalingstidslinje.Alder
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -104,7 +102,7 @@ internal class Tidslinjeperioder(
     private val forkastetVedtaksperiodeIder: List<UUID>,
     private val vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk,
     vedtaksperioder: List<IVedtaksperiode>,
-    tidslinjeberegninger: Tidslinjebereginger
+    tidslinjeberegninger: Tidslinjeberegninger
 ) {
     private var perioder: List<Tidslinjeperiode>
 
