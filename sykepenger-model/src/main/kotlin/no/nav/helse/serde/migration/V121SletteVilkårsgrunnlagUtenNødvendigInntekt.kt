@@ -1,33 +1,48 @@
 package no.nav.helse.serde.migration
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
+import org.slf4j.LoggerFactory
 
 internal class V121SletteVilkårsgrunnlagUtenNødvendigInntekt : JsonMigration(version = 121) {
 
     override val description = "Slette vilkårsgrunnlag som ble opprettet før vi mottok inntektsmelding og som ble lagret kun med skatteopplysninger"
 
+    companion object {
+        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
+    }
+
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
-        // 1. Finn aktivitetene med erroren
-        // 2. Hente ut kontekstId'ene for hver enkelt error
-        // 3. Finne den ène konteksstId'en som hører til en vedtaksperiode
-        // 4. Hente ut vedtaksperiodeId
-        // 5. Finne vilkårsgrunnlag i kontektsten
 
-
-
-
-
-        val kontekster = jsonNode["aktivetslogg"]["kontektster"]
-
-        val indekser = jsonNode["aktivitetslogg"]["aktiviteter"]
+        val aktørId = jsonNode["aktørId"]
+        val kontekster = jsonNode["aktivitetslogg"]["kontekster"]
+        val aktiviteterMedError = jsonNode["aktivitetslogg"]["aktiviteter"]
             .filter { it["alvorlighetsgrad"].asText() == "ERROR" }
             .filter { it["melding"].asText() == "Vi har ikke inntektshistorikken vi trenger for skjæringstidspunktet" }
-            .map { it["kontekster"] }
 
-        val vilkårsgrunnlag =
-            indekser.map { it.map { indeks -> kontekster[indeks.asInt()] }.single { kontekst -> kontekst["kontekstType"].asText() == "Vilkårsgrunnlag" } }
-                .map { vilkårsgrunnlag -> vilkårsgrunnlag["meldingsreferanseId"].asText() }
+        if (aktiviteterMedError.isEmpty()) return
 
+        val kontektsterPerError = aktiviteterMedError
+            .map { it["kontekster"].map(JsonNode::asInt) }
 
+        val vedtaksperiodeIder = kontektsterPerError
+            .map { it.map(kontekster::get).first { kontekst -> kontekst["kontekstType"]?.asText() == "Vedtaksperiode" } }
+            .map { kontekst -> kontekst["kontekstMap"]["vedtaksperiodeId"].asText() }
+
+        sikkerLogg.info("Prøver å fjerne vilkårsgrunnlag til $aktørId for vedtaksperioder: $vedtaksperiodeIder")
+
+        val skjæringstidspunkter = jsonNode["arbeidsgivere"].flatMap { it["forkastede"] }
+            .map { it["vedtaksperiode"] }
+            .filter { it["id"].asText() in vedtaksperiodeIder }
+            .map { it["skjæringstidspunkt"] }
+
+        jsonNode["vilkårsgrunnlagHistorikk"]
+            .forEach { innslag ->
+                innslag["vilkårsgrunnlag"]
+                    .removeAll { vilkårsgrunnlag ->
+                        vilkårsgrunnlag["skjæringstidspunkt"] in skjæringstidspunkter
+                            && vilkårsgrunnlag["sykepengegrunnlag"]["arbeidsgiverInntektsopplysninger"].all { it["inntektsopplysning"].has("skatteopplysninger") }
+                    }
+            }
     }
 }
