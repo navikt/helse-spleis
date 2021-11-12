@@ -1,0 +1,104 @@
+{
+    "aktørId": "42",
+    "fødselsnummer": "12020052345",
+    "opprettet": "2021-11-12T09:52:38.581473",
+    "aktivitetslogg": {
+        "aktiviteter": [
+            {
+                "kontekster": [1, 2, 2, 5, 7],
+                "alvorlighetsgrad": "INFO",
+                "melding": "Bruker har ingen omsorgspengeytelser"
+            },
+            {
+                "kontekster": [1, 2, 2, 5, 7],
+                "alvorlighetsgrad": "INFO",
+                "melding": "Bruker har ingen opplæringspengeytelser"
+            },
+            {
+                "kontekster": [1, 2, 2, 5, 7],
+                "alvorlighetsgrad": "INFO",
+                "melding": "Bruker har ingen institusjonsoppholdsperioder"
+            },
+            {
+                "kontekster": [1, 2, 2, 5, 7],
+                "alvorlighetsgrad": "ERROR",
+                "melding": "Vi har ikke inntektshistorikken vi trenger for skjæringstidspunktet"
+            }
+        ],
+        "kontekster": [
+            {},
+            {},
+            {},
+            {},
+            {},
+            {
+                "kontekstType": "Vilkårsgrunnlag",
+                "kontekstMap": {
+                    "meldingsreferanseId": "529828ed-11ef-47cf-affb-393270e90166",
+                    "aktørId": "42",
+                    "fødselsnummer": "12020052345",
+                    "organisasjonsnummer": "987654321"
+                }
+            },
+            {},
+            {}
+        ]
+    },
+    "vilkårsgrunnlagHistorikk": [
+        {
+            "vilkårsgrunnlag": [
+                {
+                    "skjæringstidspunkt": "2018-01-01",
+                    "type": "Vilkårsprøving",
+                    "sykepengegrunnlag": {
+                        "arbeidsgiverInntektsopplysninger": [
+                            {
+                                "orgnummer": "987654321",
+                                "inntektsopplysning": {
+                                    "skatteopplysninger": []
+                                }
+                            }
+                        ]
+                    },
+                    "meldingsreferanseId": "529828ed-11ef-47cf-affb-393270e90166"
+                },
+                {
+                    "skjæringstidspunkt": "2018-02-01",
+                    "type": "Infotrygd",
+                    "sykepengegrunnlag": {
+                        "arbeidsgiverInntektsopplysninger": [
+                            {
+                                "orgnummer": "987654321",
+                                "inntektsopplysning": {
+                                    "kilde": "INFOTRYGD"
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "skjæringstidspunkt": "2018-03-01",
+                    "type": "Vilkårsprøving",
+                    "sykepengegrunnlag": {
+                        "arbeidsgiverInntektsopplysninger": [
+                            {
+                                "orgnummer": "987654321",
+                                "inntektsopplysning": {
+                                    "kilde": "INNTEKTSMELDING"
+                                }
+                            },
+                            {
+                                "orgnummer": "987654321",
+                                "inntektsopplysning": {
+                                    "skatteopplysninger": []
+                                }
+                            }
+                        ]
+                    },
+                    "meldingsreferanseId": "3a497177-072d-4fb2-bc22-a678fca2e930"
+                }
+            ]
+        }
+    ],
+    "skjemaVersjon": 120
+}
