@@ -65,9 +65,7 @@ internal class MaksimumSykepengedagerfilter(
         Utbetalingstidslinje.avvis(tidslinjer, avvisteDatoer.grupperSammenhengendePerioder(), periode) { dato: LocalDate ->
             avvisteDatoerMedBegrunnelse[dato]!!
         }
-    }
 
-    internal fun beregnGrenser() {
         if (avvisteDatoer in periode)
             aktivitetslogg.warn("Maks antall sykepengedager er nådd i perioden. Vurder å sende vedtaksbrev fra Infotrygd")
         else

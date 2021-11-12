@@ -640,8 +640,6 @@ internal class Vedtaksperiode private constructor(
         engineForTimeline: MaksimumSykepengedagerfilter,
         hendelse: ArbeidstakerHendelse
     ) {
-        engineForTimeline.beregnGrenser()
-
         val vedtaksperioder = person.nåværendeVedtaksperioder(IKKE_FERDIG_BEHANDLET)
         val første = vedtaksperioder.first()
         if (første == this) {
@@ -738,7 +736,6 @@ internal class Vedtaksperiode private constructor(
         utbetalingstidslinje.harBrukerutbetalinger() || andreVedtaksperioder.any { it.utbetalingstidslinje.harBrukerutbetalinger() }
 
     private fun forsøkRevurdering(engineForTimeline: MaksimumSykepengedagerfilter, hendelse: ArbeidstakerHendelse) {
-        engineForTimeline.beregnGrenser()
 
         val vedtaksperioder = person.nåværendeVedtaksperioder(IKKE_FERDIG_REVURDERT)
         vedtaksperioder.forEach { it.lagRevurdering(engineForTimeline, hendelse) }

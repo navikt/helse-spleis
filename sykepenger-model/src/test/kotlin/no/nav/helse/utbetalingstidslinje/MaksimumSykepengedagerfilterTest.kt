@@ -306,7 +306,6 @@ internal class MaksimumSykepengedagerfilterTest {
             aktivitetslogg
         ).also {
             it.filter(listOf(this), personTidslinje)
-            it.beregnGrenser()
         }
         return AvvisteDager(this).datoer
     }
@@ -340,7 +339,6 @@ internal class MaksimumSykepengedagerfilterTest {
             aktivitetslogg
         ).also {
             it.filter(listOf(this), personTidslinje)
-            it.beregnGrenser()
         }
         return AvvisteDagerOgDeresKommentarer(this).dager
     }
