@@ -691,6 +691,9 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             val personDTO = speilApi()
             assertEquals(0, (personDTO.arbeidsgivere[0].vedtaksperioder[0] as VedtaksperiodeDTO).utbetalinger.arbeidsgiverUtbetaling?.linjer?.size)
             assertEquals(1, (personDTO.arbeidsgivere[0].vedtaksperioder[0] as VedtaksperiodeDTO).utbetalinger.personUtbetaling?.linjer?.size)
+
+            assertEquals(0,personDTO.arbeidsgivere[0].utbetalingshistorikk[0].utbetaling.arbeidsgiverNettoBeløp)
+            assertEquals(15741,personDTO.arbeidsgivere[0].utbetalingshistorikk[0].utbetaling.personNettoBeløp)
         }
     }
 
