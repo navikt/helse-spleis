@@ -54,9 +54,7 @@ internal class PersonMediator(
     private fun sendUtgåendeMeldinger(rapidsConnection: RapidsConnection) {
         if (meldinger.isEmpty()) return
         message.logOutgoingMessages(sikkerLogg, meldinger.size)
-        meldinger.forEach { (fødselsnummer, eventName, melding) ->
-            rapidsConnection.publish(fødselsnummer, melding.also { sikkerLogg.info("sender $eventName: $it") })
-        }
+        meldinger.forEach { pakke -> pakke.publish(rapidsConnection) }
     }
 
     private fun sendReplays(rapidsConnection: RapidsConnection) {
@@ -347,9 +345,13 @@ internal class PersonMediator(
     }
 
     private data class Pakke (
-        val fødselsnummer: String,
-        val eventName: String,
-        val blob: String,
-    )
+        private val fødselsnummer: String,
+        private val eventName: String,
+        private val blob: String,
+    ) {
+        fun publish(rapidsConnection: RapidsConnection) {
+            rapidsConnection.publish(fødselsnummer, blob.also { sikkerLogg.info("sender $eventName: $it") })
+        }
+    }
 
 }
