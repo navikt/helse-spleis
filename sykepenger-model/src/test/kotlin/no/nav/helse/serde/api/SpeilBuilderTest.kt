@@ -676,6 +676,25 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `ta med personoppdrag`() {
+        Toggles.LageBrukerutbetaling.enable {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterInntektsmelding(refusjon = Inntektsmelding.Refusjon(0.månedlig, null), førsteFraværsdag = 1.januar, arbeidsgiverperioder = listOf(1.januar til 16.januar))
+            håndterYtelser()
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser()
+            håndterSimulering()
+            håndterUtbetalingsgodkjenning()
+            håndterUtbetalt()
+
+            val personDTO = speilApi()
+            assertEquals(0, (personDTO.arbeidsgivere[0].vedtaksperioder[0] as VedtaksperiodeDTO).utbetalinger.arbeidsgiverUtbetaling?.linjer?.size)
+            assertEquals(1, (personDTO.arbeidsgivere[0].vedtaksperioder[0] as VedtaksperiodeDTO).utbetalinger.personUtbetaling?.linjer?.size)
+        }
+    }
+
+    @Test
     fun `Skal ta med forkastede vedtaksperioder`() {
         nyttVedtak(1.januar, 31.januar)
 
