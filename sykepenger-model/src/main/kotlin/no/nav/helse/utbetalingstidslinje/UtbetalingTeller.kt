@@ -1,6 +1,8 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.utbetalingstidslinje.Begrunnelse.SykepengedagerOppbrukt
+import no.nav.helse.utbetalingstidslinje.Begrunnelse.SykepengedagerOppbruktOver67
 import java.time.DayOfWeek
 import java.time.LocalDate
 import kotlin.math.max
@@ -13,6 +15,9 @@ internal class UtbetalingTeller private constructor(
     private var gammelpersonDager: Int,
     private val aktivitetslogg: IAktivitetslogg
 ) {
+    // Til bruk under visitering av Utbetalingstidslinje
+    internal var begrunnelse: Begrunnelse = SykepengedagerOppbrukt
+
     internal constructor(
         alder: Alder,
         arbeidsgiverRegler: ArbeidsgiverRegler,
@@ -20,9 +25,16 @@ internal class UtbetalingTeller private constructor(
     ) :
         this(LocalDate.MIN, alder, arbeidsgiverRegler, 0, 0, aktivitetslogg)
 
+    private fun byttBegrunnelseFordiAntallGjenværendeDagerReduseresTil60EllerVedNyRettighet(): Boolean = gammelpersonDager == 0 && betalteDager < (248 - 60)
+
     internal fun inkrementer(dato: LocalDate) {
         betalteDager += 1
-        if (dato.isAfter(alder.redusertYtelseAlder)) gammelpersonDager += 1
+        if (dato > alder.redusertYtelseAlder) {
+            if (byttBegrunnelseFordiAntallGjenværendeDagerReduseresTil60EllerVedNyRettighet()) {
+                begrunnelse = SykepengedagerOppbruktOver67
+            }
+            gammelpersonDager += 1
+        }
     }
 
     internal fun dekrementer(dato: LocalDate) {
@@ -47,14 +59,14 @@ internal class UtbetalingTeller private constructor(
     }
 
     internal fun maksdato(sisteUtbetalingsdag: LocalDate) =
-        beregnGjenståendeSykedager(minOf(alder.sisteVirkedagFørFylte70år, sisteUtbetalingsdag)).let { (_, maksdato) -> maksdato }
+        beregnGjenståendeSykepengedager(minOf(alder.sisteVirkedagFørFylte70år, sisteUtbetalingsdag)).let { (_, maksdato) -> maksdato }
 
     internal fun forbrukteDager() = betalteDager
 
-    internal fun gjenståendeSykedager(sisteUtbetalingsdag: LocalDate) =
-        beregnGjenståendeSykedager(sisteUtbetalingsdag).let { (gjenståendeSykedager, _) -> gjenståendeSykedager }
+    internal fun gjenståendeSykepengedager(sisteUtbetalingsdag: LocalDate) =
+        beregnGjenståendeSykepengedager(sisteUtbetalingsdag).let { (gjenståendeSykedager, _) -> gjenståendeSykedager }
 
-    private fun beregnGjenståendeSykedager(sisteUtbetalingsdag: LocalDate): Pair<Int, LocalDate> {
+    private fun beregnGjenståendeSykepengedager(sisteUtbetalingsdag: LocalDate): Pair<Int, LocalDate> {
         val clone = UtbetalingTeller(fom, alder, arbeidsgiverRegler, betalteDager, gammelpersonDager, aktivitetslogg)
         var result = sisteUtbetalingsdag
         var teller = 0

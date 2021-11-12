@@ -72,6 +72,7 @@ interface PersonObserver {
             }
             enum class Begrunnelse {
                 SykepengedagerOppbrukt,
+                SykepengedagerOppbruktOver67,
                 MinimumInntekt,
                 MinimumInntektOver67,
                 EgenmeldingUtenforArbeidsgiverperiode,

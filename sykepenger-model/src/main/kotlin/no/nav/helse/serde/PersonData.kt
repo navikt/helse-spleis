@@ -1167,6 +1167,7 @@ internal data class PersonData(
 
         enum class BegrunnelseData {
             SykepengedagerOppbrukt,
+            SykepengedagerOppbruktOver67,
             MinimumInntekt,
             MinimumInntektOver67,
             EgenmeldingUtenforArbeidsgiverperiode,
@@ -1178,6 +1179,7 @@ internal data class PersonData(
 
             fun tilBegrunnelse() = when (this) {
                 SykepengedagerOppbrukt -> Begrunnelse.SykepengedagerOppbrukt
+                SykepengedagerOppbruktOver67 -> Begrunnelse.SykepengedagerOppbruktOver67
                 MinimumSykdomsgrad -> Begrunnelse.MinimumSykdomsgrad
                 EgenmeldingUtenforArbeidsgiverperiode -> Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode
                 MinimumInntekt -> Begrunnelse.MinimumInntekt
@@ -1191,6 +1193,7 @@ internal data class PersonData(
             internal companion object {
                 fun fraBegrunnelse(begrunnelse: Begrunnelse) = when (begrunnelse) {
                     is Begrunnelse.SykepengedagerOppbrukt -> SykepengedagerOppbrukt
+                    is Begrunnelse.SykepengedagerOppbruktOver67 -> SykepengedagerOppbrukt
                     is Begrunnelse.MinimumSykdomsgrad -> MinimumSykdomsgrad
                     is Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode -> EgenmeldingUtenforArbeidsgiverperiode
                     is Begrunnelse.MinimumInntekt -> MinimumInntekt

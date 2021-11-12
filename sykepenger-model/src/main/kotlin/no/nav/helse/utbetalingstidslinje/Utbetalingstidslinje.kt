@@ -73,6 +73,13 @@ internal class Utbetalingstidslinje private constructor(
                 return flatMap { tidslinje -> tidslinje.subset(periode) }.any { it is AvvistDag}
             }
         }
+
+        fun avvis(tidslinjer: List<Utbetalingstidslinje>, avvistePerioder: List<Periode>, periode: Periode, finnBegrunnelse: (LocalDate) -> Begrunnelse): Boolean {
+            tidslinjer.apply {
+                forEach { it.avvis(avvistePerioder, finnBegrunnelse) }
+                return flatMap { tidslinje -> tidslinje.subset(periode) }.any { it is AvvistDag}
+            }
+        }
     }
 
     internal fun er6GBegrenset(): Boolean {
@@ -91,6 +98,13 @@ internal class Utbetalingstidslinje private constructor(
         utbetalingsdager.replaceAll {
             if (it.dato !in avvisteDatoer) it
             else it.avvis(begrunnelser) ?: it
+        }
+    }
+
+    private fun avvis(avvisteDatoer: List<Periode>, finnBegrunnelse: (LocalDate) -> Begrunnelse) {
+        utbetalingsdager.replaceAll {
+            if (it.dato !in avvisteDatoer) it
+            else it.avvis(finnBegrunnelse) ?: it
         }
     }
 
@@ -218,6 +232,7 @@ internal class Utbetalingstidslinje private constructor(
     internal fun sisteUkedag() = utbetalingsdager.last { it !is NavHelgDag }.dato
 
     internal fun periode() = Periode(førsteDato, sisteDato)
+
     internal fun sykepengeperiode(): Periode? {
         val første = utbetalingsdager.firstOrNull { it is NavDag }?.dato ?: return null
         val siste = utbetalingsdager.last { it is NavDag }.dato
@@ -302,6 +317,9 @@ internal class Utbetalingstidslinje private constructor(
             .filter { it.skalAvvises(this) }
             .takeIf(List<*>::isNotEmpty)
             ?.let(::avvisDag)
+
+        internal fun avvis(finnBegrunnelse: (LocalDate) -> Begrunnelse) =
+            avvis(listOf(finnBegrunnelse(this.dato)))
 
         protected open fun avvisDag(begrunnelser: List<Begrunnelse>) = AvvistDag(dato, økonomi, begrunnelser)
 
@@ -407,6 +425,7 @@ internal sealed class Begrunnelse(private val dagtyperSomAvvises: List<KClass<ou
     internal fun skalAvvises(utbetalingsdag: Utbetalingsdag) = utbetalingsdag is AvvistDag || utbetalingsdag::class in dagtyperSomAvvises
 
     object SykepengedagerOppbrukt : Begrunnelse()
+    object SykepengedagerOppbruktOver67 : Begrunnelse()
     object MinimumInntekt : Begrunnelse()
     object MinimumInntektOver67 : Begrunnelse()
     object EgenmeldingUtenforArbeidsgiverperiode : Begrunnelse()

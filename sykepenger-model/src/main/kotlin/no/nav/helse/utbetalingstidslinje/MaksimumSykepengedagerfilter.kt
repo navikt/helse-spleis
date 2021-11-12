@@ -4,7 +4,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.UtbetalingsdagVisitor
-import no.nav.helse.utbetalingstidslinje.Begrunnelse.SykepengedagerOppbrukt
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.UkjentDag
 import no.nav.helse.økonomi.Økonomi
@@ -29,7 +28,8 @@ internal class MaksimumSykepengedagerfilter(
     private var opphold = 0
     private lateinit var sakensStartdato: LocalDate  // Date of first NAV payment in a new 248 period
     private lateinit var dekrementerfom: LocalDate  // Three year boundary from first sick day after a work day
-    private val avvisteDatoer = mutableListOf<LocalDate>()
+    private val avvisteDatoerMedBegrunnelse = mutableMapOf<LocalDate, Begrunnelse>()
+    private val avvisteDatoer get() = avvisteDatoerMedBegrunnelse.keys.toList()
     private val betalbarDager = mutableMapOf<LocalDate, NavDag>()
     private lateinit var beregnetTidslinje: Utbetalingstidslinje
     private lateinit var tidslinjegrunnlag: List<Utbetalingstidslinje>
@@ -37,7 +37,7 @@ internal class MaksimumSykepengedagerfilter(
     internal fun maksdato() =
         if (gjenståendeSykedager() == 0) teller.maksdato(sisteBetalteDag) else teller.maksdato(sisteUkedag)
 
-    internal fun gjenståendeSykedager() = teller.gjenståendeSykedager(sisteBetalteDag)
+    internal fun gjenståendeSykedager() = teller.gjenståendeSykepengedager(sisteBetalteDag)
     internal fun forbrukteSykedager() = teller.forbrukteDager()
 
     internal fun filter(tidslinjer: List<Utbetalingstidslinje>, personTidslinje: Utbetalingstidslinje) {
@@ -48,9 +48,10 @@ internal class MaksimumSykepengedagerfilter(
         teller = UtbetalingTeller(alder, arbeidsgiverRegler, aktivitetslogg)
         state = State.Initiell
         beregnetTidslinje.accept(this)
-        if (::sakensStartdato.isInitialized)
+        if (::sakensStartdato.isInitialized) {
+            val avvisteDager = avvisteDatoer.filter { sakensStartdato <= it }
             aktivitetslogg.etterlevelse.`§8-12 ledd 1`(
-                avvisteDatoer.filter { sakensStartdato <= it } !in periode,
+                avvisteDager !in periode,
                 avvisteDatoer.firstOrNull() ?: sakensStartdato,
                 avvisteDatoer.lastOrNull() ?: sisteBetalteDag,
                 tidslinjegrunnlag,
@@ -58,9 +59,12 @@ internal class MaksimumSykepengedagerfilter(
                 gjenståendeSykedager(),
                 forbrukteSykedager(),
                 maksdato(),
-                avvisteDatoer.filter { sakensStartdato <= it }
+                avvisteDager
             )
-        Utbetalingstidslinje.avvis(tidslinjer, avvisteDatoer.grupperSammenhengendePerioder(), periode, listOf(SykepengedagerOppbrukt))
+        }
+        Utbetalingstidslinje.avvis(tidslinjer, avvisteDatoer.grupperSammenhengendePerioder(), periode) { dato: LocalDate ->
+            avvisteDatoerMedBegrunnelse[dato]!!
+        }
     }
 
     internal fun beregnGrenser() {
@@ -247,7 +251,7 @@ internal class MaksimumSykepengedagerfilter(
         object Karantene : State() {
             override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
                 avgrenser.opphold += 1
-                avgrenser.avvisteDatoer.add(dagen)
+                avgrenser.avvisteDatoerMedBegrunnelse[dagen] = avgrenser.teller.begrunnelse
             }
 
             override fun oppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
