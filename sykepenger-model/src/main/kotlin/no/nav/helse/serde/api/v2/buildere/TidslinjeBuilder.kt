@@ -187,13 +187,16 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        økonomi.medData { grad, _, _, _, totalGrad, aktuellDagsinntekt, arbeidsgiverbeløp, _, _ ->
+        økonomi.medData { grad, refusjonsbeløp, _, _, totalGrad, aktuellDagsinntekt, arbeidsgiverbeløp, personbeløp, _ ->
             utbetalingstidslinje.add(
                 NavDag(
                     type = UtbetalingstidslinjedagType.NavDag,
                     inntekt = aktuellDagsinntekt!!.roundToInt(),
                     dato = dato,
                     utbetaling = arbeidsgiverbeløp!!.roundToInt(),
+                    arbeidsgiverbeløp = arbeidsgiverbeløp.roundToInt(),
+                    personbeløp = personbeløp!!.roundToInt(),
+                    refusjonsbeløp = refusjonsbeløp!!.roundToInt(),
                     grad = grad,
                     totalGrad = totalGrad
                 )

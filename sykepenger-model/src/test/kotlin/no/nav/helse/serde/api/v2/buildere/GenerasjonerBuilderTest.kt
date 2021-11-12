@@ -1,11 +1,10 @@
 package no.nav.helse.serde.api.v2.buildere
 
-import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
+import no.nav.helse.Toggles
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.SøknadArbeidsgiver
-import no.nav.helse.hendelser.til
 import no.nav.helse.person.arbeidsgiver
+import no.nav.helse.serde.api.VedtaksperiodeDTO
 import no.nav.helse.serde.api.v2.BeregnetPeriode
 import no.nav.helse.serde.api.v2.Generasjon
 import no.nav.helse.serde.api.v2.Tidslinjeperiode
@@ -16,6 +15,7 @@ import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -609,6 +609,30 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         }
     }
 
+    @Test
+    fun `ta med personoppdrag`() {
+        Toggles.LageBrukerutbetaling.enable {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterInntektsmelding(refusjon = Inntektsmelding.Refusjon(0.månedlig, null), førsteFraværsdag = 1.januar, arbeidsgiverperioder = listOf(1.januar til 16.januar))
+            håndterYtelser()
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser()
+            håndterSimulering()
+            håndterUtbetalingsgodkjenning()
+            håndterUtbetalt()
+
+            0.generasjon {
+                assertEquals(0, this.perioder.first().sammenslåttTidslinje[16].utbetalingsinfo!!.utbetaling)
+                assertEquals(0, this.perioder.first().sammenslåttTidslinje[16].utbetalingsinfo!!.arbeidsgiverbeløp)
+                assertEquals(0, this.perioder.first().sammenslåttTidslinje[16].utbetalingsinfo!!.refusjonsbeløp)
+                assertEquals(1431, this.perioder.first().sammenslåttTidslinje[16].utbetalingsinfo!!.personbeløp)
+                assertEquals(0, beregnetPeriode(0).utbetaling.arbeidsgiverNettoBeløp)
+                assertEquals(15741, beregnetPeriode(0).utbetaling.personNettoBeløp)
+            }
+        }
+    }
+
     private fun BeregnetPeriode.assertAldersvilkår(expectedOppfylt: Boolean, expectedAlderSisteSykedag: Int) {
         assertEquals(expectedOppfylt, periodevilkår.alder.oppfylt)
         assertEquals(expectedAlderSisteSykedag, periodevilkår.alder.alderSisteSykedag)
@@ -665,7 +689,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         return this
     }
 
-    private infix fun <T : Tidslinjeperiode> T.fra(periode: no.nav.helse.hendelser.Periode): T {
+    private infix fun <T : Tidslinjeperiode> T.fra(periode: Periode): T {
         assertEquals(periode.start, this.fom)
         assertEquals(periode.endInclusive, this.tom)
         return this

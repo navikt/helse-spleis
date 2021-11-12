@@ -43,10 +43,6 @@ internal class Tidslinjeberegninger(generasjonIder: List<GenerasjonIder>, sykdom
 
 internal fun List<Sykdomstidslinjedag>.merge(utbetalingstidslinje: List<Utbetalingstidslinjedag>): List<SammenslåttDag> {
 
-    fun utbetalingsinfo(utbetalingsdag: Utbetalingstidslinjedag) = if (utbetalingsdag is NavDag)
-        Utbetalingsinfo(utbetalingsdag.inntekt, utbetalingsdag.utbetaling, utbetalingsdag.totalGrad)
-    else null
-
     fun begrunnelser(utbetalingsdag: Utbetalingstidslinjedag) =
         if (utbetalingsdag is AvvistDag) utbetalingsdag.begrunnelser else null
 

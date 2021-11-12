@@ -72,10 +72,13 @@ data class NavDag(
     override val inntekt: Int,
     override val dato: LocalDate,
     val utbetaling: Int,
+    val personbeløp: Int,
+    val arbeidsgiverbeløp: Int,
+    val refusjonsbeløp: Int,
     val grad: Double,
     val totalGrad: Double?
 ) : Utbetalingstidslinjedag {
-    override fun utbetalingsinfo() = Utbetalingsinfo(inntekt, utbetaling, totalGrad)
+    override fun utbetalingsinfo() = Utbetalingsinfo(inntekt, utbetaling, personbeløp, arbeidsgiverbeløp, refusjonsbeløp, totalGrad)
 }
 
 data class AvvistDag(
@@ -86,7 +89,7 @@ data class AvvistDag(
     val grad: Double,
     val totalGrad: Double?
 ) : Utbetalingstidslinjedag {
-    override fun utbetalingsinfo() = Utbetalingsinfo(inntekt, null, totalGrad)
+    override fun utbetalingsinfo() = Utbetalingsinfo(inntekt, null, null, null, null, totalGrad)
 }
 
 data class UtbetalingstidslinjedagUtenGrad(

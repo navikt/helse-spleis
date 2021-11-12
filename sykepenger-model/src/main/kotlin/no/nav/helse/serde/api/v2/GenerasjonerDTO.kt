@@ -44,6 +44,9 @@ interface Tidslinjeperiode {
 data class Utbetalingsinfo(
     val inntekt: Int? = null,
     val utbetaling: Int? = null,
+    val personbeløp: Int? = null,
+    val arbeidsgiverbeløp: Int? = null,
+    val refusjonsbeløp: Int? = null,
     val totalGrad: Double? = null
 )
 
