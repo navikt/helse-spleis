@@ -60,3 +60,5 @@ spec:
     value: "true"
   - name: LAGE_BRUKERUTBETALING
     value: "true"
+  - name: GraphQLPlayground
+    value: "true"

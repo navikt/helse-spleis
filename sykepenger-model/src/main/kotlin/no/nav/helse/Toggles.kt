@@ -73,6 +73,7 @@ abstract class Toggles internal constructor(enabled: Boolean = false, private va
     object DatoRangeJson : Toggles(true)
     object Etterlevelse : Toggles()
     object SpeilApiV2 : Toggles("SPEIL_API_V2")
+    object GraphQLPlayground : Toggles("GraphQLPlayground")
     object RevurdereInntektMedFlereArbeidsgivere : Toggles(false)
 
     internal object LageBrukerutbetaling : Toggles("LAGE_BRUKERUTBETALING") {

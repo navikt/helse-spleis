@@ -4,6 +4,7 @@ import com.apurebase.kgraphql.GraphQL
 import com.apurebase.kgraphql.schema.dsl.SchemaBuilder
 import io.ktor.application.*
 import io.ktor.auth.*
+import no.nav.helse.Toggles
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
 import no.nav.helse.serde.api.AktivitetDTO
@@ -127,6 +128,7 @@ fun Application.installGraphQLApi(dataSource: DataSource, authProviderName: Stri
 
     install(GraphQL) {
         endpoint = "/graphql"
+        playground = Toggles.GraphQLPlayground.enabled
 
         wrap {
             authenticate(authProviderName, build = it)
