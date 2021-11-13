@@ -128,10 +128,13 @@ fun Application.installGraphQLApi(dataSource: DataSource, authProviderName: Stri
 
     install(GraphQL) {
         endpoint = "/graphql"
-        playground = Toggles.GraphQLPlayground.enabled
 
-        wrap {
-            authenticate(authProviderName, build = it)
+        if (Toggles.GraphQLPlayground.enabled) {
+            playground = true
+        } else {
+            wrap {
+                authenticate(authProviderName, build = it)
+            }
         }
 
         schema {
