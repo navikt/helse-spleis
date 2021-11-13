@@ -10,15 +10,82 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
+enum class Vilkarsgrunnlagtype {
+    INFOTRYGD,
+    SPLEIS,
+    UKJENT
+}
+
+interface VilkarsgrunnlagElement {
+    val skjaeringstidspunkt: LocalDate
+    val omregnetArsinntekt: Double
+    val sammenligningsgrunnlag: Double?
+    val sykepengegrunnlag: Double
+    val inntekter: List<GraphQLPerson.VilkarsgrunnlaghistorikkInnslag.Arbeidsgiverinntekt>
+    val vilkarsgrunnlagtype: Vilkarsgrunnlagtype
+}
+
 data class GraphQLPerson(
     val aktorId: String,
     val fodselsnummer: String,
     val arbeidsgivere: List<GraphQLArbeidsgiver>,
     val inntektsgrunnlag: List<GraphQLInntektsgrunnlag>,
-    // vilkarsgrunnlaghistorikk
+    val vilkarsgrunnlaghistorikk: List<VilkarsgrunnlaghistorikkInnslag>,
     val dodsdato: LocalDate?,
     val versjon: Int
-)
+) {
+    data class VilkarsgrunnlaghistorikkInnslag(
+        val id: UUID,
+        val grunnlag: List<VilkarsgrunnlagElement>
+    ) {
+
+        data class Arbeidsgiverinntekt(
+            val arbeidsgiver: String,
+            val omregnetArsinntekt: OmregnetArsinntekt?,
+            val sammenligningsgrunnlag: Double? = null
+        ) {
+            data class OmregnetArsinntekt(
+                val kilde: OmregnetArsinntektKilde,
+                val belop: Double,
+                val manedsbelop: Double,
+                val inntekterFraAOrdningen: List<InntekterFraAOrdningen>?
+            )
+            enum class OmregnetArsinntektKilde {
+                Saksbehandler,
+                Inntektsmelding,
+                Infotrygd,
+                AOrdningen
+            }
+        }
+
+        data class SpleisVilkarsgrunnlag(
+            override val skjaeringstidspunkt: LocalDate,
+            override val omregnetArsinntekt: Double,
+            override val sammenligningsgrunnlag: Double?,
+            override val sykepengegrunnlag: Double,
+            override val inntekter: List<Arbeidsgiverinntekt>,
+            val avviksprosent: Double?,
+            val grunnbelop: Int,
+            val antallOpptjeningsdagerErMinst: Int,
+            val opptjeningFra: LocalDate,
+            val oppfyllerKravOmMinstelonn: Boolean,
+            val oppfyllerKravOmOpptjening: Boolean,
+            val oppfyllerKravOmMedlemskap: Boolean?
+        ) : VilkarsgrunnlagElement {
+            override val vilkarsgrunnlagtype = Vilkarsgrunnlagtype.SPLEIS
+        }
+
+        data class InfotrygdVilkarsgrunnlag(
+            override val skjaeringstidspunkt: LocalDate,
+            override val omregnetArsinntekt: Double,
+            override val sammenligningsgrunnlag: Double?,
+            override val sykepengegrunnlag: Double,
+            override val inntekter: List<Arbeidsgiverinntekt>
+        ) : VilkarsgrunnlagElement {
+            override val vilkarsgrunnlagtype = Vilkarsgrunnlagtype.INFOTRYGD
+        }
+    }
+}
 
 data class GraphQLArbeidsgiver(
     val organisasjonsnummer: String,
@@ -218,6 +285,11 @@ data class GraphQLDag(
     val begrunnelser: List<BegrunnelseDTO>?
 )
 
+data class InntekterFraAOrdningen(
+    val maned: YearMonth,
+    val sum: Double
+)
+
 data class GraphQLInntektsgrunnlag(
     val skjaeringstidspunkt: LocalDate,
     val sykepengegrunnlag: Double?,
@@ -229,11 +301,6 @@ data class GraphQLInntektsgrunnlag(
     val oppfyllerKravOmMinstelonn: Boolean?,
     val grunnbelop: Int
 ) {
-    data class InntekterFraAOrdningen(
-        val maned: YearMonth,
-        val sum: Double
-    )
-
     data class Arbeidsgiverinntekt(
         val arbeidsgiver: String,
         val omregnetArsinntekt: OmregnetArsinntekt?,

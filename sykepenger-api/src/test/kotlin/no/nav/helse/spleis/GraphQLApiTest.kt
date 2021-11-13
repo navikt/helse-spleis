@@ -443,6 +443,62 @@ internal class GraphQLApiTest : AbstractObservableTest() {
     }
 
     @Test
+    fun `vilkårsgrunnlag med person-resolver`() {
+        val query = """
+            {
+                person(fnr: ${UNG_PERSON_FNR.toLong()}) {
+                    arbeidsgivere {
+                        generasjoner {
+                            perioder {
+                                ... on GraphQLBeregnetPeriode {
+                                    vilkarsgrunnlaghistorikkId
+                                }
+                            }
+                        }
+                    },
+                    vilkarsgrunnlaghistorikk {
+                        id,
+                        grunnlag {
+                            skjaeringstidspunkt,
+                            omregnetArsinntekt,
+                            sammenligningsgrunnlag,
+                            sykepengegrunnlag,
+                            inntekter {
+                                arbeidsgiver,
+                                omregnetArsinntekt {
+                                    kilde,
+                                    belop,
+                                    manedsbelop,
+                                    inntekterFraAOrdningen {
+                                        maned,
+                                        sum
+                                    }
+                                },
+                                sammenligningsgrunnlag
+                            },
+                            vilkarsgrunnlagtype
+                        }
+                    }
+                }
+            }
+        """.trimIndent()
+
+        testServer.httpPost(
+            path = "/graphql",
+            body = """{"query": "$query"}"""
+        ) {
+            objectMapper.readTree(this).get("data").get("person").let { person ->
+                val vilkårsId: String =
+                    person.get("arbeidsgivere").get(0).get("generasjoner").get(0).get("perioder").get(0).get("vilkarsgrunnlaghistorikkId").asText()
+                val vilkårsgrunnlaghistorikk = person.get("vilkarsgrunnlaghistorikk")
+                assertEquals(1, vilkårsgrunnlaghistorikk.size())
+                assertEquals(vilkårsId, vilkårsgrunnlaghistorikk.get(0).get("id").asText())
+                assertEquals(6, vilkårsgrunnlaghistorikk.get(0).get("grunnlag").get(0).size())
+            }
+        }
+    }
+
+    @Test
     fun `tester generasjon-resolver`() {
         val query = """
             {

@@ -3,6 +3,7 @@ package no.nav.helse.spleis.graphql
 import no.nav.helse.serde.api.InntektsgrunnlagDTO
 import no.nav.helse.serde.api.SimuleringsdataDTO
 import no.nav.helse.serde.api.v2.*
+import java.util.*
 
 private fun mapDag(dag: SammenslåttDag) = GraphQLDag(
     dato = dag.dagen,
@@ -159,6 +160,67 @@ internal fun mapTidslinjeperiode(periode: Tidslinjeperiode) =
         )
     }
 
+private fun mapInntekt(inntekt: Arbeidsgiverinntekt) = GraphQLPerson.VilkarsgrunnlaghistorikkInnslag.Arbeidsgiverinntekt(
+    arbeidsgiver = inntekt.organisasjonsnummer,
+    omregnetArsinntekt = inntekt.omregnetÅrsinntekt?.let { omregnetÅrsinntekt ->
+        GraphQLPerson.VilkarsgrunnlaghistorikkInnslag.Arbeidsgiverinntekt.OmregnetArsinntekt(
+            kilde = when (omregnetÅrsinntekt.kilde) {
+                Inntektkilde.Saksbehandler -> GraphQLPerson.VilkarsgrunnlaghistorikkInnslag.Arbeidsgiverinntekt.OmregnetArsinntektKilde.Saksbehandler
+                Inntektkilde.Inntektsmelding -> GraphQLPerson.VilkarsgrunnlaghistorikkInnslag.Arbeidsgiverinntekt.OmregnetArsinntektKilde.Inntektsmelding
+                Inntektkilde.Infotrygd -> GraphQLPerson.VilkarsgrunnlaghistorikkInnslag.Arbeidsgiverinntekt.OmregnetArsinntektKilde.Infotrygd
+                Inntektkilde.AOrdningen -> GraphQLPerson.VilkarsgrunnlaghistorikkInnslag.Arbeidsgiverinntekt.OmregnetArsinntektKilde.AOrdningen
+            },
+            belop = omregnetÅrsinntekt.beløp,
+            manedsbelop = omregnetÅrsinntekt.månedsbeløp,
+            inntekterFraAOrdningen = omregnetÅrsinntekt.inntekterFraAOrdningen?.map {
+                InntekterFraAOrdningen(
+                    maned = it.måned,
+                    sum = it.sum
+                )
+            }
+        )
+    },
+    sammenligningsgrunnlag = inntekt.sammenligningsgrunnlag
+)
+
+internal fun mapVilkårsgrunnlag(id: UUID, vilkårsgrunnlag: List<Vilkårsgrunnlag>) =
+    GraphQLPerson.VilkarsgrunnlaghistorikkInnslag(
+        id = id,
+        grunnlag = vilkårsgrunnlag.map { grunnlag ->
+            when (grunnlag) {
+                is SpleisVilkårsgrunnlag -> GraphQLPerson.VilkarsgrunnlaghistorikkInnslag.SpleisVilkarsgrunnlag(
+                    skjaeringstidspunkt = grunnlag.skjæringstidspunkt,
+                    omregnetArsinntekt = grunnlag.omregnetÅrsinntekt,
+                    sammenligningsgrunnlag = grunnlag.sammenligningsgrunnlag,
+                    sykepengegrunnlag = grunnlag.sykepengegrunnlag,
+                    inntekter = grunnlag.inntekter.map { inntekt -> mapInntekt(inntekt) },
+                    avviksprosent = grunnlag.avviksprosent,
+                    grunnbelop = grunnlag.grunnbeløp,
+                    antallOpptjeningsdagerErMinst = grunnlag.antallOpptjeningsdagerErMinst,
+                    opptjeningFra = grunnlag.opptjeningFra,
+                    oppfyllerKravOmMinstelonn = grunnlag.oppfyllerKravOmMinstelønn,
+                    oppfyllerKravOmOpptjening = grunnlag.oppfyllerKravOmOpptjening,
+                    oppfyllerKravOmMedlemskap = grunnlag.oppfyllerKravOmMedlemskap
+                )
+                is InfotrygdVilkårsgrunnlag -> GraphQLPerson.VilkarsgrunnlaghistorikkInnslag.InfotrygdVilkarsgrunnlag(
+                    skjaeringstidspunkt = grunnlag.skjæringstidspunkt,
+                    omregnetArsinntekt = grunnlag.omregnetÅrsinntekt,
+                    sammenligningsgrunnlag = grunnlag.sammenligningsgrunnlag,
+                    sykepengegrunnlag = grunnlag.sykepengegrunnlag,
+                    inntekter = grunnlag.inntekter.map { inntekt -> mapInntekt(inntekt) }
+                )
+                else -> object : VilkarsgrunnlagElement {
+                    override val skjaeringstidspunkt = grunnlag.skjæringstidspunkt
+                    override val omregnetArsinntekt = grunnlag.omregnetÅrsinntekt
+                    override val sammenligningsgrunnlag = grunnlag.sammenligningsgrunnlag
+                    override val sykepengegrunnlag = grunnlag.sykepengegrunnlag
+                    override val inntekter = grunnlag.inntekter.map { inntekt -> mapInntekt(inntekt) }
+                    override val vilkarsgrunnlagtype = Vilkarsgrunnlagtype.UKJENT
+                }
+            }
+        }
+    )
+
 internal fun mapInntektsgrunnlag(inntektsgrunnlag: InntektsgrunnlagDTO) = GraphQLInntektsgrunnlag(
     skjaeringstidspunkt = inntektsgrunnlag.skjæringstidspunkt,
     sykepengegrunnlag = inntektsgrunnlag.sykepengegrunnlag,
@@ -180,7 +242,7 @@ internal fun mapInntektsgrunnlag(inntektsgrunnlag: InntektsgrunnlagDTO) = GraphQ
                     belop = årsinntekt.beløp,
                     manedsbelop = årsinntekt.månedsbeløp,
                     inntekterFraAOrdningen = årsinntekt.inntekterFraAOrdningen?.map {
-                        GraphQLInntektsgrunnlag.InntekterFraAOrdningen(
+                        InntekterFraAOrdningen(
                             maned = it.måned,
                             sum = it.sum
                         )
@@ -191,7 +253,7 @@ internal fun mapInntektsgrunnlag(inntektsgrunnlag: InntektsgrunnlagDTO) = GraphQ
                 GraphQLInntektsgrunnlag.Arbeidsgiverinntekt.Sammenligningsgrunnlag(
                     belop = sammenligningsgrunnlag.beløp,
                     inntekterFraAOrdningen = sammenligningsgrunnlag.inntekterFraAOrdningen.map {
-                        GraphQLInntektsgrunnlag.InntekterFraAOrdningen(
+                        InntekterFraAOrdningen(
                             maned = it.måned,
                             sum = it.sum
                         )

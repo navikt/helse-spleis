@@ -59,6 +59,9 @@ internal fun SchemaBuilder.personSchema(personDao: PersonDao, hendelseDao: Hende
                             )
                         },
                         inntektsgrunnlag = person.inntektsgrunnlag.map { inntektsgrunnlag -> mapInntektsgrunnlag(inntektsgrunnlag) },
+                        vilkarsgrunnlaghistorikk = person.vilkårsgrunnlagHistorikk.entries.map { (id, dateMap) ->
+                            mapVilkårsgrunnlag(id, dateMap.values.toList())
+                        },
                         dodsdato = person.dødsdato,
                         versjon = person.versjon
                     )
@@ -89,10 +92,13 @@ internal fun SchemaBuilder.personSchema(personDao: PersonDao, hendelseDao: Hende
     enum<GraphQLHendelsetype>()
     enum<BegrunnelseDTO>()
     enum<GraphQLInntektsgrunnlag.Arbeidsgiverinntekt.OmregnetArsinntekt.Kilde>()
+    enum<GraphQLPerson.VilkarsgrunnlaghistorikkInnslag.Arbeidsgiverinntekt.OmregnetArsinntektKilde>()
+    enum<Vilkarsgrunnlagtype>()
 
     type<SykdomstidslinjedagKilde>()
     type<AktivitetDTO>()
     type<Utbetalingsinfo>()
+    type<VilkarsgrunnlagElement>()
 
     stringScalar<UUID> {
         deserialize = { uuid: String -> UUID.fromString(uuid) }
