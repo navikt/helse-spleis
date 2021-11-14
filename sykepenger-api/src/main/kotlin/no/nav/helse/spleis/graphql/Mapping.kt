@@ -1,5 +1,7 @@
 package no.nav.helse.spleis.graphql
 
+import no.nav.helse.person.Periodetype
+import no.nav.helse.serde.api.BegrunnelseDTO
 import no.nav.helse.serde.api.InntektsgrunnlagDTO
 import no.nav.helse.serde.api.SimuleringsdataDTO
 import no.nav.helse.serde.api.v2.*
@@ -7,12 +9,54 @@ import java.util.*
 
 private fun mapDag(dag: SammenslåttDag) = GraphQLDag(
     dato = dag.dagen,
-    sykdomsdagtype = dag.sykdomstidslinjedagtype,
+    sykdomsdagtype = when (dag.sykdomstidslinjedagtype) {
+        SykdomstidslinjedagType.ARBEIDSDAG -> GraphQLSykdomsdagtype.ARBEIDSDAG
+        SykdomstidslinjedagType.ARBEIDSGIVERDAG -> GraphQLSykdomsdagtype.ARBEIDSGIVERDAG
+        SykdomstidslinjedagType.FERIEDAG -> GraphQLSykdomsdagtype.FERIEDAG
+        SykdomstidslinjedagType.FORELDET_SYKEDAG -> GraphQLSykdomsdagtype.FORELDET_SYKEDAG
+        SykdomstidslinjedagType.FRISK_HELGEDAG -> GraphQLSykdomsdagtype.FRISK_HELGEDAG
+        SykdomstidslinjedagType.PERMISJONSDAG -> GraphQLSykdomsdagtype.PERMISJONSDAG
+        SykdomstidslinjedagType.SYKEDAG -> GraphQLSykdomsdagtype.SYKEDAG
+        SykdomstidslinjedagType.SYK_HELGEDAG -> GraphQLSykdomsdagtype.SYK_HELGEDAG
+        SykdomstidslinjedagType.UBESTEMTDAG -> GraphQLSykdomsdagtype.UBESTEMTDAG
+        SykdomstidslinjedagType.AVSLÅTT -> GraphQLSykdomsdagtype.AVSLATT
+    },
     utbetalingsdagtype = dag.utbetalingstidslinjedagtype,
-    kilde = dag.kilde,
+    kilde = GraphQLSykdomsdagkilde(
+        id = dag.kilde.id,
+        type = when (dag.kilde.type) {
+            SykdomstidslinjedagKildetype.Inntektsmelding -> GraphQLSykdomsdagkildetype.Inntektsmelding
+            SykdomstidslinjedagKildetype.Søknad -> GraphQLSykdomsdagkildetype.Soknad
+            SykdomstidslinjedagKildetype.Sykmelding -> GraphQLSykdomsdagkildetype.Sykmelding
+            SykdomstidslinjedagKildetype.Saksbehandler -> GraphQLSykdomsdagkildetype.Saksbehandler
+            SykdomstidslinjedagKildetype.Ukjent -> GraphQLSykdomsdagkildetype.Ukjent
+        }
+    ),
     grad = dag.grad,
-    utbetalingsinfo = dag.utbetalingsinfo,
-    begrunnelser = dag.begrunnelser
+    utbetalingsinfo = dag.utbetalingsinfo?.let {
+        GraphQLUtbetalingsinfo(
+            inntekt = it.inntekt,
+            utbetaling = it.utbetaling,
+            personbelop = it.personbeløp,
+            arbeidsgiverbelop = it.arbeidsgiverbeløp,
+            refusjonsbelop = it.refusjonsbeløp,
+            totalGrad = it.totalGrad
+        )
+    },
+    begrunnelser = dag.begrunnelser?.map {
+        when (it) {
+            BegrunnelseDTO.SykepengedagerOppbrukt -> GraphQLBegrunnelse.SykepengedagerOppbrukt
+            BegrunnelseDTO.SykepengedagerOppbruktOver67 -> GraphQLBegrunnelse.SykepengedagerOppbruktOver67
+            BegrunnelseDTO.MinimumInntekt -> GraphQLBegrunnelse.MinimumInntekt
+            BegrunnelseDTO.MinimumInntektOver67 -> GraphQLBegrunnelse.MinimumInntektOver67
+            BegrunnelseDTO.EgenmeldingUtenforArbeidsgiverperiode -> GraphQLBegrunnelse.EgenmeldingUtenforArbeidsgiverperiode
+            BegrunnelseDTO.MinimumSykdomsgrad -> GraphQLBegrunnelse.MinimumSykdomsgrad
+            BegrunnelseDTO.EtterDødsdato -> GraphQLBegrunnelse.EtterDodsdato
+            BegrunnelseDTO.ManglerMedlemskap -> GraphQLBegrunnelse.ManglerMedlemskap
+            BegrunnelseDTO.ManglerOpptjening -> GraphQLBegrunnelse.ManglerOpptjening
+            BegrunnelseDTO.Over70 -> GraphQLBegrunnelse.Over70
+        }
+    }
 )
 
 private fun mapUtbetaling(utbetaling: Utbetaling) = GraphQLUtbetaling(
@@ -125,6 +169,13 @@ private fun mapPeriodevilkår(vilkår: BeregnetPeriode.Vilkår) = GraphQLBeregne
     }
 )
 
+private fun mapPeriodetype(type: Periodetype) = when (type) {
+    Periodetype.FØRSTEGANGSBEHANDLING -> GraphQLPeriodetype.FORSTEGANGSBEHANDLING
+    Periodetype.FORLENGELSE -> GraphQLPeriodetype.FORLENGELSE
+    Periodetype.OVERGANG_FRA_IT -> GraphQLPeriodetype.OVERGANG_FRA_IT
+    Periodetype.INFOTRYGDFORLENGELSE -> GraphQLPeriodetype.INFOTRYGDFORLENGELSE
+}
+
 internal fun mapTidslinjeperiode(periode: Tidslinjeperiode) =
     when (periode) {
         is BeregnetPeriode -> GraphQLBeregnetPeriode(
@@ -132,7 +183,7 @@ internal fun mapTidslinjeperiode(periode: Tidslinjeperiode) =
             tom = periode.tom,
             tidslinje = periode.sammenslåttTidslinje.map { mapDag(it) },
             behandlingstype = periode.behandlingstype,
-            periodetype = periode.periodetype,
+            periodetype = mapPeriodetype(periode.periodetype),
             inntektskilde = periode.inntektskilde,
             erForkastet = periode.erForkastet,
             opprettet = periode.opprettet,
@@ -153,7 +204,7 @@ internal fun mapTidslinjeperiode(periode: Tidslinjeperiode) =
             tom = periode.tom,
             tidslinje = periode.sammenslåttTidslinje.map { mapDag(it) },
             behandlingstype = periode.behandlingstype,
-            periodetype = periode.periodetype,
+            periodetype = mapPeriodetype(periode.periodetype),
             inntektskilde = periode.inntektskilde,
             erForkastet = periode.erForkastet,
             opprettet = periode.opprettet
@@ -209,13 +260,13 @@ internal fun mapVilkårsgrunnlag(id: UUID, vilkårsgrunnlag: List<Vilkårsgrunnl
                     sykepengegrunnlag = grunnlag.sykepengegrunnlag,
                     inntekter = grunnlag.inntekter.map { inntekt -> mapInntekt(inntekt) }
                 )
-                else -> object : VilkarsgrunnlagElement {
+                else -> object : GraphQLVilkarsgrunnlagElement {
                     override val skjaeringstidspunkt = grunnlag.skjæringstidspunkt
                     override val omregnetArsinntekt = grunnlag.omregnetÅrsinntekt
                     override val sammenligningsgrunnlag = grunnlag.sammenligningsgrunnlag
                     override val sykepengegrunnlag = grunnlag.sykepengegrunnlag
                     override val inntekter = grunnlag.inntekter.map { inntekt -> mapInntekt(inntekt) }
-                    override val vilkarsgrunnlagtype = Vilkarsgrunnlagtype.UKJENT
+                    override val vilkarsgrunnlagtype = GraphQLVilkarsgrunnlagtype.UKJENT
                 }
             }
         }

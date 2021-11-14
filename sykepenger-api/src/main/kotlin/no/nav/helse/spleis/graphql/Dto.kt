@@ -1,28 +1,26 @@
 package no.nav.helse.spleis.graphql
 
 import no.nav.helse.person.Inntektskilde
-import no.nav.helse.person.Periodetype
 import no.nav.helse.serde.api.AktivitetDTO
-import no.nav.helse.serde.api.BegrunnelseDTO
 import no.nav.helse.serde.api.v2.*
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
-enum class Vilkarsgrunnlagtype {
+enum class GraphQLVilkarsgrunnlagtype {
     INFOTRYGD,
     SPLEIS,
     UKJENT
 }
 
-interface VilkarsgrunnlagElement {
+interface GraphQLVilkarsgrunnlagElement {
     val skjaeringstidspunkt: LocalDate
     val omregnetArsinntekt: Double
     val sammenligningsgrunnlag: Double?
     val sykepengegrunnlag: Double
     val inntekter: List<GraphQLPerson.VilkarsgrunnlaghistorikkInnslag.Arbeidsgiverinntekt>
-    val vilkarsgrunnlagtype: Vilkarsgrunnlagtype
+    val vilkarsgrunnlagtype: GraphQLVilkarsgrunnlagtype
 }
 
 data class GraphQLPerson(
@@ -36,7 +34,7 @@ data class GraphQLPerson(
 ) {
     data class VilkarsgrunnlaghistorikkInnslag(
         val id: UUID,
-        val grunnlag: List<VilkarsgrunnlagElement>
+        val grunnlag: List<GraphQLVilkarsgrunnlagElement>
     ) {
 
         data class Arbeidsgiverinntekt(
@@ -50,6 +48,7 @@ data class GraphQLPerson(
                 val manedsbelop: Double,
                 val inntekterFraAOrdningen: List<InntekterFraAOrdningen>?
             )
+
             enum class OmregnetArsinntektKilde {
                 Saksbehandler,
                 Inntektsmelding,
@@ -71,8 +70,8 @@ data class GraphQLPerson(
             val oppfyllerKravOmMinstelonn: Boolean,
             val oppfyllerKravOmOpptjening: Boolean,
             val oppfyllerKravOmMedlemskap: Boolean?
-        ) : VilkarsgrunnlagElement {
-            override val vilkarsgrunnlagtype = Vilkarsgrunnlagtype.SPLEIS
+        ) : GraphQLVilkarsgrunnlagElement {
+            override val vilkarsgrunnlagtype = GraphQLVilkarsgrunnlagtype.SPLEIS
         }
 
         data class InfotrygdVilkarsgrunnlag(
@@ -81,8 +80,8 @@ data class GraphQLPerson(
             override val sammenligningsgrunnlag: Double?,
             override val sykepengegrunnlag: Double,
             override val inntekter: List<Arbeidsgiverinntekt>
-        ) : VilkarsgrunnlagElement {
-            override val vilkarsgrunnlagtype = Vilkarsgrunnlagtype.INFOTRYGD
+        ) : GraphQLVilkarsgrunnlagElement {
+            override val vilkarsgrunnlagtype = GraphQLVilkarsgrunnlagtype.INFOTRYGD
         }
     }
 }
@@ -98,13 +97,20 @@ data class GraphQLGenerasjon(
     val perioder: List<GraphQLTidslinjeperiode>
 )
 
+enum class GraphQLPeriodetype {
+    FORSTEGANGSBEHANDLING,
+    FORLENGELSE,
+    OVERGANG_FRA_IT,
+    INFOTRYGDFORLENGELSE;
+}
+
 interface GraphQLTidslinjeperiode {
     val id: UUID
     val fom: LocalDate
     val tom: LocalDate
     val tidslinje: List<GraphQLDag>
     val behandlingstype: Behandlingstype
-    val periodetype: Periodetype
+    val periodetype: GraphQLPeriodetype
     val inntektskilde: Inntektskilde
     val erForkastet: Boolean
     val opprettet: LocalDateTime
@@ -115,7 +121,7 @@ data class GraphQLUberegnetPeriode(
     override val tom: LocalDate,
     override val tidslinje: List<GraphQLDag>,
     override val behandlingstype: Behandlingstype,
-    override val periodetype: Periodetype,
+    override val periodetype: GraphQLPeriodetype,
     override val inntektskilde: Inntektskilde,
     override val erForkastet: Boolean,
     override val opprettet: LocalDateTime
@@ -125,9 +131,9 @@ data class GraphQLUberegnetPeriode(
 
 enum class GraphQLHendelsetype {
     INNTEKTSMELDING,
-    SENDT_SØKNAD_NAV,
-    SENDT_SØKNAD_ARBEIDSGIVER,
-    NY_SØKNAD,
+    SENDT_SOKNAD_NAV,
+    SENDT_SOKNAD_ARBEIDSGIVER,
+    NY_SOKNAD,
     UKJENT
 }
 
@@ -151,7 +157,7 @@ data class GraphQLSoknadNav(
     val rapportertDato: LocalDateTime,
     val sendtNav: LocalDateTime
 ) : GraphQLHendelse {
-    override val type = GraphQLHendelsetype.SENDT_SØKNAD_NAV
+    override val type = GraphQLHendelsetype.SENDT_SOKNAD_NAV
 }
 
 data class GraphQLSoknadArbeidsgiver(
@@ -161,7 +167,7 @@ data class GraphQLSoknadArbeidsgiver(
     val rapportertDato: LocalDateTime,
     val sendtArbeidsgiver: LocalDateTime
 ) : GraphQLHendelse {
-    override val type = GraphQLHendelsetype.SENDT_SØKNAD_ARBEIDSGIVER
+    override val type = GraphQLHendelsetype.SENDT_SOKNAD_ARBEIDSGIVER
 }
 
 data class GraphQLSykmelding(
@@ -170,7 +176,7 @@ data class GraphQLSykmelding(
     val tom: LocalDate,
     val rapportertDato: LocalDateTime
 ) : GraphQLHendelse {
-    override val type = GraphQLHendelsetype.NY_SØKNAD
+    override val type = GraphQLHendelsetype.NY_SOKNAD
 }
 
 data class GraphQLSimulering(
@@ -213,7 +219,7 @@ data class GraphQLBeregnetPeriode(
     override val tom: LocalDate,
     override val tidslinje: List<GraphQLDag>,
     override val behandlingstype: Behandlingstype,
-    override val periodetype: Periodetype,
+    override val periodetype: GraphQLPeriodetype,
     override val inntektskilde: Inntektskilde,
     override val erForkastet: Boolean,
     override val opprettet: LocalDateTime,
@@ -275,14 +281,62 @@ data class GraphQLUtbetaling(
     )
 }
 
+enum class GraphQLSykdomsdagtype {
+    ARBEIDSDAG,
+    ARBEIDSGIVERDAG,
+    FERIEDAG,
+    FORELDET_SYKEDAG,
+    FRISK_HELGEDAG,
+    PERMISJONSDAG,
+    SYKEDAG,
+    SYK_HELGEDAG,
+    UBESTEMTDAG,
+    AVSLATT
+}
+
+enum class GraphQLSykdomsdagkildetype {
+    Inntektsmelding,
+    Soknad,
+    Sykmelding,
+    Saksbehandler,
+    Ukjent
+}
+
+data class GraphQLSykdomsdagkilde(
+    val id: UUID,
+    val type: GraphQLSykdomsdagkildetype
+)
+
+data class GraphQLUtbetalingsinfo(
+    val inntekt: Int?,
+    val utbetaling: Int?,
+    val personbelop: Int?,
+    val arbeidsgiverbelop: Int?,
+    val refusjonsbelop: Int?,
+    val totalGrad: Double?
+)
+
+enum class GraphQLBegrunnelse {
+    SykepengedagerOppbrukt,
+    SykepengedagerOppbruktOver67,
+    MinimumInntekt,
+    MinimumInntektOver67,
+    EgenmeldingUtenforArbeidsgiverperiode,
+    MinimumSykdomsgrad,
+    EtterDodsdato,
+    ManglerMedlemskap,
+    ManglerOpptjening,
+    Over70,
+}
+
 data class GraphQLDag(
     val dato: LocalDate,
-    val sykdomsdagtype: SykdomstidslinjedagType,
+    val sykdomsdagtype: GraphQLSykdomsdagtype,
     val utbetalingsdagtype: UtbetalingstidslinjedagType,
-    val kilde: Sykdomstidslinjedag.SykdomstidslinjedagKilde,
+    val kilde: GraphQLSykdomsdagkilde,
     val grad: Double?,
-    val utbetalingsinfo: Utbetalingsinfo?,
-    val begrunnelser: List<BegrunnelseDTO>?
+    val utbetalingsinfo: GraphQLUtbetalingsinfo?,
+    val begrunnelser: List<GraphQLBegrunnelse>?
 )
 
 data class InntekterFraAOrdningen(
