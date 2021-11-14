@@ -514,4 +514,35 @@ internal class GraphQLApiTest : AbstractObservableTest() {
             body = """{"query": "$query"}"""
         )
     }
+
+    @Test
+    fun `tester nøstede resolvers`() {
+        val query = """
+            {
+                person(fnr: ${UNG_PERSON_FNR.toLong()}) {
+                    arbeidsgiver(organisasjonsnummer: \"$ORGNUMMER\") {
+                        organisasjonsnummer,
+                        generasjon(index: 0) {
+                            id,
+                            perioder(from: 0, to: 1) {
+                                ... on GraphQLBeregnetPeriode {
+                                    fom,
+                                    tom,
+                                    beregningId
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        """.trimIndent()
+
+        testServer.httpPost(
+            path = "/graphql",
+            body = """{"query": "$query"}"""
+        ) {
+            val organisasjonsnummer = objectMapper.readTree(this).get("data").get("person").get("arbeidsgiver").get("organisasjonsnummer").asText()
+            assertEquals(ORGNUMMER, organisasjonsnummer)
+        }
+    }
 }

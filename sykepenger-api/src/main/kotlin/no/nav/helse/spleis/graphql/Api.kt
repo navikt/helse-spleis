@@ -22,22 +22,6 @@ import java.util.*
 import javax.sql.DataSource
 
 internal fun SchemaBuilder.personSchema(personDao: PersonDao, hendelseDao: HendelseDao) {
-    query("generasjon") {
-        resolver { fnr: Long, orgnr: String, indeks: Int ->
-            personDao.hentPersonFraFnr(fnr)
-                ?.deserialize { hendelseDao.hentAlleHendelser(fnr) }
-                ?.let { håndterPerson(it, hendelseDao) }
-                ?.let { person ->
-                    person.arbeidsgivere
-                        .firstOrNull { it.organisasjonsnummer == orgnr }
-                        ?.let { arbeidsgiver ->
-                            arbeidsgiver.generasjoner?.get(indeks)?.perioder
-                                ?.map { periode -> mapTidslinjeperiode(periode) }
-                        }
-                } ?: emptyList()
-        }
-    }
-
     query("person") {
         resolver { fnr: Long ->
             personDao.hentPersonFraFnr(fnr)
@@ -68,10 +52,35 @@ internal fun SchemaBuilder.personSchema(personDao: PersonDao, hendelseDao: Hende
                     )
                 }
         }
-    }
 
-    type<GraphQLPerson>()
-    type<GraphQLArbeidsgiver>()
+        type<GraphQLPerson>() {
+            property<GraphQLArbeidsgiver?>("arbeidsgiver") {
+                resolver { person: GraphQLPerson, organisasjonsnummer: String ->
+                    person.arbeidsgivere.find { it.organisasjonsnummer == organisasjonsnummer }
+                }
+            }
+        }
+
+        type<GraphQLArbeidsgiver>() {
+            property<GraphQLGenerasjon?>("generasjon") {
+                resolver { arbeidsgiver: GraphQLArbeidsgiver, index: Int ->
+                    arbeidsgiver.generasjoner.getOrNull(index)
+                }
+            }
+        }
+
+        type<GraphQLGenerasjon>() {
+            property<List<GraphQLTidslinjeperiode>>("perioder") {
+                resolver { generasjon: GraphQLGenerasjon, from: Int?, to: Int? ->
+                    if (from == null || to == null || from >= to) {
+                        generasjon.perioder
+                    } else {
+                        generasjon.perioder.subList(from.coerceAtLeast(0), to.coerceAtMost(generasjon.perioder.size))
+                    }
+                }
+            }
+        }
+    }
     type<GraphQLTidslinjeperiode>()
     type<GraphQLBeregnetPeriode>()
     type<GraphQLUberegnetPeriode>()
