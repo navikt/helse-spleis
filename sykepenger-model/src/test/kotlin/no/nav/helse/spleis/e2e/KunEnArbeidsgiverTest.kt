@@ -1961,7 +1961,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         )
     }
 
-    @Disabled("Håndtering av overlapp skal medføre at overlappende sykmeldinger blir delt opp i egne perioder")
+    @ForventetFeil("Håndtering av overlapp skal medføre at overlappende sykmeldinger blir delt opp i egne perioder")
     @Test
     fun `Overlapp-scenario fra prod`() {
         håndterSykmelding(Sykmeldingsperiode(27.mai(2020), 14.juni(2020), 100.prosent))

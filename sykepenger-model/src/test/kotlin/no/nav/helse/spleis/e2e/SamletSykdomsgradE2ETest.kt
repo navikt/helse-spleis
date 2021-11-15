@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.ForventetFeil
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
@@ -15,7 +16,6 @@ import no.nav.helse.utbetalingslinjer.Utbetaling.Sendt
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
@@ -83,7 +83,7 @@ internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
         )
     }
 
-    @Disabled("når vi mottar korrigert søknad ligger det igjen warnings fra før som ikke lengre gjelder")
+    @ForventetFeil("når vi mottar korrigert søknad ligger det igjen warnings fra før som ikke lengre gjelder")
     @Test
     fun `opprinnelig søknad med 100 prosent arbeidshelse blir korrigert slik at sykdomsgraden blir 100 prosent `() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent))

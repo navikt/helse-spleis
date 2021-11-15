@@ -1,5 +1,6 @@
 package no.nav.helse.serde.api.v2.buildere
 
+import no.nav.helse.ForventetFeil
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -150,7 +151,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    @Disabled("Vi støtter ikke revurdering av inntekt på flere arbeidsgivere. Vi overstyrer begge arbeidsgiverne")
+    @ForventetFeil("Vi støtter ikke revurdering av inntekt på flere arbeidsgivere. Vi overstyrer begge arbeidsgiverne")
     fun `revurdering av inntekt flere AG`() {
         nyeVedtak(1.januar, 31.januar, AG1, AG2) {
             lagInntektperioder(fom = 1.januar, inntekt = 19000.månedlig, orgnummer = AG1)

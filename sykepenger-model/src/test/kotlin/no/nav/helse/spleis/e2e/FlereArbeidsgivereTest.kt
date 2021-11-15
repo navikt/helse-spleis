@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.ForventetFeil
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.SøknadArbeidsgiver.Sykdom
@@ -103,7 +104,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     }
 
     @Test
-    @Disabled("Trenger inntekt fra Inntektskomponenten før disse virker (§8-28)")
+    @ForventetFeil("Trenger inntekt fra Inntektskomponenten før disse virker (§8-28)")
     fun `Sammenligningsgrunnlag for flere arbeidsgivere som overlapper hverandres sykeperioder`() {
         nyPeriode(15.januar til 5.februar, a1)
         person.håndter(
@@ -152,7 +153,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     }
 
     @Test
-    @Disabled("Trenger inntekt fra Inntektskomponenten før disse virker (§8-28)")
+    @ForventetFeil("Trenger inntekt fra Inntektskomponenten før disse virker (§8-28)")
     fun `overlappende arbeidsgivere ikke sendt til infotrygd`() {
         gapPeriode(1.januar til 31.januar, a1)
         gapPeriode(15.januar til 15.februar, a2)
@@ -178,7 +179,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     }
 
     @Test
-    @Disabled("Trenger inntekt fra Inntektskomponenten før disse virker (§8-28)")
+    @ForventetFeil("Trenger inntekt fra Inntektskomponenten før disse virker (§8-28)")
     fun `Tre overlappende perioder med en ikke-overlappende periode`() {
         gapPeriode(1.januar til 31.januar, a1)
         gapPeriode(15.januar til 15.mars, a2)
@@ -259,7 +260,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     }
 
     @Test
-    @Disabled("Trenger inntekt fra Inntektskomponenten før disse virker (§8-28)")
+    @ForventetFeil("Trenger inntekt fra Inntektskomponenten før disse virker (§8-28)")
     fun `Tre paralelle perioder`() {
         gapPeriode(3.januar til 31.januar, a1)
         gapPeriode(1.januar til 31.januar, a2)
@@ -500,7 +501,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(a2, TIL_INFOTRYGD)
     }
 
-    @Disabled("Det finnes ikke inntekt for skjæringstidspunktet (4. januar)")
+    @ForventetFeil("Det finnes ikke inntekt for skjæringstidspunktet (4. januar)")
     @Test
     fun `Tillater flere arbeidsgivere selv om ikke alle har samme periodetype`() {
         val periode = 27.januar(2021) til 31.januar(2021)

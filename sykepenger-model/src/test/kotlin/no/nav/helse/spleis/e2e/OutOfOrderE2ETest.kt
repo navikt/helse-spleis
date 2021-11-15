@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.ForventetFeil
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -12,7 +13,6 @@ import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
@@ -691,7 +691,6 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    @Disabled("MottattSykmeldingFerdigForlengelse tar ikke i mot Inntektsmelding")
     fun `ny sykmelding før en ferdig forlengelse som avventer søknad (inntektsmelding etter søknad arbeidsgiver)`() {
         håndterSykmelding(Sykmeldingsperiode(8.februar, 15.februar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(16.februar, 25.februar, 100.prosent))
@@ -861,7 +860,7 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    @Disabled("Vi har forkastet et sett med utbetalte perioder pga overlappende sykmelding, allikevel tar vi inn en tidligere periode som går til utbetaling")
+    @ForventetFeil("Vi har forkastet et sett med utbetalte perioder pga overlappende sykmelding, allikevel tar vi inn en tidligere periode som går til utbetaling")
     fun `forlengelse fra IT før et utbetalt løp`() {
         nyttVedtak(1.mars, 31.mars)
         forlengVedtak(1.april, 14.april)

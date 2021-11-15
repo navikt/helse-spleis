@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.ForventetFeil
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.person.OppdragVisitor
@@ -13,7 +14,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -159,7 +159,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     }
 
     @Test
-    @Disabled("Denne er skrudd av i påvente av at vi skal støtte revurdering over skjæringstidspunkt")
+    @ForventetFeil("Denne er skrudd av i påvente av at vi skal støtte revurdering over skjæringstidspunkt")
     fun `overstyr inntekt to vedtak med kort opphold`() {
         nyttVedtak(1.januar, 26.januar, 100.prosent)
 

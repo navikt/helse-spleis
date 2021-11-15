@@ -14,12 +14,11 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
-    @Disabled("WIP Test for inntektsmelding med refusjonsopphold")
+    @ForventetFeil("WIP Test for inntektsmelding med refusjonsopphold")
     @Test
     fun `inntektsmelding med refusjonsopphold`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 30.januar, 100.prosent))
