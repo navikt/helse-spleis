@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "1.5.21"
+    kotlin("jvm") version "1.5.31"
 }
 
 val flywayVersion = "7.12.0"
@@ -21,7 +21,7 @@ allprojects {
     }
 
     dependencies {
-        implementation("org.jetbrains.kotlin:kotlin-reflect:1.5.21")
+        implementation("org.jetbrains.kotlin:kotlin-reflect:1.5.31")
         implementation("ch.qos.logback:logback-classic:1.2.5")
         implementation("net.logstash.logback:logstash-logback-encoder:6.6") {
             exclude("com.fasterxml.jackson.core")
@@ -57,7 +57,7 @@ allprojects {
         }
 
         withType<Wrapper> {
-            gradleVersion = "7.1.1"
+            gradleVersion = "7.3"
         }
     }
 }
