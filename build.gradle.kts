@@ -2,11 +2,11 @@ plugins {
     kotlin("jvm") version "1.5.31"
 }
 
-val flywayVersion = "7.12.0"
+val flywayVersion = "8.0.2"
 val hikariVersion = "5.0.0"
-val jacksonVersion = "2.12.5"
-val junitJupiterVersion = "5.7.2"
-val kotliqueryVersion = "1.3.1"
+val jacksonVersion = "2.13.0"
+val junitJupiterVersion = "5.8.1"
+val kotliqueryVersion = "1.6.0"
 val vaultJdbcVersion = "1.3.9"
 val kGraphQLVersion = "0.17.14"
 
@@ -22,7 +22,7 @@ allprojects {
 
     dependencies {
         implementation("org.jetbrains.kotlin:kotlin-reflect:1.5.31")
-        implementation("ch.qos.logback:logback-classic:1.2.5")
+        implementation("ch.qos.logback:logback-classic:1.2.6")
         implementation("net.logstash.logback:logstash-logback-encoder:6.6") {
             exclude("com.fasterxml.jackson.core")
             exclude("com.fasterxml.jackson.dataformat")
