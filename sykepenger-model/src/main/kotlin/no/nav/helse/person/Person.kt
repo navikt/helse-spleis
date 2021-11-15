@@ -4,6 +4,7 @@ import no.nav.helse.Fødselsnummer
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.utbetaling.*
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-30 ledd 2`
 import no.nav.helse.person.Arbeidsgiver.Companion.antallMedVedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnSykepengegrunnlag
@@ -648,13 +649,7 @@ class Person private constructor(
         val avviksprosent = grunnlagForSykepengegrunnlag.avviksprosent(sammenligningsgrunnlag)
         val akseptabeltAvvik = avviksprosent <= Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT
 
-        hendelse.etterlevelse.`§8-30 ledd 2`(
-            akseptabeltAvvik,
-            Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT,
-            grunnlagForSykepengegrunnlag.grunnlagForSykepengegrunnlag,
-            sammenligningsgrunnlag,
-            avviksprosent
-        )
+        hendelse.`§8-30 ledd 2`(akseptabeltAvvik, Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT, grunnlagForSykepengegrunnlag.grunnlagForSykepengegrunnlag, sammenligningsgrunnlag, avviksprosent)
 
         if (akseptabeltAvvik) {
             hendelse.info(

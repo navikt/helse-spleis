@@ -1,5 +1,9 @@
 package no.nav.helse.person
 
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-30 ledd 2`
+import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Prosent.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -170,6 +174,12 @@ internal class AktivitetsloggTest {
         assertEquals("Person 1", aktivitetslogg.behov().first().kontekst()["Person"])
         assertEquals(param1, aktivitetslogg.behov().first().detaljer()["param1"])
         assertEquals(param2, aktivitetslogg.behov().first().detaljer()["param2"])
+    }
+
+    @Test
+    fun `Juridisk vurdering`() {
+        aktivitetslogg.`§8-30 ledd 2`(true, 100.prosent, Inntekt.INGEN, Inntekt.INGEN, 0.prosent)
+        assertEquals(1, aktivitetslogg.juridiskeVurderinger().size)
     }
 
     private fun assertInfo(message: String, aktivitetslogg: Aktivitetslogg = this.aktivitetslogg) {

@@ -1,13 +1,18 @@
 package no.nav.helse.person
 
-import no.nav.helse.Toggles
 import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov
-import no.nav.helse.person.vilkår.Etterlevelse
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.TidslinjegrunnlagVisitor.Periode.Companion.dager
 import no.nav.helse.serde.reflection.AktivitetsloggMap
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Prosent
+import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -22,9 +27,6 @@ class Aktivitetslogg(
 ) : IAktivitetslogg {
     internal val aktiviteter = mutableListOf<Aktivitet>()
     private val kontekster = mutableListOf<Aktivitetskontekst>()  // Doesn't need serialization
-
-    override val etterlevelse: Etterlevelse = forelder?.etterlevelse ?: Etterlevelse()
-        get() = if (Toggles.Etterlevelse.enabled) forelder?.etterlevelse ?: field else Etterlevelse()
 
     internal fun accept(visitor: AktivitetsloggVisitor) {
         visitor.preVisitAktivitetslogg(this)
@@ -52,6 +54,10 @@ class Aktivitetslogg(
         add(Aktivitet.Severe(kontekster.toSpesifikk(), String.format(melding, *params)))
 
         throw AktivitetException(this)
+    }
+
+    override fun juridiskVurdering(melding: String, vurdering: Etterlevelse.Vurderingsresultat) {
+        add(Etterlevelse(kontekster.toSpesifikk(), melding, vurdering))
     }
 
     private fun add(aktivitet: Aktivitet) {
@@ -120,6 +126,7 @@ class Aktivitetslogg(
     override fun behov() = Behov.filter(aktiviteter)
     private fun error() = Aktivitet.Error.filter(aktiviteter)
     private fun severe() = Aktivitet.Severe.filter(aktiviteter)
+    override fun juridiskeVurderinger() = Aktivitet.Etterlevelse.filter(aktiviteter)
 
     companion object {
         private val MODELL_KONTEKSTER: Array<String> = arrayOf("Person", "Arbeidsgiver", "Vedtaksperiode")
@@ -469,6 +476,303 @@ class Aktivitetslogg(
             }
         }
 
+        class Etterlevelse internal constructor(
+            kontekster: List<SpesifikkKontekst>,
+            private val melding: String,
+            private val vurdering: Vurderingsresultat,
+            private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
+        ) : Aktivitet(100, 'J', melding + vurdering, tidsstempel, kontekster) {
+            override fun accept(visitor: AktivitetsloggVisitor) {
+                visitor.preVisitEtterlevelse(kontekster, this, melding, vurdering, tidsstempel)
+                vurdering.accept(visitor)
+                visitor.postVisitEtterlevelse(kontekster, this, melding, vurdering, tidsstempel)
+            }
+
+            internal companion object {
+                fun filter(aktiviteter: List<Aktivitet>) = aktiviteter.filterIsInstance<Etterlevelse>()
+            }
+
+            class Vurderingsresultat private constructor(
+                private val oppfylt: Boolean,
+                private val versjon: LocalDate,
+                private val paragraf: String,
+                private val ledd: String,
+                private val inputdata: Map<Any, Any?>,
+                private val outputdata: Map<Any, Any?>
+            ) {
+                internal fun accept(visitor: AktivitetsloggVisitor) {
+                    visitor.visitVurderingsresultat(oppfylt, versjon, paragraf, ledd, inputdata, outputdata)
+                }
+
+                override fun toString(): String {
+                    return """
+                Juridisk vurdering:
+                    oppfylt: $oppfylt
+                    versjon: $versjon
+                    paragraf: $paragraf
+                    ledd: $ledd
+                    input: ${
+                        inputdata.map { (key, value) ->
+                            "$key: $value"
+                        }
+                    }
+                    output: ${
+                        outputdata.map { (key, value) ->
+                            "$key: $value"
+                        }
+                    }
+            """
+                }
+
+                override fun equals(other: Any?): Boolean {
+                    if (this === other) return true
+                    if (other !is Vurderingsresultat || javaClass != other.javaClass) return false
+
+                    return oppfylt == other.oppfylt
+                        && versjon == other.versjon
+                        && paragraf == other.paragraf
+                        && ledd == other.ledd
+                        && inputdata == other.inputdata
+                        && outputdata == other.outputdata
+                }
+
+                override fun hashCode(): Int {
+                    var result = oppfylt.hashCode()
+                    result = 31 * result + versjon.hashCode()
+                    result = 31 * result + paragraf.hashCode()
+                    result = 31 * result + ledd.hashCode()
+                    result = 31 * result + inputdata.hashCode()
+                    result = 31 * result + outputdata.hashCode()
+                    return result
+                }
+
+                internal companion object {
+                    internal fun filter(aktiviteter: List<Aktivitet>): List<Etterlevelse> {
+                        return aktiviteter.filterIsInstance<Etterlevelse>()
+                    }
+
+                    internal fun IAktivitetslogg.`§2`(oppfylt: Boolean) {}
+
+                    internal fun IAktivitetslogg.`§8-2 ledd 1`(
+                        oppfylt: Boolean,
+                        skjæringstidspunkt: LocalDate,
+                        tilstrekkeligAntallOpptjeningsdager: Int,
+                        arbeidsforhold: List<Map<String, Any?>>
+                    ) {
+                        juridiskVurdering(
+                            "", Vurderingsresultat(
+                                oppfylt = oppfylt,
+                                versjon = LocalDate.of(2020, 6, 12),
+                                paragraf = "8-2",
+                                ledd = "1",
+                                inputdata = mapOf(
+                                    "skjæringstidspunkt" to skjæringstidspunkt,
+                                    "tilstrekkeligAntallOpptjeningsdager" to tilstrekkeligAntallOpptjeningsdager,
+                                    "arbeidsforhold" to arbeidsforhold
+                                ),
+                                outputdata = emptyMap() //TODO: Ta med antall dager
+                            )
+                        )
+                    }
+
+                    internal fun IAktivitetslogg.`§8-3 ledd 1`(oppfylt: Boolean) {}
+
+                    internal fun IAktivitetslogg.`§8-3 ledd 2`(
+                        oppfylt: Boolean,
+                        skjæringstidspunkt: LocalDate,
+                        grunnlagForSykepengegrunnlag: Inntekt,
+                        minimumInntekt: Inntekt
+                    ) {
+                        juridiskVurdering("",
+                            Vurderingsresultat(
+                                oppfylt = oppfylt,
+                                versjon = LocalDate.of(2011, 12, 16),
+                                paragraf = "8-3",
+                                ledd = "2",
+                                inputdata = mapOf(
+                                    "skjæringstidspunkt" to skjæringstidspunkt,
+                                    "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
+                                    "minimumInntekt" to minimumInntekt.reflection { årlig, _, _, _ -> årlig }
+                                ),
+                                outputdata = emptyMap()
+                            )
+                        )
+                    }
+
+                    internal fun IAktivitetslogg.`§8-10 ledd 2`(
+                        oppfylt: Boolean,
+                        funnetRelevant: Boolean,
+                        maks: Inntekt,
+                        skjæringstidspunkt: LocalDate,
+                        grunnlagForSykepengegrunnlag: Inntekt
+                    ) {
+                    }
+
+                    //TODO: Hvordan skal denne kunne legges inn???
+                    internal fun IAktivitetslogg.`§8-10 ledd 3`(oppfylt: Boolean) {}
+
+                    internal fun IAktivitetslogg.`§8-12 ledd 1`(
+                        oppfylt: Boolean,
+                        fom: LocalDate,
+                        tom: LocalDate,
+                        tidslinjegrunnlag: List<Utbetalingstidslinje>,
+                        beregnetTidslinje: Utbetalingstidslinje,
+                        gjenståendeSykedager: Int,
+                        forbrukteSykedager: Int,
+                        maksdato: LocalDate,
+                        avvisteDager: List<LocalDate>
+                    ) {
+                        juridiskVurdering(
+                            "",
+                            Vurderingsresultat(
+                                oppfylt = oppfylt,
+                                versjon = LocalDate.of(2021, 5, 21),
+                                paragraf = "8-12",
+                                ledd = "1",
+                                inputdata = mapOf(
+                                    "fom" to fom,
+                                    "tom" to tom,
+                                    "tidslinjegrunnlag" to tidslinjegrunnlag.map { TidslinjegrunnlagVisitor(it).dager() },
+                                    "beregnetTidslinje" to TidslinjegrunnlagVisitor(beregnetTidslinje).dager()
+                                ),
+                                outputdata = mapOf(
+                                    "gjenståendeSykedager" to gjenståendeSykedager,
+                                    "forbrukteSykedager" to forbrukteSykedager,
+                                    "maksdato" to maksdato,
+                                    "avvisteDager" to avvisteDager.grupperSammenhengendePerioder()
+                                )
+                            )
+                        )
+                    }
+
+                    internal fun IAktivitetslogg.`§8-12 ledd 2`(
+                        dato: LocalDate,
+                        tilstrekkeligOppholdISykedager: Int,
+                        tidslinjegrunnlag: List<Utbetalingstidslinje>,
+                        beregnetTidslinje: Utbetalingstidslinje
+                    ) {
+                        juridiskVurdering(
+                            "", Vurderingsresultat(
+                                oppfylt = true,
+                                versjon = LocalDate.of(2021, 5, 21),
+                                paragraf = "8-12",
+                                ledd = "2",
+                                inputdata = mapOf(
+                                    "dato" to dato,
+                                    "tilstrekkeligOppholdISykedager" to tilstrekkeligOppholdISykedager,
+                                    "tidslinjegrunnlag" to tidslinjegrunnlag.map { TidslinjegrunnlagVisitor(it).dager() },
+                                    "beregnetTidslinje" to TidslinjegrunnlagVisitor(beregnetTidslinje).dager()
+                                ),
+                                outputdata = emptyMap()
+                            )
+                        )
+                    }
+
+                    internal fun IAktivitetslogg.`§8-13 ledd 1`(oppfylt: Boolean) {}
+
+                    internal fun IAktivitetslogg.`§8-16 ledd 1`(oppfylt: Boolean) {} // Én gang, med periode over hvilke dager vi har satt dekningsgrad
+
+                    internal fun IAktivitetslogg.`§8-17 ledd 1 bokstav a`(oppfylt: Boolean) {}
+
+                    internal fun IAktivitetslogg.`§8-17 ledd 2`(oppfylt: Boolean) {} //Legges inn på ferie/permisjonsdager i utbetalingstidslinje, med periodene av ferie/permisjon som input
+
+                    internal fun IAktivitetslogg.`§8-30 ledd 2`(
+                        oppfylt: Boolean,
+                        maksimaltTillattAvvikPåÅrsinntekt: Prosent,
+                        grunnlagForSykepengegrunnlag: Inntekt,
+                        sammenligningsgrunnlag: Inntekt,
+                        avvik: Prosent
+                    ) {
+                        juridiskVurdering("Vurdering av avviksprosent ved inntektsvurdering",
+                            Vurderingsresultat(
+                                oppfylt = oppfylt,
+                                versjon = LocalDate.of(2017, 4, 5),
+                                paragraf = "8-30",
+                                ledd = "2",
+                                inputdata = mapOf(
+                                    "maksimaltTillattAvvikPåÅrsinntekt" to maksimaltTillattAvvikPåÅrsinntekt.prosent(),
+                                    "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
+                                    "sammenligningsgrunnlag" to sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig }
+                                ),
+                                outputdata = mapOf(
+                                    "avvik" to avvik.prosent()
+                                )
+                            ))
+                    }
+
+                    internal fun IAktivitetslogg.`§8-51 ledd 2`(
+                        oppfylt: Boolean,
+                        skjæringstidspunkt: LocalDate,
+                        grunnlagForSykepengegrunnlag: Inntekt,
+                        minimumInntekt: Inntekt
+                    ) {
+                        juridiskVurdering("",
+                            Vurderingsresultat(
+                                oppfylt = oppfylt,
+                                versjon = LocalDate.of(2011, 12, 16),
+                                paragraf = "8-51",
+                                ledd = "2",
+                                inputdata = mapOf(
+                                    "skjæringstidspunkt" to skjæringstidspunkt,
+                                    "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
+                                    "minimumInntekt" to minimumInntekt.reflection { årlig, _, _, _ -> årlig }
+                                ),
+                                outputdata = emptyMap()
+                            )
+                        )
+                    }
+                }
+            }
+
+            private class TidslinjegrunnlagVisitor(utbetalingstidslinje: Utbetalingstidslinje) : UtbetalingsdagVisitor {
+                private val navdager = mutableListOf<Periode>()
+                private var forrigeDato: LocalDate? = null
+
+                private class Periode(
+                    val fom: LocalDate,
+                    var tom: LocalDate,
+                    val dagtype: String
+                ) {
+                    companion object {
+                        fun List<Periode>.dager() = map {
+                            mapOf(
+                                "fom" to it.fom,
+                                "tom" to it.tom,
+                                "dagtype" to it.dagtype
+                            )
+                        }
+                    }
+                }
+
+                init {
+                    utbetalingstidslinje.accept(this)
+                }
+
+                fun dager() = navdager.dager()
+
+                override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag, dato: LocalDate, økonomi: Økonomi) {
+                    visit(dato, "NAVDAG")
+                }
+
+                override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag, dato: LocalDate, økonomi: Økonomi) {
+                    visit(dato, "NAVDAG")
+                }
+
+                override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag, dato: LocalDate, økonomi: Økonomi) {
+                    if (forrigeDato != null && forrigeDato?.plusDays(1) == dato) visit(dato, "FRIDAG")
+                }
+
+                private fun visit(dato: LocalDate, dagtype: String) {
+                    forrigeDato = dato
+                    if (navdager.isEmpty() || dagtype != navdager.last().dagtype || navdager.last().tom.plusDays(1) != dato) {
+                        navdager.add(Periode(dato, dato, dagtype))
+                    } else {
+                        navdager.last().tom = dato
+                    }
+                }
+            }
+        }
+
         internal data class AktivVedtaksperiode(
             val orgnummer: String,
             val vedtaksperiodeId: UUID,
@@ -489,6 +793,7 @@ interface IAktivitetslogg {
     fun behov(type: Behov.Behovtype, melding: String, detaljer: Map<String, Any?> = emptyMap())
     fun error(melding: String, vararg params: Any?)
     fun severe(melding: String, vararg params: Any?): Nothing
+    fun juridiskVurdering(melding: String, vurdering: Etterlevelse.Vurderingsresultat)
 
     fun hasActivities(): Boolean
     fun hasWarningsOrWorse(): Boolean
@@ -496,6 +801,7 @@ interface IAktivitetslogg {
 
     fun aktivitetsteller(): Int
     fun behov(): List<Behov>
+    fun juridiskeVurderinger(): List<Etterlevelse>
     fun barn(): Aktivitetslogg
     fun kontekst(kontekst: Aktivitetskontekst)
     fun kontekst(person: Person)
@@ -503,7 +809,6 @@ interface IAktivitetslogg {
     fun hendelseskontekster(): Map<String, String>
     fun hendelseskontekst(): Hendelseskontekst
     fun toMap(): Map<String, List<Map<String, Any>>>
-    val etterlevelse: Etterlevelse
 }
 
 internal interface AktivitetsloggVisitor {
@@ -549,6 +854,24 @@ internal interface AktivitetsloggVisitor {
         tidsstempel: String
     ) {
     }
+
+    fun preVisitEtterlevelse(
+        kontekster: List<SpesifikkKontekst>,
+        aktivitet: Etterlevelse,
+        melding: String,
+        vurderingsresultat: Etterlevelse.Vurderingsresultat,
+        tidsstempel: String
+    ) {}
+
+    fun visitVurderingsresultat(oppfylt: Boolean, versjon: LocalDate, paragraf: String, ledd: String, inputdata: Map<Any, Any?>, outputdata: Map<Any, Any?>) {}
+
+    fun postVisitEtterlevelse(
+        kontekster: List<SpesifikkKontekst>,
+        aktivitet: Etterlevelse,
+        melding: String,
+        vurderingsresultat: Etterlevelse.Vurderingsresultat,
+        tidsstempel: String
+    ) {}
 
     fun postVisitAktivitetslogg(aktivitetslogg: Aktivitetslogg) {}
 }

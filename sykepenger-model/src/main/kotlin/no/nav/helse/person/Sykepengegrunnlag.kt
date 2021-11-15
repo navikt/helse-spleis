@@ -1,6 +1,7 @@
 package no.nav.helse.person
 
 import no.nav.helse.Grunnbeløp
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-10 ledd 2`
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.inntekt
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.inntektsopplysningPerArbeidsgiver
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.*
@@ -17,7 +18,7 @@ internal class Sykepengegrunnlag(
         private fun sykepengegrunnlag(inntekt: Inntekt, skjæringstidspunkt: LocalDate, aktivitetslogg: IAktivitetslogg): Inntekt {
             val maks = Grunnbeløp.`6G`.beløp(skjæringstidspunkt)
             return if (inntekt > maks) {
-                aktivitetslogg.etterlevelse.`§8-10 ledd 2`(
+                aktivitetslogg.`§8-10 ledd 2`(
                     oppfylt = true,
                     funnetRelevant = true,
                     maks = maks,
@@ -26,7 +27,7 @@ internal class Sykepengegrunnlag(
                 )
                 maks
             } else {
-                aktivitetslogg.etterlevelse.`§8-10 ledd 2`(
+                aktivitetslogg.`§8-10 ledd 2`(
                     oppfylt = true,
                     funnetRelevant = false,
                     maks = maks,

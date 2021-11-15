@@ -23,7 +23,9 @@ import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -32,6 +34,16 @@ import java.time.Year
 import java.util.*
 
 class JsonBuilderTest {
+
+    @BeforeEach
+    fun beforeEach() {
+        Toggles.Etterlevelse.enable()
+    }
+
+    @AfterEach
+    fun afterEach() {
+        Toggles.Etterlevelse.pop()
+    }
 
     @Test
     fun `gjenoppbygd Person skal være lik opprinnelig Person - The Jackson Way`() {

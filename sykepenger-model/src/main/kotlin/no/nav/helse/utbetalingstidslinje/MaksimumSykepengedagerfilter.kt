@@ -2,6 +2,8 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-12 ledd 1`
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-12 ledd 2`
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
@@ -50,7 +52,7 @@ internal class MaksimumSykepengedagerfilter(
         beregnetTidslinje.accept(this)
         if (::sakensStartdato.isInitialized) {
             val avvisteDager = avvisteDatoer.filter { sakensStartdato <= it }
-            aktivitetslogg.etterlevelse.`§8-12 ledd 1`(
+            aktivitetslogg.`§8-12 ledd 1`(
                 avvisteDager !in periode,
                 avvisteDatoer.firstOrNull() ?: sakensStartdato,
                 avvisteDatoer.lastOrNull() ?: sisteBetalteDag,
@@ -147,7 +149,7 @@ internal class MaksimumSykepengedagerfilter(
 
     private fun nextState(dagen: LocalDate): State? {
         if (opphold >= TILSTREKKELIG_OPPHOLD_I_SYKEDAGER) {
-            aktivitetslogg.etterlevelse.`§8-12 ledd 1`(
+            aktivitetslogg.`§8-12 ledd 1`(
                 avvisteDatoer.filter { sakensStartdato <= it } !in periode,
                 avvisteDatoer.firstOrNull() ?: sakensStartdato,
                 avvisteDatoer.lastOrNull() ?: sisteBetalteDag,
@@ -158,7 +160,7 @@ internal class MaksimumSykepengedagerfilter(
                 maksdato(),
                 avvisteDatoer.filter { sakensStartdato <= it }
             )
-            aktivitetslogg.etterlevelse.`§8-12 ledd 2`(
+            aktivitetslogg.`§8-12 ledd 2`(
                 dagen,
                 TILSTREKKELIG_OPPHOLD_I_SYKEDAGER,
                 tidslinjegrunnlag,
@@ -172,7 +174,7 @@ internal class MaksimumSykepengedagerfilter(
         }
         if (state == State.Karantene) return null
         return if (teller.påGrensen(dagen) {
-                aktivitetslogg.etterlevelse.`§8-12 ledd 1`(
+                aktivitetslogg.`§8-12 ledd 1`(
                     true,
                     sakensStartdato,
                     sisteBetalteDag,

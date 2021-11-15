@@ -1,6 +1,7 @@
 package no.nav.helse.serde
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped
+import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.helse.hendelser.Arbeidsforhold
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
@@ -304,6 +305,12 @@ internal data class PersonData(
             internal fun parseAktivitet(spesifikkKontekster: List<SpesifikkKontekst>): Aktivitetslogg.Aktivitet {
                 val kontekster = kontekster.map { index -> spesifikkKontekster[index] }
                 return when (alvorlighetsgrad) {
+                    Alvorlighetsgrad.JURIDISK_VURDERING -> Aktivitetslogg.Aktivitet.Etterlevelse(
+                        kontekster,
+                        melding,
+                        serdeObjectMapper.convertValue(detaljer),
+                        tidsstempel
+                    )
                     Alvorlighetsgrad.INFO -> Aktivitetslogg.Aktivitet.Info(
                         kontekster,
                         melding,
@@ -345,6 +352,7 @@ internal data class PersonData(
         }
 
         enum class Alvorlighetsgrad {
+            JURIDISK_VURDERING,
             INFO,
             WARN,
             BEHOV,

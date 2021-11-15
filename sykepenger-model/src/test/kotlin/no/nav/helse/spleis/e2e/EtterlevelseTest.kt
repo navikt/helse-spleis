@@ -4,7 +4,8 @@ import no.nav.helse.Toggles
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
-import no.nav.helse.person.vilkår.Etterlevelse
+import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.AktivitetsloggVisitor
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterEach
@@ -35,7 +36,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
 
-        val etterlevelseInspektør = EtterlevelseInspektør(inspektør.personLogg.etterlevelse)
+        val etterlevelseInspektør = EtterlevelseInspektør(inspektør.personLogg)
         assertEquals(4, etterlevelseInspektør.size)
         assertTrue(etterlevelseInspektør.resultat("8-2", "1").single().oppfylt)
         assertTrue(etterlevelseInspektør.resultat("8-3", "2").single().oppfylt)
@@ -53,7 +54,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, fnr = eldrePersonFnr)
         håndterYtelser(1.vedtaksperiode, fnr = eldrePersonFnr)
 
-        val etterlevelseInspektør = EtterlevelseInspektør(inspektør.personLogg.etterlevelse)
+        val etterlevelseInspektør = EtterlevelseInspektør(inspektør.personLogg)
         assertEquals(4, etterlevelseInspektør.size)
         assertTrue(etterlevelseInspektør.resultat("8-2", "1").single().oppfylt)
         assertTrue(etterlevelseInspektør.resultat("8-51", "2").single().oppfylt)
@@ -61,17 +62,17 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         assertTrue(etterlevelseInspektør.resultat("8-30", "2").single().oppfylt)
     }
 
-    private class EtterlevelseInspektør(etterlevelse: Etterlevelse) : Etterlevelse.EtterlevelseVisitor {
+    private class EtterlevelseInspektør(aktivitetslogg: Aktivitetslogg) : AktivitetsloggVisitor {
         private val resultater = mutableListOf<Resultat>()
 
         val size get() = resultater.size
         fun resultat(paragraf: String, ledd: String) = resultater.filter { it.paragraf == paragraf && it.ledd == ledd }
 
         init {
-            etterlevelse.accept(this)
+            aktivitetslogg.accept(this)
         }
 
-        override fun visitVurderingsresultat(oppfylt: Boolean, versjon: LocalDate, paragraf: String, ledd: String, inputdata: Any?, outputdata: Any?) {
+        override fun visitVurderingsresultat(oppfylt: Boolean, versjon: LocalDate, paragraf: String, ledd: String, inputdata: Map<Any, Any?>, outputdata: Map<Any, Any?>) {
             resultater.add(Resultat(oppfylt, versjon, paragraf, ledd, inputdata, outputdata))
         }
     }

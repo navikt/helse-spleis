@@ -1,11 +1,13 @@
 package no.nav.helse.serde.reflection
 
+import no.nav.helse.Toggles
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.*
 import no.nav.helse.person.AktivitetsloggVisitor
 import no.nav.helse.person.SpesifikkKontekst
 import no.nav.helse.serde.PersonData.AktivitetsloggData.Alvorlighetsgrad
 import no.nav.helse.serde.PersonData.AktivitetsloggData.Alvorlighetsgrad.*
+import java.time.LocalDate
 
 internal class AktivitetsloggMap(aktivitetslogg: Aktivitetslogg) : AktivitetsloggVisitor {
     private val aktiviteter = mutableListOf<Map<String, Any>>()
@@ -47,13 +49,55 @@ internal class AktivitetsloggMap(aktivitetslogg: Aktivitetslogg) : Aktivitetslog
         leggTilMelding(kontekster, SEVERE, melding, tidsstempel)
     }
 
-    private fun leggTilMelding(kontekster: List<SpesifikkKontekst>, alvorlighetsgrad: Alvorlighetsgrad, melding: String, tidsstempel: String) {
+    private lateinit var juridiskVurdering: JuridiskVurdering
+
+    class JuridiskVurdering(
+        private val oppfylt: Boolean,
+        private val versjon: LocalDate,
+        private val paragraf: String,
+        private val ledd: String,
+        private val inputdata: Map<Any, Any?>,
+        private val outputdata: Map<Any, Any?>
+    ) {
+        fun toMap() = mapOf(
+            "oppfylt" to oppfylt,
+            "versjon" to versjon,
+            "paragraf" to paragraf,
+            "ledd" to ledd,
+            "inputdata" to inputdata,
+            "outputdata" to outputdata
+        )
+    }
+
+    override fun visitVurderingsresultat(
+        oppfylt: Boolean,
+        versjon: LocalDate,
+        paragraf: String,
+        ledd: String,
+        inputdata: Map<Any, Any?>,
+        outputdata: Map<Any, Any?>
+    ) {
+        juridiskVurdering = JuridiskVurdering(oppfylt, versjon, paragraf, ledd, inputdata, outputdata)
+    }
+
+    override fun postVisitEtterlevelse(
+        kontekster: List<SpesifikkKontekst>,
+        aktivitet: Etterlevelse,
+        melding: String,
+        vurderingsresultat: Etterlevelse.Vurderingsresultat,
+        tidsstempel: String
+    ) {
+        if(Toggles.Etterlevelse.enabled)
+            leggTilMelding(kontekster, JURIDISK_VURDERING, melding, tidsstempel, juridiskVurdering.toMap())
+    }
+
+    private fun leggTilMelding(kontekster: List<SpesifikkKontekst>, alvorlighetsgrad: Alvorlighetsgrad, melding: String, tidsstempel: String, detaljer: Map<String, Any> = emptyMap()) {
         aktiviteter.add(
-            mutableMapOf<String, Any>(
+            mutableMapOf(
                 "kontekster" to kontekstIndices(kontekster),
                 "alvorlighetsgrad" to alvorlighetsgrad.name,
                 "melding" to melding,
-                "detaljer" to emptyMap<String, Any>(),
+                "detaljer" to detaljer,
                 "tidsstempel" to tidsstempel
             )
         )

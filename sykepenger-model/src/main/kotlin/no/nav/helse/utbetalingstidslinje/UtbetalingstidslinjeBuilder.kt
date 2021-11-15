@@ -2,6 +2,7 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-17 ledd 1 bokstav a`
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.SykdomstidslinjeVisitor
@@ -238,7 +239,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         sykedagerIArbeidsgiverperiode += 1
         if (arbeidsgiverRegler.arbeidsgiverperiodenGjennomført(sykedagerIArbeidsgiverperiode)) {
             //TODO: Skal kalles ved første utbetalingsdag etter arbeidsgiverperioden, og med riktig aktivitetslogg
-            Aktivitetslogg().etterlevelse.`§8-17 ledd 1 bokstav a`(true)
+            Aktivitetslogg().`§8-17 ledd 1 bokstav a`(true)
             state(UtbetalingSykedager)
         }
         return false
