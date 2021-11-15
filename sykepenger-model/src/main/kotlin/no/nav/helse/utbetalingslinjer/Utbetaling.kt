@@ -104,7 +104,7 @@ internal class Utbetaling private constructor(
     private val oppdragsperiode = Oppdrag.periode(arbeidsgiverOppdrag, personOppdrag)
     internal val periode get() = oppdragsperiode.oppdaterTom(utbetalingstidslinje.periode())
 
-    private val stønadsdager get() = arbeidsgiverOppdrag.stønadsdager() + personOppdrag.stønadsdager()
+    private val stønadsdager get() = Oppdrag.stønadsdager(arbeidsgiverOppdrag, personOppdrag)
     private val observers = mutableSetOf<UtbetalingObserver>()
     private var forrigeHendelse: ArbeidstakerHendelse? = null
 

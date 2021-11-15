@@ -93,8 +93,29 @@ internal class UtbetalingslinjeForskjellTest {
     }
 
     @Test
-    fun `teller ikke overlappende dager dobbelt`() {
+    fun `teller unike dager`() {
+        val oppdrag1 = linjer(1.januar to 7.januar)
+        val oppdrag2 = linjer(4.januar to 9.januar)
+        assertEquals(7, Oppdrag.stønadsdager(oppdrag1, oppdrag2))
+    }
 
+    @Test
+    fun `teller overlappende dager som opphører i det ene oppdraget`() {
+        val arbeidsgiverOppdrag = linjer(1.januar to 7.januar)
+        val personOppdrag = linjer(4.januar to 9.januar)
+        val deleted = linjer()
+        val opphørtPersonoppdrag = deleted - personOppdrag
+        assertEquals(5, Oppdrag.stønadsdager(arbeidsgiverOppdrag, opphørtPersonoppdrag))
+    }
+
+    @Test
+    fun `teller stønadsdager i et oppdrags om kjøres frem igjen`() {
+        val arbeidsgiverOppdrag = linjer(1.januar to 7.januar)
+        val personOppdrag = linjer(4.januar to 9.januar)
+        val deleted = linjer()
+        val opphørtPersonoppdrag = deleted - personOppdrag
+        val personoppdragKjørtFremIgjen = linjer(4.januar to 9.januar)
+        assertEquals(7, Oppdrag.stønadsdager(arbeidsgiverOppdrag, personoppdragKjørtFremIgjen - opphørtPersonoppdrag))
     }
 
     @Test

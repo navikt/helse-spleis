@@ -33,6 +33,10 @@ internal class Oppdrag private constructor(
                 ?.let { liste -> Periode(liste.minOf { it.førstedato }, liste.maxOf { it.sistedato }) }
                 ?: Periode(LocalDate.MIN, LocalDate.MAX)
         }
+
+        internal fun stønadsdager(vararg oppdrag: Oppdrag): Int {
+            return Utbetalingslinje.stønadsdager(oppdrag.toList().flatten())
+        }
     }
 
     internal val førstedato get() = linjer.firstOrNull()?.let { it.datoStatusFom() ?: it.fom } ?: LocalDate.MIN

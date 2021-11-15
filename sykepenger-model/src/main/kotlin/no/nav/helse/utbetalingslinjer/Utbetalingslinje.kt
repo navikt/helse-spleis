@@ -7,7 +7,6 @@ import no.nav.helse.utbetalingslinjer.Endringskode.*
 import no.nav.helse.utbetalingslinjer.Klassekode.RefusjonFeriepengerIkkeOpplysningspliktig
 import no.nav.helse.utbetalingslinjer.Klassekode.RefusjonIkkeOpplysningspliktig
 import java.time.LocalDate
-import kotlin.streams.toList
 
 internal class Utbetalingslinje internal constructor(
     internal var fom: LocalDate,
@@ -23,6 +22,17 @@ internal class Utbetalingslinje internal constructor(
     private var klassekode: Klassekode = RefusjonIkkeOpplysningspliktig,
     private var datoStatusFom: LocalDate? = null
 ) : Iterable<LocalDate> {
+
+    internal companion object {
+        internal fun stønadsdager(linjer: List<Utbetalingslinje>): Int {
+            return linjer
+                .filterNot { it.erOpphør() }
+                .flatten()
+                .distinct()
+                .filterNot { it.erHelg() }
+                .size
+        }
+    }
 
     internal val periode get() = fom til tom
 
