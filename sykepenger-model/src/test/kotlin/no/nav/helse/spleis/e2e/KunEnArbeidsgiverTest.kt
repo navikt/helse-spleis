@@ -21,7 +21,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -3192,7 +3191,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    @Disabled
+    @ForventetFeil("gammel inntektsmelding med endring i refusjon kaster ut ny periode etter gap via replay")
     fun `gammel inntektsmelding med endring i refusjon kaster ut ny periode etter gap via replay`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 30.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 30.januar, 100.prosent))

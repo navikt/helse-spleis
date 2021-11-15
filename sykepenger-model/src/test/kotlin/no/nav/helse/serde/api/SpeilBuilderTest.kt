@@ -1,5 +1,6 @@
 package no.nav.helse.serde.api
 
+import no.nav.helse.ForventetFeil
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Dagtype.Feriedag
@@ -562,7 +563,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         assertEquals(Periodetype.OVERGANG_FRA_IT, vedtaksperioder.first().periodetype)
     }
 
-    @Disabled
+    @ForventetFeil("overgang fra infotrygd får ikke riktig periodetype ved forkasting")
     @Test
     fun `overgang fra infotrygd får ikke riktig periodetype ved forkasting`() {
         val fom1Periode = 1.januar

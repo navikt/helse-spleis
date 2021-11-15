@@ -16,7 +16,6 @@ import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -235,7 +234,6 @@ internal class UtbetalingTest {
     }
 
     @Test
-    @Disabled
     fun `overføre utbetaling med delvis refusjon`() {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600))
         beregnUtbetalinger(tidslinje)
