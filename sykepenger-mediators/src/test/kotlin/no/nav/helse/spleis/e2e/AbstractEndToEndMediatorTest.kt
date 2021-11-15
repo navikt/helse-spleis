@@ -99,6 +99,19 @@ internal abstract class AbstractEndToEndMediatorTest {
         )
     }
 
+    protected fun sendSøknadUtenVedtaksperiode(perioder: List<SoknadsperiodeDTO>) {
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagSøknadNav(
+                perioder = perioder,
+                orgnummer = ORGNUMMER,
+                fravær = emptyList(),
+                egenmeldinger = emptyList(),
+                andreInntektskilder = null,
+                sendtNav = perioder.maxOfOrNull { it.tom!! }?.atStartOfDay()
+            )
+        )
+    }
+
     protected fun sendKorrigerendeSøknad(
         perioder: List<SoknadsperiodeDTO>,
         fravær: List<FravarDTO> = emptyList(),

@@ -19,14 +19,14 @@ open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Ite
 
         fun List<Periode>.slutterEtter(grense: LocalDate) = any { it.slutterEtter(grense) }
 
-        internal fun List<LocalDate>.grupperSammenhengendePerioder() = sorted().distinct().fold(listOf<Periode>()) { perioder, dato ->
+        fun List<LocalDate>.grupperSammenhengendePerioder() = sorted().distinct().fold(listOf<Periode>()) { perioder, dato ->
             val siste = perioder.lastOrNull()
             if (siste == null || siste.endInclusive.plusDays(1) != dato) perioder.plus<Periode>(dato til dato)
             else perioder.dropLast(1).plus<Periode>(siste.oppdaterTom(dato))
         }
     }
 
-    internal fun overlapperMed(other: Periode) =
+    fun overlapperMed(other: Periode) =
         maxOf(this.start, other.start) <= minOf(this.endInclusive, other.endInclusive)
 
     internal fun slutterEtter(other: LocalDate) =

@@ -42,6 +42,18 @@ internal class HendelseRepository(private val dataSource: DataSource) {
             )
         }
 
+    internal fun finnSøknader(fnr: Fødselsnummer): List<JsonNode> =
+        using(sessionOf(dataSource)) { session ->
+            session.run(
+                queryOf(
+                    "SELECT data FROM melding WHERE fnr = ? AND melding_type = 'SENDT_SØKNAD_NAV' ORDER BY lest_dato ASC",
+                    fnr.toLong()
+                )
+                    .map { objectMapper.readTree(it.string("data")) }
+                    .asList
+            )
+        }
+
     internal fun lagreMelding(melding: HendelseMessage, fødselsnummer: Fødselsnummer, meldingId: UUID, json: String) {
         val meldingtype = meldingstype(melding) ?: return
         using(sessionOf(dataSource)) { session ->
