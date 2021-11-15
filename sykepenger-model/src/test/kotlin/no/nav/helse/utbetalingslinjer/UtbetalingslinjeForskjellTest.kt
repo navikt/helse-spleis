@@ -71,6 +71,33 @@ internal class UtbetalingslinjeForskjellTest {
     }
 
     @Test
+    fun `stønadsdager teller ukedager`() {
+        val oppdrag = linjer(1.januar to 7.januar)
+        assertEquals(5, oppdrag.stønadsdager())
+    }
+
+    @Test
+    fun `stønadsdager teller uendrede linjer`() {
+        val original = linjer(1.januar to 7.januar)
+        val recalculated = linjer(1.januar to 7.januar)
+        val actual = recalculated - original
+        assertEquals(5, actual.stønadsdager())
+    }
+
+    @Test
+    fun `stønadsdager teller ikke opphørslinjer`() {
+        val original = linjer(1.januar to 7.januar)
+        val deleted = linjer()
+        val actual = deleted - original
+        assertEquals(0, actual.stønadsdager())
+    }
+
+    @Test
+    fun `teller ikke overlappende dager dobbelt`() {
+
+    }
+
+    @Test
     fun `helt separate utbetalingslinjer`() {
         val original = linjer(1.januar to 5.januar)
         val recalculated = linjer(5.februar to 9.februar)
