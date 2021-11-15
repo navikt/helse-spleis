@@ -142,6 +142,7 @@ internal class PersonMediator(
             "maksdato" to event.maksdato,
             "forbrukteSykedager" to event.forbrukteSykedager,
             "gjenståendeSykedager" to event.gjenståendeSykedager,
+            "stønadsdager" to event.stønadsdager,
             "ident" to event.ident,
             "epost" to event.epost,
             "tidspunkt" to event.tidspunkt,

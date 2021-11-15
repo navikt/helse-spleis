@@ -96,7 +96,8 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
         personNettoBeløp: Int,
         maksdato: LocalDate,
         forbrukteSykedager: Int?,
-        gjenståendeSykedager: Int?
+        gjenståendeSykedager: Int?,
+        stønadsdager: Int
     ) {
         if (tilstand is Utbetaling.Forkastet) return
 

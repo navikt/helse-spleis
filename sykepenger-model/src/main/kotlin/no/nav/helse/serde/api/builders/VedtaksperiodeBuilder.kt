@@ -382,7 +382,8 @@ internal class VedtaksperiodeBuilder(
         personNettoBeløp: Int,
         maksdato: LocalDate,
         forbrukteSykedager: Int?,
-        gjenståendeSykedager: Int?
+        gjenståendeSykedager: Int?,
+        stønadsdager: Int
     ) {
         inUtbetaling = true
         if (tilstand is Utbetaling.Forkastet) return
@@ -429,7 +430,8 @@ internal class VedtaksperiodeBuilder(
         personNettoBeløp: Int,
         maksdato: LocalDate,
         forbrukteSykedager: Int?,
-        gjenståendeSykedager: Int?
+        gjenståendeSykedager: Int?,
+        stønadsdager: Int
     ) {
         inUtbetaling = false
         if (tilstand is Utbetaling.Forkastet) return

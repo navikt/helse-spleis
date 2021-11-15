@@ -26,13 +26,14 @@ internal interface UtbetalingObserver {
         maksdato: LocalDate,
         forbrukteSykedager: Int,
         gjenståendeSykedager: Int,
-        arbeidsgiverOppdrag: Oppdrag,
+        stønadsdager: Int,
         personOppdrag: Oppdrag,
         ident: String,
         epost: String,
         tidspunkt: LocalDateTime,
         automatiskBehandling: Boolean,
         utbetalingstidslinje: Utbetalingstidslinje,
+        arbeidsgiverOppdrag: Oppdrag
     ) {
     }
 
@@ -44,13 +45,14 @@ internal interface UtbetalingObserver {
         maksdato: LocalDate,
         forbrukteSykedager: Int,
         gjenståendeSykedager: Int,
-        arbeidsgiverOppdrag: Oppdrag,
+        stønadsdager: Int,
         personOppdrag: Oppdrag,
         ident: String,
-        epost: String,
+        arbeidsgiverOppdrag: Oppdrag,
         tidspunkt: LocalDateTime,
         automatiskBehandling: Boolean,
         utbetalingstidslinje: Utbetalingstidslinje,
+        epost: String
     ) {
     }
 

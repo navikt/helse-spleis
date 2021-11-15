@@ -24,18 +24,19 @@ internal class UtbetalingerBuilder(vedtaksperiode: Vedtaksperiode): Vedtaksperio
     internal fun build() = utbetalinger.values.toList()
 
     override fun preVisitUtbetaling(
-        utbetaling: InternUtbetaling,
+        utbetaling: no.nav.helse.utbetalingslinjer.Utbetaling,
         id: UUID,
         beregningId: UUID,
-        type: InternUtbetaling.Utbetalingtype,
-        tilstand: InternUtbetaling.Tilstand,
+        type: no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype,
+        tilstand: no.nav.helse.utbetalingslinjer.Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,
         arbeidsgiverNettoBeløp: Int,
         personNettoBeløp: Int,
         maksdato: LocalDate,
         forbrukteSykedager: Int?,
-        gjenståendeSykedager: Int?
+        gjenståendeSykedager: Int?,
+        stønadsdager: Int
     ) {
         if (!utbetaling.erForkastet()) {
             utbetalinger.putIfAbsent(beregningId, UtbetalingBuilder(utbetaling).build())
@@ -53,18 +54,19 @@ internal class UtbetalingBuilder(utbetaling: InternUtbetaling): UtbetalingVisito
     internal fun build() = utbetaling
 
     override fun preVisitUtbetaling(
-        utbetaling: InternUtbetaling,
+        utbetaling: no.nav.helse.utbetalingslinjer.Utbetaling,
         id: UUID,
         beregningId: UUID,
-        type: InternUtbetaling.Utbetalingtype,
-        tilstand: InternUtbetaling.Tilstand,
+        type: no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype,
+        tilstand: no.nav.helse.utbetalingslinjer.Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,
         arbeidsgiverNettoBeløp: Int,
         personNettoBeløp: Int,
         maksdato: LocalDate,
         forbrukteSykedager: Int?,
-        gjenståendeSykedager: Int?
+        gjenståendeSykedager: Int?,
+        stønadsdager: Int
     ) {
         val tidslinje = UtbetalingstidslinjeBuilder(utbetaling).build()
         val vurdering = VurderingBuilder(utbetaling).build()

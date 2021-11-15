@@ -210,7 +210,8 @@ internal class Feriepengeberegner(
                 personNettoBeløp: Int,
                 maksdato: LocalDate,
                 forbrukteSykedager: Int?,
-                gjenståendeSykedager: Int?
+                gjenståendeSykedager: Int?,
+                stønadsdager: Int
             ) {
                 utbetaltUtbetaling = tilstand == Utbetaling.Utbetalt
                 annullertUtbetaling = tilstand == Utbetaling.Annullert
@@ -257,7 +258,8 @@ internal class Feriepengeberegner(
                 personNettoBeløp: Int,
                 maksdato: LocalDate,
                 forbrukteSykedager: Int?,
-                gjenståendeSykedager: Int?
+                gjenståendeSykedager: Int?,
+                stønadsdager: Int
             ) {
                 utbetaltUtbetaling = false
             }

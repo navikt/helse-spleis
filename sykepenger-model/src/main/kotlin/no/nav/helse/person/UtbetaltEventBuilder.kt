@@ -93,7 +93,8 @@ private class UtbetaltEventBuilder(
         personNettoBeløp: Int,
         maksdato: LocalDate,
         forbrukteSykedager: Int?,
-        gjenståendeSykedager: Int?
+        gjenståendeSykedager: Int?,
+        stønadsdager: Int
     ) {
         utbetalingId = id
         opprettet = tidsstempel

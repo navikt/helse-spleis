@@ -38,7 +38,8 @@ internal class VurderingBuilder: BuilderState() {
         personNettoBeløp: Int,
         maksdato: LocalDate,
         forbrukteSykedager: Int?,
-        gjenståendeSykedager: Int?
+        gjenståendeSykedager: Int?,
+        stønadsdager: Int
     ) {
         popState()
     }

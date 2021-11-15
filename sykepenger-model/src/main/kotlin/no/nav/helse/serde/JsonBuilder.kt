@@ -776,7 +776,8 @@ internal class JsonBuilder : AbstractBuilder() {
             personNettoBeløp: Int,
             maksdato: LocalDate,
             forbrukteSykedager: Int?,
-            gjenståendeSykedager: Int?
+            gjenståendeSykedager: Int?,
+            stønadsdager: Int
         ) {
             utbetalinger.add(utbetaling.toMap())
         }
@@ -912,7 +913,8 @@ internal class JsonBuilder : AbstractBuilder() {
             personNettoBeløp: Int,
             maksdato: LocalDate,
             forbrukteSykedager: Int?,
-            gjenståendeSykedager: Int?
+            gjenståendeSykedager: Int?,
+            stønadsdager: Int
         ) {
             inUtbetaling = true
         }
@@ -929,7 +931,8 @@ internal class JsonBuilder : AbstractBuilder() {
             personNettoBeløp: Int,
             maksdato: LocalDate,
             forbrukteSykedager: Int?,
-            gjenståendeSykedager: Int?
+            gjenståendeSykedager: Int?,
+            stønadsdager: Int
         ) {
             inUtbetaling = false
         }

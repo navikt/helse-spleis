@@ -86,6 +86,7 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         assertDato(melding.path("maksdato").asText())
         assertTrue(melding.path("forbrukteSykedager").isInt)
         assertTrue(melding.path("gjenståendeSykedager").isInt)
+        assertTrue(melding.path("stønadsdager").isInt)
         assertTrue(melding.path("ident").asText().isNotEmpty())
         assertTrue(melding.path("epost").asText().isNotEmpty())
         assertTrue(melding.path("utbetalingsdager").toList().isNotEmpty())

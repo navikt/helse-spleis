@@ -678,7 +678,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         personNettoBeløp: Int,
         maksdato: LocalDate,
         forbrukteSykedager: Int?,
-        gjenståendeSykedager: Int?
+        gjenståendeSykedager: Int?,
+        stønadsdager: Int
     ) {
         delegatee.preVisitUtbetaling(
             utbetaling,
@@ -692,7 +693,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             personNettoBeløp,
             maksdato,
             forbrukteSykedager,
-            gjenståendeSykedager
+            gjenståendeSykedager,
+            stønadsdager
         )
     }
 
@@ -751,7 +753,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         personNettoBeløp: Int,
         maksdato: LocalDate,
         forbrukteSykedager: Int?,
-        gjenståendeSykedager: Int?
+        gjenståendeSykedager: Int?,
+        stønadsdager: Int
     ) {
         delegatee.postVisitUtbetaling(
             utbetaling,
@@ -765,7 +768,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             personNettoBeløp,
             maksdato,
             forbrukteSykedager,
-            gjenståendeSykedager
+            gjenståendeSykedager,
+            stønadsdager
         )
     }
 

@@ -74,7 +74,8 @@ internal class Avstemmer(person: Person) {
             personNettoBeløp: Int,
             maksdato: LocalDate,
             forbrukteSykedager: Int?,
-            gjenståendeSykedager: Int?
+            gjenståendeSykedager: Int?,
+            stønadsdager: Int
         ) {
             utbetalinger.add(mapOf(
                 "id" to id,

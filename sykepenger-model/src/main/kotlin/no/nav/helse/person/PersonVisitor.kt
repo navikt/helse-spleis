@@ -523,7 +523,8 @@ internal interface UtbetalingVisitor : UtbetalingsdagVisitor, OppdragVisitor {
         personNettoBeløp: Int,
         maksdato: LocalDate,
         forbrukteSykedager: Int?,
-        gjenståendeSykedager: Int?
+        gjenståendeSykedager: Int?,
+        stønadsdager: Int
     ) {
     }
 
@@ -555,7 +556,8 @@ internal interface UtbetalingVisitor : UtbetalingsdagVisitor, OppdragVisitor {
         personNettoBeløp: Int,
         maksdato: LocalDate,
         forbrukteSykedager: Int?,
-        gjenståendeSykedager: Int?
+        gjenståendeSykedager: Int?,
+        stønadsdager: Int
     ) {
     }
 }

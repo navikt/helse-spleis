@@ -520,13 +520,14 @@ internal class Arbeidsgiver private constructor(
         maksdato: LocalDate,
         forbrukteSykedager: Int,
         gjenståendeSykedager: Int,
-        arbeidsgiverOppdrag: Oppdrag,
+        stønadsdager: Int,
         personOppdrag: Oppdrag,
         ident: String,
         epost: String,
         tidspunkt: LocalDateTime,
         automatiskBehandling: Boolean,
         utbetalingstidslinje: Utbetalingstidslinje,
+        arbeidsgiverOppdrag: Oppdrag,
     ) {
         person.utbetalingUtbetalt(
             hendelseskontekst,
@@ -538,14 +539,15 @@ internal class Arbeidsgiver private constructor(
                 maksdato = maksdato,
                 forbrukteSykedager = forbrukteSykedager,
                 gjenståendeSykedager = gjenståendeSykedager,
-                ident = ident,
+                stønadsdager = stønadsdager,
                 epost = epost,
                 tidspunkt = tidspunkt,
                 automatiskBehandling = automatiskBehandling,
                 arbeidsgiverOppdrag = arbeidsgiverOppdrag.toMap(),
                 personOppdrag = personOppdrag.toMap(),
                 utbetalingsdager = utbetalingstidslinje.toList(),
-                vedtaksperiodeIder = vedtaksperioder.iderMedUtbetaling(id) + forkastede.iderMedUtbetaling(id)
+                vedtaksperiodeIder = vedtaksperioder.iderMedUtbetaling(id) + forkastede.iderMedUtbetaling(id),
+                ident = ident
             )
         )
     }
@@ -558,13 +560,14 @@ internal class Arbeidsgiver private constructor(
         maksdato: LocalDate,
         forbrukteSykedager: Int,
         gjenståendeSykedager: Int,
-        arbeidsgiverOppdrag: Oppdrag,
+        stønadsdager: Int,
         personOppdrag: Oppdrag,
         ident: String,
-        epost: String,
+        arbeidsgiverOppdrag: Oppdrag,
         tidspunkt: LocalDateTime,
         automatiskBehandling: Boolean,
         utbetalingstidslinje: Utbetalingstidslinje,
+        epost: String,
     ) {
         person.utbetalingUtenUtbetaling(
             hendelseskontekst,
@@ -576,14 +579,15 @@ internal class Arbeidsgiver private constructor(
                 maksdato = maksdato,
                 forbrukteSykedager = forbrukteSykedager,
                 gjenståendeSykedager = gjenståendeSykedager,
-                ident = ident,
+                stønadsdager = stønadsdager,
                 epost = epost,
                 tidspunkt = tidspunkt,
                 automatiskBehandling = automatiskBehandling,
                 arbeidsgiverOppdrag = arbeidsgiverOppdrag.toMap(),
                 personOppdrag = personOppdrag.toMap(),
                 utbetalingsdager = utbetalingstidslinje.toList(),
-                vedtaksperiodeIder = vedtaksperioder.iderMedUtbetaling(id) + forkastede.iderMedUtbetaling(id)
+                vedtaksperiodeIder = vedtaksperioder.iderMedUtbetaling(id) + forkastede.iderMedUtbetaling(id),
+                ident = ident
             )
         )
     }

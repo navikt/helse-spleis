@@ -1733,7 +1733,8 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
                             personNettoBeløp: Int,
                             maksdato: LocalDate,
                             forbrukteSykedager: Int?,
-                            gjenståendeSykedager: Int?
+                            gjenståendeSykedager: Int?,
+                            stønadsdager: Int
                         ) {
                             utbetalingerIder.add(
                                 UtbetalingFagsystemID(

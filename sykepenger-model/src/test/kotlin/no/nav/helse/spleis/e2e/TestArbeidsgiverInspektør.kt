@@ -282,7 +282,8 @@ internal class TestArbeidsgiverInspektør(
         personNettoBeløp: Int,
         maksdato: LocalDate,
         forbrukteSykedager: Int?,
-        gjenståendeSykedager: Int?
+        gjenståendeSykedager: Int?,
+        stønadsdager: Int
     ) {
         inUtbetaling = true
         if (!inVedtaksperiode) {
@@ -308,7 +309,8 @@ internal class TestArbeidsgiverInspektør(
         personNettoBeløp: Int,
         maksdato: LocalDate,
         forbrukteSykedager: Int?,
-        gjenståendeSykedager: Int?
+        gjenståendeSykedager: Int?,
+        stønadsdager: Int
     ) {
         inUtbetaling = false
     }

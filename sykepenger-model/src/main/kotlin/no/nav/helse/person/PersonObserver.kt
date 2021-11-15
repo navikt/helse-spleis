@@ -141,14 +141,15 @@ interface PersonObserver {
         val maksdato: LocalDate,
         val forbrukteSykedager: Int,
         val gjenståendeSykedager: Int,
-        val ident: String,
+        val stønadsdager: Int,
         val epost: String,
         val tidspunkt: LocalDateTime,
         val automatiskBehandling: Boolean,
         val arbeidsgiverOppdrag: Map<String, Any?>,
         val personOppdrag: Map<String, Any?>,
         val utbetalingsdager: List<Utbetalingsdag>,
-        val vedtaksperiodeIder: List<UUID>
+        val vedtaksperiodeIder: List<UUID>,
+        val ident: String
     )
 
     data class Utbetalingsdag(

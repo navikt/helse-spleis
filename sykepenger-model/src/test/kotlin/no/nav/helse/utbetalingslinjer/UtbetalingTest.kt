@@ -543,7 +543,8 @@ internal class UtbetalingTest {
             personNettoBeløp: Int,
             maksdato: LocalDate,
             forbrukteSykedager: Int?,
-            gjenståendeSykedager: Int?
+            gjenståendeSykedager: Int?,
+            stønadsdager: Int
         ) {
             utbetalingId = id
             this.tilstand = tilstand

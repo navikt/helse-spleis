@@ -502,7 +502,7 @@ internal class Utbetaling private constructor(
     }
 
     internal fun accept(visitor: UtbetalingVisitor) {
-        visitor.preVisitUtbetaling(this, id, beregningId, type, tilstand, tidsstempel, oppdatert, arbeidsgiverOppdrag.nettoBeløp(), personOppdrag.nettoBeløp(), maksdato, forbrukteSykedager, gjenståendeSykedager)
+        visitor.preVisitUtbetaling(this, id, beregningId, type, tilstand, tidsstempel, oppdatert, arbeidsgiverOppdrag.nettoBeløp(), personOppdrag.nettoBeløp(), maksdato, forbrukteSykedager, gjenståendeSykedager, stønadsdager)
         utbetalingstidslinje.accept(visitor)
         visitor.preVisitArbeidsgiverOppdrag(arbeidsgiverOppdrag)
         arbeidsgiverOppdrag.accept(visitor)
@@ -511,7 +511,7 @@ internal class Utbetaling private constructor(
         personOppdrag.accept(visitor)
         visitor.postVisitPersonOppdrag(personOppdrag)
         vurdering?.accept(visitor)
-        visitor.postVisitUtbetaling(this, id, beregningId, type, tilstand, tidsstempel, oppdatert, arbeidsgiverOppdrag.nettoBeløp(), personOppdrag.nettoBeløp(), maksdato, forbrukteSykedager, gjenståendeSykedager)
+        visitor.postVisitUtbetaling(this, id, beregningId, type, tilstand, tidsstempel, oppdatert, arbeidsgiverOppdrag.nettoBeløp(), personOppdrag.nettoBeløp(), maksdato, forbrukteSykedager, gjenståendeSykedager, stønadsdager)
     }
 
     internal fun utbetalingstidslinje() = utbetalingstidslinje
@@ -934,13 +934,14 @@ internal class Utbetaling private constructor(
                     utbetaling.maksdato,
                     utbetaling.forbrukteSykedager!!,
                     utbetaling.gjenståendeSykedager!!,
-                    utbetaling.arbeidsgiverOppdrag,
+                    utbetaling.stønadsdager,
                     utbetaling.personOppdrag,
                     ident,
                     epost,
                     tidspunkt,
                     automatiskBehandling,
                     utbetaling.utbetalingstidslinje,
+                    utbetaling.arbeidsgiverOppdrag
                 )
             }
         }
@@ -955,13 +956,14 @@ internal class Utbetaling private constructor(
                     utbetaling.maksdato,
                     utbetaling.forbrukteSykedager!!,
                     utbetaling.gjenståendeSykedager!!,
-                    utbetaling.arbeidsgiverOppdrag,
+                    utbetaling.stønadsdager,
                     utbetaling.personOppdrag,
                     ident,
-                    epost,
+                    utbetaling.arbeidsgiverOppdrag,
                     tidspunkt,
                     automatiskBehandling,
                     utbetaling.utbetalingstidslinje,
+                    epost
                 )
             }
         }

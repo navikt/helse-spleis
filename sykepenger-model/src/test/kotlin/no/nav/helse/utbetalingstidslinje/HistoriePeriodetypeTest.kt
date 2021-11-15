@@ -258,7 +258,8 @@ internal class HistoriePeriodetypeTest {
                 personNettoBeløp: Int,
                 maksdato: LocalDate,
                 forbrukteSykedager: Int?,
-                gjenståendeSykedager: Int?
+                gjenståendeSykedager: Int?,
+                stønadsdager: Int
             ) {
                 _id = id
             }

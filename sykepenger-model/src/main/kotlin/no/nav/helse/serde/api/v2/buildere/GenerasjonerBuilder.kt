@@ -3,7 +3,6 @@ package no.nav.helse.serde.api.v2.buildere
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.*
-import no.nav.helse.serde.api.v2.HendelseDTO
 import no.nav.helse.serde.api.v2.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -109,7 +108,8 @@ internal class GenerasjonerBuilder(
         personNettoBeløp: Int,
         maksdato: LocalDate,
         forbrukteSykedager: Int?,
-        gjenståendeSykedager: Int?
+        gjenståendeSykedager: Int?,
+        stønadsdager: Int
     ) {
         if (utbetaling.erAnnullering()) {
             annulleringer.leggTil(UtbetalingBuilder(utbetaling).build())
