@@ -71,8 +71,7 @@ internal class OppdragBuilder(
         økonomi: Økonomi
     ) {
         økonomi.medData { grad, aktuellDagsinntekt ->
-            if (utbetalingslinjer.isEmpty()) return@medData tilstand.nyLinje(dag, dato, grad, aktuellDagsinntekt!!)
-            if (grad == linje.grad && (linje.beløp == null || linje.beløp == fagområde.beløp(dag.økonomi)))
+            if (utbetalingslinjer.isNotEmpty() && fagområde.kanLinjeUtvides(linje, dag.økonomi, grad))
                 tilstand.betalingsdag(dag, dato, grad, aktuellDagsinntekt!!)
             else
                 tilstand.nyLinje(dag, dato, grad, aktuellDagsinntekt!!)
@@ -134,26 +133,11 @@ internal class OppdragBuilder(
     }
 
     private fun addLinje(dag: Utbetalingsdag, dato: LocalDate, grad: Double, aktuellDagsinntekt: Double) {
-        utbetalingslinjer.add(
-            0,
-            Utbetalingslinje(
-                dato,
-                dato,
-                Satstype.DAG,
-                fagområde.beløp(dag.økonomi),
-                aktuellDagsinntekt.roundToInt(),
-                grad,
-                fagsystemId,
-                klassekode = fagområde.klassekode()
-            )
-        )
+        utbetalingslinjer.add(0, fagområde.linje(fagsystemId, dag.økonomi, dato, grad, aktuellDagsinntekt.roundToInt()))
     }
 
     private fun addLinje(dato: LocalDate, grad: Double) {
-        utbetalingslinjer.add(
-            0,
-            Utbetalingslinje(dato, dato, Satstype.DAG, null, 0, grad, fagsystemId, klassekode = fagområde.klassekode())
-        )
+        utbetalingslinjer.add(0, fagområde.linje(fagsystemId, dato, grad))
     }
 
     internal interface Tilstand {
@@ -298,9 +282,7 @@ internal class OppdragBuilder(
             grad: Double,
             aktuellDagsinntekt: Double
         ) {
-            linje.beløp = fagområde.beløp(dag.økonomi)
-            linje.aktuellDagsinntekt = aktuellDagsinntekt.roundToInt()
-            linje.fom = dag.dato
+            fagområde.oppdaterLinje(linje, dag.dato, dag.økonomi, aktuellDagsinntekt.roundToInt())
             tilstand = LinjeMedSats()
         }
 

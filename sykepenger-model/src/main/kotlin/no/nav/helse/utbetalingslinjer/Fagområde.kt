@@ -3,28 +3,32 @@ package no.nav.helse.utbetalingslinjer
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag.Companion.reflectedArbeidsgiverBeløp
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag.Companion.reflectedPersonBeløp
 import no.nav.helse.økonomi.Økonomi
+import java.time.LocalDate
 
 internal enum class Fagområde(
     internal val verdi: String,
-    private val linjerStrategy: (Utbetaling) -> Oppdrag,
-    private val beløpStrategy: (Økonomi) -> Int
+    private val beløpStrategy: (Økonomi) -> Int,
+    private val klassekode: Klassekode
 ) {
-    SykepengerRefusjon("SPREF", Utbetaling::arbeidsgiverOppdrag, reflectedArbeidsgiverBeløp) {
-        override fun klassekode(): Klassekode = Klassekode.RefusjonIkkeOpplysningspliktig
-    },
-    Sykepenger("SP", Utbetaling::personOppdrag, reflectedPersonBeløp) {
-        override fun klassekode(): Klassekode = Klassekode.SykepengerArbeidstakerOrdinær
-    };
+    SykepengerRefusjon("SPREF", reflectedArbeidsgiverBeløp, Klassekode.RefusjonIkkeOpplysningspliktig),
+    Sykepenger("SP", reflectedPersonBeløp, Klassekode.SykepengerArbeidstakerOrdinær);
 
     override fun toString() = verdi
 
-    abstract fun klassekode(): Klassekode
+    internal fun linje(fagsystemId: String, økonomi: Økonomi, dato: LocalDate, grad: Double, beløp: Int) =
+        Utbetalingslinje(dato, dato, Satstype.DAG, beløpStrategy(økonomi), beløp, grad, fagsystemId, klassekode = klassekode)
 
-    internal fun beløp(økonomi: Økonomi) =
-        beløpStrategy(økonomi)
+    internal fun linje(fagsystemId: String, dato: LocalDate, grad: Double) =
+        Utbetalingslinje(dato, dato, Satstype.DAG, null, 0, grad, fagsystemId, klassekode = klassekode)
 
-    internal fun utbetalingslinjer(utbetaling: Utbetaling): Oppdrag =
-        linjerStrategy(utbetaling)
+    internal fun oppdaterLinje(linje: Utbetalingslinje, dato: LocalDate, økonomi: Økonomi, beløp: Int) {
+        linje.beløp = beløpStrategy(økonomi)
+        linje.aktuellDagsinntekt = beløp
+        linje.fom = dato
+    }
+
+    internal fun kanLinjeUtvides(linje: Utbetalingslinje, økonomi: Økonomi, grad: Double) =
+        grad == linje.grad && (linje.beløp == null || linje.beløp == beløpStrategy(økonomi))
 
     internal companion object {
         private val map = values().associateBy(Fagområde::verdi)
