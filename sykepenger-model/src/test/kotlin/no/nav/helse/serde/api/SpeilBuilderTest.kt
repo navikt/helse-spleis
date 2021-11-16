@@ -466,7 +466,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             utbetalteUtbetalinger.last().arbeidsgiverOppdrag().fagsystemId(),
             utbetalinger.arbeidsgiverUtbetaling!!.fagsystemId
         )
-        assertNull(utbetalinger.personUtbetaling)
+        assertTrue(utbetalinger.personUtbetaling!!.linjer.isEmpty())
         assertEquals(
             utbetalteUtbetalinger.last().arbeidsgiverOppdrag().førstedato,
             utbetalinger.arbeidsgiverUtbetaling!!.linjer.first().fom

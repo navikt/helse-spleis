@@ -156,11 +156,22 @@ internal class UtbetalingslinjeForskjellTest {
 
     @Test
     fun `overtar fagsystemId fra et tomt oppdrag`() {
-        val original = tomtOppdrag()
-        val recalculated = linjer(5.februar to 9.februar)
+        val original = tomtOppdrag(sisteArbeidsgiverdag = 4.februar)
+        val recalculated = linjer(5.februar to 9.februar, sisteArbeidsgiverdag = 4.februar)
         val actual = recalculated - original
         assertUtbetalinger(linjer(5.februar to 9.februar), actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
+        assertEquals(NY, actual.endringskode)
+        assertFalse(aktivitetslogg.hasWarningsOrWorse())
+    }
+
+    @Test
+    fun `overtar ikke fagsystemId fra et tomt oppdrag når siste arbeidsgiverdag er ulik`() {
+        val original = tomtOppdrag(sisteArbeidsgiverdag = 1.mars)
+        val recalculated = linjer(5.februar to 9.februar, sisteArbeidsgiverdag = 4.februar)
+        val actual = recalculated - original
+        assertUtbetalinger(linjer(5.februar to 9.februar), actual)
+        assertNotEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(NY, actual.endringskode)
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
@@ -945,8 +956,8 @@ internal class UtbetalingslinjeForskjellTest {
         assertNotEquals(original[0].hashCode(), actual[0].hashCode())
     }
 
-    private fun tomtOppdrag(fagsystemId: String = genererUtbetalingsreferanse(UUID.randomUUID())) =
-        Oppdrag(ORGNUMMER, SykepengerRefusjon, fagsystemId = fagsystemId, sisteArbeidsgiverdag = null)
+    private fun tomtOppdrag(fagsystemId: String = genererUtbetalingsreferanse(UUID.randomUUID()), sisteArbeidsgiverdag: LocalDate? = null) =
+        Oppdrag(ORGNUMMER, SykepengerRefusjon, fagsystemId = fagsystemId, sisteArbeidsgiverdag = sisteArbeidsgiverdag)
 
     private val Oppdrag.endringskode get() = this.get<Endringskode>("endringskode")
 

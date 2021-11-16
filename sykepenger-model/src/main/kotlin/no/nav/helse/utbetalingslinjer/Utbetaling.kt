@@ -1,6 +1,5 @@
 package no.nav.helse.utbetalingslinjer
 
-import no.nav.helse.Toggles
 import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
@@ -91,15 +90,6 @@ internal class Utbetaling private constructor(
         forbrukteSykedager,
         gjenståendeSykedager
     )
-
-    init {
-        if (Toggles.LageBrukerutbetaling.disabled) {
-            // slår ut når begge har linjer
-            check(arbeidsgiverOppdrag.isEmpty() || personOppdrag.isEmpty()) {
-                "Manglende støtte: Kan ikke støtte både arbeidsgiver- og personoppdrag uten at Delvis refusjon er skrudd på: arbeidsgiverlinjer: ${arbeidsgiverOppdrag.size}, personlinjer: ${personOppdrag.size}"
-            }
-        }
-    }
 
     private val oppdragsperiode = Oppdrag.periode(arbeidsgiverOppdrag, personOppdrag)
     internal val periode get() = oppdragsperiode.oppdaterTom(utbetalingstidslinje.periode())
@@ -469,7 +459,6 @@ internal class Utbetaling private constructor(
             aktivitetslogg: IAktivitetslogg,
             forrige: Oppdrag?
         ): Oppdrag {
-            if (Toggles.LageBrukerutbetaling.disabled) return Oppdrag(fødselsnummer, Sykepenger)
             return byggOppdrag(sisteAktive, fødselsnummer, tidslinje, sisteDato, aktivitetslogg, forrige, Sykepenger)
         }
 
