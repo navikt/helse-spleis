@@ -11,6 +11,12 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Ukj
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 
+internal data class Sykepengerettighet(
+    val maksdato : LocalDate,
+    val gjenståendeSykedager : Int,
+    val forbrukteSykedager : Int
+)
+
 internal class MaksimumSykepengedagerfilter(
     private val alder: Alder,
     private val arbeidsgiverRegler: ArbeidsgiverRegler,
@@ -36,13 +42,13 @@ internal class MaksimumSykepengedagerfilter(
     private lateinit var beregnetTidslinje: Utbetalingstidslinje
     private lateinit var tidslinjegrunnlag: List<Utbetalingstidslinje>
 
-    internal fun maksdato() =
+    private fun maksdato() =
         if (gjenståendeSykedager() == 0) teller.maksdato(sisteBetalteDag) else teller.maksdato(sisteUkedag)
 
-    internal fun gjenståendeSykedager() = teller.gjenståendeSykepengedager(sisteBetalteDag)
-    internal fun forbrukteSykedager() = teller.forbrukteDager()
+    private fun gjenståendeSykedager() = teller.gjenståendeSykepengedager(sisteBetalteDag)
+    private fun forbrukteSykedager() = teller.forbrukteDager()
 
-    internal fun filter(tidslinjer: List<Utbetalingstidslinje>, personTidslinje: Utbetalingstidslinje) {
+    internal fun filter(tidslinjer: List<Utbetalingstidslinje>, personTidslinje: Utbetalingstidslinje) : Sykepengerettighet {
         beregnetTidslinje = tidslinjer
             .reduce(Utbetalingstidslinje::plus)
             .plus(personTidslinje)
@@ -72,6 +78,8 @@ internal class MaksimumSykepengedagerfilter(
             aktivitetslogg.warn("Maks antall sykepengedager er nådd i perioden. Vurder å sende vedtaksbrev fra Infotrygd")
         else
             aktivitetslogg.info("Maksimalt antall sykedager overskrides ikke i perioden")
+
+        return Sykepengerettighet(maksdato(), gjenståendeSykedager(), forbrukteSykedager())
     }
 
     private fun state(nyState: State) {

@@ -32,7 +32,7 @@ import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harId
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
-import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerfilter
+import no.nav.helse.utbetalingstidslinje.Sykepengerettighet
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
@@ -648,13 +648,13 @@ internal class Vedtaksperiode private constructor(
      * Skedulering av utbetaling opp mot andre arbeidsgivere
      */
     private fun forsøkUtbetaling(
-        engineForTimeline: MaksimumSykepengedagerfilter,
+        sykepengerettighet: Sykepengerettighet,
         hendelse: ArbeidstakerHendelse
     ) {
         val vedtaksperioder = person.nåværendeVedtaksperioder(IKKE_FERDIG_BEHANDLET)
         val første = vedtaksperioder.first()
         if (første == this) {
-            return første.forsøkUtbetalingSteg2(vedtaksperioder.drop(1), engineForTimeline, hendelse)
+            return første.forsøkUtbetalingSteg2(vedtaksperioder.drop(1), sykepengerettighet, hendelse)
         }
 
         vedtaksperioder
@@ -665,13 +665,13 @@ internal class Vedtaksperiode private constructor(
         Companion.gjenopptaBehandling(hendelse, person, AvventerArbeidsgivere, AvventerHistorikk)
     }
 
-    private fun lagUtbetaling(engineForTimeline: MaksimumSykepengedagerfilter, hendelse: ArbeidstakerHendelse) {
+    private fun lagUtbetaling(sykepengerettighet: Sykepengerettighet, hendelse: ArbeidstakerHendelse) {
         val utbetaling = arbeidsgiver.lagUtbetaling(
             aktivitetslogg = hendelse,
             fødselsnummer = fødselsnummer,
-            maksdato = engineForTimeline.maksdato(),
-            forbrukteSykedager = engineForTimeline.forbrukteSykedager(),
-            gjenståendeSykedager = engineForTimeline.gjenståendeSykedager(),
+            maksdato = sykepengerettighet.maksdato,
+            forbrukteSykedager = sykepengerettighet.forbrukteSykedager,
+            gjenståendeSykedager = sykepengerettighet.gjenståendeSykedager,
             periode = periode,
             forrige = utbetaling
         ).also {
@@ -682,7 +682,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun forsøkUtbetalingSteg2(
         andreVedtaksperioder: List<Vedtaksperiode>,
-        engineForTimeline: MaksimumSykepengedagerfilter,
+        sykepengerettighet: Sykepengerettighet,
         hendelse: ArbeidstakerHendelse
     ) {
         if (andreVedtaksperioder
@@ -691,7 +691,7 @@ internal class Vedtaksperiode private constructor(
         ) {
             (andreVedtaksperioder + this)
                 .filter { this.periode.overlapperMed(it.periode) }
-                .forEach { it.lagUtbetaling(engineForTimeline, hendelse) }
+                .forEach { it.lagUtbetaling(sykepengerettighet, hendelse) }
             høstingsresultater(hendelse, andreVedtaksperioder)
         } else tilstand(hendelse, AvventerArbeidsgivere)
     }
@@ -746,10 +746,10 @@ internal class Vedtaksperiode private constructor(
     private fun harBrukerutbetaling(andreVedtaksperioder: List<Vedtaksperiode>) =
         utbetalingstidslinje.harBrukerutbetalinger() || andreVedtaksperioder.any { it.utbetalingstidslinje.harBrukerutbetalinger() }
 
-    private fun forsøkRevurdering(engineForTimeline: MaksimumSykepengedagerfilter, hendelse: ArbeidstakerHendelse) {
+    private fun forsøkRevurdering(sykepengerettighet: Sykepengerettighet, hendelse: ArbeidstakerHendelse) {
 
         val vedtaksperioder = person.nåværendeVedtaksperioder(IKKE_FERDIG_REVURDERT)
-        vedtaksperioder.forEach { it.lagRevurdering(engineForTimeline, hendelse) }
+        vedtaksperioder.forEach { it.lagRevurdering(sykepengerettighet, hendelse) }
         val første = vedtaksperioder.first()
         if (første == this) return første.forsøkRevurderingSteg2(vedtaksperioder.drop(1), hendelse)
 
@@ -761,13 +761,13 @@ internal class Vedtaksperiode private constructor(
         Companion.gjenopptaBehandling(hendelse, person, AvventerArbeidsgivereRevurdering, AvventerHistorikkRevurdering, IKKE_FERDIG_REVURDERT)
     }
 
-    private fun lagRevurdering(engineForTimeline: MaksimumSykepengedagerfilter, hendelse: ArbeidstakerHendelse) {
+    private fun lagRevurdering(sykepengerettighet: Sykepengerettighet, hendelse: ArbeidstakerHendelse) {
         val utbetaling = arbeidsgiver.lagRevurdering(
             aktivitetslogg = hendelse,
             fødselsnummer = fødselsnummer,
-            maksdato = engineForTimeline.maksdato(),
-            forbrukteSykedager = engineForTimeline.forbrukteSykedager(),
-            gjenståendeSykedager = engineForTimeline.gjenståendeSykedager(),
+            maksdato = sykepengerettighet.maksdato,
+            forbrukteSykedager = sykepengerettighet.forbrukteSykedager,
+            gjenståendeSykedager = sykepengerettighet.gjenståendeSykedager,
             periode = periode,
             forrige = utbetalinger.aktive().lastOrNull()
         ).also {
@@ -1520,7 +1520,7 @@ internal class Vedtaksperiode private constructor(
                 }
                 onSuccess {
                     tmpLog.accept(AktivitetsloggDeescalator(ytelser))
-                    vedtaksperiode.forsøkRevurdering(arbeidsgiverUtbetalinger.tidslinjeEngine, ytelser)
+                    vedtaksperiode.forsøkRevurdering(arbeidsgiverUtbetalinger.sykepengerettighet, ytelser)
                 }
             }
         }
@@ -2075,7 +2075,7 @@ internal class Vedtaksperiode private constructor(
                     if (vedtaksperiode.person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt)!!.gjelderFlereArbeidsgivere()) {
                         vedtaksperiode.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE
                     }
-                    vedtaksperiode.forsøkUtbetaling(arbeidsgiverUtbetalinger2.tidslinjeEngine, ytelser)
+                    vedtaksperiode.forsøkUtbetaling(arbeidsgiverUtbetalinger2.sykepengerettighet, ytelser)
                 }
             }
         }

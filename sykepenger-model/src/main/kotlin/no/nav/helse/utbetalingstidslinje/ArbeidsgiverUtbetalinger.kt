@@ -15,7 +15,7 @@ internal class ArbeidsgiverUtbetalinger(
     private val dødsdato: LocalDate?,
     private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
 ) {
-    internal lateinit var tidslinjeEngine: MaksimumSykepengedagerfilter
+    internal lateinit var sykepengerettighet: Sykepengerettighet
 
     internal fun beregn(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String, periode: Periode, virkningsdato: LocalDate = periode.endInclusive) {
         val tidslinjer = arbeidsgivere.mapValues { (arbeidsgiver, builder) ->
@@ -33,9 +33,10 @@ internal class ArbeidsgiverUtbetalinger(
         AvvisDagerEtterDødsdatofilter(tidslinjer, periode, dødsdato, aktivitetslogg).filter()
         AvvisDagerEtterFylte70ÅrFilter(tidslinjer, periode, alder, aktivitetslogg).filter()
         vilkårsgrunnlagHistorikk.avvisUtbetalingsdagerMedBegrunnelse(tidslinjer, alder)
-        tidslinjeEngine = MaksimumSykepengedagerfilter(alder, regler, periode, aktivitetslogg).also {
-            it.filter(tidslinjer, infotrygdhistorikk.utbetalingstidslinje().kutt(periode.endInclusive))
-        }
+        sykepengerettighet = MaksimumSykepengedagerfilter(alder, regler, periode, aktivitetslogg).filter(
+            tidslinjer,
+            infotrygdhistorikk.utbetalingstidslinje().kutt(periode.endInclusive)
+        )
         arbeidsgivere.forEach { (arbeidsgiver, tidslinje) ->
             Refusjonsgjødsler(
                 tidslinje = tidslinje + arbeidsgiver.infotrygdUtbetalingstidslinje(),

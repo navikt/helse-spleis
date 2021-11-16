@@ -215,31 +215,27 @@ internal class MaksimumSykepengedagerfilterTest {
     @Test fun `teller sykedager med opphold i sykdom`() {
         val gjeldendePerioder = listOf(tidslinjeOf(12.NAVv2, startDato = 1.mars))
         val historikk = tidslinjeOf(45.NAVv2, startDato = 1.januar(2018))
-        val filter = maksimumSykepengedagerfilter()
-            .also { it.filter(gjeldendePerioder, historikk) }
-        assertEquals(41, filter.forbrukteSykedager())
+        val sykepengerettighet = maksimumSykepengedagerfilter().filter(gjeldendePerioder, historikk)
+        assertEquals(41, sykepengerettighet.forbrukteSykedager)
     }
 
     @Test fun `teller sykedager med overlapp`() {
         val gjeldendePerioder = listOf(tidslinjeOf(12.NAVv2, startDato = 1.februar))
         val historikk = tidslinjeOf(12.ARBv2, 45.NAVv2, startDato = 1.januar(2018))
-        val filter = maksimumSykepengedagerfilter()
-            .also { it.filter(gjeldendePerioder, historikk) }
-        assertEquals(31, filter.forbrukteSykedager())
+        val sykepengerettighet = maksimumSykepengedagerfilter().filter(gjeldendePerioder, historikk)
+        assertEquals(31, sykepengerettighet.forbrukteSykedager)
     }
 
     @Test fun `teller sykedager med konflikt`() {
         val gjeldendePerioder = listOf(tidslinjeOf(12.NAVv2, startDato = 1.januar))
         val historikk = tidslinjeOf(12.ARBv2, 45.NAVv2, startDato = 1.januar)
-        val filter = maksimumSykepengedagerfilter()
-            .also { it.filter(gjeldendePerioder, historikk) }
-        assertEquals(41, filter.forbrukteSykedager())
+        val sykepengerettighet = maksimumSykepengedagerfilter().filter(gjeldendePerioder, historikk)
+        assertEquals(41, sykepengerettighet.forbrukteSykedager)
     }
 
     @Test fun `teller sykedager med 26 uker`() {
-        val filter = maksimumSykepengedagerfilter()
-            .also { it.filter(listOf(enAnnenSykdom()), Utbetalingstidslinje()) }
-        assertEquals(54, filter.forbrukteSykedager())
+        val sykepengerettighet = maksimumSykepengedagerfilter().filter(listOf(enAnnenSykdom()), Utbetalingstidslinje())
+        assertEquals(54, sykepengerettighet.forbrukteSykedager)
     }
 
     private val Utbetalingstidslinje.inspiser get() = UtbetalingsTidslinjeInspektør().also { this.accept(it) }
@@ -304,9 +300,7 @@ internal class MaksimumSykepengedagerfilterTest {
             NormalArbeidstaker,
             periode,
             aktivitetslogg
-        ).also {
-            it.filter(listOf(this), personTidslinje)
-        }
+        ).filter(listOf(this), personTidslinje)
         return AvvisteDager(this).datoer
     }
 
@@ -337,9 +331,7 @@ internal class MaksimumSykepengedagerfilterTest {
             NormalArbeidstaker,
             periode,
             aktivitetslogg
-        ).also {
-            it.filter(listOf(this), personTidslinje)
-        }
+        ).filter(listOf(this), personTidslinje)
         return AvvisteDagerOgDeresKommentarer(this).dager
     }
 
