@@ -59,10 +59,6 @@ internal class OppdragBuilder(
         utbetalingslinjer.firstOrNull()?.refFagsystemId = null
     }
 
-    private fun oppdragBasertPåTidligere(tidligere: Oppdrag, aktivitetslogg: IAktivitetslogg) =
-        nyttOppdrag()
-
-
     private val linje get() = utbetalingslinjer.first()
 
     override fun visit(dag: UkjentDag, dato: LocalDate, økonomi: Økonomi) {
@@ -153,14 +149,12 @@ internal class OppdragBuilder(
         )
     }
 
-
     private fun addLinje(dato: LocalDate, grad: Double) {
         utbetalingslinjer.add(
             0,
-            Utbetalingslinje(dato, dato, Satstype.DAG, null, 0, grad, fagsystemId)
+            Utbetalingslinje(dato, dato, Satstype.DAG, null, 0, grad, fagsystemId, klassekode = fagområde.klassekode())
         )
     }
-
 
     internal interface Tilstand {
         fun sisteArbeidsgiverdag(dato: LocalDate) {}

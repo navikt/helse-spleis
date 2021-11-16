@@ -410,6 +410,14 @@ internal class OppdragBuilderTest {
     fun `Utbetalingstidslinje med delvis refusjon medfører et oppdrag til sykmeldte med en linje`() {
         val oppdrag = tilSykmeldte(1.januar til 31.januar er NAVDAGER medGrad 100.0 medBeløp 1200 medRefusjon 600)
         assertEquals(1, oppdrag.size)
+        assertEquals(Klassekode.SykepengerArbeidstakerOrdinær, oppdrag[0].klassekode)
+    }
+
+    @Test
+    fun `utbetaling som slutter på helg`() {
+        val oppdrag = tilSykmeldte(1.januar til 6.januar er NAVDAGER medGrad 100.0 medBeløp 1200 medRefusjon 0)
+        assertEquals(1, oppdrag.size)
+        assertEquals(Klassekode.SykepengerArbeidstakerOrdinær, oppdrag[0].klassekode)
     }
 
     @Test
@@ -425,6 +433,8 @@ internal class OppdragBuilderTest {
         assertEquals(Fagområde.Sykepenger, oppdrag.fagområde())
         oppdrag.assertLinje(0, 17.januar, 31.januar, null, 1200, 100.0, endringskode = NY, klassekode = Klassekode.SykepengerArbeidstakerOrdinær)
     }
+
+    private val Utbetalingslinje.klassekode get() = this.get<Klassekode>("klassekode")
 
     private fun Oppdrag.assertLinje(
         index: Int,
