@@ -633,6 +633,17 @@ internal class Vedtaksperiode private constructor(
         Companion.gjenopptaBehandling(inntektsmelding, person, AvventerArbeidsgivere, AvventerHistorikk)
     }
 
+    private fun forberedMuligUtbetaling(søknad: Søknad) {
+        val overlappendeVedtaksperioder = overlappendeVedtaksperioder()
+        val nesteTilstand = if (overlappendeVedtaksperioder.kanGåTilNesteTilstand()) AvventerHistorikk else AvventerArbeidsgivere
+
+        håndterSøknad(søknad, nesteTilstand)
+        if (tilstand == AvventerArbeidsgivere) {
+            overlappendeVedtaksperioder.forEach { it.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE }
+        }
+        Companion.gjenopptaBehandling(søknad, person, AvventerArbeidsgivere, AvventerHistorikk)
+    }
+
     /**
      * Skedulering av utbetaling opp mot andre arbeidsgivere
      */
@@ -1318,7 +1329,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            vedtaksperiode.håndterSøknad(søknad, AvventerHistorikk)
+            vedtaksperiode.forberedMuligUtbetaling(søknad)
             søknad.info("Fullført behandling av søknad")
         }
 
