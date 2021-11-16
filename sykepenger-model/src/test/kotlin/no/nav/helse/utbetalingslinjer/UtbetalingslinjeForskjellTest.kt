@@ -120,13 +120,37 @@ internal class UtbetalingslinjeForskjellTest {
 
     @Test
     fun `helt separate utbetalingslinjer`() {
-        val original = linjer(1.januar to 5.januar)
-        val recalculated = linjer(5.februar to 9.februar)
+        val original = linjer(2.januar to 5.januar, sisteArbeidsgiverdag = 1.januar)
+        val recalculated = linjer(5.februar to 9.februar, sisteArbeidsgiverdag = 4.februar)
         val actual = recalculated - original
         assertUtbetalinger(linjer(5.februar to 9.februar), actual)
         assertEquals(5, actual.stønadsdager())
         assertNotEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(NY, actual.endringskode)
+        assertFalse(aktivitetslogg.hasWarningsOrWorse())
+    }
+
+    @Test
+    fun `kjeder seg ikke på forrige oppdrag når sisteArbeidsgiverdag er ulik`() {
+        val original = linjer(2.januar to 5.januar, sisteArbeidsgiverdag = 1.januar)
+        val recalculated = linjer(*emptyArray<TestUtbetalingslinje>(), sisteArbeidsgiverdag = 4.februar)
+        val actual = recalculated - original
+        assertUtbetalinger(linjer(), actual)
+        assertEquals(0, actual.stønadsdager())
+        assertNotEquals(original.fagsystemId, actual.fagsystemId)
+        assertEquals(NY, actual.endringskode)
+        assertFalse(aktivitetslogg.hasWarningsOrWorse())
+    }
+
+    @Test
+    fun `kjeder seg på forrige oppdrag når sisteArbeidsgiverdag er lik`() {
+        val original = linjer(2.januar to 5.januar, sisteArbeidsgiverdag = 1.januar)
+        val recalculated = linjer(*emptyArray<TestUtbetalingslinje>(), sisteArbeidsgiverdag = 1.januar)
+        val actual = recalculated - original
+        assertUtbetalinger(linjer(2.januar to 5.januar endringskode ENDR opphører 2.januar), actual)
+        assertEquals(0, actual.stønadsdager())
+        assertEquals(original.fagsystemId, actual.fagsystemId)
+        assertEquals(ENDR, actual.endringskode)
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
@@ -699,8 +723,8 @@ internal class UtbetalingslinjeForskjellTest {
 
     @Test
     fun `ingen overlapp og ulik fagsystemId`() {
-        val original = linjer(5.januar to 10.januar)
-        val recalculated = linjer(1.januar to 3.januar)
+        val original = linjer(5.januar to 10.januar, sisteArbeidsgiverdag = 4.januar)
+        val recalculated = linjer(1.januar to 3.januar, sisteArbeidsgiverdag = 31.desember(2017))
         val actual = recalculated - original
         assertUtbetalinger(linjer(1.januar to 3.januar endringskode NY), actual)
         assertNotEquals(original.fagsystemId, actual.fagsystemId)
@@ -950,13 +974,13 @@ internal class UtbetalingslinjeForskjellTest {
         }
     }
 
-    private fun linjer(vararg linjer: TestUtbetalingslinje, other: Oppdrag? = null) =
-        Oppdrag(ORGNUMMER, SykepengerRefusjon, linjer.map { it.asUtbetalingslinje() }, fagsystemId = other?.fagsystemId() ?: genererUtbetalingsreferanse(UUID.randomUUID()), sisteArbeidsgiverdag = 31.desember(2017)).also { oppdrag ->
+    private fun linjer(vararg linjer: TestUtbetalingslinje, other: Oppdrag? = null, sisteArbeidsgiverdag: LocalDate = 31.desember(2017)) =
+        Oppdrag(ORGNUMMER, SykepengerRefusjon, linjer.map { it.asUtbetalingslinje() }, fagsystemId = other?.fagsystemId() ?: genererUtbetalingsreferanse(UUID.randomUUID()), sisteArbeidsgiverdag = sisteArbeidsgiverdag).also { oppdrag ->
             oppdrag.forEach { if(it.refId != null) it.refFagsystemId = oppdrag.fagsystemId() }
         }
 
-    private fun linjer(vararg linjer: Utbetalingslinje) =
-        Oppdrag(ORGNUMMER, SykepengerRefusjon, linjer.toList(), sisteArbeidsgiverdag = 31.desember(2017)).also { oppdrag ->
+    private fun linjer(vararg linjer: Utbetalingslinje, sisteArbeidsgiverdag: LocalDate = 31.desember(2017)) =
+        Oppdrag(ORGNUMMER, SykepengerRefusjon, linjer.toList(), sisteArbeidsgiverdag = sisteArbeidsgiverdag).also { oppdrag ->
             oppdrag.zipWithNext { a, b -> b.kobleTil(a) }
             oppdrag.forEach { if(it.refId != null) it.refFagsystemId = oppdrag.fagsystemId() }
         }

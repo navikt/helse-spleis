@@ -127,4 +127,42 @@ internal class FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
         assertTrue(inspektør.utbetaling(1).personOppdrag().harUtbetalinger())
         assertEquals(1.februar til 28.februar, Oppdrag.periode(inspektør.utbetaling(1).personOppdrag()))
     }
+
+    // Tester strengt talt et ugyldig case siden refusjon ikke får lov å gå fra null til full, men den treffer uansett en probemstilling i modellen
+    @Test
+    fun `starter med ingen refusjon, så korrigeres refusjonen til full`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, refusjon = Inntektsmelding.Refusjon(0.daglig, null))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterYtelser(2.vedtaksperiode)
+
+        assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode)) {
+            "Perioden forkastes pga. feature toggle om delvis refusjon." +
+                "Den dagen delvis refusjon støttes vil koden under være riktig asserts -- med mindre man stopper dette caset på en funksjonelt nivå"
+        }
+
+        /*håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
+        håndterUtbetalt(2.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+
+        assertFalse(inspektør.utbetaling(0).arbeidsgiverOppdrag().harUtbetalinger())
+        assertTrue(inspektør.utbetaling(0).personOppdrag().harUtbetalinger())
+        assertEquals(17.januar til 31.januar, Oppdrag.periode(inspektør.utbetaling(0).personOppdrag()))
+
+        assertTrue(inspektør.utbetaling(1).arbeidsgiverOppdrag().harUtbetalinger())
+        assertTrue(inspektør.utbetaling(1).personOppdrag().harUtbetalinger())
+        assertTrue(inspektør.utbetaling(1).personOppdrag()[0].erOpphør())
+        assertEquals(17.januar til 31.januar, Oppdrag.periode(inspektør.utbetaling(1).arbeidsgiverOppdrag()))*/
+    }
 }

@@ -3,8 +3,9 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.testhelpers.*
+import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 @Suppress("UNCHECKED_CAST")
@@ -261,14 +262,9 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         assertEquals(1, oppdrag.linjerUtenOpphør().size)
 
         // Ny fagsystemId fordi perioden vi forlenger har blitt opphørt
-        assertFalse(inspektør.arbeidsgiverOppdrag.first().fagsystemId() == inspektør.arbeidsgiverOppdrag.last().fagsystemId())
-
-        val behov = inspektør.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling)
-        assertEquals(1, (behov.detaljer()["linjer"] as List<*>).size)
-
-        assertEquals("2021-04-24", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["fom"])
-        assertEquals("2021-05-15", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["tom"])
-        assertEquals("NY", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["endringskode"])
+        assertEquals(inspektør.arbeidsgiverOppdrag.first().fagsystemId(), inspektør.arbeidsgiverOppdrag.last().fagsystemId())
+        assertEquals(15, inspektør.arbeidsgiverOppdrag.last().stønadsdager())
+        assertEquals(24.april(2021) til 15.mai(2021), Oppdrag.periode(inspektør.arbeidsgiverOppdrag.last()))
     }
 
     @Test
@@ -313,14 +309,9 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt(2.vedtaksperiode)
 
-        assertNotEquals(inspektør.arbeidsgiverOppdrag.first().fagsystemId(), inspektør.arbeidsgiverOppdrag.last().fagsystemId())
-
-        val behov = inspektør.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling)
-        assertEquals(1, (behov.detaljer()["linjer"] as List<*>).size)
-
-        assertEquals("2021-04-24", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["fom"])
-        assertEquals("2021-05-15", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["tom"])
-        assertEquals("NY", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["endringskode"])
+        assertEquals(inspektør.arbeidsgiverOppdrag.first().fagsystemId(), inspektør.arbeidsgiverOppdrag.last().fagsystemId())
+        assertEquals(15, inspektør.arbeidsgiverOppdrag.last().stønadsdager())
+        assertEquals(24.april(2021) til 15.mai(2021), Oppdrag.periode(inspektør.arbeidsgiverOppdrag.last()))
     }
 
     @Test
@@ -366,14 +357,9 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt(2.vedtaksperiode)
 
-        assertNotEquals(inspektør.arbeidsgiverOppdrag.first().fagsystemId(), inspektør.arbeidsgiverOppdrag.last().fagsystemId())
-
-        val behov = inspektør.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling)
-        assertEquals(1, (behov.detaljer()["linjer"] as List<*>).size)
-
-        assertEquals("2021-04-24", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["fom"])
-        assertEquals("2021-05-15", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["tom"])
-        assertEquals("NY", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["endringskode"])
+        assertEquals(inspektør.arbeidsgiverOppdrag.first().fagsystemId(), inspektør.arbeidsgiverOppdrag.last().fagsystemId())
+        assertEquals(15, inspektør.arbeidsgiverOppdrag.last().stønadsdager())
+        assertEquals(24.april(2021) til 15.mai(2021), Oppdrag.periode(inspektør.arbeidsgiverOppdrag.last()))
     }
 
     @Test

@@ -74,7 +74,7 @@ internal class Oppdrag private constructor(
     internal operator fun contains(other: Oppdrag) = this.tilhører(other) || this.overlapperMed(other)
 
     private fun tilhører(other: Oppdrag) = this.fagsystemId == other.fagsystemId && this.fagområde == other.fagområde
-    private fun overlapperMed(other: Oppdrag) = maxOf(this.førstedato, other.førstedato) <= minOf(this.sistedato, other.sistedato)
+    private fun overlapperMed(other: Oppdrag) = maxOf(this.førstedato, other.førstedato) <= minOf(this.sistedato, other.sistedato) || (this.sisteArbeidsgiverdag != null && this.sisteArbeidsgiverdag == other.sisteArbeidsgiverdag)
 
     internal fun overfør(
         aktivitetslogg: IAktivitetslogg,
@@ -159,8 +159,8 @@ internal class Oppdrag private constructor(
     internal fun minus(eldre: Oppdrag, aktivitetslogg: IAktivitetslogg): Oppdrag {
         return when {
             eldre.isEmpty() -> this.also { this.fagsystemId = eldre.fagsystemId }
-            // Vi ønsker ikke å forlenge et oppdrag vi ikke overlapper med, eller et tomt oppdrag
-            harIngenKoblingTilTidligereOppdrag(eldre) -> this
+            // Vi ønsker ikke å forlenge et oppdrag vi ikke overlapper med
+            this !in eldre -> this
             // om man trekker fra et utbetalt oppdrag med et tomt oppdrag medfører det et oppdrag som opphører (les: annullerer) hele fagsystemIDen
             erTomt() -> annulleringsoppdrag(eldre)
             // "fom" kan flytte seg fremover i tid dersom man, eksempelvis, revurderer en utbetalt periode til å starte med ikke-utbetalte dager (f.eks. ferie)
@@ -183,8 +183,6 @@ internal class Oppdrag private constructor(
     }
 
     private fun ingenUtbetalteDager() = linjerUtenOpphør().isEmpty()
-
-    private fun harIngenKoblingTilTidligereOppdrag(eldre: Oppdrag) = eldre.isEmpty() || this !in eldre
 
     private fun erTomt() = this.isEmpty()
 

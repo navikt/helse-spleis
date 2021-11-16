@@ -105,6 +105,46 @@ internal class UtbetalingTest {
     }
 
     @Test
+    fun `forlenger seg ikke på en annullering`() {
+        val tidslinje = tidslinjeOf(16.AP, 3.NAV, 2.HELG, 5.NAV)
+        beregnUtbetalinger(tidslinje)
+        val første = opprettUtbetaling(tidslinje)
+        val annullering = første.annuller(AnnullerUtbetaling(UUID.randomUUID(), "", "", "", første.arbeidsgiverOppdrag().fagsystemId(), "", "", LocalDateTime.now())) ?: fail {
+            "Klarte ikke lage annullering"
+        }
+        val andre = opprettUtbetaling(tidslinje, annullering)
+        assertNotEquals(første.arbeidsgiverOppdrag().fagsystemId(), andre.arbeidsgiverOppdrag().fagsystemId())
+    }
+
+    @Test
+    fun `omgjøre en revurdert periode med opphør`() {
+        val tidslinje = tidslinjeOf(16.AP, 3.NAV, 2.HELG, 5.NAV)
+        val ferietidslinje = tidslinjeOf(16.AP, 10.FRI)
+        beregnUtbetalinger(tidslinje)
+        val første = opprettUtbetaling(tidslinje)
+        val andre = opprettUtbetaling(ferietidslinje, første)
+        val tredje = opprettUtbetaling(tidslinje, andre)
+        assertEquals(første.arbeidsgiverOppdrag().fagsystemId(), andre.arbeidsgiverOppdrag().fagsystemId())
+        assertTrue(andre.arbeidsgiverOppdrag()[0].erOpphør())
+        assertEquals(første.arbeidsgiverOppdrag().fagsystemId(), tredje.arbeidsgiverOppdrag().fagsystemId())
+        assertEquals(17.januar, tredje.arbeidsgiverOppdrag().førstedato)
+    }
+
+    @Test
+    fun `forlenger seg på en revurdert periode med opphør`() {
+        val tidslinje = tidslinjeOf(16.AP, 3.NAV, 2.HELG, 5.NAV)
+        val ferietidslinje = tidslinjeOf(16.AP, 10.FRI)
+        beregnUtbetalinger(tidslinje)
+        val første = opprettUtbetaling(tidslinje)
+        val andre = opprettUtbetaling(ferietidslinje, første)
+        val tredje = opprettUtbetaling(beregnUtbetalinger(ferietidslinje + tidslinjeOf(10.NAV, startDato = 27.januar)), andre)
+        assertEquals(første.arbeidsgiverOppdrag().fagsystemId(), andre.arbeidsgiverOppdrag().fagsystemId())
+        assertTrue(andre.arbeidsgiverOppdrag()[0].erOpphør())
+        assertEquals(første.arbeidsgiverOppdrag().fagsystemId(), tredje.arbeidsgiverOppdrag().fagsystemId())
+        assertEquals(27.januar, tredje.arbeidsgiverOppdrag().førstedato)
+    }
+
+    @Test
     fun nettoBeløp() {
         val tidslinje = tidslinjeOf(5.NAV, 2.HELG, 4.NAV)
         beregnUtbetalinger(tidslinje)
