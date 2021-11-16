@@ -164,7 +164,7 @@ internal class Utbetaling private constructor(
         tilstand.overført(this, utbetalingOverført)
     }
 
-    internal fun harDelvisRefusjon() = arbeidsgiverOppdrag.isNotEmpty() && personOppdrag.isNotEmpty()
+    internal fun harDelvisRefusjon() = arbeidsgiverOppdrag.harUtbetalinger () && personOppdrag.harUtbetalinger()
 
     internal fun simuler(hendelse: IAktivitetslogg) {
         hendelse.kontekst(this)
