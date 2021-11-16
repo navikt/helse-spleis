@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggles
+import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
@@ -19,12 +19,12 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
 
     @BeforeEach
     fun setup(){
-        Toggles.Etterlevelse.enable()
+        Toggle.Etterlevelse.enable()
     }
 
     @AfterEach
     fun teardown(){
-        Toggles.Etterlevelse.pop()
+        Toggle.Etterlevelse.pop()
     }
 
     @Test

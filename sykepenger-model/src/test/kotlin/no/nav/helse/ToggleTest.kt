@@ -1,17 +1,17 @@
 package no.nav.helse
 
-import no.nav.helse.Toggles.Companion.disable
-import no.nav.helse.Toggles.Companion.enable
+import no.nav.helse.Toggle.Companion.disable
+import no.nav.helse.Toggle.Companion.enable
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class TogglesTest {
+internal class ToggleTest {
 
-    private lateinit var toggle: Toggles
+    private lateinit var toggle: Toggle
 
     private fun prepareToggle(enabled: Boolean, force: Boolean) {
-        toggle = object : Toggles(enabled, force) {}
+        toggle = object : Toggle(enabled, force) {}
     }
 
     @Test
@@ -135,9 +135,9 @@ internal class TogglesTest {
 
     @Test
     fun `enable multiple toggles`() {
-        val toggle1 = object : Toggles(enabled = false, force = false) {}
-        val toggle2 = object : Toggles(enabled = false, force = false) {}
-        val toggle3 = object : Toggles(enabled = false, force = false) {}
+        val toggle1 = object : Toggle(enabled = false, force = false) {}
+        val toggle2 = object : Toggle(enabled = false, force = false) {}
+        val toggle3 = object : Toggle(enabled = false, force = false) {}
 
         assertFalse(toggle1.enabled)
         assertFalse(toggle2.enabled)
@@ -159,9 +159,9 @@ internal class TogglesTest {
 
     @Test
     fun `disable multiple toggles`() {
-        val toggle1 = object : Toggles(enabled = true, force = false) {}
-        val toggle2 = object : Toggles(enabled = true, force = false) {}
-        val toggle3 = object : Toggles(enabled = true, force = false) {}
+        val toggle1 = object : Toggle(enabled = true, force = false) {}
+        val toggle2 = object : Toggle(enabled = true, force = false) {}
+        val toggle3 = object : Toggle(enabled = true, force = false) {}
 
         assertFalse(toggle1.disabled)
         assertFalse(toggle2.disabled)
@@ -183,9 +183,9 @@ internal class TogglesTest {
 
     @Test
     fun `enable multiple toggles - keep disabled when forced`() {
-        val toggle1 = object : Toggles(enabled = false, force = false) {}
-        val toggle2 = object : Toggles(enabled = false, force = true) {}
-        val toggle3 = object : Toggles(enabled = false, force = false) {}
+        val toggle1 = object : Toggle(enabled = false, force = false) {}
+        val toggle2 = object : Toggle(enabled = false, force = true) {}
+        val toggle3 = object : Toggle(enabled = false, force = false) {}
 
         assertFalse(toggle1.enabled)
         assertFalse(toggle2.enabled)
@@ -207,9 +207,9 @@ internal class TogglesTest {
 
     @Test
     fun `disable multiple toggles - keep enabled when forced`() {
-        val toggle1 = object : Toggles(enabled = true, force = true) {}
-        val toggle2 = object : Toggles(enabled = true, force = false) {}
-        val toggle3 = object : Toggles(enabled = true, force = true) {}
+        val toggle1 = object : Toggle(enabled = true, force = true) {}
+        val toggle2 = object : Toggle(enabled = true, force = false) {}
+        val toggle3 = object : Toggle(enabled = true, force = true) {}
 
         assertFalse(toggle1.disabled)
         assertFalse(toggle2.disabled)

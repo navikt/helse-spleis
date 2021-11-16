@@ -1,6 +1,6 @@
 package no.nav.helse.serde
 
-import no.nav.helse.Toggles
+import no.nav.helse.Toggle
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.*
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.Arbeidskategorikode
@@ -37,12 +37,12 @@ class JsonBuilderTest {
 
     @BeforeEach
     fun beforeEach() {
-        Toggles.Etterlevelse.enable()
+        Toggle.Etterlevelse.enable()
     }
 
     @AfterEach
     fun afterEach() {
-        Toggles.Etterlevelse.pop()
+        Toggle.Etterlevelse.pop()
     }
 
     @Test
@@ -121,14 +121,14 @@ class JsonBuilderTest {
 
     @Test
     fun `Serialisering av feriepenger`() {
-        Toggles.SendFeriepengeOppdrag.enable {
+        Toggle.SendFeriepengeOppdrag.enable {
             testSerialiseringAvPerson(personMedFeriepenger())
         }
     }
 
     @Test
     fun `Skal ikke serialisere feriepenger når toggle er disabled`() {
-        Toggles.SendFeriepengeOppdrag.disable {
+        Toggle.SendFeriepengeOppdrag.disable {
             val søknadhendelseId = UUID.randomUUID()
 
             val personMedFeriepenger = personMedFeriepenger(søknadhendelseId = søknadhendelseId)

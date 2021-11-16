@@ -1,7 +1,7 @@
 package no.nav.helse.person
 
 import no.nav.helse.Fødselsnummer
-import no.nav.helse.Toggles
+import no.nav.helse.Toggle
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.utbetaling.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-30 ledd 2`
@@ -123,7 +123,7 @@ class Person private constructor(
         }
         arbeidsgivere.beregnFeriepengerForAlleArbeidsgivere(aktørId, feriepengeberegner, utbetalingshistorikk)
 
-        if (Toggles.SendFeriepengeOppdrag.enabled) {
+        if (Toggle.SendFeriepengeOppdrag.enabled) {
             aktivitetslogg.info("Feriepenger er utbetalt")
         }
     }

@@ -4,7 +4,7 @@ import com.apurebase.kgraphql.GraphQL
 import com.apurebase.kgraphql.schema.dsl.SchemaBuilder
 import io.ktor.application.*
 import io.ktor.auth.*
-import no.nav.helse.Toggles
+import no.nav.helse.Toggle
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.dao.PersonDao
 import no.nav.helse.spleis.dto.håndterPerson
@@ -85,7 +85,7 @@ fun Application.installGraphQLApi(dataSource: DataSource, authProviderName: Stri
     install(GraphQL) {
         endpoint = "/graphql"
 
-        if (Toggles.GraphQLPlayground.enabled) {
+        if (Toggle.GraphQLPlayground.enabled) {
             playground = true
         } else {
             wrap {

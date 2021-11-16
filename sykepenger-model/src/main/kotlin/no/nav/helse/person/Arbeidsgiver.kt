@@ -1,6 +1,6 @@
 package no.nav.helse.person
 
-import no.nav.helse.Toggles
+import no.nav.helse.Toggle
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.utbetaling.*
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.iderMedUtbetaling
@@ -281,7 +281,7 @@ internal class Arbeidsgiver private constructor(
             feriepengeutbetalinger
         ).build()
 
-        if (Toggles.SendFeriepengeOppdrag.enabled) {
+        if (Toggle.SendFeriepengeOppdrag.enabled) {
             feriepengeutbetalinger.add(feriepengeutbetaling)
 
             if (feriepengeutbetaling.sendTilOppdrag) {
@@ -322,14 +322,14 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(søknad: Søknad) {
         korrigerFerieIForkant(søknad)
-        if (Toggles.OppretteVedtaksperioderVedSøknad.enabled) return håndterEllerOpprettVedtaksperiode(søknad, Vedtaksperiode::håndter)
+        if (Toggle.OppretteVedtaksperioderVedSøknad.enabled) return håndterEllerOpprettVedtaksperiode(søknad, Vedtaksperiode::håndter)
         søknad.kontekst(this)
         noenHarHåndtert(søknad, Vedtaksperiode::håndter, "Forventet ikke søknad. Har nok ikke mottatt sykmelding")
         finalize(søknad)
     }
 
     internal fun håndter(søknad: SøknadArbeidsgiver) {
-        if (Toggles.OppretteVedtaksperioderVedSøknad.enabled) return håndterEllerOpprettVedtaksperiode(søknad, Vedtaksperiode::håndter)
+        if (Toggle.OppretteVedtaksperioderVedSøknad.enabled) return håndterEllerOpprettVedtaksperiode(søknad, Vedtaksperiode::håndter)
         søknad.kontekst(this)
         noenHarHåndtert(søknad, Vedtaksperiode::håndter, "Forventet ikke søknad til arbeidsgiver. Har nok ikke mottatt sykmelding")
         finalize(søknad)

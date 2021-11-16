@@ -2,7 +2,7 @@ package no.nav.helse.serde
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
-import no.nav.helse.Toggles
+import no.nav.helse.Toggle
 import java.time.LocalDate
 
 sealed class DateRange {
@@ -48,7 +48,7 @@ class DateRanges {
     private val ranges = mutableListOf<DataHolder>()
     fun plus(date: LocalDate, data: Map<String, Any?>) = apply {
         val last = ranges.lastOrNull()
-        if (last != null && last.canBeJoinedBy(date, data) && Toggles.DatoRangeJson.enabled) {
+        if (last != null && last.canBeJoinedBy(date, data) && Toggle.DatoRangeJson.enabled) {
             last.range += date
         } else {
             ranges.add(DataHolder(DateRange.Single(date), data))

@@ -1,6 +1,6 @@
 package no.nav.helse.spleis
 
-import no.nav.helse.Toggles
+import no.nav.helse.Toggle
 import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.person.Person
 import no.nav.helse.somFødselsnummer
@@ -19,7 +19,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
 
     @BeforeAll
     internal fun setupServer() {
-        Toggles.SpeilApiV2.enable()
+        Toggle.SpeilApiV2.enable()
         testServer = ApiTestServer()
         testServer.start()
     }
@@ -27,7 +27,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
     @AfterAll
     internal fun tearDownServer() {
         testServer.tearDown()
-        Toggles.SpeilApiV2.pop()
+        Toggle.SpeilApiV2.pop()
     }
 
     @BeforeEach

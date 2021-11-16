@@ -1,6 +1,6 @@
 package no.nav.helse.person
 
-import no.nav.helse.Toggles
+import no.nav.helse.Toggle
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Validation.Companion.validation
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
@@ -252,7 +252,7 @@ internal class Vedtaksperiode private constructor(
             return
         }
 
-        if (Toggles.RevurdereInntektMedFlereArbeidsgivere.disabled && inntektskilde == Inntektskilde.FLERE_ARBEIDSGIVERE) {
+        if (Toggle.RevurdereInntektMedFlereArbeidsgivere.disabled && inntektskilde == Inntektskilde.FLERE_ARBEIDSGIVERE) {
             hendelse.error("Forespurt overstyring av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
             return
         }
@@ -707,7 +707,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         when {
-            Toggles.LageBrukerutbetaling.kanIkkeFortsette(hendelse, utbetaling(), harBrukerutbetaling) -> {
+            Toggle.LageBrukerutbetaling.kanIkkeFortsette(hendelse, utbetaling(), harBrukerutbetaling) -> {
                 person.invaliderAllePerioder(hendelse, "Kan ikke fortsette på grunn av manglende funksjonalitet for utbetaling til bruker")
             }
             ingenUtbetaling && kunArbeidsgiverdager && ingenWarnings -> {
@@ -2220,7 +2220,7 @@ internal class Vedtaksperiode private constructor(
             hendelse: IAktivitetslogg,
             infotrygdhistorikk: Infotrygdhistorikk
         ) {
-            if (Toggles.RebregnUtbetalingVedHistorikkendring.enabled && infotrygdhistorikk.harEndretHistorikk(vedtaksperiode.utbetaling())) return vedtaksperiode.tilstand(
+            if (Toggle.RebregnUtbetalingVedHistorikkendring.enabled && infotrygdhistorikk.harEndretHistorikk(vedtaksperiode.utbetaling())) return vedtaksperiode.tilstand(
                 hendelse,
                 AvventerHistorikk
             ) {

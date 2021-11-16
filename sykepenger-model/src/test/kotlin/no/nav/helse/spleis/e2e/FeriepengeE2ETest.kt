@@ -3,7 +3,7 @@ package no.nav.helse.spleis.e2e
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
-import no.nav.helse.Toggles
+import no.nav.helse.Toggle
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode
 import no.nav.helse.person.Aktivitetslogg
@@ -35,12 +35,12 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     @BeforeEach
     fun setUp() {
         logCollector.list.clear()
-        Toggles.SendFeriepengeOppdrag.enable()
+        Toggle.SendFeriepengeOppdrag.enable()
     }
 
     @AfterEach
     fun tearDown() {
-        Toggles.SendFeriepengeOppdrag.pop()
+        Toggle.SendFeriepengeOppdrag.pop()
     }
 
     @Test
@@ -596,7 +596,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `Sender ikke behov når det ikke er noen diff i IT og spleis sine beregninger av feriepenger`() {
-        Toggles.SendFeriepengeOppdrag.enable {
+        Toggle.SendFeriepengeOppdrag.enable {
             håndterSykmelding(Sykmeldingsperiode(6.juni(2020), 7.juni(2020), 100.prosent))
             håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(6.juni(2020), 7.juni(2020), 100.prosent))
             håndterUtbetalingshistorikk(1.vedtaksperiode)
@@ -620,7 +620,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `Totalbeløp settes til sats for utbetaling av feriepenger`() {
-        Toggles.SendFeriepengeOppdrag.enable {
+        Toggle.SendFeriepengeOppdrag.enable {
             håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 30.juni(2020), 100.prosent))
             håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.juni(2020), 30.juni(2020), 100.prosent))
             håndterUtbetalingshistorikk(1.vedtaksperiode)
@@ -846,7 +846,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `toggle av føkekr ikke shit`() {
-        Toggles.SendFeriepengeOppdrag.enable {
+        Toggle.SendFeriepengeOppdrag.enable {
             håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 14.august(2020), 100.prosent))
             håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.juni(2020), 14.august(2020), 100.prosent)) // 43 dager
             håndterUtbetalingshistorikk(1.vedtaksperiode)
@@ -869,7 +869,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             )
             val førsteUtbetaling = engangsutbetalinger()
 
-            Toggles.SendFeriepengeOppdrag.disable {
+            Toggle.SendFeriepengeOppdrag.disable {
                 håndterUtbetalingshistorikkForFeriepenger(
                     utbetalinger = listOf(
                         Arbeidsgiverutbetalingsperiode(

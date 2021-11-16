@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggles
+import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -22,12 +22,12 @@ internal class FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
 
     @BeforeAll
     fun setup() {
-        Toggles.LageBrukerutbetaling.enable()
+        Toggle.LageBrukerutbetaling.enable()
     }
 
     @AfterAll
     fun teardown() {
-        Toggles.LageBrukerutbetaling.pop()
+        Toggle.LageBrukerutbetaling.pop()
     }
 
     @Test

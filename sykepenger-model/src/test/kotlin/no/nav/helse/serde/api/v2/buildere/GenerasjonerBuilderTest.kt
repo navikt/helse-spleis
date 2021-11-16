@@ -1,10 +1,9 @@
 package no.nav.helse.serde.api.v2.buildere
 
-import no.nav.helse.Toggles
+import no.nav.helse.Toggle
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.arbeidsgiver
-import no.nav.helse.serde.api.VedtaksperiodeDTO
 import no.nav.helse.serde.api.v2.BeregnetPeriode
 import no.nav.helse.serde.api.v2.Generasjon
 import no.nav.helse.serde.api.v2.Tidslinjeperiode
@@ -611,7 +610,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
     @Test
     fun `ta med personoppdrag`() {
-        Toggles.LageBrukerutbetaling.enable {
+        Toggle.LageBrukerutbetaling.enable {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
             håndterInntektsmelding(refusjon = Inntektsmelding.Refusjon(0.månedlig, null), førsteFraværsdag = 1.januar, arbeidsgiverperioder = listOf(1.januar til 16.januar))

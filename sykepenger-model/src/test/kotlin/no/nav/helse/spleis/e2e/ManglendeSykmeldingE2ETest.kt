@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggles
+import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -20,12 +20,12 @@ internal class ManglendeSykmeldingE2ETest : AbstractEndToEndTest() {
 
     @BeforeAll
     fun setup() {
-        Toggles.OppretteVedtaksperioderVedSøknad.enable()
+        Toggle.OppretteVedtaksperioderVedSøknad.enable()
     }
 
     @AfterAll
     fun teardown() {
-        Toggles.OppretteVedtaksperioderVedSøknad.pop()
+        Toggle.OppretteVedtaksperioderVedSøknad.pop()
     }
 
     @Test

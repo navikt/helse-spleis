@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggles
+import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
@@ -47,7 +47,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
 
     @Test
     fun `alle perioder for alle arbeidsgivere med aktuelt skjæringstidspunkt skal ha hendelseIden`() {
-        Toggles.RevurdereInntektMedFlereArbeidsgivere.enable {
+        Toggle.RevurdereInntektMedFlereArbeidsgivere.enable {
             nyeVedtak(1.januar, 31.januar, AG1, AG2)
             val hendelseId = UUID.randomUUID()
             håndterOverstyrInntekt(orgnummer = AG1, skjæringstidspunkt = 1.januar, meldingsreferanseId = hendelseId)

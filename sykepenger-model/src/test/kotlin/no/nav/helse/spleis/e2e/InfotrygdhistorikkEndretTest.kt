@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggles
+import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
@@ -24,12 +24,12 @@ internal class InfotrygdhistorikkEndretTest: AbstractEndToEndTest() {
 
     @BeforeEach
     fun setup() {
-        Toggles.RebregnUtbetalingVedHistorikkendring.enable()
+        Toggle.RebregnUtbetalingVedHistorikkendring.enable()
     }
 
     @AfterEach
     fun teardown() {
-        Toggles.RebregnUtbetalingVedHistorikkendring.pop()
+        Toggle.RebregnUtbetalingVedHistorikkendring.pop()
     }
 
     @Test

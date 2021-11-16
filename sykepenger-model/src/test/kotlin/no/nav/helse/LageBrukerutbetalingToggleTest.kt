@@ -28,46 +28,46 @@ internal class LageBrukerutbetalingToggleTest {
 
     @Test
     fun `slår ikke ut dersom toggle er av`() {
-        Toggles.LageBrukerutbetaling.disable {
-            assertFalse(Toggles.LageBrukerutbetaling.kanIkkeFortsette(aktivitetslogg, lagUtbetaling(), false))
-            assertTrue(Toggles.LageBrukerutbetaling.kanIkkeFortsette(aktivitetslogg, lagUtbetaling(), true))
+        Toggle.LageBrukerutbetaling.disable {
+            assertFalse(Toggle.LageBrukerutbetaling.kanIkkeFortsette(aktivitetslogg, lagUtbetaling(), false))
+            assertTrue(Toggle.LageBrukerutbetaling.kanIkkeFortsette(aktivitetslogg, lagUtbetaling(), true))
         }
     }
 
     @Test
     fun `slår ikke ut ved full refusjon`() {
-        Toggles.LageBrukerutbetaling.enable {
+        Toggle.LageBrukerutbetaling.enable {
             val utbetaling = lagUtbetaling()
-            assertFalse(Toggles.LageBrukerutbetaling.kanIkkeFortsette(aktivitetslogg, utbetaling, false))
-            assertFalse(Toggles.LageBrukerutbetaling.kanIkkeFortsette(aktivitetslogg, utbetaling, true))
+            assertFalse(Toggle.LageBrukerutbetaling.kanIkkeFortsette(aktivitetslogg, utbetaling, false))
+            assertFalse(Toggle.LageBrukerutbetaling.kanIkkeFortsette(aktivitetslogg, utbetaling, true))
             assertFalse(utbetaling.harDelvisRefusjon())
         }
     }
 
     @Test
     fun `slår ikke ut ved null refusjon`() {
-        Toggles.LageBrukerutbetaling.enable {
+        Toggle.LageBrukerutbetaling.enable {
             val utbetaling = lagUtbetaling(tidslinjeOf(16.AP, 15.NAV.copyWith(arbeidsgiverbeløp = 0)))
-            assertFalse(Toggles.LageBrukerutbetaling.kanIkkeFortsette(aktivitetslogg, utbetaling, true))
+            assertFalse(Toggle.LageBrukerutbetaling.kanIkkeFortsette(aktivitetslogg, utbetaling, true))
             assertFalse(utbetaling.harDelvisRefusjon())
         }
     }
 
     @Test
     fun `slår ut ved delvis refusjon`() {
-        Toggles.LageBrukerutbetaling.enable {
+        Toggle.LageBrukerutbetaling.enable {
             val utbetaling = lagUtbetaling(tidslinjeOf(16.AP, 15.NAV.copyWith(arbeidsgiverbeløp = 600)))
-            assertTrue(Toggles.LageBrukerutbetaling.kanIkkeFortsette(aktivitetslogg, utbetaling, true))
+            assertTrue(Toggle.LageBrukerutbetaling.kanIkkeFortsette(aktivitetslogg, utbetaling, true))
             assertTrue(utbetaling.harDelvisRefusjon())
         }
     }
 
     @Test
     fun `slår ikke ut ved overgang i refusjon`() {
-        Toggles.LageBrukerutbetaling.enable {
+        Toggle.LageBrukerutbetaling.enable {
             val første = lagUtbetaling(tidslinjeOf(16.AP, 15.NAV))
             val andre = lagUtbetaling(tidslinjeOf(16.AP, 15.NAV, 15.NAV(dekningsgrunnlag = 1200, refusjonsbeløp = 0)), forrige = første)
-            assertFalse(Toggles.LageBrukerutbetaling.kanIkkeFortsette(aktivitetslogg, andre, true))
+            assertFalse(Toggle.LageBrukerutbetaling.kanIkkeFortsette(aktivitetslogg, andre, true))
             assertFalse(andre.harDelvisRefusjon())
         }
     }

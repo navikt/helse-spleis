@@ -3,7 +3,7 @@ package no.nav.helse.spleis.e2e
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
-import no.nav.helse.Toggles
+import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
@@ -39,12 +39,12 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
     @BeforeEach
     fun setUp() {
         logCollector.list.clear()
-        Toggles.SendFeriepengeOppdrag.enable()
+        Toggle.SendFeriepengeOppdrag.enable()
     }
 
     @AfterEach
     fun tearDown() {
-        Toggles.SendFeriepengeOppdrag.pop()
+        Toggle.SendFeriepengeOppdrag.pop()
     }
 
     @Test

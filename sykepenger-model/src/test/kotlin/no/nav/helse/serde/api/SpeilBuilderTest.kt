@@ -1,6 +1,6 @@
 package no.nav.helse.serde.api
 
-import no.nav.helse.Toggles
+import no.nav.helse.Toggle
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Dagtype.Feriedag
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
@@ -34,12 +34,12 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
 
     @BeforeAll
     fun beforeAllTests() {
-        Toggles.SpeilApiV2.enable()
+        Toggle.SpeilApiV2.enable()
     }
 
     @AfterAll
     fun afterAllTests() {
-        Toggles.SpeilApiV2.pop()
+        Toggle.SpeilApiV2.pop()
     }
 
     @Test
@@ -672,7 +672,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
 
     @Test
     fun `ta med personoppdrag`() {
-        Toggles.LageBrukerutbetaling.enable {
+        Toggle.LageBrukerutbetaling.enable {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
             håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
             håndterInntektsmelding(

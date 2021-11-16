@@ -1,6 +1,6 @@
 package no.nav.helse.utbetalingslinjer
 
-import no.nav.helse.Toggles
+import no.nav.helse.Toggle
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.*
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse.Oppdragstatus.AKSEPTERT
@@ -244,7 +244,7 @@ internal class UtbetalingTest {
     fun `delvis refusjon`() {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600))
         beregnUtbetalinger(tidslinje)
-        Toggles.LageBrukerutbetaling.enable {
+        Toggle.LageBrukerutbetaling.enable {
             val utbetaling = opprettUtbetaling(tidslinje)
             assertTrue(utbetaling.harDelvisRefusjon())
         }
@@ -254,7 +254,7 @@ internal class UtbetalingTest {
     fun `null refusjon`() {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 0))
         beregnUtbetalinger(tidslinje)
-        Toggles.LageBrukerutbetaling.enable {
+        Toggle.LageBrukerutbetaling.enable {
             val utbetaling = opprettUtbetaling(tidslinje)
             assertFalse(utbetaling.harDelvisRefusjon())
             assertTrue(utbetaling.harUtbetalinger())
@@ -265,7 +265,7 @@ internal class UtbetalingTest {
     fun `overføre utbetaling med null refusjon`() {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 0))
         beregnUtbetalinger(tidslinje)
-        Toggles.LageBrukerutbetaling.enable {
+        Toggle.LageBrukerutbetaling.enable {
             val utbetaling = opprettUbetaltUtbetaling(tidslinje)
             val hendelselogg = godkjenn(utbetaling)
             val utbetalingsbehov = hendelselogg.behov().filter { it.type == Behovtype.Utbetaling }
@@ -279,7 +279,7 @@ internal class UtbetalingTest {
     fun `overføre utbetaling med delvis refusjon`() {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600))
         beregnUtbetalinger(tidslinje)
-        Toggles.LageBrukerutbetaling.enable {
+        Toggle.LageBrukerutbetaling.enable {
             val utbetaling = opprettUbetaltUtbetaling(tidslinje)
             val hendelselogg = godkjenn(utbetaling)
             val utbetalingsbehov = hendelselogg.behov().filter { it.type == Behovtype.Utbetaling }
@@ -321,7 +321,7 @@ internal class UtbetalingTest {
 
     @Test
     fun `overgang fra full til null refusjon`() {
-        Toggles.LageBrukerutbetaling.enable {
+        Toggle.LageBrukerutbetaling.enable {
             val tidslinje = tidslinjeOf(
                 16.AP, 1.NAV, 2.HELG, 5.NAV, 2.HELG, 5.NAV, 2.HELG, 5.NAV(1200, refusjonsbeløp = 0.0), 2.HELG, 5.NAV, 2.HELG, 1.ARB, 4.NAV(1200, refusjonsbeløp = 0.0)
             )

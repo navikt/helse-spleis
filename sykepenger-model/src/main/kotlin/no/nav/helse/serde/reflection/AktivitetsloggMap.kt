@@ -1,6 +1,6 @@
 package no.nav.helse.serde.reflection
 
-import no.nav.helse.Toggles
+import no.nav.helse.Toggle
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.*
 import no.nav.helse.person.AktivitetsloggVisitor
@@ -87,7 +87,7 @@ internal class AktivitetsloggMap(aktivitetslogg: Aktivitetslogg) : Aktivitetslog
         vurderingsresultat: Etterlevelse.Vurderingsresultat,
         tidsstempel: String
     ) {
-        if(Toggles.Etterlevelse.enabled)
+        if(Toggle.Etterlevelse.enabled)
             leggTilMelding(kontekster, JURIDISK_VURDERING, melding, tidsstempel, juridiskVurdering.toMap())
     }
 
