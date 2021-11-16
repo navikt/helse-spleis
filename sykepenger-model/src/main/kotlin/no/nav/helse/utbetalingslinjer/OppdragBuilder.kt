@@ -109,7 +109,7 @@ internal class OppdragBuilder(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        if (sisteArbeidsgiverdag == null) sisteArbeidsgiverdag = dag.dato
+        if (sisteArbeidsgiverdag == null) tilstand.sisteArbeidsgiverdag(dag.dato)
         tilstand = Avsluttet
     }
 
@@ -163,6 +163,8 @@ internal class OppdragBuilder(
 
 
     internal interface Tilstand {
+        fun sisteArbeidsgiverdag(dato: LocalDate) {}
+
         fun betalingsdag(
             dag: Utbetalingsdag,
             dato: LocalDate,
@@ -197,6 +199,10 @@ internal class OppdragBuilder(
     }
 
     private inner class MellomLinjer : Tilstand {
+        override fun sisteArbeidsgiverdag(dato: LocalDate) {
+            sisteArbeidsgiverdag = dato
+        }
+
         override fun betalingsdag(
             dag: Utbetalingsdag,
             dato: LocalDate,
@@ -239,6 +245,10 @@ internal class OppdragBuilder(
     }
 
     private inner class LinjeMedSats : Tilstand {
+        override fun sisteArbeidsgiverdag(dato: LocalDate) {
+            sisteArbeidsgiverdag = dato
+        }
+
         override fun ikkeBetalingsdag() {
             tilstand = MellomLinjer()
         }
@@ -280,6 +290,10 @@ internal class OppdragBuilder(
     }
 
     private inner class LinjeUtenSats : Tilstand {
+        override fun sisteArbeidsgiverdag(dato: LocalDate) {
+            sisteArbeidsgiverdag = dato
+        }
+
         override fun ikkeBetalingsdag() {
             tilstand = MellomLinjer()
         }
