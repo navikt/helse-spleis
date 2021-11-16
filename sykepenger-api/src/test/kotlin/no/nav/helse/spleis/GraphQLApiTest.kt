@@ -114,7 +114,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                                 }
                                 behandlingstype,
                                 periodetype,
-                                inntektskilde,
+                                inntektstype,
                                 erForkastet,
                                 opprettet,
                                 ... on GraphQLBeregnetPeriode {
@@ -333,7 +333,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                                 }
                                 behandlingstype,
                                 periodetype,
-                                inntektskilde,
+                                inntektstype,
                                 erForkastet,
                                 opprettet,
                                 ... on GraphQLBeregnetPeriode {
@@ -474,7 +474,9 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                                         sum
                                     }
                                 },
-                                sammenligningsgrunnlag
+                                sammenligningsgrunnlag {
+                                    belop
+                                }
                             },
                             vilkarsgrunnlagtype
                         }
@@ -496,23 +498,6 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                 assertEquals(6, vilkårsgrunnlaghistorikk.get(0).get("grunnlag").get(0).size())
             }
         }
-    }
-
-    @Test
-    fun `tester generasjon-resolver`() {
-        val query = """
-            {
-                generasjon(fnr: ${UNG_PERSON_FNR.toLong()}, orgnr: \"$ORGNUMMER\", indeks: 0) {
-                    fom,
-                    tom
-                }
-            }
-        """.trimIndent()
-
-        testServer.httpPost(
-            path = "/graphql",
-            body = """{"query": "$query"}"""
-        )
     }
 
     @Test

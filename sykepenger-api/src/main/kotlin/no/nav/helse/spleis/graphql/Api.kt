@@ -5,13 +5,10 @@ import com.apurebase.kgraphql.schema.dsl.SchemaBuilder
 import io.ktor.application.*
 import io.ktor.auth.*
 import no.nav.helse.Toggles
-import no.nav.helse.person.Inntektskilde
-import no.nav.helse.serde.api.AktivitetDTO
-import no.nav.helse.serde.api.v2.Behandlingstype
-import no.nav.helse.serde.api.v2.UtbetalingstidslinjedagType
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.dao.PersonDao
 import no.nav.helse.spleis.dto.håndterPerson
+import no.nav.helse.spleis.graphql.dto.*
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -50,64 +47,15 @@ internal fun SchemaBuilder.personSchema(personDao: PersonDao, hendelseDao: Hende
                     )
                 }
         }
-
-        type<GraphQLPerson> {
-            property<GraphQLArbeidsgiver?>("arbeidsgiver") {
-                resolver { person: GraphQLPerson, organisasjonsnummer: String ->
-                    person.arbeidsgivere.find { it.organisasjonsnummer == organisasjonsnummer }
-                }
-            }
-        }
-
-        type<GraphQLArbeidsgiver> {
-            property<GraphQLGenerasjon?>("generasjon") {
-                resolver { arbeidsgiver: GraphQLArbeidsgiver, index: Int ->
-                    arbeidsgiver.generasjoner.getOrNull(index)
-                }
-            }
-        }
-
-        type<GraphQLGenerasjon> {
-            property<List<GraphQLTidslinjeperiode>>("perioder") {
-                resolver { generasjon: GraphQLGenerasjon, from: Int?, to: Int? ->
-                    if (from == null || to == null || from >= to) {
-                        generasjon.perioder
-                    } else {
-                        generasjon.perioder.subList(from.coerceAtLeast(0), to.coerceAtMost(generasjon.perioder.size))
-                    }
-                }
-            }
-        }
     }
-    type<GraphQLTidslinjeperiode>()
-    type<GraphQLBeregnetPeriode>()
-    type<GraphQLUberegnetPeriode>()
-    type<GraphQLUtbetaling>()
-    type<GraphQLHendelse>()
-    type<GraphQLInntektsmelding>()
-    type<GraphQLSoknadNav>()
-    type<GraphQLSoknadArbeidsgiver>()
-    type<GraphQLSykmelding>()
-    type<GraphQLSimulering>()
-    type<GraphQLInntektsgrunnlag>()
-    type<GraphQLUtbetalingsinfo>()
-    type<GraphQLVilkarsgrunnlagElement>()
-    type<GraphQLSykdomsdagkilde>()
 
-    enum<GraphQLPeriodetype>()
-    enum<GraphQLSykdomsdagtype>()
-    enum<GraphQLSykdomsdagkildetype>()
-    enum<GraphQLHendelsetype>()
-    enum<GraphQLBegrunnelse>()
-    enum<GraphQLInntektsgrunnlag.Arbeidsgiverinntekt.OmregnetArsinntekt.Kilde>()
-    enum<GraphQLPerson.VilkarsgrunnlaghistorikkInnslag.Arbeidsgiverinntekt.OmregnetArsinntektKilde>()
-    enum<GraphQLVilkarsgrunnlagtype>()
-
-    enum<Behandlingstype>()
-    enum<Inntektskilde>()
-    enum<UtbetalingstidslinjedagType>()
-
-    type<AktivitetDTO>()
+    personTypes()
+    arbeidsgiverTypes()
+    hendelseTypes()
+    inntektsgrunnlagTypes()
+    simuleringTypes()
+    tidslinjeperiodeTypes()
+    vilkarsgrunnlagTypes()
 
     stringScalar<UUID> {
         deserialize = { uuid: String -> UUID.fromString(uuid) }

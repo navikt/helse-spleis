@@ -1,27 +1,39 @@
 package no.nav.helse.spleis.graphql
 
+import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
 import no.nav.helse.serde.api.BegrunnelseDTO
 import no.nav.helse.serde.api.InntektsgrunnlagDTO
 import no.nav.helse.serde.api.SimuleringsdataDTO
 import no.nav.helse.serde.api.v2.*
+import no.nav.helse.spleis.graphql.dto.*
 import java.util.*
 
 private fun mapDag(dag: SammenslåttDag) = GraphQLDag(
     dato = dag.dagen,
     sykdomsdagtype = when (dag.sykdomstidslinjedagtype) {
-        SykdomstidslinjedagType.ARBEIDSDAG -> GraphQLSykdomsdagtype.ARBEIDSDAG
-        SykdomstidslinjedagType.ARBEIDSGIVERDAG -> GraphQLSykdomsdagtype.ARBEIDSGIVERDAG
-        SykdomstidslinjedagType.FERIEDAG -> GraphQLSykdomsdagtype.FERIEDAG
-        SykdomstidslinjedagType.FORELDET_SYKEDAG -> GraphQLSykdomsdagtype.FORELDET_SYKEDAG
-        SykdomstidslinjedagType.FRISK_HELGEDAG -> GraphQLSykdomsdagtype.FRISK_HELGEDAG
-        SykdomstidslinjedagType.PERMISJONSDAG -> GraphQLSykdomsdagtype.PERMISJONSDAG
-        SykdomstidslinjedagType.SYKEDAG -> GraphQLSykdomsdagtype.SYKEDAG
-        SykdomstidslinjedagType.SYK_HELGEDAG -> GraphQLSykdomsdagtype.SYK_HELGEDAG
-        SykdomstidslinjedagType.UBESTEMTDAG -> GraphQLSykdomsdagtype.UBESTEMTDAG
-        SykdomstidslinjedagType.AVSLÅTT -> GraphQLSykdomsdagtype.AVSLATT
+        SykdomstidslinjedagType.ARBEIDSDAG -> GraphQLSykdomsdagtype.Arbeidsdag
+        SykdomstidslinjedagType.ARBEIDSGIVERDAG -> GraphQLSykdomsdagtype.Arbeidsgiverdag
+        SykdomstidslinjedagType.FERIEDAG -> GraphQLSykdomsdagtype.Feriedag
+        SykdomstidslinjedagType.FORELDET_SYKEDAG -> GraphQLSykdomsdagtype.ForeldetSykedag
+        SykdomstidslinjedagType.FRISK_HELGEDAG -> GraphQLSykdomsdagtype.FriskHelgedag
+        SykdomstidslinjedagType.PERMISJONSDAG -> GraphQLSykdomsdagtype.Permisjonsdag
+        SykdomstidslinjedagType.SYKEDAG -> GraphQLSykdomsdagtype.Sykedag
+        SykdomstidslinjedagType.SYK_HELGEDAG -> GraphQLSykdomsdagtype.SykHelgedag
+        SykdomstidslinjedagType.UBESTEMTDAG -> GraphQLSykdomsdagtype.Ubestemtdag
+        SykdomstidslinjedagType.AVSLÅTT -> GraphQLSykdomsdagtype.Avslatt
     },
-    utbetalingsdagtype = dag.utbetalingstidslinjedagtype,
+    utbetalingsdagtype = when (dag.utbetalingstidslinjedagtype) {
+        UtbetalingstidslinjedagType.ArbeidsgiverperiodeDag -> GraphQLUtbetalingsdagType.ArbeidsgiverperiodeDag
+        UtbetalingstidslinjedagType.NavDag -> GraphQLUtbetalingsdagType.NavDag
+        UtbetalingstidslinjedagType.NavHelgDag -> GraphQLUtbetalingsdagType.NavHelgDag
+        UtbetalingstidslinjedagType.Helgedag -> GraphQLUtbetalingsdagType.Helgedag
+        UtbetalingstidslinjedagType.Arbeidsdag -> GraphQLUtbetalingsdagType.Arbeidsdag
+        UtbetalingstidslinjedagType.Feriedag -> GraphQLUtbetalingsdagType.Feriedag
+        UtbetalingstidslinjedagType.AvvistDag -> GraphQLUtbetalingsdagType.AvvistDag
+        UtbetalingstidslinjedagType.UkjentDag -> GraphQLUtbetalingsdagType.UkjentDag
+        UtbetalingstidslinjedagType.ForeldetDag -> GraphQLUtbetalingsdagType.ForeldetDag
+    },
     kilde = GraphQLSykdomsdagkilde(
         id = dag.kilde.id,
         type = when (dag.kilde.type) {
@@ -67,7 +79,7 @@ private fun mapUtbetaling(utbetaling: Utbetaling) = GraphQLUtbetaling(
     arbeidsgiverFagsystemId = utbetaling.arbeidsgiverFagsystemId,
     personFagsystemId = utbetaling.personFagsystemId,
     vurdering = utbetaling.vurdering?.let {
-        GraphQLUtbetaling.Vurdering(
+        GraphQLVurdering(
             godkjent = it.godkjent,
             tidsstempel = it.tidsstempel,
             automatisk = it.automatisk,
@@ -104,24 +116,24 @@ private fun mapHendelse(hendelse: HendelseDTO) = when (hendelse) {
     )
     else -> object : GraphQLHendelse {
         override val id = hendelse.id
-        override val type = GraphQLHendelsetype.UKJENT
+        override val type = GraphQLHendelsetype.Ukjent
     }
 }
 
 private fun mapSimulering(simulering: SimuleringsdataDTO) = GraphQLSimulering(
     totalbelop = simulering.totalbeløp,
     perioder = simulering.perioder.map { periode ->
-        GraphQLSimulering.Periode(
+        GraphQLSimuleringsperiode(
             fom = periode.fom,
             tom = periode.tom,
             utbetalinger = periode.utbetalinger.map { utbetaling ->
-                GraphQLSimulering.Utbetaling(
+                GraphQLSimuleringsutbetaling(
                     utbetalesTilId = utbetaling.utbetalesTilId,
                     utbetalesTilNavn = utbetaling.utbetalesTilNavn,
                     forfall = utbetaling.forfall,
                     feilkonto = utbetaling.feilkonto,
                     detaljer = utbetaling.detaljer.map {
-                        GraphQLSimulering.Detaljer(
+                        GraphQLSimuleringsdetaljer(
                             faktiskFom = it.faktiskFom,
                             faktiskTom = it.faktiskTom,
                             konto = it.konto,
@@ -143,9 +155,9 @@ private fun mapSimulering(simulering: SimuleringsdataDTO) = GraphQLSimulering(
     }
 )
 
-private fun mapPeriodevilkår(vilkår: BeregnetPeriode.Vilkår) = GraphQLBeregnetPeriode.Vilkar(
+private fun mapPeriodevilkår(vilkår: BeregnetPeriode.Vilkår) = GraphQLPeriodevilkar(
     sykepengedager = vilkår.sykepengedager.let {
-        GraphQLBeregnetPeriode.Sykepengedager(
+        GraphQLPeriodevilkar.Sykepengedager(
             skjaeringstidspunkt = it.skjæringstidspunkt,
             maksdato = it.maksdato,
             forbrukteSykedager = it.forbrukteSykedager,
@@ -154,13 +166,13 @@ private fun mapPeriodevilkår(vilkår: BeregnetPeriode.Vilkår) = GraphQLBeregne
         )
     },
     alder = vilkår.alder.let {
-        GraphQLBeregnetPeriode.Alder(
+        GraphQLPeriodevilkar.Alder(
             alderSisteSykedag = it.alderSisteSykedag,
             oppfylt = it.oppfylt
         )
     },
     soknadsfrist = vilkår.søknadsfrist?.let {
-        GraphQLBeregnetPeriode.Soknadsfrist(
+        GraphQLPeriodevilkar.Soknadsfrist(
             sendtNav = it.sendtNav,
             soknadFom = it.søknadFom,
             soknadTom = it.søknadTom,
@@ -170,10 +182,15 @@ private fun mapPeriodevilkår(vilkår: BeregnetPeriode.Vilkår) = GraphQLBeregne
 )
 
 private fun mapPeriodetype(type: Periodetype) = when (type) {
-    Periodetype.FØRSTEGANGSBEHANDLING -> GraphQLPeriodetype.FORSTEGANGSBEHANDLING
-    Periodetype.FORLENGELSE -> GraphQLPeriodetype.FORLENGELSE
-    Periodetype.OVERGANG_FRA_IT -> GraphQLPeriodetype.OVERGANG_FRA_IT
-    Periodetype.INFOTRYGDFORLENGELSE -> GraphQLPeriodetype.INFOTRYGDFORLENGELSE
+    Periodetype.FØRSTEGANGSBEHANDLING -> GraphQLPeriodetype.Forstegangsbehandling
+    Periodetype.FORLENGELSE -> GraphQLPeriodetype.Forlengelse
+    Periodetype.OVERGANG_FRA_IT -> GraphQLPeriodetype.OvergangFraIt
+    Periodetype.INFOTRYGDFORLENGELSE -> GraphQLPeriodetype.Infotrygdforlengelse
+}
+
+private fun mapInntektstype(kilde: Inntektskilde) = when (kilde) {
+    Inntektskilde.EN_ARBEIDSGIVER -> GraphQLInntektstype.EnArbeidsgiver
+    Inntektskilde.FLERE_ARBEIDSGIVERE -> GraphQLInntektstype.FlereArbeidsgivere
 }
 
 internal fun mapTidslinjeperiode(periode: Tidslinjeperiode) =
@@ -182,9 +199,13 @@ internal fun mapTidslinjeperiode(periode: Tidslinjeperiode) =
             fom = periode.fom,
             tom = periode.tom,
             tidslinje = periode.sammenslåttTidslinje.map { mapDag(it) },
-            behandlingstype = periode.behandlingstype,
+            behandlingstype = when (periode.behandlingstype) {
+                Behandlingstype.UBEREGNET -> GraphQLBehandlingstype.Uberegnet
+                Behandlingstype.BEHANDLET -> GraphQLBehandlingstype.Behandlet
+                Behandlingstype.VENTER -> GraphQLBehandlingstype.Venter
+            },
             periodetype = mapPeriodetype(periode.periodetype),
-            inntektskilde = periode.inntektskilde,
+            inntektstype = mapInntektstype(periode.inntektskilde),
             erForkastet = periode.erForkastet,
             opprettet = periode.opprettet,
             beregningId = periode.beregningId,
@@ -197,49 +218,65 @@ internal fun mapTidslinjeperiode(periode: Tidslinjeperiode) =
             hendelser = periode.hendelser.map { mapHendelse(it) },
             simulering = periode.simulering?.let { mapSimulering(it) },
             periodevilkar = mapPeriodevilkår(periode.periodevilkår),
-            aktivitetslogg = periode.aktivitetslogg
+            aktivitetslogg = periode.aktivitetslogg.map {
+                GraphQLAktivitet(
+                    vedtaksperiodeId = it.vedtaksperiodeId,
+                    alvorlighetsgrad = it.alvorlighetsgrad,
+                    melding = it.melding,
+                    tidsstempel = it.tidsstempel
+                )
+            }
         )
         else -> GraphQLUberegnetPeriode(
             fom = periode.fom,
             tom = periode.tom,
             tidslinje = periode.sammenslåttTidslinje.map { mapDag(it) },
-            behandlingstype = periode.behandlingstype,
+            behandlingstype = when (periode.behandlingstype) {
+                Behandlingstype.UBEREGNET -> GraphQLBehandlingstype.Uberegnet
+                Behandlingstype.BEHANDLET -> GraphQLBehandlingstype.Behandlet
+                Behandlingstype.VENTER -> GraphQLBehandlingstype.Venter
+            },
             periodetype = mapPeriodetype(periode.periodetype),
-            inntektskilde = periode.inntektskilde,
+            inntektstype = mapInntektstype(periode.inntektskilde),
             erForkastet = periode.erForkastet,
             opprettet = periode.opprettet
         )
     }
 
-private fun mapInntekt(inntekt: Arbeidsgiverinntekt) = GraphQLPerson.VilkarsgrunnlaghistorikkInnslag.Arbeidsgiverinntekt(
+private fun mapInntekt(inntekt: Arbeidsgiverinntekt) = GraphQLArbeidsgiverinntekt(
     arbeidsgiver = inntekt.organisasjonsnummer,
     omregnetArsinntekt = inntekt.omregnetÅrsinntekt?.let { omregnetÅrsinntekt ->
-        GraphQLPerson.VilkarsgrunnlaghistorikkInnslag.Arbeidsgiverinntekt.OmregnetArsinntekt(
+        GraphQLOmregnetArsinntekt(
             kilde = when (omregnetÅrsinntekt.kilde) {
-                Inntektkilde.Saksbehandler -> GraphQLPerson.VilkarsgrunnlaghistorikkInnslag.Arbeidsgiverinntekt.OmregnetArsinntektKilde.Saksbehandler
-                Inntektkilde.Inntektsmelding -> GraphQLPerson.VilkarsgrunnlaghistorikkInnslag.Arbeidsgiverinntekt.OmregnetArsinntektKilde.Inntektsmelding
-                Inntektkilde.Infotrygd -> GraphQLPerson.VilkarsgrunnlaghistorikkInnslag.Arbeidsgiverinntekt.OmregnetArsinntektKilde.Infotrygd
-                Inntektkilde.AOrdningen -> GraphQLPerson.VilkarsgrunnlaghistorikkInnslag.Arbeidsgiverinntekt.OmregnetArsinntektKilde.AOrdningen
+                Inntektkilde.Saksbehandler -> GraphQLInntektskilde.Saksbehandler
+                Inntektkilde.Inntektsmelding -> GraphQLInntektskilde.Inntektsmelding
+                Inntektkilde.Infotrygd -> GraphQLInntektskilde.Infotrygd
+                Inntektkilde.AOrdningen -> GraphQLInntektskilde.AOrdningen
             },
             belop = omregnetÅrsinntekt.beløp,
             manedsbelop = omregnetÅrsinntekt.månedsbeløp,
             inntekterFraAOrdningen = omregnetÅrsinntekt.inntekterFraAOrdningen?.map {
-                InntekterFraAOrdningen(
+                GraphQLInntekterFraAOrdningen(
                     maned = it.måned,
                     sum = it.sum
                 )
             }
         )
     },
-    sammenligningsgrunnlag = inntekt.sammenligningsgrunnlag
+    sammenligningsgrunnlag = inntekt.sammenligningsgrunnlag?.let {
+        GraphQLSammenligningsgrunnlag(
+            belop = it,
+            inntekterFraAOrdningen = emptyList()
+        )
+    }
 )
 
 internal fun mapVilkårsgrunnlag(id: UUID, vilkårsgrunnlag: List<Vilkårsgrunnlag>) =
-    GraphQLPerson.VilkarsgrunnlaghistorikkInnslag(
+    GraphQLVilkarsgrunnlaghistorikk(
         id = id,
         grunnlag = vilkårsgrunnlag.map { grunnlag ->
             when (grunnlag) {
-                is SpleisVilkårsgrunnlag -> GraphQLPerson.VilkarsgrunnlaghistorikkInnslag.SpleisVilkarsgrunnlag(
+                is SpleisVilkårsgrunnlag -> GraphQLSpleisVilkarsgrunnlag(
                     skjaeringstidspunkt = grunnlag.skjæringstidspunkt,
                     omregnetArsinntekt = grunnlag.omregnetÅrsinntekt,
                     sammenligningsgrunnlag = grunnlag.sammenligningsgrunnlag,
@@ -253,20 +290,20 @@ internal fun mapVilkårsgrunnlag(id: UUID, vilkårsgrunnlag: List<Vilkårsgrunnl
                     oppfyllerKravOmOpptjening = grunnlag.oppfyllerKravOmOpptjening,
                     oppfyllerKravOmMedlemskap = grunnlag.oppfyllerKravOmMedlemskap
                 )
-                is InfotrygdVilkårsgrunnlag -> GraphQLPerson.VilkarsgrunnlaghistorikkInnslag.InfotrygdVilkarsgrunnlag(
+                is InfotrygdVilkårsgrunnlag -> GraphQLInfotrygdVilkarsgrunnlag(
                     skjaeringstidspunkt = grunnlag.skjæringstidspunkt,
                     omregnetArsinntekt = grunnlag.omregnetÅrsinntekt,
                     sammenligningsgrunnlag = grunnlag.sammenligningsgrunnlag,
                     sykepengegrunnlag = grunnlag.sykepengegrunnlag,
                     inntekter = grunnlag.inntekter.map { inntekt -> mapInntekt(inntekt) }
                 )
-                else -> object : GraphQLVilkarsgrunnlagElement {
+                else -> object : GraphQLVilkarsgrunnlag {
                     override val skjaeringstidspunkt = grunnlag.skjæringstidspunkt
                     override val omregnetArsinntekt = grunnlag.omregnetÅrsinntekt
                     override val sammenligningsgrunnlag = grunnlag.sammenligningsgrunnlag
                     override val sykepengegrunnlag = grunnlag.sykepengegrunnlag
                     override val inntekter = grunnlag.inntekter.map { inntekt -> mapInntekt(inntekt) }
-                    override val vilkarsgrunnlagtype = GraphQLVilkarsgrunnlagtype.UKJENT
+                    override val vilkarsgrunnlagtype = GraphQLVilkarsgrunnlagtype.Ukjent
                 }
             }
         }
@@ -280,20 +317,20 @@ internal fun mapInntektsgrunnlag(inntektsgrunnlag: InntektsgrunnlagDTO) = GraphQ
     avviksprosent = inntektsgrunnlag.avviksprosent,
     maksUtbetalingPerDag = inntektsgrunnlag.maksUtbetalingPerDag,
     inntekter = inntektsgrunnlag.inntekter.map { inntekt ->
-        GraphQLInntektsgrunnlag.Arbeidsgiverinntekt(
+        GraphQLArbeidsgiverinntekt(
             arbeidsgiver = inntekt.arbeidsgiver,
             omregnetArsinntekt = inntekt.omregnetÅrsinntekt?.let { årsinntekt ->
-                GraphQLInntektsgrunnlag.Arbeidsgiverinntekt.OmregnetArsinntekt(
+                GraphQLOmregnetArsinntekt(
                     kilde = when (årsinntekt.kilde) {
-                        InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.Saksbehandler -> GraphQLInntektsgrunnlag.Arbeidsgiverinntekt.OmregnetArsinntekt.Kilde.Saksbehandler
-                        InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.Inntektsmelding -> GraphQLInntektsgrunnlag.Arbeidsgiverinntekt.OmregnetArsinntekt.Kilde.Inntektsmelding
-                        InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.Infotrygd -> GraphQLInntektsgrunnlag.Arbeidsgiverinntekt.OmregnetArsinntekt.Kilde.Infotrygd
-                        InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.AOrdningen -> GraphQLInntektsgrunnlag.Arbeidsgiverinntekt.OmregnetArsinntekt.Kilde.AOrdningen
+                        InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.Saksbehandler -> GraphQLInntektskilde.Saksbehandler
+                        InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.Inntektsmelding -> GraphQLInntektskilde.Inntektsmelding
+                        InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.Infotrygd -> GraphQLInntektskilde.Infotrygd
+                        InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.AOrdningen -> GraphQLInntektskilde.AOrdningen
                     },
                     belop = årsinntekt.beløp,
                     manedsbelop = årsinntekt.månedsbeløp,
                     inntekterFraAOrdningen = årsinntekt.inntekterFraAOrdningen?.map {
-                        InntekterFraAOrdningen(
+                        GraphQLInntekterFraAOrdningen(
                             maned = it.måned,
                             sum = it.sum
                         )
@@ -301,10 +338,10 @@ internal fun mapInntektsgrunnlag(inntektsgrunnlag: InntektsgrunnlagDTO) = GraphQ
                 )
             },
             sammenligningsgrunnlag = inntekt.sammenligningsgrunnlag?.let { sammenligningsgrunnlag ->
-                GraphQLInntektsgrunnlag.Arbeidsgiverinntekt.Sammenligningsgrunnlag(
+                GraphQLSammenligningsgrunnlag(
                     belop = sammenligningsgrunnlag.beløp,
                     inntekterFraAOrdningen = sammenligningsgrunnlag.inntekterFraAOrdningen.map {
-                        InntekterFraAOrdningen(
+                        GraphQLInntekterFraAOrdningen(
                             maned = it.måned,
                             sum = it.sum
                         )
