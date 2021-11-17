@@ -1,9 +1,11 @@
-package no.nav.helse.spleis
+package no.nav.helse.spleis.graphql
 
 import no.nav.helse.Toggle
 import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.person.Person
 import no.nav.helse.somFødselsnummer
+import no.nav.helse.spleis.AbstractObservableTest
+import no.nav.helse.spleis.objectMapper
 import no.nav.helse.spleis.testhelpers.ApiTestServer
 import no.nav.helse.spleis.testhelpers.TestObservatør
 import org.junit.jupiter.api.*
