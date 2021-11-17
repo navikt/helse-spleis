@@ -26,7 +26,28 @@ internal fun SchemaBuilder.tidslinjeperiodeTypes() {
     type<GraphQLPeriodevilkar.Sykepengedager>()
     type<GraphQLPeriodevilkar.Alder>()
     type<GraphQLPeriodevilkar.Soknadsfrist>()
-    type<GraphQLBeregnetPeriode>()
+    type<GraphQLBeregnetPeriode>() {
+        property<List<GraphQLInntektsmelding>>("inntektsmeldinger") {
+            resolver { periode ->
+                periode.hendelser.filterIsInstance<GraphQLInntektsmelding>()
+            }
+        }
+        property<List<GraphQLSoknadNav>>("soknaderNav") {
+            resolver { periode ->
+                periode.hendelser.filterIsInstance<GraphQLSoknadNav>()
+            }
+        }
+        property<List<GraphQLSoknadArbeidsgiver>>("soknaderArbeidsgiver") {
+            resolver { periode ->
+                periode.hendelser.filterIsInstance<GraphQLSoknadArbeidsgiver>()
+            }
+        }
+        property<List<GraphQLSykmelding>>("sykmeldinger") {
+            resolver { periode ->
+                periode.hendelser.filterIsInstance<GraphQLSykmelding>()
+            }
+        }
+    }
 }
 
 enum class GraphQLInntektstype {

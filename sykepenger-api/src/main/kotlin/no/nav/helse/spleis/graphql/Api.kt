@@ -18,9 +18,9 @@ import javax.sql.DataSource
 
 internal fun SchemaBuilder.personSchema(personDao: PersonDao, hendelseDao: HendelseDao) {
     query("person") {
-        resolver { fnr: Long ->
-            personDao.hentPersonFraFnr(fnr)
-                ?.deserialize { hendelseDao.hentAlleHendelser(fnr) }
+        resolver { fnr: String ->
+            personDao.hentPersonFraFnr(fnr.toLong())
+                ?.deserialize { hendelseDao.hentAlleHendelser(fnr.toLong()) }
                 ?.let { håndterPerson(it, hendelseDao) }
                 ?.let { person ->
                     GraphQLPerson(

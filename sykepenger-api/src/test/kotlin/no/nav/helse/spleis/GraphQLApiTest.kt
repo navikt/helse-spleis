@@ -84,7 +84,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
     fun `person med person-resolver`() {
         val query = """
             {
-                person(fnr: ${UNG_PERSON_FNR.toLong()}) {
+                person(fnr: \"$UNG_PERSON_FNR\") {
                     aktorId,
                     fodselsnummer,
                     arbeidsgivere {
@@ -231,7 +231,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
     fun `arbeidsgivere med person-resolver`() {
         val query = """
             {
-                person(fnr: ${UNG_PERSON_FNR.toLong()}) {
+                person(fnr: \"$UNG_PERSON_FNR\") {
                     arbeidsgivere {
                         organisasjonsnummer,
                         id,
@@ -258,7 +258,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
     fun `inntektsgrunnlag med person-resolver`() {
         val query = """
             {
-                person(fnr: ${UNG_PERSON_FNR.toLong()}) {
+                person(fnr: \"$UNG_PERSON_FNR\") {
                     inntektsgrunnlag {
                         skjaeringstidspunkt,
                         sykepengegrunnlag,
@@ -307,7 +307,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
     fun `generasjoner med person-resolver`() {
         val query = """
             {
-                person(fnr: ${UNG_PERSON_FNR.toLong()}) {
+                person(fnr: \"$UNG_PERSON_FNR\") {
                     arbeidsgivere {
                         generasjoner {
                             id,
@@ -446,7 +446,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
     fun `vilkårsgrunnlag med person-resolver`() {
         val query = """
             {
-                person(fnr: ${UNG_PERSON_FNR.toLong()}) {
+                person(fnr: \"$UNG_PERSON_FNR\") {
                     arbeidsgivere {
                         generasjoner {
                             perioder {
@@ -504,12 +504,48 @@ internal class GraphQLApiTest : AbstractObservableTest() {
     fun `tester nøstede resolvers`() {
         val query = """
             {
-                person(fnr: ${UNG_PERSON_FNR.toLong()}) {
+                person(fnr: \"$UNG_PERSON_FNR\") {
                     arbeidsgiver(organisasjonsnummer: \"$ORGNUMMER\") {
                         organisasjonsnummer,
                         generasjon(index: 0) {
                             id,
-                            perioder(from: 0, to: 1) {
+                            perioder(first: 1) {
+                                ... on GraphQLBeregnetPeriode {
+                                    fom,
+                                    tom,
+                                    beregningId,
+                                    inntektsmeldinger {
+                                        id,
+                                        mottattDato,
+                                        beregnetInntekt
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        """.trimIndent()
+
+        testServer.httpPost(
+            path = "/graphql",
+            body = """{"query": "$query"}"""
+        ) {
+            val organisasjonsnummer = objectMapper.readTree(this).get("data").get("person").get("arbeidsgiver").get("organisasjonsnummer").asText()
+            assertEquals(ORGNUMMER, organisasjonsnummer)
+        }
+    }
+
+    @Test
+    fun `henter data for detaljvisning av første periode`() {
+        val query = """
+            {
+                person(fnr: \"$UNG_PERSON_FNR\") {
+                    arbeidsgiver(organisasjonsnummer: \"$ORGNUMMER\") {
+                        organisasjonsnummer,
+                        generasjon(index: 0) {
+                            id,
+                            perioder(first: 1) {
                                 ... on GraphQLBeregnetPeriode {
                                     fom,
                                     tom,

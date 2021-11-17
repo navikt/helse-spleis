@@ -6,12 +6,21 @@ import java.util.*
 internal fun SchemaBuilder.arbeidsgiverTypes() {
     type<GraphQLGenerasjon> {
         property<List<GraphQLTidslinjeperiode>>("perioder") {
-            resolver { generasjon: GraphQLGenerasjon, from: Int?, to: Int? ->
-                if (from == null || to == null || from >= to) {
-                    generasjon.perioder
-                } else {
-                    generasjon.perioder.subList(from.coerceAtLeast(0), to.coerceAtMost(generasjon.perioder.size))
-                }
+            resolver { generasjon: GraphQLGenerasjon, first: Int?, after: Int? ->
+                val max = generasjon.perioder.size
+                val start = (after ?: 0).coerceAtMost(max)
+                val end = (first ?: max).coerceAtLeast(0).coerceAtMost(max)
+                generasjon.perioder.subList(start, end)
+            }
+        }
+        property<GraphQLTidslinjeperiode?>("periode") {
+            resolver { generasjon: GraphQLGenerasjon, index: Int ->
+                generasjon.perioder.getOrNull(index)
+            }
+        }
+        property<GraphQLTidslinjeperiode?>("sistePeriode") {
+            resolver { generasjon: GraphQLGenerasjon ->
+                generasjon.perioder.firstOrNull()
             }
         }
     }
@@ -20,6 +29,11 @@ internal fun SchemaBuilder.arbeidsgiverTypes() {
         property<GraphQLGenerasjon?>("generasjon") {
             resolver { arbeidsgiver: GraphQLArbeidsgiver, index: Int ->
                 arbeidsgiver.generasjoner.getOrNull(index)
+            }
+        }
+        property<GraphQLGenerasjon?>("sisteGenerasjon") {
+            resolver { arbeidsgiver: GraphQLArbeidsgiver ->
+                arbeidsgiver.generasjoner.firstOrNull()
             }
         }
     }
