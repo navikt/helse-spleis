@@ -2047,6 +2047,9 @@ internal class Vedtaksperiode private constructor(
                     when (periodetype) {
                         in listOf(OVERGANG_FRA_IT, INFOTRYGDFORLENGELSE) -> {
                             vedtaksperiode.forlengelseFraInfotrygd = JA
+                            if(vedtaksperiode.skjæringstidspunktFraInfotrygd in LocalDate.of(2021, 5, 1) til LocalDate.of(2021, 5, 16)) {
+                                ytelser.warn("Første utbetalingsdag er i Infotrygd og mellom 1. og 16. mai. Kontroller at riktig grunnbeløp er brukt.")
+                            }
                         }
                         else -> {
                             vedtaksperiode.forlengelseFraInfotrygd = NEI

@@ -1842,4 +1842,28 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             TIL_INFOTRYGD
         )
     }
+
+    @Test
+    fun `Legger på warning hvis første utbetalingsdag i infotrygdforlengelse er mellom første og sekstende mai 2021`() {
+        håndterSykmelding(Sykmeldingsperiode(12.juli(2021), 1.august(2021), 100.prosent))
+        håndterSøknad(Sykdom(12.juli(2021), 1.august(2021), 100.prosent))
+
+        val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 2.mai(2021), INNTEKT, true))
+        val utbetlinger = arrayOf(
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 2.mai(2021), 21.juni(2021), 100.prosent, 1000.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 22.juni(2021), 11.juli(2021), 100.prosent, 1000.daglig)
+        )
+        håndterUtbetalingshistorikk(1.vedtaksperiode, utbetalinger = utbetlinger, inntektshistorikk = inntektshistorikk)
+        håndterYtelser(1.vedtaksperiode)
+
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING
+        )
+        assertTrue(inspektør.personLogg.warn().toString().contains("Første utbetalingsdag er i Infotrygd og mellom 1. og 16. mai. Kontroller at riktig grunnbeløp er brukt."))
+    }
 }
