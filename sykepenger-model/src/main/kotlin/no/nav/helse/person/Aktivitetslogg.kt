@@ -482,7 +482,7 @@ class Aktivitetslogg(
             private val melding: String,
             private val vurdering: Vurderingsresultat,
             private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
-        ) : Aktivitet(100, 'J', melding + vurdering, tidsstempel, kontekster) {
+        ) : Aktivitet(100, 'J', melding, tidsstempel, kontekster) {
             override fun accept(visitor: AktivitetsloggVisitor) {
                 visitor.preVisitEtterlevelse(kontekster, this, melding, vurdering, tidsstempel)
                 vurdering.accept(visitor)
@@ -624,7 +624,7 @@ class Aktivitetslogg(
                         avvisteDager: List<LocalDate>
                     ) {
                         juridiskVurdering(
-                            "",
+                            "It's a' me, Mario: §8-12 ledd 1",
                             Vurderingsresultat(
                                 oppfylt = oppfylt,
                                 versjon = LocalDate.of(2021, 5, 21),

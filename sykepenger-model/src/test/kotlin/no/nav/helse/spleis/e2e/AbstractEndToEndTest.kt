@@ -273,11 +273,12 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         vedtaksperiodeIdInnhenter: IdInnhenter,
         vararg perioder: Søknad.Søknadsperiode,
         andreInntektskilder: List<Søknad.Inntektskilde> = emptyList(),
+        sendtTilNav: LocalDate = Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive,
         orgnummer: String = ORGNUMMER,
         fnr: String = UNG_PERSON_FNR_2018,
     ) {
         assertIkkeEtterspurt(Søknad::class, Behovtype.InntekterForSammenligningsgrunnlag, vedtaksperiodeIdInnhenter, ORGNUMMER)
-        håndterSøknad(*perioder, andreInntektskilder = andreInntektskilder, orgnummer = orgnummer, fnr = fnr)
+        håndterSøknad(*perioder, andreInntektskilder = andreInntektskilder, sendtTilNav = sendtTilNav, orgnummer = orgnummer, fnr = fnr)
     }
 
     protected fun håndterSøknad(
