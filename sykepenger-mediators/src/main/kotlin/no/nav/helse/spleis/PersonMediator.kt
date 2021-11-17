@@ -365,21 +365,21 @@ internal class PersonMediator(
             .finnInntektsmeldinger(Fødselsnummer.tilFødselsnummer(fnr))
             .map { inntektsmelding ->
                 inntektsmelding["foersteFravaersdag"].asOptionalLocalDate() to
-                    Periode(
+                    if (inntektsmelding["arbeidsgiverperioder"].isEmpty) Periode(LocalDate.MIN, LocalDate.MIN)
+                    else Periode(
                         inntektsmelding["arbeidsgiverperioder"].minOf { it["fom"].asLocalDate() },
                         inntektsmelding["arbeidsgiverperioder"].maxOf { it["tom"].asLocalDate() }
                     )
             }
-            .any { (førsteFraværsdag, sammenslåttArbeidsgiverperiode) -> gjeldendePeriode.fårInntektFra(sammenslåttArbeidsgiverperiode, førsteFraværsdag) }
+            .any { (førsteFraværsdag, sammenslåttArbeidsgiverperiode) -> gjeldendePeriode.fårInntektFra(førsteFraværsdag, sammenslåttArbeidsgiverperiode) }
     }
 
-    private fun Periode.fårInntektFra(arbeidsgiverperiode: Periode, førsteFraværsdag: LocalDate?): Boolean {
-        if (førsteFraværsdagErEtterArbeidsgiverperioden(arbeidsgiverperiode, førsteFraværsdag)) return førsteFraværsdag in this
+    private fun Periode.fårInntektFra(førsteFraværsdag: LocalDate?, arbeidsgiverperiode: Periode): Boolean {
+        if (førsteFraværsdag.erEtterPeriode(arbeidsgiverperiode)) return førsteFraværsdag in this
         return this.overlapperMed(arbeidsgiverperiode)
     }
 
-    private fun førsteFraværsdagErEtterArbeidsgiverperioden(arbeidsgiverperiode: Periode, førsteFraværsdag: LocalDate?) =
-        førsteFraværsdag?.let { arbeidsgiverperiode.endInclusive < førsteFraværsdag } ?: false
+    private fun LocalDate?.erEtterPeriode (periode: Periode) = this?.let { periode.endInclusive < this } ?: false
 
     private data class Pakke (
         private val fødselsnummer: String,
