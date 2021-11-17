@@ -3,6 +3,7 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-17 ledd 1 bokstav a`
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-17 ledd 2`
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.SykdomstidslinjeVisitor
@@ -89,8 +90,11 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     override fun visitDag(dag: Dag.UkjentDag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
         implisittDag(dato)
 
-    override fun visitDag(dag: Dag.Permisjonsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
+    override fun visitDag(dag: Dag.Permisjonsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+        // TODO: Bør flyttes dit hvor beslutningen om å ikke utbetale pga. fridag tas, når denne er gjort: https://trello.com/c/Wffztv11
+        Aktivitetslogg().`§8-17 ledd 2`(true)
         fridag(dato)
+    }
 
     override fun visitDag(dag: Dag.Arbeidsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
         arbeidsdag(dato)
@@ -102,8 +106,11 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) = egenmeldingsdag(dato)
 
-    override fun visitDag(dag: Dag.Feriedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
+    override fun visitDag(dag: Dag.Feriedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+        // TODO: Bør flyttes dit hvor beslutningen om å ikke utbetale pga. fridag tas, når denne er gjort: https://trello.com/c/Wffztv11
+        Aktivitetslogg().`§8-17 ledd 2`(true)
         fridag(dato)
+    }
 
     override fun visitDag(dag: Dag.FriskHelgedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
         arbeidsdag(dato)

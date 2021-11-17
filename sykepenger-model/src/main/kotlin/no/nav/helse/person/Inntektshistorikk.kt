@@ -3,6 +3,7 @@ package no.nav.helse.person
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-28 ledd 3 bokstav a`
 import no.nav.helse.person.Inntektshistorikk.Innslag.Companion.nyesteId
 import no.nav.helse.serde.reflection.Inntektsopplysningskilde
 import no.nav.helse.økonomi.Inntekt
@@ -227,12 +228,17 @@ internal class Inntektshistorikk {
         override fun grunnlagForSykepengegrunnlag(dato: LocalDate) =
             takeIf { inntektsopplysninger.any { it.grunnlagForSykepengegrunnlag(dato) != null } }
 
-        override fun grunnlagForSykepengegrunnlag() =
-            inntektsopplysninger
-                .filter { it.erRelevant(3) }
+        override fun grunnlagForSykepengegrunnlag(): Inntekt {
+            val (inntekterSisteTreMåneder, alleAndre) = inntektsopplysninger.partition { it.erRelevant(3) }
+            return inntekterSisteTreMåneder
                 .map(Skatt::grunnlagForSykepengegrunnlag)
                 .summer()
                 .div(3)
+                .also {
+                    //TODO: fix aktivitetslogg
+                    Aktivitetslogg().`§8-28 ledd 3 bokstav a`(true, alleAndre, inntekterSisteTreMåneder, it)
+                }
+        }
 
         override fun grunnlagForSammenligningsgrunnlag(dato: LocalDate) =
             takeIf { inntektsopplysninger.any { it.grunnlagForSammenligningsgrunnlag(dato) != null } }

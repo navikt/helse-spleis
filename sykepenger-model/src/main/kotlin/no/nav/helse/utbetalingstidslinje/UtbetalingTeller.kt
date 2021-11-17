@@ -1,5 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-3 ledd 1 punktum 2`
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.SykepengedagerOppbrukt
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.SykepengedagerOppbruktOver67
@@ -53,9 +55,14 @@ internal class UtbetalingTeller private constructor(
         val harNåddMaksSykepengedager = betalteDager >= arbeidsgiverRegler.maksSykepengedager()
         if (harNåddMaksSykepengedager) doStuff()
 
+        val harNåddMaksSykepengedagerOver67 = gammelpersonDager >= arbeidsgiverRegler.maksSykepengedagerOver67()
+        val harFylt70 = dato.plusDays(1) >= alder.datoForØvreAldersgrense
+        //TODO: Aktivitetslogg().`§8-12 ledd 1`(oppfylt = !harNåddMaksSykepengedager)
+        //TODO: Aktivitetslogg().`§8-51 ledd 3`(oppfylt = !harNåddMaksSykepengedagerOver67)
+        Aktivitetslogg().`§8-3 ledd 1 punktum 2`(oppfylt = !harFylt70)
         return harNåddMaksSykepengedager
-            || gammelpersonDager >= arbeidsgiverRegler.maksSykepengedagerOver67()
-            || dato.plusDays(1) >= alder.datoForØvreAldersgrense
+            || harNåddMaksSykepengedagerOver67
+            || harFylt70
     }
 
     internal fun maksdato(sisteUtbetalingsdag: LocalDate) =

@@ -2,6 +2,8 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.Grunnbeløp
+import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-33 ledd 3`
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.Year
@@ -14,6 +16,10 @@ internal class Alder(fødselsnummer: Fødselsnummer) {
     internal val sisteVirkedagFørFylte70år = datoForØvreAldersgrense.minusDays(1)
     internal val redusertYtelseAlder = fødselsdato.plusYears(67)
     private val forhøyetInntektskravAlder = fødselsdato.plusYears(67)
+
+    private companion object {
+        private const val ALDER_FOR_FORHØYET_FERIEPENGESATS = 59
+    }
 
     private fun LocalDate.trimHelg() = this.minusDays(
         when (this.dayOfWeek) {
@@ -30,6 +36,11 @@ internal class Alder(fødselsnummer: Fødselsnummer) {
 
     internal fun forhøyetInntektskrav(dato: LocalDate) = dato > forhøyetInntektskravAlder
 
-    internal fun beregnFeriepenger(opptjeningsår: Year, beløp: Int) =
-        beløp * if (alderVedSluttenAvÅret(opptjeningsår) < 59) 0.102 else 0.125
+    internal fun beregnFeriepenger(opptjeningsår: Year, beløp: Int): Double {
+        val alderVedSluttenAvÅret = alderVedSluttenAvÅret(opptjeningsår)
+        val prosentsats = if (alderVedSluttenAvÅret < ALDER_FOR_FORHØYET_FERIEPENGESATS) 0.102 else 0.125
+        val feriepenger = beløp * prosentsats
+        Aktivitetslogg().`§8-33 ledd 3`(beløp, opptjeningsår, prosentsats, alderVedSluttenAvÅret, feriepenger)
+        return feriepenger
+    }
 }

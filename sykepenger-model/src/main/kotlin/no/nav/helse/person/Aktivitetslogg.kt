@@ -15,6 +15,7 @@ import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.Year
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -575,7 +576,7 @@ class Aktivitetslogg(
                         )
                     }
 
-                    internal fun IAktivitetslogg.`§8-3 ledd 1`(oppfylt: Boolean) {}
+                    internal fun IAktivitetslogg.`§8-3 ledd 1 punktum 2`(oppfylt: Boolean) {}
 
                     internal fun IAktivitetslogg.`§8-3 ledd 2`(
                         oppfylt: Boolean,
@@ -676,6 +677,23 @@ class Aktivitetslogg(
 
                     internal fun IAktivitetslogg.`§8-17 ledd 2`(oppfylt: Boolean) {} //Legges inn på ferie/permisjonsdager i utbetalingstidslinje, med periodene av ferie/permisjon som input
 
+                    internal fun IAktivitetslogg.`§8-28 ledd 3 bokstav a`(
+                        oppfylt: Boolean,
+                        inntekter: List<Inntektshistorikk.Skatt>,
+                        inntekterSisteTreMåneder: List<Inntektshistorikk.Skatt>,
+                        grunnlagForSykepengegrunnlag: Inntekt
+                    ) {}
+
+                    internal fun IAktivitetslogg.`§8-30 ledd 1`(
+                        oppfylt: Boolean,
+                        list: List<ArbeidsgiverInntektsopplysning>,
+                        grunnlagForSykepengegrunnlag: Inntekt
+                    ) {
+//                        juridiskVurdering("Vurdering av fastsetting av sykepengegrunnlag",
+//                            Vurderingsresultat(oppfylt)
+//                        )
+                    }
+
                     internal fun IAktivitetslogg.`§8-30 ledd 2`(
                         oppfylt: Boolean,
                         maksimaltTillattAvvikPåÅrsinntekt: Prosent,
@@ -700,7 +718,40 @@ class Aktivitetslogg(
                             ))
                     }
 
+                    internal fun IAktivitetslogg.`§8-33 ledd 1`() {}
+
+                    internal fun IAktivitetslogg.`§8-33 ledd 3`(
+                        grunnlagForFeriepenger: Int,
+                        opptjeningsår: Year,
+                        prosentsats: Double,
+                        alder: Int,
+                        feriepenger: Double
+                    ) {
+                    }
+
                     internal fun IAktivitetslogg.`§8-51 ledd 2`(
+                        oppfylt: Boolean,
+                        skjæringstidspunkt: LocalDate,
+                        grunnlagForSykepengegrunnlag: Inntekt,
+                        minimumInntekt: Inntekt
+                    ) {
+                        juridiskVurdering("",
+                            Vurderingsresultat(
+                                oppfylt = oppfylt,
+                                versjon = LocalDate.of(2011, 12, 16),
+                                paragraf = "8-51",
+                                ledd = "2",
+                                inputdata = mapOf(
+                                    "skjæringstidspunkt" to skjæringstidspunkt,
+                                    "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
+                                    "minimumInntekt" to minimumInntekt.reflection { årlig, _, _, _ -> årlig }
+                                ),
+                                outputdata = emptyMap()
+                            )
+                        )
+                    }
+
+                    internal fun IAktivitetslogg.`§8-51 ledd 3`(
                         oppfylt: Boolean,
                         skjæringstidspunkt: LocalDate,
                         grunnlagForSykepengegrunnlag: Inntekt,

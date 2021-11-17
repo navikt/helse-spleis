@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.*
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-33 ledd 1`
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.ARBEIDSGIVER
@@ -30,7 +31,7 @@ internal class Feriepengeberegner(
     private val utbetalteDager: List<UtbetaltDag>
 ) {
     private companion object {
-        private const val MAGIC_NUMBER = 48
+        private const val ANTALL_FERIEPENGEDAGER_I_OPPTJENINGSÅRET = 48
     }
 
     internal constructor(
@@ -92,11 +93,14 @@ internal class Feriepengeberegner(
     ) {
         internal companion object {
             internal fun List<UtbetaltDag>.tilDato() = map { it.dato }.distinct()
-            internal fun List<UtbetaltDag>.feriepengedager() = this
-                .sortedBy { it.dato }
-                .groupBy { it.dato }
-                .entries
-                .take(MAGIC_NUMBER)
+            internal fun List<UtbetaltDag>.feriepengedager(): List<Map.Entry<LocalDate, List<UtbetaltDag>>> {
+                Aktivitetslogg().`§8-33 ledd 1`() //TODO: Finne ut hvordan vi løser denne mtp. input Infotrygd/Spleis og pr. arbeidsgiver
+                return this
+                    .sortedBy { it.dato }
+                    .groupBy { it.dato }
+                    .entries
+                    .take(ANTALL_FERIEPENGEDAGER_I_OPPTJENINGSÅRET)
+            }
 
             internal fun List<UtbetaltDag>.summer() = sumOf { it.beløp }
 
