@@ -577,8 +577,8 @@ internal class Utbetaling private constructor(
     private fun lagreOverføringsinformasjon(hendelse: ArbeidstakerHendelse, avstemmingsnøkkel: Long, tidspunkt: LocalDateTime) {
         hendelse.info("Utbetalingen ble overført til Oppdrag/UR $tidspunkt, og har fått avstemmingsnøkkel $avstemmingsnøkkel.\n" +
             "Tidligere verdier:\n" +
-            "Overføringstidspunkt: $tidspunkt\n" +
-            "Avstemmingsnøkkel: $avstemmingsnøkkel")
+            "Overføringstidspunkt: ${this.overføringstidspunkt}\n" +
+            "Avstemmingsnøkkel: ${this.avstemmingsnøkkel}")
         if (this.avstemmingsnøkkel != avstemmingsnøkkel || this.overføringstidspunkt != tidspunkt)
             hendelse.info("Overføringstidspunkt eller avstemmingsnøkkel har endret seg")
         this.overføringstidspunkt = tidspunkt
