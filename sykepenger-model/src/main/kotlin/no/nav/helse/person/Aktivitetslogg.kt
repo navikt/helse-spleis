@@ -559,7 +559,8 @@ class Aktivitetslogg(
                         oppfylt: Boolean,
                         skjæringstidspunkt: LocalDate,
                         tilstrekkeligAntallOpptjeningsdager: Int,
-                        arbeidsforhold: List<Map<String, Any?>>
+                        arbeidsforhold: List<Map<String, Any?>>,
+                        antallOpptjeningsdager: Int
                     ) {
                         juridiskVurdering(
                             "", Vurderingsresultat(
@@ -572,7 +573,9 @@ class Aktivitetslogg(
                                     "tilstrekkeligAntallOpptjeningsdager" to tilstrekkeligAntallOpptjeningsdager,
                                     "arbeidsforhold" to arbeidsforhold
                                 ),
-                                outputdata = emptyMap() //TODO: Ta med antall dager
+                                outputdata = mapOf(
+                                    "antallOpptjeningsdager" to antallOpptjeningsdager
+                                )
                             )
                         )
                     }

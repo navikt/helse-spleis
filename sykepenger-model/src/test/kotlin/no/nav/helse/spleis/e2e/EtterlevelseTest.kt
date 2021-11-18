@@ -1,16 +1,16 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Toggle
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
-import no.nav.helse.hendelser.til
+import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.*
 import no.nav.helse.person.Ledd.LEDD_1
 import no.nav.helse.person.Ledd.LEDD_2
 import no.nav.helse.person.Paragraf.*
 import no.nav.helse.serde.reflection.castAsList
+import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.juni
 import no.nav.helse.testhelpers.mai
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterEach
@@ -34,7 +34,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
     @Test
     fun `Sykmelding med gradering`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 50.prosent))
-        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 50.prosent, 50.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 50.prosent, 50.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
@@ -52,7 +52,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
     fun `Sykmelding med gradering over 67`() {
         val eldrePersonFnr = "21023701901"
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 50.prosent), fnr = eldrePersonFnr)
-        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 50.prosent, 50.prosent), fnr = eldrePersonFnr)
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 50.prosent, 50.prosent), fnr = eldrePersonFnr)
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
         håndterYtelser(1.vedtaksperiode, fnr = eldrePersonFnr)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, fnr = eldrePersonFnr)
@@ -69,7 +69,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
     @Test
     fun `§8-12 ledd 1 - Brukt færre enn 248 dager`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 50.prosent))
-        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 50.prosent, 50.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 50.prosent, 50.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
@@ -106,7 +106,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar(2018), 11.januar(2019), 50.prosent))
         håndterSøknadMedValidering(
             1.vedtaksperiode,
-            Søknad.Søknadsperiode.Sykdom(3.januar(2018), 11.januar(2019), 50.prosent, 50.prosent),
+            Sykdom(3.januar(2018), 11.januar(2019), 50.prosent, 50.prosent),
             sendtTilNav = 3.januar(2018)
         )
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar(2018), 18.januar(2018))))
@@ -166,6 +166,62 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
             listOf(2.januar(2019) til 4.januar(2019), 7.januar(2019) til 11.januar(2019)),
             resultat2.outputdata["avvisteDager"].castAsList<Periode>()
         )
+    }
+
+    @Test
+    fun `8-2 ledd 1 - opptjeningstid tilfredstilt`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterYtelser()
+        val arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER, 4.desember(2017), 31.januar))
+        håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold)
+        val inspektør = EtterlevelseInspektør(person.aktivitetslogg)
+        val resultat = inspektør.resultat(PARAGRAF_8_2, LEDD_1).single()
+        assertTrue(resultat.oppfylt)
+        assertEquals(12.juni(2020), resultat.versjon)
+        assertEquals(
+            mapOf(
+                "skjæringstidspunkt" to 1.januar,
+                "tilstrekkeligAntallOpptjeningsdager" to 28,
+                "arbeidsforhold" to listOf(
+                    mapOf(
+                        "orgnummer" to ORGNUMMER,
+                        "fom" to 4.desember(2017),
+                        "tom" to 31.januar
+                    )
+                )
+            ), resultat.inputdata
+        )
+        assertEquals(mapOf("antallOpptjeningsdager" to 28), resultat.outputdata)
+    }
+
+    @Test
+    fun `8-2 ledd 1 - opptjeningstid ikke tilfredstilt`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterYtelser()
+        val arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER, 5.desember(2017), 31.januar))
+        håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold)
+        val inspektør = EtterlevelseInspektør(person.aktivitetslogg)
+        val resultat = inspektør.resultat(PARAGRAF_8_2, LEDD_1).single()
+        assertFalse(resultat.oppfylt)
+        assertEquals(12.juni(2020), resultat.versjon)
+        assertEquals(
+            mapOf(
+                "skjæringstidspunkt" to 1.januar,
+                "tilstrekkeligAntallOpptjeningsdager" to 28,
+                "arbeidsforhold" to listOf(
+                    mapOf(
+                        "orgnummer" to ORGNUMMER,
+                        "fom" to 5.desember(2017),
+                        "tom" to 31.januar
+                    )
+                )
+            ), resultat.inputdata
+        )
+        assertEquals(mapOf("antallOpptjeningsdager" to 27), resultat.outputdata)
     }
 
     private class EtterlevelseInspektør(aktivitetslogg: Aktivitetslogg) : AktivitetsloggVisitor {

@@ -358,7 +358,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     }
 
     protected fun håndterVilkårsgrunnlag(
-        vedtaksperiodeIdInnhenter: IdInnhenter,
+        vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
         inntekt: Inntekt = INNTEKT,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
         orgnummer: String = ORGNUMMER,
