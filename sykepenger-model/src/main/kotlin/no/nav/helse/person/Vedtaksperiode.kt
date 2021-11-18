@@ -706,6 +706,15 @@ internal class Vedtaksperiode private constructor(
             hendelse.info("Behandlet en vedtaksperiode som tidligere ville blitt kastet ut på grunn av refusjon")
         }
 
+        val filter = person.brukerutbetalingfilter()
+            .periodetype(periodetype())
+            .utbetaling(utbetaling())
+            .build()
+
+        if (filter.filtrer(hendelse)) {
+            hendelse.info("Kandidat for brukerutbetaling${if (harBrukerutbetaling) " og perioden er brukerutbetaling" else ", men perioden har ikke brukerutbetaling"}")
+        }
+
         when {
             Toggle.LageBrukerutbetaling.kanIkkeFortsette(hendelse, utbetaling(), harBrukerutbetaling) -> {
                 person.invaliderAllePerioder(hendelse, "Kan ikke fortsette på grunn av manglende funksjonalitet for utbetaling til bruker")
