@@ -496,13 +496,14 @@ class Aktivitetslogg(
             class Vurderingsresultat private constructor(
                 private val oppfylt: Boolean,
                 private val versjon: LocalDate,
-                private val paragraf: String,
-                private val ledd: String,
+                private val paragraf: Paragraf,
+                private val ledd: Ledd = Ledd.LEDD_1,
+                private val punktum: Punktum = Punktum.PUNKTUM_1,
                 private val inputdata: Map<Any, Any?>,
                 private val outputdata: Map<Any, Any?>
             ) {
                 internal fun accept(visitor: AktivitetsloggVisitor) {
-                    visitor.visitVurderingsresultat(oppfylt, versjon, paragraf, ledd, inputdata, outputdata)
+                    visitor.visitVurderingsresultat(oppfylt, versjon, paragraf, ledd, punktum, inputdata, outputdata)
                 }
 
                 override fun toString(): String {
@@ -564,8 +565,8 @@ class Aktivitetslogg(
                             "", Vurderingsresultat(
                                 oppfylt = oppfylt,
                                 versjon = LocalDate.of(2020, 6, 12),
-                                paragraf = "8-2",
-                                ledd = "1",
+                                paragraf = Paragraf.PARAGRAF_8_2,
+                                ledd = Ledd.LEDD_1,
                                 inputdata = mapOf(
                                     "skjæringstidspunkt" to skjæringstidspunkt,
                                     "tilstrekkeligAntallOpptjeningsdager" to tilstrekkeligAntallOpptjeningsdager,
@@ -588,8 +589,8 @@ class Aktivitetslogg(
                             Vurderingsresultat(
                                 oppfylt = oppfylt,
                                 versjon = LocalDate.of(2011, 12, 16),
-                                paragraf = "8-3",
-                                ledd = "2",
+                                paragraf = Paragraf.PARAGRAF_8_3,
+                                ledd = Ledd.LEDD_2,
                                 inputdata = mapOf(
                                     "skjæringstidspunkt" to skjæringstidspunkt,
                                     "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
@@ -624,12 +625,12 @@ class Aktivitetslogg(
                         avvisteDager: List<LocalDate>
                     ) {
                         juridiskVurdering(
-                            "It's a' me, Mario: §8-12 ledd 1",
+                            "§8-12 ledd 1",
                             Vurderingsresultat(
                                 oppfylt = oppfylt,
                                 versjon = LocalDate.of(2021, 5, 21),
-                                paragraf = "8-12",
-                                ledd = "1",
+                                paragraf = Paragraf.PARAGRAF_8_12,
+                                ledd = Ledd.LEDD_1,
                                 inputdata = mapOf(
                                     "fom" to fom,
                                     "tom" to tom,
@@ -656,8 +657,8 @@ class Aktivitetslogg(
                             "", Vurderingsresultat(
                                 oppfylt = true,
                                 versjon = LocalDate.of(2021, 5, 21),
-                                paragraf = "8-12",
-                                ledd = "2",
+                                paragraf = Paragraf.PARAGRAF_8_12,
+                                ledd = Ledd.LEDD_2,
                                 inputdata = mapOf(
                                     "dato" to dato,
                                     "tilstrekkeligOppholdISykedager" to tilstrekkeligOppholdISykedager,
@@ -705,8 +706,8 @@ class Aktivitetslogg(
                             Vurderingsresultat(
                                 oppfylt = oppfylt,
                                 versjon = LocalDate.of(2017, 4, 5),
-                                paragraf = "8-30",
-                                ledd = "2",
+                                paragraf = Paragraf.PARAGRAF_8_30,
+                                ledd = Ledd.LEDD_2,
                                 inputdata = mapOf(
                                     "maksimaltTillattAvvikPåÅrsinntekt" to maksimaltTillattAvvikPåÅrsinntekt.prosent(),
                                     "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
@@ -739,8 +740,8 @@ class Aktivitetslogg(
                             Vurderingsresultat(
                                 oppfylt = oppfylt,
                                 versjon = LocalDate.of(2011, 12, 16),
-                                paragraf = "8-51",
-                                ledd = "2",
+                                paragraf = Paragraf.PARAGRAF_8_51,
+                                ledd = Ledd.LEDD_2,
                                 inputdata = mapOf(
                                     "skjæringstidspunkt" to skjæringstidspunkt,
                                     "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
@@ -761,8 +762,8 @@ class Aktivitetslogg(
                             Vurderingsresultat(
                                 oppfylt = oppfylt,
                                 versjon = LocalDate.of(2011, 12, 16),
-                                paragraf = "8-51",
-                                ledd = "2",
+                                paragraf = Paragraf.PARAGRAF_8_51,
+                                ledd = Ledd.LEDD_3,
                                 inputdata = mapOf(
                                     "skjæringstidspunkt" to skjæringstidspunkt,
                                     "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
@@ -914,7 +915,15 @@ internal interface AktivitetsloggVisitor {
         tidsstempel: String
     ) {}
 
-    fun visitVurderingsresultat(oppfylt: Boolean, versjon: LocalDate, paragraf: String, ledd: String, inputdata: Map<Any, Any?>, outputdata: Map<Any, Any?>) {}
+    fun visitVurderingsresultat(
+        oppfylt: Boolean,
+        versjon: LocalDate,
+        paragraf: Paragraf,
+        ledd: Ledd,
+        punktum: Punktum,
+        inputdata: Map<Any, Any?>,
+        outputdata: Map<Any, Any?>
+    ) {}
 
     fun postVisitEtterlevelse(
         kontekster: List<SpesifikkKontekst>,

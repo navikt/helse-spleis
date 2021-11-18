@@ -1,10 +1,8 @@
 package no.nav.helse.serde.reflection
 
 import no.nav.helse.Toggle
-import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.*
-import no.nav.helse.person.AktivitetsloggVisitor
-import no.nav.helse.person.SpesifikkKontekst
 import no.nav.helse.serde.PersonData.AktivitetsloggData.Alvorlighetsgrad
 import no.nav.helse.serde.PersonData.AktivitetsloggData.Alvorlighetsgrad.*
 import java.time.LocalDate
@@ -54,8 +52,9 @@ internal class AktivitetsloggMap(aktivitetslogg: Aktivitetslogg) : Aktivitetslog
     class JuridiskVurdering(
         private val oppfylt: Boolean,
         private val versjon: LocalDate,
-        private val paragraf: String,
-        private val ledd: String,
+        private val paragraf: Paragraf,
+        private val ledd: Ledd,
+        private val punktum: Punktum,
         private val inputdata: Map<Any, Any?>,
         private val outputdata: Map<Any, Any?>
     ) {
@@ -64,6 +63,7 @@ internal class AktivitetsloggMap(aktivitetslogg: Aktivitetslogg) : Aktivitetslog
             "versjon" to versjon,
             "paragraf" to paragraf,
             "ledd" to ledd,
+            "punktum" to punktum,
             "inputdata" to inputdata,
             "outputdata" to outputdata
         )
@@ -72,12 +72,13 @@ internal class AktivitetsloggMap(aktivitetslogg: Aktivitetslogg) : Aktivitetslog
     override fun visitVurderingsresultat(
         oppfylt: Boolean,
         versjon: LocalDate,
-        paragraf: String,
-        ledd: String,
+        paragraf: Paragraf,
+        ledd: Ledd,
+        punktum: Punktum,
         inputdata: Map<Any, Any?>,
         outputdata: Map<Any, Any?>
     ) {
-        juridiskVurdering = JuridiskVurdering(oppfylt, versjon, paragraf, ledd, inputdata, outputdata)
+        juridiskVurdering = JuridiskVurdering(oppfylt, versjon, paragraf, ledd, punktum, inputdata, outputdata)
     }
 
     override fun postVisitEtterlevelse(

@@ -5,9 +5,10 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.AktivitetsloggVisitor
-import no.nav.helse.person.SpesifikkKontekst
+import no.nav.helse.person.*
+import no.nav.helse.person.Ledd.LEDD_1
+import no.nav.helse.person.Ledd.LEDD_2
+import no.nav.helse.person.Paragraf.*
 import no.nav.helse.serde.reflection.castAsList
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mai
@@ -41,10 +42,10 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
 
         val etterlevelseInspektør = EtterlevelseInspektør(inspektør.personLogg)
         assertEquals(4, etterlevelseInspektør.size)
-        assertTrue(etterlevelseInspektør.resultat("8-2", "1").single().oppfylt)
-        assertTrue(etterlevelseInspektør.resultat("8-3", "2").single().oppfylt)
-        assertTrue(etterlevelseInspektør.resultat("8-12", "1").single().oppfylt)
-        assertTrue(etterlevelseInspektør.resultat("8-30", "2").single().oppfylt)
+        assertTrue(etterlevelseInspektør.resultat(PARAGRAF_8_2, LEDD_1).single().oppfylt)
+        assertTrue(etterlevelseInspektør.resultat(PARAGRAF_8_3, LEDD_2).single().oppfylt)
+        assertTrue(etterlevelseInspektør.resultat(PARAGRAF_8_12, LEDD_1).single().oppfylt)
+        assertTrue(etterlevelseInspektør.resultat(PARAGRAF_8_30, LEDD_2).single().oppfylt)
     }
 
     @Test
@@ -59,10 +60,10 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
 
         val etterlevelseInspektør = EtterlevelseInspektør(inspektør.personLogg)
         assertEquals(4, etterlevelseInspektør.size)
-        assertTrue(etterlevelseInspektør.resultat("8-2", "1").single().oppfylt)
-        assertTrue(etterlevelseInspektør.resultat("8-51", "2").single().oppfylt)
-        assertTrue(etterlevelseInspektør.resultat("8-12", "1").single().oppfylt)
-        assertTrue(etterlevelseInspektør.resultat("8-30", "2").single().oppfylt)
+        assertTrue(etterlevelseInspektør.resultat(PARAGRAF_8_2, LEDD_1).single().oppfylt)
+        assertTrue(etterlevelseInspektør.resultat(PARAGRAF_8_51, LEDD_2).single().oppfylt)
+        assertTrue(etterlevelseInspektør.resultat(PARAGRAF_8_12, LEDD_1).single().oppfylt)
+        assertTrue(etterlevelseInspektør.resultat(PARAGRAF_8_30, LEDD_2).single().oppfylt)
     }
 
     @Test
@@ -74,8 +75,8 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
 
-        val resultat = EtterlevelseInspektør(inspektør.personLogg).resultat("8-12", "1").single()
-        assertEquals("It's a' me, Mario: §8-12 ledd 1", resultat.melding)
+        val resultat = EtterlevelseInspektør(inspektør.personLogg).resultat(PARAGRAF_8_12, LEDD_1).single()
+        assertEquals("§8-12 ledd 1", resultat.melding)
         assertTrue(resultat.oppfylt)
         assertEquals(21.mai(2021), resultat.versjon)
         assertEquals(19.januar, resultat.inputdata["fom"])
@@ -113,8 +114,8 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
 
-        val resultat1 = EtterlevelseInspektør(inspektør.personLogg).resultat("8-12", "1").first()
-        assertEquals("It's a' me, Mario: §8-12 ledd 1", resultat1.melding)
+        val resultat1 = EtterlevelseInspektør(inspektør.personLogg).resultat(PARAGRAF_8_12, LEDD_1).first()
+        assertEquals("§8-12 ledd 1", resultat1.melding)
         assertTrue(resultat1.oppfylt)
         assertEquals(21.mai(2021), resultat1.versjon)
         assertEquals(19.januar(2018), resultat1.inputdata["fom"])
@@ -138,8 +139,8 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         assertEquals(1.januar(2019), resultat1.outputdata["maksdato"])
         assertTrue(resultat1.outputdata["avvisteDager"].castAsList<Any>().isEmpty())
 
-        val resultat2 = EtterlevelseInspektør(inspektør.personLogg).resultat("8-12", "1").last()
-        assertEquals("It's a' me, Mario: §8-12 ledd 1", resultat2.melding)
+        val resultat2 = EtterlevelseInspektør(inspektør.personLogg).resultat(PARAGRAF_8_12, LEDD_1).last()
+        assertEquals("§8-12 ledd 1", resultat2.melding)
         assertFalse(resultat2.oppfylt)
         assertEquals(21.mai(2021), resultat2.versjon)
         assertEquals(2.januar(2019), resultat2.inputdata["fom"])
@@ -171,7 +172,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         private val resultater = mutableListOf<Resultat>()
 
         val size get() = resultater.size
-        fun resultat(paragraf: String, ledd: String) = resultater.filter { it.paragraf == paragraf && it.ledd == ledd }
+        fun resultat(paragraf: Paragraf, ledd: Ledd) = resultater.filter { it.paragraf == paragraf && it.ledd == ledd }
 
         init {
             aktivitetslogg.accept(this)
@@ -192,12 +193,13 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         override fun visitVurderingsresultat(
             oppfylt: Boolean,
             versjon: LocalDate,
-            paragraf: String,
-            ledd: String,
+            paragraf: Paragraf,
+            ledd: Ledd,
+            punktum: Punktum,
             inputdata: Map<Any, Any?>,
             outputdata: Map<Any, Any?>
         ) {
-            resultater.add(Resultat(melding, oppfylt, versjon, paragraf, ledd, inputdata, outputdata))
+            resultater.add(Resultat(melding, oppfylt, versjon, paragraf, ledd, punktum, inputdata, outputdata))
         }
     }
 
@@ -205,8 +207,9 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         val melding: String,
         val oppfylt: Boolean,
         val versjon: LocalDate,
-        val paragraf: String,
-        val ledd: String,
+        val paragraf: Paragraf,
+        val ledd: Ledd,
+        val punktum: Punktum,
         val inputdata: Map<Any, Any?>,
         val outputdata: Map<Any, Any?>
     )
