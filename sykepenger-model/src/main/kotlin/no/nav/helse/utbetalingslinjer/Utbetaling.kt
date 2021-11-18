@@ -574,6 +574,15 @@ internal class Utbetaling private constructor(
     )
     internal fun fagsystemIder() = listOf(arbeidsgiverOppdrag.fagsystemId(), personOppdrag.fagsystemId())
 
+    private fun lagreOverføringsinformasjon(hendelse: ArbeidstakerHendelse, avstemmingsnøkkel: Long, tidspunkt: LocalDateTime) {
+        hendelse.info("Utbetalingen ble overført til Oppdrag/UR $tidspunkt, og har fått avstemmingsnøkkel $avstemmingsnøkkel.\n" +
+            "Tidligere verdier:\n" +
+            "Overføringstidspunkt: $tidspunkt\n" +
+            "Avstemmingsnøkkel: $avstemmingsnøkkel")
+        this.overføringstidspunkt = tidspunkt
+        this.avstemmingsnøkkel = avstemmingsnøkkel
+    }
+
     internal interface Tilstand {
         fun forkast(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
             hendelse.info("Forkaster ikke utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
@@ -775,20 +784,13 @@ internal class Utbetaling private constructor(
         }
 
         override fun overført(utbetaling: Utbetaling, hendelse: UtbetalingOverført) {
-            lagreOverføringsinformasjon(utbetaling, hendelse, hendelse.avstemmingsnøkkel, hendelse.overføringstidspunkt)
+            utbetaling.lagreOverføringsinformasjon(hendelse, hendelse.avstemmingsnøkkel, hendelse.overføringstidspunkt)
             utbetaling.tilstand(Overført, hendelse)
         }
 
         override fun kvittér(utbetaling: Utbetaling, hendelse: UtbetalingHendelse) {
-            lagreOverføringsinformasjon(utbetaling, hendelse, hendelse.avstemmingsnøkkel, hendelse.overføringstidspunkt)
+            utbetaling.lagreOverføringsinformasjon(hendelse, hendelse.avstemmingsnøkkel, hendelse.overføringstidspunkt)
             utbetaling.håndterKvittering(hendelse)
-        }
-
-        private fun lagreOverføringsinformasjon(utbetaling: Utbetaling, hendelse: ArbeidstakerHendelse, avstemmingsnøkkel: Long, tidspunkt: LocalDateTime) {
-            utbetaling.overføringstidspunkt = tidspunkt
-            utbetaling.avstemmingsnøkkel = avstemmingsnøkkel
-            hendelse.info("Utbetalingen ble overført til Oppdrag/UR $tidspunkt, " +
-                "og har fått avstemmingsnøkkel $avstemmingsnøkkel")
         }
     }
 
@@ -799,11 +801,11 @@ internal class Utbetaling private constructor(
 
         override fun overført(utbetaling: Utbetaling, hendelse: UtbetalingOverført) {
             hendelse.info("Mottok overførtkvittering, men står allerede i Overført. Venter på kvittering.")
-            utbetaling.avstemmingsnøkkel = hendelse.avstemmingsnøkkel
+            utbetaling.lagreOverføringsinformasjon(hendelse, hendelse.avstemmingsnøkkel, hendelse.overføringstidspunkt)
         }
 
         override fun kvittér(utbetaling: Utbetaling, hendelse: UtbetalingHendelse) {
-            utbetaling.avstemmingsnøkkel = hendelse.avstemmingsnøkkel
+            utbetaling.lagreOverføringsinformasjon(hendelse, hendelse.avstemmingsnøkkel, hendelse.overføringstidspunkt)
             utbetaling.håndterKvittering(hendelse)
         }
     }
