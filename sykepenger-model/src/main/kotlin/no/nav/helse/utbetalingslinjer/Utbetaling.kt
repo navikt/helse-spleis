@@ -579,6 +579,8 @@ internal class Utbetaling private constructor(
             "Tidligere verdier:\n" +
             "Overføringstidspunkt: $tidspunkt\n" +
             "Avstemmingsnøkkel: $avstemmingsnøkkel")
+        if (this.avstemmingsnøkkel != avstemmingsnøkkel || this.overføringstidspunkt != tidspunkt)
+            hendelse.info("Overføringstidspunkt eller avstemmingsnøkkel har endret seg")
         this.overføringstidspunkt = tidspunkt
         this.avstemmingsnøkkel = avstemmingsnøkkel
     }
