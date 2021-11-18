@@ -592,7 +592,8 @@ internal class TestMessageFactory(
         saksbehandlerIdent: String,
         saksbehandlerEpost: String,
         automatiskBehandling: Boolean,
-        makstidOppnådd: Boolean
+        makstidOppnådd: Boolean,
+        godkjenttidspunkt: LocalDateTime
     ): String {
         return lagBehovMedLøsning(
             behov = listOf("Godkjenning"),
@@ -604,7 +605,7 @@ internal class TestMessageFactory(
                     "saksbehandlerIdent" to saksbehandlerIdent,
                     "saksbehandlerEpost" to saksbehandlerEpost,
                     "automatiskBehandling" to automatiskBehandling,
-                    "godkjenttidspunkt" to LocalDateTime.now(),
+                    "godkjenttidspunkt" to godkjenttidspunkt,
                     "makstidOppnådd" to makstidOppnådd
                 )
             ),

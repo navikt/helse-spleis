@@ -97,6 +97,7 @@ internal class Utbetaling private constructor(
     private val stønadsdager get() = Oppdrag.stønadsdager(arbeidsgiverOppdrag, personOppdrag)
     private val observers = mutableSetOf<UtbetalingObserver>()
     private var forrigeHendelse: ArbeidstakerHendelse? = null
+    internal fun godkjenttidspunkt() = vurdering?.godkjenttidspunkt()
 
     internal enum class Utbetalingtype { UTBETALING, ETTERUTBETALING, ANNULLERING, REVURDERING, FERIEPENGER }
 
@@ -316,7 +317,8 @@ internal class Utbetaling private constructor(
                     ER_IKKE_6G_BEGRENSET -> "ER_IKKE_6G_BEGRENSET"
                     VURDERT_I_INFOTRYGD -> "VURDERT_I_INFOTRYGD"
                     else -> "VET_IKKE"
-                }
+                },
+                utbetaling?.godkjenttidspunkt() ?: LocalDateTime.MIN
             ))
         }
 
@@ -912,6 +914,8 @@ internal class Utbetaling private constructor(
                 it.utbetalingAnnullert(hendelseskontekst, utbetaling.id, utbetaling.periode, oppdrag.fagsystemId(), tidspunkt, epost, ident)
             }
         }
+
+        internal fun godkjenttidspunkt() = tidspunkt
 
         internal fun utbetalt(hendelseskontekst: Hendelseskontekst, utbetaling: Utbetaling) {
             utbetaling.observers.forEach {

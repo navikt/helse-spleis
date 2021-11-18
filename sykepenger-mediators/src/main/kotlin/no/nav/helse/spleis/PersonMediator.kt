@@ -220,7 +220,8 @@ internal class PersonMediator(
                 "grunnlagForSykepengegrunnlag" to event.grunnlagForSykepengegrunnlag,
                 "grunnlagForSykepengegrunnlagPerArbeidsgiver" to event.grunnlagForSykepengegrunnlagPerArbeidsgiver,
                 "begrensning" to event.sykepengegrunnlagsbegrensning,
-                "inntekt" to event.inntekt
+                "inntekt" to event.inntekt,
+                "godkjenttidspunkt" to event.godkjenttidspunkt
             ).apply {
                 event.utbetalingId?.let { this["utbetalingId"] = it }
             }

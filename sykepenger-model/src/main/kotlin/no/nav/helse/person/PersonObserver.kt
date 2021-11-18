@@ -177,7 +177,8 @@ interface PersonObserver {
         val grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Double>,
         val inntekt: Double,
         val utbetalingId: UUID?,
-        val sykepengegrunnlagsbegrensning: String
+        val sykepengegrunnlagsbegrensning: String,
+        val godkjenttidspunkt: LocalDateTime
     )
 
     fun inntektsmeldingReplay(fødselsnummer: Fødselsnummer, vedtaksperiodeId: UUID) {}

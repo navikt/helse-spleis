@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.rapids_rivers.asLocalDate
+import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.testhelpers.*
 import no.nav.inntektsmeldingkontrakt.Naturalytelse
@@ -15,6 +16,8 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 
 internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
@@ -462,6 +465,61 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
 
         assertEquals(1, testRapid.inspektør.meldinger("trenger_inntektsmelding").size)
         assertEquals(17.januar, testRapid.inspektør.siste("trenger_inntektsmelding")["fom"].asLocalDate())
+    }
+
+
+    @Test
+    fun `Sender med godkjenningstidspunkt i vedtak_fattet`() {
+        val godkjenttidspunkt = LocalDateTime.now().plusMinutes(1)
+        sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
+        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)))
+        sendInntektsmelding(0, listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
+        sendYtelser(0)
+        sendVilkårsgrunnlag(0)
+        sendYtelserUtenSykepengehistorikk(0)
+        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
+        sendUtbetalingsgodkjenning(0, true, godkjenttidspunkt = godkjenttidspunkt)
+        sendUtbetaling()
+        assertTilstander(
+            0,
+            "MOTTATT_SYKMELDING_FERDIG_GAP",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVVENTER_HISTORIKK",
+            "AVVENTER_VILKÅRSPRØVING",
+            "AVVENTER_HISTORIKK",
+            "AVVENTER_SIMULERING",
+            "AVVENTER_GODKJENNING",
+            "TIL_UTBETALING",
+            "AVSLUTTET"
+        )
+        assertUtbetalingTilstander(0, "IKKE_UTBETALT", "GODKJENT", "SENDT", "OVERFØRT", "UTBETALT")
+
+        assertEquals(1, testRapid.inspektør.meldinger("vedtak_fattet").size)
+        assertEquals(godkjenttidspunkt, testRapid.inspektør.siste("vedtak_fattet")["godkjenttidspunkt"].asLocalDateTime())
+    }
+
+    @Test
+    fun `Sender med godkjenningstidspunkt i vedtak_fattet for perioder som avsluttes uten utbetaling`() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 16.januar, sykmeldingsgrad = 100))
+        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 16.januar, sykmeldingsgrad = 100)))
+        sendInntektsmelding(0, listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
+        sendYtelser(0)
+        sendVilkårsgrunnlag(0)
+        sendYtelserUtenSykepengehistorikk(0)
+        assertTilstander(
+            0,
+            "MOTTATT_SYKMELDING_FERDIG_GAP",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVVENTER_HISTORIKK",
+            "AVVENTER_VILKÅRSPRØVING",
+            "AVVENTER_HISTORIKK",
+            "AVSLUTTET_UTEN_UTBETALING"
+        )
+        assertUtbetalingTilstander(0, "IKKE_UTBETALT", "GODKJENT_UTEN_UTBETALING")
+
+        assertEquals(1, testRapid.inspektør.meldinger("vedtak_fattet").size)
+        // Sjekker på localdate fordi modellen slenger på LocalDateTime.now() ved automatisk godkjenning, og det er vanskelig å teste på.
+        assertEquals(LocalDate.now(), testRapid.inspektør.siste("vedtak_fattet")["godkjenttidspunkt"].asLocalDateTime().toLocalDate())
     }
 
     @Disabled("https://trello.com/c/Ob6kSelp")

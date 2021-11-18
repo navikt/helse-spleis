@@ -126,7 +126,8 @@ internal class MessageMediatorTest {
             saksbehandlerIdent = "en_saksbehandler",
             saksbehandlerEpost = "en_saksbehandler@ikke.no",
             automatiskBehandling = false,
-            makstidOppnådd = false
+            makstidOppnådd = false,
+            godkjenttidspunkt = LocalDateTime.now()
         ))
         assertTrue(hendelseMediator.lestUtbetalingsgodkjenning)
     }
