@@ -522,6 +522,25 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         assertEquals(LocalDate.now(), testRapid.inspektør.siste("vedtak_fattet")["godkjenttidspunkt"].asLocalDateTime().toLocalDate())
     }
 
+    @Test
+    fun `trenger_inntektsmelding håndterer korrigerende sykmelding som forkorter perioden`() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendInntektsmelding(0, listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
+        sendYtelser(0)
+        sendVilkårsgrunnlag(0)
+        sendYtelserUtenSykepengehistorikk(0)
+        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
+        sendUtbetalingsgodkjenning(0)
+        sendUtbetaling()
+
+        sendNySøknad(SoknadsperiodeDTO(fom = 2.februar, tom = 12.februar, sykmeldingsgrad = 100))
+        sendNySøknad(SoknadsperiodeDTO(fom = 2.februar, tom = 8.februar, sykmeldingsgrad = 100))
+        sendSøknad(1, listOf(SoknadsperiodeDTO(fom = 2.februar, tom = 8.februar, sykmeldingsgrad = 100)))
+
+        assertEquals(2, testRapid.inspektør.meldinger("trenger_inntektsmelding").size)
+    }
+
     @Disabled("https://trello.com/c/Ob6kSelp")
     @Test
     fun `spleis sender korrekt grad (avrundet) ut`() {

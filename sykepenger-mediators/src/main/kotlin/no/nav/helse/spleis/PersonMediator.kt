@@ -360,7 +360,7 @@ internal class PersonMediator(
         val gjeldendePeriode = hendelseRepository.finnSøknader(Fødselsnummer.tilFødselsnummer(fnr))
             .flatMap { søknad -> Periode(søknad["fom"].asLocalDate(), søknad["tom"].asLocalDate()) }
             .grupperSammenhengendePerioder()
-            .first { it.contains(fom) && it.contains(tom) }
+            .firstOrNull { it.contains(fom) || it.contains(tom) }
 
         return hendelseRepository
             .finnInntektsmeldinger(Fødselsnummer.tilFødselsnummer(fnr))
@@ -372,7 +372,7 @@ internal class PersonMediator(
                         inntektsmelding["arbeidsgiverperioder"].maxOf { it["tom"].asLocalDate() }
                     )
             }
-            .any { (førsteFraværsdag, sammenslåttArbeidsgiverperiode) -> gjeldendePeriode.fårInntektFra(førsteFraværsdag, sammenslåttArbeidsgiverperiode) }
+            .any { (førsteFraværsdag, sammenslåttArbeidsgiverperiode) -> gjeldendePeriode?.fårInntektFra(førsteFraværsdag, sammenslåttArbeidsgiverperiode) ?: false }
     }
 
     private fun Periode.fårInntektFra(førsteFraværsdag: LocalDate?, arbeidsgiverperiode: Periode): Boolean {
