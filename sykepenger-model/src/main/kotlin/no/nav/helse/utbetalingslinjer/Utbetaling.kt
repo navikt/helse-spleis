@@ -568,7 +568,7 @@ internal class Utbetaling private constructor(
         "gjenståendeSykedager" to gjenståendeSykedager,
         "vurdering" to vurdering?.toMap(),
         "overføringstidspunkt" to overføringstidspunkt,
-        "avstemmingsnøkkel" to avstemmingsnøkkel,
+        "avstemmingsnøkkel" to "$avstemmingsnøkkel",
         "avsluttet" to avsluttet,
         "oppdatert" to oppdatert
     )
