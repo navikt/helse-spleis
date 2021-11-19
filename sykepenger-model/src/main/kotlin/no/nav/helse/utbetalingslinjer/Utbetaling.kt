@@ -575,14 +575,11 @@ internal class Utbetaling private constructor(
     internal fun fagsystemIder() = listOf(arbeidsgiverOppdrag.fagsystemId(), personOppdrag.fagsystemId())
 
     private fun lagreOverføringsinformasjon(hendelse: ArbeidstakerHendelse, avstemmingsnøkkel: Long, tidspunkt: LocalDateTime) {
-        hendelse.info("Utbetalingen ble overført til Oppdrag/UR $tidspunkt, og har fått avstemmingsnøkkel $avstemmingsnøkkel.\n" +
-            "Tidligere verdier:\n" +
-            "Overføringstidspunkt: ${this.overføringstidspunkt}\n" +
-            "Avstemmingsnøkkel: ${this.avstemmingsnøkkel}")
-        if (this.avstemmingsnøkkel != avstemmingsnøkkel || this.overføringstidspunkt != tidspunkt)
-            hendelse.info("Overføringstidspunkt eller avstemmingsnøkkel har endret seg")
-        this.overføringstidspunkt = tidspunkt
-        this.avstemmingsnøkkel = avstemmingsnøkkel
+        hendelse.info("Utbetalingen ble overført til Oppdrag/UR $tidspunkt, og har fått avstemmingsnøkkel $avstemmingsnøkkel.\n")
+        if (this.avstemmingsnøkkel != null && this.avstemmingsnøkkel != avstemmingsnøkkel)
+            hendelse.info("Avstemmingsnøkkel har endret seg.\nTidligere verdi: ${this.avstemmingsnøkkel}")
+        if (this.overføringstidspunkt == null) this.overføringstidspunkt = tidspunkt
+        if (this.avstemmingsnøkkel == null) this.avstemmingsnøkkel = avstemmingsnøkkel
     }
 
     internal interface Tilstand {
