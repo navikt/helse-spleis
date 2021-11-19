@@ -7,8 +7,8 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.*
 import no.nav.helse.person.Ledd.LEDD_1
-import no.nav.helse.person.Paragraf.PARAGRAF_8_12
-import no.nav.helse.person.Paragraf.PARAGRAF_8_2
+import no.nav.helse.person.Ledd.LEDD_2
+import no.nav.helse.person.Paragraf.*
 import no.nav.helse.person.Punktum.Companion.punktum
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
@@ -76,6 +76,29 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
                 )
             ),
             outputdata = mapOf("antallOpptjeningsdager" to 27)
+        )
+    }
+
+    @Test
+    fun `§8-3 ledd 2 punktum 1 - har minimum inntekt halv G`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterYtelser()
+        val arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER, 5.desember(2017), 31.januar))
+        håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold)
+
+        assertOppfylt(
+            paragraf = PARAGRAF_8_3,
+            ledd = LEDD_2,
+            punktum = 1.punktum,
+            versjon = 16.desember(2011),
+            inputdata = mapOf(
+                "skjæringstidspunkt" to 1.januar,
+                "grunnlagForSykepengegrunnlag" to 372000.0,
+                "minimumInntekt" to 46817.0
+            ),
+            outputdata = emptyMap()
         )
     }
 
