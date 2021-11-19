@@ -2,6 +2,7 @@ package no.nav.helse.person.filter
 
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.NAV
@@ -27,29 +28,34 @@ internal class BrukerutbetalingfilterTest {
 
     @Test
     fun `refusjon passer filter`() {
-        assertTrue(Brukerutbetalingfilter(Fødselsnummer.tilFødselsnummer("31108512345"), Periodetype.FØRSTEGANGSBEHANDLING, lagUtbetaling()))
+        assertTrue(Brukerutbetalingfilter(Fødselsnummer.tilFødselsnummer("31108512345"), Periodetype.FØRSTEGANGSBEHANDLING, lagUtbetaling(), Inntektskilde.EN_ARBEIDSGIVER))
     }
 
     @Test
     fun `ingen refusjon passer filter`() {
         val ingenRefusjon = lagUtbetaling(tidslinjeOf(16.AP, 15.NAV.copyWith(arbeidsgiverbeløp = 0)))
-        assertTrue(Brukerutbetalingfilter(Fødselsnummer.tilFødselsnummer("31108512345"), Periodetype.FØRSTEGANGSBEHANDLING, ingenRefusjon))
+        assertTrue(Brukerutbetalingfilter(Fødselsnummer.tilFødselsnummer("31108512345"), Periodetype.FØRSTEGANGSBEHANDLING, ingenRefusjon, Inntektskilde.EN_ARBEIDSGIVER))
     }
 
     @Test
     fun `feil periodetype`() {
-        assertFalse(Brukerutbetalingfilter(Fødselsnummer.tilFødselsnummer("31108512345"), Periodetype.FORLENGELSE, lagUtbetaling()))
+        assertFalse(Brukerutbetalingfilter(Fødselsnummer.tilFødselsnummer("31108512345"), Periodetype.FORLENGELSE, lagUtbetaling(), Inntektskilde.EN_ARBEIDSGIVER))
     }
 
     @Test
     fun `feil fødselsdato passer ikke`() {
-        assertFalse(Brukerutbetalingfilter(Fødselsnummer.tilFødselsnummer("02108512345"), Periodetype.FØRSTEGANGSBEHANDLING, lagUtbetaling()))
+        assertFalse(Brukerutbetalingfilter(Fødselsnummer.tilFødselsnummer("02108512345"), Periodetype.FØRSTEGANGSBEHANDLING, lagUtbetaling(), Inntektskilde.EN_ARBEIDSGIVER))
     }
 
     @Test
     fun `delvis refusjon passer ikke`() {
         val delvisRefusjon = lagUtbetaling(tidslinjeOf(16.AP, 15.NAV.copyWith(arbeidsgiverbeløp = 600)))
-        assertFalse(Brukerutbetalingfilter(Fødselsnummer.tilFødselsnummer("31108512345"), Periodetype.FØRSTEGANGSBEHANDLING, delvisRefusjon))
+        assertFalse(Brukerutbetalingfilter(Fødselsnummer.tilFødselsnummer("31108512345"), Periodetype.FØRSTEGANGSBEHANDLING, delvisRefusjon, Inntektskilde.EN_ARBEIDSGIVER))
+    }
+
+    @Test
+    fun `inntektskilde fra flere arbeidsgivere passer ikke`() {
+        assertFalse(Brukerutbetalingfilter(Fødselsnummer.tilFødselsnummer("31108512345"), Periodetype.FØRSTEGANGSBEHANDLING, lagUtbetaling(), Inntektskilde.FLERE_ARBEIDSGIVERE))
     }
 
     private fun assertTrue(filter: Featurefilter) {

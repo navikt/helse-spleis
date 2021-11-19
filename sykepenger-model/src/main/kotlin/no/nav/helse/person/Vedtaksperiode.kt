@@ -709,6 +709,7 @@ internal class Vedtaksperiode private constructor(
         val filter = person.brukerutbetalingfilter()
             .periodetype(periodetype())
             .utbetaling(utbetaling())
+            .inntektkilde(inntektskilde())
             .build()
 
         if (filter.filtrer(hendelse)) {
