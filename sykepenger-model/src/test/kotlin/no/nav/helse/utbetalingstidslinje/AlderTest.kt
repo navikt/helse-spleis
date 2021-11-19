@@ -4,6 +4,7 @@ import no.nav.helse.Grunnbeløp
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -17,23 +18,26 @@ internal class AlderTest {
     }
 
     @Test
-    fun `Minimum inntekt er en halv g hvis du akkurat har fylt 67`(){
+    fun `Minimum inntekt er en halv g hvis du akkurat har fylt 67`() {
         val alder = "01015149945".somFødselsnummer().alder()
         assertEquals(67, alder.alderPåDato(1.januar))
-        assertEquals(Grunnbeløp.halvG.dagsats(1.januar), alder.minimumInntekt(1.januar))
+        assertEquals(Grunnbeløp.halvG.beløp(1.januar), alder.minimumInntekt(1.januar))
+        assertEquals((93634 / 2).årlig, alder.minimumInntekt(1.januar))
     }
 
     @Test
-    fun `Minimum inntekt er 2g hvis du er en dag over 67`(){
+    fun `Minimum inntekt er 2g hvis du er en dag over 67`() {
         val alder = "01015149945".somFødselsnummer().alder()
         assertEquals(67, alder.alderPåDato(2.januar))
-        assertEquals(Grunnbeløp.`2G`.dagsats(2.januar), alder.minimumInntekt(2.januar))
+        assertEquals(Grunnbeløp.`2G`.beløp(2.januar), alder.minimumInntekt(2.januar))
+        assertEquals((93634 * 2).årlig, alder.minimumInntekt(2.januar))
     }
 
     @Test
-    fun `Minimum inntekt er 2g hvis du er 69`(){
+    fun `Minimum inntekt er 2g hvis du er 69`() {
         val alder = "01014949945".somFødselsnummer().alder()
         assertEquals(69, alder.alderPåDato(1.januar))
-        assertEquals(Grunnbeløp.`2G`.dagsats(1.januar), alder.minimumInntekt(1.januar), )
+        assertEquals(Grunnbeløp.`2G`.beløp(1.januar), alder.minimumInntekt(1.januar))
+        assertEquals((93634 * 2).årlig, alder.minimumInntekt(1.januar))
     }
 }
