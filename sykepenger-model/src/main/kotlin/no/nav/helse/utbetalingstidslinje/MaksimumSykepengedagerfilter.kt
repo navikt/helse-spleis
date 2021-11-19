@@ -2,7 +2,7 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-12 ledd 1`
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-12 ledd 1 punktum 1`
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-12 ledd 2`
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.UtbetalingsdagVisitor
@@ -58,7 +58,7 @@ internal class MaksimumSykepengedagerfilter(
         beregnetTidslinje.accept(this)
         if (::sakensStartdato.isInitialized) {
             val avvisteDager = avvisteDatoer.filter { sakensStartdato <= it }
-            aktivitetslogg.`§8-12 ledd 1`(
+            aktivitetslogg.`§8-12 ledd 1 punktum 1`(
                 avvisteDager !in periode,
                 avvisteDatoer.firstOrNull() ?: sakensStartdato,
                 avvisteDatoer.lastOrNull() ?: sisteBetalteDag,
@@ -157,7 +157,7 @@ internal class MaksimumSykepengedagerfilter(
 
     private fun nextState(dagen: LocalDate): State? {
         if (opphold >= TILSTREKKELIG_OPPHOLD_I_SYKEDAGER) {
-            aktivitetslogg.`§8-12 ledd 1`(
+            aktivitetslogg.`§8-12 ledd 1 punktum 1`(
                 avvisteDatoer.filter { sakensStartdato <= it } !in periode,
                 avvisteDatoer.firstOrNull() ?: sakensStartdato,
                 avvisteDatoer.lastOrNull() ?: sisteBetalteDag,
@@ -168,12 +168,7 @@ internal class MaksimumSykepengedagerfilter(
                 maksdato(),
                 avvisteDatoer.filter { sakensStartdato <= it }
             )
-            aktivitetslogg.`§8-12 ledd 2`(
-                dagen,
-                TILSTREKKELIG_OPPHOLD_I_SYKEDAGER,
-                tidslinjegrunnlag,
-                beregnetTidslinje
-            )
+            aktivitetslogg.`§8-12 ledd 2`(dagen, TILSTREKKELIG_OPPHOLD_I_SYKEDAGER, tidslinjegrunnlag, beregnetTidslinje)
             if (gjenståendeSykedager() <= 0 && dagen in periode) {
                 aktivitetslogg.warn("26 uker siden forrige utbetaling av sykepenger, vurder om vilkårene for sykepenger er oppfylt")
             }
@@ -182,7 +177,7 @@ internal class MaksimumSykepengedagerfilter(
         }
         if (state == State.Karantene) return null
         return if (teller.påGrensen(dagen) {
-                aktivitetslogg.`§8-12 ledd 1`(
+                aktivitetslogg.`§8-12 ledd 1 punktum 1`(
                     true,
                     sakensStartdato,
                     sisteBetalteDag,

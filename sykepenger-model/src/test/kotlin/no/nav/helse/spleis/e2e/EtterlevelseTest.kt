@@ -251,7 +251,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
             versjon: LocalDate,
             paragraf: Paragraf,
             ledd: Ledd,
-            punktum: Punktum,
+            punktum: List<Punktum>,
             inputdata: Map<Any, Any?>,
             outputdata: Map<Any, Any?>
         ) {
@@ -265,7 +265,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         val versjon: LocalDate,
         val paragraf: Paragraf,
         val ledd: Ledd,
-        val punktum: Punktum,
+        val punktum: List<Punktum>,
         val inputdata: Map<Any, Any?>,
         val outputdata: Map<Any, Any?>
     )

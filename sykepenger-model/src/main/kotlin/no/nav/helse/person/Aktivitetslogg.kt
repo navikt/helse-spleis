@@ -6,6 +6,11 @@ import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.TidslinjegrunnlagVisitor.Periode.Companion.dager
+import no.nav.helse.person.Ledd.Companion.ledd
+import no.nav.helse.person.Ledd.LEDD_2
+import no.nav.helse.person.Ledd.LEDD_3
+import no.nav.helse.person.Paragraf.*
+import no.nav.helse.person.Punktum.Companion.punktum
 import no.nav.helse.serde.reflection.AktivitetsloggMap
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
@@ -497,8 +502,8 @@ class Aktivitetslogg(
                 private val oppfylt: Boolean,
                 private val versjon: LocalDate,
                 private val paragraf: Paragraf,
-                private val ledd: Ledd = Ledd.LEDD_1,
-                private val punktum: Punktum = Punktum.PUNKTUM_1,
+                private val ledd: Ledd,
+                private val punktum: List<Punktum>,
                 private val inputdata: Map<Any, Any?>,
                 private val outputdata: Map<Any, Any?>
             ) {
@@ -562,12 +567,14 @@ class Aktivitetslogg(
                         arbeidsforhold: List<Map<String, Any?>>,
                         antallOpptjeningsdager: Int
                     ) {
+                        //TODO: Gjør vi vurdering av punktum 2?
                         juridiskVurdering(
                             "", Vurderingsresultat(
                                 oppfylt = oppfylt,
                                 versjon = LocalDate.of(2020, 6, 12),
-                                paragraf = Paragraf.PARAGRAF_8_2,
-                                ledd = Ledd.LEDD_1,
+                                paragraf = PARAGRAF_8_2,
+                                ledd = 1.ledd,
+                                punktum = 1.punktum,
                                 inputdata = mapOf(
                                     "skjæringstidspunkt" to skjæringstidspunkt,
                                     "tilstrekkeligAntallOpptjeningsdager" to tilstrekkeligAntallOpptjeningsdager,
@@ -582,7 +589,7 @@ class Aktivitetslogg(
 
                     internal fun IAktivitetslogg.`§8-3 ledd 1 punktum 2`(oppfylt: Boolean) {}
 
-                    internal fun IAktivitetslogg.`§8-3 ledd 2`(
+                    internal fun IAktivitetslogg.`§8-3 ledd 2 punktum 1`(
                         oppfylt: Boolean,
                         skjæringstidspunkt: LocalDate,
                         grunnlagForSykepengegrunnlag: Inntekt,
@@ -592,8 +599,9 @@ class Aktivitetslogg(
                             Vurderingsresultat(
                                 oppfylt = oppfylt,
                                 versjon = LocalDate.of(2011, 12, 16),
-                                paragraf = Paragraf.PARAGRAF_8_3,
-                                ledd = Ledd.LEDD_2,
+                                paragraf = PARAGRAF_8_3,
+                                ledd = 2.ledd,
+                                punktum = 1.punktum,
                                 inputdata = mapOf(
                                     "skjæringstidspunkt" to skjæringstidspunkt,
                                     "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
@@ -616,7 +624,7 @@ class Aktivitetslogg(
                     //TODO: Hvordan skal denne kunne legges inn???
                     internal fun IAktivitetslogg.`§8-10 ledd 3`(oppfylt: Boolean) {}
 
-                    internal fun IAktivitetslogg.`§8-12 ledd 1`(
+                    internal fun IAktivitetslogg.`§8-12 ledd 1 punktum 1`(
                         oppfylt: Boolean,
                         fom: LocalDate,
                         tom: LocalDate,
@@ -632,8 +640,9 @@ class Aktivitetslogg(
                             Vurderingsresultat(
                                 oppfylt = oppfylt,
                                 versjon = LocalDate.of(2021, 5, 21),
-                                paragraf = Paragraf.PARAGRAF_8_12,
-                                ledd = Ledd.LEDD_1,
+                                paragraf = PARAGRAF_8_12,
+                                ledd = 1.ledd,
+                                punktum = 1.punktum,
                                 inputdata = mapOf(
                                     "fom" to fom,
                                     "tom" to tom,
@@ -660,8 +669,9 @@ class Aktivitetslogg(
                             "", Vurderingsresultat(
                                 oppfylt = true,
                                 versjon = LocalDate.of(2021, 5, 21),
-                                paragraf = Paragraf.PARAGRAF_8_12,
-                                ledd = Ledd.LEDD_2,
+                                paragraf = PARAGRAF_8_12,
+                                ledd = 2.ledd,
+                                punktum = (1..2).punktum,
                                 inputdata = mapOf(
                                     "dato" to dato,
                                     "tilstrekkeligOppholdISykedager" to tilstrekkeligOppholdISykedager,
@@ -692,11 +702,7 @@ class Aktivitetslogg(
                         oppfylt: Boolean,
                         list: List<ArbeidsgiverInntektsopplysning>,
                         grunnlagForSykepengegrunnlag: Inntekt
-                    ) {
-//                        juridiskVurdering("Vurdering av fastsetting av sykepengegrunnlag",
-//                            Vurderingsresultat(oppfylt)
-//                        )
-                    }
+                    ) {}
 
                     internal fun IAktivitetslogg.`§8-30 ledd 2`(
                         oppfylt: Boolean,
@@ -709,8 +715,9 @@ class Aktivitetslogg(
                             Vurderingsresultat(
                                 oppfylt = oppfylt,
                                 versjon = LocalDate.of(2017, 4, 5),
-                                paragraf = Paragraf.PARAGRAF_8_30,
-                                ledd = Ledd.LEDD_2,
+                                paragraf = PARAGRAF_8_30,
+                                ledd = 2.ledd,
+                                punktum = (1..3).punktum,
                                 inputdata = mapOf(
                                     "maksimaltTillattAvvikPåÅrsinntekt" to maksimaltTillattAvvikPåÅrsinntekt.prosent(),
                                     "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
@@ -743,8 +750,9 @@ class Aktivitetslogg(
                             Vurderingsresultat(
                                 oppfylt = oppfylt,
                                 versjon = LocalDate.of(2011, 12, 16),
-                                paragraf = Paragraf.PARAGRAF_8_51,
-                                ledd = Ledd.LEDD_2,
+                                paragraf = PARAGRAF_8_51,
+                                ledd = LEDD_2,
+                                punktum = 1.punktum,
                                 inputdata = mapOf(
                                     "skjæringstidspunkt" to skjæringstidspunkt,
                                     "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
@@ -765,8 +773,9 @@ class Aktivitetslogg(
                             Vurderingsresultat(
                                 oppfylt = oppfylt,
                                 versjon = LocalDate.of(2011, 12, 16),
-                                paragraf = Paragraf.PARAGRAF_8_51,
-                                ledd = Ledd.LEDD_3,
+                                paragraf = PARAGRAF_8_51,
+                                ledd = LEDD_3,
+                                punktum = 1.punktum,
                                 inputdata = mapOf(
                                     "skjæringstidspunkt" to skjæringstidspunkt,
                                     "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
@@ -923,7 +932,7 @@ internal interface AktivitetsloggVisitor {
         versjon: LocalDate,
         paragraf: Paragraf,
         ledd: Ledd,
-        punktum: Punktum,
+        punktum: List<Punktum>,
         inputdata: Map<Any, Any?>,
         outputdata: Map<Any, Any?>
     ) {}

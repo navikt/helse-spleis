@@ -54,7 +54,7 @@ internal class AktivitetsloggMap(aktivitetslogg: Aktivitetslogg) : Aktivitetslog
         private val versjon: LocalDate,
         private val paragraf: Paragraf,
         private val ledd: Ledd,
-        private val punktum: Punktum,
+        private val punktum: List<Punktum>,
         private val inputdata: Map<Any, Any?>,
         private val outputdata: Map<Any, Any?>
     ) {
@@ -74,7 +74,7 @@ internal class AktivitetsloggMap(aktivitetslogg: Aktivitetslogg) : Aktivitetslog
         versjon: LocalDate,
         paragraf: Paragraf,
         ledd: Ledd,
-        punktum: Punktum,
+        punktum: List<Punktum>,
         inputdata: Map<Any, Any?>,
         outputdata: Map<Any, Any?>
     ) {
