@@ -31,7 +31,7 @@ class Simulering(
         if (!oppdrag.erRelevant(fagsystemId, fagområde)) return@apply
 
         if (!simuleringOK) {
-            info("Feil under simulering", melding)
+            info("Feil under simulering: $melding")
             error("Feil under simulering")
         }
         when {
