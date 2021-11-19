@@ -135,8 +135,8 @@ abstract class Toggle internal constructor(enabled: Boolean = false, private val
 
     internal object LageBrukerutbetaling : Toggle("LAGE_BRUKERUTBETALING") {
         fun kanIkkeFortsette(aktivitetslogg: IAktivitetslogg, utbetaling: Utbetaling, harBrukerutbetaling: Boolean): Boolean {
-            if (disabled && harBrukerutbetaling) aktivitetslogg.error("Utbetalingstidslinje inneholder brukerutbetaling")
-            else if (enabled && utbetaling.harDelvisRefusjon()) aktivitetslogg.error("Støtter ikke brukerutbetaling med delvis refusjon")
+            if (utbetaling.harDelvisRefusjon()) aktivitetslogg.error("Utbetalingen har endringer i både arbeidsgiver- og personoppdrag")
+            else if (disabled && harBrukerutbetaling) aktivitetslogg.error("Utbetalingstidslinje inneholder brukerutbetaling")
             return aktivitetslogg.hasErrorsOrWorse()
         }
     }

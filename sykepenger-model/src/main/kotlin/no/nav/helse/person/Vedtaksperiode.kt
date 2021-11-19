@@ -797,7 +797,7 @@ internal class Vedtaksperiode private constructor(
     private fun høstingsresultaterRevurdering(hendelse: ArbeidstakerHendelse, andreVedtaksperioder: List<Vedtaksperiode>) {
         hendelse.info("Videresender utbetaling til alle vedtaksperioder innenfor samme fagsystemid som er til revurdering")
         when {
-            harBrukerutbetaling(andreVedtaksperioder) -> {
+            utbetaling().harDelvisRefusjon() || harBrukerutbetaling(andreVedtaksperioder) -> {
                 tilstand(hendelse, RevurderingFeilet) {
                     hendelse.error("""Saken inneholder brukerutbetalinger etter revurdering, settes til "Revurdering feilet"""")
                 }
