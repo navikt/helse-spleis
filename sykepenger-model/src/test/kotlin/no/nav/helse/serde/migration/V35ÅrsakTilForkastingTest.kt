@@ -4,9 +4,7 @@ import no.nav.helse.serde.serdeObjectMapper
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class V35ÅrsakTilForkastingTest {
 
     @Test

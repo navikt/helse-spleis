@@ -18,10 +18,12 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.parallel.Isolated
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
+@Isolated
 internal class InfotrygdhistorikkTest {
     private companion object {
         private val tidligsteDato = 1.januar

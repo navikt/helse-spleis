@@ -7,9 +7,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class V34OpprinneligPeriodePåVedtaksperiodeTest {
     private val objectMapper = jacksonObjectMapper()
         .registerModule(JavaTimeModule())

@@ -7,9 +7,7 @@ import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class VedtaksperiodeAvbruttE2ETest : AbstractEndToEndTest() {
 
     @Test

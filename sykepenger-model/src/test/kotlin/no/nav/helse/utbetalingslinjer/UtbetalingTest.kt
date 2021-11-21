@@ -18,10 +18,12 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.parallel.Isolated
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
+@Isolated
 internal class UtbetalingTest {
 
     private lateinit var aktivitetslogg: Aktivitetslogg

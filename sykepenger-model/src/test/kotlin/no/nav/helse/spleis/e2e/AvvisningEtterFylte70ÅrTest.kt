@@ -20,8 +20,10 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.parallel.Isolated
 import org.slf4j.LoggerFactory
 
+@Isolated
 internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
     private val logCollector = ListAppender<ILoggingEvent>()
 
