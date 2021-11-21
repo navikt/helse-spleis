@@ -3,7 +3,7 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.ArbeidsgiverVisitor
 import no.nav.helse.somFødselsnummer
-import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.*
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling

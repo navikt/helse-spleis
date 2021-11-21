@@ -5,7 +5,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.person.TilstandType.*
-import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.*
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.testhelpers.SykdomstidslinjeInspektør
 import no.nav.helse.testhelpers.februar

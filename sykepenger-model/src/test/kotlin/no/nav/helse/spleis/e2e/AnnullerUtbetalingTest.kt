@@ -518,4 +518,8 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         }
 
     }
+
+    fun <T> sjekkAt(t: T, init: T.() -> Unit) {
+        t.init()
+    }
 }

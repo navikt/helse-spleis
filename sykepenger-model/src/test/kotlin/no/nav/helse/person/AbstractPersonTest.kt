@@ -19,12 +19,12 @@ internal abstract class AbstractPersonTest {
         const val a4 = "456789123"
     }
 
-    protected lateinit var person: Person
-    protected lateinit var observatør: TestObservatør
-    protected val inspektør get() = inspektør(ORGNUMMER)
-    protected val String.inspektør get() = inspektør(this)
+    lateinit var person: Person
+    lateinit var observatør: TestObservatør
+    val inspektør get() = inspektør(ORGNUMMER)
+    val String.inspektør get() = inspektør(this)
 
-    protected val Int.vedtaksperiode: IdInnhenter get() = { orgnummer -> this.vedtaksperiode(orgnummer) }
+    val Int.vedtaksperiode: IdInnhenter get() = { orgnummer -> this.vedtaksperiode(orgnummer) }
 
     @BeforeEach
     internal fun createTestPerson() {
@@ -33,9 +33,9 @@ internal abstract class AbstractPersonTest {
     }
 
     private fun Int.vedtaksperiode(orgnummer: String) = observatør.vedtaksperiode(orgnummer, this - 1)
-    protected fun Int.utbetaling(orgnummer: String) = inspektør(orgnummer).utbetalingId(this - 1)
-    protected fun inspektør(orgnummer: String) = TestArbeidsgiverInspektør(person, orgnummer)
-    protected fun inspektør(orgnummer: String, block: TestArbeidsgiverInspektør.() -> Unit) = inspektør(orgnummer).run(block)
+    fun Int.utbetaling(orgnummer: String) = inspektør(orgnummer).utbetalingId(this - 1)
+    fun inspektør(orgnummer: String) = TestArbeidsgiverInspektør(person, orgnummer)
+    fun inspektør(orgnummer: String, block: TestArbeidsgiverInspektør.() -> Unit) = inspektør(orgnummer).run(block)
 }
 
 internal typealias IdInnhenter = (orgnummer: String) -> UUID
