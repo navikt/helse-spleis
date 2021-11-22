@@ -12,7 +12,6 @@ import no.nav.helse.person.Ledd.LEDD_3
 import no.nav.helse.person.Paragraf.*
 import no.nav.helse.person.Punktum.Companion.punktum
 import no.nav.helse.serde.reflection.AktivitetsloggMap
-import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
@@ -354,22 +353,6 @@ class Aktivitetslogg(
                     )
                 }
 
-                internal fun simulering(
-                    aktivitetslogg: IAktivitetslogg,
-                    oppdrag: Oppdrag,
-                    maksdato: LocalDate,
-                    saksbehandler: String
-                ) {
-                    aktivitetslogg.behov(
-                        Behovtype.Simulering,
-                        "Trenger simulering fra Oppdragssystemet",
-                        mutableMapOf(
-                            "maksdato" to maksdato.toString(),
-                            "saksbehandler" to saksbehandler
-                        ) + oppdrag.toBehovMap()
-                    )
-                }
-
                 internal fun godkjenning(
                     aktivitetslogg: IAktivitetslogg,
                     periodeFom: LocalDate,
@@ -401,23 +384,6 @@ class Aktivitetslogg(
                         )
                     )
                 }
-
-                internal fun utbetaling(
-                    aktivitetslogg: IAktivitetslogg,
-                    oppdrag: Oppdrag,
-                    maksdato: LocalDate? = null,
-                    saksbehandler: String
-                ) {
-                    aktivitetslogg.behov(
-                        Behovtype.Utbetaling,
-                        "Trenger å sende utbetaling til Oppdrag",
-                        oppdrag.toBehovMap().apply {
-                            put("saksbehandler", saksbehandler)
-                            maksdato?.let {
-                                put("maksdato", maksdato.toString())
-                            }
-                        })
-                }
             }
 
             fun detaljer() = detaljer
@@ -438,6 +404,10 @@ class Aktivitetslogg(
                 Godkjenning,
                 Simulering,
                 Utbetaling,
+                UtbetalingArbeidsgiver,
+                UtbetalingPerson,
+                SimuleringArbeidsgiver,
+                SimuleringPerson,
                 InntekterForSammenligningsgrunnlag,
                 InntekterForSykepengegrunnlag,
                 @Deprecated("Behovet er ikke i bruk, men beholdes for derserialisering av aktivitetsloggen")

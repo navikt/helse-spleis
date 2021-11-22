@@ -138,7 +138,7 @@ internal class Utbetalingslinje internal constructor(
 
     internal fun erOpphør() = datoStatusFom != null
 
-    internal fun toMap() = mutableMapOf<String, Any?>(
+    internal fun toMap() = mapOf<String, Any?>(
         "fom" to fom.toString(),
         "tom" to tom.toString(),
         "satstype" to satstype.name,

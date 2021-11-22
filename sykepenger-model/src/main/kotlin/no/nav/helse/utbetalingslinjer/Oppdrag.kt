@@ -2,8 +2,6 @@ package no.nav.helse.utbetalingslinjer
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.simulering
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetaling
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.sykdomstidslinje.erHelg
@@ -85,22 +83,27 @@ internal class Oppdrag private constructor(
         saksbehandler: String
     ) {
         if (!harUtbetalinger()) return aktivitetslogg.info("Overfører ikke oppdrag uten endring for fagområde=$fagområde med fagsystemId=$fagsystemId")
-        utbetaling(
-            aktivitetslogg = aktivitetslogg,
-            oppdrag = kopierKunLinjerMedEndring(),
-            maksdato = maksdato,
-            saksbehandler = saksbehandler
-        )
+        fagområde.overfør(aktivitetslogg, behovdetaljer(saksbehandler, maksdato))
     }
 
     internal fun simuler(aktivitetslogg: IAktivitetslogg, maksdato: LocalDate, saksbehandler: String) {
         if (!harUtbetalinger()) return aktivitetslogg.info("Simulerer ikke oppdrag uten endring fagområde=$fagområde med fagsystemId=$fagsystemId")
-        simulering(
-            aktivitetslogg = aktivitetslogg,
-            oppdrag = kopierKunLinjerMedEndring(),
-            maksdato = maksdato,
-            saksbehandler = saksbehandler
-        )
+        fagområde.simuler(aktivitetslogg, behovdetaljer(saksbehandler, maksdato))
+    }
+
+    private fun behovdetaljer(saksbehandler: String, maksdato: LocalDate?): MutableMap<String, Any> {
+        return mutableMapOf(
+            "mottaker" to mottaker,
+            "fagområde" to "$fagområde",
+            "linjer" to kopierKunLinjerMedEndring().map(Utbetalingslinje::toMap),
+            "fagsystemId" to fagsystemId,
+            "endringskode" to "$endringskode",
+            "saksbehandler" to saksbehandler
+        ).apply {
+            maksdato?.let {
+                put("maksdato", maksdato.toString())
+            }
+        }
     }
 
     internal fun totalbeløp() = linjerUtenOpphør().sumOf { it.totalbeløp() }
@@ -298,18 +301,10 @@ internal class Oppdrag private constructor(
         tilstand = Ny()
     }
 
-    internal fun toBehovMap() = mutableMapOf(
+    internal fun toMap() = mapOf(
         "mottaker" to mottaker,
         "fagområde" to fagområde.verdi,
-        "linjer" to map { it.toMap() },
-        "fagsystemId" to fagsystemId,
-        "endringskode" to endringskode.toString()
-    )
-
-    internal fun toMap() = mutableMapOf(
-        "mottaker" to mottaker,
-        "fagområde" to fagområde.verdi,
-        "linjer" to map { it.toMap() },
+        "linjer" to map(Utbetalingslinje::toMap),
         "fagsystemId" to fagsystemId,
         "endringskode" to endringskode.toString(),
         "sisteArbeidsgiverdag" to sisteArbeidsgiverdag,

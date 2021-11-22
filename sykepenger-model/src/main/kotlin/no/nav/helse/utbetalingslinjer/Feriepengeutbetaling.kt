@@ -1,7 +1,7 @@
 package no.nav.helse.utbetalingslinjer
 
-import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
+import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.person.*
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
@@ -77,8 +77,8 @@ internal class Feriepengeutbetaling private constructor(
             PersonObserver.UtbetalingEndretEvent(
                 utbetalingId = utbetalingId,
                 type = Utbetaling.Utbetalingtype.FERIEPENGER.name,
-                arbeidsgiverOppdrag = oppdrag.toBehovMap(),
-                personOppdrag = Oppdrag(utbetalingHendelse.fødselsnummer(), Fagområde.SykepengerRefusjon).toBehovMap(),
+                arbeidsgiverOppdrag = oppdrag.toMap(),
+                personOppdrag = Oppdrag(utbetalingHendelse.fødselsnummer(), Fagområde.SykepengerRefusjon).toMap(),
                 forrigeStatus = Utbetalingstatus.fraTilstand(Utbetaling.Ubetalt).name,
                 gjeldendeStatus = Utbetalingstatus.fraTilstand(Utbetaling.Utbetalt).name
             )

@@ -159,7 +159,7 @@ interface PersonObserver {
     )
 
     data class FeriepengerUtbetaltEvent(
-        val arbeidsgiverOppdrag: MutableMap<String, Any?>,
+        val arbeidsgiverOppdrag: Map<String, Any?>,
         val personOppdrag: Map<String, Any> = mapOf("linjer" to emptyList<String>())
     )
 
