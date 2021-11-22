@@ -1,7 +1,8 @@
 package no.nav.helse.hendelser.utbetaling
 
-import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse.Oppdragstatus.*
+import no.nav.helse.utbetalingslinjer.Oppdragstatus.*
 import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import java.time.LocalDateTime
 import java.util.*
 
@@ -34,11 +35,4 @@ class UtbetalingHendelse(
     internal fun erRelevant(arbeidsgiverFagsystemId: String, personFagsystemId: String, utbetalingId: UUID) =
         (erRelevant(arbeidsgiverFagsystemId) || erRelevant(personFagsystemId)) && this.utbetalingId == utbetalingId.toString()
 
-    enum class Oppdragstatus {
-        OVERFØRT,
-        AKSEPTERT,
-        AKSEPTERT_MED_FEIL,
-        AVVIST,
-        FEIL
-    }
 }

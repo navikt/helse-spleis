@@ -9,6 +9,7 @@ import no.nav.helse.testhelpers.FRI
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.tidslinjeOf
+import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
@@ -115,7 +116,7 @@ internal class UtbetalingReflectTest {
                     orgnummer = ORGNUMMER,
                     fagsystemId = utbetaling.arbeidsgiverOppdrag().fagsystemId(),
                     utbetalingId = utbetalingId,
-                    status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT,
+                    status = Oppdragstatus.AKSEPTERT,
                     melding = "hei",
                     avstemmingsnøkkel = 123456L,
                     overføringstidspunkt = LocalDateTime.now()
@@ -217,7 +218,7 @@ internal class UtbetalingReflectTest {
                     orgnummer = ORGNUMMER,
                     fagsystemId = utbetaling.arbeidsgiverOppdrag().fagsystemId(),
                     utbetalingId = utbetalingId,
-                    status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT,
+                    status = Oppdragstatus.AKSEPTERT,
                     melding = "hei",
                     avstemmingsnøkkel = 123456L,
                     overføringstidspunkt = LocalDateTime.now()

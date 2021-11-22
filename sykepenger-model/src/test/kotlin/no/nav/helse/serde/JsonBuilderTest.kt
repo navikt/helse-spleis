@@ -20,6 +20,7 @@ import no.nav.helse.spleis.e2e.TestArbeidsgiverInspektør
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Oppdrag
+import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -758,7 +759,7 @@ class JsonBuilderTest {
             orgnummer = orgnummer,
             fagsystemId = utbetalingsliste.getValue(orgnummer).last().arbeidsgiverOppdrag().fagsystemId(),
             utbetalingId = this.aktivitetslogg.behov().last { it.type == Behovtype.Utbetaling }.kontekst().getValue("utbetalingId"),
-            status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT,
+            status = Oppdragstatus.AKSEPTERT,
             melding = "hei",
             avstemmingsnøkkel = 123456L,
             overføringstidspunkt = LocalDateTime.now()

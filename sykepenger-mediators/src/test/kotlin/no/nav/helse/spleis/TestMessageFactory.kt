@@ -6,13 +6,13 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
-import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.person.TilstandType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.spleis.TestMessageFactory.UtbetalingshistorikkTestdata.Companion.toJson
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
+import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.inntektsmeldingkontrakt.*
 import no.nav.syfo.kafka.felles.*
 import java.time.LocalDate
@@ -677,7 +677,7 @@ internal class TestMessageFactory(
             vedtaksperiodeId = null,
             løsninger = mapOf(
                 "Utbetaling" to mapOf(
-                    "status" to if (utbetalingOK) UtbetalingHendelse.Oppdragstatus.AKSEPTERT.name else UtbetalingHendelse.Oppdragstatus.AVVIST.name,
+                    "status" to if (utbetalingOK) Oppdragstatus.AKSEPTERT.name else Oppdragstatus.AVVIST.name,
                     "beskrivelse" to if (!utbetalingOK) "FEIL fra Spenn" else "",
                     "avstemmingsnøkkel" to avstemmingsnøkkel,
                     "overføringstidspunkt" to overføringstidspunkt
@@ -702,7 +702,7 @@ internal class TestMessageFactory(
             vedtaksperiodeId = null,
             løsninger = mapOf(
                 "Utbetaling" to mapOf(
-                    "status" to UtbetalingHendelse.Oppdragstatus.OVERFØRT.name,
+                    "status" to Oppdragstatus.OVERFØRT.name,
                     "beskrivelse" to "",
                     "avstemmingsnøkkel" to avstemmingsnøkkel,
                     "overføringstidspunkt" to overføringstidspunkt

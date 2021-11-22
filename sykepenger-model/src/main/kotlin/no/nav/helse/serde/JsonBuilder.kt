@@ -17,6 +17,7 @@ import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
+import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling
 import no.nav.helse.utbetalingslinjer.Oppdrag
@@ -338,12 +339,24 @@ internal class JsonBuilder : AbstractBuilder() {
             totalBeløp: Int,
             nettoBeløp: Int,
             tidsstempel: LocalDateTime,
-            endringskode: Endringskode
+            endringskode: Endringskode,
+            avstemmingsnøkkel: Long?,
+            status: Oppdragstatus?,
+            overføringstidspunkt: LocalDateTime?
         ) {
             ferieutbetalingMap["oppdrag"] = oppdrag.toMap()
         }
 
-        override fun postVisitOppdrag(oppdrag: Oppdrag, totalBeløp: Int, nettoBeløp: Int, tidsstempel: LocalDateTime) {
+        override fun postVisitOppdrag(
+            oppdrag: Oppdrag,
+            totalBeløp: Int,
+            nettoBeløp: Int,
+            tidsstempel: LocalDateTime,
+            endringskode: Endringskode,
+            avstemmingsnøkkel: Long?,
+            status: Oppdragstatus?,
+            overføringstidspunkt: LocalDateTime?
+        ) {
             popState()
         }
     }

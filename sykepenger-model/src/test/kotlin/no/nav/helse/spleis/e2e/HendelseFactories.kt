@@ -14,6 +14,7 @@ import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.testhelpers.Inntektperioder
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt
 import org.junit.jupiter.api.fail
 import java.time.LocalDate
@@ -24,7 +25,7 @@ import java.util.*
 
 internal fun AbstractEndToEndTest.utbetaling(
     fagsystemId: String,
-    status: UtbetalingHendelse.Oppdragstatus,
+    status: Oppdragstatus,
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     meldingsreferanseId: UUID = UUID.randomUUID()
 ) =
@@ -45,7 +46,7 @@ internal fun AbstractEndToEndTest.utbetaling(
 
 internal fun AbstractEndToEndTest.feriepengeutbetaling(
     fagsystemId: String,
-    status: UtbetalingHendelse.Oppdragstatus,
+    status: Oppdragstatus,
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     meldingsreferanseId: UUID = UUID.randomUUID()
 ) =

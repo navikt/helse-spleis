@@ -21,6 +21,9 @@ internal class Oppdrag private constructor(
     private var endringskode: Endringskode,
     private val sisteArbeidsgiverdag: LocalDate?,
     private var nettoBeløp: Int = linjer.sumOf { it.totalbeløp() },
+    private var overføringstidspunkt: LocalDateTime? = null,
+    private var avstemmingsnøkkel: Long? = null,
+    private var status: Oppdragstatus? = null,
     private val tidsstempel: LocalDateTime
 ) : MutableList<Utbetalingslinje> by linjer {
     internal companion object {
@@ -60,9 +63,9 @@ internal class Oppdrag private constructor(
         this(mottaker, fagområde, sisteArbeidsgiverdag = null)
 
     internal fun accept(visitor: OppdragVisitor) {
-        visitor.preVisitOppdrag(this, totalbeløp(), nettoBeløp, tidsstempel, endringskode)
+        visitor.preVisitOppdrag(this, totalbeløp(), nettoBeløp, tidsstempel, endringskode, avstemmingsnøkkel, status, overføringstidspunkt,)
         linjer.forEach { it.accept(visitor) }
-        visitor.postVisitOppdrag(this, totalbeløp(), nettoBeløp, tidsstempel)
+        visitor.postVisitOppdrag(this, totalbeløp(), nettoBeløp, tidsstempel, endringskode, avstemmingsnøkkel, status, overføringstidspunkt)
     }
 
     internal fun mottaker() = mottaker
@@ -264,6 +267,9 @@ internal class Oppdrag private constructor(
         fagsystemId,
         endringskode,
         sisteArbeidsgiverdag,
+        overføringstidspunkt = overføringstidspunkt,
+        avstemmingsnøkkel = avstemmingsnøkkel,
+        status = status,
         tidsstempel = tidsstempel
     )
 
@@ -303,14 +309,17 @@ internal class Oppdrag private constructor(
 
     internal fun toMap() = mapOf(
         "mottaker" to mottaker,
-        "fagområde" to fagområde.verdi,
+        "fagområde" to "$fagområde",
         "linjer" to map(Utbetalingslinje::toMap),
         "fagsystemId" to fagsystemId,
-        "endringskode" to endringskode.toString(),
+        "endringskode" to "$endringskode",
         "sisteArbeidsgiverdag" to sisteArbeidsgiverdag,
         "tidsstempel" to tidsstempel,
         "nettoBeløp" to nettoBeløp,
         "stønadsdager" to stønadsdager(),
+        "avstemmingsnøkkel" to avstemmingsnøkkel,
+        "status" to status?.let { "$it" },
+        "overføringstidspunkt" to overføringstidspunkt,
         "fom" to førstedato,
         "tom" to sistedato
     )

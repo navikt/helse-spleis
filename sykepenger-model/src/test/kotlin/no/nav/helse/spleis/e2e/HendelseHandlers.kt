@@ -8,6 +8,7 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.testhelpers.*
+import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel
@@ -151,7 +152,7 @@ internal fun AbstractEndToEndTest.nyttVedtak(
     inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, fom) }
 ) {
     val id = tilGodkjent(fom, tom, grad, førsteFraværsdag, orgnummer = orgnummer, refusjon = refusjon, inntekterBlock = inntekterBlock)
-    håndterUtbetalt({ id }, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT, orgnummer = orgnummer)
+    håndterUtbetalt({ id }, status = Oppdragstatus.AKSEPTERT, orgnummer = orgnummer)
 }
 
 internal fun AbstractEndToEndTest.tilGodkjent(
@@ -229,7 +230,7 @@ internal fun AbstractEndToEndTest.forlengVedtak(fom: LocalDate, tom: LocalDate, 
     håndterYtelser(id, orgnummer = orgnummer)
     if (skalSimuleres) håndterSimulering(id, orgnummer = orgnummer)
     håndterUtbetalingsgodkjenning(id, true, orgnummer = orgnummer)
-    håndterUtbetalt(id, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT, orgnummer = orgnummer)
+    håndterUtbetalt(id, status = Oppdragstatus.AKSEPTERT, orgnummer = orgnummer)
 }
 
 internal fun AbstractEndToEndTest.forlengPeriode(fom: LocalDate, tom: LocalDate, grad: Prosentdel = 100.prosent, orgnummer: String = AbstractPersonTest.ORGNUMMER) {
@@ -507,7 +508,7 @@ internal fun AbstractEndToEndTest.håndterUtbetalingsgodkjenning(
 
 internal fun AbstractEndToEndTest.håndterUtbetalt(
     vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
-    status: UtbetalingHendelse.Oppdragstatus = UtbetalingHendelse.Oppdragstatus.AKSEPTERT,
+    status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
     sendOverførtKvittering: Boolean = true,
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     fagsystemId: String = inspektør(orgnummer).fagsystemId(vedtaksperiodeIdInnhenter),
@@ -628,7 +629,7 @@ internal fun AbstractEndToEndTest.håndterUtbetalingshistorikkForFeriepenger(
 }
 
 internal fun AbstractEndToEndTest.håndterFeriepengerUtbetalt(
-    status: UtbetalingHendelse.Oppdragstatus = UtbetalingHendelse.Oppdragstatus.AKSEPTERT,
+    status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     fagsystemId: String,
     meldingsreferanseId: UUID = UUID.randomUUID()
@@ -767,7 +768,7 @@ internal fun AbstractEndToEndTest.betale(orgnummer: String) {
     person.håndter(
         utbetaling(
             inspektør(orgnummer).fagsystemId(1.vedtaksperiode),
-            status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT,
+            status = Oppdragstatus.AKSEPTERT,
             orgnummer = orgnummer
         )
     )

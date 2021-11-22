@@ -2,7 +2,7 @@ package no.nav.helse.spleis
 
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
-import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse.Oppdragstatus.AKSEPTERT
+import no.nav.helse.utbetalingslinjer.Oppdragstatus.AKSEPTERT
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Person
@@ -12,6 +12,7 @@ import no.nav.helse.somFødselsnummer
 import no.nav.helse.spleis.testhelpers.TestObservatør
 import no.nav.helse.spleis.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.spleis.testhelpers.inntektperioderForSykepengegrunnlag
+import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -285,7 +286,7 @@ abstract class AbstractObservableTest {
 
     protected fun utbetaling(
         fagsystemId: String = "tilfeldig-string",
-        status: UtbetalingHendelse.Oppdragstatus = AKSEPTERT,
+        status: Oppdragstatus = AKSEPTERT,
         orgnummer: String = ORGNUMMER,
         meldingsreferanseId: UUID = UUID.randomUUID()
     ) =

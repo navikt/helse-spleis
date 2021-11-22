@@ -727,7 +727,16 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
 private fun Oppdrag.skalHaEndringskode(kode: Endringskode, message: String = "") = accept(UtbetalingSkalHaEndringskode(kode, message))
 
 private class UtbetalingSkalHaEndringskode(private val ønsketEndringskode: Endringskode, private val message: String = ""): OppdragVisitor {
-    override fun preVisitOppdrag(oppdrag: Oppdrag, totalBeløp: Int, nettoBeløp: Int, tidsstempel: LocalDateTime, endringskode: Endringskode) {
+    override fun preVisitOppdrag(
+        oppdrag: Oppdrag,
+        totalBeløp: Int,
+        nettoBeløp: Int,
+        tidsstempel: LocalDateTime,
+        endringskode: Endringskode,
+        avstemmingsnøkkel: Long?,
+        status: Oppdragstatus?,
+        overføringstidspunkt: LocalDateTime?
+    ) {
         assertEquals(ønsketEndringskode, endringskode, message)
     }
 }

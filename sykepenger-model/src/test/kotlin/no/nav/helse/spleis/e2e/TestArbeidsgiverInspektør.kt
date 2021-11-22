@@ -223,7 +223,10 @@ internal class TestArbeidsgiverInspektør(
         totalBeløp: Int,
         nettoBeløp: Int,
         tidsstempel: LocalDateTime,
-        endringskode: Endringskode
+        endringskode: Endringskode,
+        avstemmingsnøkkel: Long?,
+        status: Oppdragstatus?,
+        overføringstidspunkt: LocalDateTime?
     ) {
         if (inFeriepengeutbetaling) feriepengeoppdrag.add(Feriepengeoppdrag(oppdrag.fagsystemId()))
 

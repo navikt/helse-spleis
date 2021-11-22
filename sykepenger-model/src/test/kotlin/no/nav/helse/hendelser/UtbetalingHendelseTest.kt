@@ -1,6 +1,7 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
+import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -27,7 +28,7 @@ internal class UtbetalingHendelseTest {
         "orgnr",
         fagsystemId,
         "$utbetalingId",
-        UtbetalingHendelse.Oppdragstatus.AKSEPTERT,
+        Oppdragstatus.AKSEPTERT,
         "melding",
         1L,
         LocalDateTime.now()

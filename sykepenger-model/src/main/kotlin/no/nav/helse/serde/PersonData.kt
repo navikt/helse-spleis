@@ -1113,7 +1113,10 @@ internal data class PersonData(
         private val endringskode: String,
         private val sisteArbeidsgiverdag: LocalDate?,
         private val tidsstempel: LocalDateTime,
-        private val nettoBeløp: Int
+        private val nettoBeløp: Int,
+        private val avstemmingsnøkkel: Long?,
+        private val status: Oppdragstatus?,
+        private val overføringstidspunkt: LocalDateTime?
     ) {
         internal fun konverterTilOppdrag(): Oppdrag {
             return Oppdrag::class.primaryConstructor!!
@@ -1126,6 +1129,9 @@ internal data class PersonData(
                     Endringskode.valueOf(endringskode),
                     sisteArbeidsgiverdag,
                     nettoBeløp,
+                    overføringstidspunkt,
+                    avstemmingsnøkkel,
+                    status,
                     tidsstempel
                 )
         }

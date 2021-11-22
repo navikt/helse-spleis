@@ -8,6 +8,7 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.testhelpers.*
+import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -43,7 +44,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
     @Test
     fun `utbetaling er godkjent av saksbehandler`() {
         håndterGodkjenning(SAKSBEHANDLER_IDENT, false)
-        person.håndter(utbetaling(UtbetalingHendelse.Oppdragstatus.AKSEPTERT))
+        person.håndter(utbetaling(Oppdragstatus.AKSEPTERT))
         assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
 
         assertEquals(2, observatør.utbetaltEventer.first().oppdrag.size)
@@ -95,7 +96,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
     @Test
     fun `utbetaling er godkjent automatisk`() {
         håndterGodkjenning("SYSTEM", true)
-        person.håndter(utbetaling(UtbetalingHendelse.Oppdragstatus.AKSEPTERT))
+        person.håndter(utbetaling(Oppdragstatus.AKSEPTERT))
         assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
 
         assertEquals(2, observatør.utbetaltEventer.first().oppdrag.size)
@@ -147,7 +148,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
     @Test
     fun `utbetaling ikke godkjent`() {
         håndterGodkjenning()
-        person.håndter(utbetaling(UtbetalingHendelse.Oppdragstatus.AVVIST))
+        person.håndter(utbetaling(Oppdragstatus.AVVIST))
         assertEquals(TilstandType.UTBETALING_FEILET, inspektør.sisteTilstand(1.vedtaksperiode))
         assertTrue(observatør.utbetaltEventer.isEmpty())
     }
@@ -178,7 +179,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
         )
     }
 
-    private fun utbetaling(status: UtbetalingHendelse.Oppdragstatus) =
+    private fun utbetaling(status: Oppdragstatus) =
         UtbetalingHendelse(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = AKTØRID,

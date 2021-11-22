@@ -3,7 +3,7 @@ package no.nav.helse.utbetalingslinjer
 import no.nav.helse.Toggle
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.*
-import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse.Oppdragstatus.AKSEPTERT
+import no.nav.helse.utbetalingslinjer.Oppdragstatus.AKSEPTERT
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.UtbetalingVisitor
@@ -529,7 +529,10 @@ internal class UtbetalingTest {
             totalBeløp: Int,
             nettoBeløp: Int,
             tidsstempel: LocalDateTime,
-            endringskode: Endringskode
+            endringskode: Endringskode,
+            avstemmingsnøkkel: Long?,
+            status: Oppdragstatus?,
+            overføringstidspunkt: LocalDateTime?
         ) {
             fagsystemIder.add(oppdrag.fagsystemId())
             this.nettoBeløp.add(nettoBeløp)

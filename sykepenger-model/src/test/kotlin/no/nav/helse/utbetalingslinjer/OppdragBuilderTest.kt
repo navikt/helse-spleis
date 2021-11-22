@@ -335,7 +335,16 @@ internal class OppdragBuilderTest {
     }
 
     object AssertAtOppdragErENDR : OppdragVisitor {
-        override fun preVisitOppdrag(oppdrag: Oppdrag, totalBeløp: Int, nettoBeløp: Int, tidsstempel: LocalDateTime, endringskode: Endringskode) {
+        override fun preVisitOppdrag(
+            oppdrag: Oppdrag,
+            totalBeløp: Int,
+            nettoBeløp: Int,
+            tidsstempel: LocalDateTime,
+            endringskode: Endringskode,
+            avstemmingsnøkkel: Long?,
+            status: Oppdragstatus?,
+            overføringstidspunkt: LocalDateTime?
+        ) {
             assertEquals(ENDR, endringskode)
         }
     }
