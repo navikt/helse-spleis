@@ -10,10 +10,7 @@ import no.nav.helse.person.Ledd.LEDD_1
 import no.nav.helse.person.Ledd.LEDD_2
 import no.nav.helse.person.Paragraf.*
 import no.nav.helse.person.Punktum.Companion.punktum
-import no.nav.helse.testhelpers.desember
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.juni
-import no.nav.helse.testhelpers.mai
+import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
@@ -209,6 +206,80 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         )
     }
 
+    @Test
+    fun `§8-12 ledd 2 - Bruker har vært arbeidsfør i 26 uker`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 50.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 31.januar, 50.prosent, 50.prosent))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+
+        håndterSykmelding(Sykmeldingsperiode(17.juli, 31.august, 50.prosent))
+        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(17.juli, 31.august, 50.prosent, 50.prosent))
+        håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(17.juli, 1.august)))
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt(2.vedtaksperiode)
+
+
+        assertOppfylt(
+            resultatvelger = 1.resultat,
+            paragraf = PARAGRAF_8_12,
+            ledd = LEDD_2,
+            punktum = (1..2).punktum,
+            versjon = 21.mai(2021),
+            inputdata = mapOf(
+                "dato" to 1.august,
+                "tilstrekkeligOppholdISykedager" to 182, //26 uker * 7 dager
+                "tidslinjegrunnlag" to listOf(
+                    listOf(
+                        mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG"),
+                        mapOf("fom" to 2.august, "tom" to 31.august, "dagtype" to "NAVDAG")
+                    ), emptyList()
+                ),
+                "beregnetTidslinje" to listOf(
+                    mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG"),
+                    mapOf("fom" to 2.august, "tom" to 31.august, "dagtype" to "NAVDAG")
+                )
+            ),
+            outputdata = emptyMap()
+        )
+    }
+
+    @Test
+    fun `§8-12 ledd 2 - Bruker har ikke vært arbeidsfør i 26 uker`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 50.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 31.januar, 50.prosent, 50.prosent))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+
+        håndterSykmelding(Sykmeldingsperiode(16.juli, 31.august, 50.prosent))
+        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(16.juli, 31.august, 50.prosent, 50.prosent))
+        håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(16.juli, 31.juli)))
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt(2.vedtaksperiode)
+
+        assertIkkeVurdert(paragraf = PARAGRAF_8_12, ledd = LEDD_2)
+    }
+
     private val Int.resultat: (List<Resultat>) -> Resultat get() = { it[this - 1] }
 
     private fun assertOppfylt(
@@ -241,6 +312,16 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         assertResultat(versjon, inputdata, outputdata, resultat)
     }
 
+    private fun assertIkkeVurdert(
+        paragraf: Paragraf,
+        ledd: Ledd? = null,
+        punktum: List<Punktum>? = null,
+        inspektør: EtterlevelseInspektør = EtterlevelseInspektør(person.aktivitetslogg)
+    ) {
+        val resultat = inspektør.resultat(paragraf, ledd, punktum)
+        assertTrue(resultat.isEmpty()) { "Forventet at $paragraf $ledd $punktum ikke er vurdert" }
+    }
+
     private fun assertResultat(
         versjon: LocalDate,
         inputdata: Map<Any, Any?>,
@@ -255,8 +336,8 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
     private class EtterlevelseInspektør(aktivitetslogg: Aktivitetslogg) : AktivitetsloggVisitor {
         private val resultater = mutableListOf<Resultat>()
 
-        fun resultat(paragraf: Paragraf, ledd: Ledd, punktum: List<Punktum>) =
-            resultater.filter { it.paragraf == paragraf && it.ledd == ledd && it.punktum == punktum }
+        fun resultat(paragraf: Paragraf, ledd: Ledd?, punktum: List<Punktum>?) =
+            resultater.filter { it.paragraf == paragraf && ledd?.equals(it.ledd) ?: true && punktum?.equals(it.punktum) ?: true }
 
         init {
             aktivitetslogg.accept(this)

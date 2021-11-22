@@ -636,7 +636,8 @@ class Aktivitetslogg(
                         beregnetTidslinje: Utbetalingstidslinje
                     ) {
                         juridiskVurdering(
-                            "", Vurderingsresultat(
+                            "§8-12 ledd 2",
+                            Vurderingsresultat(
                                 oppfylt = true,
                                 versjon = LocalDate.of(2021, 5, 21),
                                 paragraf = PARAGRAF_8_12,
