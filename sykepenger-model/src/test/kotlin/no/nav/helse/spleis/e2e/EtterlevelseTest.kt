@@ -14,6 +14,7 @@ import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.juni
 import no.nav.helse.testhelpers.mai
+import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -83,7 +84,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
     fun `§8-3 ledd 2 punktum 1 - har minimum inntekt halv G`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 46817.årlig)
         håndterYtelser()
         val arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER, 5.desember(2017), 31.januar))
         håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold)
@@ -95,7 +96,30 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
             versjon = 16.desember(2011),
             inputdata = mapOf(
                 "skjæringstidspunkt" to 1.januar,
-                "grunnlagForSykepengegrunnlag" to 372000.0,
+                "grunnlagForSykepengegrunnlag" to 46817.0,
+                "minimumInntekt" to 46817.0
+            ),
+            outputdata = emptyMap()
+        )
+    }
+
+    @Test
+    fun `§8-3 ledd 2 punktum 1 - har inntekt mindre enn en halv G`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 46816.årlig)
+        håndterYtelser()
+        val arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER, 5.desember(2017), 31.januar))
+        håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold)
+
+        assertIkkeOppfylt(
+            paragraf = PARAGRAF_8_3,
+            ledd = LEDD_2,
+            punktum = 1.punktum,
+            versjon = 16.desember(2011),
+            inputdata = mapOf(
+                "skjæringstidspunkt" to 1.januar,
+                "grunnlagForSykepengegrunnlag" to 46816.0,
                 "minimumInntekt" to 46817.0
             ),
             outputdata = emptyMap()
@@ -198,7 +222,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         inspektør: EtterlevelseInspektør = EtterlevelseInspektør(person.aktivitetslogg)
     ) {
         val resultat = inspektør.resultat(paragraf, ledd, punktum).let(resultatvelger)
-        assertTrue(resultat.oppfylt)
+        assertTrue(resultat.oppfylt) { "Forventet oppfylt $paragraf $ledd $punktum" }
         assertResultat(versjon, inputdata, outputdata, resultat)
     }
 
@@ -213,7 +237,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         inspektør: EtterlevelseInspektør = EtterlevelseInspektør(person.aktivitetslogg)
     ) {
         val resultat = inspektør.resultat(paragraf, ledd, punktum).let(resultatvelger)
-        assertFalse(resultat.oppfylt)
+        assertFalse(resultat.oppfylt) { "Forventet ikke oppfylt $paragraf $ledd $punktum" }
         assertResultat(versjon, inputdata, outputdata, resultat)
     }
 
