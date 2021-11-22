@@ -53,7 +53,9 @@ abstract class Infotrygdperiode(fom: LocalDate, tom: LocalDate) : Periode(fom, t
                     }
                 }
 
-            if (!inntekter.harInntekterFor(førsteUtbetalingsdager)) aktivitetslogg.error("Mangler inntekt for første utbetalingsdag i en av infotrygdperiodene: $førsteUtbetalingsdager")
+            if (inntekter.harInntekterFor(førsteUtbetalingsdager)) return
+            aktivitetslogg.info("Mangler inntekt for første utbetalingsdag i en av infotrygdperiodene: $førsteUtbetalingsdager")
+            aktivitetslogg.error("Mangler inntekt for første utbetalingsdag i en av infotrygdperiodene")
         }
 
         internal fun Iterable<Infotrygdperiode>.harBrukerutbetalingFor(organisasjonsnummer: String, periode: Periode) = this
