@@ -2,6 +2,8 @@ package no.nav.helse.utbetalingslinjer
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
+import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.sykdomstidslinje.erHelg
@@ -323,6 +325,20 @@ internal class Oppdrag private constructor(
         "fom" to førstedato,
         "tom" to sistedato
     )
+
+    internal fun lagreOverføringsinformasjon(hendelse: UtbetalingOverført) {
+        if (!hendelse.erRelevant(fagsystemId)) return
+        if (this.avstemmingsnøkkel == null) this.avstemmingsnøkkel = hendelse.avstemmingsnøkkel
+        if (this.overføringstidspunkt == null) this.overføringstidspunkt = hendelse.overføringstidspunkt
+        this.status = Oppdragstatus.OVERFØRT
+    }
+
+    internal fun lagreOverføringsinformasjon(hendelse: UtbetalingHendelse) {
+        if (!hendelse.erRelevant(fagsystemId)) return
+        if (this.avstemmingsnøkkel == null) this.avstemmingsnøkkel = hendelse.avstemmingsnøkkel
+        if (this.overføringstidspunkt == null) this.overføringstidspunkt = hendelse.overføringstidspunkt
+        this.status = hendelse.status
+    }
 
     private interface Tilstand {
         fun håndterForskjell(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje, aktivitetslogg: IAktivitetslogg)

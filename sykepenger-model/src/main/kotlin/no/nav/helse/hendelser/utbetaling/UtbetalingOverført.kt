@@ -22,5 +22,5 @@ class UtbetalingOverført(
     internal fun erRelevant(arbeidsgiverFagsystemId: String, personFagsystemId: String, utbetalingId: UUID) =
         (erRelevant(arbeidsgiverFagsystemId) || erRelevant(personFagsystemId)) && this.utbetalingId == utbetalingId.toString()
 
-    private fun erRelevant(fagsystemId: String) = fagsystemId == this.fagsystemId
+    internal fun erRelevant(fagsystemId: String) = fagsystemId == this.fagsystemId
 }

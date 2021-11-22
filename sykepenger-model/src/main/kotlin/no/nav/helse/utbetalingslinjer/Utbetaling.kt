@@ -784,11 +784,15 @@ internal class Utbetaling private constructor(
 
         override fun overført(utbetaling: Utbetaling, hendelse: UtbetalingOverført) {
             utbetaling.lagreOverføringsinformasjon(hendelse, hendelse.avstemmingsnøkkel, hendelse.overføringstidspunkt)
+            utbetaling.arbeidsgiverOppdrag.lagreOverføringsinformasjon(hendelse)
+            utbetaling.personOppdrag.lagreOverføringsinformasjon(hendelse)
             utbetaling.tilstand(Overført, hendelse)
         }
 
         override fun kvittér(utbetaling: Utbetaling, hendelse: UtbetalingHendelse) {
             utbetaling.lagreOverføringsinformasjon(hendelse, hendelse.avstemmingsnøkkel, hendelse.overføringstidspunkt)
+            utbetaling.arbeidsgiverOppdrag.lagreOverføringsinformasjon(hendelse)
+            utbetaling.personOppdrag.lagreOverføringsinformasjon(hendelse)
             utbetaling.håndterKvittering(hendelse)
         }
     }
@@ -801,10 +805,14 @@ internal class Utbetaling private constructor(
         override fun overført(utbetaling: Utbetaling, hendelse: UtbetalingOverført) {
             hendelse.info("Mottok overførtkvittering, men står allerede i Overført. Venter på kvittering.")
             utbetaling.lagreOverføringsinformasjon(hendelse, hendelse.avstemmingsnøkkel, hendelse.overføringstidspunkt)
+            utbetaling.arbeidsgiverOppdrag.lagreOverføringsinformasjon(hendelse)
+            utbetaling.personOppdrag.lagreOverføringsinformasjon(hendelse)
         }
 
         override fun kvittér(utbetaling: Utbetaling, hendelse: UtbetalingHendelse) {
             utbetaling.lagreOverføringsinformasjon(hendelse, hendelse.avstemmingsnøkkel, hendelse.overføringstidspunkt)
+            utbetaling.arbeidsgiverOppdrag.lagreOverføringsinformasjon(hendelse)
+            utbetaling.personOppdrag.lagreOverføringsinformasjon(hendelse)
             utbetaling.håndterKvittering(hendelse)
         }
     }

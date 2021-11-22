@@ -13,7 +13,7 @@ class UtbetalingHendelse(
     private val orgnummer: String,
     private val fagsystemId: String,
     private val utbetalingId: String,
-    private val status: Oppdragstatus,
+    internal val status: Oppdragstatus,
     private val melding: String,
     internal val avstemmingsnøkkel: Long,
     internal val overføringstidspunkt: LocalDateTime
