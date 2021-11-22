@@ -413,6 +413,14 @@ internal class UtbetalingTest {
         assertNull(Utbetaling.finnUtbetalingForJustering(utbetalinger, "somethingrandom".gRegulering()))
     }
 
+    @Test
+    fun `serialiserer avstemmingsnøkkel som null når den ikke er satt`() {
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000))
+        beregnUtbetalinger(tidslinje)
+        val utbetaling = opprettUbetaltUtbetaling(tidslinje)
+        assertNull(utbetaling.toMap()["avstemmingsnøkkel"])
+    }
+
     private fun String.gRegulering() = Grunnbeløpsregulering(UUID.randomUUID(), "", "", "", LocalDate.now(), this)
 
     private fun beregnUtbetalinger(tidslinje: Utbetalingstidslinje) = tidslinje.also {

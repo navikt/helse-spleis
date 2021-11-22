@@ -319,7 +319,7 @@ internal class Oppdrag private constructor(
         "tidsstempel" to tidsstempel,
         "nettoBeløp" to nettoBeløp,
         "stønadsdager" to stønadsdager(),
-        "avstemmingsnøkkel" to avstemmingsnøkkel,
+        "avstemmingsnøkkel" to avstemmingsnøkkel?.let { "$it" },
         "status" to status?.let { "$it" },
         "overføringstidspunkt" to overføringstidspunkt,
         "fom" to førstedato,

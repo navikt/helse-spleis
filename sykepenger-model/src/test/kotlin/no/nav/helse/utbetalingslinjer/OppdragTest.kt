@@ -142,7 +142,7 @@ internal class OppdragTest {
             overføringstidspunkt = overføringstidspunkt
         ))
 
-        assertEquals(avstemmingsnøkkel, oppdrag.toMap()["avstemmingsnøkkel"])
+        assertEquals("$avstemmingsnøkkel", oppdrag.toMap()["avstemmingsnøkkel"])
         assertEquals(overføringstidspunkt, oppdrag.toMap()["overføringstidspunkt"])
         assertEquals("${Oppdragstatus.OVERFØRT}", oppdrag.toMap()["status"])
     }
@@ -178,7 +178,7 @@ internal class OppdragTest {
             status = Oppdragstatus.AKSEPTERT
         ))
 
-        assertEquals(avstemmingsnøkkel, oppdrag.toMap()["avstemmingsnøkkel"])
+        assertEquals("$avstemmingsnøkkel", oppdrag.toMap()["avstemmingsnøkkel"])
         assertEquals(overføringstidspunkt, oppdrag.toMap()["overføringstidspunkt"])
         assertEquals("${Oppdragstatus.AKSEPTERT}", oppdrag.toMap()["status"])
     }
@@ -226,7 +226,7 @@ internal class OppdragTest {
             status = Oppdragstatus.AKSEPTERT
         ))
 
-        assertEquals(avstemmingsnøkkel, oppdrag.toMap()["avstemmingsnøkkel"])
+        assertEquals("$avstemmingsnøkkel", oppdrag.toMap()["avstemmingsnøkkel"])
         assertEquals(overføringstidspunkt, oppdrag.toMap()["overføringstidspunkt"])
         assertEquals("${Oppdragstatus.AKSEPTERT}", oppdrag.toMap()["status"])
     }
