@@ -469,8 +469,8 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
 
 
     @Test
-    fun `Sender med godkjenningstidspunkt i vedtak_fattet`() {
-        val godkjenttidspunkt = LocalDateTime.now().plusMinutes(1)
+    fun `Sender med vedtakFattetTidspunkt i vedtak_fattet`() {
+        val vedtakFattetTidspunkt = LocalDateTime.now().plusMinutes(1)
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
@@ -478,7 +478,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendVilkårsgrunnlag(0)
         sendYtelserUtenSykepengehistorikk(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
-        sendUtbetalingsgodkjenning(0, true, godkjenttidspunkt = godkjenttidspunkt)
+        sendUtbetalingsgodkjenning(0, true, godkjenttidspunkt = vedtakFattetTidspunkt)
         sendUtbetaling()
         assertTilstander(
             0,
@@ -495,11 +495,11 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         assertUtbetalingTilstander(0, "IKKE_UTBETALT", "GODKJENT", "SENDT", "OVERFØRT", "UTBETALT")
 
         assertEquals(1, testRapid.inspektør.meldinger("vedtak_fattet").size)
-        assertEquals(godkjenttidspunkt, testRapid.inspektør.siste("vedtak_fattet")["godkjenttidspunkt"].asLocalDateTime())
+        assertEquals(vedtakFattetTidspunkt, testRapid.inspektør.siste("vedtak_fattet")["vedtakFattetTidspunkt"].asLocalDateTime())
     }
 
     @Test
-    fun `Sender med godkjenningstidspunkt i vedtak_fattet for perioder som avsluttes uten utbetaling`() {
+    fun `Sender med vedtakFattetTidspunkt i vedtak_fattet for perioder som avsluttes uten utbetaling`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 16.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 16.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
@@ -519,7 +519,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
 
         assertEquals(1, testRapid.inspektør.meldinger("vedtak_fattet").size)
         // Sjekker på localdate fordi modellen slenger på LocalDateTime.now() ved automatisk godkjenning, og det er vanskelig å teste på.
-        assertEquals(LocalDate.now(), testRapid.inspektør.siste("vedtak_fattet")["godkjenttidspunkt"].asLocalDateTime().toLocalDate())
+        assertEquals(LocalDate.now(), testRapid.inspektør.siste("vedtak_fattet")["vedtakFattetTidspunkt"].asLocalDateTime().toLocalDate())
     }
 
     @Test

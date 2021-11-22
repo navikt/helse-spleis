@@ -318,7 +318,7 @@ internal class Utbetaling private constructor(
                     VURDERT_I_INFOTRYGD -> "VURDERT_I_INFOTRYGD"
                     else -> "VET_IKKE"
                 },
-                utbetaling?.godkjenttidspunkt() ?: LocalDateTime.MIN
+                utbetaling?.godkjenttidspunkt() ?: LocalDateTime.now()
             ))
         }
 
