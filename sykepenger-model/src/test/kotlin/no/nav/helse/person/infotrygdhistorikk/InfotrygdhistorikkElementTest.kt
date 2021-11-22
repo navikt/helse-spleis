@@ -333,21 +333,6 @@ internal class InfotrygdhistorikkElementTest {
     }
 
     @Test
-    fun `direkteutbetaling til bruker støttes ikke ennå`() {
-        val utbetalinger = listOf(
-            PersonUtbetalingsperiode(ORGNUMMER, 1.januar, 5.januar, 100.prosent, 1234.daglig)
-        )
-        val element = historikkelement(
-            perioder = utbetalinger,
-            inntekter = listOf(
-                Inntektsopplysning("123456789", 1.januar, 1234.månedlig, false)
-            )
-        )
-        assertFalse(element.valider(aktivitetslogg, Periodetype.FØRSTEGANGSBEHANDLING, Periode(6.januar, 31.januar), 1.januar))
-        assertTrue(aktivitetslogg.hasErrorsOrWorse())
-    }
-
-    @Test
     fun `forlengelser fra infotrygd med tilstøtende periode med samme orgnr er ok`() {
         val utbetalinger = listOf(
             ArbeidsgiverUtbetalingsperiode("1234", 1.januar, 3.januar, 100.prosent, 1234.daglig),

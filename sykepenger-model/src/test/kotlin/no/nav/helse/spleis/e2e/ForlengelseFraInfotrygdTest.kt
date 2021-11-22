@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggle
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -631,6 +632,11 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
 
     @Test
     fun `Person uten refusjon til arbeidsgiver blir ikke behandlet i Spleis`() {
+        assertFalse(Toggle.LageBrukerutbetaling.enabled) { "Denne testen gir ikke mening å kjøre når brukerutbetaling er live and direct!" }
+
+        // seeder personen med historisk refusjonsopplysning
+        håndterInntektsmelding(listOf(7.oktober(2019) til 23.oktober(2019)), refusjon = Inntektsmelding.Refusjon(null, null))
+
         håndterSykmelding(Sykmeldingsperiode(23.oktober(2020), 18.november(2020), 100.prosent))
         håndterSøknad(Sykdom(23.oktober(2020), 18.november(2020), 100.prosent))
         val historikk = arrayOf(
@@ -642,12 +648,13 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             Inntektsopplysning(ORGNUMMER, 7.oktober(2019), INNTEKT, false)
         )
         håndterUtbetalingshistorikk(1.vedtaksperiode, *historikk, inntektshistorikk = inntektsopplysning)
-
+        håndterYtelser(1.vedtaksperiode)
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
             TIL_INFOTRYGD
         )
     }

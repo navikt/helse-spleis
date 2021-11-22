@@ -51,13 +51,13 @@ internal class InfotrygdInntektsopplysningTest {
     @Test
     fun `refusjon opphører før perioden`() {
         inntektsopplysning(1.januar).valider(aktivitetslogg, PERIODE, DATO)
-        assertTrue(aktivitetslogg.hasErrorsOrWorse())
+        assertFalse(aktivitetslogg.hasErrorsOrWorse())
     }
 
     @Test
     fun `refusjon opphører i perioden`() {
         inntektsopplysning(15.februar).valider(aktivitetslogg, PERIODE, DATO)
-        assertTrue(aktivitetslogg.hasErrorsOrWorse())
+        assertFalse(aktivitetslogg.hasErrorsOrWorse())
     }
 
     @Test
