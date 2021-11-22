@@ -5,7 +5,7 @@ import java.time.LocalDate
 
 class Fødselsnummer private constructor(private val value: String) {
     private val individnummer = value.substring(6, 9).toInt()
-    val fødselsdato = LocalDate.of(
+    val fødselsdato: LocalDate = LocalDate.of(
         value.substring(4, 6).toInt().toYear(individnummer),
         value.substring(2, 4).toInt(),
         value.substring(0, 2).toInt().toDay()

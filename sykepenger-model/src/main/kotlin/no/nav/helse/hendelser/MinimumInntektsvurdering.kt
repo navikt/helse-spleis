@@ -15,7 +15,7 @@ internal fun validerMinimumInntekt(
 ): Boolean {
     val alder = fødselsnummer.alder()
     val minimumInntekt = alder.minimumInntekt(skjæringstidspunkt)
-    val oppfylt = grunnlagForSykepengegrunnlag.grunnlagForSykepengegrunnlag > minimumInntekt
+    val oppfylt = grunnlagForSykepengegrunnlag.grunnlagForSykepengegrunnlag >= minimumInntekt
 
 
     if (alder.forhøyetInntektskrav(skjæringstidspunkt))
