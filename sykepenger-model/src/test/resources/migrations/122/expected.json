@@ -1,0 +1,18 @@
+{
+    "arbeidsgivere": [
+        {
+            "utbetalinger": [
+                {
+                    "avstemmingsnøkkel": null
+                },
+                {
+                    "avstemmingsnøkkel": "123456"
+                },
+                {
+                    "avstemmingsnøkkel": null
+                }
+            ]
+        }
+    ],
+    "skjemaVersjon": 122
+}

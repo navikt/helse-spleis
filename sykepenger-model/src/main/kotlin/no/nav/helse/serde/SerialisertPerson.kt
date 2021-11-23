@@ -140,7 +140,8 @@ class SerialisertPerson(val json: String) {
             V118LeggTilBegrensningPåSykepengegrunnlag(),
             V119SletteSkatteopplydsningFraITVilkårsgrunnlag(),
             V120BrukeInntektsmeldingOverSkattIVilkårsgrunnlag(),
-            V121SletteVilkårsgrunnlagUtenNødvendigInntekt()
+            V121SletteVilkårsgrunnlagUtenNødvendigInntekt(),
+            V122FikseNullverdierForAvstemmingsnøkkel()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)
