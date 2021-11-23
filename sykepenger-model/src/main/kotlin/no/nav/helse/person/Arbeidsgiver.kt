@@ -12,6 +12,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.KLAR_TIL_BEHANDLING
 import no.nav.helse.person.Vedtaksperiode.Companion.REVURDERING_IGANGSATT
 import no.nav.helse.person.Vedtaksperiode.Companion.harInntekt
 import no.nav.helse.person.Vedtaksperiode.Companion.harNødvendigInntekt
+import no.nav.helse.person.Vedtaksperiode.Companion.harOverlappendeUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.harOverlappendeUtbetaltePerioder
 import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.medSkjæringstidspunkt
@@ -829,6 +830,9 @@ internal class Arbeidsgiver private constructor(
     internal fun tidligerePerioderFerdigBehandlet(vedtaksperiode: Vedtaksperiode) =
         Vedtaksperiode.tidligerePerioderFerdigBehandlet(vedtaksperioder, vedtaksperiode)
 
+    internal fun harOverlappendeUtbetaling(periode: Periode) =
+        vedtaksperioder.harOverlappendeUtbetaling(periode)
+
     internal fun alleAndrePerioderErKlare(vedtaksperiode: Vedtaksperiode) = vedtaksperioder.filterNot { it == vedtaksperiode }.none(IKKE_FERDIG_REVURDERT)
 
     internal fun fordelRevurdertUtbetaling(hendelse: ArbeidstakerHendelse, utbetaling: Utbetaling) {
@@ -1019,6 +1023,8 @@ internal class Arbeidsgiver private constructor(
 
     internal fun erSykmeldingenDenSistSkrevne(sykmelding: Sykmelding, hendelseIder: Set<UUID>): Boolean =
         sykdomshistorikk.erSykmeldingenDenSistSkrevne(sykmelding, hendelseIder)
+
+    internal fun søknadsperioder(hendelseIder: Set<UUID>) = sykdomshistorikk.søknadsperioder(hendelseIder)
 
     fun loggførHendelsesreferanse(organisasjonsnummer: String, skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID) {
         if (this.organisasjonsnummer != organisasjonsnummer) return

@@ -337,7 +337,8 @@ internal class Vedtaksperiode private constructor(
         person.vedtaksperiodeAvbrutt(
             hendelse,
             PersonObserver.VedtaksperiodeAvbruttEvent(
-                gjeldendeTilstand = tilstand.type
+                gjeldendeTilstand = tilstand.type,
+                harRelatertUtbetaling = harNærliggendeUtbetaling(),
             )
         )
     }
@@ -814,6 +815,12 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun forkastUgyldigeUtbetalinger(hendelse: IAktivitetslogg) = utbetalinger.forEach { it.forkast(hendelse) }
+
+    private fun harNærliggendeUtbetaling() : Boolean {
+        val søknadsperioder = arbeidsgiver.søknadsperioder(hendelseIder).takeUnless { it.isEmpty() } ?: return false
+        val periode = søknadsperioder.minOf { it.start } til søknadsperioder.maxOf { it.endInclusive }
+        return person.harNærliggendeUtbetaling(periode)
+    }
 
     private fun mottaUtbetalingTilRevurdering(utbetaling: Utbetaling) {
         utbetalinger.add(utbetaling)
@@ -2676,6 +2683,9 @@ internal class Vedtaksperiode private constructor(
 
         internal fun List<Vedtaksperiode>.iderMedUtbetaling(utbetalingId: UUID) =
             filter { it.utbetalinger.harId(utbetalingId) }.map { it.id }
+
+        internal fun List<Vedtaksperiode>.harOverlappendeUtbetaling(periode: Periode) =
+            flatMap { it.utbetalinger }.any { it.periode.overlapperMed(periode) }
 
         internal fun List<Vedtaksperiode>.periode(): Periode {
             val fom = minOf { it.periode.start }

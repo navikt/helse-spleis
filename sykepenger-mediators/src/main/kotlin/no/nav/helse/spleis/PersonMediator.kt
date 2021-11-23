@@ -223,7 +223,8 @@ internal class PersonMediator(
             hendelseskontekst,
             "vedtaksperiode_forkastet", JsonMessage.newMessage(
                 mapOf(
-                    "tilstand" to event.gjeldendeTilstand
+                    "tilstand" to event.gjeldendeTilstand,
+                    "harRelatertUtbetaling" to event.harRelatertUtbetaling,
                 )
             )
         )

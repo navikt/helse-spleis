@@ -23,7 +23,8 @@ interface PersonObserver {
     )
 
     data class VedtaksperiodeAvbruttEvent(
-        val gjeldendeTilstand: TilstandType
+        val gjeldendeTilstand: TilstandType,
+        val harRelatertUtbetaling: Boolean,
     )
 
     data class UtbetaltEvent(
@@ -173,7 +174,8 @@ interface PersonObserver {
 
     data class HendelseIkkeHåndtertEvent(
         val hendelseId: UUID,
-        val årsaker: List<String>
+        val årsaker: List<String>,
+        val harRelatertUtbetaling: Boolean,
     )
 
     data class VedtakFattetEvent(

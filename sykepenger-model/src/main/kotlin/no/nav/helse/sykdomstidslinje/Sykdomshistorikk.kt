@@ -2,10 +2,12 @@ package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmelding
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.person.PersonHendelse
 import no.nav.helse.person.SykdomshistorikkVisitor
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk.Element.Companion.erSykmeldingenDenSistSkrevne
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk.Element.Companion.nyesteId
+import no.nav.helse.sykdomstidslinje.Sykdomshistorikk.Element.Companion.søknadsperioder
 import no.nav.helse.tournament.Dagturnering
 import java.time.LocalDateTime
 import java.util.*
@@ -77,6 +79,8 @@ internal class Sykdomshistorikk private constructor(
     internal fun erSykmeldingenDenSistSkrevne(sykmelding: Sykmelding, hendelseIder: Set<UUID>): Boolean =
         elementer.erSykmeldingenDenSistSkrevne(sykmelding, hendelseIder)
 
+    internal fun søknadsperioder(hendelseIder: Set<UUID>) = elementer.søknadsperioder(hendelseIder)
+
     internal class Element private constructor(
         private val id: UUID = UUID.randomUUID(),
         private val hendelseId: UUID? = null,
@@ -145,6 +149,12 @@ internal class Sykdomshistorikk private constructor(
                 return filter { it.hendelseId in hendelseIder }.none {
                     it.hendelseSykdomstidslinje.sykmeldingSkrevet() > sykmelding.sykdomstidslinje().sykmeldingSkrevet()
                 }
+            }
+
+            internal fun List<Element>.søknadsperioder(hendelseIder: Set<UUID>): List<Periode> {
+                return filter { it.hendelseId in hendelseIder }
+                    .filter { it.hendelseSykdomstidslinje.all { dag -> dag.kommerFra(Søknad::class) } }
+                    .mapNotNull { it.hendelseSykdomstidslinje.periode() }
             }
         }
     }

@@ -2,8 +2,9 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Hendelseskontekst
-import no.nav.helse.person.*
+import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.VedtaksperiodeEndretEvent
+import no.nav.helse.person.TilstandType
 import org.junit.jupiter.api.fail
 import java.util.*
 
@@ -18,13 +19,14 @@ internal class TestObservatør : PersonObserver {
     val feriepengerUtbetaltEventer = mutableListOf<PersonObserver.FeriepengerUtbetaltEvent>()
     val utbetaltEndretEventer = mutableListOf<ObservedEvent<PersonObserver.UtbetalingEndretEvent>>()
     val vedtakFattetEvent = mutableMapOf<UUID, PersonObserver.VedtakFattetEvent>()
+    val hendelseIkkeHåndtertEventer =  mutableMapOf<UUID, PersonObserver.HendelseIkkeHåndtertEvent>()
 
     private lateinit var sisteVedtaksperiode: UUID
     private val vedtaksperioder = mutableMapOf<String, MutableSet<UUID>>()
     private val vedtaksperiodeendringer = mutableMapOf<UUID, MutableList<VedtaksperiodeEndretEvent>>()
 
     val utbetaltEventer = mutableListOf<PersonObserver.UtbetaltEvent>()
-    private val avbruttEventer = mutableMapOf<UUID, TilstandType>()
+    private val avbruttEventer = mutableMapOf<UUID, PersonObserver.VedtaksperiodeAvbruttEvent>()
     val annulleringer = mutableListOf<PersonObserver.UtbetalingAnnullertEvent>()
     lateinit var avstemming: Map<String, Any>
     val inntektsmeldingReplayEventer = mutableListOf<UUID>()
@@ -42,6 +44,7 @@ internal class TestObservatør : PersonObserver {
 
     fun avbruttePerioder() = avbruttEventer.size
     fun avbrutt(vedtaksperiodeId: UUID) = avbruttEventer.getValue(vedtaksperiodeId)
+    fun hendelseIkkeHåndtert(hendelseId: UUID) = hendelseIkkeHåndtertEventer.getValue(hendelseId)
 
     override fun avstemt(hendelseskontekst: Hendelseskontekst, result: Map<String, Any>) {
         avstemming = result
@@ -102,7 +105,11 @@ internal class TestObservatør : PersonObserver {
     }
 
     override fun vedtaksperiodeAvbrutt(hendelseskontekst: Hendelseskontekst, event: PersonObserver.VedtaksperiodeAvbruttEvent) {
-        avbruttEventer[hendelseskontekst.vedtaksperiodeId()] = event.gjeldendeTilstand
+        avbruttEventer[hendelseskontekst.vedtaksperiodeId()] = event
+    }
+
+    override fun hendelseIkkeHåndtert(hendelseskontekst: Hendelseskontekst, event: PersonObserver.HendelseIkkeHåndtertEvent) {
+        hendelseIkkeHåndtertEventer[event.hendelseId] = event
     }
 
     override fun revurderingAvvist(hendelseskontekst: Hendelseskontekst, event: PersonObserver.RevurderingAvvistEvent) {

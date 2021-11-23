@@ -430,6 +430,12 @@ class Person private constructor(
 
     internal fun nåværendeVedtaksperioder(filter: VedtaksperiodeFilter) = arbeidsgivere.nåværendeVedtaksperioder(filter).sorted()
 
+    internal fun harNærliggendeUtbetaling(periode: Periode): Boolean {
+        val arbeidsgiverperiode = 16L
+        val farligOmråde = periode.let { it.start.minusDays(arbeidsgiverperiode) til it.endInclusive.plusYears(3) }
+        return arbeidsgivere.any { it.harOverlappendeUtbetaling(farligOmråde)}
+    }
+
     internal fun lagreDødsdato(dødsdato: LocalDate) {
         this.dødsdato = dødsdato
     }
@@ -544,7 +550,7 @@ class Person private constructor(
         return aktiviteter
     }
 
-    internal fun emitHendelseIkkeHåndtert(hendelse: PersonHendelse) {
+    internal fun emitHendelseIkkeHåndtert(hendelse: SykdomstidslinjeHendelse) {
         val errorMeldinger = mutableListOf<String>()
         aktivitetslogg.accept(object : AktivitetsloggVisitor {
             override fun visitError(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Error, melding: String, tidsstempel: String) {
@@ -560,7 +566,11 @@ class Person private constructor(
         observers.forEach {
             it.hendelseIkkeHåndtert(
                 hendelse.hendelseskontekst(),
-                PersonObserver.HendelseIkkeHåndtertEvent(hendelse.meldingsreferanseId(), errorMeldinger)
+                PersonObserver.HendelseIkkeHåndtertEvent(
+                    hendelse.meldingsreferanseId(),
+                    errorMeldinger,
+                    hendelse.sykdomstidslinje().periode()?.let(::harNærliggendeUtbetaling) ?: false
+                )
             )
         }
     }
