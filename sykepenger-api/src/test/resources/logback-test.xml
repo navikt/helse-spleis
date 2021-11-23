@@ -15,6 +15,8 @@
     <logger name="com.zaxxer" level="WARN" />
     <logger name="org.eclipse" level="WARN" />
     <logger name="io.netty" level="WARN" />
+    <logger name="org.testcontainers" level="WARN" />
+    <logger name="com.github.dockerjava" level="WARN" />
 
     <root level="DEBUG">
         <appender-ref ref="CONSOLE"/>
