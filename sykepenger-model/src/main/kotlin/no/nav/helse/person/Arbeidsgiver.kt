@@ -19,6 +19,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.reflection.Utbetalingstatus
+import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -541,7 +542,7 @@ internal class Arbeidsgiver private constructor(
                 automatiskBehandling = automatiskBehandling,
                 arbeidsgiverOppdrag = arbeidsgiverOppdrag.toMap(),
                 personOppdrag = personOppdrag.toMap(),
-                utbetalingsdager = utbetalingstidslinje.toList(),
+                utbetalingsdager = utbetalingstidslinje.tilUtbetalingsdager(fridagplog(sykdomshistorikk.sykdomstidslinje())),
                 vedtaksperiodeIder = vedtaksperioder.iderMedUtbetaling(id) + forkastede.iderMedUtbetaling(id),
                 ident = ident
             )
@@ -581,7 +582,7 @@ internal class Arbeidsgiver private constructor(
                 automatiskBehandling = automatiskBehandling,
                 arbeidsgiverOppdrag = arbeidsgiverOppdrag.toMap(),
                 personOppdrag = personOppdrag.toMap(),
-                utbetalingsdager = utbetalingstidslinje.toList(),
+                utbetalingsdager = utbetalingstidslinje.tilUtbetalingsdager(fridagplog(sykdomshistorikk.sykdomstidslinje())),
                 vedtaksperiodeIder = vedtaksperioder.iderMedUtbetaling(id) + forkastede.iderMedUtbetaling(id),
                 ident = ident
             )
@@ -1014,6 +1015,15 @@ internal class Arbeidsgiver private constructor(
     fun loggførHendelsesreferanse(organisasjonsnummer: String, skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID) {
         if (this.organisasjonsnummer != organisasjonsnummer) return
         vedtaksperioder.filter { it.gjelder(skjæringstidspunkt) }.forEach { it.loggførHendelsesreferanse(meldingsreferanseId) }
+    }
+
+    private fun fridagplog(sykdomstidslinje: Sykdomstidslinje): (Utbetalingstidslinje.Utbetalingsdag) -> String = { utbetalingsdag ->
+        require(utbetalingsdag is Utbetalingstidslinje.Utbetalingsdag.Fridag) { "Fridagplogen trenger Fridag" }
+        when (sykdomstidslinje[utbetalingsdag.dato]) {
+            is Dag.Feriedag -> "Feriedag"
+            is Dag.Permisjonsdag -> "Permisjonsdag"
+            else -> "Fridag"
+        }
     }
 
     internal class JsonRestorer private constructor() {

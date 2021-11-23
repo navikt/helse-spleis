@@ -207,7 +207,6 @@ internal abstract class AbstractEndToEndMediatorTest {
         automatiskBehandling: Boolean = false,
         makstidOppnådd: Boolean = false,
         godkjenttidspunkt: LocalDateTime = LocalDateTime.now()
-
     ) {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Godkjenning))
         testRapid.sendTestMessage(

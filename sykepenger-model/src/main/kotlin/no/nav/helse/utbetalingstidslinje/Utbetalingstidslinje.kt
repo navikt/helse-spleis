@@ -273,11 +273,11 @@ internal class Utbetalingstidslinje private constructor(
 
     fun toMap() = mutableMapOf<String, Any?>("dager" to DateRanges().apply { forEach { plus(it.dato, it.toMap()) } }.toList())
 
-    fun toList(): List<PersonObserver.Utbetalingsdag> {
+    fun tilUtbetalingsdager(fridagplog: (Utbetalingsdag) -> String): List<PersonObserver.Utbetalingsdag> {
         return map { utbetalingsdag ->
             PersonObserver.Utbetalingsdag(
                 utbetalingsdag.dato,
-                mapDagtype(utbetalingsdag),
+                mapDagtype(utbetalingsdag, fridagplog),
                 mapBegrunnelser(utbetalingsdag)
             )
         }
@@ -288,15 +288,15 @@ internal class Utbetalingstidslinje private constructor(
             utbetalingsdag.begrunnelser.map { begrunnelse -> begrunnelse.javaClass.simpleName }
         else null
 
-    private fun mapDagtype(dag: Utbetalingsdag) = when (dag) {
+    private fun mapDagtype(dag: Utbetalingsdag, fridagplog: (Utbetalingsdag) -> String) = when (dag) {
         is Arbeidsdag -> PersonData.UtbetalingstidslinjeData.TypeData.Arbeidsdag.name
         is ArbeidsgiverperiodeDag -> PersonData.UtbetalingstidslinjeData.TypeData.ArbeidsgiverperiodeDag.name
         is NavDag -> PersonData.UtbetalingstidslinjeData.TypeData.NavDag.name
         is NavHelgDag -> PersonData.UtbetalingstidslinjeData.TypeData.NavHelgDag.name
-        is Fridag -> PersonData.UtbetalingstidslinjeData.TypeData.Fridag.name
         is UkjentDag -> PersonData.UtbetalingstidslinjeData.TypeData.UkjentDag.name
         is AvvistDag -> PersonData.UtbetalingstidslinjeData.TypeData.AvvistDag.name
         is ForeldetDag -> PersonData.UtbetalingstidslinjeData.TypeData.ForeldetDag.name
+        is Fridag -> fridagplog(dag)
     }
 
     internal sealed class Utbetalingsdag(
