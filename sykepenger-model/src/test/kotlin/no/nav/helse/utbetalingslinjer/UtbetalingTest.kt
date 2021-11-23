@@ -1,6 +1,5 @@
 package no.nav.helse.utbetalingslinjer
 
-import no.nav.helse.Toggle
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.*
 import no.nav.helse.person.Aktivitetslogg
@@ -492,34 +491,41 @@ internal class UtbetalingTest {
     fun `delvis refusjon`() {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600))
         beregnUtbetalinger(tidslinje)
-        Toggle.LageBrukerutbetaling.enable {
-            val utbetaling = opprettUtbetaling(tidslinje)
-            assertTrue(utbetaling.harDelvisRefusjon())
-        }
+        val utbetaling = opprettUtbetaling(tidslinje)
+        assertTrue(utbetaling.harDelvisRefusjon())
     }
 
     @Test
     fun `null refusjon`() {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 0))
         beregnUtbetalinger(tidslinje)
-        Toggle.LageBrukerutbetaling.enable {
-            val utbetaling = opprettUtbetaling(tidslinje)
-            assertFalse(utbetaling.harDelvisRefusjon())
-            assertTrue(utbetaling.harUtbetalinger())
-        }
+        val utbetaling = opprettUtbetaling(tidslinje)
+        assertFalse(utbetaling.harDelvisRefusjon())
+        assertTrue(utbetaling.harUtbetalinger())
+    }
+
+    @Test
+    fun `overføre utbetaling med delvis refusjon`() {
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600))
+        beregnUtbetalinger(tidslinje)
+        val utbetaling = opprettUbetaltUtbetaling(tidslinje)
+        val hendelselogg = godkjenn(utbetaling)
+        val utbetalingsbehov = hendelselogg.behov().filter { it.type == Behovtype.Utbetaling }
+        assertEquals(2, utbetalingsbehov.size) { "Forventer to utbetalingsbehov" }
+        val fagområder = utbetalingsbehov.map { it.detaljer().getValue("fagområde") as String }
+        assertTrue(Fagområde.Sykepenger.verdi in fagområder)
+        assertTrue(Fagområde.SykepengerRefusjon.verdi in fagområder)
     }
 
     @Test
     fun `overføre utbetaling med null refusjon`() {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 0))
         beregnUtbetalinger(tidslinje)
-        Toggle.LageBrukerutbetaling.enable {
-            val utbetaling = opprettUbetaltUtbetaling(tidslinje)
-            val hendelselogg = godkjenn(utbetaling)
-            val utbetalingsbehov = hendelselogg.behov().filter { it.type == Behovtype.Utbetaling }
-            assertEquals(1, utbetalingsbehov.size) { "Forventer bare ett utbetalingsbehov" }
-            assertEquals(Fagområde.Sykepenger.verdi, utbetalingsbehov.first().detaljer().getValue("fagområde"))
-        }
+        val utbetaling = opprettUbetaltUtbetaling(tidslinje)
+        val hendelselogg = godkjenn(utbetaling)
+        val utbetalingsbehov = hendelselogg.behov().filter { it.type == Behovtype.Utbetaling }
+        assertEquals(1, utbetalingsbehov.size) { "Forventer bare ett utbetalingsbehov" }
+        assertEquals(Fagområde.Sykepenger.verdi, utbetalingsbehov.first().detaljer().getValue("fagområde"))
     }
 
     @Test
@@ -553,37 +559,35 @@ internal class UtbetalingTest {
 
     @Test
     fun `overgang fra full til null refusjon`() {
-        Toggle.LageBrukerutbetaling.enable {
-            val tidslinje = tidslinjeOf(
-                16.AP, 1.NAV, 2.HELG, 5.NAV, 2.HELG, 5.NAV, 2.HELG, 5.NAV(1200, refusjonsbeløp = 0.0), 2.HELG, 5.NAV, 2.HELG, 1.ARB, 4.NAV(1200, refusjonsbeløp = 0.0)
-            )
+        val tidslinje = tidslinjeOf(
+            16.AP, 1.NAV, 2.HELG, 5.NAV, 2.HELG, 5.NAV, 2.HELG, 5.NAV(1200, refusjonsbeløp = 0.0), 2.HELG, 5.NAV, 2.HELG, 1.ARB, 4.NAV(1200, refusjonsbeløp = 0.0)
+        )
 
-            beregnUtbetalinger(tidslinje)
+        beregnUtbetalinger(tidslinje)
 
-            val første = opprettUtbetaling(tidslinje.kutt(26.januar))
-            val andre = opprettUtbetaling(tidslinje.kutt(31.januar), tidligere = første)
-            val tredje = opprettUtbetaling(tidslinje.kutt(7.februar), tidligere = andre)
-            val fjerde = opprettUtbetaling(tidslinje.kutt(14.februar), tidligere = tredje)
-            val femte = opprettUtbetaling(tidslinje.kutt(21.februar), tidligere = fjerde)
+        val første = opprettUtbetaling(tidslinje.kutt(26.januar))
+        val andre = opprettUtbetaling(tidslinje.kutt(31.januar), tidligere = første)
+        val tredje = opprettUtbetaling(tidslinje.kutt(7.februar), tidligere = andre)
+        val fjerde = opprettUtbetaling(tidslinje.kutt(14.februar), tidligere = tredje)
+        val femte = opprettUtbetaling(tidslinje.kutt(21.februar), tidligere = fjerde)
 
-            assertEquals(første.arbeidsgiverOppdrag().fagsystemId(), andre.arbeidsgiverOppdrag().fagsystemId())
-            assertEquals(andre.arbeidsgiverOppdrag().fagsystemId(), tredje.arbeidsgiverOppdrag().fagsystemId())
-            assertEquals(tredje.arbeidsgiverOppdrag().fagsystemId(), fjerde.arbeidsgiverOppdrag().fagsystemId())
-            assertEquals(fjerde.arbeidsgiverOppdrag().fagsystemId(), femte.arbeidsgiverOppdrag().fagsystemId())
+        assertEquals(første.arbeidsgiverOppdrag().fagsystemId(), andre.arbeidsgiverOppdrag().fagsystemId())
+        assertEquals(andre.arbeidsgiverOppdrag().fagsystemId(), tredje.arbeidsgiverOppdrag().fagsystemId())
+        assertEquals(tredje.arbeidsgiverOppdrag().fagsystemId(), fjerde.arbeidsgiverOppdrag().fagsystemId())
+        assertEquals(fjerde.arbeidsgiverOppdrag().fagsystemId(), femte.arbeidsgiverOppdrag().fagsystemId())
 
-            assertNotEquals(første.arbeidsgiverOppdrag().fagsystemId(), første.personOppdrag().fagsystemId())
+        assertNotEquals(første.arbeidsgiverOppdrag().fagsystemId(), første.personOppdrag().fagsystemId())
 
-            assertEquals(første.personOppdrag().fagsystemId(), andre.personOppdrag().fagsystemId())
-            assertEquals(andre.personOppdrag().fagsystemId(), tredje.personOppdrag().fagsystemId())
-            assertEquals(tredje.personOppdrag().fagsystemId(), fjerde.personOppdrag().fagsystemId())
-            assertEquals(fjerde.personOppdrag().fagsystemId(), femte.personOppdrag().fagsystemId())
+        assertEquals(første.personOppdrag().fagsystemId(), andre.personOppdrag().fagsystemId())
+        assertEquals(andre.personOppdrag().fagsystemId(), tredje.personOppdrag().fagsystemId())
+        assertEquals(tredje.personOppdrag().fagsystemId(), fjerde.personOppdrag().fagsystemId())
+        assertEquals(fjerde.personOppdrag().fagsystemId(), femte.personOppdrag().fagsystemId())
 
-            assertEquals(0, første.personOppdrag().inspektør.antallLinjer())
-            assertEquals(0, andre.personOppdrag().inspektør.antallLinjer())
-            assertEquals(1, tredje.personOppdrag().inspektør.antallLinjer())
-            assertEquals(1, fjerde.personOppdrag().inspektør.antallLinjer())
-            assertEquals(2, femte.personOppdrag().inspektør.antallLinjer())
-        }
+        assertEquals(0, første.personOppdrag().inspektør.antallLinjer())
+        assertEquals(0, andre.personOppdrag().inspektør.antallLinjer())
+        assertEquals(1, tredje.personOppdrag().inspektør.antallLinjer())
+        assertEquals(1, fjerde.personOppdrag().inspektør.antallLinjer())
+        assertEquals(2, femte.personOppdrag().inspektør.antallLinjer())
     }
 
     @Test

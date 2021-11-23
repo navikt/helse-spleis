@@ -4,8 +4,8 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
-import no.nav.helse.person.IAktivitetslogg
-import no.nav.helse.person.OppdragVisitor
+import no.nav.helse.person.*
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.AVVIST
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.FEIL
@@ -29,7 +29,7 @@ internal class Oppdrag private constructor(
     private var avstemmingsnøkkel: Long? = null,
     private var status: Oppdragstatus? = null,
     private val tidsstempel: LocalDateTime
-) : MutableList<Utbetalingslinje> by linjer {
+) : MutableList<Utbetalingslinje> by linjer, Aktivitetskontekst {
     internal companion object {
         internal fun periode(vararg oppdrag: Oppdrag): Periode {
             return oppdrag
@@ -98,14 +98,18 @@ internal class Oppdrag private constructor(
     ) {
         if (!harUtbetalinger()) return aktivitetslogg.info("Overfører ikke oppdrag uten endring for fagområde=$fagområde med fagsystemId=$fagsystemId")
         check(endringskode != Endringskode.UEND)
-        fagområde.overfør(aktivitetslogg, behovdetaljer(saksbehandler, maksdato))
+        aktivitetslogg.kontekst(this)
+        aktivitetslogg.behov(Behovtype.Utbetaling, "Trenger å sende utbetaling til Oppdrag", behovdetaljer(saksbehandler, maksdato))
     }
 
     internal fun simuler(aktivitetslogg: IAktivitetslogg, maksdato: LocalDate, saksbehandler: String) {
         if (!harUtbetalinger()) return aktivitetslogg.info("Simulerer ikke oppdrag uten endring fagområde=$fagområde med fagsystemId=$fagsystemId")
         check(endringskode != Endringskode.UEND)
-        fagområde.simuler(aktivitetslogg, behovdetaljer(saksbehandler, maksdato))
+        aktivitetslogg.kontekst(this)
+        aktivitetslogg.behov(Behovtype.Simulering, "Trenger simulering fra Oppdragssystemet", behovdetaljer(saksbehandler, maksdato))
     }
+
+    override fun toSpesifikkKontekst() = SpesifikkKontekst("Oppdrag", mapOf("fagsystemId" to fagsystemId))
 
     private fun behovdetaljer(saksbehandler: String, maksdato: LocalDate?): MutableMap<String, Any> {
         return mutableMapOf(

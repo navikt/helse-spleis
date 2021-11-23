@@ -404,10 +404,6 @@ class Aktivitetslogg(
                 Godkjenning,
                 Simulering,
                 Utbetaling,
-                UtbetalingArbeidsgiver,
-                UtbetalingPerson,
-                SimuleringArbeidsgiver,
-                SimuleringPerson,
                 InntekterForSammenligningsgrunnlag,
                 InntekterForSykepengegrunnlag,
                 @Deprecated("Behovet er ikke i bruk, men beholdes for derserialisering av aktivitetsloggen")

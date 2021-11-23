@@ -162,6 +162,9 @@ internal class TestRapid : RapidsConnection() {
         fun etterspurteBehov(behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
             behovmeldinger.last { it.first == behovtype }.second
 
+        fun alleEtterspurteBehov(behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
+            behovmeldinger.filter { it.first == behovtype }.map { it.second }
+
         fun tilstandForEtterspurteBehov(vedtaksperiodeIndeks: Int, behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
             behov.getValue(vedtaksperiodeId(vedtaksperiodeIndeks)).last { it.first == behovtype }.second
     }

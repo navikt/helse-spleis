@@ -98,11 +98,11 @@ abstract class Toggle internal constructor(enabled: Boolean = false, private val
      */
     internal operator fun plus(toggle: Toggle) = listOf(this, toggle)
 
-    internal companion object {
+    companion object {
         /**
          *
          */
-        internal fun Iterable<Toggle>.enable(block: () -> Unit) {
+        fun Iterable<Toggle>.enable(block: () -> Unit) {
             forEach(Toggle::enable)
             try {
                 block()
@@ -114,7 +114,7 @@ abstract class Toggle internal constructor(enabled: Boolean = false, private val
         /**
          *
          */
-        internal fun Iterable<Toggle>.disable(block: () -> Unit) {
+        fun Iterable<Toggle>.disable(block: () -> Unit) {
             forEach(Toggle::disable)
             try {
                 block()
@@ -133,10 +133,11 @@ abstract class Toggle internal constructor(enabled: Boolean = false, private val
     object GraphQLPlayground : Toggle("GraphQLPlayground")
     object RevurdereInntektMedFlereArbeidsgivere : Toggle(false)
     object NyeBehovForUtbetaling : Toggle(false)
+    object DelvisRefusjon : Toggle(false)
 
-    internal object LageBrukerutbetaling : Toggle("LAGE_BRUKERUTBETALING") {
-        fun kanIkkeFortsette(aktivitetslogg: IAktivitetslogg, utbetaling: Utbetaling, harBrukerutbetaling: Boolean): Boolean {
-            if (utbetaling.harDelvisRefusjon()) aktivitetslogg.error("Utbetalingen har endringer i både arbeidsgiver- og personoppdrag")
+    object LageBrukerutbetaling : Toggle("LAGE_BRUKERUTBETALING") {
+        internal fun kanIkkeFortsette(aktivitetslogg: IAktivitetslogg, utbetaling: Utbetaling, harBrukerutbetaling: Boolean): Boolean {
+            if (DelvisRefusjon.disabled && utbetaling.harDelvisRefusjon()) aktivitetslogg.error("Utbetalingen har endringer i både arbeidsgiver- og personoppdrag")
             else if (disabled && harBrukerutbetaling) aktivitetslogg.error("Utbetalingstidslinje inneholder brukerutbetaling")
             return aktivitetslogg.hasErrorsOrWorse()
         }
