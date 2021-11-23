@@ -145,6 +145,25 @@ internal class OppdragTest {
     }
 
     @Test
+    fun `nettobeløp for annulleringer`() {
+        val oppdrag = Oppdrag(
+            "mottaker", Fagområde.Sykepenger, listOf(
+                Utbetalingslinje(
+                    fom = 1.januar,
+                    tom = 16.januar,
+                    endringskode = Endringskode.UEND,
+                    aktuellDagsinntekt = 1000,
+                    beløp = 1000,
+                    grad = 100.0
+                )
+
+            ), sisteArbeidsgiverdag = 16.januar
+        )
+        val annullering = oppdrag.annuller(Aktivitetslogg())
+        assertEquals(-1 * oppdrag.totalbeløp(), annullering.nettoBeløp())
+    }
+
+    @Test
     fun `uend linjer i oppdrag ber ikke om simulering (brukerutbetaling)`() {
         val oppdrag = Oppdrag(
             "mottaker", Fagområde.Sykepenger, listOf(

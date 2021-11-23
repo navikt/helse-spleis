@@ -171,7 +171,9 @@ internal class Oppdrag private constructor(
         }
 
     internal fun annuller(aktivitetslogg: IAktivitetslogg): Oppdrag {
-        return tomtOppdrag().minus(this, aktivitetslogg)
+        return tomtOppdrag().minus(this, aktivitetslogg).also { annullering ->
+            annullering.nettoBeløp(this)
+        }
     }
 
     private fun tomtOppdrag(): Oppdrag =
