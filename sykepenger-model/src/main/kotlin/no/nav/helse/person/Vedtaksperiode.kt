@@ -357,11 +357,6 @@ internal class Vedtaksperiode private constructor(
 
     private fun erUtbetalt() = tilstand == Avsluttet && utbetaling?.erAvsluttet() == true
 
-    private fun sammeArbeidsgiverperiode(other: Vedtaksperiode): Boolean {
-        val fagsystemId = utbetaling?.arbeidsgiverOppdrag()?.fagsystemId()
-        return fagsystemId != null && fagsystemId == other.utbetaling?.arbeidsgiverOppdrag()?.fagsystemId()
-    }
-
     internal fun revurder(hendelse: OverstyrTidslinje) {
         kontekst(hendelse)
         tilstand.revurder(this, hendelse)
@@ -371,9 +366,6 @@ internal class Vedtaksperiode private constructor(
         kontekst(hendelse)
         tilstand.revurder(this, hendelse)
     }
-
-    internal fun sammeArbeidsgiverPeriodeOgUtbetalt(other: Vedtaksperiode) =
-        sammeArbeidsgiverperiode(other) && erUtbetalt()
 
     internal fun periode() = periode
 
