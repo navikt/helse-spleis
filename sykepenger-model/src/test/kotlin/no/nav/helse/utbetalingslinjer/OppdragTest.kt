@@ -3,6 +3,7 @@ package no.nav.helse.utbetalingslinjer
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -10,6 +11,130 @@ import java.time.LocalDateTime
 import java.util.*
 
 internal class OppdragTest {
+
+    @Test
+    fun `tomme oppdrag er synkroniserte med hverandre`() {
+        val oppdrag1 = Oppdrag("mottaker", Fagområde.SykepengerRefusjon)
+        val oppdrag2 = Oppdrag("mottaker", Fagområde.Sykepenger)
+        assertTrue(Oppdrag.synkronisert(oppdrag1, oppdrag1))
+        assertTrue(Oppdrag.synkronisert(oppdrag1, oppdrag2))
+    }
+
+    @Test
+    fun `tomme oppdrag er synkroniserte med andre ikke tomme`() {
+        val oppdrag1 = Oppdrag("mottaker", Fagområde.SykepengerRefusjon, listOf(
+            Utbetalingslinje(
+                fom = 1.januar,
+                tom = 16.januar,
+                endringskode = Endringskode.NY,
+                aktuellDagsinntekt = 1000,
+                beløp = 1000,
+                grad = 100.0
+            )
+        ), sisteArbeidsgiverdag = 31.desember(2017))
+        val oppdrag2 = Oppdrag("mottaker", Fagområde.Sykepenger)
+        assertTrue(Oppdrag.synkronisert(oppdrag1, oppdrag1))
+        assertTrue(Oppdrag.synkronisert(oppdrag1, oppdrag2))
+    }
+
+    @Test
+    fun `oppdrag med status er synkronisert med tomt oppdrag`() {
+        val oppdrag1 = Oppdrag("mottaker", Fagområde.SykepengerRefusjon, listOf(
+            Utbetalingslinje(
+                fom = 1.januar,
+                tom = 16.januar,
+                endringskode = Endringskode.NY,
+                aktuellDagsinntekt = 1000,
+                beløp = 1000,
+                grad = 100.0
+            )
+        ), sisteArbeidsgiverdag = 31.desember(2017))
+        val oppdrag2 = Oppdrag("mottaker", Fagområde.Sykepenger)
+        oppdrag1.lagreOverføringsinformasjon(UtbetalingOverført(UUID.randomUUID(), "aktør", "fnr", "orgnr", oppdrag1.fagsystemId(), UUID.randomUUID().toString(), 1234L, LocalDateTime.now()))
+        assertTrue(Oppdrag.synkronisert(oppdrag1, oppdrag1))
+        assertTrue(Oppdrag.synkronisert(oppdrag1, oppdrag2))
+    }
+
+    @Test
+    fun `oppdrag med ulik status er ikke synkroniserte`() {
+        val oppdrag1 = Oppdrag("mottaker", Fagområde.SykepengerRefusjon, listOf(
+            Utbetalingslinje(
+                fom = 1.januar,
+                tom = 16.januar,
+                endringskode = Endringskode.NY,
+                aktuellDagsinntekt = 1000,
+                beløp = 1000,
+                grad = 100.0
+            )
+        ), sisteArbeidsgiverdag = 31.desember(2017))
+        val oppdrag2 = Oppdrag("mottaker", Fagområde.Sykepenger, listOf(
+            Utbetalingslinje(
+                fom = 1.januar,
+                tom = 16.januar,
+                endringskode = Endringskode.NY,
+                aktuellDagsinntekt = 1000,
+                beløp = 1000,
+                grad = 100.0
+            )
+        ), sisteArbeidsgiverdag = 31.desember(2017))
+        oppdrag1.lagreOverføringsinformasjon(UtbetalingOverført(UUID.randomUUID(), "aktør", "fnr", "orgnr", oppdrag1.fagsystemId(), UUID.randomUUID().toString(), 1234L, LocalDateTime.now()))
+        assertFalse(Oppdrag.synkronisert(oppdrag1, oppdrag2))
+    }
+
+    @Test
+    fun `oppdrag med ulik status er ikke synkroniserte 2`() {
+        val oppdrag1 = Oppdrag("mottaker", Fagområde.SykepengerRefusjon, listOf(
+            Utbetalingslinje(
+                fom = 1.januar,
+                tom = 16.januar,
+                endringskode = Endringskode.NY,
+                aktuellDagsinntekt = 1000,
+                beløp = 1000,
+                grad = 100.0
+            )
+        ), sisteArbeidsgiverdag = 31.desember(2017))
+        val oppdrag2 = Oppdrag("mottaker", Fagområde.Sykepenger, listOf(
+            Utbetalingslinje(
+                fom = 1.januar,
+                tom = 16.januar,
+                endringskode = Endringskode.NY,
+                aktuellDagsinntekt = 1000,
+                beløp = 1000,
+                grad = 100.0
+            )
+        ), sisteArbeidsgiverdag = 31.desember(2017))
+        oppdrag1.lagreOverføringsinformasjon(UtbetalingOverført(UUID.randomUUID(), "aktør", "fnr", "orgnr", oppdrag1.fagsystemId(), UUID.randomUUID().toString(), 1234L, LocalDateTime.now()))
+        oppdrag1.lagreOverføringsinformasjon(UtbetalingHendelse(UUID.randomUUID(), "aktør", "fnr", "orgnr", oppdrag1.fagsystemId(), UUID.randomUUID().toString(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
+        oppdrag2.lagreOverføringsinformasjon(UtbetalingOverført(UUID.randomUUID(), "aktør", "fnr", "orgnr", oppdrag2.fagsystemId(), UUID.randomUUID().toString(), 1234L, LocalDateTime.now()))
+        assertFalse(Oppdrag.synkronisert(oppdrag1, oppdrag2))
+    }
+
+    @Test
+    fun `oppdrag med lik status er synkroniserte`() {
+        val oppdrag1 = Oppdrag("mottaker", Fagområde.SykepengerRefusjon, listOf(
+            Utbetalingslinje(
+                fom = 1.januar,
+                tom = 16.januar,
+                endringskode = Endringskode.NY,
+                aktuellDagsinntekt = 1000,
+                beløp = 1000,
+                grad = 100.0
+            )
+        ), sisteArbeidsgiverdag = 31.desember(2017))
+        val oppdrag2 = Oppdrag("mottaker", Fagområde.Sykepenger, listOf(
+            Utbetalingslinje(
+                fom = 1.januar,
+                tom = 16.januar,
+                endringskode = Endringskode.NY,
+                aktuellDagsinntekt = 1000,
+                beløp = 1000,
+                grad = 100.0
+            )
+        ), sisteArbeidsgiverdag = 31.desember(2017))
+        oppdrag1.lagreOverføringsinformasjon(UtbetalingOverført(UUID.randomUUID(), "aktør", "fnr", "orgnr", oppdrag1.fagsystemId(), UUID.randomUUID().toString(), 1234L, LocalDateTime.now()))
+        oppdrag2.lagreOverføringsinformasjon(UtbetalingOverført(UUID.randomUUID(), "aktør", "fnr", "orgnr", oppdrag2.fagsystemId(), UUID.randomUUID().toString(), 1234L, LocalDateTime.now()))
+        assertTrue(Oppdrag.synkronisert(oppdrag1, oppdrag2))
+    }
 
     @Test
     fun `tomt oppdrag ber ikke om simulering (brukerutbetaling)`() {

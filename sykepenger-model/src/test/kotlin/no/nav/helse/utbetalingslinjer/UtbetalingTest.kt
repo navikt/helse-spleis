@@ -3,7 +3,6 @@ package no.nav.helse.utbetalingslinjer
 import no.nav.helse.Toggle
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.*
-import no.nav.helse.utbetalingslinjer.Oppdragstatus.AKSEPTERT
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.UtbetalingVisitor
@@ -11,12 +10,12 @@ import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.testhelpers.*
+import no.nav.helse.utbetalingslinjer.Oppdragstatus.AKSEPTERT
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.parallel.Isolated
 import java.time.LocalDate
@@ -243,6 +242,120 @@ internal class UtbetalingTest {
     }
 
     @Test
+    fun `går ikke videre når ett av to oppdrag er overført`() {
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600))
+        beregnUtbetalinger(tidslinje)
+        val (utbetaling, utbetalingId) = opprettGodkjentUtbetaling(tidslinje)
+        val personOppdrag = utbetaling.inspektør.personOppdrag
+        utbetaling.håndter(
+            UtbetalingOverført(
+                meldingsreferanseId = UUID.randomUUID(),
+                aktørId = "aktørId",
+                fødselsnummer = "fnr",
+                orgnummer = "orgnr",
+                fagsystemId = utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId(),
+                utbetalingId = utbetalingId.toString(),
+                avstemmingsnøkkel = 1234L,
+                overføringstidspunkt = LocalDateTime.now()
+            )
+        )
+        assertEquals(Utbetaling.Sendt, utbetaling.inspektør.tilstand)
+    }
+
+    @Test
+    fun `går videre når begge oppdragene er overført`() {
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600))
+        beregnUtbetalinger(tidslinje)
+        val (utbetaling, utbetalingId) = opprettGodkjentUtbetaling(tidslinje)
+        utbetaling.håndter(
+            UtbetalingOverført(
+                meldingsreferanseId = UUID.randomUUID(),
+                aktørId = "aktørId",
+                fødselsnummer = "fnr",
+                orgnummer = "orgnr",
+                fagsystemId = utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId(),
+                utbetalingId = utbetalingId.toString(),
+                avstemmingsnøkkel = 1234L,
+                overføringstidspunkt = LocalDateTime.now()
+            )
+        )
+        utbetaling.håndter(
+            UtbetalingOverført(
+                meldingsreferanseId = UUID.randomUUID(),
+                aktørId = "aktørId",
+                fødselsnummer = "fnr",
+                orgnummer = "orgnr",
+                fagsystemId = utbetaling.inspektør.personOppdrag.fagsystemId(),
+                utbetalingId = utbetalingId.toString(),
+                avstemmingsnøkkel = 1234L,
+                overføringstidspunkt = LocalDateTime.now()
+            )
+        )
+        assertEquals(Utbetaling.Overført, utbetaling.inspektør.tilstand)
+    }
+
+    @Test
+    fun `går ikke videre når ett av to oppdrag er akseptert`() {
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600))
+        beregnUtbetalinger(tidslinje)
+        val (utbetaling, utbetalingId) = opprettGodkjentUtbetaling(tidslinje)
+        val personOppdrag = utbetaling.inspektør.personOppdrag
+        utbetaling.håndter(
+            UtbetalingHendelse(
+                meldingsreferanseId = UUID.randomUUID(),
+                aktørId = "aktørId",
+                fødselsnummer = "fnr",
+                orgnummer = "orgnr",
+                fagsystemId = utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId(),
+                utbetalingId = utbetalingId.toString(),
+                status = AKSEPTERT,
+                melding = "",
+                avstemmingsnøkkel = 1234L,
+                overføringstidspunkt = LocalDateTime.now()
+            )
+        )
+        assertEquals(Utbetaling.Sendt, utbetaling.inspektør.tilstand)
+    }
+
+    @Test
+    fun `går videre når begge oppdragene er akseptert`() {
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600))
+        beregnUtbetalinger(tidslinje)
+        val (utbetaling, utbetalingId) = opprettGodkjentUtbetaling(tidslinje)
+        utbetaling.håndter(
+            UtbetalingHendelse(
+                meldingsreferanseId = UUID.randomUUID(),
+                aktørId = "aktørId",
+                fødselsnummer = "fnr",
+                orgnummer = "orgnr",
+                fagsystemId = utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId(),
+                utbetalingId = utbetalingId.toString(),
+                status = AKSEPTERT,
+                melding = "",
+                avstemmingsnøkkel = 1234L,
+                overføringstidspunkt = LocalDateTime.now()
+            )
+        )
+        utbetaling.håndter(
+            UtbetalingHendelse(
+                meldingsreferanseId = UUID.randomUUID(),
+                aktørId = "aktørId",
+                fødselsnummer = "fnr",
+                orgnummer = "orgnr",
+                fagsystemId = utbetaling.inspektør.personOppdrag.fagsystemId(),
+                utbetalingId = utbetalingId.toString(),
+                status = AKSEPTERT,
+                melding = "",
+                avstemmingsnøkkel = 1234L,
+                overføringstidspunkt = LocalDateTime.now()
+            )
+        )
+        assertEquals(Utbetaling.Utbetalt, utbetaling.inspektør.tilstand)
+    }
+
+    private val Utbetaling.inspektør get() = UtbetalingsInspektør(this)
+
+    @Test
     fun `delvis refusjon`() {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600))
         beregnUtbetalinger(tidslinje)
@@ -273,22 +386,6 @@ internal class UtbetalingTest {
             val utbetalingsbehov = hendelselogg.behov().filter { it.type == Behovtype.Utbetaling }
             assertEquals(1, utbetalingsbehov.size) { "Forventer bare ett utbetalingsbehov" }
             assertEquals(Fagområde.Sykepenger.verdi, utbetalingsbehov.first().detaljer().getValue("fagområde"))
-        }
-    }
-
-    @Test
-    @Disabled
-    fun `overføre utbetaling med delvis refusjon`() {
-        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600))
-        beregnUtbetalinger(tidslinje)
-        Toggle.LageBrukerutbetaling.enable {
-            val utbetaling = opprettUbetaltUtbetaling(tidslinje)
-            val hendelselogg = godkjenn(utbetaling)
-            val utbetalingsbehov = hendelselogg.behov().filter { it.type == Behovtype.Utbetaling }
-            assertEquals(2, utbetalingsbehov.size) { "Forventer to utbetalingsbehov" }
-            val fagområder = utbetalingsbehov.map { it.detaljer().getValue("fagområde") as String }
-            assertTrue(Fagområde.Sykepenger.verdi in fagområder)
-            assertTrue(Fagområde.SykepengerRefusjon.verdi in fagområder)
         }
     }
 
@@ -579,6 +676,8 @@ internal class UtbetalingTest {
     class UtbetalingsInspektør(utbetaling: Utbetaling) : UtbetalingVisitor {
         lateinit var utbetalingId: UUID
         lateinit var tilstand: Utbetaling.Tilstand
+        lateinit var arbeidsgiverOppdrag: Oppdrag
+        lateinit var personOppdrag: Oppdrag
 
         init {
             utbetaling.accept(this)
@@ -601,6 +700,14 @@ internal class UtbetalingTest {
         ) {
             utbetalingId = id
             this.tilstand = tilstand
+        }
+
+        override fun preVisitArbeidsgiverOppdrag(oppdrag: Oppdrag) {
+            this.arbeidsgiverOppdrag = oppdrag
+        }
+
+        override fun preVisitPersonOppdrag(oppdrag: Oppdrag) {
+            this.personOppdrag = oppdrag
         }
     }
 

@@ -257,9 +257,10 @@ internal class Utbetaling private constructor(
     }
 
     private fun tilstand(neste: Tilstand, hendelse: IAktivitetslogg) {
+        oppdatert = LocalDateTime.now()
+        if (!Oppdrag.synkronisert(arbeidsgiverOppdrag, personOppdrag)) return hendelse.info("Venter på status på det andre oppdraget før vi kan gå videre")
         val forrigeTilstand = tilstand
         tilstand = neste
-        oppdatert = LocalDateTime.now()
         observers.forEach {
             it.utbetalingEndret(hendelse.hendelseskontekst(), id, type, arbeidsgiverOppdrag, personOppdrag, forrigeTilstand, neste)
         }

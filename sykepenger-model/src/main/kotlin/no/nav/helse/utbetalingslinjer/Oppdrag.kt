@@ -40,6 +40,11 @@ internal class Oppdrag private constructor(
         internal fun stønadsdager(vararg oppdrag: Oppdrag): Int {
             return Utbetalingslinje.stønadsdager(oppdrag.toList().flatten())
         }
+
+        internal fun synkronisert(vararg oppdrag: Oppdrag): Boolean {
+            val endrede = oppdrag.filter { it.harUtbetalinger() }
+            return endrede.all { it.status == endrede.first().status }
+        }
     }
 
     internal val førstedato get() = linjer.firstOrNull()?.let { it.datoStatusFom() ?: it.fom } ?: LocalDate.MIN
