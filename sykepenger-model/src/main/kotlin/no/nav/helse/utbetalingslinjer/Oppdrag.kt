@@ -88,11 +88,13 @@ internal class Oppdrag private constructor(
         saksbehandler: String
     ) {
         if (!harUtbetalinger()) return aktivitetslogg.info("Overfører ikke oppdrag uten endring for fagområde=$fagområde med fagsystemId=$fagsystemId")
+        check(endringskode != Endringskode.UEND)
         fagområde.overfør(aktivitetslogg, behovdetaljer(saksbehandler, maksdato))
     }
 
     internal fun simuler(aktivitetslogg: IAktivitetslogg, maksdato: LocalDate, saksbehandler: String) {
         if (!harUtbetalinger()) return aktivitetslogg.info("Simulerer ikke oppdrag uten endring fagområde=$fagområde med fagsystemId=$fagsystemId")
+        check(endringskode != Endringskode.UEND)
         fagområde.simuler(aktivitetslogg, behovdetaljer(saksbehandler, maksdato))
     }
 
@@ -240,6 +242,7 @@ internal class Oppdrag private constructor(
             påtroppendeOppdrag.kobleTil(avtroppendeOppdrag)
             påtroppendeOppdrag.kopierLikeLinjer(avtroppendeOppdrag, aktivitetslogg)
             påtroppendeOppdrag.håndterLengreNåværende(avtroppendeOppdrag)
+            if (!påtroppendeOppdrag.last().erForskjell()) påtroppendeOppdrag.endringskode = Endringskode.UEND
         }
 
     // når man oppretter en NY linje vil Oppdragsystemet IKKE ta stilling til periodene FØR.
@@ -345,7 +348,7 @@ internal class Oppdrag private constructor(
     }
 
     private inner class Identisk : Tilstand {
-        override fun håndterForskjell(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje, aktivitetslogg: IAktivitetslogg) {
+         override fun håndterForskjell(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje, aktivitetslogg: IAktivitetslogg) {
             if (nåværende == tidligere) return nåværende.markerUendret(tidligere)
             håndterUlikhet(nåværende, tidligere, aktivitetslogg)
         }

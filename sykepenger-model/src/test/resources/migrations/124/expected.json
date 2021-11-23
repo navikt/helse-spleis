@@ -1,0 +1,71 @@
+{
+    "arbeidsgivere": [
+        {
+            "utbetalinger": [
+                {
+                    "arbeidsgiverOppdrag": {
+                        "linjer": [
+                            {
+                                "endringskode": "NY"
+                            }
+                        ],
+                        "fagsystemId": "fagsystemId1",
+                        "endringskode": "NY",
+                        "tidsstempel": "2021-05-26T11:57:08.264113616"
+                    },
+                    "personOppdrag": {
+                        "linjer": [],
+                        "fagsystemId": "fagsystemId2",
+                        "endringskode": "NY",
+                        "tidsstempel": "2021-05-26T11:57:08.264152159"
+                    }
+                },
+                {
+                    "arbeidsgiverOppdrag": {
+                        "linjer": [
+                            {
+                                "endringskode": "UEND"
+                            }
+                        ],
+                        "fagsystemId": "fagsystemId1",
+                        "endringskode": "UEND",
+                        "tidsstempel": "2021-05-26T11:57:08.264113616"
+                    },
+                    "personOppdrag": {
+                        "linjer": [
+                            {
+                                "endringskode": "ENDR"
+                            }
+                        ],
+                        "fagsystemId": "fagsystemId2",
+                        "endringskode": "ENDR",
+                        "tidsstempel": "2021-05-26T11:57:08.264152159"
+                    }
+                },
+                {
+                    "arbeidsgiverOppdrag": {
+                        "linjer": [
+                            {
+                                "endringskode": "ENDR"
+                            }
+                        ],
+                        "fagsystemId": "fagsystemId1",
+                        "endringskode": "ENDR",
+                        "tidsstempel": "2021-05-26T11:57:08.264113616"
+                    },
+                    "personOppdrag": {
+                        "linjer": [
+                            {
+                                "endringskode": "UEND"
+                            }
+                        ],
+                        "fagsystemId": "fagsystemId2",
+                        "endringskode": "UEND",
+                        "tidsstempel": "2021-05-26T11:57:08.264152159"
+                    }
+                }
+            ]
+        }
+    ],
+    "skjemaVersjon": 124
+}
