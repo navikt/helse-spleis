@@ -1,6 +1,7 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -9,7 +10,6 @@ import org.junit.jupiter.api.Test
 
 internal class OverlapMergeTest {
     private lateinit var tidslinje: Sykdomstidslinje
-    private val inspektør get() = SykdomstidslinjeInspektør(tidslinje)
 
     @Test
     fun `overlap av samme type`() {
@@ -19,9 +19,7 @@ internal class OverlapMergeTest {
         assertEquals(15, tidslinje.filterIsInstance<Arbeidsdag>().size)
         assertEquals(4, tidslinje.filterIsInstance<FriskHelgedag>().size)
 
-        inspektør.also {
-            assertTrue(it[1.januar] is Arbeidsdag)
-        }
+        assertTrue(tidslinje.inspektør[1.januar] is Arbeidsdag)
     }
 
     @Test
@@ -96,16 +94,13 @@ internal class OverlapMergeTest {
         assertEquals(4, tidslinje.filterIsInstance<Feriedag>().size)
         assertEquals(1, tidslinje.filterIsInstance<Sykedag>().size)
 
-        inspektør.also {
-            assertEquals(50, it.grader[1.januar])
-        }
+        assertEquals(50, tidslinje.inspektør.grader[1.januar])
     }
 
     @Test
     fun `problemdager med melding`() {
         tidslinje = listOf(1.januar sykTil 10.januar, 5.januar sykTil 15.januar).merge(testBeste)
-
-        inspektør.also {
+        tidslinje.inspektør.also {
             assertTrue(it.problemdagmeldinger[6.januar]?.contains("Kan ikke velge mellom") ?: false)
             assertTrue(it.problemdagmeldinger[6.januar]?.contains("TestHendelse") ?: false)
         }

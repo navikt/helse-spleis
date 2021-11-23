@@ -4,6 +4,7 @@ import no.nav.helse.ForventetFeil
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType.*
@@ -2777,7 +2778,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
 
-        UtbetalingstidslinjeInspektør(inspektør.utbetalingUtbetalingstidslinje(0)).also {
+        inspektør.utbetalingUtbetalingstidslinje(0).inspektør.also {
             assertEquals(5, it.navDagTeller)
             assertEquals(16, it.arbeidsgiverperiodeDagTeller)
         }
@@ -2814,7 +2815,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
 
-        UtbetalingstidslinjeInspektør(inspektør.utbetalingUtbetalingstidslinje(0)).also {
+        inspektør.utbetalingUtbetalingstidslinje(0).inspektør.also {
             assertEquals(5, it.navDagTeller)
             assertEquals(16, it.arbeidsgiverperiodeDagTeller)
         }
@@ -2851,7 +2852,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
 
-        UtbetalingstidslinjeInspektør(inspektør.utbetalingUtbetalingstidslinje(0)).also {
+        inspektør.utbetalingUtbetalingstidslinje(0).inspektør.also {
             assertEquals(6, it.navDagTeller)
             assertEquals(16, it.arbeidsgiverperiodeDagTeller)
         }
@@ -3185,7 +3186,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
 
-        UtbetalingstidslinjeInspektør(inspektør.utbetalingstidslinjer(2.vedtaksperiode)).let {
+        inspektør.utbetalingstidslinjer(2.vedtaksperiode).inspektør.let {
             assertEquals(6, it.navHelgDagTeller)
             assertEquals(15, it.foreldetDagTeller)
         }

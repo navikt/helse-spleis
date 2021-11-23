@@ -1,8 +1,8 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.testhelpers.NAV
-import no.nav.helse.testhelpers.UtbetalingstidslinjeInspektør
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.tidslinjeOf
 import org.junit.jupiter.api.Assertions.*
@@ -10,7 +10,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class MaksimumUtbetalingHendelseTest {
-    private lateinit var inspektør: UtbetalingstidslinjeInspektør
     private lateinit var aktivitetslogg: Aktivitetslogg
 
     @BeforeEach internal fun setup() {
@@ -24,8 +23,7 @@ internal class MaksimumUtbetalingHendelseTest {
             aktivitetslogg,
             1.januar
         ).betal()
-        undersøke(tidslinje)
-        assertEquals(12000.0, inspektør.totalUtbetaling())
+        assertEquals(12000.0, tidslinje.inspektør.totalUtbetaling())
     }
 
     @Test fun `når inntekt er over 6G blir utbetaling lik 6G`() {
@@ -35,8 +33,7 @@ internal class MaksimumUtbetalingHendelseTest {
             aktivitetslogg,
             1.januar
         ).betal()
-        undersøke(tidslinje)
-        assertEquals(21610.0, inspektør.totalUtbetaling())
+        assertEquals(21610.0, tidslinje.inspektør.totalUtbetaling())
     }
 
     @Test fun `utbetaling for tidslinje med ulike daginntekter blir kalkulert per dag`() {
@@ -46,8 +43,7 @@ internal class MaksimumUtbetalingHendelseTest {
             aktivitetslogg,
             1.januar
         ).betal()
-        undersøke(tidslinje)
-        assertEquals(21610.0 + 12000.0, inspektør.totalUtbetaling())
+        assertEquals(21610.0 + 12000.0, tidslinje.inspektør.totalUtbetaling())
         assertTrue(aktivitetslogg.hasActivities())
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
@@ -60,8 +56,7 @@ internal class MaksimumUtbetalingHendelseTest {
             1.januar
 
         ).betal()
-        undersøke(tidslinje)
-        assertEquals(10810.0, inspektør.totalUtbetaling())
+        assertEquals(10810.0, tidslinje.inspektør.totalUtbetaling())
     }
 
     @Test fun `utbetaling for tidslinje med gradert sykdom får gradert utbetaling`() {
@@ -72,14 +67,8 @@ internal class MaksimumUtbetalingHendelseTest {
             1.januar
 
         ).betal()
-        undersøke(tidslinje)
-        assertEquals(6000.0, inspektør.totalUtbetaling())
+        assertEquals(6000.0, tidslinje.inspektør.totalUtbetaling())
         assertTrue(aktivitetslogg.hasActivities())
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
-    }
-
-
-    private fun undersøke(tidslinje: Utbetalingstidslinje) {
-        inspektør = UtbetalingstidslinjeInspektør(tidslinje)
     }
 }

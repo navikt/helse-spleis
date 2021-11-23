@@ -2,9 +2,14 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.UtbetalingstidslinjeInspektør
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.somFødselsnummer
-import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.NAVv2
+import no.nav.helse.testhelpers.februar
+import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.tidslinjeOf
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -62,6 +67,6 @@ internal class AvvisDagerEtterFylte70ÅrFilterTest {
         aktivitetslogg = Aktivitetslogg()
         val tidslinjer = listOf(tidslinjeOf(9001.NAVv2, startDato = periode.start).kutt(periode.endInclusive))
         AvvisDagerEtterFylte70ÅrFilter(tidslinjer, periode, alder, aktivitetslogg).filter()
-        inspektør = UtbetalingstidslinjeInspektør(tidslinjer.first())
+        inspektør = tidslinjer.first().inspektør
     }
 }

@@ -4,6 +4,7 @@ import no.nav.helse.Toggle
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.TilstandType.*
@@ -334,7 +335,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         )
         inspektør.utbetalinger.aktive().also { utbetalinger ->
             assertEquals(1, utbetalinger.size)
-            UtbetalingstidslinjeInspektør(utbetalinger.first().utbetalingstidslinje()).also {
+            utbetalinger.first().utbetalingstidslinje().inspektør.also {
                 assertEquals(15, it.arbeidsgiverperiodeDagTeller)
                 assertEquals(16, it.navDagTeller)
             }

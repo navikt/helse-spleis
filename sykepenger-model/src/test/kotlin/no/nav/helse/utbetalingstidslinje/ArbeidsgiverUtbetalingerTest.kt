@@ -2,6 +2,8 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.*
+import no.nav.helse.inspectors.UtbetalingstidslinjeInspektør
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.*
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
@@ -430,7 +432,7 @@ internal class ArbeidsgiverUtbetalingerTest {
             gjenståendeSykedager = it.sykepengerettighet.gjenståendeSykedager
             forbrukteSykedager = it.sykepengerettighet.forbrukteSykedager
         }
-        inspektør = UtbetalingstidslinjeInspektør(person.arbeidsgiver(ORGNUMMER).nåværendeTidslinje())
+        inspektør = person.arbeidsgiver(ORGNUMMER).nåværendeTidslinje().inspektør
     }
 
     private fun infotrygdperiodeMockMed(historiskTidslinje: Utbetalingstidslinje) =

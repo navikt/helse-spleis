@@ -3,11 +3,11 @@ package no.nav.helse.spleis.e2e.korrigering
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.spleis.e2e.*
 import no.nav.helse.sykdomstidslinje.Dag.*
-import no.nav.helse.testhelpers.SykdomstidslinjeInspektør
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.utbetalingslinjer.Endringskode
@@ -76,7 +76,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Permisjon(30.januar, 30.januar), Ferie(31.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        SykdomstidslinjeInspektør(inspektør.sykdomstidslinje).also {
+        inspektør.sykdomstidslinje.inspektør.also {
             assertTrue(it[30.januar] is Sykedag)
             assertTrue(it[31.januar] is Sykedag)
         }
@@ -89,7 +89,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Permisjon(30.januar, 30.januar), Ferie(31.januar, 31.januar))
-        SykdomstidslinjeInspektør(inspektør.sykdomstidslinje).also {
+        inspektør.sykdomstidslinje.inspektør.also {
             assertTrue(it[30.januar] is Permisjonsdag)
             assertTrue(it[31.januar] is Feriedag)
         }
@@ -138,7 +138,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(28.februar, 28.februar))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
 
-        SykdomstidslinjeInspektør(inspektør.sykdomstidslinje).also {
+        inspektør.sykdomstidslinje.inspektør.also {
             assertTrue(it[28.februar] is Sykedag)
         }
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
@@ -156,7 +156,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(2.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(2.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(2.februar, 28.februar, 100.prosent), Ferie(28.februar, 28.februar))
-        SykdomstidslinjeInspektør(inspektør.sykdomstidslinje).also {
+        inspektør.sykdomstidslinje.inspektør.also {
             assertTrue(it[28.februar] is Feriedag)
         }
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
@@ -173,7 +173,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(2.februar, 28.februar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 2.februar)
         håndterSøknad(Sykdom(2.februar, 28.februar, 100.prosent), Ferie(28.februar, 28.februar))
-        SykdomstidslinjeInspektør(inspektør.sykdomstidslinje).also {
+        inspektør.sykdomstidslinje.inspektør.also {
             assertTrue(it[28.februar] is Feriedag)
         }
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
@@ -190,7 +190,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(28.februar, 28.februar))
 
-        SykdomstidslinjeInspektør(inspektør.sykdomstidslinje).also {
+        inspektør.sykdomstidslinje.inspektør.also {
             assertTrue(it[28.februar] is Feriedag)
         }
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
@@ -208,7 +208,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
         håndterSøknad(Sykdom(11.januar, 31.januar, 100.prosent), Ferie(31.januar, 31.januar))
 
-        SykdomstidslinjeInspektør(inspektør.sykdomstidslinje).also {
+        inspektør.sykdomstidslinje.inspektør.also {
             assertTrue(it[31.januar] is Feriedag)
         }
         assertTilstander(
@@ -231,7 +231,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(31.januar, 31.januar))
 
-        SykdomstidslinjeInspektør(inspektør.sykdomstidslinje).also {
+        inspektør.sykdomstidslinje.inspektør.also {
             assertTrue(it[31.januar] is Feriedag)
         }
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
@@ -246,7 +246,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(31.januar, 31.januar))
 
-        SykdomstidslinjeInspektør(inspektør.sykdomstidslinje).also {
+        inspektør.sykdomstidslinje.inspektør.also {
             assertTrue(it[31.januar] is Feriedag)
         }
         assertTilstander(
@@ -265,7 +265,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(31.januar, 31.januar))
 
-        SykdomstidslinjeInspektør(inspektør.sykdomstidslinje).also {
+        inspektør.sykdomstidslinje.inspektør.also {
             assertTrue(it[31.januar] is Feriedag)
         }
         assertTilstander(
@@ -290,7 +290,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
 
-        SykdomstidslinjeInspektør(inspektør.sykdomstidslinje).also {
+        inspektør.sykdomstidslinje.inspektør.also {
             assertTrue(it[31.januar] is Sykedag)
         }
         assertTilstander(
@@ -318,7 +318,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
 
-        SykdomstidslinjeInspektør(inspektør.sykdomstidslinje).also {
+        inspektør.sykdomstidslinje.inspektør.also {
             assertTrue(it[31.januar] is Sykedag)
         }
         assertTilstander(

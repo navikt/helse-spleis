@@ -3,7 +3,7 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.testhelpers.UtbetalingstidslinjeInspektør
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
@@ -21,9 +21,7 @@ internal class DødIPeriodenTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, dødsdato = 18.januar)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, dødsdato = 18.januar)
-        UtbetalingstidslinjeInspektør(inspektør.utbetalinger.first().utbetalingstidslinje()).also {
-            assertEquals(13, it.avvistDagTeller)
-        }
+        assertEquals(13, inspektør.utbetalinger.first().utbetalingstidslinje().inspektør.avvistDagTeller)
     }
 
     @Test
@@ -34,9 +32,7 @@ internal class DødIPeriodenTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, dødsdato = 1.februar)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, dødsdato = 1.februar)
-        UtbetalingstidslinjeInspektør(inspektør.utbetalinger.first().utbetalingstidslinje()).also {
-            assertEquals(0, it.avvistDagTeller)
-        }
+        assertEquals(0, inspektør.utbetalinger.first().utbetalingstidslinje().inspektør.avvistDagTeller)
     }
 
     @Test
@@ -47,7 +43,7 @@ internal class DødIPeriodenTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, dødsdato = 31.desember(2017))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, dødsdato = 31.desember(2017))
-        UtbetalingstidslinjeInspektør(inspektør.utbetalinger.first().utbetalingstidslinje()).also {
+        inspektør.utbetalinger.first().utbetalingstidslinje().inspektør.also {
             assertEquals(15, it.avvistDagTeller)
             assertEquals(16, it.arbeidsgiverperiodeDagTeller)
             assertEquals(0, it.navHelgDagTeller)

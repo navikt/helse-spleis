@@ -2,6 +2,7 @@ package no.nav.helse.person.infotrygdhistorikk
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.*
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.somFødselsnummer
@@ -14,7 +15,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -157,8 +157,7 @@ internal class InfotrygdhistorikkElementTest {
             )
         )
         val tidslinje = element.sykdomstidslinje()
-        val inspektør = SykdomstidslinjeInspektør(tidslinje)
-        assertTrue(inspektør.dager.values.none { it is Dag.UkjentDag })
+        assertTrue(tidslinje.inspektør.dager.values.none { it is Dag.UkjentDag })
         assertEquals(1.januar, tidslinje.sisteSkjæringstidspunkt())
     }
 
@@ -171,7 +170,7 @@ internal class InfotrygdhistorikkElementTest {
                 Friperiode(11.januar, 15.januar)
             )
         )
-        val inspektør = SykdomstidslinjeInspektør(element.historikkFor("ag1", sykdomstidslinje))
+        val inspektør = element.historikkFor("ag1", sykdomstidslinje).inspektør
         assertEquals(8, inspektør.dager.filter { it.value is Dag.Arbeidsdag }.size)
         assertEquals(2, inspektør.dager.filter { it.value is Dag.FriskHelgedag }.size)
         assertEquals(5, inspektør.dager.filter { it.value is Dag.Feriedag }.size)
@@ -458,9 +457,9 @@ internal class InfotrygdhistorikkElementTest {
 
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
 
-        val inspektør = Inspektør().apply { tidslinje.accept(this) }
-        assertEquals(1.januar, inspektør.førsteDag)
-        assertEquals(10.januar, inspektør.sisteDag)
+        val inspektør = tidslinje.inspektør
+        assertEquals(1.januar, inspektør.førstedato)
+        assertEquals(10.januar, inspektør.sistedato)
         assertEquals(8, inspektør.navDagTeller)
     }
 
@@ -490,9 +489,9 @@ internal class InfotrygdhistorikkElementTest {
 
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
 
-        val inspektør = Inspektør().apply { tidslinje.accept(this) }
-        assertEquals(1.januar, inspektør.førsteDag)
-        assertEquals(25.januar, inspektør.sisteDag)
+        val inspektør = tidslinje.inspektør
+        assertEquals(1.januar, inspektør.førstedato)
+        assertEquals(25.januar, inspektør.sistedato)
         assertEquals(17, inspektør.navDagTeller)
     }
 
@@ -505,9 +504,9 @@ internal class InfotrygdhistorikkElementTest {
 
         val tidslinje = utbetalinger.map { it.utbetalingstidslinje() }.reduce(Utbetalingstidslinje::plus)
 
-        val inspektør = Inspektør().apply { tidslinje.accept(this) }
-        assertEquals(1.januar, inspektør.førsteDag)
-        assertEquals(10.januar, inspektør.sisteDag)
+        val inspektør = tidslinje.inspektør
+        assertEquals(1.januar, inspektør.førstedato)
+        assertEquals(10.januar, inspektør.sistedato)
     }
 
     @Test
@@ -708,81 +707,5 @@ internal class InfotrygdhistorikkElementTest {
             grunnlagForSykepengegrunnlag = inntekt,
             begrensning = ER_IKKE_6G_BEGRENSET
         )
-    }
-
-    private class Inspektør : UtbetalingsdagVisitor {
-        var førsteDag: LocalDate? = null
-        var sisteDag: LocalDate? = null
-        var navDagTeller: Int = 0
-
-        private fun visitDag(dag: Utbetalingstidslinje.Utbetalingsdag) {
-            førsteDag = førsteDag ?: dag.dato
-            sisteDag = dag.dato
-        }
-
-        override fun visit(
-            dag: ArbeidsgiverperiodeDag,
-            dato: LocalDate,
-            økonomi: Økonomi
-        ) {
-            visitDag(dag)
-        }
-
-        override fun visit(
-            dag: NavDag,
-            dato: LocalDate,
-            økonomi: Økonomi
-        ) {
-            navDagTeller += 1
-            visitDag(dag)
-        }
-
-        override fun visit(
-            dag: NavHelgDag,
-            dato: LocalDate,
-            økonomi: Økonomi
-        ) {
-            visitDag(dag)
-        }
-
-        override fun visit(
-            dag: Arbeidsdag,
-            dato: LocalDate,
-            økonomi: Økonomi
-        ) {
-            visitDag(dag)
-        }
-
-        override fun visit(
-            dag: Fridag,
-            dato: LocalDate,
-            økonomi: Økonomi
-        ) {
-            visitDag(dag)
-        }
-
-        override fun visit(
-            dag: AvvistDag,
-            dato: LocalDate,
-            økonomi: Økonomi
-        ) {
-            visitDag(dag)
-        }
-
-        override fun visit(
-            dag: ForeldetDag,
-            dato: LocalDate,
-            økonomi: Økonomi
-        ) {
-            visitDag(dag)
-        }
-
-        override fun visit(
-            dag: UkjentDag,
-            dato: LocalDate,
-            økonomi: Økonomi
-        ) {
-            visitDag(dag)
-        }
     }
 }

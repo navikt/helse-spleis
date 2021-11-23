@@ -1,6 +1,7 @@
 package no.nav.helse.person.infotrygdhistorikk
 
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.*
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.serde.PersonData
@@ -366,8 +367,8 @@ internal class InfotrygdhistorikkTest {
             ArbeidsgiverUtbetalingsperiode("ag2", 10.januar,  20.januar, 100.prosent, 1500.daglig),
             Friperiode(20.januar,  31.januar)
         )))
-        assertEquals(22, SykdomstidslinjeInspektør(historikk.historikkFor("ag1", Sykdomstidslinje())).dager.filterNot { it.value is Dag.UkjentDag }.size)
-        assertEquals(12, SykdomstidslinjeInspektør(historikk.historikkFor("ag3", Sykdomstidslinje())).dager.filterNot { it.value is Dag.UkjentDag }.size)
+        assertEquals(22, historikk.historikkFor("ag1", Sykdomstidslinje()).inspektør.dager.filterNot { it.value is Dag.UkjentDag }.size)
+        assertEquals(12, historikk.historikkFor("ag3", Sykdomstidslinje()).inspektør.dager.filterNot { it.value is Dag.UkjentDag }.size)
     }
 
     @Test

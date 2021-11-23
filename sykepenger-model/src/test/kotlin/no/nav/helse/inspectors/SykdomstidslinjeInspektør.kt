@@ -1,4 +1,4 @@
-package no.nav.helse.testhelpers
+package no.nav.helse.inspectors
 
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.Dag
@@ -7,6 +7,8 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
+
+internal val Sykdomstidslinje.inspektør get() = SykdomstidslinjeInspektør(this)
 
 internal class SykdomstidslinjeInspektør(tidslinje: Sykdomstidslinje) : SykdomstidslinjeVisitor {
     internal val dager = mutableMapOf<LocalDate, Dag>()
@@ -19,7 +21,7 @@ internal class SykdomstidslinjeInspektør(tidslinje: Sykdomstidslinje) : Sykdoms
     }
 
     internal operator fun get(dato: LocalDate) = dager[dato]
-        ?: throw IllegalArgumentException("No dag for ${dato}")
+        ?: throw IllegalArgumentException("No dag for $dato")
 
     internal val size get() = dager.size
 

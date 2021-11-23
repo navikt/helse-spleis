@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.ForlengelseFraInfotrygd.JA
 import no.nav.helse.person.ForlengelseFraInfotrygd.NEI
@@ -324,7 +325,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(17.januar, 17.februar, 100.prosent))
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        UtbetalingstidslinjeInspektør(inspektør.utbetalingUtbetalingstidslinje(0)).also {
+        inspektør.utbetalingUtbetalingstidslinje(0).inspektør.also {
             assertEquals(0, it.navDagTeller)
             assertEquals(16, it.arbeidsgiverperiodeDagTeller)
             assertEquals(23, it.avvistDagTeller)
@@ -382,7 +383,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(17.januar, 17.februar, 100.prosent))
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        UtbetalingstidslinjeInspektør(inspektør.utbetalingUtbetalingstidslinje(1)).also {
+        inspektør.utbetalingUtbetalingstidslinje(1).inspektør.also {
             assertEquals(0, it.navDagTeller)
             assertEquals(16, it.arbeidsgiverperiodeDagTeller)
             assertEquals(23, it.avvistDagTeller)
@@ -435,7 +436,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_INFOTRYGD
         )
-        UtbetalingstidslinjeInspektør(inspektør.utbetalingUtbetalingstidslinje(1)).also {
+        inspektør.utbetalingUtbetalingstidslinje(1).inspektør.also {
             assertEquals(15, it.navDagTeller)
             assertEquals(0, it.arbeidsgiverperiodeDagTeller)
             assertEquals(0, it.avvistDagTeller)

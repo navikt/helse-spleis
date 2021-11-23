@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType.*
@@ -349,7 +350,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         nyttVedtak(3.januar, 26.januar)
         nyttVedtak(3.mars, 26.mars)
         håndterOverstyrTidslinje((4.januar til 20.januar).map { manuellFeriedag(it) })
-        SykdomstidslinjeInspektør(inspektør.sykdomstidslinje).also { sykdomstidslinjeInspektør ->
+        inspektør.sykdomstidslinje.inspektør.also { sykdomstidslinjeInspektør ->
             assertTrue((4.januar til 20.januar).none { sykdomstidslinjeInspektør.dager[it] == Dag.Feriedag::class })
         }
         assertTrue(hendelselogg.hasErrorsOrWorse())
@@ -386,7 +387,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         nyttVedtak(3.januar, 26.januar)
         tilGodkjenning(3.mars, 26.mars, 100.prosent, 3.mars)
         håndterOverstyrTidslinje((4.januar til 20.januar).map { manuellFeriedag(it) })
-        SykdomstidslinjeInspektør(inspektør.sykdomstidslinje).also { sykdomstidslinjeInspektør ->
+        inspektør.sykdomstidslinje.inspektør.also { sykdomstidslinjeInspektør ->
             assertTrue((4.januar til 20.januar).none { sykdomstidslinjeInspektør.dager[it] == Dag.Feriedag::class })
         }
         assertTrue(hendelselogg.hasErrorsOrWorse())
@@ -540,7 +541,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(16.mars, 26.mars, 100.prosent))
 
         håndterOverstyrTidslinje((4.januar til 20.januar).map { manuellFeriedag(it) })
-        SykdomstidslinjeInspektør(inspektør.sykdomstidslinje).also { sykdomstidslinjeInspektør ->
+        inspektør.sykdomstidslinje.inspektør.also { sykdomstidslinjeInspektør ->
             assertTrue((4.januar til 20.januar).none { sykdomstidslinjeInspektør.dager[it] == Dag.Feriedag::class })
         }
         assertTrue(hendelselogg.hasErrorsOrWorse())
@@ -590,7 +591,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.juni, 14.juni, 100.prosent))
 
         håndterOverstyrTidslinje((4.januar til 20.januar).map { manuellFeriedag(it) })
-        SykdomstidslinjeInspektør(inspektør.sykdomstidslinje).also { sykdomstidslinjeInspektør ->
+        inspektør.sykdomstidslinje.inspektør.also { sykdomstidslinjeInspektør ->
             assertTrue((4.januar til 20.januar).none { sykdomstidslinjeInspektør.dager[it] == Dag.Feriedag::class })
         }
         assertTrue(hendelselogg.hasErrorsOrWorse())

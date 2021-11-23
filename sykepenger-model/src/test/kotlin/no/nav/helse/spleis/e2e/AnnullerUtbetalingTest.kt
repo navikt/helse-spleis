@@ -2,21 +2,19 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.IdInnhenter
-import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.person.TilstandType
 import no.nav.helse.serde.api.TilstandstypeDTO
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
-import no.nav.helse.utbetalingslinjer.*
+import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.LocalDateTime
 
 internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
@@ -63,11 +61,10 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
             (personLogg.behov().size - behovTeller) skalVære 1 ellers personLogg.toString()
         }
 
-        sjekkAt(TestOppdragInspektør(inspektør.arbeidsgiverOppdrag[1])) {
-            assertEquals(19.januar, linjer[0].fom)
-            assertEquals(26.januar, linjer[0].tom)
-            assertEquals(19.januar, linjer[0].datoStatusFom())
-            assertTrue(linjer[0].erOpphør())
+        inspektør.arbeidsgiverOppdrag[1].inspektør.also {
+            assertEquals(19.januar, it.fom(0))
+            assertEquals(26.januar, it.tom(0))
+            assertEquals(19.januar, it.datoStatusFom(0))
         }
 
         sjekkAt(inspektør.personLogg.behov().last()) {
@@ -472,53 +469,6 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         // sjekk at _nå_ er den forkasta
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
         assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
-    }
-
-    private inner class TestOppdragInspektør(oppdrag: Oppdrag) : OppdragVisitor {
-        val oppdrag = mutableListOf<Oppdrag>()
-        val linjer = mutableListOf<Utbetalingslinje>()
-        val endringskoder = mutableListOf<Endringskode>()
-        val fagsystemIder = mutableListOf<String?>()
-        val refFagsystemIder = mutableListOf<String?>()
-
-        init {
-            oppdrag.accept(this)
-        }
-
-        override fun preVisitOppdrag(
-            oppdrag: Oppdrag,
-            totalBeløp: Int,
-            nettoBeløp: Int,
-            tidsstempel: LocalDateTime,
-            endringskode: Endringskode,
-            avstemmingsnøkkel: Long?,
-            status: Oppdragstatus?,
-            overføringstidspunkt: LocalDateTime?
-        ) {
-            this.oppdrag.add(oppdrag)
-            fagsystemIder.add(oppdrag.fagsystemId())
-        }
-
-        override fun visitUtbetalingslinje(
-            linje: Utbetalingslinje,
-            fom: LocalDate,
-            tom: LocalDate,
-            satstype: Satstype,
-            beløp: Int?,
-            aktuellDagsinntekt: Int?,
-            grad: Double?,
-            delytelseId: Int,
-            refDelytelseId: Int?,
-            refFagsystemId: String?,
-            endringskode: Endringskode,
-            datoStatusFom: LocalDate?,
-            klassekode: Klassekode
-        ) {
-            linjer.add(linje)
-            endringskoder.add(endringskode)
-            refFagsystemIder.add(refFagsystemId)
-        }
-
     }
 
     fun <T> sjekkAt(t: T, init: T.() -> Unit) {

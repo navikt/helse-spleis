@@ -1,6 +1,8 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.inspectors.UtbetalingstidslinjeInspektør
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions.*
@@ -62,8 +64,8 @@ internal class SykdomsgradfilterTest {
         )
         val periode = Periode(1.januar, 21.januar)
         undersøke(tidslinjer, periode)
-        assertEquals(5, UtbetalingstidslinjeInspektør(tidslinjer.first()).avvistDagTeller)
-        assertEquals(5, UtbetalingstidslinjeInspektør(tidslinjer.last()).avvistDagTeller)
+        assertEquals(5, tidslinjer.inspektør(0).avvistDagTeller)
+        assertEquals(5, tidslinjer.inspektør(1).avvistDagTeller)
     }
 
     @Test
@@ -100,5 +102,5 @@ internal class SykdomsgradfilterTest {
         inspektør = tidslinjer.inspektør(0)
     }
 
-    private fun List<Utbetalingstidslinje>.inspektør(index: Int) = UtbetalingstidslinjeInspektør(this[index])
+    private fun List<Utbetalingstidslinje>.inspektør(index: Int) = this[index].inspektør
 }

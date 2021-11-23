@@ -3,11 +3,11 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Aktivitetskontekst
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.SpesifikkKontekst
 import no.nav.helse.person.TilstandType.*
-import no.nav.helse.testhelpers.UtbetalingstidslinjeInspektør
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
 import no.nav.helse.utbetalingslinjer.Utbetaling.GodkjentUtenUtbetaling
@@ -34,9 +34,7 @@ internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
         assertTrue(utbetalingstidslinje[17.januar] is Utbetalingstidslinje.Utbetalingsdag.AvvistDag)
         assertTrue(utbetalingstidslinje[18.januar] is Utbetalingstidslinje.Utbetalingsdag.AvvistDag)
         assertTrue(utbetalingstidslinje[19.januar] is Utbetalingstidslinje.Utbetalingsdag.AvvistDag)
-        UtbetalingstidslinjeInspektør(utbetalingstidslinje).also {
-            assertEquals(3, it.avvistDagTeller)
-        }
+        assertEquals(3, utbetalingstidslinje.inspektør.avvistDagTeller)
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -68,9 +66,7 @@ internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
         assertTrue(utbetalingstidslinje[17.januar] is Utbetalingstidslinje.Utbetalingsdag.AvvistDag)
         assertTrue(utbetalingstidslinje[18.januar] is Utbetalingstidslinje.Utbetalingsdag.AvvistDag)
         assertTrue(utbetalingstidslinje[19.januar] is Utbetalingstidslinje.Utbetalingsdag.AvvistDag)
-        UtbetalingstidslinjeInspektør(utbetalingstidslinje).also {
-            assertEquals(3, it.avvistDagTeller)
-        }
+        assertEquals(3, utbetalingstidslinje.inspektør.avvistDagTeller)
         assertEquals(Sendt, inspektør.utbetalingtilstand(1))
         assertTilstander(
             2.vedtaksperiode,

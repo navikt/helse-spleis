@@ -4,8 +4,8 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.SøknadArbeidsgiver
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.TilstandType.*
-import no.nav.helse.testhelpers.SykdomstidslinjeInspektør
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.oktober
 import no.nav.helse.testhelpers.september
@@ -24,7 +24,7 @@ internal class EnTilEnOverlappendeSykmeldingE2ETest : AbstractEndToEndTest() {
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
         assertEquals(3.januar til 15.januar, inspektør.periode(1.vedtaksperiode))
-        SykdomstidslinjeInspektør(inspektør.sykdomstidslinje).also { sykdomstidslinjeInspektør ->
+        inspektør.sykdomstidslinje.inspektør.also { sykdomstidslinjeInspektør ->
             assertTrue(sykdomstidslinjeInspektør.grader.all { it.value == 100 })
         }
         assertNoErrors(inspektør)
@@ -39,7 +39,7 @@ internal class EnTilEnOverlappendeSykmeldingE2ETest : AbstractEndToEndTest() {
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
         assertEquals(3.januar til 15.januar, inspektør.periode(1.vedtaksperiode))
-        SykdomstidslinjeInspektør(inspektør.sykdomstidslinje).also { sykdomstidslinjeInspektør ->
+        inspektør.sykdomstidslinje.inspektør.also { sykdomstidslinjeInspektør ->
             assertTrue(sykdomstidslinjeInspektør.grader.all { it.value == 90 })
         }
         assertNoErrors(inspektør)
@@ -89,7 +89,7 @@ internal class EnTilEnOverlappendeSykmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(21.januar, 25.januar, 90.prosent))
         assertEquals(2, inspektør.vedtaksperiodeTeller)
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE)
-        SykdomstidslinjeInspektør(inspektør.sykdomstidslinje).also { sykdomstidslinjeInspektør ->
+        inspektør.sykdomstidslinje.inspektør.also { sykdomstidslinjeInspektør ->
             assertTrue(sykdomstidslinjeInspektør.grader.filterKeys { it.isAfter(20.januar) }.all { it.value == 90 })
         }
         assertNoErrors(inspektør)
@@ -103,7 +103,7 @@ internal class EnTilEnOverlappendeSykmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(16.januar, 20.januar, 90.prosent))
         assertEquals(2, inspektør.vedtaksperiodeTeller)
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE)
-        SykdomstidslinjeInspektør(inspektør.sykdomstidslinje).also { sykdomstidslinjeInspektør ->
+        inspektør.sykdomstidslinje.inspektør.also { sykdomstidslinjeInspektør ->
             assertTrue(sykdomstidslinjeInspektør.grader.filterKeys { it.isAfter(15.januar) }.all { it.value == 90 })
         }
         assertNoErrors(inspektør)
@@ -117,7 +117,7 @@ internal class EnTilEnOverlappendeSykmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(19.januar, 20.januar, 90.prosent))
         assertEquals(2, inspektør.vedtaksperiodeTeller)
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP)
-        SykdomstidslinjeInspektør(inspektør.sykdomstidslinje).also { sykdomstidslinjeInspektør ->
+        inspektør.sykdomstidslinje.inspektør.also { sykdomstidslinjeInspektør ->
             assertTrue(sykdomstidslinjeInspektør.grader.filterKeys { it.isAfter(15.januar) }.all { it.value == 90 })
         }
         assertNoErrors(inspektør)
