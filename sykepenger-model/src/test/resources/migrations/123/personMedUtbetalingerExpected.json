@@ -1,0 +1,153 @@
+{
+    "arbeidsgivere": [
+        {
+            "utbetalinger": [
+                {
+                    "arbeidsgiverOppdrag": {
+                        "mottaker": "987654321",
+                        "fagområde": "SPREF",
+                        "fagsystemId": "H2B3JPCATVA7XHAD6KZICAL4S4",
+                        "endringskode": "NY",
+                        "sisteArbeidsgiverdag": "2018-01-18",
+                        "tidsstempel": "2021-11-22T15:16:59.492591",
+                        "nettoBeløp": 8586,
+                        "stønadsdager": 6,
+                        "avstemmingsnøkkel": "123456",
+                        "status": "AKSEPTERT",
+                        "overføringstidspunkt": "2021-11-22T15:16:59.622401",
+                        "fom": "2018-01-19",
+                        "tom": "2018-01-26"
+                    },
+                    "personOppdrag": {
+                        "mottaker": "12020052345",
+                        "fagområde": "SP",
+                        "fagsystemId": "XR726HHXHJF7ZDH2J52YOL5Q5Y",
+                        "endringskode": "NY",
+                        "sisteArbeidsgiverdag": "2018-01-18",
+                        "tidsstempel": "2021-11-22T15:16:59.495985",
+                        "nettoBeløp": 0,
+                        "stønadsdager": 0,
+                        "avstemmingsnøkkel": null,
+                        "status": null,
+                        "overføringstidspunkt": null,
+                        "fom": "-999999999-01-01",
+                        "tom": "-999999999-01-01"
+                    },
+                    "status": "UTBETALT",
+                    "type": "UTBETALING",
+                    "overføringstidspunkt": "2021-11-22T15:16:59.622401",
+                    "avstemmingsnøkkel": "123456"
+                },
+                {
+                    "arbeidsgiverOppdrag": {
+                        "mottaker": "987654321",
+                        "fagområde": "SPREF",
+                        "fagsystemId": "H2B3JPCATVA7XHAD6KZICAL4S4",
+                        "endringskode": "NY",
+                        "sisteArbeidsgiverdag": "2018-01-18",
+                        "tidsstempel": "2021-11-22T15:16:59.492591",
+                        "nettoBeløp": 8586,
+                        "stønadsdager": 6,
+                        "avstemmingsnøkkel": null,
+                        "status": null,
+                        "overføringstidspunkt": null,
+                        "fom": "2018-01-19",
+                        "tom": "2018-01-26"
+                    },
+                    "personOppdrag": {
+                        "mottaker": "12020052345",
+                        "fagområde": "SP",
+                        "fagsystemId": "XR726HHXHJF7ZDH2J52YOL5Q5Y",
+                        "endringskode": "NY",
+                        "sisteArbeidsgiverdag": "2018-01-18",
+                        "tidsstempel": "2021-11-22T15:16:59.495985",
+                        "nettoBeløp": 0,
+                        "stønadsdager": 0,
+                        "avstemmingsnøkkel": null,
+                        "status": null,
+                        "overføringstidspunkt": null,
+                        "fom": "-999999999-01-01",
+                        "tom": "-999999999-01-01"
+                    },
+                    "status": "IKKE_UTBETALT",
+                    "type": "UTBETALING",
+                    "overføringstidspunkt": null,
+                    "avstemmingsnøkkel": null
+                },
+                {
+                    "arbeidsgiverOppdrag": {
+                        "mottaker": "987654321",
+                        "fagområde": "SPREF",
+                        "fagsystemId": "H2B3JPCATVA7XHAD6KZICAL4S4",
+                        "endringskode": "NY",
+                        "sisteArbeidsgiverdag": "2018-01-18",
+                        "tidsstempel": "2021-11-22T15:16:59.492591",
+                        "nettoBeløp": 8586,
+                        "stønadsdager": 6,
+                        "avstemmingsnøkkel": "123456",
+                        "status": "AKSEPTERT",
+                        "overføringstidspunkt": "2021-11-22T15:16:59.622401",
+                        "fom": "2018-01-19",
+                        "tom": "2018-01-26"
+                    },
+                    "personOppdrag": {
+                        "mottaker": "12020052345",
+                        "fagområde": "SP",
+                        "fagsystemId": "XR726HHXHJF7ZDH2J52YOL5Q5Y",
+                        "endringskode": "NY",
+                        "sisteArbeidsgiverdag": "2018-01-18",
+                        "tidsstempel": "2021-11-22T15:16:59.495985",
+                        "nettoBeløp": 0,
+                        "stønadsdager": 0,
+                        "avstemmingsnøkkel": null,
+                        "status": null,
+                        "overføringstidspunkt": null,
+                        "fom": "-999999999-01-01",
+                        "tom": "-999999999-01-01"
+                    },
+                    "status": "ANNULLERT",
+                    "type": "ANNULERING",
+                    "overføringstidspunkt": "2021-11-22T15:16:59.622401",
+                    "avstemmingsnøkkel": "123456"
+                },
+                {
+                    "arbeidsgiverOppdrag": {
+                        "mottaker": "987654321",
+                        "fagområde": "SPREF",
+                        "fagsystemId": "H2B3JPCATVA7XHAD6KZICAL4S4",
+                        "endringskode": "NY",
+                        "sisteArbeidsgiverdag": "2018-01-18",
+                        "tidsstempel": "2021-11-22T15:16:59.492591",
+                        "nettoBeløp": 8586,
+                        "stønadsdager": 6,
+                        "avstemmingsnøkkel": "123456",
+                        "status": "AVVIST",
+                        "overføringstidspunkt": "2021-11-22T15:16:59.622401",
+                        "fom": "2018-01-19",
+                        "tom": "2018-01-26"
+                    },
+                    "personOppdrag": {
+                        "mottaker": "12020052345",
+                        "fagområde": "SP",
+                        "fagsystemId": "XR726HHXHJF7ZDH2J52YOL5Q5Y",
+                        "endringskode": "NY",
+                        "sisteArbeidsgiverdag": "2018-01-18",
+                        "tidsstempel": "2021-11-22T15:16:59.495985",
+                        "nettoBeløp": 0,
+                        "stønadsdager": 0,
+                        "avstemmingsnøkkel": null,
+                        "status": null,
+                        "overføringstidspunkt": null,
+                        "fom": "-999999999-01-01",
+                        "tom": "-999999999-01-01"
+                    },
+                    "status": "UTBETALING_FEILET",
+                    "type": "UTBETALING",
+                    "overføringstidspunkt": "2021-11-22T15:16:59.622401",
+                    "avstemmingsnøkkel": "123456"
+                }
+            ]
+        }
+    ],
+    "skjemaVersjon": 123
+}
