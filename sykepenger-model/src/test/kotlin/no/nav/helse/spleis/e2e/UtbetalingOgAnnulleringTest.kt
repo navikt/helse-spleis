@@ -1,7 +1,11 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -31,7 +35,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
-        val fagsystemId = inspektør.utbetalinger.aktive().last().arbeidsgiverOppdrag().fagsystemId()
+        val fagsystemId = inspektør.utbetalinger.aktive().last().inspektør.arbeidsgiverOppdrag.fagsystemId()
         håndterAnnullerUtbetaling(fagsystemId = fagsystemId)
         håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
 
@@ -69,7 +73,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
 
-        val fagsystemIdFørsteVedtaksperiode = inspektør.utbetalinger.aktive().last().arbeidsgiverOppdrag().fagsystemId()
+        val fagsystemIdFørsteVedtaksperiode = inspektør.utbetalinger.aktive().last().inspektør.arbeidsgiverOppdrag.fagsystemId()
         håndterAnnullerUtbetaling(fagsystemId = fagsystemIdFørsteVedtaksperiode)
         håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
 
@@ -393,9 +397,9 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
             assertEquals(10.juni til 30.juni, utbetalingUtbetalingstidslinje.periode())
         }
         inspektør.utbetaling(0).also { utbetaling ->
-            assertEquals(26.juni, utbetaling.arbeidsgiverOppdrag().førstedato)
-            assertEquals(30.juni, utbetaling.arbeidsgiverOppdrag().sistedato)
-            assertEquals(1, utbetaling.arbeidsgiverOppdrag().size)
+            assertEquals(26.juni, utbetaling.inspektør.arbeidsgiverOppdrag.førstedato)
+            assertEquals(30.juni, utbetaling.inspektør.arbeidsgiverOppdrag.sistedato)
+            assertEquals(1, utbetaling.inspektør.arbeidsgiverOppdrag.size)
         }
         inspektør.utbetalingUtbetalingstidslinje(1).also { utbetalingUtbetalingstidslinje ->
             assertEquals(10.juni til 31.august, utbetalingUtbetalingstidslinje.periode())
@@ -403,9 +407,9 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
             assertEquals(Utbetalingstidslinje.Utbetalingsdag.UkjentDag::class, utbetalingUtbetalingstidslinje[31.juli]::class)
         }
         inspektør.utbetaling(1).also { utbetaling ->
-            assertEquals(1.august, utbetaling.arbeidsgiverOppdrag().førstedato)
-            assertEquals(31.august, utbetaling.arbeidsgiverOppdrag().sistedato)
-            assertEquals(1, utbetaling.arbeidsgiverOppdrag().size)
+            assertEquals(1.august, utbetaling.inspektør.arbeidsgiverOppdrag.førstedato)
+            assertEquals(31.august, utbetaling.inspektør.arbeidsgiverOppdrag.sistedato)
+            assertEquals(1, utbetaling.inspektør.arbeidsgiverOppdrag.size)
         }
     }
 

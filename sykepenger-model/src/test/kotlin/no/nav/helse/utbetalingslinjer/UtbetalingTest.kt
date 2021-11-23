@@ -561,7 +561,7 @@ internal class UtbetalingTest {
         assertEquals(tredje.inspektør.arbeidsgiverOppdrag.fagsystemId(), fjerde.inspektør.arbeidsgiverOppdrag.fagsystemId())
         assertEquals(fjerde.inspektør.arbeidsgiverOppdrag.fagsystemId(), femte.inspektør.arbeidsgiverOppdrag.fagsystemId())
 
-        assertNotEquals(første.inspektør.arbeidsgiverOppdrag.fagsystemId(), første.personOppdrag().fagsystemId())
+        assertNotEquals(første.inspektør.arbeidsgiverOppdrag.fagsystemId(), første.inspektør.personOppdrag.fagsystemId())
 
         assertEquals(første.inspektør.personOppdrag.fagsystemId(), andre.inspektør.personOppdrag.fagsystemId())
         assertEquals(andre.inspektør.personOppdrag.fagsystemId(), tredje.inspektør.personOppdrag.fagsystemId())
@@ -593,7 +593,7 @@ internal class UtbetalingTest {
     @Test
     fun `utbetalingOverført som treffer på brukerFagsystemId`() {
         val (utbetaling, utbetalingId) = opprettGodkjentUtbetaling()
-        val fagsystemId = utbetaling.personOppdrag().fagsystemId()
+        val fagsystemId = utbetaling.inspektør.personOppdrag.fagsystemId()
         utbetaling.håndter(utbetalingOverført(utbetalingId, fagsystemId))
         assertEquals(Utbetaling.Overført, utbetaling.inspektør.tilstand)
     }
@@ -601,7 +601,7 @@ internal class UtbetalingTest {
     @Test
     fun `utbetalingOverført som bommer på utbetalingId`() {
         val (utbetaling, _) = opprettGodkjentUtbetaling()
-        val fagsystemId = utbetaling.personOppdrag().fagsystemId()
+        val fagsystemId = utbetaling.inspektør.personOppdrag.fagsystemId()
         utbetaling.håndter(utbetalingOverført(UUID.randomUUID(), fagsystemId))
         assertEquals(Utbetaling.Sendt, utbetaling.inspektør.tilstand)
     }
@@ -609,7 +609,7 @@ internal class UtbetalingTest {
     @Test
     fun `utbetalingHendelse som treffer på brukeroppdraget`() {
         val (utbetaling, utbetalingId) = opprettGodkjentUtbetaling()
-        val fagsystemId = utbetaling.personOppdrag().fagsystemId()
+        val fagsystemId = utbetaling.inspektør.personOppdrag.fagsystemId()
         utbetaling.håndter(utbetalingOverført(UUID.randomUUID(), fagsystemId))
         utbetaling.håndter(utbetalingHendelse(utbetalingId, fagsystemId))
         assertEquals(Utbetaling.Utbetalt, utbetaling.inspektør.tilstand)
@@ -618,7 +618,7 @@ internal class UtbetalingTest {
     @Test
     fun `g-regulering skal treffe personOppdrag`() {
         val (utbetalingMedPersonOppdragMatch, _) = opprettGodkjentUtbetaling()
-        val personFagsystemId = utbetalingMedPersonOppdragMatch.personOppdrag().fagsystemId()
+        val personFagsystemId = utbetalingMedPersonOppdragMatch.inspektør.personOppdrag.fagsystemId()
         val arbeidsgiverFagsystemId = utbetalingMedPersonOppdragMatch.inspektør.arbeidsgiverOppdrag.fagsystemId()
         val (utbetalingUtenMatch, _) = opprettGodkjentUtbetaling()
         val utbetalinger = listOf(utbetalingUtenMatch, utbetalingMedPersonOppdragMatch)

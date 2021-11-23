@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Inntektshistorikk.Skatt.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -60,7 +61,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
 
-        val a1Linje = inspektør(a1).utbetalinger.last().arbeidsgiverOppdrag().single()
+        val a1Linje = inspektør(a1).utbetalinger.last().inspektør.arbeidsgiverOppdrag.single()
         assertEquals(17.januar, a1Linje.fom)
         assertEquals(15.mars, a1Linje.tom)
         assertEquals(1063, a1Linje.beløp)
@@ -157,7 +158,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
 
-        val a1Linje = inspektør(a1).utbetalinger.last().arbeidsgiverOppdrag().single()
+        val a1Linje = inspektør(a1).utbetalinger.last().inspektør.arbeidsgiverOppdrag.single()
         assertEquals(17.januar, a1Linje.fom)
         assertEquals(15.mars, a1Linje.tom)
         assertEquals(1431, a1Linje.beløp)
@@ -203,7 +204,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
 
-        val a1Linje = inspektør(a1).utbetalinger.last().arbeidsgiverOppdrag().single()
+        val a1Linje = inspektør(a1).utbetalinger.last().inspektør.arbeidsgiverOppdrag.single()
         assertEquals(17.januar, a1Linje.fom)
         assertEquals(15.mars, a1Linje.tom)
         assertEquals(1431, a1Linje.beløp)
@@ -253,7 +254,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
 
-        val a1Linje = inspektør(a1).utbetalinger.last().arbeidsgiverOppdrag().last()
+        val a1Linje = inspektør(a1).utbetalinger.last().inspektør.arbeidsgiverOppdrag.last()
         assertEquals(17.mars, a1Linje.fom)
         assertEquals(31.mars, a1Linje.tom)
         assertEquals(997, a1Linje.beløp)
@@ -303,7 +304,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
 
-        val a1Linje = inspektør(a1).utbetalinger.last().arbeidsgiverOppdrag().last()
+        val a1Linje = inspektør(a1).utbetalinger.last().inspektør.arbeidsgiverOppdrag.last()
         assertEquals(17.mars, a1Linje.fom)
         assertEquals(31.mars, a1Linje.tom)
         assertEquals(499, a1Linje.beløp)
@@ -360,7 +361,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(2.vedtaksperiode, orgnummer = a1)
 
-        val a1Linje = inspektør(a1).utbetalinger.last().arbeidsgiverOppdrag().single()
+        val a1Linje = inspektør(a1).utbetalinger.last().inspektør.arbeidsgiverOppdrag.single()
         assertEquals(17.mars, a1Linje.fom)
         assertEquals(30.april, a1Linje.tom)
         assertEquals(997, a1Linje.beløp)

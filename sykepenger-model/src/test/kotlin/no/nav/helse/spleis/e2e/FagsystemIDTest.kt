@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -51,8 +52,8 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterUtbetalt(2.vedtaksperiode, Oppdragstatus.AKSEPTERT)
 
         assertEquals(2, inspektør.utbetalinger.size)
-        val første = inspektør.utbetalinger.first().arbeidsgiverOppdrag()
-        val siste = inspektør.utbetalinger.last().arbeidsgiverOppdrag()
+        val første = inspektør.utbetalinger.first().inspektør.arbeidsgiverOppdrag
+        val siste = inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag
         assertNotEquals(første.fagsystemId(), siste.fagsystemId())
         første.linjerUtenOpphør().also { linjer ->
             assertEquals(1, linjer.size)
@@ -111,9 +112,9 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterUtbetalt(3.vedtaksperiode, Oppdragstatus.AKSEPTERT)
 
         assertEquals(3, inspektør.utbetalinger.size)
-        val første = inspektør.utbetalinger.first().arbeidsgiverOppdrag()
-        val andre = inspektør.utbetalinger[1].arbeidsgiverOppdrag()
-        val siste = inspektør.utbetalinger.last().arbeidsgiverOppdrag()
+        val første = inspektør.utbetalinger.first().inspektør.arbeidsgiverOppdrag
+        val andre = inspektør.utbetalinger[1].inspektør.arbeidsgiverOppdrag
+        val siste = inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag
         assertNotEquals(første.fagsystemId(), siste.fagsystemId())
         assertEquals(andre.fagsystemId(), siste.fagsystemId())
         siste.linjerUtenOpphør().also { linjer ->
@@ -161,8 +162,8 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterUtbetalt(2.vedtaksperiode, Oppdragstatus.AKSEPTERT)
 
         assertEquals(2, inspektør.utbetalinger.size)
-        val første = inspektør.utbetalinger.first().arbeidsgiverOppdrag()
-        val siste = inspektør.utbetalinger.last().arbeidsgiverOppdrag()
+        val første = inspektør.utbetalinger.first().inspektør.arbeidsgiverOppdrag
+        val siste = inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag
         assertNotEquals(første.fagsystemId(), siste.fagsystemId())
         første.linjerUtenOpphør().also { linjer ->
             assertEquals(1, linjer.size)
@@ -210,7 +211,7 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt(2.vedtaksperiode, Oppdragstatus.AKSEPTERT)
 
-        val siste = inspektør.utbetalinger.last().arbeidsgiverOppdrag()
+        val siste = inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag
         siste.linjerUtenOpphør().also { linjer ->
             assertEquals(1, linjer.size)
             assertEquals(11.april, linjer.last().fom)
@@ -258,8 +259,8 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterUtbetalt(2.vedtaksperiode, Oppdragstatus.AKSEPTERT)
 
         assertEquals(2, inspektør.utbetalinger.size)
-        val første = inspektør.utbetalinger.first().arbeidsgiverOppdrag()
-        val siste = inspektør.utbetalinger.last().arbeidsgiverOppdrag()
+        val første = inspektør.utbetalinger.first().inspektør.arbeidsgiverOppdrag
+        val siste = inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag
         assertNotEquals(første.fagsystemId(), siste.fagsystemId())
         første.linjerUtenOpphør().also { linjer ->
             assertEquals(1, linjer.size)
@@ -319,9 +320,9 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterUtbetalt(3.vedtaksperiode, Oppdragstatus.AKSEPTERT)
 
         assertEquals(3, inspektør.utbetalinger.size)
-        val første = inspektør.utbetalinger.first().arbeidsgiverOppdrag()
-        val andre = inspektør.utbetalinger[1].arbeidsgiverOppdrag()
-        val siste = inspektør.utbetalinger.last().arbeidsgiverOppdrag()
+        val første = inspektør.utbetalinger.first().inspektør.arbeidsgiverOppdrag
+        val andre = inspektør.utbetalinger[1].inspektør.arbeidsgiverOppdrag
+        val siste = inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag
 
         assertEquals(16.april, første.toMap().getValue("sisteArbeidsgiverdag"))
         assertNull(andre.toMap().getValue("sisteArbeidsgiverdag"))

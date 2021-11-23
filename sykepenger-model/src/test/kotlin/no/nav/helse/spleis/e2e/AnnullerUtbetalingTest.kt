@@ -403,14 +403,14 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(2.vedtaksperiode))
         håndterUtbetalt(2.vedtaksperiode, status = Oppdragstatus.AKSEPTERT)
         sisteBehovErAnnullering(2.vedtaksperiode)
-        assertFalse(inspektør.utbetalinger.last { it.arbeidsgiverOppdrag().fagsystemId() == inspektør.fagsystemId(1.vedtaksperiode) }.erAnnullering())
-        assertTrue(inspektør.utbetalinger.last { it.arbeidsgiverOppdrag().fagsystemId() == inspektør.fagsystemId(2.vedtaksperiode) }.erAnnullering())
+        assertFalse(inspektør.utbetalinger.last { it.inspektør.arbeidsgiverOppdrag.fagsystemId() == inspektør.fagsystemId(1.vedtaksperiode) }.erAnnullering())
+        assertTrue(inspektør.utbetalinger.last { it.inspektør.arbeidsgiverOppdrag.fagsystemId() == inspektør.fagsystemId(2.vedtaksperiode) }.erAnnullering())
 
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
         håndterUtbetalt(1.vedtaksperiode, status = Oppdragstatus.AKSEPTERT)
         sisteBehovErAnnullering(1.vedtaksperiode)
-        assertTrue(inspektør.utbetalinger.last { it.arbeidsgiverOppdrag().fagsystemId() == inspektør.fagsystemId(1.vedtaksperiode) }.erAnnullering())
-        assertTrue(inspektør.utbetalinger.last { it.arbeidsgiverOppdrag().fagsystemId() == inspektør.fagsystemId(2.vedtaksperiode) }.erAnnullering())
+        assertTrue(inspektør.utbetalinger.last { it.inspektør.arbeidsgiverOppdrag.fagsystemId() == inspektør.fagsystemId(1.vedtaksperiode) }.erAnnullering())
+        assertTrue(inspektør.utbetalinger.last { it.inspektør.arbeidsgiverOppdrag.fagsystemId() == inspektør.fagsystemId(2.vedtaksperiode) }.erAnnullering())
     }
 
     @Test
@@ -426,8 +426,8 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         val annullering = inspektør.utbetaling(2)
         sisteBehovErAnnullering(1.vedtaksperiode)
         assertTrue(annullering.erAnnullering())
-        assertEquals(19.januar, annullering.arbeidsgiverOppdrag().førstedato)
-        assertEquals(26.januar, annullering.arbeidsgiverOppdrag().sistedato)
+        assertEquals(19.januar, annullering.inspektør.arbeidsgiverOppdrag.førstedato)
+        assertEquals(26.januar, annullering.inspektør.arbeidsgiverOppdrag.sistedato)
     }
 
     @Test

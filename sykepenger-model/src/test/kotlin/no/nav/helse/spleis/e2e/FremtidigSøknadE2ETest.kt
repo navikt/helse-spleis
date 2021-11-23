@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
@@ -48,8 +49,8 @@ internal class FremtidigSøknadE2ETest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET
         )
-        assertEquals(sisteArbeidsgiverdag.plusDays(1), inspektør.utbetalinger.first().arbeidsgiverOppdrag().førstedato)
-        assertEquals(tom, inspektør.utbetalinger.first().arbeidsgiverOppdrag().sistedato)
+        assertEquals(sisteArbeidsgiverdag.plusDays(1), inspektør.utbetalinger.first().inspektør.arbeidsgiverOppdrag.førstedato)
+        assertEquals(tom, inspektør.utbetalinger.first().inspektør.arbeidsgiverOppdrag.sistedato)
     }
 
 }

@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.utbetalingslinjer.Oppdrag
@@ -51,13 +52,13 @@ internal class FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt(2.vedtaksperiode, Oppdragstatus.AKSEPTERT)
 
-        assertFalse(inspektør.utbetaling(0).arbeidsgiverOppdrag().harUtbetalinger())
-        assertTrue(inspektør.utbetaling(0).personOppdrag().harUtbetalinger())
-        assertEquals(17.januar til 31.januar, Oppdrag.periode(inspektør.utbetaling(0).personOppdrag()))
+        assertFalse(inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.harUtbetalinger())
+        assertTrue(inspektør.utbetaling(0).inspektør.personOppdrag.harUtbetalinger())
+        assertEquals(17.januar til 31.januar, Oppdrag.periode(inspektør.utbetaling(0).inspektør.personOppdrag))
 
-        assertFalse(inspektør.utbetaling(1).arbeidsgiverOppdrag().harUtbetalinger())
-        assertTrue(inspektør.utbetaling(1).personOppdrag().harUtbetalinger())
-        assertEquals(17.januar til 28.februar, Oppdrag.periode(inspektør.utbetaling(1).personOppdrag()))
+        assertFalse(inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag.harUtbetalinger())
+        assertTrue(inspektør.utbetaling(1).inspektør.personOppdrag.harUtbetalinger())
+        assertEquals(17.januar til 28.februar, Oppdrag.periode(inspektør.utbetaling(1).inspektør.personOppdrag))
     }
 
     @Test
@@ -79,10 +80,10 @@ internal class FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt(2.vedtaksperiode, Oppdragstatus.AKSEPTERT)
 
-        assertFalse(inspektør.utbetaling(1).arbeidsgiverOppdrag().harUtbetalinger())
-        assertEquals(17.januar til 31.januar, Oppdrag.periode(inspektør.utbetaling(1).arbeidsgiverOppdrag()))
-        assertTrue(inspektør.utbetaling(1).personOppdrag().harUtbetalinger())
-        assertEquals(1.februar til 28.februar, Oppdrag.periode(inspektør.utbetaling(1).personOppdrag()))
+        assertFalse(inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag.harUtbetalinger())
+        assertEquals(17.januar til 31.januar, Oppdrag.periode(inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag))
+        assertTrue(inspektør.utbetaling(1).inspektør.personOppdrag.harUtbetalinger())
+        assertEquals(1.februar til 28.februar, Oppdrag.periode(inspektør.utbetaling(1).inspektør.personOppdrag))
     }
 
     @Test
@@ -124,10 +125,10 @@ internal class FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt(2.vedtaksperiode, Oppdragstatus.AKSEPTERT)
 
-        assertFalse(inspektør.utbetaling(1).arbeidsgiverOppdrag().harUtbetalinger())
-        assertEquals(17.januar til 31.januar, Oppdrag.periode(inspektør.utbetaling(1).arbeidsgiverOppdrag()))
-        assertTrue(inspektør.utbetaling(1).personOppdrag().harUtbetalinger())
-        assertEquals(1.februar til 28.februar, Oppdrag.periode(inspektør.utbetaling(1).personOppdrag()))
+        assertFalse(inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag.harUtbetalinger())
+        assertEquals(17.januar til 31.januar, Oppdrag.periode(inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag))
+        assertTrue(inspektør.utbetaling(1).inspektør.personOppdrag.harUtbetalinger())
+        assertEquals(1.februar til 28.februar, Oppdrag.periode(inspektør.utbetaling(1).inspektør.personOppdrag))
     }
 
     // Tester strengt talt et ugyldig case siden refusjon ikke får lov å gå fra null til full, men den treffer uansett en probemstilling i modellen
@@ -158,13 +159,13 @@ internal class FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt(2.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
-        assertFalse(inspektør.utbetaling(0).arbeidsgiverOppdrag().harUtbetalinger())
-        assertTrue(inspektør.utbetaling(0).personOppdrag().harUtbetalinger())
-        assertEquals(17.januar til 31.januar, Oppdrag.periode(inspektør.utbetaling(0).personOppdrag()))
+        assertFalse(inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.harUtbetalinger())
+        assertTrue(inspektør.utbetaling(0).inspektør.personOppdrag.harUtbetalinger())
+        assertEquals(17.januar til 31.januar, Oppdrag.periode(inspektør.utbetaling(0).inspektør.personOppdrag))
 
-        assertTrue(inspektør.utbetaling(1).arbeidsgiverOppdrag().harUtbetalinger())
-        assertTrue(inspektør.utbetaling(1).personOppdrag().harUtbetalinger())
-        assertTrue(inspektør.utbetaling(1).personOppdrag()[0].erOpphør())
-        assertEquals(17.januar til 31.januar, Oppdrag.periode(inspektør.utbetaling(1).arbeidsgiverOppdrag()))*/
+        assertTrue(inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag.harUtbetalinger())
+        assertTrue(inspektør.utbetaling(1).inspektør.personOppdrag.harUtbetalinger())
+        assertTrue(inspektør.utbetaling(1).inspektør.personOppdrag[0].erOpphør())
+        assertEquals(17.januar til 31.januar, Oppdrag.periode(inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag))*/
     }
 }

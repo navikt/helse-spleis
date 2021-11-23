@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -54,8 +55,8 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             AVSLUTTET,
         )
 
-        assertEquals(15741, inspektør.utbetalinger.first().arbeidsgiverOppdrag().nettoBeløp())
-        assertEquals(506, inspektør.utbetalinger.last().arbeidsgiverOppdrag().nettoBeløp())
+        assertEquals(15741, inspektør.utbetalinger.first().inspektør.arbeidsgiverOppdrag.nettoBeløp())
+        assertEquals(506, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.nettoBeløp())
 
         assertEquals(2, inspektør.vilkårsgrunnlagHistorikk.size)
         assertEquals(3, inspektør.vilkårsgrunnlagHistorikk[0].second.avviksprosent?.roundToInt())
@@ -89,9 +90,9 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode)
 
-        assertEquals(15741, inspektør.utbetalinger[0].arbeidsgiverOppdrag().nettoBeløp())
-        assertEquals(506, inspektør.utbetalinger[1].arbeidsgiverOppdrag().nettoBeløp())
-        assertEquals(-506, inspektør.utbetalinger[2].arbeidsgiverOppdrag().nettoBeløp())
+        assertEquals(15741, inspektør.utbetalinger[0].inspektør.arbeidsgiverOppdrag.nettoBeløp())
+        assertEquals(506, inspektør.utbetalinger[1].inspektør.arbeidsgiverOppdrag.nettoBeløp())
+        assertEquals(-506, inspektør.utbetalinger[2].inspektør.arbeidsgiverOppdrag.nettoBeløp())
 
         val inntektFraSaksbehandler = inspektør.inntektInspektør.sisteInnslag?.opplysninger?.filter { it.kilde == Kilde.SAKSBEHANDLER }!!
         assertEquals(1, inntektFraSaksbehandler.size)
@@ -346,7 +347,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
 
         val utbetalingTilRevurdering = inspektør.utbetalinger.last()
         assertEquals(2, inspektør.utbetalinger.size)
-        assertEquals(-15741, utbetalingTilRevurdering.arbeidsgiverOppdrag().nettoBeløp())
+        assertEquals(-15741, utbetalingTilRevurdering.inspektør.arbeidsgiverOppdrag.nettoBeløp())
 
         assertWarningTekst(inspektør, "Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.", "Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag")
         assertFalse(utbetalingTilRevurdering.utbetalingstidslinje().harUtbetalinger())
@@ -543,8 +544,8 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
 
         val utbetalinger = inspektør.utbetalinger
-        assertEquals(1, utbetalinger.map { it.arbeidsgiverOppdrag().fagsystemId() }.toSet().size)
-        assertEquals(utbetalinger.first().arbeidsgiverOppdrag().nettoBeløp(), -1 * utbetalinger.last().arbeidsgiverOppdrag().nettoBeløp())
+        assertEquals(1, utbetalinger.map { it.inspektør.arbeidsgiverOppdrag.fagsystemId() }.toSet().size)
+        assertEquals(utbetalinger.first().inspektør.arbeidsgiverOppdrag.nettoBeløp(), -1 * utbetalinger.last().inspektør.arbeidsgiverOppdrag.nettoBeløp())
         assertEquals(2, utbetalinger.size)
     }
 
@@ -582,19 +583,19 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
 
         val utbetalinger = inspektør.utbetalinger
         var opprinneligFagsystemId: String?
-        utbetalinger[0].arbeidsgiverOppdrag().apply {
+        utbetalinger[0].inspektør.arbeidsgiverOppdrag.apply {
             skalHaEndringskode(Endringskode.NY)
             opprinneligFagsystemId = fagsystemId()
             assertEquals(1, size)
             first().assertUtbetalingslinje(Endringskode.NY, 1, null, null)
         }
-        utbetalinger[1].arbeidsgiverOppdrag().apply {
+        utbetalinger[1].inspektør.arbeidsgiverOppdrag.apply {
             skalHaEndringskode(Endringskode.ENDR)
             assertEquals(opprinneligFagsystemId, fagsystemId())
             assertEquals(1, size)
             first().assertUtbetalingslinje(Endringskode.ENDR, 1, null, null, ønsketDatoStatusFom = 17.januar)
         }
-        utbetalinger[2].arbeidsgiverOppdrag().apply {
+        utbetalinger[2].inspektør.arbeidsgiverOppdrag.apply {
             skalHaEndringskode(Endringskode.ENDR)
             assertEquals(opprinneligFagsystemId, fagsystemId())
             assertEquals(1, size)

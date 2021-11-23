@@ -2040,10 +2040,10 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(5.februar, 10.februar, 100.prosent))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(5.februar, 10.februar, 100.prosent))
-        håndterAnnullerUtbetaling(fagsystemId = inspektør.utbetalinger[0].arbeidsgiverOppdrag().fagsystemId())
-        håndterAnnullerUtbetaling(fagsystemId = inspektør.utbetalinger[0].arbeidsgiverOppdrag().fagsystemId())
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.utbetalinger[0].inspektør.arbeidsgiverOppdrag.fagsystemId())
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.utbetalinger[0].inspektør.arbeidsgiverOppdrag.fagsystemId())
         håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
-        håndterAnnullerUtbetaling(fagsystemId = inspektør.utbetalinger[0].arbeidsgiverOppdrag().fagsystemId())
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.utbetalinger[0].inspektør.arbeidsgiverOppdrag.fagsystemId())
 
         assertTrue(inspektør.utbetalinger[0].erUtbetalt())
         assertTrue(inspektør.utbetalinger[1].erAnnullering())

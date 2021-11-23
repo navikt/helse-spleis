@@ -304,9 +304,9 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         )
         val revurdering = inspektør.utbetaling(2)
         assertNoErrors(inspektør)
-        assertEquals(2, revurdering.arbeidsgiverOppdrag().size)
-        assertEquals(19.januar, revurdering.arbeidsgiverOppdrag()[0].datoStatusFom())
-        assertEquals(23.januar til 26.januar, revurdering.arbeidsgiverOppdrag()[1].periode)
+        assertEquals(2, revurdering.inspektør.arbeidsgiverOppdrag.size)
+        assertEquals(19.januar, revurdering.inspektør.arbeidsgiverOppdrag[0].datoStatusFom())
+        assertEquals(23.januar til 26.januar, revurdering.inspektør.arbeidsgiverOppdrag[1].periode)
     }
 
     @Test
@@ -1284,8 +1284,8 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         assertEquals(Utbetaling.Utbetalt, inspektør.utbetalingtilstand(0))
         assertEquals(Utbetaling.Sendt, inspektør.utbetalingtilstand(1))
-        assertEquals(inspektør.utbetaling(0).arbeidsgiverOppdrag().fagsystemId(), inspektør.utbetaling(1).arbeidsgiverOppdrag().fagsystemId())
-        inspektør.utbetaling(1).arbeidsgiverOppdrag().also { oppdrag ->
+        assertEquals(inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.fagsystemId(), inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag.fagsystemId())
+        inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag.also { oppdrag ->
             assertEquals(2, oppdrag.size)
             assertEquals(18.januar, oppdrag[0].fom)
             assertEquals(25.januar, oppdrag[0].tom)
@@ -1323,8 +1323,8 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         assertEquals(Utbetaling.Utbetalt, inspektør.utbetalingtilstand(0))
         assertEquals(Utbetaling.Utbetalt, inspektør.utbetalingtilstand(1))
         assertEquals(Utbetaling.Sendt, inspektør.utbetalingtilstand(2))
-        assertEquals(inspektør.utbetaling(1).arbeidsgiverOppdrag().fagsystemId(), inspektør.utbetaling(2).arbeidsgiverOppdrag().fagsystemId())
-        inspektør.utbetaling(2).arbeidsgiverOppdrag().also { oppdrag ->
+        assertEquals(inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag.fagsystemId(), inspektør.utbetaling(2).inspektør.arbeidsgiverOppdrag.fagsystemId())
+        inspektør.utbetaling(2).inspektør.arbeidsgiverOppdrag.also { oppdrag ->
             assertEquals(1, oppdrag.size)
             assertEquals(18.januar, oppdrag[0].fom)
             assertEquals(26.januar, oppdrag[0].tom)

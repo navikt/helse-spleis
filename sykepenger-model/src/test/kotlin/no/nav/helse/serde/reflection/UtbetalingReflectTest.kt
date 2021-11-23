@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.testhelpers.FRI
 import no.nav.helse.testhelpers.NAV
@@ -102,7 +103,7 @@ internal class UtbetalingReflectTest {
                     aktørId = "ignore",
                     fødselsnummer = "ignore",
                     orgnummer = "ignore",
-                    fagsystemId = utbetaling.arbeidsgiverOppdrag().fagsystemId(),
+                    fagsystemId = utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId(),
                     utbetalingId = utbetalingId,
                     avstemmingsnøkkel = 123456L,
                     overføringstidspunkt = LocalDateTime.now()
@@ -114,7 +115,7 @@ internal class UtbetalingReflectTest {
                     aktørId = "ignore",
                     fødselsnummer = UNG_PERSON_FNR_2018,
                     orgnummer = ORGNUMMER,
-                    fagsystemId = utbetaling.arbeidsgiverOppdrag().fagsystemId(),
+                    fagsystemId = utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId(),
                     utbetalingId = utbetalingId,
                     status = Oppdragstatus.AKSEPTERT,
                     melding = "hei",
@@ -162,7 +163,7 @@ internal class UtbetalingReflectTest {
         assertUtbetalingslinje(1, null, "datoStatusFom")
         assertUtbetalingslinje(1, 2, "delytelseId")
         assertUtbetalingslinje(1, 1, "refDelytelseId")
-        assertUtbetalingslinje(1, tidligereUtbetaling.arbeidsgiverOppdrag().fagsystemId(), "refFagsystemId")
+        assertUtbetalingslinje(1, tidligereUtbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId(), "refFagsystemId")
         assertUtbetalingslinje(1, "NY", "endringskode")
         assertUtbetalingslinje(1, "SPREFAG-IOP", "klassekode")
     }
@@ -204,7 +205,7 @@ internal class UtbetalingReflectTest {
                     aktørId = "ignore",
                     fødselsnummer = "ignore",
                     orgnummer = "ignore",
-                    fagsystemId = utbetaling.arbeidsgiverOppdrag().fagsystemId(),
+                    fagsystemId = utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId(),
                     utbetalingId = utbetalingId,
                     avstemmingsnøkkel = 123456L,
                     overføringstidspunkt = LocalDateTime.now()
@@ -216,7 +217,7 @@ internal class UtbetalingReflectTest {
                     aktørId = "ignore",
                     fødselsnummer = UNG_PERSON_FNR_2018,
                     orgnummer = ORGNUMMER,
-                    fagsystemId = utbetaling.arbeidsgiverOppdrag().fagsystemId(),
+                    fagsystemId = utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId(),
                     utbetalingId = utbetalingId,
                     status = Oppdragstatus.AKSEPTERT,
                     melding = "hei",
@@ -231,7 +232,7 @@ internal class UtbetalingReflectTest {
             "aktør",
             "fnr",
             "orgnr",
-            tidligereUtbetaling.arbeidsgiverOppdrag().fagsystemId(),
+            tidligereUtbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId(),
             "ident",
             "epost",
             LocalDateTime.now()

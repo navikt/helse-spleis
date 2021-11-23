@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -21,9 +22,9 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     fun `Full refusjon til en arbeidsgiver med RefusjonPerDag på`() {
         nyttVedtak(1.januar, 31.januar, refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()))
 
-        assertTrue(inspektør.utbetalinger.last().arbeidsgiverOppdrag().isNotEmpty())
-        inspektør.utbetalinger.last().arbeidsgiverOppdrag().forEach { assertEquals(1431, it.beløp) }
-        assertTrue(inspektør.utbetalinger.last().personOppdrag().isEmpty())
+        assertTrue(inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.isNotEmpty())
+        inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.forEach { assertEquals(1431, it.beløp) }
+        assertTrue(inspektør.utbetalinger.last().inspektør.personOppdrag.isEmpty())
         assertUtbetalingsbeløp(1.vedtaksperiode, 0, 1431, subset = 1.januar til 16.januar)
         assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, subset = 17.januar til 31.januar)
     }
@@ -37,9 +38,9 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING)
-        assertTrue(inspektør.utbetalinger.last().arbeidsgiverOppdrag().isNotEmpty())
-        inspektør.utbetalinger.last().arbeidsgiverOppdrag().forEach { assertEquals(1431, it.beløp) }
-        assertTrue(inspektør.utbetalinger.last().personOppdrag().isEmpty())
+        assertTrue(inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.isNotEmpty())
+        inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.forEach { assertEquals(1431, it.beløp) }
+        assertTrue(inspektør.utbetalinger.last().inspektør.personOppdrag.isEmpty())
         assertUtbetalingsbeløp(2.vedtaksperiode, 1431, 1431, subset = 1.februar til 26.februar)
         assertUtbetalingsbeløp(2.vedtaksperiode, 0, 1431, subset = 27.februar til 27.februar)
         assertUtbetalingsbeløp(2.vedtaksperiode, 0, 0, subset = 28.februar til 28.februar)
@@ -195,9 +196,9 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         )
 
 
-        assertTrue(inspektør.utbetalinger.last().arbeidsgiverOppdrag().isNotEmpty())
-        inspektør.utbetalinger.last().arbeidsgiverOppdrag().forEach { assertEquals(1431, it.beløp) }
-        assertTrue(inspektør.utbetalinger.last().personOppdrag().isEmpty())
+        assertTrue(inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.isNotEmpty())
+        inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.forEach { assertEquals(1431, it.beløp) }
+        assertTrue(inspektør.utbetalinger.last().inspektør.personOppdrag.isEmpty())
         assertUtbetalingsbeløp(2.vedtaksperiode, 0, 1431, subset = 1.mars til 16.mars)
         assertUtbetalingsbeløp(2.vedtaksperiode, 1431, 1431, subset = 17.mars til 31.mars)
     }
@@ -295,9 +296,9 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING
         )
 
-        assertTrue(inspektør.utbetalinger.last().arbeidsgiverOppdrag().isNotEmpty())
-        inspektør.utbetalinger.last().arbeidsgiverOppdrag().forEach { assertEquals(1431, it.beløp) }
-        assertTrue(inspektør.utbetalinger.last().personOppdrag().isEmpty())
+        assertTrue(inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.isNotEmpty())
+        inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.forEach { assertEquals(1431, it.beløp) }
+        assertTrue(inspektør.utbetalinger.last().inspektør.personOppdrag.isEmpty())
 
         assertUtbetalingsbeløp(1.vedtaksperiode, 0, 1431, 1.januar til 16.januar)
         assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, 17.januar til 24.januar)

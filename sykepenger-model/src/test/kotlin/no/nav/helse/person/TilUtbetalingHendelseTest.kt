@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.somFødselsnummer
@@ -171,7 +172,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = ORGNUMMER,
-            fagsystemId = inspektør.utbetalinger.last().arbeidsgiverOppdrag().fagsystemId(),
+            fagsystemId = inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.fagsystemId(),
             utbetalingId = inspektør.sisteBehov(Behovtype.Utbetaling).kontekst().getValue("utbetalingId").toString(),
             avstemmingsnøkkel = 123456L,
             overføringstidspunkt = LocalDateTime.now()
@@ -185,7 +186,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = ORGNUMMER,
-            fagsystemId = inspektør.utbetalinger.last().arbeidsgiverOppdrag().fagsystemId(),
+            fagsystemId = inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.fagsystemId(),
             utbetalingId = inspektør.sisteBehov(Behovtype.Utbetaling).kontekst().getValue("utbetalingId").toString(),
             status = status,
             melding = "hei",

@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Dagtype.Feriedag
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
@@ -105,19 +106,19 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         val modellUtbetaling = inspektør.utbetalinger.first()
         val apiUtbetalinger = vedtaksperiode.utbetalinger
         assertEquals(
-            modellUtbetaling.arbeidsgiverOppdrag().fagsystemId(),
+            modellUtbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId(),
             apiUtbetalinger.arbeidsgiverUtbetaling!!.fagsystemId
         )
         assertEquals(
-            modellUtbetaling.personOppdrag().fagsystemId(),
+            modellUtbetaling.inspektør.personOppdrag.fagsystemId(),
             apiUtbetalinger.personUtbetaling!!.fagsystemId
         )
         assertEquals(
-            modellUtbetaling.arbeidsgiverOppdrag().førstedato,
+            modellUtbetaling.inspektør.arbeidsgiverOppdrag.førstedato,
             apiUtbetalinger.arbeidsgiverUtbetaling!!.linjer.first().fom
         )
         assertEquals(
-            modellUtbetaling.arbeidsgiverOppdrag().sistedato,
+            modellUtbetaling.inspektør.arbeidsgiverOppdrag.sistedato,
             apiUtbetalinger.arbeidsgiverUtbetaling!!.linjer.first().tom
         )
 
@@ -255,7 +256,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         assertEquals(237, tidslinje.utbetaling.gjenståendeSykedager)
         assertEquals(11, tidslinje.utbetaling.forbrukteSykedager)
         assertEquals(15741, tidslinje.utbetaling.arbeidsgiverNettoBeløp)
-        assertEquals(utbetaling.arbeidsgiverOppdrag().fagsystemId(), tidslinje.utbetaling.arbeidsgiverFagsystemId)
+        assertEquals(utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId(), tidslinje.utbetaling.arbeidsgiverFagsystemId)
         assertNotNull(tidslinje.utbetaling.vurdering)
         assertNotNull(tidslinje.tidsstempel)
         tidslinje.utbetaling.vurdering?.also {
@@ -465,16 +466,16 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
 
         val utbetalteUtbetalinger = inspektør.utbetalinger.filter { it.erUtbetalt() }
         assertEquals(
-            utbetalteUtbetalinger.last().arbeidsgiverOppdrag().fagsystemId(),
+            utbetalteUtbetalinger.last().inspektør.arbeidsgiverOppdrag.fagsystemId(),
             utbetalinger.arbeidsgiverUtbetaling!!.fagsystemId
         )
         assertTrue(utbetalinger.personUtbetaling!!.linjer.isEmpty())
         assertEquals(
-            utbetalteUtbetalinger.last().arbeidsgiverOppdrag().førstedato,
+            utbetalteUtbetalinger.last().inspektør.arbeidsgiverOppdrag.førstedato,
             utbetalinger.arbeidsgiverUtbetaling!!.linjer.first().fom
         )
         assertEquals(
-            utbetalteUtbetalinger.last().arbeidsgiverOppdrag().sistedato,
+            utbetalteUtbetalinger.last().inspektør.arbeidsgiverOppdrag.sistedato,
             utbetalinger.arbeidsgiverUtbetaling!!.linjer.first().tom
         )
     }

@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.TilstandType
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
@@ -176,14 +177,14 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
 
         // 10153 = round((20000 * 12) / 260) * 11 (11 nav-dager i januar 2018)
-        assertEquals(10153, inspektør.utbetalinger.last().arbeidsgiverOppdrag().totalbeløp())
+        assertEquals(10153, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.totalbeløp())
 
         håndterOverstyrInntekt(inntekt = 25000.månedlig, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         // 12694 = round((25000 * 12) / 260) * 11 (11 nav-dager i januar)
-        assertEquals(12694, inspektør.utbetalinger.last().arbeidsgiverOppdrag().totalbeløp())
+        assertEquals(12694, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.totalbeløp())
 
         assertTilstander(1.vedtaksperiode,
             TilstandType.START,
@@ -218,7 +219,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
 
         // 28613 = round((20000 * 12) / 260) * 31 (31 nav-dager i januar + februar 2018)
-        assertEquals(28613, inspektør.utbetalinger.last().arbeidsgiverOppdrag().totalbeløp())
+        assertEquals(28613, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.totalbeløp())
 
         håndterOverstyrInntekt(inntekt = 25000.månedlig, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
@@ -226,7 +227,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
 
         // 35774 = round((25000 * 12) / 260) * 31 (31 nav-dager i januar + februar)
-        assertEquals(35774, inspektør.utbetalinger.last().arbeidsgiverOppdrag().totalbeløp())
+        assertEquals(35774, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.totalbeløp())
 
         assertTilstander(1.vedtaksperiode,
             TilstandType.START,
@@ -282,7 +283,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
 
         // 23075 = round((20000 * 12) / 260) * 25 (25 nav-dager i januar + februar 2018)
-        assertEquals(23075, inspektør.utbetalinger.last().arbeidsgiverOppdrag().totalbeløp())
+        assertEquals(23075, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.totalbeløp())
         assertEquals("SSSSSHH SSSSSHH SSSSSFF FFFFFFF FSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString().trim())
         assertEquals("PPPPPPP PPPPPPP PPNNNFF FFFFFFF FNNNNHH NNNNNHH NNNNNHH NNNNNHH NNN", inspektør.sisteUtbetalingUtbetalingstidslinje().toString().trim())
 
@@ -359,7 +360,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
 
         val utbetalinger = inspektør.utbetalinger
         assertEquals(2, utbetalinger.size)
-        assertEquals(0, utbetalinger.last().arbeidsgiverOppdrag().nettoBeløp())
+        assertEquals(0, utbetalinger.last().inspektør.arbeidsgiverOppdrag.nettoBeløp())
         assertTrue(utbetalinger.last().erAvsluttet())
         assertTrue(utbetalinger.first().erForkastet())
     }
@@ -398,7 +399,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         assertTrue(utbetalinger[0].erUtbetalt())
         assertTrue(utbetalinger[1].erForkastet())
         assertTrue(utbetalinger[2].erUtbetalt())
-        assertEquals(utbetalinger.first().arbeidsgiverOppdrag().nettoBeløp(), -1 * utbetalinger.last().arbeidsgiverOppdrag().nettoBeløp())
-        assertEquals(1, utbetalinger.map { it.arbeidsgiverOppdrag().fagsystemId() }.toSet().size)
+        assertEquals(utbetalinger.first().inspektør.arbeidsgiverOppdrag.nettoBeløp(), -1 * utbetalinger.last().inspektør.arbeidsgiverOppdrag.nettoBeløp())
+        assertEquals(1, utbetalinger.map { it.inspektør.arbeidsgiverOppdrag.fagsystemId() }.toSet().size)
     }
 }

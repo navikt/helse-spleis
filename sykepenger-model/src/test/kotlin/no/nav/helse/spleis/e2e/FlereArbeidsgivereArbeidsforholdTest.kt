@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -344,7 +345,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
 
-        val a2Linje = inspektør(a2).utbetalinger.last().arbeidsgiverOppdrag().last()
+        val a2Linje = inspektør(a2).utbetalinger.last().inspektør.arbeidsgiverOppdrag.last()
         assertEquals(17.mars, a2Linje.fom)
         assertEquals(31.mars, a2Linje.tom)
         assertEquals(692, a2Linje.beløp)
@@ -488,7 +489,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
 
         val utbetaling = inspektør(a2).utbetalinger.single()
-        val linje = utbetaling.arbeidsgiverOppdrag().linjerUtenOpphør().single()
+        val linje = utbetaling.inspektør.arbeidsgiverOppdrag.linjerUtenOpphør().single()
         assertEquals(100.0, utbetaling.utbetalingstidslinje()[20.februar].økonomi.medData { _, _, _, _, totalGrad, _, _, _, _ -> totalGrad })
         assertEquals(2077, linje.beløp) // Ikke cappet på 6G, siden personen ikke jobber hos a1 ved dette skjæringstidspunktet
         assertEquals(18.februar, linje.fom)

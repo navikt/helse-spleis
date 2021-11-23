@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.SøknadArbeidsgiver.Sykdom
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.Inntektskilde.FLERE_ARBEIDSGIVERE
 import no.nav.helse.person.Periodetype
@@ -1735,10 +1736,10 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
 
         inspektør(a1).utbetalinger.forEach {
-            assertEquals(a1, it.arbeidsgiverOppdrag().mottaker())
+            assertEquals(a1, it.inspektør.arbeidsgiverOppdrag.mottaker())
         }
         inspektør(a2).utbetalinger.forEach {
-            assertEquals(a2, it.arbeidsgiverOppdrag().mottaker())
+            assertEquals(a2, it.inspektør.arbeidsgiverOppdrag.mottaker())
         }
     }
 

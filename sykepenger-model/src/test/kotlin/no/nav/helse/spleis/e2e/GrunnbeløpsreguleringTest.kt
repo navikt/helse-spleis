@@ -2,10 +2,11 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.hendelser.*
-import no.nav.helse.utbetalingslinjer.Oppdragstatus.AKSEPTERT
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.TilstandType
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Endringskode
+import no.nav.helse.utbetalingslinjer.Oppdragstatus.AKSEPTERT
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -56,7 +57,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
         assertEquals(14, inspektør.utbetalinger.size)
         val etterutbetaling = inspektør.utbetalinger.last()
         assertTrue(etterutbetaling.erEtterutbetaling())
-        assertEquals(11.august(2020), etterutbetaling.arbeidsgiverOppdrag().sistedato)
+        assertEquals(11.august(2020), etterutbetaling.inspektør.arbeidsgiverOppdrag.sistedato)
     }
 
     @Test
@@ -134,17 +135,17 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
             assertEquals(10.juni(2020) til 30.juni(2020), utbetalingUtbetalingstidslinje.periode())
         }
         inspektør.utbetaling(0).also { utbetaling ->
-            assertEquals(26.juni(2020), utbetaling.arbeidsgiverOppdrag().førstedato)
-            assertEquals(30.juni(2020), utbetaling.arbeidsgiverOppdrag().sistedato)
-            assertEquals(1, utbetaling.arbeidsgiverOppdrag().size)
+            assertEquals(26.juni(2020), utbetaling.inspektør.arbeidsgiverOppdrag.førstedato)
+            assertEquals(30.juni(2020), utbetaling.inspektør.arbeidsgiverOppdrag.sistedato)
+            assertEquals(1, utbetaling.inspektør.arbeidsgiverOppdrag.size)
         }
         inspektør.utbetalingUtbetalingstidslinje(1).also { utbetalingUtbetalingstidslinje ->
             assertEquals(10.juni(2020) til 30.juni(2020), utbetalingUtbetalingstidslinje.periode())
         }
         inspektør.utbetaling(1).also { utbetaling ->
-            assertEquals(26.juni(2020), utbetaling.arbeidsgiverOppdrag().førstedato)
-            assertEquals(30.juni(2020), utbetaling.arbeidsgiverOppdrag().sistedato)
-            assertEquals(1, utbetaling.arbeidsgiverOppdrag().size)
+            assertEquals(26.juni(2020), utbetaling.inspektør.arbeidsgiverOppdrag.førstedato)
+            assertEquals(30.juni(2020), utbetaling.inspektør.arbeidsgiverOppdrag.sistedato)
+            assertEquals(1, utbetaling.inspektør.arbeidsgiverOppdrag.size)
         }
     }
 
@@ -175,7 +176,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
         utbetaltVedtaksperiodeBegrensetAv6G(2, 5.juli(2020), 31.juli(2020))
         håndterGrunnbeløpsregulering(
             gyldighetsdato = GYLDIGHETSDATO_2020_GRUNNBELØP,
-            fagsystemId = inspektør.utbetalinger.first().arbeidsgiverOppdrag().fagsystemId()
+            fagsystemId = inspektør.utbetalinger.first().inspektør.arbeidsgiverOppdrag.fagsystemId()
         )
         utbetaltForlengetVedtaksperiodeBegrensetAv6G(3, 1.august(2020), 31.august(2020))
         inspektør.utbetalinger.also { utbetalinger ->
@@ -184,10 +185,10 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
             assertEquals(inspektør.gjeldendeUtbetalingForVedtaksperiode(2.vedtaksperiode), utbetalinger[1])
             assertEquals(inspektør.gjeldendeUtbetalingForVedtaksperiode(3.vedtaksperiode), utbetalinger[3])
 
-            assertEquals(utbetalinger[0].arbeidsgiverOppdrag().fagsystemId(), utbetalinger[2].arbeidsgiverOppdrag().fagsystemId())
+            assertEquals(utbetalinger[0].inspektør.arbeidsgiverOppdrag.fagsystemId(), utbetalinger[2].inspektør.arbeidsgiverOppdrag.fagsystemId())
             assertTrue(utbetalinger[2].erEtterutbetaling())
-            assertNotEquals(utbetalinger[0].arbeidsgiverOppdrag().fagsystemId(), utbetalinger[1].arbeidsgiverOppdrag().fagsystemId())
-            assertEquals(utbetalinger[1].arbeidsgiverOppdrag().fagsystemId(), utbetalinger[3].arbeidsgiverOppdrag().fagsystemId())
+            assertNotEquals(utbetalinger[0].inspektør.arbeidsgiverOppdrag.fagsystemId(), utbetalinger[1].inspektør.arbeidsgiverOppdrag.fagsystemId())
+            assertEquals(utbetalinger[1].inspektør.arbeidsgiverOppdrag.fagsystemId(), utbetalinger[3].inspektør.arbeidsgiverOppdrag.fagsystemId())
         }
     }
 
