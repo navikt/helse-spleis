@@ -1,0 +1,1 @@
+ALTER TABLE melding ADD COLUMN behandlet_tidspunkt TIMESTAMP DEFAULT NULL;

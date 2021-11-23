@@ -62,7 +62,14 @@ internal class MessageMediator(
             messageRecognized = true
             message.logRecognized(sikkerLogg)
             hendelseRepository.lagreMelding(message)
+
+            if (!message.erReplay && hendelseRepository.erBehandlet(message.id)) {
+                message.logDuplikat(sikkerLogg)
+                return
+            }
+
             hendelseMediator.behandle(message)
+            hendelseRepository.markerSomBehandlet(message.id)
         } catch (err: JsonMigrationException) {
             severeErrorHandler(err, message)
         } catch (err: DeserializationException) {

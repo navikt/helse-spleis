@@ -39,12 +39,13 @@ internal class TestMessageFactory(
     fun lagNySøknad(
         vararg perioder: SoknadsperiodeDTO,
         orgnummer: String = organisasjonsnummer,
-        opprettet: LocalDateTime = perioder.minOfOrNull { it.fom!! }!!.atStartOfDay()
+        opprettet: LocalDateTime = perioder.minOfOrNull { it.fom!! }!!.atStartOfDay(),
+        meldingId: String = UUID.randomUUID().toString()
     ): String {
         val fom = perioder.minOfOrNull { it.fom!! }!!
         val nySøknad = SykepengesoknadDTO(
             status = SoknadsstatusDTO.NY,
-            id = UUID.randomUUID().toString(),
+            id = meldingId,
             sykmeldingId = UUID.randomUUID().toString(),
             aktorId = aktørId,
             fodselsnummer = SkjultVerdi(fødselsnummer),
@@ -60,7 +61,7 @@ internal class TestMessageFactory(
             opprettet = fom.plusMonths(3)?.atStartOfDay(),
             sykmeldingSkrevet = fom.atStartOfDay()
         )
-        return nyHendelse("ny_søknad", mapOf("@opprettet" to opprettet) + nySøknad.toMap())
+        return nyHendelse("ny_søknad", mapOf("@opprettet" to opprettet, "@id" to meldingId) + nySøknad.toMap())
     }
 
     fun lagSøknadArbeidsgiver(
@@ -119,36 +120,61 @@ internal class TestMessageFactory(
         return nyHendelse("sendt_søknad_nav", sendtSøknad.toMap())
     }
 
-    fun lagInnteksmelding(
+    private fun lagInntektsmelding(
         arbeidsgiverperiode: List<Periode>,
         førsteFraværsdag: LocalDate,
         opphørAvNaturalytelser: List<OpphoerAvNaturalytelse> = emptyList(),
         beregnetInntekt: Double = inntekt,
         opphørsdatoForRefusjon: LocalDate? = null
-    ): String {
-        val inntektsmelding = Inntektsmelding(
-            inntektsmeldingId = UUID.randomUUID().toString(),
-            arbeidstakerFnr = fødselsnummer,
-            arbeidstakerAktorId = aktørId,
-            virksomhetsnummer = organisasjonsnummer,
-            arbeidsgiverFnr = null,
-            arbeidsgiverAktorId = null,
-            arbeidsgivertype = Arbeidsgivertype.VIRKSOMHET,
-            arbeidsforholdId = null,
-            beregnetInntekt = beregnetInntekt.toBigDecimal(),
-            refusjon = Refusjon(beregnetInntekt.toBigDecimal(), opphørsdatoForRefusjon),
-            endringIRefusjoner = emptyList(),
-            opphoerAvNaturalytelser = opphørAvNaturalytelser,
-            gjenopptakelseNaturalytelser = emptyList(),
-            arbeidsgiverperioder = arbeidsgiverperiode,
-            status = Status.GYLDIG,
-            arkivreferanse = "",
-            ferieperioder = emptyList(),
-            foersteFravaersdag = førsteFraværsdag,
-            mottattDato = LocalDateTime.now()
-        )
-        return nyHendelse("inntektsmelding", inntektsmelding.toMap())
-    }
+    ) = Inntektsmelding(
+        inntektsmeldingId = UUID.randomUUID().toString(),
+        arbeidstakerFnr = fødselsnummer,
+        arbeidstakerAktorId = aktørId,
+        virksomhetsnummer = organisasjonsnummer,
+        arbeidsgiverFnr = null,
+        arbeidsgiverAktorId = null,
+        arbeidsgivertype = Arbeidsgivertype.VIRKSOMHET,
+        arbeidsforholdId = null,
+        beregnetInntekt = beregnetInntekt.toBigDecimal(),
+        refusjon = Refusjon(beregnetInntekt.toBigDecimal(), opphørsdatoForRefusjon),
+        endringIRefusjoner = emptyList(),
+        opphoerAvNaturalytelser = opphørAvNaturalytelser,
+        gjenopptakelseNaturalytelser = emptyList(),
+        arbeidsgiverperioder = arbeidsgiverperiode,
+        status = Status.GYLDIG,
+        arkivreferanse = "",
+        ferieperioder = emptyList(),
+        foersteFravaersdag = førsteFraværsdag,
+        mottattDato = LocalDateTime.now()
+    )
+
+    fun lagInnteksmelding(
+        arbeidsgiverperiode: List<Periode>,
+        førsteFraværsdag: LocalDate,
+        opphørAvNaturalytelser: List<OpphoerAvNaturalytelse> = emptyList(),
+        beregnetInntekt: Double = inntekt,
+        opphørsdatoForRefusjon: LocalDate? = null,
+        meldingId: String = UUID.randomUUID().toString()
+    ) = nyHendelse(
+        "inntektsmelding",
+        mapOf("@id" to meldingId) + lagInntektsmelding(
+            arbeidsgiverperiode,
+            førsteFraværsdag,
+            opphørAvNaturalytelser,
+            beregnetInntekt,
+            opphørsdatoForRefusjon
+        ).toMap()
+    )
+
+    fun lagInnteksmeldingReplay(
+        vedtaksperiodeId: UUID,
+        arbeidsgiverperiode: List<Periode>,
+        førsteFraværsdag: LocalDate,
+        meldingId: String = UUID.randomUUID().toString()
+    ) = nyHendelse(
+        "inntektsmelding_replay",
+        mapOf("@id" to meldingId, "vedtaksperiodeId" to vedtaksperiodeId) + lagInntektsmelding(arbeidsgiverperiode, førsteFraværsdag).toMap()
+    )
 
     fun lagUtbetalingshistorikk(vedtaksperiodeId: UUID, tilstand: TilstandType, sykepengehistorikk: List<UtbetalingshistorikkTestdata> = emptyList()): String {
         return lagBehovMedLøsning(

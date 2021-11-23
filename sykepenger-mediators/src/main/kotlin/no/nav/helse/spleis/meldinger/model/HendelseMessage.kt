@@ -15,6 +15,7 @@ internal abstract class HendelseMessage(private val packet: JsonMessage) {
     internal val id: UUID = UUID.fromString(packet["@id"].asText())
     private val navn = packet["@event_name"].asText()
     protected val opprettet = packet["@opprettet"].asLocalDateTime()
+    internal open val erReplay = false
 
     protected abstract val fødselsnummer: String
 
@@ -34,6 +35,10 @@ internal abstract class HendelseMessage(private val packet: JsonMessage) {
 
     internal fun logRecognized(logger: Logger) {
         logger.info("gjenkjente {} med id={} for fnr={}:\n{}", this::class.simpleName, id, fødselsnummer, toJson())
+    }
+
+    internal fun logDuplikat(logger: Logger) {
+        logger.warn("Har mottatt duplikat {} med id={} for fnr={}", this::class.simpleName, id, fødselsnummer)
     }
 
     internal fun secureDiagnosticinfo() = mapOf(

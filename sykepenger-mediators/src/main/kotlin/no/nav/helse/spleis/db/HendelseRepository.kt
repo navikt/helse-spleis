@@ -71,6 +71,19 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         }
     }
 
+    fun markerSomBehandlet(meldingId: UUID) = using(sessionOf(dataSource)) { session ->
+        session.run(queryOf("UPDATE melding SET behandlet_tidspunkt=now() WHERE melding_id = ? AND behandlet_tidspunkt IS NULL",
+            meldingId.toString()
+        ).asUpdate)
+    }
+
+    fun erBehandlet(meldingId: UUID) = using(sessionOf(dataSource)) { session ->
+        session.run(
+            queryOf("SELECT behandlet_tidspunkt FROM melding WHERE melding_id = ?", meldingId.toString())
+                .map { it.localDateTimeOrNull("behandlet_tidspunkt") }.asSingle
+        ) != null
+    }
+
     private fun skalLagres(melding: HendelseMessage): Boolean {
         return meldingstype(melding) != null
     }

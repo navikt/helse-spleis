@@ -75,9 +75,10 @@ internal abstract class AbstractEndToEndMediatorTest {
     protected fun sendNySøknad(
         vararg perioder: SoknadsperiodeDTO,
         orgnummer: String = ORGNUMMER,
-        meldingOpprettet: LocalDateTime = perioder.minOfOrNull { it.fom!! }!!.atStartOfDay()
+        meldingOpprettet: LocalDateTime = perioder.minOfOrNull { it.fom!! }!!.atStartOfDay(),
+        meldingId: String = UUID.randomUUID().toString()
     ) {
-        testRapid.sendTestMessage(meldingsfabrikk.lagNySøknad(*perioder, orgnummer = orgnummer, opprettet = meldingOpprettet))
+        testRapid.sendTestMessage(meldingsfabrikk.lagNySøknad(*perioder, orgnummer = orgnummer, opprettet = meldingOpprettet, meldingId = meldingId))
     }
 
     protected fun sendSøknad(
@@ -139,10 +140,11 @@ internal abstract class AbstractEndToEndMediatorTest {
         førsteFraværsdag: LocalDate,
         opphørAvNaturalytelser: List<OpphoerAvNaturalytelse> = emptyList(),
         beregnetInntekt: Double = INNTEKT,
-        opphørsdatoForRefusjon: LocalDate? = null
+        opphørsdatoForRefusjon: LocalDate? = null,
+        meldingId: String = UUID.randomUUID().toString()
     ) {
         assertFalse(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Foreldrepenger))
-        sendInntektsmelding(arbeidsgiverperiode, førsteFraværsdag, opphørAvNaturalytelser, beregnetInntekt, opphørsdatoForRefusjon)
+        sendInntektsmelding(arbeidsgiverperiode, førsteFraværsdag, opphørAvNaturalytelser, beregnetInntekt, opphørsdatoForRefusjon, meldingId)
     }
 
     protected fun sendInntektsmelding(
@@ -150,7 +152,8 @@ internal abstract class AbstractEndToEndMediatorTest {
         førsteFraværsdag: LocalDate,
         opphørAvNaturalytelser: List<OpphoerAvNaturalytelse> = emptyList(),
         beregnetInntekt: Double = INNTEKT,
-        opphørsdatoForRefusjon: LocalDate? = null
+        opphørsdatoForRefusjon: LocalDate? = null,
+        meldingId: String = UUID.randomUUID().toString()
     ) {
         testRapid.sendTestMessage(
             meldingsfabrikk.lagInnteksmelding(
@@ -158,7 +161,24 @@ internal abstract class AbstractEndToEndMediatorTest {
                 førsteFraværsdag,
                 opphørAvNaturalytelser,
                 beregnetInntekt,
-                opphørsdatoForRefusjon
+                opphørsdatoForRefusjon,
+                meldingId
+            )
+        )
+    }
+
+    protected fun sendInntektsmeldingReplay(
+        vedtaksperiodeIndeks: Int = 0,
+        arbeidsgiverperiode: List<Periode>,
+        førsteFraværsdag: LocalDate,
+        meldingId: String = UUID.randomUUID().toString()
+    ) {
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagInnteksmeldingReplay(
+                testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
+                arbeidsgiverperiode,
+                førsteFraværsdag,
+                meldingId
             )
         )
     }

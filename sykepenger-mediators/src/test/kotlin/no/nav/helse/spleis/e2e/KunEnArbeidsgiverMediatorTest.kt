@@ -1,9 +1,15 @@
 package no.nav.helse.spleis.e2e
 
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
+import no.nav.helse.spleis.MessageMediator
+import no.nav.helse.spleis.TestHendelseMediator
+import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.testhelpers.*
 import no.nav.inntektsmeldingkontrakt.Naturalytelse
@@ -19,6 +25,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
+import java.util.*
 
 internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
 
@@ -539,6 +546,67 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendSøknad(1, listOf(SoknadsperiodeDTO(fom = 2.februar, tom = 8.februar, sykmeldingsgrad = 100)))
 
         assertEquals(2, testRapid.inspektør.meldinger("trenger_inntektsmelding").size)
+    }
+
+    @Test
+    fun `Behandler ikke melding hvis den allerede er behandlet`() {
+        val hendelseRepository: HendelseRepository = mockk(relaxed = true)
+        every { hendelseRepository.erBehandlet(any()) } returnsMany(listOf(false, true))
+
+        MessageMediator(
+            rapidsConnection = testRapid,
+            hendelseRepository = hendelseRepository,
+            hendelseMediator = TestHendelseMediator()
+        )
+
+        val meldingId = UUID.randomUUID()
+        sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 25.januar, sykmeldingsgrad = 100), meldingId = meldingId.toString())
+        verify(exactly = 1) { hendelseRepository.markerSomBehandlet(meldingId) }
+        sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 26.januar, sykmeldingsgrad = 100), meldingId = meldingId.toString())
+        verify(exactly = 1) { hendelseRepository.markerSomBehandlet(meldingId) }
+        verify(exactly = 2) { hendelseRepository.erBehandlet(any()) }
+    }
+
+    @Test
+    fun `Behandler melding hvis den tidligere har prøvd å behandle melding, men kræsjet`() {
+        val hendelseRepository: HendelseRepository = mockk(relaxed = true)
+        every { hendelseRepository.erBehandlet(any()) } returnsMany(listOf(false, false, true))
+
+        MessageMediator(
+            rapidsConnection = testRapid,
+            hendelseRepository = hendelseRepository,
+            hendelseMediator = TestHendelseMediator()
+        )
+
+        val meldingId = UUID.randomUUID()
+        sendNySøknad(SoknadsperiodeDTO(fom = 25.januar, tom = 1.januar, sykmeldingsgrad = 100), meldingId = meldingId.toString())
+        verify(exactly = 0) { hendelseRepository.markerSomBehandlet(meldingId) }
+        sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 25.januar, sykmeldingsgrad = 100), meldingId = meldingId.toString())
+        verify(exactly = 1) { hendelseRepository.markerSomBehandlet(meldingId) }
+        sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 25.januar, sykmeldingsgrad = 100), meldingId = meldingId.toString())
+        verify(exactly = 1) { hendelseRepository.markerSomBehandlet(meldingId) }
+        verify(exactly = 3) { hendelseRepository.erBehandlet(any()) }
+    }
+
+    @Test
+    fun `InntektsmeldingReplay blir ikke stoppet av duplikatsjekk`() {
+        val meldingId = UUID.randomUUID()
+
+        val hendelseRepository: HendelseRepository = mockk(relaxed = true)
+        MessageMediator(
+            rapidsConnection = testRapid,
+            hendelseRepository = hendelseRepository,
+            hendelseMediator = TestHendelseMediator()
+        )
+
+        sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+
+        verify(exactly = 0) { hendelseRepository.markerSomBehandlet(meldingId) }
+        sendInntektsmelding(0, listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar, meldingId = meldingId.toString())
+        verify(exactly = 1) { hendelseRepository.markerSomBehandlet(meldingId) }
+        sendInntektsmeldingReplay(0, listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar, meldingId = meldingId.toString())
+        verify(exactly = 2) { hendelseRepository.markerSomBehandlet(meldingId) }
     }
 
     @Disabled("https://trello.com/c/Ob6kSelp")
