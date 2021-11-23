@@ -5,7 +5,7 @@ import java.util.*
 
 internal fun SchemaBuilder.arbeidsgiverTypes() {
     type<GraphQLGenerasjon> {
-        property<List<GraphQLTidslinjeperiode>>("perioder") {
+        property<List<GraphQLTidslinjeperiode>>("perioderSlice") {
             resolver { generasjon: GraphQLGenerasjon, first: Int?, from: Int? ->
                 generasjon.perioder.safeSlice(first, from)
             }
@@ -23,7 +23,7 @@ internal fun SchemaBuilder.arbeidsgiverTypes() {
     }
 
     type<GraphQLArbeidsgiver> {
-        property<List<GraphQLGenerasjon>>("generasjoner") {
+        property<List<GraphQLGenerasjon>>("generasjonerSlice") {
             resolver { arbeidsgiver: GraphQLArbeidsgiver, first: Int?, from: Int? ->
                 arbeidsgiver.generasjoner.safeSlice(first, from)
             }

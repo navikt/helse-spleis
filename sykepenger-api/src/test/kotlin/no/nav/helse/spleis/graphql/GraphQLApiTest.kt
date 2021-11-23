@@ -511,7 +511,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                         organisasjonsnummer,
                         generasjon(index: 0) {
                             id,
-                            perioder(first: 1) {
+                            perioderSlice(first: 1) {
                                 ... on GraphQLBeregnetPeriode {
                                     fom,
                                     tom,
@@ -547,7 +547,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                         organisasjonsnummer,
                         generasjon(index: 0) {
                             id,
-                            perioder(first: 1) {
+                            perioderSlice(first: 1) {
                                 ... on GraphQLBeregnetPeriode {
                                     fom,
                                     tom,
