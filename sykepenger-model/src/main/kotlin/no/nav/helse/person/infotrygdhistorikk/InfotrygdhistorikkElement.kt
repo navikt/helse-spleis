@@ -29,7 +29,7 @@ internal class InfotrygdhistorikkElement private constructor(
     private var lagretInntekter: Boolean,
     private var lagretVilkårsgrunnlag: Boolean
 ) {
-    private val perioder = perioder.sortedBy { it.start }
+    private val perioder = perioder.sortedBy { it.start }.sortedBy { it::class.qualifiedName }
     private val kilde = SykdomstidslinjeHendelse.Hendelseskilde("Infotrygdhistorikk", id, tidsstempel)
 
     init {

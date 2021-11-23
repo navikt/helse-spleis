@@ -73,6 +73,21 @@ internal class InfotrygdhistorikkElementTest {
     }
 
     @Test
+    fun `person- og arbeidsgiverutbetaling på samme dag`() {
+        val element1 = historikkelement(perioder = listOf(
+            ArbeidsgiverUtbetalingsperiode("orgnr", 1.januar, 1.januar, 100.prosent, 1000.daglig),
+            PersonUtbetalingsperiode("orgnr", 1.januar, 1.januar, 100.prosent, 1000.daglig)
+        ))
+        val identiskElement = historikkelement(perioder = listOf(
+            PersonUtbetalingsperiode("orgnr", 1.januar, 1.januar, 100.prosent, 1000.daglig),
+            ArbeidsgiverUtbetalingsperiode("orgnr", 1.januar, 1.januar, 100.prosent, 1000.daglig)
+        ))
+        assertEquals(element1, identiskElement)
+        assertEquals(element1.hashCode(), identiskElement.hashCode())
+        assertTrue(identiskElement.erstatter(element1))
+    }
+
+    @Test
     fun `lik ugyldig periode`() {
         val element1 = historikkelement(ugyldigePerioder = listOf(UgyldigPeriode(1.januar, 1.januar, 100)))
         val identiskElement = historikkelement(ugyldigePerioder = listOf(UgyldigPeriode(1.januar, 1.januar, 100)))
