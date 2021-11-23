@@ -13,6 +13,7 @@ internal class UtbetalingOverførtMessage(packet: JsonMessage) : BehovMessage(pa
     private val utbetalingId = packet["utbetalingId"].asText()
     private val avstemmingsnøkkel = packet["@løsning.${Utbetaling.name}.avstemmingsnøkkel"].asLong()
     private val overføringstidspunkt = packet["@løsning.${Utbetaling.name}.overføringstidspunkt"].asLocalDateTime()
+    override val skalDuplikatsjekkes = false
 
     private val utbetaling
         get() = UtbetalingOverført(

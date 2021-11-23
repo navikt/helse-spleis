@@ -63,7 +63,7 @@ internal class MessageMediator(
             message.logRecognized(sikkerLogg)
             hendelseRepository.lagreMelding(message)
 
-            if (!message.erReplay && hendelseRepository.erBehandlet(message.id)) {
+            if (message.skalDuplikatsjekkes && hendelseRepository.erBehandlet(message.id)) {
                 message.logDuplikat(sikkerLogg)
                 return
             }

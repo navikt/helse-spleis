@@ -1,11 +1,11 @@
 package no.nav.helse.spleis.meldinger.model
 
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
-import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spleis.IHendelseMediator
+import no.nav.helse.utbetalingslinjer.Oppdragstatus
 
 internal class UtbetalingMessage(packet: JsonMessage) : BehovMessage(packet) {
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
@@ -16,6 +16,7 @@ internal class UtbetalingMessage(packet: JsonMessage) : BehovMessage(packet) {
     private val beskrivelse = packet["@løsning.${Utbetaling.name}.beskrivelse"].asText()
     private val avstemmingsnøkkel = packet["@løsning.${Utbetaling.name}.avstemmingsnøkkel"].asLong()
     private val overføringstidspunkt = packet["@løsning.${Utbetaling.name}.overføringstidspunkt"].asLocalDateTime()
+    override val skalDuplikatsjekkes = false
 
     private val utbetaling
         get() = UtbetalingHendelse(

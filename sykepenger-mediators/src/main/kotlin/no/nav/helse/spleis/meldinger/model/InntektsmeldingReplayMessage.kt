@@ -8,7 +8,7 @@ import java.util.*
 // Understands a JSON message representing an Inntektsmelding replay
 internal class InntektsmeldingReplayMessage(packet: JsonMessage) : InntektsmeldingMessage(packet) {
     private val vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText())
-    override val erReplay = true
+    override val skalDuplikatsjekkes = false
 
     override fun behandle(mediator: IHendelseMediator) {
         mediator.behandle(this, InntektsmeldingReplay(inntektsmelding, vedtaksperiodeId))
