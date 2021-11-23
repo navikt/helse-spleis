@@ -1,4 +1,4 @@
-package no.nav.helse.spleis.e2e
+package no.nav.helse.inspectors
 
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidsgiverVisitor

@@ -84,9 +84,9 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalt(2.vedtaksperiode)
 
         assertNoErrors(inspektør)
-        assertEquals(3, inspektør.sykdomshistorikkDagTeller[Dag.Feriedag::class])
-        assertNull(inspektør.vedtaksperiodeDagTeller(1.vedtaksperiode)?.get(Dag.Feriedag::class))
-        assertNull(inspektør.vedtaksperiodeDagTeller(2.vedtaksperiode)?.get(Dag.Feriedag::class))
+        assertEquals(3, inspektør.sykdomstidslinje.inspektør.dagteller[Dag.Feriedag::class])
+        assertNull(inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode).inspektør.dagteller[Dag.Feriedag::class])
+        assertNull(inspektør.vedtaksperiodeSykdomstidslinje(2.vedtaksperiode).inspektør.dagteller[Dag.Feriedag::class])
     }
 
     @Test

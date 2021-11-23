@@ -193,7 +193,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
-        inspektør.låstePerioder.also {
+        inspektør.sykdomstidslinje.inspektør.låstePerioder.also {
             assertEquals(1, it.size)
             assertEquals(Periode(1.januar, 31.januar), it.first())
         }
@@ -203,7 +203,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             Sykdom(1.februar, 28.februar, 100.prosent),
             andreInntektskilder = listOf(Søknad.Inntektskilde(true, "ANDRE_ARBEIDSFORHOLD")) // <-- for å sende til Infotrygd
         )
-        inspektør.låstePerioder.also {
+        inspektør.sykdomstidslinje.inspektør.låstePerioder.also {
             assertEquals(0, it.size)
         }
 
@@ -218,7 +218,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSimulering(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode, true)
         håndterUtbetalt(3.vedtaksperiode, Oppdragstatus.AKSEPTERT)
-        inspektør.låstePerioder.also {
+        inspektør.sykdomstidslinje.inspektør.låstePerioder.also {
             assertEquals(1, it.size)
             assertEquals(Periode(1.mars, 31.mars), it.first())
         }
@@ -407,7 +407,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt(2.vedtaksperiode, Oppdragstatus.AKSEPTERT)
-        inspektør.låstePerioder.also {
+        inspektør.sykdomstidslinje.inspektør.låstePerioder.also {
             assertEquals(1, it.size)
             assertEquals(Periode(29.januar, 23.februar), it.first())
         }

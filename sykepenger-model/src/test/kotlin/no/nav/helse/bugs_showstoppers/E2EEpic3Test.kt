@@ -3,6 +3,7 @@ package no.nav.helse.bugs_showstoppers
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -859,9 +860,9 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
 
         inspektør.also {
-            assertEquals(4, it.sykdomshistorikkDagTeller[Sykedag::class])
-            assertEquals(2, it.sykdomshistorikkDagTeller[FriskHelgedag::class])
-            assertEquals(2, it.sykdomshistorikkDagTeller[Dag.Arbeidsdag::class])
+            assertEquals(4, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
+            assertEquals(2, it.sykdomstidslinje.inspektør.dagteller[FriskHelgedag::class])
+            assertEquals(2, it.sykdomstidslinje.inspektør.dagteller[Dag.Arbeidsdag::class])
         }
         assertTilstander(
             1.vedtaksperiode,
@@ -893,9 +894,9 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(Periode(20.februar(2020), 5.mars(2020))), 20.februar(2020))
 
         inspektør.also {
-            assertNull(it.sykdomshistorikkDagTeller[Arbeidsgiverdag::class])
-            assertEquals(6, it.sykdomshistorikkDagTeller[SykHelgedag::class])
-            assertEquals(12, it.sykdomshistorikkDagTeller[Sykedag::class])
+            assertNull(it.sykdomstidslinje.inspektør.dagteller[Arbeidsgiverdag::class])
+            assertEquals(6, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
+            assertEquals(12, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
             assertEquals(20.februar(2020), it.sykdomstidslinje.førsteDag())
         }
     }
@@ -922,10 +923,10 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
 
         inspektør.also {
-            assertEquals(16, it.sykdomshistorikkDagTeller[Sykedag::class])
-            assertEquals(6, it.sykdomshistorikkDagTeller[SykHelgedag::class])
-            assertEquals(null, it.sykdomshistorikkDagTeller[Feriedag::class])
-            assertEquals(1, it.sykdomshistorikkDagTeller[Dag.Arbeidsdag::class])
+            assertEquals(16, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
+            assertEquals(6, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
+            assertEquals(null, it.sykdomstidslinje.inspektør.dagteller[Feriedag::class])
+            assertEquals(1, it.sykdomstidslinje.inspektør.dagteller[Dag.Arbeidsdag::class])
 
             TestTidslinjeInspektør(it.utbetalingstidslinjer(1.vedtaksperiode)).also { tidslinjeInspektør ->
                 assertEquals(16, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
@@ -970,10 +971,10 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
 
         inspektør.also {
-            assertEquals(16, it.sykdomshistorikkDagTeller[Sykedag::class])
-            assertEquals(6, it.sykdomshistorikkDagTeller[SykHelgedag::class])
-            assertEquals(7, it.sykdomshistorikkDagTeller[Dag.Arbeidsdag::class])
-            assertEquals(2, it.sykdomshistorikkDagTeller[FriskHelgedag::class])
+            assertEquals(16, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
+            assertEquals(6, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
+            assertEquals(7, it.sykdomstidslinje.inspektør.dagteller[Dag.Arbeidsdag::class])
+            assertEquals(2, it.sykdomstidslinje.inspektør.dagteller[FriskHelgedag::class])
 
             TestTidslinjeInspektør(it.utbetalingstidslinjer(1.vedtaksperiode)).also { tidslinjeInspektør ->
                 assertEquals(16, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
@@ -1735,7 +1736,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         inspektør.also {
             assertEquals(1.februar, it.sykdomstidslinje.førsteDag())
             assertEquals(28.februar, it.sykdomstidslinje.sisteDag())
-            assertEquals(28, it.sykdomshistorikkDagTeller[Feriedag::class])
+            assertEquals(28, it.sykdomstidslinje.inspektør.dagteller[Feriedag::class])
         }
     }
 
@@ -1794,7 +1795,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.mars til 16.mars))
 
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
-        val sykdomstidslinjedagerForAndrePeriode = inspektør.vedtaksperiodeDagTeller(2.vedtaksperiode)!!
+        val sykdomstidslinjedagerForAndrePeriode = inspektør.vedtaksperiodeSykdomstidslinje(2.vedtaksperiode).inspektør.dagteller
         assertEquals(21, sykdomstidslinjedagerForAndrePeriode.values.reduce { acc, i -> acc + i })
         assertEquals(7, sykdomstidslinjedagerForAndrePeriode[Sykedag::class])
         assertEquals(4, sykdomstidslinjedagerForAndrePeriode[SykHelgedag::class])

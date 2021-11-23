@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.Dag.Feriedag
 import no.nav.helse.testhelpers.februar
@@ -48,7 +49,7 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
             Søknad.Søknadsperiode.Sykdom(1.mars, 28.mars, 100.prosent),
             Søknad.Søknadsperiode.Ferie(1.juli(2015), 10.juli(2015)),
         )
-        assertEquals(null, inspektør.vedtaksperiodeDagTeller(1.vedtaksperiode)?.get(Feriedag::class))
+        assertEquals(null, inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode).inspektør.dagteller[Feriedag::class])
     }
 
     @Test
@@ -122,8 +123,8 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
         assertEquals(1.februar til 28.februar, inspektør.periode(2.vedtaksperiode) )
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE)
-        assertEquals(7, inspektør.vedtaksperiodeDagTeller(1.vedtaksperiode)?.get(Feriedag::class))
-        assertEquals(null, inspektør.vedtaksperiodeDagTeller(2.vedtaksperiode)?.get(Feriedag::class))
+        assertEquals(7, inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode).inspektør.dagteller[Feriedag::class])
+        assertEquals(null, inspektør.vedtaksperiodeSykdomstidslinje(2.vedtaksperiode).inspektør.dagteller[Feriedag::class])
     }
 
     @Test
@@ -136,7 +137,7 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
             Søknad.Søknadsperiode.Ferie(26.januar, 31.januar)
         )
         assertEquals(17.januar til 28.februar, inspektør.periode(1.vedtaksperiode) )
-        assertEquals(null, inspektør.vedtaksperiodeDagTeller(1.vedtaksperiode)?.get(Feriedag::class))
+        assertEquals(null, inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode).inspektør.dagteller[Feriedag::class])
     }
 
     @Test
@@ -149,7 +150,7 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
             Søknad.Søknadsperiode.Ferie(26.januar, 2.februar)
         )
         assertEquals(17.januar til 28.februar, inspektør.periode(1.vedtaksperiode) )
-        assertEquals(2, inspektør.vedtaksperiodeDagTeller(1.vedtaksperiode)?.get(Feriedag::class))
+        assertEquals(2, inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode).inspektør.dagteller[Feriedag::class])
     }
 
     @Test
@@ -164,8 +165,8 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
         assertEquals(1.februar til 28.februar, inspektør.periode(2.vedtaksperiode) )
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE)
-        assertEquals(null, inspektør.vedtaksperiodeDagTeller(1.vedtaksperiode)?.get(Feriedag::class))
-        assertEquals(null, inspektør.vedtaksperiodeDagTeller(2.vedtaksperiode)?.get(Feriedag::class))
+        assertEquals(null, inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode).inspektør.dagteller[Feriedag::class])
+        assertEquals(null, inspektør.vedtaksperiodeSykdomstidslinje(2.vedtaksperiode).inspektør.dagteller[Feriedag::class])
         assertWarnings(inspektør)
     }
 
@@ -181,8 +182,8 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
         assertEquals(1.februar til 28.februar, inspektør.periode(2.vedtaksperiode) )
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE)
-        assertEquals(null, inspektør.vedtaksperiodeDagTeller(1.vedtaksperiode)?.get(Feriedag::class))
-        assertEquals(null, inspektør.vedtaksperiodeDagTeller(2.vedtaksperiode)?.get(Feriedag::class))
+        assertEquals(null, inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode).inspektør.dagteller[Feriedag::class])
+        assertEquals(null, inspektør.vedtaksperiodeSykdomstidslinje(2.vedtaksperiode).inspektør.dagteller[Feriedag::class])
         assertWarningTekst(inspektør, "Det er oppgitt ny informasjon om ferie i søknaden som det ikke har blitt opplyst om tidligere. Tidligere periode må revurderes.")
     }
 
@@ -198,8 +199,8 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
         assertEquals(1.februar til 28.februar, inspektør.periode(2.vedtaksperiode) )
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP)
-        assertEquals(null, inspektør.vedtaksperiodeDagTeller(1.vedtaksperiode)?.get(Feriedag::class))
-        assertEquals(null, inspektør.vedtaksperiodeDagTeller(2.vedtaksperiode)?.get(Feriedag::class))
+        assertEquals(null, inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode).inspektør.dagteller[Feriedag::class])
+        assertEquals(null, inspektør.vedtaksperiodeSykdomstidslinje(2.vedtaksperiode).inspektør.dagteller[Feriedag::class])
     }
 
     @Test
@@ -214,8 +215,8 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
         assertEquals(1.februar til 28.februar, inspektør.periode(2.vedtaksperiode) )
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP)
-        assertEquals(null, inspektør.vedtaksperiodeDagTeller(1.vedtaksperiode)?.get(Feriedag::class))
-        assertEquals(null, inspektør.vedtaksperiodeDagTeller(2.vedtaksperiode)?.get(Feriedag::class))
+        assertEquals(null, inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode).inspektør.dagteller[Feriedag::class])
+        assertEquals(null, inspektør.vedtaksperiodeSykdomstidslinje(2.vedtaksperiode).inspektør.dagteller[Feriedag::class])
     }
 
     @Test
@@ -230,8 +231,8 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
         assertEquals(1.februar til 28.februar, inspektør.periode(2.vedtaksperiode) )
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP)
-        assertEquals(null, inspektør.vedtaksperiodeDagTeller(1.vedtaksperiode)?.get(Feriedag::class))
-        assertEquals(null, inspektør.vedtaksperiodeDagTeller(2.vedtaksperiode)?.get(Feriedag::class))
+        assertEquals(null, inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode).inspektør.dagteller[Feriedag::class])
+        assertEquals(null, inspektør.vedtaksperiodeSykdomstidslinje(2.vedtaksperiode).inspektør.dagteller[Feriedag::class])
         assertWarnings(inspektør)
     }
 
@@ -247,7 +248,7 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
         assertEquals(1.februar til 28.februar, inspektør.periode(2.vedtaksperiode) )
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP)
-        assertEquals(5, inspektør.vedtaksperiodeDagTeller(1.vedtaksperiode)?.get(Feriedag::class))
-        assertEquals(null, inspektør.vedtaksperiodeDagTeller(2.vedtaksperiode)?.get(Feriedag::class))
+        assertEquals(5, inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode).inspektør.dagteller[Feriedag::class])
+        assertEquals(null, inspektør.vedtaksperiodeSykdomstidslinje(2.vedtaksperiode).inspektør.dagteller[Feriedag::class])
     }
 }

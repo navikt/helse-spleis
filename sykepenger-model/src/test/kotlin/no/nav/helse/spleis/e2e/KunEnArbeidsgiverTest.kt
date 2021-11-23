@@ -43,7 +43,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        inspektør.låstePerioder.also {
+        inspektør.sykdomstidslinje.inspektør.låstePerioder.also {
             assertEquals(0, it.size)
         }
         håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
@@ -52,8 +52,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertActivities(it)
             assertInntektForDato(INNTEKT, 3.januar, it)
             assertEquals(3, it.sykdomshistorikk.size)
-            assertEquals(18, it.sykdomshistorikkDagTeller[Sykedag::class])
-            assertEquals(6, it.sykdomshistorikkDagTeller[SykHelgedag::class])
+            assertEquals(18, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
+            assertEquals(6, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
         }
         assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
         assertTilstander(
@@ -70,7 +70,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             AVSLUTTET
         )
         assertTrue(1.vedtaksperiode(ORGNUMMER) in observatør.utbetalteVedtaksperioder)
-        inspektør.låstePerioder.also {
+        inspektør.sykdomstidslinje.inspektør.låstePerioder.also {
             assertEquals(1, it.size)
             assertEquals(Periode(3.januar, 26.januar), it.first())
         }
@@ -87,8 +87,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertActivities(it)
             assertInntektForDato(INNTEKT, 3.januar, it)
             assertEquals(3, it.sykdomshistorikk.size)
-            assertEquals(4, it.sykdomshistorikkDagTeller[Sykedag::class])
-            assertEquals(2, it.sykdomshistorikkDagTeller[SykHelgedag::class])
+            assertEquals(4, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
+            assertEquals(2, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
         }
         assertTilstander(
             0,
@@ -118,8 +118,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertActivities(it)
             assertInntektForDato(INNTEKT, 3.januar, it)
             assertEquals(7, it.sykdomshistorikk.size)
-            assertEquals(4, it.sykdomshistorikkDagTeller[SykHelgedag::class])
-            assertEquals(14, it.sykdomshistorikkDagTeller[Sykedag::class])
+            assertEquals(4, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
+            assertEquals(14, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
         }
         assertTilstander(
             1.vedtaksperiode,
@@ -165,8 +165,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertActivities(it)
             assertInntektForDato(INNTEKT, 8.januar, it)
             assertEquals(7, it.sykdomshistorikk.size)
-            assertEquals(4, it.sykdomshistorikkDagTeller[SykHelgedag::class])
-            assertEquals(13, it.sykdomshistorikkDagTeller[Sykedag::class])
+            assertEquals(4, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
+            assertEquals(13, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
         }
         assertTilstander(
             1.vedtaksperiode,
@@ -200,8 +200,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertActivities(it)
             assertInntektForDato(INNTEKT, 3.januar, it)
             assertEquals(3, it.sykdomshistorikk.size)
-            assertEquals(4, it.sykdomshistorikkDagTeller[Sykedag::class])
-            assertEquals(2, it.sykdomshistorikkDagTeller[SykHelgedag::class])
+            assertEquals(4, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
+            assertEquals(2, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
         }
         assertTilstander(
             1.vedtaksperiode,
@@ -228,8 +228,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertActivities(it)
             assertInntektForDato(INNTEKT, 3.januar, it)
             assertEquals(3, it.sykdomshistorikk.size)
-            assertEquals(18, it.sykdomshistorikkDagTeller[Sykedag::class])
-            assertEquals(6, it.sykdomshistorikkDagTeller[SykHelgedag::class])
+            assertEquals(18, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
+            assertEquals(6, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
         }
         assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
         assertTilstander(
@@ -264,8 +264,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertWarn("Utdanning oppgitt i perioden i søknaden.", it.personLogg)
             assertWarn("Utenlandsopphold oppgitt i perioden i søknaden.", it.personLogg)
             assertEquals(3, it.sykdomshistorikk.size)
-            assertEquals(18, it.sykdomshistorikkDagTeller[Sykedag::class])
-            assertEquals(6, it.sykdomshistorikkDagTeller[SykHelgedag::class])
+            assertEquals(18, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
+            assertEquals(6, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
         }
     }
 
@@ -283,8 +283,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertActivities(it)
             assertInntektForDato(INNTEKT, 3.januar, it)
             assertEquals(3, it.sykdomshistorikk.size)
-            assertNull(it.sykdomshistorikkDagTeller[Sykedag::class])
-            assertEquals(6, it.sykdomshistorikkDagTeller[SykHelgedag::class])
+            assertNull(it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
+            assertEquals(6, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
             assertDoesNotThrow { it.arbeidsgiver.nåværendeTidslinje() }
             assertTrue(it.utbetalingslinjer(0).isEmpty())
             TestTidslinjeInspektør(it.utbetalingstidslinjer(1.vedtaksperiode)).also { tidslinjeInspektør ->
@@ -322,8 +322,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertActivities(it)
             assertInntektForDato(INNTEKT, 3.januar, it)
             assertEquals(3, it.sykdomshistorikk.size)
-            assertEquals(18, it.sykdomshistorikkDagTeller[Sykedag::class])
-            assertEquals(6, it.sykdomshistorikkDagTeller[SykHelgedag::class])
+            assertEquals(18, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
+            assertEquals(6, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
         }
         assertNotNull(1.vedtaksperiode)
         assertTilstander(
@@ -357,8 +357,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertActivities(it)
             assertInntektForDato(null, 2.januar, it)
             assertEquals(2, it.sykdomshistorikk.size)
-            assertEquals(18, it.sykdomshistorikkDagTeller[Sykedag::class])
-            assertEquals(6, it.sykdomshistorikkDagTeller[SykHelgedag::class])
+            assertEquals(18, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
+            assertEquals(6, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
         }
         assertTilstander(
             1.vedtaksperiode,
@@ -396,8 +396,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertActivities(it)
             assertInntektForDato(45000.månedlig, 27.juli(2020), it)
             assertEquals(2, it.sykdomshistorikk.size)
-            assertEquals(21, it.sykdomshistorikkDagTeller[Sykedag::class])
-            assertEquals(9, it.sykdomshistorikkDagTeller[SykHelgedag::class])
+            assertEquals(21, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
+            assertEquals(9, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
             assertEquals(43617, it.nettoBeløp[0])
         }
         assertTilstander(
@@ -475,9 +475,9 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertInntektForDato(INNTEKT, 24.januar, it)
             assertEquals(4.januar, it.skjæringstidspunkt(1.vedtaksperiode))
             assertEquals(24.januar, it.skjæringstidspunkt(2.vedtaksperiode))
-            assertEquals(19, it.sykdomshistorikkDagTeller[Sykedag::class])
-            assertEquals(8, it.sykdomshistorikkDagTeller[SykHelgedag::class])
-            assertEquals(1, it.sykdomshistorikkDagTeller[Dag.UkjentDag::class])
+            assertEquals(19, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
+            assertEquals(8, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
+            assertEquals(1, it.sykdomstidslinje.inspektør.dagteller[Dag.UkjentDag::class])
         }
     }
 
@@ -1344,10 +1344,10 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertActivities(it)
-            assertEquals(3, it.sykdomshistorikkDagTeller[Dag.Arbeidsgiverdag::class])
-            assertEquals(2, it.sykdomshistorikkDagTeller[Dag.ArbeidsgiverHelgedag::class])
-            assertEquals(35, it.sykdomshistorikkDagTeller[Sykedag::class])
-            assertEquals(12, it.sykdomshistorikkDagTeller[SykHelgedag::class])
+            assertEquals(3, it.sykdomstidslinje.inspektør.dagteller[Dag.Arbeidsgiverdag::class])
+            assertEquals(2, it.sykdomstidslinje.inspektør.dagteller[Dag.ArbeidsgiverHelgedag::class])
+            assertEquals(35, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
+            assertEquals(12, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
         }
         assertTilstander(
             1.vedtaksperiode,
@@ -2721,11 +2721,11 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
 
-        assertEquals(null, inspektør.sykdomshistorikkDagTeller[Dag.Feriedag::class])
+        assertEquals(null, inspektør.sykdomstidslinje.inspektør.dagteller[Dag.Feriedag::class])
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(14.januar(2021), Dagtype.Feriedag)))
 
-        assertEquals(1, inspektør.sykdomshistorikkDagTeller[Dag.Feriedag::class])
+        assertEquals(1, inspektør.sykdomstidslinje.inspektør.dagteller[Dag.Feriedag::class])
     }
 
     @Test
