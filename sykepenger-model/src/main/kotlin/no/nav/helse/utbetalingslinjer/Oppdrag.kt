@@ -7,6 +7,8 @@ import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.sykdomstidslinje.erHelg
+import no.nav.helse.utbetalingslinjer.Oppdragstatus.AVVIST
+import no.nav.helse.utbetalingslinjer.Oppdragstatus.FEIL
 import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -45,6 +47,8 @@ internal class Oppdrag private constructor(
             val endrede = oppdrag.filter { it.harUtbetalinger() }
             return endrede.all { it.status == endrede.first().status }
         }
+
+        internal fun ingenFeil(vararg oppdrag: Oppdrag) = oppdrag.none { it.status in listOf(AVVIST, FEIL) }
     }
 
     internal val førstedato get() = linjer.firstOrNull()?.let { it.datoStatusFom() ?: it.fom } ?: LocalDate.MIN

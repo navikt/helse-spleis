@@ -258,7 +258,7 @@ internal class Utbetaling private constructor(
 
     private fun tilstand(neste: Tilstand, hendelse: IAktivitetslogg) {
         oppdatert = LocalDateTime.now()
-        if (!Oppdrag.synkronisert(arbeidsgiverOppdrag, personOppdrag)) return hendelse.info("Venter på status på det andre oppdraget før vi kan gå videre")
+        if (Oppdrag.ingenFeil(arbeidsgiverOppdrag, personOppdrag) && !Oppdrag.synkronisert(arbeidsgiverOppdrag, personOppdrag)) return hendelse.info("Venter på status på det andre oppdraget før vi kan gå videre")
         val forrigeTilstand = tilstand
         tilstand = neste
         observers.forEach {
@@ -898,6 +898,16 @@ internal class Utbetaling private constructor(
         override fun håndter(utbetaling: Utbetaling, påminnelse: Utbetalingpåminnelse) {
             påminnelse.info("Forsøker å sende utbetalingen på nytt")
             utbetaling.overfør(Overført, påminnelse)
+        }
+
+        override fun overført(utbetaling: Utbetaling, hendelse: UtbetalingOverført) {
+            utbetaling.arbeidsgiverOppdrag.lagreOverføringsinformasjon(hendelse)
+            utbetaling.personOppdrag.lagreOverføringsinformasjon(hendelse)
+        }
+
+        override fun kvittér(utbetaling: Utbetaling, hendelse: UtbetalingHendelse) {
+            utbetaling.arbeidsgiverOppdrag.lagreOverføringsinformasjon(hendelse)
+            utbetaling.personOppdrag.lagreOverføringsinformasjon(hendelse)
         }
     }
 
