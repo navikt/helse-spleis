@@ -132,7 +132,6 @@ abstract class Toggle internal constructor(enabled: Boolean = false, private val
     object SpeilApiV2 : Toggle("SPEIL_API_V2")
     object GraphQLPlayground : Toggle("GraphQLPlayground")
     object RevurdereInntektMedFlereArbeidsgivere : Toggle(false)
-    object NyeBehovForUtbetaling : Toggle(false)
     object DelvisRefusjon : Toggle(false)
 
     object LageBrukerutbetaling : Toggle("LAGE_BRUKERUTBETALING") {
