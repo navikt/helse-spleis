@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Aktivitetskontekst
 import no.nav.helse.person.IdInnhenter

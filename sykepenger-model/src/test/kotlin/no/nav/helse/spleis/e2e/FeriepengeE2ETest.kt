@@ -6,6 +6,7 @@ import ch.qos.logback.core.read.ListAppender
 import no.nav.helse.Toggle
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode
+import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning

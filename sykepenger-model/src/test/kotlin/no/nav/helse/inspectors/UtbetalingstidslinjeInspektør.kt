@@ -5,6 +5,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
+import kotlin.reflect.KClass
 
 internal val Utbetalingstidslinje.inspektør get() = UtbetalingstidslinjeInspektør(this)
 
@@ -25,6 +26,14 @@ internal class UtbetalingstidslinjeInspektør(utbetalingstidslinje: Utbetalingst
     internal var ukjentDagTeller = 0
     internal var totalUtbetaling = 0.0
     internal var totalInntekt = 0.0
+
+    val navdager = mutableListOf<NavDag>()
+    val navHelgdager = mutableListOf<NavHelgDag>()
+    val arbeidsdager = mutableListOf<Arbeidsdag>()
+    val arbeidsgiverdager = mutableListOf<ArbeidsgiverperiodeDag>()
+    val fridager = mutableListOf<Fridag>()
+
+    val unikedager = mutableSetOf<KClass<out Utbetalingstidslinje.Utbetalingsdag>>()
 
     internal val size get() =
         arbeidsdagTeller +
@@ -51,6 +60,7 @@ internal class UtbetalingstidslinjeInspektør(utbetalingstidslinje: Utbetalingst
     internal fun totalInntekt() = totalInntekt
 
     private fun collect(dag: Utbetalingstidslinje.Utbetalingsdag, dato: LocalDate) {
+        unikedager.add(dag::class)
         første(dag, dato)
         sistedag = dag
         sistedato = dato
@@ -68,6 +78,7 @@ internal class UtbetalingstidslinjeInspektør(utbetalingstidslinje: Utbetalingst
         økonomi: Økonomi
     ) {
         arbeidsdagTeller += 1
+        arbeidsdager.add(dag)
         collect(dag, dato)
     }
 
@@ -77,6 +88,7 @@ internal class UtbetalingstidslinjeInspektør(utbetalingstidslinje: Utbetalingst
         økonomi: Økonomi
     ) {
         arbeidsgiverperiodeDagTeller += 1
+        arbeidsgiverdager.add(dag)
         collect(dag, dato)
     }
 
@@ -95,6 +107,7 @@ internal class UtbetalingstidslinjeInspektør(utbetalingstidslinje: Utbetalingst
         økonomi: Økonomi
     ) {
         fridagTeller += 1
+        fridager.add(dag)
         collect(dag, dato)
     }
 
@@ -109,6 +122,7 @@ internal class UtbetalingstidslinjeInspektør(utbetalingstidslinje: Utbetalingst
             totalInntekt += aktuellDagsinntekt ?: 0.0
         }
         navDagTeller += 1
+        navdager.add(dag)
         collect(dag, dato)
     }
 
@@ -118,6 +132,7 @@ internal class UtbetalingstidslinjeInspektør(utbetalingstidslinje: Utbetalingst
         økonomi: Økonomi
     ) {
         navHelgDagTeller += 1
+        navHelgdager.add(dag)
         collect(dag, dato)
     }
 

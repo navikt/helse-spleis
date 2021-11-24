@@ -1,10 +1,9 @@
-package no.nav.helse.spleis.e2e
+package no.nav.helse.inspectors
 
 import no.nav.helse.antallEtterspurteBehov
 import no.nav.helse.etterspurteBehov
 import no.nav.helse.etterspurteBehovFinnes
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.inspectors.InntektshistorikkInspektør
 import no.nav.helse.person.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -140,13 +139,15 @@ internal class TestArbeidsgiverInspektør(
         inntektshistorikkInnslagId: UUID,
         vilkårsgrunnlagHistorikkInnslagId: UUID
     ) {
-        utbetalingstidslinjeberegningData.add(UtbetalingstidslinjeberegningData(
+        utbetalingstidslinjeberegningData.add(
+            UtbetalingstidslinjeberegningData(
             id = id,
             tidsstempel = tidsstempel,
             sykdomshistorikkElementId = sykdomshistorikkElementId,
             inntektshistorikkInnslagId = inntektshistorikkInnslagId,
             vilkårsgrunnlagHistorikkInnslagId = vilkårsgrunnlagHistorikkInnslagId
-        ))
+        )
+        )
     }
 
     override fun preVisitVedtaksperiode(

@@ -16,8 +16,6 @@ import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -927,13 +925,12 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             assertEquals(6, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
             assertEquals(null, it.sykdomstidslinje.inspektør.dagteller[Feriedag::class])
             assertEquals(1, it.sykdomstidslinje.inspektør.dagteller[Dag.Arbeidsdag::class])
-
-            TestTidslinjeInspektør(it.utbetalingstidslinjer(1.vedtaksperiode)).also { tidslinjeInspektør ->
-                assertEquals(16, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
-                assertEquals(null, tidslinjeInspektør.dagtelling[Fridag::class])
-                assertEquals(4, tidslinjeInspektør.dagtelling[NavHelgDag::class])
-                assertEquals(10, tidslinjeInspektør.dagtelling[NavDag::class])
-                assertEquals(1, tidslinjeInspektør.dagtelling[Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag::class])
+            it.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
+                assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
+                assertEquals(0, tidslinjeInspektør.fridagTeller)
+                assertEquals(4, tidslinjeInspektør.navHelgDagTeller)
+                assertEquals(10, tidslinjeInspektør.navDagTeller)
+                assertEquals(1, tidslinjeInspektør.arbeidsdagTeller)
             }
         }
         assertEquals(3.januar(2020), inspektør.skjæringstidspunkt(1.vedtaksperiode))
@@ -975,12 +972,11 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             assertEquals(6, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
             assertEquals(7, it.sykdomstidslinje.inspektør.dagteller[Dag.Arbeidsdag::class])
             assertEquals(2, it.sykdomstidslinje.inspektør.dagteller[FriskHelgedag::class])
-
-            TestTidslinjeInspektør(it.utbetalingstidslinjer(1.vedtaksperiode)).also { tidslinjeInspektør ->
-                assertEquals(16, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
-                assertEquals(1, tidslinjeInspektør.dagtelling[NavHelgDag::class])
-                assertEquals(5, tidslinjeInspektør.dagtelling[NavDag::class])
-                assertEquals(9, tidslinjeInspektør.dagtelling[Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag::class])
+            it.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
+                assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
+                assertEquals(1, tidslinjeInspektør.navHelgDagTeller)
+                assertEquals(5, tidslinjeInspektør.navDagTeller)
+                assertEquals(9, tidslinjeInspektør.arbeidsdagTeller)
             }
         }
         assertTilstander(
@@ -1100,10 +1096,10 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         inspektør.also {
             assertTrue(it.personLogg.hasWarningsOrWorse())
-            TestTidslinjeInspektør(it.utbetalingstidslinjer(1.vedtaksperiode)).also { tidslinjeInspektør ->
-                assertEquals(16, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
-                assertEquals(4, tidslinjeInspektør.dagtelling[NavHelgDag::class])
-                assertEquals(11, tidslinjeInspektør.dagtelling[AvvistDag::class])
+            it.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
+                assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
+                assertEquals(4, tidslinjeInspektør.navHelgDagTeller)
+                assertEquals(11, tidslinjeInspektør.avvistDagTeller)
             }
         }
     }
@@ -1145,10 +1141,10 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         inspektør.also {
             assertFalse(it.personLogg.hasWarningsOrWorse())
-            TestTidslinjeInspektør(it.utbetalingstidslinjer(1.vedtaksperiode)).also { tidslinjeInspektør ->
-                assertEquals(16, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
-                assertEquals(4, tidslinjeInspektør.dagtelling[NavHelgDag::class])
-                assertEquals(11, tidslinjeInspektør.dagtelling[NavDag::class])
+            it.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
+                assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
+                assertEquals(4, tidslinjeInspektør.navHelgDagTeller)
+                assertEquals(11, tidslinjeInspektør.navDagTeller)
             }
         }
 
@@ -1189,16 +1185,16 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         inspektør.also {
             assertTrue(it.personLogg.hasWarningsOrWorse())
-            TestTidslinjeInspektør(it.utbetalingstidslinjer(2.vedtaksperiode)).also { tidslinjeInspektør ->
-                assertEquals(16, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
-                assertEquals(4, tidslinjeInspektør.dagtelling[NavHelgDag::class])
-                assertEquals(11, tidslinjeInspektør.dagtelling[AvvistDag::class])
+            it.utbetalingstidslinjer(2.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
+                assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
+                assertEquals(4, tidslinjeInspektør.navHelgDagTeller)
+                assertEquals(11, tidslinjeInspektør.avvistDagTeller)
             }
 
-            TestTidslinjeInspektør(it.utbetaling(1).utbetalingstidslinje()).also { tidslinjeInspektør ->
-                assertEquals(32, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
-                assertEquals(8, tidslinjeInspektør.dagtelling[NavHelgDag::class])
-                assertEquals(11, tidslinjeInspektør.dagtelling[AvvistDag::class])
+            it.utbetaling(1).utbetalingstidslinje().inspektør.also { tidslinjeInspektør ->
+                assertEquals(32, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
+                assertEquals(8, tidslinjeInspektør.navHelgDagTeller)
+                assertEquals(11, tidslinjeInspektør.avvistDagTeller)
 
             }
         }
@@ -1237,10 +1233,10 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         inspektør.also {
             assertTrue(it.personLogg.hasWarningsOrWorse())
-            TestTidslinjeInspektør(it.utbetalingstidslinjer(1.vedtaksperiode)).also { tidslinjeInspektør ->
-                assertEquals(16, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
-                assertEquals(4, tidslinjeInspektør.dagtelling[NavHelgDag::class])
-                assertEquals(11, tidslinjeInspektør.dagtelling[AvvistDag::class])
+            it.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
+                assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
+                assertEquals(4, tidslinjeInspektør.navHelgDagTeller)
+                assertEquals(11, tidslinjeInspektør.avvistDagTeller)
             }
         }
 
@@ -1281,16 +1277,16 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         inspektør.also {
             assertTrue(it.personLogg.hasWarningsOrWorse())
-            TestTidslinjeInspektør(it.utbetalingstidslinjer(2.vedtaksperiode)).also { tidslinjeInspektør ->
-                assertEquals(16, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
-                assertEquals(4, tidslinjeInspektør.dagtelling[NavHelgDag::class])
-                assertEquals(11, tidslinjeInspektør.dagtelling[AvvistDag::class])
+            it.utbetalingstidslinjer(2.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
+                assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
+                assertEquals(4, tidslinjeInspektør.navHelgDagTeller)
+                assertEquals(11, tidslinjeInspektør.avvistDagTeller)
             }
 
-            TestTidslinjeInspektør(it.utbetaling(1).utbetalingstidslinje()).also { tidslinjeInspektør ->
-                assertEquals(32, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
-                assertEquals(8, tidslinjeInspektør.dagtelling[NavHelgDag::class])
-                assertEquals(22, tidslinjeInspektør.dagtelling[AvvistDag::class])
+            it.utbetaling(1).utbetalingstidslinje().inspektør.also { tidslinjeInspektør ->
+                assertEquals(32, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
+                assertEquals(8, tidslinjeInspektør.navHelgDagTeller)
+                assertEquals(22, tidslinjeInspektør.avvistDagTeller)
 
             }
         }
@@ -1337,10 +1333,10 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         inspektør.also {
             assertTrue(it.personLogg.hasWarningsOrWorse())
-            TestTidslinjeInspektør(it.utbetalingstidslinjer(1.vedtaksperiode)).also { tidslinjeInspektør ->
-                assertEquals(16, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
-                assertEquals(4, tidslinjeInspektør.dagtelling[NavHelgDag::class])
-                assertEquals(11, tidslinjeInspektør.dagtelling[AvvistDag::class])
+            it.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
+                assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
+                assertEquals(4, tidslinjeInspektør.navHelgDagTeller)
+                assertEquals(11, tidslinjeInspektør.avvistDagTeller)
             }
         }
 
@@ -1384,17 +1380,17 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         inspektør.also {
             assertTrue(it.personLogg.hasWarningsOrWorse())
-            TestTidslinjeInspektør(it.utbetalingstidslinjer(2.vedtaksperiode)).also { tidslinjeInspektør ->
-                assertEquals(16, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
-                assertEquals(4, tidslinjeInspektør.dagtelling[NavHelgDag::class])
-                assertEquals(11, tidslinjeInspektør.dagtelling[NavDag::class])
+            it.utbetalingstidslinjer(2.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
+                assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
+                assertEquals(4, tidslinjeInspektør.navHelgDagTeller)
+                assertEquals(11, tidslinjeInspektør.navDagTeller)
             }
 
-            TestTidslinjeInspektør(it.utbetaling(1).utbetalingstidslinje()).also { tidslinjeInspektør ->
-                assertEquals(32, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
-                assertEquals(8, tidslinjeInspektør.dagtelling[NavHelgDag::class])
-                assertEquals(11, tidslinjeInspektør.dagtelling[NavDag::class])
-                assertEquals(11, tidslinjeInspektør.dagtelling[AvvistDag::class])
+            it.utbetaling(1).utbetalingstidslinje().inspektør.also { tidslinjeInspektør ->
+                assertEquals(32, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
+                assertEquals(8, tidslinjeInspektør.navHelgDagTeller)
+                assertEquals(11, tidslinjeInspektør.navDagTeller)
+                assertEquals(11, tidslinjeInspektør.avvistDagTeller)
 
             }
         }
@@ -1433,10 +1429,10 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         inspektør.also {
             assertTrue(it.personLogg.hasWarningsOrWorse())
-            TestTidslinjeInspektør(it.utbetalingstidslinjer(1.vedtaksperiode)).also { tidslinjeInspektør ->
-                assertEquals(16, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
-                assertEquals(4, tidslinjeInspektør.dagtelling[NavHelgDag::class])
-                assertEquals(11, tidslinjeInspektør.dagtelling[AvvistDag::class])
+            it.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
+                assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
+                assertEquals(4, tidslinjeInspektør.navHelgDagTeller)
+                assertEquals(11, tidslinjeInspektør.avvistDagTeller)
             }
         }
 
@@ -1504,17 +1500,17 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         inspektør.also {
             assertTrue(it.personLogg.hasWarningsOrWorse())
-            TestTidslinjeInspektør(it.utbetalingstidslinjer(3.vedtaksperiode)).also { tidslinjeInspektør ->
-                assertEquals(16, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
-                assertEquals(4, tidslinjeInspektør.dagtelling[NavHelgDag::class])
-                assertEquals(11, tidslinjeInspektør.dagtelling[NavDag::class])
+            it.utbetalingstidslinjer(3.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
+                assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
+                assertEquals(4, tidslinjeInspektør.navHelgDagTeller)
+                assertEquals(11, tidslinjeInspektør.navDagTeller)
             }
 
-            TestTidslinjeInspektør(it.utbetaling(2).utbetalingstidslinje()).also { tidslinjeInspektør ->
-                assertEquals(32, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
-                assertEquals(16, tidslinjeInspektør.dagtelling[NavHelgDag::class])
-                assertEquals(34, tidslinjeInspektør.dagtelling[NavDag::class])
-                assertEquals(11, tidslinjeInspektør.dagtelling[AvvistDag::class])
+            it.utbetaling(2).utbetalingstidslinje().inspektør.also { tidslinjeInspektør ->
+                assertEquals(32, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
+                assertEquals(16, tidslinjeInspektør.navHelgDagTeller)
+                assertEquals(34, tidslinjeInspektør.navDagTeller)
+                assertEquals(11, tidslinjeInspektør.avvistDagTeller)
 
             }
         }
@@ -1698,8 +1694,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
 
         inspektør.also {
-            TestTidslinjeInspektør(it.utbetalingstidslinjer(2.vedtaksperiode)).also { tidslinjeInspektør ->
-                assertNull(tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+            it.utbetalingstidslinjer(2.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
+                assertEquals(0, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
             }
         }
     }

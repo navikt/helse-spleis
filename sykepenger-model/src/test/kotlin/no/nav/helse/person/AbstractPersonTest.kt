@@ -1,7 +1,7 @@
 package no.nav.helse.person
 
+import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.somFødselsnummer
-import no.nav.helse.spleis.e2e.TestArbeidsgiverInspektør
 import no.nav.helse.spleis.e2e.TestObservatør
 import org.junit.jupiter.api.BeforeEach
 import java.util.*

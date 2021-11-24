@@ -17,7 +17,7 @@ import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -287,10 +287,10 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertEquals(6, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
             assertDoesNotThrow { it.arbeidsgiver.nåværendeTidslinje() }
             assertTrue(it.utbetalingslinjer(0).isEmpty())
-            TestTidslinjeInspektør(it.utbetalingstidslinjer(1.vedtaksperiode)).also { tidslinjeInspektør ->
-                assertEquals(6, tidslinjeInspektør.dagtelling[ForeldetDag::class])
-                assertEquals(2, tidslinjeInspektør.dagtelling[NavHelgDag::class])
-                assertEquals(16, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+            it.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
+                assertEquals(6, tidslinjeInspektør.foreldetDagTeller)
+                assertEquals(2, tidslinjeInspektør.navHelgDagTeller)
+                assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
             }
         }
         assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))

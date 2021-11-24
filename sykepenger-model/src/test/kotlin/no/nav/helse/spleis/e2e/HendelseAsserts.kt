@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.person.*
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje

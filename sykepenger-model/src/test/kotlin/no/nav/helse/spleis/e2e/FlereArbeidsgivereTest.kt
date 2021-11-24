@@ -12,7 +12,6 @@ import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.reflection.castAsList
 import no.nav.helse.testhelpers.*
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
@@ -1367,18 +1366,18 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
 
         a1.inspektør.also {
             assertTrue(it.personLogg.hasWarningsOrWorse())
-            TestTidslinjeInspektør(it.utbetalingstidslinjer(1.vedtaksperiode)).also { tidslinjeInspektør ->
-                assertEquals(16, tidslinjeInspektør.dagtelling[Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag::class])
-                assertEquals(4, tidslinjeInspektør.dagtelling[Utbetalingstidslinje.Utbetalingsdag.NavHelgDag::class])
-                assertEquals(11, tidslinjeInspektør.dagtelling[Utbetalingstidslinje.Utbetalingsdag.AvvistDag::class])
+            it.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
+                assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
+                assertEquals(4, tidslinjeInspektør.navHelgDagTeller)
+                assertEquals(11, tidslinjeInspektør.avvistDagTeller)
             }
         }
         a2.inspektør.also {
             assertTrue(it.personLogg.hasWarningsOrWorse())
-            TestTidslinjeInspektør(it.utbetalingstidslinjer(1.vedtaksperiode)).also { tidslinjeInspektør ->
-                assertEquals(16, tidslinjeInspektør.dagtelling[Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag::class])
-                assertEquals(4, tidslinjeInspektør.dagtelling[Utbetalingstidslinje.Utbetalingsdag.NavHelgDag::class])
-                assertEquals(11, tidslinjeInspektør.dagtelling[Utbetalingstidslinje.Utbetalingsdag.AvvistDag::class])
+            it.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
+                assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
+                assertEquals(4, tidslinjeInspektør.navHelgDagTeller)
+                assertEquals(11, tidslinjeInspektør.avvistDagTeller)
             }
         }
 
