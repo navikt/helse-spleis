@@ -171,9 +171,7 @@ internal class Oppdrag private constructor(
         }
 
     internal fun annuller(aktivitetslogg: IAktivitetslogg): Oppdrag {
-        return tomtOppdrag().minus(this, aktivitetslogg).also { annullering ->
-            annullering.nettoBeløp(this)
-        }
+        return tomtOppdrag().minus(this, aktivitetslogg)
     }
 
     private fun tomtOppdrag(): Oppdrag =
@@ -185,11 +183,11 @@ internal class Oppdrag private constructor(
         )
 
     internal fun minus(eldre: Oppdrag, aktivitetslogg: IAktivitetslogg): Oppdrag {
+        // Vi ønsker ikke å forlenge et oppdrag vi ikke overlapper med, eller et tomt oppdrag
+        if (harIngenKoblingTilTidligereOppdrag(eldre)) return this
+        // overtar fagsystemId fra tidligere Oppdrag uten utbetaling, gitt at det er samme arbeidsgiverperiode
+        if (eldre.erTomt()) return this.also { this.fagsystemId = eldre.fagsystemId }
         return when {
-            harIngenKoblingTilTidligereOppdrag(eldre) -> this
-            // overtar fagsystemId fra tidligere Oppdrag uten utbetaling, gitt at det er samme arbeidsgiverperiode
-            eldre.erTomt() -> this.also { this.fagsystemId = eldre.fagsystemId }
-            // Vi ønsker ikke å forlenge et oppdrag vi ikke overlapper med, eller et tomt oppdrag
             // om man trekker fra et utbetalt oppdrag med et tomt oppdrag medfører det et oppdrag som opphører (les: annullerer) hele fagsystemIDen
             erTomt() -> annulleringsoppdrag(eldre)
             // "fom" kan flytte seg fremover i tid dersom man, eksempelvis, revurderer en utbetalt periode til å starte med ikke-utbetalte dager (f.eks. ferie)
@@ -208,7 +206,7 @@ internal class Oppdrag private constructor(
             }
             // fom er lik, men endring kan oppstå overalt ellers
             else -> endre(eldre.kopierUtenOpphørslinjer(), aktivitetslogg)
-        }
+        }.also { it.nettoBeløp(eldre) }
     }
 
     private fun harIngenKoblingTilTidligereOppdrag(eldre: Oppdrag) = (eldre.erTomt() && !sammenhengendeUtbetalingsperiode(eldre)) || this !in eldre

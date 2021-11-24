@@ -31,9 +31,7 @@ internal class OppdragBuilder(
         val oppdrag = nyttOppdrag()
         return when (tidligere) {
             null -> oppdrag
-            else -> oppdrag.minus(tidligere, aktivitetslogg).also {
-                if (tidligere.fagsystemId() == it.fagsystemId()) it.nettoBeløp(tidligere)
-            }
+            else -> oppdrag.minus(tidligere, aktivitetslogg)
         }.also {
             aktivitetslogg.info(
                 if (it.isEmpty()) "Ingen utbetalingslinjer bygget"
