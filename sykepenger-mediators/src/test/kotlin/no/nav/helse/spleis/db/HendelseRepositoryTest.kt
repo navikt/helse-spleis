@@ -48,7 +48,7 @@ private object TestMessages {
     val now = LocalDateTime.now().toString()
     val id = UUID.randomUUID()
     val deceitfulRiver: FalskeNyeSøknaderRiver = FalskeNyeSøknaderRiver(TestRapid(), TestMessageMediator())
-    val NySøknad = deceitfulRiver.lagDenFordømteMeldinga(JsonMessage("""
+    val NySøknad = deceitfulRiver.yossarian(JsonMessage("""
         {
             "@id": "$id",
             "@event_name": "ny_soknad",
@@ -78,7 +78,7 @@ internal class FalskeNyeSøknaderRiver(
     }
 
     override fun createMessage(packet: JsonMessage) = NySøknadMessage(packet)
-    fun lagDenFordømteMeldinga(packet: JsonMessage): NySøknadMessage {
+    fun yossarian(packet: JsonMessage): NySøknadMessage {
         packet.requireKey("@id")
         packet.requireKey("@event_name")
         packet.requireKey("@opprettet")
