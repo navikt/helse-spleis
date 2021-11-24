@@ -83,10 +83,10 @@ internal class Oppdrag private constructor(
     internal fun fagområde() = fagområde
     internal fun fagsystemId() = fagsystemId
 
-    internal operator fun contains(other: Oppdrag) = this.tilhører(other) || this.overlapperMed(other)
+    private operator fun contains(other: Oppdrag) = this.tilhører(other) || this.overlapperMed(other) || sammenhengendeUtbetalingsperiode(other)
 
-    private fun tilhører(other: Oppdrag) = this.fagsystemId == other.fagsystemId && this.fagområde == other.fagområde
-    private fun overlapperMed(other: Oppdrag) = maxOf(this.førstedato, other.førstedato) <= minOf(this.sistedato, other.sistedato) || sammenhengendeUtbetalingsperiode(other)
+    internal fun tilhører(other: Oppdrag) = this.fagsystemId == other.fagsystemId && this.fagområde == other.fagområde
+    private fun overlapperMed(other: Oppdrag) = !erTomt() && maxOf(this.førstedato, other.førstedato) <= minOf(this.sistedato, other.sistedato)
 
     private fun sammenhengendeUtbetalingsperiode(other: Oppdrag) =
         this.sisteArbeidsgiverdag != null && this.sisteArbeidsgiverdag == other.sisteArbeidsgiverdag
@@ -131,7 +131,7 @@ internal class Oppdrag private constructor(
 
     internal fun nettoBeløp() = nettoBeløp
 
-    internal fun nettoBeløp(tidligere: Oppdrag) {
+    private fun nettoBeløp(tidligere: Oppdrag) {
         nettoBeløp = this.totalbeløp() - tidligere.totalbeløp()
     }
 

@@ -53,7 +53,7 @@ internal class Utbetaling private constructor(
         gjenståendeSykedager: Int?
     ) : this(
         UUID.randomUUID(),
-        korrelerendeUtbetaling?.takeIf { it.arbeidsgiverOppdrag.fagsystemId() == arbeidsgiverOppdrag.fagsystemId() || it.personOppdrag.fagsystemId() == personOppdrag.fagsystemId() }?.korrelasjonsId ?: UUID.randomUUID(),
+        korrelerendeUtbetaling?.takeIf { arbeidsgiverOppdrag.tilhører(it.arbeidsgiverOppdrag) || personOppdrag.tilhører(it.personOppdrag) }?.korrelasjonsId ?: UUID.randomUUID(),
         beregningId,
         utbetalingstidslinje,
         arbeidsgiverOppdrag,
