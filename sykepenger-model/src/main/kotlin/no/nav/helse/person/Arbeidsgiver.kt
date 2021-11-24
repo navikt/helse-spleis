@@ -615,7 +615,8 @@ internal class Arbeidsgiver private constructor(
         hendelseskontekst: Hendelseskontekst,
         id: UUID,
         periode: Periode,
-        fagsystemId: String,
+        arbeidsgiverFagsystemId: String,
+        personFagsystemId: String,
         godkjenttidspunkt: LocalDateTime,
         saksbehandlerEpost: String,
         saksbehandlerIdent: String
@@ -623,7 +624,8 @@ internal class Arbeidsgiver private constructor(
         person.annullert(
             hendelseskontekst = hendelseskontekst,
             PersonObserver.UtbetalingAnnullertEvent(
-                fagsystemId = fagsystemId,
+                arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
+                personFagsystemId = personFagsystemId,
                 utbetalingId = id,
                 fom = periode.start,
                 tom = periode.endInclusive,

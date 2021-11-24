@@ -146,16 +146,24 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
 
     private fun assertAnnullert(melding: JsonNode) {
         assertTrue(melding.path("utbetalingId").asText().isNotEmpty())
-        assertTrue(melding.path("fagsystemId").asText().isNotEmpty())
+        assertTrue(melding.path("arbeidsgiverFagsystemId").asText().isNotEmpty())
+        assertEquals(melding.path("fagsystemId").asText(), melding.path("arbeidsgiverFagsystemId").asText())
+        assertTrue(melding.path("personFagsystemId").asText().isNotEmpty())
         assertDato(melding.path("fom").asText())
         assertDato(melding.path("tom").asText())
-        assertDatotid(melding.path("annullertAvSaksbehandler").asText())
-        assertTrue(melding.path("saksbehandlerEpost").asText().isNotEmpty())
+        assertDatotid(melding.path("tidspunkt").asText())
+        assertEquals(melding.path("annullertAvSaksbehandler").asText(), melding.path("tidspunkt").asText())
+        assertTrue(melding.path("epost").asText().isNotEmpty())
+        assertEquals(melding.path("saksbehandlerEpost").asText(), melding.path("epost").asText())
+        assertTrue(melding.path("ident").asText().isNotEmpty())
+        assertEquals(melding.path("saksbehandlerIdent").asText(), melding.path("ident").asText())
         assertTrue(melding.path("utbetalingslinjer").isArray)
         assertFalse(melding.path("utbetalingslinjer").isEmpty)
         melding.path("utbetalingslinjer").onEach {
             assertDato(it.path("fom").asText())
             assertDato(it.path("tom").asText())
+            assertEquals(0.0, it.path("grad").asDouble())
+            assertEquals(0, it.path("beløp").asInt())
         }
     }
 

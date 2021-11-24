@@ -108,7 +108,8 @@ interface PersonObserver {
 
     data class UtbetalingAnnullertEvent(
         val utbetalingId: UUID,
-        val fagsystemId: String,
+        val arbeidsgiverFagsystemId: String,
+        val personFagsystemId: String,
         val fom: LocalDate,
         val tom: LocalDate,
         val utbetalingslinjer: List<Utbetalingslinje>,

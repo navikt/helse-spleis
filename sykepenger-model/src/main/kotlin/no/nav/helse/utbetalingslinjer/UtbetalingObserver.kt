@@ -12,7 +12,8 @@ internal interface UtbetalingObserver {
         hendelseskontekst: Hendelseskontekst,
         id: UUID,
         periode: Periode,
-        fagsystemId: String,
+        arbeidsgiverFagsystemId: String,
+        personFagsystemId: String,
         godkjenttidspunkt: LocalDateTime,
         saksbehandlerEpost: String,
         saksbehandlerIdent: String

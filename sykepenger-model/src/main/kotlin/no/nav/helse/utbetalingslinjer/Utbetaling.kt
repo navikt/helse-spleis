@@ -820,7 +820,7 @@ internal class Utbetaling private constructor(
 
     internal object Annullert : Tilstand {
         override fun entering(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
-            utbetaling.vurdering?.annullert(hendelse.hendelseskontekst(), utbetaling, utbetaling.arbeidsgiverOppdrag)
+            utbetaling.vurdering?.annullert(hendelse.hendelseskontekst(), utbetaling)
             utbetaling.avsluttet = LocalDateTime.now()
         }
     }
@@ -929,9 +929,9 @@ internal class Utbetaling private constructor(
             visitor.visitVurdering(this, ident, epost, tidspunkt, automatiskBehandling, godkjent)
         }
 
-        internal fun annullert(hendelseskontekst: Hendelseskontekst, utbetaling: Utbetaling, oppdrag: Oppdrag) {
+        internal fun annullert(hendelseskontekst: Hendelseskontekst, utbetaling: Utbetaling) {
             utbetaling.observers.forEach {
-                it.utbetalingAnnullert(hendelseskontekst, utbetaling.id, utbetaling.periode, oppdrag.fagsystemId(), tidspunkt, epost, ident)
+                it.utbetalingAnnullert(hendelseskontekst, utbetaling.id, utbetaling.periode, utbetaling.arbeidsgiverOppdrag.fagsystemId(), utbetaling.personOppdrag.fagsystemId(), tidspunkt, epost, ident)
             }
         }
 

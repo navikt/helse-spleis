@@ -109,7 +109,26 @@ internal class PersonMediator(
         queueMessage(
             hendelseskontekst,
             "utbetaling_annullert", JsonMessage.newMessage(
-                objectMapper.convertValue(event)
+                mapOf(
+                    "utbetalingId" to event.utbetalingId,
+                    "fagsystemId" to event.arbeidsgiverFagsystemId,
+                    "arbeidsgiverFagsystemId" to event.arbeidsgiverFagsystemId,
+                    "personFagsystemId" to event.personFagsystemId,
+                    "fom" to event.fom,
+                    "tom" to event.tom,
+                    "annullertAvSaksbehandler" to event.annullertAvSaksbehandler,
+                    "tidspunkt" to event.annullertAvSaksbehandler,
+                    "saksbehandlerEpost" to event.saksbehandlerEpost,
+                    "epost" to event.saksbehandlerEpost,
+                    "saksbehandlerIdent" to event.saksbehandlerIdent,
+                    "ident" to event.saksbehandlerIdent,
+                    "utbetalingslinjer" to event.utbetalingslinjer.map { mapOf(
+                        "fom" to it.fom,
+                        "tom" to it.tom,
+                        "grad" to it.grad,
+                        "beløp" to it.beløp
+                    )}
+                )
             )
         )
     }
