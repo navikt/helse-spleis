@@ -931,7 +931,16 @@ internal class Utbetaling private constructor(
 
         internal fun annullert(hendelseskontekst: Hendelseskontekst, utbetaling: Utbetaling) {
             utbetaling.observers.forEach {
-                it.utbetalingAnnullert(hendelseskontekst, utbetaling.id, utbetaling.periode, utbetaling.arbeidsgiverOppdrag.fagsystemId(), utbetaling.personOppdrag.fagsystemId(), tidspunkt, epost, ident)
+                it.utbetalingAnnullert(
+                    hendelseskontekst = hendelseskontekst,
+                    id = utbetaling.id,
+                    periode = utbetaling.periode,
+                    arbeidsgiverFagsystemId = utbetaling.arbeidsgiverOppdrag.takeIf { it.harUtbetalinger() }?.fagsystemId(),
+                    personFagsystemId = utbetaling.personOppdrag.takeIf { it.harUtbetalinger() }?.fagsystemId(),
+                    godkjenttidspunkt = tidspunkt,
+                    saksbehandlerEpost = epost,
+                    saksbehandlerIdent = ident
+                )
             }
         }
 

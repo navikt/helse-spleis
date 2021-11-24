@@ -305,7 +305,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `publiserer et event ved annullering`() {
+    fun `publiserer et event ved annullering av full refusjon`() {
         nyttVedtak(3.januar, 26.januar, 100.prosent, 3.januar)
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
         håndterUtbetalt(
@@ -317,7 +317,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         no.nav.helse.testhelpers.assertNotNull(annullering)
 
         assertEquals(inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.fagsystemId(), annullering.arbeidsgiverFagsystemId)
-        assertEquals(inspektør.utbetaling(0).inspektør.personOppdrag.fagsystemId(), annullering.personFagsystemId)
+        assertNull(annullering.personFagsystemId)
 
         val utbetalingslinje = annullering.utbetalingslinjer.first()
         assertEquals("tbd@nav.no", annullering.saksbehandlerEpost)
@@ -330,7 +330,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `publiserer kun ett event ved annullering av utbetaling som strekker seg over flere vedtaksperioder`() {
+    fun `publiserer kun ett event ved annullering av utbetaling som strekker seg over flere vedtaksperioder med full refusjon`() {
         nyttVedtak(3.januar, 26.januar, 100.prosent, 3.januar)
         val fagsystemId = inspektør.fagsystemId(1.vedtaksperiode)
         forlengVedtak(27.januar, 20.februar, 100.prosent)
@@ -351,7 +351,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         no.nav.helse.testhelpers.assertNotNull(annullering)
 
         assertEquals(inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.fagsystemId(), annullering.arbeidsgiverFagsystemId)
-        assertEquals(inspektør.utbetaling(0).inspektør.personOppdrag.fagsystemId(), annullering.personFagsystemId)
+        assertNull(annullering.personFagsystemId)
         assertEquals(19.januar, annullering.fom)
         assertEquals(20.februar, annullering.tom)
 

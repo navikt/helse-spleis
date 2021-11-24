@@ -109,11 +109,8 @@ internal class PersonMediator(
         queueMessage(
             hendelseskontekst,
             "utbetaling_annullert", JsonMessage.newMessage(
-                mapOf(
+                mutableMapOf(
                     "utbetalingId" to event.utbetalingId,
-                    "fagsystemId" to event.arbeidsgiverFagsystemId,
-                    "arbeidsgiverFagsystemId" to event.arbeidsgiverFagsystemId,
-                    "personFagsystemId" to event.personFagsystemId,
                     "fom" to event.fom,
                     "tom" to event.tom,
                     "annullertAvSaksbehandler" to event.annullertAvSaksbehandler,
@@ -128,7 +125,15 @@ internal class PersonMediator(
                         "grad" to it.grad,
                         "beløp" to it.beløp
                     )}
-                )
+                ).apply {
+                    event.arbeidsgiverFagsystemId?.also {
+                        this["fagsystemId"] = it
+                        this["arbeidsgiverFagsystemId"] = it
+                    }
+                    event.personFagsystemId?.also {
+                        this["personFagsystemId"] = it
+                    }
+                }
             )
         )
     }

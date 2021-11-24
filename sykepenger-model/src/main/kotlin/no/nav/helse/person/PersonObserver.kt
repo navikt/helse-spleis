@@ -108,8 +108,8 @@ interface PersonObserver {
 
     data class UtbetalingAnnullertEvent(
         val utbetalingId: UUID,
-        val arbeidsgiverFagsystemId: String,
-        val personFagsystemId: String,
+        val arbeidsgiverFagsystemId: String?,
+        val personFagsystemId: String?,
         val fom: LocalDate,
         val tom: LocalDate,
         val utbetalingslinjer: List<Utbetalingslinje>,
@@ -117,6 +117,11 @@ interface PersonObserver {
         val saksbehandlerEpost: String,
         val saksbehandlerIdent: String
     ) {
+        init {
+            require(arbeidsgiverFagsystemId != null || personFagsystemId != null) {
+                "Enten arbeidsgiverFagsystemId eller personfagsystemId må være satt"
+            }
+        }
         data class Utbetalingslinje(
             val fom: LocalDate,
             val tom: LocalDate,

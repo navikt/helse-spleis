@@ -1,7 +1,11 @@
 package no.nav.helse.spleis.e2e
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.ForventetFeil
+import no.nav.helse.Toggle
+import no.nav.helse.Toggle.Companion.enable
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
+import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.testhelpers.januar
 import no.nav.inntektsmeldingkontrakt.Periode
@@ -109,7 +113,7 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun annullering() {
+    fun `annullering full refusjon`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
@@ -122,7 +126,42 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         sendAnnullering(testRapid.inspektør.etterspurteBehov(Utbetaling).path(Utbetaling.name).path("fagsystemId").asText())
         sendUtbetaling()
         val utbetalt = testRapid.inspektør.siste("utbetaling_annullert")
-        assertAnnullert(utbetalt)
+        assertAnnullert(utbetalt, arbeidsgiverAnnulering = true, personAnnullering = false)
+    }
+
+    @Test
+    fun `annullering delvis refusjon`() = listOf(Toggle.LageBrukerutbetaling, Toggle.DelvisRefusjon).enable {
+        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar, opphørsdatoForRefusjon = 20.januar)
+        sendYtelser(0)
+        sendVilkårsgrunnlag(0)
+        sendYtelser(0)
+        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
+        sendUtbetalingsgodkjenning(0)
+        sendUtbetaling()
+        sendAnnullering(testRapid.inspektør.alleEtterspurteBehov(Utbetaling).first { it.path(Utbetaling.name).path("fagområde").asText() == "SPREF"}.path(Utbetaling.name).path("fagsystemId").asText())
+        sendUtbetaling()
+        val utbetalt = testRapid.inspektør.siste("utbetaling_annullert")
+        assertAnnullert(utbetalt, arbeidsgiverAnnulering = true, personAnnullering = true)
+    }
+
+    @Test
+    @ForventetFeil("https://trello.com/c/2tTTa7k9")
+    fun `annullering ingen refusjon`() = Toggle.LageBrukerutbetaling.enable {
+        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar, opphørsdatoForRefusjon = 3.januar)
+        sendYtelser(0)
+        sendVilkårsgrunnlag(0)
+        sendYtelser(0)
+        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
+        sendUtbetalingsgodkjenning(0)
+        sendUtbetaling()
+        sendAnnullering(testRapid.inspektør.alleEtterspurteBehov(Utbetaling).first { it.path(Utbetaling.name).path("fagområde").asText() == "SPREF"}.path(Utbetaling.name).path("fagsystemId").asText())
+        sendUtbetaling()
+        val utbetalt = testRapid.inspektør.siste("utbetaling_annullert")
+        assertAnnullert(utbetalt, arbeidsgiverAnnulering = false, personAnnullering = true)
     }
 
     private fun assertUtbetalt(melding: JsonNode) {
@@ -144,11 +183,20 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         assertOppdragdetaljer(melding.path("personOppdrag"), false)
     }
 
-    private fun assertAnnullert(melding: JsonNode) {
+    private fun assertAnnullert(melding: JsonNode, arbeidsgiverAnnulering: Boolean, personAnnullering: Boolean) {
         assertTrue(melding.path("utbetalingId").asText().isNotEmpty())
-        assertTrue(melding.path("arbeidsgiverFagsystemId").asText().isNotEmpty())
-        assertEquals(melding.path("fagsystemId").asText(), melding.path("arbeidsgiverFagsystemId").asText())
-        assertTrue(melding.path("personFagsystemId").asText().isNotEmpty())
+        if (arbeidsgiverAnnulering) {
+            assertTrue(melding.path("arbeidsgiverFagsystemId").asText().isNotEmpty())
+            assertEquals(melding.path("fagsystemId").asText(), melding.path("arbeidsgiverFagsystemId").asText())
+        } else {
+            assertTrue(melding.path("fagsystemId").isMissingOrNull())
+            assertTrue(melding.path("arbeidsgiverFagsystemId").isMissingOrNull())
+        }
+        if (personAnnullering) {
+            assertTrue(melding.path("personFagsystemId").asText().isNotEmpty())
+        } else {
+            assertTrue(melding.path("personFagsystemId").isMissingOrNull())
+        }
         assertDato(melding.path("fom").asText())
         assertDato(melding.path("tom").asText())
         assertDatotid(melding.path("tidspunkt").asText())

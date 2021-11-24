@@ -615,8 +615,8 @@ internal class Arbeidsgiver private constructor(
         hendelseskontekst: Hendelseskontekst,
         id: UUID,
         periode: Periode,
-        arbeidsgiverFagsystemId: String,
-        personFagsystemId: String,
+        arbeidsgiverFagsystemId: String?,
+        personFagsystemId: String?,
         godkjenttidspunkt: LocalDateTime,
         saksbehandlerEpost: String,
         saksbehandlerIdent: String
