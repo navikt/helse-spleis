@@ -52,26 +52,25 @@ internal class OppdragBuilderTest {
     @Test
     fun `kun arbeidsdag`() {
         val oppdrag = tilArbeidsgiver(2.ARB)
-
         assertEquals(0, oppdrag.size)
     }
 
     @Test
-    fun `nuller ut siste arbeidsgiverdag dersom vi støter på Ukjentdager fra Infotrygd`() {
+    fun `nuller ut siste arbeidsgiverperiodedag dersom vi støter på Ukjentdager fra Infotrygd`() {
         val oppdrag = tilArbeidsgiver(16.AP, 15.NAV, 10.NAV, 30.NAV, infotrygdtidslinje = tidslinjeOf(10.NAV, startDato = 1.februar))
-        assertNull(oppdrag.sisteArbeidsgiverdag)
+        assertNull(oppdrag.sisteArbeidsgiverperiodedag)
     }
 
     @Test
-    fun `siste arbeidsgiverdag er siste dag i arbeidsgiverperioden`() {
+    fun `siste arbeidsgiverperiodedag er siste dag i arbeidsgiverperioden`() {
         val oppdrag = tilArbeidsgiver(16.AP, 15.NAV)
-        assertEquals(16.januar, oppdrag.sisteArbeidsgiverdag)
+        assertEquals(16.januar, oppdrag.sisteArbeidsgiverperiodedag)
     }
 
     @Test
-    fun `siste arbeidsgiverdag er siste dag i arbeidsgiverperioden 2`() {
+    fun `siste arbeidsgiverperiodedag er siste dag i arbeidsgiverperioden 2`() {
         val oppdrag = tilArbeidsgiver(16.AP, 15.NAV, 17.ARB, 16.AP, 10.NAV)
-        assertEquals(5.mars, oppdrag.sisteArbeidsgiverdag)
+        assertEquals(5.mars, oppdrag.sisteArbeidsgiverperiodedag)
     }
 
     @Test
@@ -119,7 +118,7 @@ internal class OppdragBuilderTest {
 
         assertEquals(1, oppdrag.size)
         oppdrag.assertLinje(0, 5.januar, 11.januar, null)
-        assertEquals(4.januar, oppdrag.sisteArbeidsgiverdag)
+        assertEquals(4.januar, oppdrag.sisteArbeidsgiverperiodedag)
     }
 
     @Test
@@ -128,7 +127,7 @@ internal class OppdragBuilderTest {
 
         assertEquals(1, oppdrag.size)
         oppdrag.assertLinje(0, 11.januar, 13.januar, null, klassekode = Klassekode.RefusjonIkkeOpplysningspliktig)
-        assertEquals(10.januar, oppdrag.sisteArbeidsgiverdag)
+        assertEquals(10.januar, oppdrag.sisteArbeidsgiverperiodedag)
     }
 
     @Test
@@ -470,7 +469,7 @@ internal class OppdragBuilderTest {
         assertEquals(klassekode, this[index].get<Klassekode>("klassekode"))
     }
 
-    private val Oppdrag.sisteArbeidsgiverdag get() = this.get<LocalDate?>("sisteArbeidsgiverdag")
+    private val Oppdrag.sisteArbeidsgiverperiodedag get() = this.get<LocalDate?>("sisteArbeidsgiverdag")
 
     private fun assertNyLinjeVedGap(gapDay: Utbetalingsdager) {
         val oppdrag = tilArbeidsgiver(2.NAV, gapDay, 2.NAV, 2.HELG, 3.NAV)

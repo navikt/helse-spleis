@@ -104,7 +104,7 @@ internal class OppdragBuilder(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        if (sisteArbeidsgiverdag == null) tilstand.sisteArbeidsgiverdag(dag.dato)
+        tilstand.sisteArbeidsgiverdag(dag.dato)
         tilstand = Avsluttet
     }
 
