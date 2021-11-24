@@ -518,19 +518,21 @@ internal class Arbeidsgiver private constructor(
         forbrukteSykedager: Int,
         gjenståendeSykedager: Int,
         stønadsdager: Int,
+        arbeidsgiverOppdrag: Oppdrag,
         personOppdrag: Oppdrag,
-        ident: String,
         epost: String,
         tidspunkt: LocalDateTime,
         automatiskBehandling: Boolean,
         utbetalingstidslinje: Utbetalingstidslinje,
-        arbeidsgiverOppdrag: Oppdrag,
+        ident: String,
+        vedtaksfeednøkkel: String,
     ) {
         person.utbetalingUtbetalt(
             hendelseskontekst,
             PersonObserver.UtbetalingUtbetaltEvent(
                 utbetalingId = id,
                 type = type.name,
+                vedtaksfeednøkkel = vedtaksfeednøkkel,
                 fom = periode.start,
                 tom = periode.endInclusive,
                 maksdato = maksdato,
@@ -565,6 +567,7 @@ internal class Arbeidsgiver private constructor(
         automatiskBehandling: Boolean,
         utbetalingstidslinje: Utbetalingstidslinje,
         epost: String,
+        vedtaksfeednøkkel: String,
     ) {
         person.utbetalingUtenUtbetaling(
             hendelseskontekst,
@@ -584,7 +587,8 @@ internal class Arbeidsgiver private constructor(
                 personOppdrag = personOppdrag.toMap(),
                 utbetalingsdager = utbetalingstidslinje.tilUtbetalingsdager(fridagplog(sykdomshistorikk.sykdomstidslinje())),
                 vedtaksperiodeIder = vedtaksperioder.iderMedUtbetaling(id) + forkastede.iderMedUtbetaling(id),
-                ident = ident
+                ident = ident,
+                vedtaksfeednøkkel = vedtaksfeednøkkel
             )
         )
     }
@@ -615,15 +619,17 @@ internal class Arbeidsgiver private constructor(
         hendelseskontekst: Hendelseskontekst,
         id: UUID,
         periode: Periode,
-        arbeidsgiverFagsystemId: String?,
+        vedtaksfeednøkkel: String,
         personFagsystemId: String?,
         godkjenttidspunkt: LocalDateTime,
         saksbehandlerEpost: String,
-        saksbehandlerIdent: String
+        saksbehandlerIdent: String,
+        arbeidsgiverFagsystemId: String?
     ) {
         person.annullert(
             hendelseskontekst = hendelseskontekst,
             PersonObserver.UtbetalingAnnullertEvent(
+                vedtaksfeednøkkel = vedtaksfeednøkkel,
                 arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
                 personFagsystemId = personFagsystemId,
                 utbetalingId = id,

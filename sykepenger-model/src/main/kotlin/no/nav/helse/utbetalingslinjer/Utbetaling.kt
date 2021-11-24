@@ -94,9 +94,12 @@ internal class Utbetaling private constructor(
     private val oppdragsperiode = Oppdrag.periode(arbeidsgiverOppdrag, personOppdrag)
     internal val periode get() = oppdragsperiode.oppdaterTom(utbetalingstidslinje.periode())
 
+    // av historiske årsaker brukes arbeidsgiveroppdragets fagsystemId for å gruppere linjene i SP-VL-skjermbildet
+    private val vedtaksfeednøkkel = arbeidsgiverOppdrag.fagsystemId()
     private val stønadsdager get() = Oppdrag.stønadsdager(arbeidsgiverOppdrag, personOppdrag)
     private val observers = mutableSetOf<UtbetalingObserver>()
     private var forrigeHendelse: ArbeidstakerHendelse? = null
+
     internal fun godkjenttidspunkt() = vurdering?.godkjenttidspunkt()
 
     internal enum class Utbetalingtype { UTBETALING, ETTERUTBETALING, ANNULLERING, REVURDERING, FERIEPENGER }
@@ -124,9 +127,6 @@ internal class Utbetaling private constructor(
     // og at this er lik den siste aktive utbetalingen for fagsystemIden
     internal fun hørerSammen(other: Utbetaling) =
         arbeidsgiverOppdrag.fagsystemId() == other.arbeidsgiverOppdrag.fagsystemId()
-
-    internal fun kanRevurdere(other: Utbetaling, utbetalinger: List<Utbetaling>) =
-        hørerSammen(other) && utbetalinger.aktive().any { it == this }
 
     internal fun harUtbetalinger() =
         arbeidsgiverOppdrag.harUtbetalinger() || personOppdrag.harUtbetalinger()
@@ -935,8 +935,9 @@ internal class Utbetaling private constructor(
                     hendelseskontekst = hendelseskontekst,
                     id = utbetaling.id,
                     periode = utbetaling.periode,
-                    arbeidsgiverFagsystemId = utbetaling.arbeidsgiverOppdrag.takeIf { it.harUtbetalinger() }?.fagsystemId(),
-                    personFagsystemId = utbetaling.personOppdrag.takeIf { it.harUtbetalinger() }?.fagsystemId(),
+                    vedtaksfeednøkkel = utbetaling.vedtaksfeednøkkel,
+                    arbeidsgiverFagsystemId = utbetaling.arbeidsgiverOppdrag.takeIf(Oppdrag::harUtbetalinger)?.fagsystemId(),
+                    personFagsystemId = utbetaling.personOppdrag.takeIf(Oppdrag::harUtbetalinger)?.fagsystemId(),
                     godkjenttidspunkt = tidspunkt,
                     saksbehandlerEpost = epost,
                     saksbehandlerIdent = ident
@@ -957,13 +958,14 @@ internal class Utbetaling private constructor(
                     utbetaling.forbrukteSykedager!!,
                     utbetaling.gjenståendeSykedager!!,
                     utbetaling.stønadsdager,
+                    utbetaling.arbeidsgiverOppdrag,
                     utbetaling.personOppdrag,
-                    ident,
                     epost,
                     tidspunkt,
                     automatiskBehandling,
                     utbetaling.utbetalingstidslinje,
-                    utbetaling.arbeidsgiverOppdrag
+                    ident,
+                    utbetaling.vedtaksfeednøkkel
                 )
             }
         }
@@ -985,7 +987,8 @@ internal class Utbetaling private constructor(
                     tidspunkt,
                     automatiskBehandling,
                     utbetaling.utbetalingstidslinje,
-                    epost
+                    epost,
+                    utbetaling.vedtaksfeednøkkel
                 )
             }
         }

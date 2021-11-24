@@ -111,6 +111,7 @@ internal class PersonMediator(
             "utbetaling_annullert", JsonMessage.newMessage(
                 mutableMapOf(
                     "utbetalingId" to event.utbetalingId,
+                    "vedtaksfeednøkkel" to event.vedtaksfeednøkkel,
                     "fom" to event.fom,
                     "tom" to event.tom,
                     "annullertAvSaksbehandler" to event.annullertAvSaksbehandler,
@@ -179,7 +180,8 @@ internal class PersonMediator(
             "arbeidsgiverOppdrag" to event.arbeidsgiverOppdrag,
             "personOppdrag" to event.personOppdrag,
             "utbetalingsdager" to event.utbetalingsdager,
-            "vedtaksperiodeIder" to event.vedtaksperiodeIder
+            "vedtaksperiodeIder" to event.vedtaksperiodeIder,
+            "vedtaksfeednøkkel" to event.vedtaksfeednøkkel
         ))
 
     override fun feriepengerUtbetalt(hendelseskontekst: Hendelseskontekst, event: PersonObserver.FeriepengerUtbetaltEvent) =

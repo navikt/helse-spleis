@@ -108,6 +108,7 @@ interface PersonObserver {
 
     data class UtbetalingAnnullertEvent(
         val utbetalingId: UUID,
+        val vedtaksfeednøkkel: String,
         val arbeidsgiverFagsystemId: String?,
         val personFagsystemId: String?,
         val fom: LocalDate,
@@ -141,6 +142,7 @@ interface PersonObserver {
 
     data class UtbetalingUtbetaltEvent(
         val utbetalingId: UUID,
+        val vedtaksfeednøkkel: String,
         val type: String,
         val fom: LocalDate,
         val tom: LocalDate,

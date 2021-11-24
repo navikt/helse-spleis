@@ -12,11 +12,12 @@ internal interface UtbetalingObserver {
         hendelseskontekst: Hendelseskontekst,
         id: UUID,
         periode: Periode,
-        arbeidsgiverFagsystemId: String?,
+        vedtaksfeednøkkel: String,
         personFagsystemId: String?,
         godkjenttidspunkt: LocalDateTime,
         saksbehandlerEpost: String,
-        saksbehandlerIdent: String
+        saksbehandlerIdent: String,
+        arbeidsgiverFagsystemId: String?
     )
 
     fun utbetalingUtbetalt(
@@ -28,13 +29,14 @@ internal interface UtbetalingObserver {
         forbrukteSykedager: Int,
         gjenståendeSykedager: Int,
         stønadsdager: Int,
+        arbeidsgiverOppdrag: Oppdrag,
         personOppdrag: Oppdrag,
-        ident: String,
         epost: String,
         tidspunkt: LocalDateTime,
         automatiskBehandling: Boolean,
         utbetalingstidslinje: Utbetalingstidslinje,
-        arbeidsgiverOppdrag: Oppdrag
+        ident: String,
+        vedtaksfeednøkkel: String
     ) {
     }
 
@@ -53,7 +55,8 @@ internal interface UtbetalingObserver {
         tidspunkt: LocalDateTime,
         automatiskBehandling: Boolean,
         utbetalingstidslinje: Utbetalingstidslinje,
-        epost: String
+        epost: String,
+        vedtaksfeednøkkel: String
     ) {
     }
 
