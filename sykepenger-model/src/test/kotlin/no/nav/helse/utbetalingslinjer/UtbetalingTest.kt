@@ -232,19 +232,8 @@ internal class UtbetalingTest {
     fun `går ikke videre når ett av to oppdrag er overført`() {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600))
         beregnUtbetalinger(tidslinje)
-        val (utbetaling, utbetalingId) = opprettGodkjentUtbetaling(tidslinje)
-        utbetaling.håndter(
-            UtbetalingOverført(
-                meldingsreferanseId = UUID.randomUUID(),
-                aktørId = "aktørId",
-                fødselsnummer = "fnr",
-                orgnummer = "orgnr",
-                fagsystemId = utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId(),
-                utbetalingId = utbetalingId.toString(),
-                avstemmingsnøkkel = 1234L,
-                overføringstidspunkt = LocalDateTime.now()
-            )
-        )
+        val utbetaling = opprettGodkjentUtbetaling(tidslinje)
+        overfør(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId())
         assertEquals(Utbetaling.Sendt, utbetaling.inspektør.tilstand)
     }
 
@@ -252,31 +241,9 @@ internal class UtbetalingTest {
     fun `går videre når begge oppdragene er overført`() {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600))
         beregnUtbetalinger(tidslinje)
-        val (utbetaling, utbetalingId) = opprettGodkjentUtbetaling(tidslinje)
-        utbetaling.håndter(
-            UtbetalingOverført(
-                meldingsreferanseId = UUID.randomUUID(),
-                aktørId = "aktørId",
-                fødselsnummer = "fnr",
-                orgnummer = "orgnr",
-                fagsystemId = utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId(),
-                utbetalingId = utbetalingId.toString(),
-                avstemmingsnøkkel = 1234L,
-                overføringstidspunkt = LocalDateTime.now()
-            )
-        )
-        utbetaling.håndter(
-            UtbetalingOverført(
-                meldingsreferanseId = UUID.randomUUID(),
-                aktørId = "aktørId",
-                fødselsnummer = "fnr",
-                orgnummer = "orgnr",
-                fagsystemId = utbetaling.inspektør.personOppdrag.fagsystemId(),
-                utbetalingId = utbetalingId.toString(),
-                avstemmingsnøkkel = 1234L,
-                overføringstidspunkt = LocalDateTime.now()
-            )
-        )
+        val utbetaling = opprettGodkjentUtbetaling(tidslinje)
+        overfør(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId())
+        overfør(utbetaling, utbetaling.inspektør.personOppdrag.fagsystemId())
         assertEquals(Utbetaling.Overført, utbetaling.inspektør.tilstand)
     }
 
@@ -284,21 +251,8 @@ internal class UtbetalingTest {
     fun `går ikke videre når ett av to oppdrag er akseptert`() {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600))
         beregnUtbetalinger(tidslinje)
-        val (utbetaling, utbetalingId) = opprettGodkjentUtbetaling(tidslinje)
-        utbetaling.håndter(
-            UtbetalingHendelse(
-                meldingsreferanseId = UUID.randomUUID(),
-                aktørId = "aktørId",
-                fødselsnummer = "fnr",
-                orgnummer = "orgnr",
-                fagsystemId = utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId(),
-                utbetalingId = utbetalingId.toString(),
-                status = AKSEPTERT,
-                melding = "",
-                avstemmingsnøkkel = 1234L,
-                overføringstidspunkt = LocalDateTime.now()
-            )
-        )
+        val utbetaling = opprettGodkjentUtbetaling(tidslinje)
+        kvittèr(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId())
         assertEquals(Utbetaling.Sendt, utbetaling.inspektør.tilstand)
     }
 
@@ -306,35 +260,9 @@ internal class UtbetalingTest {
     fun `går videre når begge oppdragene er akseptert`() {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600))
         beregnUtbetalinger(tidslinje)
-        val (utbetaling, utbetalingId) = opprettGodkjentUtbetaling(tidslinje)
-        utbetaling.håndter(
-            UtbetalingHendelse(
-                meldingsreferanseId = UUID.randomUUID(),
-                aktørId = "aktørId",
-                fødselsnummer = "fnr",
-                orgnummer = "orgnr",
-                fagsystemId = utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId(),
-                utbetalingId = utbetalingId.toString(),
-                status = AKSEPTERT,
-                melding = "",
-                avstemmingsnøkkel = 1234L,
-                overføringstidspunkt = LocalDateTime.now()
-            )
-        )
-        utbetaling.håndter(
-            UtbetalingHendelse(
-                meldingsreferanseId = UUID.randomUUID(),
-                aktørId = "aktørId",
-                fødselsnummer = "fnr",
-                orgnummer = "orgnr",
-                fagsystemId = utbetaling.inspektør.personOppdrag.fagsystemId(),
-                utbetalingId = utbetalingId.toString(),
-                status = AKSEPTERT,
-                melding = "",
-                avstemmingsnøkkel = 1234L,
-                overføringstidspunkt = LocalDateTime.now()
-            )
-        )
+        val utbetaling = opprettGodkjentUtbetaling(tidslinje)
+        kvittèr(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId())
+        kvittèr(utbetaling, utbetaling.inspektør.personOppdrag.fagsystemId())
         assertEquals(Utbetaling.Utbetalt, utbetaling.inspektør.tilstand)
     }
 
@@ -342,21 +270,8 @@ internal class UtbetalingTest {
     fun `utbetalingen er feilet dersom én av oppdragene er avvist 1`() {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600))
         beregnUtbetalinger(tidslinje)
-        val (utbetaling, utbetalingId) = opprettGodkjentUtbetaling(tidslinje)
-        utbetaling.håndter(
-            UtbetalingHendelse(
-                meldingsreferanseId = UUID.randomUUID(),
-                aktørId = "aktørId",
-                fødselsnummer = "fnr",
-                orgnummer = "orgnr",
-                fagsystemId = utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId(),
-                utbetalingId = utbetalingId.toString(),
-                status = AVVIST,
-                melding = "Oppdraget er avvist",
-                avstemmingsnøkkel = 1234L,
-                overføringstidspunkt = LocalDateTime.now()
-            )
-        )
+        val utbetaling = opprettGodkjentUtbetaling(tidslinje)
+        kvittèr(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId(), AVVIST)
         assertEquals(Utbetaling.UtbetalingFeilet, utbetaling.inspektør.tilstand)
     }
 
@@ -364,35 +279,9 @@ internal class UtbetalingTest {
     fun `tar imot kvittering på det andre oppdraget selv om utbetalingen har feilet`() {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600))
         beregnUtbetalinger(tidslinje)
-        val (utbetaling, utbetalingId) = opprettGodkjentUtbetaling(tidslinje)
-        utbetaling.håndter(
-            UtbetalingHendelse(
-                meldingsreferanseId = UUID.randomUUID(),
-                aktørId = "aktørId",
-                fødselsnummer = "fnr",
-                orgnummer = "orgnr",
-                fagsystemId = utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId(),
-                utbetalingId = utbetalingId.toString(),
-                status = AVVIST,
-                melding = "Oppdraget er avvist",
-                avstemmingsnøkkel = 1234L,
-                overføringstidspunkt = LocalDateTime.now()
-            )
-        )
-        utbetaling.håndter(
-            UtbetalingHendelse(
-                meldingsreferanseId = UUID.randomUUID(),
-                aktørId = "aktørId",
-                fødselsnummer = "fnr",
-                orgnummer = "orgnr",
-                fagsystemId = utbetaling.inspektør.personOppdrag.fagsystemId(),
-                utbetalingId = utbetalingId.toString(),
-                status = AKSEPTERT,
-                melding = "",
-                avstemmingsnøkkel = 1234L,
-                overføringstidspunkt = LocalDateTime.now()
-            )
-        )
+        val utbetaling = opprettGodkjentUtbetaling(tidslinje)
+        kvittèr(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId(), AVVIST)
+        kvittèr(utbetaling, utbetaling.inspektør.personOppdrag.fagsystemId(), AKSEPTERT)
         assertEquals(AVVIST, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.status())
         assertEquals(AKSEPTERT, utbetaling.inspektør.personOppdrag.inspektør.status())
         assertEquals(Utbetaling.UtbetalingFeilet, utbetaling.inspektør.tilstand)
@@ -402,35 +291,9 @@ internal class UtbetalingTest {
     fun `tar imot overført på det andre oppdraget selv om utbetalingen har feilet`() {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600))
         beregnUtbetalinger(tidslinje)
-        val (utbetaling, utbetalingId) = opprettGodkjentUtbetaling(tidslinje)
-        utbetaling.håndter(
-            UtbetalingHendelse(
-                meldingsreferanseId = UUID.randomUUID(),
-                aktørId = "aktørId",
-                fødselsnummer = "fnr",
-                orgnummer = "orgnr",
-                fagsystemId = utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId(),
-                utbetalingId = utbetalingId.toString(),
-                status = AVVIST,
-                melding = "Oppdraget er avvist",
-                avstemmingsnøkkel = 1234L,
-                overføringstidspunkt = LocalDateTime.now()
-            )
-        )
-        utbetaling.håndter(
-            UtbetalingHendelse(
-                meldingsreferanseId = UUID.randomUUID(),
-                aktørId = "aktørId",
-                fødselsnummer = "fnr",
-                orgnummer = "orgnr",
-                fagsystemId = utbetaling.inspektør.personOppdrag.fagsystemId(),
-                utbetalingId = utbetalingId.toString(),
-                status = OVERFØRT,
-                melding = "",
-                avstemmingsnøkkel = 1234L,
-                overføringstidspunkt = LocalDateTime.now()
-            )
-        )
+        val utbetaling = opprettGodkjentUtbetaling(tidslinje)
+        kvittèr(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId(), AVVIST)
+        overfør(utbetaling, utbetaling.inspektør.personOppdrag.fagsystemId())
         assertEquals(AVVIST, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.status())
         assertEquals(OVERFØRT, utbetaling.inspektør.personOppdrag.inspektør.status())
         assertEquals(Utbetaling.UtbetalingFeilet, utbetaling.inspektør.tilstand)
@@ -440,35 +303,9 @@ internal class UtbetalingTest {
     fun `utbetalingen er feilet dersom én av oppdragene er avvist 2`() {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600))
         beregnUtbetalinger(tidslinje)
-        val (utbetaling, utbetalingId) = opprettGodkjentUtbetaling(tidslinje)
-        utbetaling.håndter(
-            UtbetalingHendelse(
-                meldingsreferanseId = UUID.randomUUID(),
-                aktørId = "aktørId",
-                fødselsnummer = "fnr",
-                orgnummer = "orgnr",
-                fagsystemId = utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId(),
-                utbetalingId = utbetalingId.toString(),
-                status = AKSEPTERT,
-                melding = "Oppdraget er avvist",
-                avstemmingsnøkkel = 1234L,
-                overføringstidspunkt = LocalDateTime.now()
-            )
-        )
-        utbetaling.håndter(
-            UtbetalingHendelse(
-                meldingsreferanseId = UUID.randomUUID(),
-                aktørId = "aktørId",
-                fødselsnummer = "fnr",
-                orgnummer = "orgnr",
-                fagsystemId = utbetaling.inspektør.personOppdrag.fagsystemId(),
-                utbetalingId = utbetalingId.toString(),
-                status = AVVIST,
-                melding = "",
-                avstemmingsnøkkel = 1234L,
-                overføringstidspunkt = LocalDateTime.now()
-            )
-        )
+        val utbetaling = opprettGodkjentUtbetaling(tidslinje)
+        kvittèr(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId(), AKSEPTERT)
+        kvittèr(utbetaling, utbetaling.inspektør.personOppdrag.fagsystemId(), AVVIST)
         assertEquals(Utbetaling.UtbetalingFeilet, utbetaling.inspektør.tilstand)
     }
 
@@ -485,7 +322,7 @@ internal class UtbetalingTest {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600))
         beregnUtbetalinger(tidslinje)
         val utbetaling = opprettUtbetaling(tidslinje)
-        val annullering = utbetaling.annuller(AnnullerUtbetaling(UUID.randomUUID(), "aktør", "fnr", "orgnr", utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId(), "Z123456", "tbd@nav.no", LocalDateTime.now()))
+        val annullering = annuller(utbetaling)
         no.nav.helse.testhelpers.assertNotNull(annullering)
         assertTrue(annullering.inspektør.arbeidsgiverOppdrag.last().erOpphør())
         assertTrue(annullering.inspektør.personOppdrag.last().erOpphør())
@@ -496,7 +333,7 @@ internal class UtbetalingTest {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 0))
         beregnUtbetalinger(tidslinje)
         val utbetaling = opprettUtbetaling(tidslinje)
-        val annullering = utbetaling.annuller(AnnullerUtbetaling(UUID.randomUUID(), "aktør", "fnr", "orgnr", utbetaling.inspektør.personOppdrag.fagsystemId(), "Z123456", "tbd@nav.no", LocalDateTime.now()))
+        val annullering = annuller(utbetaling, utbetaling.inspektør.personOppdrag.fagsystemId())
         assertNull(annullering) { "Det er ikke støttet å annullere på personoppdrag sin fagsystemId pt. Annullering bør skje på utbetalingId" }
     }
 
@@ -506,7 +343,7 @@ internal class UtbetalingTest {
         beregnUtbetalinger(tidslinje)
         val første = opprettUtbetaling(tidslinje.kutt(21.januar))
         val andre = opprettUtbetaling(tidslinje, første)
-        val annullering = andre.annuller(AnnullerUtbetaling(UUID.randomUUID(), "aktør", "fnr", "orgnr", andre.inspektør.arbeidsgiverOppdrag.fagsystemId(), "Z123456", "tbd@nav.no", LocalDateTime.now()))
+        val annullering = annuller(andre)
         no.nav.helse.testhelpers.assertNotNull(annullering)
         assertTrue(annullering.inspektør.arbeidsgiverOppdrag.last().erOpphør())
         assertTrue(annullering.inspektør.personOppdrag.last().erOpphør())
@@ -609,35 +446,35 @@ internal class UtbetalingTest {
 
     @Test
     fun `utbetalingOverført som ikke treffer på fagsystemId`() {
-        val (utbetaling, _) = opprettGodkjentUtbetaling()
+        val utbetaling = opprettGodkjentUtbetaling()
         overfør(utbetaling, "feil fagsystemId")
         assertEquals(Utbetaling.Sendt, utbetaling.inspektør.tilstand)
     }
 
     @Test
     fun `utbetalingOverført som treffer på arbeidsgiverFagsystemId`() {
-        val (utbetaling, _) = opprettGodkjentUtbetaling()
+        val utbetaling = opprettGodkjentUtbetaling()
         overfør(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId())
         assertEquals(Utbetaling.Overført, utbetaling.inspektør.tilstand)
     }
 
     @Test
     fun `utbetalingOverført som treffer på brukerFagsystemId`() {
-        val (utbetaling, _) = opprettGodkjentUtbetaling()
+        val utbetaling = opprettGodkjentUtbetaling()
         overfør(utbetaling, utbetaling.inspektør.personOppdrag.fagsystemId())
         assertEquals(Utbetaling.Overført, utbetaling.inspektør.tilstand)
     }
 
     @Test
     fun `utbetalingOverført som bommer på utbetalingId`() {
-        val (utbetaling, _) = opprettGodkjentUtbetaling()
+        val utbetaling = opprettGodkjentUtbetaling()
         overfør(utbetaling, utbetaling.inspektør.personOppdrag.fagsystemId(), UUID.randomUUID())
         assertEquals(Utbetaling.Sendt, utbetaling.inspektør.tilstand)
     }
 
     @Test
     fun `utbetalingHendelse som treffer på brukeroppdraget`() {
-        val (utbetaling, _) = opprettGodkjentUtbetaling()
+        val utbetaling = opprettGodkjentUtbetaling()
         overfør(utbetaling, utbetaling.inspektør.personOppdrag.fagsystemId(), UUID.randomUUID())
         kvittèr(utbetaling, utbetaling.inspektør.personOppdrag.fagsystemId())
         assertEquals(Utbetaling.Utbetalt, utbetaling.inspektør.tilstand)
@@ -645,10 +482,10 @@ internal class UtbetalingTest {
 
     @Test
     fun `g-regulering skal treffe personOppdrag`() {
-        val (utbetalingMedPersonOppdragMatch, _) = opprettGodkjentUtbetaling()
+        val utbetalingMedPersonOppdragMatch = opprettGodkjentUtbetaling()
         val personFagsystemId = utbetalingMedPersonOppdragMatch.inspektør.personOppdrag.fagsystemId()
         val arbeidsgiverFagsystemId = utbetalingMedPersonOppdragMatch.inspektør.arbeidsgiverOppdrag.fagsystemId()
-        val (utbetalingUtenMatch, _) = opprettGodkjentUtbetaling()
+        val utbetalingUtenMatch = opprettGodkjentUtbetaling()
         val utbetalinger = listOf(utbetalingUtenMatch, utbetalingMedPersonOppdragMatch)
 
         val funnetArbeidsgiverUtbetaling = Utbetaling.finnUtbetalingForJustering(utbetalinger, arbeidsgiverFagsystemId.gRegulering())
@@ -684,9 +521,8 @@ internal class UtbetalingTest {
         fødselsnummer: String = UNG_PERSON_FNR_2018,
         orgnummer: String = ORGNUMMER,
         aktivitetslogg: Aktivitetslogg = this.aktivitetslogg
-    ): Pair<Utbetaling, UUID> = opprettUbetaltUtbetaling(beregnUtbetalinger(tidslinje), null, sisteDato, fødselsnummer, orgnummer, aktivitetslogg)
+    ) = opprettUbetaltUtbetaling(beregnUtbetalinger(tidslinje), null, sisteDato, fødselsnummer, orgnummer, aktivitetslogg)
         .also { godkjenn(it) }
-        .let { it to it.inspektør.utbetalingId }
 
     private fun opprettUbetaltUtbetaling(
         tidslinje: Utbetalingstidslinje,
@@ -739,7 +575,7 @@ internal class UtbetalingTest {
         )
     }
 
-    private fun kvittèr(utbetaling: Utbetaling, fagsystemId: String) {
+    private fun kvittèr(utbetaling: Utbetaling, fagsystemId: String, status: Oppdragstatus = AKSEPTERT) {
         utbetaling.håndter(
             UtbetalingHendelse(
                 meldingsreferanseId = UUID.randomUUID(),
@@ -748,7 +584,7 @@ internal class UtbetalingTest {
                 orgnummer = ORGNUMMER,
                 fagsystemId = fagsystemId,
                 utbetalingId = "${utbetaling.inspektør.utbetalingId}",
-                status = AKSEPTERT,
+                status = status,
                 melding = "hei",
                 avstemmingsnøkkel = 123456L,
                 overføringstidspunkt = LocalDateTime.now()
@@ -772,4 +608,7 @@ internal class UtbetalingTest {
         ).also {
             utbetaling.håndter(it)
         }
+
+    private fun annuller(utbetaling: Utbetaling, fagsystemId: String = utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId()) =
+        utbetaling.annuller(AnnullerUtbetaling(UUID.randomUUID(), "aktør", "fnr", "orgnr", fagsystemId, "Z123456", "tbd@nav.no", LocalDateTime.now()))
 }
