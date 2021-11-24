@@ -12,7 +12,7 @@ internal class Utbetalingslinje internal constructor(
     internal var fom: LocalDate,
     internal var tom: LocalDate,
     internal var satstype: Satstype = Satstype.DAG,
-    internal var beløp: Int?, //TODO: arbeidsgiverbeløp || personbeløp
+    internal var beløp: Int?,
     internal var aktuellDagsinntekt: Int?,
     internal val grad: Double?,
     internal var refFagsystemId: String? = null,
