@@ -32,6 +32,8 @@ internal class UtbetalingstidslinjeInspektør(utbetalingstidslinje: Utbetalingst
     val arbeidsdager = mutableListOf<Arbeidsdag>()
     val arbeidsgiverdager = mutableListOf<ArbeidsgiverperiodeDag>()
     val fridager = mutableListOf<Fridag>()
+    val avvistedatoer = mutableListOf<LocalDate>()
+    val avvistedager = mutableListOf<AvvistDag>()
 
     val unikedager = mutableSetOf<KClass<out Utbetalingstidslinje.Utbetalingsdag>>()
 
@@ -98,6 +100,8 @@ internal class UtbetalingstidslinjeInspektør(utbetalingstidslinje: Utbetalingst
         økonomi: Økonomi
     ) {
         avvistDagTeller += 1
+        avvistedatoer.add(dato)
+        avvistedager.add(dag)
         collect(dag, dato)
     }
 

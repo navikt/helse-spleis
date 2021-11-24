@@ -2,12 +2,11 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
-import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -238,15 +237,6 @@ internal class MaksimumSykepengedagerfilterTest {
         assertEquals(54, sykepengerettighet.forbrukteSykedager)
     }
 
-    private val Utbetalingstidslinje.inspiser get() = UtbetalingsTidslinjeInspektør().also { this.accept(it) }
-    private class UtbetalingsTidslinjeInspektør: UtbetalingsdagVisitor {
-        var avvisteDager = 0
-
-        override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag, dato: LocalDate, økonomi: Økonomi) {
-            avvisteDager += 1
-        }
-    }
-
     private fun maksimumSykepengedagerfilter() = MaksimumSykepengedagerfilter(
         UNG_PERSON_FNR_2018.somFødselsnummer().alder(),
         NormalArbeidstaker,
@@ -301,24 +291,7 @@ internal class MaksimumSykepengedagerfilterTest {
             periode,
             aktivitetslogg
         ).filter(listOf(this), personTidslinje)
-        return AvvisteDager(this).datoer
-    }
-
-    private class AvvisteDager(tidslinje: Utbetalingstidslinje): UtbetalingsdagVisitor {
-        internal val datoer = mutableListOf<LocalDate>()
-
-        init {
-            tidslinje.accept(this)
-        }
-
-        override fun visit(
-            dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag,
-            dato: LocalDate,
-            økonomi: Økonomi
-        ) {
-            datoer.add(dag.dato)
-        }
-
+        return inspektør.avvistedatoer
     }
 
     private fun Utbetalingstidslinje.utbetalingsavgrenserMedKommentarer(
@@ -332,23 +305,6 @@ internal class MaksimumSykepengedagerfilterTest {
             periode,
             aktivitetslogg
         ).filter(listOf(this), personTidslinje)
-        return AvvisteDagerOgDeresKommentarer(this).dager
-    }
-
-    private class AvvisteDagerOgDeresKommentarer(tidslinje: Utbetalingstidslinje) : UtbetalingsdagVisitor {
-        val dager = mutableListOf<Utbetalingstidslinje.Utbetalingsdag.AvvistDag>()
-
-        init {
-            tidslinje.accept(this)
-        }
-
-        override fun visit(
-            dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag,
-            dato: LocalDate,
-            økonomi: Økonomi
-        ) {
-            dager.add(dag)
-        }
-
+        return inspektør.avvistedager
     }
 }

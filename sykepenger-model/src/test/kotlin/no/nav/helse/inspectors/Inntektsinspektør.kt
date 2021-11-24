@@ -1,5 +1,7 @@
-package no.nav.helse.person
+package no.nav.helse.inspectors
 
+import no.nav.helse.person.InntekthistorikkVisitor
+import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
