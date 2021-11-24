@@ -18,10 +18,6 @@ import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.utbetalingslinjer.*
-import no.nav.helse.utbetalingslinjer.Endringskode
-import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling
-import no.nav.helse.utbetalingslinjer.Oppdrag
-import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
@@ -780,7 +776,7 @@ internal class JsonBuilder : AbstractBuilder() {
         override fun preVisitUtbetaling(
             utbetaling: Utbetaling,
             id: UUID,
-            beregningId: UUID,
+            korrelasjonsId: UUID,
             type: Utbetaling.Utbetalingtype,
             tilstand: Utbetaling.Tilstand,
             tidsstempel: LocalDateTime,
@@ -790,7 +786,8 @@ internal class JsonBuilder : AbstractBuilder() {
             maksdato: LocalDate,
             forbrukteSykedager: Int?,
             gjenståendeSykedager: Int?,
-            stønadsdager: Int
+            stønadsdager: Int,
+            beregningId: UUID
         ) {
             utbetalinger.add(utbetaling.toMap())
         }
@@ -917,7 +914,7 @@ internal class JsonBuilder : AbstractBuilder() {
         override fun preVisitUtbetaling(
             utbetaling: Utbetaling,
             id: UUID,
-            beregningId: UUID,
+            korrelasjonsId: UUID,
             type: Utbetaling.Utbetalingtype,
             tilstand: Utbetaling.Tilstand,
             tidsstempel: LocalDateTime,
@@ -927,7 +924,8 @@ internal class JsonBuilder : AbstractBuilder() {
             maksdato: LocalDate,
             forbrukteSykedager: Int?,
             gjenståendeSykedager: Int?,
-            stønadsdager: Int
+            stønadsdager: Int,
+            beregningId: UUID
         ) {
             inUtbetaling = true
         }
@@ -935,7 +933,7 @@ internal class JsonBuilder : AbstractBuilder() {
         override fun postVisitUtbetaling(
             utbetaling: Utbetaling,
             id: UUID,
-            beregningId: UUID,
+            korrelasjonsId: UUID,
             type: Utbetaling.Utbetalingtype,
             tilstand: Utbetaling.Tilstand,
             tidsstempel: LocalDateTime,
@@ -945,7 +943,8 @@ internal class JsonBuilder : AbstractBuilder() {
             maksdato: LocalDate,
             forbrukteSykedager: Int?,
             gjenståendeSykedager: Int?,
-            stønadsdager: Int
+            stønadsdager: Int,
+            beregningId: UUID
         ) {
             inUtbetaling = false
         }

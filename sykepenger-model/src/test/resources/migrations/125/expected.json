@@ -1,0 +1,27 @@
+{
+    "arbeidsgivere": [
+        {
+            "utbetalinger": [
+                {
+                    "korrelasjonsId": "ef824916-0b29-4e9a-982a-64a89deabe9f",
+                    "arbeidsgiverOppdrag": {
+                        "fagsystemId": "56BESFQLFFHJVGBKMSUJ32V6T4"
+                    }
+                },
+                {
+                    "korrelasjonsId": "ef824916-0b29-4e9a-982a-64a89deabe9f",
+                    "arbeidsgiverOppdrag": {
+                        "fagsystemId": "56BESFQLFFHJVGBKMSUJ32V6T4"
+                    }
+                },
+                {
+                    "korrelasjonsId": "2e63c585-b0b7-446a-9baf-7f9dfb77da78",
+                    "arbeidsgiverOppdrag": {
+                        "fagsystemId": "FZR4LBNQW5CGVG5PP6O7W562PA"
+                    }
+                }
+            ]
+        }
+    ],
+    "skjemaVersjon": 125
+}

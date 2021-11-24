@@ -99,7 +99,7 @@ internal class GenerasjonerBuilder(
     override fun preVisitUtbetaling(
         utbetaling: Utbetaling,
         id: UUID,
-        beregningId: UUID,
+        korrelasjonsId: UUID,
         type: Utbetaling.Utbetalingtype,
         tilstand: Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
@@ -109,7 +109,8 @@ internal class GenerasjonerBuilder(
         maksdato: LocalDate,
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?,
-        stønadsdager: Int
+        stønadsdager: Int,
+        beregningId: UUID
     ) {
         if (utbetaling.erAnnullering()) {
             annulleringer.leggTil(UtbetalingBuilder(utbetaling).build())

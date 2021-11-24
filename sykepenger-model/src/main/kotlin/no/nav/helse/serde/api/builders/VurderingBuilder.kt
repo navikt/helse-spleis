@@ -29,7 +29,7 @@ internal class VurderingBuilder: BuilderState() {
     override fun postVisitUtbetaling(
         utbetaling: Utbetaling,
         id: UUID,
-        beregningId: UUID,
+        korrelasjonsId: UUID,
         type: Utbetaling.Utbetalingtype,
         tilstand: Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
@@ -39,7 +39,8 @@ internal class VurderingBuilder: BuilderState() {
         maksdato: LocalDate,
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?,
-        stønadsdager: Int
+        stønadsdager: Int,
+        beregningId: UUID
     ) {
         popState()
     }

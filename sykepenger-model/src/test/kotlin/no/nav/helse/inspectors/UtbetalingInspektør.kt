@@ -12,6 +12,7 @@ internal val Utbetaling.inspektør get() = UtbetalingInspektør(this)
 
 internal class UtbetalingInspektør(utbetaling: Utbetaling) : UtbetalingVisitor {
     lateinit var utbetalingId: UUID
+    lateinit var korrelasjonsId: UUID
     lateinit var tilstand: Utbetaling.Tilstand
     lateinit var arbeidsgiverOppdrag: Oppdrag
     lateinit var personOppdrag: Oppdrag
@@ -24,7 +25,7 @@ internal class UtbetalingInspektør(utbetaling: Utbetaling) : UtbetalingVisitor 
     override fun preVisitUtbetaling(
         utbetaling: Utbetaling,
         id: UUID,
-        beregningId: UUID,
+        korrelasjonsId: UUID,
         type: Utbetaling.Utbetalingtype,
         tilstand: Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
@@ -34,9 +35,11 @@ internal class UtbetalingInspektør(utbetaling: Utbetaling) : UtbetalingVisitor 
         maksdato: LocalDate,
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?,
-        stønadsdager: Int
+        stønadsdager: Int,
+        beregningId: UUID
     ) {
         utbetalingId = id
+        this.korrelasjonsId = korrelasjonsId
         this.tilstand = tilstand
     }
 

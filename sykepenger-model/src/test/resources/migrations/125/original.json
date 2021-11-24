@@ -1,0 +1,24 @@
+{
+    "arbeidsgivere": [
+        {
+            "utbetalinger": [
+                {
+                    "arbeidsgiverOppdrag": {
+                        "fagsystemId": "56BESFQLFFHJVGBKMSUJ32V6T4"
+                    }
+                },
+                {
+                    "arbeidsgiverOppdrag": {
+                        "fagsystemId": "56BESFQLFFHJVGBKMSUJ32V6T4"
+                    }
+                },
+                {
+                    "arbeidsgiverOppdrag": {
+                        "fagsystemId": "FZR4LBNQW5CGVG5PP6O7W562PA"
+                    }
+                }
+            ]
+        }
+    ],
+    "skjemaVersjon": 124
+}

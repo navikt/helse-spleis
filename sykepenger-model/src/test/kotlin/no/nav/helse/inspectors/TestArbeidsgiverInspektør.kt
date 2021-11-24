@@ -271,7 +271,7 @@ internal class TestArbeidsgiverInspektør(
     override fun preVisitUtbetaling(
         utbetaling: Utbetaling,
         id: UUID,
-        beregningId: UUID,
+        korrelasjonsId: UUID,
         type: Utbetaling.Utbetalingtype,
         tilstand: Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
@@ -281,7 +281,8 @@ internal class TestArbeidsgiverInspektør(
         maksdato: LocalDate,
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?,
-        stønadsdager: Int
+        stønadsdager: Int,
+        beregningId: UUID
     ) {
         inUtbetaling = true
         if (!inVedtaksperiode) {
@@ -298,7 +299,7 @@ internal class TestArbeidsgiverInspektør(
     override fun postVisitUtbetaling(
         utbetaling: Utbetaling,
         id: UUID,
-        beregningId: UUID,
+        korrelasjonsId: UUID,
         type: Utbetaling.Utbetalingtype,
         tilstand: Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
@@ -308,7 +309,8 @@ internal class TestArbeidsgiverInspektør(
         maksdato: LocalDate,
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?,
-        stønadsdager: Int
+        stønadsdager: Int,
+        beregningId: UUID
     ) {
         inUtbetaling = false
     }

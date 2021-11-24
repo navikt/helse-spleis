@@ -24,6 +24,7 @@ import java.util.*
 // Understands related payment activities for an Arbeidsgiver
 internal class Utbetaling private constructor(
     private val id: UUID,
+    private val korrelasjonsId: UUID,
     private val beregningId: UUID,
     private val utbetalingstidslinje: Utbetalingstidslinje,
     private val arbeidsgiverOppdrag: Oppdrag,
@@ -42,6 +43,7 @@ internal class Utbetaling private constructor(
 ) : Aktivitetskontekst {
     private constructor(
         beregningId: UUID,
+        korrelerendeUtbetaling: Utbetaling?,
         utbetalingstidslinje: Utbetalingstidslinje,
         arbeidsgiverOppdrag: Oppdrag,
         personOppdrag: Oppdrag,
@@ -51,6 +53,7 @@ internal class Utbetaling private constructor(
         gjenståendeSykedager: Int?
     ) : this(
         UUID.randomUUID(),
+        korrelerendeUtbetaling?.takeIf { it.arbeidsgiverOppdrag.fagsystemId() == arbeidsgiverOppdrag.fagsystemId() }?.korrelasjonsId ?: UUID.randomUUID(),
         beregningId,
         utbetalingstidslinje,
         arbeidsgiverOppdrag,
@@ -82,6 +85,7 @@ internal class Utbetaling private constructor(
         forrige: Utbetaling?
     ) : this(
         beregningId,
+        forrige ?: sisteAktive,
         utbetalingstidslinje.kutt(sisteDato),
         byggArbeidsgiveroppdrag(sisteAktive?.arbeidsgiverOppdrag, organisasjonsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, forrige?.arbeidsgiverOppdrag),
         byggPersonoppdrag(sisteAktive?.personOppdrag, fødselsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, forrige?.personOppdrag),
@@ -93,9 +97,6 @@ internal class Utbetaling private constructor(
 
     private val oppdragsperiode = Oppdrag.periode(arbeidsgiverOppdrag, personOppdrag)
     internal val periode get() = oppdragsperiode.oppdaterTom(utbetalingstidslinje.periode())
-
-    // av historiske årsaker brukes arbeidsgiveroppdragets fagsystemId for å gruppere linjene i SP-VL-skjermbildet
-    private val vedtaksfeednøkkel = arbeidsgiverOppdrag.fagsystemId()
     private val stønadsdager get() = Oppdrag.stønadsdager(arbeidsgiverOppdrag, personOppdrag)
     private val observers = mutableSetOf<UtbetalingObserver>()
     private var forrigeHendelse: ArbeidstakerHendelse? = null
@@ -126,7 +127,7 @@ internal class Utbetaling private constructor(
     // this kan revurdere other gitt at fagsystemId == other.fagsystemId,
     // og at this er lik den siste aktive utbetalingen for fagsystemIden
     internal fun hørerSammen(other: Utbetaling) =
-        arbeidsgiverOppdrag.fagsystemId() == other.arbeidsgiverOppdrag.fagsystemId()
+        this.korrelasjonsId == other.korrelasjonsId
 
     internal fun harUtbetalinger() =
         arbeidsgiverOppdrag.harUtbetalinger() || personOppdrag.harUtbetalinger()
@@ -494,7 +495,22 @@ internal class Utbetaling private constructor(
     }
 
     internal fun accept(visitor: UtbetalingVisitor) {
-        visitor.preVisitUtbetaling(this, id, beregningId, type, tilstand, tidsstempel, oppdatert, arbeidsgiverOppdrag.nettoBeløp(), personOppdrag.nettoBeløp(), maksdato, forbrukteSykedager, gjenståendeSykedager, stønadsdager)
+        visitor.preVisitUtbetaling(
+            this,
+            id,
+            korrelasjonsId,
+            type,
+            tilstand,
+            tidsstempel,
+            oppdatert,
+            arbeidsgiverOppdrag.nettoBeløp(),
+            personOppdrag.nettoBeløp(),
+            maksdato,
+            forbrukteSykedager,
+            gjenståendeSykedager,
+            stønadsdager,
+            beregningId
+        )
         utbetalingstidslinje.accept(visitor)
         visitor.preVisitArbeidsgiverOppdrag(arbeidsgiverOppdrag)
         arbeidsgiverOppdrag.accept(visitor)
@@ -503,7 +519,22 @@ internal class Utbetaling private constructor(
         personOppdrag.accept(visitor)
         visitor.postVisitPersonOppdrag(personOppdrag)
         vurdering?.accept(visitor)
-        visitor.postVisitUtbetaling(this, id, beregningId, type, tilstand, tidsstempel, oppdatert, arbeidsgiverOppdrag.nettoBeløp(), personOppdrag.nettoBeløp(), maksdato, forbrukteSykedager, gjenståendeSykedager, stønadsdager)
+        visitor.postVisitUtbetaling(
+            this,
+            id,
+            korrelasjonsId,
+            type,
+            tilstand,
+            tidsstempel,
+            oppdatert,
+            arbeidsgiverOppdrag.nettoBeløp(),
+            personOppdrag.nettoBeløp(),
+            maksdato,
+            forbrukteSykedager,
+            gjenståendeSykedager,
+            stønadsdager,
+            beregningId
+        )
     }
 
     internal fun utbetalingstidslinje() = utbetalingstidslinje
@@ -554,6 +585,7 @@ internal class Utbetaling private constructor(
 
     internal fun toMap(): MutableMap<String, Any?> = mutableMapOf(
         "id" to id,
+        "korrelasjonsId" to korrelasjonsId,
         "beregningId" to beregningId,
         "utbetalingstidslinje" to utbetalingstidslinje.toMap(),
         "arbeidsgiverOppdrag" to arbeidsgiverOppdrag.toMap(),
@@ -834,6 +866,7 @@ internal class Utbetaling private constructor(
         override fun annuller(utbetaling: Utbetaling, hendelse: AnnullerUtbetaling) =
             Utbetaling(
                 utbetaling.beregningId,
+                utbetaling,
                 utbetaling.utbetalingstidslinje,
                 utbetaling.arbeidsgiverOppdrag.annuller(hendelse),
                 utbetaling.personOppdrag.annuller(hendelse),
@@ -934,8 +967,8 @@ internal class Utbetaling private constructor(
                 it.utbetalingAnnullert(
                     hendelseskontekst = hendelseskontekst,
                     id = utbetaling.id,
+                    korrelasjonsId = utbetaling.korrelasjonsId,
                     periode = utbetaling.periode,
-                    vedtaksfeednøkkel = utbetaling.vedtaksfeednøkkel,
                     arbeidsgiverFagsystemId = utbetaling.arbeidsgiverOppdrag.takeIf(Oppdrag::harUtbetalinger)?.fagsystemId(),
                     personFagsystemId = utbetaling.personOppdrag.takeIf(Oppdrag::harUtbetalinger)?.fagsystemId(),
                     godkjenttidspunkt = tidspunkt,
@@ -952,6 +985,7 @@ internal class Utbetaling private constructor(
                 it.utbetalingUtbetalt(
                     hendelseskontekst,
                     utbetaling.id,
+                    utbetaling.korrelasjonsId,
                     utbetaling.type,
                     utbetaling.periode,
                     utbetaling.maksdato,
@@ -964,8 +998,7 @@ internal class Utbetaling private constructor(
                     tidspunkt,
                     automatiskBehandling,
                     utbetaling.utbetalingstidslinje,
-                    ident,
-                    utbetaling.vedtaksfeednøkkel
+                    ident
                 )
             }
         }
@@ -975,6 +1008,7 @@ internal class Utbetaling private constructor(
                 it.utbetalingUtenUtbetaling(
                     hendelseskontekst,
                     utbetaling.id,
+                    utbetaling.korrelasjonsId,
                     utbetaling.type,
                     utbetaling.periode,
                     utbetaling.maksdato,
@@ -987,8 +1021,7 @@ internal class Utbetaling private constructor(
                     tidspunkt,
                     automatiskBehandling,
                     utbetaling.utbetalingstidslinje,
-                    epost,
-                    utbetaling.vedtaksfeednøkkel
+                    epost
                 )
             }
         }

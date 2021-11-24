@@ -65,7 +65,7 @@ internal class Avstemmer(person: Person) {
         override fun preVisitUtbetaling(
             utbetaling: Utbetaling,
             id: UUID,
-            beregningId: UUID,
+            korrelasjonsId: UUID,
             type: Utbetaling.Utbetalingtype,
             tilstand: Utbetaling.Tilstand,
             tidsstempel: LocalDateTime,
@@ -75,7 +75,8 @@ internal class Avstemmer(person: Person) {
             maksdato: LocalDate,
             forbrukteSykedager: Int?,
             gjenståendeSykedager: Int?,
-            stønadsdager: Int
+            stønadsdager: Int,
+            beregningId: UUID
         ) {
             utbetalinger.add(mapOf(
                 "id" to id,

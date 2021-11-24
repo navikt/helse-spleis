@@ -211,7 +211,7 @@ internal class Feriepengeberegner(
             override fun preVisitUtbetaling(
                 utbetaling: Utbetaling,
                 id: UUID,
-                beregningId: UUID,
+                korrelasjonsId: UUID,
                 type: Utbetaling.Utbetalingtype,
                 tilstand: Utbetaling.Tilstand,
                 tidsstempel: LocalDateTime,
@@ -221,7 +221,8 @@ internal class Feriepengeberegner(
                 maksdato: LocalDate,
                 forbrukteSykedager: Int?,
                 gjenståendeSykedager: Int?,
-                stønadsdager: Int
+                stønadsdager: Int,
+                beregningId: UUID
             ) {
                 utbetaltUtbetaling = tilstand == Utbetaling.Utbetalt
                 annullertUtbetaling = tilstand == Utbetaling.Annullert
@@ -268,7 +269,7 @@ internal class Feriepengeberegner(
             override fun postVisitUtbetaling(
                 utbetaling: Utbetaling,
                 id: UUID,
-                beregningId: UUID,
+                korrelasjonsId: UUID,
                 type: Utbetaling.Utbetalingtype,
                 tilstand: Utbetaling.Tilstand,
                 tidsstempel: LocalDateTime,
@@ -278,7 +279,8 @@ internal class Feriepengeberegner(
                 maksdato: LocalDate,
                 forbrukteSykedager: Int?,
                 gjenståendeSykedager: Int?,
-                stønadsdager: Int
+                stønadsdager: Int,
+                beregningId: UUID
             ) {
                 utbetaltUtbetaling = false
             }

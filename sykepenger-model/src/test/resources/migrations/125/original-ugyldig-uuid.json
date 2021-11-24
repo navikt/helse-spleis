@@ -1,0 +1,24 @@
+{
+    "arbeidsgivere": [
+        {
+            "utbetalinger": [
+                {
+                    "arbeidsgiverOppdrag": {
+                        "fagsystemId": "ugyldig uuid"
+                    }
+                },
+                {
+                    "arbeidsgiverOppdrag": {
+                        "fagsystemId": "ugyldig uuid"
+                    }
+                },
+                {
+                    "arbeidsgiverOppdrag": {
+                        "fagsystemId": "enda en!"
+                    }
+                }
+            ]
+        }
+    ],
+    "skjemaVersjon": 124
+}

@@ -512,6 +512,7 @@ internal class Arbeidsgiver private constructor(
     override fun utbetalingUtbetalt(
         hendelseskontekst: Hendelseskontekst,
         id: UUID,
+        korrelasjonsId: UUID,
         type: Utbetaling.Utbetalingtype,
         periode: Periode,
         maksdato: LocalDate,
@@ -525,14 +526,13 @@ internal class Arbeidsgiver private constructor(
         automatiskBehandling: Boolean,
         utbetalingstidslinje: Utbetalingstidslinje,
         ident: String,
-        vedtaksfeednøkkel: String,
     ) {
         person.utbetalingUtbetalt(
             hendelseskontekst,
             PersonObserver.UtbetalingUtbetaltEvent(
                 utbetalingId = id,
                 type = type.name,
-                vedtaksfeednøkkel = vedtaksfeednøkkel,
+                korrelasjonsId = korrelasjonsId,
                 fom = periode.start,
                 tom = periode.endInclusive,
                 maksdato = maksdato,
@@ -554,6 +554,7 @@ internal class Arbeidsgiver private constructor(
     override fun utbetalingUtenUtbetaling(
         hendelseskontekst: Hendelseskontekst,
         id: UUID,
+        korrelasjonsId: UUID,
         type: Utbetaling.Utbetalingtype,
         periode: Periode,
         maksdato: LocalDate,
@@ -567,7 +568,6 @@ internal class Arbeidsgiver private constructor(
         automatiskBehandling: Boolean,
         utbetalingstidslinje: Utbetalingstidslinje,
         epost: String,
-        vedtaksfeednøkkel: String,
     ) {
         person.utbetalingUtenUtbetaling(
             hendelseskontekst,
@@ -588,7 +588,7 @@ internal class Arbeidsgiver private constructor(
                 utbetalingsdager = utbetalingstidslinje.tilUtbetalingsdager(fridagplog(sykdomshistorikk.sykdomstidslinje())),
                 vedtaksperiodeIder = vedtaksperioder.iderMedUtbetaling(id) + forkastede.iderMedUtbetaling(id),
                 ident = ident,
-                vedtaksfeednøkkel = vedtaksfeednøkkel
+                korrelasjonsId = korrelasjonsId
             )
         )
     }
@@ -618,8 +618,8 @@ internal class Arbeidsgiver private constructor(
     override fun utbetalingAnnullert(
         hendelseskontekst: Hendelseskontekst,
         id: UUID,
+        korrelasjonsId: UUID,
         periode: Periode,
-        vedtaksfeednøkkel: String,
         personFagsystemId: String?,
         godkjenttidspunkt: LocalDateTime,
         saksbehandlerEpost: String,
@@ -629,7 +629,7 @@ internal class Arbeidsgiver private constructor(
         person.annullert(
             hendelseskontekst = hendelseskontekst,
             PersonObserver.UtbetalingAnnullertEvent(
-                vedtaksfeednøkkel = vedtaksfeednøkkel,
+                korrelasjonsId = korrelasjonsId,
                 arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
                 personFagsystemId = personFagsystemId,
                 utbetalingId = id,

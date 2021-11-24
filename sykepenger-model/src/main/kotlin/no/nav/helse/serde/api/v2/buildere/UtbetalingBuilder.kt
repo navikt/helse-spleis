@@ -26,7 +26,7 @@ internal class UtbetalingerBuilder(vedtaksperiode: Vedtaksperiode): Vedtaksperio
     override fun preVisitUtbetaling(
         utbetaling: no.nav.helse.utbetalingslinjer.Utbetaling,
         id: UUID,
-        beregningId: UUID,
+        korrelasjonsId: UUID,
         type: no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype,
         tilstand: no.nav.helse.utbetalingslinjer.Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
@@ -36,7 +36,8 @@ internal class UtbetalingerBuilder(vedtaksperiode: Vedtaksperiode): Vedtaksperio
         maksdato: LocalDate,
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?,
-        stønadsdager: Int
+        stønadsdager: Int,
+        beregningId: UUID
     ) {
         if (!utbetaling.erForkastet()) {
             utbetalinger.putIfAbsent(beregningId, UtbetalingBuilder(utbetaling).build())
@@ -56,7 +57,7 @@ internal class UtbetalingBuilder(utbetaling: InternUtbetaling): UtbetalingVisito
     override fun preVisitUtbetaling(
         utbetaling: no.nav.helse.utbetalingslinjer.Utbetaling,
         id: UUID,
-        beregningId: UUID,
+        korrelasjonsId: UUID,
         type: no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype,
         tilstand: no.nav.helse.utbetalingslinjer.Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
@@ -66,7 +67,8 @@ internal class UtbetalingBuilder(utbetaling: InternUtbetaling): UtbetalingVisito
         maksdato: LocalDate,
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?,
-        stønadsdager: Int
+        stønadsdager: Int,
+        beregningId: UUID
     ) {
         val tidslinje = UtbetalingstidslinjeBuilder(utbetaling).build()
         val vurdering = VurderingBuilder(utbetaling).build()

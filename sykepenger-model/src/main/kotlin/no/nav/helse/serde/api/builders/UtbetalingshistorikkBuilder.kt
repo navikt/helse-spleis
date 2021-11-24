@@ -87,7 +87,7 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
     override fun preVisitUtbetaling(
         utbetaling: Utbetaling,
         id: UUID,
-        beregningId: UUID,
+        korrelasjonsId: UUID,
         type: Utbetaling.Utbetalingtype,
         tilstand: Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
@@ -97,7 +97,8 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
         maksdato: LocalDate,
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?,
-        stønadsdager: Int
+        stønadsdager: Int,
+        beregningId: UUID
     ) {
         if (tilstand is Utbetaling.Forkastet) return
 

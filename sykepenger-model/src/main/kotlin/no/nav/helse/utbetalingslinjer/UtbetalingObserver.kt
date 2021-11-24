@@ -11,8 +11,8 @@ internal interface UtbetalingObserver {
     fun utbetalingAnnullert(
         hendelseskontekst: Hendelseskontekst,
         id: UUID,
+        korrelasjonsId: UUID,
         periode: Periode,
-        vedtaksfeednøkkel: String,
         personFagsystemId: String?,
         godkjenttidspunkt: LocalDateTime,
         saksbehandlerEpost: String,
@@ -23,6 +23,7 @@ internal interface UtbetalingObserver {
     fun utbetalingUtbetalt(
         hendelseskontekst: Hendelseskontekst,
         id: UUID,
+        korrelasjonsId: UUID,
         type: Utbetaling.Utbetalingtype,
         periode: Periode,
         maksdato: LocalDate,
@@ -35,14 +36,14 @@ internal interface UtbetalingObserver {
         tidspunkt: LocalDateTime,
         automatiskBehandling: Boolean,
         utbetalingstidslinje: Utbetalingstidslinje,
-        ident: String,
-        vedtaksfeednøkkel: String
+        ident: String
     ) {
     }
 
     fun utbetalingUtenUtbetaling(
         hendelseskontekst: Hendelseskontekst,
         id: UUID,
+        korrelasjonsId: UUID,
         type: Utbetaling.Utbetalingtype,
         periode: Periode,
         maksdato: LocalDate,
@@ -55,8 +56,7 @@ internal interface UtbetalingObserver {
         tidspunkt: LocalDateTime,
         automatiskBehandling: Boolean,
         utbetalingstidslinje: Utbetalingstidslinje,
-        epost: String,
-        vedtaksfeednøkkel: String
+        epost: String
     ) {
     }
 

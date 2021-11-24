@@ -87,11 +87,9 @@ internal class UtbetalingTest {
         val første = opprettUtbetaling(tidslinje, sisteDato = 21.januar)
         val andre = opprettUtbetaling(tidslinje, første, 28.januar)
         val tredje = opprettUtbetaling(tidslinje, andre, 2.februar)
-        val annullering =
-            tredje.annuller(AnnullerUtbetaling(UUID.randomUUID(), "", "", "", tredje.inspektør.arbeidsgiverOppdrag.fagsystemId(), "", "", LocalDateTime.now()))
-                ?: fail {
-                    "Klarte ikke lage annullering"
-                }
+        val annullering = annuller(tredje)
+        no.nav.helse.testhelpers.assertNotNull(annullering)
+        assertEquals(første.inspektør.korrelasjonsId, annullering.inspektør.korrelasjonsId)
         assertEquals(17.januar til 2.februar, annullering.periode)
         assertEquals(17.januar, annullering.inspektør.arbeidsgiverOppdrag.førstedato)
     }
@@ -101,10 +99,10 @@ internal class UtbetalingTest {
         val tidslinje = tidslinjeOf(16.AP, 3.NAV, 2.HELG, 5.NAV)
         beregnUtbetalinger(tidslinje)
         val første = opprettUtbetaling(tidslinje)
-        val annullering = første.annuller(AnnullerUtbetaling(UUID.randomUUID(), "", "", "", første.inspektør.arbeidsgiverOppdrag.fagsystemId(), "", "", LocalDateTime.now())) ?: fail {
-            "Klarte ikke lage annullering"
-        }
+        val annullering = annuller(første)
+        no.nav.helse.testhelpers.assertNotNull(annullering)
         val andre = opprettUtbetaling(tidslinje, annullering)
+        assertNotEquals(første.inspektør.korrelasjonsId, andre.inspektør.korrelasjonsId)
         assertNotEquals(første.inspektør.arbeidsgiverOppdrag.fagsystemId(), andre.inspektør.arbeidsgiverOppdrag.fagsystemId())
     }
 
@@ -117,8 +115,10 @@ internal class UtbetalingTest {
         val andre = opprettUtbetaling(ferietidslinje, første)
         val tredje = opprettUtbetaling(tidslinje, andre)
         assertEquals(første.inspektør.arbeidsgiverOppdrag.fagsystemId(), andre.inspektør.arbeidsgiverOppdrag.fagsystemId())
+        assertEquals(første.inspektør.korrelasjonsId, andre.inspektør.korrelasjonsId)
         assertTrue(andre.inspektør.arbeidsgiverOppdrag[0].erOpphør())
         assertEquals(første.inspektør.arbeidsgiverOppdrag.fagsystemId(), tredje.inspektør.arbeidsgiverOppdrag.fagsystemId())
+        assertEquals(første.inspektør.korrelasjonsId, tredje.inspektør.korrelasjonsId)
         assertEquals(17.januar, tredje.inspektør.arbeidsgiverOppdrag.førstedato)
     }
 
@@ -131,8 +131,10 @@ internal class UtbetalingTest {
         val andre = opprettUtbetaling(ferietidslinje, første)
         val tredje = opprettUtbetaling(beregnUtbetalinger(ferietidslinje + tidslinjeOf(10.NAV, startDato = 27.januar)), andre)
         assertEquals(første.inspektør.arbeidsgiverOppdrag.fagsystemId(), andre.inspektør.arbeidsgiverOppdrag.fagsystemId())
+        assertEquals(første.inspektør.korrelasjonsId, andre.inspektør.korrelasjonsId)
         assertTrue(andre.inspektør.arbeidsgiverOppdrag[0].erOpphør())
         assertEquals(første.inspektør.arbeidsgiverOppdrag.fagsystemId(), tredje.inspektør.arbeidsgiverOppdrag.fagsystemId())
+        assertEquals(første.inspektør.korrelasjonsId, tredje.inspektør.korrelasjonsId)
         assertEquals(27.januar, tredje.inspektør.arbeidsgiverOppdrag.førstedato)
     }
 
@@ -159,12 +161,9 @@ internal class UtbetalingTest {
         val første = opprettUtbetaling(tidslinje.kutt(19.januar(2020)))
         val andre = opprettUtbetaling(tidslinje.kutt(24.januar(2020)), tidligere = første)
         val tredje = opprettUtbetaling(tidslinje.kutt(18.februar(2020)), tidligere = andre)
-        val andreAnnullert =
-            andre.annuller(AnnullerUtbetaling(UUID.randomUUID(), "", "", "", andre.inspektør.arbeidsgiverOppdrag.fagsystemId(), "", "", LocalDateTime.now())) ?: fail {
-                "Klarte ikke lage annullering"
-            }
+        val andreAnnullert = annuller(andre)
+        no.nav.helse.testhelpers.assertNotNull(andreAnnullert)
         godkjenn(andreAnnullert)
-
         assertEquals(listOf(andre, tredje), listOf(tredje, andre, første).aktive())
         assertEquals(listOf(tredje), listOf(andreAnnullert, tredje, andre, første).aktive())
     }
@@ -181,6 +180,7 @@ internal class UtbetalingTest {
         val tidligere = opprettUtbetaling(tidslinje.kutt(19.januar(2020)))
         val utbetaling = opprettUtbetaling(tidslinje.kutt(24.januar(2020)), tidligere = tidligere)
 
+        assertEquals(tidligere.inspektør.korrelasjonsId, utbetaling.inspektør.korrelasjonsId)
         utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.also { inspektør ->
             assertEquals(2, inspektør.antallLinjer())
             assertNull(inspektør.refDelytelseId(0))
@@ -218,13 +218,13 @@ internal class UtbetalingTest {
 
         val inspektør1 = første.inspektør.arbeidsgiverOppdrag.inspektør
         val inspektør2 = andre.inspektør.arbeidsgiverOppdrag.inspektør
+        assertNotEquals(første.inspektør.korrelasjonsId, andre.inspektør.korrelasjonsId)
         assertEquals(1, inspektør1.antallLinjer())
         assertEquals(1, inspektør2.antallLinjer())
         assertNull(inspektør1.refDelytelseId(0))
         assertNull(inspektør1.refFagsystemId(0))
         assertNull(inspektør2.refDelytelseId(0))
         assertNull(inspektør2.refFagsystemId(0))
-
         assertNotEquals(inspektør1.fagsystemId(0), inspektør2.fagsystemId(0))
     }
 
@@ -351,11 +351,13 @@ internal class UtbetalingTest {
 
     @Test
     fun `null refusjon`() {
-        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 0))
+        val tidslinje = tidslinjeOf(16.AP, 30.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 0))
         beregnUtbetalinger(tidslinje)
-        val utbetaling = opprettUtbetaling(tidslinje)
-        assertFalse(utbetaling.harDelvisRefusjon())
-        assertTrue(utbetaling.harUtbetalinger())
+        val første = opprettUtbetaling(tidslinje.kutt(31.januar))
+        val andre = opprettUtbetaling(tidslinje, første)
+        assertFalse(første.harDelvisRefusjon())
+        assertTrue(første.harUtbetalinger())
+        assertEquals(første.inspektør.korrelasjonsId, andre.inspektør.korrelasjonsId)
     }
 
     @Test
@@ -426,9 +428,13 @@ internal class UtbetalingTest {
         val femte = opprettUtbetaling(tidslinje.kutt(21.februar), tidligere = fjerde)
 
         assertEquals(første.inspektør.arbeidsgiverOppdrag.fagsystemId(), andre.inspektør.arbeidsgiverOppdrag.fagsystemId())
+        assertEquals(første.inspektør.korrelasjonsId, andre.inspektør.korrelasjonsId)
         assertEquals(andre.inspektør.arbeidsgiverOppdrag.fagsystemId(), tredje.inspektør.arbeidsgiverOppdrag.fagsystemId())
+        assertEquals(andre.inspektør.korrelasjonsId, tredje.inspektør.korrelasjonsId)
         assertEquals(tredje.inspektør.arbeidsgiverOppdrag.fagsystemId(), fjerde.inspektør.arbeidsgiverOppdrag.fagsystemId())
+        assertEquals(tredje.inspektør.korrelasjonsId, fjerde.inspektør.korrelasjonsId)
         assertEquals(fjerde.inspektør.arbeidsgiverOppdrag.fagsystemId(), femte.inspektør.arbeidsgiverOppdrag.fagsystemId())
+        assertEquals(fjerde.inspektør.korrelasjonsId, femte.inspektør.korrelasjonsId)
 
         assertNotEquals(første.inspektør.arbeidsgiverOppdrag.fagsystemId(), første.inspektør.personOppdrag.fagsystemId())
 

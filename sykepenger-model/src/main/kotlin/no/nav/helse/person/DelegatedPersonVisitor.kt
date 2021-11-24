@@ -669,7 +669,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
     override fun preVisitUtbetaling(
         utbetaling: Utbetaling,
         id: UUID,
-        beregningId: UUID,
+        korrelasjonsId: UUID,
         type: Utbetaling.Utbetalingtype,
         tilstand: Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
@@ -679,12 +679,13 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         maksdato: LocalDate,
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?,
-        stønadsdager: Int
+        stønadsdager: Int,
+        beregningId: UUID
     ) {
         delegatee.preVisitUtbetaling(
             utbetaling,
             id,
-            beregningId,
+            korrelasjonsId,
             type,
             tilstand,
             tidsstempel,
@@ -694,7 +695,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             maksdato,
             forbrukteSykedager,
             gjenståendeSykedager,
-            stønadsdager
+            stønadsdager,
+            beregningId
         )
     }
 
@@ -744,7 +746,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
     override fun postVisitUtbetaling(
         utbetaling: Utbetaling,
         id: UUID,
-        beregningId: UUID,
+        korrelasjonsId: UUID,
         type: Utbetaling.Utbetalingtype,
         tilstand: Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
@@ -754,12 +756,13 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         maksdato: LocalDate,
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?,
-        stønadsdager: Int
+        stønadsdager: Int,
+        beregningId: UUID
     ) {
         delegatee.postVisitUtbetaling(
             utbetaling,
             id,
-            beregningId,
+            korrelasjonsId,
             type,
             tilstand,
             tidsstempel,
@@ -769,7 +772,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             maksdato,
             forbrukteSykedager,
             gjenståendeSykedager,
-            stønadsdager
+            stønadsdager,
+            beregningId
         )
     }
 
