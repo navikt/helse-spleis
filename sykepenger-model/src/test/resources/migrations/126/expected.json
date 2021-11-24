@@ -1,0 +1,33 @@
+{
+    "arbeidsgivere": [
+        {
+            "utbetalinger": [
+                {
+                    "arbeidsgiverOppdrag": {
+                        "fagsystemId": "56BESFQLFFHJVGBKMSUJ32V6T4"
+                    },
+                    "personOppdrag": {
+                        "fagsystemId": "UCAQ3TJDJ5AC3AURDNVX4OIT4Q"
+                    }
+                },
+                {
+                    "arbeidsgiverOppdrag": {
+                        "fagsystemId": "56BESFQLFFHJVGBKMSUJ32V6T4"
+                    },
+                    "personOppdrag": {
+                        "fagsystemId": "UCAQ3TJDJ5AC3AURDNVX4OIT4Q"
+                    }
+                },
+                {
+                    "arbeidsgiverOppdrag": {
+                        "fagsystemId": "FZR4LBNQW5CGVG5PP6O7W562PA"
+                    },
+                    "personOppdrag": {
+                        "fagsystemId": "3SZ52FV3WJA3XL3R3AVFM23XCM"
+                    }
+                }
+            ]
+        }
+    ],
+    "skjemaVersjon": 126
+}

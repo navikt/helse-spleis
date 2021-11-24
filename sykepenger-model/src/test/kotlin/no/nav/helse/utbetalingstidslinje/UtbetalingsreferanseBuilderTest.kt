@@ -11,7 +11,7 @@ internal class UtbetalingsreferanseBuilderTest {
         val uuid = UUID.randomUUID()
         val encoded = genererUtbetalingsreferanse(uuid)
         val decoded = decodeUtbetalingsreferanse(encoded)
-        println("$encoded - $decoded")
         assertEquals(uuid, decoded)
+        assertEquals(26, encoded.length)
     }
 }
