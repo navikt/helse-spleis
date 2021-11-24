@@ -233,7 +233,7 @@ internal class UtbetalingTest {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600))
         beregnUtbetalinger(tidslinje)
         val utbetaling = opprettGodkjentUtbetaling(tidslinje)
-        overfør(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId())
+        overfør(utbetaling)
         assertEquals(Utbetaling.Sendt, utbetaling.inspektør.tilstand)
     }
 
@@ -242,7 +242,7 @@ internal class UtbetalingTest {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600))
         beregnUtbetalinger(tidslinje)
         val utbetaling = opprettGodkjentUtbetaling(tidslinje)
-        overfør(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId())
+        overfør(utbetaling)
         overfør(utbetaling, utbetaling.inspektør.personOppdrag.fagsystemId())
         assertEquals(Utbetaling.Overført, utbetaling.inspektør.tilstand)
     }
@@ -252,7 +252,7 @@ internal class UtbetalingTest {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600))
         beregnUtbetalinger(tidslinje)
         val utbetaling = opprettGodkjentUtbetaling(tidslinje)
-        kvittèr(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId())
+        kvittèr(utbetaling)
         assertEquals(Utbetaling.Sendt, utbetaling.inspektør.tilstand)
     }
 
@@ -261,7 +261,7 @@ internal class UtbetalingTest {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600))
         beregnUtbetalinger(tidslinje)
         val utbetaling = opprettGodkjentUtbetaling(tidslinje)
-        kvittèr(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId())
+        kvittèr(utbetaling)
         kvittèr(utbetaling, utbetaling.inspektør.personOppdrag.fagsystemId())
         assertEquals(Utbetaling.Utbetalt, utbetaling.inspektør.tilstand)
     }
@@ -454,7 +454,7 @@ internal class UtbetalingTest {
     @Test
     fun `utbetalingOverført som treffer på arbeidsgiverFagsystemId`() {
         val utbetaling = opprettGodkjentUtbetaling()
-        overfør(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId())
+        overfør(utbetaling)
         assertEquals(Utbetaling.Overført, utbetaling.inspektør.tilstand)
     }
 
@@ -560,7 +560,7 @@ internal class UtbetalingTest {
             .onEach { kvittèr(utbetaling, it) }
     }
 
-    private fun overfør(utbetaling: Utbetaling, fagsystemId: String, utbetalingId: UUID = utbetaling.inspektør.utbetalingId) {
+    private fun overfør(utbetaling: Utbetaling, fagsystemId: String = utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId(), utbetalingId: UUID = utbetaling.inspektør.utbetalingId) {
         utbetaling.håndter(
             UtbetalingOverført(
                 meldingsreferanseId = UUID.randomUUID(),
@@ -575,7 +575,7 @@ internal class UtbetalingTest {
         )
     }
 
-    private fun kvittèr(utbetaling: Utbetaling, fagsystemId: String, status: Oppdragstatus = AKSEPTERT) {
+    private fun kvittèr(utbetaling: Utbetaling, fagsystemId: String = utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId(), status: Oppdragstatus = AKSEPTERT) {
         utbetaling.håndter(
             UtbetalingHendelse(
                 meldingsreferanseId = UUID.randomUUID(),
