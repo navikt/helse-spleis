@@ -43,9 +43,10 @@ internal class OppdragBuilder(
     }
 
     private fun nyttOppdrag(): Oppdrag {
+        val eldsteDag = utbetalingslinjer.firstOrNull()?.fom?.minusDays(1)
         fjernLinjerUtenUtbetalingsdager()
         kjedeSammenLinjer()
-        return Oppdrag(mottaker, fagområde, utbetalingslinjer, fagsystemId, sisteArbeidsgiverdag)
+        return Oppdrag(mottaker, fagområde, utbetalingslinjer, fagsystemId, sisteArbeidsgiverdag ?: eldsteDag)
     }
 
     private fun fjernLinjerUtenUtbetalingsdager() {
@@ -62,6 +63,7 @@ internal class OppdragBuilder(
     private val linje get() = utbetalingslinjer.first()
 
     override fun visit(dag: UkjentDag, dato: LocalDate, økonomi: Økonomi) {
+        tilstand.sisteArbeidsgiverdag(dag.dato)
         tilstand = Avsluttet
     }
 

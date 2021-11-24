@@ -5,13 +5,14 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.*
+import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 
 internal class FagsystemIDTest : AbstractEndToEndTest() {
@@ -325,8 +326,8 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         val siste = inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag
 
         assertEquals(16.april, første.toMap().getValue("sisteArbeidsgiverdag"))
-        assertNull(andre.toMap().getValue("sisteArbeidsgiverdag"))
-        assertNull(siste.toMap().getValue("sisteArbeidsgiverdag"))
+        assertEquals(29.mai, andre.toMap().getValue("sisteArbeidsgiverdag"))
+        assertEquals(29.mai, siste.toMap().getValue("sisteArbeidsgiverdag"))
         assertNotEquals(første.fagsystemId(), siste.fagsystemId())
         assertEquals(andre.fagsystemId(), siste.fagsystemId())
         siste.linjerUtenOpphør().also { linjer ->

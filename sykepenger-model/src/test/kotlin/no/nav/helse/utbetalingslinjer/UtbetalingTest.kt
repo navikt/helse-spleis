@@ -366,7 +366,7 @@ internal class UtbetalingTest {
         val første = opprettUtbetaling(tidslinje.kutt(21.januar))
         val andre = opprettUtbetaling(tidslinje, første)
         assertEquals(første.inspektør.personOppdrag.fagsystemId(), andre.inspektør.personOppdrag.fagsystemId())
-        assertNotEquals(første.inspektør.arbeidsgiverOppdrag.fagsystemId(), andre.inspektør.arbeidsgiverOppdrag.fagsystemId()) { "Det hadde vært fint om disse egentlig var like, så om asserten feiler så er det egentlig helt ok" }
+        assertEquals(første.inspektør.arbeidsgiverOppdrag.fagsystemId(), andre.inspektør.arbeidsgiverOppdrag.fagsystemId())
         assertEquals(første.inspektør.korrelasjonsId, andre.inspektør.korrelasjonsId)
     }
 
@@ -378,7 +378,7 @@ internal class UtbetalingTest {
         val tredje = opprettUtbetaling(tidslinje, andre)
         assertNotEquals(første.inspektør.korrelasjonsId, andre.inspektør.korrelasjonsId)
         assertEquals(andre.inspektør.personOppdrag.fagsystemId(), tredje.inspektør.personOppdrag.fagsystemId())
-        assertNotEquals(andre.inspektør.arbeidsgiverOppdrag.fagsystemId(), tredje.inspektør.arbeidsgiverOppdrag.fagsystemId()) { "Det hadde vært fint om disse egentlig var like, så om asserten feiler så er det egentlig helt ok" }
+        assertEquals(andre.inspektør.arbeidsgiverOppdrag.fagsystemId(), tredje.inspektør.arbeidsgiverOppdrag.fagsystemId())
         assertEquals(andre.inspektør.korrelasjonsId, tredje.inspektør.korrelasjonsId)
     }
 
@@ -388,7 +388,7 @@ internal class UtbetalingTest {
         val første = opprettUtbetaling(tidslinje.kutt(21.januar))
         val andre = opprettUtbetaling(tidslinje, første)
         assertEquals(første.inspektør.arbeidsgiverOppdrag.fagsystemId(), andre.inspektør.arbeidsgiverOppdrag.fagsystemId())
-        assertNotEquals(første.inspektør.personOppdrag.fagsystemId(), andre.inspektør.personOppdrag.fagsystemId()) { "Det hadde vært fint om disse egentlig var like, så om asserten feiler så er det egentlig helt ok" }
+        assertEquals(første.inspektør.personOppdrag.fagsystemId(), andre.inspektør.personOppdrag.fagsystemId())
         assertEquals(første.inspektør.korrelasjonsId, andre.inspektør.korrelasjonsId)
     }
 
@@ -400,7 +400,7 @@ internal class UtbetalingTest {
         val tredje = opprettUtbetaling(tidslinje, andre)
         assertNotEquals(første.inspektør.korrelasjonsId, andre.inspektør.korrelasjonsId)
         assertEquals(andre.inspektør.arbeidsgiverOppdrag.fagsystemId(), tredje.inspektør.arbeidsgiverOppdrag.fagsystemId())
-        assertNotEquals(andre.inspektør.personOppdrag.fagsystemId(), tredje.inspektør.personOppdrag.fagsystemId()) { "Det hadde vært fint om disse egentlig var like, så om asserten feiler så er det egentlig helt ok" }
+        assertEquals(andre.inspektør.personOppdrag.fagsystemId(), tredje.inspektør.personOppdrag.fagsystemId())
         assertEquals(andre.inspektør.korrelasjonsId, tredje.inspektør.korrelasjonsId)
     }
 

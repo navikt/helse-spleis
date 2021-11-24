@@ -13,7 +13,6 @@ import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -56,9 +55,9 @@ internal class OppdragBuilderTest {
     }
 
     @Test
-    fun `nuller ut siste arbeidsgiverperiodedag dersom vi støter på Ukjentdager fra Infotrygd`() {
+    fun `siste arbeidsgiverperiodedag er siste ukjent dag fra Infotrygd`() {
         val oppdrag = tilArbeidsgiver(16.AP, 15.NAV, 10.NAV, 30.NAV, infotrygdtidslinje = tidslinjeOf(10.NAV, startDato = 1.februar))
-        assertNull(oppdrag.sisteArbeidsgiverperiodedag)
+        assertEquals(10.februar, oppdrag.sisteArbeidsgiverperiodedag)
     }
 
     @Test

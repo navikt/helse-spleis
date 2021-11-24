@@ -86,9 +86,9 @@ internal class Oppdrag private constructor(
     internal operator fun contains(other: Oppdrag) = this.tilhører(other) || this.overlapperMed(other)
 
     private fun tilhører(other: Oppdrag) = this.fagsystemId == other.fagsystemId && this.fagområde == other.fagområde
-    private fun overlapperMed(other: Oppdrag) = maxOf(this.førstedato, other.førstedato) <= minOf(this.sistedato, other.sistedato) || sammeArbeidsgiverperiode(other)
+    private fun overlapperMed(other: Oppdrag) = maxOf(this.førstedato, other.førstedato) <= minOf(this.sistedato, other.sistedato) || sammenhengendeUtbetalingsperiode(other)
 
-    private fun sammeArbeidsgiverperiode(other: Oppdrag) =
+    private fun sammenhengendeUtbetalingsperiode(other: Oppdrag) =
         this.sisteArbeidsgiverdag != null && this.sisteArbeidsgiverdag == other.sisteArbeidsgiverdag
 
     internal fun overfør(
@@ -211,7 +211,7 @@ internal class Oppdrag private constructor(
         }
     }
 
-    private fun harIngenKoblingTilTidligereOppdrag(eldre: Oppdrag) = (eldre.erTomt() && !sammeArbeidsgiverperiode(eldre)) || this !in eldre
+    private fun harIngenKoblingTilTidligereOppdrag(eldre: Oppdrag) = (eldre.erTomt() && !sammenhengendeUtbetalingsperiode(eldre)) || this !in eldre
 
     private fun ingenUtbetalteDager() = linjerUtenOpphør().isEmpty()
 
