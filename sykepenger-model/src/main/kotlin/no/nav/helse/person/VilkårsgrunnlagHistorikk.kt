@@ -109,6 +109,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         fun inntektsopplysningPerArbeidsgiver(): Map<String, Inntektshistorikk.Inntektsopplysning>
         fun gjelderFlereArbeidsgivere(): Boolean
         fun oppdaterManglendeMinimumInntekt(person: Person, skjæringstidspunkt: LocalDate) {}
+        fun validerAvviksprosent(): Boolean = true
     }
 
     internal class Grunnlagsdata(
@@ -127,6 +128,11 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         }
 
         override fun valider(aktivitetslogg: Aktivitetslogg) {}
+
+        override fun validerAvviksprosent(): Boolean {
+            if (avviksprosent == null) return true
+            return avviksprosent < Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT
+        }
 
         override fun oppdaterManglendeMinimumInntekt(person: Person, skjæringstidspunkt: LocalDate) {
             if (harMinimumInntekt != null) return

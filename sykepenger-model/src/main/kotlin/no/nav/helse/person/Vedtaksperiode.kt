@@ -35,7 +35,6 @@ import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
 import no.nav.helse.utbetalingstidslinje.Sykepengerettighet
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -1972,10 +1971,8 @@ internal class Vedtaksperiode private constructor(
         ) {
             val periodetype = vedtaksperiode.periodetype()
             validation(ytelser) {
-                onValidationFailed { errorLogAlreadyDone ->
-                    if (!errorLogAlreadyDone) {
-                        error("Behandling av Ytelser feilet, årsak ukjent")
-                    }
+                onValidationFailed {
+                    if (!ytelser.hasErrorsOrWorse()) error("Behandling av Ytelser feilet, årsak ukjent")
                     vedtaksperiode.tilstand(ytelser, TilInfotrygd)
                 }
                 valider("Det er utbetalt en senere periode i Infotrygd") { vedtaksperiode.validerSenerePerioderIInfotrygd(infotrygdhistorikk) }
@@ -2016,13 +2013,9 @@ internal class Vedtaksperiode private constructor(
                         info("Mangler vilkårsgrunnlag for ${vedtaksperiode.skjæringstidspunkt}")
                     }
                 }
-                valider {
-                    val vilkårsgrunnlagElement = person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt)
-                    if (vilkårsgrunnlagElement is VilkårsgrunnlagHistorikk.Grunnlagsdata) {
-                        vilkårsgrunnlagElement.avviksprosent?.let { avvik -> avvik < Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT } ?: true
-                    } else {
-                        true
-                    }
+                lateinit var vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
+                validerHvis("Har for mye avvik i inntekt", { person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt)?.also { vilkårsgrunnlag = it } != null }) {
+                    vilkårsgrunnlag.validerAvviksprosent()
                 }
                 onSuccess {
                     when (periodetype) {

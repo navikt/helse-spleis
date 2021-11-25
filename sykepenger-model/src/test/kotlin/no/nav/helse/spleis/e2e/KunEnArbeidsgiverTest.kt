@@ -3216,7 +3216,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `det error-logges i aktivitetsloggen når validering av perioder i AvventerHistorikk feiler uten eksplisitt error-logging`() {
+    fun `25 % avvik i inntekt lager error`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2021), 1.januar(2021), 100.prosent))
         håndterSøknad(Sykdom(1.januar(2021), 1.januar(2021), 100.prosent))
         val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021)), førsteFraværsdag = 1.januar(2021))
@@ -3235,9 +3235,9 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         håndterInntektsmeldingReplay(inntektsmeldingId, 2.vedtaksperiode(ORGNUMMER))
 
-        håndterYtelser(2.vedtaksperiode) // Feiler pga over 25 % avvik, men det mangler konkret error-logging
+        håndterYtelser(2.vedtaksperiode)
 
-        assertErrorTekst(inspektør, "Behandling av Ytelser feilet, årsak ukjent")
+        assertErrorTekst(inspektør, "Har mer enn 25 % avvik", "Har for mye avvik i inntekt")
     }
 
     @Test

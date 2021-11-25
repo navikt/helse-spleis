@@ -6,7 +6,7 @@ import java.time.LocalDate
 
 internal class Validation private constructor(private val hendelse: IAktivitetslogg) : IAktivitetslogg by(hendelse) {
     private var hasErrors = false
-    private var errorBlock: Validation.(errorLogAlreadyDone: Boolean) -> Unit = {}
+    private var errorBlock: Validation.() -> Unit = {}
 
     internal companion object {
         internal inline fun validation(hendelse: IAktivitetslogg, block: Validation.() -> Unit) {
@@ -14,12 +14,16 @@ internal class Validation private constructor(private val hendelse: IAktivitetsl
         }
     }
 
-    internal fun onValidationFailed(block: Validation.(errorLogAlreadyDone: Boolean) -> Unit) {
+    internal fun onValidationFailed(block: Validation.() -> Unit) {
         errorBlock = block
     }
 
     internal fun validerHvis(feilmelding: String? = null, hvis: Boolean, isValid: Validation.() -> Boolean) {
-        if (!hvis) return
+        validerHvis(feilmelding, { hvis }, isValid)
+    }
+
+    internal fun validerHvis(feilmelding: String? = null, hvis: () -> Boolean, isValid: Validation.() -> Boolean) {
+        if (!hvis()) return
         valider(feilmelding, isValid)
     }
 
@@ -38,7 +42,7 @@ internal class Validation private constructor(private val hendelse: IAktivitetsl
     private fun onValidationFailed(feilmelding: String?) {
         hasErrors = true
         feilmelding?.also { error(it) }
-        errorBlock(this, hendelse.hasErrorsOrWorse())
+        errorBlock(this)
     }
 }
 
