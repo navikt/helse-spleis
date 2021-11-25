@@ -154,11 +154,12 @@ internal class Økonomi private constructor(
             økonomiList.any { it.er6GBegrenset() }
     }
 
+    init {
+        if (dekningsgrunnlag != null) require(dekningsgrunnlag >= INGEN) { "dekningsgrunnlag kan ikke være negativ." }
+    }
+
     internal fun inntekt(aktuellDagsinntekt: Inntekt, dekningsgrunnlag: Inntekt = aktuellDagsinntekt, skjæringstidspunkt: LocalDate): Økonomi =
-        dekningsgrunnlag.let {
-            require(it >= INGEN) { "dekningsgrunnlag kan ikke være negativ. Aktuell dagsinntekt: $aktuellDagsinntekt, dekningsgrunnlag: $dekningsgrunnlag, skjæringstidspunkt: $skjæringstidspunkt" }
-            tilstand.inntekt(this, aktuellDagsinntekt, it, skjæringstidspunkt)
-        }
+        tilstand.inntekt(this, aktuellDagsinntekt, dekningsgrunnlag, skjæringstidspunkt)
 
     internal fun arbeidsgiverRefusjon(beløp: Inntekt): Økonomi {
         arbeidsgiverRefusjonsbeløp = beløp

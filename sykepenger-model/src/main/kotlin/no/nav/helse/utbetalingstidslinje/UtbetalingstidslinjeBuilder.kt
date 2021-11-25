@@ -12,8 +12,8 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
-import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException.ManglerInntektException
-import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException.UforventetDagException
+import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException.*
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
@@ -70,12 +70,20 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     private fun inntektForDato(dato: LocalDate) =
         inntektForDatoOrNull(dato) ?: throw ManglerInntektException(dato, skjæringstidspunkter)
 
+    private fun dekningsgrunnlag(inntekt: Inntekt, dagen: LocalDate, skjæringstidspunkt: LocalDate): Inntekt {
+        val dekningsgrunnlag = inntekt.dekningsgrunnlag(arbeidsgiverRegler)
+        if (dekningsgrunnlag < INGEN) {
+            throw NegativDekningsgrunnlagException(dekningsgrunnlag, dagen, skjæringstidspunkt)
+        }
+        return dekningsgrunnlag
+    }
+
     private fun Økonomi.inntektIfNotNull(dato: LocalDate) =
         inntektForDatoOrNull(dato)
             ?.let { (skjæringstidspunkt, inntekt) ->
                 inntekt(
                     aktuellDagsinntekt = inntekt,
-                    dekningsgrunnlag = inntekt.dekningsgrunnlag(arbeidsgiverRegler),
+                    dekningsgrunnlag = dekningsgrunnlag(inntekt, dato, skjæringstidspunkt),
                     skjæringstidspunkt = skjæringstidspunkt
                 )
             }
@@ -158,7 +166,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         tidslinje.addForeldetDag(
             dagen, økonomi.inntekt(
                 aktuellDagsinntekt = inntekt,
-                dekningsgrunnlag = inntekt.dekningsgrunnlag(arbeidsgiverRegler),
+                dekningsgrunnlag = dekningsgrunnlag(inntekt, dagen, skjæringstidspunkt),
                 skjæringstidspunkt = skjæringstidspunkt
             )
         )
@@ -174,7 +182,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
             dato,
             økonomi.inntekt(
                 aktuellDagsinntekt = inntekt,
-                dekningsgrunnlag = inntekt.dekningsgrunnlag(arbeidsgiverRegler),
+                dekningsgrunnlag = dekningsgrunnlag(inntekt, dato, skjæringstidspunkt),
                 skjæringstidspunkt = skjæringstidspunkt
             )
         )
@@ -577,5 +585,10 @@ internal sealed class UtbetalingstidslinjeBuilderException(private val kort: Str
     internal class UforventetDagException(dag: Dag, melding: String) : UtbetalingstidslinjeBuilderException(
         "Forventet ikke ${dag::class.simpleName}",
         "Forventet ikke ${dag::class.simpleName} i utbetalingstidslinjen. Melding: $melding"
+    )
+
+    internal class NegativDekningsgrunnlagException(dekningsgrunnlag: Inntekt, dagen: LocalDate, skjæringstidspunkt: LocalDate) : UtbetalingstidslinjeBuilderException(
+        "Dekningsgrunnlag er negativ",
+        "Dekningsgrunnlag for $dagen med skjæringstidspunkt $skjæringstidspunkt gir negativt beløp: $dekningsgrunnlag"
     )
 }
