@@ -37,7 +37,6 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Økonomi
-import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -2011,12 +2010,9 @@ internal class Vedtaksperiode private constructor(
                         ?: return@håndter info("Mangler vilkårsgrunnlag for $vedtaksperiode.skjæringstidspunkt").also {
                             vedtaksperiode.tilstand(ytelser, AvventerVilkårsprøving)
                         }
-                    if (vilkårsgrunnlag is VilkårsgrunnlagHistorikk.Grunnlagsdata && vilkårsgrunnlag.harMinimumInntekt == null) {
-                        // Må gjøres frem til 1.oktober 2021. Etter denne datoen kan denne koden slettes,
-                        // fordi da vil vi ikke ha noen forlengelser til perioder som har harMinimumInntekt = null til behandling lenger.
-                        person.oppdaterHarMinimumInntekt(vedtaksperiode.skjæringstidspunkt, vilkårsgrunnlag)
-                        sikkerLogg.info("Vi antar at det ikke finnes forlengelser til perioder som har harMinimumInntekt = null lenger")
-                    }
+                    // Må gjøres frem til 1.oktober 2021. Etter denne datoen kan denne koden slettes,
+                    // fordi da vil vi ikke ha noen forlengelser til perioder som har harMinimumInntekt = null til behandling lenger.
+                    vilkårsgrunnlag.oppdaterManglendeMinimumInntekt(person, vedtaksperiode.skjæringstidspunkt)
                 }
                 valider {
                     val vilkårsgrunnlagElement = person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt)
@@ -2584,8 +2580,6 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal companion object {
-        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
-
         private const val IKKE_HÅNDTERT: Boolean = false
 
         internal val SENERE_INCLUSIVE = fun(senereEnnDenne: Vedtaksperiode): VedtaksperiodeFilter {

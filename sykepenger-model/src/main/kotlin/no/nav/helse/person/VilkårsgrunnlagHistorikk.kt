@@ -8,6 +8,7 @@ import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -107,6 +108,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         fun grunnlagForSykepengegrunnlag(): Inntekt
         fun inntektsopplysningPerArbeidsgiver(): Map<String, Inntektshistorikk.Inntektsopplysning>
         fun gjelderFlereArbeidsgivere(): Boolean
+        fun oppdaterManglendeMinimumInntekt(person: Person, skjæringstidspunkt: LocalDate) {}
     }
 
     internal class Grunnlagsdata(
@@ -120,8 +122,17 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         internal val vurdertOk: Boolean,
         internal val meldingsreferanseId: UUID?
     ) : VilkårsgrunnlagElement {
+        private companion object {
+            private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
+        }
 
         override fun valider(aktivitetslogg: Aktivitetslogg) {}
+
+        override fun oppdaterManglendeMinimumInntekt(person: Person, skjæringstidspunkt: LocalDate) {
+            if (harMinimumInntekt != null) return
+            person.oppdaterHarMinimumInntekt(skjæringstidspunkt, this)
+            sikkerLogg.info("Vi antar at det ikke finnes forlengelser til perioder som har harMinimumInntekt = null lenger")
+        }
 
         override fun isOk() = vurdertOk
 
@@ -129,7 +140,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             vilkårsgrunnlagHistorikkVisitor.preVisitGrunnlagsdata(skjæringstidspunkt, this)
             sykepengegrunnlag.accept(vilkårsgrunnlagHistorikkVisitor)
             vilkårsgrunnlagHistorikkVisitor.postVisitGrunnlagsdata(skjæringstidspunkt, this)
-
         }
 
         override fun sykepengegrunnlag() = sykepengegrunnlag.sykepengegrunnlag
@@ -149,7 +159,9 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             harMinimumInntekt = minimumInntektVurdering,
             vurdertOk = vurdertOk && minimumInntektVurdering,
             meldingsreferanseId = meldingsreferanseId
-        )
+        ).also {
+            sikkerLogg.info("Oppretter nytt Grunnlagsdata med harMinimumInntekt=$harMinimumInntekt")
+        }
 
         internal fun kopierGrunnlagsdataMed(
             sykepengegrunnlag: Sykepengegrunnlag,
