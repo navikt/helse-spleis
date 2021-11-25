@@ -2006,13 +2006,15 @@ internal class Vedtaksperiode private constructor(
                     person.minstEttSykepengegrunnlagSomIkkeKommerFraSkatt(vedtaksperiode.skjæringstidspunkt)
                 }
                 onSuccess {
-                    val vilkårsgrunnlag = person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt)
-                        ?: return@håndter info("Mangler vilkårsgrunnlag for $vedtaksperiode.skjæringstidspunkt").also {
-                            vedtaksperiode.tilstand(ytelser, AvventerVilkårsprøving)
-                        }
-                    // Må gjøres frem til 1.oktober 2021. Etter denne datoen kan denne koden slettes,
-                    // fordi da vil vi ikke ha noen forlengelser til perioder som har harMinimumInntekt = null til behandling lenger.
-                    vilkårsgrunnlag.oppdaterManglendeMinimumInntekt(person, vedtaksperiode.skjæringstidspunkt)
+                    person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt)?.also {
+                        // Må gjøres frem til 1.oktober 2021. Etter denne datoen kan denne koden slettes,
+                        // fordi da vil vi ikke ha noen forlengelser til perioder som har harMinimumInntekt = null til behandling lenger.
+                        // TODO: Det skjer fortsatt etter 011021, link til søk: https://logs.adeo.no/goto/3d53e0351dd10ac0fddcfe58819e5abe
+                        it.oppdaterManglendeMinimumInntekt(person, vedtaksperiode.skjæringstidspunkt)
+                    } ?: return@håndter vedtaksperiode.tilstand(ytelser, AvventerVilkårsprøving) {
+                        // TODO: Mangler ofte vilkårsgrunnlag for perioder (https://logs.adeo.no/goto/844ac8a834ecd9c7ee5022ba0f89e569).
+                        info("Mangler vilkårsgrunnlag for ${vedtaksperiode.skjæringstidspunkt}")
+                    }
                 }
                 valider {
                     val vilkårsgrunnlagElement = person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt)
