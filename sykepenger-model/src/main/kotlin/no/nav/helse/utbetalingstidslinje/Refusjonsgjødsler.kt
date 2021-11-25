@@ -1,7 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Refusjonshistorikk
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
@@ -14,7 +13,7 @@ internal class Refusjonsgjødsler(
     private val organisasjonsnummer: String
 ) {
     internal fun gjødsle(aktivitetslogg: IAktivitetslogg, periode: Periode) {
-        sammenhengendeUtbetalingsperioder(tidslinje).forEach { utbetalingsperiode ->
+        tidslinje.sammenhengendeUtbetalingsperioder().forEach { utbetalingsperiode ->
             val refusjon = refusjonshistorikk.finnRefusjon(utbetalingsperiode.periode(), aktivitetslogg)
             if (utbetalingsperiode.periode().overlapperMed(periode)) {
                 if (refusjon == null) håndterManglendeRefusjon(utbetalingsperiode, aktivitetslogg)
@@ -38,14 +37,6 @@ internal class Refusjonsgjødsler(
             aktivitetslogg.warn("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.")
         }
     }
-
-    private fun sammenhengendeUtbetalingsperioder(utbetalingstidslinje: Utbetalingstidslinje) = utbetalingstidslinje
-        .filter { it !is Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag && it !is Utbetalingstidslinje.Utbetalingsdag.UkjentDag }
-        .map(Utbetalingstidslinje.Utbetalingsdag::dato)
-        .grupperSammenhengendePerioder()
-        .map(utbetalingstidslinje::subset)
-        .map(Utbetalingstidslinje::trimLedendeFridager)
-        .filter(Utbetalingstidslinje::harUtbetalinger)
 
     private companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")

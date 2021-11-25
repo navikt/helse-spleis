@@ -21,8 +21,9 @@ internal class CreateØkonomiTest {
     fun `opprette bare prosenter`() {
         val data = sykdomstidslinjedag(79.5)
         createØkonomi(data).also { økonomi ->
-            økonomi.medData { grad, arbeidsgiverBetalingProsent, dekningsgrunnlag, _, _, aktuellDagsinntekt, _, _, _ ->
+            økonomi.medData { grad, arbeidsgiverRefusjonsbeløp, dekningsgrunnlag, _, _, aktuellDagsinntekt, _, _, _ ->
                 assertEquals(79.5, grad)
+                assertEquals(0.0, arbeidsgiverRefusjonsbeløp)
                 assertNull(dekningsgrunnlag)
                 assertNull(aktuellDagsinntekt)
             }
@@ -88,7 +89,7 @@ internal class CreateØkonomiTest {
 
     private fun utbetalingsdag(
         grad: Double,
-        arbeidsgiverRefusjonsbeløp: Double?,
+        arbeidsgiverRefusjonsbeløp: Double,
         aktuellDagsinntekt: Double,
         dekningsgrunnlag: Double,
         arbeidsgiverbeløp: Double? = null,
@@ -116,7 +117,7 @@ internal class CreateØkonomiTest {
         PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG,
         PersonData.ArbeidsgiverData.SykdomstidslinjeData.KildeData("type", UUID.randomUUID(), 1.januar.atStartOfDay()),
         grad,
-        null,
+        0.0,
         null,
         null,
         null,

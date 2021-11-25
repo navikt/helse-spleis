@@ -100,7 +100,7 @@ internal class ØkonomiTest {
 
     @Test
     fun `kan ikke låses etter betaling`() {
-        50.prosent.sykdomsgrad.inntekt(1200.daglig, 1200.daglig, skjæringstidspunkt = 1.januar).also { økonomi ->
+        50.prosent.sykdomsgrad.inntekt(1200.daglig, 1200.daglig, skjæringstidspunkt = 1.januar).arbeidsgiverRefusjon(1200.daglig).also { økonomi ->
             listOf(økonomi).betal(1.januar)
             assertUtbetaling(økonomi, 600.0, 0.0)
             assertThrows<IllegalStateException> { økonomi.lås() }
@@ -109,7 +109,7 @@ internal class ØkonomiTest {
 
     @Test
     fun `opplåsing tillater betaling`() {
-        50.prosent.sykdomsgrad.inntekt(1200.daglig, 1200.daglig, skjæringstidspunkt = 1.januar).lås().låsOpp().also { økonomi ->
+        50.prosent.sykdomsgrad.inntekt(1200.daglig, 1200.daglig, skjæringstidspunkt = 1.januar).arbeidsgiverRefusjon(1200.daglig).lås().låsOpp().also { økonomi ->
             listOf(økonomi).betal(1.januar)
             assertUtbetaling(økonomi, 600.0, 0.0)
         }
@@ -118,7 +118,7 @@ internal class ØkonomiTest {
     @Test
     fun `kan ikke låses opp med mindre den er låst`() {
         assertThrows<IllegalStateException> { 50.prosent.sykdomsgrad.låsOpp() }
-        50.prosent.sykdomsgrad.inntekt(1200.daglig, 1200.daglig, skjæringstidspunkt = 1.januar).also { økonomi ->
+        50.prosent.sykdomsgrad.inntekt(1200.daglig, 1200.daglig, skjæringstidspunkt = 1.januar).arbeidsgiverRefusjon(1200.daglig).also { økonomi ->
             assertThrows<IllegalStateException> { økonomi.låsOpp() }
             listOf(økonomi).betal(1.januar)
             assertUtbetaling(økonomi, 600.0, 0.0)
@@ -135,7 +135,7 @@ internal class ØkonomiTest {
 
     @Test
     fun `betal 0 hvis låst`() {
-        50.prosent.sykdomsgrad.inntekt(1200.daglig, 1200.daglig, skjæringstidspunkt = 1.januar).lås().also { økonomi ->
+        50.prosent.sykdomsgrad.inntekt(1200.daglig, 1200.daglig, skjæringstidspunkt = 1.januar).arbeidsgiverRefusjon(1200.daglig).lås().also { økonomi ->
             listOf(økonomi).betal(1.januar)
             assertUtbetaling(økonomi, 0.0, 0.0)
             økonomi.låsOpp()
@@ -188,7 +188,7 @@ internal class ØkonomiTest {
 
     @Test
     fun `Beregn utbetaling når mindre enn 6G`() {
-        80.prosent.sykdomsgrad.inntekt(1200.daglig, 1200.daglig, skjæringstidspunkt = 1.januar).also {
+        80.prosent.sykdomsgrad.inntekt(1200.daglig, 1200.daglig, skjæringstidspunkt = 1.januar).arbeidsgiverRefusjon(1200.daglig).also {
             listOf(it).betal(1.januar)
             it.medData { grad, _, dekningsgrunnlag, _, _, _, arbeidsgiverbeløp, personbeløp, _ ->
                 assertEquals(80.0, grad)
@@ -212,8 +212,9 @@ internal class ØkonomiTest {
             .arbeidsgiverRefusjon(499.5.daglig)
             .also {
                 listOf(it).betal(1.januar)
-                it.medData { grad, arbeidsgiverBetalingProsent, dekningsgrunnlag, _, _, _, arbeidsgiverbeløp, personbeløp, _ ->
+                it.medData { grad, arbeidsgiverRefusjonsbeløp, dekningsgrunnlag, _, _, _, arbeidsgiverbeløp, personbeløp, _ ->
                     assertEquals(100.0, grad)
+                    assertEquals(499.5, arbeidsgiverRefusjonsbeløp)
                     assertEquals(999.0, dekningsgrunnlag)
                     assertEquals(500.0, arbeidsgiverbeløp)
                     assertEquals(499.0, personbeløp)
@@ -325,8 +326,8 @@ internal class ØkonomiTest {
 
     @Test
     fun `Sykdomdsgrad rundes opp`() {
-        val a = Økonomi.sykdomsgrad(20.prosent).inntekt(10000.daglig, 10000.daglig, skjæringstidspunkt = 1.januar)
-        val b = Økonomi.sykdomsgrad(21.prosent).inntekt(10000.daglig, 10000.daglig, skjæringstidspunkt = 1.januar)
+        val a = Økonomi.sykdomsgrad(20.prosent).inntekt(10000.daglig, 10000.daglig, skjæringstidspunkt = 1.januar).arbeidsgiverRefusjon(10000.daglig)
+        val b = Økonomi.sykdomsgrad(21.prosent).inntekt(10000.daglig, 10000.daglig, skjæringstidspunkt = 1.januar).arbeidsgiverRefusjon(10000.daglig)
         listOf(a, b).betal(1.januar).also {
             assertEquals(20.5.prosent, it.totalSykdomsgrad()) //dekningsgrunnlag 454
         }

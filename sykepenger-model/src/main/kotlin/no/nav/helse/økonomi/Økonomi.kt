@@ -16,7 +16,7 @@ import kotlin.math.roundToInt
 
 internal class Økonomi private constructor(
     private val grad: Prosentdel,
-    private var arbeidsgiverRefusjonsbeløp: Inntekt? = null,
+    private var arbeidsgiverRefusjonsbeløp: Inntekt = INGEN,
     private val aktuellDagsinntekt: Inntekt? = null,
     private val dekningsgrunnlag: Inntekt? = null,
     private val skjæringstidspunkt: LocalDate? = null,
@@ -183,7 +183,7 @@ internal class Økonomi private constructor(
                   personbeløp,
                   er6GBegrenset ->
             map["grad"] = grad
-            map.compute("arbeidsgiverRefusjonsbeløp") { _, _ -> arbeidsgiverRefusjonsbeløp }
+            map["arbeidsgiverRefusjonsbeløp"] = arbeidsgiverRefusjonsbeløp
             map.compute("skjæringstidspunkt") { _, _ -> skjæringstidspunkt }
             map.compute("totalGrad") { _, _ -> totalGrad }
             map.compute("dekningsgrunnlag") { _, _ -> dekningsgrunnlag }
@@ -199,7 +199,7 @@ internal class Økonomi private constructor(
     internal fun <R> medAvrundetData(
         block: (
             grad: Int,
-            arbeidsgiverRefusjonsbeløp: Int?,
+            arbeidsgiverRefusjonsbeløp: Int,
             dekningsgrunnlag: Int?,
             aktuellDagsinntekt: Int?,
             arbeidsgiverbeløp: Int?,
@@ -208,7 +208,7 @@ internal class Økonomi private constructor(
         ) -> R
     ) =
         medData { grad: Double,
-                  arbeidsgiverRefusjonsbeløp: Double?,
+                  arbeidsgiverRefusjonsbeløp: Double,
                   dekningsgrunnlag: Double?,
                   _: LocalDate?,
                   _: Double?,
@@ -218,7 +218,7 @@ internal class Økonomi private constructor(
                   er6GBegrenset: Boolean? ->
             block(
                 grad.roundToInt(),
-                arbeidsgiverRefusjonsbeløp?.roundToInt(),
+                arbeidsgiverRefusjonsbeløp.roundToInt(),
                 dekningsgrunnlag?.roundToInt(),
                 aktuellDagsinntekt?.roundToInt(),
                 arbeidsgiverbeløp?.roundToInt(),
@@ -229,7 +229,7 @@ internal class Økonomi private constructor(
 
     internal fun <R> medData(block: (grad: Double, aktuellDagsinntekt: Double?) -> R) =
         medData { grad: Double,
-                  _: Double?,
+                  _: Double,
                   _: Double?,
                   _: LocalDate?,
                   _: Double?,
@@ -242,7 +242,7 @@ internal class Økonomi private constructor(
 
     internal fun medAvrundetData(block: (Int, Int?) -> Unit) {
         medAvrundetData { grad: Int,
-                          _: Int?,
+                          _: Int,
                           _: Int?,
                           aktuellDagsinntekt: Int?,
                           _: Int?,
@@ -254,7 +254,7 @@ internal class Økonomi private constructor(
 
     private fun <R> medDataFraBeløp(lambda: MedØkonomiData<R>) = lambda(
         grad.toDouble(),
-        arbeidsgiverRefusjonsbeløp?.reflection { _, _, daglig, _ -> daglig },
+        arbeidsgiverRefusjonsbeløp.reflection { _, _, daglig, _ -> daglig },
         dekningsgrunnlag!!.reflection { _, _, daglig, _ -> daglig },
         skjæringstidspunkt,
         totalGrad?.toDouble(),
@@ -266,7 +266,7 @@ internal class Økonomi private constructor(
 
     private fun <R> medDataFraInntekt(lambda: MedØkonomiData<R>) = lambda(
         grad.toDouble(),
-        arbeidsgiverRefusjonsbeløp?.reflection { _, _, daglig, _ -> daglig },
+        arbeidsgiverRefusjonsbeløp.reflection { _, _, daglig, _ -> daglig },
         dekningsgrunnlag!!.reflection { _, _, daglig, _ -> daglig },
         skjæringstidspunkt,
         totalGrad?.toDouble(),
@@ -284,8 +284,8 @@ internal class Økonomi private constructor(
 
     private fun _betal() {
         val total = dekningsgrunnlag!! * grad().ratio()
-        val gradertArbeidsgiverRefusjonsbeløp = arbeidsgiverRefusjonsbeløp?.let { it * grad().ratio() }
-        arbeidsgiverbeløp = gradertArbeidsgiverRefusjonsbeløp?.coerceAtMost(total) ?: total
+        val gradertArbeidsgiverRefusjonsbeløp = arbeidsgiverRefusjonsbeløp * grad().ratio()
+        arbeidsgiverbeløp = gradertArbeidsgiverRefusjonsbeløp.coerceAtMost(total)
         personbeløp = (total - arbeidsgiverbeløp!!).coerceAtLeast(INGEN)
     }
 
@@ -394,7 +394,7 @@ internal class Økonomi private constructor(
             override fun lås(økonomi: Økonomi) = økonomi
 
             override fun <R> medData(økonomi: Økonomi, lambda: MedØkonomiData<R>) =
-                lambda(økonomi.grad.toDouble(), null, null, null, null, null, null, null, null)
+                lambda(økonomi.grad.toDouble(), økonomi.arbeidsgiverRefusjonsbeløp.reflection { _, _, daglig, _ -> daglig }, null, null, null, null, null, null, null)
         }
 
         internal object HarInntekt : Tilstand() {
@@ -474,7 +474,7 @@ internal fun List<Økonomi>.er6GBegrenset() = Økonomi.er6GBegrenset(this)
 internal fun interface MedØkonomiData<R> {
     operator fun invoke(
         grad: Double,
-        arbeidsgiverRefusjonsbeløp: Double?,
+        arbeidsgiverRefusjonsbeløp: Double,
         dekningsgrunnlag: Double?,
         skjæringstidspunkt: LocalDate?,
         totalGrad: Double?,

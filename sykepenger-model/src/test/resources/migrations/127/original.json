@@ -1,0 +1,339 @@
+{
+    "arbeidsgivere": [
+        {
+            "beregnetUtbetalingstidslinjer": [
+                {
+                    "utbetalingstidslinje": {
+                        "dager": [
+                            {
+                                "type": "ArbeidsgiverperiodeDag",
+                                "grad": 0.0,
+                                "skjæringstidspunkt": "2018-01-03",
+                                "totalGrad": 0.0,
+                                "arbeidsgiverRefusjonsbeløp": 1337,
+                                "dekningsgrunnlag": 1430.7692307692307,
+                                "aktuellDagsinntekt": 1430.7692307692307,
+                                "arbeidsgiverbeløp": 0.0,
+                                "personbeløp": 0.0,
+                                "er6GBegrenset": false,
+                                "fom": "2018-01-03",
+                                "tom": "2018-01-18"
+                            },
+                            {
+                                "type": "NavDag",
+                                "grad": 100.0,
+                                "skjæringstidspunkt": "2018-01-03",
+                                "totalGrad": 100.0,
+                                "dekningsgrunnlag": 1430.7692307692307,
+                                "aktuellDagsinntekt": 1430.7692307692307,
+                                "arbeidsgiverbeløp": 1431.0,
+                                "personbeløp": 0.0,
+                                "er6GBegrenset": false,
+                                "dato": "2018-01-19"
+                            },
+                            {
+                                "type": "NavHelgDag",
+                                "grad": 100.0,
+                                "skjæringstidspunkt": "2018-01-03",
+                                "totalGrad": 100.0,
+                                "dekningsgrunnlag": 0.0,
+                                "aktuellDagsinntekt": 0.0,
+                                "arbeidsgiverbeløp": 0.0,
+                                "personbeløp": 0.0,
+                                "er6GBegrenset": false,
+                                "fom": "2018-01-20",
+                                "tom": "2018-01-21"
+                            },
+                            {
+                                "type": "NavDag",
+                                "grad": 100.0,
+                                "skjæringstidspunkt": "2018-01-03",
+                                "totalGrad": 100.0,
+                                "dekningsgrunnlag": 1430.7692307692307,
+                                "aktuellDagsinntekt": 1430.7692307692307,
+                                "arbeidsgiverbeløp": 1431.0,
+                                "personbeløp": 0.0,
+                                "er6GBegrenset": false,
+                                "fom": "2018-01-22",
+                                "tom": "2018-01-26"
+                            }
+                        ]
+                    }
+                }
+            ],
+            "sykdomshistorikk": [
+                {
+                    "hendelseSykdomstidslinje": {
+                        "låstePerioder": [],
+                        "periode": {
+                            "fom": "2018-01-03",
+                            "tom": "2018-01-18"
+                        },
+                        "dager": [
+                            {
+                                "type": "ARBEIDSGIVERDAG",
+                                "kilde": {
+                                    "type": "Inntektsmelding",
+                                    "id": "735af09e-6dff-48af-a4bf-fd2d6978d6e5",
+                                    "tidsstempel": "2021-11-25T14:27:13.883441"
+                                },
+                                "grad": 100.0,
+                                "fom": "2018-01-03",
+                                "tom": "2018-01-18"
+                            }
+                        ]
+                    },
+                    "beregnetSykdomstidslinje": {
+                        "låstePerioder": [
+                            {
+                                "fom": "2018-01-03",
+                                "tom": "2018-01-26"
+                            }
+                        ],
+                        "periode": {
+                            "fom": "2018-01-03",
+                            "tom": "2018-01-26"
+                        },
+                        "dager": [
+                            {
+                                "type": "SYKEDAG",
+                                "kilde": {
+                                    "type": "Søknad",
+                                    "id": "1d0f0f18-1a83-4b68-a7fc-334fd62b7867",
+                                    "tidsstempel": "2018-01-03T00:00:00"
+                                },
+                                "grad": 100.0,
+                                "fom": "2018-01-03",
+                                "tom": "2018-01-26"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "hendelseSykdomstidslinje": {
+                        "låstePerioder": [],
+                        "periode": {
+                            "fom": "2018-01-03",
+                            "tom": "2018-01-26"
+                        },
+                        "dager": [
+                            {
+                                "type": "SYKEDAG",
+                                "kilde": {
+                                    "type": "Søknad",
+                                    "id": "1d0f0f18-1a83-4b68-a7fc-334fd62b7867",
+                                    "tidsstempel": "2018-01-03T00:00:00"
+                                },
+                                "grad": 100.0,
+                                "fom": "2018-01-03",
+                                "tom": "2018-01-26"
+                            }
+                        ]
+                    },
+                    "beregnetSykdomstidslinje": {
+                        "låstePerioder": [],
+                        "periode": {
+                            "fom": "2018-01-03",
+                            "tom": "2018-01-26"
+                        },
+                        "dager": [
+                            {
+                                "type": "SYKEDAG",
+                                "kilde": {
+                                    "type": "Søknad",
+                                    "id": "1d0f0f18-1a83-4b68-a7fc-334fd62b7867",
+                                    "tidsstempel": "2018-01-03T00:00:00"
+                                },
+                                "grad": 100.0,
+                                "fom": "2018-01-03",
+                                "tom": "2018-01-26"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "hendelseSykdomstidslinje": {
+                        "låstePerioder": [],
+                        "periode": {
+                            "fom": "2018-01-03",
+                            "tom": "2018-01-26"
+                        },
+                        "dager": [
+                            {
+                                "type": "SYKEDAG",
+                                "kilde": {
+                                    "type": "Sykmelding",
+                                    "id": "6e112777-33a5-4828-ae80-98a0603d7eab",
+                                    "tidsstempel": "2018-01-03T00:00:00"
+                                },
+                                "grad": 100.0,
+                                "fom": "2018-01-03",
+                                "tom": "2018-01-26"
+                            }
+                        ]
+                    },
+                    "beregnetSykdomstidslinje": {
+                        "låstePerioder": [],
+                        "periode": {
+                            "fom": "2018-01-03",
+                            "tom": "2018-01-26"
+                        },
+                        "dager": [
+                            {
+                                "type": "SYKEDAG",
+                                "kilde": {
+                                    "type": "Sykmelding",
+                                    "id": "6e112777-33a5-4828-ae80-98a0603d7eab",
+                                    "tidsstempel": "2018-01-03T00:00:00"
+                                },
+                                "grad": 100.0,
+                                "fom": "2018-01-03",
+                                "tom": "2018-01-26"
+                            }
+                        ]
+                    }
+                }
+            ],
+            "utbetalinger": [
+                {
+                    "utbetalingstidslinje": {
+                        "dager": [
+                            {
+                                "type": "ArbeidsgiverperiodeDag",
+                                "grad": 0.0,
+                                "skjæringstidspunkt": "2018-01-03",
+                                "totalGrad": 0.0,
+                                "dekningsgrunnlag": 1430.7692307692307,
+                                "aktuellDagsinntekt": 1430.7692307692307,
+                                "arbeidsgiverbeløp": 0.0,
+                                "personbeløp": 0.0,
+                                "er6GBegrenset": false,
+                                "fom": "2018-01-03",
+                                "tom": "2018-01-18"
+                            },
+                            {
+                                "type": "NavDag",
+                                "grad": 100.0,
+                                "skjæringstidspunkt": "2018-01-03",
+                                "totalGrad": 100.0,
+                                "dekningsgrunnlag": 1430.7692307692307,
+                                "aktuellDagsinntekt": 1430.7692307692307,
+                                "arbeidsgiverbeløp": 1431.0,
+                                "personbeløp": 0.0,
+                                "er6GBegrenset": false,
+                                "dato": "2018-01-19"
+                            },
+                            {
+                                "type": "NavHelgDag",
+                                "grad": 100.0,
+                                "skjæringstidspunkt": "2018-01-03",
+                                "totalGrad": 100.0,
+                                "dekningsgrunnlag": 0.0,
+                                "aktuellDagsinntekt": 0.0,
+                                "arbeidsgiverbeløp": 0.0,
+                                "personbeløp": 0.0,
+                                "er6GBegrenset": false,
+                                "fom": "2018-01-20",
+                                "tom": "2018-01-21"
+                            },
+                            {
+                                "type": "NavDag",
+                                "grad": 100.0,
+                                "skjæringstidspunkt": "2018-01-03",
+                                "totalGrad": 100.0,
+                                "dekningsgrunnlag": 1430.7692307692307,
+                                "aktuellDagsinntekt": 1430.7692307692307,
+                                "arbeidsgiverbeløp": 1431.0,
+                                "personbeløp": 0.0,
+                                "er6GBegrenset": false,
+                                "fom": "2018-01-22",
+                                "tom": "2018-01-26"
+                            }
+                        ]
+                    }
+                }
+            ],
+            "vedtaksperioder": [
+                {
+                    "utbetalingstidslinje": {
+                        "dager": [
+                            {
+                                "type": "ArbeidsgiverperiodeDag",
+                                "grad": 0.0,
+                                "skjæringstidspunkt": "2018-01-03",
+                                "totalGrad": 0.0,
+                                "dekningsgrunnlag": 1430.7692307692307,
+                                "aktuellDagsinntekt": 1430.7692307692307,
+                                "arbeidsgiverbeløp": 0.0,
+                                "personbeløp": 0.0,
+                                "er6GBegrenset": false,
+                                "fom": "2018-01-03",
+                                "tom": "2018-01-18"
+                            },
+                            {
+                                "type": "NavDag",
+                                "grad": 100.0,
+                                "skjæringstidspunkt": "2018-01-03",
+                                "totalGrad": 100.0,
+                                "dekningsgrunnlag": 1430.7692307692307,
+                                "aktuellDagsinntekt": 1430.7692307692307,
+                                "arbeidsgiverbeløp": 1431.0,
+                                "personbeløp": 0.0,
+                                "er6GBegrenset": false,
+                                "dato": "2018-01-19"
+                            },
+                            {
+                                "type": "NavHelgDag",
+                                "grad": 100.0,
+                                "skjæringstidspunkt": "2018-01-03",
+                                "totalGrad": 100.0,
+                                "dekningsgrunnlag": 0.0,
+                                "aktuellDagsinntekt": 0.0,
+                                "arbeidsgiverbeløp": 0.0,
+                                "personbeløp": 0.0,
+                                "er6GBegrenset": false,
+                                "fom": "2018-01-20",
+                                "tom": "2018-01-21"
+                            },
+                            {
+                                "type": "NavDag",
+                                "grad": 100.0,
+                                "skjæringstidspunkt": "2018-01-03",
+                                "totalGrad": 100.0,
+                                "dekningsgrunnlag": 1430.7692307692307,
+                                "aktuellDagsinntekt": 1430.7692307692307,
+                                "arbeidsgiverbeløp": 1431.0,
+                                "personbeløp": 0.0,
+                                "er6GBegrenset": false,
+                                "fom": "2018-01-22",
+                                "tom": "2018-01-26"
+                            }
+                        ]
+                    },
+                    "sykdomstidslinje": {
+                        "låstePerioder": [],
+                        "periode": {
+                            "fom": "2018-01-03",
+                            "tom": "2018-01-26"
+                        },
+                        "dager": [
+                            {
+                                "type": "SYKEDAG",
+                                "kilde": {
+                                    "type": "Søknad",
+                                    "id": "1d0f0f18-1a83-4b68-a7fc-334fd62b7867",
+                                    "tidsstempel": "2018-01-03T00:00:00"
+                                },
+                                "grad": 100.0,
+                                "fom": "2018-01-03",
+                                "tom": "2018-01-26"
+                            }
+                        ]
+                    }
+                }
+            ],
+            "forkastede": []
+        }
+    ],
+    "skjemaVersjon": 126
+}

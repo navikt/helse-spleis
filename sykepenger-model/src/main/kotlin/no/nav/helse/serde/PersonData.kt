@@ -582,7 +582,7 @@ internal data class PersonData(
                 private val type: JsonDagType,
                 private val kilde: KildeData,
                 private val grad: Double,
-                private val arbeidsgiverRefusjonsbeløp: Double?,
+                private val arbeidsgiverRefusjonsbeløp: Double,
                 private val aktuellDagsinntekt: Double?,
                 private val dekningsgrunnlag: Double?,
                 private val skjæringstidspunkt: LocalDate?,
@@ -609,7 +609,7 @@ internal data class PersonData(
                         .apply { isAccessible = true }
                         .call(
                             grad.prosent,
-                            arbeidsgiverRefusjonsbeløp?.daglig,
+                            arbeidsgiverRefusjonsbeløp.daglig,
                             aktuellDagsinntekt?.daglig,
                             dekningsgrunnlag?.daglig,
                             skjæringstidspunkt,
@@ -1242,7 +1242,7 @@ internal data class PersonData(
             private val begrunnelse: BegrunnelseData?,
             private val begrunnelser: List<BegrunnelseData>?,
             private val grad: Double?,
-            private val arbeidsgiverRefusjonsbeløp: Double?,
+            private val arbeidsgiverRefusjonsbeløp: Double,
             private val arbeidsgiverbeløp: Double?,
             private val personbeløp: Double?,
             private val er6GBegrenset: Boolean?
@@ -1256,7 +1256,7 @@ internal data class PersonData(
                     .apply { isAccessible = true }
                     .call(
                         grad?.prosent,
-                        arbeidsgiverRefusjonsbeløp?.daglig,
+                        arbeidsgiverRefusjonsbeløp.daglig,
                         aktuellDagsinntekt.daglig,
                         dekningsgrunnlag.daglig,
                         skjæringstidspunkt,

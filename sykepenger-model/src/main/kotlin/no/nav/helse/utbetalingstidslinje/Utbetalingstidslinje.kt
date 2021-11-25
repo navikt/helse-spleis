@@ -1,6 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.contains
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.PersonObserver
@@ -211,7 +212,7 @@ internal class Utbetalingstidslinje private constructor(
         return subset(første til last { it !is UkjentDag }.dato)
     }
 
-    internal fun trimLedendeFridager() = Utbetalingstidslinje(dropWhile { it is Fridag }.toMutableList())
+    private fun trimLedendeFridager() = Utbetalingstidslinje(dropWhile { it is Fridag }.toMutableList())
 
     private fun utvide(tidligsteDato: LocalDate, sisteDato: LocalDate) =
         Utbetalingstidslinje().apply {
@@ -238,6 +239,14 @@ internal class Utbetalingstidslinje private constructor(
         val siste = utbetalingsdager.last { it is NavDag }.dato
         return første til siste
     }
+
+    internal fun sammenhengendeUtbetalingsperioder() =
+        filter { it !is Arbeidsdag && it !is UkjentDag }
+            .map(Utbetalingsdag::dato)
+            .grupperSammenhengendePerioder()
+            .map(::subset)
+            .map(Utbetalingstidslinje::trimLedendeFridager)
+            .filter { it.any { it is NavDag || it is ForeldetDag }}
 
     internal fun subset(periode: Periode): Utbetalingstidslinje {
         if (isEmpty()) return Utbetalingstidslinje()

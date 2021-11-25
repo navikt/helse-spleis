@@ -89,7 +89,7 @@ internal class RefusjonsgjødslerTest {
         val aktivitetslogg = Aktivitetslogg()
         refusjonsgjødsler.gjødsle(aktivitetslogg, 1.mars til 10.mars)
         assertRefusjonArbeidsgiver(utbetalingstidslinje[1.februar til 26.februar], 2308.0)
-        assertRefusjonArbeidsgiver(utbetalingstidslinje[27.februar til 28.februar], null)
+        assertRefusjonArbeidsgiver(utbetalingstidslinje[27.februar til 28.februar], 0.0)
         assertRefusjonArbeidsgiver(utbetalingstidslinje[1.mars til 10.mars], 2500.0)
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
@@ -111,7 +111,7 @@ internal class RefusjonsgjødslerTest {
         )
         val aktivitetslogg = Aktivitetslogg()
         refusjonsgjødsler.gjødsle(aktivitetslogg, 1.februar til 28.februar)
-        assertRefusjonArbeidsgiver(utbetalingstidslinje[1.februar til 18.februar], null)
+        assertRefusjonArbeidsgiver(utbetalingstidslinje[1.februar til 18.februar], 0.0)
         assertRefusjonArbeidsgiver(utbetalingstidslinje[19.februar til 28.februar], 2308.0)
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
