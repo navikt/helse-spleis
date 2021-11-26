@@ -72,15 +72,19 @@ internal class VedtaksperiodeBuilder(
             private set
         var avviksprosent: Prosent? = null
             private set
+        var antallOpptjeningsdagerErMinst: Int = 0
+            private set
         override fun preVisitGrunnlagsdata(
             skjæringstidspunkt: LocalDate,
             grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
             sykepengegrunnlag: Sykepengegrunnlag,
             sammenligningsgrunnlag: Inntekt,
-            avviksprosent: Prosent?
+            avviksprosent: Prosent?,
+            antallOpptjeningsdagerErMinst: Int
         ) {
             this.sammenligningsgrunnlag = sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig }
             this.avviksprosent = avviksprosent
+            this.antallOpptjeningsdagerErMinst = antallOpptjeningsdagerErMinst
         }
     }
 
@@ -89,15 +93,16 @@ internal class VedtaksperiodeBuilder(
         GrunnlagsdataDTO(
             beregnetÅrsinntektFraInntektskomponenten = builder.sammenligningsgrunnlag,
             avviksprosent = builder.avviksprosent?.ratio(),
-            antallOpptjeningsdagerErMinst = grunnlagsdata.antallOpptjeningsdagerErMinst,
+            antallOpptjeningsdagerErMinst = builder.antallOpptjeningsdagerErMinst,
             harOpptjening = grunnlagsdata.harOpptjening,
             medlemskapstatus = medlemskapstatusDTO!!
         )
     }
     private val opptjeningDTO: OpptjeningDTO? = dataForVilkårsvurdering?.let { grunnlagsdata ->
+        val builder = GrunnlagsdataBuilder(grunnlagsdata)
         OpptjeningDTO(
-            antallKjenteOpptjeningsdager = grunnlagsdata.antallOpptjeningsdagerErMinst,
-            fom = skjæringstidspunkt.minusDays(grunnlagsdata.antallOpptjeningsdagerErMinst.toLong()),
+            antallKjenteOpptjeningsdager = builder.antallOpptjeningsdagerErMinst,
+            fom = skjæringstidspunkt.minusDays(builder.antallOpptjeningsdagerErMinst.toLong()),
             oppfylt = grunnlagsdata.harOpptjening
         )
     }

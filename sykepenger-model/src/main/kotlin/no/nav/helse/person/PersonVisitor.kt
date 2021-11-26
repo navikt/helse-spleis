@@ -96,14 +96,16 @@ internal interface VilkårsgrunnlagHistorikkVisitor : InntekthistorikkVisitor {
         grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
         sykepengegrunnlag: Sykepengegrunnlag,
         sammenligningsgrunnlag: Inntekt,
-        avviksprosent: Prosent?
+        avviksprosent: Prosent?,
+        antallOpptjeningsdagerErMinst: Int
     ) {}
     fun postVisitGrunnlagsdata(
         skjæringstidspunkt: LocalDate,
         grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
         sykepengegrunnlag: Sykepengegrunnlag,
         sammenligningsgrunnlag: Inntekt,
-        avviksprosent: Prosent?
+        avviksprosent: Prosent?,
+        antallOpptjeningsdagerErMinst: Int
     ) {}
     fun preVisitInfotrygdVilkårsgrunnlag(
         infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag,
