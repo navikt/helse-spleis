@@ -17,6 +17,7 @@ import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
@@ -94,13 +95,15 @@ internal interface VilkårsgrunnlagHistorikkVisitor : InntekthistorikkVisitor {
         skjæringstidspunkt: LocalDate,
         grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
         sykepengegrunnlag: Sykepengegrunnlag,
-        sammenligningsgrunnlag: Inntekt
+        sammenligningsgrunnlag: Inntekt,
+        avviksprosent: Prosent?
     ) {}
     fun postVisitGrunnlagsdata(
         skjæringstidspunkt: LocalDate,
         grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
         sykepengegrunnlag: Sykepengegrunnlag,
-        sammenligningsgrunnlag: Inntekt
+        sammenligningsgrunnlag: Inntekt,
+        avviksprosent: Prosent?
     ) {}
     fun preVisitInfotrygdVilkårsgrunnlag(
         infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag,

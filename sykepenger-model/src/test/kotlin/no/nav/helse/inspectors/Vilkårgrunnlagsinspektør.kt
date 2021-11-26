@@ -1,6 +1,5 @@
 package no.nav.helse.inspectors
 
-import no.nav.helse.hendelser.VilkårsgrunnlagTest
 import no.nav.helse.person.Sykepengegrunnlag
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.VilkårsgrunnlagHistorikkVisitor
@@ -31,7 +30,8 @@ internal class Vilkårgrunnlagsinspektør(historikk: VilkårsgrunnlagHistorikk) 
         skjæringstidspunkt: LocalDate,
         grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
         sykepengegrunnlag: Sykepengegrunnlag,
-        sammenligningsgrunnlag: Inntekt
+        sammenligningsgrunnlag: Inntekt,
+        avviksprosent: Prosent?
     ) {
         val teller = vilkårsgrunnlagTeller.getOrDefault(innslag, 0)
         vilkårsgrunnlagTeller[innslag] = teller.inc()
@@ -66,11 +66,12 @@ internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.
         skjæringstidspunkt: LocalDate,
         grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
         sykepengegrunnlag: Sykepengegrunnlag,
-        sammenligningsgrunnlag: Inntekt
+        sammenligningsgrunnlag: Inntekt,
+        avviksprosent: Prosent?
     ) {
         this.sykepengegrunnlag = sykepengegrunnlag
         this.sammenligningsgrunnlag = sammenligningsgrunnlag
-        this.avviksprosent = grunnlagsdata.avviksprosent
+        this.avviksprosent = avviksprosent
         this.antallOpptjeningsdagerErMinst = grunnlagsdata.antallOpptjeningsdagerErMinst
         this.harOpptjening = grunnlagsdata.harOpptjening
     }

@@ -9,6 +9,7 @@ import no.nav.helse.person.VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag
 import no.nav.helse.serde.api.v2.SpleisVilkårsgrunnlag
 import no.nav.helse.serde.api.v2.Vilkårsgrunnlag
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Prosent
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -154,12 +155,12 @@ internal class VilkårsgrunnlagBuilder(
             skjæringstidspunkt: LocalDate,
             grunnlagsdata: Grunnlagsdata,
             sykepengegrunnlag: Sykepengegrunnlag,
-            sammenligningsgrunnlag: Inntekt
+            sammenligningsgrunnlag: Inntekt,
+            avviksprosent: Prosent?
         ) {
             val compositeSykepengegrunnlag = SykepengegrunnlagBuilder(sykepengegrunnlag, sammenligningsgrunnlagBuilder).build()
             val minimumInntekt = InntektBuilder(person.minimumInntekt(skjæringstidspunkt)).build()
             val grunnbeløp = InntektBuilder(Grunnbeløp.`1G`.beløp(skjæringstidspunkt)).build()
-            val avviksprosent = grunnlagsdata.avviksprosent?.prosent()
             val oppfyllerKravOmMedlemskap = when (grunnlagsdata.medlemskapstatus) {
                 Medlemskapsvurdering.Medlemskapstatus.Ja -> true
                 Medlemskapsvurdering.Medlemskapstatus.Nei -> false
@@ -173,7 +174,7 @@ internal class VilkårsgrunnlagBuilder(
                     sammenligningsgrunnlag = InntektBuilder(sammenligningsgrunnlag).build().årlig,
                     inntekter = compositeSykepengegrunnlag.inntekterPerArbeidsgiver,
                     sykepengegrunnlag = compositeSykepengegrunnlag.sykepengegrunnlag,
-                    avviksprosent = avviksprosent,
+                    avviksprosent = avviksprosent?.prosent(),
                     grunnbeløp = grunnbeløp.årlig.toInt(),
                     meldingsreferanseId = grunnlagsdata.meldingsreferanseId,
                     antallOpptjeningsdagerErMinst = grunnlagsdata.antallOpptjeningsdagerErMinst,

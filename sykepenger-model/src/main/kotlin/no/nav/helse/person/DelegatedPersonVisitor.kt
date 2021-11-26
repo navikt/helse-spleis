@@ -16,6 +16,7 @@ import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
@@ -51,9 +52,10 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         skjæringstidspunkt: LocalDate,
         grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
         sykepengegrunnlag: Sykepengegrunnlag,
-        sammenligningsgrunnlag: Inntekt
+        sammenligningsgrunnlag: Inntekt,
+        avviksprosent: Prosent?
     ) {
-        delegatee.postVisitGrunnlagsdata(skjæringstidspunkt, grunnlagsdata, sykepengegrunnlag, sammenligningsgrunnlag)
+        delegatee.postVisitGrunnlagsdata(skjæringstidspunkt, grunnlagsdata, sykepengegrunnlag, sammenligningsgrunnlag, avviksprosent)
     }
 
     override fun postVisitInfotrygdVilkårsgrunnlag(skjæringstidspunkt: LocalDate, infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag) {
@@ -147,9 +149,10 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         skjæringstidspunkt: LocalDate,
         grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
         sykepengegrunnlag: Sykepengegrunnlag,
-        sammenligningsgrunnlag: Inntekt
+        sammenligningsgrunnlag: Inntekt,
+        avviksprosent: Prosent?
     ) {
-        delegatee.preVisitGrunnlagsdata(skjæringstidspunkt, grunnlagsdata, sykepengegrunnlag, sammenligningsgrunnlag)
+        delegatee.preVisitGrunnlagsdata(skjæringstidspunkt, grunnlagsdata, sykepengegrunnlag, sammenligningsgrunnlag, avviksprosent)
     }
 
     override fun preVisitInfotrygdVilkårsgrunnlag(
