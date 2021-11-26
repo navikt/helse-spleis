@@ -218,13 +218,23 @@ internal class PersonMediator(
         )
     }
 
+    override fun opprettOppgaveForSpeilsaksbehandlere(hendelseskontekst: Hendelseskontekst, event: PersonObserver.OpprettOppgaveForSpeilsaksbehandlereEvent) {
+        queueMessage(
+            hendelseskontekst,
+            "opprett_oppgave_for_speilsaksbehandlere", JsonMessage.newMessage(
+                mapOf(
+                    "hendelser" to event.hendelser,
+                )
+            )
+        )
+    }
+
     override fun vedtaksperiodeAvbrutt(hendelseskontekst: Hendelseskontekst, event: PersonObserver.VedtaksperiodeAvbruttEvent) {
         queueMessage(
             hendelseskontekst,
             "vedtaksperiode_forkastet", JsonMessage.newMessage(
                 mapOf(
                     "tilstand" to event.gjeldendeTilstand,
-                    "harRelatertUtbetaling" to event.harRelatertUtbetaling,
                 )
             )
         )

@@ -338,7 +338,6 @@ internal class Vedtaksperiode private constructor(
             hendelse,
             PersonObserver.VedtaksperiodeAvbruttEvent(
                 gjeldendeTilstand = tilstand.type,
-                harRelatertUtbetaling = harNærliggendeUtbetaling(),
             )
         )
     }
@@ -2563,6 +2562,15 @@ internal class Vedtaksperiode private constructor(
                 hendelse,
                 vedtaksperiode.periode
             )
+
+            if(vedtaksperiode.harNærliggendeUtbetaling()){
+                vedtaksperiode.person.opprettOppgaveForSpeilsaksbehandlere(
+                    hendelse,
+                    PersonObserver.OpprettOppgaveForSpeilsaksbehandlereEvent(
+                        hendelser = vedtaksperiode.hendelseIder,
+                    )
+                )
+            }
         }
 
         override fun håndter(

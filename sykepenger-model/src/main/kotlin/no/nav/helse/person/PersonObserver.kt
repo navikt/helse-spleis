@@ -24,7 +24,10 @@ interface PersonObserver {
 
     data class VedtaksperiodeAvbruttEvent(
         val gjeldendeTilstand: TilstandType,
-        val harRelatertUtbetaling: Boolean,
+    )
+
+    data class OpprettOppgaveForSpeilsaksbehandlereEvent(
+        val hendelser: Set<UUID>,
     )
 
     data class UtbetaltEvent(
@@ -175,7 +178,6 @@ interface PersonObserver {
     data class HendelseIkkeHåndtertEvent(
         val hendelseId: UUID,
         val årsaker: List<String>,
-        val harRelatertUtbetaling: Boolean,
     )
 
     data class VedtakFattetEvent(
@@ -197,6 +199,7 @@ interface PersonObserver {
     fun vedtaksperiodeEndret(hendelseskontekst: Hendelseskontekst, event: VedtaksperiodeEndretEvent) {}
     fun vedtaksperiodeReberegnet(hendelseskontekst: Hendelseskontekst) {}
     fun vedtaksperiodeAvbrutt(hendelseskontekst: Hendelseskontekst, event: VedtaksperiodeAvbruttEvent) {}
+    fun opprettOppgaveForSpeilsaksbehandlere(hendelseskontekst: Hendelseskontekst, event: OpprettOppgaveForSpeilsaksbehandlereEvent) {}
     @Deprecated("Fjernes til fordel for utbetaling_utbetalt")
     fun vedtaksperiodeUtbetalt(hendelseskontekst: Hendelseskontekst, event: UtbetaltEvent) {}
     fun personEndret(hendelseskontekst: Hendelseskontekst) {}

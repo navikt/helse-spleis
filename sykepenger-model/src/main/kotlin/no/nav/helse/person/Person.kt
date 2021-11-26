@@ -275,6 +275,10 @@ class Person private constructor(
         observers.forEach { it.vedtaksperiodeIkkePåminnet(påminnelse.hendelseskontekst(), tilstandType) }
     }
 
+    fun opprettOppgaveForSpeilsaksbehandlere(aktivitetslogg: IAktivitetslogg, event: PersonObserver.OpprettOppgaveForSpeilsaksbehandlereEvent) {
+        observers.forEach { it.opprettOppgaveForSpeilsaksbehandlere(aktivitetslogg.hendelseskontekst(), event) }
+    }
+
     fun vedtaksperiodeAvbrutt(aktivitetslogg: IAktivitetslogg, event: PersonObserver.VedtaksperiodeAvbruttEvent) {
         observers.forEach { it.vedtaksperiodeAvbrutt(aktivitetslogg.hendelseskontekst(), event) }
     }
@@ -550,6 +554,17 @@ class Person private constructor(
         return aktiviteter
     }
 
+    internal fun emitOpprettOppgaveForSpeilsaksbehandlereEvent(hendelse: SykdomstidslinjeHendelse) {
+        observers.forEach {
+            it.opprettOppgaveForSpeilsaksbehandlere(
+                hendelse.hendelseskontekst(),
+                PersonObserver.OpprettOppgaveForSpeilsaksbehandlereEvent(
+                    setOf(hendelse.meldingsreferanseId())
+                )
+            )
+        }
+    }
+
     internal fun emitHendelseIkkeHåndtert(hendelse: SykdomstidslinjeHendelse) {
         val errorMeldinger = mutableListOf<String>()
         aktivitetslogg.accept(object : AktivitetsloggVisitor {
@@ -563,13 +578,13 @@ class Person private constructor(
                 }
             }
         })
+
         observers.forEach {
             it.hendelseIkkeHåndtert(
                 hendelse.hendelseskontekst(),
                 PersonObserver.HendelseIkkeHåndtertEvent(
                     hendelse.meldingsreferanseId(),
                     errorMeldinger,
-                    hendelse.sykdomstidslinje().periode()?.let(::harNærliggendeUtbetaling) ?: false
                 )
             )
         }
@@ -700,4 +715,5 @@ class Person private constructor(
     internal fun infotrygdUtbetalingstidslinje(organisasjonsnummer: String) = infotrygdhistorikk.utbetalingstidslinje(organisasjonsnummer)
 
     internal fun loggførHendelsesreferanse(orgnummer: String, skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID) = arbeidsgivere.forEach { it.loggførHendelsesreferanse(orgnummer, skjæringstidspunkt, meldingsreferanseId) }
+
 }

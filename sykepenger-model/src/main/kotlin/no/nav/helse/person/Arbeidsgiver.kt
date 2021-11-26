@@ -344,7 +344,11 @@ internal class Arbeidsgiver private constructor(
     private fun <Hendelse : SykdomstidslinjeHendelse> håndterSøknad(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean) {
         hendelse.kontekst(this)
         noenHarHåndtert(hendelse, håndterer, "Forventet ikke ${hendelse.kilde}. Har nok ikke mottatt sykmelding")
-        if (hendelse.hasErrorsOrWorse()) person.emitHendelseIkkeHåndtert(hendelse)
+        if (hendelse.hasErrorsOrWorse()) {
+            val harNærliggendeUtbetaling = hendelse.sykdomstidslinje().periode()?.let(person::harNærliggendeUtbetaling) ?: false
+            if(harNærliggendeUtbetaling) person.emitOpprettOppgaveForSpeilsaksbehandlereEvent(hendelse)
+            person.emitHendelseIkkeHåndtert(hendelse)
+        }
         finalize(hendelse)
     }
 
