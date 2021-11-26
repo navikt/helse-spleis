@@ -595,7 +595,11 @@ internal class JsonBuilder : AbstractBuilder() {
 
     private class VilkårsgrunnlagElementState(private val vilkårsgrunnlagElement: MutableList<Map<String, Any?>>) : BuilderState() {
 
-        override fun preVisitGrunnlagsdata(skjæringstidspunkt: LocalDate, grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata) {
+        override fun preVisitGrunnlagsdata(
+            skjæringstidspunkt: LocalDate,
+            grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
+            sykepengegrunnlag: Sykepengegrunnlag
+        ) {
             val sykepengegrunnlag = mutableMapOf<String, Any>()
             vilkårsgrunnlagElement.add(
                 mapOf(
@@ -664,7 +668,11 @@ internal class JsonBuilder : AbstractBuilder() {
             pushState(ArbeidsgiverInntektsopplysningerState(arbeidsgiverInntektsopplysninger))
         }
 
-        override fun postVisitGrunnlagsdata(skjæringstidspunkt: LocalDate, grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata) {
+        override fun postVisitGrunnlagsdata(
+            skjæringstidspunkt: LocalDate,
+            grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
+            sykepengegrunnlag: Sykepengegrunnlag
+        ) {
             popState()
         }
 

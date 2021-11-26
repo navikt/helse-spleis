@@ -99,7 +99,11 @@ internal class TestArbeidsgiverInspektør(
             this.arbeidsgiver = arbeidsgiver
         }
 
-        override fun preVisitGrunnlagsdata(skjæringstidspunkt: LocalDate, grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata) {
+        override fun preVisitGrunnlagsdata(
+            skjæringstidspunkt: LocalDate,
+            grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
+            sykepengegrunnlag: Sykepengegrunnlag
+        ) {
             vilkårsgrunnlagHistorikk.add(skjæringstidspunkt to grunnlagsdata)
         }
 

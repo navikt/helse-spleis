@@ -114,7 +114,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
     }
 
     internal class Grunnlagsdata(
-        internal val sykepengegrunnlag: Sykepengegrunnlag,
+        private val sykepengegrunnlag: Sykepengegrunnlag,
         internal val sammenligningsgrunnlag: Inntekt,
         internal val avviksprosent: Prosent?,
         internal val antallOpptjeningsdagerErMinst: Int,
@@ -144,9 +144,9 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         override fun isOk() = vurdertOk
 
         override fun accept(skjæringstidspunkt: LocalDate, vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {
-            vilkårsgrunnlagHistorikkVisitor.preVisitGrunnlagsdata(skjæringstidspunkt, this)
+            vilkårsgrunnlagHistorikkVisitor.preVisitGrunnlagsdata(skjæringstidspunkt, this, sykepengegrunnlag)
             sykepengegrunnlag.accept(vilkårsgrunnlagHistorikkVisitor)
-            vilkårsgrunnlagHistorikkVisitor.postVisitGrunnlagsdata(skjæringstidspunkt, this)
+            vilkårsgrunnlagHistorikkVisitor.postVisitGrunnlagsdata(skjæringstidspunkt, this, sykepengegrunnlag)
         }
 
         override fun sykepengegrunnlag() = sykepengegrunnlag.sykepengegrunnlag
