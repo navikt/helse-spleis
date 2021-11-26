@@ -150,10 +150,14 @@ internal class VilkårsgrunnlagBuilder(
 
         internal fun build() = IInnslag(vilkårsgrunnlag.toMap())
 
-        override fun preVisitGrunnlagsdata(skjæringstidspunkt: LocalDate, grunnlagsdata: Grunnlagsdata, sykepengegrunnlag: Sykepengegrunnlag) {
+        override fun preVisitGrunnlagsdata(
+            skjæringstidspunkt: LocalDate,
+            grunnlagsdata: Grunnlagsdata,
+            sykepengegrunnlag: Sykepengegrunnlag,
+            sammenligningsgrunnlag: Inntekt
+        ) {
             val compositeSykepengegrunnlag = SykepengegrunnlagBuilder(sykepengegrunnlag, sammenligningsgrunnlagBuilder).build()
             val minimumInntekt = InntektBuilder(person.minimumInntekt(skjæringstidspunkt)).build()
-            val sammenligningsgrunnlag = InntektBuilder(grunnlagsdata.sammenligningsgrunnlag).build()
             val grunnbeløp = InntektBuilder(Grunnbeløp.`1G`.beløp(skjæringstidspunkt)).build()
             val avviksprosent = grunnlagsdata.avviksprosent?.prosent()
             val oppfyllerKravOmMedlemskap = when (grunnlagsdata.medlemskapstatus) {
@@ -166,7 +170,7 @@ internal class VilkårsgrunnlagBuilder(
                 skjæringstidspunkt, ISpleisGrunnlag(
                     skjæringstidspunkt = skjæringstidspunkt,
                     omregnetÅrsinntekt = compositeSykepengegrunnlag.omregnetÅrsinntekt,
-                    sammenligningsgrunnlag = sammenligningsgrunnlag.årlig,
+                    sammenligningsgrunnlag = InntektBuilder(sammenligningsgrunnlag).build().årlig,
                     inntekter = compositeSykepengegrunnlag.inntekterPerArbeidsgiver,
                     sykepengegrunnlag = compositeSykepengegrunnlag.sykepengegrunnlag,
                     avviksprosent = avviksprosent,

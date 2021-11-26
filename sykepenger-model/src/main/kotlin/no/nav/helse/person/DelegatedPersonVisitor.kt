@@ -50,9 +50,10 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
     override fun postVisitGrunnlagsdata(
         skjæringstidspunkt: LocalDate,
         grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
-        sykepengegrunnlag: Sykepengegrunnlag
+        sykepengegrunnlag: Sykepengegrunnlag,
+        sammenligningsgrunnlag: Inntekt
     ) {
-        delegatee.postVisitGrunnlagsdata(skjæringstidspunkt, grunnlagsdata, sykepengegrunnlag)
+        delegatee.postVisitGrunnlagsdata(skjæringstidspunkt, grunnlagsdata, sykepengegrunnlag, sammenligningsgrunnlag)
     }
 
     override fun postVisitInfotrygdVilkårsgrunnlag(skjæringstidspunkt: LocalDate, infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag) {
@@ -145,9 +146,10 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
     override fun preVisitGrunnlagsdata(
         skjæringstidspunkt: LocalDate,
         grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
-        sykepengegrunnlag: Sykepengegrunnlag
+        sykepengegrunnlag: Sykepengegrunnlag,
+        sammenligningsgrunnlag: Inntekt
     ) {
-        delegatee.preVisitGrunnlagsdata(skjæringstidspunkt, grunnlagsdata, sykepengegrunnlag)
+        delegatee.preVisitGrunnlagsdata(skjæringstidspunkt, grunnlagsdata, sykepengegrunnlag, sammenligningsgrunnlag)
     }
 
     override fun preVisitInfotrygdVilkårsgrunnlag(
