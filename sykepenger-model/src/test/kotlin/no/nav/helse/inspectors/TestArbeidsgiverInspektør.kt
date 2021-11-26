@@ -106,7 +106,8 @@ internal class TestArbeidsgiverInspektør(
             grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
             sykepengegrunnlag: Sykepengegrunnlag,
             sammenligningsgrunnlag: Inntekt,
-            avviksprosent: Prosent?
+            avviksprosent: Prosent?,
+            antallOpptjeningsdagerErMinst: Int
         ) {
             vilkårsgrunnlagHistorikk.add(skjæringstidspunkt to grunnlagsdata)
         }

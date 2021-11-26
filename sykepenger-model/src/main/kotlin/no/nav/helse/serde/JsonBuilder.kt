@@ -601,14 +601,15 @@ internal class JsonBuilder : AbstractBuilder() {
             grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
             sykepengegrunnlag: Sykepengegrunnlag,
             sammenligningsgrunnlag: Inntekt,
-            avviksprosent: Prosent?
+            avviksprosent: Prosent?,
+            antallOpptjeningsdagerErMinst: Int
         ) {
             val sykepengegrunnlag = mutableMapOf<String, Any>()
             vilkårsgrunnlagElement.add(
                 mapOf(
                     "skjæringstidspunkt" to skjæringstidspunkt,
                     "type" to "Vilkårsprøving",
-                    "antallOpptjeningsdagerErMinst" to grunnlagsdata.antallOpptjeningsdagerErMinst,
+                    "antallOpptjeningsdagerErMinst" to antallOpptjeningsdagerErMinst,
                     "avviksprosent" to avviksprosent?.ratio(),
                     "sykepengegrunnlag" to sykepengegrunnlag,
                     "sammenligningsgrunnlag" to sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
@@ -676,7 +677,8 @@ internal class JsonBuilder : AbstractBuilder() {
             grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
             sykepengegrunnlag: Sykepengegrunnlag,
             sammenligningsgrunnlag: Inntekt,
-            avviksprosent: Prosent?
+            avviksprosent: Prosent?,
+            antallOpptjeningsdagerErMinst: Int
         ) {
             popState()
         }

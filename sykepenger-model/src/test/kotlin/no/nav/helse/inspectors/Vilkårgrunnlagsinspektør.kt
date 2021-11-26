@@ -31,7 +31,8 @@ internal class Vilkårgrunnlagsinspektør(historikk: VilkårsgrunnlagHistorikk) 
         grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
         sykepengegrunnlag: Sykepengegrunnlag,
         sammenligningsgrunnlag: Inntekt,
-        avviksprosent: Prosent?
+        avviksprosent: Prosent?,
+        antallOpptjeningsdagerErMinst: Int
     ) {
         val teller = vilkårsgrunnlagTeller.getOrDefault(innslag, 0)
         vilkårsgrunnlagTeller[innslag] = teller.inc()
@@ -67,12 +68,13 @@ internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.
         grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
         sykepengegrunnlag: Sykepengegrunnlag,
         sammenligningsgrunnlag: Inntekt,
-        avviksprosent: Prosent?
+        avviksprosent: Prosent?,
+        antallOpptjeningsdagerErMinst: Int
     ) {
         this.sykepengegrunnlag = sykepengegrunnlag
         this.sammenligningsgrunnlag = sammenligningsgrunnlag
         this.avviksprosent = avviksprosent
-        this.antallOpptjeningsdagerErMinst = grunnlagsdata.antallOpptjeningsdagerErMinst
+        this.antallOpptjeningsdagerErMinst = antallOpptjeningsdagerErMinst
         this.harOpptjening = grunnlagsdata.harOpptjening
     }
 }
