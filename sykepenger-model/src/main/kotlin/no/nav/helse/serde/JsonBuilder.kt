@@ -21,6 +21,7 @@ import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
@@ -599,7 +600,8 @@ internal class JsonBuilder : AbstractBuilder() {
             skjæringstidspunkt: LocalDate,
             grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
             sykepengegrunnlag: Sykepengegrunnlag,
-            sammenligningsgrunnlag: Inntekt
+            sammenligningsgrunnlag: Inntekt,
+            avviksprosent: Prosent?
         ) {
             val sykepengegrunnlag = mutableMapOf<String, Any>()
             vilkårsgrunnlagElement.add(
@@ -607,7 +609,7 @@ internal class JsonBuilder : AbstractBuilder() {
                     "skjæringstidspunkt" to skjæringstidspunkt,
                     "type" to "Vilkårsprøving",
                     "antallOpptjeningsdagerErMinst" to grunnlagsdata.antallOpptjeningsdagerErMinst,
-                    "avviksprosent" to grunnlagsdata.avviksprosent?.ratio(),
+                    "avviksprosent" to avviksprosent?.ratio(),
                     "sykepengegrunnlag" to sykepengegrunnlag,
                     "sammenligningsgrunnlag" to sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
                     "harOpptjening" to grunnlagsdata.harOpptjening,
@@ -673,7 +675,8 @@ internal class JsonBuilder : AbstractBuilder() {
             skjæringstidspunkt: LocalDate,
             grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
             sykepengegrunnlag: Sykepengegrunnlag,
-            sammenligningsgrunnlag: Inntekt
+            sammenligningsgrunnlag: Inntekt,
+            avviksprosent: Prosent?
         ) {
             popState()
         }

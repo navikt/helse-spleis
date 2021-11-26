@@ -11,6 +11,7 @@ import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Prosent
 import org.junit.jupiter.api.fail
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -104,7 +105,8 @@ internal class TestArbeidsgiverInspektør(
             skjæringstidspunkt: LocalDate,
             grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
             sykepengegrunnlag: Sykepengegrunnlag,
-            sammenligningsgrunnlag: Inntekt
+            sammenligningsgrunnlag: Inntekt,
+            avviksprosent: Prosent?
         ) {
             vilkårsgrunnlagHistorikk.add(skjæringstidspunkt to grunnlagsdata)
         }

@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
+import no.nav.helse.inspectors.GrunnlagsdataInspektør
 import no.nav.helse.inspectors.Kilde
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.OppdragVisitor
@@ -36,6 +37,8 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode)
 
+        val grunnlagsdataInspektør = GrunnlagsdataInspektør(inspektør.vilkårsgrunnlagHistorikk[0].second)
+
         assertTilstander(
             0,
             START,
@@ -60,7 +63,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         assertEquals(506, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.nettoBeløp())
 
         assertEquals(2, inspektør.vilkårsgrunnlagHistorikk.size)
-        assertEquals(3, inspektør.vilkårsgrunnlagHistorikk[0].second.avviksprosent?.roundToInt())
+        assertEquals(3, grunnlagsdataInspektør.avviksprosent?.roundToInt())
 
         val tidligereBeregning = inspektør.utbetalingstidslinjeberegningData.first()
         assertEquals(tidligereBeregning.inntektshistorikkInnslagId, tidligereInntektInnslagId)

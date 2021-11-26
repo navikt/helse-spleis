@@ -14,6 +14,7 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.kronologisk
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Prosent
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -69,13 +70,17 @@ internal class VedtaksperiodeBuilder(
         }
         var sammenligningsgrunnlag: Double = 0.0
             private set
+        var avviksprosent: Prosent? = null
+            private set
         override fun preVisitGrunnlagsdata(
             skjæringstidspunkt: LocalDate,
             grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
             sykepengegrunnlag: Sykepengegrunnlag,
-            sammenligningsgrunnlag: Inntekt
+            sammenligningsgrunnlag: Inntekt,
+            avviksprosent: Prosent?
         ) {
             this.sammenligningsgrunnlag = sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig }
+            this.avviksprosent = avviksprosent
         }
     }
 
@@ -83,7 +88,7 @@ internal class VedtaksperiodeBuilder(
         val builder = GrunnlagsdataBuilder(grunnlagsdata)
         GrunnlagsdataDTO(
             beregnetÅrsinntektFraInntektskomponenten = builder.sammenligningsgrunnlag,
-            avviksprosent = grunnlagsdata.avviksprosent?.ratio(),
+            avviksprosent = builder.avviksprosent?.ratio(),
             antallOpptjeningsdagerErMinst = grunnlagsdata.antallOpptjeningsdagerErMinst,
             harOpptjening = grunnlagsdata.harOpptjening,
             medlemskapstatus = medlemskapstatusDTO!!
@@ -96,7 +101,10 @@ internal class VedtaksperiodeBuilder(
             oppfylt = grunnlagsdata.harOpptjening
         )
     }
-    private val avviksprosent: Double? = dataForVilkårsvurdering?.avviksprosent?.prosent()
+    private val avviksprosent: Double? = dataForVilkårsvurdering?.let { grunnlagsdata ->
+        val builder = GrunnlagsdataBuilder(grunnlagsdata)
+        builder.avviksprosent?.prosent()
+    }
 
     private var dataForSimulering: SimuleringsdataDTO? = null
     private var arbeidsgiverFagsystemId: String? = null
