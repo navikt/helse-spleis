@@ -150,8 +150,8 @@ internal class VilkårsgrunnlagBuilder(
 
         internal fun build() = IInnslag(vilkårsgrunnlag.toMap())
 
-        override fun preVisitGrunnlagsdata(skjæringstidspunkt: LocalDate, grunnlagsdata: Grunnlagsdata) {
-            val sykepengegrunnlag = SykepengegrunnlagBuilder(grunnlagsdata.sykepengegrunnlag, sammenligningsgrunnlagBuilder).build()
+        override fun preVisitGrunnlagsdata(skjæringstidspunkt: LocalDate, grunnlagsdata: Grunnlagsdata, sykepengegrunnlag: Sykepengegrunnlag) {
+            val compositeSykepengegrunnlag = SykepengegrunnlagBuilder(sykepengegrunnlag, sammenligningsgrunnlagBuilder).build()
             val minimumInntekt = InntektBuilder(person.minimumInntekt(skjæringstidspunkt)).build()
             val sammenligningsgrunnlag = InntektBuilder(grunnlagsdata.sammenligningsgrunnlag).build()
             val grunnbeløp = InntektBuilder(Grunnbeløp.`1G`.beløp(skjæringstidspunkt)).build()
@@ -165,15 +165,15 @@ internal class VilkårsgrunnlagBuilder(
             vilkårsgrunnlag.putIfAbsent(
                 skjæringstidspunkt, ISpleisGrunnlag(
                     skjæringstidspunkt = skjæringstidspunkt,
-                    omregnetÅrsinntekt = sykepengegrunnlag.omregnetÅrsinntekt,
+                    omregnetÅrsinntekt = compositeSykepengegrunnlag.omregnetÅrsinntekt,
                     sammenligningsgrunnlag = sammenligningsgrunnlag.årlig,
-                    inntekter = sykepengegrunnlag.inntekterPerArbeidsgiver,
-                    sykepengegrunnlag = sykepengegrunnlag.sykepengegrunnlag,
+                    inntekter = compositeSykepengegrunnlag.inntekterPerArbeidsgiver,
+                    sykepengegrunnlag = compositeSykepengegrunnlag.sykepengegrunnlag,
                     avviksprosent = avviksprosent,
                     grunnbeløp = grunnbeløp.årlig.toInt(),
                     meldingsreferanseId = grunnlagsdata.meldingsreferanseId,
                     antallOpptjeningsdagerErMinst = grunnlagsdata.antallOpptjeningsdagerErMinst,
-                    oppfyllerKravOmMinstelønn = sykepengegrunnlag.sykepengegrunnlag > minimumInntekt.årlig,
+                    oppfyllerKravOmMinstelønn = compositeSykepengegrunnlag.sykepengegrunnlag > minimumInntekt.årlig,
                     oppfyllerKravOmOpptjening = grunnlagsdata.harOpptjening,
                     oppfyllerKravOmMedlemskap = oppfyllerKravOmMedlemskap
                 )
