@@ -6,16 +6,20 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.*
+import no.nav.helse.person.Ledd.Companion.ledd
 import no.nav.helse.person.Ledd.LEDD_1
 import no.nav.helse.person.Ledd.LEDD_2
 import no.nav.helse.person.Paragraf.*
 import no.nav.helse.person.Punktum.Companion.punktum
 import no.nav.helse.testhelpers.*
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.*
 
 internal class EtterlevelseTest : AbstractEndToEndTest() {
 
@@ -280,6 +284,113 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         assertIkkeVurdert(paragraf = PARAGRAF_8_12, ledd = LEDD_2)
     }
 
+    @Test
+    fun `§8-30 ledd 2 - under 25 prosent avvik`() {
+        val beregnetInntekt = 31000.0
+        val sammenligningsgrunnlag = 31000.0
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = beregnetInntekt.månedlig)
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, sammenligningsgrunnlag.månedlig)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        assertOppfylt(
+            PARAGRAF_8_30,
+            2.ledd,
+            (1..3).punktum,
+            LocalDate.of(2017, 4, 5),
+            inputdata = mapOf(
+                "maksimaltTillattAvvikPåÅrsinntekt" to 25.0,
+                "grunnlagForSykepengegrunnlag" to beregnetInntekt * 12,
+                "sammenligningsgrunnlag" to sammenligningsgrunnlag * 12
+            ),
+            outputdata = mapOf(
+                "avvik" to 0.0
+            )
+        )
+    }
+
+    @Test
+    fun `§8-30 ledd 2 - akkurat 25 prosent avvik`() {
+        val beregnetInntekt = 38750.0
+        val sammenligningsgrunnlag = 31000.0
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = beregnetInntekt.månedlig)
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, sammenligningsgrunnlag.månedlig)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        assertOppfylt(
+            PARAGRAF_8_30,
+            2.ledd,
+            (1..3).punktum,
+            LocalDate.of(2017, 4, 5),
+            inputdata = mapOf(
+                "maksimaltTillattAvvikPåÅrsinntekt" to 25.0,
+                "grunnlagForSykepengegrunnlag" to beregnetInntekt * 12,
+                "sammenligningsgrunnlag" to sammenligningsgrunnlag * 12
+            ),
+            outputdata = mapOf(
+                "avvik" to 25.0
+            )
+        )
+    }
+
+    @Test
+    fun `§8-30 ledd 2 - over 25 prosent avvik`() {
+        val beregnetInntekt = 38781.0
+        val sammenligningsgrunnlag = 31000.0
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = beregnetInntekt.månedlig)
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, sammenligningsgrunnlag.månedlig)
+
+        assertIkkeOppfylt(
+            PARAGRAF_8_30,
+            2.ledd,
+            (1..3).punktum,
+            LocalDate.of(2017, 4, 5),
+            inputdata = mapOf(
+                "maksimaltTillattAvvikPåÅrsinntekt" to 25.0,
+                "grunnlagForSykepengegrunnlag" to beregnetInntekt * 12,
+                "sammenligningsgrunnlag" to sammenligningsgrunnlag * 12
+            ),
+            outputdata = mapOf(
+                "avvik" to 25.1
+            )
+        )
+    }
+
+    @Test
+    fun `§8-30 ledd 2 - gjør ikke ny juridisk vurdering ved sjekk av inntektsavvik i forlengelse av kort periode`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 1.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 1.januar, 100.prosent))
+        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterYtelser()
+        håndterVilkårsgrunnlag()
+        håndterPåminnelse(1.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK, LocalDateTime.MIN)
+
+        håndterSykmelding(Sykmeldingsperiode(2.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmeldingReplay(inntektsmeldingId, 2.vedtaksperiode(ORGNUMMER))
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt(2.vedtaksperiode)
+
+        assertVurdert(PARAGRAF_8_30, LEDD_2, vedtaksperiodeId = 1.vedtaksperiode)
+        assertIkkeVurdert(PARAGRAF_8_30, LEDD_2, vedtaksperiodeId = 2.vedtaksperiode)
+    }
+
     private val Int.resultat: (List<Resultat>) -> Resultat get() = { it[this - 1] }
 
     private fun assertOppfylt(
@@ -312,13 +423,27 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         assertResultat(versjon, inputdata, outputdata, resultat)
     }
 
+    private fun assertVurdert(
+        paragraf: Paragraf,
+        ledd: Ledd? = null,
+        punktum: List<Punktum>? = null,
+        vedtaksperiodeId: IdInnhenter? = null,
+        organisasjonsnummer: String = ORGNUMMER,
+        inspektør: EtterlevelseInspektør = EtterlevelseInspektør(person.aktivitetslogg)
+    ) {
+        val resultat = inspektør.resultat(paragraf, ledd, punktum, vedtaksperiodeId?.invoke(organisasjonsnummer))
+        assertTrue(resultat.isNotEmpty()) { "Forventet at $paragraf $ledd $punktum er vurdert" }
+    }
+
     private fun assertIkkeVurdert(
         paragraf: Paragraf,
         ledd: Ledd? = null,
         punktum: List<Punktum>? = null,
+        vedtaksperiodeId: IdInnhenter? = null,
+        organisasjonsnummer: String = ORGNUMMER,
         inspektør: EtterlevelseInspektør = EtterlevelseInspektør(person.aktivitetslogg)
     ) {
-        val resultat = inspektør.resultat(paragraf, ledd, punktum)
+        val resultat = inspektør.resultat(paragraf, ledd, punktum, vedtaksperiodeId?.invoke(organisasjonsnummer))
         assertTrue(resultat.isEmpty()) { "Forventet at $paragraf $ledd $punktum ikke er vurdert" }
     }
 
@@ -336,14 +461,15 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
     private class EtterlevelseInspektør(aktivitetslogg: Aktivitetslogg) : AktivitetsloggVisitor {
         private val resultater = mutableListOf<Resultat>()
 
-        fun resultat(paragraf: Paragraf, ledd: Ledd?, punktum: List<Punktum>?) =
-            resultater.filter { it.paragraf == paragraf && ledd?.equals(it.ledd) ?: true && punktum?.equals(it.punktum) ?: true }
+        fun resultat(paragraf: Paragraf, ledd: Ledd?, punktum: List<Punktum>?, vedtaksperiodeId: UUID? = null) =
+            resultater.filter { it.paragraf == paragraf && ledd?.equals(it.ledd) ?: true && punktum?.equals(it.punktum) ?: true && vedtaksperiodeId?.equals(it.vedtaksperiodeIdFraKontekst()) ?: true}
 
         init {
             aktivitetslogg.accept(this)
         }
 
         private lateinit var melding: String
+        private lateinit var kontekster: List<SpesifikkKontekst>
 
         override fun preVisitEtterlevelse(
             kontekster: List<SpesifikkKontekst>,
@@ -352,6 +478,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
             vurderingsresultat: Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat,
             tidsstempel: String
         ) {
+            this.kontekster = kontekster
             this.melding = melding
         }
 
@@ -364,7 +491,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
             inputdata: Map<Any, Any?>,
             outputdata: Map<Any, Any?>
         ) {
-            resultater.add(Resultat(melding, oppfylt, versjon, paragraf, ledd, punktum, inputdata, outputdata))
+            resultater.add(Resultat(melding, oppfylt, versjon, paragraf, ledd, punktum, inputdata, outputdata, kontekster))
         }
     }
 
@@ -376,6 +503,9 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         val ledd: Ledd,
         val punktum: List<Punktum>,
         val inputdata: Map<Any, Any?>,
-        val outputdata: Map<Any, Any?>
-    )
+        val outputdata: Map<Any, Any?>,
+        val kontekster: List<SpesifikkKontekst>
+    ) {
+        fun vedtaksperiodeIdFraKontekst(): UUID = UUID.fromString(kontekster.first { it.kontekstType == "Vedtaksperiode" }.kontekstMap["vedtaksperiodeId"])
+    }
 }
