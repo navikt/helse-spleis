@@ -2022,7 +2022,7 @@ internal class Vedtaksperiode private constructor(
                 }
                 lateinit var vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
                 validerHvis("Har for mye avvik i inntekt", { person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt)?.also { vilkårsgrunnlag = it } != null }) {
-                    vilkårsgrunnlag.validerAvviksprosent()
+                    vilkårsgrunnlag.sjekkAvviksprosent(ytelser)
                 }
                 onSuccess {
                     when (periodetype) {

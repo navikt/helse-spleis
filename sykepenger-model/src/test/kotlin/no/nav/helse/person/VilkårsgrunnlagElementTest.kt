@@ -3,6 +3,7 @@ package no.nav.helse.person
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosent
+import no.nav.helse.økonomi.Prosent.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -13,31 +14,31 @@ internal class VilkårsgrunnlagElementTest {
     @Test
     fun `infotrygd har ikke avviksjekk`() {
         val element = infotrygdgrunnlag()
-        assertTrue(element.validerAvviksprosent())
+        assertTrue(element.sjekkAvviksprosent(Aktivitetslogg()))
     }
 
     @Test
     fun `null avvik er ok`() {
         val element = grunnlagsdata(avviksprosent = null)
-        assertTrue(element.validerAvviksprosent())
+        assertTrue(element.sjekkAvviksprosent(Aktivitetslogg()))
     }
 
     @Test
     fun `litt avvik er lov`() {
         val element = grunnlagsdata(avviksprosent = Prosent.ratio(Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT.ratio() - 0.0001))
-        assertTrue(element.validerAvviksprosent())
+        assertTrue(element.sjekkAvviksprosent(Aktivitetslogg()))
     }
 
     @Test
     fun `avvik er ikke lov`() {
-        val element = grunnlagsdata(avviksprosent = Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT)
-        assertFalse(element.validerAvviksprosent())
+        val element = grunnlagsdata(avviksprosent = 26.prosent)
+        assertFalse(element.sjekkAvviksprosent(Aktivitetslogg()))
     }
 
     @Test
     fun `for mye avvik er ikke lov`() {
         val element = grunnlagsdata(avviksprosent = Prosent.ratio(Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT.ratio() + 0.0001))
-        assertFalse(element.validerAvviksprosent())
+        assertFalse(element.sjekkAvviksprosent(Aktivitetslogg()))
     }
 
     private fun grunnlagsdata(avviksprosent: Prosent? = null): VilkårsgrunnlagHistorikk.Grunnlagsdata {

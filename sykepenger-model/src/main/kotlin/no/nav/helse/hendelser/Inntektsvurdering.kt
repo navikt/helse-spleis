@@ -12,10 +12,7 @@ import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Prosent.Companion.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT
 import java.time.LocalDate
 
-class Inntektsvurdering(
-    private val inntekter: List<ArbeidsgiverInntekt>
-) {
-
+class Inntektsvurdering(private val inntekter: List<ArbeidsgiverInntekt>) {
     private var avviksprosent: Prosent? = null
 
     internal fun avviksprosent() = avviksprosent
@@ -32,8 +29,22 @@ class Inntektsvurdering(
         }
         grunnlagForSykepengegrunnlag.avviksprosent(sammenligningsgrunnlag).also { avvik ->
             avviksprosent = avvik
-            val akseptabeltAvvik = avvik <= MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT
-            aktivitetslogg.`§8-30 ledd 2`(akseptabeltAvvik, MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT, grunnlagForSykepengegrunnlag.grunnlagForSykepengegrunnlag, sammenligningsgrunnlag, avvik)
+            return validerAvvik(aktivitetslogg, avvik, grunnlagForSykepengegrunnlag.grunnlagForSykepengegrunnlag, sammenligningsgrunnlag)
+        }
+    }
+
+    internal fun lagreInntekter(person: Person, skjæringstidspunkt: LocalDate, hendelse: PersonHendelse) =
+        ArbeidsgiverInntekt.lagreSammenligningsgrunnlag(inntekter, person, skjæringstidspunkt, hendelse)
+
+    internal companion object {
+        internal fun validerAvvik(aktivitetslogg: IAktivitetslogg, avvik: Prosent, grunnlagForSykepengegrunnlag: Inntekt, sammenligningsgrunnlag: Inntekt): Boolean {
+            return sjekkAvvik(avvik, aktivitetslogg).also { akseptabeltAvvik ->
+                aktivitetslogg.`§8-30 ledd 2`(akseptabeltAvvik, MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT, grunnlagForSykepengegrunnlag, sammenligningsgrunnlag, avvik)
+            }
+        }
+
+        internal fun sjekkAvvik(avvik: Prosent, aktivitetslogg: IAktivitetslogg): Boolean {
+            val akseptabeltAvvik = akseptabeltAvvik(avvik)
             if (akseptabeltAvvik) {
                 aktivitetslogg.info("Har %.0f %% eller mindre avvik i inntekt (%.2f %%)", MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT.prosent(), avvik.prosent())
             } else {
@@ -41,8 +52,7 @@ class Inntektsvurdering(
             }
             return akseptabeltAvvik
         }
-    }
 
-    internal fun lagreInntekter(person: Person, skjæringstidspunkt: LocalDate, hendelse: PersonHendelse) =
-        ArbeidsgiverInntekt.lagreSammenligningsgrunnlag(inntekter, person, skjæringstidspunkt, hendelse)
+        private fun akseptabeltAvvik(avvik: Prosent) = avvik <= MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT
+    }
 }
