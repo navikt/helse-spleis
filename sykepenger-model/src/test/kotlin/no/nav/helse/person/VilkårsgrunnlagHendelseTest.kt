@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import no.nav.helse.etterspurtBehov
 import no.nav.helse.hendelser.*
+import no.nav.helse.inspectors.GrunnlagsdataInspektør
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
@@ -67,8 +68,9 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
             arbeidsforhold = ansattSidenStart2017()
         )
 
+        val grunnlagsdataInspektør = GrunnlagsdataInspektør(inspektør.vilkårsgrunnlag(1.vedtaksperiode) as VilkårsgrunnlagHistorikk.Grunnlagsdata)
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(148000.årlig, (inspektør.vilkårsgrunnlag(1.vedtaksperiode) as VilkårsgrunnlagHistorikk.Grunnlagsdata?)?.sammenligningsgrunnlag)
+        assertEquals(148000.årlig, grunnlagsdataInspektør.sammenligningsgrunnlag)
     }
 
     @Test

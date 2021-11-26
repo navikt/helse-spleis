@@ -63,9 +63,26 @@ internal class VedtaksperiodeBuilder(
         }
     }
 
+    private class GrunnlagsdataBuilder(grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata) : VilkårsgrunnlagHistorikkVisitor {
+        init {
+            grunnlagsdata.accept(LocalDate.now(), this)
+        }
+        var sammenligningsgrunnlag: Double = 0.0
+            private set
+        override fun preVisitGrunnlagsdata(
+            skjæringstidspunkt: LocalDate,
+            grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
+            sykepengegrunnlag: Sykepengegrunnlag,
+            sammenligningsgrunnlag: Inntekt
+        ) {
+            this.sammenligningsgrunnlag = sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig }
+        }
+    }
+
     private val dataForVilkårsvurdering: GrunnlagsdataDTO? = dataForVilkårsvurdering?.let { grunnlagsdata ->
+        val builder = GrunnlagsdataBuilder(grunnlagsdata)
         GrunnlagsdataDTO(
-            beregnetÅrsinntektFraInntektskomponenten = grunnlagsdata.sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
+            beregnetÅrsinntektFraInntektskomponenten = builder.sammenligningsgrunnlag,
             avviksprosent = grunnlagsdata.avviksprosent?.ratio(),
             antallOpptjeningsdagerErMinst = grunnlagsdata.antallOpptjeningsdagerErMinst,
             harOpptjening = grunnlagsdata.harOpptjening,

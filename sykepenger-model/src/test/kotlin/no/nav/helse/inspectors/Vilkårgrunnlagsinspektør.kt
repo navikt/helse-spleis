@@ -1,11 +1,15 @@
 package no.nav.helse.inspectors
 
+import no.nav.helse.hendelser.VilkårsgrunnlagTest
 import no.nav.helse.person.Sykepengegrunnlag
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.VilkårsgrunnlagHistorikkVisitor
+import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Prosent
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import kotlin.properties.Delegates
 
 internal class Vilkårgrunnlagsinspektør(historikk: VilkårsgrunnlagHistorikk) : VilkårsgrunnlagHistorikkVisitor {
     val vilkårsgrunnlagTeller = mutableMapOf<Int, Int>()
@@ -26,7 +30,8 @@ internal class Vilkårgrunnlagsinspektør(historikk: VilkårsgrunnlagHistorikk) 
     override fun preVisitGrunnlagsdata(
         skjæringstidspunkt: LocalDate,
         grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
-        sykepengegrunnlag: Sykepengegrunnlag
+        sykepengegrunnlag: Sykepengegrunnlag,
+        sammenligningsgrunnlag: Inntekt
     ) {
         val teller = vilkårsgrunnlagTeller.getOrDefault(innslag, 0)
         vilkårsgrunnlagTeller[innslag] = teller.inc()
@@ -40,5 +45,33 @@ internal class Vilkårgrunnlagsinspektør(historikk: VilkårsgrunnlagHistorikk) 
         val teller = vilkårsgrunnlagTeller.getOrDefault(innslag, 0)
         vilkårsgrunnlagTeller[innslag] = teller.inc()
     }
+}
 
+internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata) : VilkårsgrunnlagHistorikkVisitor {
+    internal lateinit var sykepengegrunnlag: Sykepengegrunnlag
+        private set
+    internal lateinit var sammenligningsgrunnlag: Inntekt
+        private set
+    internal var avviksprosent: Prosent? = null
+        private set
+    internal var antallOpptjeningsdagerErMinst by Delegates.notNull<Int>()
+        private set
+    internal var harOpptjening by Delegates.notNull<Boolean>()
+        private set
+    init {
+        grunnlagsdata.accept(LocalDate.now(), this)
+    }
+
+    override fun preVisitGrunnlagsdata(
+        skjæringstidspunkt: LocalDate,
+        grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
+        sykepengegrunnlag: Sykepengegrunnlag,
+        sammenligningsgrunnlag: Inntekt
+    ) {
+        this.sykepengegrunnlag = sykepengegrunnlag
+        this.sammenligningsgrunnlag = sammenligningsgrunnlag
+        this.avviksprosent = grunnlagsdata.avviksprosent
+        this.antallOpptjeningsdagerErMinst = grunnlagsdata.antallOpptjeningsdagerErMinst
+        this.harOpptjening = grunnlagsdata.harOpptjening
+    }
 }

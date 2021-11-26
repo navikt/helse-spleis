@@ -10,6 +10,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
+import no.nav.helse.økonomi.Inntekt
 import org.junit.jupiter.api.fail
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -102,7 +103,8 @@ internal class TestArbeidsgiverInspektør(
         override fun preVisitGrunnlagsdata(
             skjæringstidspunkt: LocalDate,
             grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
-            sykepengegrunnlag: Sykepengegrunnlag
+            sykepengegrunnlag: Sykepengegrunnlag,
+            sammenligningsgrunnlag: Inntekt
         ) {
             vilkårsgrunnlagHistorikk.add(skjæringstidspunkt to grunnlagsdata)
         }

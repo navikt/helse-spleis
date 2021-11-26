@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.inspectors.GrunnlagsdataInspektør
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.person.*
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
@@ -44,8 +45,7 @@ internal class VilkårsgrunnlagTest {
     fun `samme inntekt fra inntektskomponenten og inntektsmelding lagres i vedtaksperioden`() {
         val vilkårsgrunnlag = vilkårsgrunnlag()
         person.håndter(vilkårsgrunnlag)
-        assertEquals(Prosent.ratio(0.0), dataForVilkårsvurdering()?.avviksprosent)
-        assertEquals(INNTEKT, dataForVilkårsvurdering()?.sammenligningsgrunnlag)
+        assertGrunnlagsdata(INNTEKT, Prosent.ratio(0.0), 28, true)
     }
 
     @Test
@@ -57,10 +57,7 @@ internal class VilkårsgrunnlagTest {
                 }}
         )
         person.håndter(vilkårsgrunnlag)
-        assertEquals(Prosent.ratio(0.2), dataForVilkårsvurdering()?.avviksprosent)
-        assertEquals(37500.månedlig, dataForVilkårsvurdering()?.sammenligningsgrunnlag)
-        assertEquals(28, dataForVilkårsvurdering()!!.antallOpptjeningsdagerErMinst)
-        assertEquals(true, dataForVilkårsvurdering()?.harOpptjening)
+        assertGrunnlagsdata(37500.månedlig, Prosent.ratio(0.2), 28, true)
     }
 
     @Test
@@ -69,8 +66,7 @@ internal class VilkårsgrunnlagTest {
             arbeidsforhold = listOf(Arbeidsforhold(orgnummer, 5.desember(2017)))
         )
         person.håndter(vilkårsgrunnlag)
-        assertEquals(27, dataForVilkårsvurdering()?.antallOpptjeningsdagerErMinst)
-        assertEquals(false, dataForVilkårsvurdering()?.harOpptjening)
+        assertGrunnlagsdata(INNTEKT, Prosent.ratio(0.0), 27, false)
         assertEquals(TilstandType.AVVENTER_HISTORIKK, hentTilstand()?.type)
         assertTrue(vilkårsgrunnlag.hasWarningsOrWorse())
     }
@@ -81,8 +77,7 @@ internal class VilkårsgrunnlagTest {
             arbeidsforhold = listOf(Arbeidsforhold(orgnummer, fangeSkjæringstidspunkt(person).plusDays(1)))
         )
         person.håndter(vilkårsgrunnlag)
-        assertEquals(0, dataForVilkårsvurdering()?.antallOpptjeningsdagerErMinst)
-        assertEquals(false, dataForVilkårsvurdering()?.harOpptjening)
+        assertGrunnlagsdata(INNTEKT, Prosent.ratio(0.0), 0, false)
         assertEquals(TilstandType.AVVENTER_HISTORIKK, hentTilstand()?.type)
         assertTrue(vilkårsgrunnlag.hasWarningsOrWorse())
     }
@@ -93,8 +88,7 @@ internal class VilkårsgrunnlagTest {
             arbeidsforhold = listOf(Arbeidsforhold(orgnummer, 4.desember(2017)))
         )
         person.håndter(vilkårsgrunnlag)
-        assertEquals(28, dataForVilkårsvurdering()?.antallOpptjeningsdagerErMinst)
-        assertEquals(true, dataForVilkårsvurdering()?.harOpptjening)
+        assertGrunnlagsdata(INNTEKT, Prosent.ratio(0.0), 28, true)
         assertEquals(TilstandType.AVVENTER_HISTORIKK, hentTilstand()?.type)
         assertFalse(vilkårsgrunnlag.hasWarningsOrWorse())
     }
@@ -105,8 +99,7 @@ internal class VilkårsgrunnlagTest {
             arbeidsforhold = listOf(Arbeidsforhold("eitAnnaOrgNummer", 4.desember(2017)))
         )
         person.håndter(vilkårsgrunnlag)
-        assertEquals(28, dataForVilkårsvurdering()?.antallOpptjeningsdagerErMinst)
-        assertEquals(true, dataForVilkårsvurdering()?.harOpptjening)
+        assertGrunnlagsdata(INNTEKT, Prosent.ratio(0.0), 28, true)
         assertEquals(TilstandType.AVVENTER_HISTORIKK, hentTilstand()?.type)
         assertEquals("Arbeidsgiver er ikke registrert i Aa-registeret.", inspektør().warnings.single())
     }
@@ -117,8 +110,7 @@ internal class VilkårsgrunnlagTest {
             arbeidsforhold = emptyList()
         )
         person.håndter(vilkårsgrunnlag)
-        assertEquals(0, dataForVilkårsvurdering()?.antallOpptjeningsdagerErMinst)
-        assertEquals(false, dataForVilkårsvurdering()?.harOpptjening)
+        assertGrunnlagsdata(INNTEKT, Prosent.ratio(0.0), 0, false)
         assertEquals(TilstandType.AVVENTER_HISTORIKK, hentTilstand()?.type)
         assertTrue(vilkårsgrunnlag.hasWarningsOrWorse())
     }
@@ -134,9 +126,19 @@ internal class VilkårsgrunnlagTest {
         assertFalse(vilkårsgrunnlag.hasWarningsOrWorse())
     }
 
-    private fun dataForVilkårsvurdering(): VilkårsgrunnlagHistorikk.Grunnlagsdata? {
-        val inspektør = TestArbeidsgiverInspektør(person, orgnummer)
-        return inspektør.vilkårsgrunnlag { observatør.vedtaksperiode(orgnummer, 0) } as VilkårsgrunnlagHistorikk.Grunnlagsdata?
+    private fun assertGrunnlagsdata(
+        forventetSammenligningsgrunnlag: Inntekt,
+        forventetAvviksprosent: Prosent,
+        forventetAntallOpptjeningsdager: Int,
+        forventetHarOpptjening: Boolean
+    ) {
+        val arbeidsgiverInspektør = TestArbeidsgiverInspektør(person, orgnummer)
+        val grunnlagsdata = arbeidsgiverInspektør.vilkårsgrunnlag { observatør.vedtaksperiode(orgnummer, 0) } as VilkårsgrunnlagHistorikk.Grunnlagsdata
+        val grunnlagsdataInspektør = GrunnlagsdataInspektør(grunnlagsdata)
+        assertEquals(forventetSammenligningsgrunnlag, grunnlagsdataInspektør.sammenligningsgrunnlag)
+        assertEquals(forventetAvviksprosent, grunnlagsdataInspektør.avviksprosent)
+        assertEquals(forventetAntallOpptjeningsdager, grunnlagsdataInspektør.antallOpptjeningsdagerErMinst)
+        assertEquals(forventetHarOpptjening, grunnlagsdataInspektør.harOpptjening)
     }
 
     private fun hentTilstand(): Vedtaksperiodetilstand? {

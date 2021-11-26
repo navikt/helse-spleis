@@ -598,7 +598,8 @@ internal class JsonBuilder : AbstractBuilder() {
         override fun preVisitGrunnlagsdata(
             skjæringstidspunkt: LocalDate,
             grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
-            sykepengegrunnlag: Sykepengegrunnlag
+            sykepengegrunnlag: Sykepengegrunnlag,
+            sammenligningsgrunnlag: Inntekt
         ) {
             val sykepengegrunnlag = mutableMapOf<String, Any>()
             vilkårsgrunnlagElement.add(
@@ -608,7 +609,7 @@ internal class JsonBuilder : AbstractBuilder() {
                     "antallOpptjeningsdagerErMinst" to grunnlagsdata.antallOpptjeningsdagerErMinst,
                     "avviksprosent" to grunnlagsdata.avviksprosent?.ratio(),
                     "sykepengegrunnlag" to sykepengegrunnlag,
-                    "sammenligningsgrunnlag" to grunnlagsdata.sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
+                    "sammenligningsgrunnlag" to sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
                     "harOpptjening" to grunnlagsdata.harOpptjening,
                     "medlemskapstatus" to when (grunnlagsdata.medlemskapstatus) {
                         Medlemskapsvurdering.Medlemskapstatus.Ja -> JsonMedlemskapstatus.JA
@@ -671,7 +672,8 @@ internal class JsonBuilder : AbstractBuilder() {
         override fun postVisitGrunnlagsdata(
             skjæringstidspunkt: LocalDate,
             grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
-            sykepengegrunnlag: Sykepengegrunnlag
+            sykepengegrunnlag: Sykepengegrunnlag,
+            sammenligningsgrunnlag: Inntekt
         ) {
             popState()
         }

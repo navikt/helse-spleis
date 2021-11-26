@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.inspectors.GrunnlagsdataInspektør
 import no.nav.helse.inspectors.Kilde
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.person.IdInnhenter
@@ -88,8 +89,8 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertInntektForDato(4750.månedlig, 1.januar, a3Inspektør)
         assertInntektForDato(2250.månedlig, 1.januar, a4Inspektør)
 
-        val vilkårsgrunnlag = a1Inspektør.vilkårsgrunnlag(1.vedtaksperiode) as VilkårsgrunnlagHistorikk.Grunnlagsdata?
-        assertEquals(300000.årlig, vilkårsgrunnlag?.sammenligningsgrunnlag)
+        val grunnlagsdataInspektør = GrunnlagsdataInspektør(a1Inspektør.vilkårsgrunnlag(1.vedtaksperiode) as VilkårsgrunnlagHistorikk.Grunnlagsdata)
+        assertEquals(300000.årlig, grunnlagsdataInspektør.sammenligningsgrunnlag)
 
     }
 
