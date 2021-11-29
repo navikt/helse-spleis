@@ -46,9 +46,9 @@ internal fun createApp(ktorConfig: KtorConfig, azureConfig: AzureAdAppConfig, da
             ktorConfig.configure(this)
             module {
                 install(CallId) {
-                    generate {
-                        UUID.randomUUID().toString()
-                    }
+                    header("callId")
+                    verify { it.isNotEmpty() }
+                    generate { UUID.randomUUID().toString() }
                 }
                 install(CallLogging) {
                     logger = httpTraceLog
