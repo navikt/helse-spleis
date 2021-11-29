@@ -1,6 +1,7 @@
 package no.nav.helse.person
 
 import no.nav.helse.Fødselsnummer
+import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
@@ -98,7 +99,8 @@ internal interface VilkårsgrunnlagHistorikkVisitor : InntekthistorikkVisitor {
         sammenligningsgrunnlag: Inntekt,
         avviksprosent: Prosent?,
         antallOpptjeningsdagerErMinst: Int,
-        harOpptjening: Boolean
+        harOpptjening: Boolean,
+        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
     ) {}
     fun postVisitGrunnlagsdata(
         skjæringstidspunkt: LocalDate,
@@ -107,7 +109,8 @@ internal interface VilkårsgrunnlagHistorikkVisitor : InntekthistorikkVisitor {
         sammenligningsgrunnlag: Inntekt,
         avviksprosent: Prosent?,
         antallOpptjeningsdagerErMinst: Int,
-        harOpptjening: Boolean
+        harOpptjening: Boolean,
+        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
     ) {}
     fun preVisitInfotrygdVilkårsgrunnlag(
         infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag,

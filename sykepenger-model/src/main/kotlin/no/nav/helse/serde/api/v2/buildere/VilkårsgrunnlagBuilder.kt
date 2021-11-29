@@ -158,12 +158,13 @@ internal class VilkårsgrunnlagBuilder(
             sammenligningsgrunnlag: Inntekt,
             avviksprosent: Prosent?,
             antallOpptjeningsdagerErMinst: Int,
-            harOpptjening: Boolean
+            harOpptjening: Boolean,
+            medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
         ) {
             val compositeSykepengegrunnlag = SykepengegrunnlagBuilder(sykepengegrunnlag, sammenligningsgrunnlagBuilder).build()
             val minimumInntekt = InntektBuilder(person.minimumInntekt(skjæringstidspunkt)).build()
             val grunnbeløp = InntektBuilder(Grunnbeløp.`1G`.beløp(skjæringstidspunkt)).build()
-            val oppfyllerKravOmMedlemskap = when (grunnlagsdata.medlemskapstatus) {
+            val oppfyllerKravOmMedlemskap = when (medlemskapstatus) {
                 Medlemskapsvurdering.Medlemskapstatus.Ja -> true
                 Medlemskapsvurdering.Medlemskapstatus.Nei -> false
                 else -> null

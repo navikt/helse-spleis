@@ -56,14 +56,6 @@ internal class VedtaksperiodeBuilder(
             ?: emptyList())).distinctBy { it.melding }
     private val beregnetSykdomstidslinje = mutableListOf<SykdomstidslinjedagDTO>()
 
-    private val medlemskapstatusDTO: MedlemskapstatusDTO? = dataForVilkårsvurdering?.let { grunnlagsdata ->
-        when (grunnlagsdata.medlemskapstatus) {
-            Medlemskapsvurdering.Medlemskapstatus.Ja -> MedlemskapstatusDTO.JA
-            Medlemskapsvurdering.Medlemskapstatus.Nei -> MedlemskapstatusDTO.NEI
-            else -> MedlemskapstatusDTO.VET_IKKE
-        }
-    }
-
     private class GrunnlagsdataBuilder(skjæringstidspunkt: LocalDate, grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata) : VilkårsgrunnlagHistorikkVisitor {
         init {
             grunnlagsdata.accept(skjæringstidspunkt, this)
@@ -76,6 +68,8 @@ internal class VedtaksperiodeBuilder(
             private set
         var harOpptjening: Boolean = false
             private set
+        lateinit var medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
+            private set
 
         override fun preVisitGrunnlagsdata(
             skjæringstidspunkt: LocalDate,
@@ -84,12 +78,23 @@ internal class VedtaksperiodeBuilder(
             sammenligningsgrunnlag: Inntekt,
             avviksprosent: Prosent?,
             antallOpptjeningsdagerErMinst: Int,
-            harOpptjening: Boolean
+            harOpptjening: Boolean,
+            medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
         ) {
             this.sammenligningsgrunnlag = sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig }
             this.avviksprosent = avviksprosent
             this.antallOpptjeningsdagerErMinst = antallOpptjeningsdagerErMinst
             this.harOpptjening = harOpptjening
+            this.medlemskapstatus = medlemskapstatus
+        }
+    }
+
+    private val medlemskapstatusDTO: MedlemskapstatusDTO? = dataForVilkårsvurdering?.let { grunnlagsdata ->
+        val builder = GrunnlagsdataBuilder(skjæringstidspunkt, grunnlagsdata)
+        when (builder.medlemskapstatus) {
+            Medlemskapsvurdering.Medlemskapstatus.Ja -> MedlemskapstatusDTO.JA
+            Medlemskapsvurdering.Medlemskapstatus.Nei -> MedlemskapstatusDTO.NEI
+            else -> MedlemskapstatusDTO.VET_IKKE
         }
     }
 
