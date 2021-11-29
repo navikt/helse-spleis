@@ -109,7 +109,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         private val antallOpptjeningsdagerErMinst: Int,
         private val harOpptjening: Boolean,
         private val medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
-        internal val harMinimumInntekt: Boolean?,
+        private val harMinimumInntekt: Boolean?,
         internal val vurdertOk: Boolean,
         internal val meldingsreferanseId: UUID?
     ) : VilkårsgrunnlagElement {
@@ -141,7 +141,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 avviksprosent,
                 antallOpptjeningsdagerErMinst,
                 harOpptjening,
-                medlemskapstatus
+                medlemskapstatus,
+                harMinimumInntekt
             )
             sykepengegrunnlag.accept(vilkårsgrunnlagHistorikkVisitor)
             vilkårsgrunnlagHistorikkVisitor.postVisitGrunnlagsdata(
@@ -152,7 +153,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 avviksprosent,
                 antallOpptjeningsdagerErMinst,
                 harOpptjening,
-                medlemskapstatus
+                medlemskapstatus,
+                harMinimumInntekt
             )
         }
 

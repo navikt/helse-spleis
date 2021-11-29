@@ -110,7 +110,8 @@ internal class TestArbeidsgiverInspektør(
             avviksprosent: Prosent?,
             antallOpptjeningsdagerErMinst: Int,
             harOpptjening: Boolean,
-            medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
+            medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
+            harMinimumInntekt: Boolean?
         ) {
             vilkårsgrunnlagHistorikk.add(skjæringstidspunkt to grunnlagsdata)
         }

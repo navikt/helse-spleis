@@ -100,7 +100,8 @@ internal interface VilkårsgrunnlagHistorikkVisitor : InntekthistorikkVisitor {
         avviksprosent: Prosent?,
         antallOpptjeningsdagerErMinst: Int,
         harOpptjening: Boolean,
-        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
+        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
+        harMinimumInntekt: Boolean?
     ) {}
     fun postVisitGrunnlagsdata(
         skjæringstidspunkt: LocalDate,
@@ -110,7 +111,8 @@ internal interface VilkårsgrunnlagHistorikkVisitor : InntekthistorikkVisitor {
         avviksprosent: Prosent?,
         antallOpptjeningsdagerErMinst: Int,
         harOpptjening: Boolean,
-        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
+        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
+        harMinimumInntekt: Boolean?
     ) {}
     fun preVisitInfotrygdVilkårsgrunnlag(
         infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag,

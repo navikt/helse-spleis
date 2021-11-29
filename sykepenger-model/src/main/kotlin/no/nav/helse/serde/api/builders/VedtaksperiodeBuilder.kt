@@ -487,7 +487,8 @@ private class GrunnlagsdataBuilder(skjæringstidspunkt: LocalDate, grunnlagsdata
         avviksprosent: Prosent?,
         antallOpptjeningsdagerErMinst: Int,
         harOpptjening: Boolean,
-        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
+        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
+        harMinimumInntekt: Boolean?
     ) {
         this.medlemskapstatus = when (medlemskapstatus) {
             Medlemskapsvurdering.Medlemskapstatus.Ja -> MedlemskapstatusDTO.JA
