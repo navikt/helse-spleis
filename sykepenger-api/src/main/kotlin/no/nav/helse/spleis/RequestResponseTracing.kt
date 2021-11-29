@@ -34,7 +34,7 @@ internal fun Application.requestResponseTracing(logger: Logger) {
                 proceed()
             }
         } catch (err: Throwable) {
-            logger.info("exception thrown during processing: ${err.message} callId=${call.callId}")
+            logger.error("exception thrown during processing: ${err.message} callId=${call.callId}")
             throw err
         }
     }

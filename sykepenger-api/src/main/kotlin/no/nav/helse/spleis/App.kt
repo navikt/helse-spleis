@@ -40,29 +40,35 @@ fun main() {
 }
 
 internal fun createApp(ktorConfig: KtorConfig, azureConfig: AzureAdAppConfig, dataSourceConfiguration: DataSourceConfiguration, teller: AtomicInteger) =
-    embeddedServer(Netty, applicationEngineEnvironment {
-        ktorConfig.configure(this)
-        module {
-            install(CallId) {
-                generate {
-                    UUID.randomUUID().toString()
+    embeddedServer(
+        factory = Netty,
+        environment = applicationEngineEnvironment {
+            ktorConfig.configure(this)
+            module {
+                install(CallId) {
+                    generate {
+                        UUID.randomUUID().toString()
+                    }
                 }
+                install(CallLogging) {
+                    logger = httpTraceLog
+                    level = Level.INFO
+                    callIdMdc("callId")
+                    filter { call -> call.request.path().startsWith("/api/") }
+                }
+                preStopHook(teller)
+                install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
+                requestResponseTracing(httpTraceLog)
+                nais(teller)
+                azureAdAppAuthentication(azureConfig)
+                val dataSource = dataSourceConfiguration.getDataSource(DataSourceConfiguration.Role.ReadOnly)
+                spesialistApi(dataSource, API_SERVICE)
+                spannerApi(dataSource, API_SERVICE)
+                installGraphQLApi(dataSource, API_SERVICE)
             }
-            install(CallLogging) {
-                logger = httpTraceLog
-                level = Level.INFO
-                callIdMdc("callId")
-                filter { call -> call.request.path().startsWith("/api/") }
-            }
-            preStopHook(teller)
-            install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
-            requestResponseTracing(httpTraceLog)
-            nais(teller)
-            azureAdAppAuthentication(azureConfig)
-            val dataSource = dataSourceConfiguration.getDataSource(DataSourceConfiguration.Role.ReadOnly)
-            spesialistApi(dataSource, API_SERVICE)
-            spannerApi(dataSource, API_SERVICE)
-            installGraphQLApi(dataSource, API_SERVICE)
+        },
+        configure = {
+            this.responseWriteTimeoutSeconds = 30
         }
-    })
+    )
 
