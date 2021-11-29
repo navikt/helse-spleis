@@ -35,7 +35,8 @@ internal class Vilkårgrunnlagsinspektør(historikk: VilkårsgrunnlagHistorikk) 
         avviksprosent: Prosent?,
         antallOpptjeningsdagerErMinst: Int,
         harOpptjening: Boolean,
-        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
+        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
+        harMinimumInntekt: Boolean?
     ) {
         val teller = vilkårsgrunnlagTeller.getOrDefault(innslag, 0)
         vilkårsgrunnlagTeller[innslag] = teller.inc()
@@ -74,7 +75,8 @@ internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.
         avviksprosent: Prosent?,
         antallOpptjeningsdagerErMinst: Int,
         harOpptjening: Boolean,
-        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
+        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
+        harMinimumInntekt: Boolean?
     ) {
         this.sykepengegrunnlag = sykepengegrunnlag
         this.sammenligningsgrunnlag = sammenligningsgrunnlag

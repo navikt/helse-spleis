@@ -57,7 +57,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         avviksprosent: Prosent?,
         antallOpptjeningsdagerErMinst: Int,
         harOpptjening: Boolean,
-        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
+        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
+        harMinimumInntekt: Boolean?
     ) {
         delegatee.postVisitGrunnlagsdata(
             skjæringstidspunkt,
@@ -67,7 +68,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             avviksprosent,
             antallOpptjeningsdagerErMinst,
             harOpptjening,
-            medlemskapstatus
+            medlemskapstatus,
+            harMinimumInntekt
         )
     }
 
@@ -166,7 +168,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         avviksprosent: Prosent?,
         antallOpptjeningsdagerErMinst: Int,
         harOpptjening: Boolean,
-        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
+        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
+        harMinimumInntekt: Boolean?
     ) {
         delegatee.preVisitGrunnlagsdata(
             skjæringstidspunkt,
@@ -176,7 +179,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             avviksprosent,
             antallOpptjeningsdagerErMinst,
             harOpptjening,
-            medlemskapstatus
+            medlemskapstatus,
+            harMinimumInntekt
         )
     }
 
