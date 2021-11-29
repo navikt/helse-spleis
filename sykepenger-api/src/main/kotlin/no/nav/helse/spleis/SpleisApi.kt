@@ -13,24 +13,35 @@ import no.nav.helse.serde.serialize
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.dao.PersonDao
 import no.nav.helse.spleis.dto.håndterPerson
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
 
 internal fun Application.spesialistApi(dataSource: DataSource, authProviderName: String) {
+
     val hendelseDao = HendelseDao(dataSource)
     val personDao = PersonDao(dataSource)
+
+    val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
     routing {
         authenticate(authProviderName) {
             get("/api/person-snapshot") {
                 val fnr = call.request.header("fnr")!!.toLong()
-                personDao.hentPersonFraFnr(fnr)
-                    ?.deserialize { hendelseDao.hentAlleHendelser(fnr) }
-                    ?.let { håndterPerson(it, hendelseDao) }
-                    ?.let { call.respond(it) }
-                    ?: call.respond(HttpStatusCode.NotFound, "Resource not found")
+                sikkerLogg.info("Serverer person-snapshot for fødselsnummer $fnr")
+                try {
+                    personDao.hentPersonFraFnr(fnr)
+                        ?.deserialize { hendelseDao.hentAlleHendelser(fnr) }
+                        ?.let { håndterPerson(it, hendelseDao) }
+                        ?.let { call.respond(it) }
+                        ?: call.respond(HttpStatusCode.NotFound, "Resource not found")
+                } catch (e: RuntimeException) {
+                    sikkerLogg.error("Feil ved servering av person-json for person: $fnr", e)
+                    call.respond(HttpStatusCode.InternalServerError, "Feil ved servering av person-json. Sjekk sikkerlogg i spleis-api")
+                    throw e
+                }
             }
         }
     }
