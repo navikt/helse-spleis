@@ -111,7 +111,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         private val medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
         private val harMinimumInntekt: Boolean?,
         private val vurdertOk: Boolean,
-        internal val meldingsreferanseId: UUID?
+        private val meldingsreferanseId: UUID?
     ) : VilkårsgrunnlagElement {
         private companion object {
             private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
@@ -143,7 +143,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 harOpptjening,
                 medlemskapstatus,
                 harMinimumInntekt,
-                vurdertOk
+                vurdertOk,
+                meldingsreferanseId
             )
             sykepengegrunnlag.accept(vilkårsgrunnlagHistorikkVisitor)
             vilkårsgrunnlagHistorikkVisitor.postVisitGrunnlagsdata(
@@ -156,7 +157,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 harOpptjening,
                 medlemskapstatus,
                 harMinimumInntekt,
-                vurdertOk
+                vurdertOk,
+                meldingsreferanseId
             )
         }
 

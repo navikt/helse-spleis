@@ -161,7 +161,8 @@ internal class VilkårsgrunnlagBuilder(
             harOpptjening: Boolean,
             medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
             harMinimumInntekt: Boolean?,
-            vurdertOk: Boolean
+            vurdertOk: Boolean,
+            meldingsreferanseId: UUID?
         ) {
             val compositeSykepengegrunnlag = SykepengegrunnlagBuilder(sykepengegrunnlag, sammenligningsgrunnlagBuilder).build()
             val minimumInntekt = InntektBuilder(person.minimumInntekt(skjæringstidspunkt)).build()
@@ -181,7 +182,7 @@ internal class VilkårsgrunnlagBuilder(
                     sykepengegrunnlag = compositeSykepengegrunnlag.sykepengegrunnlag,
                     avviksprosent = avviksprosent?.prosent(),
                     grunnbeløp = grunnbeløp.årlig.toInt(),
-                    meldingsreferanseId = grunnlagsdata.meldingsreferanseId,
+                    meldingsreferanseId = meldingsreferanseId,
                     antallOpptjeningsdagerErMinst = antallOpptjeningsdagerErMinst,
                     oppfyllerKravOmMinstelønn = compositeSykepengegrunnlag.sykepengegrunnlag > minimumInntekt.årlig,
                     oppfyllerKravOmOpptjening = harOpptjening,

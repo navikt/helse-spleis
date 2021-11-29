@@ -37,7 +37,8 @@ internal class Vilkårgrunnlagsinspektør(historikk: VilkårsgrunnlagHistorikk) 
         harOpptjening: Boolean,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
         harMinimumInntekt: Boolean?,
-        vurdertOk: Boolean
+        vurdertOk: Boolean,
+        meldingsreferanseId: UUID?
     ) {
         val teller = vilkårsgrunnlagTeller.getOrDefault(innslag, 0)
         vilkårsgrunnlagTeller[innslag] = teller.inc()
@@ -64,6 +65,8 @@ internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.
         private set
     internal var harOpptjening by Delegates.notNull<Boolean>()
         private set
+    internal var meldingsreferanseId: UUID? = null
+        private set
     init {
         grunnlagsdata.accept(LocalDate.now(), this)
     }
@@ -78,12 +81,14 @@ internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.
         harOpptjening: Boolean,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
         harMinimumInntekt: Boolean?,
-        vurdertOk: Boolean
+        vurdertOk: Boolean,
+        meldingsreferanseId: UUID?
     ) {
         this.sykepengegrunnlag = sykepengegrunnlag
         this.sammenligningsgrunnlag = sammenligningsgrunnlag
         this.avviksprosent = avviksprosent
         this.antallOpptjeningsdagerErMinst = antallOpptjeningsdagerErMinst
         this.harOpptjening = harOpptjening
+        this.meldingsreferanseId = meldingsreferanseId
     }
 }

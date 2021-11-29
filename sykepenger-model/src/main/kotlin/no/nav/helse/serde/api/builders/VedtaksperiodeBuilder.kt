@@ -51,12 +51,13 @@ internal class VedtaksperiodeBuilder(
             TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING,
             TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
         ) || (tilstand.type == TilstandType.AVSLUTTET_UTEN_UTBETALING && beregningIder.isNotEmpty())
-    private val warnings =
-        (hentWarnings(vedtaksperiode) + (dataForVilkårsvurdering?.meldingsreferanseId?.let { hentVilkårsgrunnlagWarnings(vedtaksperiode, id, it) }
-            ?: emptyList())).distinctBy { it.melding }
-    private val beregnetSykdomstidslinje = mutableListOf<SykdomstidslinjedagDTO>()
-
     private val grunnlagsdataBuilder = dataForVilkårsvurdering?.let { GrunnlagsdataBuilder(skjæringstidspunkt, it) }
+
+    private val warnings =
+        (hentWarnings(vedtaksperiode) + (grunnlagsdataBuilder?.meldingsreferanseId?.let { hentVilkårsgrunnlagWarnings(vedtaksperiode, id, it) }
+            ?: emptyList())).distinctBy { it.melding }
+
+    private val beregnetSykdomstidslinje = mutableListOf<SykdomstidslinjedagDTO>()
 
     private var dataForSimulering: SimuleringsdataDTO? = null
     private var arbeidsgiverFagsystemId: String? = null
@@ -478,6 +479,8 @@ private class GrunnlagsdataBuilder(skjæringstidspunkt: LocalDate, grunnlagsdata
         private set
     var avviksprosent: Double? = null
         private set
+    var meldingsreferanseId: UUID? = null
+        private set
 
     override fun preVisitGrunnlagsdata(
         skjæringstidspunkt: LocalDate,
@@ -489,7 +492,8 @@ private class GrunnlagsdataBuilder(skjæringstidspunkt: LocalDate, grunnlagsdata
         harOpptjening: Boolean,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
         harMinimumInntekt: Boolean?,
-        vurdertOk: Boolean
+        vurdertOk: Boolean,
+        meldingsreferanseId: UUID?
     ) {
         this.medlemskapstatus = when (medlemskapstatus) {
             Medlemskapsvurdering.Medlemskapstatus.Ja -> MedlemskapstatusDTO.JA
@@ -509,6 +513,7 @@ private class GrunnlagsdataBuilder(skjæringstidspunkt: LocalDate, grunnlagsdata
             oppfylt = harOpptjening
         )
         this.avviksprosent = avviksprosent?.prosent()
+        this.meldingsreferanseId = meldingsreferanseId
     }
 }
 
