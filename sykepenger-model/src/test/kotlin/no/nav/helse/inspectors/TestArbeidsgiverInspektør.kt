@@ -111,7 +111,8 @@ internal class TestArbeidsgiverInspektør(
             antallOpptjeningsdagerErMinst: Int,
             harOpptjening: Boolean,
             medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
-            harMinimumInntekt: Boolean?
+            harMinimumInntekt: Boolean?,
+            vurdertOk: Boolean
         ) {
             vilkårsgrunnlagHistorikk.add(skjæringstidspunkt to grunnlagsdata)
         }
