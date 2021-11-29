@@ -54,9 +54,18 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         sykepengegrunnlag: Sykepengegrunnlag,
         sammenligningsgrunnlag: Inntekt,
         avviksprosent: Prosent?,
-        antallOpptjeningsdagerErMinst: Int
+        antallOpptjeningsdagerErMinst: Int,
+        harOpptjening: Boolean
     ) {
-        delegatee.postVisitGrunnlagsdata(skjæringstidspunkt, grunnlagsdata, sykepengegrunnlag, sammenligningsgrunnlag, avviksprosent, antallOpptjeningsdagerErMinst)
+        delegatee.postVisitGrunnlagsdata(
+            skjæringstidspunkt,
+            grunnlagsdata,
+            sykepengegrunnlag,
+            sammenligningsgrunnlag,
+            avviksprosent,
+            antallOpptjeningsdagerErMinst,
+            harOpptjening
+        )
     }
 
     override fun postVisitInfotrygdVilkårsgrunnlag(skjæringstidspunkt: LocalDate, infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag) {
@@ -152,9 +161,18 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         sykepengegrunnlag: Sykepengegrunnlag,
         sammenligningsgrunnlag: Inntekt,
         avviksprosent: Prosent?,
-        antallOpptjeningsdagerErMinst: Int
+        antallOpptjeningsdagerErMinst: Int,
+        harOpptjening: Boolean
     ) {
-        delegatee.preVisitGrunnlagsdata(skjæringstidspunkt, grunnlagsdata, sykepengegrunnlag, sammenligningsgrunnlag, avviksprosent, antallOpptjeningsdagerErMinst)
+        delegatee.preVisitGrunnlagsdata(
+            skjæringstidspunkt,
+            grunnlagsdata,
+            sykepengegrunnlag,
+            sammenligningsgrunnlag,
+            avviksprosent,
+            antallOpptjeningsdagerErMinst,
+            harOpptjening
+        )
     }
 
     override fun preVisitInfotrygdVilkårsgrunnlag(

@@ -64,9 +64,9 @@ internal class VedtaksperiodeBuilder(
         }
     }
 
-    private class GrunnlagsdataBuilder(grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata) : VilkårsgrunnlagHistorikkVisitor {
+    private class GrunnlagsdataBuilder(skjæringstidspunkt: LocalDate, grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata) : VilkårsgrunnlagHistorikkVisitor {
         init {
-            grunnlagsdata.accept(LocalDate.now(), this)
+            grunnlagsdata.accept(skjæringstidspunkt, this)
         }
         var sammenligningsgrunnlag: Double = 0.0
             private set
@@ -74,40 +74,45 @@ internal class VedtaksperiodeBuilder(
             private set
         var antallOpptjeningsdagerErMinst: Int = 0
             private set
+        var harOpptjening: Boolean = false
+            private set
+
         override fun preVisitGrunnlagsdata(
             skjæringstidspunkt: LocalDate,
             grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
             sykepengegrunnlag: Sykepengegrunnlag,
             sammenligningsgrunnlag: Inntekt,
             avviksprosent: Prosent?,
-            antallOpptjeningsdagerErMinst: Int
+            antallOpptjeningsdagerErMinst: Int,
+            harOpptjening: Boolean
         ) {
             this.sammenligningsgrunnlag = sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig }
             this.avviksprosent = avviksprosent
             this.antallOpptjeningsdagerErMinst = antallOpptjeningsdagerErMinst
+            this.harOpptjening = harOpptjening
         }
     }
 
     private val dataForVilkårsvurdering: GrunnlagsdataDTO? = dataForVilkårsvurdering?.let { grunnlagsdata ->
-        val builder = GrunnlagsdataBuilder(grunnlagsdata)
+        val builder = GrunnlagsdataBuilder(skjæringstidspunkt, grunnlagsdata)
         GrunnlagsdataDTO(
             beregnetÅrsinntektFraInntektskomponenten = builder.sammenligningsgrunnlag,
             avviksprosent = builder.avviksprosent?.ratio(),
             antallOpptjeningsdagerErMinst = builder.antallOpptjeningsdagerErMinst,
-            harOpptjening = grunnlagsdata.harOpptjening,
+            harOpptjening = builder.harOpptjening,
             medlemskapstatus = medlemskapstatusDTO!!
         )
     }
     private val opptjeningDTO: OpptjeningDTO? = dataForVilkårsvurdering?.let { grunnlagsdata ->
-        val builder = GrunnlagsdataBuilder(grunnlagsdata)
+        val builder = GrunnlagsdataBuilder(skjæringstidspunkt, grunnlagsdata)
         OpptjeningDTO(
             antallKjenteOpptjeningsdager = builder.antallOpptjeningsdagerErMinst,
             fom = skjæringstidspunkt.minusDays(builder.antallOpptjeningsdagerErMinst.toLong()),
-            oppfylt = grunnlagsdata.harOpptjening
+            oppfylt = builder.harOpptjening
         )
     }
     private val avviksprosent: Double? = dataForVilkårsvurdering?.let { grunnlagsdata ->
-        val builder = GrunnlagsdataBuilder(grunnlagsdata)
+        val builder = GrunnlagsdataBuilder(skjæringstidspunkt, grunnlagsdata)
         builder.avviksprosent?.prosent()
     }
 
