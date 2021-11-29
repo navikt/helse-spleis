@@ -3,6 +3,7 @@ package no.nav.helse.inspectors
 import no.nav.helse.antallEtterspurteBehov
 import no.nav.helse.etterspurteBehov
 import no.nav.helse.etterspurteBehovFinnes
+import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
@@ -108,7 +109,8 @@ internal class TestArbeidsgiverInspektør(
             sammenligningsgrunnlag: Inntekt,
             avviksprosent: Prosent?,
             antallOpptjeningsdagerErMinst: Int,
-            harOpptjening: Boolean
+            harOpptjening: Boolean,
+            medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
         ) {
             vilkårsgrunnlagHistorikk.add(skjæringstidspunkt to grunnlagsdata)
         }

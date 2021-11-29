@@ -1,6 +1,7 @@
 package no.nav.helse.person
 
 import no.nav.helse.Fødselsnummer
+import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
@@ -55,7 +56,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         sammenligningsgrunnlag: Inntekt,
         avviksprosent: Prosent?,
         antallOpptjeningsdagerErMinst: Int,
-        harOpptjening: Boolean
+        harOpptjening: Boolean,
+        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
     ) {
         delegatee.postVisitGrunnlagsdata(
             skjæringstidspunkt,
@@ -64,7 +66,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             sammenligningsgrunnlag,
             avviksprosent,
             antallOpptjeningsdagerErMinst,
-            harOpptjening
+            harOpptjening,
+            medlemskapstatus
         )
     }
 
@@ -162,7 +165,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         sammenligningsgrunnlag: Inntekt,
         avviksprosent: Prosent?,
         antallOpptjeningsdagerErMinst: Int,
-        harOpptjening: Boolean
+        harOpptjening: Boolean,
+        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
     ) {
         delegatee.preVisitGrunnlagsdata(
             skjæringstidspunkt,
@@ -171,7 +175,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             sammenligningsgrunnlag,
             avviksprosent,
             antallOpptjeningsdagerErMinst,
-            harOpptjening
+            harOpptjening,
+            medlemskapstatus
         )
     }
 

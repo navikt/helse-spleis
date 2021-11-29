@@ -603,7 +603,8 @@ internal class JsonBuilder : AbstractBuilder() {
             sammenligningsgrunnlag: Inntekt,
             avviksprosent: Prosent?,
             antallOpptjeningsdagerErMinst: Int,
-            harOpptjening: Boolean
+            harOpptjening: Boolean,
+            medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
         ) {
             val sykepengegrunnlagMap = mutableMapOf<String, Any>()
             vilkårsgrunnlagElement.add(
@@ -615,7 +616,7 @@ internal class JsonBuilder : AbstractBuilder() {
                     "sykepengegrunnlag" to sykepengegrunnlagMap,
                     "sammenligningsgrunnlag" to sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
                     "harOpptjening" to harOpptjening,
-                    "medlemskapstatus" to when (grunnlagsdata.medlemskapstatus) {
+                    "medlemskapstatus" to when (medlemskapstatus) {
                         Medlemskapsvurdering.Medlemskapstatus.Ja -> JsonMedlemskapstatus.JA
                         Medlemskapsvurdering.Medlemskapstatus.Nei -> JsonMedlemskapstatus.NEI
                         Medlemskapsvurdering.Medlemskapstatus.VetIkke -> JsonMedlemskapstatus.VET_IKKE
@@ -680,7 +681,8 @@ internal class JsonBuilder : AbstractBuilder() {
             sammenligningsgrunnlag: Inntekt,
             avviksprosent: Prosent?,
             antallOpptjeningsdagerErMinst: Int,
-            harOpptjening: Boolean
+            harOpptjening: Boolean,
+            medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
         ) {
             popState()
         }
