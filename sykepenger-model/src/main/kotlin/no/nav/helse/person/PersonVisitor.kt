@@ -102,7 +102,8 @@ internal interface VilkårsgrunnlagHistorikkVisitor : InntekthistorikkVisitor {
         harOpptjening: Boolean,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
         harMinimumInntekt: Boolean?,
-        vurdertOk: Boolean
+        vurdertOk: Boolean,
+        meldingsreferanseId: UUID?
     ) {}
     fun postVisitGrunnlagsdata(
         skjæringstidspunkt: LocalDate,
@@ -114,7 +115,8 @@ internal interface VilkårsgrunnlagHistorikkVisitor : InntekthistorikkVisitor {
         harOpptjening: Boolean,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
         harMinimumInntekt: Boolean?,
-        vurdertOk: Boolean
+        vurdertOk: Boolean,
+        meldingsreferanseId: UUID?
     ) {}
     fun preVisitInfotrygdVilkårsgrunnlag(
         infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag,

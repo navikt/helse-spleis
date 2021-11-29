@@ -1,6 +1,7 @@
 package no.nav.helse.serde.api.v2.buildere
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.inspectors.GrunnlagsdataInspektør
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
@@ -85,6 +86,9 @@ internal class PeriodeVarslerBuilderTest: AbstractEndToEndTest() {
     }
 
     private fun meldingsreferanseId(vedtaksperiode: IdInnhenter): UUID? {
-        return inspektør.vilkårsgrunnlag(vedtaksperiode)?.let { it as? VilkårsgrunnlagHistorikk.Grunnlagsdata }?.meldingsreferanseId
+        return inspektør.vilkårsgrunnlag(vedtaksperiode)
+            ?.let { it as? VilkårsgrunnlagHistorikk.Grunnlagsdata }
+            ?.let { GrunnlagsdataInspektør(it) }
+            ?.meldingsreferanseId
     }
 }

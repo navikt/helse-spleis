@@ -59,7 +59,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         harOpptjening: Boolean,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
         harMinimumInntekt: Boolean?,
-        vurdertOk: Boolean
+        vurdertOk: Boolean,
+        meldingsreferanseId: UUID?
     ) {
         delegatee.postVisitGrunnlagsdata(
             skjæringstidspunkt,
@@ -71,7 +72,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             harOpptjening,
             medlemskapstatus,
             harMinimumInntekt,
-            vurdertOk
+            vurdertOk,
+            meldingsreferanseId
         )
     }
 
@@ -172,7 +174,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         harOpptjening: Boolean,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
         harMinimumInntekt: Boolean?,
-        vurdertOk: Boolean
+        vurdertOk: Boolean,
+        meldingsreferanseId: UUID?
     ) {
         delegatee.preVisitGrunnlagsdata(
             skjæringstidspunkt,
@@ -184,7 +187,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             harOpptjening,
             medlemskapstatus,
             harMinimumInntekt,
-            vurdertOk
+            vurdertOk,
+            meldingsreferanseId
         )
     }
 
