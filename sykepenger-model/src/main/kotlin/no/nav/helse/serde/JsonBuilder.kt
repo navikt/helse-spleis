@@ -602,18 +602,19 @@ internal class JsonBuilder : AbstractBuilder() {
             sykepengegrunnlag: Sykepengegrunnlag,
             sammenligningsgrunnlag: Inntekt,
             avviksprosent: Prosent?,
-            antallOpptjeningsdagerErMinst: Int
+            antallOpptjeningsdagerErMinst: Int,
+            harOpptjening: Boolean
         ) {
-            val sykepengegrunnlag = mutableMapOf<String, Any>()
+            val sykepengegrunnlagMap = mutableMapOf<String, Any>()
             vilkårsgrunnlagElement.add(
                 mapOf(
                     "skjæringstidspunkt" to skjæringstidspunkt,
                     "type" to "Vilkårsprøving",
                     "antallOpptjeningsdagerErMinst" to antallOpptjeningsdagerErMinst,
                     "avviksprosent" to avviksprosent?.ratio(),
-                    "sykepengegrunnlag" to sykepengegrunnlag,
+                    "sykepengegrunnlag" to sykepengegrunnlagMap,
                     "sammenligningsgrunnlag" to sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
-                    "harOpptjening" to grunnlagsdata.harOpptjening,
+                    "harOpptjening" to harOpptjening,
                     "medlemskapstatus" to when (grunnlagsdata.medlemskapstatus) {
                         Medlemskapsvurdering.Medlemskapstatus.Ja -> JsonMedlemskapstatus.JA
                         Medlemskapsvurdering.Medlemskapstatus.Nei -> JsonMedlemskapstatus.NEI
@@ -625,7 +626,7 @@ internal class JsonBuilder : AbstractBuilder() {
                 )
             )
 
-            pushState(SykepengegrunnlagState(sykepengegrunnlag))
+            pushState(SykepengegrunnlagState(sykepengegrunnlagMap))
         }
 
         override fun preVisitInfotrygdVilkårsgrunnlag(
@@ -633,16 +634,16 @@ internal class JsonBuilder : AbstractBuilder() {
             skjæringstidspunkt: LocalDate,
             sykepengegrunnlag: Sykepengegrunnlag
         ) {
-            val sykepengegrunnlag = mutableMapOf<String, Any>()
+            val sykepengegrunnlagMap = mutableMapOf<String, Any>()
             vilkårsgrunnlagElement.add(
                 mapOf(
                     "skjæringstidspunkt" to skjæringstidspunkt,
                     "type" to "Infotrygd",
-                    "sykepengegrunnlag" to sykepengegrunnlag
+                    "sykepengegrunnlag" to sykepengegrunnlagMap
                 )
             )
 
-            pushState(SykepengegrunnlagState(sykepengegrunnlag))
+            pushState(SykepengegrunnlagState(sykepengegrunnlagMap))
         }
 
 
@@ -678,7 +679,8 @@ internal class JsonBuilder : AbstractBuilder() {
             sykepengegrunnlag: Sykepengegrunnlag,
             sammenligningsgrunnlag: Inntekt,
             avviksprosent: Prosent?,
-            antallOpptjeningsdagerErMinst: Int
+            antallOpptjeningsdagerErMinst: Int,
+            harOpptjening: Boolean
         ) {
             popState()
         }

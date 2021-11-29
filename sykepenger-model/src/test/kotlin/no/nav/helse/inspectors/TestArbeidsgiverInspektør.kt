@@ -107,7 +107,8 @@ internal class TestArbeidsgiverInspektør(
             sykepengegrunnlag: Sykepengegrunnlag,
             sammenligningsgrunnlag: Inntekt,
             avviksprosent: Prosent?,
-            antallOpptjeningsdagerErMinst: Int
+            antallOpptjeningsdagerErMinst: Int,
+            harOpptjening: Boolean
         ) {
             vilkårsgrunnlagHistorikk.add(skjæringstidspunkt to grunnlagsdata)
         }
