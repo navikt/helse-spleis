@@ -6,8 +6,10 @@ import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.request.*
 import io.ktor.response.*
+import io.ktor.util.*
 import io.prometheus.client.Counter
 import io.prometheus.client.Histogram
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import org.slf4j.Logger
 
 private val ignoredPaths = listOf("/metrics", "/isalive", "/isready")
@@ -29,7 +31,12 @@ internal fun Application.requestResponseTracing(logger: Logger) {
     intercept(ApplicationCallPipeline.Monitoring) {
         try {
             if (call.request.uri in ignoredPaths) return@intercept proceed()
-            logger.info("incoming callId=${call.callId} method=${call.request.httpMethod.value} uri=${call.request.uri}")
+            val headers = call.request.headers.toMap()
+                .filterNot { (key, _) -> key.lowercase() in listOf("authorization") }
+                .map { (key, values) ->
+                    keyValue("req_header_$key", values.joinToString(separator = ";"))
+                }.toTypedArray()
+            logger.info("incoming callId=${call.callId} method=${call.request.httpMethod.value} uri=${call.request.uri}", *headers)
             httpRequestDuration.startTimer().use {
                 proceed()
             }
