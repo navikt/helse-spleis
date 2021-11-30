@@ -1,3 +1,0 @@
-FROM navikt/java:16
-
-COPY gc-job/build/libs/*.jar ./

@@ -1,0 +1,95 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+    name: spleis-avstemming
+    namespace: tbd
+    labels:
+        team: tbd
+spec:
+    schedule: "0 2 * * *"
+    jobTemplate:
+        spec:
+            ttlSecondsAfterFinished: 43200
+            backoffLimit: 0
+            template:
+                spec:
+                    containers:
+                        - name: spleis-avstemming
+                          image: {{image}}
+                          resources:
+                              requests:
+                                  memory: 256Mi
+                                  cpu: 100m
+                              limits:
+                                  memory: 1024Mi
+                                  cpu: 1000m
+                          volumeMounts:
+                              - mountPath: /var/run/secrets/nais.io/vault
+                                name: vault-secrets
+                                subPath: subpath/var/run/secrets/nais.io/vault
+                              - mountPath: /var/run/secrets/nais.io/service_user
+                                name: vault-secrets
+                                subPath: subpath/var/run/secrets/nais.io/service_user
+                              - mountPath: /etc/ssl/certs/java/cacerts
+                                name: ca-bundle
+                                subPath: ca-bundle.jks
+                          args:
+                              - avstemming
+                          env:
+                              - name: VAULT_TOKEN_PATH
+                                value: /var/run/secrets/nais.io/vault/vault_token
+                              - name: DB_NAME
+                                value: spleis
+                              - name: JDBC_URL
+                                value: "jdbc:postgresql://b27dbvl008.preprod.local:5432"
+                              - name: VAULT_MOUNTPATH
+                                value: postgresql/preprod-fss/
+                              - name: NAV_TRUSTSTORE_PATH
+                                value: /etc/ssl/certs/java/cacerts
+                              - name: NAV_TRUSTSTORE_PASSWORD
+                                value: changeme
+                    imagePullSecrets:
+                        - name: gpr-credentials
+                    initContainers:
+                        - name: vks-init
+                          image: navikt/vault-sidekick:v0.3.10-d122b16
+                          resources:
+                              requests:
+                                  memory: "64Mi"
+                                  cpu: "100m"
+                              limits:
+                                  memory: "128Mi"
+                                  cpu: "1000m"
+                          volumeMounts:
+                              - mountPath: /var/run/secrets/nais.io/vault
+                                name: vault-secrets
+                                subPath: subpath/var/run/secrets/nais.io/vault
+                              - mountPath: /var/run/secrets/nais.io/service_user
+                                name: vault-secrets
+                                subPath: subpath/var/run/secrets/nais.io/service_user
+                          args:
+                              - -v=10
+                              - -logtostderr
+                              - -vault=https://vault.adeo.no
+                              - -one-shot
+                              - -save-token=/var/run/secrets/nais.io/vault/vault_token
+                              - -cn=secret:serviceuser/data/dev/srvspleis:dir=/var/run/secrets/nais.io/service_user,fmt=flatten
+                          env:
+                              - name: VAULT_AUTH_METHOD
+                                value: kubernetes
+                              - name: VAULT_SIDEKICK_ROLE
+                                value: spleis-avstemming
+                              - name: VAULT_K8S_LOGIN_PATH
+                                value: auth/kubernetes/preprod/fss/login
+                    serviceAccount: podcreator
+                    serviceAccountName: podcreator
+                    volumes:
+                        - name: vault-secrets
+                          emptyDir:
+                              medium: Memory
+                        - name: ca-bundle
+                          configMap:
+                              defaultMode: 420
+                              name: ca-bundle-jks
+                    restartPolicy: Never
+

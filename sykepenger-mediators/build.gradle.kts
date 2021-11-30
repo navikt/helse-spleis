@@ -10,10 +10,6 @@ dependencies {
     testImplementation("io.mockk:mockk:1.12.0")
 }
 
-repositories {
-    maven("https://jitpack.io")
-}
-
 tasks {
     withType<Jar> {
         archiveBaseName.set("app")

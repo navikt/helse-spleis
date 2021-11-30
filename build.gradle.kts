@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "1.5.31"
+    kotlin("jvm") version "1.6.0"
 }
 
 val flywayVersion = "8.0.2"
@@ -18,6 +18,7 @@ allprojects {
 
     repositories {
         mavenCentral()
+        maven("https://jitpack.io")
     }
 
     dependencies {
