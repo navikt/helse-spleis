@@ -9,6 +9,8 @@ import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.util.pipeline.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import no.nav.helse.serde.serialize
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.dao.PersonDao
@@ -29,18 +31,20 @@ internal fun Application.spesialistApi(dataSource: DataSource, authProviderName:
     routing {
         authenticate(authProviderName) {
             get("/api/person-snapshot") {
-                val fnr = call.request.header("fnr")!!.toLong()
-                sikkerLogg.info("Serverer person-snapshot for fødselsnummer $fnr")
-                try {
-                    personDao.hentPersonFraFnr(fnr)
-                        ?.deserialize { hendelseDao.hentAlleHendelser(fnr) }
-                        ?.let { håndterPerson(it, hendelseDao) }
-                        ?.let { call.respond(it) }
-                        ?: call.respond(HttpStatusCode.NotFound, "Resource not found")
-                } catch (e: RuntimeException) {
-                    sikkerLogg.error("Feil ved servering av person-json for person: $fnr", e)
-                    call.respond(HttpStatusCode.InternalServerError, "Feil ved servering av person-json. Sjekk sikkerlogg i spleis-api")
-                    throw e
+                withContext(Dispatchers.IO) {
+                    val fnr = call.request.header("fnr")!!.toLong()
+                    sikkerLogg.info("Serverer person-snapshot for fødselsnummer $fnr")
+                    try {
+                        personDao.hentPersonFraFnr(fnr)
+                            ?.deserialize { hendelseDao.hentAlleHendelser(fnr) }
+                            ?.let { håndterPerson(it, hendelseDao) }
+                            ?.let { call.respond(it) }
+                            ?: call.respond(HttpStatusCode.NotFound, "Resource not found")
+                    } catch (e: RuntimeException) {
+                        sikkerLogg.error("Feil ved servering av person-json for person: $fnr", e)
+                        call.respond(HttpStatusCode.InternalServerError, "Feil ved servering av person-json. Sjekk sikkerlogg i spleis-api")
+                        throw e
+                    }
                 }
             }
         }
@@ -54,27 +58,29 @@ internal fun Application.spannerApi(dataSource: DataSource, authProviderName: St
     routing {
         authenticate(authProviderName) {
             get("/api/person-json") {
-                val fnr = fnr(personDao)
-
-                val person = personDao.hentPersonFraFnr(fnr) ?: throw NotFoundException("Kunne ikke finne person for fødselsnummer")
-
-                call.respond(person.deserialize { hendelseDao.hentAlleHendelser(fnr) }.serialize().json)
+                withContext(Dispatchers.IO) {
+                    val fnr = fnr(personDao)
+                    val person = personDao.hentPersonFraFnr(fnr) ?: throw NotFoundException("Kunne ikke finne person for fødselsnummer")
+                    call.respond(person.deserialize { hendelseDao.hentAlleHendelser(fnr) }.serialize().json)
+                }
             }
 
             get("/api/hendelse-json/{hendelse}") {
-                val hendelseId = call.parameters["hendelse"] ?: throw IllegalArgumentException("Kall Mangler hendelse referanse")
+                withContext(Dispatchers.IO) {
+                    val hendelseId = call.parameters["hendelse"] ?: throw IllegalArgumentException("Kall Mangler hendelse referanse")
 
-                val meldingsReferanse = try {
-                    UUID.fromString(hendelseId)
-                } catch (e: IllegalArgumentException) {
-                    throw BadRequestException("meldingsreferanse bør/skal være en UUID")
+                    val meldingsReferanse = try {
+                        UUID.fromString(hendelseId)
+                    } catch (e: IllegalArgumentException) {
+                        throw BadRequestException("meldingsreferanse bør/skal være en UUID")
+                    }
+
+                    val hendelse =
+                        hendelseDao.hentHendelse(meldingsReferanse) ?: throw NotFoundException("Kunne ikke finne hendelse for hendelsereferanse = ${hendelseId}")
+
+
+                    call.respondText(hendelse, ContentType.Application.Json)
                 }
-
-                val hendelse =
-                    hendelseDao.hentHendelse(meldingsReferanse) ?: throw NotFoundException("Kunne ikke finne hendelse for hendelsereferanse = ${hendelseId}")
-
-
-                call.respondText(hendelse, ContentType.Application.Json)
             }
         }
     }
