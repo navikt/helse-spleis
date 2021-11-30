@@ -54,7 +54,7 @@ internal class Vilkårgrunnlagsinspektør(historikk: VilkårsgrunnlagHistorikk) 
     }
 }
 
-internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata) : VilkårsgrunnlagHistorikkVisitor {
+internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement) : VilkårsgrunnlagHistorikkVisitor {
     internal lateinit var sykepengegrunnlag: Sykepengegrunnlag
         private set
     internal lateinit var sammenligningsgrunnlag: Inntekt

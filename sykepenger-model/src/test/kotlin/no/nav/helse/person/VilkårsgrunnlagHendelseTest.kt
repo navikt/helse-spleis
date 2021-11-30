@@ -12,8 +12,7 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*
@@ -68,7 +67,8 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
             arbeidsforhold = ansattSidenStart2017()
         )
 
-        val grunnlagsdataInspektør = GrunnlagsdataInspektør(inspektør.vilkårsgrunnlag(1.vedtaksperiode) as VilkårsgrunnlagHistorikk.Grunnlagsdata)
+        val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(1.vedtaksperiode) ?: fail("Forventet at vilkårsgrunnlag er satt")
+        val grunnlagsdataInspektør = GrunnlagsdataInspektør(vilkårsgrunnlag)
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(148000.årlig, grunnlagsdataInspektør.sammenligningsgrunnlag)
     }
