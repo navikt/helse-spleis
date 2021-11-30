@@ -36,7 +36,7 @@ class Sykmelding(
         return this
     }
 
-    override fun forGammel() = (periode.endInclusive < mottatt.toLocalDate().minusMonths(6)).also {
+    internal fun forGammel() = (periode.endInclusive < mottatt.toLocalDate().minusMonths(6)).also {
         if (it) error("Søknadsperioden kan ikke være eldre enn 6 måneder fra mottattidspunkt")
     }
 

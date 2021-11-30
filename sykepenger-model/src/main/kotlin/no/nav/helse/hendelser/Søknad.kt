@@ -42,10 +42,6 @@ class Søknad(
             .merge(Dagturnering.SØKNAD::beste)
     }
 
-    override fun forGammel() = (sykdomsperiode.endInclusive < avskjæringsdato()).also {
-        if (it) error("Søknaden kan ikke være eldre enn avskjæringsdato")
-    }
-
     override fun sykdomstidslinje() =
         sykdomstidslinjeUtenUønsketFerieIForkant ?: sykdomstidslinje
 

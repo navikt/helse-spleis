@@ -2,9 +2,10 @@ package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.*
-import no.nav.helse.person.AktivitetsloggVisitor
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.person.IAktivitetslogg
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -50,7 +51,6 @@ abstract class SykdomstidslinjeHendelse(
         internal fun toJson() = mapOf("type" to toString(), "id" to meldingsreferanseId(), "tidsstempel" to tidsstempel())
     }
 
-    internal open fun forGammel() = false
     internal abstract fun sykdomstidslinje(): Sykdomstidslinje
 
     internal fun erRelevant(other: Periode) = !trimmetForbi() && erRelevantMed(other)
