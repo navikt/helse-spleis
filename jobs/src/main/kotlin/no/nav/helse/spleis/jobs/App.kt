@@ -69,7 +69,7 @@ private class PaginatedQuery(private val select: String, private val table: Stri
             log.info("Total of $count records, yielding $pages pages ($resultsPerPage results pre page)")
             var currentPage = 0
             while (currentPage < pages) {
-                session.run(queryOf("$select FROM $table WHERE $where LIMIT $resultsPerPage OFFSET ${currentPage * resultsPerPage}", params).map { row -> handler(row) }.asList)
+                session.run(queryOf("SELECT $select FROM $table WHERE $where LIMIT $resultsPerPage OFFSET ${currentPage * resultsPerPage}", params).map { row -> handler(row) }.asList)
                 currentPage += 1
                 log.info("Page $currentPage of $pages complete")
             }
