@@ -5,9 +5,14 @@ import kotliquery.Row
 import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.rapids_and_rivers.cli.AivenConfig
+import no.nav.rapids_and_rivers.cli.ConsumerProducerFactory
 import no.nav.vault.jdbc.hikaricp.HikariCPVaultUtil
+import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.*
 import javax.sql.DataSource
 import kotlin.math.ceil
 import kotlin.properties.Delegates
@@ -25,7 +30,7 @@ fun main(args: Array<String>) {
 
     when (val task = args[0].trim().lowercase()) {
         "vacuum" -> vacuumTask()
-        "avstemming" -> avstemmingTask()
+        "avstemming" -> avstemmingTask(ConsumerProducerFactory(AivenConfig.default))
         else -> log.error("Unknown task $task")
     }
 }
@@ -41,18 +46,31 @@ private fun vacuumTask() {
 }
 
 @ExperimentalTime
-private fun avstemmingTask() {
+private fun avstemmingTask(factory: ConsumerProducerFactory) {
     val ds = hikariConfig.datasource("readonly")
-    log.info("Commencing avstemming")
     val dayOfMonth = LocalDate.now().dayOfMonth
+    log.info("Commencing avstemming for dayOfMonth=$dayOfMonth")
+    val producer = factory.createProducer()
     val paginated = PaginatedQuery("fnr,aktor_id", "unike_person", "(1 + mod(fnr, 31)) = :dayOfMonth")
     val duration = measureTime {
         paginated.run(ds, mapOf("dayOfMonth" to dayOfMonth)) { row ->
-            // TODO: push message to kafka
+            val fnr = row.string("fnr").padStart(11, '0')
+            producer.send(ProducerRecord("tbd.rapid.v1", fnr, lagAvstemming(fnr, row.string("aktor_id"))))
         }
     }
+    producer.flush()
     log.info("Avstemming completed after {} hour(s), {} minute(s) and {} second(s)", duration.toInt(DurationUnit.HOURS), duration.toInt(DurationUnit.MINUTES) % 60, duration.toInt(DurationUnit.SECONDS) % 60)
 }
+
+private fun lagAvstemming(fnr: String, aktørId: String) = """
+{
+  "@id": "${UUID.randomUUID()}",
+  "@event_name": "person_avstemming",
+  "@opprettet": "${LocalDateTime.now()}",
+  "aktørId": "$aktørId",
+  "fødselsnummer": "$fnr"
+}
+"""
 
 private class PaginatedQuery(private val select: String, private val table: String, private val where: String) {
     private var count by Delegates.notNull<Long>()
@@ -66,12 +84,12 @@ private class PaginatedQuery(private val select: String, private val table: Stri
         sessionOf(dataSource).use { session ->
             count(session, params)
             val pages = ceil(count / resultsPerPage.toDouble()).toInt()
-            log.info("Total of $count records, yielding $pages pages ($resultsPerPage results pre page)")
+            log.info("Total of $count records, yielding $pages pages ($resultsPerPage results per page)")
             var currentPage = 0
             while (currentPage < pages) {
-                session.run(queryOf("SELECT $select FROM $table WHERE $where LIMIT $resultsPerPage OFFSET ${currentPage * resultsPerPage}", params).map { row -> handler(row) }.asList)
+                val rows = session.run(queryOf("SELECT $select FROM $table WHERE $where LIMIT $resultsPerPage OFFSET ${currentPage * resultsPerPage}", params).map { row -> handler(row) }.asList).count()
                 currentPage += 1
-                log.info("Page $currentPage of $pages complete")
+                log.info("Page $currentPage of $pages complete ($rows rows)")
             }
         }
     }

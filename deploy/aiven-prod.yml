@@ -110,6 +110,9 @@ spec:
           application: spleis-api
           access: readwrite
         - team: tbd
+          application: spleis-avstemming
+          access: readwrite
+        - team: tbd
           application: spock
           access: readwrite
         - team: tbd
