@@ -67,6 +67,8 @@ internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.
         private set
     internal var meldingsreferanseId: UUID? = null
         private set
+    internal var vurdertOk by Delegates.notNull<Boolean>()
+        private set
     init {
         grunnlagsdata.accept(LocalDate.now(), this)
     }
@@ -90,5 +92,6 @@ internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.
         this.antallOpptjeningsdagerErMinst = antallOpptjeningsdagerErMinst
         this.harOpptjening = harOpptjening
         this.meldingsreferanseId = meldingsreferanseId
+        this.vurdertOk = vurdertOk
     }
 }
