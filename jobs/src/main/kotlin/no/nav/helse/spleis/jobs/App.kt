@@ -59,7 +59,7 @@ private class PaginatedQuery(private val select: String, private val table: Stri
     private val resultsPerPage = 1000
 
     private fun count(session: Session, params: Map<String, Any>) {
-        this.count = session.run(queryOf("SELECT COUNT(1) FROM $table WHERE $where", params).map { it.long(0) }.asSingle) ?: 0
+        this.count = session.run(queryOf("SELECT COUNT(1) FROM $table WHERE $where", params).map { it.long(1) }.asSingle) ?: 0
     }
 
     internal fun run(dataSource: DataSource, params: Map<String, Any>, handler: (Row) -> Unit) {
