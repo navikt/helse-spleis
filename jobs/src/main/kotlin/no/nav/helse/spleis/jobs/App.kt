@@ -65,7 +65,7 @@ private class PaginatedQuery(private val select: String, private val table: Stri
     internal fun run(dataSource: DataSource, params: Map<String, Any>, handler: (Row) -> Unit) {
         sessionOf(dataSource).use { session ->
             count(session, params)
-            val pages = ceil(count / resultsPerPage.toDouble())
+            val pages = ceil(count / resultsPerPage.toDouble()).toInt()
             log.info("Total of $count records, yielding $pages pages ($resultsPerPage results pre page)")
             var currentPage = 0
             while (currentPage < pages) {
