@@ -3,6 +3,7 @@ package no.nav.helse.person
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent.Companion.prosent
@@ -89,7 +90,6 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
 
     private val testgrunnlag
         get() = object : VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement {
-            override fun vurdertOk(): Boolean = true
             override fun accept(skjæringstidspunkt: LocalDate, vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {}
 
             override fun sykepengegrunnlag() = Inntekt.INGEN
@@ -101,6 +101,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
             override fun inntektsopplysningPerArbeidsgiver(): Map<String, Inntektshistorikk.Inntektsopplysning> = emptyMap()
 
             override fun gjelderFlereArbeidsgivere() = false
+            override fun begrunnelserForAvvisteVilkår(alder: Alder, skjæringstidspunkt: LocalDate): List<Begrunnelse> = emptyList()
 
             override fun valider(aktivitetslogg: Aktivitetslogg) {}
         }

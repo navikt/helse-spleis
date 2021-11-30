@@ -74,9 +74,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         internal fun finnBegrunnelser(alder: Alder) =
             vilkårsgrunnlag.mapValues { (skjæringstidspunkt, vilkårsgrunnlagElement) ->
-                if (vilkårsgrunnlagElement is Grunnlagsdata && !vilkårsgrunnlagElement.vurdertOk()) {
-                    vilkårsgrunnlagElement.begrunnelserForFeiletVilkårsprøving(alder, skjæringstidspunkt)
-                } else emptyList()
+                vilkårsgrunnlagElement.begrunnelserForAvvisteVilkår(alder, skjæringstidspunkt)
             }.filterValues { it.isNotEmpty() }
 
         internal fun inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver() =
@@ -91,7 +89,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
     internal interface VilkårsgrunnlagElement {
         fun valider(aktivitetslogg: Aktivitetslogg)
-        fun vurdertOk(): Boolean
         fun accept(skjæringstidspunkt: LocalDate, vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor)
         fun sykepengegrunnlag(): Inntekt
         fun grunnlagsBegrensning(): Sykepengegrunnlag.Begrensning
@@ -100,6 +97,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         fun gjelderFlereArbeidsgivere(): Boolean
         fun oppdaterManglendeMinimumInntekt(person: Person, skjæringstidspunkt: LocalDate) {}
         fun sjekkAvviksprosent(aktivitetslogg: IAktivitetslogg): Boolean = true
+        fun begrunnelserForAvvisteVilkår(alder: Alder, skjæringstidspunkt: LocalDate): List<Begrunnelse>
     }
 
     internal class Grunnlagsdata(
@@ -129,8 +127,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             person.oppdaterHarMinimumInntekt(skjæringstidspunkt, this)
             sikkerLogg.info("Vi antar at det ikke finnes forlengelser til perioder som har harMinimumInntekt = null lenger")
         }
-
-        override fun vurdertOk() = vurdertOk
 
         override fun accept(skjæringstidspunkt: LocalDate, vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {
             vilkårsgrunnlagHistorikkVisitor.preVisitGrunnlagsdata(
@@ -169,7 +165,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         override fun inntektsopplysningPerArbeidsgiver() = sykepengegrunnlag.inntektsopplysningPerArbeidsgiver()
         override fun gjelderFlereArbeidsgivere() = inntektsopplysningPerArbeidsgiver().size > 1
 
-        internal fun begrunnelserForFeiletVilkårsprøving(alder: Alder, skjæringstidspunkt: LocalDate): List<Begrunnelse> {
+        override fun begrunnelserForAvvisteVilkår(alder: Alder, skjæringstidspunkt: LocalDate): List<Begrunnelse> {
+            if (vurdertOk) return emptyList()
             val begrunnelser = mutableListOf<Begrunnelse>()
             if (medlemskapstatus == Medlemskapsvurdering.Medlemskapstatus.Nei) begrunnelser.add(Begrunnelse.ManglerMedlemskap)
             if (harMinimumInntekt == false) begrunnelser.add(alder.begrunnelseForMinimumInntekt(skjæringstidspunkt))
@@ -215,8 +212,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         override fun valider(aktivitetslogg: Aktivitetslogg) {
         }
 
-        override fun vurdertOk() = true
-
         override fun accept(skjæringstidspunkt: LocalDate, vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {
             vilkårsgrunnlagHistorikkVisitor.preVisitInfotrygdVilkårsgrunnlag(this, skjæringstidspunkt, sykepengegrunnlag)
             sykepengegrunnlag.accept(vilkårsgrunnlagHistorikkVisitor)
@@ -231,5 +226,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         override fun inntektsopplysningPerArbeidsgiver() = sykepengegrunnlag.inntektsopplysningPerArbeidsgiver()
         override fun gjelderFlereArbeidsgivere() = inntektsopplysningPerArbeidsgiver().size > 1
 
+        // Vi har ingen avviste vilkår dersom vilkårsprøving er gjort i Infotrygd
+        override fun begrunnelserForAvvisteVilkår(alder: Alder, skjæringstidspunkt: LocalDate): List<Begrunnelse> = emptyList()
     }
 }
