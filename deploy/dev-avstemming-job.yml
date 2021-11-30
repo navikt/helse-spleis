@@ -12,6 +12,9 @@ spec:
             ttlSecondsAfterFinished: 43200
             backoffLimit: 0
             template:
+                metadata:
+                    labels:
+                        team: tbd
                 spec:
                     containers:
                         - name: spleis-avstemming
@@ -30,6 +33,9 @@ spec:
                               - mountPath: /var/run/secrets/nais.io/service_user
                                 name: vault-secrets
                                 subPath: subpath/var/run/secrets/nais.io/service_user
+                              - mountPath: /var/run/secrets/nais.io/kafka
+                                name: kafka-credentials
+                                readOnly: true
                               - mountPath: /etc/ssl/certs/java/cacerts
                                 name: ca-bundle
                                 subPath: ca-bundle.jks
@@ -48,6 +54,20 @@ spec:
                                 value: /etc/ssl/certs/java/cacerts
                               - name: NAV_TRUSTSTORE_PASSWORD
                                 value: changeme
+                              - name: KAFKA_BROKERS
+                                valueFrom:
+                                  secretKeyRef:
+                                    key: KAFKA_BROKERS
+                                    name: kafka-spenn-avstemming-nav-dev-54a6fb8c
+                              - name: KAFKA_CREDSTORE_PASSWORD
+                                valueFrom:
+                                  secretKeyRef:
+                                    key: KAFKA_CREDSTORE_PASSWORD
+                                    name: kafka-spenn-avstemming-nav-dev-54a6fb8c
+                              - name: KAFKA_KEYSTORE_PATH
+                                value: /var/run/secrets/nais.io/kafka/client.keystore.p12
+                              - name: KAFKA_TRUSTSTORE_PATH
+                                value: /var/run/secrets/nais.io/kafka/client.truststore.jks
                     imagePullSecrets:
                         - name: gpr-credentials
                     initContainers:
@@ -91,5 +111,20 @@ spec:
                           configMap:
                               defaultMode: 420
                               name: ca-bundle-jks
+                        - name: kafka-credentials
+                          secret:
+                            defaultMode: 420
+                            secretName: kafka-spenn-avstemming-nav-dev-54a6fb8c
+                            items:
+                              - key: KAFKA_CERTIFICATE
+                                path: kafka.crt
+                              - key: KAFKA_PRIVATE_KEY
+                                path: kafka.key
+                              - key: KAFKA_CA
+                                path: ca.crt
+                              - key: client.keystore.p12
+                                path: client.keystore.p12
+                              - key: client.truststore.jks
+                                path: client.truststore.jks
                     restartPolicy: Never
 
