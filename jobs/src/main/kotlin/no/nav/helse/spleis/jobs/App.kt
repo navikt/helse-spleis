@@ -45,7 +45,7 @@ private fun avstemmingTask() {
     val ds = hikariConfig.datasource("readonly")
     log.info("Commencing avstemming")
     val dayOfMonth = LocalDate.now().dayOfMonth
-    val paginated = PaginatedQuery("fnr,aktor_id", "unike_person", "(1 + mod(fnr, 31)) == :dayOfMonth")
+    val paginated = PaginatedQuery("fnr,aktor_id", "unike_person", "(1 + mod(fnr, 31)) = :dayOfMonth")
     val duration = measureTime {
         paginated.run(ds, mapOf("dayOfMonth" to dayOfMonth)) { row ->
             // TODO: push message to kafka
