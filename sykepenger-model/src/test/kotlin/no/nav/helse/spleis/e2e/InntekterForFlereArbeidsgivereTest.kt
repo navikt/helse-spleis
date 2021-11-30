@@ -89,7 +89,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertInntektForDato(4750.månedlig, 1.januar, a3Inspektør)
         assertInntektForDato(2250.månedlig, 1.januar, a4Inspektør)
 
-        val grunnlagsdataInspektør = GrunnlagsdataInspektør(a1Inspektør.vilkårsgrunnlag(1.vedtaksperiode) as VilkårsgrunnlagHistorikk.Grunnlagsdata)
+        val grunnlagsdataInspektør = GrunnlagsdataInspektør(a1Inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!)
         assertEquals(300000.årlig, grunnlagsdataInspektør.sammenligningsgrunnlag)
 
     }

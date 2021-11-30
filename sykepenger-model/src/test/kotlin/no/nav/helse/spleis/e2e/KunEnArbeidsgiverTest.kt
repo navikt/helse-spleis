@@ -1140,7 +1140,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             MOTTATT_SYKMELDING_FERDIG_GAP
         )
-        val grunnlagsdataInspektør = GrunnlagsdataInspektør(inspektør.vilkårsgrunnlag(1.vedtaksperiode) as VilkårsgrunnlagHistorikk.Grunnlagsdata)
+        val grunnlagsdataInspektør = GrunnlagsdataInspektør(inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!)
         assertEquals(INNTEKT, grunnlagsdataInspektør.sammenligningsgrunnlag)
         assertNull(inspektør.vilkårsgrunnlag(2.vedtaksperiode))
     }

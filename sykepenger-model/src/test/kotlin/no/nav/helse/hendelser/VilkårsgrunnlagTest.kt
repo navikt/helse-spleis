@@ -132,8 +132,8 @@ internal class VilkårsgrunnlagTest {
         forventetAntallOpptjeningsdager: Int,
         forventetHarOpptjening: Boolean
     ) {
-        val arbeidsgiverInspektør = TestArbeidsgiverInspektør(person, orgnummer)
-        val grunnlagsdata = arbeidsgiverInspektør.vilkårsgrunnlag { observatør.vedtaksperiode(orgnummer, 0) } as VilkårsgrunnlagHistorikk.Grunnlagsdata
+        val grunnlagsdata =
+            TestArbeidsgiverInspektør(person, orgnummer).vilkårsgrunnlag { observatør.vedtaksperiode(orgnummer, 0) } ?: fail("Forventet at vilkårsgrunnlag er satt")
         val grunnlagsdataInspektør = GrunnlagsdataInspektør(grunnlagsdata)
         assertEquals(forventetSammenligningsgrunnlag, grunnlagsdataInspektør.sammenligningsgrunnlag)
         assertEquals(forventetAvviksprosent, grunnlagsdataInspektør.avviksprosent)
