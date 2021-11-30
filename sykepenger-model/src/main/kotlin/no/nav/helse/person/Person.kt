@@ -43,7 +43,7 @@ class Person private constructor(
     internal val aktivitetslogg: Aktivitetslogg,
     private val opprettet: LocalDateTime,
     private val infotrygdhistorikk: Infotrygdhistorikk,
-    internal val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
+    private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
     private var dødsdato: LocalDate?
 ) : Aktivitetskontekst {
     private companion object {
@@ -343,7 +343,7 @@ class Person private constructor(
 
     fun håndter(hendelse: Grunnbeløpsregulering) {
         hendelse.kontekst(this)
-        arbeidsgivere.finn(hendelse.organisasjonsnummer())?.håndter(arbeidsgivere, hendelse)
+        arbeidsgivere.finn(hendelse.organisasjonsnummer())?.håndter(arbeidsgivere, hendelse, vilkårsgrunnlagHistorikk)
             ?: hendelse.error("Finner ikke arbeidsgiver")
     }
 
@@ -380,7 +380,7 @@ class Person private constructor(
     internal fun brukerutbetalingfilter() = Brukerutbetalingfilter.Builder(fødselsnummer)
 
     internal fun accept(visitor: PersonVisitor) {
-        visitor.preVisitPerson(this, opprettet, aktørId, fødselsnummer, dødsdato)
+        visitor.preVisitPerson(this, opprettet, aktørId, fødselsnummer, dødsdato, vilkårsgrunnlagHistorikk)
         visitor.visitPersonAktivitetslogg(aktivitetslogg)
         aktivitetslogg.accept(visitor)
         visitor.preVisitArbeidsgivere()
@@ -388,7 +388,7 @@ class Person private constructor(
         visitor.postVisitArbeidsgivere()
         infotrygdhistorikk.accept(visitor)
         vilkårsgrunnlagHistorikk.accept(visitor)
-        visitor.postVisitPerson(this, opprettet, aktørId, fødselsnummer, dødsdato)
+        visitor.postVisitPerson(this, opprettet, aktørId, fødselsnummer, dødsdato, vilkårsgrunnlagHistorikk)
     }
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
@@ -405,7 +405,7 @@ class Person private constructor(
         arbeidsgivere.forEach { it.søppelbøtte(hendelse, ALLE, ForkastetÅrsak.IKKE_STØTTET) }
     }
 
-    fun revurderingHarFeilet(event: IAktivitetslogg) {
+    internal fun revurderingHarFeilet(event: IAktivitetslogg) {
         arbeidsgivere.forEach { it.håndterRevurderingFeilet(event) }
     }
 
@@ -442,6 +442,18 @@ class Person private constructor(
 
     internal fun lagreDødsdato(dødsdato: LocalDate) {
         this.dødsdato = dødsdato
+    }
+
+    internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)
+
+    internal fun lagreVilkårsgrunnlag(skjæringstidspunkt: LocalDate, vilkårsgrunnlag: Vilkårsgrunnlag) {
+        vilkårsgrunnlagHistorikk.lagre(skjæringstidspunkt, vilkårsgrunnlag)
+    }
+
+    internal fun lagreVilkårsgrunnlagFraInfotrygd(skjæringstidspunkt: LocalDate, periode: Periode) {
+        infotrygdhistorikk.lagreVilkårsgrunnlag(skjæringstidspunkt, vilkårsgrunnlagHistorikk) {
+            beregnSykepengegrunnlagForInfotrygd(it, periode.start)
+        }
     }
 
     internal fun lagreGrunnlagForSykepengegrunnlag(
@@ -483,7 +495,7 @@ class Person private constructor(
     internal fun beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate, aktivitetslogg: IAktivitetslogg) =
         Sykepengegrunnlag(arbeidsgivere.beregnSykepengegrunnlag(skjæringstidspunkt), skjæringstidspunkt, aktivitetslogg)
 
-    internal fun beregnSykepengegrunnlagForInfotrygd(skjæringstidspunkt: LocalDate, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden: LocalDate) =
+    private fun beregnSykepengegrunnlagForInfotrygd(skjæringstidspunkt: LocalDate, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden: LocalDate) =
         Sykepengegrunnlag(arbeidsgivere.beregnSykepengegrunnlag(skjæringstidspunkt, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden))
 
     internal fun grunnlagForSykepengegrunnlagPerArbeidsgiver(skjæringstidspunkt: LocalDate) =
@@ -504,9 +516,9 @@ class Person private constructor(
     }
 
     internal fun kanRevurdereInntekt(skjæringstidspunkt: LocalDate) =
-        sammenligningsgrunnlag(skjæringstidspunkt) != null && grunnlagForSykepengegrunnlagGammel(skjæringstidspunkt) != null && vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(
-            skjæringstidspunkt
-        ) != null
+        sammenligningsgrunnlag(skjæringstidspunkt) != null &&
+            grunnlagForSykepengegrunnlagGammel(skjæringstidspunkt) != null
+            && vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) != null
 
     internal fun harNødvendigInntekt(skjæringstidspunkt: LocalDate) = arbeidsgivere.harNødvendigInntekt(skjæringstidspunkt)
 

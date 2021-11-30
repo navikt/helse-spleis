@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.inspectors.PersonInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.ForlengelseFraInfotrygd.JA
@@ -319,7 +320,11 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
             vurdertOk = true,
             meldingsreferanseId = UUID.randomUUID()
         )
-        person.vilkårsgrunnlagHistorikk.lagre(1.januar, vilkårsgrunnlagElement)
+
+        // Gjøres utelukkende for å teste oppførsel som ikke skal kunne skje lenger
+        // (minimumInntekt kan være null i db, men ikke i modellen, mangler en migrering)
+        val vilkårsgrunnlagHistorikk = PersonInspektør(person).vilkårsgrunnlagHistorikk
+        vilkårsgrunnlagHistorikk.lagre(1.januar, vilkårsgrunnlagElement)
 
         håndterSykmelding(Sykmeldingsperiode(17.januar, 17.februar, 100.prosent))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(17.januar, 17.februar, 100.prosent))
@@ -372,7 +377,11 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         )
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        person.vilkårsgrunnlagHistorikk.lagre(1.januar, vilkårsgrunnlagElement)
+
+        // Gjøres utelukkende for å teste oppførsel som ikke skal kunne skje lenger
+        // (minimumInntekt kan være null i db, men ikke i modellen, mangler en migrering)
+        val vilkårsgrunnlagHistorikk = PersonInspektør(person).vilkårsgrunnlagHistorikk
+        vilkårsgrunnlagHistorikk.lagre(1.januar, vilkårsgrunnlagElement)
 
         assertTilstander(
             1.vedtaksperiode,

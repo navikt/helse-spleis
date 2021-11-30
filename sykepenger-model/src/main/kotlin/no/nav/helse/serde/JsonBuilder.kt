@@ -49,7 +49,8 @@ internal class JsonBuilder : AbstractBuilder() {
         opprettet: LocalDateTime,
         aktørId: String,
         fødselsnummer: Fødselsnummer,
-        dødsdato: LocalDate?
+        dødsdato: LocalDate?,
+        vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
     ) {
         personBuilder = PersonState(fødselsnummer, aktørId, opprettet, dødsdato)
         pushState(personBuilder)
@@ -91,7 +92,8 @@ internal class JsonBuilder : AbstractBuilder() {
             opprettet: LocalDateTime,
             aktørId: String,
             fødselsnummer: Fødselsnummer,
-            dødsdato: LocalDate?
+            dødsdato: LocalDate?,
+            vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
         ) {
             popState()
         }

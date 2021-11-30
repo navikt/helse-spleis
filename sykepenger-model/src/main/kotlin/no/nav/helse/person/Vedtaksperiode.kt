@@ -486,7 +486,7 @@ internal class Vedtaksperiode private constructor(
             person.antallArbeidsgivereMedAktivtArbeidsforhold(skjæringstidspunkt),
             periodetype()
         )
-        person.vilkårsgrunnlagHistorikk.lagre(skjæringstidspunkt, vilkårsgrunnlag)
+        person.lagreVilkårsgrunnlag(skjæringstidspunkt, vilkårsgrunnlag)
         if (vilkårsgrunnlag.hasErrorsOrWorse()) {
             return person.invaliderAllePerioder(vilkårsgrunnlag, null)
         }
@@ -1996,20 +1996,16 @@ internal class Vedtaksperiode private constructor(
                 }
                 onSuccess { infotrygdhistorikk.addInntekter(person, this) }
                 onSuccess {
-                    infotrygdhistorikk.lagreVilkårsgrunnlag(
-                        vedtaksperiode.skjæringstidspunkt,
-                        periodetype,
-                        person.vilkårsgrunnlagHistorikk
-                    ) { person.beregnSykepengegrunnlagForInfotrygd(it, vedtaksperiode.periode.start) }
+                    person.lagreVilkårsgrunnlagFraInfotrygd(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode())
                 }
                 validerHvis(
                     "Forventer minst ett sykepengegrunnlag som er fra inntektsmelding eller Infotrygd",
-                    person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt) == null
+                    person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt) == null
                 ) {
                     person.minstEttSykepengegrunnlagSomIkkeKommerFraSkatt(vedtaksperiode.skjæringstidspunkt)
                 }
                 onSuccess {
-                    person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt)?.also {
+                    person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt)?.also {
                         // Må gjøres frem til 1.oktober 2021. Etter denne datoen kan denne koden slettes,
                         // fordi da vil vi ikke ha noen forlengelser til perioder som har harMinimumInntekt = null til behandling lenger.
                         // TODO: Det skjer fortsatt etter 011021, link til søk: https://logs.adeo.no/goto/3d53e0351dd10ac0fddcfe58819e5abe
@@ -2020,7 +2016,7 @@ internal class Vedtaksperiode private constructor(
                     }
                 }
                 lateinit var vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
-                validerHvis("Har for mye avvik i inntekt", { person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt)?.also { vilkårsgrunnlag = it } != null }) {
+                validerHvis("Har for mye avvik i inntekt", { person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt)?.also { vilkårsgrunnlag = it } != null }) {
                     vilkårsgrunnlag.sjekkAvviksprosent(ytelser)
                 }
                 onSuccess {
@@ -2049,13 +2045,13 @@ internal class Vedtaksperiode private constructor(
                     if (vedtaksperiode.person.harKunEtAnnetAktivtArbeidsforholdEnn(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer)) {
                         ytelser.warn("Den sykmeldte har skiftet arbeidsgiver, og det er beregnet at den nye arbeidsgiveren mottar refusjon lik forrige. Kontroller at dagsatsen blir riktig.")
                     } else if (
-                        person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt) !is VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag &&
+                        person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt) !is VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag &&
                         vedtaksperiode.person.harFlereArbeidsgivereUtenSykdomVedSkjæringstidspunkt(vedtaksperiode.skjæringstidspunkt)
                     ) {
                         person.loggTilfelleAvFlereArbeidsgivereMedSkatteinntekt(vedtaksperiode.skjæringstidspunkt)
                         ytelser.warn("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold")
                     }
-                    if (vedtaksperiode.person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt)!!.gjelderFlereArbeidsgivere()) {
+                    if (vedtaksperiode.person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt)!!.gjelderFlereArbeidsgivere()) {
                         vedtaksperiode.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE
                     }
                     vedtaksperiode.forsøkUtbetaling(arbeidsgiverUtbetalinger2.sykepengerettighet, ytelser)

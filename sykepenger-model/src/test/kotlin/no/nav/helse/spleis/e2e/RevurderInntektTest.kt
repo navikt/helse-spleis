@@ -71,7 +71,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         val beregning = inspektør.utbetalingstidslinjeberegningData.last()
         assertEquals(beregning.inntektshistorikkInnslagId, inspektør.inntektInspektør.sisteInnslag?.innslagId)
 
-        assertTrue(beregning.vilkårsgrunnlagHistorikkInnslagId == person.vilkårsgrunnlagHistorikk.sisteId())
+        assertEquals(beregning.vilkårsgrunnlagHistorikkInnslagId, person.nyesteIdForVilkårsgrunnlagHistorikk())
 
         assertTrue(inspektør.inntektInspektør.sisteInnslag?.opplysninger?.any { it.kilde == Kilde.SAKSBEHANDLER } ?: false)
     }

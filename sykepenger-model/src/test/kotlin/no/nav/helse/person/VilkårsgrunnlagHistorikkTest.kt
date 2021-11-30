@@ -154,7 +154,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         vilkårsgrunnlag.valider(sykepengegrunnlag(10000.månedlig), 10000.månedlig, 1.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
 
         historikk.lagre(1.januar, vilkårsgrunnlag)
-        infotrygdhistorikk.lagreVilkårsgrunnlag(4.januar, Periodetype.OVERGANG_FRA_IT, historikk, sykepengegrunnlagFor(INGEN))
+        infotrygdhistorikk.lagreVilkårsgrunnlag(4.januar, historikk, sykepengegrunnlagFor(INGEN))
         assertEquals(1, inspektør.vilkårsgrunnlagTeller[1])
         assertEquals(2, inspektør.vilkårsgrunnlagTeller[0])
     }
@@ -219,7 +219,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 )
             )
         }
-        historikk.lagreVilkårsgrunnlag(1.januar, Periodetype.OVERGANG_FRA_IT, vilkårsgrunnlagHistorikk, sykepengegrunnlagFor(31000.månedlig))
+        historikk.lagreVilkårsgrunnlag(1.januar, vilkårsgrunnlagHistorikk, sykepengegrunnlagFor(31000.månedlig))
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
     }
 
@@ -239,7 +239,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 )
             )
         }
-        historikk.lagreVilkårsgrunnlag(1.januar, Periodetype.INFOTRYGDFORLENGELSE, vilkårsgrunnlagHistorikk, sykepengegrunnlagFor(31000.månedlig))
+        historikk.lagreVilkårsgrunnlag(1.januar, vilkårsgrunnlagHistorikk, sykepengegrunnlagFor(31000.månedlig))
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
     }
 
@@ -259,7 +259,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 )
             )
         }
-        historikk.lagreVilkårsgrunnlag(1.januar, Periodetype.FØRSTEGANGSBEHANDLING, vilkårsgrunnlagHistorikk, sykepengegrunnlagFor(INGEN))
+        historikk.lagreVilkårsgrunnlag(1.januar, vilkårsgrunnlagHistorikk, sykepengegrunnlagFor(INGEN))
         assertNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
     }
 
@@ -279,7 +279,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 )
             )
         }
-        historikk.lagreVilkårsgrunnlag(1.januar, Periodetype.FORLENGELSE, vilkårsgrunnlagHistorikk, sykepengegrunnlagFor(INGEN))
+        historikk.lagreVilkårsgrunnlag(1.januar, vilkårsgrunnlagHistorikk, sykepengegrunnlagFor(INGEN))
         assertNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
     }
 

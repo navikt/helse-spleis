@@ -295,7 +295,11 @@ internal class Arbeidsgiver private constructor(
     internal fun nåværendeTidslinje() =
         beregnetUtbetalingstidslinjer.lastOrNull()?.utbetalingstidslinje() ?: throw IllegalStateException("mangler utbetalinger")
 
-    internal fun lagreUtbetalingstidslinjeberegning(organisasjonsnummer: String, utbetalingstidslinje: Utbetalingstidslinje) {
+    internal fun lagreUtbetalingstidslinjeberegning(
+        organisasjonsnummer: String,
+        utbetalingstidslinje: Utbetalingstidslinje,
+        vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
+    ) {
         val sykdomshistorikkId = sykdomshistorikk.nyesteId()
         val inntektshistorikkId = if (inntektshistorikk.isNotEmpty()) {
             inntektshistorikk.nyesteId()
@@ -303,7 +307,7 @@ internal class Arbeidsgiver private constructor(
             require(!utbetalingstidslinje.harUtbetalinger()) { "Arbeidsgiver har utbetaling, men vi finner ikke inntektshistorikk" }
             Inntektshistorikk.NULLUUID
         }
-        val vilkårsgrunnlagHistorikkId = person.nyesteIdForVilkårsgrunnlagHistorikk()
+        val vilkårsgrunnlagHistorikkId = vilkårsgrunnlagHistorikk.sisteId()
         beregnetUtbetalingstidslinjer.add(
             Utbetalingstidslinjeberegning(sykdomshistorikkId, inntektshistorikkId, vilkårsgrunnlagHistorikkId, organisasjonsnummer, utbetalingstidslinje)
         )
@@ -467,7 +471,7 @@ internal class Arbeidsgiver private constructor(
         finalize(hendelse)
     }
 
-    internal fun håndter(arbeidsgivere: List<Arbeidsgiver>, hendelse: Grunnbeløpsregulering) {
+    internal fun håndter(arbeidsgivere: List<Arbeidsgiver>, hendelse: Grunnbeløpsregulering, vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk) {
         hendelse.kontekst(this)
         hendelse.info("Håndterer etterutbetaling")
 
@@ -478,7 +482,7 @@ internal class Arbeidsgiver private constructor(
 
         val periode = LocalDate.of(2020, 5, 1).minusMonths(18) til LocalDate.now()
 
-        val reberegnetTidslinje = reberegnUtbetalte(hendelse, arbeidsgivere, periode)
+        val reberegnetTidslinje = reberegnUtbetalte(hendelse, arbeidsgivere, periode, vilkårsgrunnlagHistorikk)
 
         val etterutbetaling = sisteUtbetalte.etterutbetale(hendelse, reberegnetTidslinje)
             ?: return hendelse.info("Utbetalingen for $organisasjonsnummer for perioden ${sisteUtbetalte.periode} er ikke blitt endret. Grunnbeløpsregulering gjennomføres ikke.")
@@ -497,7 +501,8 @@ internal class Arbeidsgiver private constructor(
     private fun reberegnUtbetalte(
         aktivitetslogg: IAktivitetslogg,
         arbeidsgivere: List<Arbeidsgiver>,
-        periode: Periode
+        periode: Periode,
+        vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
     ): Utbetalingstidslinje {
         val arbeidsgivertidslinjer = arbeidsgivere
             .map { it to it.utbetalinger.utbetaltTidslinje() }
@@ -508,7 +513,7 @@ internal class Arbeidsgiver private constructor(
             .betal()
 
         arbeidsgivertidslinjer.forEach { (arbeidsgiver, reberegnetUtbetalingstidslinje) ->
-            arbeidsgiver.lagreUtbetalingstidslinjeberegning(organisasjonsnummer, reberegnetUtbetalingstidslinje)
+            arbeidsgiver.lagreUtbetalingstidslinjeberegning(organisasjonsnummer, reberegnetUtbetalingstidslinje, vilkårsgrunnlagHistorikk)
         }
 
         return nåværendeTidslinje()

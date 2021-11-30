@@ -443,7 +443,7 @@ internal class TestArbeidsgiverInspektør(
 
     internal fun forlengelseFraInfotrygd(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(forlengelserFraInfotrygd)
 
-    internal fun vilkårsgrunnlag(vedtaksperiodeIdInnhenter: IdInnhenter) = person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt(vedtaksperiodeIdInnhenter))
+    internal fun vilkårsgrunnlag(vedtaksperiodeIdInnhenter: IdInnhenter) = person.vilkårsgrunnlagFor(skjæringstidspunkt(vedtaksperiodeIdInnhenter))
 
     internal fun utbetalingslinjer(indeks: Int) = arbeidsgiverOppdrag[indeks]
 

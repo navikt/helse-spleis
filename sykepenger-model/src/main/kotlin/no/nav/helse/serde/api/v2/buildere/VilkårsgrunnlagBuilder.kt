@@ -124,12 +124,11 @@ internal class IVilkårsgrunnlagHistorikk {
 internal class VilkårsgrunnlagBuilder(
     private val person: Person,
     private val sammenligningsgrunnlagBuilder: OppsamletSammenligningsgrunnlagBuilder
-) :
-    VilkårsgrunnlagHistorikkVisitor {
+) : PersonVisitor {
     private val historikk = IVilkårsgrunnlagHistorikk()
 
     init {
-        person.vilkårsgrunnlagHistorikk.accept(this)
+        person.accept(this)
     }
 
     internal fun build() = historikk

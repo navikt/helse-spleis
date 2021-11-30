@@ -23,7 +23,7 @@ internal class ArbeidsgiverUtbetalinger(
         }.filterValues { it.isNotEmpty() }
         filtrer(aktivitetslogg, tidslinjer, periode, virkningsdato)
         tidslinjer.forEach { (arbeidsgiver, utbetalingstidslinje) ->
-            arbeidsgiver.lagreUtbetalingstidslinjeberegning(organisasjonsnummer, utbetalingstidslinje)
+            arbeidsgiver.lagreUtbetalingstidslinjeberegning(organisasjonsnummer, utbetalingstidslinje, vilkårsgrunnlagHistorikk)
         }
     }
 

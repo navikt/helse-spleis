@@ -28,11 +28,25 @@ import java.time.YearMonth
 import java.util.*
 
 internal interface PersonVisitor : ArbeidsgiverVisitor, AktivitetsloggVisitor, VilkårsgrunnlagHistorikkVisitor, InfotrygdhistorikkVisitor {
-    fun preVisitPerson(person: Person, opprettet: LocalDateTime, aktørId: String, fødselsnummer: Fødselsnummer, dødsdato: LocalDate?) {}
+    fun preVisitPerson(
+        person: Person,
+        opprettet: LocalDateTime,
+        aktørId: String,
+        fødselsnummer: Fødselsnummer,
+        dødsdato: LocalDate?,
+        vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
+    ) {}
     fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) {}
     fun preVisitArbeidsgivere() {}
     fun postVisitArbeidsgivere() {}
-    fun postVisitPerson(person: Person, opprettet: LocalDateTime, aktørId: String, fødselsnummer: Fødselsnummer, dødsdato: LocalDate?) {}
+    fun postVisitPerson(
+        person: Person,
+        opprettet: LocalDateTime,
+        aktørId: String,
+        fødselsnummer: Fødselsnummer,
+        dødsdato: LocalDate?,
+        vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
+    ) {}
 }
 
 internal interface InfotrygdhistorikkVisitor {

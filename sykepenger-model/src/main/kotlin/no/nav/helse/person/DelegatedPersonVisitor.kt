@@ -140,8 +140,15 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.postVisitAktivitetslogg(aktivitetslogg)
     }
 
-    override fun preVisitPerson(person: Person, opprettet: LocalDateTime, aktørId: String, fødselsnummer: Fødselsnummer, dødsdato: LocalDate?) {
-        delegatee.preVisitPerson(person, opprettet, aktørId, fødselsnummer, dødsdato)
+    override fun preVisitPerson(
+        person: Person,
+        opprettet: LocalDateTime,
+        aktørId: String,
+        fødselsnummer: Fødselsnummer,
+        dødsdato: LocalDate?,
+        vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
+    ) {
+        delegatee.preVisitPerson(person, opprettet, aktørId, fødselsnummer, dødsdato, vilkårsgrunnlagHistorikk)
     }
 
     override fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) {
@@ -291,8 +298,15 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.postVisitInfotrygdhistorikk()
     }
 
-    override fun postVisitPerson(person: Person, opprettet: LocalDateTime, aktørId: String, fødselsnummer: Fødselsnummer, dødsdato: LocalDate?) {
-        delegatee.postVisitPerson(person, opprettet, aktørId, fødselsnummer, dødsdato)
+    override fun postVisitPerson(
+        person: Person,
+        opprettet: LocalDateTime,
+        aktørId: String,
+        fødselsnummer: Fødselsnummer,
+        dødsdato: LocalDate?,
+        vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
+    ) {
+        delegatee.postVisitPerson(person, opprettet, aktørId, fødselsnummer, dødsdato, vilkårsgrunnlagHistorikk)
     }
 
     override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {

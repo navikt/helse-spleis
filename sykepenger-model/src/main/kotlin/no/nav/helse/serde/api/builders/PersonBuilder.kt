@@ -3,6 +3,7 @@ package no.nav.helse.serde.api.builders
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Person
+import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.serde.AbstractBuilder
 import no.nav.helse.serde.api.PersonDTO
 import no.nav.helse.serde.api.v2.HendelseDTO
@@ -18,6 +19,7 @@ internal class PersonBuilder(
     private val fødselsnummer: Fødselsnummer,
     private val aktørId: String,
     private val dødsdato: LocalDate?,
+    private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
     private val versjon: Int
 ) : BuilderState(builder) {
     private val arbeidsgivere = mutableListOf<ArbeidsgiverBuilder>()
@@ -49,7 +51,7 @@ internal class PersonBuilder(
         organisasjonsnummer: String
     ) {
         val arbeidsgiverBuilder =
-            ArbeidsgiverBuilder(arbeidsgiver, person.vilkårsgrunnlagHistorikk, id, organisasjonsnummer, fødselsnummer.toString(), inntektshistorikkBuilder)
+            ArbeidsgiverBuilder(arbeidsgiver, vilkårsgrunnlagHistorikk, id, organisasjonsnummer, fødselsnummer.toString(), inntektshistorikkBuilder)
         arbeidsgivere.add(arbeidsgiverBuilder)
         pushState(arbeidsgiverBuilder)
     }
@@ -59,7 +61,8 @@ internal class PersonBuilder(
         opprettet: LocalDateTime,
         aktørId: String,
         fødselsnummer: Fødselsnummer,
-        dødsdato: LocalDate?
+        dødsdato: LocalDate?,
+        vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
     ) {
         popState()
     }

@@ -28,7 +28,7 @@ internal class InntektshistorikkBuilder(private val person: Person) {
     private fun inntektsgrunnlag() = nøkkeldataOmInntekter
         .groupBy { it.skjæringstidspunkt }
         .mapNotNull { (_, value) -> value.maxByOrNull { it.sisteDagISammenhengendePeriode } }
-        .mapNotNull { nøkkeldata -> person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(nøkkeldata.skjæringstidspunkt)?.let { nøkkeldata to it } }
+        .mapNotNull { nøkkeldata -> person.vilkårsgrunnlagFor(nøkkeldata.skjæringstidspunkt)?.let { nøkkeldata to it } }
         .map { (nøkkeldata, vilkårsgrunnlag) ->
             val sykepengegrunnlag = vilkårsgrunnlag.sykepengegrunnlag()
             val grunnlagForSykepengegrunnlag = vilkårsgrunnlag.grunnlagForSykepengegrunnlag()

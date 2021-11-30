@@ -14,6 +14,7 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosent
@@ -195,7 +196,8 @@ internal class HistoriePeriodetypeTest {
             override fun valider(periode: Periode): IAktivitetslogg { return this }
             override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) {}
         })
-        person.vilkårsgrunnlagHistorikk.lagre(1.januar, VilkårsgrunnlagHistorikk.Grunnlagsdata(
+        val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
+        vilkårsgrunnlagHistorikk.lagre(1.januar, VilkårsgrunnlagHistorikk.Grunnlagsdata(
             sykepengegrunnlag = sykepengegrunnlag(30000.månedlig),
             sammenligningsgrunnlag = 30000.månedlig,
             avviksprosent = Prosent.prosent(0.0),
@@ -224,7 +226,7 @@ internal class HistoriePeriodetypeTest {
             skjæringstidspunkt = 1.januar
         )
         MaksimumUtbetaling(listOf(utbetalingstidslinje), Aktivitetslogg(), 1.januar).betal()
-        arbeidsgiver.lagreUtbetalingstidslinjeberegning(arbeidsgiver.organisasjonsnummer(), utbetalingstidslinje)
+        arbeidsgiver.lagreUtbetalingstidslinjeberegning(arbeidsgiver.organisasjonsnummer(), utbetalingstidslinje, vilkårsgrunnlagHistorikk)
         val utbetaling = arbeidsgiver.lagUtbetaling(Aktivitetslogg(), UNG_PERSON_FNR_2018.toString(), LocalDate.MAX, 0, 0, utbetalingstidslinje.periode(), null)
         utbetaling.håndter(
             Utbetalingsgodkjenning(

@@ -373,7 +373,9 @@ internal class ArbeidsgiverUtbetalingerTest {
             )
         )
 
-        person.vilkårsgrunnlagHistorikk.lagre(
+        val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
+
+        vilkårsgrunnlagHistorikk.lagre(
             1.januar, vilkårsgrunnlagElement ?: VilkårsgrunnlagHistorikk.Grunnlagsdata(
                 sykepengegrunnlag = sykepengegrunnlag(30000.månedlig),
                 sammenligningsgrunnlag = 30000.månedlig,
@@ -425,7 +427,7 @@ internal class ArbeidsgiverUtbetalingerTest {
             infotrygdhistorikk,
             fnr.alder(),
             null,
-            person.vilkårsgrunnlagHistorikk
+            vilkårsgrunnlagHistorikk
         ).also {
             it.beregn(aktivitetslogg, "88888888", Periode(1.januar, 31.desember(2019)))
             maksdato = it.sykepengerettighet.maksdato
