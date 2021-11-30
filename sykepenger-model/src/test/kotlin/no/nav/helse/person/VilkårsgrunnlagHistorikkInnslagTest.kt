@@ -89,7 +89,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
 
     private val testgrunnlag
         get() = object : VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement {
-            override fun isOk(): Boolean = true
+            override fun vurdertOk(): Boolean = true
             override fun accept(skjæringstidspunkt: LocalDate, vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {}
 
             override fun sykepengegrunnlag() = Inntekt.INGEN

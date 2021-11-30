@@ -74,7 +74,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         internal fun finnBegrunnelser(alder: Alder) =
             vilkårsgrunnlag.mapValues { (skjæringstidspunkt, vilkårsgrunnlagElement) ->
-                if (vilkårsgrunnlagElement is Grunnlagsdata) {
+                if (vilkårsgrunnlagElement is Grunnlagsdata && !vilkårsgrunnlagElement.vurdertOk()) {
                     vilkårsgrunnlagElement.begrunnelserForFeiletVilkårsprøving(alder, skjæringstidspunkt)
                 } else emptyList()
             }.filterValues { it.isNotEmpty() }
@@ -91,7 +91,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
     internal interface VilkårsgrunnlagElement {
         fun valider(aktivitetslogg: Aktivitetslogg)
-        fun isOk(): Boolean
+        fun vurdertOk(): Boolean
         fun accept(skjæringstidspunkt: LocalDate, vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor)
         fun sykepengegrunnlag(): Inntekt
         fun grunnlagsBegrensning(): Sykepengegrunnlag.Begrensning
@@ -130,7 +130,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             sikkerLogg.info("Vi antar at det ikke finnes forlengelser til perioder som har harMinimumInntekt = null lenger")
         }
 
-        override fun isOk() = vurdertOk
+        override fun vurdertOk() = vurdertOk
 
         override fun accept(skjæringstidspunkt: LocalDate, vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {
             vilkårsgrunnlagHistorikkVisitor.preVisitGrunnlagsdata(
@@ -170,7 +170,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         override fun gjelderFlereArbeidsgivere() = inntektsopplysningPerArbeidsgiver().size > 1
 
         internal fun begrunnelserForFeiletVilkårsprøving(alder: Alder, skjæringstidspunkt: LocalDate): List<Begrunnelse> {
-            if (isOk()) return emptyList()
             val begrunnelser = mutableListOf<Begrunnelse>()
             if (medlemskapstatus == Medlemskapsvurdering.Medlemskapstatus.Nei) begrunnelser.add(Begrunnelse.ManglerMedlemskap)
             if (harMinimumInntekt == false) begrunnelser.add(alder.begrunnelseForMinimumInntekt(skjæringstidspunkt))
@@ -216,7 +215,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         override fun valider(aktivitetslogg: Aktivitetslogg) {
         }
 
-        override fun isOk() = true
+        override fun vurdertOk() = true
 
         override fun accept(skjæringstidspunkt: LocalDate, vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {
             vilkårsgrunnlagHistorikkVisitor.preVisitInfotrygdVilkårsgrunnlag(this, skjæringstidspunkt, sykepengegrunnlag)
