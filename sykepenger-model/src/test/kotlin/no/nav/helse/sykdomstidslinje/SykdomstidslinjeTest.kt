@@ -88,8 +88,8 @@ internal class SykdomstidslinjeTest {
         assertEquals(1.februar, Sykdomstidslinje.sykedager(1.februar, 1.februar, 100.prosent, TestEvent.testkilde)
             .fremTilOgMed(1.februar)
             .sisteDag())
-        assertEquals(0, tidslinje.fremTilOgMed(tidslinje.førsteDag().minusDays(1)).length())
-        assertEquals(0, Sykdomstidslinje().fremTilOgMed(1.januar).length())
+        assertEquals(0, tidslinje.fremTilOgMed(tidslinje.førsteDag().minusDays(1)).count())
+        assertEquals(0, Sykdomstidslinje().fremTilOgMed(1.januar).count())
     }
 
     @Test

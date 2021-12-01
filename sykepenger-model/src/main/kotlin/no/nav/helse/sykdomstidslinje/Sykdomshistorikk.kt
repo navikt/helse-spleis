@@ -23,8 +23,6 @@ internal class Sykdomshistorikk private constructor(
 
     internal fun harSykdom() = !isEmpty() && !elementer.first().isEmpty()
 
-    internal fun harDager() = elementer.isNotEmpty() && !elementer.first().isEmpty()
-
     internal fun sykdomstidslinje() = Element.sykdomstidslinje(elementer)
 
     internal fun nyesteId(): UUID = elementer.nyesteId()
@@ -38,12 +36,9 @@ internal class Sykdomshistorikk private constructor(
 
     internal fun fyllUtPeriodeMedForventedeDager(hendelse: PersonHendelse, periode: Periode) {
         val sykdomstidslinje = if (isEmpty()) Sykdomstidslinje() else this.sykdomstidslinje()
-
-        val utvidetTidslinje = sykdomstidslinje.forsøkUtvidelse(periode)
-        if (utvidetTidslinje != null) {
-            val arbeidsdager = Sykdomstidslinje().forsøkUtvidelse(periode)
-            elementer.add(0, Element.opprett(hendelse, arbeidsdager!!, utvidetTidslinje))
-        }
+        val utvidetTidslinje = sykdomstidslinje.forsøkUtvidelse(periode) ?: return
+        val arbeidsdager = Sykdomstidslinje().forsøkUtvidelse(periode)
+        elementer.add(0, Element.opprett(hendelse, arbeidsdager!!, utvidetTidslinje))
     }
 
     internal fun tøm() {
@@ -52,8 +47,6 @@ internal class Sykdomshistorikk private constructor(
     }
 
     internal fun fjernDager(periode: Periode): Sykdomstidslinje {
-        // TODO: Remove size == 0 whenever migration is done
-        if (size == 0 || sykdomstidslinje().length() == 0) return sykdomstidslinje()
         if (sykdomstidslinje().periode()?.overlapperMed(periode) != true) return sykdomstidslinje()
         elementer.add(0, Element.opprettReset(this, periode))
         return sykdomstidslinje()

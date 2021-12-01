@@ -30,7 +30,6 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harId
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
 import no.nav.helse.utbetalingstidslinje.Sykepengerettighet
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -64,7 +63,6 @@ internal class Vedtaksperiode private constructor(
     private var oppdatert: LocalDateTime = opprettet
 ) : Aktivitetskontekst, Comparable<Vedtaksperiode> {
 
-    private val regler = NormalArbeidstaker
     private val skjæringstidspunkt get() = skjæringstidspunktFraInfotrygd ?: person.skjæringstidspunkt(periode)
     private val utbetaling get() = utbetalinger.lastOrNull()
 
@@ -1552,7 +1550,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
             vedtaksperiode.person.nyInntekt(hendelse)
-            vedtaksperiode.person.vilkårsprøvEtterNyInntekt(hendelse, vedtaksperiode.periode.start)
+            vedtaksperiode.person.vilkårsprøvEtterNyInntekt(hendelse)
             if (!hendelse.hasErrorsOrWorse()) {
                 vedtaksperiode.tilstand(hendelse, AvventerHistorikkRevurdering)
             } else {
@@ -2254,7 +2252,7 @@ internal class Vedtaksperiode private constructor(
         return merge.harProblemdager()
     }
 
-    fun loggførHendelsesreferanse(meldingsreferanseId: UUID) = hendelseIder.add(meldingsreferanseId)
+    internal fun loggførHendelsesreferanse(meldingsreferanseId: UUID) = hendelseIder.add(meldingsreferanseId)
 
     internal object AvventerGodkjenningRevurdering : Vedtaksperiodetilstand {
         override val type = AVVENTER_GODKJENNING_REVURDERING
@@ -2522,11 +2520,11 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.tilstand.håndter(vedtaksperiode, hendelse)
         }
 
-        override fun håndterTidligereUferdigPeriode(vedtaksperiode: Vedtaksperiode, underRevurdering: Vedtaksperiode, hendelse: IAktivitetslogg) {
+        override fun håndterTidligereUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, AvventerArbeidsgivereRevurdering)
         }
 
-        override fun håndterTidligereTilstøtendeUferdigPeriode(vedtaksperiode: Vedtaksperiode, underRevurdering: Vedtaksperiode, hendelse: IAktivitetslogg) {
+        override fun håndterTidligereTilstøtendeUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, AvventerArbeidsgivereRevurdering)
         }
 

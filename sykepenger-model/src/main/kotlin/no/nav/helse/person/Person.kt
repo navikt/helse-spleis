@@ -547,25 +547,6 @@ class Person private constructor(
         vilkårsgrunnlagHistorikk.lagre(skjæringstidspunkt, grunnlagsdataMedHarMinimumInntekt)
     }
 
-    internal fun warningsFraVilkårsgrunnlag(vilkårsgrunnlagId: UUID): List<Aktivitetslogg.Aktivitet> {
-        val aktiviteter = mutableListOf<Aktivitetslogg.Aktivitet>()
-        aktivitetslogg.accept(object : AktivitetsloggVisitor {
-            override fun visitWarn(
-                kontekster: List<SpesifikkKontekst>,
-                aktivitet: Aktivitetslogg.Aktivitet.Warn,
-                melding: String,
-                tidsstempel: String
-            ) {
-                kontekster.filter { it.kontekstType == "Vilkårsgrunnlag" }
-                    .map { it.kontekstMap["meldingsreferanseId"] }
-                    .map(UUID::fromString)
-                    .find { it == vilkårsgrunnlagId }
-                    ?.also { aktiviteter.add(aktivitet) }
-            }
-        })
-        return aktiviteter
-    }
-
     internal fun emitOpprettOppgaveForSpeilsaksbehandlereEvent(hendelse: SykdomstidslinjeHendelse) {
         observers.forEach {
             it.opprettOppgaveForSpeilsaksbehandlere(
@@ -681,7 +662,7 @@ class Person private constructor(
         return aktiveArbeidsforhold.size == 1 && aktiveArbeidsforhold.single().organisasjonsnummer() != orgnummer
     }
 
-    internal fun vilkårsprøvEtterNyInntekt(hendelse: OverstyrInntekt, kompenseringsdatoForManglendeSkjæringstidspunktIInfotrygd: LocalDate) {
+    internal fun vilkårsprøvEtterNyInntekt(hendelse: OverstyrInntekt) {
         val skjæringstidspunkt = hendelse.skjæringstidspunkt
         val grunnlagForSykepengegrunnlag = beregnSykepengegrunnlag(skjæringstidspunkt, hendelse)
         val sammenligningsgrunnlag = sammenligningsgrunnlag(skjæringstidspunkt)

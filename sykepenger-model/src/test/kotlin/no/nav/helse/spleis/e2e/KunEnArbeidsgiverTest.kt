@@ -9,7 +9,6 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType.*
-import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -2025,7 +2024,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(8.juni(2020), 21.juni(2020), 100.prosent))
         håndterInntektsmelding(listOf(Periode(8.juni(2020), 23.juni(2020))), førsteFraværsdag = 8.juni(2020))
         håndterPåminnelse(1.vedtaksperiode, AVVENTER_HISTORIKK, LocalDateTime.now().minusDays(200))
-        assertEquals(0, inspektør.sykdomshistorikk.sykdomstidslinje().length())
+        assertEquals(0, inspektør.sykdomshistorikk.sykdomstidslinje().count())
     }
 
     @Test

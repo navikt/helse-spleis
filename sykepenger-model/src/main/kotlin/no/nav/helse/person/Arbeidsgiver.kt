@@ -126,18 +126,6 @@ internal class Arbeidsgiver private constructor(
         internal fun List<Arbeidsgiver>.minstEttSykepengegrunnlagSomIkkeKommerFraSkatt(skjæringstidspunkt: LocalDate) =
             any { !it.grunnlagForSykepengegrunnlagKommerFraSkatt(skjæringstidspunkt) }
 
-        /**
-         * Brukes i MVP for flere arbeidsgivere. Alle forlengelser hos alle arbeidsgivere må gjelde samme periode
-         * */
-        internal fun Iterable<Arbeidsgiver>.forlengerSammePeriode(other: Vedtaksperiode): Boolean {
-            val arbeidsgivere = filter { it.finnSykeperiodeRettFør(other) != null || it.finnForkastetSykeperiodeRettFør(other) != null }
-            if (arbeidsgivere.size == 1) return true
-            return arbeidsgivere.all { arbeidsgiver ->
-                arbeidsgiver.vedtaksperioder.any { vedtaksperiode -> vedtaksperiode.periode() == other.periode() }
-                    && arbeidsgiver.finnSykeperiodeRettFør(other) != null
-            }
-        }
-
         internal fun Iterable<Arbeidsgiver>.harArbeidsgivereMedOverlappendeUtbetaltePerioder(orgnummer: String, periode: Periode) = this
             .filter { it.organisasjonsnummer != orgnummer }
             .any { it.vedtaksperioder.harOverlappendeUtbetaltePerioder(periode) }
@@ -1035,7 +1023,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun søknadsperioder(hendelseIder: Set<UUID>) = sykdomshistorikk.søknadsperioder(hendelseIder)
 
-    fun loggførHendelsesreferanse(organisasjonsnummer: String, skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID) {
+    internal fun loggførHendelsesreferanse(organisasjonsnummer: String, skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID) {
         if (this.organisasjonsnummer != organisasjonsnummer) return
         vedtaksperioder.filter { it.gjelder(skjæringstidspunkt) }.forEach { it.loggførHendelsesreferanse(meldingsreferanseId) }
     }

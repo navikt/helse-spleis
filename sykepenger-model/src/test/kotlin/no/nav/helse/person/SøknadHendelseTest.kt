@@ -69,7 +69,7 @@ internal class SøknadHendelseTest : AbstractPersonTest() {
         assertEquals(2, inspektør.vedtaksperiodeTeller)
         assertEquals(AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
         assertEquals(AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, inspektør.sisteTilstand(2.vedtaksperiode))
-        assertEquals(10, inspektør.sykdomstidslinje.length())
+        assertEquals(10, inspektør.sykdomstidslinje.count())
     }
 
     @Test
