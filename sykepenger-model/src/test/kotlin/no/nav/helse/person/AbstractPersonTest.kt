@@ -28,7 +28,11 @@ internal abstract class AbstractPersonTest {
 
     @BeforeEach
     internal fun createTestPerson() {
-        person = Person(AKTØRID, UNG_PERSON_FNR_2018.somFødselsnummer())
+        createTestPerson(UNG_PERSON_FNR_2018)
+    }
+
+    protected fun createTestPerson(fødselsnummer: String) {
+        person = Person(AKTØRID, fødselsnummer.somFødselsnummer())
         observatør = TestObservatør().also { person.addObserver(it) }
     }
 

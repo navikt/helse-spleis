@@ -11,6 +11,7 @@ import no.nav.helse.person.Ledd.LEDD_1
 import no.nav.helse.person.Ledd.LEDD_2
 import no.nav.helse.person.Paragraf.*
 import no.nav.helse.person.Punktum.Companion.punktum
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
@@ -102,6 +103,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
             ),
             outputdata = emptyMap()
         )
+        assertIkkeVurdert(PARAGRAF_8_51, LEDD_2, 1.punktum)
     }
 
     @Test
@@ -125,6 +127,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
             ),
             outputdata = emptyMap()
         )
+        assertIkkeVurdert(PARAGRAF_8_51, LEDD_2, 1.punktum)
     }
 
     @Test
@@ -389,6 +392,58 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
 
         assertVurdert(PARAGRAF_8_30, LEDD_2, vedtaksperiodeId = 1.vedtaksperiode)
         assertIkkeVurdert(PARAGRAF_8_30, LEDD_2, vedtaksperiodeId = 2.vedtaksperiode)
+    }
+
+    @Test
+    fun `§8-51 ledd 2 - har minimum inntekt 2G - over 67 år`() {
+        val GAMMEL = "01014500065"
+        createTestPerson(GAMMEL)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), fnr = GAMMEL)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), fnr = GAMMEL)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 187268.årlig, fnr = GAMMEL)
+        håndterYtelser(fnr = GAMMEL)
+        val arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER, 5.desember(2017), 31.januar))
+        håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold, fnr = GAMMEL)
+
+        assertOppfylt(
+            paragraf = PARAGRAF_8_51,
+            ledd = LEDD_2,
+            punktum = 1.punktum,
+            versjon = 16.desember(2011),
+            inputdata = mapOf(
+                "skjæringstidspunkt" to 1.januar,
+                "grunnlagForSykepengegrunnlag" to 187268.0,
+                "minimumInntekt" to 187268.0
+            ),
+            outputdata = emptyMap()
+        )
+        assertIkkeVurdert(PARAGRAF_8_3, ledd = LEDD_2, 1.punktum)
+    }
+
+    @Test
+    fun `§8-51 ledd 2 - har inntekt mindre enn 2G - over 67 år`() {
+        val GAMMEL = "01014500065"
+        createTestPerson(GAMMEL)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), fnr = GAMMEL)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), fnr = GAMMEL)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 187267.årlig, fnr = GAMMEL)
+        håndterYtelser(fnr = GAMMEL)
+        val arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER, 5.desember(2017), 31.januar))
+        håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold, fnr = GAMMEL)
+
+        assertIkkeOppfylt(
+            paragraf = PARAGRAF_8_51,
+            ledd = LEDD_2,
+            punktum = 1.punktum,
+            versjon = 16.desember(2011),
+            inputdata = mapOf(
+                "skjæringstidspunkt" to 1.januar,
+                "grunnlagForSykepengegrunnlag" to 187267.0,
+                "minimumInntekt" to 187268.0
+            ),
+            outputdata = emptyMap()
+        )
+        assertIkkeVurdert(PARAGRAF_8_3, ledd = LEDD_2, 1.punktum)
     }
 
     private val Int.resultat: (List<Resultat>) -> Resultat get() = { it[this - 1] }
