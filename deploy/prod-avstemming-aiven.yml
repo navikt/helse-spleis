@@ -1,0 +1,11 @@
+---
+apiVersion: aiven.nais.io/v1
+kind: AivenApplication
+metadata:
+    name: spleis-avstemming
+    namespace: tbd
+spec:
+    kafka:
+        pool: nav-prod
+    secretName: kafka-spleis-avstemming-nav-prod-7274ae34
+    protected: true

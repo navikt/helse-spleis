@@ -8,7 +8,6 @@ import kotliquery.sessionOf
 import no.nav.rapids_and_rivers.cli.AivenConfig
 import no.nav.rapids_and_rivers.cli.ConsumerProducerFactory
 import no.nav.vault.jdbc.hikaricp.HikariCPVaultUtil
-import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -55,7 +54,7 @@ private fun avstemmingTask(factory: ConsumerProducerFactory) {
     val duration = measureTime {
         paginated.run(ds, mapOf("dayOfMonth" to dayOfMonth)) { row ->
             val fnr = row.string("fnr").padStart(11, '0')
-            producer.send(ProducerRecord("tbd.rapid.v1", fnr, lagAvstemming(fnr, row.string("aktor_id"))))
+            //producer.send(ProducerRecord("tbd.rapid.v1", fnr, lagAvstemming(fnr, row.string("aktor_id"))))
         }
     }
     producer.flush()

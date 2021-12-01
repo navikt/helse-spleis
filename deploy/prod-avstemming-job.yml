@@ -58,12 +58,12 @@ spec:
                                 valueFrom:
                                   secretKeyRef:
                                     key: KAFKA_BROKERS
-                                    name: kafka-spenn-avstemming-nav-dev-54a6fb8c
+                                    name: kafka-spleis-avstemming-nav-prod-7274ae34
                               - name: KAFKA_CREDSTORE_PASSWORD
                                 valueFrom:
                                   secretKeyRef:
                                     key: KAFKA_CREDSTORE_PASSWORD
-                                    name: kafka-spenn-avstemming-nav-dev-54a6fb8c
+                                    name: kafka-spleis-avstemming-nav-prod-7274ae34
                               - name: KAFKA_KEYSTORE_PATH
                                 value: /var/run/secrets/nais.io/kafka/client.keystore.p12
                               - name: KAFKA_TRUSTSTORE_PATH
@@ -114,7 +114,7 @@ spec:
                         - name: kafka-credentials
                           secret:
                             defaultMode: 420
-                            secretName: kafka-spenn-avstemming-nav-prod-2195ff19
+                            secretName: kafka-spleis-avstemming-nav-prod-7274ae34
                             items:
                               - key: KAFKA_CERTIFICATE
                                 path: kafka.crt
