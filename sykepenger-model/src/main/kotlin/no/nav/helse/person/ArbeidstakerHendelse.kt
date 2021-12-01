@@ -16,7 +16,6 @@ abstract class ArbeidstakerHendelse protected constructor(
     )
 
     fun errorsAndWorse(): List<String> {
-        Aktivitetslogg.Aktivitet.Error.filter(aktivitetslogg.aktiviteter).forEach { it.toString() }
         val meldingsoppsamler = ErrorsAndWorse()
         aktivitetslogg.accept(meldingsoppsamler)
         return meldingsoppsamler.meldinger()
