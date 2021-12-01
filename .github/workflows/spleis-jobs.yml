@@ -64,5 +64,5 @@ jobs:
             env:
                 APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
                 CLUSTER: prod-fss
-                RESOURCE: deploy/prod-gc-job.yml,deploy/dev-avstemming-aiven.yml,deploy/prod-avstemming-job.yml
+                RESOURCE: deploy/prod-gc-job.yml,deploy/prod-avstemming-aiven.yml,deploy/prod-avstemming-job.yml
                 IMAGE: ${{ needs.set_version.outputs.image }}
