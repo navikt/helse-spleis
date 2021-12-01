@@ -22,14 +22,6 @@ internal fun interface IUtbetalingstidslinjeBuilder {
     fun result(sykdomstidslinje: Sykdomstidslinje, periode: Periode): Utbetalingstidslinje
 }
 
-internal fun interface Forlengelsestrategi {
-    fun erArbeidsgiverperiodenGjennomførtFør(dagen: LocalDate): Boolean
-
-    companion object {
-        val Ingen = Forlengelsestrategi { false }
-    }
-}
-
 /**
  *  Forstår opprettelsen av en Utbetalingstidslinje
  */
