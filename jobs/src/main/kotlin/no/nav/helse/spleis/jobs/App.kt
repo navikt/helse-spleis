@@ -51,7 +51,7 @@ private fun avstemmingTask(factory: ConsumerProducerFactory) {
     val dayOfMonth = LocalDate.now().dayOfMonth
     log.info("Commencing avstemming for dayOfMonth=$dayOfMonth")
     val producer = factory.createProducer()
-    val paginated = PaginatedQuery("fnr,aktor_id", "unike_person", "(1 + mod(fnr, 31)) = :dayOfMonth")
+    val paginated = PaginatedQuery("fnr,aktor_id", "unike_person", "(1 + mod(fnr, 27)) = :dayOfMonth")
     val duration = measureTime {
         paginated.run(ds, mapOf("dayOfMonth" to dayOfMonth)) { row ->
             val fnr = row.string("fnr").padStart(11, '0')
