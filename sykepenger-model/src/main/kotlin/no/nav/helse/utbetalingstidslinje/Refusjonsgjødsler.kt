@@ -23,10 +23,7 @@ internal class Refusjonsgjødsler(
                 }
             }
 
-            utbetalingsperiode.forEach { utbetalingsdag ->
-                if (refusjon == null) utbetalingsdag.økonomi.settFullArbeidsgiverRefusjon()
-                else utbetalingsdag.økonomi.arbeidsgiverRefusjon(refusjon.beløp(utbetalingsdag.dato))
-            }
+            utbetalingsperiode.forEach { utbetalingsdag -> utbetalingsdag.gjødsle(refusjon) }
         }
     }
 

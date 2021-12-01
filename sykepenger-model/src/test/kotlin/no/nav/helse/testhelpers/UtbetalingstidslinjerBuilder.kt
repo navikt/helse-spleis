@@ -3,7 +3,6 @@ package no.nav.helse.testhelpers
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
@@ -22,11 +21,11 @@ internal fun tidslinjeOf(
     utbetalingsdager.fold(startDato) { startDato, (antallDager, utbetalingsdag, helgedag, dekningsgrunnlag, grad, arbeidsgiverbeløp) ->
         var dato = startDato
         repeat(antallDager) {
-            if (helgedag != null && dato.erHelg()) {
-                this.helgedag(dato, Økonomi.sykdomsgrad(grad.prosent).arbeidsgiverRefusjon(arbeidsgiverbeløp.daglig).inntekt(dekningsgrunnlag.daglig, skjæringstidspunkt = skjæringstidspunkt(dato)))
-            } else {
-                this.utbetalingsdag(dato, Økonomi.sykdomsgrad(grad.prosent).arbeidsgiverRefusjon(arbeidsgiverbeløp.daglig).inntekt(dekningsgrunnlag.daglig, skjæringstidspunkt = skjæringstidspunkt(dato)))
-            }
+            val økonomi = Økonomi.sykdomsgrad(grad.prosent)
+                .inntekt(dekningsgrunnlag.daglig, skjæringstidspunkt = skjæringstidspunkt(dato))
+                .arbeidsgiverRefusjon(arbeidsgiverbeløp.daglig)
+            if (helgedag != null && dato.erHelg()) this.helgedag(dato, økonomi)
+            else this.utbetalingsdag(dato, økonomi)
             dato = dato.plusDays(1)
         }
         dato

@@ -161,12 +161,8 @@ internal class Økonomi private constructor(
     internal fun inntekt(aktuellDagsinntekt: Inntekt, dekningsgrunnlag: Inntekt = aktuellDagsinntekt, skjæringstidspunkt: LocalDate): Økonomi =
         tilstand.inntekt(this, aktuellDagsinntekt, dekningsgrunnlag, skjæringstidspunkt)
 
-    internal fun arbeidsgiverRefusjon(beløp: Inntekt): Økonomi {
-        arbeidsgiverRefusjonsbeløp = beløp
-        return this
-    }
-
-    internal fun settFullArbeidsgiverRefusjon() = arbeidsgiverRefusjon(aktuellDagsinntekt!!)
+    internal fun arbeidsgiverRefusjon(refusjonsbeløp: Inntekt?) =
+        tilstand.arbeidsgiverRefusjon(this, refusjonsbeløp)
 
     internal fun lås() = tilstand.lås(this)
 
@@ -375,6 +371,10 @@ internal class Økonomi private constructor(
             throw IllegalStateException("Kan ikke låse opp Økonomi i tilstand ${this::class.simpleName}")
         }
 
+        internal open fun arbeidsgiverRefusjon(økonomi: Økonomi, refusjonsbeløp: Inntekt?): Økonomi {
+            throw IllegalStateException("Kan ikke sette arbeidsgiverrefusjonsbeløp i tilstand ${this::class.simpleName}")
+        }
+
         internal object KunGrad : Tilstand() {
 
             override fun inntekt(
@@ -404,6 +404,10 @@ internal class Økonomi private constructor(
             }
 
             override fun <R> medData(økonomi: Økonomi, lambda: MedØkonomiData<R>) = økonomi.medDataFraInntekt(lambda)
+
+            override fun arbeidsgiverRefusjon(økonomi: Økonomi, refusjonsbeløp: Inntekt?) = økonomi.apply {
+                økonomi.arbeidsgiverRefusjonsbeløp = refusjonsbeløp ?: økonomi.aktuellDagsinntekt!!
+            }
 
             override fun betal(økonomi: Økonomi) {
                 økonomi._betal()

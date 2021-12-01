@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.contains
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.Refusjonshistorikk
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.serde.DateRanges
 import no.nav.helse.serde.PersonData
@@ -334,14 +335,18 @@ internal class Utbetalingstidslinje private constructor(
 
         internal abstract fun accept(visitor: UtbetalingsdagVisitor)
 
+        internal open fun gjødsle(refusjon: Refusjonshistorikk.Refusjon?) {
+            økonomi.arbeidsgiverRefusjon(refusjon?.beløp(dato))
+        }
+
         internal class ArbeidsgiverperiodeDag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
             override val prioritet = 30
             override fun accept(visitor: UtbetalingsdagVisitor) = økonomi.accept(visitor, this, dato)
             override fun serialiseringstype(): PersonData.UtbetalingstidslinjeData.TypeData =
                 PersonData.UtbetalingstidslinjeData.TypeData.ArbeidsgiverperiodeDag
         }
-
         abstract fun serialiseringstype(): PersonData.UtbetalingstidslinjeData.TypeData
+
         internal open fun toMap() = mutableMapOf<String, Any?>(
             "type" to serialiseringstype()
         ).apply {
@@ -403,6 +408,10 @@ internal class Utbetalingstidslinje private constructor(
             override fun accept(visitor: UtbetalingsdagVisitor) = økonomi.accept(visitor, this, dato)
             internal fun navDag(): Utbetalingsdag =
                 if (EgenmeldingUtenforArbeidsgiverperiode in begrunnelser) this else NavDag(dato, økonomi.låsOpp())
+
+            override fun gjødsle(refusjon: Refusjonshistorikk.Refusjon?) {
+                /* noop */
+            }
 
             override internal fun toMap() = mutableMapOf<String, Any?>(
                 "type" to PersonData.UtbetalingstidslinjeData.TypeData.AvvistDag,

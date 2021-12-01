@@ -116,6 +116,24 @@ internal class ØkonomiTest {
     }
 
     @Test
+    fun `kan ikke sette arbeidsgiverrefusjon uten inntekt`() {
+        assertThrows<IllegalStateException> { 100.prosent.sykdomsgrad.arbeidsgiverRefusjon(1000.daglig) }
+        assertDoesNotThrow { 100.prosent.sykdomsgrad.inntekt(1000.daglig, skjæringstidspunkt = 1.januar).arbeidsgiverRefusjon(1000.daglig) }
+    }
+
+    @Test
+    fun `kan ikke sette arbeidsgiverrefusjon på låst økonomi`() {
+        assertThrows<IllegalStateException> { 100.prosent.sykdomsgrad.inntekt(1000.daglig, skjæringstidspunkt = 1.januar).lås().arbeidsgiverRefusjon(1000.daglig) }
+    }
+
+    @Test
+    fun `kan ikke sette arbeidsgiverrefusjon etter betaling`() {
+        val økonomi = 100.prosent.sykdomsgrad.inntekt(1000.daglig, skjæringstidspunkt = 1.januar)
+        listOf(økonomi).betal(1.januar)
+        assertThrows<IllegalStateException> { økonomi.arbeidsgiverRefusjon(1000.daglig) }
+    }
+
+    @Test
     fun `kan ikke låses opp med mindre den er låst`() {
         assertThrows<IllegalStateException> { 50.prosent.sykdomsgrad.låsOpp() }
         50.prosent.sykdomsgrad.inntekt(1200.daglig, 1200.daglig, skjæringstidspunkt = 1.januar).arbeidsgiverRefusjon(1200.daglig).also { økonomi ->
