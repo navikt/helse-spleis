@@ -138,6 +138,7 @@ abstract class Toggle internal constructor(enabled: Boolean = false, private val
         internal fun kanIkkeFortsette(aktivitetslogg: IAktivitetslogg, utbetaling: Utbetaling, harBrukerutbetaling: Boolean): Boolean {
             if (DelvisRefusjon.disabled && utbetaling.harDelvisRefusjon()) aktivitetslogg.error("Utbetalingen har endringer i både arbeidsgiver- og personoppdrag")
             else if (disabled && harBrukerutbetaling) aktivitetslogg.error("Utbetalingstidslinje inneholder brukerutbetaling")
+            else if (disabled && utbetaling.harBrukerutbetaling()) aktivitetslogg.error("Utbetaling inneholder brukerutbetaling (men ikke for den aktuelle vedtaksperioden)")
             return aktivitetslogg.hasErrorsOrWorse()
         }
     }

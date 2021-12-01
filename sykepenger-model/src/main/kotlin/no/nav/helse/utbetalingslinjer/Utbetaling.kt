@@ -157,6 +157,7 @@ internal class Utbetaling private constructor(
     }
 
     internal fun harDelvisRefusjon() = arbeidsgiverOppdrag.harUtbetalinger () && personOppdrag.harUtbetalinger()
+    internal fun harBrukerutbetaling() = personOppdrag.harUtbetalinger()
 
     internal fun simuler(hendelse: IAktivitetslogg) {
         hendelse.kontekst(this)
