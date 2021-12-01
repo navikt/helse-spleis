@@ -13,7 +13,7 @@ import no.nav.helse.økonomi.Prosent.Companion.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSI
 import java.time.LocalDate
 
 class Inntektsvurdering(private val inntekter: List<ArbeidsgiverInntekt>) {
-    private var avviksprosent: Prosent? = null
+    private lateinit var avviksprosent: Prosent
 
     internal fun avviksprosent() = avviksprosent
 
@@ -27,32 +27,35 @@ class Inntektsvurdering(private val inntekter: List<ArbeidsgiverInntekt>) {
         if (inntekter.kilder(3) > antallArbeidsgivereFraAareg) {
             aktivitetslogg.warn("Bruker har flere inntektskilder de siste tre månedene enn arbeidsforhold som er oppdaget i Aa-registeret.")
         }
-        grunnlagForSykepengegrunnlag.avviksprosent(sammenligningsgrunnlag).also { avvik ->
-            avviksprosent = avvik
-            return validerAvvik(aktivitetslogg, avvik, grunnlagForSykepengegrunnlag.grunnlagForSykepengegrunnlag, sammenligningsgrunnlag)
-        }
+        avviksprosent = grunnlagForSykepengegrunnlag.avviksprosent(sammenligningsgrunnlag)
+        return validerAvvik(aktivitetslogg, avviksprosent, grunnlagForSykepengegrunnlag.grunnlagForSykepengegrunnlag, sammenligningsgrunnlag)
     }
 
     internal fun lagreInntekter(person: Person, skjæringstidspunkt: LocalDate, hendelse: PersonHendelse) =
         ArbeidsgiverInntekt.lagreSammenligningsgrunnlag(inntekter, person, skjæringstidspunkt, hendelse)
 
-    internal companion object {
-        internal fun validerAvvik(aktivitetslogg: IAktivitetslogg, avvik: Prosent, grunnlagForSykepengegrunnlag: Inntekt, sammenligningsgrunnlag: Inntekt): Boolean {
-            return sjekkAvvik(avvik, aktivitetslogg).also { akseptabeltAvvik ->
-                aktivitetslogg.`§8-30 ledd 2`(akseptabeltAvvik, MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT, grunnlagForSykepengegrunnlag, sammenligningsgrunnlag, avvik)
-            }
-        }
+    private fun validerAvvik(
+        aktivitetslogg: IAktivitetslogg,
+        avvik: Prosent,
+        grunnlagForSykepengegrunnlag: Inntekt,
+        sammenligningsgrunnlag: Inntekt
+    ): Boolean {
+        val harAkseptabeltAvvik = sjekkAvvik(avvik, aktivitetslogg)
+        aktivitetslogg.`§8-30 ledd 2`(harAkseptabeltAvvik, MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT, grunnlagForSykepengegrunnlag, sammenligningsgrunnlag, avvik)
+        return harAkseptabeltAvvik
+    }
 
+    internal companion object {
         internal fun sjekkAvvik(avvik: Prosent, aktivitetslogg: IAktivitetslogg): Boolean {
-            val akseptabeltAvvik = akseptabeltAvvik(avvik)
-            if (akseptabeltAvvik) {
+            val harAkseptabeltAvvik = harAkseptabeltAvvik(avvik)
+            if (harAkseptabeltAvvik) {
                 aktivitetslogg.info("Har %.0f %% eller mindre avvik i inntekt (%.2f %%)", MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT.prosent(), avvik.prosent())
             } else {
                 aktivitetslogg.error("Har mer enn %.0f %% avvik", MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT.prosent())
             }
-            return akseptabeltAvvik
+            return harAkseptabeltAvvik
         }
 
-        private fun akseptabeltAvvik(avvik: Prosent) = avvik <= MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT
+        private fun harAkseptabeltAvvik(avvik: Prosent) = avvik <= MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT
     }
 }
