@@ -533,7 +533,6 @@ class Aktivitetslogg(
                         arbeidsforhold: List<Map<String, Any?>>,
                         antallOpptjeningsdager: Int
                     ) {
-                        //TODO: Gjør vi vurdering av punktum 2?
                         juridiskVurdering(
                             "", Vurderingsresultat(
                                 oppfylt = oppfylt,
