@@ -581,10 +581,28 @@ class Aktivitetslogg(
                     internal fun IAktivitetslogg.`§8-10 ledd 2`(
                         oppfylt: Boolean,
                         funnetRelevant: Boolean,
-                        maks: Inntekt,
+                        maksimaltSykepengegrunnlag: Inntekt,
                         skjæringstidspunkt: LocalDate,
                         grunnlagForSykepengegrunnlag: Inntekt
                     ) {
+                        juridiskVurdering(
+                            "",
+                            Vurderingsresultat(
+                                oppfylt,
+                                versjon = LocalDate.of(2020, 1, 1),
+                                PARAGRAF_8_10,
+                                LEDD_2,
+                                1.punktum,
+                                inputdata = mapOf(
+                                    "maksimaltSykepengegrunnlag" to maksimaltSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
+                                    "skjæringstidspunkt" to skjæringstidspunkt,
+                                    "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig }
+                                ),
+                                outputdata = mapOf(
+                                    "funnetRelevant" to funnetRelevant
+                                )
+                            )
+                        )
                     }
 
                     //TODO: Hvordan skal denne kunne legges inn???

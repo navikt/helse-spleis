@@ -5,6 +5,7 @@ internal enum class Paragraf {
     PARAGRAF_8_2,
     PARAGRAF_8_3,
     PARAGRAF_8_4,
+    PARAGRAF_8_10,
     PARAGRAF_8_12,
     PARAGRAF_8_30,
     PARAGRAF_8_51

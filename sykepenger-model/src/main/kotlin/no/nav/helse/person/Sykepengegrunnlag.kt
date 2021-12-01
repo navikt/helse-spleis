@@ -16,21 +16,21 @@ internal class Sykepengegrunnlag(
 ) {
     private companion object {
         private fun sykepengegrunnlag(inntekt: Inntekt, skjæringstidspunkt: LocalDate, aktivitetslogg: IAktivitetslogg): Inntekt {
-            val maks = Grunnbeløp.`6G`.beløp(skjæringstidspunkt)
-            return if (inntekt > maks) {
+            val maksimaltSykepengegrunnlag = Grunnbeløp.`6G`.beløp(skjæringstidspunkt)
+            return if (inntekt > maksimaltSykepengegrunnlag) {
                 aktivitetslogg.`§8-10 ledd 2`(
                     oppfylt = true,
                     funnetRelevant = true,
-                    maks = maks,
+                    maksimaltSykepengegrunnlag = maksimaltSykepengegrunnlag,
                     skjæringstidspunkt = skjæringstidspunkt,
                     grunnlagForSykepengegrunnlag = inntekt
                 )
-                maks
+                maksimaltSykepengegrunnlag
             } else {
                 aktivitetslogg.`§8-10 ledd 2`(
                     oppfylt = true,
                     funnetRelevant = false,
-                    maks = maks,
+                    maksimaltSykepengegrunnlag = maksimaltSykepengegrunnlag,
                     skjæringstidspunkt = skjæringstidspunkt,
                     grunnlagForSykepengegrunnlag = inntekt
                 )
