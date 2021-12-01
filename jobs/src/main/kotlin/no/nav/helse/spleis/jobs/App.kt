@@ -30,7 +30,7 @@ fun main(args: Array<String>) {
 
     when (val task = args[0].trim().lowercase()) {
         "vacuum" -> vacuumTask()
-        "avstemming" -> avstemmingTask(ConsumerProducerFactory(AivenConfig.default))
+        "avstemming" -> avstemmingTask(ConsumerProducerFactory(AivenConfig.default), args.getOrNull(1)?.toIntOrNull())
         else -> log.error("Unknown task $task")
     }
 }
@@ -46,12 +46,12 @@ private fun vacuumTask() {
 }
 
 @ExperimentalTime
-private fun avstemmingTask(factory: ConsumerProducerFactory) {
+private fun avstemmingTask(factory: ConsumerProducerFactory, customDayOfMonth: Int? = null) {
     val ds = hikariConfig.datasource("readonly")
-    val dayOfMonth = LocalDate.now().dayOfMonth
+    val dayOfMonth = customDayOfMonth ?: LocalDate.now().dayOfMonth
     log.info("Commencing avstemming for dayOfMonth=$dayOfMonth")
     val producer = factory.createProducer()
-    val paginated = PaginatedQuery("fnr,aktor_id", "unike_person", "(1 + mod(fnr, 27)) = :dayOfMonth")
+    val paginated = PaginatedQuery("fnr,aktor_id", "unike_person", "(1 + mod(fnr, 27)) = :dayOfMonth AND (sist_avstemt is null or sist_avstemt < now() - interval '1 day')")
     val duration = measureTime {
         paginated.run(ds, mapOf("dayOfMonth" to dayOfMonth)) { row ->
             val fnr = row.string("fnr").padStart(11, '0')
