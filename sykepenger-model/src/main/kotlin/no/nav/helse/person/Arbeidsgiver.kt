@@ -410,6 +410,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(simulering: Simulering) {
         simulering.kontekst(this)
+        utbetalinger.forEach { it.håndter(simulering) }
         håndter(simulering, Vedtaksperiode::håndter)
         finalize(simulering)
     }

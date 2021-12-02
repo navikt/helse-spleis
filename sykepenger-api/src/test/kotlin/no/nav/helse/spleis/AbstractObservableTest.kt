@@ -224,6 +224,7 @@ abstract class AbstractObservableTest {
             fagområde = "SPREF",
             simuleringOK = simuleringOK,
             melding = "",
+            utbetalingId = UUID.randomUUID(),
             simuleringResultat = Simulering.SimuleringResultat(
                 totalbeløp = 2000,
                 perioder = listOf(

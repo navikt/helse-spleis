@@ -370,7 +370,8 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
             fagområde = hendelse.behov().first { it.type == Behovtype.Simulering }.detaljer().getValue("fagområde") as String,
             simuleringOK = true,
             melding = "",
-            simuleringResultat = null
+            simuleringResultat = null,
+            utbetalingId = UUID.randomUUID()
         ).apply {
             hendelse = this
         }

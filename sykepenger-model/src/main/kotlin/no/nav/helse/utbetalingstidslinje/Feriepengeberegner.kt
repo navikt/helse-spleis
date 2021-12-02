@@ -1,6 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.*
@@ -236,7 +237,8 @@ internal class Feriepengeberegner(
                 endringskode: Endringskode,
                 avstemmingsnøkkel: Long?,
                 status: Oppdragstatus?,
-                overføringstidspunkt: LocalDateTime?
+                overføringstidspunkt: LocalDateTime?,
+                simuleringsResultat: Simulering.SimuleringResultat?
             ) {
                 if (utbetaltUtbetaling || annullertUtbetaling) {
                     utbetalteDagerForOppdrag = mutableListOf()

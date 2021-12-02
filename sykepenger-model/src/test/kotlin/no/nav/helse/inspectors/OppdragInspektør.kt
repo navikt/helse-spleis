@@ -1,5 +1,6 @@
 package no.nav.helse.inspectors
 
+import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.UtbetalingVisitor
 import no.nav.helse.utbetalingslinjer.*
 import java.time.LocalDate
@@ -19,6 +20,7 @@ internal class OppdragInspektør(oppdrag: Oppdrag) : UtbetalingVisitor {
     private val refDelytelseIder = mutableListOf<Int?>()
     private val refFagsystemIder = mutableListOf<String?>()
     private var status: Oppdragstatus? = null
+    private var simuleringsResultat: Simulering.SimuleringResultat? = null
 
     init {
         oppdrag.accept(this)
@@ -32,11 +34,13 @@ internal class OppdragInspektør(oppdrag: Oppdrag) : UtbetalingVisitor {
         endringskode: Endringskode,
         avstemmingsnøkkel: Long?,
         status: Oppdragstatus?,
-        overføringstidspunkt: LocalDateTime?
+        overføringstidspunkt: LocalDateTime?,
+        simuleringsResultat: Simulering.SimuleringResultat?
     ) {
         fagsystemIder.add(oppdrag.fagsystemId())
         this.nettoBeløp.add(nettoBeløp)
         this.status = status
+        this.simuleringsResultat = simuleringsResultat
     }
 
     override fun visitUtbetalingslinje(
@@ -74,4 +78,5 @@ internal class OppdragInspektør(oppdrag: Oppdrag) : UtbetalingVisitor {
     fun totalBeløp(indeks: Int) = totalBeløp.elementAt(indeks)
     fun nettoBeløp(indeks: Int) = nettoBeløp.elementAt(indeks)
     fun status() = status
+    fun simuleringsResultat() = simuleringsResultat
 }

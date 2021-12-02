@@ -519,7 +519,8 @@ internal class TestMessageFactory(
     fun lagSimulering(
         vedtaksperiodeId: UUID,
         tilstand: TilstandType,
-        status: SimuleringMessage.Simuleringstatus
+        status: SimuleringMessage.Simuleringstatus,
+        utbetalingId: UUID
     ): String {
         return lagBehovMedLøsning(
             behov = listOf("Simulering"),
@@ -572,6 +573,7 @@ internal class TestMessageFactory(
                 )
             ),
             ekstraFelter = mapOf(
+                "utbetalingId" to "$utbetalingId",
                 "Simulering" to mapOf(
                     "fagsystemId" to "fagsystemid",
                     "fagområde" to "SPREF"

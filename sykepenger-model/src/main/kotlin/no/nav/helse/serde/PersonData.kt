@@ -14,6 +14,7 @@ import no.nav.helse.serde.PersonData.ArbeidsgiverData.RefusjonData.EndringIRefus
 import no.nav.helse.serde.PersonData.InfotrygdhistorikkElementData.Companion.tilModellObjekt
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.SykepengegrunnlagData.ArbeidsgiverInntektsopplysningData.Companion.parseArbeidsgiverInntektsopplysninger
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagInnslagData.Companion.tilModellObjekt
+import no.nav.helse.serde.api.SimuleringsdataDTO
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
 import no.nav.helse.serde.reflection.Inntektsopplysningskilde
 import no.nav.helse.serde.reflection.Utbetalingstatus
@@ -1118,7 +1119,8 @@ internal data class PersonData(
         private val nettoBeløp: Int,
         private val avstemmingsnøkkel: Long?,
         private val status: Oppdragstatus?,
-        private val overføringstidspunkt: LocalDateTime?
+        private val overføringstidspunkt: LocalDateTime?,
+        private val simuleringsResultat: ArbeidsgiverData.VedtaksperiodeData.DataForSimuleringData?
     ) {
         internal fun konverterTilOppdrag(): Oppdrag {
             return Oppdrag::class.primaryConstructor!!
@@ -1134,7 +1136,8 @@ internal data class PersonData(
                     overføringstidspunkt,
                     avstemmingsnøkkel,
                     status,
-                    tidsstempel
+                    tidsstempel,
+                    simuleringsResultat?.parseDataForSimulering()
                 )
         }
     }

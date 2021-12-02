@@ -5,6 +5,7 @@ import no.nav.helse.etterspurteBehov
 import no.nav.helse.etterspurteBehovFinnes
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -236,7 +237,8 @@ internal class TestArbeidsgiverInspektør(
         endringskode: Endringskode,
         avstemmingsnøkkel: Long?,
         status: Oppdragstatus?,
-        overføringstidspunkt: LocalDateTime?
+        overføringstidspunkt: LocalDateTime?,
+        simuleringsResultat: Simulering.SimuleringResultat?
     ) {
         if (inFeriepengeutbetaling) feriepengeoppdrag.add(Feriepengeoppdrag(oppdrag.fagsystemId()))
 

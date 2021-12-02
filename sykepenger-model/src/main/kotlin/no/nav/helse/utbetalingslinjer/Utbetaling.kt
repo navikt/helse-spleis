@@ -616,6 +616,12 @@ internal class Utbetaling private constructor(
         if (this.avstemmingsnøkkel == null) this.avstemmingsnøkkel = avstemmingsnøkkel
     }
 
+    internal fun håndter(simulering: Simulering) {
+        if (!simulering.erRelevantForUtbetaling(id)) return
+        personOppdrag.håndter(simulering)
+        arbeidsgiverOppdrag.håndter(simulering)
+    }
+
     internal interface Tilstand {
         fun forkast(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
             hendelse.info("Forkaster ikke utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
