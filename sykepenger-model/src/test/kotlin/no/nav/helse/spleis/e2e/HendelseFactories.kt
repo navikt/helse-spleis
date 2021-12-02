@@ -429,7 +429,6 @@ internal fun AbstractEndToEndTest.simulering(
         fagområde = inspektør(orgnummer).sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering).detaljer().getValue("fagområde") as String,
         simuleringOK = simuleringOK,
         melding = "",
-        utbetalingId = UUID.fromString(inspektør.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering).kontekst().getValue("utbetalingId")),
         simuleringResultat = Simulering.SimuleringResultat(
             totalbeløp = 2000,
             perioder = listOf(

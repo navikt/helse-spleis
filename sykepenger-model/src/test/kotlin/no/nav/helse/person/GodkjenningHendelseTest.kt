@@ -254,8 +254,7 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
             fagområde = inspektør.sisteBehov(Behovtype.Simulering).detaljer().getValue("fagområde") as String,
             simuleringOK = true,
             melding = "",
-            simuleringResultat = null,
-            utbetalingId = UUID.randomUUID()
+            simuleringResultat = null
         ).apply {
             hendelse = this
         }

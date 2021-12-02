@@ -1,6 +1,5 @@
 package no.nav.helse.utbetalingslinjer
 
-import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.*
 import no.nav.helse.inspectors.inspektør
@@ -363,8 +362,7 @@ internal class UtbetalingTest {
 
     @Test
     fun `korrelasjonsId er lik på brukerutbetalinger direkte fra Infotrygd`() {
-        val tidslinje =
-            beregnUtbetalinger(tidslinjeOf(31.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 0)), infotrygdtidslinje = tidslinjeOf(5.NAV, startDato = 1.januar))
+        val tidslinje = beregnUtbetalinger(tidslinjeOf(31.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 0)), infotrygdtidslinje = tidslinjeOf(5.NAV, startDato = 1.januar))
         val første = opprettUtbetaling(tidslinje.kutt(21.januar))
         val andre = opprettUtbetaling(tidslinje, første)
         assertEquals(første.inspektør.personOppdrag.fagsystemId(), andre.inspektør.personOppdrag.fagsystemId())
@@ -374,10 +372,7 @@ internal class UtbetalingTest {
 
     @Test
     fun `korrelasjonsId er lik på brukerutbetalinger fra Infotrygd`() {
-        val tidslinje = beregnUtbetalinger(
-            tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 0), 28.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 0)),
-            infotrygdtidslinje = tidslinjeOf(5.NAV, startDato = 1.februar)
-        )
+        val tidslinje = beregnUtbetalinger(tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 0), 28.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 0)), infotrygdtidslinje = tidslinjeOf(5.NAV, startDato = 1.februar))
         val første = opprettUtbetaling(tidslinje.kutt(31.januar))
         val andre = opprettUtbetaling(tidslinje.kutt(20.februar), første)
         val tredje = opprettUtbetaling(tidslinje, andre)
@@ -465,19 +460,7 @@ internal class UtbetalingTest {
     @Test
     fun `overgang fra full til null refusjon`() {
         val tidslinje = tidslinjeOf(
-            16.AP,
-            1.NAV,
-            2.HELG,
-            5.NAV,
-            2.HELG,
-            5.NAV,
-            2.HELG,
-            5.NAV(1200, refusjonsbeløp = 0.0),
-            2.HELG,
-            5.NAV,
-            2.HELG,
-            1.ARB,
-            4.NAV(1200, refusjonsbeløp = 0.0)
+            16.AP, 1.NAV, 2.HELG, 5.NAV, 2.HELG, 5.NAV, 2.HELG, 5.NAV(1200, refusjonsbeløp = 0.0), 2.HELG, 5.NAV, 2.HELG, 1.ARB, 4.NAV(1200, refusjonsbeløp = 0.0)
         )
 
         beregnUtbetalinger(tidslinje)
@@ -572,100 +555,6 @@ internal class UtbetalingTest {
         assertNull(utbetaling.toMap()["avstemmingsnøkkel"])
     }
 
-    @Test
-    fun `simulering som er relevant for personoppdrag`() {
-        val utbetalingId = UUID.randomUUID()
-        val simulering = opprettSimulering("1", Fagområde.Sykepenger, utbetalingId)
-        assertTrue(simulering.erRelevantForUtbetaling(utbetalingId))
-        assertFalse(simulering.erRelevantForUtbetaling(UUID.randomUUID()))
-        assertTrue(simulering.erRelevantFor(Fagområde.Sykepenger, "1"))
-        assertFalse(simulering.erRelevantFor(Fagområde.Sykepenger, "2"))
-        assertFalse(simulering.erRelevantFor(Fagområde.SykepengerRefusjon, "1"))
-    }
-
-    @Test
-    fun `simulering som er relevant for arbeidsgiveroppdrag`() {
-        val utbetalingId = UUID.randomUUID()
-        val simulering = opprettSimulering("1", Fagområde.SykepengerRefusjon, utbetalingId)
-        assertTrue(simulering.erRelevantForUtbetaling(utbetalingId))
-        assertFalse(simulering.erRelevantForUtbetaling(UUID.randomUUID()))
-        assertTrue(simulering.erRelevantFor(Fagområde.SykepengerRefusjon, "1"))
-        assertFalse(simulering.erRelevantFor(Fagområde.SykepengerRefusjon, "2"))
-        assertFalse(simulering.erRelevantFor(Fagområde.Sykepenger, "1"))
-    }
-
-    @Test
-    fun `simulerer ingen refusjon`() {
-        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 0))
-        beregnUtbetalinger(tidslinje)
-        val utbetaling = opprettUbetaltUtbetaling(tidslinje)
-        val simulering = opprettSimulering(
-            utbetaling.inspektør.personOppdrag.fagsystemId(), Fagområde.Sykepenger, utbetaling.inspektør.utbetalingId, Simulering.SimuleringResultat(
-                totalbeløp = 1000,
-                perioder = emptyList()
-            )
-        )
-        utbetaling.håndter(simulering)
-        assertNotNull(utbetaling.inspektør.personOppdrag.inspektør.simuleringsResultat())
-        assertNull(utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.simuleringsResultat())
-    }
-
-    @Test
-    fun `simulerer full refusjon`() {
-        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 1000))
-        beregnUtbetalinger(tidslinje)
-        val utbetaling = opprettUbetaltUtbetaling(tidslinje)
-        val simulering = opprettSimulering(
-            utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId(), Fagområde.SykepengerRefusjon, utbetaling.inspektør.utbetalingId, Simulering.SimuleringResultat(
-                totalbeløp = 1000,
-                perioder = emptyList()
-            )
-        )
-        utbetaling.håndter(simulering)
-        assertNotNull(utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.simuleringsResultat())
-        assertNull(utbetaling.inspektør.personOppdrag.inspektør.simuleringsResultat())
-    }
-
-    @Test
-    fun `simulerer delvis refusjon`() {
-        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 500))
-        beregnUtbetalinger(tidslinje)
-        val utbetaling = opprettUbetaltUtbetaling(tidslinje)
-
-        val simuleringArbeidsgiver = opprettSimulering(
-            utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId(), Fagområde.SykepengerRefusjon, utbetaling.inspektør.utbetalingId, Simulering.SimuleringResultat(
-                totalbeløp = 500,
-                perioder = emptyList()
-            )
-        )
-        val simuleringPerson = opprettSimulering(
-            utbetaling.inspektør.personOppdrag.fagsystemId(), Fagområde.Sykepenger, utbetaling.inspektør.utbetalingId, Simulering.SimuleringResultat(
-                totalbeløp = 500,
-                perioder = emptyList()
-            )
-        )
-        utbetaling.håndter(simuleringArbeidsgiver)
-        utbetaling.håndter(simuleringPerson)
-
-        assertNotNull(utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.simuleringsResultat())
-        assertNotNull(utbetaling.inspektør.personOppdrag.inspektør.simuleringsResultat())
-    }
-
-    private fun opprettSimulering(fagsystemId: String, fagområde: Fagområde, utbetalingId: UUID, simuleringResultat: Simulering.SimuleringResultat? = null) =
-        Simulering(
-            meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = "1",
-            aktørId = "aktørId",
-            fødselsnummer = "fødselsnummer",
-            orgnummer = "orgnummer",
-            fagsystemId = fagsystemId,
-            fagområde = fagområde.verdi,
-            simuleringOK = true,
-            melding = "melding",
-            simuleringResultat = simuleringResultat,
-            utbetalingId = utbetalingId
-        )
-
     private fun String.gRegulering() = Grunnbeløpsregulering(UUID.randomUUID(), "", "", "", LocalDate.now(), this)
 
     private fun beregnUtbetalinger(tidslinje: Utbetalingstidslinje, infotrygdtidslinje: Utbetalingstidslinje = Utbetalingstidslinje()) = tidslinje.let {
@@ -725,11 +614,7 @@ internal class UtbetalingTest {
             .onEach { kvittèr(utbetaling, it) }
     }
 
-    private fun overfør(
-        utbetaling: Utbetaling,
-        fagsystemId: String = utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId(),
-        utbetalingId: UUID = utbetaling.inspektør.utbetalingId
-    ) {
+    private fun overfør(utbetaling: Utbetaling, fagsystemId: String = utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId(), utbetalingId: UUID = utbetaling.inspektør.utbetalingId) {
         utbetaling.håndter(
             UtbetalingOverført(
                 meldingsreferanseId = UUID.randomUUID(),
@@ -744,11 +629,7 @@ internal class UtbetalingTest {
         )
     }
 
-    private fun kvittèr(
-        utbetaling: Utbetaling,
-        fagsystemId: String = utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId(),
-        status: Oppdragstatus = AKSEPTERT
-    ) {
+    private fun kvittèr(utbetaling: Utbetaling, fagsystemId: String = utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId(), status: Oppdragstatus = AKSEPTERT) {
         utbetaling.håndter(
             UtbetalingHendelse(
                 meldingsreferanseId = UUID.randomUUID(),

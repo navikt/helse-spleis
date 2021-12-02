@@ -16,15 +16,12 @@ class Simulering(
     fagområde: String,
     private val simuleringOK: Boolean,
     private val melding: String,
-    internal val simuleringResultat: SimuleringResultat?,
-    private val utbetalingId: UUID
+    internal val simuleringResultat: SimuleringResultat?
 ) : ArbeidstakerHendelse(meldingsreferanseId) {
 
     private val fagområde = Fagområde.from(fagområde)
 
     internal fun erRelevant(other: UUID) = other.toString() == vedtaksperiodeId
-    internal fun erRelevantForUtbetaling(utbetalingId: UUID) = this.utbetalingId == utbetalingId
-    internal fun erRelevantFor(fagområde: Fagområde, fagsystemId: String) = this.fagområde == fagområde && this.fagsystemId == fagsystemId
 
     override fun aktørId() = aktørId
     override fun fødselsnummer() = fødselsnummer

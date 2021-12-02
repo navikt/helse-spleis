@@ -9,13 +9,11 @@ import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage.Simuleringstatus.*
-import java.util.*
 
 internal class SimuleringMessage(packet: JsonMessage) : BehovMessage(packet) {
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
     private val aktørId = packet["aktørId"].asText()
-    private val utbetalingId = UUID.fromString(packet["utbetalingId"].asText())
 
     private val fagsystemId = packet["Simulering.fagsystemId"].asText()
     private val fagområde = packet["Simulering.fagområde"].asText()
@@ -79,8 +77,7 @@ internal class SimuleringMessage(packet: JsonMessage) : BehovMessage(packet) {
             fagområde = fagområde,
             simuleringOK = simuleringOK,
             melding = melding,
-            simuleringResultat = simuleringResultat,
-            utbetalingId = utbetalingId
+            simuleringResultat = simuleringResultat
         )
 
     override fun behandle(mediator: IHendelseMediator) {

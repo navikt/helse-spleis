@@ -740,8 +740,7 @@ private class UtbetalingSkalHaEndringskode(private val ønsketEndringskode: Endr
         endringskode: Endringskode,
         avstemmingsnøkkel: Long?,
         status: Oppdragstatus?,
-        overføringstidspunkt: LocalDateTime?,
-        simuleringsResultat: Simulering.SimuleringResultat?
+        overføringstidspunkt: LocalDateTime?
     ) {
         assertEquals(ønsketEndringskode, endringskode, message)
     }

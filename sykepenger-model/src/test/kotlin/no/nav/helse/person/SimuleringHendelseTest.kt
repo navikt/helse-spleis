@@ -204,7 +204,6 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
             fagområde = hendelse.behov().first { it.type == Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering }.detaljer().getValue("fagområde") as String,
             simuleringOK = simuleringOK,
             melding = "",
-            utbetalingId = UUID.randomUUID(),
             simuleringResultat = if (!simuleringOK) null else Simulering.SimuleringResultat(
                 totalbeløp = 44361,
                 perioder = listOf(
