@@ -681,7 +681,20 @@ class Aktivitetslogg(
                         )
                     }
 
-                    internal fun IAktivitetslogg.`§8-13 ledd 1`(oppfylt: Boolean) {}
+                    internal fun IAktivitetslogg.`§8-13 ledd 1`(oppfylt: Boolean, avvisteDager: List<LocalDate>) {
+                        juridiskVurdering(
+                            "",
+                            Vurderingsresultat(
+                                oppfylt = oppfylt,
+                                paragraf = PARAGRAF_8_13,
+                                ledd = LEDD_1,
+                                punktum = (1..2).punktum,
+                                versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
+                                inputdata = mapOf("avvisteDager" to avvisteDager),
+                                outputdata = emptyMap()
+                            )
+                        )
+                    }
 
                     internal fun IAktivitetslogg.`§8-16 ledd 1`(oppfylt: Boolean) {} // Én gang, med periode over hvilke dager vi har satt dekningsgrad
 
