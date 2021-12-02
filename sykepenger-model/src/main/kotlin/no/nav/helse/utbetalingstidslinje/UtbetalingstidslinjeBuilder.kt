@@ -12,6 +12,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodestrategi.Default
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException.*
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -30,18 +31,41 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     private val skjæringstidspunkter: List<LocalDate>,
     private val inntektPerSkjæringstidspunkt: Map<LocalDate, Inntektshistorikk.Inntektsopplysning?>?,
     private val arbeidsgiverRegler: ArbeidsgiverRegler = NormalArbeidstaker
-) : SykdomstidslinjeVisitor, IUtbetalingstidslinjeBuilder {
-    private var forlengelseStrategy: Forlengelsestrategi = Forlengelsestrategi.Ingen
-    private var tilstand: UtbetalingState = Initiell
-
-    private var sykedagerIArbeidsgiverperiode = 0
-    private var ikkeSykedager = 0
-    private var fridager = mutableListOf<LocalDate>()
-
+) : SykdomstidslinjeVisitor, IUtbetalingstidslinjeBuilder, Arbeidsgiverperiodeteller.Observatør {
+    private lateinit var teller: Arbeidsgiverperiodeteller
     private val tidslinje = Utbetalingstidslinje()
 
+    init {
+        teller(Forlengelsestrategi.Ingen)
+    }
+
+    private var harArbeidsgiverperiode = false
+    // future feature: koble på økonomi-objektene?
+    private var nåværendeArbeidsgiverperiode: Arbeidsgiverperiode? = null
+
+    override fun arbeidsgiverperiodeFerdig(arbeidsgiverperiode: Arbeidsgiverperiode, dagen: LocalDate) {
+        harArbeidsgiverperiode = true
+        nåværendeArbeidsgiverperiode = arbeidsgiverperiode
+    }
+
+    override fun ingenArbeidsgiverperiode(dagen: LocalDate) {
+        nåværendeArbeidsgiverperiode = null
+    }
+
     internal fun forlengelsestrategi(strategi: Forlengelsestrategi) {
-        this.forlengelseStrategy = strategi
+        teller(strategi)
+    }
+
+    override fun result(sykdomstidslinje: Sykdomstidslinje, periode: Periode): Utbetalingstidslinje {
+        sykdomstidslinje.fremTilOgMed(periode.endInclusive).accept(this)
+        teller.avslutt()
+        return tidslinje
+    }
+
+    private fun teller(strategi: Forlengelsestrategi) {
+        this.teller = Arbeidsgiverperiodeteller(arbeidsgiverRegler, strategi).also {
+            it.observatør(this)
+        }
     }
 
     private fun inntektForDatoOrNull(dato: LocalDate) =
@@ -81,72 +105,132 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
             }
             ?: inntekt(aktuellDagsinntekt = INGEN, dekningsgrunnlag = INGEN, skjæringstidspunkt = dato)
 
-    override fun result(sykdomstidslinje: Sykdomstidslinje, periode: Periode): Utbetalingstidslinje {
-        sykdomstidslinje.fremTilOgMed(periode.endInclusive).accept(this)
-        hengendeFridager()
-        return tidslinje
+
+    private fun sykedagIArbeidsgiverperioden(dato: LocalDate) {
+        addArbeidsgiverdag(dato)
+    }
+    private fun sykedagEtterArbeidsgiverperioden(dato: LocalDate, økonomi: Økonomi) {
+        addNAVdag(dato, økonomi)
+    }
+    private fun sykHelgedagEtterArbeidsgiverperioden(dato: LocalDate, økonomi: Økonomi) {
+        addNAVHelgedag(dato, økonomi)
+    }
+    private fun foreldetSykedagEtterArbeidsgiverperioden(dato: LocalDate, økonomi: Økonomi) {
+        addForeldetDag(dato, økonomi)
     }
 
-    override fun visitDag(dag: Dag.UkjentDag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
-        implisittDag(dato)
-
-    override fun visitDag(dag: Dag.Permisjonsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
-        // TODO: Bør flyttes dit hvor beslutningen om å ikke utbetale pga. fridag tas, når denne er gjort: https://trello.com/c/Wffztv11
-        Aktivitetslogg().`§8-17 ledd 2`(true)
-        fridag(dato)
+    private fun egenmeldingsdagEtterArbeidsgiverperioden(dato: LocalDate) {
+        addAvvistDag(dato)
     }
 
-    override fun visitDag(dag: Dag.Arbeidsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
+    private fun fridagIArbeidsgiverperioden(dato: LocalDate) = sykedagIArbeidsgiverperioden(dato)
+
+    private fun fridagUtenforArbeidsgiverperioden(dato: LocalDate) {
+        addFridag(dato)
+    }
+
+    private fun arbeidsdag(dato: LocalDate) {
+        addArbeidsdag(dato)
+    }
+
+    private fun sykedag(dato: LocalDate, økonomi: Økonomi) {
+        teller.inkrementer(dato, Default({ sykedagIArbeidsgiverperioden(dato) }, { sykedagEtterArbeidsgiverperioden(dato, økonomi) }))
+    }
+
+    private fun sykHelgedag(dato: LocalDate, økonomi: Økonomi) {
+        teller.inkrementer(dato, Default ({ sykedagIArbeidsgiverperioden(dato) }, { sykHelgedagEtterArbeidsgiverperioden(dato, økonomi) }))
+    }
+
+    private fun foreldetSykedag(dato: LocalDate, økonomi: Økonomi) {
+        teller.inkrementer(dato, Default ({ sykedagIArbeidsgiverperioden(dato) }, { foreldetSykedagEtterArbeidsgiverperioden(dato, økonomi) }))
+    }
+
+    private fun fridag(dato: LocalDate) {
+        teller.inkrementEllerDekrement(dato, Default ({ fridagIArbeidsgiverperioden(dato) }, { fridagUtenforArbeidsgiverperioden(dato) }))
+    }
+
+    private fun egenmeldingsdag(dato: LocalDate) {
+        teller.inkrementer(dato, Default ({ sykedagIArbeidsgiverperioden(dato) }, { egenmeldingsdagEtterArbeidsgiverperioden(dato) }))
+    }
+
+    final override fun visitDag(dag: Dag.Arbeidsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+        teller.dekrementer(dato)
         arbeidsdag(dato)
+    }
 
-    override fun visitDag(
+    final override fun visitDag(
         dag: Dag.Arbeidsgiverdag,
         dato: LocalDate,
         økonomi: Økonomi,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
-    ) = egenmeldingsdag(dato)
+    ) {
+        egenmeldingsdag(dato)
+    }
 
-    override fun visitDag(dag: Dag.Feriedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+    final override fun visitDag(dag: Dag.FriskHelgedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+        teller.dekrementer(dato)
+        arbeidsdag(dato)
+    }
+
+    final override fun visitDag(dag: Dag.UkjentDag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+        if (dato.erHelg()) return fridag(dato)
+        teller.dekrementer(dato)
+        arbeidsdag(dato)
+    }
+
+    final override fun visitDag(dag: Dag.Permisjonsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
         // TODO: Bør flyttes dit hvor beslutningen om å ikke utbetale pga. fridag tas, når denne er gjort: https://trello.com/c/Wffztv11
         Aktivitetslogg().`§8-17 ledd 2`(true)
         fridag(dato)
     }
 
-    override fun visitDag(dag: Dag.FriskHelgedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
-        arbeidsdag(dato)
-
-    override fun visitDag(dag: Dag.AvslåttDag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
+    final override fun visitDag(dag: Dag.Feriedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+        // TODO: Bør flyttes dit hvor beslutningen om å ikke utbetale pga. fridag tas, når denne er gjort: https://trello.com/c/Wffztv11
+        Aktivitetslogg().`§8-17 ledd 2`(true)
         fridag(dato)
+    }
 
-    override fun visitDag(
+    final override fun visitDag(dag: Dag.AvslåttDag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+        fridag(dato)
+    }
+
+    final override fun visitDag(
         dag: Dag.ArbeidsgiverHelgedag,
         dato: LocalDate,
         økonomi: Økonomi,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
-    ) = sykHelgedag(dato, økonomi)
+    ) {
+        sykHelgedag(dato, økonomi)
+    }
 
-    override fun visitDag(
+    final override fun visitDag(
         dag: Dag.Sykedag,
         dato: LocalDate,
         økonomi: Økonomi,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
-    ) = sykedag(dato, økonomi)
+    ) {
+        sykedag(dato, økonomi)
+    }
 
-    override fun visitDag(
-        dag: Dag.ForeldetSykedag,
-        dato: LocalDate,
-        økonomi: Økonomi,
-        kilde: SykdomstidslinjeHendelse.Hendelseskilde
-    ) = foreldetSykedag(dato, økonomi)
-
-    override fun visitDag(
+    final override fun visitDag(
         dag: Dag.SykHelgedag,
         dato: LocalDate,
         økonomi: Økonomi,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
-    ) = sykHelgedag(dato, økonomi)
+    ) {
+        sykHelgedag(dato, økonomi)
+    }
 
-    override fun visitDag(
+    final override fun visitDag(
+        dag: Dag.ForeldetSykedag,
+        dato: LocalDate,
+        økonomi: Økonomi,
+        kilde: SykdomstidslinjeHendelse.Hendelseskilde
+    ) {
+        foreldetSykedag(dato, økonomi)
+    }
+
+    final override fun visitDag(
         dag: Dag.ProblemDag,
         dato: LocalDate,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde,
@@ -169,6 +253,12 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     }
 
     private fun addNAVdag(dato: LocalDate, økonomi: Økonomi) {
+        if (harArbeidsgiverperiode) {
+            //TODO: Skal kalles med riktig aktivitetslogg
+            Aktivitetslogg().`§8-17 ledd 1 bokstav a`(true)
+            harArbeidsgiverperiode = false
+        }
+
         val (skjæringstidspunkt, inntekt) = inntektForDato(dato)
         tidslinje.addNAVdag(
             dato,
@@ -198,368 +288,6 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
 
     private fun addFridag(dato: LocalDate) {
         tidslinje.addFridag(dato, Økonomi.ikkeBetalt().inntektIfNotNull(dato))
-    }
-
-    private fun foreldetSykedag(dagen: LocalDate, økonomi: Økonomi) {
-        tilstand.justerSykedagtelling(this, dagen)
-        tilstand.foreldetSykedag(this, dagen, økonomi)
-    }
-
-    private fun egenmeldingsdag(dato: LocalDate) {
-        tilstand.justerSykedagtelling(this, dato)
-        tilstand.egenmeldingsdag(this, dato)
-    }
-
-    private fun implisittDag(dagen: LocalDate) = if (dagen.erHelg()) fridag(dagen) else arbeidsdag(dagen)
-
-    private fun sykedag(dagen: LocalDate, økonomi: Økonomi) {
-        tilstand.justerSykedagtelling(this, dagen)
-        tilstand.sykedag(this, dagen, økonomi)
-    }
-
-    private fun sykHelgedag(dagen: LocalDate, økonomi: Økonomi) {
-        tilstand.justerSykedagtelling(this, dagen)
-        tilstand.sykHelgedag(this, dagen, økonomi)
-    }
-
-    private fun arbeidsdag(dagen: LocalDate) {
-        tilstand.justerIkkeSykedagtelling(this)
-        tilstand.arbeidsdag(this, dagen)
-    }
-
-    private fun fridag(dagen: LocalDate) {
-        tilstand.fridag(this, dagen)
-    }
-
-    private fun håndterArbeidsgiverdag(dagen: LocalDate) {
-        inkrementerSykedagerIArbeidsgiverperiode()
-        addArbeidsgiverdag(dagen)
-    }
-
-    private fun håndterArbeidsdag(dagen: LocalDate) {
-        inkrementerIkkeSykedager()
-        addArbeidsdag(dagen)
-    }
-
-    private fun inkrementerSykedagerIArbeidsgiverperiode(): Boolean {
-        if (arbeidsgiverRegler.arbeidsgiverperiodenGjennomført(sykedagerIArbeidsgiverperiode)) return true
-        sykedagerIArbeidsgiverperiode += 1
-        if (arbeidsgiverRegler.arbeidsgiverperiodenGjennomført(sykedagerIArbeidsgiverperiode)) {
-            //TODO: Skal kalles ved første utbetalingsdag etter arbeidsgiverperioden, og med riktig aktivitetslogg
-            Aktivitetslogg().`§8-17 ledd 1 bokstav a`(true)
-            state(UtbetalingSykedager)
-        }
-        return false
-    }
-
-    private fun inkrementerSykedagerIArbeidsgiverperiodeFraInfotrygd(dagen: LocalDate) {
-        if (!forlengelseStrategy.erArbeidsgiverperiodenGjennomførtFør(dagen)) return
-        sykedagerIArbeidsgiverperiode = arbeidsgiverRegler.fullførArbeidsgiverperiode()
-        state(UtbetalingSykedager)
-    }
-
-    private fun inkrementerSykedagerIArbeidsgiverperiodeMedFridager() {
-        fridager.onEach { if (!inkrementerSykedagerIArbeidsgiverperiode()) addArbeidsgiverdag(it) else addFridag(it) }.clear()
-    }
-
-    private fun hengendeFridager() {
-        fridager.onEach { addFridag(it) }.clear()
-    }
-
-    private fun inkrementerIkkeSykedagerFraFridager() {
-        fridager.onEach { håndterFridagOpphold(it) }.clear()
-    }
-
-    private fun inkrementerIkkeSykedager() {
-        ikkeSykedager += 1
-        if (!arbeidsgiverRegler.burdeStarteNyArbeidsgiverperiode(ikkeSykedager)) return
-        state(Initiell)
-    }
-
-    private fun håndterUsikkerFridag(dato: LocalDate) {
-        fridager.add(dato)
-    }
-
-    private fun håndterFridagOpphold(dagen: LocalDate) {
-        inkrementerIkkeSykedager()
-        addFridag(dagen)
-    }
-
-    private fun state(state: UtbetalingState) {
-        this.tilstand.leaving(this)
-        this.tilstand = state
-        this.tilstand.entering(this)
-    }
-
-    internal interface UtbetalingState {
-        fun justerSykedagtelling(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate) {}
-        fun sykedag(
-            splitter: UtbetalingstidslinjeBuilder,
-            dagen: LocalDate,
-            økonomi: Økonomi
-        )
-
-        fun foreldetSykedag(
-            splitter: UtbetalingstidslinjeBuilder,
-            dagen: LocalDate,
-            økonomi: Økonomi
-        ) {
-            sykedag(splitter, dagen, økonomi)
-        }
-
-        fun egenmeldingsdag(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate) {
-            sykedag(splitter, dagen, Økonomi.ikkeBetalt())
-        }
-
-        fun fridag(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate)
-        fun justerIkkeSykedagtelling(splitter: UtbetalingstidslinjeBuilder) {}
-        fun arbeidsdag(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate)
-        fun sykHelgedag(
-            splitter: UtbetalingstidslinjeBuilder,
-            dagen: LocalDate,
-            økonomi: Økonomi
-        )
-
-        fun entering(splitter: UtbetalingstidslinjeBuilder) {}
-        fun leaving(splitter: UtbetalingstidslinjeBuilder) {}
-    }
-
-    private object Initiell : UtbetalingState {
-
-        override fun entering(splitter: UtbetalingstidslinjeBuilder) {
-            splitter.sykedagerIArbeidsgiverperiode = 0
-        }
-
-        override fun leaving(splitter: UtbetalingstidslinjeBuilder) {
-            splitter.ikkeSykedager = 0
-        }
-
-        override fun justerSykedagtelling(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate) {
-            splitter.inkrementerSykedagerIArbeidsgiverperiodeFraInfotrygd(dagen)
-        }
-
-        override fun sykedag(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate, økonomi: Økonomi) {
-            splitter.state(ArbeidsgiverperiodeSykedager)
-            splitter.håndterArbeidsgiverdag(dagen)
-        }
-
-        override fun sykHelgedag(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate, økonomi: Økonomi) {
-            splitter.state(ArbeidsgiverperiodeSykedager)
-            splitter.håndterArbeidsgiverdag(dagen)
-        }
-
-        override fun fridag(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate) {
-            splitter.addFridag(dagen)
-        }
-
-        override fun arbeidsdag(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate) {
-            splitter.håndterArbeidsdag(dagen)
-        }
-
-    }
-
-    private object ArbeidsgiverperiodeSykedager : UtbetalingState {
-        override fun sykedag(
-            splitter: UtbetalingstidslinjeBuilder,
-            dagen: LocalDate,
-            økonomi: Økonomi
-        ) {
-            splitter.håndterArbeidsgiverdag(dagen)
-        }
-
-        override fun sykHelgedag(
-            splitter: UtbetalingstidslinjeBuilder,
-            dagen: LocalDate,
-            økonomi: Økonomi
-        ) {
-            splitter.håndterArbeidsgiverdag(dagen)
-        }
-
-        override fun arbeidsdag(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate) {
-            splitter.state(ArbeidsgiverperiodeOpphold)
-            splitter.håndterArbeidsdag(dagen)
-        }
-
-
-        override fun fridag(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate) {
-            splitter.state(ArbeidsgiverperiodeFri)
-            splitter.håndterUsikkerFridag(dagen)
-        }
-    }
-
-    private object ArbeidsgiverperiodeFri : UtbetalingState {
-        override fun fridag(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate) {
-            splitter.håndterUsikkerFridag(dagen)
-        }
-
-        override fun justerSykedagtelling(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate) {
-            // når vi treffer en sykedag skal evt. ferie/helg i forkant telles som en del av arbeidsgiverperioden
-            splitter.inkrementerSykedagerIArbeidsgiverperiodeMedFridager()
-        }
-
-        override fun sykedag(
-            splitter: UtbetalingstidslinjeBuilder,
-            dagen: LocalDate,
-            økonomi: Økonomi
-        ) {
-            splitter.state(ArbeidsgiverperiodeSykedager)
-            splitter.håndterArbeidsgiverdag(dagen)
-        }
-
-        override fun justerIkkeSykedagtelling(splitter: UtbetalingstidslinjeBuilder) {
-            // når vi treffer en arbeidsdag skal evt. ferie/helg i forkant _ikke_ telle som del av arbeidsgiverperioden,
-            // men heller telles som oppholdsdager
-            splitter.inkrementerIkkeSykedagerFraFridager()
-        }
-
-        override fun arbeidsdag(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate) {
-            splitter.state(ArbeidsgiverperiodeOpphold)
-            splitter.håndterArbeidsdag(dagen)
-        }
-
-        override fun sykHelgedag(
-            splitter: UtbetalingstidslinjeBuilder,
-            dagen: LocalDate,
-            økonomi: Økonomi
-        ) {
-            splitter.state(ArbeidsgiverperiodeSykedager)
-            splitter.håndterArbeidsgiverdag(dagen)
-        }
-
-    }
-
-    private object ArbeidsgiverperiodeOpphold : UtbetalingState {
-        override fun leaving(splitter: UtbetalingstidslinjeBuilder) {
-            splitter.ikkeSykedager = 0
-        }
-
-        override fun arbeidsdag(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate) {
-            splitter.håndterArbeidsdag(dagen)
-        }
-
-        override fun sykedag(
-            splitter: UtbetalingstidslinjeBuilder,
-            dagen: LocalDate,
-            økonomi: Økonomi
-        ) {
-            splitter.state(ArbeidsgiverperiodeSykedager)
-            splitter.håndterArbeidsgiverdag(dagen)
-        }
-
-        override fun fridag(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate) {
-            splitter.håndterFridagOpphold(dagen)
-        }
-
-        override fun sykHelgedag(
-            splitter: UtbetalingstidslinjeBuilder,
-            dagen: LocalDate,
-            økonomi: Økonomi
-        ) {
-            splitter.state(ArbeidsgiverperiodeSykedager)
-            splitter.håndterArbeidsgiverdag(dagen)
-        }
-
-    }
-
-    private object UtbetalingSykedager : UtbetalingState {
-        override fun sykHelgedag(
-            splitter: UtbetalingstidslinjeBuilder,
-            dagen: LocalDate,
-            økonomi: Økonomi
-        ) {
-            splitter.addNAVHelgedag(dagen, økonomi)
-        }
-
-        override fun egenmeldingsdag(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate) {
-            splitter.addAvvistDag(dagen)
-        }
-
-        override fun foreldetSykedag(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate, økonomi: Økonomi) {
-            splitter.addForeldetDag(dagen, økonomi)
-        }
-
-        override fun sykedag(
-            splitter: UtbetalingstidslinjeBuilder,
-            dagen: LocalDate,
-            økonomi: Økonomi
-        ) {
-            splitter.addNAVdag(dagen, økonomi)
-        }
-
-        override fun arbeidsdag(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate) {
-            splitter.state(UtbetalingOpphold)
-            splitter.håndterArbeidsdag(dagen)
-        }
-
-        override fun fridag(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate) {
-            splitter.state(UtbetalingFri)
-            splitter.addFridag(dagen)
-        }
-    }
-
-    private object UtbetalingFri : UtbetalingState {
-        override fun sykedag(
-            splitter: UtbetalingstidslinjeBuilder,
-            dagen: LocalDate,
-            økonomi: Økonomi
-        ) {
-            splitter.state(UtbetalingSykedager)
-            splitter.addNAVdag(dagen, økonomi)
-        }
-
-        override fun fridag(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate) {
-            splitter.addFridag(dagen)
-        }
-
-        override fun arbeidsdag(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate) {
-            splitter.state(UtbetalingOpphold)
-            splitter.håndterArbeidsdag(dagen)
-        }
-
-        override fun sykHelgedag(
-            splitter: UtbetalingstidslinjeBuilder,
-            dagen: LocalDate,
-            økonomi: Økonomi
-        ) {
-            splitter.state(UtbetalingSykedager)
-            splitter.addNAVHelgedag(dagen, økonomi)
-        }
-    }
-
-    private object UtbetalingOpphold : UtbetalingState {
-        override fun leaving(splitter: UtbetalingstidslinjeBuilder) {
-            splitter.ikkeSykedager = 0
-        }
-
-        override fun sykedag(
-            splitter: UtbetalingstidslinjeBuilder,
-            dagen: LocalDate,
-            økonomi: Økonomi
-        ) {
-            splitter.state(UtbetalingSykedager)
-            splitter.addNAVdag(dagen, økonomi)
-        }
-
-        override fun arbeidsdag(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate) {
-            splitter.håndterArbeidsdag(dagen)
-        }
-
-        override fun fridag(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate) {
-            splitter.håndterFridagOpphold(dagen)
-        }
-
-        override fun foreldetSykedag(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate, økonomi: Økonomi) {
-            splitter.addForeldetDag(dagen, økonomi)
-        }
-
-        override fun sykHelgedag(
-            splitter: UtbetalingstidslinjeBuilder,
-            dagen: LocalDate,
-            økonomi: Økonomi
-        ) {
-            splitter.state(UtbetalingSykedager)
-            splitter.addNAVHelgedag(dagen, økonomi)
-        }
     }
 }
 
