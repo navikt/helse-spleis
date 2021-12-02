@@ -1,11 +1,14 @@
 package no.nav.helse.person
 
+import no.nav.helse.Toggle
+import no.nav.helse.Toggle.Companion.enable
 import no.nav.helse.hendelser.*
-import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.testhelpers.*
+import no.nav.helse.utbetalingslinjer.Fagområde
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
@@ -24,7 +27,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
     @Test
     fun `simulering er OK`() {
         håndterYtelser()
-        person.håndter(simulering())
+        håndterSimuleringer()
         assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
         assertFalse(inspektør.personLogg.hasWarningsOrWorse())
     }
@@ -32,7 +35,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
     @Test
     fun `simulering med endret dagsats`() {
         håndterYtelser()
-        person.håndter(simulering(dagsats = 500))
+        håndterSimuleringer(mapOf(Fagområde.SykepengerRefusjon to Pair(true, 500)))
         assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
         assertTrue(inspektør.personLogg.warn().toString().contains("Simulering"))
     }
@@ -40,15 +43,48 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
     @Test
     fun `simulering er ikke OK`() {
         håndterYtelser()
-        person.håndter(simulering(false))
+        håndterSimuleringer(mapOf(Fagområde.SykepengerRefusjon to Pair(false, 1431)))
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
         assertEquals(TIL_INFOTRYGD, inspektør.sisteTilstand(1.vedtaksperiode))
     }
 
-    private fun håndterYtelser() {
+    @Test
+    fun `simulering ved delvis refusjon`() = listOf(Toggle.LageBrukerutbetaling, Toggle.DelvisRefusjon).enable {
+        håndterYtelser(Inntektsmelding.Refusjon(31000.månedlig, sisteSykedag.minusDays(7), emptyList()))
+        håndterSimuleringer(mapOf(
+            Fagområde.SykepengerRefusjon to Pair(true, 1431),
+            Fagområde.Sykepenger to Pair(true, 1431)
+        ))
+        assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
+        assertFalse(inspektør.personLogg.hasWarningsOrWorse())
+    }
+
+    @Test
+    fun `simulering ved delvis refusjon hvor vi avventer en simulering`() = listOf(Toggle.LageBrukerutbetaling, Toggle.DelvisRefusjon).enable {
+        håndterYtelser(Inntektsmelding.Refusjon(31000.månedlig, sisteSykedag.minusDays(7), emptyList()))
+        håndterSimuleringer(mapOf(
+            Fagområde.SykepengerRefusjon to Pair(true, 1431)
+        ))
+        assertEquals(AVVENTER_SIMULERING, inspektør.sisteTilstand(1.vedtaksperiode))
+        assertFalse(inspektør.personLogg.hasWarningsOrWorse())
+    }
+
+    @Test
+    fun `simulering ved ingen refusjon`() = listOf(Toggle.LageBrukerutbetaling, Toggle.DelvisRefusjon).enable {
+        håndterYtelser(Inntektsmelding.Refusjon(INGEN, null, emptyList()))
+        håndterSimuleringer(mapOf(
+            Fagområde.Sykepenger to Pair(true, 1431)
+        ))
+        assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
+        assertFalse(inspektør.personLogg.hasWarningsOrWorse())
+    }
+
+    private fun håndterYtelser(
+        refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList())
+    ) {
         person.håndter(sykmelding())
         person.håndter(søknad())
-        person.håndter(inntektsmelding())
+        person.håndter(inntektsmelding(refusjon))
         person.håndter(ytelser())
         person.håndter(vilkårsgrunnlag())
         person.håndter(ytelser())
@@ -139,10 +175,12 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
             hendelse = this
         }
 
-    private fun inntektsmelding() =
+    private fun inntektsmelding(
+        refusjon: Inntektsmelding.Refusjon
+    ) =
         Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
-            refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
+            refusjon = refusjon,
             orgnummer = ORGNUMMER,
             fødselsnummer = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
@@ -193,18 +231,34 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
             hendelse = this
         }
 
-    private fun simulering(simuleringOK: Boolean = true, dagsats: Int = 1431) =
+    private fun håndterSimuleringer(simuleringsdetaljer: Map<Fagområde, Pair<Boolean,Int>> = mapOf(Fagområde.SykepengerRefusjon to Pair(true, 1431))) {
+        hendelse.behov().filter { it.type == Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering }.forEach { simuleringsBehov ->
+            val fagsystemId = simuleringsBehov.detaljer().getValue("fagsystemId") as String
+            val fagområde = Fagområde.from(simuleringsBehov.detaljer().getValue("fagområde") as String)
+            val utbetalingId = UUID.fromString(simuleringsBehov.kontekst().getValue("utbetalingId"))
+            if (!simuleringsdetaljer.containsKey(fagområde)) return@forEach
+            val (simuleringOk, dagsats) = simuleringsdetaljer.getValue(fagområde)
+            person.håndter(simulering(simuleringOk, dagsats, fagområde, fagsystemId, utbetalingId))
+        }
+    }
+
+    private fun simulering(
+        simuleringOK: Boolean,
+        dagsats: Int,
+        fagområde: Fagområde,
+        fagsystemId: String,
+        utbetalingId: UUID) =
         Simulering(
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = "${1.vedtaksperiode(ORGNUMMER)}",
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = ORGNUMMER,
-            fagsystemId = hendelse.behov().first { it.type == Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering }.detaljer().getValue("fagsystemId") as String,
-            fagområde = hendelse.behov().first { it.type == Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering }.detaljer().getValue("fagområde") as String,
+            fagsystemId = fagsystemId,
+            fagområde = fagområde.verdi,
             simuleringOK = simuleringOK,
             melding = "",
-            utbetalingId = UUID.randomUUID(),
+            utbetalingId = utbetalingId,
             simuleringResultat = if (!simuleringOK) null else Simulering.SimuleringResultat(
                 totalbeløp = 44361,
                 perioder = listOf(

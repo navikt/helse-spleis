@@ -365,6 +365,8 @@ internal class Oppdrag private constructor(
         this.simuleringsResultat = simulering.simuleringResultat
     }
 
+    internal fun erKlarForGodkjenning() = !harUtbetalinger() || simuleringsResultat != null
+
     private interface Tilstand {
         fun håndterForskjell(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje, aktivitetslogg: IAktivitetslogg)
     }

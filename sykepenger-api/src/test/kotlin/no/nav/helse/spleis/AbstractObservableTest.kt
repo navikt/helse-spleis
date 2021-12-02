@@ -212,7 +212,10 @@ abstract class AbstractObservableTest {
         simuleringOK: Boolean = true,
         orgnummer: String = ORGNUMMER,
         fom: LocalDate = FOM.plusDays(16),
-        tom: LocalDate = TOM
+        tom: LocalDate = TOM,
+        fagsystemId: String,
+        fagområde: String,
+        utbetalingId: UUID
     ) =
         Simulering(
             meldingsreferanseId = UUID.randomUUID(),
@@ -220,11 +223,11 @@ abstract class AbstractObservableTest {
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR,
             orgnummer = orgnummer,
-            fagsystemId = "fagsystemID",
-            fagområde = "SPREF",
+            fagsystemId = fagsystemId,
+            fagområde = fagområde,
             simuleringOK = simuleringOK,
             melding = "",
-            utbetalingId = UUID.randomUUID(),
+            utbetalingId = utbetalingId,
             simuleringResultat = Simulering.SimuleringResultat(
                 totalbeløp = 2000,
                 perioder = listOf(
@@ -270,7 +273,7 @@ abstract class AbstractObservableTest {
         utbetalingGodkjent: Boolean = true,
         orgnummer: String = ORGNUMMER,
         automatiskBehandling: Boolean = false,
-        utbetalingId: UUID = UUID.randomUUID()
+        utbetalingId: UUID
     ) = Utbetalingsgodkjenning(
         meldingsreferanseId = UUID.randomUUID(),
         aktørId = AKTØRID,
@@ -286,10 +289,11 @@ abstract class AbstractObservableTest {
     )
 
     protected fun utbetaling(
-        fagsystemId: String = "tilfeldig-string",
+        fagsystemId: String,
         status: Oppdragstatus = AKSEPTERT,
         orgnummer: String = ORGNUMMER,
-        meldingsreferanseId: UUID = UUID.randomUUID()
+        meldingsreferanseId: UUID = UUID.randomUUID(),
+        utbetalingId: UUID
     ) =
         UtbetalingHendelse(
             meldingsreferanseId = meldingsreferanseId,
@@ -297,7 +301,7 @@ abstract class AbstractObservableTest {
             fødselsnummer = UNG_PERSON_FNR,
             orgnummer = orgnummer,
             fagsystemId = fagsystemId,
-            utbetalingId = UUID.randomUUID().toString(),
+            utbetalingId = "$utbetalingId",
             status = status,
             melding = "hei",
             avstemmingsnøkkel = 123456L,
@@ -306,3 +310,4 @@ abstract class AbstractObservableTest {
 }
 
 internal typealias IdInnhenter = (orgnummer: String) -> UUID
+

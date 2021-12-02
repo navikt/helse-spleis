@@ -622,6 +622,8 @@ internal class Utbetaling private constructor(
         arbeidsgiverOppdrag.håndter(simulering)
     }
 
+    internal fun erKlarForGodkjenning() = personOppdrag.erKlarForGodkjenning() && arbeidsgiverOppdrag.erKlarForGodkjenning()
+
     internal interface Tilstand {
         fun forkast(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
             hendelse.info("Forkaster ikke utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")

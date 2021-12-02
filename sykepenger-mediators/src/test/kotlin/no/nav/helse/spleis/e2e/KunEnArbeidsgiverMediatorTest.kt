@@ -643,7 +643,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             sendYtelser(0)
             sendVilkårsgrunnlag(0)
             sendYtelserUtenSykepengehistorikk(0)
-            sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
+            sendSimulering(0, SimuleringMessage.Simuleringstatus.OK, forventedeFagområder = setOf("SPREF", "SP"))
             sendUtbetalingsgodkjenning(0)
             sendUtbetaling()
             assertUtbetalingTilstander(0, "IKKE_UTBETALT", "GODKJENT", "SENDT", "OVERFØRT", "UTBETALT")

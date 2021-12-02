@@ -137,7 +137,7 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         sendYtelser(0)
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
-        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
+        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK, forventedeFagområder = setOf("SPREF", "SP"))
         sendUtbetalingsgodkjenning(0)
         sendUtbetaling()
         sendAnnullering(testRapid.inspektør.alleEtterspurteBehov(Utbetaling).first { it.path(Utbetaling.name).path("fagområde").asText() == "SPREF"}.path(Utbetaling.name).path("fagsystemId").asText())

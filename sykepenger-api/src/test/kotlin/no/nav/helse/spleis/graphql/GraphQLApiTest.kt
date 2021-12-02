@@ -2,6 +2,7 @@ package no.nav.helse.spleis.graphql
 
 import no.nav.helse.Toggle
 import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
 import no.nav.helse.person.Person
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.spleis.AbstractObservableTest
@@ -36,28 +37,32 @@ internal class GraphQLApiTest : AbstractObservableTest() {
     internal fun setup() {
         person = Person(AKTØRID, UNG_PERSON_FNR.somFødselsnummer())
         observatør = TestObservatør().also { person.addObserver(it) }
-
         person.håndter(sykmelding())
         person.håndter(søknad())
         person.håndter(inntektsmelding())
         person.håndter(ytelser())
         person.håndter(vilkårsgrunnlag())
-        person.håndter(ytelser())
-        person.håndter(simulering())
-        person.håndter(utbetalingsgodkjenning())
+        val ytelser = ytelser()
+        person.håndter(ytelser)
+        val simuleringsbehov = ytelser.behov().last { it.type == Simulering }
+        val utbetalingId = UUID.fromString(simuleringsbehov.kontekst().getValue("utbetalingId"))
+        val fagsystemId = simuleringsbehov.detaljer().getValue("fagsystemId") as String
+        val fagområde = simuleringsbehov.detaljer().getValue("fagområde") as String
+        person.håndter(simulering(utbetalingId = utbetalingId, fagsystemId = fagsystemId, fagområde = fagområde))
+        person.håndter(utbetalingsgodkjenning(utbetalingId = utbetalingId))
         person.håndter(
             UtbetalingOverført(
                 meldingsreferanseId = UUID.randomUUID(),
                 aktørId = AKTØRID,
                 fødselsnummer = UNG_PERSON_FNR,
                 orgnummer = ORGNUMMER,
-                fagsystemId = "tilfeldig-string",
-                utbetalingId = UUID.randomUUID().toString(),
+                fagsystemId = fagsystemId,
+                utbetalingId = "$utbetalingId",
                 avstemmingsnøkkel = 123456L,
                 overføringstidspunkt = LocalDateTime.now()
             )
         )
-        person.håndter(utbetaling())
+        person.håndter(utbetaling(utbetalingId = utbetalingId, fagsystemId = fagsystemId))
 
         testServer.clean()
         testServer.lagrePerson(AKTØRID, UNG_PERSON_FNR, person)

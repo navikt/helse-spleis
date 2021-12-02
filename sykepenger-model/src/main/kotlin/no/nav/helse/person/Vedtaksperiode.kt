@@ -2098,6 +2098,11 @@ internal class Vedtaksperiode private constructor(
             if (vedtaksperiode.utbetaling().valider(simulering).hasErrorsOrWorse())
                 return vedtaksperiode.tilstand(simulering, TilInfotrygd)
             vedtaksperiode.dataForSimulering = simulering.simuleringResultat
+
+            if (!vedtaksperiode.utbetaling().erKlarForGodkjenning()) {
+                return
+            }
+
             vedtaksperiode.tilstand(simulering, AvventerGodkjenning)
         }
 
@@ -2125,6 +2130,11 @@ internal class Vedtaksperiode private constructor(
                 return vedtaksperiode.tilstand(simulering, RevurderingFeilet)
             }
             vedtaksperiode.dataForSimulering = simulering.simuleringResultat
+
+            if (!vedtaksperiode.utbetaling().erKlarForGodkjenning()) {
+                return
+            }
+
             vedtaksperiode.tilstand(simulering, AvventerGodkjenningRevurdering)
         }
 

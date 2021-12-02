@@ -340,16 +340,28 @@ internal abstract class AbstractEndToEndMediatorTest {
         )
     }
 
-    protected fun sendSimulering(vedtaksperiodeIndeks: Int, status: SimuleringMessage.Simuleringstatus) {
+    protected fun sendSimulering(
+        vedtaksperiodeIndeks: Int,
+        status: SimuleringMessage.Simuleringstatus,
+        forventedeFagområder: Set<String> = setOf("SPREF")
+    ) {
+        val fagområder = mutableSetOf<String>()
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Simulering))
-        testRapid.sendTestMessage(
-            meldingsfabrikk.lagSimulering(
-                vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
-                tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, Simulering),
-                status = status,
-                utbetalingId = UUID.fromString(testRapid.inspektør.etterspurteBehov(Simulering).path("utbetalingId").asText())
+        testRapid.inspektør.alleEtterspurteBehov(Simulering).forEach { behov ->
+            testRapid.sendTestMessage(
+                meldingsfabrikk.lagSimulering(
+                    vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
+                    tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, Simulering),
+                    status = status,
+                    utbetalingId = UUID.fromString(behov.path("utbetalingId").asText()),
+                    fagsystemId = behov.path("Simulering").path("fagsystemId").asText(),
+                    fagområde = behov.path("Simulering").path("fagområde").asText().also {
+                        fagområder.add(it)
+                    }
+                )
             )
-        )
+        }
+        assertEquals(forventedeFagområder, fagområder)
     }
 
     protected fun sendEtterbetaling(

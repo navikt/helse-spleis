@@ -520,7 +520,9 @@ internal class TestMessageFactory(
         vedtaksperiodeId: UUID,
         tilstand: TilstandType,
         status: SimuleringMessage.Simuleringstatus,
-        utbetalingId: UUID
+        utbetalingId: UUID,
+        fagsystemId: String = "fagsystemid",
+        fagområde: String = "SPREF"
     ): String {
         return lagBehovMedLøsning(
             behov = listOf("Simulering"),
@@ -528,8 +530,8 @@ internal class TestMessageFactory(
             tilstand = tilstand,
             løsninger = mapOf(
                 "Simulering" to mapOf(
-                    "fagsystemId" to "fagsystemid",
-                    "fagområde" to "SPREF",
+                    "fagsystemId" to fagsystemId,
+                    "fagområde" to fagområde,
                     "status" to status.name,
                     "feilmelding" to if (status == SimuleringMessage.Simuleringstatus.OK) null else "FEIL I SIMULERING",
                     "simulering" to if (status != SimuleringMessage.Simuleringstatus.OK) null else mapOf(
@@ -575,8 +577,8 @@ internal class TestMessageFactory(
             ekstraFelter = mapOf(
                 "utbetalingId" to "$utbetalingId",
                 "Simulering" to mapOf(
-                    "fagsystemId" to "fagsystemid",
-                    "fagområde" to "SPREF"
+                    "fagsystemId" to fagsystemId,
+                    "fagområde" to fagområde
                 )
             )
         )

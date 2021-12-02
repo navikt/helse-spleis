@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.testhelpers
 
-import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.person.*
 import no.nav.helse.person.PersonObserver.VedtaksperiodeEndretEvent
@@ -30,10 +29,6 @@ internal class TestObservatør : PersonObserver {
         if (event.gjeldendeTilstand == TilstandType.AVSLUTTET) utbetalteVedtaksperioder.add(hendelseskontekst.vedtaksperiodeId())
     }
 
-    override fun utbetalingUtbetalt(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetalingUtbetaltEvent) {
-        super.utbetalingUtbetalt(hendelseskontekst, event)
-    }
-
     companion object {
         private fun Hendelseskontekst.toMap() = mutableMapOf<String, String>().also { appendTo(it::set) }
 
@@ -43,11 +38,6 @@ internal class TestObservatør : PersonObserver {
 
         private fun Hendelseskontekst.orgnummer(): String {
             return toMap()["organisasjonsnummer"]!!
-        }
-
-        data class ObservedEvent<EventType>(val event: EventType, private val kontekst: Hendelseskontekst) {
-            fun vedtaksperiodeId() = kontekst.vedtaksperiodeId()
-            fun orgnummer() = kontekst.orgnummer()
         }
     }
 }
