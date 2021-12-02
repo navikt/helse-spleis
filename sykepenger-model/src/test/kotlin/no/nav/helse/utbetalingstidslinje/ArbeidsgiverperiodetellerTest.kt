@@ -5,8 +5,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -28,10 +27,11 @@ internal class ArbeidsgiverperiodetellerTest {
     fun `16 sykedager utgjør ny arbeidsgiverperiode`() {
         val sykedager = 1.januar til 16.januar
         sykedager.tell()
-        assertEquals(16, strategi.antallDagerInnenforArbeidsgiverperioden)
-        assertEquals(0, strategi.antallDagerIForkantAvEllerEtterFullførtArbeidsgiverperiode)
+        assertEquals(16, strategi.antallDagerSomInngårIArbeidsgiverperiodetelling)
+        assertEquals(0, strategi.antallDagerSomIkkeInngårIArbeidsgiverperiodetelling)
         assertEquals(1, observatør.arbeidsgiverperioder())
         assertEquals(sykedager, observatør.arbeidsgiverperiode(0))
+        sykedager.forEach { assertEquals(1.januar til it, strategi.arbeidsgiverperiodeFor(it)) }
     }
 
     @Test
@@ -40,10 +40,11 @@ internal class ArbeidsgiverperiodetellerTest {
             1.januar til 16.januar,
             1.februar til 17.februar
         ).tell()
-        assertEquals(16, strategi.antallDagerInnenforArbeidsgiverperioden)
-        assertEquals(17, strategi.antallDagerIForkantAvEllerEtterFullførtArbeidsgiverperiode)
+        assertEquals(16, strategi.antallDagerSomInngårIArbeidsgiverperiodetelling)
+        assertEquals(17, strategi.antallDagerSomIkkeInngårIArbeidsgiverperiodetelling)
         assertEquals(1, observatør.arbeidsgiverperioder())
         assertEquals(sykedager[0], observatør.arbeidsgiverperiode(0))
+        (1.februar til 17.februar).forEach { assertEquals(1.januar til 16.januar, strategi.arbeidsgiverperiodeFor(it)) }
     }
 
     @Test
@@ -52,8 +53,8 @@ internal class ArbeidsgiverperiodetellerTest {
             1.januar til 16.januar,
             2.februar til 17.februar
         ).tell()
-        assertEquals(32, strategi.antallDagerInnenforArbeidsgiverperioden)
-        assertEquals(0, strategi.antallDagerIForkantAvEllerEtterFullførtArbeidsgiverperiode)
+        assertEquals(32, strategi.antallDagerSomInngårIArbeidsgiverperiodetelling)
+        assertEquals(0, strategi.antallDagerSomIkkeInngårIArbeidsgiverperiodetelling)
         assertEquals(2, observatør.arbeidsgiverperioder())
         assertEquals(sykedager[0], observatør.arbeidsgiverperiode(0))
         assertEquals(sykedager[1], observatør.arbeidsgiverperiode(1))
@@ -65,10 +66,12 @@ internal class ArbeidsgiverperiodetellerTest {
         1.januar.tell()
         (2.januar til 31.januar).feriedager()
         1.februar.tell()
-        assertEquals(16, strategi.antallDagerInnenforArbeidsgiverperioden)
-        assertEquals(16, strategi.antallDagerIForkantAvEllerEtterFullførtArbeidsgiverperiode)
+        assertEquals(16, strategi.antallDagerSomInngårIArbeidsgiverperiodetelling)
+        assertEquals(16, strategi.antallDagerSomIkkeInngårIArbeidsgiverperiodetelling)
         assertEquals(1, observatør.arbeidsgiverperioder())
         assertEquals(1.januar til 16.januar, observatør.arbeidsgiverperiode(0))
+        (1.januar til 16.januar).forEach { assertEquals(1.januar til it, strategi.arbeidsgiverperiodeFor(it)) }
+        (17.januar til 1.februar).forEach { assertEquals(1.januar til 16.januar, strategi.arbeidsgiverperiodeFor(it)) }
     }
 
     @Test
@@ -76,18 +79,20 @@ internal class ArbeidsgiverperiodetellerTest {
         1.januar().tell()
         (2.januar til 31.januar).feriedager()
         1.februar().oppholdsdag()
-        assertEquals(1, strategi.antallDagerInnenforArbeidsgiverperioden)
-        assertEquals(30, strategi.antallDagerIForkantAvEllerEtterFullførtArbeidsgiverperiode)
+        assertEquals(1, strategi.antallDagerSomInngårIArbeidsgiverperiodetelling)
+        assertEquals(30, strategi.antallDagerSomIkkeInngårIArbeidsgiverperiodetelling)
         assertEquals(0, observatør.arbeidsgiverperioder())
         assertTrue(observatør.tilbakestillingAvArbeidsgiverperiodetelling(17.januar))
+        assertEquals(1.januar, strategi.arbeidsgiverperiodeFor(1.januar))
+        (2.januar til 1.februar).forEach { assertNull(strategi.arbeidsgiverperiodeFor(it)) }
     }
 
     @Test
     fun `ferie i forkant teller ikke med i tellingen`() {
         (1.januar til 31.januar).feriedager()
         val sykedager = (1.februar til 16.februar).tell()
-        assertEquals(16, strategi.antallDagerInnenforArbeidsgiverperioden)
-        assertEquals(31, strategi.antallDagerIForkantAvEllerEtterFullførtArbeidsgiverperiode)
+        assertEquals(16, strategi.antallDagerSomInngårIArbeidsgiverperiodetelling)
+        assertEquals(31, strategi.antallDagerSomIkkeInngårIArbeidsgiverperiodetelling)
         assertEquals(1, observatør.arbeidsgiverperioder())
         assertEquals(sykedager, observatør.arbeidsgiverperiode(0))
     }
@@ -95,8 +100,8 @@ internal class ArbeidsgiverperiodetellerTest {
     @Test
     fun `oppholdsdager i forkant teller ikke med i telling`() {
         (1.januar til 31.januar).oppholdsdager()
-        assertEquals(0, strategi.antallDagerInnenforArbeidsgiverperioden)
-        assertEquals(0, strategi.antallDagerIForkantAvEllerEtterFullførtArbeidsgiverperiode)
+        assertEquals(0, strategi.antallDagerSomInngårIArbeidsgiverperiodetelling)
+        assertEquals(0, strategi.antallDagerSomIkkeInngårIArbeidsgiverperiodetelling)
         val sykedager = (1.februar til 16.februar).tell()
         assertEquals(1, observatør.arbeidsgiverperioder())
         assertEquals(sykedager, observatør.arbeidsgiverperiode(0))
@@ -109,8 +114,8 @@ internal class ArbeidsgiverperiodetellerTest {
         val del3 = (11.januar til 11.januar).tell()
         (12.januar til 26.januar).oppholdsdager()
         val del4 = (27.januar til 31.januar).tell()
-        assertEquals(16, strategi.antallDagerInnenforArbeidsgiverperioden)
-        assertEquals(0, strategi.antallDagerIForkantAvEllerEtterFullførtArbeidsgiverperiode)
+        assertEquals(16, strategi.antallDagerSomInngårIArbeidsgiverperiodetelling)
+        assertEquals(0, strategi.antallDagerSomIkkeInngårIArbeidsgiverperiodetelling)
         assertEquals(1, observatør.arbeidsgiverperioder())
         assertEquals(listOf(del1, del2, del3, del4), observatør.arbeidsgiverperiode(0))
     }
@@ -135,8 +140,8 @@ internal class ArbeidsgiverperiodetellerTest {
             29.januar,
             31.januar
         ).tell()
-        assertEquals(16, strategi.antallDagerInnenforArbeidsgiverperioden)
-        assertEquals(0, strategi.antallDagerIForkantAvEllerEtterFullførtArbeidsgiverperiode)
+        assertEquals(16, strategi.antallDagerSomInngårIArbeidsgiverperiodetelling)
+        assertEquals(0, strategi.antallDagerSomIkkeInngårIArbeidsgiverperiodetelling)
         assertEquals(1, observatør.arbeidsgiverperioder())
         assertEquals(sykedager, observatør.arbeidsgiverperiode(0))
     }
@@ -155,7 +160,13 @@ internal class ArbeidsgiverperiodetellerTest {
         perioder.forEach { (periode, callback) -> callback(periode) }
     }
 
-    private fun assertEquals(expected: Iterable<LocalDate>, actual: Arbeidsgiverperiode) {
+    private fun assertEquals(expected: LocalDate, actual: Arbeidsgiverperiode?) {
+        no.nav.helse.testhelpers.assertNotNull(actual)
+        assertEquals(listOf(expected), actual.toList())
+    }
+
+    private fun assertEquals(expected: Iterable<LocalDate>, actual: Arbeidsgiverperiode?) {
+        no.nav.helse.testhelpers.assertNotNull(actual)
         assertEquals(expected.toList(), actual.toList())
     }
 
@@ -172,17 +183,23 @@ internal class ArbeidsgiverperiodetellerTest {
     private fun Iterable<LocalDate>.feriedager() = onEach { teller.inkrementEllerDekrement(it, strategi) }
 
     private class Strategi : Arbeidsgiverperiodestrategi {
-        var antallDagerInnenforArbeidsgiverperioden = 0
+        var antallDagerSomInngårIArbeidsgiverperiodetelling = 0
             private set
-        var antallDagerIForkantAvEllerEtterFullførtArbeidsgiverperiode = 0
+        var antallDagerSomIkkeInngårIArbeidsgiverperiodetelling = 0
             private set
 
-        override fun dagenErInnenforArbeidsgiverperioden() {
-            antallDagerInnenforArbeidsgiverperioden += 1
+        private val dager = mutableMapOf<LocalDate, Arbeidsgiverperiode?>()
+
+        internal fun arbeidsgiverperiodeFor(dagen: LocalDate) = dager[dagen]
+
+        override fun dagenInngårIArbeidsgiverperiodetelling(arbeidsgiverperiode: Arbeidsgiverperiode, dagen: LocalDate) {
+            antallDagerSomInngårIArbeidsgiverperiodetelling += 1
+            dager[dagen] = arbeidsgiverperiode
         }
 
-        override fun dagenErEtterArbeidsgiverperioden() {
-            antallDagerIForkantAvEllerEtterFullførtArbeidsgiverperiode += 1
+        override fun dagenInngårIkkeIArbeidsgiverperiodetelling(arbeidsgiverperiode: Arbeidsgiverperiode?, dagen: LocalDate) {
+            antallDagerSomIkkeInngårIArbeidsgiverperiodetelling += 1
+            dager[dagen] = arbeidsgiverperiode
         }
     }
 

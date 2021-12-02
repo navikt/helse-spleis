@@ -13,24 +13,24 @@ internal fun interface Forlengelsestrategi {
 }
 
 internal interface Arbeidsgiverperiodestrategi {
-    fun dagenErInnenforArbeidsgiverperioden() {}
-    fun dagenErEtterArbeidsgiverperioden() {}
+    fun dagenInngårIArbeidsgiverperiodetelling(arbeidsgiverperiode: Arbeidsgiverperiode, dagen: LocalDate) {}
+    fun dagenInngårIkkeIArbeidsgiverperiodetelling(arbeidsgiverperiode: Arbeidsgiverperiode?, dagen: LocalDate) {}
 
     class Default(
-        private val dagenErInnenforArbeidsgiverperiodenFun: () -> Unit,
-        private val dagenErEtterArbeidsgiverperiodenFun: () -> Unit
+        private val dagenInngårIArbeidsgiverperiodetellingFun: (arbeidsgiverperiode: Arbeidsgiverperiode) -> Unit,
+        private val dagenInngårIkkeIArbeidsgiverperiodetellingFun: () -> Unit
     ) : Arbeidsgiverperiodestrategi {
-        override fun dagenErInnenforArbeidsgiverperioden() {
-            dagenErInnenforArbeidsgiverperiodenFun()
+        override fun dagenInngårIArbeidsgiverperiodetelling(arbeidsgiverperiode: Arbeidsgiverperiode, dagen: LocalDate) {
+            dagenInngårIArbeidsgiverperiodetellingFun(arbeidsgiverperiode)
         }
 
-        override fun dagenErEtterArbeidsgiverperioden() {
-            dagenErEtterArbeidsgiverperiodenFun()
+        override fun dagenInngårIkkeIArbeidsgiverperiodetelling(arbeidsgiverperiode: Arbeidsgiverperiode?, dagen: LocalDate) {
+            dagenInngårIkkeIArbeidsgiverperiodetellingFun()
         }
     }
 
     companion object {
-        val Empty = Default({}, {})
+        val Empty = object : Arbeidsgiverperiodestrategi {}
     }
 }
 
@@ -73,6 +73,7 @@ internal class Arbeidsgiverperiodeteller(private val regler: ArbeidsgiverRegler,
     private val usikker = mutableListOf<Pair<LocalDate, Arbeidsgiverperiodestrategi>>()
 
     private val builder = ArbeidsgiverperiodeBuilder()
+    private var arbeidsgiverperiode: Arbeidsgiverperiode? = null
 
     internal fun observatør(observatør: Observatør) {
         observatører.add(observatør)
@@ -85,7 +86,7 @@ internal class Arbeidsgiverperiodeteller(private val regler: ArbeidsgiverRegler,
     }
 
     internal fun avslutt() {
-        usikker.onEach { (_, strategi) -> strategi.dagenErEtterArbeidsgiverperioden() }.clear()
+        usikker.onEach { (dagen, strategi) -> strategi.dagenInngårIkkeIArbeidsgiverperiodetelling(arbeidsgiverperiode, dagen) }.clear()
     }
 
     // fridager kan telles som en inkrement (del av arbeidsgiverperioden) eller dekrement (telles som oppholdsdag)
@@ -113,9 +114,10 @@ internal class Arbeidsgiverperiodeteller(private val regler: ArbeidsgiverRegler,
         oppholdsdager = 0
         arbeidsgiverperiodedager += 1
         builder.nyDag(dagen)
-        strategi.dagenErInnenforArbeidsgiverperioden()
+        strategi.dagenInngårIArbeidsgiverperiodetelling(builder.build(), dagen)
         if (!regler.arbeidsgiverperiodenGjennomført(arbeidsgiverperiodedager)) return
-        fortell(dagen) { arbeidsgiverperiodeFerdig(builder.build(), dagen) }
+        arbeidsgiverperiode = builder.build()
+        fortell(dagen) { arbeidsgiverperiodeFerdig(arbeidsgiverperiode!!, dagen) }
         tilstand(HarFullstendigArbeidsgiverperiode, dagen)
     }
 
@@ -142,9 +144,7 @@ internal class Arbeidsgiverperiodeteller(private val regler: ArbeidsgiverRegler,
         }
 
         internal fun build(): Arbeidsgiverperiode {
-            return Arbeidsgiverperiode(perioder.toList()).also {
-                reset()
-            }
+            return Arbeidsgiverperiode(perioder.toList())
         }
     }
 
@@ -178,6 +178,7 @@ internal class Arbeidsgiverperiodeteller(private val regler: ArbeidsgiverRegler,
             teller.oppholdsdager = 0
             teller.arbeidsgiverperiodedager = 0
             teller.builder.reset()
+            teller.arbeidsgiverperiode = null
             teller.fortell(dagen, Observatør::ingenArbeidsgiverperiode)
         }
 
@@ -186,12 +187,12 @@ internal class Arbeidsgiverperiodeteller(private val regler: ArbeidsgiverRegler,
             dagen: LocalDate,
             strategi: Arbeidsgiverperiodestrategi
         ) {
-            strategi.dagenErEtterArbeidsgiverperioden()
+            strategi.dagenInngårIkkeIArbeidsgiverperiodetelling(teller.arbeidsgiverperiode, dagen)
         }
 
         override fun inkrementer(teller: Arbeidsgiverperiodeteller, dagen: LocalDate, strategi: Arbeidsgiverperiodestrategi) {
             if (teller.forlengelsestrategi.erArbeidsgiverperiodenGjennomførtFør(dagen)) {
-                strategi.dagenErEtterArbeidsgiverperioden()
+                strategi.dagenInngårIkkeIArbeidsgiverperiodetelling(teller.arbeidsgiverperiode, dagen)
                 return teller.tilstand(HarFullstendigArbeidsgiverperiode, dagen)
             }
 
@@ -212,7 +213,7 @@ internal class Arbeidsgiverperiodeteller(private val regler: ArbeidsgiverRegler,
         override fun dekrementerUsikker(teller: Arbeidsgiverperiodeteller) {
             teller.usikker.onEach { (dagen, strategi) ->
                 teller.tilstand.dekrementerer(teller, dagen)
-                strategi.dagenErEtterArbeidsgiverperioden()
+                strategi.dagenInngårIkkeIArbeidsgiverperiodetelling(teller.arbeidsgiverperiode, dagen)
             }.clear()
         }
 
@@ -246,7 +247,7 @@ internal class Arbeidsgiverperiodeteller(private val regler: ArbeidsgiverRegler,
             strategi: Arbeidsgiverperiodestrategi
         ) {
             dekrementerer(teller, dagen)
-            strategi.dagenErEtterArbeidsgiverperioden()
+            strategi.dagenInngårIkkeIArbeidsgiverperiodetelling(teller.arbeidsgiverperiode, dagen)
         }
 
         override fun inkrementer(teller: Arbeidsgiverperiodeteller, dagen: LocalDate, strategi: Arbeidsgiverperiodestrategi) {
@@ -270,11 +271,11 @@ internal class Arbeidsgiverperiodeteller(private val regler: ArbeidsgiverRegler,
             dagen: LocalDate,
             strategi: Arbeidsgiverperiodestrategi
         ) {
-            strategi.dagenErEtterArbeidsgiverperioden()
+            inkrementer(teller, dagen, strategi)
         }
 
         override fun inkrementer(teller: Arbeidsgiverperiodeteller, dagen: LocalDate, strategi: Arbeidsgiverperiodestrategi) {
-            strategi.dagenErEtterArbeidsgiverperioden()
+            strategi.dagenInngårIkkeIArbeidsgiverperiodetelling(teller.arbeidsgiverperiode, dagen)
         }
     }
 
@@ -285,7 +286,7 @@ internal class Arbeidsgiverperiodeteller(private val regler: ArbeidsgiverRegler,
 
         override fun inkrementer(teller: Arbeidsgiverperiodeteller, dagen: LocalDate, strategi: Arbeidsgiverperiodestrategi) {
             teller.tilstand(HarFullstendigArbeidsgiverperiode, dagen)
-            strategi.dagenErEtterArbeidsgiverperioden()
+            strategi.dagenInngårIkkeIArbeidsgiverperiodetelling(teller.arbeidsgiverperiode, dagen)
         }
 
         override fun inkrementEllerDekrement(
@@ -294,7 +295,7 @@ internal class Arbeidsgiverperiodeteller(private val regler: ArbeidsgiverRegler,
             strategi: Arbeidsgiverperiodestrategi
         ) {
             dekrementerer(teller, dagen)
-            strategi.dagenErEtterArbeidsgiverperioden()
+            strategi.dagenInngårIkkeIArbeidsgiverperiodetelling(teller.arbeidsgiverperiode, dagen)
         }
 
         override fun dekrementerer(teller: Arbeidsgiverperiodeteller, dagen: LocalDate) {
