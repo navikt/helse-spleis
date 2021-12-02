@@ -1,0 +1,36 @@
+{
+    "arbeidsgivere": [
+        {
+            "utbetalinger": [
+                {
+                    "arbeidsgiverOppdrag": {
+                        "fagsystemId": "fagsystemId1",
+                        "overføringstidspunkt": "2020-11-21T17:39:57.014"
+                    },
+                    "personOppdrag": {
+                        "fagsystemId": "fagsystemId2"
+                    }
+                },
+                {
+                    "arbeidsgiverOppdrag": {
+                        "fagsystemId": "fagsystemId3",
+                        "overføringstidspunkt": "2020-11-21T17:39:57.014"
+                    },
+                    "personOppdrag": {
+                        "fagsystemId": "fagsystemId4"
+                    }
+                },
+                {
+                    "arbeidsgiverOppdrag": {
+                        "fagsystemId": "fagsystemId5",
+                        "overføringstidspunkt": "2020-11-21T17:39:57.014"
+                    },
+                    "personOppdrag": {
+                        "fagsystemId": "fagsystemId6"
+                    }
+                }
+            ]
+        }
+    ],
+    "skjemaVersjon": 128
+}

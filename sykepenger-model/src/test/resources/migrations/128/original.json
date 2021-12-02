@@ -1,0 +1,40 @@
+{
+    "arbeidsgivere": [
+        {
+            "utbetalinger": [
+                {
+                    "arbeidsgiverOppdrag": {
+                        "fagsystemId": "fagsystemId1",
+                        "overføringstidspunkt": "2020-11-21T17:39:57.014",
+                        "simuleringsResultat": {"totalbeløp$sykepenger_model":500,"perioder$sykepenger_model":[]}
+                    },
+                    "personOppdrag": {
+                        "fagsystemId": "fagsystemId2",
+                        "simuleringsResultat": null
+                    }
+                },
+                {
+                    "arbeidsgiverOppdrag": {
+                        "fagsystemId": "fagsystemId3",
+                        "overføringstidspunkt": "2020-11-21T17:39:57.014",
+                        "simuleringsResultat": {}
+                    },
+                    "personOppdrag": {
+                        "fagsystemId": "fagsystemId4",
+                        "simuleringsResultat": {"totalbeløp$sykepenger_model":500,"perioder$sykepenger_model":[]}
+                    }
+                },
+                {
+                    "arbeidsgiverOppdrag": {
+                        "fagsystemId": "fagsystemId5",
+                        "overføringstidspunkt": "2020-11-21T17:39:57.014"
+                    },
+                    "personOppdrag": {
+                        "fagsystemId": "fagsystemId6"
+                    }
+                }
+            ]
+        }
+    ],
+    "skjemaVersjon": 127
+}
