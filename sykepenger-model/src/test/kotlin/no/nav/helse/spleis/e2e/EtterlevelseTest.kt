@@ -354,7 +354,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `§8-30 ledd 2 - under 25 prosent avvik`() {
+    fun `§8-30 ledd 2 punktum 1 - under 25 prosent avvik`() {
         val beregnetInntekt = 31000.0
         val sammenligningsgrunnlag = 31000.0
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
@@ -370,7 +370,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         assertOppfylt(
             PARAGRAF_8_30,
             2.ledd,
-            (1..3).punktum,
+            1.punktum,
             LocalDate.of(2017, 4, 5),
             inputdata = mapOf(
                 "maksimaltTillattAvvikPåÅrsinntekt" to 25.0,
@@ -384,7 +384,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `§8-30 ledd 2 - akkurat 25 prosent avvik`() {
+    fun `§8-30 ledd 2 punktum 1 - akkurat 25 prosent avvik`() {
         val beregnetInntekt = 38750.0
         val sammenligningsgrunnlag = 31000.0
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
@@ -400,7 +400,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         assertOppfylt(
             PARAGRAF_8_30,
             2.ledd,
-            (1..3).punktum,
+            1.punktum,
             LocalDate.of(2017, 4, 5),
             inputdata = mapOf(
                 "maksimaltTillattAvvikPåÅrsinntekt" to 25.0,
@@ -414,7 +414,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `§8-30 ledd 2 - over 25 prosent avvik`() {
+    fun `§8-30 ledd 2 punktum 1 - over 25 prosent avvik`() {
         val beregnetInntekt = 38781.0
         val sammenligningsgrunnlag = 31000.0
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
@@ -426,7 +426,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         assertIkkeOppfylt(
             PARAGRAF_8_30,
             2.ledd,
-            (1..3).punktum,
+            1.punktum,
             LocalDate.of(2017, 4, 5),
             inputdata = mapOf(
                 "maksimaltTillattAvvikPåÅrsinntekt" to 25.0,

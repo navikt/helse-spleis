@@ -2,7 +2,7 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.antallMåneder
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.kilder
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-30 ledd 2`
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-30 ledd 2 punktum 1`
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonHendelse
@@ -41,7 +41,7 @@ class Inntektsvurdering(private val inntekter: List<ArbeidsgiverInntekt>) {
         sammenligningsgrunnlag: Inntekt
     ): Boolean {
         val harAkseptabeltAvvik = sjekkAvvik(avvik, aktivitetslogg)
-        aktivitetslogg.`§8-30 ledd 2`(harAkseptabeltAvvik, MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT, grunnlagForSykepengegrunnlag, sammenligningsgrunnlag, avvik)
+        aktivitetslogg.`§8-30 ledd 2 punktum 1`(harAkseptabeltAvvik, MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT, grunnlagForSykepengegrunnlag, sammenligningsgrunnlag, avvik)
         return harAkseptabeltAvvik
     }
 

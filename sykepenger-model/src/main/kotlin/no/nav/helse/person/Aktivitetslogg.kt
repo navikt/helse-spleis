@@ -702,7 +702,7 @@ class Aktivitetslogg(
                         grunnlagForSykepengegrunnlag: Inntekt
                     ) {}
 
-                    internal fun IAktivitetslogg.`§8-30 ledd 2`(
+                    internal fun IAktivitetslogg.`§8-30 ledd 2 punktum 1`(
                         oppfylt: Boolean,
                         maksimaltTillattAvvikPåÅrsinntekt: Prosent,
                         grunnlagForSykepengegrunnlag: Inntekt,
@@ -715,7 +715,7 @@ class Aktivitetslogg(
                                 versjon = LocalDate.of(2017, 4, 5),
                                 paragraf = PARAGRAF_8_30,
                                 ledd = 2.ledd,
-                                punktum = (1..3).punktum,
+                                punktum = 1.punktum,
                                 inputdata = mapOf(
                                     "maksimaltTillattAvvikPåÅrsinntekt" to maksimaltTillattAvvikPåÅrsinntekt.prosent(),
                                     "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },

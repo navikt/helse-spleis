@@ -1,7 +1,6 @@
 package no.nav.helse.person
 
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-30 ledd 2`
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-30 ledd 2 punktum 1`
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
@@ -178,7 +177,7 @@ internal class AktivitetsloggTest {
 
     @Test
     fun `Juridisk vurdering`() {
-        aktivitetslogg.`§8-30 ledd 2`(true, 100.prosent, Inntekt.INGEN, Inntekt.INGEN, 0.prosent)
+        aktivitetslogg.`§8-30 ledd 2 punktum 1`(true, 100.prosent, Inntekt.INGEN, Inntekt.INGEN, 0.prosent)
         assertEquals(1, aktivitetslogg.juridiskeVurderinger().size)
     }
 
