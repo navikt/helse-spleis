@@ -6,9 +6,8 @@ import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.TidslinjegrunnlagVisitor.Periode.Companion.dager
+import no.nav.helse.person.Ledd.*
 import no.nav.helse.person.Ledd.Companion.ledd
-import no.nav.helse.person.Ledd.LEDD_2
-import no.nav.helse.person.Ledd.LEDD_3
 import no.nav.helse.person.Paragraf.*
 import no.nav.helse.person.Punktum.Companion.punktum
 import no.nav.helse.serde.reflection.AktivitetsloggMap
@@ -606,6 +605,21 @@ class Aktivitetslogg(
 
                     //TODO: Hvordan skal denne kunne legges inn???
                     internal fun IAktivitetslogg.`§8-10 ledd 3`(oppfylt: Boolean) {}
+
+                    internal fun IAktivitetslogg.`§8-11 første ledd`() {
+                        juridiskVurdering(
+                            "",
+                            Vurderingsresultat(
+                                oppfylt = true,
+                                paragraf = PARAGRAF_8_11,
+                                ledd = LEDD_1,
+                                punktum = 1.punktum,
+                                versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
+                                inputdata = emptyMap(),
+                                outputdata = emptyMap()
+                            )
+                        )
+                    }
 
                     internal fun IAktivitetslogg.`§8-12 ledd 1 punktum 1`(
                         oppfylt: Boolean,

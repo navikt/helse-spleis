@@ -1,11 +1,14 @@
 package no.nav.helse.person
 
+import java.time.LocalDate
+
 internal enum class Paragraf {
     PARAGRAF_2,
     PARAGRAF_8_2,
     PARAGRAF_8_3,
     PARAGRAF_8_4,
     PARAGRAF_8_10,
+    PARAGRAF_8_11,
     PARAGRAF_8_12,
     PARAGRAF_8_30,
     PARAGRAF_8_51
@@ -38,3 +41,5 @@ internal enum class Punktum(private val nummer: Int) {
         val IntRange.punktum get() = enumValues<Punktum>().filter { it.nummer in this }
     }
 }
+
+internal val FOLKETRYGDLOVENS_OPPRINNELSESDATO = LocalDate.of(1997, 2, 28)
