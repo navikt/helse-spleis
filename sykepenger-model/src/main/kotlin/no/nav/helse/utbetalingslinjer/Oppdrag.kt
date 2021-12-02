@@ -28,7 +28,8 @@ internal class Oppdrag private constructor(
     private var overføringstidspunkt: LocalDateTime? = null,
     private var avstemmingsnøkkel: Long? = null,
     private var status: Oppdragstatus? = null,
-    private val tidsstempel: LocalDateTime
+    private val tidsstempel: LocalDateTime,
+    private var simuleringsResultat: Simulering.SimuleringResultat? = null
 ) : MutableList<Utbetalingslinje> by linjer, Aktivitetskontekst {
     internal companion object {
         internal fun periode(vararg oppdrag: Oppdrag): Periode {
@@ -74,9 +75,9 @@ internal class Oppdrag private constructor(
         this(mottaker, fagområde, sisteArbeidsgiverdag = null)
 
     internal fun accept(visitor: OppdragVisitor) {
-        visitor.preVisitOppdrag(this, totalbeløp(), nettoBeløp, tidsstempel, endringskode, avstemmingsnøkkel, status, overføringstidspunkt,)
+        visitor.preVisitOppdrag(this, totalbeløp(), nettoBeløp, tidsstempel, endringskode, avstemmingsnøkkel, status, overføringstidspunkt, simuleringsResultat)
         linjer.forEach { it.accept(visitor) }
-        visitor.postVisitOppdrag(this, totalbeløp(), nettoBeløp, tidsstempel, endringskode, avstemmingsnøkkel, status, overføringstidspunkt)
+        visitor.postVisitOppdrag(this, totalbeløp(), nettoBeløp, tidsstempel, endringskode, avstemmingsnøkkel, status, overføringstidspunkt, simuleringsResultat)
     }
 
     internal fun mottaker() = mottaker
@@ -341,7 +342,8 @@ internal class Oppdrag private constructor(
         "status" to status?.let { "$it" },
         "overføringstidspunkt" to overføringstidspunkt,
         "fom" to førstedato,
-        "tom" to sistedato
+        "tom" to sistedato,
+        "simuleringsResultat" to simuleringsResultat
     )
 
     internal fun lagreOverføringsinformasjon(hendelse: UtbetalingOverført) {
@@ -356,6 +358,11 @@ internal class Oppdrag private constructor(
         if (this.avstemmingsnøkkel == null) this.avstemmingsnøkkel = hendelse.avstemmingsnøkkel
         if (this.overføringstidspunkt == null) this.overføringstidspunkt = hendelse.overføringstidspunkt
         this.status = hendelse.status
+    }
+
+    internal fun håndter(simulering: Simulering) {
+        if (!simulering.erRelevantFor(fagområde, fagsystemId)) return
+        this.simuleringsResultat = simulering.simuleringResultat
     }
 
     private interface Tilstand {

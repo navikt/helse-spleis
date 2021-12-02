@@ -3,6 +3,7 @@ package no.nav.helse.serde
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.*
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.UgyldigPeriode
@@ -341,7 +342,8 @@ internal class JsonBuilder : AbstractBuilder() {
             endringskode: Endringskode,
             avstemmingsnøkkel: Long?,
             status: Oppdragstatus?,
-            overføringstidspunkt: LocalDateTime?
+            overføringstidspunkt: LocalDateTime?,
+            simuleringsResultat: Simulering.SimuleringResultat?
         ) {
             ferieutbetalingMap["oppdrag"] = oppdrag.toMap()
         }
@@ -354,7 +356,8 @@ internal class JsonBuilder : AbstractBuilder() {
             endringskode: Endringskode,
             avstemmingsnøkkel: Long?,
             status: Oppdragstatus?,
-            overføringstidspunkt: LocalDateTime?
+            overføringstidspunkt: LocalDateTime?,
+            simuleringsResultat: Simulering.SimuleringResultat?
         ) {
             popState()
         }

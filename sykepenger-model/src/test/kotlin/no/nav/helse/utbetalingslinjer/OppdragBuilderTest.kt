@@ -1,6 +1,7 @@
 package no.nav.helse.utbetalingslinjer
 
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.OppdragVisitor
@@ -341,7 +342,8 @@ internal class OppdragBuilderTest {
             endringskode: Endringskode,
             avstemmingsnøkkel: Long?,
             status: Oppdragstatus?,
-            overføringstidspunkt: LocalDateTime?
+            overføringstidspunkt: LocalDateTime?,
+            simuleringsResultat: Simulering.SimuleringResultat?
         ) {
             assertEquals(ENDR, endringskode)
         }

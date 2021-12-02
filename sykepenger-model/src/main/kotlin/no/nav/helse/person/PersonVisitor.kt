@@ -613,7 +613,8 @@ internal interface OppdragVisitor {
         endringskode: Endringskode,
         avstemmingsnøkkel: Long?,
         status: Oppdragstatus?,
-        overføringstidspunkt: LocalDateTime?
+        overføringstidspunkt: LocalDateTime?,
+        simuleringsResultat: Simulering.SimuleringResultat?
     ) {
     }
 
@@ -642,7 +643,8 @@ internal interface OppdragVisitor {
         endringskode: Endringskode,
         avstemmingsnøkkel: Long?,
         status: Oppdragstatus?,
-        overføringstidspunkt: LocalDateTime?
+        overføringstidspunkt: LocalDateTime?,
+        simuleringsResultat: Simulering.SimuleringResultat?
     ) {
     }
 }

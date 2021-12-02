@@ -728,7 +728,8 @@ class JsonBuilderTest {
             fagområde = TestArbeidsgiverInspektør(this, orgnummer).sisteBehov(Behovtype.Simulering).detaljer().getValue("fagområde") as String,
             simuleringOK = true,
             melding = "Hei Aron",
-            simuleringResultat = null
+            simuleringResultat = null,
+            utbetalingId = UUID.randomUUID()
         )
 
         fun annullering(fagsystemId: String) = AnnullerUtbetaling(

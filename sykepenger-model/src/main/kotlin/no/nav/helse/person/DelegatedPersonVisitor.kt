@@ -849,9 +849,10 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         endringskode: Endringskode,
         avstemmingsnøkkel: Long?,
         status: Oppdragstatus?,
-        overføringstidspunkt: LocalDateTime?
+        overføringstidspunkt: LocalDateTime?,
+        simuleringsResultat: Simulering.SimuleringResultat?
     ) {
-        delegatee.preVisitOppdrag(oppdrag, totalBeløp, nettoBeløp, tidsstempel, endringskode, avstemmingsnøkkel, status, overføringstidspunkt)
+        delegatee.preVisitOppdrag(oppdrag, totalBeløp, nettoBeløp, tidsstempel, endringskode, avstemmingsnøkkel, status, overføringstidspunkt, simuleringsResultat)
     }
 
     override fun postVisitOppdrag(
@@ -862,9 +863,10 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         endringskode: Endringskode,
         avstemmingsnøkkel: Long?,
         status: Oppdragstatus?,
-        overføringstidspunkt: LocalDateTime?
+        overføringstidspunkt: LocalDateTime?,
+        simuleringsResultat: Simulering.SimuleringResultat?
     ) {
-        delegatee.postVisitOppdrag(oppdrag, totalBeløp, nettoBeløp, tidsstempel, endringskode, avstemmingsnøkkel, status, overføringstidspunkt)
+        delegatee.postVisitOppdrag(oppdrag, totalBeløp, nettoBeløp, tidsstempel, endringskode, avstemmingsnøkkel, status, overføringstidspunkt, simuleringsResultat)
     }
 
     override fun visitUtbetalingslinje(

@@ -346,7 +346,8 @@ internal abstract class AbstractEndToEndMediatorTest {
             meldingsfabrikk.lagSimulering(
                 vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
                 tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, Simulering),
-                status = status
+                status = status,
+                utbetalingId = UUID.fromString(testRapid.inspektør.etterspurteBehov(Simulering).path("utbetalingId").asText())
             )
         )
     }
