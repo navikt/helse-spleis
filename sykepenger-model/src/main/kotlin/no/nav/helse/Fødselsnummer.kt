@@ -5,7 +5,7 @@ import java.time.LocalDate
 
 class Fødselsnummer private constructor(private val value: String) {
     private val individnummer = value.substring(6, 9).toInt()
-    val fødselsdato: LocalDate = LocalDate.of(
+    private val fødselsdato: LocalDate = LocalDate.of(
         value.substring(4, 6).toInt().toYear(individnummer),
         value.substring(2, 4).toInt(),
         value.substring(0, 2).toInt().toDay()
@@ -16,7 +16,7 @@ class Fødselsnummer private constructor(private val value: String) {
     override fun equals(other: Any?) = other is Fødselsnummer && this.value == other.value
 
     fun toLong() = value.toLong()
-    internal fun alder() = Alder(this)
+    internal fun alder() = Alder(this.fødselsdato)
 
     private fun Int.toDay() = if (this > 40) this - 40 else this
     private fun Int.toYear(individnummer: Int): Int {
@@ -29,6 +29,9 @@ class Fødselsnummer private constructor(private val value: String) {
     }
 
     companion object {
+        internal fun brukerutbetalingfilter(fødselsnummer: Fødselsnummer) =
+            fødselsnummer.fødselsdato.dayOfMonth == 31
+
         fun tilFødselsnummer(fnr: String): Fødselsnummer {
             if (fnr.length == 11 && alleTegnErSiffer(fnr)) return Fødselsnummer(fnr)
             else throw RuntimeException("$fnr er ikke et gyldig fødselsnummer")

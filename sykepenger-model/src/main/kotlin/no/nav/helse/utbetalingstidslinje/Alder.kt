@@ -1,6 +1,5 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.Fødselsnummer
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-33 ledd 3`
@@ -9,8 +8,7 @@ import java.time.LocalDate
 import java.time.Year
 import java.time.temporal.ChronoUnit.YEARS
 
-internal class Alder(fødselsnummer: Fødselsnummer) {
-    private val fødselsdato = fødselsnummer.fødselsdato
+internal class Alder(private val fødselsdato: LocalDate) {
     internal val søttiårsdagen = fødselsdato.plusYears(70)
     internal val datoForØvreAldersgrense = søttiårsdagen.trimHelg()
     internal val sisteVirkedagFørFylte70år = datoForØvreAldersgrense.minusDays(1)

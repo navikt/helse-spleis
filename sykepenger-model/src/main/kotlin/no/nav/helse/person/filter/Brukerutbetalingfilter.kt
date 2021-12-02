@@ -18,7 +18,7 @@ internal class Brukerutbetalingfilter(
 ) : Featurefilter {
 
     override fun filtrer(aktivitetslogg: IAktivitetslogg): Boolean {
-        if (fødselsnummer.fødselsdato.dayOfMonth != 31) return nei(aktivitetslogg, "Fødselsdag passer ikke")
+        if (!Fødselsnummer.brukerutbetalingfilter(fødselsnummer)) return nei(aktivitetslogg, "Fødselsdag passer ikke")
         if (periodetype != Periodetype.FØRSTEGANGSBEHANDLING) return nei(aktivitetslogg, "Perioden er ikke førstegangsbehandling")
         if (utbetaling.harDelvisRefusjon()) return nei(aktivitetslogg, "Utbetalingen består av delvis refusjon")
         if (inntektskilde != Inntektskilde.EN_ARBEIDSGIVER) return nei(aktivitetslogg, "Inntektskilden er ikke for en arbeidsgiver")

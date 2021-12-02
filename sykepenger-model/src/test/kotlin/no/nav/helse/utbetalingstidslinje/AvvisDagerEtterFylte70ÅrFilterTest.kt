@@ -18,8 +18,8 @@ internal class AvvisDagerEtterFylte70ÅrFilterTest {
     private lateinit var aktivitetslogg: Aktivitetslogg
 
     companion object {
-        private val FYLLER_70_FØRSTE_FEBRUAR = Alder("01024812345".somFødselsnummer())
-        private val FYLLER_70_SØNDAG_FJERDE_FEBRUAR = Alder("04024812345".somFødselsnummer())
+        private val FYLLER_70_FØRSTE_FEBRUAR = "01024812345".somFødselsnummer().alder()
+        private val FYLLER_70_SØNDAG_FJERDE_FEBRUAR = "04024812345".somFødselsnummer().alder()
     }
 
     @Test
