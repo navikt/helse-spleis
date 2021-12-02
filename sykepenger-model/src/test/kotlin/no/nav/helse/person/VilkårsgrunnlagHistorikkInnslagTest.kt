@@ -18,7 +18,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
     private lateinit var innslag: VilkårsgrunnlagHistorikk.Innslag
 
     private companion object {
-        const val UNG_PERSON_FNR_2018 = "12020052345"
+        const val UNG_PERSON_FNR_2018 = "12029240045"
         val ALDER = Fødselsnummer.tilFødselsnummer(UNG_PERSON_FNR_2018).alder()
     }
 

@@ -22,7 +22,7 @@ internal class InntektshistorikkTest {
     private val inspektør get() = Inntektsinspektør(historikk)
 
     private companion object {
-        const val UNG_PERSON_FNR_2018 = "12020052345"
+        const val UNG_PERSON_FNR_2018 = "12029240045"
         const val AKTØRID = "42"
         const val ORGNUMMER = "987654321"
         val INNTEKT = 31000.00.månedlig

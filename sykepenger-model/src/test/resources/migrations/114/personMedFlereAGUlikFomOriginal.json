@@ -1,7 +1,7 @@
 
     {
     "aktørId": "42",
-    "fødselsnummer": "12020052345",
+    "fødselsnummer": "12029240045",
     "arbeidsgivere": [
         {
             "organisasjonsnummer": "arbeidsgiver 1",
@@ -127,4 +127,3 @@
     ],
     "skjemaVersjon": 113
 }
-    

@@ -41,7 +41,7 @@ import javax.sql.DataSource
 @TestInstance(Lifecycle.PER_CLASS)
 internal class RestApiTest {
     private companion object {
-        private const val UNG_PERSON_FNR = "12020052345"
+        private const val UNG_PERSON_FNR = "12029240045"
         private const val ORGNUMMER = "987654321"
         private val MELDINGSREFERANSE = UUID.randomUUID()
         private const val AKTØRID = "42"

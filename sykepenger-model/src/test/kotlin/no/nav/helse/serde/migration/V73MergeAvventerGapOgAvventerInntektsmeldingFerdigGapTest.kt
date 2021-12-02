@@ -41,7 +41,7 @@ class V73MergeAvventerGapOgAvventerInntektsmeldingFerdigGapTest {
     val avventerGap = """
 {
   "aktørId": "42",
-  "fødselsnummer": "12020052345",
+  "fødselsnummer": "12029240045",
   "arbeidsgivere": [
     {
       "vedtaksperioder": [
@@ -60,7 +60,7 @@ class V73MergeAvventerGapOgAvventerInntektsmeldingFerdigGapTest {
     val avventerInntektsmeldingFerdigGap = """
 {
   "aktørId": "42",
-  "fødselsnummer": "12020052345",
+  "fødselsnummer": "12029240045",
   "arbeidsgivere": [
     {
       "vedtaksperioder": [
@@ -79,7 +79,7 @@ class V73MergeAvventerGapOgAvventerInntektsmeldingFerdigGapTest {
     val expected = """
 {
   "aktørId": "42",
-  "fødselsnummer": "12020052345",
+  "fødselsnummer": "12029240045",
   "arbeidsgivere": [
     {
       "vedtaksperioder": [
@@ -98,7 +98,7 @@ class V73MergeAvventerGapOgAvventerInntektsmeldingFerdigGapTest {
     val avventerGapForkastet = """
 {
   "aktørId": "42",
-  "fødselsnummer": "12020052345",
+  "fødselsnummer": "12029240045",
   "arbeidsgivere": [
     {
       "vedtaksperioder": [],
@@ -119,7 +119,7 @@ class V73MergeAvventerGapOgAvventerInntektsmeldingFerdigGapTest {
     val avventerInntektsmeldingFerdigGapForkastet = """
 {
   "aktørId": "42",
-  "fødselsnummer": "12020052345",
+  "fødselsnummer": "12029240045",
   "arbeidsgivere": [
     {
       "vedtaksperioder": [],
@@ -140,7 +140,7 @@ class V73MergeAvventerGapOgAvventerInntektsmeldingFerdigGapTest {
     val expectedForkastet = """
 {
   "aktørId": "42",
-  "fødselsnummer": "12020052345",
+  "fødselsnummer": "12029240045",
   "arbeidsgivere": [
     {
       "vedtaksperioder": [],

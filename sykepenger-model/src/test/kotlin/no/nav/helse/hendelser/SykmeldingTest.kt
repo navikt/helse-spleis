@@ -14,7 +14,7 @@ import java.util.*
 internal class SykmeldingTest {
 
     private companion object {
-        const val UNG_PERSON_FNR_2018 = "12020052345"
+        const val UNG_PERSON_FNR_2018 = "12029240045"
     }
 
     private lateinit var sykmelding: Sykmelding

@@ -31,7 +31,7 @@ internal class ArbeidsgiverUtbetalingerTest {
     private lateinit var aktivitetslogg: Aktivitetslogg
 
     private companion object {
-        val UNG_PERSON_FNR_2018 = "12020052345".somFødselsnummer()
+        val UNG_PERSON_FNR_2018 = "12029240045".somFødselsnummer()
         val PERSON_67_ÅR_FNR_2018 = "05015112345".somFødselsnummer()
         const val ORGNUMMER = "888888888"
     }

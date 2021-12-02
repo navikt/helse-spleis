@@ -150,7 +150,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         assertTrue(sykepengedager.oppfylt)
 
         val alder = vilkår.alder
-        assertEquals(17, alder.alderSisteSykedag)
+        assertEquals(25, alder.alderSisteSykedag)
         assertTrue(alder.oppfylt!!)
 
         val opptjening = vilkår.opptjening

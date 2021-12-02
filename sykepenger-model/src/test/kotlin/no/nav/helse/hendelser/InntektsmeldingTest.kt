@@ -402,7 +402,7 @@ internal class InntektsmeldingTest {
             meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(refusjonBeløp, refusjonOpphørsdato, endringerIRefusjon),
             orgnummer = "88888888",
-            fødselsnummer = "12020052345",
+            fødselsnummer = "12029240045",
             aktørId = "100010101010",
             førsteFraværsdag = førsteFraværsdag,
             beregnetInntekt = beregnetInntekt,

@@ -20,7 +20,7 @@ import java.util.*
 internal class SøknadTest {
 
     private companion object {
-        private const val UNG_PERSON_FNR_2018 = "12020052345"
+        private const val UNG_PERSON_FNR_2018 = "12029240045"
         private val EN_PERIODE = Periode(1.januar, 31.januar)
     }
 

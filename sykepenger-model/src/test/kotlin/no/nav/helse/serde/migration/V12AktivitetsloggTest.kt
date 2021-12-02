@@ -32,7 +32,7 @@ private const val json = """{
                         "kontekstType": "Sykmelding",
                         "kontekstMap": {
                             "aktørId": "12345",
-                            "fødselsnummer": "12020052345",
+                            "fødselsnummer": "12029240045",
                             "organisasjonsnummer": "987654321",
                             "id": "15a35623-af26-4eb4-8d4e-443a1dd29b38"
                         }
@@ -40,7 +40,7 @@ private const val json = """{
                     {
                         "kontekstType": "Person",
                         "kontekstMap": {
-                            "fødselsnummer": "12020052345",
+                            "fødselsnummer": "12029240045",
                             "aktørId": "12345"
                         }
                     }
@@ -56,7 +56,7 @@ private const val json = """{
                         "kontekstType": "Sykmelding",
                         "kontekstMap": {
                             "aktørId": "12345",
-                            "fødselsnummer": "12020052345",
+                            "fødselsnummer": "12029240045",
                             "organisasjonsnummer": "987654321",
                             "id": "15a35623-af26-4eb4-8d4e-443a1dd29b38"
                         }
@@ -64,7 +64,7 @@ private const val json = """{
                     {
                         "kontekstType": "Person",
                         "kontekstMap": {
-                            "fødselsnummer": "12020052345",
+                            "fødselsnummer": "12029240045",
                             "aktørId": "12345"
                         }
                     },
@@ -86,7 +86,7 @@ private const val json = """{
                         "kontekstType": "Sykmelding",
                         "kontekstMap": {
                             "aktørId": "12345",
-                            "fødselsnummer": "12020052345",
+                            "fødselsnummer": "12029240045",
                             "organisasjonsnummer": "987654321",
                             "id": "15a35623-af26-4eb4-8d4e-443a1dd29b38"
                         }
@@ -94,7 +94,7 @@ private const val json = """{
                     {
                         "kontekstType": "Person",
                         "kontekstMap": {
-                            "fødselsnummer": "12020052345",
+                            "fødselsnummer": "12029240045",
                             "aktørId": "12345"
                         }
                     },
@@ -134,7 +134,7 @@ private const val json = """{
                         "kontekstType": "Søknad",
                         "kontekstMap": {
                             "aktørId": "12345",
-                            "fødselsnummer": "12020052345",
+                            "fødselsnummer": "12029240045",
                             "organisasjonsnummer": "987654321",
                             "id": "37e1bc4f-c552-4ea9-ae95-bf3942483b21"
                         }
@@ -142,7 +142,7 @@ private const val json = """{
                     {
                         "kontekstType": "Person",
                         "kontekstMap": {
-                            "fødselsnummer": "12020052345",
+                            "fødselsnummer": "12029240045",
                             "aktørId": "12345"
                         }
                     },

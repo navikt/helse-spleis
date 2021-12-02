@@ -14,7 +14,6 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosent
@@ -31,7 +30,7 @@ import java.util.*
 internal class HistoriePeriodetypeTest {
     private companion object {
         private const val aktørId = "aktørId"
-        private val UNG_PERSON_FNR_2018 = "12020052345".somFødselsnummer()
+        private val UNG_PERSON_FNR_2018 = "12029240045".somFødselsnummer()
         private const val AG1 = "AG1"
     }
     private lateinit var person: Person

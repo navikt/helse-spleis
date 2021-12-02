@@ -54,7 +54,7 @@ private fun originalJson() =
         "kontekstType": "Sykmelding",
         "kontekstMap": {
           "aktørId": "12345",
-          "fødselsnummer": "12020052345",
+          "fødselsnummer": "12029240045",
           "organisasjonsnummer": "987654321",
           "id": "f337c964-1cd6-404b-ab47-b4d453b78b9b"
         }
@@ -167,7 +167,7 @@ private fun expectedJson() =
         "kontekstType": "Sykmelding",
         "kontekstMap": {
           "aktørId": "12345",
-          "fødselsnummer": "12020052345",
+          "fødselsnummer": "12029240045",
           "organisasjonsnummer": "987654321",
           "id": "f337c964-1cd6-404b-ab47-b4d453b78b9b"
         }

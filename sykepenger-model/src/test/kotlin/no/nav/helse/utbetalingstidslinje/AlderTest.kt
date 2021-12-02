@@ -16,11 +16,10 @@ internal class AlderTest {
 
     @Test
     fun `alder på gitt dato`() {
-        val alder = "12020052345".somFødselsnummer().alder()
-        assertEquals(17, alder.alderPåDato(1.januar))
-        assertEquals(18, alder.alderPåDato(12.februar))
+        val alder = "12029240045".somFødselsnummer().alder()
+        assertEquals(25, alder.alderPåDato(11.februar))
+        assertEquals(26, alder.alderPåDato(12.februar))
     }
-
     @Test
     fun `Minimum inntekt er en halv g hvis du akkurat har fylt 67`() {
         assertEquals(67, FYLLER_67_1_JANUAR_2018.alderPåDato(1.januar))

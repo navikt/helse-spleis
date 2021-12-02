@@ -36,7 +36,7 @@ import javax.sql.DataSource
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal abstract class AbstractEndToEndMediatorTest {
     internal companion object {
-        internal const val UNG_PERSON_FNR_2018 = "12020052345"
+        internal const val UNG_PERSON_FNR_2018 = "12029240045"
         internal const val AKTØRID = "42"
         internal const val ORGNUMMER = "987654321"
         internal const val INNTEKT = 31000.00

@@ -1,6 +1,6 @@
 {
     "aktørId": "42",
-    "fødselsnummer": "12020052345",
+    "fødselsnummer": "12029240045",
     "opprettet": "2021-11-12T09:52:38.581473",
     "arbeidsgivere": [
         {
@@ -55,7 +55,7 @@
                 "kontekstMap": {
                     "meldingsreferanseId": "529828ed-11ef-47cf-affb-393270e90166",
                     "aktørId": "42",
-                    "fødselsnummer": "12020052345",
+                    "fødselsnummer": "12029240045",
                     "organisasjonsnummer": "987654321"
                 }
             },

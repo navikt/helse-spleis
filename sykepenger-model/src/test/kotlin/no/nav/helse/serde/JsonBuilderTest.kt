@@ -180,7 +180,7 @@ class JsonBuilderTest {
 
     private companion object {
         private const val aktørId = "12345"
-        private val fnr = "12020052345".somFødselsnummer()
+        private val fnr = "12029240045".somFødselsnummer()
         private const val orgnummer = "987654321"
         private lateinit var vedtaksperiodeId: String
         private lateinit var tilstand: TilstandType

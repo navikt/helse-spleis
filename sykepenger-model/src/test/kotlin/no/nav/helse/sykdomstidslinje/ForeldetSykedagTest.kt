@@ -20,7 +20,7 @@ import kotlin.reflect.KClass
 internal class ForeldetSykedagTest {
 
     companion object {
-        private const val UNG_PERSON_FNR_2018 = "12020052345"
+        private const val UNG_PERSON_FNR_2018 = "12029240045"
         private const val AKTØRID = "42"
         private const val ORGNUMMER = "987654321"
     }

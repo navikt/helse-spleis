@@ -9,7 +9,7 @@ import java.util.*
 internal abstract class AbstractPersonTest {
 
     internal companion object {
-        const val UNG_PERSON_FNR_2018 = "12020052345"
+        const val UNG_PERSON_FNR_2018 = "12029240045"
         const val AKTØRID = "42"
         const val ORGNUMMER = "987654321"
 

@@ -46,7 +46,7 @@ private val forkastetTilInfotrygdMedUtbetalingJson =
                 "kontekstType": "Sykmelding",
                 "kontekstMap": {
                     "aktørId": "12345",
-                    "fødselsnummer": "12020052345",
+                    "fødselsnummer": "12029240045",
                     "organisasjonsnummer": "987654321",
                     "id": "f337c964-1cd6-404b-ab47-b4d453b78b9b"
                 }
@@ -127,7 +127,7 @@ private val expectedForkastetTilInfotrygdMedUtbetalingJson =
         "kontekstType": "Sykmelding",
         "kontekstMap": {
           "aktørId": "12345",
-          "fødselsnummer": "12020052345",
+          "fødselsnummer": "12029240045",
           "organisasjonsnummer": "987654321",
           "id": "f337c964-1cd6-404b-ab47-b4d453b78b9b"
         }
@@ -206,7 +206,7 @@ private val forkastetTilInfotrygdMedUtbetalingAutomatiskGodkjentJson =
                 "kontekstType": "Sykmelding",
                 "kontekstMap": {
                     "aktørId": "12345",
-                    "fødselsnummer": "12020052345",
+                    "fødselsnummer": "12029240045",
                     "organisasjonsnummer": "987654321",
                     "id": "f337c964-1cd6-404b-ab47-b4d453b78b9b"
                 }
@@ -274,7 +274,7 @@ private val expectedForkastetTilInfotrygdMedUtbetalingAutomatiskGodkjentJson =
         "kontekstType": "Sykmelding",
         "kontekstMap": {
           "aktørId": "12345",
-          "fødselsnummer": "12020052345",
+          "fødselsnummer": "12029240045",
           "organisasjonsnummer": "987654321",
           "id": "f337c964-1cd6-404b-ab47-b4d453b78b9b"
         }

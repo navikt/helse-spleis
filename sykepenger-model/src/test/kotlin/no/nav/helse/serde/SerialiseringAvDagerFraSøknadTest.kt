@@ -71,7 +71,7 @@ internal class SerialiseringAvDagerFraSøknadTest {
     }
 
     private val aktørId = "12345"
-    private val fnr = "12020052345"
+    private val fnr = "12029240045"
     private val orgnummer = "987654321"
 
     private lateinit var aktivitetslogg: Aktivitetslogg

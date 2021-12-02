@@ -79,7 +79,7 @@ private fun originalJson() =
         "kontekstType": "Sykmelding",
         "kontekstMap": {
           "aktørId": "12345",
-          "fødselsnummer": "12020052345",
+          "fødselsnummer": "12029240045",
           "organisasjonsnummer": "987654321",
           "id": "f337c964-1cd6-404b-ab47-b4d453b78b9b"
         }
@@ -87,7 +87,7 @@ private fun originalJson() =
       {
         "kontekstType": "Person",
         "kontekstMap": {
-          "fødselsnummer": "12020052345",
+          "fødselsnummer": "12029240045",
           "aktørId": "42"
         }
       },
@@ -119,7 +119,7 @@ private fun originalJson() =
         "kontekstType": "Søknad",
         "kontekstMap": {
           "aktørId": "12345",
-          "fødselsnummer": "12020052345",
+          "fødselsnummer": "12029240045",
           "organisasjonsnummer": "987654321",
           "id": "cdf276d0-8fbd-4ff7-b9d7-5a84bdc6463d"
         }
@@ -134,7 +134,7 @@ private fun originalJson() =
         "kontekstType": "Inntektsmelding",
         "kontekstMap": {
           "aktørId": "aktørId",
-          "fødselsnummer": "12020052345",
+          "fødselsnummer": "12029240045",
           "organisasjonsnummer": "987654321",
           "id": "c0c4f24d-9d93-4522-bee1-a5d26b0ac5be"
         }
@@ -149,7 +149,7 @@ private fun originalJson() =
         "kontekstType": "Vilkårsgrunnlag",
         "kontekstMap": {
           "aktørId": "aktørId",
-          "fødselsnummer": "12020052345",
+          "fødselsnummer": "12029240045",
           "organisasjonsnummer": "987654321",
           "id": "b8742f66-5930-43e1-91fe-30259c6fa4d1"
         }
@@ -164,7 +164,7 @@ private fun originalJson() =
         "kontekstType": "Ytelser",
         "kontekstMap": {
           "aktørId": "aktørId",
-          "fødselsnummer": "12020052345",
+          "fødselsnummer": "12029240045",
           "organisasjonsnummer": "987654321",
           "id": "f703ef84-9b64-435b-9428-392718771dde"
         }
@@ -269,7 +269,7 @@ private fun expectedJson() =
         "kontekstType": "Sykmelding",
         "kontekstMap": {
           "aktørId": "12345",
-          "fødselsnummer": "12020052345",
+          "fødselsnummer": "12029240045",
           "organisasjonsnummer": "987654321",
           "id": "f337c964-1cd6-404b-ab47-b4d453b78b9b"
         }
@@ -277,7 +277,7 @@ private fun expectedJson() =
       {
         "kontekstType": "Person",
         "kontekstMap": {
-          "fødselsnummer": "12020052345",
+          "fødselsnummer": "12029240045",
           "aktørId": "42"
         }
       },
@@ -309,7 +309,7 @@ private fun expectedJson() =
         "kontekstType": "Søknad",
         "kontekstMap": {
           "aktørId": "12345",
-          "fødselsnummer": "12020052345",
+          "fødselsnummer": "12029240045",
           "organisasjonsnummer": "987654321",
           "id": "cdf276d0-8fbd-4ff7-b9d7-5a84bdc6463d"
         }
@@ -324,7 +324,7 @@ private fun expectedJson() =
         "kontekstType": "Inntektsmelding",
         "kontekstMap": {
           "aktørId": "aktørId",
-          "fødselsnummer": "12020052345",
+          "fødselsnummer": "12029240045",
           "organisasjonsnummer": "987654321",
           "id": "c0c4f24d-9d93-4522-bee1-a5d26b0ac5be"
         }
@@ -339,7 +339,7 @@ private fun expectedJson() =
         "kontekstType": "Vilkårsgrunnlag",
         "kontekstMap": {
           "aktørId": "aktørId",
-          "fødselsnummer": "12020052345",
+          "fødselsnummer": "12029240045",
           "organisasjonsnummer": "987654321",
           "id": "b8742f66-5930-43e1-91fe-30259c6fa4d1"
         }
@@ -354,7 +354,7 @@ private fun expectedJson() =
         "kontekstType": "Ytelser",
         "kontekstMap": {
           "aktørId": "aktørId",
-          "fødselsnummer": "12020052345",
+          "fødselsnummer": "12029240045",
           "organisasjonsnummer": "987654321",
           "id": "f703ef84-9b64-435b-9428-392718771dde"
         }

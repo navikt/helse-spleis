@@ -529,8 +529,8 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         forlengVedtak(1.februar, 28.februar)
 
         0.generasjon {
-            beregnetPeriode(0).assertAldersvilkår(true, 18)
-            beregnetPeriode(1).assertAldersvilkår(true, 17)
+            beregnetPeriode(0).assertAldersvilkår(true, 26)
+            beregnetPeriode(1).assertAldersvilkår(true, 25)
         }
     }
 
@@ -564,8 +564,8 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
 
         0.generasjon {
-            beregnetPeriode(0).assertAldersvilkår(true, 18)
-            beregnetPeriode(1).assertAldersvilkår(true, 17)
+            beregnetPeriode(0).assertAldersvilkår(true, 26)
+            beregnetPeriode(1).assertAldersvilkår(true, 25)
             beregnetPeriode(0).assertSykepengedagerVilkår(29,219, 1.januar(2019), 1.januar,true)
             beregnetPeriode(1).assertSykepengedagerVilkår(11,237, 28.desember, 1.januar,true)
             beregnetPeriode(0).assertSøknadsfristVilkår(1.februar, 28.februar, 28.februar.atStartOfDay(),true)
@@ -590,8 +590,8 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
 
         0.generasjon {
-            beregnetPeriode(0).assertAldersvilkår(true, 18)
-            beregnetPeriode(1).assertAldersvilkår(true, 17)
+            beregnetPeriode(0).assertAldersvilkår(true, 26)
+            beregnetPeriode(1).assertAldersvilkår(true, 25)
             // Revurdering av tidligere periode medfører at alle perioder berørt av revurderingen deler den samme utbetalingen, og derfor ender opp med samme
             // gjenstående dager, forbrukte dager og maksdato. Kan muligens skrives om i modellen slik at disse tallene kan fiskes ut fra utbetalingen gitt en
             // periode

@@ -22,7 +22,7 @@ import java.util.*
 internal class VilkårsgrunnlagTest {
     private companion object {
         private const val aktørId = "123"
-        private val UNG_PERSON_FNR_2018 = "12020052345".somFødselsnummer()
+        private val UNG_PERSON_FNR_2018 = "12029240045".somFødselsnummer()
         private const val orgnummer = "345"
         private val INNTEKT = 30000.0.månedlig
     }

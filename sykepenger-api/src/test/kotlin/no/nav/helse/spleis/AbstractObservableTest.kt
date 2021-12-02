@@ -2,7 +2,6 @@ package no.nav.helse.spleis
 
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
-import no.nav.helse.utbetalingslinjer.Oppdragstatus.AKSEPTERT
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Person
@@ -13,6 +12,7 @@ import no.nav.helse.spleis.testhelpers.TestObservatør
 import no.nav.helse.spleis.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.spleis.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
+import no.nav.helse.utbetalingslinjer.Oppdragstatus.AKSEPTERT
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -22,7 +22,7 @@ import java.util.*
 
 abstract class AbstractObservableTest {
     protected companion object {
-        const val UNG_PERSON_FNR = "12020052345"
+        const val UNG_PERSON_FNR = "12029240045"
         const val ORGNUMMER = "987654321"
         const val AKTØRID = "42"
         val INNTEKTSMELDING_ID: UUID = UUID.randomUUID()

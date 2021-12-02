@@ -9,7 +9,7 @@ import java.time.LocalDateTime
 import java.util.*
 
 internal sealed class TestEvent(opprettet: LocalDateTime) : SykdomstidslinjeHendelse(UUID.randomUUID(), opprettet) {
-    private val UNG_PERSON_FNR_2018 = "12020052345"
+    private val UNG_PERSON_FNR_2018 = "12029240045"
     private val AKTØRID = "42"
     private val ORGNUMMER = "987654321"
 
