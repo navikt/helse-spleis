@@ -4,6 +4,7 @@ import no.nav.helse.Grunnbeløp
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.november
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -12,6 +13,7 @@ internal class AlderTest {
 
     private companion object {
         val FYLLER_67_1_JANUAR_2018 = "01015149945".somFødselsnummer().alder()
+        val FYLLER_18_ÅR_2_NOVEMBER = "02110075045".somFødselsnummer().alder()
     }
 
     @Test
@@ -19,6 +21,16 @@ internal class AlderTest {
         val alder = "12029240045".somFødselsnummer().alder()
         assertEquals(25, alder.alderPåDato(11.februar))
         assertEquals(26, alder.alderPåDato(12.februar))
+    }
+
+    @Test
+    fun `får ikke lov å søke sykepenger dersom personen er mindre enn 18 år på søknadstidspunktet`() {
+        assertTrue(FYLLER_18_ÅR_2_NOVEMBER.forUngForÅSøke(1.november))
+    }
+
+    @Test
+    fun `får lov å søke dersom personen er minst 18 år`() {
+        assertFalse(FYLLER_18_ÅR_2_NOVEMBER.forUngForÅSøke(2.november))
     }
     @Test
     fun `Minimum inntekt er en halv g hvis du akkurat har fylt 67`() {

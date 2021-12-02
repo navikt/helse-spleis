@@ -17,6 +17,7 @@ internal class Alder(private val fødselsdato: LocalDate) {
 
     private companion object {
         private const val ALDER_FOR_FORHØYET_FERIEPENGESATS = 59
+        private const val MINSTEALDER_UTEN_FULLMAKT_FRA_VERGE = 18
     }
 
     private fun LocalDate.trimHelg() = this.minusDays(
@@ -37,6 +38,8 @@ internal class Alder(private val fødselsdato: LocalDate) {
 
     internal fun begrunnelseForMinimumInntekt(skjæringstidspunkt: LocalDate) =
         if (forhøyetInntektskrav(skjæringstidspunkt)) Begrunnelse.MinimumInntektOver67 else Begrunnelse.MinimumInntekt
+
+    internal fun forUngForÅSøke(søknadstidspunkt: LocalDate) = alderPåDato(søknadstidspunkt) < MINSTEALDER_UTEN_FULLMAKT_FRA_VERGE
 
     internal fun beregnFeriepenger(opptjeningsår: Year, beløp: Int): Double {
         val alderVedSluttenAvÅret = alderVedSluttenAvÅret(opptjeningsår)

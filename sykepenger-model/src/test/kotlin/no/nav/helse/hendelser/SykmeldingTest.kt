@@ -1,9 +1,11 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.juli
+import no.nav.helse.testhelpers.november
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -15,6 +17,7 @@ internal class SykmeldingTest {
 
     private companion object {
         const val UNG_PERSON_FNR_2018 = "12029240045"
+        val FYLLER_18_ÅR_2_NOVEMBER = "02110075045".somFødselsnummer().alder()
     }
 
     private lateinit var sykmelding: Sykmelding
@@ -43,6 +46,20 @@ internal class SykmeldingTest {
         assertThrows<Aktivitetslogg.AktivitetException> {
             sykmelding(Sykmeldingsperiode(10.januar, 12.januar, 100.prosent), Sykmeldingsperiode(1.januar, 12.januar, 100.prosent))
         }
+    }
+
+    @Test
+    fun `17 år på søknadstidspunkt gir error`() {
+        sykmelding(Sykmeldingsperiode(1.januar, 12.januar, 100.prosent), mottatt = 1.november.atStartOfDay())
+        sykmelding.forUng(FYLLER_18_ÅR_2_NOVEMBER)
+        assertTrue(sykmelding.valider(sykmelding.periode()).hasErrorsOrWorse())
+    }
+
+    @Test
+    fun `17 år på søknadstidspunkt gir ikke error`() {
+        sykmelding(Sykmeldingsperiode(1.januar, 12.januar, 100.prosent), mottatt = 2.november.atStartOfDay())
+        sykmelding.forUng(FYLLER_18_ÅR_2_NOVEMBER)
+        assertTrue(sykmelding.valider(sykmelding.periode()).hasErrorsOrWorse())
     }
 
     @Test
