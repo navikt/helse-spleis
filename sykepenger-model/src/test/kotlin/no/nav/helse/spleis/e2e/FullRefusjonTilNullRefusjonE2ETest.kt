@@ -162,5 +162,6 @@ internal class FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
         assertTrue(inspektør.utbetaling(1).inspektør.personOppdrag.harUtbetalinger())
         assertTrue(inspektør.utbetaling(1).inspektør.personOppdrag[0].erOpphør())
         assertEquals(17.januar til 28.februar, Oppdrag.periode(inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag))
+        assertNoWarnings(2.vedtaksperiode)
     }
 }

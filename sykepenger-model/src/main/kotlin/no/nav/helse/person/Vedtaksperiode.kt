@@ -2371,7 +2371,6 @@ internal class Vedtaksperiode private constructor(
                 utbetaling.erUtbetalt() -> vedtaksperiode.tilstand(hendelse, Avsluttet) {
                     hendelse.info("OK fra Oppdragssystemet")
                 }
-                else -> hendelse.warn("Utbetalingen er ikke gjennomført. Prøver automatisk igjen senere")
             }
         }
 
