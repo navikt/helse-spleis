@@ -34,6 +34,10 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         innslag.add(skjæringstidspunkt, grunnlagselement)
     }
 
+    internal fun oppdaterMinimumInntektsvurdering(skjæringstidspunkt: LocalDate, grunnlagsdata: Grunnlagsdata, oppfyllerKravTilMinimumInntekt: Boolean) {
+        innslag.add(skjæringstidspunkt, grunnlagsdata.kopierMedMinimumInntektsvurdering(oppfyllerKravTilMinimumInntekt))
+    }
+
     internal fun sisteId() = historikk.sisteId()
 
     internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) = historikk.firstOrNull()?.vilkårsgrunnlagFor(skjæringstidspunkt)
@@ -124,7 +128,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         override fun oppdaterManglendeMinimumInntekt(person: Person, skjæringstidspunkt: LocalDate) {
             if (harMinimumInntekt != null) return
-            person.oppdaterHarMinimumInntekt(skjæringstidspunkt, this)
+            sykepengegrunnlag.oppdaterHarMinimumInntekt(skjæringstidspunkt, person, this)
             sikkerLogg.info("Vi antar at det ikke finnes forlengelser til perioder som har harMinimumInntekt = null lenger")
         }
 
@@ -174,7 +178,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             return begrunnelser
         }
 
-        internal fun grunnlagsdataMedMinimumInntektsvurdering(minimumInntektVurdering: Boolean) = Grunnlagsdata(
+        internal fun kopierMedMinimumInntektsvurdering(minimumInntektVurdering: Boolean) = Grunnlagsdata(
             sykepengegrunnlag = sykepengegrunnlag,
             sammenligningsgrunnlag = sammenligningsgrunnlag,
             avviksprosent = avviksprosent,

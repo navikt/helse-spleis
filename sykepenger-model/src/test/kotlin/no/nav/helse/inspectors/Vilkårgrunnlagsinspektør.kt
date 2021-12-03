@@ -67,6 +67,8 @@ internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.
         private set
     internal var meldingsreferanseId: UUID? = null
         private set
+    internal var harMinimumInntekt: Boolean? = null
+        private set
     internal var vurdertOk by Delegates.notNull<Boolean>()
         private set
     init {
@@ -92,6 +94,7 @@ internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.
         this.antallOpptjeningsdagerErMinst = antallOpptjeningsdagerErMinst
         this.harOpptjening = harOpptjening
         this.meldingsreferanseId = meldingsreferanseId
+        this.harMinimumInntekt = harMinimumInntekt
         this.vurdertOk = vurdertOk
     }
 }

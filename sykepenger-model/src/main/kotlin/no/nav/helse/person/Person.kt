@@ -9,7 +9,6 @@ import no.nav.helse.person.Arbeidsgiver.Companion.antallMedVedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSammenligningsgrunnlag
-import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSykepengegrunnlagGammel
 import no.nav.helse.person.Arbeidsgiver.Companion.harArbeidsgivereMedOverlappendeUtbetaltePerioder
 import no.nav.helse.person.Arbeidsgiver.Companion.harGrunnlagForSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntekt
@@ -504,10 +503,6 @@ class Person private constructor(
     internal fun sammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =
         arbeidsgivere.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt)
 
-    @Deprecated("Kan denne fjernes?")
-    private fun grunnlagForSykepengegrunnlagGammel(skjæringstidspunkt: LocalDate) =
-        arbeidsgivere.grunnlagForSykepengegrunnlagGammel(skjæringstidspunkt)
-
     private fun finnArbeidsgiverForInntekter(arbeidsgiver: String, aktivitetslogg: IAktivitetslogg): Arbeidsgiver {
         return arbeidsgivere.finnEllerOpprett(arbeidsgiver) {
             aktivitetslogg.info("Ny arbeidsgiver med organisasjonsnummer %s for denne personen", arbeidsgiver)
@@ -517,7 +512,7 @@ class Person private constructor(
 
     internal fun kanRevurdereInntekt(skjæringstidspunkt: LocalDate) =
         sammenligningsgrunnlag(skjæringstidspunkt) != null &&
-            grunnlagForSykepengegrunnlagGammel(skjæringstidspunkt) != null
+            grunnlagForSykepengegrunnlag(skjæringstidspunkt) != null
             && vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) != null
 
     internal fun harNødvendigInntekt(skjæringstidspunkt: LocalDate) = arbeidsgivere.harNødvendigInntekt(skjæringstidspunkt)
@@ -541,10 +536,12 @@ class Person private constructor(
         arbeidsgivere.forEach { it.søppelbøtte(hendelse, it.tidligereOgEttergølgende(periode), ForkastetÅrsak.IKKE_STØTTET) }
     }
 
-    internal fun oppdaterHarMinimumInntekt(skjæringstidspunkt: LocalDate, grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata) {
-        val harMinimumInntekt = grunnlagForSykepengegrunnlagGammel(skjæringstidspunkt)?.let { it > fødselsnummer.alder().minimumInntekt(skjæringstidspunkt) } ?: false
-        val grunnlagsdataMedHarMinimumInntekt = grunnlagsdata.grunnlagsdataMedMinimumInntektsvurdering(harMinimumInntekt)
-        vilkårsgrunnlagHistorikk.lagre(skjæringstidspunkt, grunnlagsdataMedHarMinimumInntekt)
+    internal fun oppdaterHarMinimumInntekt(
+        skjæringstidspunkt: LocalDate,
+        grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
+        oppfyltKravTilMinimumInntekt: Boolean
+    ) {
+        vilkårsgrunnlagHistorikk.oppdaterMinimumInntektsvurdering(skjæringstidspunkt, grunnlagsdata, oppfyltKravTilMinimumInntekt)
     }
 
     internal fun emitOpprettOppgaveForSpeilsaksbehandlereEvent(hendelse: SykdomstidslinjeHendelse) {
