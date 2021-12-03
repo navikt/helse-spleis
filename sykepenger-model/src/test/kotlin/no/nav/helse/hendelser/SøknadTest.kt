@@ -6,10 +6,7 @@ import no.nav.helse.hentErrors
 import no.nav.helse.hentWarnings
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.sykdomstidslinje.Dag.*
-import no.nav.helse.testhelpers.desember
-import no.nav.helse.testhelpers.februar
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.mai
+import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -22,6 +19,7 @@ internal class SøknadTest {
     private companion object {
         private const val UNG_PERSON_FNR_2018 = "12029240045"
         private val EN_PERIODE = Periode(1.januar, 31.januar)
+        val FYLLER_18_ÅR_2_NOVEMBER = "02110075045"
     }
 
     private lateinit var søknad: Søknad
@@ -45,6 +43,18 @@ internal class SøknadTest {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent), Ferie(2.januar, 4.januar))
         assertFalse(søknad.valider(EN_PERIODE).hasErrorsOrWorse())
         assertEquals(10, søknad.sykdomstidslinje().count())
+    }
+
+    @Test
+    fun `17 år på søknadstidspunkt gir error`() {
+        søknad(Sykdom(1.januar, 10.januar, 100.prosent), fnr = FYLLER_18_ÅR_2_NOVEMBER, sendtTilNav = 1.november.atStartOfDay())
+        assertTrue(søknad.valider(EN_PERIODE).hasErrorsOrWorse())
+    }
+
+    @Test
+    fun `18 år på søknadstidspunkt gir ikke error`() {
+        søknad(Sykdom(1.januar, 10.januar, 100.prosent), fnr = FYLLER_18_ÅR_2_NOVEMBER, sendtTilNav = 2.november.atStartOfDay())
+        assertFalse(søknad.valider(EN_PERIODE).hasErrorsOrWorse())
     }
 
     @Test
@@ -234,15 +244,15 @@ internal class SøknadTest {
         assertTrue(søknad.hentErrors().contains("Søknaden inneholder andre inntektskilder enn ANDRE_ARBEIDSFORHOLD"))
     }
 
-    private fun søknad(vararg perioder: Søknadsperiode, andreInntektskilder: List<Søknad.Inntektskilde> = emptyList(), permittert: Boolean = false, merknaderFraSykmelding: List<Søknad.Merknad> = emptyList()) {
+    private fun søknad(vararg perioder: Søknadsperiode, andreInntektskilder: List<Søknad.Inntektskilde> = emptyList(), permittert: Boolean = false, merknaderFraSykmelding: List<Søknad.Merknad> = emptyList(), fnr: String = UNG_PERSON_FNR_2018, sendtTilNav: LocalDateTime? = null) {
         søknad = Søknad(
             meldingsreferanseId = UUID.randomUUID(),
-            fnr = UNG_PERSON_FNR_2018,
+            fnr = fnr,
             aktørId = "12345",
             orgnummer = "987654321",
             perioder = listOf(*perioder),
             andreInntektskilder = andreInntektskilder,
-            sendtTilNAV = Søknadsperiode.søknadsperiode(perioder.toList())?.endInclusive?.atStartOfDay() ?: LocalDateTime.now(),
+            sendtTilNAV = sendtTilNav ?: Søknadsperiode.søknadsperiode(perioder.toList())?.endInclusive?.atStartOfDay() ?: LocalDateTime.now(),
             permittert = permittert,
             merknaderFraSykmelding = merknaderFraSykmelding,
             sykmeldingSkrevet = LocalDateTime.now()

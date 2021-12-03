@@ -1,7 +1,8 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
+import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.november
 import no.nav.helse.testhelpers.oktober
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -22,15 +23,17 @@ internal class AvvisningFørFylte18ÅrTest : AbstractEndToEndTest() {
 
     @Test
     fun `avviser sykmeldinger for person under 18 år ved søknadstidspunkt`() {
-        val meldingsreferanse = håndterSykmelding(Sykmeldingsperiode(1.oktober, 31.oktober, 100.prosent), mottatt = 1.november.atStartOfDay(), fnr = FYLLER_18_ÅR_2_NOVEMBER)
+        håndterSykmelding(Sykmeldingsperiode(1.oktober, 31.oktober, 100.prosent), mottatt = 1.november.atStartOfDay(), fnr = FYLLER_18_ÅR_2_NOVEMBER)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.oktober, 31.oktober, 100.prosent), sendtTilNav = 1.november, fnr = FYLLER_18_ÅR_2_NOVEMBER)
         assertTrue(hendelselogg.hasErrorsOrWorse())
-        assertTrue(Sykmelding.AVSLAGSTEKST_PERSON_UNDER_18_ÅR in observatør.hendelseIkkeHåndtert(meldingsreferanse).årsaker)
+        assertForkastetPeriodeTilstander(1, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
     }
 
     @Test
     fun `avviser ikke sykmeldinger for person som er 18 år ved søknadstidspunkt`() {
-        val meldingsreferanse = håndterSykmelding(Sykmeldingsperiode(1.oktober, 31.oktober, 100.prosent), mottatt = 2.november.atStartOfDay(), fnr = FYLLER_18_ÅR_2_NOVEMBER)
+        håndterSykmelding(Sykmeldingsperiode(1.oktober, 31.oktober, 100.prosent), mottatt = 2.november.atStartOfDay(), fnr = FYLLER_18_ÅR_2_NOVEMBER)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.oktober, 31.oktober, 100.prosent), sendtTilNav = 2.november, fnr = FYLLER_18_ÅR_2_NOVEMBER)
         assertFalse(hendelselogg.hasErrorsOrWorse())
-        assertFalse(observatør.hendelseIkkeHåndtertEventer.containsKey(meldingsreferanse))
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
     }
 }

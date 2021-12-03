@@ -7,7 +7,6 @@ import no.nav.helse.sykdomstidslinje.Dag.Companion.noOverlap
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.merge
-import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.økonomi.Prosentdel
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -27,8 +26,7 @@ class Sykmelding(
     private val periode: Periode
 
     internal companion object {
-        const val AVSLAGSTEKST_PERSON_UNDER_18_ÅR = "Søker er ikke gammel nok på søknadstidspunktet til å søke sykepenger uten fullmakt fra verge"
-        const val AVSLAGSTEKST_FOR_GAMMEL = "Søknadsperioden kan ikke være eldre enn 6 måneder fra mottattidspunkt"
+        const val ERRORTEKST_FOR_GAMMEL = "Søknadsperioden kan ikke være eldre enn 6 måneder fra mottattidspunkt"
     }
 
     init {
@@ -42,12 +40,8 @@ class Sykmelding(
         return this
     }
 
-    internal fun forUng(alder: Alder) = alder.forUngForÅSøke(mottatt.toLocalDate()).also {
-        if (it) error(AVSLAGSTEKST_PERSON_UNDER_18_ÅR)
-    }
-
     internal fun forGammel() = (periode.endInclusive < mottatt.toLocalDate().minusMonths(6)).also {
-        if (it) error(AVSLAGSTEKST_FOR_GAMMEL)
+        if (it) error(ERRORTEKST_FOR_GAMMEL)
     }
 
     override fun melding(klassName: String) = "Sykmelding"

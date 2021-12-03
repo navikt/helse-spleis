@@ -2,11 +2,13 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.tournament.Dagturnering
+import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.økonomi.Prosentdel
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -29,8 +31,9 @@ class Søknad(
     private val sykdomstidslinje: Sykdomstidslinje
     private var sykdomstidslinjeUtenUønsketFerieIForkant: Sykdomstidslinje? = null
 
-    private companion object {
+    internal companion object {
         private const val tidslinjegrense = 40L
+        internal const val ERRORTEKST_PERSON_UNDER_18_ÅR = "Søker er ikke gammel nok på søknadstidspunktet til å søke sykepenger uten fullmakt fra verge"
     }
 
     init {
@@ -59,12 +62,17 @@ class Søknad(
     override fun valider(periode: Periode): IAktivitetslogg {
         perioder.forEach { it.valider(this) }
         andreInntektskilder.forEach { it.valider(this) }
+        forUng(fnr.somFødselsnummer().alder())
         if (permittert) warn("Søknaden inneholder permittering. Vurder om permittering har konsekvens for rett til sykepenger")
         if (merknaderFraSykmelding.any { it.type == "UGYLDIG_TILBAKEDATERING" || it.type == "TILBAKEDATERING_KREVER_FLERE_OPPLYSNINGER" }) {
             warn("Sykmeldingen er tilbakedatert, vurder fra og med dato for utbetaling.")
         }
         if (sykdomstidslinje.any { it is Dag.ForeldetSykedag }) warn("Minst én dag er avslått på grunn av foreldelse. Vurder å sende vedtaksbrev fra Infotrygd")
         return this
+    }
+
+    private fun forUng(alder: Alder) = alder.forUngForÅSøke(sendtTilNAV.toLocalDate()).also {
+        if (it) error(ERRORTEKST_PERSON_UNDER_18_ÅR)
     }
 
     override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) {
