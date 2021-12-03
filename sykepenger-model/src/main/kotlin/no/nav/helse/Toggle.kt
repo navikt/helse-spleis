@@ -30,12 +30,12 @@ abstract class Toggle internal constructor(enabled: Boolean = false, private val
     /**
      *
      */
-    private val states = mutableListOf(enabled)
+    private val states = ThreadLocal.withInitial { mutableListOf(enabled) }
 
     /**
      *
      */
-    val enabled get() = states.last()
+    val enabled get() = states.get().last()
 
     /**
      *
@@ -50,7 +50,7 @@ abstract class Toggle internal constructor(enabled: Boolean = false, private val
      */
     fun enable() {
         if (force) return
-        states.add(true)
+        states.get().add(true)
     }
 
     /**
@@ -66,7 +66,7 @@ abstract class Toggle internal constructor(enabled: Boolean = false, private val
      */
     fun disable() {
         if (force) return
-        states.add(false)
+        states.get().add(false)
     }
 
     /**
@@ -81,9 +81,11 @@ abstract class Toggle internal constructor(enabled: Boolean = false, private val
      * Brukes av [enable]
      */
     fun pop() {
-        if (states.size == 1) return
-        states.removeLast()
+        if (states.get().size == 1) return
+        states.get().removeLast()
     }
+
+    fun threadLocal() = states
 
     private fun runWith(block: () -> Unit) {
         try {

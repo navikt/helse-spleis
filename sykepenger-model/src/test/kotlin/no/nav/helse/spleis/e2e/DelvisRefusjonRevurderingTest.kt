@@ -8,9 +8,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.parallel.Isolated
 
-@Isolated
 internal class DelvisRefusjonRevurderingTest : AbstractEndToEndTest() {
 
     @Test

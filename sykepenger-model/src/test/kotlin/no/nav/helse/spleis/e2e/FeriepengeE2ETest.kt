@@ -21,12 +21,10 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.parallel.Isolated
 import org.slf4j.LoggerFactory
 import java.time.Year
 import kotlin.math.roundToInt
 
-@Isolated
 internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     private val logCollector = ListAppender<ILoggingEvent>()
 

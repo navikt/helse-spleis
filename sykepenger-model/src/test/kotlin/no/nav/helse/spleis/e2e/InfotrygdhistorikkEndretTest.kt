@@ -15,10 +15,8 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.parallel.Isolated
 import java.time.LocalDateTime
 
-@Isolated
 internal class InfotrygdhistorikkEndretTest: AbstractEndToEndTest() {
     private val gammelHistorikk = LocalDateTime.now().minusHours(24)
     private val utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar,  31.januar, 100.prosent, INNTEKT))

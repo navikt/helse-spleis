@@ -16,11 +16,9 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
-import org.junit.jupiter.api.parallel.Isolated
 import java.time.LocalDate
 import java.util.*
 
-@Isolated
 internal class UtbetalingstidslinjeBuilderTest {
     private val hendelseId = UUID.randomUUID()
     private lateinit var tidslinje: Utbetalingstidslinje

@@ -10,9 +10,12 @@ import io.ktor.http.*
 import io.ktor.server.engine.*
 import io.mockk.every
 import io.mockk.mockkStatic
+import kotlinx.coroutines.asContextElement
+import kotlinx.coroutines.withContext
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import no.nav.helse.Toggle
 import no.nav.helse.person.Person
 import no.nav.helse.serde.serialize
 import no.nav.helse.spleis.*
@@ -114,6 +117,14 @@ internal class ApiTestServer {
         )
 
         app.start(wait = false)
+
+        // Her vil togglen ha samme state som i testen som kjøres siden ApiTestServer#start blir kalt fra samme JUnit tråd som testen blir kjørt fra
+        // ThreadLocal#asContextElement passer på at coroutines restorer staten til ThreadLocal uansett hvilke worker-thread som kjører koden i samme context
+        val speilContext = Toggle.SpeilApiV2.threadLocal().asContextElement()
+        app.application.intercept(ApplicationCallPipeline.Features) {
+            // Om vi hadde prøvd å hente Toggle herifra ville vi vært i en av Ktors worker threads, for disse ville Togglen ikke ha samme state som JUnit tråden
+            withContext(speilContext) { proceed() }
+        }
     }
 
     private fun createToken() = jwtStub.createTokenFor(

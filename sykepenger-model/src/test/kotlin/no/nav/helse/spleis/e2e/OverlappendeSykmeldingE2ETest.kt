@@ -11,9 +11,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.parallel.Isolated
 
-@Isolated
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class OverlappendeSykmeldingE2ETest : AbstractEndToEndTest() {
 

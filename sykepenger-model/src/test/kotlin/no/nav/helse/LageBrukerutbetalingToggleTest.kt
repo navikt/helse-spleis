@@ -13,12 +13,10 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.parallel.Isolated
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-@Isolated
 internal class LageBrukerutbetalingToggleTest {
 
     private lateinit var aktivitetslogg: IAktivitetslogg

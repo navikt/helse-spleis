@@ -18,6 +18,7 @@ import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -3306,5 +3307,45 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterUtbetalt(2.vedtaksperiode)
 
         assertTrue(inspektør.utbetalinger.last().utbetalingstidslinje()[18.oktober(2021)] is NavDag)
+    }
+
+    @Test
+    fun `hopper videre uten å validere inntektsmelding dersom vi har inntekt`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent), orgnummer = a1)
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent), orgnummer = a2)
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = a2)
+
+        håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent), orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent), orgnummer = a2)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1, refusjon = Refusjon(Inntekt.INGEN, null))
+
+
+        //håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar, 100.prosent), orgnummer = a2)
+        //håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent), orgnummer = a2)
+    }
+
+    @Test
+    fun `hei christian og david`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent), orgnummer = a1)
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent), orgnummer = a2)
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = a2)
+
+        håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent), orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent), orgnummer = a2)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1, refusjon = Refusjon(Inntekt.INGEN, null))
+
+
+        //håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar, 100.prosent), orgnummer = a2)
+        //håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent), orgnummer = a2)
     }
 }

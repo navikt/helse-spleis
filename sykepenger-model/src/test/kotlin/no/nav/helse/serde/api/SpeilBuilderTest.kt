@@ -25,13 +25,11 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.parallel.Isolated
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
-@Isolated
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class SpeilBuilderTest : AbstractEndToEndTest() {
 

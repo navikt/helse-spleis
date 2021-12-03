@@ -16,10 +16,8 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.parallel.Isolated
 import java.time.LocalDateTime
 
-@Isolated
 internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
 
     @Test

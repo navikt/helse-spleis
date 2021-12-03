@@ -18,9 +18,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.parallel.Isolated
 
-@Isolated
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
 

@@ -16,12 +16,10 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.parallel.Isolated
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-@Isolated
 internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
     private companion object {
         private const val SAKSBEHANDLER_IDENT = "O123456"

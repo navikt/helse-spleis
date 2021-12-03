@@ -11,10 +11,8 @@ import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.parallel.Isolated
 import java.util.*
 
-@Isolated
 internal class RevurderInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
     private companion object {
         const val AG1 = "123456789"
