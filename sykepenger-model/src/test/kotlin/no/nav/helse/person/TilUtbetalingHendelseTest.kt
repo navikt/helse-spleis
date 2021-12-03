@@ -16,10 +16,12 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.parallel.Isolated
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
+@Isolated
 internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
     private companion object {
         private const val SAKSBEHANDLER_IDENT = "O123456"
@@ -374,7 +376,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
                 totalbeløp = 1000,
                 perioder = emptyList()
             ),
-            utbetalingId = UUID.fromString(hendelse.behov().first { it.type == Behovtype.Simulering }.kontekst().getValue("utbetalingId") as String)
+            utbetalingId = UUID.fromString(hendelse.behov().first { it.type == Behovtype.Simulering }.kontekst().getValue("utbetalingId"))
         ).apply {
             hendelse = this
         }
