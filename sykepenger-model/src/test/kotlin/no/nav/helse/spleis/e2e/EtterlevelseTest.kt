@@ -19,6 +19,8 @@ import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import java.time.DayOfWeek.SATURDAY
+import java.time.DayOfWeek.SUNDAY
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -365,18 +367,13 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(1.vedtaksperiode)
 
-        /* TODO: Dette er rart :thinkies: Gjøres foreløpig fordi arbeidsgiverperiodedager tolkes som avviste dager...
-            Må tas stilling til
-        */
-        val arbeidsgiverperiodedager = (1..16).map { it.januar }
-
         assertOppfylt(
             paragraf = PARAGRAF_8_13,
             ledd = 1.ledd,
             punktum = (1..2).punktum,
             versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
             inputdata = mapOf(
-                "avvisteDager" to arbeidsgiverperiodedager
+                "avvisteDager" to emptyList<LocalDate>()
             ),
             outputdata = emptyMap()
         )
@@ -392,7 +389,9 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
-        val avvisteDager = (1..31).map { it.januar }
+        val avvisteDager = (17..31)
+            .map { it.januar }
+            .filter { it.dayOfWeek != SATURDAY && it.dayOfWeek != SUNDAY }
 
         assertIkkeOppfylt(
             paragraf = PARAGRAF_8_13,
