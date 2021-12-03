@@ -117,8 +117,8 @@ internal class Arbeidsgiverperiodeteller(private val regler: ArbeidsgiverRegler,
         strategi.dagenInngårIArbeidsgiverperiodetelling(builder.build(), dagen)
         if (!regler.arbeidsgiverperiodenGjennomført(arbeidsgiverperiodedager)) return
         arbeidsgiverperiode = builder.build()
-        fortell(dagen) { arbeidsgiverperiodeFerdig(arbeidsgiverperiode!!, dagen) }
         tilstand(HarFullstendigArbeidsgiverperiode, dagen)
+        fortell(dagen) { arbeidsgiverperiodeFerdig(arbeidsgiverperiode!!, dagen) }
     }
 
     private fun _dekrementer(dagen: LocalDate) {
@@ -187,13 +187,13 @@ internal class Arbeidsgiverperiodeteller(private val regler: ArbeidsgiverRegler,
             dagen: LocalDate,
             strategi: Arbeidsgiverperiodestrategi
         ) {
-            strategi.dagenInngårIkkeIArbeidsgiverperiodetelling(teller.arbeidsgiverperiode, dagen)
+            strategi.dagenInngårIkkeIArbeidsgiverperiodetelling(null, dagen)
         }
 
         override fun inkrementer(teller: Arbeidsgiverperiodeteller, dagen: LocalDate, strategi: Arbeidsgiverperiodestrategi) {
             if (teller.forlengelsestrategi.erArbeidsgiverperiodenGjennomførtFør(dagen)) {
-                strategi.dagenInngårIkkeIArbeidsgiverperiodetelling(teller.arbeidsgiverperiode, dagen)
-                return teller.tilstand(HarFullstendigArbeidsgiverperiode, dagen)
+                strategi.dagenInngårIkkeIArbeidsgiverperiodetelling(null, dagen)
+                return teller.tilstand(HarFullstendigInfotrygdArbeidsgiverperiode, dagen)
             }
 
             teller._inkrementer(dagen, strategi)
@@ -213,7 +213,7 @@ internal class Arbeidsgiverperiodeteller(private val regler: ArbeidsgiverRegler,
         override fun dekrementerUsikker(teller: Arbeidsgiverperiodeteller) {
             teller.usikker.onEach { (dagen, strategi) ->
                 teller.tilstand.dekrementerer(teller, dagen)
-                strategi.dagenInngårIkkeIArbeidsgiverperiodetelling(teller.arbeidsgiverperiode, dagen)
+                strategi.dagenInngårIkkeIArbeidsgiverperiodetelling(null, dagen)
             }.clear()
         }
 
@@ -247,7 +247,7 @@ internal class Arbeidsgiverperiodeteller(private val regler: ArbeidsgiverRegler,
             strategi: Arbeidsgiverperiodestrategi
         ) {
             dekrementerer(teller, dagen)
-            strategi.dagenInngårIkkeIArbeidsgiverperiodetelling(teller.arbeidsgiverperiode, dagen)
+            strategi.dagenInngårIkkeIArbeidsgiverperiodetelling(teller.builder.build(), dagen)
         }
 
         override fun inkrementer(teller: Arbeidsgiverperiodeteller, dagen: LocalDate, strategi: Arbeidsgiverperiodestrategi) {
@@ -258,7 +258,7 @@ internal class Arbeidsgiverperiodeteller(private val regler: ArbeidsgiverRegler,
 
     private object HarFullstendigArbeidsgiverperiode : Tilstand {
         override fun entering(teller: Arbeidsgiverperiodeteller, dagen: LocalDate) {
-            teller.oppholdsdager = 0
+            teller.oppholdsdager = 0 // om oppholdsdager > 0 betyr det at vi kommer tilbake fra et opphold i arbeidsgiverperioden
             teller.arbeidsgiverperiodedager = 0
         }
 
@@ -275,7 +275,7 @@ internal class Arbeidsgiverperiodeteller(private val regler: ArbeidsgiverRegler,
         }
 
         override fun inkrementer(teller: Arbeidsgiverperiodeteller, dagen: LocalDate, strategi: Arbeidsgiverperiodestrategi) {
-            strategi.dagenInngårIkkeIArbeidsgiverperiodetelling(teller.arbeidsgiverperiode, dagen)
+            strategi.dagenInngårIkkeIArbeidsgiverperiodetelling(teller.arbeidsgiverperiode!!, dagen)
         }
     }
 
@@ -286,7 +286,7 @@ internal class Arbeidsgiverperiodeteller(private val regler: ArbeidsgiverRegler,
 
         override fun inkrementer(teller: Arbeidsgiverperiodeteller, dagen: LocalDate, strategi: Arbeidsgiverperiodestrategi) {
             teller.tilstand(HarFullstendigArbeidsgiverperiode, dagen)
-            strategi.dagenInngårIkkeIArbeidsgiverperiodetelling(teller.arbeidsgiverperiode, dagen)
+            strategi.dagenInngårIkkeIArbeidsgiverperiodetelling(teller.arbeidsgiverperiode!!, dagen)
         }
 
         override fun inkrementEllerDekrement(
@@ -295,7 +295,56 @@ internal class Arbeidsgiverperiodeteller(private val regler: ArbeidsgiverRegler,
             strategi: Arbeidsgiverperiodestrategi
         ) {
             dekrementerer(teller, dagen)
+            // teller.arbeidsgiverperiode kan være null, om *dagen* medfører tilbakestilling
             strategi.dagenInngårIkkeIArbeidsgiverperiodetelling(teller.arbeidsgiverperiode, dagen)
+        }
+
+        override fun dekrementerer(teller: Arbeidsgiverperiodeteller, dagen: LocalDate) {
+            teller._dekrementer(dagen)
+        }
+    }
+
+    private object HarFullstendigInfotrygdArbeidsgiverperiode : Tilstand {
+        override fun entering(teller: Arbeidsgiverperiodeteller, dagen: LocalDate) {
+            teller.oppholdsdager = 0 // om oppholdsdager > 0 betyr det at vi kommer tilbake fra et opphold i arbeidsgiverperioden
+            check(teller.arbeidsgiverperiodedager == 0)
+            check(teller.arbeidsgiverperiode == null)
+        }
+
+        override fun dekrementerer(teller: Arbeidsgiverperiodeteller, dagen: LocalDate) {
+            teller.tilstand(HarOppholdIFullstendigInfotrygdArbeidsgiverperiode, dagen)
+        }
+
+        override fun inkrementEllerDekrement(
+            teller: Arbeidsgiverperiodeteller,
+            dagen: LocalDate,
+            strategi: Arbeidsgiverperiodestrategi
+        ) {
+            inkrementer(teller, dagen, strategi)
+        }
+
+        override fun inkrementer(teller: Arbeidsgiverperiodeteller, dagen: LocalDate, strategi: Arbeidsgiverperiodestrategi) {
+            strategi.dagenInngårIkkeIArbeidsgiverperiodetelling(null, dagen)
+        }
+    }
+
+    private object HarOppholdIFullstendigInfotrygdArbeidsgiverperiode : Tilstand {
+        override fun entering(teller: Arbeidsgiverperiodeteller, dagen: LocalDate) {
+            teller.oppholdsdager = 1
+        }
+
+        override fun inkrementer(teller: Arbeidsgiverperiodeteller, dagen: LocalDate, strategi: Arbeidsgiverperiodestrategi) {
+            teller.tilstand(HarFullstendigInfotrygdArbeidsgiverperiode, dagen)
+            strategi.dagenInngårIkkeIArbeidsgiverperiodetelling(null, dagen)
+        }
+
+        override fun inkrementEllerDekrement(
+            teller: Arbeidsgiverperiodeteller,
+            dagen: LocalDate,
+            strategi: Arbeidsgiverperiodestrategi
+        ) {
+            dekrementerer(teller, dagen)
+            strategi.dagenInngårIkkeIArbeidsgiverperiodetelling(null, dagen)
         }
 
         override fun dekrementerer(teller: Arbeidsgiverperiodeteller, dagen: LocalDate) {
