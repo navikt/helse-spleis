@@ -386,7 +386,7 @@ internal fun AbstractEndToEndTest.håndterSimulering(
     orgnummer: String = AbstractPersonTest.ORGNUMMER
 ) {
     assertEtterspurt(Simulering::class, Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering, vedtaksperiodeIdInnhenter, orgnummer)
-    simulering(vedtaksperiodeIdInnhenter, simuleringOK, orgnummer).håndter(Person::håndter)
+    simulering(vedtaksperiodeIdInnhenter, simuleringOK, orgnummer).forEach { simulering -> simulering.håndter(Person::håndter) }
 }
 
 internal fun AbstractEndToEndTest.håndterUtbetalingshistorikk(
@@ -744,7 +744,9 @@ internal fun AbstractEndToEndTest.nyPeriode(periode: Periode, orgnummer: String)
 }
 
 internal fun AbstractEndToEndTest.betale(orgnummer: String) {
-    person.håndter(simulering(1.vedtaksperiode, orgnummer = orgnummer))
+    simulering(1.vedtaksperiode, orgnummer = orgnummer).forEach { simulering ->
+        person.håndter(simulering)
+    }
     person.håndter(
         utbetalingsgodkjenning(
             1.vedtaksperiode,

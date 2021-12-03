@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Toggle
+import no.nav.helse.Toggle.Companion.enable
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -9,7 +10,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.utbetalingslinjer.Oppdrag
-import no.nav.helse.utbetalingslinjer.Oppdragstatus
+import no.nav.helse.utbetalingslinjer.Oppdragstatus.AKSEPTERT
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterAll
@@ -43,14 +44,14 @@ internal class FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(1.vedtaksperiode, AKSEPTERT)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt(2.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(2.vedtaksperiode, AKSEPTERT)
 
         assertFalse(inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.harUtbetalinger())
         assertTrue(inspektør.utbetaling(0).inspektør.personOppdrag.harUtbetalinger())
@@ -71,14 +72,14 @@ internal class FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(1.vedtaksperiode, AKSEPTERT)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt(2.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(2.vedtaksperiode, AKSEPTERT)
 
         assertFalse(inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag.harUtbetalinger())
         assertEquals(17.januar til 31.januar, Oppdrag.periode(inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag))
@@ -96,7 +97,7 @@ internal class FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(1.vedtaksperiode, AKSEPTERT)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
@@ -114,7 +115,7 @@ internal class FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(1.vedtaksperiode, AKSEPTERT)
 
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, refusjon = Inntektsmelding.Refusjon(INNTEKT, 31.januar))
 
@@ -123,7 +124,7 @@ internal class FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt(2.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(2.vedtaksperiode, AKSEPTERT)
 
         assertFalse(inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag.harUtbetalinger())
         assertEquals(17.januar til 31.januar, Oppdrag.periode(inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag))
@@ -131,9 +132,8 @@ internal class FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
         assertEquals(1.februar til 28.februar, Oppdrag.periode(inspektør.utbetaling(1).inspektør.personOppdrag))
     }
 
-    // Tester strengt talt et ugyldig case siden refusjon ikke får lov å gå fra null til full, men den treffer uansett en probemstilling i modellen
     @Test
-    fun `starter med ingen refusjon, så korrigeres refusjonen til full`() {
+    fun `starter med ingen refusjon, så korrigeres refusjonen til full`() = listOf(Toggle.LageBrukerutbetaling, Toggle.DelvisRefusjon).enable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, refusjon = Inntektsmelding.Refusjon(0.daglig, null))
@@ -142,7 +142,7 @@ internal class FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(1.vedtaksperiode, AKSEPTERT)
 
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
 
@@ -150,14 +150,9 @@ internal class FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         håndterYtelser(2.vedtaksperiode)
 
-        assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode)) {
-            "Perioden forkastes pga. feature toggle om delvis refusjon." +
-                "Den dagen delvis refusjon støttes vil koden under være riktig asserts -- med mindre man stopper dette caset på en funksjonelt nivå"
-        }
-
-        /*håndterSimulering(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt(2.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(2.vedtaksperiode, AKSEPTERT)
 
         assertFalse(inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.harUtbetalinger())
         assertTrue(inspektør.utbetaling(0).inspektør.personOppdrag.harUtbetalinger())
@@ -166,6 +161,6 @@ internal class FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
         assertTrue(inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag.harUtbetalinger())
         assertTrue(inspektør.utbetaling(1).inspektør.personOppdrag.harUtbetalinger())
         assertTrue(inspektør.utbetaling(1).inspektør.personOppdrag[0].erOpphør())
-        assertEquals(17.januar til 31.januar, Oppdrag.periode(inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag))*/
+        assertEquals(17.januar til 28.februar, Oppdrag.periode(inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag))
     }
 }

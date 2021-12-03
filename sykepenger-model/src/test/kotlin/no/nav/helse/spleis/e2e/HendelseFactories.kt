@@ -418,18 +418,18 @@ internal fun AbstractEndToEndTest.simulering(
     vedtaksperiodeIdInnhenter: IdInnhenter,
     simuleringOK: Boolean = true,
     orgnummer: String = AbstractPersonTest.ORGNUMMER
-) =
+) = inspektør(orgnummer).etterspurteBehov(vedtaksperiodeIdInnhenter).filter { it.type == Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering }.map { simuleringsBehov ->
     Simulering(
         meldingsreferanseId = UUID.randomUUID(),
         vedtaksperiodeId = vedtaksperiodeIdInnhenter(orgnummer).toString(),
         aktørId = AbstractPersonTest.AKTØRID,
         fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018,
         orgnummer = orgnummer,
-        fagsystemId = inspektør(orgnummer).sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering).detaljer().getValue("fagsystemId") as String,
-        fagområde = inspektør(orgnummer).sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering).detaljer().getValue("fagområde") as String,
+        fagsystemId = simuleringsBehov.detaljer().getValue("fagsystemId") as String,
+        fagområde = simuleringsBehov.detaljer().getValue("fagområde") as String,
         simuleringOK = simuleringOK,
         melding = "",
-        utbetalingId = UUID.fromString(inspektør.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering).kontekst().getValue("utbetalingId")),
+        utbetalingId = UUID.fromString(simuleringsBehov.kontekst().getValue("utbetalingId")),
         simuleringResultat = Simulering.SimuleringResultat(
             totalbeløp = 2000,
             perioder = listOf(
@@ -471,6 +471,7 @@ internal fun AbstractEndToEndTest.simulering(
     ).apply {
         hendelselogg = this
     }
+}
 
 internal fun AbstractEndToEndTest.utbetalingsgodkjenning(
     vedtaksperiodeIdInnhenter: IdInnhenter,

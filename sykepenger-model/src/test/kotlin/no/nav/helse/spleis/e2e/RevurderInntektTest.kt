@@ -1,5 +1,8 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggle
+import no.nav.helse.Toggle.Companion.disable
+import no.nav.helse.Toggle.Companion.enable
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.inspectors.GrunnlagsdataInspektør
@@ -203,7 +206,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             AVVENTER_GJENNOMFØRT_REVURDERING,
             AVSLUTTET,
 
-        )
+            )
 
         assertTilstander(
             1,
@@ -353,7 +356,11 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         assertEquals(2, inspektør.utbetalinger.size)
         assertEquals(-15741, utbetalingTilRevurdering.inspektør.arbeidsgiverOppdrag.nettoBeløp())
 
-        assertWarningTekst(inspektør, "Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.", "Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag")
+        assertWarningTekst(
+            inspektør,
+            "Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.",
+            "Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag"
+        )
         assertFalse(utbetalingTilRevurdering.utbetalingstidslinje().harUtbetalinger())
     }
 
@@ -727,11 +734,63 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         assertHarHendelseIder(2.vedtaksperiode, overstyrInntektHendelseId)
         assertHarHendelseIder(3.vedtaksperiode, overstyrInntektHendelseId)
     }
+
+    @Test
+    fun `revurdere inntekt slik at det blir brukerutbetaling`() = Toggle.LageBrukerutbetaling.enable {
+        nyttVedtak(1.januar, 31.januar)
+        håndterOverstyrInntekt(inntekt = 35000.månedlig, skjæringstidspunkt = 1.januar)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+    }
+
+    @Test
+    fun `revurdere inntekt slik at det blir brukerutbetaling uten å ha skrudd på brukerutbetaling `() =
+        Toggle.LageBrukerutbetaling.disable {
+            nyttVedtak(1.januar, 31.januar)
+            håndterOverstyrInntekt(inntekt = 35000.månedlig, skjæringstidspunkt = 1.januar)
+            håndterYtelser(1.vedtaksperiode)
+            assertSisteTilstand(1.vedtaksperiode, REVURDERING_FEILET)
+        }
+
+    @Test
+    fun `revurdere inntekt slik at det blir delvis refusjon`() = listOf(Toggle.LageBrukerutbetaling, Toggle.DelvisRefusjon).enable {
+        nyttVedtak(1.januar, 31.januar)
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), refusjon = Refusjon(25000.månedlig, null, emptyList()))
+        håndterOverstyrInntekt(inntekt = 35000.månedlig, skjæringstidspunkt = 1.januar)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+    }
+
+    @Test
+    fun `revurdere inntekt slik at det blir delvis refusjon uten å skrudd på brukerutbetaling eller delvis refusjon`() =
+        listOf(Toggle.LageBrukerutbetaling, Toggle.DelvisRefusjon).disable {
+            nyttVedtak(1.januar, 31.januar)
+            håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), refusjon = Refusjon(25000.månedlig, null, emptyList()))
+            håndterOverstyrInntekt(inntekt = 35000.månedlig, skjæringstidspunkt = 1.januar)
+            håndterYtelser(1.vedtaksperiode)
+            assertSisteTilstand(1.vedtaksperiode, REVURDERING_FEILET)
+        }
+
+    @Test
+    fun `revurdere inntekt slik at det blir delvis refusjon uten å skrudd på delvis refusjon`() =
+        Toggle.LageBrukerutbetaling.enable {
+            Toggle.DelvisRefusjon.disable {
+                nyttVedtak(1.januar, 31.januar)
+                håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), refusjon = Refusjon(25000.månedlig, null, emptyList()))
+                håndterOverstyrInntekt(inntekt = 35000.månedlig, skjæringstidspunkt = 1.januar)
+                håndterYtelser(1.vedtaksperiode)
+                assertSisteTilstand(1.vedtaksperiode, REVURDERING_FEILET)
+            }
+        }
 }
 
 private fun Oppdrag.skalHaEndringskode(kode: Endringskode, message: String = "") = accept(UtbetalingSkalHaEndringskode(kode, message))
 
-private class UtbetalingSkalHaEndringskode(private val ønsketEndringskode: Endringskode, private val message: String = ""): OppdragVisitor {
+private class UtbetalingSkalHaEndringskode(private val ønsketEndringskode: Endringskode, private val message: String = "") : OppdragVisitor {
     override fun preVisitOppdrag(
         oppdrag: Oppdrag,
         totalBeløp: Int,
