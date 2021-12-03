@@ -1,0 +1,39 @@
+{
+    "arbeidsgivere": [
+        {
+            "utbetalinger": [
+                {
+                    "id": "utbetalingId",
+                    "arbeidsgiverOppdrag": {
+                        "fagsystemId": "fagsystemId1",
+                        "mottaker": "987654321",
+                        "linjer": [
+                            {
+                                "endringskode": "NY"
+                            }
+                        ]
+                    },
+                    "personOppdrag": {
+                        "fagsystemId": "fagsystemId2",
+                        "mottaker": "12029240045",
+                        "linjer": [
+                            {
+                                "endringskode": "NY"
+                            }
+                        ]
+                    },
+                    "tidsstempel": "2021-12-03T15:01:05.127625"
+                }
+            ],
+            "vedtaksperioder": [
+                {
+                    "id": "vedtaksperiodeId",
+                    "utbetalinger": [
+                        "utbetalingId"
+                    ]
+                }
+            ]
+        }
+    ],
+    "skjemaVersjon": 129
+}

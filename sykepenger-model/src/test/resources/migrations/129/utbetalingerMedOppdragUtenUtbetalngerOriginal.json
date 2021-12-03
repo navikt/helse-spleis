@@ -1,0 +1,90 @@
+{
+    "arbeidsgivere": [
+        {
+            "utbetalinger": [
+                {
+                    "id": "utbetalingId1",
+                    "arbeidsgiverOppdrag": {
+                        "fagsystemId": "fagsystemId1",
+                        "mottaker": "987654321",
+                        "linjer": []
+                    },
+                    "personOppdrag": {
+                        "fagsystemId": "fagsystemId2",
+                        "mottaker": "12029240045",
+                        "linjer": [
+                            {
+                                "endringskode": "NY"
+                            }
+                        ]
+                    },
+                    "tidsstempel": "2021-12-03T15:01:05.127625"
+                },
+                {
+                    "id": "utbetalingId2",
+                    "arbeidsgiverOppdrag": {
+                        "fagsystemId": "fagsystemId3",
+                        "mottaker": "987654321",
+                        "linjer": []
+                    },
+                    "personOppdrag": {
+                        "fagsystemId": "fagsystemId4",
+                        "mottaker": "12029240045",
+                        "linjer": [
+                            {
+                                "endringskode": "UEND"
+                            }
+                        ]
+                    },
+                    "tidsstempel": "2021-12-04T15:01:05.127625"
+                },
+                {
+                    "id": "utbetalingId3",
+                    "arbeidsgiverOppdrag": {
+                        "fagsystemId": "fagsystemId5",
+                        "mottaker": "987654321",
+                        "linjer": [
+                            {
+                                "endringskode": "UEND"
+                            }
+                        ]
+                    },
+                    "personOppdrag": {
+                        "fagsystemId": "fagsystemId6",
+                        "mottaker": "12029240045",
+                        "linjer": [
+                            {
+                                "endringskode": "UEND"
+                            }
+                        ]
+                    },
+                    "tidsstempel": "2021-12-05T15:01:05.127625"
+                }
+            ],
+            "vedtaksperioder": [
+                {
+                    "id": "vedtaksperiodeId",
+                    "dataForSimulering": {
+                        "perioder": [
+                            {
+                                "utbetalinger": [
+                                    {
+                                        "utbetalesTil": {
+                                            "id": "12029240045"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "utbetalinger": [
+                        "utbetalingId1",
+                        "utbetalingId2",
+                        "utbetalingId3"
+                    ]
+                }
+            ]
+        }
+    ],
+    "skjemaVersjon": 128
+}
