@@ -401,6 +401,7 @@ internal class PersonMediator(
 
         return hendelseRepository
             .finnInntektsmeldinger(Fødselsnummer.tilFødselsnummer(fnr))
+            .filterNot { it["foersteFravaersdag"] == null }
             .map { inntektsmelding ->
                 inntektsmelding["foersteFravaersdag"].asOptionalLocalDate() to
                     if (inntektsmelding["arbeidsgiverperioder"].isEmpty) Periode(LocalDate.MIN, LocalDate.MIN)
