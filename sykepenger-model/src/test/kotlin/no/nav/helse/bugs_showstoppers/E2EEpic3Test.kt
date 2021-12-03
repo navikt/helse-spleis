@@ -1,5 +1,6 @@
 package no.nav.helse.bugs_showstoppers
 
+import no.nav.helse.Grunnbeløp
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
@@ -1854,11 +1855,12 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Legger på warning hvis første utbetalingsdag i infotrygdforlengelse er mellom første og sekstende mai 2021`() {
+    fun `Legger på warning hvis første utbetalingsdag i infotrygdforlengelse er mellom første og sekstende mai 2021 og sykepengegrunnlag har blitt begrenset av gammelt G-beløp`() {
         håndterSykmelding(Sykmeldingsperiode(12.juli(2021), 1.august(2021), 100.prosent))
         håndterSøknad(Sykdom(12.juli(2021), 1.august(2021), 100.prosent))
 
-        val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 2.mai(2021), INNTEKT, true))
+        val inntektHøyereEllerLikGammeltGBeløp = Grunnbeløp.`6G`.beløp(LocalDate.of(2021, 4, 30))
+        val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 2.mai(2021), inntektHøyereEllerLikGammeltGBeløp, true))
         val utbetlinger = arrayOf(
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 2.mai(2021), 21.juni(2021), 100.prosent, 1000.daglig),
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 22.juni(2021), 11.juli(2021), 100.prosent, 1000.daglig)
@@ -1875,5 +1877,22 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVVENTER_SIMULERING
         )
         assertTrue(inspektør.personLogg.warn().toString().contains("Første utbetalingsdag er i Infotrygd og mellom 1. og 16. mai. Kontroller at riktig grunnbeløp er brukt."))
+    }
+
+    @Test
+    fun `Legger ikke på warning hvis inntekt ikke blir begrenset av gammel 6G`() {
+        håndterSykmelding(Sykmeldingsperiode(12.juli(2021), 1.august(2021), 100.prosent))
+        håndterSøknad(Sykdom(12.juli(2021), 1.august(2021), 100.prosent))
+
+        val inntektLavereEnnGammeltGBeløp = Grunnbeløp.`6G`.beløp(LocalDate.of(2021, 4, 30)).minus(1.00.daglig)
+        val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 2.mai(2021), inntektLavereEnnGammeltGBeløp, true))
+        val utbetlinger = arrayOf(
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 2.mai(2021), 21.juni(2021), 100.prosent, 1000.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 22.juni(2021), 11.juli(2021), 100.prosent, 1000.daglig)
+        )
+        håndterUtbetalingshistorikk(1.vedtaksperiode, utbetalinger = utbetlinger, inntektshistorikk = inntektshistorikk)
+        håndterYtelser(1.vedtaksperiode)
+
+        assertFalse(inspektør.personLogg.warn().toString().contains("Første utbetalingsdag er i Infotrygd og mellom 1. og 16. mai. Kontroller at riktig grunnbeløp er brukt."))
     }
 }

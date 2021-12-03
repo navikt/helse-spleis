@@ -1,5 +1,6 @@
 package no.nav.helse.person
 
+import no.nav.helse.Grunnbeløp
 import no.nav.helse.Toggle
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Validation.Companion.validation
@@ -2022,7 +2023,9 @@ internal class Vedtaksperiode private constructor(
                         in listOf(OVERGANG_FRA_IT, INFOTRYGDFORLENGELSE) -> {
                             vedtaksperiode.forlengelseFraInfotrygd = JA
                             if(vedtaksperiode.skjæringstidspunktFraInfotrygd in LocalDate.of(2021, 5, 1) til LocalDate.of(2021, 5, 16)) {
-                                ytelser.warn("Første utbetalingsdag er i Infotrygd og mellom 1. og 16. mai. Kontroller at riktig grunnbeløp er brukt.")
+                                val gammeltGrunnbeløp = Grunnbeløp.`6G`.beløp(LocalDate.of(2021, 4, 30))
+                                val sykepengegrunnlag = vilkårsgrunnlag.sykepengegrunnlag()
+                                if (sykepengegrunnlag >= gammeltGrunnbeløp) ytelser.warn("Første utbetalingsdag er i Infotrygd og mellom 1. og 16. mai. Kontroller at riktig grunnbeløp er brukt.")
                             }
                         }
                         else -> {
