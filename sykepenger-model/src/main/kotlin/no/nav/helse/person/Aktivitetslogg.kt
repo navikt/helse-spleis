@@ -711,9 +711,28 @@ class Aktivitetslogg(
 
                     internal fun IAktivitetslogg.`§8-30 ledd 1`(
                         oppfylt: Boolean,
-                        list: List<ArbeidsgiverInntektsopplysning>,
+                        grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Inntekt>,
                         grunnlagForSykepengegrunnlag: Inntekt
-                    ) {}
+                    ) {
+                        val beregnetMånedsinntektPerArbeidsgiver = grunnlagForSykepengegrunnlagPerArbeidsgiver
+                            .mapValues { it.value.reflection { _, månedlig, _, _ -> månedlig } }
+                        juridiskVurdering(
+                            "",
+                            Vurderingsresultat(
+                                oppfylt = oppfylt,
+                                versjon = LocalDate.of(2019, 1, 1),
+                                paragraf = PARAGRAF_8_30,
+                                ledd = LEDD_1,
+                                punktum = 1.punktum,
+                                inputdata = mapOf(
+                                    "beregnetMånedsinntektPerArbeidsgiver" to beregnetMånedsinntektPerArbeidsgiver
+                                ),
+                                outputdata = mapOf(
+                                    "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig }
+                                )
+                            )
+                        )
+                    }
 
                     internal fun IAktivitetslogg.`§8-30 ledd 2 punktum 1`(
                         oppfylt: Boolean,

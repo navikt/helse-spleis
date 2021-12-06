@@ -449,9 +449,9 @@ class Person private constructor(
         vilkårsgrunnlagHistorikk.lagre(skjæringstidspunkt, vilkårsgrunnlag)
     }
 
-    internal fun lagreVilkårsgrunnlagFraInfotrygd(skjæringstidspunkt: LocalDate, periode: Periode) {
+    internal fun lagreVilkårsgrunnlagFraInfotrygd(skjæringstidspunkt: LocalDate, periode: Periode, hendelse: IAktivitetslogg) {
         infotrygdhistorikk.lagreVilkårsgrunnlag(skjæringstidspunkt, vilkårsgrunnlagHistorikk) {
-            beregnSykepengegrunnlagForInfotrygd(it, periode.start)
+            beregnSykepengegrunnlagForInfotrygd(it, periode.start, hendelse)
         }
     }
 
@@ -494,8 +494,12 @@ class Person private constructor(
     internal fun beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate, aktivitetslogg: IAktivitetslogg) =
         Sykepengegrunnlag(arbeidsgivere.beregnSykepengegrunnlag(skjæringstidspunkt), skjæringstidspunkt, aktivitetslogg)
 
-    private fun beregnSykepengegrunnlagForInfotrygd(skjæringstidspunkt: LocalDate, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden: LocalDate) =
-        Sykepengegrunnlag(arbeidsgivere.beregnSykepengegrunnlag(skjæringstidspunkt, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden))
+    private fun beregnSykepengegrunnlagForInfotrygd(
+        skjæringstidspunkt: LocalDate,
+        personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden: LocalDate,
+        hendelse: IAktivitetslogg
+    ) =
+        Sykepengegrunnlag(arbeidsgivere.beregnSykepengegrunnlag(skjæringstidspunkt, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden), hendelse)
 
     internal fun grunnlagForSykepengegrunnlagPerArbeidsgiver(skjæringstidspunkt: LocalDate) =
         vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)?.inntektsopplysningPerArbeidsgiver()

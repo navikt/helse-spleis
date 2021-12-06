@@ -44,18 +44,39 @@ internal class Sykepengegrunnlag(
         skjæringstidspunkt: LocalDate,
         aktivitetslogg: IAktivitetslogg
     ) : this(
-        sykepengegrunnlag(arbeidsgiverInntektsopplysninger.inntekt(), skjæringstidspunkt, aktivitetslogg),
         arbeidsgiverInntektsopplysninger,
-        arbeidsgiverInntektsopplysninger.inntekt(),
-        if (arbeidsgiverInntektsopplysninger.inntekt() > Grunnbeløp.`6G`.beløp(skjæringstidspunkt)) ER_6G_BEGRENSET else ER_IKKE_6G_BEGRENSET
+        skjæringstidspunkt,
+        aktivitetslogg,
+        arbeidsgiverInntektsopplysninger.inntekt(aktivitetslogg)
     )
 
     constructor(
         arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
+        aktivitetslogg: IAktivitetslogg
     ) : this(
-        arbeidsgiverInntektsopplysninger.inntekt(),
         arbeidsgiverInntektsopplysninger,
-        arbeidsgiverInntektsopplysninger.inntekt(),
+        arbeidsgiverInntektsopplysninger.inntekt(aktivitetslogg)
+    )
+
+    private constructor(
+        arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
+        skjæringstidspunkt: LocalDate,
+        aktivitetslogg: IAktivitetslogg,
+        grunnlagForSykepengegrunnlag: Inntekt,
+    ): this(
+        sykepengegrunnlag(grunnlagForSykepengegrunnlag, skjæringstidspunkt, aktivitetslogg),
+        arbeidsgiverInntektsopplysninger,
+        grunnlagForSykepengegrunnlag,
+        if (grunnlagForSykepengegrunnlag > Grunnbeløp.`6G`.beløp(skjæringstidspunkt)) ER_6G_BEGRENSET else ER_IKKE_6G_BEGRENSET
+    )
+
+    private constructor(
+        arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
+        grunnlagForSykepengegrunnlag: Inntekt
+    ): this (
+        grunnlagForSykepengegrunnlag,
+        arbeidsgiverInntektsopplysninger,
+        grunnlagForSykepengegrunnlag,
         VURDERT_I_INFOTRYGD
     )
 

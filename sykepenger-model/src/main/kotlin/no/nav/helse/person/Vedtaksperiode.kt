@@ -1995,7 +1995,7 @@ internal class Vedtaksperiode private constructor(
                 }
                 onSuccess { infotrygdhistorikk.addInntekter(person, this) }
                 onSuccess {
-                    person.lagreVilkårsgrunnlagFraInfotrygd(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode())
+                    person.lagreVilkårsgrunnlagFraInfotrygd(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode(), ytelser)
                 }
                 validerHvis(
                     "Forventer minst ett sykepengegrunnlag som er fra inntektsmelding eller Infotrygd",
