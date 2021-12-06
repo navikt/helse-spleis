@@ -51,4 +51,12 @@ internal class V129KopiereSimuleringsResultatTilOppdragTest : MigrationTest(V129
             originalJson = "/migrations/129/vedtaksperiodeUtenSimuleringsResultatOriginal.json"
         )
     }
+
+    @Test
+    fun `finner ingen utbetaling simuleringsresultatet kan høre til`() {
+        assertMigration(
+            expectedJson = "/migrations/129/ingenUtbetalingSimuleringenHørerTilExpected.json",
+            originalJson = "/migrations/129/ingenUtbetalingSimuleringenHørerTilOriginal.json"
+        )
+    }
 }

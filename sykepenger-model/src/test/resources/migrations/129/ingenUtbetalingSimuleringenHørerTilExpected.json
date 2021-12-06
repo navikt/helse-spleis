@@ -1,0 +1,44 @@
+{
+    "arbeidsgivere": [
+        {
+            "utbetalinger": [
+                {
+                    "id": "utbetalingId",
+                    "arbeidsgiverOppdrag": {
+                        "fagsystemId": "fagsystemId1",
+                        "mottaker": "987654321",
+                        "linjer": []
+                    },
+                    "personOppdrag": {
+                        "fagsystemId": "fagsystemId2",
+                        "mottaker": "12029240045",
+                        "linjer": []
+                    },
+                    "tidsstempel": "2021-12-03T15:01:05.127625"
+                }
+            ],
+            "vedtaksperioder": [
+                {
+                    "id": "vedtaksperiodeId",
+                    "dataForSimulering": {
+                        "perioder": [
+                            {
+                                "utbetalinger": [
+                                    {
+                                        "utbetalesTil": {
+                                            "id": "987654321"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "utbetalinger": [
+                        "utbetalingId"
+                    ]
+                }
+            ]
+        }
+    ],
+    "skjemaVersjon": 129
+}

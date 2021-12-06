@@ -19,21 +19,24 @@ internal class V129KopiereSimuleringsResultatTilOppdrag : JsonMigration(version 
 
             arbeidsgiver.path("vedtaksperioder")
                 .filter { it.vedtaksperiodeHarSimuleringsResultat() } // Trenger ikke kopiere over fra de som ikke har noe simuleringsResultat
-                .forEach { vedtaksperiode ->
-                    val simuleringsResultat = vedtaksperiode["dataForSimulering"]
-                    val utbetalingIder = vedtaksperiode.path("utbetalinger").map { it.asText() }
-                    val sisteUtbetaling = utbetalinger.last { it["id"].asText() in utbetalingIder }
-                    val personOppdrag = sisteUtbetaling["personOppdrag"] as ObjectNode
-                    val personOppdragMottaker = personOppdrag.path("mottaker").asText()
-                    val arbeidsgiverOppdrag = sisteUtbetaling["arbeidsgiverOppdrag"] as ObjectNode
+                .forEach { it.kopierSimuleringsResultat(utbetalinger) }
+        }
+    }
 
-                    if (simuleringsResultat.simuleringsResultatInneholderMottaker(personOppdragMottaker) && personOppdrag.oppdragManglerSimuleringsResultat()) {
-                        personOppdrag.replace("simuleringsResultat", simuleringsResultat)
-                        logger.info("La til simuleringsResultat for personOppdrag på utbetaling ${sisteUtbetaling["id"].asText()}")
-                    } else if (arbeidsgiverOppdrag.oppdragManglerSimuleringsResultat()) {
-                        arbeidsgiverOppdrag.replace("simuleringsResultat", simuleringsResultat)
-                    }
-                }
+    private fun JsonNode.kopierSimuleringsResultat(utbetalinger: List<JsonNode>) {
+        val simuleringsResultat = path("dataForSimulering")
+        val utbetalingIder = path("utbetalinger").map { it.asText() }
+        val sisteUtbetaling = utbetalinger.lastOrNull { it["id"].asText() in utbetalingIder }
+            ?: return logger.info("Fant ingen utbetaling å migrere simuleringsResultat til for vedtaksperiode ${path("id").asText()}")
+        val personOppdrag = sisteUtbetaling["personOppdrag"] as ObjectNode
+        val personOppdragMottaker = personOppdrag.path("mottaker").asText()
+        val arbeidsgiverOppdrag = sisteUtbetaling["arbeidsgiverOppdrag"] as ObjectNode
+
+        if (simuleringsResultat.simuleringsResultatInneholderMottaker(personOppdragMottaker) && personOppdrag.oppdragManglerSimuleringsResultat()) {
+            personOppdrag.replace("simuleringsResultat", simuleringsResultat)
+            logger.info("La til simuleringsResultat for personOppdrag på utbetaling ${sisteUtbetaling["id"].asText()}")
+        } else if (arbeidsgiverOppdrag.oppdragManglerSimuleringsResultat()) {
+            arbeidsgiverOppdrag.replace("simuleringsResultat", simuleringsResultat)
         }
     }
 
