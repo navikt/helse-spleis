@@ -254,7 +254,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         assertEquals(237, tidslinje.utbetaling.gjenståendeSykedager)
         assertEquals(11, tidslinje.utbetaling.forbrukteSykedager)
         assertEquals(15741, tidslinje.utbetaling.arbeidsgiverNettoBeløp)
-        assertEquals(utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId(), tidslinje.utbetaling.arbeidsgiverFagsystemId)
+        assertEquals(utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), tidslinje.utbetaling.arbeidsgiverFagsystemId)
         assertNotNull(tidslinje.utbetaling.vurdering)
         assertNotNull(tidslinje.tidsstempel)
         tidslinje.utbetaling.vurdering?.also {
