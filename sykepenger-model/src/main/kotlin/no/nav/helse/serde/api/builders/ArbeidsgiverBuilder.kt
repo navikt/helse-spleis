@@ -40,13 +40,17 @@ internal class ArbeidsgiverBuilder(
         byggerForkastedePerioder = true
     )
 
-    internal fun build(hendelser: List<HendelseDTO>, fødselsnummer: String, vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk) = ArbeidsgiverDTO(
-        organisasjonsnummer = organisasjonsnummer,
-        id = id,
-        vedtaksperioder = perioderBuilder.build(hendelser, utbetalinger) + forkastetPerioderBuilder.build(hendelser, utbetalinger).filter { it.tilstand.visesNårForkastet() },
-        utbetalingshistorikk = utbetalingshistorikkBuilder.build(),
-        generasjoner = if (Toggle.SpeilApiV2.enabled) GenerasjonerBuilder(hendelser, fødselsnummer.somFødselsnummer(), vilkårsgrunnlagHistorikk, arbeidsgiver).build() else null
-    )
+    internal fun build(hendelser: List<HendelseDTO>, fødselsnummer: String, vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk): ArbeidsgiverDTO {
+        val utbetalingshistorikk = utbetalingshistorikkBuilder.build()
+
+        return ArbeidsgiverDTO(
+            organisasjonsnummer = organisasjonsnummer,
+            id = id,
+            vedtaksperioder = perioderBuilder.build(hendelser, utbetalingshistorikk) + forkastetPerioderBuilder.build(hendelser, utbetalingshistorikk).filter { it.tilstand.visesNårForkastet() },
+            utbetalingshistorikk = utbetalingshistorikk,
+            generasjoner = if (Toggle.SpeilApiV2.enabled) GenerasjonerBuilder(hendelser, fødselsnummer.somFødselsnummer(), vilkårsgrunnlagHistorikk, arbeidsgiver).build() else null
+        )
+    }
 
     override fun preVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {
         pushState(perioderBuilder)

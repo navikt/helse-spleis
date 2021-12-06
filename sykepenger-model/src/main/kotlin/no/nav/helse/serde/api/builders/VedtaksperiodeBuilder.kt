@@ -5,13 +5,13 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.*
 import no.nav.helse.serde.api.*
+import no.nav.helse.serde.api.dto.UtbetalingshistorikkElementDTO
 import no.nav.helse.serde.api.v2.HendelseDTO
 import no.nav.helse.serde.api.v2.SøknadNavDTO
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.kronologisk
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
@@ -74,23 +74,25 @@ internal class VedtaksperiodeBuilder(
     private var totalbeløpArbeidstaker: Int = 0
     private var vedtaksperiodeUtbetaling: Utbetaling? = null
 
-    internal fun build(hendelser: List<HendelseDTO>, utbetalinger: List<Utbetaling>): VedtaksperiodeDTOBase {
-        val relevanteHendelser = hendelser.filter { it.id in hendelseIder.map { it.toString() } }
+    private var utbetalingId: UUID? = null
 
-        val tilstandstypeDTO = buildTilstandtypeDto(finnRiktigUtbetaling(utbetalinger))
+    internal fun build(hendelser: List<HendelseDTO>, utbetalinger: List<UtbetalingshistorikkElementDTO>): VedtaksperiodeDTOBase {
+        val relevanteHendelser = hendelser.filter { it.id in hendelseIder.map { id -> id.toString() } }
 
-        if (!fullstendig) return buildUfullstendig(utbetalinger, tilstandstypeDTO, forkastet)
+        val utbetaling = utbetalinger.firstOrNull { it.utbetaling.utbetalingId == utbetalingId }?.utbetaling
+
+        val tilstandstypeDTO = UtbetalingshistorikkElementDTO.UtbetalingDTO.tilstandFor(
+            periode = periode,
+            tilstandstype = tilstand.type,
+            utbetaling = utbetaling,
+            utbetalinger = utbetalinger.map { it.utbetaling }
+        )
+
+        if (!fullstendig) return buildUfullstendig(utbetaling, tilstandstypeDTO, forkastet)
 
         val utbetalteUtbetalinger = byggUtbetalteUtbetalingerForPeriode(utbetalinger)
         return buildFullstendig(relevanteHendelser, tilstandstypeDTO, totalbeløpArbeidstaker, utbetalteUtbetalinger, forkastet)
     }
-
-    private fun finnRiktigUtbetaling(utbetalinger: List<Utbetaling>) = arbeidsgiverFagsystemId?.let {
-        utbetalinger.filter { utbetaling -> utbetaling.arbeidsgiverOppdrag().fagsystemId() == arbeidsgiverFagsystemId }
-            .kronologisk()
-            .reversed()
-            .firstOrNull()
-    }?.takeIf { it.erAnnullering() } ?: vedtaksperiodeUtbetaling
 
     private fun buildFullstendig(
         relevanteHendelser: List<HendelseDTO>,
@@ -134,8 +136,8 @@ internal class VedtaksperiodeBuilder(
         )
     }
 
-    private fun buildUfullstendig(utbetalinger: List<Utbetaling>, tilstandstypeDTO: TilstandstypeDTO, forkastet: Boolean): UfullstendigVedtaksperiodeDTO {
-        val ufullstendingUtbetalingstidslinje = buildUfullstendigUtbetalingstidslinje(utbetalinger)
+    private fun buildUfullstendig(utbetaling: UtbetalingshistorikkElementDTO.UtbetalingDTO?, tilstandstypeDTO: TilstandstypeDTO, forkastet: Boolean): UfullstendigVedtaksperiodeDTO {
+        val ufullstendingUtbetalingstidslinje = buildUfullstendigUtbetalingstidslinje(utbetaling)
         return UfullstendigVedtaksperiodeDTO(
             id = id,
             gruppeId = gruppeId,
@@ -149,24 +151,11 @@ internal class VedtaksperiodeBuilder(
         )
     }
 
-    private fun buildUfullstendigUtbetalingstidslinje(utbetalinger: List<Utbetaling>) =
-        utbetalinger
-            .map { it.utbetalingstidslinje() }
-            .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
-            .subset(periode)
-            .map {
-                val type = when (it) {
-                    is Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag -> DagtypeDTO.ArbeidsgiverperiodeDag
-                    is Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag -> DagtypeDTO.Arbeidsdag
-                    is Utbetalingstidslinje.Utbetalingsdag.AvvistDag -> DagtypeDTO.AvvistDag
-                    is Utbetalingstidslinje.Utbetalingsdag.Fridag -> DagtypeDTO.Feriedag
-                    is Utbetalingstidslinje.Utbetalingsdag.ForeldetDag -> DagtypeDTO.ForeldetDag
-                    is Utbetalingstidslinje.Utbetalingsdag.UkjentDag -> DagtypeDTO.UkjentDag
-                    is Utbetalingstidslinje.Utbetalingsdag.NavDag -> DagtypeDTO.NavDag
-                    is Utbetalingstidslinje.Utbetalingsdag.NavHelgDag -> DagtypeDTO.ArbeidsgiverperiodeDag
-                }
-                UfullstendigVedtaksperiodedagDTO(type = type, dato = it.dato)
-            }
+    private fun buildUfullstendigUtbetalingstidslinje(utbetaling: UtbetalingshistorikkElementDTO.UtbetalingDTO?) =
+        utbetaling?.utbetalingstidslinje?.filter { it.dato in periode }?.map { UfullstendigVedtaksperiodedagDTO(
+            type = it.type,
+            dato = it.dato
+        )} ?: emptyList()
 
     private fun buildVilkår(hendelser: List<HendelseDTO>): VilkårDTO {
         val sisteSykepengedagEllerSisteDagIPerioden = sykepengeperiode?.endInclusive ?: beregnetSykdomstidslinje.last().dagen
@@ -201,60 +190,6 @@ internal class VedtaksperiodeBuilder(
         val søknadSendtMåned = søknadNav.sendtNav.toLocalDate().withDayOfMonth(1)
         val senesteMuligeSykedag = søknadNav.fom.plusMonths(3)
         return søknadSendtMåned < senesteMuligeSykedag.plusDays(1)
-    }
-
-    private fun buildTilstandtypeDto(utbetaling: Utbetaling?): TilstandstypeDTO {
-        return when (tilstand.type) {
-            TilstandType.START,
-            TilstandType.MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-            TilstandType.MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
-            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
-            TilstandType.MOTTATT_SYKMELDING_UFERDIG_GAP,
-            TilstandType.AVVENTER_ARBEIDSGIVERSØKNAD_FERDIG_GAP,
-            TilstandType.AVVENTER_ARBEIDSGIVERSØKNAD_UFERDIG_GAP,
-            TilstandType.AVVENTER_SØKNAD_FERDIG_GAP,
-            TilstandType.AVVENTER_SØKNAD_UFERDIG_GAP,
-            TilstandType.AVVENTER_VILKÅRSPRØVING,
-            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            TilstandType.AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE,
-            TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_GAP,
-            TilstandType.AVVENTER_UFERDIG_GAP,
-            TilstandType.AVVENTER_SØKNAD_UFERDIG_FORLENGELSE,
-            TilstandType.AVVENTER_SØKNAD_FERDIG_FORLENGELSE,
-            TilstandType.AVVENTER_UFERDIG_FORLENGELSE,
-            TilstandType.AVVENTER_SIMULERING,
-            TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING,
-            TilstandType.AVVENTER_SIMULERING_REVURDERING,
-            TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING,
-            TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING,
-            TilstandType.AVVENTER_HISTORIKK_REVURDERING,
-            TilstandType.AVVENTER_REVURDERING,
-            TilstandType.AVVENTER_UTBETALINGSGRUNNLAG,
-            TilstandType.AVVENTER_HISTORIKK -> TilstandstypeDTO.Venter
-            TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
-            TilstandType.AVVENTER_ARBEIDSGIVERE -> TilstandstypeDTO.VenterPåKiling
-            TilstandType.TIL_INFOTRYGD -> TilstandstypeDTO.TilInfotrygd
-            TilstandType.UTBETALING_FEILET,
-            TilstandType.REVURDERING_FEILET -> TilstandstypeDTO.Feilet
-            TilstandType.TIL_UTBETALING -> TilstandstypeDTO.TilUtbetaling
-            TilstandType.AVVENTER_GODKJENNING_REVURDERING,
-            TilstandType.AVVENTER_GODKJENNING -> TilstandstypeDTO.Oppgaver
-            TilstandType.AVSLUTTET -> when {
-                utbetaling == null -> TilstandstypeDTO.IngenUtbetaling
-                utbetaling.erAnnullering() && utbetaling.erUtbetalt() -> TilstandstypeDTO.Annullert
-                utbetaling.erAnnullering() && utbetaling.harFeilet() -> TilstandstypeDTO.AnnulleringFeilet
-                utbetaling.erAnnullering() -> TilstandstypeDTO.TilAnnullering
-                utbetaling.revurdertUtenEndring() || utbetaling.harUtbetalinger() -> TilstandstypeDTO.Utbetalt
-                utbetaling.utbetalingstidslinje(periode).kunFridager() -> TilstandstypeDTO.KunFerie
-                else -> TilstandstypeDTO.IngenUtbetaling
-            }
-            TilstandType.AVSLUTTET_UTEN_UTBETALING,
-            TilstandType.UTEN_UTBETALING_MED_INNTEKTSMELDING_UFERDIG_GAP,
-            TilstandType.UTEN_UTBETALING_MED_INNTEKTSMELDING_UFERDIG_FORLENGELSE ->
-                if (utbetaling != null && utbetaling.utbetalingstidslinje(periode)
-                        .kunFridager()
-                ) TilstandstypeDTO.KunFerie else TilstandstypeDTO.IngenUtbetaling
-        }
     }
 
     private fun hentWarnings(vedtaksperiode: Vedtaksperiode): List<AktivitetDTO> {
@@ -366,6 +301,7 @@ internal class VedtaksperiodeBuilder(
     ) {
         inUtbetaling = true
         if (tilstand is Utbetaling.Forkastet) return
+        this.utbetalingId = utbetalingId
 
         utbetalingGodkjent = tilstand !in listOf(Utbetaling.IkkeGodkjent, Utbetaling.Ubetalt)
         this.maksdato = maksdato
@@ -436,33 +372,15 @@ internal class VedtaksperiodeBuilder(
         popState()
     }
 
-    private fun byggUtbetalteUtbetalingerForPeriode(utbetalinger: List<Utbetaling>): UtbetalingerDTO =
+    private fun byggUtbetalteUtbetalingerForPeriode(utbetalinger: List<UtbetalingshistorikkElementDTO>): UtbetalingerDTO =
         UtbetalingerDTO(
-            utbetalinger.filter { it.erUtbetalt() }.byggUtbetaling(
-                arbeidsgiverFagsystemId,
-                Utbetaling::arbeidsgiverOppdrag
-            ),
-            utbetalinger.filter { it.erUtbetalt() }.byggUtbetaling(
-                personFagsystemId,
-                Utbetaling::personOppdrag
-            )
+            arbeidsgiverUtbetaling = utbetalinger.filter { it.utbetaling.status == "UTBETALT" }.map { it.utbetaling.arbeidsgiverOppdrag }.byggUtbetaling(),
+            personUtbetaling = utbetalinger.filter { it.utbetaling.status == "UTBETALT" }.map { it.utbetaling.personOppdrag }.byggUtbetaling()
         )
 
-    private fun List<Utbetaling>.byggUtbetaling(fagsystemId: String?, oppdragStrategy: (Utbetaling) -> Oppdrag) =
-        fagsystemId?.let {
-            this.lastOrNull { utbetaling ->
-                oppdragStrategy(utbetaling).fagsystemId() == fagsystemId
-            }?.let { utbetaling ->
-                val linjer = oppdragStrategy(utbetaling).linjerUtenOpphør().map { linje ->
-                    UtbetalingerDTO.UtbetalingslinjeDTO(
-                        fom = linje.fom,
-                        tom = linje.tom,
-                        dagsats = linje.beløp!!,
-                        grad = linje.grad!!
-                    )
-                }
-                UtbetalingerDTO.UtbetalingDTO(linjer, fagsystemId)
-            }
+    private fun List<OppdragDTO>.byggUtbetaling() =
+        maxByOrNull { it.tidsstempel }?.let {
+            UtbetalingerDTO.UtbetalingDTO(it.utbetalingslinjer, it.fagsystemId)
         }
 }
 

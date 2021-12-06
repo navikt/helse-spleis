@@ -24,6 +24,8 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
         .reversed()
 
     private data class UtbetalingInfo(
+        private val utbetalingId: UUID,
+        private val korrelasjonsId: UUID,
         private val beregningId: UUID,
         private val type: String,
         private val maksdato: LocalDate,
@@ -40,6 +42,8 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
         private var vurdering : UtbetalingshistorikkElementDTO.UtbetalingDTO.VurderingDTO? = null
 
         fun utbetaling() = UtbetalingshistorikkElementDTO.UtbetalingDTO(
+            utbetalingId = utbetalingId,
+            korrelasjonsId = korrelasjonsId,
             utbetalingstidslinje = utbetalingstidslinjeBuilder.build(),
             beregningId = beregningId,
             type = type,
@@ -50,8 +54,8 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
             forbrukteSykedager = forbrukteSykedager,
             arbeidsgiverNettoBeløp = arbeidsgiverNettoBeløp,
             personNettoBeløp = personNettoBeløp,
-            arbeidsgiverFagsystemId = arbeidsgiverOppdragBuilder.fagsystemId(),
-            personFagsystemId = personOppdragBuilder.fagsystemId(),
+            arbeidsgiverOppdrag = arbeidsgiverOppdragBuilder.build(),
+            personOppdrag = personOppdragBuilder.build(),
             vurdering = vurdering
         )
 
@@ -155,6 +159,8 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
         if (tilstand is Utbetaling.Forkastet) return
 
         val utbetalingInfo = UtbetalingInfo(
+            utbetalingId = id,
+            korrelasjonsId = korrelasjonsId,
             // en annullering kopierer den forrige utbetalingsens beregningId
             beregningId = if (type == Utbetaling.Utbetalingtype.ANNULLERING) UUID.randomUUID() else beregningId,
             type = type.name,

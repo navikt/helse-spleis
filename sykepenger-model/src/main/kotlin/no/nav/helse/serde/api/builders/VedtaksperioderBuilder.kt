@@ -2,6 +2,7 @@ package no.nav.helse.serde.api.builders
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.*
+import no.nav.helse.serde.api.dto.UtbetalingshistorikkElementDTO
 import no.nav.helse.serde.api.v2.HendelseDTO
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import java.time.LocalDate
@@ -18,7 +19,7 @@ internal class VedtaksperioderBuilder(
 ) : BuilderState() {
     private val perioder = mutableListOf<VedtaksperiodeBuilder>()
 
-    fun build(hendelser: List<HendelseDTO>, utbetalinger: List<Utbetaling>) =
+    fun build(hendelser: List<HendelseDTO>, utbetalinger: List<UtbetalingshistorikkElementDTO>) =
         perioder.map { it.build(hendelser, utbetalinger) }
 
     private fun gruppeId(vedtaksperiode: Vedtaksperiode): UUID {
