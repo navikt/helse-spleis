@@ -10,7 +10,7 @@ internal val Oppdrag.inspektør get() = OppdragInspektør(this)
 
 internal class OppdragInspektør(oppdrag: Oppdrag) : UtbetalingVisitor {
     private var linjeteller = 0
-    private val fagsystemIder = mutableListOf<String>()
+    private lateinit var fagsystemId: String
     private val totalBeløp = mutableListOf<Int>()
     private val nettoBeløp = mutableListOf<Int>()
     private val fom = mutableListOf<LocalDate>()
@@ -38,7 +38,7 @@ internal class OppdragInspektør(oppdrag: Oppdrag) : UtbetalingVisitor {
         overføringstidspunkt: LocalDateTime?,
         simuleringsResultat: Simulering.SimuleringResultat?
     ) {
-        fagsystemIder.add(oppdrag.fagsystemId())
+        this.fagsystemId = fagsystemId
         this.nettoBeløp.add(nettoBeløp)
         this.status = status
         this.simuleringsResultat = simuleringsResultat
@@ -69,7 +69,7 @@ internal class OppdragInspektør(oppdrag: Oppdrag) : UtbetalingVisitor {
     }
 
     fun antallLinjer() = linjeteller
-    fun fagsystemId(indeks: Int) = fagsystemIder.elementAt(indeks)
+    fun fagsystemId() = fagsystemId
     fun delytelseId(indeks: Int) = delytelseIder.elementAt(indeks)
     fun refDelytelseId(indeks: Int) = refDelytelseIder.elementAt(indeks)
     fun refFagsystemId(indeks: Int) = refFagsystemIder.elementAt(indeks)

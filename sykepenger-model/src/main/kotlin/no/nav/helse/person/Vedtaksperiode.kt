@@ -344,13 +344,10 @@ internal class Vedtaksperiode private constructor(
     private fun erAvsluttet() =
         utbetaling?.erAvsluttet() == true || tilstand == AvsluttetUtenUtbetaling
 
-    private fun utbetalingTillaterForkasting() = utbetaling?.tillaterForkastingAvPeriode() ?: true
-    private fun tilstandTillaterForkasting() = tilstand.kanForkastes
-    internal fun kanForkastes(annullerteFagsystemIder: List<String>) =
-        (utbetalingTillaterForkasting() && tilstandTillaterForkasting()) || harAnnullertUtbetaling(annullerteFagsystemIder)
-
-    private fun harAnnullertUtbetaling(annullerteFagsystemIder: List<String>) =
-        utbetalinger.flatMap { it.fagsystemIder() }.any { annullerteFagsystemIder.contains(it) }
+    internal fun kanForkastes(utbetalinger: List<Utbetaling>): Boolean {
+        if (utbetaling == null) return tilstand != AvsluttetUtenUtbetaling
+        return utbetaling!!.kanForkastes(utbetalinger)
+    }
 
     private fun erUtbetalt() = tilstand == Avsluttet && utbetaling?.erAvsluttet() == true
 

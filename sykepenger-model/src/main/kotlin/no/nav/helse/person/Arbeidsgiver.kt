@@ -738,9 +738,8 @@ internal class Arbeidsgiver private constructor(
             ?: listOf()
     }
 
-    private fun annullerteFagsystemIder() = utbetalinger.filter { it.erAnnullering() }.flatMap { it.fagsystemIder() }
     private fun forkast(filter: VedtaksperiodeFilter, årsak: ForkastetÅrsak) = vedtaksperioder
-        .filter { periode -> periode.kanForkastes(annullerteFagsystemIder()) }
+        .filter { periode -> periode.kanForkastes(utbetalinger) }
         .filter(filter)
         .also { perioder ->
             vedtaksperioder.removeAll(perioder)

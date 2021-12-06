@@ -224,7 +224,76 @@ internal class UtbetalingTest {
         assertNull(inspektør1.refFagsystemId(0))
         assertNull(inspektør2.refDelytelseId(0))
         assertNull(inspektør2.refFagsystemId(0))
-        assertNotEquals(inspektør1.fagsystemId(0), inspektør2.fagsystemId(0))
+        assertNotEquals(inspektør1.fagsystemId(), inspektør2.fagsystemId())
+    }
+
+    @Test
+    fun `kan forkaste ubetalt utbetaling`() {
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV)
+        beregnUtbetalinger(tidslinje)
+        val utbetaling = opprettUbetaltUtbetaling(tidslinje)
+        assertTrue(utbetaling.kanForkastes(emptyList()))
+    }
+
+    @Test
+    fun `kan forkaste underkjent utbetaling`() {
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV)
+        beregnUtbetalinger(tidslinje)
+        val utbetaling = opprettUbetaltUtbetaling(tidslinje)
+        godkjenn(utbetaling, false)
+        assertTrue(utbetaling.kanForkastes(emptyList()))
+    }
+
+    @Test
+    fun `kan forkaste forkastet utbetaling`() {
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV)
+        beregnUtbetalinger(tidslinje)
+        val utbetaling = opprettUbetaltUtbetaling(tidslinje)
+        utbetaling.forkast(Aktivitetslogg())
+        assertTrue(utbetaling.kanForkastes(emptyList()))
+    }
+
+    @Test
+    fun `kan ikke forkaste utbetaling i spill`() {
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV)
+        beregnUtbetalinger(tidslinje)
+        val utbetaling = opprettGodkjentUtbetaling(tidslinje)
+        assertFalse(utbetaling.kanForkastes(emptyList()))
+        overfør(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+        assertFalse(utbetaling.kanForkastes(emptyList()))
+        kvittèr(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+        assertFalse(utbetaling.kanForkastes(emptyList()))
+    }
+
+    @Test
+    fun `kan ikke forkaste feilet utbetaling`() {
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV)
+        beregnUtbetalinger(tidslinje)
+        val utbetaling = opprettGodkjentUtbetaling(tidslinje)
+        overfør(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+        kvittèr(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), status = AVVIST)
+        assertFalse(utbetaling.kanForkastes(emptyList()))
+    }
+
+    @Test
+    fun `kan forkaste annullert utbetaling`() {
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV)
+        beregnUtbetalinger(tidslinje)
+        val utbetaling = opprettUtbetaling(tidslinje).let {
+            annuller(it, it.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+        } ?: fail { "Kunne ikke annullere" }
+        assertTrue(utbetaling.kanForkastes(emptyList()))
+    }
+
+    @Test
+    fun `kan forkaste utbetalt utbetaling dersom den er annullert`() {
+        val tidslinje = tidslinjeOf(16.AP, 32.NAV)
+        beregnUtbetalinger(tidslinje)
+        val utbetaling = opprettUtbetaling(tidslinje.kutt(31.januar))
+        val annullert = opprettUtbetaling(tidslinje.kutt(17.februar), tidligere = utbetaling).let {
+            annuller(it, it.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+        } ?: fail { "Kunne ikke annullere" }
+        assertTrue(utbetaling.kanForkastes(listOf(annullert)))
     }
 
     @Test
@@ -763,7 +832,7 @@ internal class UtbetalingTest {
         )
     }
 
-    private fun godkjenn(utbetaling: Utbetaling) =
+    private fun godkjenn(utbetaling: Utbetaling, utbetalingGodkjent: Boolean = true) =
         Utbetalingsgodkjenning(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = "ignore",
@@ -773,7 +842,7 @@ internal class UtbetalingTest {
             vedtaksperiodeId = "ignore",
             saksbehandler = "Z999999",
             saksbehandlerEpost = "mille.mellomleder@nav.no",
-            utbetalingGodkjent = true,
+            utbetalingGodkjent = utbetalingGodkjent,
             godkjenttidspunkt = LocalDateTime.now(),
             automatiskBehandling = false,
         ).also {

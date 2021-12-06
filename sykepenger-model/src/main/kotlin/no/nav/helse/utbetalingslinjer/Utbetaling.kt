@@ -117,7 +117,6 @@ internal class Utbetaling private constructor(
     internal fun erForkastet() = tilstand == Forkastet
     private fun erAktiv() = erUtbetalt() || tilstand in listOf(Godkjent, Sendt, Overført, UtbetalingFeilet)
     internal fun erAvsluttet() = tilstand in listOf(GodkjentUtenUtbetaling, Utbetalt, Annullert)
-    internal fun tillaterForkastingAvPeriode() = !(erAvsluttet() || tilstand in listOf(Overført, Sendt, Godkjent))
     internal fun erAvvist() = tilstand in listOf(IkkeGodkjent)
     internal fun harFeilet() = tilstand == UtbetalingFeilet
     internal fun erAnnullering() = type == Utbetalingtype.ANNULLERING
@@ -131,6 +130,14 @@ internal class Utbetaling private constructor(
 
     internal fun harUtbetalinger() =
         arbeidsgiverOppdrag.harUtbetalinger() || personOppdrag.harUtbetalinger()
+
+    internal fun harDelvisRefusjon() = arbeidsgiverOppdrag.harUtbetalinger () && personOppdrag.harUtbetalinger()
+    internal fun harBrukerutbetaling() = personOppdrag.harUtbetalinger()
+
+    internal fun erKlarForGodkjenning() = personOppdrag.erKlarForGodkjenning() && arbeidsgiverOppdrag.erKlarForGodkjenning()
+
+    internal fun kanForkastes(utbetalinger: List<Utbetaling>) =
+        this.tilstand in listOf(Ubetalt, IkkeGodkjent, Forkastet) || utbetalinger.filter { it.erAnnullering() }.any(::hørerSammen)
 
     internal fun håndter(hendelse: Utbetalingsgodkjenning) {
         if (!hendelse.erRelevant(id)) return
@@ -156,8 +163,11 @@ internal class Utbetaling private constructor(
         tilstand.overført(this, utbetalingOverført)
     }
 
-    internal fun harDelvisRefusjon() = arbeidsgiverOppdrag.harUtbetalinger () && personOppdrag.harUtbetalinger()
-    internal fun harBrukerutbetaling() = personOppdrag.harUtbetalinger()
+    internal fun håndter(simulering: Simulering) {
+        if (!simulering.erRelevantForUtbetaling(id)) return
+        personOppdrag.håndter(simulering)
+        arbeidsgiverOppdrag.håndter(simulering)
+    }
 
     internal fun simuler(hendelse: IAktivitetslogg) {
         hendelse.kontekst(this)
@@ -606,7 +616,6 @@ internal class Utbetaling private constructor(
         "avsluttet" to avsluttet,
         "oppdatert" to oppdatert
     )
-    internal fun fagsystemIder() = listOf(arbeidsgiverOppdrag.fagsystemId(), personOppdrag.fagsystemId())
 
     private fun lagreOverføringsinformasjon(hendelse: ArbeidstakerHendelse, avstemmingsnøkkel: Long, tidspunkt: LocalDateTime) {
         hendelse.info("Utbetalingen ble overført til Oppdrag/UR $tidspunkt, og har fått avstemmingsnøkkel $avstemmingsnøkkel.\n")
@@ -616,13 +625,7 @@ internal class Utbetaling private constructor(
         if (this.avstemmingsnøkkel == null) this.avstemmingsnøkkel = avstemmingsnøkkel
     }
 
-    internal fun håndter(simulering: Simulering) {
-        if (!simulering.erRelevantForUtbetaling(id)) return
-        personOppdrag.håndter(simulering)
-        arbeidsgiverOppdrag.håndter(simulering)
-    }
-
-    internal fun erKlarForGodkjenning() = personOppdrag.erKlarForGodkjenning() && arbeidsgiverOppdrag.erKlarForGodkjenning()
+    override fun toString() = "$type(${Utbetalingstatus.fraTilstand(tilstand)}) - $periode"
 
     internal interface Tilstand {
         fun forkast(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
