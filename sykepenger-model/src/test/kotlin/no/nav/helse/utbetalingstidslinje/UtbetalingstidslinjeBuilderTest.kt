@@ -376,6 +376,16 @@ internal class UtbetalingstidslinjeBuilderTest {
     }
 
     @Test
+    fun `siste sykedag faller på fredag - lørdag og søndag teller ikke som opphold`() {
+        (19.S + 2.UK + 14.A + 19.S).utbetalingslinjer()
+        assertEquals(16, tidslinje.inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(2, tidslinje.inspektør.fridagTeller)
+        assertEquals(14, tidslinje.inspektør.arbeidsdagTeller)
+        assertEquals(4, tidslinje.inspektør.navHelgDagTeller)
+        assertEquals(18, tidslinje.inspektør.navDagTeller)
+    }
+
+    @Test
     fun `starter ny arbeidsgiverperiode etter ferie og arbeidsdag dersom oppholdet er høyt nok`() {
         (2.S + 15.F + 1.A + 17.S).utbetalingslinjer()
         assertEquals(18, tidslinje.inspektør.arbeidsgiverperiodeDagTeller)
