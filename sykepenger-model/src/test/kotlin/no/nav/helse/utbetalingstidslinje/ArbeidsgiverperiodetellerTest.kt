@@ -176,6 +176,29 @@ internal class ArbeidsgiverperiodetellerTest {
     }
 
     @Test
+    fun `siste utbetaling på en fredag - lørdag og søndag teller ikke med i opphold`() {
+        (1.januar til 19.januar).tell() // 19.januar er fredag
+        (20.januar til 21.januar).feriedager()
+        (22.januar til 4.februar).oppholdsdager() // 16 dager inkl. de to helg-dagene
+        5.februar.tell()
+        assertFalse(observatør.tilbakestillingAvArbeidsgiverperiodetelling(4.februar))
+        assertEquals(6, strategi.antallSykedagerEllerFridagerSomIkkeInngårIArbeidsgiverperiodetelling)
+        assertEquals(16, strategi.antallDagerSomInngårIArbeidsgiverperiodetelling)
+    }
+
+    @Test
+    fun `siste utbetaling i infotrygd på en fredag - lørdag og søndag teller ikke med i opphold`() {
+        teller { dagen -> dagen == 1.januar }
+        (1.januar til 19.januar).tell() // 19.januar er fredag
+        (20.januar til 21.januar).feriedager()
+        (22.januar til 4.februar).oppholdsdager() // 16 dager inkl. de to helg-dagene
+        5.februar.tell()
+        assertFalse(observatør.tilbakestillingAvArbeidsgiverperiodetelling(4.februar))
+        assertEquals(22, strategi.antallSykedagerEllerFridagerSomIkkeInngårIArbeidsgiverperiodetelling)
+        assertEquals(0, strategi.antallDagerSomInngårIArbeidsgiverperiodetelling)
+    }
+
+    @Test
     fun `arbeidsgiverperiode gjennomført i infotrygd`() {
         teller { dagen -> dagen == 1.januar }
         (1.januar til 31.januar).tell()
