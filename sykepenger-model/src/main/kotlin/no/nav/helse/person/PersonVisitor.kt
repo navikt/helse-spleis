@@ -285,7 +285,7 @@ internal interface VedtaksperiodeVisitor : UtbetalingVisitor, SykdomstidslinjeVi
 }
 
 internal interface UtbetalingsdagVisitor {
-    fun preVisit(tidslinje: Utbetalingstidslinje) {}
+    fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {}
     fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag,
         dato: LocalDate,
@@ -342,7 +342,7 @@ internal interface UtbetalingsdagVisitor {
     ) {
     }
 
-    fun postVisit(tidslinje: Utbetalingstidslinje) {}
+    fun postVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {}
 }
 
 internal interface SykdomshistorikkVisitor : SykdomstidslinjeVisitor {
@@ -607,6 +607,7 @@ internal interface UtbetalingVisitor : UtbetalingsdagVisitor, OppdragVisitor {
 internal interface OppdragVisitor {
     fun preVisitOppdrag(
         oppdrag: Oppdrag,
+        fagsystemId: String,
         totalBeløp: Int,
         nettoBeløp: Int,
         tidsstempel: LocalDateTime,
@@ -637,6 +638,7 @@ internal interface OppdragVisitor {
 
     fun postVisitOppdrag(
         oppdrag: Oppdrag,
+        fagsystemId: String,
         totalBeløp: Int,
         nettoBeløp: Int,
         tidsstempel: LocalDateTime,

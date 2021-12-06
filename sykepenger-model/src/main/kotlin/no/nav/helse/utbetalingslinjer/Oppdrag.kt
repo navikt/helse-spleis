@@ -75,9 +75,31 @@ internal class Oppdrag private constructor(
         this(mottaker, fagområde, sisteArbeidsgiverdag = null)
 
     internal fun accept(visitor: OppdragVisitor) {
-        visitor.preVisitOppdrag(this, totalbeløp(), nettoBeløp, tidsstempel, endringskode, avstemmingsnøkkel, status, overføringstidspunkt, simuleringsResultat)
+        visitor.preVisitOppdrag(
+            this,
+            fagsystemId,
+            totalbeløp(),
+            nettoBeløp,
+            tidsstempel,
+            endringskode,
+            avstemmingsnøkkel,
+            status,
+            overføringstidspunkt,
+            simuleringsResultat
+        )
         linjer.forEach { it.accept(visitor) }
-        visitor.postVisitOppdrag(this, totalbeløp(), nettoBeløp, tidsstempel, endringskode, avstemmingsnøkkel, status, overføringstidspunkt, simuleringsResultat)
+        visitor.postVisitOppdrag(
+            this,
+            fagsystemId,
+            totalbeløp(),
+            nettoBeløp,
+            tidsstempel,
+            endringskode,
+            avstemmingsnøkkel,
+            status,
+            overføringstidspunkt,
+            simuleringsResultat
+        )
     }
 
     internal fun mottaker() = mottaker

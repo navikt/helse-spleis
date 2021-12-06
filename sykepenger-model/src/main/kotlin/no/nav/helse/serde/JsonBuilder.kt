@@ -155,7 +155,7 @@ internal class JsonBuilder : AbstractBuilder() {
             arbeidsgiverMap["utbetalingstidslinjer"] = utbetalingstidslinjer
         }
 
-        override fun preVisit(tidslinje: Utbetalingstidslinje) {
+        override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
             val utbetalingstidslinjeMap = mutableMapOf<String, Any?>()
             utbetalingstidslinjer.add(utbetalingstidslinjeMap)
         }
@@ -336,6 +336,7 @@ internal class JsonBuilder : AbstractBuilder() {
     private class OppdragState(private val ferieutbetalingMap: MutableMap<String, Any>) : BuilderState() {
         override fun preVisitOppdrag(
             oppdrag: Oppdrag,
+            fagsystemId: String,
             totalBeløp: Int,
             nettoBeløp: Int,
             tidsstempel: LocalDateTime,
@@ -350,6 +351,7 @@ internal class JsonBuilder : AbstractBuilder() {
 
         override fun postVisitOppdrag(
             oppdrag: Oppdrag,
+            fagsystemId: String,
             totalBeløp: Int,
             nettoBeløp: Int,
             tidsstempel: LocalDateTime,

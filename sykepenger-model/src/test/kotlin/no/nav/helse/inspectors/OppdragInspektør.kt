@@ -28,6 +28,7 @@ internal class OppdragInspektør(oppdrag: Oppdrag) : UtbetalingVisitor {
 
     override fun preVisitOppdrag(
         oppdrag: Oppdrag,
+        fagsystemId: String,
         totalBeløp: Int,
         nettoBeløp: Int,
         tidsstempel: LocalDateTime,

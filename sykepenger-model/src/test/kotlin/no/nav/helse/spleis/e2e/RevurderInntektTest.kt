@@ -793,6 +793,7 @@ private fun Oppdrag.skalHaEndringskode(kode: Endringskode, message: String = "")
 private class UtbetalingSkalHaEndringskode(private val ønsketEndringskode: Endringskode, private val message: String = "") : OppdragVisitor {
     override fun preVisitOppdrag(
         oppdrag: Oppdrag,
+        fagsystemId: String,
         totalBeløp: Int,
         nettoBeløp: Int,
         tidsstempel: LocalDateTime,

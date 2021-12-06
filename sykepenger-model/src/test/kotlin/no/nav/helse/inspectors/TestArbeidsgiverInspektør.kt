@@ -196,7 +196,7 @@ internal class TestArbeidsgiverInspektør(
         vedtaksperiode.accept(VedtaksperiodeSykdomstidslinjeinnhenter())
     }
 
-    override fun preVisit(tidslinje: Utbetalingstidslinje) {
+    override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
         if (inVedtaksperiode && !inUtbetaling) utbetalingstidslinjer[vedtaksperiodeindeks] = tidslinje
         else if (!inVedtaksperiode && inUtbetaling) utbetalingutbetalingstidslinjer.add(tidslinje)
     }
@@ -231,6 +231,7 @@ internal class TestArbeidsgiverInspektør(
 
     override fun preVisitOppdrag(
         oppdrag: Oppdrag,
+        fagsystemId: String,
         totalBeløp: Int,
         nettoBeløp: Int,
         tidsstempel: LocalDateTime,

@@ -143,7 +143,7 @@ internal class UtbetalingstidslinjeBuilder(
         )
     }
 
-    override fun postVisit(tidslinje: Utbetalingstidslinje) {
+    override fun postVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
         popState()
     }
 }

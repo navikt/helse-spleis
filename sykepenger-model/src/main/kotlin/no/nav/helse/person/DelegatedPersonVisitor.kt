@@ -518,8 +518,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         )
     }
 
-    override fun preVisit(tidslinje: Utbetalingstidslinje) {
-        delegatee.preVisit(tidslinje)
+    override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
+        delegatee.preVisitUtbetalingstidslinje(tidslinje)
     }
 
     override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag, dato: LocalDate, økonomi: Økonomi) {
@@ -554,8 +554,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.visit(dag, dato, økonomi)
     }
 
-    override fun postVisit(tidslinje: Utbetalingstidslinje) {
-        delegatee.postVisit(tidslinje)
+    override fun postVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
+        delegatee.postVisitUtbetalingstidslinje(tidslinje)
     }
 
     override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
@@ -843,6 +843,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
 
     override fun preVisitOppdrag(
         oppdrag: Oppdrag,
+        fagsystemId: String,
         totalBeløp: Int,
         nettoBeløp: Int,
         tidsstempel: LocalDateTime,
@@ -852,11 +853,23 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         overføringstidspunkt: LocalDateTime?,
         simuleringsResultat: Simulering.SimuleringResultat?
     ) {
-        delegatee.preVisitOppdrag(oppdrag, totalBeløp, nettoBeløp, tidsstempel, endringskode, avstemmingsnøkkel, status, overføringstidspunkt, simuleringsResultat)
+        delegatee.preVisitOppdrag(
+            oppdrag,
+            fagsystemId,
+            totalBeløp,
+            nettoBeløp,
+            tidsstempel,
+            endringskode,
+            avstemmingsnøkkel,
+            status,
+            overføringstidspunkt,
+            simuleringsResultat
+        )
     }
 
     override fun postVisitOppdrag(
         oppdrag: Oppdrag,
+        fagsystemId: String,
         totalBeløp: Int,
         nettoBeløp: Int,
         tidsstempel: LocalDateTime,
@@ -866,7 +879,18 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         overføringstidspunkt: LocalDateTime?,
         simuleringsResultat: Simulering.SimuleringResultat?
     ) {
-        delegatee.postVisitOppdrag(oppdrag, totalBeløp, nettoBeløp, tidsstempel, endringskode, avstemmingsnøkkel, status, overføringstidspunkt, simuleringsResultat)
+        delegatee.postVisitOppdrag(
+            oppdrag,
+            fagsystemId,
+            totalBeløp,
+            nettoBeløp,
+            tidsstempel,
+            endringskode,
+            avstemmingsnøkkel,
+            status,
+            overføringstidspunkt,
+            simuleringsResultat
+        )
     }
 
     override fun visitUtbetalingslinje(

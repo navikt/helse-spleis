@@ -43,7 +43,7 @@ internal class UtbetalingInspektør(utbetaling: Utbetaling) : UtbetalingVisitor 
         this.tilstand = tilstand
     }
 
-    override fun preVisit(tidslinje: Utbetalingstidslinje) {
+    override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
         this.utbetalingstidslinje = tidslinje
     }
 

@@ -1,11 +1,14 @@
 package no.nav.helse.serde.api.builders
 
+import no.nav.helse.person.UtbetalingVisitor
 import no.nav.helse.serde.api.builders.UtbetalingshistorikkBuilder.SykdomshistorikkElementBuilder.Companion.build
 import no.nav.helse.serde.api.dto.UtbetalingshistorikkElementDTO
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -29,11 +32,13 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
         private val forbrukteSykedager: Int?,
         private val arbeidsgiverNettoBeløp: Int,
         private val personNettoBeløp: Int,
-        private val tidsstempel: LocalDateTime,
-        private val vurderingBuilder: VurderingBuilder,
-        private val oppdragBuilder: OppdragBuilder,
-        private val utbetalingstidslinjeBuilder: UtbetalingstidslinjeBuilder
-    ) {
+        private val tidsstempel: LocalDateTime
+    ) : UtbetalingVisitor, BuilderState() {
+        private val arbeidsgiverOppdragBuilder = OppdragBuilder()
+        private val personOppdragBuilder = OppdragBuilder()
+        private val utbetalingstidslinjeBuilder = UtbetalingstidslinjeBuilder(mutableListOf())
+        private var vurdering : UtbetalingshistorikkElementDTO.UtbetalingDTO.VurderingDTO? = null
+
         fun utbetaling() = UtbetalingshistorikkElementDTO.UtbetalingDTO(
             utbetalingstidslinje = utbetalingstidslinjeBuilder.build(),
             beregningId = beregningId,
@@ -45,10 +50,57 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
             forbrukteSykedager = forbrukteSykedager,
             arbeidsgiverNettoBeløp = arbeidsgiverNettoBeløp,
             personNettoBeløp = personNettoBeløp,
-            arbeidsgiverFagsystemId = oppdragBuilder.arbeidsgiverFagsystemId(),
-            personFagsystemId = oppdragBuilder.personFagsystemId(),
-            vurdering = vurderingBuilder.build()
+            arbeidsgiverFagsystemId = arbeidsgiverOppdragBuilder.fagsystemId(),
+            personFagsystemId = personOppdragBuilder.fagsystemId(),
+            vurdering = vurdering
         )
+
+        override fun preVisitArbeidsgiverOppdrag(oppdrag: Oppdrag) {
+            pushState(arbeidsgiverOppdragBuilder)
+        }
+
+        override fun preVisitPersonOppdrag(oppdrag: Oppdrag) {
+            pushState(personOppdragBuilder)
+        }
+
+        override fun visitVurdering(
+            vurdering: Utbetaling.Vurdering,
+            ident: String,
+            epost: String,
+            tidspunkt: LocalDateTime,
+            automatiskBehandling: Boolean,
+            godkjent: Boolean
+        ) {
+            this.vurdering = UtbetalingshistorikkElementDTO.UtbetalingDTO.VurderingDTO(
+                godkjent = godkjent,
+                tidsstempel = tidspunkt,
+                automatisk = automatiskBehandling,
+                ident = ident
+            )
+        }
+
+        override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
+            pushState(utbetalingstidslinjeBuilder)
+        }
+
+        override fun postVisitUtbetaling(
+            utbetaling: Utbetaling,
+            id: UUID,
+            korrelasjonsId: UUID,
+            type: Utbetaling.Utbetalingtype,
+            tilstand: Utbetaling.Tilstand,
+            tidsstempel: LocalDateTime,
+            oppdatert: LocalDateTime,
+            arbeidsgiverNettoBeløp: Int,
+            personNettoBeløp: Int,
+            maksdato: LocalDate,
+            forbrukteSykedager: Int?,
+            gjenståendeSykedager: Int?,
+            stønadsdager: Int,
+            beregningId: UUID
+        ) {
+            popState()
+        }
 
         companion object {
             fun utbetalinger(
@@ -102,31 +154,20 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
     ) {
         if (tilstand is Utbetaling.Forkastet) return
 
-        val vurderingBuilder = VurderingBuilder()
-        pushState(vurderingBuilder)
-
-        val oppdragBuilder = OppdragBuilder()
-        pushState(oppdragBuilder)
-
-        val utbetalingstidslinjeBuilder = UtbetalingstidslinjeBuilder(mutableListOf())
-        utbetalingstidslinjeBuilders.add(
-            UtbetalingInfo(
-                // en annullering kopierer den forrige utbetalingsens beregningId
-                beregningId = if (utbetaling.erAnnullering()) UUID.randomUUID() else beregningId,
-                type = type.name,
-                maksdato = maksdato,
-                status = Utbetalingstatus.fraTilstand(tilstand).name,
-                tidsstempel = tidsstempel,
-                gjenståendeSykedager = gjenståendeSykedager,
-                forbrukteSykedager = forbrukteSykedager,
-                arbeidsgiverNettoBeløp = arbeidsgiverNettoBeløp,
-                personNettoBeløp = personNettoBeløp,
-                vurderingBuilder = vurderingBuilder,
-                oppdragBuilder = oppdragBuilder,
-                utbetalingstidslinjeBuilder = utbetalingstidslinjeBuilder
-            )
+        val utbetalingInfo = UtbetalingInfo(
+            // en annullering kopierer den forrige utbetalingsens beregningId
+            beregningId = if (utbetaling.erAnnullering()) UUID.randomUUID() else beregningId,
+            type = type.name,
+            maksdato = maksdato,
+            status = Utbetalingstatus.fraTilstand(tilstand).name,
+            tidsstempel = tidsstempel,
+            gjenståendeSykedager = gjenståendeSykedager,
+            forbrukteSykedager = forbrukteSykedager,
+            arbeidsgiverNettoBeløp = arbeidsgiverNettoBeløp,
+            personNettoBeløp = personNettoBeløp
         )
-        pushState(utbetalingstidslinjeBuilder)
+        utbetalingstidslinjeBuilders.add(utbetalingInfo)
+        pushState(utbetalingInfo)
     }
 
     override fun postVisitUtbetalinger(utbetalinger: List<Utbetaling>) {

@@ -231,6 +231,7 @@ internal class Feriepengeberegner(
 
             override fun preVisitOppdrag(
                 oppdrag: Oppdrag,
+                fagsystemId: String,
                 totalBeløp: Int,
                 nettoBeløp: Int,
                 tidsstempel: LocalDateTime,

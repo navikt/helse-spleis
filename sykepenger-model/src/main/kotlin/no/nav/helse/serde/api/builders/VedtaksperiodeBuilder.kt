@@ -304,7 +304,7 @@ internal class VedtaksperiodeBuilder(
 
     private var sykepengeperiode: Periode? = null
 
-    override fun preVisit(tidslinje: Utbetalingstidslinje) {
+    override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
         if (inUtbetaling) return
         sykepengeperiode = tidslinje.sykepengeperiode()
         pushState(UtbetalingstidslinjeBuilder(utbetalingstidslinje))

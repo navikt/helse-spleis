@@ -97,9 +97,9 @@ internal class Utbetalingstidslinje private constructor(
     }
 
     internal fun accept(visitor: UtbetalingsdagVisitor) {
-        visitor.preVisit(this)
+        visitor.preVisitUtbetalingstidslinje(this)
         utbetalingsdager.forEach { it.accept(visitor) }
-        visitor.postVisit(this)
+        visitor.postVisitUtbetalingstidslinje(this)
     }
 
     private fun avvis(avvisteDatoer: List<Periode>, begrunnelser: List<Begrunnelse>) {
