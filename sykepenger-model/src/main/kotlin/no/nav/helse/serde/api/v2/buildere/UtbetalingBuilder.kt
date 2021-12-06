@@ -9,6 +9,7 @@ import no.nav.helse.serde.api.v2.IUtbetaling
 import no.nav.helse.serde.api.v2.Utbetaling
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling.Forkastet
+import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -28,7 +29,7 @@ internal class UtbetalingerBuilder(vedtaksperiode: Vedtaksperiode): Vedtaksperio
         utbetaling: no.nav.helse.utbetalingslinjer.Utbetaling,
         id: UUID,
         korrelasjonsId: UUID,
-        type: no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype,
+        type: Utbetalingtype,
         tilstand: no.nav.helse.utbetalingslinjer.Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,
@@ -58,7 +59,7 @@ internal class UtbetalingBuilder(utbetaling: InternUtbetaling): UtbetalingVisito
         utbetaling: no.nav.helse.utbetalingslinjer.Utbetaling,
         id: UUID,
         korrelasjonsId: UUID,
-        type: no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype,
+        type: Utbetalingtype,
         tilstand: no.nav.helse.utbetalingslinjer.Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,

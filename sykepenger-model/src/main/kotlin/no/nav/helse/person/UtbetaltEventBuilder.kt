@@ -85,7 +85,7 @@ private class UtbetaltEventBuilder(
         utbetaling: Utbetaling,
         id: UUID,
         korrelasjonsId: UUID,
-        type: Utbetaling.Utbetalingtype,
+        type: Utbetalingtype,
         tilstand: Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,

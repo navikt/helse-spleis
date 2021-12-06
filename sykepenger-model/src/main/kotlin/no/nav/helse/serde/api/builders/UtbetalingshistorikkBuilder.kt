@@ -8,6 +8,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -27,9 +28,9 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
         private val utbetalingId: UUID,
         private val korrelasjonsId: UUID,
         private val beregningId: UUID,
-        private val type: String,
+        private val type: Utbetalingtype,
         private val maksdato: LocalDate,
-        private val status: String,
+        private val status: Utbetalingstatus,
         private val gjenståendeSykedager: Int?,
         private val forbrukteSykedager: Int?,
         private val arbeidsgiverNettoBeløp: Int,
@@ -91,7 +92,7 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
             utbetaling: Utbetaling,
             id: UUID,
             korrelasjonsId: UUID,
-            type: Utbetaling.Utbetalingtype,
+            type: Utbetalingtype,
             tilstand: Utbetaling.Tilstand,
             tidsstempel: LocalDateTime,
             oppdatert: LocalDateTime,
@@ -144,7 +145,7 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
         utbetaling: Utbetaling,
         id: UUID,
         korrelasjonsId: UUID,
-        type: Utbetaling.Utbetalingtype,
+        type: Utbetalingtype,
         tilstand: Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,
@@ -162,10 +163,10 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
             utbetalingId = id,
             korrelasjonsId = korrelasjonsId,
             // en annullering kopierer den forrige utbetalingsens beregningId
-            beregningId = if (type == Utbetaling.Utbetalingtype.ANNULLERING) UUID.randomUUID() else beregningId,
-            type = type.name,
+            beregningId = if (type == Utbetalingtype.ANNULLERING) UUID.randomUUID() else beregningId,
+            type = type,
             maksdato = maksdato,
-            status = Utbetalingstatus.fraTilstand(tilstand).name,
+            status = Utbetalingstatus.fraTilstand(tilstand),
             tidsstempel = tidsstempel,
             gjenståendeSykedager = gjenståendeSykedager,
             forbrukteSykedager = forbrukteSykedager,

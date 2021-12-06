@@ -14,7 +14,6 @@ import no.nav.helse.serde.PersonData.ArbeidsgiverData.RefusjonData.EndringIRefus
 import no.nav.helse.serde.PersonData.InfotrygdhistorikkElementData.Companion.tilModellObjekt
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.SykepengegrunnlagData.ArbeidsgiverInntektsopplysningData.Companion.parseArbeidsgiverInntektsopplysninger
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagInnslagData.Companion.tilModellObjekt
-import no.nav.helse.serde.api.SimuleringsdataDTO
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
 import no.nav.helse.serde.reflection.Inntektsopplysningskilde
 import no.nav.helse.serde.reflection.Utbetalingstatus
@@ -1078,7 +1077,7 @@ internal data class PersonData(
                 personOppdrag.konverterTilOppdrag(),
                 tidsstempel,
                 enumValueOf<Utbetalingstatus>(status).tilTilstand(),
-                enumValueOf<Utbetaling.Utbetalingtype>(type),
+                enumValueOf<Utbetalingtype>(type),
                 maksdato,
                 forbrukteSykedager,
                 gjenståendeSykedager,

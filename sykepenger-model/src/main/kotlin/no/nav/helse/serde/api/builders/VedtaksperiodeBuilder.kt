@@ -8,10 +8,12 @@ import no.nav.helse.serde.api.*
 import no.nav.helse.serde.api.dto.UtbetalingshistorikkElementDTO
 import no.nav.helse.serde.api.v2.HendelseDTO
 import no.nav.helse.serde.api.v2.SøknadNavDTO
+import no.nav.helse.serde.reflection.Utbetalingstatus.UTBETALT
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
@@ -287,7 +289,7 @@ internal class VedtaksperiodeBuilder(
         utbetaling: Utbetaling,
         id: UUID,
         korrelasjonsId: UUID,
-        type: Utbetaling.Utbetalingtype,
+        type: Utbetalingtype,
         tilstand: Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,
@@ -337,7 +339,7 @@ internal class VedtaksperiodeBuilder(
         utbetaling: Utbetaling,
         id: UUID,
         korrelasjonsId: UUID,
-        type: Utbetaling.Utbetalingtype,
+        type: Utbetalingtype,
         tilstand: Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,
@@ -374,8 +376,8 @@ internal class VedtaksperiodeBuilder(
 
     private fun byggUtbetalteUtbetalingerForPeriode(utbetalinger: List<UtbetalingshistorikkElementDTO>): UtbetalingerDTO =
         UtbetalingerDTO(
-            arbeidsgiverUtbetaling = utbetalinger.filter { it.utbetaling.status == "UTBETALT" }.map { it.utbetaling.arbeidsgiverOppdrag }.byggUtbetaling(),
-            personUtbetaling = utbetalinger.filter { it.utbetaling.status == "UTBETALT" }.map { it.utbetaling.personOppdrag }.byggUtbetaling()
+            arbeidsgiverUtbetaling = utbetalinger.filter { it.utbetaling.status == UTBETALT }.map { it.utbetaling.arbeidsgiverOppdrag }.byggUtbetaling(),
+            personUtbetaling = utbetalinger.filter { it.utbetaling.status == UTBETALT }.map { it.utbetaling.personOppdrag }.byggUtbetaling()
         )
 
     private fun List<OppdragDTO>.byggUtbetaling() =

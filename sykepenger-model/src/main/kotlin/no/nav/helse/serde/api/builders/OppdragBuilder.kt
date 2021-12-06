@@ -4,11 +4,6 @@ import no.nav.helse.hendelser.Simulering
 import no.nav.helse.serde.api.SimuleringsdataDTO
 import no.nav.helse.serde.api.UtbetalingerDTO
 import no.nav.helse.utbetalingslinjer.*
-import no.nav.helse.utbetalingslinjer.Endringskode
-import no.nav.helse.utbetalingslinjer.Klassekode
-import no.nav.helse.utbetalingslinjer.Oppdrag
-import no.nav.helse.utbetalingslinjer.Satstype
-import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -92,15 +87,13 @@ internal class OppdragBuilder : BuilderState() {
         datoStatusFom: LocalDate?,
         klassekode: Klassekode
     ) {
-        val erOpphør = datoStatusFom != null
-        if (!erOpphør) {
-            utbetalingslinjer.add(UtbetalingerDTO.UtbetalingslinjeDTO(
-                fom = fom,
-                tom = tom,
-                dagsats = beløp!!,
-                grad = grad!!
-            ))
-        }
+        if (datoStatusFom != null) return
+        utbetalingslinjer.add(UtbetalingerDTO.UtbetalingslinjeDTO(
+            fom = fom,
+            tom = tom,
+            dagsats = beløp!!,
+            grad = grad!!
+        ))
     }
 
     override fun postVisitOppdrag(

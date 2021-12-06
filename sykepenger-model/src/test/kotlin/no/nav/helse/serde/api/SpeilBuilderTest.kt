@@ -17,10 +17,11 @@ import no.nav.helse.serde.api.v2.InntektsmeldingDTO
 import no.nav.helse.serde.api.v2.SykmeldingDTO
 import no.nav.helse.serde.api.v2.SøknadNavDTO
 import no.nav.helse.serde.mapping.SpeilDagtype
+import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.spleis.e2e.*
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
-import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.*
@@ -249,8 +250,8 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         assertEquals(31, tidslinje.utbetaling.utbetalingstidslinje.size)
 
         assertEquals(vilkårsgrunnlagIder[0].id, personDTO.arbeidsgivere.first().utbetalingshistorikk[0].vilkårsgrunnlagHistorikkId)
-        assertEquals("UTBETALT", tidslinje.utbetaling.status)
-        assertEquals("UTBETALING", tidslinje.utbetaling.type)
+        assertEquals(Utbetalingstatus.UTBETALT, tidslinje.utbetaling.status)
+        assertEquals(Utbetalingtype.UTBETALING, tidslinje.utbetaling.type)
         assertEquals(237, tidslinje.utbetaling.gjenståendeSykedager)
         assertEquals(11, tidslinje.utbetaling.forbrukteSykedager)
         assertEquals(15741, tidslinje.utbetaling.arbeidsgiverNettoBeløp)
@@ -307,7 +308,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         assertEquals(1, vedtaksperiode.beregningIder.size)
         val utbetalingFraHistorikk = personDTO.arbeidsgivere.first().utbetalingshistorikk.first().utbetaling
         assertEquals(vedtaksperiode.beregningIder.first(), utbetalingFraHistorikk.beregningId)
-        assertEquals(Utbetaling.Utbetalingtype.UTBETALING.name, utbetalingFraHistorikk.type)
+        assertEquals(Utbetalingtype.UTBETALING, utbetalingFraHistorikk.type)
         assertEquals(28.desember, utbetalingFraHistorikk.maksdato)
         assertTrue(personDTO.arbeidsgivere.first().utbetalingshistorikk.first().beregningId in vedtaksperiode.beregningIder)
     }
@@ -775,7 +776,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         assertEquals(1, vedtaksperiode.beregningIder.size)
         assertEquals(1, utbetalingshistorikk.size)
         assertEquals(vedtaksperiode.beregningIder.first(), utbetalingshistorikk.first().beregningId)
-        assertEquals("IKKE_UTBETALT", utbetalingshistorikk.first().utbetaling.status)
+        assertEquals(Utbetalingstatus.IKKE_UTBETALT, utbetalingshistorikk.first().utbetaling.status)
     }
 
     @Test

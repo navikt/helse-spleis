@@ -3,6 +3,7 @@ package no.nav.helse.inspectors
 import no.nav.helse.person.UtbetalingVisitor
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -18,12 +19,12 @@ internal class UtbetalingInspektør(utbetaling: Utbetaling) : UtbetalingVisitor 
     lateinit var personOppdrag: Oppdrag
     lateinit var utbetalingstidslinje: Utbetalingstidslinje
     private lateinit var status: Utbetaling.Tilstand
-    private lateinit var type: Utbetaling.Utbetalingtype
+    private lateinit var type: Utbetalingtype
 
     val erUbetalt get() = status == Utbetaling.Ubetalt
     val erForkastet get() = status == Utbetaling.Forkastet
-    val erEtterutbetaling get() = type == Utbetaling.Utbetalingtype.ETTERUTBETALING
-    val erAnnullering get() = type == Utbetaling.Utbetalingtype.ANNULLERING
+    val erEtterutbetaling get() = type == Utbetalingtype.ETTERUTBETALING
+    val erAnnullering get() = type == Utbetalingtype.ANNULLERING
     val erUtbetalt get() = status == Utbetaling.Annullert || status == Utbetaling.Utbetalt
 
     init {
@@ -34,7 +35,7 @@ internal class UtbetalingInspektør(utbetaling: Utbetaling) : UtbetalingVisitor 
         utbetaling: Utbetaling,
         id: UUID,
         korrelasjonsId: UUID,
-        type: Utbetaling.Utbetalingtype,
+        type: Utbetalingtype,
         tilstand: Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,

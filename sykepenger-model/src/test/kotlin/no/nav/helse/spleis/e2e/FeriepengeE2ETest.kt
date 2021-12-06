@@ -15,7 +15,7 @@ import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.utbetalingslinjer.Satstype
-import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
@@ -588,7 +588,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             assertEquals(2627, linje["totalbeløp"])
         }
 
-        val feriepengerUtbetaltEndretEventer = observatør.utbetaltEndretEventer.filter { it.event.type == Utbetaling.Utbetalingtype.FERIEPENGER.name }
+        val feriepengerUtbetaltEndretEventer = observatør.utbetaltEndretEventer.filter { it.event.type == Utbetalingtype.FERIEPENGER.name }
         assertEquals(2, feriepengerUtbetaltEndretEventer.size)
         assertTrue(feriepengerUtbetaltEndretEventer.any {
             it.event.arbeidsgiverOppdrag["linjer"].castAsList<Map<String, Any>>().single()["satstype"] == "ENG"

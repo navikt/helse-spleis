@@ -6,6 +6,7 @@ import no.nav.helse.person.*
 import no.nav.helse.serde.api.v2.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -100,7 +101,7 @@ internal class GenerasjonerBuilder(
         utbetaling: Utbetaling,
         id: UUID,
         korrelasjonsId: UUID,
-        type: Utbetaling.Utbetalingtype,
+        type: Utbetalingtype,
         tilstand: Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,
@@ -112,7 +113,7 @@ internal class GenerasjonerBuilder(
         stønadsdager: Int,
         beregningId: UUID
     ) {
-        if (type != Utbetaling.Utbetalingtype.ANNULLERING) return
+        if (type != Utbetalingtype.ANNULLERING) return
         annulleringer.leggTil(UtbetalingBuilder(utbetaling).build())
     }
 

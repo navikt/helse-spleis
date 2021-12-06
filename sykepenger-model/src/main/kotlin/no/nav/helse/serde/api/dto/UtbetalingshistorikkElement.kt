@@ -7,6 +7,11 @@ import no.nav.helse.serde.api.SykdomstidslinjedagDTO
 import no.nav.helse.serde.api.TilstandstypeDTO
 import no.nav.helse.serde.api.UtbetalingstidslinjedagDTO
 import no.nav.helse.serde.api.builders.OppdragDTO
+import no.nav.helse.serde.reflection.Utbetalingstatus
+import no.nav.helse.serde.reflection.Utbetalingstatus.*
+import no.nav.helse.utbetalingslinjer.Utbetalingtype
+import no.nav.helse.utbetalingslinjer.Utbetalingtype.ANNULLERING
+import no.nav.helse.utbetalingslinjer.Utbetalingtype.REVURDERING
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -20,14 +25,14 @@ data class UtbetalingshistorikkElementDTO(
 ) {
     val beregningId = utbetaling.beregningId
 
-    data class UtbetalingDTO(
+    data class UtbetalingDTO internal constructor(
         val utbetalingId: UUID,
         val korrelasjonsId: UUID,
         val utbetalingstidslinje: List<UtbetalingstidslinjedagDTO>,
         val beregningId: UUID,
-        val type: String,
+        val type: Utbetalingtype,
         val maksdato: LocalDate,
-        val status: String,
+        val status: Utbetalingstatus,
         val gjenståendeSykedager: Int?,
         val forbrukteSykedager: Int?,
         val arbeidsgiverNettoBeløp: Int,
@@ -39,22 +44,19 @@ data class UtbetalingshistorikkElementDTO(
     ) {
         @Deprecated("hent fra oppdraget")
         val arbeidsgiverFagsystemId = arbeidsgiverOppdrag.fagsystemId
-
         @Deprecated("hent fra oppdraget")
         val personFagsystemId = personOppdrag.fagsystemId
 
         fun tilstandFor(periode: Periode) = when (type) {
-            "ANNULLERING" -> when (status) {
-                "ANNULLERT" -> TilstandstypeDTO.Annullert
-                "UTBETALING_FEILET" -> TilstandstypeDTO.AnnulleringFeilet
+            ANNULLERING -> when (status) {
+                ANNULLERT -> TilstandstypeDTO.Annullert
+                UTBETALING_FEILET -> TilstandstypeDTO.AnnulleringFeilet
                 else -> TilstandstypeDTO.TilAnnullering
             }
-            "REVURDERING" -> TilstandstypeDTO.Utbetalt
+            REVURDERING -> TilstandstypeDTO.Utbetalt
             else -> {
-                val kunFerie = utbetalingstidslinje.filter { it.dato in periode }
-                    .all { it.type in setOf(DagtypeDTO.NavHelgDag, DagtypeDTO.Feriedag, DagtypeDTO.Helgedag) }
-                val harUtbetaling = utbetalingstidslinje.filter { it.dato in periode }
-                    .any { it.type in setOf(DagtypeDTO.NavDag) }
+                val kunFerie = kunFerie(periode)
+                val harUtbetaling = harUtbetaling(periode)
                 when {
                     kunFerie -> TilstandstypeDTO.KunFerie
                     harUtbetaling -> TilstandstypeDTO.Utbetalt
@@ -63,8 +65,20 @@ data class UtbetalingshistorikkElementDTO(
             }
         }
 
+        private fun harUtbetaling(periode: Periode) =
+            utbetalingstidslinje.filter { it.dato in periode }
+                .any { it.type in setOf(DagtypeDTO.NavDag) }
 
-        fun erAnnullering() = type == "ANNULLERING"
+        private fun kunFerie(periode: Periode) =
+            utbetalingstidslinje.filter { it.dato in periode }
+                .all { it.type in setOf(DagtypeDTO.NavHelgDag, DagtypeDTO.Feriedag, DagtypeDTO.Helgedag) }
+
+        private fun annulleringFor(utbetalinger: List<UtbetalingDTO>) =
+            utbetalinger
+                .filter { it.erAnnullering() && it.status != FORKASTET }
+                .firstOrNull { it.korrelasjonsId == this.korrelasjonsId }
+
+        fun erAnnullering() = type == ANNULLERING
 
         data class VurderingDTO(
             val godkjent: Boolean,
@@ -75,9 +89,7 @@ data class UtbetalingshistorikkElementDTO(
 
         internal companion object {
             internal fun tilstandFor(periode: Periode, tilstandstype: TilstandType, utbetaling: UtbetalingDTO?, utbetalinger: List<UtbetalingDTO>): TilstandstypeDTO {
-                val annullering =
-                    utbetalinger.filterNot { it.status == "FORKASTET" }.filter { it.erAnnullering() }
-                        .firstOrNull { it.korrelasjonsId == utbetaling?.korrelasjonsId }
+                val annullering = utbetaling?.annulleringFor(utbetalinger)
 
                 return when (tilstandstype) {
                     TilstandType.START,
@@ -118,9 +130,8 @@ data class UtbetalingshistorikkElementDTO(
                     TilstandType.AVSLUTTET_UTEN_UTBETALING,
                     TilstandType.UTEN_UTBETALING_MED_INNTEKTSMELDING_UFERDIG_GAP,
                     TilstandType.UTEN_UTBETALING_MED_INNTEKTSMELDING_UFERDIG_FORLENGELSE -> when {
-                        utbetaling == null -> TilstandstypeDTO.IngenUtbetaling
                         annullering != null -> annullering.tilstandFor(periode)
-                        else -> utbetaling.tilstandFor(periode)
+                        else -> utbetaling?.tilstandFor(periode) ?: TilstandstypeDTO.IngenUtbetaling
                     }
                 }
             }

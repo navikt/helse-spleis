@@ -3,6 +3,7 @@ package no.nav.helse.person
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -66,7 +67,7 @@ internal class Avstemmer(person: Person) {
             utbetaling: Utbetaling,
             id: UUID,
             korrelasjonsId: UUID,
-            type: Utbetaling.Utbetalingtype,
+            type: Utbetalingtype,
             tilstand: Utbetaling.Tilstand,
             tidsstempel: LocalDateTime,
             oppdatert: LocalDateTime,

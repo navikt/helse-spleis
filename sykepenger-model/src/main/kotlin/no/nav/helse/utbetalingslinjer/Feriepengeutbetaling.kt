@@ -76,7 +76,7 @@ internal class Feriepengeutbetaling private constructor(
             utbetalingHendelse.hendelseskontekst(),
             PersonObserver.UtbetalingEndretEvent(
                 utbetalingId = utbetalingId,
-                type = Utbetaling.Utbetalingtype.FERIEPENGER.name,
+                type = Utbetalingtype.FERIEPENGER.name,
                 arbeidsgiverOppdrag = oppdrag.toMap(),
                 personOppdrag = Oppdrag(utbetalingHendelse.fødselsnummer(), Fagområde.SykepengerRefusjon).toMap(),
                 forrigeStatus = Utbetalingstatus.fraTilstand(Utbetaling.Ubetalt).name,

@@ -24,12 +24,9 @@ import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling
+import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling.Companion.gjelderFeriepengeutbetaling
-import no.nav.helse.utbetalingslinjer.Oppdrag
-import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetaltTidslinje
-import no.nav.helse.utbetalingslinjer.UtbetalingObserver
 import no.nav.helse.utbetalingstidslinje.*
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import java.time.LocalDate
@@ -505,7 +502,7 @@ internal class Arbeidsgiver private constructor(
         hendelseskontekst: Hendelseskontekst,
         id: UUID,
         korrelasjonsId: UUID,
-        type: Utbetaling.Utbetalingtype,
+        type: Utbetalingtype,
         periode: Periode,
         maksdato: LocalDate,
         forbrukteSykedager: Int,
@@ -547,7 +544,7 @@ internal class Arbeidsgiver private constructor(
         hendelseskontekst: Hendelseskontekst,
         id: UUID,
         korrelasjonsId: UUID,
-        type: Utbetaling.Utbetalingtype,
+        type: Utbetalingtype,
         periode: Periode,
         maksdato: LocalDate,
         forbrukteSykedager: Int,
@@ -588,7 +585,7 @@ internal class Arbeidsgiver private constructor(
     override fun utbetalingEndret(
         hendelseskontekst: Hendelseskontekst,
         id: UUID,
-        type: Utbetaling.Utbetalingtype,
+        type: Utbetalingtype,
         arbeidsgiverOppdrag: Oppdrag,
         personOppdrag: Oppdrag,
         forrigeTilstand: Utbetaling.Tilstand,
