@@ -301,7 +301,7 @@ internal class VedtaksperiodeBuilder(
     ) {
         inUtbetaling = true
         if (tilstand is Utbetaling.Forkastet) return
-        this.utbetalingId = utbetalingId
+        this.utbetalingId = id
 
         utbetalingGodkjent = tilstand !in listOf(Utbetaling.IkkeGodkjent, Utbetaling.Ubetalt)
         this.maksdato = maksdato
