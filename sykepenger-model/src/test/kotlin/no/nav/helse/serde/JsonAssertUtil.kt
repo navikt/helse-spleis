@@ -8,6 +8,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import org.junit.jupiter.api.Assertions
@@ -24,6 +25,9 @@ private class UtbetalingMixin
 @JsonIgnoreProperties("dagtyperSomAvvises")
 private class BegrunnelseMixin
 
+@JsonIgnoreProperties("oppslag", "utbetalingstidslinjeoppslag")
+private class InfotrygdhistorikkElementMixin
+
 private val objectMapper = jacksonObjectMapper()
     .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
     .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
@@ -32,7 +36,8 @@ private val objectMapper = jacksonObjectMapper()
             Arbeidsgiver::class.java to ArbeidsgiverMixin::class.java,
             Vedtaksperiode::class.java to VedtaksperiodeMixin::class.java,
             Utbetaling::class.java to UtbetalingMixin::class.java,
-            Begrunnelse::class.java to BegrunnelseMixin::class.java
+            Begrunnelse::class.java to BegrunnelseMixin::class.java,
+            InfotrygdhistorikkElement::class.java to InfotrygdhistorikkElementMixin::class.java
         )
     )
     .setVisibility(PropertyAccessor.GETTER, JsonAutoDetect.Visibility.NONE)

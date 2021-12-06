@@ -76,9 +76,18 @@ internal class InfotrygdhistorikkElement private constructor(
             )
     }
 
+    private data class Oppslagsnøkkel(
+        val orgnummer: String,
+        val sykdomstidslinje: Sykdomstidslinje
+    )
+
+    private val oppslag = mutableMapOf<Oppslagsnøkkel, Sykdomstidslinje>()
+
     internal fun historikkFor(orgnummer: String, sykdomstidslinje: Sykdomstidslinje): Sykdomstidslinje {
-        return perioder.fold(sykdomstidslinje) { result, periode ->
-            periode.historikkFor(orgnummer, result, kilde)
+        return oppslag.computeIfAbsent(Oppslagsnøkkel(orgnummer, sykdomstidslinje)) {
+            perioder.fold(sykdomstidslinje) { result, periode ->
+                periode.historikkFor(orgnummer, result, kilde)
+            }
         }
     }
 
@@ -158,11 +167,15 @@ internal class InfotrygdhistorikkElement private constructor(
             .map { it.utbetalingstidslinje() }
             .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
 
+    private val utbetalingstidslinjeoppslag = mutableMapOf<String, Utbetalingstidslinje>()
+
     internal fun utbetalingstidslinje(organisasjonsnummer: String) =
-        perioder
-            .filter { it.gjelder(organisasjonsnummer) }
-            .map { it.utbetalingstidslinje() }
-            .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
+        utbetalingstidslinjeoppslag.computeIfAbsent(organisasjonsnummer) {
+            perioder
+                .filter { it.gjelder(organisasjonsnummer) }
+                .map { it.utbetalingstidslinje() }
+                .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
+        }
 
     internal fun fjernHistorikk(utbetalingstidlinje: Utbetalingstidslinje, organisasjonsnummer: String, tidligsteDato: LocalDate): Utbetalingstidslinje {
         return utbetalingstidlinje.plus(utbetalingstidslinje(organisasjonsnummer)) { spleisDag: Utbetalingstidslinje.Utbetalingsdag, infotrygdDag: Utbetalingstidslinje.Utbetalingsdag ->

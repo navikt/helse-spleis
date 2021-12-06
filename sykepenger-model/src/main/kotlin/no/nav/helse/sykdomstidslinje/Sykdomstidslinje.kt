@@ -218,10 +218,10 @@ internal class Sykdomstidslinje private constructor(
 
     override fun equals(other: Any?): Boolean {
         if (other !is Sykdomstidslinje) return false
-        return dager == other.dager && låstePerioder == other.låstePerioder
+        return dager == other.dager && periode == other.periode && låstePerioder == other.låstePerioder
     }
 
-    override fun hashCode() = Objects.hash(dager, låstePerioder)
+    override fun hashCode() = Objects.hash(dager, periode, låstePerioder)
 
     override fun toString() = toShortString()
 

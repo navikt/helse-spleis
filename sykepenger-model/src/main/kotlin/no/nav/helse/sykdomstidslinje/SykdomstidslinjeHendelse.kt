@@ -80,5 +80,9 @@ abstract class SykdomstidslinjeHendelse(
 
     override fun equals(other: Any?): Boolean = other is SykdomstidslinjeHendelse
         && this.meldingsreferanseId() == other.meldingsreferanseId()
+
+    override fun hashCode(): Int {
+        return meldingsreferanseId().hashCode()
+    }
 }
 

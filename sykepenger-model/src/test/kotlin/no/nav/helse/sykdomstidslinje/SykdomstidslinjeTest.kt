@@ -2,6 +2,7 @@ package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.sykdomstidslinje.Dag.Companion.default
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
@@ -39,6 +40,18 @@ internal class SykdomstidslinjeTest {
         )
         val tidslinje = tidslinje1.merge(tidslinje2, konfliktsky)
         assertEquals("SSS???? ??SSS", tidslinje.toShortString())
+    }
+
+    @Test
+    fun `default strategi støtter ikke å mørje dager med forskjellig kilde`() {
+        val tidslinje1 = Sykdomstidslinje.sykedager(
+            1.mandag, 1.onsdag, 100.prosent, TestEvent.søknad
+        )
+        val tidslinje2 = Sykdomstidslinje.sykedager(
+            1.mandag, 1.onsdag, 100.prosent, TestEvent.inntektsmelding
+        )
+        val tidslinje = tidslinje1.merge(tidslinje2, default)
+        assertEquals("XXX", tidslinje.toShortString())
     }
 
     @Test

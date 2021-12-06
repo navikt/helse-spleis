@@ -869,8 +869,8 @@ internal class Arbeidsgiver private constructor(
     internal fun periodetype(periode: Periode): Periodetype {
         val skjæringstidspunkt = skjæringstidspunkt(periode)
         return when {
-            erFørstegangsbehandling(periode) -> Periodetype.FØRSTEGANGSBEHANDLING
-            forlengerInfotrygd(periode) -> when {
+            erFørstegangsbehandling(periode, skjæringstidspunkt) -> Periodetype.FØRSTEGANGSBEHANDLING
+            forlengerInfotrygd(periode, skjæringstidspunkt) -> when {
                 Utbetaling.harBetalt(utbetalinger, Periode(skjæringstidspunkt, periode.start.minusDays(1))) -> Periodetype.INFOTRYGDFORLENGELSE
                 else -> Periodetype.OVERGANG_FRA_IT
             }
@@ -879,14 +879,14 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
-    internal fun erFørstegangsbehandling(periode: Periode) =
-        skjæringstidspunkt(periode) in periode
+    internal fun erFørstegangsbehandling(periode: Periode, skjæringstidspunkt: LocalDate) =
+        skjæringstidspunkt in periode
 
-    internal fun erForlengelse(periode: Periode) =
-        !erFørstegangsbehandling(periode)
+    internal fun erForlengelse(periode: Periode, skjæringstidspunkt: LocalDate = skjæringstidspunkt(periode)) =
+        !erFørstegangsbehandling(periode, skjæringstidspunkt)
 
-    internal fun forlengerInfotrygd(periode: Periode) =
-        person.harInfotrygdUtbetalt(organisasjonsnummer, skjæringstidspunkt(periode))
+    internal fun forlengerInfotrygd(periode: Periode, skjæringstidspunkt: LocalDate = skjæringstidspunkt(periode)) =
+        person.harInfotrygdUtbetalt(organisasjonsnummer, skjæringstidspunkt)
 
     private fun skjæringstidspunkt(periode: Periode) = person.skjæringstidspunkt(organisasjonsnummer, sykdomstidslinje(), periode)
 

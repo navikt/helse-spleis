@@ -94,6 +94,7 @@ internal class Vedtaksperiode private constructor(
     )
 
     internal fun accept(visitor: VedtaksperiodeVisitor) {
+        val periodetype = periodetype()
         visitor.preVisitVedtaksperiode(
             this,
             id,
@@ -103,7 +104,7 @@ internal class Vedtaksperiode private constructor(
             periode,
             sykmeldingsperiode,
             skjæringstidspunkt,
-            periodetype(),
+            periodetype,
             forlengelseFraInfotrygd,
             hendelseIder,
             inntektsmeldingInfo,
@@ -124,7 +125,7 @@ internal class Vedtaksperiode private constructor(
             periode,
             sykmeldingsperiode,
             skjæringstidspunkt,
-            periodetype(),
+            periodetype,
             forlengelseFraInfotrygd,
             hendelseIder,
             inntektsmeldingInfo,
@@ -2038,7 +2039,7 @@ internal class Vedtaksperiode private constructor(
                 onSuccess {
                     if (vedtaksperiode.person.harKunEtAnnetAktivtArbeidsforholdEnn(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer)) {
                         ytelser.warn("Den sykmeldte har skiftet arbeidsgiver, og det er beregnet at den nye arbeidsgiveren mottar refusjon lik forrige. Kontroller at dagsatsen blir riktig.")
-                    } else if (vedtaksperiode.arbeidsgiver.erFørstegangsbehandling(vedtaksperiode.periode) && vilkårsgrunnlag is VilkårsgrunnlagHistorikk.Grunnlagsdata && vilkårsgrunnlag.harInntektFraSkatt()) {
+                    } else if (vedtaksperiode.arbeidsgiver.erFørstegangsbehandling(vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt) && vilkårsgrunnlag is VilkårsgrunnlagHistorikk.Grunnlagsdata && vilkårsgrunnlag.harInntektFraSkatt()) {
                         ytelser.warn("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold")
                     }
                     if (vedtaksperiode.person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt)!!.gjelderFlereArbeidsgivere()) {

@@ -110,9 +110,9 @@ internal sealed class Dag(
     override fun equals(other: Any?) =
         other != null && this::class == other::class && this.equals(other as Dag)
 
-    protected open fun equals(other: Dag) = this.dato == other.dato// && this.kilde == other.kilde
+    protected open fun equals(other: Dag) = this.dato == other.dato && this.kilde == other.kilde
 
-    override fun hashCode() = dato.hashCode() * 37 + this::class.hashCode()
+    override fun hashCode() = dato.hashCode() * 37 + kilde.hashCode() * 41 + this::class.hashCode()
 
     override fun toString() = "${this::class.java.simpleName} ($dato) $kilde"
 
