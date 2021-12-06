@@ -1,0 +1,156 @@
+{
+    "arbeidsgivere": [
+        {
+            "beregnetUtbetalingstidslinjer": [
+                {
+                    "utbetalingstidslinje": {
+                        "dager": [
+                            {
+                                "type": "UkjentDag",
+                                "fom": "2018-01-03",
+                                "tom": "2018-01-18"
+                            },
+                            {
+                                "type": "Fridag",
+                                "fom": "2018-01-20",
+                                "tom": "2018-01-21"
+                            },
+                            {
+                                "type": "NavDag",
+                                "fom": "2018-01-22",
+                                "tom": "2018-01-26"
+                            }
+                        ]
+                    }
+                }
+            ],
+            "utbetalinger": [
+                {
+                    "utbetalingstidslinje": {
+                        "dager": [
+                            {
+                                "type": "Fridag",
+                                "fom": "2018-01-03",
+                                "tom": "2018-01-18"
+                            },
+                            {
+                                "type": "UkjentDag",
+                                "dato": "2018-01-19"
+                            },
+                            {
+                                "type": "NavHelgDag",
+                                "fom": "2018-01-20",
+                                "tom": "2018-01-21"
+                            },
+                            {
+                                "type": "NavDag",
+                                "fom": "2018-01-22",
+                                "tom": "2018-01-26"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "utbetalingstidslinje": {
+                        "dager": [
+                            {
+                                "type": "Arbeidsdag",
+                                "fom": "2018-01-01",
+                                "tom": "2018-01-05"
+                            },
+                            {
+                                "type": "Fridag",
+                                "dato": "2018-01-06"
+                            },
+                            {
+                                "type": "Fridag",
+                                "dato": "2018-01-07"
+                            },
+                            {
+                                "type": "NavDag",
+                                "fom": "2018-01-08",
+                                "tom": "2018-01-26"
+                            }
+                        ]
+                    }
+                }
+            ],
+            "vedtaksperioder": [
+                {
+                    "utbetalingstidslinje": {
+                        "dager": [
+                            {
+                                "type": "Arbeidsdag",
+                                "fom": "2018-01-03",
+                                "tom": "2018-01-18"
+                            },
+                            {
+                                "type": "UkjentDag",
+                                "dato": "2018-01-19"
+                            },
+                            {
+                                "type": "Fridag",
+                                "fom": "2018-01-20",
+                                "tom": "2018-01-21"
+                            },
+                            {
+                                "type": "NavDag",
+                                "fom": "2018-01-22",
+                                "tom": "2018-01-26"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "utbetalingstidslinje": {
+                        "dager": [
+                            {
+                                "type": "Arbeidsdag",
+                                "dato": "2018-01-03"
+                            },
+                            {
+                                "type": "UkjentDag",
+                                "dato": "2018-01-04"
+                            },
+                            {
+                                "type": "NavDag",
+                                "fom": "2018-01-05",
+                                "tom": "2018-01-21"
+                            }
+                        ]
+                    }
+                }
+            ],
+            "forkastede": [
+                {
+                    "vedtaksperiode": {
+                        "utbetalingstidslinje": {
+                            "dager": [
+                                {
+                                    "type": "NavDag",
+                                    "fom": "2018-01-03",
+                                    "tom": "2018-01-18"
+                                },
+                                {
+                                    "type": "UkjentDag",
+                                    "dato": "2018-01-19"
+                                },
+                                {
+                                    "type": "Fridag",
+                                    "fom": "2018-01-20",
+                                    "tom": "2018-01-21"
+                                },
+                                {
+                                    "type": "NavDag",
+                                    "fom": "2018-01-22",
+                                    "tom": "2018-01-26"
+                                }
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "skjemaVersjon": 129
+}
