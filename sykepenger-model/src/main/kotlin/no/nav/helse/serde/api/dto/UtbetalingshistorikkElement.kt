@@ -73,10 +73,13 @@ data class UtbetalingshistorikkElementDTO(
             utbetalingstidslinje.filter { it.dato in periode }
                 .all { it.type in setOf(DagtypeDTO.NavHelgDag, DagtypeDTO.Feriedag, DagtypeDTO.Helgedag) }
 
-        private fun annulleringFor(utbetalinger: List<UtbetalingDTO>) =
+        private fun annulleringFor(utbetalinger: List<UtbetalingshistorikkElementDTO>) =
             utbetalinger
+                .map { it.utbetaling }
                 .filter { it.erAnnullering() && it.status != FORKASTET }
                 .firstOrNull { it.korrelasjonsId == this.korrelasjonsId }
+
+        private fun erUtbetalt() = status == UTBETALT || status == ANNULLERT
 
         fun erAnnullering() = type == ANNULLERING
 
@@ -88,7 +91,17 @@ data class UtbetalingshistorikkElementDTO(
         )
 
         internal companion object {
-            internal fun tilstandFor(periode: Periode, tilstandstype: TilstandType, utbetaling: UtbetalingDTO?, utbetalinger: List<UtbetalingDTO>): TilstandstypeDTO {
+            internal fun utbetalingFor(liste: List<UtbetalingshistorikkElementDTO>, utbetalingId: UUID) =
+                liste.firstOrNull { it.utbetaling.utbetalingId == utbetalingId }?.utbetaling
+
+            internal fun sisteUtbetalingFor(liste: List<UtbetalingshistorikkElementDTO>, utbetaling: UtbetalingDTO) =
+                liste
+                    .filter { it.utbetaling.erUtbetalt() }
+                    .sortedBy { it.tidsstempel }
+                    .lastOrNull { it.utbetaling.korrelasjonsId == utbetaling.korrelasjonsId }
+                    ?.utbetaling
+
+            internal fun tilstandFor(periode: Periode, tilstandstype: TilstandType, utbetaling: UtbetalingDTO?, utbetalinger: List<UtbetalingshistorikkElementDTO>): TilstandstypeDTO {
                 val annullering = utbetaling?.annulleringFor(utbetalinger)
 
                 return when (tilstandstype) {

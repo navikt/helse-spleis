@@ -51,24 +51,50 @@ data class VedtaksperiodeDTO(
     override val inntektskilde: Inntektskilde,
     override val erForkastet: Boolean = false,
     val utbetalingsreferanse: String?,
-    val utbetalinger: UtbetalingerDTO,
-    val utbetalteUtbetalinger: UtbetalingerDTO,
+    val utbetaling: UtbetalingshistorikkElementDTO.UtbetalingDTO?,
+    val sisteUtbetaling: UtbetalingshistorikkElementDTO.UtbetalingDTO?,
     val sykdomstidslinje: List<SykdomstidslinjedagDTO>,
-    val godkjentAv: String?,
-    val godkjenttidspunkt: LocalDateTime?,
-    val automatiskBehandlet: Boolean,
     val vilkår: VilkårDTO,
     val inntektsmeldingId: UUID?,
     val inntektFraInntektsmelding: Double?,
-    val totalbeløpArbeidstaker: Int,
     val hendelser: List<HendelseDTO>,
     val dataForVilkårsvurdering: GrunnlagsdataDTO?,
-    val simuleringsdata: SimuleringsdataDTO?,
     val aktivitetslogg: List<AktivitetDTO>,
     val forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
     val periodetype: Periodetype,
     val beregningIder: List<UUID> = emptyList()
-) : VedtaksperiodeDTOBase
+) : VedtaksperiodeDTOBase {
+    @Deprecated("Speil må lese fra utbetaling.vurdering")
+    val godkjentAv: String? = utbetaling?.vurdering?.ident
+    @Deprecated("Speil må lese fra utbetaling.vurdering")
+    val godkjenttidspunkt: LocalDateTime? = utbetaling?.vurdering?.tidsstempel
+    @Deprecated("Speil må lese fra utbetaling.vurdering")
+    val automatiskBehandlet: Boolean = utbetaling?.vurdering?.automatisk ?: false
+
+    @Deprecated("Speil må lese fra utbetaling")
+    val simuleringsdata = utbetaling?.arbeidsgiverOppdrag?.simuleringsResultat
+
+    @Deprecated("Speil burde lest fra utbetaling.arbeidsgiverOppdrag og utbetaling.personOppdrag")
+    val totalbeløpArbeidstaker: Int = (utbetaling?.arbeidsgiverNettoBeløp ?: 0) + (utbetaling?.personNettoBeløp ?: 0)
+
+    @Deprecated("Speil må bytte til sisteUtbetaling")
+    val utbetalinger: UtbetalingerDTO = UtbetalingerDTO(
+        arbeidsgiverUtbetaling = sisteUtbetaling?.arbeidsgiverOppdrag?.let {
+            UtbetalingerDTO.UtbetalingDTO(
+                fagsystemId = it.fagsystemId,
+                linjer = it.utbetalingslinjer
+            )
+        },
+        personUtbetaling = sisteUtbetaling?.personOppdrag?.let {
+            UtbetalingerDTO.UtbetalingDTO(
+                fagsystemId = it.fagsystemId,
+                linjer = it.utbetalingslinjer
+            )
+        }
+    )
+    @Deprecated("Speil må bytte til sisteUtbetaling")
+    val utbetalteUtbetalinger: UtbetalingerDTO = utbetalinger
+}
 
 data class UtbetalingerDTO(
     val arbeidsgiverUtbetaling: UtbetalingDTO?,

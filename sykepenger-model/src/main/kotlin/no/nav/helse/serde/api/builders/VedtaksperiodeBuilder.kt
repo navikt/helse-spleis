@@ -2,19 +2,16 @@ package no.nav.helse.serde.api.builders
 
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.*
 import no.nav.helse.serde.api.*
 import no.nav.helse.serde.api.dto.UtbetalingshistorikkElementDTO
 import no.nav.helse.serde.api.v2.HendelseDTO
 import no.nav.helse.serde.api.v2.SøknadNavDTO
-import no.nav.helse.serde.reflection.Utbetalingstatus.UTBETALT
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 import java.time.LocalDate
@@ -61,52 +58,37 @@ internal class VedtaksperiodeBuilder(
 
     private val beregnetSykdomstidslinje = mutableListOf<SykdomstidslinjedagDTO>()
 
-    private var dataForSimulering: SimuleringsdataDTO? = null
-    private var arbeidsgiverFagsystemId: String? = null
-    private var personFagsystemId: String? = null
-    private var inUtbetaling = false
-    private var utbetalingGodkjent = false
-    private val utbetalingstidslinje = mutableListOf<UtbetalingstidslinjedagDTO>()
-    private var forbrukteSykedager: Int? = null
-    private var gjenståendeSykedager: Int? = null
-    private var maksdato: LocalDate = LocalDate.MAX
-    private var godkjentAv: String? = null
-    private var godkjenttidspunkt: LocalDateTime? = null
-    private var automatiskBehandling: Boolean = false
-    private var totalbeløpArbeidstaker: Int = 0
-    private var vedtaksperiodeUtbetaling: Utbetaling? = null
-
     private var utbetalingId: UUID? = null
 
     internal fun build(hendelser: List<HendelseDTO>, utbetalinger: List<UtbetalingshistorikkElementDTO>): VedtaksperiodeDTOBase {
         val relevanteHendelser = hendelser.filter { it.id in hendelseIder.map { id -> id.toString() } }
 
-        val utbetaling = utbetalinger.firstOrNull { it.utbetaling.utbetalingId == utbetalingId }?.utbetaling
+        val utbetaling = utbetalingId?.let { UtbetalingshistorikkElementDTO.UtbetalingDTO.utbetalingFor(utbetalinger, it) }
 
         val tilstandstypeDTO = UtbetalingshistorikkElementDTO.UtbetalingDTO.tilstandFor(
             periode = periode,
             tilstandstype = tilstand.type,
             utbetaling = utbetaling,
-            utbetalinger = utbetalinger.map { it.utbetaling }
+            utbetalinger = utbetalinger
         )
 
         if (!fullstendig) return buildUfullstendig(utbetaling, tilstandstypeDTO, forkastet)
 
-        val utbetalteUtbetalinger = byggUtbetalteUtbetalingerForPeriode(utbetalinger)
-        return buildFullstendig(relevanteHendelser, tilstandstypeDTO, totalbeløpArbeidstaker, utbetalteUtbetalinger, forkastet)
+        val sisteUtbetalingFor = utbetaling?.let { UtbetalingshistorikkElementDTO.UtbetalingDTO.sisteUtbetalingFor(utbetalinger, utbetaling) }
+        return buildFullstendig(relevanteHendelser, tilstandstypeDTO, utbetaling, sisteUtbetalingFor, forkastet)
     }
 
     private fun buildFullstendig(
         relevanteHendelser: List<HendelseDTO>,
         tilstandstypeDTO: TilstandstypeDTO,
-        totalbeløpArbeidstaker: Int,
-        utbetalteUtbetalinger: UtbetalingerDTO,
+        utbetaling: UtbetalingshistorikkElementDTO.UtbetalingDTO?,
+        sisteUtbetalingFor: UtbetalingshistorikkElementDTO.UtbetalingDTO?,
         forkastet: Boolean
     ): VedtaksperiodeDTO {
         inntektshistorikkBuilder.nøkkeldataOmInntekt(InntektshistorikkBuilder.NøkkeldataOmInntekt(periode.endInclusive, skjæringstidspunkt, grunnlagsdataBuilder?.avviksprosent))
 
         val tom = beregnetSykdomstidslinje.last().dagen
-        val vilkår = buildVilkår(relevanteHendelser)
+        val vilkår = buildVilkår(utbetaling, relevanteHendelser)
         return VedtaksperiodeDTO(
             id = id,
             gruppeId = gruppeId,
@@ -115,21 +97,16 @@ internal class VedtaksperiodeBuilder(
             tilstand = tilstandstypeDTO,
             fullstendig = true,
             utbetalingsreferanse = null, // TODO: deprecated/never set in SpeilBuilder
-            utbetalingstidslinje = utbetalingstidslinje,
+            utbetalingstidslinje = utbetaling?.utbetalingstidslinje?.filter { it.dato in periode } ?: emptyList(),
             sykdomstidslinje = beregnetSykdomstidslinje,
-            godkjentAv = godkjentAv,
-            godkjenttidspunkt = godkjenttidspunkt,
-            automatiskBehandlet = automatiskBehandling,
             vilkår = vilkår,
             inntektsmeldingId = inntektsmeldingId,
             inntektFraInntektsmelding = sykepengegrunnlag?.reflection { _, månedlig, _, _ -> månedlig },
-            totalbeløpArbeidstaker = totalbeløpArbeidstaker,
             hendelser = relevanteHendelser,
             dataForVilkårsvurdering = grunnlagsdataBuilder?.grunnlagsdata,
-            simuleringsdata = dataForSimulering,
             aktivitetslogg = warnings,
-            utbetalinger = utbetalteUtbetalinger,
-            utbetalteUtbetalinger = utbetalteUtbetalinger,
+            utbetaling = utbetaling,
+            sisteUtbetaling = sisteUtbetalingFor,
             forlengelseFraInfotrygd = forlengelseFraInfotrygd,
             periodetype = periodetype,
             inntektskilde = inntektskilde,
@@ -159,15 +136,21 @@ internal class VedtaksperiodeBuilder(
             dato = it.dato
         )} ?: emptyList()
 
-    private fun buildVilkår(hendelser: List<HendelseDTO>): VilkårDTO {
+    private fun buildVilkår(utbetaling: UtbetalingshistorikkElementDTO.UtbetalingDTO?, hendelser: List<HendelseDTO>): VilkårDTO {
+        val sykepengeperiode = utbetaling?.utbetalingstidslinje?.filter { it.dato in periode }?.let { dager ->
+            val første = dager.firstOrNull { it.type == DagtypeDTO.NavDag } ?: return@let null
+            val siste = dager.last { it.type == DagtypeDTO.NavDag }
+            første.dato til siste.dato
+        }
         val sisteSykepengedagEllerSisteDagIPerioden = sykepengeperiode?.endInclusive ?: beregnetSykdomstidslinje.last().dagen
         val personalder = fødselsnummer.somFødselsnummer().alder()
+        val maksdato = utbetaling?.maksdato ?: LocalDate.MAX
         val sykepengedager = SykepengedagerDTO(
-            forbrukteSykedager = forbrukteSykedager,
+            forbrukteSykedager = utbetaling?.forbrukteSykedager,
             skjæringstidspunkt = skjæringstidspunkt,
             førsteSykepengedag = sykepengeperiode?.start,
             maksdato = maksdato,
-            gjenståendeDager = gjenståendeSykedager,
+            gjenståendeDager = utbetaling?.gjenståendeSykedager,
             oppfylt = maksdato > sisteSykepengedagEllerSisteDagIPerioden
         )
         val alderSisteSykepengedag = personalder.alderPåDato(sisteSykepengedagEllerSisteDagIPerioden)
@@ -239,52 +222,6 @@ internal class VedtaksperiodeBuilder(
         pushState(SykdomstidslinjeBuilder(beregnetSykdomstidslinje))
     }
 
-    private var sykepengeperiode: Periode? = null
-
-    override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
-        if (inUtbetaling) return
-        sykepengeperiode = tidslinje.sykepengeperiode()
-        pushState(UtbetalingstidslinjeBuilder(utbetalingstidslinje))
-    }
-
-    override fun visitDataForSimulering(dataForSimuleringResultat: Simulering.SimuleringResultat?) {
-        if (dataForSimuleringResultat == null) return
-        dataForSimulering = SimuleringsdataDTO(
-            totalbeløp = dataForSimuleringResultat.totalbeløp,
-            perioder = dataForSimuleringResultat.perioder.map { periode ->
-                SimuleringsdataDTO.PeriodeDTO(
-                    fom = periode.periode.start,
-                    tom = periode.periode.endInclusive,
-                    utbetalinger = periode.utbetalinger.map { utbetaling ->
-                        SimuleringsdataDTO.UtbetalingDTO(
-                            utbetalesTilId = utbetaling.utbetalesTil.id,
-                            utbetalesTilNavn = utbetaling.utbetalesTil.navn,
-                            forfall = utbetaling.forfallsdato,
-                            detaljer = utbetaling.detaljer.map { detaljer ->
-                                SimuleringsdataDTO.DetaljerDTO(
-                                    faktiskFom = detaljer.periode.start,
-                                    faktiskTom = detaljer.periode.endInclusive,
-                                    konto = detaljer.konto,
-                                    beløp = detaljer.beløp,
-                                    tilbakeføring = detaljer.tilbakeføring,
-                                    sats = detaljer.sats.sats,
-                                    typeSats = detaljer.sats.type,
-                                    antallSats = detaljer.sats.antall,
-                                    uføregrad = detaljer.uføregrad,
-                                    klassekode = detaljer.klassekode.kode,
-                                    klassekodeBeskrivelse = detaljer.klassekode.beskrivelse,
-                                    utbetalingstype = detaljer.utbetalingstype,
-                                    refunderesOrgNr = detaljer.refunderesOrgnummer
-                                )
-                            },
-                            feilkonto = utbetaling.feilkonto
-                        )
-                    }
-                )
-            }
-        )
-    }
-
     override fun preVisitUtbetaling(
         utbetaling: Utbetaling,
         id: UUID,
@@ -301,59 +238,9 @@ internal class VedtaksperiodeBuilder(
         stønadsdager: Int,
         beregningId: UUID
     ) {
-        inUtbetaling = true
         if (tilstand is Utbetaling.Forkastet) return
         this.utbetalingId = id
-
-        utbetalingGodkjent = tilstand !in listOf(Utbetaling.IkkeGodkjent, Utbetaling.Ubetalt)
-        this.maksdato = maksdato
-        this.gjenståendeSykedager = gjenståendeSykedager
-        this.forbrukteSykedager = forbrukteSykedager
         this.beregningIder.add(beregningId)
-        this.vedtaksperiodeUtbetaling = utbetaling
-    }
-
-    override fun visitVurdering(
-        vurdering: Utbetaling.Vurdering,
-        ident: String,
-        epost: String,
-        tidspunkt: LocalDateTime,
-        automatiskBehandling: Boolean,
-        godkjent: Boolean
-    ) {
-        if (!utbetalingGodkjent) return
-        godkjentAv = ident
-        godkjenttidspunkt = tidspunkt
-        this.automatiskBehandling = automatiskBehandling
-    }
-
-    override fun preVisitArbeidsgiverOppdrag(oppdrag: Oppdrag) {
-        arbeidsgiverFagsystemId = oppdrag.fagsystemId()
-    }
-
-    override fun preVisitPersonOppdrag(oppdrag: Oppdrag) {
-        personFagsystemId = oppdrag.fagsystemId()
-    }
-
-    override fun postVisitUtbetaling(
-        utbetaling: Utbetaling,
-        id: UUID,
-        korrelasjonsId: UUID,
-        type: Utbetalingtype,
-        tilstand: Utbetaling.Tilstand,
-        tidsstempel: LocalDateTime,
-        oppdatert: LocalDateTime,
-        arbeidsgiverNettoBeløp: Int,
-        personNettoBeløp: Int,
-        maksdato: LocalDate,
-        forbrukteSykedager: Int?,
-        gjenståendeSykedager: Int?,
-        stønadsdager: Int,
-        beregningId: UUID
-    ) {
-        inUtbetaling = false
-        if (tilstand is Utbetaling.Forkastet) return
-        totalbeløpArbeidstaker = arbeidsgiverNettoBeløp + personNettoBeløp
     }
 
     override fun postVisitVedtaksperiode(
@@ -373,17 +260,6 @@ internal class VedtaksperiodeBuilder(
     ) {
         popState()
     }
-
-    private fun byggUtbetalteUtbetalingerForPeriode(utbetalinger: List<UtbetalingshistorikkElementDTO>): UtbetalingerDTO =
-        UtbetalingerDTO(
-            arbeidsgiverUtbetaling = utbetalinger.filter { it.utbetaling.status == UTBETALT }.map { it.utbetaling.arbeidsgiverOppdrag }.byggUtbetaling(),
-            personUtbetaling = utbetalinger.filter { it.utbetaling.status == UTBETALT }.map { it.utbetaling.personOppdrag }.byggUtbetaling()
-        )
-
-    private fun List<OppdragDTO>.byggUtbetaling() =
-        maxByOrNull { it.tidsstempel }?.let {
-            UtbetalingerDTO.UtbetalingDTO(it.utbetalingslinjer, it.fagsystemId)
-        }
 }
 
 private class GrunnlagsdataBuilder(skjæringstidspunkt: LocalDate, grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata) : VilkårsgrunnlagHistorikkVisitor {
