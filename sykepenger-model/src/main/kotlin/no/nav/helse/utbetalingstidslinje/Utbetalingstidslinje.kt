@@ -62,20 +62,31 @@ internal class Utbetalingstidslinje private constructor(
         private fun Utbetalingsdag.erSykedag() =
             this is NavDag || this is NavHelgDag || this is ArbeidsgiverperiodeDag || this is AvvistDag
 
-        fun harAvvisteDager(tidslinjer: List<Utbetalingstidslinje>, avvistPeriode: Periode, periode: Periode, begrunnelser: List<Begrunnelse>) =
+        internal fun harAvvisteDager(tidslinjer: List<Utbetalingstidslinje>, avvistPeriode: Periode, periode: Periode, begrunnelser: List<Begrunnelse>) =
             avvisteDager(tidslinjer, listOf(avvistPeriode), periode, begrunnelser).isNotEmpty()
 
-        fun avvis(tidslinjer: List<Utbetalingstidslinje>, begrunnelserForSkjæringstidspunkt: Map<LocalDate, List<Begrunnelse>>) {
+        internal fun avvis(tidslinjer: List<Utbetalingstidslinje>, begrunnelserForSkjæringstidspunkt: Map<LocalDate, List<Begrunnelse>>) {
             tidslinjer.forEach { it.avvis(begrunnelserForSkjæringstidspunkt) }
         }
 
-        fun avvisteDager(tidslinjer: List<Utbetalingstidslinje>, avvistePerioder: List<Periode>, periode: Periode, begrunnelser: List<Begrunnelse>): List<AvvistDag> {
+        internal fun avvisteDager(
+            tidslinjer: List<Utbetalingstidslinje>,
+            avvistePerioder: List<Periode>,
+            periode: Periode,
+            begrunnelser: List<Begrunnelse>
+        ): List<AvvistDag> {
             tidslinjer.forEach { it.avvis(avvistePerioder, begrunnelser) }
-            return tidslinjer.flatMap { tidslinje -> tidslinje.subset(periode) }.filterIsInstance<AvvistDag>()        }
+            return tidslinjer.flatMap { tidslinje -> tidslinje.subset(periode) }.filterIsInstance<AvvistDag>()
+        }
 
-        fun avvis(tidslinjer: List<Utbetalingstidslinje>, avvistePerioder: List<Periode>, periode: Periode, finnBegrunnelse: (LocalDate) -> Begrunnelse): Boolean {
+        internal fun avvis(
+            tidslinjer: List<Utbetalingstidslinje>,
+            avvistePerioder: List<Periode>,
+            periode: Periode,
+            finnBegrunnelse: (LocalDate) -> Begrunnelse
+        ): Boolean {
             tidslinjer.forEach { it.avvis(avvistePerioder, finnBegrunnelse) }
-            return tidslinjer.flatMap { tidslinje -> tidslinje.subset(periode) }.any { it is AvvistDag}
+            return tidslinjer.flatMap { tidslinje -> tidslinje.subset(periode) }.any { it is AvvistDag }
         }
     }
 
@@ -242,7 +253,7 @@ internal class Utbetalingstidslinje private constructor(
             .grupperSammenhengendePerioder()
             .map(::subset)
             .map(Utbetalingstidslinje::trimLedendeFridager)
-            .filter { it.any { it is NavDag || it is ForeldetDag }}
+            .filter { it.any { it is NavDag || it is ForeldetDag } }
 
     internal fun subset(periode: Periode): Utbetalingstidslinje {
         if (isEmpty()) return Utbetalingstidslinje()
@@ -340,6 +351,7 @@ internal class Utbetalingstidslinje private constructor(
             override fun serialiseringstype(): PersonData.UtbetalingstidslinjeData.TypeData =
                 PersonData.UtbetalingstidslinjeData.TypeData.ArbeidsgiverperiodeDag
         }
+
         abstract fun serialiseringstype(): PersonData.UtbetalingstidslinjeData.TypeData
 
         internal open fun toMap() = mutableMapOf<String, Any?>(

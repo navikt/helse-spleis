@@ -9,18 +9,18 @@ import java.time.Year
 import java.time.temporal.ChronoUnit.YEARS
 
 internal class Alder(private val fødselsdato: LocalDate) {
-    internal val søttiårsdagen = fødselsdato.plusYears(70)
-    internal val datoForØvreAldersgrense = søttiårsdagen.trimHelg()
-    internal val sisteVirkedagFørFylte70år = datoForØvreAldersgrense.minusDays(1)
-    internal val redusertYtelseAlder = fødselsdato.plusYears(67)
-    private val forhøyetInntektskravAlder = fødselsdato.plusYears(67)
+    internal val søttiårsdagen: LocalDate = fødselsdato.plusYears(70)
+    internal val datoForØvreAldersgrense: LocalDate = søttiårsdagen.trimHelg()
+    internal val sisteVirkedagFørFylte70år: LocalDate = datoForØvreAldersgrense.minusDays(1)
+    internal val redusertYtelseAlder: LocalDate = fødselsdato.plusYears(67)
+    private val forhøyetInntektskravAlder: LocalDate = fødselsdato.plusYears(67)
 
     private companion object {
         private const val ALDER_FOR_FORHØYET_FERIEPENGESATS = 59
         private const val MINSTEALDER_UTEN_FULLMAKT_FRA_VERGE = 18
     }
 
-    private fun LocalDate.trimHelg() = this.minusDays(
+    private fun LocalDate.trimHelg(): LocalDate = this.minusDays(
         when (this.dayOfWeek) {
             DayOfWeek.SUNDAY -> 1
             DayOfWeek.MONDAY -> 2

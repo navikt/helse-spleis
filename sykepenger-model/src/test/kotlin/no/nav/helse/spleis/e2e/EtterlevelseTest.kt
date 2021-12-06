@@ -83,6 +83,141 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `§8-3 ledd 1 punktum 2 - fyller 70`() {
+        val fnr = "20014835841"
+        createTestPerson(fnr)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), fnr = fnr)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), fnr = fnr)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), fnr = fnr)
+        håndterYtelser(fnr = fnr)
+        håndterVilkårsgrunnlag(fnr = fnr)
+        håndterYtelser(fnr = fnr)
+
+        assertOppfylt(
+            resultatvelger = 1.resultat,
+            paragraf = PARAGRAF_8_3,
+            ledd = LEDD_1,
+            punktum = 2.punktum,
+            versjon = 16.desember(2011),
+            inputdata = mapOf(
+                "syttiårsdagen" to 20.januar,
+                "vurderingFom" to 1.januar,
+                "vurderingTom" to 19.januar,
+                "tidslinjeFom" to 1.januar,
+                "tidslinjeTom" to 31.januar
+            ),
+            outputdata = mapOf(
+                "avvisteDager" to emptyList<Periode>()
+            )
+        )
+
+        assertIkkeOppfylt(
+            resultatvelger = 2.resultat,
+            paragraf = PARAGRAF_8_3,
+            ledd = LEDD_1,
+            punktum = 2.punktum,
+            versjon = 16.desember(2011),
+            inputdata = mapOf(
+                "syttiårsdagen" to 20.januar,
+                "vurderingFom" to 20.januar,
+                "vurderingTom" to 31.januar,
+                "tidslinjeFom" to 1.januar,
+                "tidslinjeTom" to 31.januar
+            ),
+            outputdata = mapOf(
+                "avvisteDager" to listOf(20.januar til 31.januar)
+            )
+        )
+    }
+
+    @Test
+    fun `§8-3 ledd 1 punktum 2 - blir aldri 70`() {
+        val fnr = "01024835841"
+        createTestPerson(fnr)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), fnr = fnr)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), fnr = fnr)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), fnr = fnr)
+        håndterYtelser(fnr = fnr)
+        håndterVilkårsgrunnlag(fnr = fnr)
+        håndterYtelser(fnr = fnr)
+
+        assertOppfylt(
+            paragraf = PARAGRAF_8_3,
+            ledd = LEDD_1,
+            punktum = 2.punktum,
+            versjon = 16.desember(2011),
+            inputdata = mapOf(
+                "syttiårsdagen" to 1.februar,
+                "vurderingFom" to 1.januar,
+                "vurderingTom" to 31.januar,
+                "tidslinjeFom" to 1.januar,
+                "tidslinjeTom" to 31.januar
+            ),
+            outputdata = mapOf(
+                "avvisteDager" to emptyList<Periode>()
+            )
+        )
+    }
+
+    @Test
+    fun `§8-3 ledd 1 punktum 2 - er alltid 70`() {
+        val fnr = "01014835841"
+        createTestPerson(fnr)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), fnr = fnr)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), fnr = fnr)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), fnr = fnr)
+        håndterYtelser(fnr = fnr)
+        håndterVilkårsgrunnlag(fnr = fnr)
+        håndterYtelser(fnr = fnr)
+
+        assertIkkeOppfylt(
+            paragraf = PARAGRAF_8_3,
+            ledd = LEDD_1,
+            punktum = 2.punktum,
+            versjon = 16.desember(2011),
+            inputdata = mapOf(
+                "syttiårsdagen" to 1.januar,
+                "vurderingFom" to 1.januar,
+                "vurderingTom" to 31.januar,
+                "tidslinjeFom" to 1.januar,
+                "tidslinjeTom" to 31.januar
+            ),
+            outputdata = mapOf(
+                "avvisteDager" to listOf(17.januar til 31.januar)
+            )
+        )
+    }
+
+    @Test
+    fun `§8-3 ledd 1 punktum 2 - er alltid 70 uten NAVdager`() {
+        val fnr = "01014835841"
+        createTestPerson(fnr)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent), fnr = fnr)
+        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), fnr = fnr)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), fnr = fnr)
+        håndterYtelser(fnr = fnr)
+        håndterVilkårsgrunnlag(fnr = fnr)
+        håndterYtelser(fnr = fnr)
+
+        assertIkkeOppfylt(
+            paragraf = PARAGRAF_8_3,
+            ledd = LEDD_1,
+            punktum = 2.punktum,
+            versjon = 16.desember(2011),
+            inputdata = mapOf(
+                "syttiårsdagen" to 1.januar,
+                "vurderingFom" to 1.januar,
+                "vurderingTom" to 16.januar,
+                "tidslinjeFom" to 1.januar,
+                "tidslinjeTom" to 16.januar
+            ),
+            outputdata = mapOf(
+                "avvisteDager" to emptyList<Periode>()
+            )
+        )
+    }
+
+    @Test
     fun `§8-3 ledd 2 punktum 1 - har minimum inntekt halv G`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
@@ -734,7 +869,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         private val resultater = mutableListOf<Resultat>()
 
         fun resultat(paragraf: Paragraf, ledd: Ledd?, punktum: List<Punktum>?, vedtaksperiodeId: UUID? = null) =
-            resultater.filter { it.paragraf == paragraf && ledd?.equals(it.ledd) ?: true && punktum?.equals(it.punktum) ?: true && vedtaksperiodeId?.equals(it.vedtaksperiodeIdFraKontekst()) ?: true}
+            resultater.filter { it.paragraf == paragraf && ledd?.equals(it.ledd) ?: true && punktum?.equals(it.punktum) ?: true && vedtaksperiodeId?.equals(it.vedtaksperiodeIdFraKontekst()) ?: true }
 
         init {
             aktivitetslogg.accept(this)

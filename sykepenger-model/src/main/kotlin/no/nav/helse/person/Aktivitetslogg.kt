@@ -405,6 +405,7 @@ class Aktivitetslogg(
                 Utbetaling,
                 InntekterForSammenligningsgrunnlag,
                 InntekterForSykepengegrunnlag,
+
                 @Deprecated("Behovet er ikke i bruk, men beholdes for derserialisering av aktivitetsloggen")
                 Opptjening,
                 Dagpenger,
@@ -551,7 +552,36 @@ class Aktivitetslogg(
                         )
                     }
 
-                    internal fun IAktivitetslogg.`§8-3 ledd 1 punktum 2`(oppfylt: Boolean) {}
+                    internal fun IAktivitetslogg.`§8-3 ledd 1 punktum 2`(
+                        oppfylt: Boolean,
+                        syttiårsdagen: LocalDate,
+                        vurderingFom: LocalDate,
+                        vurderingTom: LocalDate,
+                        tidslinjeFom: LocalDate,
+                        tidslinjeTom: LocalDate,
+                        avvisteDager: List<LocalDate>
+                    ) {
+                        juridiskVurdering(
+                            "",
+                            Vurderingsresultat(
+                                oppfylt = oppfylt,
+                                versjon = LocalDate.of(2011, 12, 16),
+                                paragraf = PARAGRAF_8_3,
+                                ledd = 1.ledd,
+                                punktum = 2.punktum,
+                                inputdata = mapOf(
+                                    "syttiårsdagen" to syttiårsdagen,
+                                    "vurderingFom" to vurderingFom,
+                                    "vurderingTom" to vurderingTom,
+                                    "tidslinjeFom" to tidslinjeFom,
+                                    "tidslinjeTom" to tidslinjeTom
+                                ),
+                                outputdata = mapOf(
+                                    "avvisteDager" to avvisteDager.grupperSammenhengendePerioder()
+                                )
+                            )
+                        )
+                    }
 
                     internal fun IAktivitetslogg.`§8-3 ledd 2 punktum 1`(
                         oppfylt: Boolean,
@@ -707,14 +737,15 @@ class Aktivitetslogg(
                         inntekter: List<Inntektshistorikk.Skatt>,
                         inntekterSisteTreMåneder: List<Inntektshistorikk.Skatt>,
                         grunnlagForSykepengegrunnlag: Inntekt
-                    ) {}
+                    ) {
+                    }
 
                     internal fun IAktivitetslogg.`§8-30 ledd 1`(
                         oppfylt: Boolean,
                         grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Inntekt>,
                         grunnlagForSykepengegrunnlag: Inntekt
                     ) {
-                        val beregnetMånedsinntektPerArbeidsgiver = grunnlagForSykepengegrunnlagPerArbeidsgiver
+                    val beregnetMånedsinntektPerArbeidsgiver = grunnlagForSykepengegrunnlagPerArbeidsgiver
                             .mapValues { it.value.reflection { _, månedlig, _, _ -> månedlig } }
                         juridiskVurdering(
                             "",
@@ -955,7 +986,8 @@ internal interface AktivitetsloggVisitor {
         melding: String,
         vurderingsresultat: Etterlevelse.Vurderingsresultat,
         tidsstempel: String
-    ) {}
+    ) {
+    }
 
     fun visitVurderingsresultat(
         oppfylt: Boolean,
@@ -965,7 +997,8 @@ internal interface AktivitetsloggVisitor {
         punktum: List<Punktum>,
         inputdata: Map<Any, Any?>,
         outputdata: Map<Any, Any?>
-    ) {}
+    ) {
+    }
 
     fun postVisitEtterlevelse(
         kontekster: List<SpesifikkKontekst>,
@@ -973,7 +1006,8 @@ internal interface AktivitetsloggVisitor {
         melding: String,
         vurderingsresultat: Etterlevelse.Vurderingsresultat,
         tidsstempel: String
-    ) {}
+    ) {
+    }
 
     fun postVisitAktivitetslogg(aktivitetslogg: Aktivitetslogg) {}
 }
