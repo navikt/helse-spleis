@@ -462,9 +462,9 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         val vedtaksperioder = personDTO.arbeidsgivere.first().vedtaksperioder.filterIsInstance<VedtaksperiodeDTO>()
         val utbetalinger = vedtaksperioder[1].utbetalteUtbetalinger
 
-        val utbetalteUtbetalinger = inspektør.utbetalinger.filter { it.erUtbetalt() }
+        val utbetalteUtbetalinger = inspektør.utbetalinger.filter { it.inspektør.erUtbetalt }
         assertEquals(
-            utbetalteUtbetalinger.last().inspektør.arbeidsgiverOppdrag.fagsystemId(),
+            utbetalteUtbetalinger.last().inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(),
             utbetalinger.arbeidsgiverUtbetaling!!.fagsystemId
         )
         assertTrue(utbetalinger.personUtbetaling!!.linjer.isEmpty())

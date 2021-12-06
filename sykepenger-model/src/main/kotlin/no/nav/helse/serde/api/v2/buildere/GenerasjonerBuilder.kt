@@ -112,9 +112,8 @@ internal class GenerasjonerBuilder(
         stønadsdager: Int,
         beregningId: UUID
     ) {
-        if (utbetaling.erAnnullering()) {
-            annulleringer.leggTil(UtbetalingBuilder(utbetaling).build())
-        }
+        if (type != Utbetaling.Utbetalingtype.ANNULLERING) return
+        annulleringer.leggTil(UtbetalingBuilder(utbetaling).build())
     }
 
     override fun visitUtbetalingstidslinjeberegning(

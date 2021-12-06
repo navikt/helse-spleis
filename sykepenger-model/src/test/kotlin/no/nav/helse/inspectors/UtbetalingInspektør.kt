@@ -17,6 +17,14 @@ internal class UtbetalingInspektør(utbetaling: Utbetaling) : UtbetalingVisitor 
     lateinit var arbeidsgiverOppdrag: Oppdrag
     lateinit var personOppdrag: Oppdrag
     lateinit var utbetalingstidslinje: Utbetalingstidslinje
+    private lateinit var status: Utbetaling.Tilstand
+    private lateinit var type: Utbetaling.Utbetalingtype
+
+    val erUbetalt get() = status == Utbetaling.Ubetalt
+    val erForkastet get() = status == Utbetaling.Forkastet
+    val erEtterutbetaling get() = type == Utbetaling.Utbetalingtype.ETTERUTBETALING
+    val erAnnullering get() = type == Utbetaling.Utbetalingtype.ANNULLERING
+    val erUtbetalt get() = status == Utbetaling.Annullert || status == Utbetaling.Utbetalt
 
     init {
         utbetaling.accept(this)
@@ -41,6 +49,8 @@ internal class UtbetalingInspektør(utbetaling: Utbetaling) : UtbetalingVisitor 
         utbetalingId = id
         this.korrelasjonsId = korrelasjonsId
         this.tilstand = tilstand
+        this.type = type
+        this.status = tilstand
     }
 
     override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {

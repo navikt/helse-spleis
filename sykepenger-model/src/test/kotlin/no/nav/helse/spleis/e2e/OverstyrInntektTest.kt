@@ -362,7 +362,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         assertEquals(2, utbetalinger.size)
         assertEquals(0, utbetalinger.last().inspektør.arbeidsgiverOppdrag.nettoBeløp())
         assertTrue(utbetalinger.last().erAvsluttet())
-        assertTrue(utbetalinger.first().erForkastet())
+        assertTrue(utbetalinger.first().inspektør.erForkastet)
     }
 
     @Test
@@ -396,9 +396,9 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode)
 
         val utbetalinger = inspektør.utbetalinger
-        assertTrue(utbetalinger[0].erUtbetalt())
-        assertTrue(utbetalinger[1].erForkastet())
-        assertTrue(utbetalinger[2].erUtbetalt())
+        assertTrue(utbetalinger[0].inspektør.erUtbetalt)
+        assertTrue(utbetalinger[1].inspektør.erForkastet)
+        assertTrue(utbetalinger[2].inspektør.erUtbetalt)
         assertEquals(utbetalinger.first().inspektør.arbeidsgiverOppdrag.nettoBeløp(), -1 * utbetalinger.last().inspektør.arbeidsgiverOppdrag.nettoBeløp())
         assertEquals(1, utbetalinger.map { it.inspektør.arbeidsgiverOppdrag.fagsystemId() }.toSet().size)
     }

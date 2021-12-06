@@ -8,6 +8,7 @@ import no.nav.helse.serde.api.SimuleringsdataDTO
 import no.nav.helse.serde.api.v2.IUtbetaling
 import no.nav.helse.serde.api.v2.Utbetaling
 import no.nav.helse.utbetalingslinjer.Oppdrag
+import no.nav.helse.utbetalingslinjer.Utbetaling.Forkastet
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -39,9 +40,8 @@ internal class UtbetalingerBuilder(vedtaksperiode: Vedtaksperiode): Vedtaksperio
         stønadsdager: Int,
         beregningId: UUID
     ) {
-        if (!utbetaling.erForkastet()) {
-            utbetalinger.putIfAbsent(beregningId, UtbetalingBuilder(utbetaling).build())
-        }
+        if (tilstand == Forkastet) return
+        utbetalinger.putIfAbsent(beregningId, UtbetalingBuilder(utbetaling).build())
     }
 }
 

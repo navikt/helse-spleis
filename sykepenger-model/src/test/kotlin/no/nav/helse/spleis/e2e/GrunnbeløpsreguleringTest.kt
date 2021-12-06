@@ -32,7 +32,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
         håndterGrunnbeløpsregulering(gyldighetsdato = GYLDIGHETSDATO_2020_GRUNNBELØP)
         assertEquals(5, inspektør.utbetalinger.size)
         val etterutbetaling = inspektør.utbetalinger.last()
-        assertTrue(etterutbetaling.erEtterutbetaling())
+        assertTrue(etterutbetaling.inspektør.erEtterutbetaling)
     }
 
     @Test
@@ -56,7 +56,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
         håndterGrunnbeløpsregulering(gyldighetsdato = GYLDIGHETSDATO_2020_GRUNNBELØP)
         assertEquals(14, inspektør.utbetalinger.size)
         val etterutbetaling = inspektør.utbetalinger.last()
-        assertTrue(etterutbetaling.erEtterutbetaling())
+        assertTrue(etterutbetaling.inspektør.erEtterutbetaling)
         assertEquals(11.august(2020), etterutbetaling.inspektør.arbeidsgiverOppdrag.sistedato)
     }
 
@@ -74,7 +74,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
         håndterGrunnbeløpsregulering(gyldighetsdato = GYLDIGHETSDATO_2020_GRUNNBELØP)
         assertEquals(2, inspektør.utbetalinger.size)
         val etterutbetaling = inspektør.utbetalinger.last()
-        assertTrue(etterutbetaling.erEtterutbetaling())
+        assertTrue(etterutbetaling.inspektør.erEtterutbetaling)
     }
 
     @Test
@@ -85,7 +85,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
         utbetaltVedtaksperiodeBegrensetAv6G(4, 10.august(2020), 31.august(2020)) // gap, ny skjæringstidspunkt 10. august
         håndterGrunnbeløpsregulering(gyldighetsdato = GYLDIGHETSDATO_2020_GRUNNBELØP)
         val etterutbetaling = inspektør.utbetaling(4)
-        assertTrue(etterutbetaling.erEtterutbetaling())
+        assertTrue(etterutbetaling.inspektør.erEtterutbetaling)
         assertEquals(inspektør.maksdato(3), inspektør.maksdato(4))
         assertEquals(inspektør.forbrukteSykedager(3), inspektør.forbrukteSykedager(4))
         assertEquals(inspektør.gjenståendeSykedager(3), inspektør.gjenståendeSykedager(4))
@@ -97,7 +97,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
         ubetaltVedtaksperiodeBegrensetAv6G(2, 10.juli(2020), 30.juli(2020))
         håndterGrunnbeløpsregulering(gyldighetsdato = GYLDIGHETSDATO_2020_GRUNNBELØP)
         assertEquals(2, inspektør.utbetalinger.size)
-        assertTrue(inspektør.utbetalinger.none { it.erEtterutbetaling() })
+        assertTrue(inspektør.utbetalinger.none { it.inspektør.erEtterutbetaling })
     }
 
     @Test
@@ -156,7 +156,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(2.vedtaksperiode))
         håndterGrunnbeløpsregulering(gyldighetsdato = GYLDIGHETSDATO_2020_GRUNNBELØP)
         assertEquals(3, inspektør.utbetalinger.size)
-        assertTrue(inspektør.utbetalinger.none { it.erEtterutbetaling() })
+        assertTrue(inspektør.utbetalinger.none { it.inspektør.erEtterutbetaling })
     }
 
     @Test
@@ -167,7 +167,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
         håndterUtbetalt()
         håndterGrunnbeløpsregulering(gyldighetsdato = GYLDIGHETSDATO_2020_GRUNNBELØP)
         assertEquals(3, inspektør.utbetalinger.size)
-        assertTrue(inspektør.utbetalinger.none { it.erEtterutbetaling() })
+        assertTrue(inspektør.utbetalinger.none { it.inspektør.erEtterutbetaling })
     }
 
     @Test
@@ -186,7 +186,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
             assertEquals(inspektør.gjeldendeUtbetalingForVedtaksperiode(3.vedtaksperiode), utbetalinger[3])
 
             assertEquals(utbetalinger[0].inspektør.arbeidsgiverOppdrag.fagsystemId(), utbetalinger[2].inspektør.arbeidsgiverOppdrag.fagsystemId())
-            assertTrue(utbetalinger[2].erEtterutbetaling())
+            assertTrue(utbetalinger[2].inspektør.erEtterutbetaling)
             assertNotEquals(utbetalinger[0].inspektør.arbeidsgiverOppdrag.fagsystemId(), utbetalinger[1].inspektør.arbeidsgiverOppdrag.fagsystemId())
             assertEquals(utbetalinger[1].inspektør.arbeidsgiverOppdrag.fagsystemId(), utbetalinger[3].inspektør.arbeidsgiverOppdrag.fagsystemId())
         }
@@ -224,7 +224,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
         håndterGrunnbeløpsregulering(gyldighetsdato = GYLDIGHETSDATO_2020_GRUNNBELØP)
 
         val etterutbetaling = inspektør.utbetalinger.last()
-        assertTrue(etterutbetaling.erEtterutbetaling())
+        assertTrue(etterutbetaling.inspektør.erEtterutbetaling)
     }
 
     @Test
@@ -235,7 +235,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
         håndterGrunnbeløpsregulering(gyldighetsdato = GYLDIGHETSDATO_2020_GRUNNBELØP)
         assertEquals(1, inspektør.utbetalinger.size)
         val etterutbetaling = inspektør.utbetalinger.last()
-        assertFalse(etterutbetaling.erEtterutbetaling())
+        assertFalse(etterutbetaling.inspektør.erEtterutbetaling)
     }
 
     @Test
@@ -246,7 +246,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
         håndterGrunnbeløpsregulering(gyldighetsdato = GYLDIGHETSDATO_2020_GRUNNBELØP)
         assertEquals(1, inspektør.utbetalinger.size)
         val etterutbetaling = inspektør.utbetalinger.last()
-        assertFalse(etterutbetaling.erEtterutbetaling())
+        assertFalse(etterutbetaling.inspektør.erEtterutbetaling)
     }
 
     private fun assertOppdrag(indeks: Int, forventetAntall: Int, vararg forventetSkjæringstidspunkt: LocalDate) {

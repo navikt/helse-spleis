@@ -101,8 +101,6 @@ internal class Utbetaling private constructor(
     private val observers = mutableSetOf<UtbetalingObserver>()
     private var forrigeHendelse: ArbeidstakerHendelse? = null
 
-    internal fun godkjenttidspunkt() = vurdering?.godkjenttidspunkt()
-
     internal enum class Utbetalingtype { UTBETALING, ETTERUTBETALING, ANNULLERING, REVURDERING, FERIEPENGER }
 
     private fun harHåndtert(hendelse: ArbeidstakerHendelse) =
@@ -114,13 +112,11 @@ internal class Utbetaling private constructor(
 
     internal fun erUbetalt() = tilstand == Ubetalt
     internal fun erUtbetalt() = tilstand == Utbetalt || tilstand == Annullert
-    internal fun erForkastet() = tilstand == Forkastet
     private fun erAktiv() = erUtbetalt() || tilstand in listOf(Godkjent, Sendt, Overført, UtbetalingFeilet)
     internal fun erAvsluttet() = tilstand in listOf(GodkjentUtenUtbetaling, Utbetalt, Annullert)
     internal fun erAvvist() = tilstand in listOf(IkkeGodkjent)
     internal fun harFeilet() = tilstand == UtbetalingFeilet
     internal fun erAnnullering() = type == Utbetalingtype.ANNULLERING
-    internal fun erEtterutbetaling() = type == Utbetalingtype.ETTERUTBETALING
     internal fun revurdertUtenEndring() = type == Utbetalingtype.REVURDERING && tilstand == GodkjentUtenUtbetaling
 
     // this kan revurdere other gitt at fagsystemId == other.fagsystemId,
@@ -331,7 +327,7 @@ internal class Utbetaling private constructor(
                     VURDERT_I_INFOTRYGD -> "VURDERT_I_INFOTRYGD"
                     else -> "VET_IKKE"
                 },
-                utbetaling?.godkjenttidspunkt() ?: LocalDateTime.now()
+                utbetaling?.vurdering?.godkjenttidspunkt() ?: LocalDateTime.now()
             ))
         }
 

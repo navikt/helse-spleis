@@ -2,6 +2,7 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.*
 import no.nav.helse.person.Periodetype.*
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
@@ -12,7 +13,6 @@ import no.nav.helse.somFødselsnummer
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.testhelpers.*
-import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -233,7 +233,7 @@ internal class HistoriePeriodetypeTest {
                 aktørId = aktørId,
                 fødselsnummer = UNG_PERSON_FNR_2018.toString(),
                 organisasjonsnummer = arbeidsgiver.organisasjonsnummer(),
-                utbetalingId = utbetaling.id,
+                utbetalingId = utbetaling.inspektør.utbetalingId,
                 vedtaksperiodeId = UUID.randomUUID().toString(),
                 saksbehandler = "Z999999",
                 saksbehandlerEpost = "z999999@nav.no",
@@ -242,31 +242,6 @@ internal class HistoriePeriodetypeTest {
                 automatiskBehandling = true
             )
         )
-    }
-
-    private val Utbetaling.id: UUID get() {
-        var _id = UUID.randomUUID()
-        accept(object : UtbetalingVisitor {
-            override fun preVisitUtbetaling(
-                utbetaling: Utbetaling,
-                id: UUID,
-                korrelasjonsId: UUID,
-                type: Utbetaling.Utbetalingtype,
-                tilstand: Utbetaling.Tilstand,
-                tidsstempel: LocalDateTime,
-                oppdatert: LocalDateTime,
-                arbeidsgiverNettoBeløp: Int,
-                personNettoBeløp: Int,
-                maksdato: LocalDate,
-                forbrukteSykedager: Int?,
-                gjenståendeSykedager: Int?,
-                stønadsdager: Int,
-                beregningId: UUID
-            ) {
-                _id = id
-            }
-        })
-        return _id
     }
 
     private fun addSykdomshistorikk(sykdomstidslinje: Sykdomstidslinje) {

@@ -156,7 +156,7 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
 
         val utbetalingInfo = UtbetalingInfo(
             // en annullering kopierer den forrige utbetalingsens beregningId
-            beregningId = if (utbetaling.erAnnullering()) UUID.randomUUID() else beregningId,
+            beregningId = if (type == Utbetaling.Utbetalingtype.ANNULLERING) UUID.randomUUID() else beregningId,
             type = type.name,
             maksdato = maksdato,
             status = Utbetalingstatus.fraTilstand(tilstand).name,

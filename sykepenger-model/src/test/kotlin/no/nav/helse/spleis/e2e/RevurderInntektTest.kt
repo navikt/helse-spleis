@@ -228,7 +228,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             AVSLUTTET,
         )
 
-        assertEquals(3, inspektør.utbetalinger.filter { it.erUtbetalt() }.size)
+        assertEquals(3, inspektør.utbetalinger.filter { it.inspektør.erUtbetalt }.size)
     }
 
     @Test
