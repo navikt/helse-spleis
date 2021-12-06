@@ -1,10 +1,7 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.hendelser.Arbeidsforhold
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.til
 import no.nav.helse.person.*
 import no.nav.helse.person.Ledd.Companion.ledd
 import no.nav.helse.person.Ledd.LEDD_1
@@ -402,6 +399,108 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
                 "avvisteDager" to avvisteDager
             ),
             outputdata = emptyMap()
+        )
+    }
+
+    @Test
+    fun `§8-30 ledd 1 - sykepengegrunnlaget utgjør aktuell månedsinntekt omregnet til årsinntekt i kontekst av §8-30 ledd 1`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+
+        assertOppfylt(
+            PARAGRAF_8_30,
+            1.ledd,
+            1.punktum,
+            versjon = 1.januar(2019),
+            inputdata = mapOf(
+                "beregnetMånedsinntektPerArbeidsgiver" to mapOf(
+                    ORGNUMMER to 31000.0
+                )
+            ),
+            outputdata = mapOf(
+                "grunnlagForSykepengegrunnlag" to 372000.0
+            )
+        )
+    }
+
+    @Test
+    fun `§8-30 ledd 1 - sykepengegrunnlaget utgjør aktuell månedsinntekt omregnet til årsinntekt i kontekst av §8-30 ledd 1 selv om beløpet overstiger 6G`() {
+        val inntekt = 60000
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntekt.månedlig)
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt.månedlig)
+        håndterYtelser(1.vedtaksperiode)
+
+        assertOppfylt(
+            PARAGRAF_8_30,
+            1.ledd,
+            1.punktum,
+            versjon = 1.januar(2019),
+            inputdata = mapOf(
+                "beregnetMånedsinntektPerArbeidsgiver" to mapOf(
+                    ORGNUMMER to 60000.0
+                )
+            ),
+            outputdata = mapOf(
+                "grunnlagForSykepengegrunnlag" to 720000.0
+            )
+        )
+    }
+
+    @Test
+    fun `§8-30 ledd 1 - sykepengegrunnlaget utgjør aktuell månedsinntekt omregnet til årsinntekt i kontekst av §8-30 ledd 1 - flere AG`() {
+        val AG1 = "987654321"
+        val AG2 = "123456789"
+        val inntekt = 60000
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = AG1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = AG2)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = AG1)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = AG2)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntekt.månedlig, orgnummer = AG1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntekt.månedlig, orgnummer = AG2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            orgnummer = AG1,
+            inntektsvurdering = Inntektsvurdering(
+                inntekter = inntektperioderForSammenligningsgrunnlag {
+                    1.januar(2017) til 1.desember(2017) inntekter {
+                        AG1 inntekt inntekt
+                        AG2 inntekt inntekt
+                    }
+                }
+            ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                inntektperioderForSykepengegrunnlag {
+                    1.oktober(2017) til 1.desember(2017) inntekter {
+                        AG1 inntekt inntekt
+                        AG2 inntekt inntekt
+                    }
+                }
+            )
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
+
+        assertOppfylt(
+            PARAGRAF_8_30,
+            1.ledd,
+            1.punktum,
+            versjon = 1.januar(2019),
+            inputdata = mapOf(
+                "beregnetMånedsinntektPerArbeidsgiver" to mapOf(
+                    AG1 to 60000.0,
+                    AG2 to 60000.0
+                )
+            ),
+            outputdata = mapOf(
+                "grunnlagForSykepengegrunnlag" to 1440000.0
+            )
         )
     }
 

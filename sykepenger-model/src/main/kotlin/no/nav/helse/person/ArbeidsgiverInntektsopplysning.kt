@@ -13,9 +13,12 @@ internal class ArbeidsgiverInntektsopplysning(private val orgnummer: String, pri
     }
 
     companion object {
-        internal fun List<ArbeidsgiverInntektsopplysning>.inntekt(): Inntekt {
+        internal fun List<ArbeidsgiverInntektsopplysning>.inntekt(aktivitetslogg: IAktivitetslogg): Inntekt {
             val grunnlagForSykepengegrunnlag = map { it.inntektsopplysning.grunnlagForSykepengegrunnlag() }.summer()
-            Aktivitetslogg().`§8-30 ledd 1`(true, this, grunnlagForSykepengegrunnlag)
+            val grunnlagForSykepengegrunnlagPerArbeidsgiver = this
+                .associateBy { it.orgnummer }
+                .mapValues { it.value.inntektsopplysning.grunnlagForSykepengegrunnlag() }
+            aktivitetslogg.`§8-30 ledd 1`(true, grunnlagForSykepengegrunnlagPerArbeidsgiver, grunnlagForSykepengegrunnlag)
             return grunnlagForSykepengegrunnlag
         }
         internal fun List<ArbeidsgiverInntektsopplysning>.inntektsopplysningPerArbeidsgiver() = associate { it.orgnummer to it.inntektsopplysning }
