@@ -6,6 +6,7 @@ import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
@@ -103,6 +104,26 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
             TilstandType.AVVENTER_GODKJENNING,
             TilstandType.TIL_UTBETALING,
             TilstandType.AVSLUTTET
+        )
+    }
+
+    @Test
+    fun `Sender vedtaksperiode_endret når inntektsmelidng kommer i AVSLUTTET_UTEN_UTBETALING`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar(2021), 1.januar(2021), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(1.januar(2021), 1.januar(2021), 100.prosent))
+
+        Assertions.assertEquals(2, observatør.hendelseider(1.vedtaksperiode(ORGNUMMER)).size)
+
+        val hendelseId = håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021)), førsteFraværsdag = 1.januar(2021))
+
+        Assertions.assertEquals(3, observatør.hendelseider(1.vedtaksperiode(ORGNUMMER)).size)
+        Assertions.assertTrue(hendelseId in observatør.hendelseider(1.vedtaksperiode(ORGNUMMER)))
+
+        assertTilstander(
+            1.vedtaksperiode,
+            TilstandType.START,
+            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
+            TilstandType.AVSLUTTET_UTEN_UTBETALING
         )
     }
 }
