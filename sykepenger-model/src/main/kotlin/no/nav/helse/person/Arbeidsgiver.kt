@@ -364,7 +364,7 @@ internal class Arbeidsgiver private constructor(
         finalize(utbetalingshistorikk)
     }
 
-    internal fun håndter(ytelser: Ytelser, arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger, infotrygdhistorikk: Infotrygdhistorikk) {
+    internal fun håndter(ytelser: Ytelser, arbeidsgiverUtbetalinger: (IAktivitetslogg) -> ArbeidsgiverUtbetalinger, infotrygdhistorikk: Infotrygdhistorikk) {
         ytelser.kontekst(this)
         håndter(ytelser) { håndter(ytelser, infotrygdhistorikk, arbeidsgiverUtbetalinger) }
         finalize(ytelser)
@@ -896,14 +896,16 @@ internal class Arbeidsgiver private constructor(
     internal fun builder(
         regler: ArbeidsgiverRegler,
         skjæringstidspunkter: List<LocalDate>,
-        inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver: Map<LocalDate, Map<String, Inntektshistorikk.Inntektsopplysning>>?
+        inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver: Map<LocalDate, Map<String, Inntektshistorikk.Inntektsopplysning>>?,
+        hendelse: IAktivitetslogg
     ): UtbetalingstidslinjeBuilder {
         return UtbetalingstidslinjeBuilder(
             skjæringstidspunkter = skjæringstidspunkter,
             inntektPerSkjæringstidspunkt = inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver?.mapValues { (_, inntektsopplysningPerArbeidsgiver) ->
                 inntektsopplysningPerArbeidsgiver[organisasjonsnummer]
             },
-            arbeidsgiverRegler = regler
+            arbeidsgiverRegler = regler,
+            aktivitetslogg = hendelse
         )
     }
 

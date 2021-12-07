@@ -129,17 +129,17 @@ class Person private constructor(
         ytelser.oppdaterHistorikk(infotrygdhistorikk)
         ytelser.lagreDødsdato(this)
 
-        finnArbeidsgiver(ytelser).håndter(ytelser, arbeidsgiverUtbetalinger(), infotrygdhistorikk)
+        finnArbeidsgiver(ytelser).håndter(ytelser, { arbeidsgiverUtbetalinger(hendelse = it) }, infotrygdhistorikk)
     }
 
-    internal fun arbeidsgiverUtbetalinger(regler: ArbeidsgiverRegler = NormalArbeidstaker): ArbeidsgiverUtbetalinger {
+    private fun arbeidsgiverUtbetalinger(regler: ArbeidsgiverRegler = NormalArbeidstaker, hendelse: IAktivitetslogg): ArbeidsgiverUtbetalinger {
         val skjæringstidspunkter = skjæringstidspunkter()
         return ArbeidsgiverUtbetalinger(
             regler = regler,
             arbeidsgivere = arbeidsgivereMedSykdom().associateWith {
                 infotrygdhistorikk.builder(
                     organisasjonsnummer = it.organisasjonsnummer(),
-                    builder = it.builder(regler, skjæringstidspunkter, vilkårsgrunnlagHistorikk.inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver())
+                    builder = it.builder(regler, skjæringstidspunkter, vilkårsgrunnlagHistorikk.inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver(), hendelse)
                 )
             },
             infotrygdhistorikk = infotrygdhistorikk,

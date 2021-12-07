@@ -30,7 +30,8 @@ internal fun interface IUtbetalingstidslinjeBuilder {
 internal class UtbetalingstidslinjeBuilder internal constructor(
     private val skjæringstidspunkter: List<LocalDate>,
     private val inntektPerSkjæringstidspunkt: Map<LocalDate, Inntektshistorikk.Inntektsopplysning?>?,
-    private val arbeidsgiverRegler: ArbeidsgiverRegler = NormalArbeidstaker
+    private val arbeidsgiverRegler: ArbeidsgiverRegler = NormalArbeidstaker,
+    private val aktivitetslogg: IAktivitetslogg
 ) : SykdomstidslinjeVisitor, IUtbetalingstidslinjeBuilder, Arbeidsgiverperiodeteller.Observatør {
     private lateinit var teller: Arbeidsgiverperiodeteller
     private val tidslinje = Utbetalingstidslinje()

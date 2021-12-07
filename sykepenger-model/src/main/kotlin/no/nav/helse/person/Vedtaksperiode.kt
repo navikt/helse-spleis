@@ -181,7 +181,7 @@ internal class Vedtaksperiode private constructor(
         tilstand.håndter(person, arbeidsgiver, this, utbetalingshistorikk, infotrygdhistorikk)
     }
 
-    internal fun håndter(ytelser: Ytelser, infotrygdhistorikk: Infotrygdhistorikk, arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger) {
+    internal fun håndter(ytelser: Ytelser, infotrygdhistorikk: Infotrygdhistorikk, arbeidsgiverUtbetalinger: (IAktivitetslogg) -> ArbeidsgiverUtbetalinger) {
         if (!ytelser.erRelevant(id)) return
         kontekst(ytelser)
         tilstand.håndter(person, arbeidsgiver, this, ytelser, infotrygdhistorikk, arbeidsgiverUtbetalinger)
@@ -1030,7 +1030,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             ytelser: Ytelser,
             infotrygdhistorikk: Infotrygdhistorikk,
-            arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger
+            arbeidsgiverUtbetalingerFun: (IAktivitetslogg) -> ArbeidsgiverUtbetalinger
         ) {
             ytelser.error("Forventet ikke ytelsehistorikk i %s", type.name)
         }
@@ -1476,7 +1476,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             ytelser: Ytelser,
             infotrygdhistorikk: Infotrygdhistorikk,
-            arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger
+            arbeidsgiverUtbetalingerFun: (IAktivitetslogg) -> ArbeidsgiverUtbetalinger
         ) {
             val tmpLog = Aktivitetslogg()
             validation(tmpLog) {
@@ -1496,6 +1496,7 @@ internal class Vedtaksperiode private constructor(
                     vedtaksperiode.tilstand(ytelser, RevurderingFeilet)
                 }
                 valider { ytelser.valider(vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt) }
+                val arbeidsgiverUtbetalinger = arbeidsgiverUtbetalingerFun(ytelser)
                 valider("Feil ved kalkulering av utbetalingstidslinjer") {
                     arbeidsgiver.beregn(this, arbeidsgiverUtbetalinger, vedtaksperiode.periode)
                 }
@@ -1964,7 +1965,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             ytelser: Ytelser,
             infotrygdhistorikk: Infotrygdhistorikk,
-            arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger
+            arbeidsgiverUtbetalingerFun: (IAktivitetslogg) -> ArbeidsgiverUtbetalinger
         ) {
             val periodetype = vedtaksperiode.periodetype()
             validation(ytelser) {
@@ -2028,11 +2029,11 @@ internal class Vedtaksperiode private constructor(
                 }
                 // TODO: forventer at denne ikke trengs lenger, sjekk om dette stemmer når lagring av sykepengegrunnlaget er stabilt. Kan hvertfall ikke fjernes før https://trello.com/c/pY0WYUC0
                 harNødvendigInntekt(person, vedtaksperiode.skjæringstidspunkt)
-                lateinit var arbeidsgiverUtbetalinger2: ArbeidsgiverUtbetalinger
+                lateinit var arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger
                 valider("Feil ved kalkulering av utbetalingstidslinjer") {
                     person.fyllUtPeriodeMedForventedeDager(ytelser, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt)
-                    arbeidsgiverUtbetalinger2 = vedtaksperiode.person.arbeidsgiverUtbetalinger()
-                    arbeidsgiver.beregn(this, arbeidsgiverUtbetalinger2, vedtaksperiode.periode)
+                    arbeidsgiverUtbetalinger = arbeidsgiverUtbetalingerFun(ytelser)
+                    arbeidsgiver.beregn(this, arbeidsgiverUtbetalinger, vedtaksperiode.periode)
                 }
                 onSuccess {
                     if (vedtaksperiode.person.harKunEtAnnetAktivtArbeidsforholdEnn(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer)) {
@@ -2043,7 +2044,7 @@ internal class Vedtaksperiode private constructor(
                     if (vedtaksperiode.person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt)!!.gjelderFlereArbeidsgivere()) {
                         vedtaksperiode.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE
                     }
-                    vedtaksperiode.forsøkUtbetaling(arbeidsgiverUtbetalinger2.sykepengerettighet, ytelser)
+                    vedtaksperiode.forsøkUtbetaling(arbeidsgiverUtbetalinger.sykepengerettighet, ytelser)
                 }
             }
         }

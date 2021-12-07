@@ -1,6 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
@@ -107,7 +108,8 @@ internal abstract class HistorieTest {
         val builder = UtbetalingstidslinjeBuilder(
             skjæringstidspunkter = infotrygdhistorikk.skjæringstidspunkter(arbeidsgiverSykdomstidslinje.values.toList()),
             inntektPerSkjæringstidspunkt = inntektsdatoer.associateWith { Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), it, UUID.randomUUID(), 25000.månedlig) },
-            arbeidsgiverRegler = regler
+            arbeidsgiverRegler = regler,
+            aktivitetslogg = Aktivitetslogg()
         )
         return infotrygdhistorikk.builder(orgnr, builder).result(sykdomstidslinje, periode)
     }

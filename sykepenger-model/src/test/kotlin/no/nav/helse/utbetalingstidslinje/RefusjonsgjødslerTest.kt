@@ -345,7 +345,8 @@ internal class RefusjonsgjødslerTest {
         ): Utbetalingstidslinje {
             val tidslinje = UtbetalingstidslinjeBuilder(
                 skjæringstidspunkter = inntektsopplysning.keys.toList(),
-                inntektPerSkjæringstidspunkt = inntektsopplysning
+                inntektPerSkjæringstidspunkt = inntektsopplysning,
+                aktivitetslogg = Aktivitetslogg()
             ).apply { forlengelsestrategi(strategi) }.result(this, periode()!!)
             verifiserRekkefølge(tidslinje)
             return tidslinje

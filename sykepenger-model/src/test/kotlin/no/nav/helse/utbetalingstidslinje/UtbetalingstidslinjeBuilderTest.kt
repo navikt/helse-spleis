@@ -3,6 +3,7 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
@@ -913,7 +914,8 @@ internal class UtbetalingstidslinjeBuilderTest {
     ) {
         tidslinje = UtbetalingstidslinjeBuilder(
             skjæringstidspunkter = skjæringstidspunkter,
-            inntektPerSkjæringstidspunkt = inntektsopplysningPerSkjæringstidspunkt
+            inntektPerSkjæringstidspunkt = inntektsopplysningPerSkjæringstidspunkt,
+            aktivitetslogg = Aktivitetslogg()
         ).apply { forlengelsestrategi(strategi) }.result(this, periode()!!)
         verifiserRekkefølge(tidslinje)
     }
