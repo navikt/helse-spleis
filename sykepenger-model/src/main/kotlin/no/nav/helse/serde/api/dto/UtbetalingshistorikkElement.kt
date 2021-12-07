@@ -54,14 +54,18 @@ data class UtbetalingshistorikkElementDTO(
                 else -> TilstandstypeDTO.TilAnnullering
             }
             REVURDERING -> TilstandstypeDTO.Utbetalt
-            else -> {
-                val kunFerie = kunFerie(periode)
-                val harUtbetaling = harUtbetaling(periode)
-                when {
-                    kunFerie -> TilstandstypeDTO.KunFerie
-                    harUtbetaling -> TilstandstypeDTO.Utbetalt
-                    else -> TilstandstypeDTO.IngenUtbetaling
+            else -> when (status) {
+                UTBETALT,GODKJENT_UTEN_UTBETALING -> {
+                    val kunFerie = kunFerie(periode)
+                    val harUtbetaling = harUtbetaling(periode)
+                    when {
+                        kunFerie -> TilstandstypeDTO.KunFerie
+                        harUtbetaling -> TilstandstypeDTO.Utbetalt
+                        else -> TilstandstypeDTO.IngenUtbetaling
+                    }
                 }
+                UTBETALING_FEILET -> TilstandstypeDTO.Feilet
+                else -> TilstandstypeDTO.TilUtbetaling
             }
         }
 
