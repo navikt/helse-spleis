@@ -197,7 +197,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
 
         assertEquals("H SSSSSHH SSSSSHH USSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
-        assertEquals(" PNNNNHH NNNNNHH NNNNNHH NNNNNHH NNN", inspektør.utbetalingstidslinjer(2.vedtaksperiode).toString())
+        assertEquals("PNNNNHH NNNNNHH NNNNNHH NNNNNHH NNN", inspektør.utbetalingstidslinjer(2.vedtaksperiode).toString())
     }
 
     @Test

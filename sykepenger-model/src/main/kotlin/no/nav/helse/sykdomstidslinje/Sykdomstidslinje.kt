@@ -242,7 +242,7 @@ internal class Sykdomstidslinje private constructor(
                     is ForeldetSykedag -> "K"
                     is AvslåttDag -> "☠"
                 }
-        } ?: "Tom tidslinje"
+        }?.trim() ?: "Tom tidslinje"
     }
 
     internal fun sykmeldingSkrevet(): LocalDateTime = dager.sykmeldingSkrevet()

@@ -284,7 +284,7 @@ internal class Utbetalingstidslinje private constructor(
                     ForeldetDag::class -> "O"
                     else -> "?"
                 }
-        }
+        }.trim()
     }
 
     fun toMap() = mutableMapOf<String, Any?>("dager" to DateRanges().apply { forEach { plus(it.dato, it.toMap()) } }.toList())

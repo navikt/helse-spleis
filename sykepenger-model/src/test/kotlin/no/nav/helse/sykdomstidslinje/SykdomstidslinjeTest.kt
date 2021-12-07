@@ -38,7 +38,7 @@ internal class SykdomstidslinjeTest {
             2.onsdag, 2.fredag, 100.prosent, TestEvent.søknad
         )
         val tidslinje = tidslinje1.merge(tidslinje2, konfliktsky)
-        assertEquals(" SSS???? ??SSS", tidslinje.toShortString())
+        assertEquals("SSS???? ??SSS", tidslinje.toShortString())
     }
 
     @Test
@@ -52,7 +52,7 @@ internal class SykdomstidslinjeTest {
 
         val tidslinje = sykedager + permisjonsdager
 
-        assertEquals(" SSSSS?? PPPPP", tidslinje.toShortString())
+        assertEquals("SSSSS?? PPPPP", tidslinje.toShortString())
     }
 
     @Test
@@ -65,7 +65,7 @@ internal class SykdomstidslinjeTest {
         assertEquals(1.mandag, tidslinje.periode()?.start)
         assertEquals(2.mandag, tidslinje.periode()?.endInclusive)
         assertEquals(8, tidslinje.count())
-        assertEquals(" SS??SHH S", tidslinje.toShortString())
+        assertEquals("SS??SHH S", tidslinje.toShortString())
     }
 
     @Test
@@ -97,7 +97,7 @@ internal class SykdomstidslinjeTest {
         val tidslinje2 = (Sykdomstidslinje.arbeidsdager(1.mandag, 1.onsdag, TestEvent.testkilde))
 
         val merged = tidslinje1.merge(tidslinje2, Dag.replace)
-        assertEquals(" AAASS", merged.toShortString())
+        assertEquals("AAASS", merged.toShortString())
     }
 
     @Test
