@@ -11,6 +11,7 @@ internal enum class Paragraf {
     PARAGRAF_8_11,
     PARAGRAF_8_12,
     PARAGRAF_8_13,
+    PARAGRAF_8_17,
     PARAGRAF_8_30,
     PARAGRAF_8_51
 }
@@ -41,6 +42,10 @@ internal enum class Punktum(private val nummer: Int) {
         val Int.punktum get() = enumValues<Punktum>().filter { it.nummer == this }
         val IntRange.punktum get() = enumValues<Punktum>().filter { it.nummer in this }
     }
+}
+
+internal enum class Bokstav {
+    BOKSTAV_A
 }
 
 internal val FOLKETRYGDLOVENS_OPPRINNELSESDATO = LocalDate.of(1997, 2, 28)

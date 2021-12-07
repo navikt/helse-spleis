@@ -75,8 +75,9 @@ internal class AktivitetsloggMap(aktivitetslogg: Aktivitetslogg) : Aktivitetslog
         paragraf: Paragraf,
         ledd: Ledd,
         punktum: List<Punktum>,
-        inputdata: Map<Any, Any?>,
-        outputdata: Map<Any, Any?>
+        bokstav: List<Bokstav>,
+        outputdata: Map<Any, Any?>,
+        inputdata: Map<Any, Any?>
     ) {
         juridiskVurdering = JuridiskVurdering(oppfylt, versjon, paragraf, ledd, punktum, inputdata, outputdata)
     }

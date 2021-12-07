@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.TidslinjegrunnlagVisitor.Periode.Companion.dager
+import no.nav.helse.person.Bokstav.BOKSTAV_A
 import no.nav.helse.person.Ledd.*
 import no.nav.helse.person.Ledd.Companion.ledd
 import no.nav.helse.person.Paragraf.*
@@ -470,11 +471,12 @@ class Aktivitetslogg(
                 private val paragraf: Paragraf,
                 private val ledd: Ledd,
                 private val punktum: List<Punktum>,
+                private val bokstav: List<Bokstav> = emptyList(),
                 private val inputdata: Map<Any, Any?>,
                 private val outputdata: Map<Any, Any?>
             ) {
                 internal fun accept(visitor: AktivitetsloggVisitor) {
-                    visitor.visitVurderingsresultat(oppfylt, versjon, paragraf, ledd, punktum, inputdata, outputdata)
+                    visitor.visitVurderingsresultat(oppfylt, versjon, paragraf, ledd, punktum, bokstav, outputdata, inputdata)
                 }
 
                 override fun toString(): String {
@@ -995,8 +997,9 @@ internal interface AktivitetsloggVisitor {
         paragraf: Paragraf,
         ledd: Ledd,
         punktum: List<Punktum>,
-        inputdata: Map<Any, Any?>,
-        outputdata: Map<Any, Any?>
+        bokstav: List<Bokstav>,
+        outputdata: Map<Any, Any?>,
+        inputdata: Map<Any, Any?>
     ) {
     }
 

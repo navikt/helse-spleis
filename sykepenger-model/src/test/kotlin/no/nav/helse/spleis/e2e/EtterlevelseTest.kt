@@ -3,11 +3,13 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.*
+import no.nav.helse.person.Bokstav.BOKSTAV_A
 import no.nav.helse.person.Ledd.Companion.ledd
 import no.nav.helse.person.Ledd.LEDD_1
 import no.nav.helse.person.Ledd.LEDD_2
 import no.nav.helse.person.Paragraf.*
 import no.nav.helse.person.Punktum.Companion.punktum
+import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.*
@@ -654,10 +656,10 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode)
 
         assertOppfylt(
-            PARAGRAF_8_30,
-            2.ledd,
-            1.punktum,
-            LocalDate.of(2017, 4, 5),
+            paragraf = PARAGRAF_8_30,
+            ledd = 2.ledd,
+            punktum = 1.punktum,
+            versjon = LocalDate.of(2017, 4, 5),
             inputdata = mapOf(
                 "maksimaltTillattAvvikPåÅrsinntekt" to 25.0,
                 "grunnlagForSykepengegrunnlag" to beregnetInntekt * 12,
@@ -684,10 +686,10 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode)
 
         assertOppfylt(
-            PARAGRAF_8_30,
-            2.ledd,
-            1.punktum,
-            LocalDate.of(2017, 4, 5),
+            paragraf = PARAGRAF_8_30,
+            ledd = 2.ledd,
+            punktum = 1.punktum,
+            versjon = LocalDate.of(2017, 4, 5),
             inputdata = mapOf(
                 "maksimaltTillattAvvikPåÅrsinntekt" to 25.0,
                 "grunnlagForSykepengegrunnlag" to beregnetInntekt * 12,
@@ -710,10 +712,10 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode, sammenligningsgrunnlag.månedlig)
 
         assertIkkeOppfylt(
-            PARAGRAF_8_30,
-            2.ledd,
-            1.punktum,
-            LocalDate.of(2017, 4, 5),
+            paragraf = PARAGRAF_8_30,
+            ledd = 2.ledd,
+            punktum = 1.punktum,
+            versjon = LocalDate.of(2017, 4, 5),
             inputdata = mapOf(
                 "maksimaltTillattAvvikPåÅrsinntekt" to 25.0,
                 "grunnlagForSykepengegrunnlag" to beregnetInntekt * 12,
@@ -804,13 +806,14 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         paragraf: Paragraf,
         ledd: Ledd,
         punktum: List<Punktum>,
+        bokstav: List<Bokstav> = emptyList(),
         versjon: LocalDate,
         inputdata: Map<Any, Any?>,
         outputdata: Map<Any, Any?>,
         resultatvelger: (List<Resultat>) -> Resultat = { it.single() },
         inspektør: EtterlevelseInspektør = EtterlevelseInspektør(person.aktivitetslogg)
     ) {
-        val resultat = inspektør.resultat(paragraf, ledd, punktum).let(resultatvelger)
+        val resultat = inspektør.resultat(paragraf, ledd, punktum, bokstav).let(resultatvelger)
         assertTrue(resultat.oppfylt) { "Forventet oppfylt $paragraf $ledd $punktum" }
         assertResultat(versjon, inputdata, outputdata, resultat)
     }
@@ -819,13 +822,14 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         paragraf: Paragraf,
         ledd: Ledd,
         punktum: List<Punktum>,
+        bokstav: List<Bokstav> = emptyList(),
         versjon: LocalDate,
         inputdata: Map<Any, Any?>,
         outputdata: Map<Any, Any?>,
         resultatvelger: (List<Resultat>) -> Resultat = { it.single() },
         inspektør: EtterlevelseInspektør = EtterlevelseInspektør(person.aktivitetslogg)
     ) {
-        val resultat = inspektør.resultat(paragraf, ledd, punktum).let(resultatvelger)
+        val resultat = inspektør.resultat(paragraf, ledd, punktum, bokstav).let(resultatvelger)
         assertFalse(resultat.oppfylt) { "Forventet ikke oppfylt $paragraf $ledd $punktum" }
         assertResultat(versjon, inputdata, outputdata, resultat)
     }
@@ -834,11 +838,12 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         paragraf: Paragraf,
         ledd: Ledd? = null,
         punktum: List<Punktum>? = null,
+        bokstav: List<Bokstav>? = null,
         vedtaksperiodeId: IdInnhenter? = null,
         organisasjonsnummer: String = ORGNUMMER,
         inspektør: EtterlevelseInspektør = EtterlevelseInspektør(person.aktivitetslogg)
     ) {
-        val resultat = inspektør.resultat(paragraf, ledd, punktum, vedtaksperiodeId?.invoke(organisasjonsnummer))
+        val resultat = inspektør.resultat(paragraf, ledd, punktum, bokstav, vedtaksperiodeId?.invoke(organisasjonsnummer))
         assertTrue(resultat.isNotEmpty()) { "Forventet at $paragraf $ledd $punktum er vurdert" }
     }
 
@@ -846,11 +851,12 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         paragraf: Paragraf,
         ledd: Ledd? = null,
         punktum: List<Punktum>? = null,
+        bokstav: List<Bokstav>? = null,
         vedtaksperiodeId: IdInnhenter? = null,
         organisasjonsnummer: String = ORGNUMMER,
         inspektør: EtterlevelseInspektør = EtterlevelseInspektør(person.aktivitetslogg)
     ) {
-        val resultat = inspektør.resultat(paragraf, ledd, punktum, vedtaksperiodeId?.invoke(organisasjonsnummer))
+        val resultat = inspektør.resultat(paragraf, ledd, punktum, bokstav, vedtaksperiodeId?.invoke(organisasjonsnummer))
         assertTrue(resultat.isEmpty()) { "Forventet at $paragraf $ledd $punktum ikke er vurdert" }
     }
 
@@ -868,8 +874,14 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
     private class EtterlevelseInspektør(aktivitetslogg: Aktivitetslogg) : AktivitetsloggVisitor {
         private val resultater = mutableListOf<Resultat>()
 
-        fun resultat(paragraf: Paragraf, ledd: Ledd?, punktum: List<Punktum>?, vedtaksperiodeId: UUID? = null) =
-            resultater.filter { it.paragraf == paragraf && ledd?.equals(it.ledd) ?: true && punktum?.equals(it.punktum) ?: true && vedtaksperiodeId?.equals(it.vedtaksperiodeIdFraKontekst()) ?: true }
+        fun resultat(paragraf: Paragraf, ledd: Ledd?, punktum: List<Punktum>?, bokstav: List<Bokstav>?, vedtaksperiodeId: UUID? = null) =
+            resultater.filter {
+                it.paragraf == paragraf
+                    && ledd?.equals(it.ledd) ?: true
+                    && punktum?.equals(it.punktum) ?: true
+                    && bokstav?.equals(it.bokstav) ?: true
+                    && vedtaksperiodeId?.equals(it.vedtaksperiodeIdFraKontekst()) ?: true
+            }
 
         init {
             aktivitetslogg.accept(this)
@@ -895,10 +907,11 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
             paragraf: Paragraf,
             ledd: Ledd,
             punktum: List<Punktum>,
-            inputdata: Map<Any, Any?>,
-            outputdata: Map<Any, Any?>
+            bokstav: List<Bokstav>,
+            outputdata: Map<Any, Any?>,
+            inputdata: Map<Any, Any?>
         ) {
-            resultater.add(Resultat(melding, oppfylt, versjon, paragraf, ledd, punktum, inputdata, outputdata, kontekster))
+            resultater.add(Resultat(melding, oppfylt, versjon, paragraf, ledd, punktum, bokstav, inputdata, outputdata, kontekster))
         }
     }
 
@@ -909,6 +922,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         val paragraf: Paragraf,
         val ledd: Ledd,
         val punktum: List<Punktum>,
+        val bokstav: List<Bokstav>,
         val inputdata: Map<Any, Any?>,
         val outputdata: Map<Any, Any?>,
         val kontekster: List<SpesifikkKontekst>
