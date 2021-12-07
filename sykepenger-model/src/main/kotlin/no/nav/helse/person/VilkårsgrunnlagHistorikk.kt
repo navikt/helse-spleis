@@ -210,6 +210,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             vurdertOk = minimumInntektVurdering && sammenligningsgrunnlagVurdering,
             meldingsreferanseId = meldingsreferanseId
         )
+
+        fun harInntektFraSkatt(): Boolean = inntektsopplysningPerArbeidsgiver().values.any { it is Inntektshistorikk.SkattComposite }
     }
 
     internal class InfotrygdVilkårsgrunnlag(private val sykepengegrunnlag: Sykepengegrunnlag) : VilkårsgrunnlagElement {

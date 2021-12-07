@@ -597,9 +597,10 @@ internal class Vedtaksperiode private constructor(
                 else -> AvventerArbeidsgivere
             }
         )
-        if (tilstand == AvventerArbeidsgivere) {
+        if (vilkårsgrunnlag.grunnlagsdata().gjelderFlereArbeidsgivere()) {
             overlappendeVedtaksperioder.forEach { it.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE }
         }
+
         Companion.gjenopptaBehandling(vilkårsgrunnlag, person, AvventerArbeidsgivere, AvventerHistorikk)
     }
 
@@ -1898,10 +1899,6 @@ internal class Vedtaksperiode private constructor(
             if (vedtaksperiode.person.harVedtaksperiodeForArbeidsgiverMedUkjentArbeidsforhold(vedtaksperiode.skjæringstidspunkt)) {
                 vilkårsgrunnlag.warn("Arbeidsgiver er ikke registrert i Aa-registeret.")
             }
-
-            if (vedtaksperiode.person.harRelevanteArbeidsforholdForFlereArbeidsgivere(vedtaksperiode.skjæringstidspunkt)) {
-                vedtaksperiode.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE
-            }
             vedtaksperiode.forberedMuligUtbetaling(vilkårsgrunnlag)
         }
     }
@@ -2007,9 +2004,9 @@ internal class Vedtaksperiode private constructor(
                         info("Mangler vilkårsgrunnlag for ${vedtaksperiode.skjæringstidspunkt}")
                     }
                 }
-                lateinit var vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
-                validerHvis("Har for mye avvik i inntekt", { person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt)?.also { vilkårsgrunnlag = it } != null }) {
-                    vilkårsgrunnlag.sjekkAvviksprosent(ytelser)
+                val vilkårsgrunnlag = person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt)
+                validerHvis("Har for mye avvik i inntekt", { vilkårsgrunnlag != null }) {
+                    vilkårsgrunnlag!!.sjekkAvviksprosent(ytelser)
                 }
                 onSuccess {
                     when (periodetype) {
@@ -2017,7 +2014,7 @@ internal class Vedtaksperiode private constructor(
                             vedtaksperiode.forlengelseFraInfotrygd = JA
                             if(vedtaksperiode.skjæringstidspunktFraInfotrygd in LocalDate.of(2021, 5, 1) til LocalDate.of(2021, 5, 16)) {
                                 val gammeltGrunnbeløp = Grunnbeløp.`6G`.beløp(LocalDate.of(2021, 4, 30))
-                                val sykepengegrunnlag = vilkårsgrunnlag.sykepengegrunnlag()
+                                val sykepengegrunnlag = vilkårsgrunnlag!!.sykepengegrunnlag()
                                 if (sykepengegrunnlag >= gammeltGrunnbeløp) ytelser.warn("Første utbetalingsdag er i Infotrygd og mellom 1. og 16. mai. Kontroller at riktig grunnbeløp er brukt.")
                             }
                         }
@@ -2038,10 +2035,7 @@ internal class Vedtaksperiode private constructor(
                 onSuccess {
                     if (vedtaksperiode.person.harKunEtAnnetAktivtArbeidsforholdEnn(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer)) {
                         ytelser.warn("Den sykmeldte har skiftet arbeidsgiver, og det er beregnet at den nye arbeidsgiveren mottar refusjon lik forrige. Kontroller at dagsatsen blir riktig.")
-                    } else if (
-                        person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt) !is VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag &&
-                        vedtaksperiode.person.harFlereArbeidsgivereUtenSykdomVedSkjæringstidspunkt(vedtaksperiode.skjæringstidspunkt)
-                    ) {
+                    } else if (vilkårsgrunnlag is VilkårsgrunnlagHistorikk.Grunnlagsdata && vilkårsgrunnlag.harInntektFraSkatt()) {
                         person.loggTilfelleAvFlereArbeidsgivereMedSkatteinntekt(vedtaksperiode.skjæringstidspunkt)
                         ytelser.warn("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold")
                     }
@@ -2641,7 +2635,7 @@ internal class Vedtaksperiode private constructor(
 
         internal fun List<Vedtaksperiode>.harNødvendigInntekt() =
             this.takeIf { it.isNotEmpty() }
-                ?.any { it.harInntekt() } ?: true
+                ?.harInntekt() ?: true
 
         internal fun List<Vedtaksperiode>.harInntekt() = any { it.harInntekt() }
 

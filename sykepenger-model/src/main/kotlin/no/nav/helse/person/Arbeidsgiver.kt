@@ -155,9 +155,6 @@ internal class Arbeidsgiver private constructor(
             filter { it.organisasjonsnummer != "0" }.forEach { it.utbetalFeriepenger(aktørId, feriepengeberegner, utbetalingshistorikkForFeriepenger) }
         }
 
-        internal fun Iterable<Arbeidsgiver>.harRelevanteArbeidsforholdForFlereArbeidsgivere(skjæringstidspunkt: LocalDate) =
-            this.relevanteArbeidsforhold(skjæringstidspunkt).size > 1
-
         internal fun Iterable<Arbeidsgiver>.relevanteArbeidsforhold(skjæringstidspunkt: LocalDate) =
             filter {
                 (it.arbeidsforholdhistorikk.harAktivtArbeidsforhold(skjæringstidspunkt) && !it.arbeidsforholdhistorikk.arbeidsforholdErEldreEnnTreMåneder(
