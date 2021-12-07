@@ -2,6 +2,7 @@ package no.nav.helse.utbetalingslinjer
 
 import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
 import java.time.LocalDateTime

@@ -21,8 +21,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-enum class Utbetalingtype { UTBETALING, ETTERUTBETALING, ANNULLERING, REVURDERING, FERIEPENGER }
-
 // Understands related payment activities for an Arbeidsgiver
 internal class Utbetaling private constructor(
     private val id: UUID,
@@ -1085,4 +1083,6 @@ internal class Utbetaling private constructor(
             "automatiskBehandling" to automatiskBehandling
         )
     }
+
+    enum class Utbetalingtype { UTBETALING, ETTERUTBETALING, ANNULLERING, REVURDERING, FERIEPENGER }
 }

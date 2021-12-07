@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.person.*
 import no.nav.helse.serde.reflection.Utbetalingstatus
+import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
 import org.slf4j.LoggerFactory

@@ -11,7 +11,7 @@ import no.nav.helse.serde.api.v2.SøknadNavDTO
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingslinjer.Utbetalingtype
+import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 import java.time.LocalDate

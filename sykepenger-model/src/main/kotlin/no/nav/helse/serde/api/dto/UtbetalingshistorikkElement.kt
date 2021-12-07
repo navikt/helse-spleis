@@ -9,9 +9,9 @@ import no.nav.helse.serde.api.UtbetalingstidslinjedagDTO
 import no.nav.helse.serde.api.builders.OppdragDTO
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.serde.reflection.Utbetalingstatus.*
-import no.nav.helse.utbetalingslinjer.Utbetalingtype
-import no.nav.helse.utbetalingslinjer.Utbetalingtype.ANNULLERING
-import no.nav.helse.utbetalingslinjer.Utbetalingtype.REVURDERING
+import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
+import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype.ANNULLERING
+import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype.REVURDERING
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*

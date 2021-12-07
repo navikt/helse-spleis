@@ -6,7 +6,7 @@ import no.nav.helse.person.*
 import no.nav.helse.serde.api.v2.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingslinjer.Utbetalingtype
+import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*

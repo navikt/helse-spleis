@@ -11,7 +11,7 @@ import no.nav.helse.person.Ledd.Companion.ledd
 import no.nav.helse.person.Paragraf.*
 import no.nav.helse.person.Punktum.Companion.punktum
 import no.nav.helse.serde.reflection.AktivitetsloggMap
-import no.nav.helse.utbetalingslinjer.Utbetalingtype
+import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
