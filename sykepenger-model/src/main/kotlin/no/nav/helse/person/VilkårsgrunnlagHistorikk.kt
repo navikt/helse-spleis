@@ -189,7 +189,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             vurdertOk = vurdertOk && minimumInntektVurdering,
             meldingsreferanseId = meldingsreferanseId
         ).also {
-            sikkerLogg.info("Oppretter nytt Grunnlagsdata med harMinimumInntekt=$harMinimumInntekt")
+            sikkerLogg.info("Oppretter nytt Grunnlagsdata med harMinimumInntekt=$minimumInntektVurdering")
         }
 
         internal fun kopierGrunnlagsdataMed(
