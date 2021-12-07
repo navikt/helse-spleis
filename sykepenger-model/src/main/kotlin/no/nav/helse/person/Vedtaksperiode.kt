@@ -320,8 +320,8 @@ internal class Vedtaksperiode private constructor(
     internal fun periodetype() = arbeidsgiver.periodetype(periode)
 
     internal fun inntektskilde() = inntektskilde
-    private fun inntekt() = arbeidsgiver.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periode.start)
-    private fun harInntekt() = inntekt() != null
+    // TODO: Kan byttes med en sjekk på vilkårsgrunnlag når AvsluttetUtenUtbetaling går gjennom vilkårsprøving
+    private fun harInntekt() = arbeidsgiver.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periode.start) != null
     private fun avgjørTilstandForInntekt(): Vedtaksperiodetilstand {
         if (!harInntekt()) return AvventerInntektsmeldingFerdigForlengelse
         return AvventerHistorikk
@@ -570,7 +570,6 @@ internal class Vedtaksperiode private constructor(
             sykepengegrunnlag,
             grunnlagForSykepengegrunnlag,
             grunnlagForSykepengegrunnlagPerArbeidsgiver.mapValues { (_, inntektsopplysning) -> inntektsopplysning.grunnlagForSykepengegrunnlag() },
-            inntekt() ?: Inntekt.INGEN,
             begrensning
         )
     }
@@ -837,13 +836,10 @@ internal class Vedtaksperiode private constructor(
     private fun utbetaling() = checkNotNull(utbetaling) { "mangler utbetalinger" }
 
     private fun sendUtbetaltEvent(hendelse: IAktivitetslogg) {
-        val sykepengegrunnlag = requireNotNull(person.sykepengegrunnlag(skjæringstidspunkt)) {
-            "Forventet sykepengegrunnlag ved opprettelse av utbetalt-event"
+        val vilkårsgrunnlag = requireNotNull(person.vilkårsgrunnlagFor(skjæringstidspunkt)) {
+            "Forventet vilkårsgrunnlag ved opprettelse av utbetalt-event"
         }
-        val inntekt = requireNotNull(inntekt()) {
-            "Forventet inntekt ved opprettelse av utbetalt-event"
-        }
-        utbetaling().ferdigstill(hendelse, person, periode, sykepengegrunnlag, inntekt, hendelseIder)
+        utbetaling().ferdigstill(hendelse, person, periode, vilkårsgrunnlag.sykepengegrunnlag(), vilkårsgrunnlag.grunnlagForSykepengegrunnlag(), hendelseIder)
     }
 
     private fun håndterMuligForlengelse(
