@@ -228,6 +228,75 @@ internal class UtbetalingTest {
     }
 
     @Test
+    fun `kan forkaste ubetalt utbetaling`() {
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV)
+        beregnUtbetalinger(tidslinje)
+        val utbetaling = opprettUbetaltUtbetaling(tidslinje)
+        assertTrue(utbetaling.kanForkastes(emptyList()))
+    }
+
+    @Test
+    fun `kan forkaste underkjent utbetaling`() {
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV)
+        beregnUtbetalinger(tidslinje)
+        val utbetaling = opprettUbetaltUtbetaling(tidslinje)
+        godkjenn(utbetaling, false)
+        assertTrue(utbetaling.kanForkastes(emptyList()))
+    }
+
+    @Test
+    fun `kan forkaste forkastet utbetaling`() {
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV)
+        beregnUtbetalinger(tidslinje)
+        val utbetaling = opprettUbetaltUtbetaling(tidslinje)
+        utbetaling.forkast(Aktivitetslogg())
+        assertTrue(utbetaling.kanForkastes(emptyList()))
+    }
+
+    @Test
+    fun `kan ikke forkaste utbetaling i spill`() {
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV)
+        beregnUtbetalinger(tidslinje)
+        val utbetaling = opprettGodkjentUtbetaling(tidslinje)
+        assertFalse(utbetaling.kanForkastes(emptyList()))
+        overfør(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+        assertFalse(utbetaling.kanForkastes(emptyList()))
+        kvittèr(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+        assertFalse(utbetaling.kanForkastes(emptyList()))
+    }
+
+    @Test
+    fun `kan ikke forkaste feilet utbetaling`() {
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV)
+        beregnUtbetalinger(tidslinje)
+        val utbetaling = opprettGodkjentUtbetaling(tidslinje)
+        overfør(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+        kvittèr(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), status = AVVIST)
+        assertFalse(utbetaling.kanForkastes(emptyList()))
+    }
+
+    @Test
+    fun `kan forkaste annullert utbetaling`() {
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV)
+        beregnUtbetalinger(tidslinje)
+        val utbetaling = opprettUtbetaling(tidslinje).let {
+            annuller(it, it.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+        } ?: fail { "Kunne ikke annullere" }
+        assertTrue(utbetaling.kanForkastes(emptyList()))
+    }
+
+    @Test
+    fun `kan forkaste utbetalt utbetaling dersom den er annullert`() {
+        val tidslinje = tidslinjeOf(16.AP, 32.NAV)
+        beregnUtbetalinger(tidslinje)
+        val utbetaling = opprettUtbetaling(tidslinje.kutt(31.januar))
+        val annullert = opprettUtbetaling(tidslinje.kutt(17.februar), tidligere = utbetaling).let {
+            annuller(it, it.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+        } ?: fail { "Kunne ikke annullere" }
+        assertTrue(utbetaling.kanForkastes(listOf(annullert)))
+    }
+
+    @Test
     fun `går ikke videre når ett av to oppdrag er overført`() {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600))
         beregnUtbetalinger(tidslinje)
