@@ -36,14 +36,6 @@ class Inntekt private constructor(private val årlig: Double) : Comparable<Innte
         fun Number.daglig(grad: Prosentdel) = this.daglig / grad
 
         internal fun List<Inntekt>.summer() = this.fold(INGEN) { acc, inntekt -> acc + inntekt }
-        internal fun List<Inntekt>.totalsum() = this.fold(INGEN) { acc, inntekt -> acc + inntekt }.tilDagligInt()
-
-        internal fun List<Inntekt>.årligGjennomsnitt(): Inntekt {
-            if (this.isEmpty()) return INGEN
-            return this.summer() / 12
-        }
-
-        internal fun Map<String, Inntekt>.konverter() = this.mapValues { it.value.tilDagligDouble() }
 
         internal val INGEN = 0.daglig
     }

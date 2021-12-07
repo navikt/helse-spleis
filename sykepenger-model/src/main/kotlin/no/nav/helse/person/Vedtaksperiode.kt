@@ -1916,8 +1916,8 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.tilstand(påminnelse, AvventerHistorikk)
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, utbetalingsgrunnlag: Utbetalingsgrunnlag) {
-            vedtaksperiode.tilstand(utbetalingsgrunnlag, AvventerHistorikk)
+        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: Utbetalingsgrunnlag) {
+            vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
         }
     }
 

@@ -468,11 +468,6 @@ internal fun List<Økonomi>.totalSykdomsgrad(): Prosentdel = Økonomi.totalSykdo
 
 internal fun List<Økonomi>.betal(virkningsdato: LocalDate) = Økonomi.betal(this, virkningsdato)
 
-internal fun List<Økonomi>.erUnderInntekstgrensen(
-    alder: Alder,
-    dato: LocalDate
-) = Økonomi.erUnderInntektsgrensen(this, alder, dato)
-
 internal fun List<Økonomi>.er6GBegrenset() = Økonomi.er6GBegrenset(this)
 
 internal fun interface MedØkonomiData<R> {
