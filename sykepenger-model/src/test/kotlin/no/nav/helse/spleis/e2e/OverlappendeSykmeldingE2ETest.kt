@@ -8,19 +8,21 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.Test
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class OverlappendeSykmeldingE2ETest : AbstractEndToEndTest() {
 
-    @BeforeAll
+    @BeforeEach
     fun setup() {
         Toggle.OverlappendeSykmelding.enable()
     }
 
-    @AfterAll
+    @AfterEach
     fun teardown() {
         Toggle.OverlappendeSykmelding.pop()
     }

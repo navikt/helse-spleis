@@ -24,22 +24,24 @@ import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class SpeilBuilderTest : AbstractEndToEndTest() {
 
-    @BeforeAll
+    @BeforeEach
     fun beforeAllTests() {
         Toggle.SpeilApiV2.enable()
     }
 
-    @AfterAll
+    @AfterEach
     fun afterAllTests() {
         Toggle.SpeilApiV2.pop()
     }
@@ -1411,27 +1413,27 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             besvart = LocalDateTime.MIN
         )
         håndterVilkårsgrunnlag(
-                1.vedtaksperiode,
-                inntektsvurdering = Inntektsvurdering(
-                    listOf(
-                        sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(12)),
-                        sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 32000.månedlig.repeat(12)),
-                        sammenligningsgrunnlag(a4, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 1000.månedlig.repeat(2))
-                    )
-                ),
-                orgnummer = a1,
-                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                    listOf(
-                        grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(3)),
-                        grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), listOf(31000.månedlig, 32000.månedlig, 33000.månedlig))
-                    )
-                ),
-                arbeidsforhold = listOf(
-                    Arbeidsforhold(a1, LocalDate.EPOCH, null),
-                    Arbeidsforhold(a2, LocalDate.EPOCH, null),
-                    Arbeidsforhold(a3, LocalDate.EPOCH, null),
-                    Arbeidsforhold(a4, LocalDate.EPOCH, 1.desember(2017))
+            1.vedtaksperiode,
+            inntektsvurdering = Inntektsvurdering(
+                listOf(
+                    sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(12)),
+                    sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 32000.månedlig.repeat(12)),
+                    sammenligningsgrunnlag(a4, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 1000.månedlig.repeat(2))
                 )
+            ),
+            orgnummer = a1,
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                listOf(
+                    grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(3)),
+                    grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), listOf(31000.månedlig, 32000.månedlig, 33000.månedlig))
+                )
+            ),
+            arbeidsforhold = listOf(
+                Arbeidsforhold(a1, LocalDate.EPOCH, null),
+                Arbeidsforhold(a2, LocalDate.EPOCH, null),
+                Arbeidsforhold(a3, LocalDate.EPOCH, null),
+                Arbeidsforhold(a4, LocalDate.EPOCH, 1.desember(2017))
+            )
         )
         håndterYtelser(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)

@@ -13,21 +13,19 @@ import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.AKSEPTERT
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
+internal class  FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
 
-    @BeforeAll
+    @BeforeEach
     fun setup() {
         Toggle.LageBrukerutbetaling.enable()
     }
 
-    @AfterAll
+    @AfterEach
     fun teardown() {
         Toggle.LageBrukerutbetaling.pop()
     }
