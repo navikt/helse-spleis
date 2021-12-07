@@ -555,10 +555,11 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun vedtakFattet(hendelse: IAktivitetslogg) {
-        val sykepengegrunnlag = person.sykepengegrunnlag(skjæringstidspunkt) ?: Inntekt.INGEN
-        val grunnlagForSykepengegrunnlag = person.grunnlagForSykepengegrunnlag(skjæringstidspunkt) ?: Inntekt.INGEN
-        val begrensning = person.grunnlagsBegrensning(skjæringstidspunkt)
-        val grunnlagForSykepengegrunnlagPerArbeidsgiver = person.grunnlagForSykepengegrunnlagPerArbeidsgiver(skjæringstidspunkt) ?: emptyMap()
+        val vilkårsgrunnlag = person.vilkårsgrunnlagFor(skjæringstidspunkt)
+        val sykepengegrunnlag = vilkårsgrunnlag?.sykepengegrunnlag() ?: Inntekt.INGEN
+        val grunnlagForSykepengegrunnlag = vilkårsgrunnlag?.grunnlagForSykepengegrunnlag() ?: Inntekt.INGEN
+        val begrensning = vilkårsgrunnlag?.grunnlagsBegrensning()
+        val grunnlagForSykepengegrunnlagPerArbeidsgiver = vilkårsgrunnlag?.inntektsopplysningPerArbeidsgiver() ?: emptyMap()
         Utbetaling.vedtakFattet(
             utbetaling,
             hendelse,
@@ -1903,6 +1904,7 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
+    // TODO: sjekk om denne kan fjernes (gammel tilstand)
     internal object AvventerUtbetalingsgrunnlag : Vedtaksperiodetilstand {
         override val type = AVVENTER_UTBETALINGSGRUNNLAG
 
@@ -2036,7 +2038,6 @@ internal class Vedtaksperiode private constructor(
                     if (vedtaksperiode.person.harKunEtAnnetAktivtArbeidsforholdEnn(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer)) {
                         ytelser.warn("Den sykmeldte har skiftet arbeidsgiver, og det er beregnet at den nye arbeidsgiveren mottar refusjon lik forrige. Kontroller at dagsatsen blir riktig.")
                     } else if (vilkårsgrunnlag is VilkårsgrunnlagHistorikk.Grunnlagsdata && vilkårsgrunnlag.harInntektFraSkatt()) {
-                        person.loggTilfelleAvFlereArbeidsgivereMedSkatteinntekt(vedtaksperiode.skjæringstidspunkt)
                         ytelser.warn("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold")
                     }
                     if (vedtaksperiode.person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt)!!.gjelderFlereArbeidsgivere()) {
@@ -2600,8 +2601,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         internal val IKKE_FERDIG_BEHANDLET: VedtaksperiodeFilter = { !it.tilstand.erFerdigBehandlet }
-
-        internal val GODKJENT_ELLER_TIL_INFOTRYGD: VedtaksperiodeFilter = { it.tilstand.erFerdigBehandlet || it.tilstand == TilUtbetaling }
 
         internal val ALLE: VedtaksperiodeFilter = { true }
 

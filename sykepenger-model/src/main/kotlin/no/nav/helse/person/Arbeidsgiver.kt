@@ -107,9 +107,6 @@ internal class Arbeidsgiver private constructor(
                 ?.map(Inntektshistorikk.Inntektsopplysning::grunnlagForSammenligningsgrunnlag)
                 ?.summer()
 
-        internal fun List<Arbeidsgiver>.harGrunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
-            filter { it.inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt) != null }
-
         internal fun List<Arbeidsgiver>.harNødvendigInntekt(skjæringstidspunkt: LocalDate) =
             this.all { it.vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt).harNødvendigInntekt() }
 
@@ -154,13 +151,6 @@ internal class Arbeidsgiver private constructor(
         ) {
             filter { it.organisasjonsnummer != "0" }.forEach { it.utbetalFeriepenger(aktørId, feriepengeberegner, utbetalingshistorikkForFeriepenger) }
         }
-
-        internal fun Iterable<Arbeidsgiver>.relevanteArbeidsforhold(skjæringstidspunkt: LocalDate) =
-            filter {
-                (it.arbeidsforholdhistorikk.harAktivtArbeidsforhold(skjæringstidspunkt) && !it.arbeidsforholdhistorikk.arbeidsforholdErEldreEnnTreMåneder(
-                    skjæringstidspunkt
-                )) || it.harGrunnlagForSykepengegrunnlag(skjæringstidspunkt)
-            }
     }
 
     internal fun accept(visitor: ArbeidsgiverVisitor) {

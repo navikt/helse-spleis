@@ -8,7 +8,6 @@ import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType.AVSLUTTET
-import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.testhelpers.*
@@ -245,7 +244,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             arbeidsforhold = arbeidsforhold
         ).håndter(Person::håndter)
 
-        assertEquals(552000.årlig, person.sykepengegrunnlag(1.januar))
+        assertEquals(552000.årlig, person.vilkårsgrunnlagFor(1.januar)?.sykepengegrunnlag())
         assertEquals(528000.årlig, person.sammenligningsgrunnlag(1.januar))
 
     }
@@ -280,7 +279,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             arbeidsforhold = arbeidsforhold
         ).håndter(Person::håndter)
 
-        assertEquals(552000.årlig, person.sykepengegrunnlag(1.januar))
+        assertEquals(552000.årlig, person.vilkårsgrunnlagFor(1.januar)?.sykepengegrunnlag())
         assertEquals(528000.årlig, person.sammenligningsgrunnlag(1.januar))
     }
 

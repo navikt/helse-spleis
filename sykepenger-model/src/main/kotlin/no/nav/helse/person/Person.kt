@@ -5,17 +5,14 @@ import no.nav.helse.Toggle
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.utbetaling.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-30 ledd 2 punktum 1`
-import no.nav.helse.person.Arbeidsgiver.Companion.antallMedVedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSammenligningsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.harArbeidsgivereMedOverlappendeUtbetaltePerioder
-import no.nav.helse.person.Arbeidsgiver.Companion.harGrunnlagForSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntekt
 import no.nav.helse.person.Arbeidsgiver.Companion.kanOverstyres
 import no.nav.helse.person.Arbeidsgiver.Companion.minstEttSykepengegrunnlagSomIkkeKommerFraSkatt
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
-import no.nav.helse.person.Arbeidsgiver.Companion.relevanteArbeidsforhold
 import no.nav.helse.person.Vedtaksperiode.Companion.ALLE
 import no.nav.helse.person.filter.Brukerutbetalingfilter
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
@@ -481,15 +478,6 @@ class Person private constructor(
         finnArbeidsgiverForInntekter(orgnummer, aktivitetslogg).lagreSykepengegrunnlagFraInfotrygd(inntektsopplysninger, hendelseId)
     }
 
-    internal fun sykepengegrunnlag(skjæringstidspunkt: LocalDate) =
-        vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)?.sykepengegrunnlag()
-
-    internal fun grunnlagsBegrensning(skjæringstidspunkt: LocalDate) =
-        vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)?.grunnlagsBegrensning()
-
-    internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
-        vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)?.grunnlagForSykepengegrunnlag()
-
     internal fun beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate, aktivitetslogg: IAktivitetslogg) =
         Sykepengegrunnlag(arbeidsgivere.beregnSykepengegrunnlag(skjæringstidspunkt), skjæringstidspunkt, aktivitetslogg)
 
@@ -499,9 +487,6 @@ class Person private constructor(
         hendelse: IAktivitetslogg
     ) =
         Sykepengegrunnlag(arbeidsgivere.beregnSykepengegrunnlag(skjæringstidspunkt, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden), hendelse)
-
-    internal fun grunnlagForSykepengegrunnlagPerArbeidsgiver(skjæringstidspunkt: LocalDate) =
-        vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)?.inntektsopplysningPerArbeidsgiver()
 
     internal fun sammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =
         arbeidsgivere.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt)
@@ -513,10 +498,7 @@ class Person private constructor(
         }
     }
 
-    internal fun kanRevurdereInntekt(skjæringstidspunkt: LocalDate) =
-        sammenligningsgrunnlag(skjæringstidspunkt) != null &&
-            grunnlagForSykepengegrunnlag(skjæringstidspunkt) != null
-            && vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) != null
+    internal fun kanRevurdereInntekt(skjæringstidspunkt: LocalDate) = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) != null
 
     internal fun harNødvendigInntekt(skjæringstidspunkt: LocalDate) = arbeidsgivere.harNødvendigInntekt(skjæringstidspunkt)
 
@@ -617,28 +599,9 @@ class Person private constructor(
     }
 
     internal fun fyllUtPeriodeMedForventedeDager(hendelse: PersonHendelse, periode: Periode, skjæringstidspunkt: LocalDate) {
-        arbeidsgivereMedAktiveArbeidsforhold(skjæringstidspunkt)
-            .harGrunnlagForSykepengegrunnlag(skjæringstidspunkt)
+        vilkårsgrunnlagFor(skjæringstidspunkt)!!.inntektsopplysningPerArbeidsgiver().keys
+            .map { arbeidsgivere.finn(it)!!  }
             .forEach { it.fyllUtPeriodeMedForventedeDager(hendelse, periode) }
-    }
-
-    internal fun harFlereArbeidsgivereUtenSykdomVedSkjæringstidspunkt(skjæringstidspunkt: LocalDate) =
-        arbeidsgivere.relevanteArbeidsforhold(skjæringstidspunkt).any { it.grunnlagForSykepengegrunnlagKommerFraSkatt(skjæringstidspunkt) }
-
-    internal fun loggTilfelleAvFlereArbeidsgivereMedSkatteinntekt(skjæringstidspunkt: LocalDate) {
-        val relevanteArbeidsforhold = arbeidsgivere.relevanteArbeidsforhold(skjæringstidspunkt)
-        val relevanteArbeidsforholdMedVedtaksperiode = relevanteArbeidsforhold.antallMedVedtaksperioder(skjæringstidspunkt)
-
-        if(relevanteArbeidsforhold.size == relevanteArbeidsforholdMedVedtaksperiode) {
-            sikkerLogg.info("Person har flere arbeidsgivere og er: ulik fom  ($fødselsnummer)")
-        }
-        else if (relevanteArbeidsforholdMedVedtaksperiode == 1) {
-            sikkerLogg.info("Person har flere arbeidsgivere og er: ghosts  ($fødselsnummer)")
-        }
-        else {
-            sikkerLogg.info("Person har flere arbeidsgivere og er: ghost eller blanding ($fødselsnummer")
-        }
-
     }
 
     private fun arbeidsgivereMedAktiveArbeidsforhold(skjæringstidspunkt: LocalDate): List<Arbeidsgiver> =
