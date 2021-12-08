@@ -4,11 +4,10 @@ dependencies {
 }
 
 tasks {
-    withType<org.gradle.api.tasks.testing.Test> {
+    withType<Test> {
         systemProperty("junit.jupiter.execution.parallel.enabled", "true")
         systemProperty("junit.jupiter.execution.parallel.mode.default", "concurrent")
         systemProperty("junit.jupiter.execution.parallel.config.strategy", "fixed")
         systemProperty("junit.jupiter.execution.parallel.config.fixed.parallelism", "8")
-        //systemProperty("junit.jupiter.execution.parallel.mode.default", "same_thread")
     }
 }

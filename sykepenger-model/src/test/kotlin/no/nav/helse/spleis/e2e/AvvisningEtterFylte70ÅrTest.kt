@@ -1,8 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import ch.qos.logback.classic.Logger
-import ch.qos.logback.classic.spi.ILoggingEvent
-import ch.qos.logback.core.read.ListAppender
 import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
@@ -20,16 +17,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.slf4j.LoggerFactory
 
 internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
-    private val logCollector = ListAppender<ILoggingEvent>()
-
-    init {
-        (LoggerFactory.getLogger("tjenestekall") as Logger).addAppender(logCollector)
-        logCollector.start()
-    }
-
     companion object {
         private val FYLLER_70_TIENDE_JANUAR = "10014812345".somFødselsnummer()
         private val FYLLER_70_FJORTENDE_JANUAR = "14014812345".somFødselsnummer()
@@ -38,7 +27,6 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
 
     @BeforeEach
     fun setUp() {
-        logCollector.list.clear()
         Toggle.SendFeriepengeOppdrag.enable()
     }
 
@@ -61,16 +49,17 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
-        val avvisteDager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == "AvvistDag"}
-        val arbeidsgiverperiodedager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == "ArbeidsgiverperiodeDag"}
-        val navDager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == "NavDag"}
-        val navHelgedager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == "NavHelgDag"}
+        val avvisteDager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == "AvvistDag" }
+        val arbeidsgiverperiodedager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == "ArbeidsgiverperiodeDag" }
+        val navDager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == "NavDag" }
+        val navHelgedager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == "NavHelgDag" }
 
         assertEquals(15, avvisteDager.size)
         assertEquals(16, arbeidsgiverperiodedager.size)
         assertEquals(0, navDager.size)
         assertEquals(0, navHelgedager.size)
-        assertTilstander(1.vedtaksperiode,
+        assertTilstander(
+            1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
@@ -107,8 +96,8 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
-        val avvisteDager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == "AvvistDag"}
-        val arbeidsgiverperiodedager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == "ArbeidsgiverperiodeDag"}
+        val avvisteDager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == "AvvistDag" }
+        val arbeidsgiverperiodedager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == "ArbeidsgiverperiodeDag" }
 
         assertEquals(5, avvisteDager.size)
         assertEquals(16 + 16, arbeidsgiverperiodedager.size)

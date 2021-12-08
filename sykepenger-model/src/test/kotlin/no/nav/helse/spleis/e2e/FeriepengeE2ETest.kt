@@ -1,8 +1,6 @@
 package no.nav.helse.spleis.e2e
 
 import ch.qos.logback.classic.Logger
-import ch.qos.logback.classic.spi.ILoggingEvent
-import ch.qos.logback.core.read.ListAppender
 import no.nav.helse.Toggle
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode
@@ -26,7 +24,7 @@ import java.time.Year
 import kotlin.math.roundToInt
 
 internal class FeriepengeE2ETest : AbstractEndToEndTest() {
-    private val logCollector = ListAppender<ILoggingEvent>()
+    private val logCollector = LogCollector()
 
     init {
         (LoggerFactory.getLogger("tjenestekall") as Logger).addAppender(logCollector)
@@ -35,7 +33,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
 
     @BeforeEach
     fun setUp() {
-        logCollector.list.clear()
+        logCollector.clear()
         Toggle.SendFeriepengeOppdrag.enable()
     }
 
@@ -384,7 +382,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         )
 
         assertEquals(1, inspektør.feriepengeoppdrag.size)
-        assertFalse(logCollector.list.any { it.message.startsWith("Beregnet feriepengebeløp til arbeidsgiver i IT samsvarer ikke med faktisk utbetalt beløp") })
+        assertFalse(logCollector.any { it.message.startsWith("Beregnet feriepengebeløp til arbeidsgiver i IT samsvarer ikke med faktisk utbetalt beløp") })
     }
 
     @Test
@@ -424,7 +422,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         )
 
         assertEquals(1, inspektør.feriepengeoppdrag.size)
-        assertTrue(logCollector.list.any { it.message.startsWith("Beregnet feriepengebeløp til arbeidsgiver i IT samsvarer ikke med faktisk utbetalt beløp") })
+        assertTrue(logCollector.any { it.message.startsWith("Beregnet feriepengebeløp til arbeidsgiver i IT samsvarer ikke med faktisk utbetalt beløp") })
     }
 
     @Test
@@ -454,7 +452,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         )
 
         assertEquals(1, inspektør.feriepengeoppdrag.size)
-        assertFalse(logCollector.list.any { it.message.startsWith("Beregnet feriepengebeløp til arbeidsgiver i IT samsvarer ikke med faktisk utbetalt beløp") })
+        assertFalse(logCollector.any { it.message.startsWith("Beregnet feriepengebeløp til arbeidsgiver i IT samsvarer ikke med faktisk utbetalt beløp") })
     }
 
     @Test
