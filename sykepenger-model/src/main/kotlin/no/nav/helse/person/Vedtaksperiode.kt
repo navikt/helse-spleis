@@ -2037,7 +2037,7 @@ internal class Vedtaksperiode private constructor(
                 onSuccess {
                     if (vedtaksperiode.person.harKunEtAnnetAktivtArbeidsforholdEnn(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer)) {
                         ytelser.warn("Den sykmeldte har skiftet arbeidsgiver, og det er beregnet at den nye arbeidsgiveren mottar refusjon lik forrige. Kontroller at dagsatsen blir riktig.")
-                    } else if (vilkårsgrunnlag is VilkårsgrunnlagHistorikk.Grunnlagsdata && vilkårsgrunnlag.harInntektFraSkatt()) {
+                    } else if (vedtaksperiode.arbeidsgiver.erFørstegangsbehandling(vedtaksperiode.periode) && vilkårsgrunnlag is VilkårsgrunnlagHistorikk.Grunnlagsdata && vilkårsgrunnlag.harInntektFraSkatt()) {
                         ytelser.warn("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold")
                     }
                     if (vedtaksperiode.person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt)!!.gjelderFlereArbeidsgivere()) {

@@ -490,7 +490,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Forlengelse etter ping-pong (Spleis-IT-Spleis) skal få ghost warning`() {
+    fun `Forlengelse etter ping-pong (Spleis-IT-Spleis) skal ikke få ghost warning`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
 
@@ -539,15 +539,14 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(2.vedtaksperiode, orgnummer = a1, utbetalinger = utbetalinger, inntektshistorikk = inntektshistorikk)
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
 
-        assertWarningTekst(
-            a1.inspektør,
-            "Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold",
-            "Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold"
+        assertWarning(
+            1.vedtaksperiode, "Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold", orgnummer = a1
         )
+        assertNoWarnings(2.vedtaksperiode, orgnummer = a1)
     }
 
     @Test
-    fun `Spleisforlengelse skal få ghost warning`() {
+    fun `Forlengelse av en ghostsak skal ikke få warning - stoler på avgjørelsen som ble tatt i førstegangsbehandlingen`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
 
@@ -592,11 +591,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
 
-        assertWarningTekst(
-            a1.inspektør,
-            "Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold",
-            "Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold"
-        )
+        assertWarning(1.vedtaksperiode, "Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold", orgnummer = a1)
+        assertNoWarnings(2.vedtaksperiode, orgnummer = a1)
     }
 
     @Test

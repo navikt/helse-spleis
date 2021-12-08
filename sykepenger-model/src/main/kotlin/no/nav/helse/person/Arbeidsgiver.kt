@@ -879,7 +879,7 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
-    private fun erFørstegangsbehandling(periode: Periode) =
+    internal fun erFørstegangsbehandling(periode: Periode) =
         skjæringstidspunkt(periode) in periode
 
     internal fun erForlengelse(periode: Periode) =
