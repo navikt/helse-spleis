@@ -319,7 +319,7 @@ internal class Arbeidsgiver private constructor(
         noenHarHåndtert(hendelse, håndterer, "Forventet ikke ${hendelse.kilde}. Har nok ikke mottatt sykmelding")
         if (hendelse.hasErrorsOrWorse()) {
             val harNærliggendeUtbetaling = hendelse.sykdomstidslinje().periode()?.let(person::harNærliggendeUtbetaling) ?: false
-            if(harNærliggendeUtbetaling) person.emitOpprettOppgaveForSpeilsaksbehandlereEvent(hendelse)
+            if (harNærliggendeUtbetaling) person.emitOpprettOppgaveForSpeilsaksbehandlereEvent(hendelse) else person.emitOpprettOppgaveEvent(hendelse)
             person.emitHendelseIkkeHåndtert(hendelse)
         }
         finalize(hendelse)

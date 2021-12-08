@@ -26,6 +26,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         // Inntektsmelding trigger sjekken av om søknad dekker hele perioden
         håndterInntektsmelding(listOf(1.januar til 16.januar), 16.februar)
 
+        assertTrue(observatør.opprettOppgaveEvent().isEmpty())
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any{søknadHendelseId in it.hendelser})
     }
 
@@ -35,10 +36,12 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(17.februar, 25.februar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(17.februar, 20.februar, 80.prosent))
-        håndterSøknad(Sykdom(17.februar, 20.februar, 80.prosent))
+        val søknadHendelseId = håndterSøknad(Sykdom(17.februar, 20.februar, 80.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), 17.februar)
 
-        assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().isEmpty())    }
+        assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().isEmpty())
+        assertTrue(observatør.opprettOppgaveEvent().any { søknadHendelseId in it.hendelser })
+    }
 
     @Test
     fun `ikke-håndtert søknad som ligger nær utbetalingsperioden skal til ny kø`() {
@@ -47,6 +50,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
 
         val søknadHendelseId = håndterSøknad(Sykdom(20.februar, 1.mars, 80.prosent))
 
+        assertTrue(observatør.opprettOppgaveEvent().isEmpty())
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any{søknadHendelseId in it.hendelser})
     }
 
@@ -69,6 +73,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(20.februar(2016), 28.februar(2016), 80.prosent))
         val søknadHendelseId = håndterSøknad(Sykdom(20.februar(2016), 28.februar(2016), 80.prosent))
 
+        assertTrue(observatør.opprettOppgaveEvent().isEmpty())
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any{søknadHendelseId in it.hendelser})
     }
 
@@ -78,9 +83,10 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         nyttVedtak(1.mars, 31.mars)
 
         håndterSykmelding(Sykmeldingsperiode(20.februar(2014), 28.februar(2014), 80.prosent))
-        håndterSøknad(Sykdom(20.februar(2014), 28.februar(2014), 80.prosent))
+        val søknadHendelseId = håndterSøknad(Sykdom(20.februar(2014), 28.februar(2014), 80.prosent))
 
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().isEmpty())
+        assertTrue(observatør.opprettOppgaveEvent().any { søknadHendelseId in it.hendelser })
     }
 
     @Test
@@ -92,7 +98,10 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(20.februar, 1.mars, 80.prosent))
         val søknadHendelseId = håndterSøknad(Sykdom(20.februar, 1.mars, 80.prosent))
 
+        // kastes ut pga at søknaden ikke dekker hele vedtaksperioden
         håndterInntektsmelding(listOf(5.februar til 20.februar))
+
+        assertTrue(observatør.opprettOppgaveEvent().isEmpty())
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any { søknadHendelseId in it.hendelser })
     }
 
@@ -102,9 +111,11 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         tilGodkjenning(1.mars, 31.mars, ORGNUMMER)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
         håndterSykmelding(Sykmeldingsperiode(11.april, 19.april, 80.prosent))
-        håndterSøknad(Sykdom(11.april, 19.april, 80.prosent), Søknad.Søknadsperiode.Papirsykmelding(11.april, 19.april))
+        val søknadHendelseId = håndterSøknad(Sykdom(11.april, 19.april, 80.prosent), Søknad.Søknadsperiode.Papirsykmelding(11.april, 19.april))
 
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().isEmpty())
+        assertTrue(observatør.opprettOppgaveEvent().any { søknadHendelseId in it.hendelser })
+
     }
 
     @Test
@@ -113,10 +124,10 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         nyttVedtak(1.mars, 31.mars)
         håndterAnnullerUtbetaling()
         håndterSykmelding(Sykmeldingsperiode(11.april, 19.april, 80.prosent))
-        håndterSøknad(Sykdom(11.april, 19.april, 80.prosent), Søknad.Søknadsperiode.Papirsykmelding(11.april, 19.april))
+        val søknadHendelseId = håndterSøknad(Sykdom(11.april, 19.april, 80.prosent), Søknad.Søknadsperiode.Papirsykmelding(11.april, 19.april))
 
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().isEmpty())
-
+        assertTrue(observatør.opprettOppgaveEvent().any { søknadHendelseId in it.hendelser })
     }
 }
 

@@ -2556,16 +2556,29 @@ internal class Vedtaksperiode private constructor(
                 hendelse,
                 vedtaksperiode.periode
             )
+            if (skalOppretteOppgave(vedtaksperiode)) sendOppgaveEvent(vedtaksperiode, hendelse)
+        }
 
-            if(vedtaksperiode.harNærliggendeUtbetaling()){
+        private fun sendOppgaveEvent(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            if (vedtaksperiode.harNærliggendeUtbetaling()) {
                 vedtaksperiode.person.opprettOppgaveForSpeilsaksbehandlere(
                     hendelse,
                     PersonObserver.OpprettOppgaveForSpeilsaksbehandlereEvent(
                         hendelser = vedtaksperiode.hendelseIder,
                     )
                 )
+            } else {
+                vedtaksperiode.person.opprettOppgave(
+                    hendelse,
+                    PersonObserver.OpprettOppgaveEvent(
+                        hendelser = vedtaksperiode.hendelseIder,
+                    )
+                )
             }
         }
+
+        private fun skalOppretteOppgave(vedtaksperiode: Vedtaksperiode) =
+            vedtaksperiode.inntektsmeldingInfo != null || vedtaksperiode.arbeidsgiver.søknadsperioder(vedtaksperiode.hendelseIder).isNotEmpty()
 
         override fun håndter(
             person: Person,

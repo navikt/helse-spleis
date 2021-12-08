@@ -30,6 +30,10 @@ interface PersonObserver {
         val hendelser: Set<UUID>,
     )
 
+    data class OpprettOppgaveEvent(
+        val hendelser: Set<UUID>,
+    )
+
     data class UtbetaltEvent(
         val hendelser: Set<UUID>,
         val utbetalingId: UUID,
@@ -200,6 +204,7 @@ interface PersonObserver {
     fun vedtaksperiodeReberegnet(hendelseskontekst: Hendelseskontekst) {}
     fun vedtaksperiodeAvbrutt(hendelseskontekst: Hendelseskontekst, event: VedtaksperiodeAvbruttEvent) {}
     fun opprettOppgaveForSpeilsaksbehandlere(hendelseskontekst: Hendelseskontekst, event: OpprettOppgaveForSpeilsaksbehandlereEvent) {}
+    fun opprettOppgave(hendelseskontekst: Hendelseskontekst, event: OpprettOppgaveEvent) {}
     @Deprecated("Fjernes til fordel for utbetaling_utbetalt")
     fun vedtaksperiodeUtbetalt(hendelseskontekst: Hendelseskontekst, event: UtbetaltEvent) {}
     fun personEndret(hendelseskontekst: Hendelseskontekst) {}
