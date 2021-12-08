@@ -552,7 +552,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
             paragraf = PARAGRAF_8_17,
             ledd = 1.ledd,
             punktum = 1.punktum,
-            bokstav = listOf(BOKSTAV_A),
+            bokstaver = listOf(BOKSTAV_A),
             versjon = 1.januar,
             inputdata = mapOf(
                 "førsteNavdag" to 17.januar,
@@ -580,7 +580,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
             paragraf = PARAGRAF_8_17,
             ledd = 1.ledd,
             punktum = 1.punktum,
-            bokstav = listOf(BOKSTAV_A),
+            bokstaver = listOf(BOKSTAV_A),
             versjon = 1.januar,
             inputdata = mapOf(
                 "førsteNavdag" to 22.januar,
@@ -875,14 +875,14 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         paragraf: Paragraf,
         ledd: Ledd,
         punktum: List<Punktum>,
-        bokstav: List<Bokstav> = emptyList(),
+        bokstaver: List<Bokstav> = emptyList(),
         versjon: LocalDate,
         inputdata: Map<Any, Any?>,
         outputdata: Map<Any, Any?>,
         resultatvelger: (List<Resultat>) -> Resultat = { it.single() },
         inspektør: EtterlevelseInspektør = EtterlevelseInspektør(person.aktivitetslogg)
     ) {
-        val resultat = inspektør.resultat(paragraf, ledd, punktum, bokstav).let(resultatvelger)
+        val resultat = inspektør.resultat(paragraf, ledd, punktum, bokstaver).let(resultatvelger)
         assertTrue(resultat.oppfylt) { "Forventet oppfylt $paragraf $ledd $punktum" }
         assertResultat(versjon, inputdata, outputdata, resultat)
     }
@@ -891,14 +891,14 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         paragraf: Paragraf,
         ledd: Ledd,
         punktum: List<Punktum>,
-        bokstav: List<Bokstav> = emptyList(),
+        bokstaver: List<Bokstav> = emptyList(),
         versjon: LocalDate,
         inputdata: Map<Any, Any?>,
         outputdata: Map<Any, Any?>,
         resultatvelger: (List<Resultat>) -> Resultat = { it.single() },
         inspektør: EtterlevelseInspektør = EtterlevelseInspektør(person.aktivitetslogg)
     ) {
-        val resultat = inspektør.resultat(paragraf, ledd, punktum, bokstav).let(resultatvelger)
+        val resultat = inspektør.resultat(paragraf, ledd, punktum, bokstaver).let(resultatvelger)
         assertFalse(resultat.oppfylt) { "Forventet ikke oppfylt $paragraf $ledd $punktum" }
         assertResultat(versjon, inputdata, outputdata, resultat)
     }
@@ -907,12 +907,12 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         paragraf: Paragraf,
         ledd: Ledd? = null,
         punktum: List<Punktum>? = null,
-        bokstav: List<Bokstav>? = null,
+        bokstaver: List<Bokstav>? = null,
         vedtaksperiodeId: IdInnhenter? = null,
         organisasjonsnummer: String = ORGNUMMER,
         inspektør: EtterlevelseInspektør = EtterlevelseInspektør(person.aktivitetslogg)
     ) {
-        val resultat = inspektør.resultat(paragraf, ledd, punktum, bokstav, vedtaksperiodeId?.invoke(organisasjonsnummer))
+        val resultat = inspektør.resultat(paragraf, ledd, punktum, bokstaver, vedtaksperiodeId?.invoke(organisasjonsnummer))
         assertTrue(resultat.isNotEmpty()) { "Forventet at $paragraf $ledd $punktum er vurdert" }
     }
 
@@ -948,7 +948,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
                 it.paragraf == paragraf
                     && ledd?.equals(it.ledd) ?: true
                     && punktum?.equals(it.punktum) ?: true
-                    && bokstav?.equals(it.bokstav) ?: true
+                    && bokstav?.equals(it.bokstaver) ?: true
                     && vedtaksperiodeId?.equals(it.vedtaksperiodeIdFraKontekst()) ?: true
             }
 
@@ -976,11 +976,11 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
             paragraf: Paragraf,
             ledd: Ledd,
             punktum: List<Punktum>,
-            bokstav: List<Bokstav>,
+            bokstaver: List<Bokstav>,
             outputdata: Map<Any, Any?>,
             inputdata: Map<Any, Any?>
         ) {
-            resultater.add(Resultat(melding, oppfylt, versjon, paragraf, ledd, punktum, bokstav, inputdata, outputdata, kontekster))
+            resultater.add(Resultat(melding, oppfylt, versjon, paragraf, ledd, punktum, bokstaver, inputdata, outputdata, kontekster))
         }
     }
 
@@ -991,7 +991,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         val paragraf: Paragraf,
         val ledd: Ledd,
         val punktum: List<Punktum>,
-        val bokstav: List<Bokstav>,
+        val bokstaver: List<Bokstav>,
         val inputdata: Map<Any, Any?>,
         val outputdata: Map<Any, Any?>,
         val kontekster: List<SpesifikkKontekst>

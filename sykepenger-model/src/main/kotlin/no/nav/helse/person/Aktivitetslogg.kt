@@ -471,12 +471,12 @@ class Aktivitetslogg(
                 private val paragraf: Paragraf,
                 private val ledd: Ledd,
                 private val punktum: List<Punktum>,
-                private val bokstav: List<Bokstav> = emptyList(),
+                private val bokstaver: List<Bokstav> = emptyList(),
                 private val inputdata: Map<Any, Any?>,
                 private val outputdata: Map<Any, Any?>
             ) {
                 internal fun accept(visitor: AktivitetsloggVisitor) {
-                    visitor.visitVurderingsresultat(oppfylt, versjon, paragraf, ledd, punktum, bokstav, outputdata, inputdata)
+                    visitor.visitVurderingsresultat(oppfylt, versjon, paragraf, ledd, punktum, bokstaver, outputdata, inputdata)
                 }
 
                 override fun toString(): String {
@@ -739,7 +739,7 @@ class Aktivitetslogg(
                                 paragraf = PARAGRAF_8_17,
                                 ledd = LEDD_1,
                                 punktum = 1.punktum,
-                                bokstav = listOf(BOKSTAV_A),
+                                bokstaver = listOf(BOKSTAV_A),
                                 inputdata = mapOf(
                                     "førsteNavdag" to førsteNavdag,
                                     "arbeidsgiverperioder" to arbeidsgiverperioder.grupperSammenhengendePerioder().map {
@@ -1016,7 +1016,7 @@ internal interface AktivitetsloggVisitor {
         paragraf: Paragraf,
         ledd: Ledd,
         punktum: List<Punktum>,
-        bokstav: List<Bokstav>,
+        bokstaver: List<Bokstav>,
         outputdata: Map<Any, Any?>,
         inputdata: Map<Any, Any?>
     ) {
