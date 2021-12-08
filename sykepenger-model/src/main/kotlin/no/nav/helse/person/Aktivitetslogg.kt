@@ -730,7 +730,26 @@ class Aktivitetslogg(
 
                     internal fun IAktivitetslogg.`§8-16 ledd 1`(oppfylt: Boolean) {} // Én gang, med periode over hvilke dager vi har satt dekningsgrad
 
-                    internal fun IAktivitetslogg.`§8-17 ledd 1 bokstav a`(oppfylt: Boolean) {}
+                    internal fun IAktivitetslogg.`§8-17 ledd 1 bokstav a`(oppfylt: Boolean, arbeidsgiverperioder: List<LocalDate>, førsteNavdag: LocalDate) {
+                        juridiskVurdering(
+                            "",
+                            Vurderingsresultat(
+                                oppfylt = oppfylt,
+                                versjon = LocalDate.of(2018, 1, 1),
+                                paragraf = PARAGRAF_8_17,
+                                ledd = LEDD_1,
+                                punktum = 1.punktum,
+                                bokstav = listOf(BOKSTAV_A),
+                                inputdata = mapOf(
+                                    "førsteNavdag" to førsteNavdag,
+                                    "arbeidsgiverperioder" to arbeidsgiverperioder.grupperSammenhengendePerioder().map {
+                                        mapOf("fom" to it.start, "tom" to it.endInclusive)
+                                    }
+                                ),
+                                outputdata = emptyMap()
+                            )
+                        )
+                    }
 
                     internal fun IAktivitetslogg.`§8-17 ledd 2`(oppfylt: Boolean) {} //Legges inn på ferie/permisjonsdager i utbetalingstidslinje, med periodene av ferie/permisjon som input
 

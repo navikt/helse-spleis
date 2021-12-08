@@ -49,12 +49,13 @@ internal class AktivitetsloggMap(aktivitetslogg: Aktivitetslogg) : Aktivitetslog
 
     private lateinit var juridiskVurdering: JuridiskVurdering
 
-    class JuridiskVurdering(
+    private class JuridiskVurdering(
         private val oppfylt: Boolean,
         private val versjon: LocalDate,
         private val paragraf: Paragraf,
         private val ledd: Ledd,
         private val punktum: List<Punktum>,
+        private val bokstaver: List<Bokstav>,
         private val inputdata: Map<Any, Any?>,
         private val outputdata: Map<Any, Any?>
     ) {
@@ -64,6 +65,7 @@ internal class AktivitetsloggMap(aktivitetslogg: Aktivitetslogg) : Aktivitetslog
             "paragraf" to paragraf,
             "ledd" to ledd,
             "punktum" to punktum,
+            "bokstav" to bokstaver,
             "inputdata" to inputdata,
             "outputdata" to outputdata
         )
@@ -79,7 +81,7 @@ internal class AktivitetsloggMap(aktivitetslogg: Aktivitetslogg) : Aktivitetslog
         outputdata: Map<Any, Any?>,
         inputdata: Map<Any, Any?>
     ) {
-        juridiskVurdering = JuridiskVurdering(oppfylt, versjon, paragraf, ledd, punktum, inputdata, outputdata)
+        juridiskVurdering = JuridiskVurdering(oppfylt, versjon, paragraf, ledd, punktum, bokstav, inputdata, outputdata)
     }
 
     override fun postVisitEtterlevelse(

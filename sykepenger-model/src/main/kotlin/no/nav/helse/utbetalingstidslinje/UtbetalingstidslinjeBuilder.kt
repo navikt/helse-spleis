@@ -261,8 +261,8 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
 
     private fun addNAVdag(dato: LocalDate, økonomi: Økonomi) {
         if (harArbeidsgiverperiode) {
-            //TODO: Skal kalles med riktig aktivitetslogg
-            Aktivitetslogg().`§8-17 ledd 1 bokstav a`(true)
+            val arbeidsgiverperioder = nåværendeArbeidsgiverperiode?.toList() ?: emptyList()
+            aktivitetslogg.`§8-17 ledd 1 bokstav a`(true, arbeidsgiverperioder, førsteNavdag = dato)
             harArbeidsgiverperiode = false
         }
 
