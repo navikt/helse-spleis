@@ -31,7 +31,7 @@ internal class ArbeidsgiverTest {
             aktørId = "aktørId",
             førsteFraværsdag = 1.januar,
             beregnetInntekt = 12000.månedlig,
-            arbeidsgiverperioder = listOf(Periode(10.september, 10.september.plusDays(16))),
+            arbeidsgiverperioder = listOf(Periode(10.september, 10.september.plusDays(15))),
             arbeidsforholdId = null,
             begrunnelseForReduksjonEllerIkkeUtbetalt = null,
             mottatt = LocalDateTime.now()

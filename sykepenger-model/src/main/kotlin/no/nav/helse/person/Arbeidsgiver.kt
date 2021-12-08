@@ -17,6 +17,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.harOverlappendeUtbetaltePeri
 import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.medSkjæringstidspunkt
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
+import no.nav.helse.person.Vedtaksperiode.Companion.periode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.reflection.Utbetalingstatus
@@ -93,7 +94,9 @@ internal class Arbeidsgiver private constructor(
             fold(emptyList<ArbeidsgiverInntektsopplysning>()) { inntektsopplysninger, arbeidsgiver ->
                 val inntektsopplysning = arbeidsgiver.inntektshistorikk.grunnlagForSykepengegrunnlag(
                     skjæringstidspunkt,
-                    maxOf(skjæringstidspunkt, periodeStart)
+                    maxOf(skjæringstidspunkt, periodeStart),
+                    arbeidsgiver.finnFørsteFraværsdag(skjæringstidspunkt)
+
                 )
                 if (inntektsopplysning == null || inntektsopplysning !is Inntektshistorikk.Infotrygd) inntektsopplysninger
                 else inntektsopplysninger + ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, inntektsopplysning)
@@ -101,7 +104,7 @@ internal class Arbeidsgiver private constructor(
 
         internal fun List<Arbeidsgiver>.beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
             this.mapNotNull { arbeidsgiver ->
-                arbeidsgiver.inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt)
+                arbeidsgiver.inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt, arbeidsgiver.finnFørsteFraværsdag(skjæringstidspunkt))
                     ?.let { ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, it) }
             }
 
@@ -682,7 +685,7 @@ internal class Arbeidsgiver private constructor(
     private fun fjernDager(periode: Periode) = sykdomshistorikk.fjernDager(periode)
 
     internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, periodeStart: LocalDate) =
-        inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periodeStart)?.grunnlagForSykepengegrunnlag()
+        inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periodeStart, finnFørsteFraværsdag(skjæringstidspunkt))?.grunnlagForSykepengegrunnlag() // TODO: se på med fungerende hjerner
 
     internal fun addInntekt(inntektsmelding: Inntektsmelding, skjæringstidspunkt: LocalDate) {
         inntektsmelding.addInntekt(inntektshistorikk, skjæringstidspunkt)
@@ -866,6 +869,14 @@ internal class Arbeidsgiver private constructor(
 
     internal fun harSykdomFor(skjæringstidspunkt: LocalDate) = vedtaksperioder.any { it.gjelder(skjæringstidspunkt) }
 
+    fun finnFørsteFraværsdag(skjæringstidspunkt: LocalDate): LocalDate? {
+        if(harSykdomFor(skjæringstidspunkt)) {
+            //return sykdomstidslinje().sisteSkjæringstidspunkt() // TODO: y dis work (feilende test: inntektsmelding i feil rekkefølge)
+            return sykdomstidslinje().subset(finnSammenhengendePeriode(skjæringstidspunkt).periode()).sisteSkjæringstidspunkt()
+        }
+       return null
+    }
+
     internal fun periodetype(periode: Periode): Periodetype {
         val skjæringstidspunkt = skjæringstidspunkt(periode)
         return when {
@@ -986,11 +997,8 @@ internal class Arbeidsgiver private constructor(
     internal fun harVedtaksperiodeMedUkjentArbeidsforhold(skjæringstidspunkt: LocalDate) =
         !harAktivtArbeidsforhold(skjæringstidspunkt) && vedtaksperioder.any { it.gjelder(skjæringstidspunkt) }
 
-    internal fun harGrunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
-        inntektshistorikk.harGrunnlagForSykepengegrunnlag(skjæringstidspunkt) || vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt).harInntekt()
-
-    internal fun harGrunnlagForSykepengegrunnlagEllerSammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =
-        inntektshistorikk.harGrunnlagForSykepengegrunnlagEllerSammenligningsgrunnlag(skjæringstidspunkt) || vedtaksperioder.medSkjæringstidspunkt(
+    internal fun harGrunnlagForSykepengegrunnlagEllerSammenligningsgrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) =
+        inntektshistorikk.harGrunnlagForSykepengegrunnlagEllerSammenligningsgrunnlag(skjæringstidspunkt, førsteFraværsdag) || vedtaksperioder.medSkjæringstidspunkt(
             skjæringstidspunkt
         ).harInntekt()
 

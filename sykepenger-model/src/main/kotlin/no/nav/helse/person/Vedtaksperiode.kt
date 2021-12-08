@@ -396,9 +396,9 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndterInntektsmelding(hendelse: Inntektsmelding, hvisIngenErrors: () -> Unit) {
-        arbeidsgiver.addInntekt(hendelse, skjæringstidspunkt)
         periode = periode.oppdaterFom(hendelse.periode())
         oppdaterHistorikk(hendelse)
+        arbeidsgiver.addInntekt(hendelse, arbeidsgiver.finnFørsteFraværsdag(skjæringstidspunkt)!!)
         inntektsmeldingInfo = InntektsmeldingInfo(id = hendelse.meldingsreferanseId(), arbeidsforholdId = hendelse.arbeidsforholdId)
 
         if (hendelse.førsteFraværsdag != null && hendelse.førsteFraværsdag != skjæringstidspunkt) {
@@ -473,6 +473,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag, nesteTilstand: Vedtaksperiodetilstand) {
         vilkårsgrunnlag.lagreInntekter(person, skjæringstidspunkt)
+
         val grunnlagForSykepengegrunnlag = person.beregnSykepengegrunnlag(skjæringstidspunkt, vilkårsgrunnlag)
         val sammenligningsgrunnlag = person.sammenligningsgrunnlag(skjæringstidspunkt)
 
@@ -2026,6 +2027,7 @@ internal class Vedtaksperiode private constructor(
                     if (vedtaksperiode.person.harKunEtAnnetAktivtArbeidsforholdEnn(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer)) {
                         ytelser.warn("Den sykmeldte har skiftet arbeidsgiver, og det er beregnet at den nye arbeidsgiveren mottar refusjon lik forrige. Kontroller at dagsatsen blir riktig.")
                     } else if (vedtaksperiode.arbeidsgiver.erFørstegangsbehandling(vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt) && vilkårsgrunnlag is VilkårsgrunnlagHistorikk.Grunnlagsdata && vilkårsgrunnlag.harInntektFraSkatt()) {
+                        // TODO: sjekken om at inntekt er fra skatt er ikke bra nok lenger - det kan være IM om fom er i samme måned
                         ytelser.warn("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold")
                     }
                     if (vedtaksperiode.person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt)!!.gjelderFlereArbeidsgivere()) {

@@ -958,6 +958,24 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `Inntekstmelding kommer i feil rekkefølge - her kommer en lur tekst når jeg skjønner greia`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(5.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(5.februar, 28.februar, 100.prosent))
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 5.februar, beregnetInntekt = 42000.månedlig)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, beregnetInntekt = INNTEKT)
+
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+
+        val inntektsopplysning = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.grunnlagForSykepengegrunnlag()
+        assertEquals(INNTEKT, inntektsopplysning)
+        assertInstanceOf(Inntektsmelding::class.java, inntektsopplysning)
+    }
+
+    @Test
     fun `sender med arbeidsforholdId på godkjenningsbehov`() {
         val arbeidsforholdId = UUID.randomUUID().toString()
 

@@ -482,8 +482,9 @@ class Person private constructor(
         finnArbeidsgiverForInntekter(orgnummer, aktivitetslogg).lagreSykepengegrunnlagFraInfotrygd(inntektsopplysninger, hendelseId)
     }
 
-    internal fun beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate, aktivitetslogg: IAktivitetslogg) =
-        Sykepengegrunnlag(arbeidsgivere.beregnSykepengegrunnlag(skjæringstidspunkt), skjæringstidspunkt, aktivitetslogg)
+    internal fun beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate, aktivitetslogg: IAktivitetslogg): Sykepengegrunnlag {
+        return Sykepengegrunnlag(arbeidsgivere.beregnSykepengegrunnlag(skjæringstidspunkt), skjæringstidspunkt, aktivitetslogg) // TODO: se på denne med fungerende hjerner
+    }
 
     private fun beregnSykepengegrunnlagForInfotrygd(
         skjæringstidspunkt: LocalDate,
@@ -633,7 +634,7 @@ class Person private constructor(
 
     internal fun harAktivtArbeidsforholdEllerInntekt(skjæringstidspunkt: LocalDate, orgnummer: String) = arbeidsgivere
         .firstOrNull { it.organisasjonsnummer() == orgnummer }
-        ?.let { it.harAktivtArbeidsforhold(skjæringstidspunkt) || it.harGrunnlagForSykepengegrunnlagEllerSammenligningsgrunnlag(skjæringstidspunkt) } ?: false
+        ?.let { it.harAktivtArbeidsforhold(skjæringstidspunkt) || it.harGrunnlagForSykepengegrunnlagEllerSammenligningsgrunnlag(skjæringstidspunkt, it.finnFørsteFraværsdag(skjæringstidspunkt)) } ?: false
 
     internal fun harKunEtAnnetAktivtArbeidsforholdEnn(skjæringstidspunkt: LocalDate, orgnummer: String): Boolean {
         val aktiveArbeidsforhold = arbeidsgivereMedAktiveArbeidsforhold(skjæringstidspunkt)

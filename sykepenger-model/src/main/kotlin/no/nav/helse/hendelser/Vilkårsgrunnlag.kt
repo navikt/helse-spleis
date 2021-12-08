@@ -39,6 +39,7 @@ class Vilkårsgrunnlag(
         antallArbeidsgivereFraAareg: Int,
         periodetype: Periodetype
     ): IAktivitetslogg {
+        require(!grunnlagForSykepengegrunnlag.inntektsopplysningPerArbeidsgiver().values.all { it is Inntektshistorikk.SkattComposite })
         val inntektsvurderingOk = inntektsvurdering.valider(
             this,
             grunnlagForSykepengegrunnlag,

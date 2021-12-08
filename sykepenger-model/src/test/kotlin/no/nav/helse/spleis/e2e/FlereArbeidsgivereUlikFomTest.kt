@@ -1,9 +1,9 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.ForventetFeil
 import no.nav.helse.hendelser.*
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Inntektshistorikk
-import no.nav.helse.serde.serialize
 import no.nav.helse.testhelpers.april
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
@@ -24,14 +24,14 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `To førstegangsbehandlinger med ulik fom - skal bruke skatteinntekter for arbeidsgiver med senest fom`() {
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+    fun `To førstegangsbehandlinger med ulik fom i forskjellige måneder - skal bruke skatteinntekter for arbeidsgiver med senest fom`() {
+        håndterSykmelding(Sykmeldingsperiode(28.februar, 31.mars, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(5.mars, 31.mars, 100.prosent), orgnummer = a2)
 
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(28.februar, 31.mars, 100.prosent), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(5.mars, 31.mars, 100.prosent), orgnummer = a2)
 
-        håndterInntektsmelding(listOf(1.mars til 16.mars), førsteFraværsdag = 1.mars, orgnummer = a1)
+        håndterInntektsmelding(listOf(28.februar til 15.mars), førsteFraværsdag = 28.februar, orgnummer = a1) // ff 1 mars
         håndterInntektsmelding(listOf(5.mars til 20.mars), førsteFraværsdag = 5.mars, beregnetInntekt = INNTEKT, orgnummer = a2)
 
         val inntekter = listOf(
@@ -58,11 +58,11 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a2)
 
-        assertEquals(31000.månedlig, inspektør(a1).inntektInspektør.grunnlagForSykepengegrunnlag(1.mars)?.grunnlagForSykepengegrunnlag())
-        assertEquals(20000.månedlig, inspektør(a2).inntektInspektør.grunnlagForSykepengegrunnlag(1.mars)?.grunnlagForSykepengegrunnlag())
-
-        person.serialize().json
-
+        assertEquals(
+            31000.månedlig,
+            inspektør(a1).inntektInspektør.grunnlagForSykepengegrunnlag(28.februar, 28.februar)?.grunnlagForSykepengegrunnlag()
+        ) // TODO
+        assertEquals(20000.månedlig, inspektør(a2).inntektInspektør.grunnlagForSykepengegrunnlag(28.februar, 5.mars)?.grunnlagForSykepengegrunnlag())
     }
 
     @Test
@@ -110,21 +110,21 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a2)
 
-        assertEquals(30000.månedlig, inspektør(a1).inntektInspektør.grunnlagForSykepengegrunnlag(1.mars)?.grunnlagForSykepengegrunnlag())
-        assertEquals(18000.månedlig, inspektør(a2).inntektInspektør.grunnlagForSykepengegrunnlag(1.mars)?.grunnlagForSykepengegrunnlag())
+
+        assertEquals(30000.månedlig, inspektør(a1).inntektInspektør.grunnlagForSykepengegrunnlag(1.mars, 1.mars)?.grunnlagForSykepengegrunnlag())
+        assertEquals(18000.månedlig, inspektør(a2).inntektInspektør.grunnlagForSykepengegrunnlag(1.mars, 1.mars)?.grunnlagForSykepengegrunnlag())
 
     }
 
-
     @Test
-    fun `bruker gjennomsnitt av skatteinntekter ved ulik fom`() {
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+    fun `Bruker gjennomsnitt av skatteinntekter ved ulik fom i forskjellige måneder`() {
+        håndterSykmelding(Sykmeldingsperiode(28.februar, 31.mars, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(5.mars, 31.mars, 100.prosent), orgnummer = a2)
 
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(28.februar, 31.mars, 100.prosent), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(5.mars, 31.mars, 100.prosent), orgnummer = a2)
 
-        håndterInntektsmelding(listOf(1.mars til 16.mars), førsteFraværsdag = 1.mars, orgnummer = a1)
+        håndterInntektsmelding(listOf(28.februar til 15.mars), førsteFraværsdag = 28.februar, orgnummer = a1)
         håndterInntektsmelding(listOf(5.mars til 20.mars), førsteFraværsdag = 5.mars, beregnetInntekt = INNTEKT, orgnummer = a2)
 
         val inntekter = listOf(
@@ -151,21 +151,22 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a2)
 
-        assertEquals(31000.månedlig, inspektør(a1).inntektInspektør.grunnlagForSykepengegrunnlag(1.mars)?.grunnlagForSykepengegrunnlag())
-        assertEquals(21000.månedlig, inspektør(a2).inntektInspektør.grunnlagForSykepengegrunnlag(1.mars)?.grunnlagForSykepengegrunnlag())
+
+        assertEquals(31000.månedlig, inspektør(a1).inntektInspektør.grunnlagForSykepengegrunnlag(28.februar, 28.februar)?.grunnlagForSykepengegrunnlag())
+        assertEquals(21000.månedlig, inspektør(a2).inntektInspektør.grunnlagForSykepengegrunnlag(28.februar, 5.mars)?.grunnlagForSykepengegrunnlag())
     }
 
     @Test
     fun `Ulik fom og ikke 6G-begrenset, utbetalinger beregnes riktig`() {
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(28.februar, 31.mars, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(5.mars, 31.mars, 100.prosent), orgnummer = a2)
 
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(28.februar, 31.mars, 100.prosent), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(5.mars, 31.mars, 100.prosent), orgnummer = a2)
 
         håndterInntektsmelding(
-            listOf(1.mars til 16.mars),
-            førsteFraværsdag = 1.mars,
+            listOf(28.februar til 15.mars),
+            førsteFraværsdag = 28.februar,
             beregnetInntekt = 10000.månedlig,
             orgnummer = a1
         )
@@ -199,7 +200,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
 
         val a1Linje = inspektør(a1).utbetalinger.last().inspektør.arbeidsgiverOppdrag.single()
-        assertEquals(17.mars, a1Linje.fom)
+        assertEquals(16.mars, a1Linje.fom)
         assertEquals(30.mars, a1Linje.tom)
         assertEquals(10000.månedlig.reflection { _, _, _, dagligInt -> dagligInt }, a1Linje.beløp)
 
@@ -217,15 +218,15 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
     @Test
     fun `Ulik fom og 6G-begrenset, skal beregne utbetaling ut fra skatteinntekter for a2`() {
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a1)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(28.februar, 31.mars, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(28.februar, 31.mars, 100.prosent), orgnummer = a1)
 
         håndterSykmelding(Sykmeldingsperiode(5.mars, 31.mars, 100.prosent), orgnummer = a2)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(5.mars, 31.mars, 100.prosent), orgnummer = a2)
 
         håndterInntektsmelding(
-            listOf(1.mars til 16.mars),
-            førsteFraværsdag = 1.mars,
+            listOf(28.februar til 15.mars),
+            førsteFraværsdag = 28.februar,
             beregnetInntekt = 30000.månedlig,
             orgnummer = a1
         )
@@ -259,7 +260,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
 
         val a1Linje = inspektør(a1).utbetalinger.last().inspektør.arbeidsgiverOppdrag.single()
-        assertEquals(17.mars, a1Linje.fom)
+        assertEquals(16.mars, a1Linje.fom)
         assertEquals(30.mars, a1Linje.tom)
         assertEquals(997, a1Linje.beløp)
 
@@ -278,15 +279,15 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
     @Test
     fun `Førstegangsbehandling med ulik fom og siste arbeidsgiver er 50 prosent sykmeldt`() {
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a1)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(28.februar, 31.mars, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(28.februar, 31.mars, 100.prosent), orgnummer = a1)
 
         håndterSykmelding(Sykmeldingsperiode(5.mars, 31.mars, 50.prosent), orgnummer = a2)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(5.mars, 31.mars, 50.prosent), orgnummer = a2)
 
         håndterInntektsmelding(
-            listOf(1.mars til 16.mars),
-            førsteFraværsdag = 1.mars,
+            listOf(28.februar til 15.mars),
+            førsteFraværsdag = 28.februar,
             beregnetInntekt = 30000.månedlig,
             orgnummer = a1
         )
@@ -324,7 +325,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
 
         val a1Linje = inspektør(a1).utbetalinger.last().inspektør.arbeidsgiverOppdrag.single()
-        assertEquals(17.mars, a1Linje.fom)
+        assertEquals(16.mars, a1Linje.fom)
         assertEquals(30.mars, a1Linje.tom)
         assertEquals(997, a1Linje.beløp)
 
@@ -337,15 +338,15 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
     @Test
     fun `Førstegangsbehandling med ulik fom og første arbeidsgiver er 50 prosent sykmeldt`() {
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 50.prosent), orgnummer = a1)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 50.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(28.februar, 31.mars, 50.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(28.februar, 31.mars, 50.prosent), orgnummer = a1)
 
         håndterSykmelding(Sykmeldingsperiode(5.mars, 31.mars, 100.prosent), orgnummer = a2)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(5.mars, 31.mars, 100.prosent), orgnummer = a2)
 
         håndterInntektsmelding(
-            listOf(1.mars til 16.mars),
-            førsteFraværsdag = 1.mars,
+            listOf(28.februar til 15.mars),
+            førsteFraværsdag = 28.februar,
             beregnetInntekt = 30000.månedlig,
             orgnummer = a1
         )
@@ -383,7 +384,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
 
         val a1Linje = inspektør(a1).utbetalinger.last().inspektør.arbeidsgiverOppdrag.single()
-        assertEquals(17.mars, a1Linje.fom)
+        assertEquals(16.mars, a1Linje.fom)
         assertEquals(30.mars, a1Linje.tom)
         assertEquals(499, a1Linje.beløp)
 
@@ -394,7 +395,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
     }
 
-    @Test
+    @Test // TODO: halvparten i en måned - halvparten i en annen - test riktig IM og skatt
     fun `Fire arbeidsgivere - overlappende perioder med ulik fom`() {
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
@@ -496,7 +497,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
     }
 
-    @Test
+    @Test // TODO: update
     fun `Fire arbeidsgivere - overlappende perioder med ulik fom men lik slutt`() {
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars, 100.prosent), orgnummer = a1)
@@ -597,7 +598,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
     }
 
-    @Test
+    @Test // TODO: update
     fun `Fire arbeidsgivere - overlappende perioder med ulik fom men lik slutt, nå med gradert sykmelding!`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars, 100.prosent), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 15.mars, 100.prosent), orgnummer = a1)
@@ -703,7 +704,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
     }
 
-    @Test
+    @Test // TODO: update
     fun `Wow! Her var det mye greier!!`() {
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars, 22.prosent), orgnummer = a1)
@@ -855,8 +856,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
-        assertWarnings(inspektør(a1))
-        assertTrue(inspektør(a1).warnings.contains("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold"))
+        assertWarning(1.vedtaksperiode, "Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold", orgnummer = a1)
         assertFalse(inspektør(a1).warnings.contains("Den sykmeldte har skiftet arbeidsgiver, og det er beregnet at den nye arbeidsgiveren mottar refusjon lik forrige. Kontroller at dagsatsen blir riktig."))
 
     }
@@ -913,15 +913,15 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
     @Test
     fun `Ulik fom og 6G-begrenset, to dager med utbetaling hos første arbeidsgiver før andre arbeidsgiver blir syk skal fortsatt 6G-cappe mht begge AG`() {
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a1)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(28.februar, 31.mars, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(28.februar, 31.mars, 100.prosent), orgnummer = a1)
 
         håndterSykmelding(Sykmeldingsperiode(20.mars, 25.april, 100.prosent), orgnummer = a2)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(20.mars, 25.april, 100.prosent), orgnummer = a2)
 
         håndterInntektsmelding(
-            listOf(1.mars til 16.mars),
-            førsteFraværsdag = 1.mars,
+            listOf(28.februar til 15.mars),
+            førsteFraværsdag = 28.februar,
             beregnetInntekt = 30000.månedlig,
             orgnummer = a1
         )
@@ -955,7 +955,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
 
         val a1Linje = inspektør(a1).utbetalinger.last().inspektør.arbeidsgiverOppdrag.last()
-        assertEquals(17.mars, a1Linje.fom)
+        assertEquals(16.mars, a1Linje.fom)
         assertEquals(30.mars, a1Linje.tom)
         assertEquals(997, a1Linje.beløp)
 
@@ -974,15 +974,15 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
     @Test
     fun `Ulik fom og 6G-begrenset, to dager med utbetaling hos første arbeidsgiver før andre arbeidsgiver blir syk skal fortsatt 6G-cappe mht begge AG, nå med gradert sykmelding!`() {
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 50.prosent), orgnummer = a1)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 50.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(28.februar, 31.mars, 50.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(28.februar, 31.mars, 50.prosent), orgnummer = a1)
 
         håndterSykmelding(Sykmeldingsperiode(20.mars, 25.april, 70.prosent), orgnummer = a2)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(20.mars, 25.april, 70.prosent), orgnummer = a2)
 
         håndterInntektsmelding(
-            listOf(1.mars til 16.mars),
-            førsteFraværsdag = 1.mars,
+            listOf(28.februar til 15.mars),
+            førsteFraværsdag = 28.februar,
             beregnetInntekt = 30000.månedlig,
             orgnummer = a1
         )
@@ -1016,7 +1016,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
 
         val a1Linje = inspektør(a1).utbetalinger.last().inspektør.arbeidsgiverOppdrag.last()
-        assertEquals(17.mars, a1Linje.fom)
+        assertEquals(16.mars, a1Linje.fom)
         assertEquals(30.mars, a1Linje.tom)
         assertEquals(499, a1Linje.beløp)
 
@@ -1032,7 +1032,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(815, a2Linje.beløp)
     }
 
-    @Disabled
     @Test
     fun `skjæringstidspunkt i samme måned betyr at begge arbeidsgivere bruker inntekt fra inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a1)
@@ -1061,15 +1060,15 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             orgnummer = a1
         )
 
-        assertEquals(31000.månedlig, inspektør(a1).inntektInspektør.grunnlagForSykepengegrunnlag(1.mars)?.grunnlagForSykepengegrunnlag())
-        assertInstanceOf(Inntektshistorikk.Inntektsmelding::class.java, inspektør(a1).inntektInspektør.grunnlagForSykepengegrunnlag(1.mars))
+        assertEquals(31000.månedlig, inspektør(a1).inntektInspektør.grunnlagForSykepengegrunnlag(1.mars, 1.mars)?.grunnlagForSykepengegrunnlag())
+        assertInstanceOf(Inntektshistorikk.Inntektsmelding::class.java, inspektør(a1).inntektInspektør.grunnlagForSykepengegrunnlag(1.mars, 1.mars))
 
-        assertEquals(21000.månedlig, inspektør(a2).inntektInspektør.grunnlagForSykepengegrunnlag(1.mars)?.grunnlagForSykepengegrunnlag())
-        assertInstanceOf(Inntektshistorikk.Inntektsmelding::class.java, inspektør(a2).inntektInspektør.grunnlagForSykepengegrunnlag(1.mars))
+        assertEquals(21000.månedlig, inspektør(a2).inntektInspektør.grunnlagForSykepengegrunnlag(1.mars, 5.mars)?.grunnlagForSykepengegrunnlag())
+        assertInstanceOf(Inntektshistorikk.Inntektsmelding::class.java, inspektør(a2).inntektInspektør.grunnlagForSykepengegrunnlag(1.mars, 5.mars))
     }
 
     @Test
-    fun `skjæringstidspunkt i forskjellige måneder betyr at senere arbeidsgiver bruker skatteinntekt`(){
+    fun `skjæringstidspunkt i forskjellige måneder betyr at senere arbeidsgiver bruker skatteinntekt`() {
         håndterSykmelding(Sykmeldingsperiode(28.februar, 30.mars, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(1.mars, 30.mars, 100.prosent), orgnummer = a2)
 
@@ -1096,11 +1095,249 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             orgnummer = a1
         )
 
-        assertEquals(31000.månedlig, inspektør(a1).inntektInspektør.grunnlagForSykepengegrunnlag(28.februar)?.grunnlagForSykepengegrunnlag())
-        assertInstanceOf(Inntektshistorikk.Inntektsmelding::class.java, inspektør(a1).inntektInspektør.grunnlagForSykepengegrunnlag(28.februar))
+        assertEquals(31000.månedlig, inspektør(a1).inntektInspektør.grunnlagForSykepengegrunnlag(28.februar, 28.februar)?.grunnlagForSykepengegrunnlag())
+        assertInstanceOf(Inntektshistorikk.Inntektsmelding::class.java, inspektør(a1).inntektInspektør.grunnlagForSykepengegrunnlag(28.februar, 28.februar))
 
-        assertEquals(20000.månedlig, inspektør(a2).inntektInspektør.grunnlagForSykepengegrunnlag(28.februar)?.grunnlagForSykepengegrunnlag())
-        assertInstanceOf(Inntektshistorikk.SkattComposite::class.java, inspektør(a2).inntektInspektør.grunnlagForSykepengegrunnlag(28.februar))
+        assertEquals(20000.månedlig, inspektør(a2).inntektInspektør.grunnlagForSykepengegrunnlag(28.februar, 1.mars)?.grunnlagForSykepengegrunnlag())
+        assertInstanceOf(Inntektshistorikk.SkattComposite::class.java, inspektør(a2).inntektInspektør.grunnlagForSykepengegrunnlag(28.februar, 1.mars))
     }
 
+    @Test
+    fun `To arbeidsgivere med ulik fom i samme måned - med en tidligere periode i samme måned - andre vedtaksperiode velger IM for egen første fraværsdag`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 18.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 18.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 18.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 18.januar, 100.prosent), orgnummer = a2)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
+
+        val sammenligningsgrunnlag = Inntektsvurdering(
+            listOf(
+                sammenligningsgrunnlag(a1, 1.januar, INNTEKT.repeat(12)),
+                sammenligningsgrunnlag(a2, 1.januar, 32000.månedlig.repeat(12))
+            )
+        )
+        val sykepengegrunnlag = InntektForSykepengegrunnlag(
+            listOf(
+                grunnlag(a1, 1.januar, INNTEKT.repeat(12)),
+                grunnlag(a2, 1.januar, INNTEKT.repeat(12))
+            )
+        )
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            inntektsvurdering = sammenligningsgrunnlag,
+            inntektsvurderingForSykepengegrunnlag = sykepengegrunnlag,
+            orgnummer = a1
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
+
+        håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(22.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(21.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(22.januar, 31.januar, 100.prosent), orgnummer = a2)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 21.januar, orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 22.januar, beregnetInntekt = 32000.månedlig, orgnummer = a2)
+
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            2.vedtaksperiode,
+            inntektsvurdering = sammenligningsgrunnlag,
+            inntektsvurderingForSykepengegrunnlag = sykepengegrunnlag,
+            orgnummer = a1
+        )
+
+        val inntektsopplysning = inspektør(a1).vilkårsgrunnlag(2.vedtaksperiode)?.inntektsopplysningPerArbeidsgiver()?.get(a2)
+        assertInstanceOf(Inntektshistorikk.Inntektsmelding::class.java, inntektsopplysning)
+        assertEquals(32000.månedlig, inntektsopplysning?.grunnlagForSykepengegrunnlag())
+    }
+
+    @ForventetFeil("https://trello.com/c/k21yUamv: kan ikke teste dette før denne lappen er fikset")
+    @Test
+    fun `To arbeidsgivere med ulik fom - med tidligere periode med gap i samme måned - velger riktig inntektsmelding for AG med senest fom`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 18.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 18.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 18.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 18.januar, 100.prosent), orgnummer = a2)
+
+        håndterSykmelding(Sykmeldingsperiode(20.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(22.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(20.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(22.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 20.januar, orgnummer = a1)
+        // Sender med en annen inntekt enn i forrige IM for å kunne asserte på at det er denne vi bruker
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 32000.månedlig, førsteFraværsdag = 22.januar, orgnummer = a2)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 31000.månedlig, orgnummer = a2)
+
+        val sammenligningsgrunnlag = Inntektsvurdering(
+            listOf(
+                sammenligningsgrunnlag(a1, 20.januar, INNTEKT.repeat(12)),
+                sammenligningsgrunnlag(a2, 20.januar, 32000.månedlig.repeat(12))
+            )
+        )
+        val sykepengegrunnlag = InntektForSykepengegrunnlag(
+            listOf(
+                grunnlag(a1, 20.januar, INNTEKT.repeat(12)),
+                grunnlag(a2, 20.januar, INNTEKT.repeat(12))
+            )
+        )
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            inntektsvurdering = sammenligningsgrunnlag,
+            inntektsvurderingForSykepengegrunnlag = sykepengegrunnlag,
+            orgnummer = a1
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
+
+        håndterYtelser(2.vedtaksperiode, orgnummer = a2)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            2.vedtaksperiode,
+            inntektsvurdering = sammenligningsgrunnlag,
+            inntektsvurderingForSykepengegrunnlag = sykepengegrunnlag,
+            orgnummer = a1
+        )
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(2.vedtaksperiode, orgnummer = a1)
+
+        håndterYtelser(2.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(2.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(2.vedtaksperiode, orgnummer = a2)
+
+        assertEquals(32000.månedlig, inspektør(a2).inntektInspektør.grunnlagForSykepengegrunnlag(20.januar, 22.januar)?.grunnlagForSykepengegrunnlag())
+    }
+
+    @Disabled("TODO: fordi den ikke ferri vel!!!!")
+    @Test
+    fun `Fire arbeidsgivere, to med fom i januar og to med fom i februar `() {
+        // Arbeidsgiverne med fom i januar skal bruke inntektsmelding
+        // Arbeidsgiverne med fom i februar skal bruke inntekt fra skatt
+        håndterSykmelding(Sykmeldingsperiode(28.januar, 31.mars, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(28.januar, 31.mars, 100.prosent), orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(30.januar, 31.mars, 100.prosent), orgnummer = a2)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(30.januar, 31.mars, 100.prosent), orgnummer = a2)
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 31.mars, 100.prosent), orgnummer = a3)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 31.mars, 100.prosent), orgnummer = a3)
+
+        håndterSykmelding(Sykmeldingsperiode(4.februar, 31.mars, 100.prosent), orgnummer = a4)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(4.februar, 31.mars, 100.prosent), orgnummer = a4)
+
+        håndterInntektsmelding(
+            listOf(28.januar til 12.februar),
+            førsteFraværsdag = 28.januar,
+            beregnetInntekt = 31000.månedlig,
+            orgnummer = a1
+        )
+        håndterInntektsmelding(
+            listOf(30.januar til 14.februar),
+            førsteFraværsdag = 30.januar,
+            beregnetInntekt = 32000.månedlig,
+            orgnummer = a2
+        )
+        håndterInntektsmelding(
+            listOf(1.februar til 16.februar),
+            førsteFraværsdag = 1.februar,
+            beregnetInntekt = 33000.månedlig,
+            orgnummer = a3
+        )
+        håndterInntektsmelding(
+            listOf(4.februar til 19.februar),
+            førsteFraværsdag = 4.februar,
+            beregnetInntekt = 34000.månedlig,
+            orgnummer = a4
+        )
+
+        val inntekter = listOf(
+            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31500.månedlig.repeat(3)),
+            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 32500.månedlig.repeat(3)),
+            grunnlag(a3, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 33500.månedlig.repeat(3)),
+            grunnlag(a4, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 34500.månedlig.repeat(3))
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            inntektsvurdering = Inntektsvurdering(
+                listOf(
+                    sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(12)),
+                    sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 32000.månedlig.repeat(12)),
+                    sammenligningsgrunnlag(a3, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 33000.månedlig.repeat(12)),
+                    sammenligningsgrunnlag(a4, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 34000.månedlig.repeat(12))
+                ),
+            ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter),
+            orgnummer = a1
+        )
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a3)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a3)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a3)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = a3)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a4)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a4)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a4)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = a4)
+
+        assertInstanceOf(Inntektshistorikk.Inntektsmelding::class.java, inspektør(a1).inntektInspektør.grunnlagForSykepengegrunnlag(28.januar, 28.januar))
+        assertInstanceOf(Inntektshistorikk.Inntektsmelding::class.java, inspektør(a2).inntektInspektør.grunnlagForSykepengegrunnlag(28.januar, 30.januar))
+        assertInstanceOf(Inntektshistorikk.SkattComposite::class.java, inspektør(a3).inntektInspektør.grunnlagForSykepengegrunnlag(28.januar, 1.februar))
+        assertInstanceOf(Inntektshistorikk.SkattComposite::class.java, inspektør(a4).inntektInspektør.grunnlagForSykepengegrunnlag(28.januar, 4.februar))
+
+        assertEquals(31000.månedlig, inspektør(a1).inntektInspektør.grunnlagForSykepengegrunnlag(28.januar, 28.januar)?.grunnlagForSykepengegrunnlag())
+        assertEquals(32000.månedlig, inspektør(a2).inntektInspektør.grunnlagForSykepengegrunnlag(28.januar, 30.januar)?.grunnlagForSykepengegrunnlag())
+        assertEquals(33500.månedlig, inspektør(a3).inntektInspektør.grunnlagForSykepengegrunnlag(28.januar, 1.februar)?.grunnlagForSykepengegrunnlag())
+        assertEquals(34500.månedlig, inspektør(a4).inntektInspektør.grunnlagForSykepengegrunnlag(28.januar, 4.februar)?.grunnlagForSykepengegrunnlag())
+
+        val a1Linjer = inspektør(a1).utbetalinger.last().arbeidsgiverOppdrag()
+        assertEquals(511, a1Linjer[0].beløp)
+
+        val a2Linje = inspektør(a2).utbetalinger.last().inspektør.arbeidsgiverOppdrag.last()
+        assertEquals(528, a2Linje.beløp)
+
+        val a3Linje = inspektør(a3).utbetalinger.last().inspektør.arbeidsgiverOppdrag.last()
+        assertEquals(553, a3Linje.beløp)
+
+        val a4Linje = inspektør(a4).utbetalinger.last().inspektør.arbeidsgiverOppdrag.last()
+        assertEquals(569, a4Linje.beløp)
+    }
 }

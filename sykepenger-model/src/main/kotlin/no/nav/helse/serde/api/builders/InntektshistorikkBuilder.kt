@@ -32,7 +32,7 @@ internal class InntektshistorikkBuilder(private val person: Person) {
         .map { (nøkkeldata, vilkårsgrunnlag) ->
             val sykepengegrunnlag = vilkårsgrunnlag.sykepengegrunnlag()
             val grunnlagForSykepengegrunnlag = vilkårsgrunnlag.grunnlagForSykepengegrunnlag()
-            // TODO: kan hente sammenligningsgrunnlaget fra vilkårsgrunnlaget (for consitency), men da må sammenligningsgrunnlag migreres inn på vilkårsgrunnlag fra IT
+            // TODO: kan hente sammenligningsgrunnlaget fra vilkårsgrunnlaget (for consistency), men da må sammenligningsgrunnlag migreres inn på vilkårsgrunnlag fra IT
             val sammenligningsgrunnlag = person.sammenligningsgrunnlag(nøkkeldata.skjæringstidspunkt)
 
             val arbeidsgiverinntekt: List<InntektsgrunnlagDTO.ArbeidsgiverinntektDTO> =
@@ -41,7 +41,7 @@ internal class InntektshistorikkBuilder(private val person: Person) {
             val arbeidsgivereMedBareSammenligningsgrunnlag = inntektshistorikk
                 .filterKeys { it !in arbeidsgiverinntekt.map { it.arbeidsgiver } }
                 .map { (orgnummer, inntektshistorikk) -> arbeidsgiverinntekt(nøkkeldata.skjæringstidspunkt, orgnummer, inntektshistorikk) }
-                .filter { person.harAktivtArbeidsforholdEllerInntekt(nøkkeldata.skjæringstidspunkt, it.arbeidsgiver) }
+                .filter { person.harAktivtArbeidsforholdEllerInntekt(nøkkeldata.skjæringstidspunkt, it.arbeidsgiver) } // TODO: bruke vilkårsgrunnlaget
 
             InntektsgrunnlagDTO(
                 skjæringstidspunkt = nøkkeldata.skjæringstidspunkt,

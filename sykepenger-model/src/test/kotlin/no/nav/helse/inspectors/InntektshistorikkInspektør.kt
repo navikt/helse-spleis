@@ -42,7 +42,7 @@ internal class InntektshistorikkInspektør(arbeidsgiver: Arbeidsgiver) : Arbeids
     ) = element(innslag.reversed()).opplysninger.filter { it.kilde in kilder }.size
     internal val sisteInnslag get() = innslag.firstOrNull()
 
-    internal fun grunnlagForSykepengegrunnlag(dato: LocalDate) = inntektshistorikk.grunnlagForSykepengegrunnlag(dato)
+    internal fun grunnlagForSykepengegrunnlag(dato: LocalDate, førsteFraværsdag: LocalDate) = inntektshistorikk.grunnlagForSykepengegrunnlag(dato, førsteFraværsdag)
 
     override fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {
         this.inntektshistorikk = inntektshistorikk
@@ -66,7 +66,7 @@ internal class InntektshistorikkInspektør(arbeidsgiver: Arbeidsgiver) : Arbeids
         inntektsopplysninger.add(
             Opplysning(
                 dato,
-                inntektsmelding.grunnlagForSykepengegrunnlag(dato)?.grunnlagForSykepengegrunnlag(),
+                inntektsmelding.grunnlagForSykepengegrunnlag(dato, dato)?.grunnlagForSykepengegrunnlag(),
                 inntektsmelding.grunnlagForSammenligningsgrunnlag(dato)?.grunnlagForSammenligningsgrunnlag(),
                 Kilde.INNTEKTSMELDING
             )
@@ -83,7 +83,7 @@ internal class InntektshistorikkInspektør(arbeidsgiver: Arbeidsgiver) : Arbeids
         inntektsopplysninger.add(
             Opplysning(
                 dato,
-                infotrygd.grunnlagForSykepengegrunnlag(dato)?.grunnlagForSykepengegrunnlag(),
+                infotrygd.grunnlagForSykepengegrunnlag(dato, dato)?.grunnlagForSykepengegrunnlag(),
                 infotrygd.grunnlagForSammenligningsgrunnlag(dato)?.grunnlagForSammenligningsgrunnlag(),
                 Kilde.INFOTRYGD
             )
@@ -124,7 +124,7 @@ internal class InntektshistorikkInspektør(arbeidsgiver: Arbeidsgiver) : Arbeids
         inntektsopplysninger.add(
             Opplysning(
                 skattedato,
-                skattComposite.grunnlagForSykepengegrunnlag(skattedato)?.grunnlagForSykepengegrunnlag(),
+                skattComposite.grunnlagForSykepengegrunnlag(skattedato, skattedato)?.grunnlagForSykepengegrunnlag(),
                 skattComposite.grunnlagForSammenligningsgrunnlag(skattedato)?.grunnlagForSammenligningsgrunnlag(),
                 Kilde.SKATT
             )
@@ -141,7 +141,7 @@ internal class InntektshistorikkInspektør(arbeidsgiver: Arbeidsgiver) : Arbeids
         inntektsopplysninger.add(
             Opplysning(
                 dato,
-                saksbehandler.grunnlagForSykepengegrunnlag(dato)?.grunnlagForSykepengegrunnlag(),
+                saksbehandler.grunnlagForSykepengegrunnlag(dato, dato)?.grunnlagForSykepengegrunnlag(),
                 saksbehandler.grunnlagForSammenligningsgrunnlag(dato)?.grunnlagForSammenligningsgrunnlag(),
                 Kilde.SAKSBEHANDLER
             )

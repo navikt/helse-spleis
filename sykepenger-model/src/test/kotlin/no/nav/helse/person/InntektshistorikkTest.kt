@@ -45,7 +45,7 @@ internal class InntektshistorikkTest {
         inntektsmelding(førsteFraværsdag = 1.januar).addInntekt(historikk, 1.januar)
         assertEquals(1, inspektør.inntektTeller.size)
         assertEquals(1, inspektør.inntektTeller.first())
-        assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(1.januar(2018))?.grunnlagForSykepengegrunnlag())
+        assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(1.januar, 1.januar)?.grunnlagForSykepengegrunnlag())
     }
 
     @Test
@@ -53,8 +53,8 @@ internal class InntektshistorikkTest {
         inntektsmelding(førsteFraværsdag = 1.januar, beregnetInntekt = 30000.månedlig).addInntekt(historikk, 1.januar)
         inntektsmelding(førsteFraværsdag = 1.januar, beregnetInntekt = 29000.månedlig).addInntekt(historikk, 1.januar)
         inntektsmelding(førsteFraværsdag = 1.februar, beregnetInntekt = 31000.månedlig).addInntekt(historikk, 1.februar)
-        assertEquals(30000.månedlig, historikk.grunnlagForSykepengegrunnlag(1.januar(2018))?.grunnlagForSykepengegrunnlag())
-        assertEquals(31000.månedlig, historikk.grunnlagForSykepengegrunnlag(1.februar(2018))?.grunnlagForSykepengegrunnlag())
+        assertEquals(30000.månedlig, historikk.grunnlagForSykepengegrunnlag(1.januar, 1.januar)?.grunnlagForSykepengegrunnlag())
+        assertEquals(31000.månedlig, historikk.grunnlagForSykepengegrunnlag(1.februar, 1.februar)?.grunnlagForSykepengegrunnlag())
     }
 
     @Test
@@ -62,7 +62,7 @@ internal class InntektshistorikkTest {
         inntektsmelding(førsteFraværsdag = 1.januar).addInntekt(historikk, 1.januar)
         assertEquals(1, inspektør.inntektTeller.size)
         assertEquals(1, inspektør.inntektTeller.first())
-        assertNull(historikk.grunnlagForSykepengegrunnlag(2.januar))
+        assertNull(historikk.grunnlagForSykepengegrunnlag(2.januar, 2.januar))
     }
 
     @Test
@@ -77,7 +77,7 @@ internal class InntektshistorikkTest {
             1.oktober(2017) til 1.oktober(2017) inntekter {
                 ORGNUMMER inntekt 30000
             }
-            1.november(2017) til 1.januar(2018) inntekter {
+            1.november(2017) til 1.januar inntekter {
                 ORGNUMMER inntekt 12000
                 ORGNUMMER inntekt 22000
             }
@@ -106,7 +106,7 @@ internal class InntektshistorikkTest {
             1.oktober(2017) til 1.oktober(2017) inntekter {
                 ORGNUMMER inntekt 30000
             }
-            1.november(2017) til 1.januar(2018) inntekter {
+            1.november(2017) til 1.januar inntekter {
                 ORGNUMMER inntekt 12000
                 ORGNUMMER inntekt 22000
             }
@@ -135,7 +135,7 @@ internal class InntektshistorikkTest {
             1.oktober(2017) til 1.oktober(2017) inntekter {
                 ORGNUMMER inntekt 30000
             }
-            1.november(2017) til 1.januar(2018) inntekter {
+            1.november(2017) til 1.januar inntekter {
                 ORGNUMMER inntekt 12000
                 ORGNUMMER inntekt 22000
             }
@@ -149,7 +149,7 @@ internal class InntektshistorikkTest {
         assertEquals(2, inspektør.inntektTeller.size)
         assertEquals(30, inspektør.inntektTeller.first())
         assertEquals(17, inspektør.inntektTeller.last())
-        assertEquals(256000.årlig, historikk.grunnlagForSykepengegrunnlag(31.desember(2017))?.grunnlagForSykepengegrunnlag())
+        assertEquals(256000.årlig, historikk.grunnlagForSykepengegrunnlag(31.desember(2017), 31.desember(2017))?.grunnlagForSykepengegrunnlag())
     }
 
     @Test
@@ -164,7 +164,7 @@ internal class InntektshistorikkTest {
             1.oktober(2017) til 1.oktober(2017) inntekter {
                 ORGNUMMER inntekt 30000
             }
-            1.november(2017) til 1.januar(2018) inntekter {
+            1.november(2017) til 1.januar inntekter {
                 ORGNUMMER inntekt 12000
                 ORGNUMMER inntekt 22000
             }
@@ -178,7 +178,7 @@ internal class InntektshistorikkTest {
         assertEquals(2, inspektør.inntektTeller.size)
         assertEquals(30, inspektør.inntektTeller.first())
         assertEquals(17, inspektør.inntektTeller.last())
-        assertEquals(392000.årlig, historikk.grunnlagForSykepengegrunnlag(1.januar)?.grunnlagForSykepengegrunnlag())
+        assertEquals(392000.årlig, historikk.grunnlagForSykepengegrunnlag(1.januar, 1.januar)?.grunnlagForSykepengegrunnlag())
     }
 
     @Test
@@ -193,7 +193,7 @@ internal class InntektshistorikkTest {
         }.forEach { it.lagreInntekter(historikk, 1.januar, UUID.randomUUID()) }
         assertEquals(1, inspektør.inntektTeller.size)
         assertEquals(22, inspektør.inntektTeller.first())
-        assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(1.januar)?.grunnlagForSykepengegrunnlag())
+        assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(1.januar, 1.januar)?.grunnlagForSykepengegrunnlag())
     }
 
     @Test
@@ -202,17 +202,17 @@ internal class InntektshistorikkTest {
             1.desember(2016) til 1.desember(2017) inntekter {
                 ORGNUMMER inntekt INNTEKT
             }
-        }.forEach { it.lagreInntekter(historikk, 1.januar(2018), UUID.randomUUID()) }
+        }.forEach { it.lagreInntekter(historikk, 1.januar, UUID.randomUUID()) }
         inntektperioderForSykepengegrunnlag {
             1.desember(2016) til 1.august(2017) inntekter {
                 ORGNUMMER inntekt INNTEKT
             }
-        }.forEach { it.lagreInntekter(historikk, 15.januar(2018), UUID.randomUUID()) }
+        }.forEach { it.lagreInntekter(historikk, 15.januar, UUID.randomUUID()) }
         assertEquals(2, inspektør.inntektTeller.size)
         assertEquals(22, inspektør.inntektTeller.first())
         assertEquals(13, inspektør.inntektTeller.last())
-        assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(1.januar(2018))?.grunnlagForSykepengegrunnlag())
-        assertNull(historikk.grunnlagForSykepengegrunnlag(15.januar(2018)))
+        assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(1.januar, 1.januar)?.grunnlagForSykepengegrunnlag())
+        assertNull(historikk.grunnlagForSykepengegrunnlag(15.januar, 15.januar))
     }
 
     @Test
@@ -221,17 +221,17 @@ internal class InntektshistorikkTest {
             1.desember(2016) til 1.desember(2017) inntekter {
                 ORGNUMMER inntekt INNTEKT
             }
-        }.forEach { it.lagreInntekter(historikk, 1.januar(2018), UUID.randomUUID()) }
+        }.forEach { it.lagreInntekter(historikk, 1.januar, UUID.randomUUID()) }
         Thread.sleep(10) // Nødvendig for konsistent resultat på windows
         inntektperioderForSykepengegrunnlag {
             1.desember(2016) til 1.august(2017) inntekter {
                 ORGNUMMER inntekt INNTEKT
             }
-        }.forEach { it.lagreInntekter(historikk, 1.januar(2018), UUID.randomUUID()) }
+        }.forEach { it.lagreInntekter(historikk, 1.januar, UUID.randomUUID()) }
         assertEquals(2, inspektør.inntektTeller.size)
         assertEquals(9, inspektør.inntektTeller.first())
         assertEquals(13, inspektør.inntektTeller.last())
-        assertNull(historikk.grunnlagForSykepengegrunnlag(1.januar(2018)))
+        assertNull(historikk.grunnlagForSykepengegrunnlag(1.januar, 1.januar))
     }
 
     @Test
@@ -253,7 +253,7 @@ internal class InntektshistorikkTest {
         inspektør.inntektTeller.forEach {
             assertEquals(22, it)
         }
-        assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(1.januar(2018))?.grunnlagForSykepengegrunnlag())
+        assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(1.januar, 1.januar)?.grunnlagForSykepengegrunnlag())
     }
 
     @Test
@@ -267,7 +267,7 @@ internal class InntektshistorikkTest {
             }.forEach { it.lagreInntekter(historikk, 1.januar, meldingsreferanseId) }
         }
         assertEquals(13, inspektør.inntektTeller.first())
-        assertEquals(INNTEKT, historikk.grunnlagForSammenligningsgrunnlag(1.januar(2018))?.grunnlagForSammenligningsgrunnlag())
+        assertEquals(INNTEKT, historikk.grunnlagForSammenligningsgrunnlag(1.januar)?.grunnlagForSammenligningsgrunnlag())
     }
 
     @Test

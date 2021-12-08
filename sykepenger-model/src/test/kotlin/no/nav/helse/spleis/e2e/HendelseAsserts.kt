@@ -13,8 +13,8 @@ import java.util.*
 import kotlin.reflect.KClass
 
 
-internal fun assertInntektForDato(forventetInntekt: Inntekt?, dato: LocalDate, inspektør: TestArbeidsgiverInspektør) {
-    Assertions.assertEquals(forventetInntekt, inspektør.inntektInspektør.grunnlagForSykepengegrunnlag(dato)?.grunnlagForSykepengegrunnlag())
+internal fun assertInntektForDato(forventetInntekt: Inntekt?, dato: LocalDate, førsteFraværsdag: LocalDate = dato, inspektør: TestArbeidsgiverInspektør) { // TODO: se på
+    Assertions.assertEquals(forventetInntekt, inspektør.inntektInspektør.grunnlagForSykepengegrunnlag(dato, førsteFraværsdag)?.grunnlagForSykepengegrunnlag())
 }
 
 internal fun AbstractEndToEndTest.erEtterspurt(type: Aktivitetslogg.Aktivitet.Behov.Behovtype, vedtaksperiodeIdInnhenter: IdInnhenter, orgnummer: String, tilstand: TilstandType): Boolean {
@@ -116,7 +116,15 @@ internal fun AbstractEndToEndTest.assertTilstand(
     tilstand: TilstandType,
     vedtaksperiodeIndeks: Int = 1
 ) {
-    Assertions.assertEquals(tilstand, inspektør(orgnummer).sisteTilstand(vedtaksperiodeIndeks.vedtaksperiode)) {
+    assertTilstand(vedtaksperiodeIndeks.vedtaksperiode, tilstand, orgnummer)
+}
+
+internal fun AbstractEndToEndTest.assertTilstand(
+    vedtaksperiodeIdInnhenter: IdInnhenter,
+    tilstand: TilstandType,
+    orgnummer: String = AbstractPersonTest.ORGNUMMER,
+) {
+    Assertions.assertEquals(tilstand, inspektør(orgnummer).sisteTilstand(vedtaksperiodeIdInnhenter)) {
         inspektør.personLogg.toString()
     }
 }

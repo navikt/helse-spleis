@@ -51,7 +51,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertActivities(it)
-            assertInntektForDato(INNTEKT, 3.januar, it)
+            assertInntektForDato(INNTEKT, 3.januar, inspektør = it)
             assertEquals(3, it.sykdomshistorikk.size)
             assertEquals(18, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
             assertEquals(6, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
@@ -86,7 +86,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertActivities(it)
-            assertInntektForDato(INNTEKT, 3.januar, it)
+            assertInntektForDato(INNTEKT, 3.januar, inspektør = it)
             assertEquals(3, it.sykdomshistorikk.size)
             assertEquals(4, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
             assertEquals(2, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
@@ -117,7 +117,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertActivities(it)
-            assertInntektForDato(INNTEKT, 3.januar, it)
+            assertInntektForDato(INNTEKT, 3.januar, inspektør = it)
             assertEquals(7, it.sykdomshistorikk.size)
             assertEquals(4, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
             assertEquals(14, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
@@ -164,7 +164,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertActivities(it)
-            assertInntektForDato(INNTEKT, 8.januar, it)
+            assertInntektForDato(INNTEKT, 8.januar, inspektør = it)
             assertEquals(7, it.sykdomshistorikk.size)
             assertEquals(4, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
             assertEquals(13, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
@@ -199,7 +199,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertActivities(it)
-            assertInntektForDato(INNTEKT, 3.januar, it)
+            assertInntektForDato(INNTEKT, 3.januar, inspektør = it)
             assertEquals(3, it.sykdomshistorikk.size)
             assertEquals(4, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
             assertEquals(2, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
@@ -227,7 +227,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertActivities(it)
-            assertInntektForDato(INNTEKT, 3.januar, it)
+            assertInntektForDato(INNTEKT, 3.januar, inspektør = it)
             assertEquals(3, it.sykdomshistorikk.size)
             assertEquals(18, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
             assertEquals(6, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
@@ -282,7 +282,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertActivities(it)
-            assertInntektForDato(INNTEKT, 3.januar, it)
+            assertInntektForDato(INNTEKT, 3.januar, inspektør = it)
             assertEquals(3, it.sykdomshistorikk.size)
             assertNull(it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
             assertEquals(6, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
@@ -321,7 +321,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertActivities(it)
-            assertInntektForDato(INNTEKT, 3.januar, it)
+            assertInntektForDato(INNTEKT, 3.januar, inspektør = it)
             assertEquals(3, it.sykdomshistorikk.size)
             assertEquals(18, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
             assertEquals(6, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
@@ -356,7 +356,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNoErrors(it)
             assertFalse(it.personLogg.hasWarningsOrWorse())
             assertActivities(it)
-            assertInntektForDato(null, 2.januar, it)
+            assertInntektForDato(null, 2.januar, inspektør = it)
             assertEquals(2, it.sykdomshistorikk.size)
             assertEquals(18, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
             assertEquals(6, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
@@ -395,7 +395,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNoErrors(1.vedtaksperiode)
             assertNoWarnings(1.vedtaksperiode)
             assertActivities(it)
-            assertInntektForDato(45000.månedlig, 27.juli(2020), it)
+            assertInntektForDato(45000.månedlig, 27.juli(2020), inspektør = it)
             assertEquals(2, it.sykdomshistorikk.size)
             assertEquals(21, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
             assertEquals(9, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
@@ -434,7 +434,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertActivities(it)
-            assertInntektForDato(INNTEKT, 21.september(2020), it)
+            assertInntektForDato(INNTEKT, 21.september(2020), inspektør = it)
             assertEquals(21.september(2020), it.skjæringstidspunkt(1.vedtaksperiode))
             assertEquals(21465, it.nettoBeløp[0])
         }
@@ -472,8 +472,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertActivities(it)
-            assertInntektForDato(INNTEKT, 4.januar, it)
-            assertInntektForDato(INNTEKT, 24.januar, it)
+            assertInntektForDato(INNTEKT, 4.januar, inspektør = it)
+            assertInntektForDato(INNTEKT, 24.januar, inspektør = it)
             assertEquals(4.januar, it.skjæringstidspunkt(1.vedtaksperiode))
             assertEquals(24.januar, it.skjæringstidspunkt(2.vedtaksperiode))
             assertEquals(19, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])

@@ -23,7 +23,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         val overstyrtInntekt = 32000.månedlig
         tilGodkjenning(fom, 31.januar(2021), 100.prosent, fom)
 
-        assertInntektForDato(INNTEKT, fom, inspektør)
+        assertInntektForDato(INNTEKT, fom, inspektør = inspektør)
 
         håndterInntektsmelding(listOf(fom til fom.plusDays(15)), beregnetInntekt = overstyrtInntekt, refusjon = Refusjon(overstyrtInntekt, null, emptyList()))
         håndterOverstyrInntekt(inntekt = overstyrtInntekt, orgnummer = ORGNUMMER, skjæringstidspunkt = fom)
@@ -60,7 +60,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
             TilstandType.AVVENTER_GODKJENNING) // <-- og her skal den nye, overstyrte inntekten vært benyttet
 
         // assert at vi bruker den nye inntekten i beregning av penger til sjuk.
-        assertInntektForDato(overstyrtInntekt, fom, inspektør)
+        assertInntektForDato(overstyrtInntekt, fom, inspektør = inspektør)
     }
 
     @Test

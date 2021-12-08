@@ -83,10 +83,10 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertNoErrors(a1Inspektør)
         assertNoErrors(a2Inspektør)
 
-        assertInntektForDato(16000.månedlig, 1.januar, a1Inspektør)
-        assertInntektForDato(null, 1.januar, a2Inspektør)
-        assertInntektForDato(4750.månedlig, 1.januar, a3Inspektør)
-        assertInntektForDato(2250.månedlig, 1.januar, a4Inspektør)
+        assertInntektForDato(16000.månedlig, 1.januar, inspektør = a1Inspektør)
+        assertInntektForDato(null, 1.januar, inspektør = a2Inspektør)
+        assertInntektForDato(4750.månedlig, 1.januar, inspektør = a3Inspektør)
+        assertInntektForDato(2250.månedlig, 1.januar, inspektør = a4Inspektør)
 
         val grunnlagsdataInspektør = GrunnlagsdataInspektør(a1Inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!)
         assertEquals(300000.årlig, grunnlagsdataInspektør.sammenligningsgrunnlag)
