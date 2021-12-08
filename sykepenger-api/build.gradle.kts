@@ -19,6 +19,9 @@ dependencies {
         exclude(group = "junit")
     }
 
+    testImplementation("org.testcontainers:postgresql:1.16.2") {
+        exclude("com.fasterxml.jackson.core")
+    }
     testImplementation("io.ktor:ktor-client-cio:$ktorVersion")
     testImplementation("org.awaitility:awaitility:4.1.1")
     testImplementation("com.github.tomakehurst:wiremock-jre8:$wireMockVersion") {
