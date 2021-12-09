@@ -1,0 +1,639 @@
+{
+    "arbeidsgivere": [
+        {
+            "organisasjonsnummer": "987654321",
+            "sykdomshistorikk": [
+                {
+                    "hendelseSykdomstidslinje": {
+                        "låstePerioder": [],
+                        "dager": [
+                            {
+                                "dato": "2018-01-01",
+                                "type": "ARBEIDSGIVERDAG"
+                            },
+                            {
+                                "dato": "2018-01-02",
+                                "type": "ARBEIDSGIVERDAG"
+                            },
+                            {
+                                "dato": "2018-01-03",
+                                "type": "ARBEIDSGIVERDAG"
+                            },
+                            {
+                                "dato": "2018-01-04",
+                                "type": "ARBEIDSGIVERDAG"
+                            },
+                            {
+                                "dato": "2018-01-05",
+                                "type": "ARBEIDSGIVERDAG"
+                            },
+                            {
+                                "dato": "2018-01-06",
+                                "type": "ARBEIDSGIVERDAG"
+                            },
+                            {
+                                "dato": "2018-01-07",
+                                "type": "ARBEIDSGIVERDAG"
+                            },
+                            {
+                                "dato": "2018-01-08",
+                                "type": "ARBEIDSGIVERDAG"
+                            },
+                            {
+                                "dato": "2018-01-09",
+                                "type": "ARBEIDSGIVERDAG"
+                            },
+                            {
+                                "dato": "2018-01-10",
+                                "type": "ARBEIDSGIVERDAG"
+                            },
+                            {
+                                "dato": "2018-01-11",
+                                "type": "ARBEIDSGIVERDAG"
+                            },
+                            {
+                                "dato": "2018-01-12",
+                                "type": "ARBEIDSGIVERDAG"
+                            },
+                            {
+                                "dato": "2018-01-13",
+                                "type": "ARBEIDSGIVERDAG"
+                            },
+                            {
+                                "dato": "2018-01-14",
+                                "type": "ARBEIDSGIVERDAG"
+                            },
+                            {
+                                "dato": "2018-01-15",
+                                "type": "ARBEIDSGIVERDAG"
+                            },
+                            {
+                                "dato": "2018-01-16",
+                                "type": "ARBEIDSGIVERDAG"
+                            }
+                        ]
+                    },
+                    "beregnetSykdomstidslinje": {
+                        "låstePerioder": [
+                            {
+                                "fom": "2018-01-01",
+                                "tom": "2018-01-31"
+                            }
+                        ],
+                        "dager": [
+                            {
+                                "dato": "2018-01-01",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-02",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-03",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-04",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-05",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-06",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-07",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-08",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-09",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-10",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-11",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-12",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-13",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-14",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-15",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-16",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-17",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-18",
+                                "type": "SYKEDAG"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "hendelseSykdomstidslinje": {
+                        "låstePerioder": [],
+                        "dager": [
+                            {
+                                "dato": "2018-01-01",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-02",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-03",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-04",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-05",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-06",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-07",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-08",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-09",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-10",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-11",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-12",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-13",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-14",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-15",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-16",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-17",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-18",
+                                "type": "SYKEDAG"
+                            }
+                        ]
+                    },
+                    "beregnetSykdomstidslinje": {
+                        "låstePerioder": [],
+                        "dager": [
+                            {
+                                "dato": "2018-01-01",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-02",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-03",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-04",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-05",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-06",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-07",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-08",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-09",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-10",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-11",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-12",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-13",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-14",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-15",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-16",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-17",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-18",
+                                "type": "SYKEDAG"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "hendelseSykdomstidslinje": {
+                        "låstePerioder": [],
+                        "dager": [
+                            {
+                                "dato": "2018-01-01",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-02",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-03",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-04",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-05",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-06",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-07",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-08",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-09",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-10",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-11",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-12",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-13",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-14",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-15",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-16",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-17",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-18",
+                                "type": "SYKEDAG"
+                            }
+                        ]
+                    },
+                    "beregnetSykdomstidslinje": {
+                        "låstePerioder": [],
+                        "dager": [
+                            {
+                                "dato": "2018-01-01",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-02",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-03",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-04",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-05",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-06",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-07",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-08",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-09",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-10",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-11",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-12",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-13",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-14",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-15",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-16",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-17",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-18",
+                                "type": "SYKEDAG"
+                            }
+                        ]
+                    }
+                }
+            ],
+            "vedtaksperioder": [
+                {
+                    "sykdomstidslinje": {
+                        "låstePerioder": [],
+                        "dager": [
+                            {
+                                "dato": "2018-01-01",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-02",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-03",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-04",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-05",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-06",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-07",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-08",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-09",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-10",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-11",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-12",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-13",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-14",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-15",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-16",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-17",
+                                "type": "SYKEDAG"
+                            },
+                            {
+                                "dato": "2018-01-18",
+                                "type": "SYKEDAG"
+                            }
+                        ]
+                    }
+                }
+            ],
+            "forkastede": [
+                {
+                    "vedtaksperiode": {
+                        "sykdomstidslinje": {
+                            "dager": [
+                                {
+                                    "dato": "2018-01-01",
+                                    "type": "SYKEDAG"
+                                },
+                                {
+                                    "dato": "2018-01-02",
+                                    "type": "SYKEDAG"
+                                },
+                                {
+                                    "dato": "2018-01-03",
+                                    "type": "SYKEDAG"
+                                },
+                                {
+                                    "dato": "2018-01-04",
+                                    "type": "SYKEDAG"
+                                },
+                                {
+                                    "dato": "2018-01-05",
+                                    "type": "SYKEDAG"
+                                },
+                                {
+                                    "dato": "2018-01-06",
+                                    "type": "SYKEDAG"
+                                },
+                                {
+                                    "dato": "2018-01-07",
+                                    "type": "SYKEDAG"
+                                },
+                                {
+                                    "dato": "2018-01-08",
+                                    "type": "SYKEDAG"
+                                },
+                                {
+                                    "dato": "2018-01-09",
+                                    "type": "SYKEDAG"
+                                },
+                                {
+                                    "dato": "2018-01-10",
+                                    "type": "SYKEDAG"
+                                },
+                                {
+                                    "dato": "2018-01-11",
+                                    "type": "SYKEDAG"
+                                },
+                                {
+                                    "dato": "2018-01-12",
+                                    "type": "SYKEDAG"
+                                },
+                                {
+                                    "dato": "2018-01-13",
+                                    "type": "SYKEDAG"
+                                },
+                                {
+                                    "dato": "2018-01-14",
+                                    "type": "SYKEDAG"
+                                },
+                                {
+                                    "dato": "2018-01-15",
+                                    "type": "SYKEDAG"
+                                },
+                                {
+                                    "dato": "2018-01-16",
+                                    "type": "SYKEDAG"
+                                },
+                                {
+                                    "dato": "2018-01-17",
+                                    "type": "SYKEDAG"
+                                },
+                                {
+                                    "dato": "2018-01-18",
+                                    "type": "SYKEDAG"
+                                }
+                            ]
+                        }
+                    }
+                }
+            ],
+            "feriepengeutbetalinger": []
+        }
+    ],
+    "skjemaVersjon": 131
+}

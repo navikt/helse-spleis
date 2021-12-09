@@ -630,7 +630,6 @@ internal data class PersonData(
                         dato,
                         hendelseskilde
                     )
-                    JsonDagType.ARBEIDSGIVER_HELGEDAG,
                     JsonDagType.ARBEIDSGIVERDAG -> if (dato.erHelg()) {
                         Dag.ArbeidsgiverHelgedag(dato, økonomi, hendelseskilde)
                     } else {
@@ -658,7 +657,6 @@ internal data class PersonData(
                         hendelseskilde,
                         melding!!
                     )
-                    JsonDagType.SYK_HELGEDAG,
                     JsonDagType.SYKEDAG -> if (dato.erHelg()) {
                         Dag.SykHelgedag(dato, økonomi, hendelseskilde)
                     } else {
@@ -672,8 +670,6 @@ internal data class PersonData(
                 ARBEIDSDAG,
                 ARBEIDSGIVERDAG,
 
-                @Deprecated("Trengs for å slippe migrering")
-                ARBEIDSGIVER_HELGEDAG,
                 FERIEDAG,
                 FRISK_HELGEDAG,
                 FORELDET_SYKEDAG,
@@ -681,8 +677,6 @@ internal data class PersonData(
                 PROBLEMDAG,
                 SYKEDAG,
 
-                @Deprecated("Trengs for å slippe migrering")
-                SYK_HELGEDAG,
                 UKJENT_DAG,
                 AVSLÅTT_DAG
             }
