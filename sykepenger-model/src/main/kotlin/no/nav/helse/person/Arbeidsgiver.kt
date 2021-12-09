@@ -679,7 +679,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun finnSammenhengendePeriode(skjæringstidspunkt: LocalDate) = vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt)
 
-    internal fun fjernDager(periode: Periode) = sykdomshistorikk.fjernDager(periode)
+    private fun fjernDager(periode: Periode) = sykdomshistorikk.fjernDager(periode)
 
     internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, periodeStart: LocalDate) =
         inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periodeStart)?.grunnlagForSykepengegrunnlag()

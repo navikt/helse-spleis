@@ -28,6 +28,30 @@ internal class InntektsmeldingTest {
     }
 
     @Test
+    fun `periode dersom første fraværsdag er kant i kant med arbeidsgiverperioden`() {
+        inntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 17.januar)
+        assertEquals(1.januar til 17.januar, inntektsmelding.periode())
+    }
+
+    @Test
+    fun `periode dersom første fraværsdag er etter arbeidsgiverperioden`() {
+        inntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 18.januar)
+        assertEquals(18.januar.somPeriode(), inntektsmelding.periode())
+    }
+
+    @Test
+    fun `periode dersom første fraværsdag er i arbeidsgiverperioden`() {
+        inntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 16.januar)
+        assertEquals(1.januar til 16.januar, inntektsmelding.periode())
+    }
+
+    @Test
+    fun `periode dersom første fraværsdag er null`() {
+        inntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = null)
+        assertEquals(1.januar til 16.januar, inntektsmelding.periode())
+    }
+
+    @Test
     fun `trimme inntektsmelding forbi tom`() {
         inntektsmelding(listOf(1.januar til 16.januar))
         inntektsmelding.trimLeft(17.januar)

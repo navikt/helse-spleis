@@ -529,7 +529,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Kort gap mot Infotrygd`() {
+    fun `periode utvides ikke tilbake til arbeidsgiverperiode dersom det er gap mellom`() {
         håndterSykmelding(Sykmeldingsperiode(2.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(2.februar, 28.februar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 2.februar)
@@ -555,9 +555,10 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             AVSLUTTET
         )
         assertEquals(1, inspektør.utbetalinger.size)
+        assertEquals(2.februar til 28.februar, inspektør.periode(1.vedtaksperiode))
         inspektør.utbetalinger.first().utbetalingstidslinje().also { utbetalingstidslinje ->
             assertAlleDager(utbetalingstidslinje, 1.januar til 16.januar, ArbeidsgiverperiodeDag::class)
-            assertAlleDager(utbetalingstidslinje, 17.januar til 1.februar, UkjentDag::class, Fridag::class)
+            assertAlleDager(utbetalingstidslinje, 17.januar til 1.februar, UkjentDag::class, Arbeidsdag::class)
             assertAlleDager(utbetalingstidslinje, 2.februar til 28.februar, NavDag::class, NavHelgDag::class)
         }
     }

@@ -1,7 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.til
+import no.nav.helse.hendelser.somPeriode
 import java.time.LocalDate
 
 internal fun interface Forlengelsestrategi {
@@ -139,7 +139,7 @@ internal class Arbeidsgiverperiodeteller(private val regler: ArbeidsgiverRegler,
             if (perioder.isNotEmpty() && siste.endInclusive.plusDays(1) == dagen) {
                 perioder[perioder.size - 1] = siste.oppdaterTom(dagen)
             } else {
-                perioder.add(dagen til dagen)
+                perioder.add(dagen.somPeriode())
             }
         }
 

@@ -853,19 +853,6 @@ internal class Vedtaksperiode private constructor(
         tilstand(hendelse, if (harSykeperiodeRettFør()) tilstandHvisForlengelse else tilstandHvisGap)
     }
 
-    private fun fjernArbeidsgiverperiodeVedOverlappMedIT(infotrygdhistorikk: Infotrygdhistorikk) {
-        val opprinneligPeriodeFom = periode.start
-        val ytelseTom = infotrygdhistorikk.sisteSykepengedag(organisasjonsnummer) ?: return
-
-        if (ytelseTom < opprinneligPeriodeFom) return
-        if (sykdomstidslinje.fremTilOgMed(ytelseTom).harSykedager()) return
-
-        val nyPeriodeFom = sykdomstidslinje.førsteIkkeUkjentDagEtter(ytelseTom.plusDays(1)) ?: sykmeldingsperiode.start
-
-        periode = nyPeriodeFom til periode.endInclusive
-        sykdomstidslinje = arbeidsgiver.fjernDager(opprinneligPeriodeFom til nyPeriodeFom.minusDays(1)).subset(periode)
-    }
-
     private fun validerSenerePerioderIInfotrygd(infotrygdhistorikk: Infotrygdhistorikk): Boolean {
         val sisteYtelseFom = infotrygdhistorikk.førsteSykepengedagISenestePeriode(organisasjonsnummer) ?: return true
         return sisteYtelseFom < periode.endInclusive
@@ -1976,7 +1963,6 @@ internal class Vedtaksperiode private constructor(
                 }
                 valider("Det er utbetalt en senere periode i Infotrygd") { vedtaksperiode.validerSenerePerioderIInfotrygd(infotrygdhistorikk) }
                 onSuccess {
-                    vedtaksperiode.fjernArbeidsgiverperiodeVedOverlappMedIT(infotrygdhistorikk)
                     vedtaksperiode.skjæringstidspunktFraInfotrygd = person.skjæringstidspunkt(vedtaksperiode.periode)
                 }
                 valider { infotrygdhistorikk.valider(this, arbeidsgiver, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt) }

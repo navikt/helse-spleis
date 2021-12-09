@@ -55,7 +55,9 @@ abstract class SykdomstidslinjeHendelse(
 
     internal fun erRelevant(other: Periode) = !trimmetForbi() && erRelevantMed(other)
 
-    protected open fun erRelevantMed(other: Periode) = periode().overlapperMed(other)
+    private fun erRelevantMed(other: Periode) = overlappsperiode()?.overlapperMed(other) ?: false
+
+    protected open fun overlappsperiode(): Periode? = sykdomstidslinje().periode()
 
     internal fun trimLeft(dato: LocalDate) {
         nesteFom = dato.plusDays(1)
@@ -63,8 +65,9 @@ abstract class SykdomstidslinjeHendelse(
 
     private val aldri = LocalDate.MIN til LocalDate.MIN
     private fun trimmetForbi() = periode() == aldri
+
     internal fun periode(): Periode {
-        val periode = sykdomstidslinje().periode() ?: aldri
+        val periode = overlappsperiode() ?: aldri
         val fom = nesteFom ?: return periode
         if (fom > periode.endInclusive) return aldri
         return (sykdomstidslinje().førsteSykedagEtter(fom) ?: fom) til periode.endInclusive

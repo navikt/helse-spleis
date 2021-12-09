@@ -21,7 +21,7 @@ open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Ite
 
         fun List<LocalDate>.grupperSammenhengendePerioder() = sorted().distinct().fold(listOf<Periode>()) { perioder, dato ->
             val siste = perioder.lastOrNull()
-            if (siste == null || siste.endInclusive.plusDays(1) != dato) perioder.plus<Periode>(dato til dato)
+            if (siste == null || siste.endInclusive.plusDays(1) != dato) perioder.plus<Periode>(dato.somPeriode())
             else perioder.dropLast(1).plus<Periode>(siste.oppdaterTom(dato))
         }
     }
@@ -88,4 +88,4 @@ open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Ite
 internal operator fun List<Periode>.contains(dato: LocalDate) = this.any { dato in it }
 
 internal infix fun LocalDate.til(tom: LocalDate) = Periode(this, tom)
-
+internal fun LocalDate.somPeriode() = Periode(this, this)

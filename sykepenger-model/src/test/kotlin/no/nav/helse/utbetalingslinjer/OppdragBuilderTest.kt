@@ -2,6 +2,7 @@ package no.nav.helse.utbetalingslinjer
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.OppdragVisitor
@@ -514,7 +515,7 @@ internal class OppdragBuilderTest {
     private val Oppdrag.antallDager get() = this.sumOf { it.dager().size }
 
     private infix fun Periode.er(dagtype: Dagtype) = dagtype.dager(this)
-    private infix fun LocalDate.er(dagtype: Dagtype) = dagtype.dager(this til this)
+    private infix fun LocalDate.er(dagtype: Dagtype) = dagtype.dager(this.somPeriode())
     private infix fun Utbetalingsdager.medBeløp(beløp: Int) = this.copyWith(beløp = beløp)
     private infix fun Utbetalingsdager.medGrad(grad: Double) = this.copyWith(grad = grad)
     private infix fun Utbetalingsdager.medRefusjon(beløp: Int) = this.copyWith(arbeidsgiverbeløp = beløp)

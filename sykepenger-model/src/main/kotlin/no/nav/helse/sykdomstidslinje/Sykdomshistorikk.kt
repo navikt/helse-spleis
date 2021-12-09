@@ -46,10 +46,9 @@ internal class Sykdomshistorikk private constructor(
         elementer.add(0, Element.empty)
     }
 
-    internal fun fjernDager(periode: Periode): Sykdomstidslinje {
-        if (sykdomstidslinje().periode()?.overlapperMed(periode) != true) return sykdomstidslinje()
+    internal fun fjernDager(periode: Periode) {
+        if (sykdomstidslinje().periode()?.overlapperMed(periode) != true) return
         elementer.add(0, Element.opprettReset(this, periode))
-        return sykdomstidslinje()
     }
 
     internal fun accept(visitor: SykdomshistorikkVisitor) {
