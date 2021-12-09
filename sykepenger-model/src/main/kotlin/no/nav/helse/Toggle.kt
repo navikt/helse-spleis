@@ -126,7 +126,6 @@ abstract class Toggle internal constructor(enabled: Boolean = false, private val
         }
     }
 
-    object RebregnUtbetalingVedHistorikkendring : Toggle()
     object OverlappendeSykmelding : Toggle(true)
     object SendFeriepengeOppdrag : Toggle(false)
     object DatoRangeJson : Toggle(true)

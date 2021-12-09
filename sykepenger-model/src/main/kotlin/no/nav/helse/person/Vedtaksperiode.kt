@@ -2199,10 +2199,7 @@ internal class Vedtaksperiode private constructor(
             hendelse: IAktivitetslogg,
             infotrygdhistorikk: Infotrygdhistorikk
         ) {
-            if (Toggle.RebregnUtbetalingVedHistorikkendring.enabled && infotrygdhistorikk.harEndretHistorikk(vedtaksperiode.utbetaling())) return vedtaksperiode.tilstand(
-                hendelse,
-                AvventerHistorikk
-            ) {
+            if (infotrygdhistorikk.harEndretHistorikk(vedtaksperiode.utbetaling())) return vedtaksperiode.tilstand(hendelse, AvventerHistorikk) {
                 hendelse.info("Infotrygdhistorikken har endret seg, reberegner periode")
             }
 
