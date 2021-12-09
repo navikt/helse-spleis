@@ -119,7 +119,7 @@ internal class Sykdomstidslinje private constructor(
 
     internal fun lås(periode: Periode) = this.also {
         requireNotNull(this.periode)
-        require(periode in this.periode)
+        require(periode in this.periode) { "$periode er ikke i ${this.periode}" }
         låstePerioder.add(periode)
     }
 
