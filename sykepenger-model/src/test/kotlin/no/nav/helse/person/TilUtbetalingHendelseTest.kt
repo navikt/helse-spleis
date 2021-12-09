@@ -14,33 +14,20 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
 internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
-    private companion object {
-        private const val SAKSBEHANDLER_IDENT = "O123456"
-        private val INNTEKT = 31000.månedlig
-        private lateinit var førsteSykedag: LocalDate
-        private lateinit var sisteSykedag: LocalDate
-        private lateinit var sykmeldingHendelseId: UUID
-        private lateinit var søknadHendelseId: UUID
-        private lateinit var inntektsmeldingHendelseId: UUID
-    }
+    private val SAKSBEHANDLER_IDENT = "O123456"
+    private val INNTEKT = 31000.månedlig
+    private val førsteSykedag = 1.januar
+    private val sisteSykedag = 31.januar
+    private val sykmeldingHendelseId = UUID.randomUUID()
+    private val søknadHendelseId = UUID.randomUUID()
+    private val inntektsmeldingHendelseId = UUID.randomUUID()
 
     private lateinit var hendelse: ArbeidstakerHendelse
-
-    @BeforeEach
-    internal fun setupTests() {
-        førsteSykedag = 1.januar
-        sisteSykedag = 31.januar
-        sykmeldingHendelseId = UUID.randomUUID()
-        søknadHendelseId = UUID.randomUUID()
-        inntektsmeldingHendelseId = UUID.randomUUID()
-    }
 
     @Test
     fun `utbetaling er godkjent av saksbehandler`() {
