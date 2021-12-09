@@ -24,6 +24,8 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
+import no.nav.helse.utbetalingstidslinje.*
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.*
@@ -611,6 +613,7 @@ internal data class PersonData(
                         .call(
                             grad.prosent,
                             arbeidsgiverRefusjonsbeløp.daglig,
+                            null,
                             aktuellDagsinntekt?.daglig,
                             dekningsgrunnlag?.daglig,
                             skjæringstidspunkt,
@@ -689,6 +692,13 @@ internal data class PersonData(
                 internal fun parseKilde() =
                     SykdomstidslinjeHendelse.Hendelseskilde(type, id, tidsstempel)
             }
+        }
+
+        data class PeriodeData(
+            private val fom: LocalDate,
+            private val tom: LocalDate
+        ) {
+            internal fun tilPeriode() = Periode(fom, tom)
         }
 
         data class ForkastetVedtaksperiodeData(
@@ -1232,6 +1242,7 @@ internal data class PersonData(
 
         data class UtbetalingsdagData(
             private val type: TypeData,
+            private val arbeidsgiverperiode: List<ArbeidsgiverData.PeriodeData>?,
             private val aktuellDagsinntekt: Double,
             private val dekningsgrunnlag: Double,
             private val skjæringstidspunkt: LocalDate?,
@@ -1254,6 +1265,7 @@ internal data class PersonData(
                     .call(
                         grad?.prosent,
                         arbeidsgiverRefusjonsbeløp.daglig,
+                        arbeidsgiverperiode?.map { it.tilPeriode() }?.let { Arbeidsgiverperiode(it) },
                         aktuellDagsinntekt.daglig,
                         dekningsgrunnlag.daglig,
                         skjæringstidspunkt,

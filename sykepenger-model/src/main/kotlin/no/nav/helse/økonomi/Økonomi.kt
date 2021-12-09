@@ -1,11 +1,13 @@
 package no.nav.helse.økonomi
 
 import no.nav.helse.Grunnbeløp
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Alder
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -17,6 +19,7 @@ import kotlin.math.roundToInt
 internal class Økonomi private constructor(
     private val grad: Prosentdel,
     private var arbeidsgiverRefusjonsbeløp: Inntekt = INGEN,
+    private var arbeidsgiverperiode: Arbeidsgiverperiode? = null,
     private val aktuellDagsinntekt: Inntekt? = null,
     private val dekningsgrunnlag: Inntekt? = null,
     private val skjæringstidspunkt: LocalDate? = null,
@@ -34,7 +37,7 @@ internal class Økonomi private constructor(
         internal fun sykdomsgrad(grad: Prosentdel) =
             Økonomi(grad)
 
-        internal fun ikkeBetalt() = sykdomsgrad(0.prosent)
+        internal fun ikkeBetalt(arbeidsgiverperiode: Arbeidsgiverperiode? = null) = sykdomsgrad(0.prosent).arbeidsgiverperiode(arbeidsgiverperiode)
 
         internal fun totalSykdomsgrad(økonomiList: List<Økonomi>) =
             Inntekt.vektlagtGjennomsnitt(økonomiList.map { it.grad() to it.dekningsgrunnlag!! })
@@ -164,6 +167,9 @@ internal class Økonomi private constructor(
     internal fun arbeidsgiverRefusjon(refusjonsbeløp: Inntekt?) =
         tilstand.arbeidsgiverRefusjon(this, refusjonsbeløp)
 
+    internal fun arbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode?) =
+        tilstand.arbeidsgiverperiode(this, arbeidsgiverperiode)
+
     internal fun lås() = tilstand.lås(this)
 
     internal fun låsOpp() = tilstand.låsOpp(this)
@@ -179,6 +185,11 @@ internal class Økonomi private constructor(
                   personbeløp,
                   er6GBegrenset ->
             map["grad"] = grad
+            map.compute("arbeidsgiverperiode") { _, _ ->
+                arbeidsgiverperiode?.toList()?.grupperSammenhengendePerioder()?.map {
+                    mapOf("fom" to it.start, "tom" to it.endInclusive)
+                }
+            }
             map["arbeidsgiverRefusjonsbeløp"] = arbeidsgiverRefusjonsbeløp
             map.compute("skjæringstidspunkt") { _, _ -> skjæringstidspunkt }
             map.compute("totalGrad") { _, _ -> totalGrad }
@@ -371,11 +382,30 @@ internal class Økonomi private constructor(
             throw IllegalStateException("Kan ikke låse opp Økonomi i tilstand ${this::class.simpleName}")
         }
 
+        internal open fun arbeidsgiverperiode(økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?): Økonomi {
+            throw IllegalStateException("Kan ikke sette arbeidsgiverperiode i tilstand ${this::class.simpleName}")
+        }
+
         internal open fun arbeidsgiverRefusjon(økonomi: Økonomi, refusjonsbeløp: Inntekt?): Økonomi {
             throw IllegalStateException("Kan ikke sette arbeidsgiverrefusjonsbeløp i tilstand ${this::class.simpleName}")
         }
 
         internal object KunGrad : Tilstand() {
+
+            override fun lås(økonomi: Økonomi) = økonomi
+
+            override fun arbeidsgiverperiode(økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?) = Økonomi(
+                grad = økonomi.grad,
+                arbeidsgiverbeløp = økonomi.arbeidsgiverbeløp,
+                arbeidsgiverperiode = arbeidsgiverperiode,
+                tilstand = HarArbeidsgiverperiode
+            )
+
+            override fun <R> medData(økonomi: Økonomi, lambda: MedØkonomiData<R>) =
+                lambda(økonomi.grad.toDouble(), økonomi.arbeidsgiverRefusjonsbeløp.reflection { _, _, daglig, _ -> daglig }, null, null, null, null, null, null, null)
+        }
+
+        internal object HarArbeidsgiverperiode : Tilstand() {
 
             override fun inntekt(
                 økonomi: Økonomi,
@@ -384,12 +414,13 @@ internal class Økonomi private constructor(
                 skjæringstidspunkt: LocalDate?
             ) = Økonomi(
                 grad = økonomi.grad,
+                arbeidsgiverperiode = økonomi.arbeidsgiverperiode,
                 arbeidsgiverRefusjonsbeløp = økonomi.arbeidsgiverRefusjonsbeløp,
                 aktuellDagsinntekt = aktuellDagsinntekt,
                 dekningsgrunnlag = dekningsgrunnlag,
-                skjæringstidspunkt = skjæringstidspunkt
+                skjæringstidspunkt = skjæringstidspunkt,
+                tilstand = HarInntekt
             )
-                .also { other -> other.tilstand = HarInntekt }
 
             override fun lås(økonomi: Økonomi) = økonomi
 

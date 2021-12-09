@@ -110,28 +110,24 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     private fun sykedagIArbeidsgiverperioden(arbeidsgiverperiode: Arbeidsgiverperiode, dato: LocalDate) {
         addArbeidsgiverdag(dato, arbeidsgiverperiode)
     }
-    private fun sykedagEtterArbeidsgiverperioden(dato: LocalDate, økonomi: Økonomi) {
-        // future feature: fortell økonomi om arbeidsgiverperioden i nåværendeArbeidsgivperiode
-        // addNAVdag(dato, økonomi.arbeidsgiverperiode(nåværendeArbeidsgiverperiode))
-        addNAVdag(dato, økonomi)
+    private fun sykedagEtterArbeidsgiverperioden(arbeidsgiverperiode: Arbeidsgiverperiode?, dato: LocalDate, økonomi: Økonomi) {
+        addNAVdag(dato, økonomi.arbeidsgiverperiode(arbeidsgiverperiode))
     }
-    private fun sykHelgedagEtterArbeidsgiverperioden(dato: LocalDate, økonomi: Økonomi) {
-        // future feature: fortell økonomi om arbeidsgiverperioden i nåværendeArbeidsgivperiode
-        addNAVHelgedag(dato, økonomi)
+    private fun sykHelgedagEtterArbeidsgiverperioden(arbeidsgiverperiode: Arbeidsgiverperiode?, dato: LocalDate, økonomi: Økonomi) {
+        addNAVHelgedag(dato, økonomi.arbeidsgiverperiode(arbeidsgiverperiode))
     }
-    private fun foreldetSykedagEtterArbeidsgiverperioden(dato: LocalDate, økonomi: Økonomi) {
-        // future feature: fortell økonomi om arbeidsgiverperioden i nåværendeArbeidsgivperiode
-        addForeldetDag(dato, økonomi)
+    private fun foreldetSykedagEtterArbeidsgiverperioden(arbeidsgiverperiode: Arbeidsgiverperiode?, dato: LocalDate, økonomi: Økonomi) {
+        addForeldetDag(dato, økonomi.arbeidsgiverperiode(arbeidsgiverperiode))
     }
 
-    private fun egenmeldingsdagEtterArbeidsgiverperioden(dato: LocalDate) {
-        addAvvistDag(dato)
+    private fun egenmeldingsdagEtterArbeidsgiverperioden(arbeidsgiverperiode: Arbeidsgiverperiode?, dato: LocalDate) {
+        addAvvistDag(dato, Økonomi.ikkeBetalt(arbeidsgiverperiode))
     }
 
     private fun fridagIArbeidsgiverperioden(arbeidsgiverperiode: Arbeidsgiverperiode, dato: LocalDate) = sykedagIArbeidsgiverperioden(arbeidsgiverperiode, dato)
 
-    private fun fridagUtenforArbeidsgiverperioden(dato: LocalDate) {
-        addFridag(dato)
+    private fun fridagUtenforArbeidsgiverperioden(arbeidsgiverperiode: Arbeidsgiverperiode?, dato: LocalDate) {
+        addFridag(dato, Økonomi.ikkeBetalt(arbeidsgiverperiode))
     }
 
     private fun arbeidsdag(dato: LocalDate) {
@@ -139,23 +135,23 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     }
 
     private fun sykedag(dato: LocalDate, økonomi: Økonomi) {
-        teller.inkrementer(dato, Default({ sykedagIArbeidsgiverperioden(it, dato) }, { sykedagEtterArbeidsgiverperioden(dato, økonomi) }))
+        teller.inkrementer(dato, Default({ sykedagIArbeidsgiverperioden(it, dato) }, { sykedagEtterArbeidsgiverperioden(it, dato, økonomi) }))
     }
 
     private fun sykHelgedag(dato: LocalDate, økonomi: Økonomi) {
-        teller.inkrementer(dato, Default ({ sykedagIArbeidsgiverperioden(it, dato) }, { sykHelgedagEtterArbeidsgiverperioden(dato, økonomi) }))
+        teller.inkrementer(dato, Default ({ sykedagIArbeidsgiverperioden(it, dato) }, { sykHelgedagEtterArbeidsgiverperioden(it, dato, økonomi) }))
     }
 
     private fun foreldetSykedag(dato: LocalDate, økonomi: Økonomi) {
-        teller.inkrementer(dato, Default ({ sykedagIArbeidsgiverperioden(it, dato) }, { foreldetSykedagEtterArbeidsgiverperioden(dato, økonomi) }))
+        teller.inkrementer(dato, Default ({ sykedagIArbeidsgiverperioden(it, dato) }, { foreldetSykedagEtterArbeidsgiverperioden(it, dato, økonomi) }))
     }
 
     private fun fridag(dato: LocalDate) {
-        teller.inkrementEllerDekrement(dato, Default ({ fridagIArbeidsgiverperioden(it, dato) }, { fridagUtenforArbeidsgiverperioden(dato) }))
+        teller.inkrementEllerDekrement(dato, Default ({ fridagIArbeidsgiverperioden(it, dato) }, { fridagUtenforArbeidsgiverperioden(it, dato) }))
     }
 
     private fun egenmeldingsdag(dato: LocalDate) {
-        teller.inkrementer(dato, Default ({ sykedagIArbeidsgiverperioden(it, dato) }, { egenmeldingsdagEtterArbeidsgiverperioden(dato) }))
+        teller.inkrementer(dato, Default ({ sykedagIArbeidsgiverperioden(it, dato) }, { egenmeldingsdagEtterArbeidsgiverperioden(it, dato) }))
     }
 
     final override fun visitDag(dag: Dag.Arbeidsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
@@ -254,9 +250,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     }
 
     private fun addArbeidsgiverdag(dato: LocalDate, arbeidsgiverperiode: Arbeidsgiverperiode) {
-        // future feature: fortell økonomi om arbeidsgiverperioden i nåværendeArbeidsgivperiode
-        // tidslinje.addArbeidsgiverperiodedag(dato, Økonomi.ikkeBetalt().arbeidsgiverperiode(arbeidsgiverperiode).inntektIfNotNull(dato))
-        tidslinje.addArbeidsgiverperiodedag(dato, Økonomi.ikkeBetalt().inntektIfNotNull(dato))
+        tidslinje.addArbeidsgiverperiodedag(dato, Økonomi.ikkeBetalt(arbeidsgiverperiode).inntektIfNotNull(dato))
     }
 
     private fun addNAVdag(dato: LocalDate, økonomi: Økonomi) {
@@ -289,12 +283,12 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         tidslinje.addArbeidsdag(dato, Økonomi.ikkeBetalt().inntektIfNotNull(dato))
     }
 
-    private fun addAvvistDag(dato: LocalDate) {
-        tidslinje.addAvvistDag(dato, Økonomi.ikkeBetalt().inntektIfNotNull(dato), listOf(Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode))
+    private fun addAvvistDag(dato: LocalDate, økonomi: Økonomi) {
+        tidslinje.addAvvistDag(dato, økonomi.inntektIfNotNull(dato), listOf(Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode))
     }
 
-    private fun addFridag(dato: LocalDate) {
-        tidslinje.addFridag(dato, Økonomi.ikkeBetalt().inntektIfNotNull(dato))
+    private fun addFridag(dato: LocalDate, økonomi: Økonomi) {
+        tidslinje.addFridag(dato, økonomi.inntektIfNotNull(dato))
     }
 }
 

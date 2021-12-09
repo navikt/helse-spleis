@@ -1,8 +1,10 @@
 package no.nav.helse.økonomi
 
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.serde.PersonData
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.PeriodeData
 import no.nav.helse.serde.PersonData.UtbetalingstidslinjeData
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -29,7 +31,8 @@ internal class CreateØkonomiTest {
             }
             // Indirect test of Økonomi state is KunGrad
             assertThrows<IllegalStateException> { listOf(økonomi).betal(1.januar) }
-            assertDoesNotThrow { økonomi.inntekt(1200.daglig, skjæringstidspunkt = 1.januar) }
+            assertThrows<IllegalStateException> { økonomi.inntekt(1200.daglig, skjæringstidspunkt = 1.januar) }
+            assertDoesNotThrow { økonomi.arbeidsgiverperiode(null).inntekt(1200.daglig, skjæringstidspunkt = 1.januar) }
         }
     }
 
@@ -95,9 +98,11 @@ internal class CreateØkonomiTest {
         arbeidsgiverbeløp: Double? = null,
         personbeløp: Double? = null,
         totalGrad: Prosentdel? = null,
-        er6GBegrenset: Boolean = false
+        er6GBegrenset: Boolean = false,
+        arbeidsgiverperiode: List<Periode>? = null
     ) = UtbetalingstidslinjeData.UtbetalingsdagData(
         UtbetalingstidslinjeData.TypeData.NavDag,
+        arbeidsgiverperiode?.map { PeriodeData(it.start, it.endInclusive) },
         aktuellDagsinntekt,
         dekningsgrunnlag,
         1.januar,

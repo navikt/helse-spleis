@@ -48,7 +48,8 @@ internal class ArbeidsgiverperiodetellerTest {
         assertEquals(17, strategi.antallSykedagerEllerFridagerSomIkkeInngårIArbeidsgiverperiodetelling)
         assertEquals(1, observatør.arbeidsgiverperioder())
         assertEquals(sykedager[0], observatør.arbeidsgiverperiode(0))
-        (1.februar til 17.februar).forEach { assertEquals(1.januar til 16.januar, strategi.arbeidsgiverperiodeFor(it)) }
+        (17.januar til 31.januar).forEach { assertNull(strategi.arbeidsgiverperiodeFor(it)) }
+        (1.februar til 17.februar).forEach { assertEquals(sykedager[0], strategi.arbeidsgiverperiodeFor(it)) }
     }
 
     @Test
@@ -76,6 +77,28 @@ internal class ArbeidsgiverperiodetellerTest {
         assertEquals(1.januar til 16.januar, observatør.arbeidsgiverperiode(0))
         (1.januar til 16.januar).forEach { assertEquals(1.januar til it, strategi.arbeidsgiverperiodeFor(it)) }
         (17.januar til 1.februar).forEach { assertEquals(1.januar til 16.januar, strategi.arbeidsgiverperiodeFor(it)) }
+    }
+
+    @Test
+    fun `hengende fridager teller ikke med i verken arbeidsgiverperiode- eller oppholdstelling`() {
+        val fridager = 1.januar til 15.januar
+        fridager.feriedager()
+        teller.avslutt()
+        assertEquals(0, strategi.antallDagerSomInngårIArbeidsgiverperiodetelling)
+        assertEquals(15, strategi.antallSykedagerEllerFridagerSomIkkeInngårIArbeidsgiverperiodetelling)
+        fridager.forEach { assertNull(strategi.arbeidsgiverperiodeFor(it)) }
+    }
+
+    @Test
+    fun `hengende fridager i påbegynt arbeidsgiverperiode teller ikke med i verken arbeidsgiverperiode- eller oppholdstelling`() {
+        val sykedager = 1.januar til 2.januar
+        val fridager = 3.januar til 15.januar
+        sykedager.tell()
+        fridager.feriedager()
+        teller.avslutt()
+        assertEquals(2, strategi.antallDagerSomInngårIArbeidsgiverperiodetelling)
+        assertEquals(13, strategi.antallSykedagerEllerFridagerSomIkkeInngårIArbeidsgiverperiodetelling)
+        fridager.forEach { assertEquals(sykedager, strategi.arbeidsgiverperiodeFor(it)) }
     }
 
     @Test
@@ -164,6 +187,21 @@ internal class ArbeidsgiverperiodetellerTest {
     }
 
     @Test
+    fun `ferie etter arbeidsdag tilbakestiller arbeidsgiverperioden`() {
+        (1.januar til 2.januar).tell()
+        (3.januar til 4.januar).oppholdsdager()
+        (5.januar til 18.januar).feriedager()
+        19.januar.tell()
+        assertTrue(observatør.tilbakestillingAvArbeidsgiverperiodetelling(18.januar))
+        assertEquals(0, observatør.arbeidsgiverperioder())
+        assertEquals(14, strategi.antallSykedagerEllerFridagerSomIkkeInngårIArbeidsgiverperiodetelling)
+        assertEquals(3, strategi.antallDagerSomInngårIArbeidsgiverperiodetelling)
+        (3.januar til 4.januar).forEach { assertNull(strategi.arbeidsgiverperiodeFor(it)) }
+        (5.januar til 17.januar).forEach { assertEquals(1.januar til 2.januar, strategi.arbeidsgiverperiodeFor(it))  }
+        assertNull(strategi.arbeidsgiverperiodeFor(18.januar))
+    }
+
+    @Test
     fun `teller oppholdsdager på nytt etter at vi har møtt en sykedag`() {
         (1.januar til 31.januar).tell()
         (1.februar til 15.februar).oppholdsdager() // 15 dager er ikke nok til tilbakestill
@@ -218,7 +256,7 @@ internal class ArbeidsgiverperiodetellerTest {
     }
 
     @Test
-    fun `infotryg - teller oppholdsdager på nytt etter at vi har møtt en sykedag`() {
+    fun `infotrygd - teller oppholdsdager på nytt etter at vi har møtt en sykedag`() {
         teller { dagen -> dagen == 1.januar }
         (1.januar til 31.januar).tell()
         (1.februar til 15.februar).oppholdsdager() // 15 dager er ikke nok til tilbakestill
