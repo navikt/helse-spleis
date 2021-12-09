@@ -1858,4 +1858,48 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertEquals(0, a1.inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistDagTeller)
         assertEquals(0, a2.inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistDagTeller)
     }
+
+    @ForventetFeil("https://trello.com/c/k21yUamv")
+    @Test
+    fun `Sykmelding og søknad kommer for to perioder før inntektsmelding kommer - skal fortsatt vilkårsprøve kun én gang`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 18.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 18.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 18.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 18.januar, 100.prosent), orgnummer = a2)
+
+        håndterSykmelding(Sykmeldingsperiode(20.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(22.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(20.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(22.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 20.januar, orgnummer = a1)
+        // Sender med en annen inntekt enn i forrige IM for å kunne asserte på at det er denne vi bruker
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 32000.månedlig, førsteFraværsdag = 22.januar, orgnummer = a2)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 31000.månedlig,  orgnummer = a2)
+
+        val sammenligningsgrunnlag = Inntektsvurdering(listOf(
+            sammenligningsgrunnlag(a1, 20.januar, INNTEKT.repeat(12)),
+            sammenligningsgrunnlag(a2, 20.januar, 32000.månedlig.repeat(12))
+        ))
+        val sykepengegrunnlag = InntektForSykepengegrunnlag(listOf(
+            grunnlag(a1, 20.januar, INNTEKT.repeat(12)),
+            grunnlag(a2, 20.januar, INNTEKT.repeat(12))
+        ))
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = sammenligningsgrunnlag, inntektsvurderingForSykepengegrunnlag = sykepengegrunnlag, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
+
+        assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer=a1)
+        assertTilstand(2.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer=a2)
+    }
 }
