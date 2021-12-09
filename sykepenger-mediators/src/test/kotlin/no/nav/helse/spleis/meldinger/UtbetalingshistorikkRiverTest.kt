@@ -32,6 +32,11 @@ internal class UtbetalingshistorikkRiverTest : RiverTest() {
         assertErrors(gammelHistorikk)
     }
 
+    @Test
+    fun `ignorerer behov med flere løsninger enn bare Sykepengehistorikk`() {
+        assertIgnored(komposittbehov)
+    }
+
     @Language("JSON")
     private val json = """
       {
@@ -274,6 +279,30 @@ internal class UtbetalingshistorikkRiverTest : RiverTest() {
           },
           "@final": true,
           "@besvart": "${LocalDateTime.now().minusHours(2)}"
+        }
+    """
+
+    @Language("JSON")
+    private val komposittbehov = """
+        {
+          "@event_name": "behov",
+          "tilstand": "AVVENTER_HISTORIKK",
+          "historikkFom": "2015-12-08",
+          "historikkTom": "2019-12-08",
+          "@behov": [
+            "Sykepengehistorikk", "Dagpenger"
+          ],
+          "@id": "${UUID.randomUUID()}",
+          "@opprettet": "2020-01-24T11:25:00",
+          "aktørId": "aktørId",
+          "fødselsnummer": "08127411111",
+          "organisasjonsnummer": "orgnummer",
+          "vedtaksperiodeId": "${UUID.randomUUID()}",
+          "@løsning": {
+            "Sykepengehistorikk": []
+          },
+          "@final": true,
+          "@besvart": "${LocalDateTime.now()}"
         }
     """
 }
