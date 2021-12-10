@@ -41,16 +41,9 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     }
 
     private var harArbeidsgiverperiode = false
-    // future feature: koble på økonomi-objektene?
-    private var nåværendeArbeidsgiverperiode: Arbeidsgiverperiode? = null
 
     override fun arbeidsgiverperiodeFerdig(arbeidsgiverperiode: Arbeidsgiverperiode, dagen: LocalDate) {
         harArbeidsgiverperiode = true
-        nåværendeArbeidsgiverperiode = arbeidsgiverperiode
-    }
-
-    override fun ingenArbeidsgiverperiode(dagen: LocalDate) {
-        nåværendeArbeidsgiverperiode = null
     }
 
     internal fun forlengelsestrategi(strategi: Forlengelsestrategi) {
@@ -111,7 +104,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         addArbeidsgiverdag(dato, arbeidsgiverperiode)
     }
     private fun sykedagEtterArbeidsgiverperioden(arbeidsgiverperiode: Arbeidsgiverperiode?, dato: LocalDate, økonomi: Økonomi) {
-        addNAVdag(dato, økonomi.arbeidsgiverperiode(arbeidsgiverperiode))
+        addNAVdag(dato, arbeidsgiverperiode, økonomi.arbeidsgiverperiode(arbeidsgiverperiode))
     }
     private fun sykHelgedagEtterArbeidsgiverperioden(arbeidsgiverperiode: Arbeidsgiverperiode?, dato: LocalDate, økonomi: Økonomi) {
         addNAVHelgedag(dato, økonomi.arbeidsgiverperiode(arbeidsgiverperiode))
@@ -253,10 +246,9 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         tidslinje.addArbeidsgiverperiodedag(dato, Økonomi.ikkeBetalt(arbeidsgiverperiode).inntektIfNotNull(dato))
     }
 
-    private fun addNAVdag(dato: LocalDate, økonomi: Økonomi) {
+    private fun addNAVdag(dato: LocalDate, arbeidsgiverperiode: Arbeidsgiverperiode?, økonomi: Økonomi) {
         if (harArbeidsgiverperiode) {
-            val arbeidsgiverperioder = nåværendeArbeidsgiverperiode?.toList() ?: emptyList()
-            aktivitetslogg.`§8-17 ledd 1 bokstav a`(true, arbeidsgiverperioder, førsteNavdag = dato)
+            aktivitetslogg.`§8-17 ledd 1 bokstav a`(true, arbeidsgiverperiode?.toList() ?: emptyList(), førsteNavdag = dato)
             harArbeidsgiverperiode = false
         }
 
