@@ -11,6 +11,15 @@ import org.junit.jupiter.api.Test
 internal class HistorieEnArbeidsgiverTest : HistorieTest() {
 
     @Test
+    fun `spleis - infotrygd - spleis`() {
+        historie(utbetaling(17.januar, 31.januar))
+        addSykdomshistorikk(AG1, sykedager(1.januar, 16.januar))
+        addSykdomshistorikk(AG1, sykedager(1.februar, 28.februar))
+        val utbetalingstidslinje = beregn(AG1, 1.februar til 28.februar, 1.januar)
+        assertEquals(1.februar til 28.februar, utbetalingstidslinje.avgrensSisteArbeidsgiverperiode(1.februar til 28.februar).periode())
+    }
+
+    @Test
     fun `spleis - infotrygd - gap, ny agp - infotrygd (kort) - spleis`() {
         historie(
             utbetaling(1.februar, 28.februar),

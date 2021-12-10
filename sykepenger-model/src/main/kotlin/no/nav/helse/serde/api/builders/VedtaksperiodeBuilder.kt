@@ -12,6 +12,7 @@ import no.nav.helse.somFødselsnummer
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 import java.time.LocalDate
@@ -56,6 +57,8 @@ internal class VedtaksperiodeBuilder(
         (hentWarnings(vedtaksperiode) + (grunnlagsdataBuilder?.meldingsreferanseId?.let { hentVilkårsgrunnlagWarnings(vedtaksperiode, id, it) }
             ?: emptyList())).distinctBy { it.melding }
 
+    private var vedtaksperiodeUtbetalingstidslinjeperiode = LocalDate.MIN til LocalDate.MIN
+    private var inUtbetaling = false
     private val beregnetSykdomstidslinje = mutableListOf<SykdomstidslinjedagDTO>()
 
     private var utbetalingId: UUID? = null
@@ -97,7 +100,7 @@ internal class VedtaksperiodeBuilder(
             tilstand = tilstandstypeDTO,
             fullstendig = true,
             utbetalingsreferanse = null, // TODO: deprecated/never set in SpeilBuilder
-            utbetalingstidslinje = utbetaling?.utbetalingstidslinje?.filter { it.dato in periode } ?: emptyList(),
+            utbetalingstidslinje = utbetaling?.utbetalingstidslinje?.filter { it.dato in vedtaksperiodeUtbetalingstidslinjeperiode } ?: emptyList(),
             sykdomstidslinje = beregnetSykdomstidslinje,
             vilkår = vilkår,
             inntektsmeldingId = inntektsmeldingId,
@@ -131,7 +134,7 @@ internal class VedtaksperiodeBuilder(
     }
 
     private fun buildUfullstendigUtbetalingstidslinje(utbetaling: UtbetalingshistorikkElementDTO.UtbetalingDTO?) =
-        utbetaling?.utbetalingstidslinje?.filter { it.dato in periode }?.map { UfullstendigVedtaksperiodedagDTO(
+        utbetaling?.utbetalingstidslinje?.filter { it.dato in vedtaksperiodeUtbetalingstidslinjeperiode }?.map { UfullstendigVedtaksperiodedagDTO(
             type = it.type,
             dato = it.dato
         )} ?: emptyList()
@@ -238,9 +241,34 @@ internal class VedtaksperiodeBuilder(
         stønadsdager: Int,
         beregningId: UUID
     ) {
+        this.inUtbetaling = true
         if (tilstand is Utbetaling.Forkastet) return
         this.utbetalingId = id
         this.beregningIder.add(beregningId)
+    }
+
+    override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
+        if (this.inUtbetaling || tidslinje.isEmpty()) return
+        this.vedtaksperiodeUtbetalingstidslinjeperiode = tidslinje.periode()
+    }
+
+    override fun postVisitUtbetaling(
+        utbetaling: Utbetaling,
+        id: UUID,
+        korrelasjonsId: UUID,
+        type: Utbetalingtype,
+        tilstand: Utbetaling.Tilstand,
+        tidsstempel: LocalDateTime,
+        oppdatert: LocalDateTime,
+        arbeidsgiverNettoBeløp: Int,
+        personNettoBeløp: Int,
+        maksdato: LocalDate,
+        forbrukteSykedager: Int?,
+        gjenståendeSykedager: Int?,
+        stønadsdager: Int,
+        beregningId: UUID
+    ) {
+        this.inUtbetaling = false
     }
 
     override fun postVisitVedtaksperiode(

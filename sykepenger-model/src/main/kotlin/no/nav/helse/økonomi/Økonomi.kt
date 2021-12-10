@@ -404,6 +404,7 @@ internal class Økonomi private constructor(
             override fun arbeidsgiverperiode(økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?) = Økonomi(
                 grad = økonomi.grad,
                 arbeidsgiverbeløp = økonomi.arbeidsgiverbeløp,
+                arbeidsgiverRefusjonsbeløp = økonomi.arbeidsgiverRefusjonsbeløp,
                 arbeidsgiverperiode = arbeidsgiverperiode,
                 tilstand = HarArbeidsgiverperiode
             )

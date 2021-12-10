@@ -31,8 +31,9 @@ abstract class Utbetalingsperiode(
 
     private fun nyDag(utbetalingstidslinje: Utbetalingstidslinje, dato: LocalDate) {
         val økonomi = Økonomi.sykdomsgrad(grad).arbeidsgiverperiode(null)
-        if (dato.erHelg()) utbetalingstidslinje.addHelg(dato, økonomi.inntekt(Inntekt.INGEN, skjæringstidspunkt = dato))
-        else utbetalingstidslinje.addNAVdag(dato, økonomi.inntekt(inntekt, skjæringstidspunkt = dato))
+        if (dato.erHelg()) return utbetalingstidslinje.addHelg(dato, økonomi.inntekt(Inntekt.INGEN, skjæringstidspunkt = dato))
+        val refusjon = if (!harBrukerutbetaling()) inntekt else Inntekt.INGEN
+        utbetalingstidslinje.addNAVdag(dato, økonomi.inntekt(inntekt, skjæringstidspunkt = dato).arbeidsgiverRefusjon(refusjon))
     }
 
     override fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode) {

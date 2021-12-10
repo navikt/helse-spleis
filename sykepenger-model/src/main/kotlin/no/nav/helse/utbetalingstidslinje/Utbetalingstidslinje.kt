@@ -264,12 +264,17 @@ internal class Utbetalingstidslinje private constructor(
 
     internal fun avgrensSisteArbeidsgiverperiode(periode: Periode): Utbetalingstidslinje {
         val tidslinje = subset(periode)
-        val oppdatertPeriode = tidslinje.map { it.økonomi }.avgrensTilArbeidsgiverperiode(periode)?.takeUnless { justertForArbeidsgiverperiode ->
-            val periodeMellom = justertForArbeidsgiverperiode.start til periode.start.minusDays(1)
-            subset(periodeMellom).any { it is NavDag || it is NavHelgDag || it is ForeldetDag }
-        } ?: return tidslinje
-        return subset(oppdatertPeriode)
+        val oppdatertPeriode = tidslinje
+            .map { it.økonomi }
+            .avgrensTilArbeidsgiverperiode(periode)
+            ?.takeUnless { justertForArbeidsgiverperiode ->
+                harUtbetalinger(justertForArbeidsgiverperiode.start til periode.start.minusDays(1))
+            }
+        return oppdatertPeriode?.let { subset(it) } ?: tidslinje
     }
+
+    private fun harUtbetalinger(periode: Periode) =
+        subset(periode).any { it is UkjentDag || it is NavDag || it is NavHelgDag || it is ForeldetDag }
 
     internal fun kutt(sisteDato: LocalDate) = subset(LocalDate.MIN til sisteDato)
 
