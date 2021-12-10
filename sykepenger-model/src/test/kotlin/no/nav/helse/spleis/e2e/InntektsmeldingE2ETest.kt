@@ -1504,4 +1504,23 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             AVSLUTTET
         )
     }
+
+    @ForventetFeil("https://trello.com/c/XIOyu6UI/1644-inntektsmelding-med-ny-arbeidsgiverperiode-midt-i-forlengelse-%C3%B8delegger-for-tidligere-utbetaling")
+    @Test
+    fun `IM som treffer periode i AVSLUTTET_UTEN_UTBETALING etter en utbetalt periode skal ikke fylle perioden med arbeidsdager fra fom til skjæringstidspunktet`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Ferie(1.februar, 28.februar))
+        håndterYtelser(2.vedtaksperiode)
+
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
+        håndterInntektsmelding(listOf(27.februar til 14.mars), førsteFraværsdag = 27.februar)
+        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+        // Siden vi tidligere fylte ut 2. vedtaksperiode med arbeidsdager ville vi regne ut et ekstra skjæringstidspunkt i den sammenhengende perioden
+        assertEquals(listOf(1.januar), person.skjæringstidspunkter())
+        håndterYtelser(3.vedtaksperiode)
+        håndterSimulering(3.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+        assertEquals(17.januar til 31.mars, inspektør.utbetalinger.last().periode)
+    }
 }
