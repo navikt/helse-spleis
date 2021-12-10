@@ -118,7 +118,8 @@ internal interface VilkårsgrunnlagHistorikkVisitor : InntekthistorikkVisitor {
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
         harMinimumInntekt: Boolean?,
         vurdertOk: Boolean,
-        meldingsreferanseId: UUID?
+        meldingsreferanseId: UUID?,
+        vilkårsgrunnlagId: UUID
     ) {}
     fun postVisitGrunnlagsdata(
         skjæringstidspunkt: LocalDate,
@@ -131,16 +132,23 @@ internal interface VilkårsgrunnlagHistorikkVisitor : InntekthistorikkVisitor {
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
         harMinimumInntekt: Boolean?,
         vurdertOk: Boolean,
-        meldingsreferanseId: UUID?
+        meldingsreferanseId: UUID?,
+        vilkårsgrunnlagId: UUID
     ) {}
     fun preVisitInfotrygdVilkårsgrunnlag(
         infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag,
         skjæringstidspunkt: LocalDate,
-        sykepengegrunnlag: Sykepengegrunnlag
+        sykepengegrunnlag: Sykepengegrunnlag,
+        vilkårsgrunnlagId: UUID
     ) {
     }
 
-    fun postVisitInfotrygdVilkårsgrunnlag(skjæringstidspunkt: LocalDate, infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag) {}
+    fun postVisitInfotrygdVilkårsgrunnlag(
+        infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag,
+        skjæringstidspunkt: LocalDate,
+        sykepengegrunnlag: Sykepengegrunnlag,
+        vilkårsgrunnlagId: UUID
+    ) {}
     fun preVisitSykepengegrunnlag(
         sykepengegrunnlag1: Sykepengegrunnlag,
         sykepengegrunnlag: Inntekt,

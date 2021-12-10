@@ -92,6 +92,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
     }
 
     internal interface VilkårsgrunnlagElement {
+        fun skjæringstidspunkt(): LocalDate
         fun valider(aktivitetslogg: Aktivitetslogg)
         fun accept(skjæringstidspunkt: LocalDate, vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor)
         fun sykepengegrunnlag(): Inntekt
@@ -105,6 +106,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
     }
 
     internal class Grunnlagsdata(
+        private val skjæringstidspunkt: LocalDate,
         private val sykepengegrunnlag: Sykepengegrunnlag,
         private val sammenligningsgrunnlag: Inntekt,
         private val avviksprosent: Prosent?,
@@ -113,11 +115,14 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         private val medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
         private val harMinimumInntekt: Boolean?,
         private val vurdertOk: Boolean,
-        private val meldingsreferanseId: UUID?
+        private val meldingsreferanseId: UUID?,
+        private val vilkårsgrunnlagId: UUID
     ) : VilkårsgrunnlagElement {
         private companion object {
             private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
         }
+
+        override fun skjæringstidspunkt() = skjæringstidspunkt
 
         override fun valider(aktivitetslogg: Aktivitetslogg) {}
 
@@ -144,7 +149,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 medlemskapstatus,
                 harMinimumInntekt,
                 vurdertOk,
-                meldingsreferanseId
+                meldingsreferanseId,
+                vilkårsgrunnlagId
             )
             sykepengegrunnlag.accept(vilkårsgrunnlagHistorikkVisitor)
             vilkårsgrunnlagHistorikkVisitor.postVisitGrunnlagsdata(
@@ -158,7 +164,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 medlemskapstatus,
                 harMinimumInntekt,
                 vurdertOk,
-                meldingsreferanseId
+                meldingsreferanseId,
+                vilkårsgrunnlagId
             )
         }
 
@@ -179,6 +186,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         }
 
         internal fun kopierMedMinimumInntektsvurdering(minimumInntektVurdering: Boolean) = Grunnlagsdata(
+            skjæringstidspunkt = skjæringstidspunkt,
             sykepengegrunnlag = sykepengegrunnlag,
             sammenligningsgrunnlag = sammenligningsgrunnlag,
             avviksprosent = avviksprosent,
@@ -187,7 +195,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             medlemskapstatus = medlemskapstatus,
             harMinimumInntekt = minimumInntektVurdering,
             vurdertOk = vurdertOk && minimumInntektVurdering,
-            meldingsreferanseId = meldingsreferanseId
+            meldingsreferanseId = meldingsreferanseId,
+            vilkårsgrunnlagId = UUID.randomUUID()
         ).also {
             sikkerLogg.info("Oppretter nytt Grunnlagsdata med harMinimumInntekt=$minimumInntektVurdering")
         }
@@ -200,6 +209,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             minimumInntektVurdering: Boolean,
             meldingsreferanseId: UUID
         ) = Grunnlagsdata(
+            skjæringstidspunkt = skjæringstidspunkt,
             sykepengegrunnlag = sykepengegrunnlag,
             sammenligningsgrunnlag = sammenligningsgrunnlag,
             avviksprosent = avviksprosent,
@@ -208,20 +218,27 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             medlemskapstatus = medlemskapstatus,
             harMinimumInntekt = minimumInntektVurdering,
             vurdertOk = minimumInntektVurdering && sammenligningsgrunnlagVurdering,
-            meldingsreferanseId = meldingsreferanseId
+            meldingsreferanseId = meldingsreferanseId,
+            vilkårsgrunnlagId = UUID.randomUUID()
         )
 
         fun harInntektFraSkatt(): Boolean = inntektsopplysningPerArbeidsgiver().values.any { it is Inntektshistorikk.SkattComposite }
     }
 
-    internal class InfotrygdVilkårsgrunnlag(private val sykepengegrunnlag: Sykepengegrunnlag) : VilkårsgrunnlagElement {
+    internal class InfotrygdVilkårsgrunnlag(
+        private val skjæringstidspunkt: LocalDate,
+        private val sykepengegrunnlag: Sykepengegrunnlag,
+        private val vilkårsgrunnlagId: UUID = UUID.randomUUID()
+    ) : VilkårsgrunnlagElement {
+        override fun skjæringstidspunkt() = skjæringstidspunkt
+
         override fun valider(aktivitetslogg: Aktivitetslogg) {
         }
 
         override fun accept(skjæringstidspunkt: LocalDate, vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {
-            vilkårsgrunnlagHistorikkVisitor.preVisitInfotrygdVilkårsgrunnlag(this, skjæringstidspunkt, sykepengegrunnlag)
+            vilkårsgrunnlagHistorikkVisitor.preVisitInfotrygdVilkårsgrunnlag(this, skjæringstidspunkt, sykepengegrunnlag, vilkårsgrunnlagId)
             sykepengegrunnlag.accept(vilkårsgrunnlagHistorikkVisitor)
-            vilkårsgrunnlagHistorikkVisitor.postVisitInfotrygdVilkårsgrunnlag(skjæringstidspunkt, this)
+            vilkårsgrunnlagHistorikkVisitor.postVisitInfotrygdVilkårsgrunnlag(this, skjæringstidspunkt, sykepengegrunnlag, vilkårsgrunnlagId)
         }
 
         override fun sykepengegrunnlag() = sykepengegrunnlag.sykepengegrunnlag

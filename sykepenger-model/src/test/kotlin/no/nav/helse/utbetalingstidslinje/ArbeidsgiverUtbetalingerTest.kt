@@ -52,6 +52,7 @@ internal class ArbeidsgiverUtbetalingerTest {
     @Test
     fun `avgrenset betaling pga minimum inntekt`() {
         val vilkårsgrunnlagElement = VilkårsgrunnlagHistorikk.Grunnlagsdata(
+            skjæringstidspunkt = 1.januar,
             sykepengegrunnlag = sykepengegrunnlag(1000.månedlig),
             sammenligningsgrunnlag = 1000.månedlig,
             avviksprosent = Prosent.prosent(0.0),
@@ -60,7 +61,8 @@ internal class ArbeidsgiverUtbetalingerTest {
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             harMinimumInntekt = false,
             vurdertOk = false,
-            meldingsreferanseId = UUID.randomUUID()
+            meldingsreferanseId = UUID.randomUUID(),
+            vilkårsgrunnlagId = UUID.randomUUID()
         )
         undersøke(UNG_PERSON_FNR_2018, 5.NAV(12), 2.HELG, 5.NAV, vilkårsgrunnlagElement = vilkårsgrunnlagElement)
 
@@ -377,6 +379,7 @@ internal class ArbeidsgiverUtbetalingerTest {
 
         vilkårsgrunnlagHistorikk.lagre(
             1.januar, vilkårsgrunnlagElement ?: VilkårsgrunnlagHistorikk.Grunnlagsdata(
+                skjæringstidspunkt = 1.januar,
                 sykepengegrunnlag = sykepengegrunnlag(30000.månedlig),
                 sammenligningsgrunnlag = 30000.månedlig,
                 avviksprosent = Prosent.prosent(0.0),
@@ -385,7 +388,8 @@ internal class ArbeidsgiverUtbetalingerTest {
                 medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
                 harMinimumInntekt = true,
                 vurdertOk = true,
-                meldingsreferanseId = UUID.randomUUID()
+                meldingsreferanseId = UUID.randomUUID(),
+                vilkårsgrunnlagId = UUID.randomUUID()
             )
         )
 

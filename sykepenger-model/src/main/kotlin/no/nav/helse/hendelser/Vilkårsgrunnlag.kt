@@ -50,6 +50,7 @@ class Vilkårsgrunnlag(
         val minimumInntektvurderingOk = validerMinimumInntekt(this, fødselsnummer, skjæringstidspunkt, grunnlagForSykepengegrunnlag)
 
         grunnlagsdata = VilkårsgrunnlagHistorikk.Grunnlagsdata(
+            skjæringstidspunkt = skjæringstidspunkt,
             sykepengegrunnlag = grunnlagForSykepengegrunnlag,
             sammenligningsgrunnlag = sammenligningsgrunnlag,
             avviksprosent = inntektsvurdering.avviksprosent(),
@@ -58,7 +59,8 @@ class Vilkårsgrunnlag(
             medlemskapstatus = medlemskapsvurdering.medlemskapstatus,
             harMinimumInntekt = minimumInntektvurderingOk,
             vurdertOk = inntektsvurderingOk && opptjeningvurderingOk && medlemskapsvurderingOk && minimumInntektvurderingOk,
-            meldingsreferanseId = meldingsreferanseId()
+            meldingsreferanseId = meldingsreferanseId(),
+            vilkårsgrunnlagId = UUID.randomUUID()
         )
         return this
     }

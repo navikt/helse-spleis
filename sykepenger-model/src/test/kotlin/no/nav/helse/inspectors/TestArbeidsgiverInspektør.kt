@@ -115,7 +115,8 @@ internal class TestArbeidsgiverInspektør(
             medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
             harMinimumInntekt: Boolean?,
             vurdertOk: Boolean,
-            meldingsreferanseId: UUID?
+            meldingsreferanseId: UUID?,
+            vilkårsgrunnlagId: UUID
         ) {
             vilkårsgrunnlagHistorikk.add(skjæringstidspunkt to grunnlagsdata)
         }

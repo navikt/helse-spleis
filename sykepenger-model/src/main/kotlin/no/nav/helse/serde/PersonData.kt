@@ -217,10 +217,12 @@ internal data class PersonData(
         private val medlemskapstatus: JsonMedlemskapstatus?,
         private val harMinimumInntekt: Boolean?,
         private val vurdertOk: Boolean?,
-        private val meldingsreferanseId: UUID?
+        private val meldingsreferanseId: UUID?,
+        private val vilkårsgrunnlagId: UUID
     ) {
         internal fun parseDataForVilkårsvurdering(): Pair<LocalDate, VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement> = skjæringstidspunkt to when (type) {
             GrunnlagsdataType.Vilkårsprøving -> VilkårsgrunnlagHistorikk.Grunnlagsdata(
+                skjæringstidspunkt = skjæringstidspunkt,
                 sykepengegrunnlag = sykepengegrunnlag.parseSykepengegrunnlag(),
                 sammenligningsgrunnlag = sammenligningsgrunnlag!!.årlig,
                 avviksprosent = avviksprosent?.ratio,
@@ -233,9 +235,14 @@ internal data class PersonData(
                 },
                 harMinimumInntekt = harMinimumInntekt,
                 vurdertOk = vurdertOk!!,
-                meldingsreferanseId = meldingsreferanseId
+                meldingsreferanseId = meldingsreferanseId,
+                vilkårsgrunnlagId = vilkårsgrunnlagId
             )
-            GrunnlagsdataType.Infotrygd -> VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(sykepengegrunnlag.parseSykepengegrunnlag())
+            GrunnlagsdataType.Infotrygd -> VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(
+                skjæringstidspunkt = skjæringstidspunkt,
+                sykepengegrunnlag = sykepengegrunnlag.parseSykepengegrunnlag(),
+                vilkårsgrunnlagId = vilkårsgrunnlagId
+            )
         }
 
         enum class GrunnlagsdataType {

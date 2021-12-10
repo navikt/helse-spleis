@@ -77,7 +77,8 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
 
     private fun grunnlagsdata(skjæringstidspunkt: LocalDate, vurdertOk: Boolean = true, harOpptjening: Boolean = true, harMinimumInntekt: Boolean = true) =
         VilkårsgrunnlagHistorikk.Grunnlagsdata(
-            Sykepengegrunnlag(emptyList(), skjæringstidspunkt, Aktivitetslogg()),
+            skjæringstidspunkt = skjæringstidspunkt,
+            sykepengegrunnlag = Sykepengegrunnlag(emptyList(), skjæringstidspunkt, Aktivitetslogg()),
             sammenligningsgrunnlag = Inntekt.INGEN,
             avviksprosent = 0.0.prosent,
             antallOpptjeningsdagerErMinst = 28,
@@ -85,7 +86,8 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             harMinimumInntekt = harMinimumInntekt,
             vurdertOk = vurdertOk,
-            meldingsreferanseId = UUID.randomUUID()
+            meldingsreferanseId = UUID.randomUUID(),
+            vilkårsgrunnlagId = UUID.randomUUID()
         )
 
     private val testgrunnlag
@@ -102,6 +104,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
 
             override fun gjelderFlereArbeidsgivere() = false
             override fun begrunnelserForAvvisteVilkår(alder: Alder, skjæringstidspunkt: LocalDate): List<Begrunnelse> = emptyList()
+            override fun skjæringstidspunkt() = 1.januar
 
             override fun valider(aktivitetslogg: Aktivitetslogg) {}
         }

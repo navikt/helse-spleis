@@ -615,7 +615,8 @@ internal class JsonBuilder : AbstractBuilder() {
             medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
             harMinimumInntekt: Boolean?,
             vurdertOk: Boolean,
-            meldingsreferanseId: UUID?
+            meldingsreferanseId: UUID?,
+            vilkårsgrunnlagId: UUID
         ) {
             val sykepengegrunnlagMap = mutableMapOf<String, Any>()
             vilkårsgrunnlagElement.add(
@@ -634,7 +635,8 @@ internal class JsonBuilder : AbstractBuilder() {
                     },
                     "harMinimumInntekt" to harMinimumInntekt,
                     "vurdertOk" to vurdertOk,
-                    "meldingsreferanseId" to meldingsreferanseId
+                    "meldingsreferanseId" to meldingsreferanseId,
+                    "vilkårsgrunnlagId" to vilkårsgrunnlagId
                 )
             )
 
@@ -644,14 +646,16 @@ internal class JsonBuilder : AbstractBuilder() {
         override fun preVisitInfotrygdVilkårsgrunnlag(
             infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag,
             skjæringstidspunkt: LocalDate,
-            sykepengegrunnlag: Sykepengegrunnlag
+            sykepengegrunnlag: Sykepengegrunnlag,
+            vilkårsgrunnlagId: UUID
         ) {
             val sykepengegrunnlagMap = mutableMapOf<String, Any>()
             vilkårsgrunnlagElement.add(
                 mapOf(
                     "skjæringstidspunkt" to skjæringstidspunkt,
                     "type" to "Infotrygd",
-                    "sykepengegrunnlag" to sykepengegrunnlagMap
+                    "sykepengegrunnlag" to sykepengegrunnlagMap,
+                    "vilkårsgrunnlagId" to vilkårsgrunnlagId
                 )
             )
 
@@ -696,14 +700,17 @@ internal class JsonBuilder : AbstractBuilder() {
             medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
             harMinimumInntekt: Boolean?,
             vurdertOk: Boolean,
-            meldingsreferanseId: UUID?
+            meldingsreferanseId: UUID?,
+            vilkårsgrunnlagId: UUID
         ) {
             popState()
         }
 
         override fun postVisitInfotrygdVilkårsgrunnlag(
+            infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag,
             skjæringstidspunkt: LocalDate,
-            infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag
+            sykepengegrunnlag: Sykepengegrunnlag,
+            vilkårsgrunnlagId: UUID
         ) {
             popState()
         }

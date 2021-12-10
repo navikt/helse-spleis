@@ -161,7 +161,8 @@ internal class VilkårsgrunnlagBuilder(
             medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
             harMinimumInntekt: Boolean?,
             vurdertOk: Boolean,
-            meldingsreferanseId: UUID?
+            meldingsreferanseId: UUID?,
+            vilkårsgrunnlagId: UUID
         ) {
             val compositeSykepengegrunnlag = SykepengegrunnlagBuilder(sykepengegrunnlag, sammenligningsgrunnlagBuilder).build()
             val minimumInntekt = InntektBuilder(person.minimumInntekt(skjæringstidspunkt)).build()
@@ -193,7 +194,8 @@ internal class VilkårsgrunnlagBuilder(
         override fun preVisitInfotrygdVilkårsgrunnlag(
             infotrygdVilkårsgrunnlag: InfotrygdVilkårsgrunnlag,
             skjæringstidspunkt: LocalDate,
-            sykepengegrunnlag: Sykepengegrunnlag
+            sykepengegrunnlag: Sykepengegrunnlag,
+            vilkårsgrunnlagId: UUID
         ) {
             val byggetSykepengegrunnlag = SykepengegrunnlagBuilder(sykepengegrunnlag, sammenligningsgrunnlagBuilder).build()
             vilkårsgrunnlag.putIfAbsent(

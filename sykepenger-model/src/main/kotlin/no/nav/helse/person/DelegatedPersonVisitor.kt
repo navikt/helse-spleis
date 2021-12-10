@@ -61,7 +61,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
         harMinimumInntekt: Boolean?,
         vurdertOk: Boolean,
-        meldingsreferanseId: UUID?
+        meldingsreferanseId: UUID?,
+        vilkårsgrunnlagId: UUID
     ) {
         delegatee.postVisitGrunnlagsdata(
             skjæringstidspunkt,
@@ -74,12 +75,18 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             medlemskapstatus,
             harMinimumInntekt,
             vurdertOk,
-            meldingsreferanseId
+            meldingsreferanseId,
+            vilkårsgrunnlagId
         )
     }
 
-    override fun postVisitInfotrygdVilkårsgrunnlag(skjæringstidspunkt: LocalDate, infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag) {
-        delegatee.postVisitInfotrygdVilkårsgrunnlag(skjæringstidspunkt, infotrygdVilkårsgrunnlag)
+    override fun postVisitInfotrygdVilkårsgrunnlag(
+        infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag,
+        skjæringstidspunkt: LocalDate,
+        sykepengegrunnlag: Sykepengegrunnlag,
+        vilkårsgrunnlagId: UUID
+    ) {
+        delegatee.postVisitInfotrygdVilkårsgrunnlag(infotrygdVilkårsgrunnlag, skjæringstidspunkt, sykepengegrunnlag, vilkårsgrunnlagId)
     }
 
     override fun preVisitSykepengegrunnlag(
@@ -183,7 +190,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
         harMinimumInntekt: Boolean?,
         vurdertOk: Boolean,
-        meldingsreferanseId: UUID?
+        meldingsreferanseId: UUID?,
+        vilkårsgrunnlagId: UUID
     ) {
         delegatee.preVisitGrunnlagsdata(
             skjæringstidspunkt,
@@ -196,16 +204,18 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             medlemskapstatus,
             harMinimumInntekt,
             vurdertOk,
-            meldingsreferanseId
+            meldingsreferanseId,
+            vilkårsgrunnlagId
         )
     }
 
     override fun preVisitInfotrygdVilkårsgrunnlag(
         infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag,
         skjæringstidspunkt: LocalDate,
-        sykepengegrunnlag: Sykepengegrunnlag
+        sykepengegrunnlag: Sykepengegrunnlag,
+        vilkårsgrunnlagId: UUID
     ) {
-        delegatee.preVisitInfotrygdVilkårsgrunnlag(infotrygdVilkårsgrunnlag, skjæringstidspunkt, sykepengegrunnlag)
+        delegatee.preVisitInfotrygdVilkårsgrunnlag(infotrygdVilkårsgrunnlag, skjæringstidspunkt, sykepengegrunnlag, vilkårsgrunnlagId)
     }
 
     override fun postVisitInnslag(innslag: VilkårsgrunnlagHistorikk.Innslag, id: UUID, opprettet: LocalDateTime) {

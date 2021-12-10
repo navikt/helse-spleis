@@ -197,6 +197,7 @@ internal class HistoriePeriodetypeTest {
         })
         val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
         vilkårsgrunnlagHistorikk.lagre(1.januar, VilkårsgrunnlagHistorikk.Grunnlagsdata(
+            skjæringstidspunkt = 1.januar,
             sykepengegrunnlag = sykepengegrunnlag(30000.månedlig),
             sammenligningsgrunnlag = 30000.månedlig,
             avviksprosent = Prosent.prosent(0.0),
@@ -205,7 +206,8 @@ internal class HistoriePeriodetypeTest {
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             harMinimumInntekt = true,
             vurdertOk = true,
-            meldingsreferanseId = UUID.randomUUID()
+            meldingsreferanseId = UUID.randomUUID(),
+            vilkårsgrunnlagId = UUID.randomUUID()
         ))
         arbeidsgiver.addInntekt(
             inntektsmelding = Inntektsmelding(

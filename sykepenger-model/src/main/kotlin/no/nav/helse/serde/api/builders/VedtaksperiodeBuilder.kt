@@ -317,7 +317,8 @@ private class GrunnlagsdataBuilder(skjæringstidspunkt: LocalDate, grunnlagsdata
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
         harMinimumInntekt: Boolean?,
         vurdertOk: Boolean,
-        meldingsreferanseId: UUID?
+        meldingsreferanseId: UUID?,
+        vilkårsgrunnlagId: UUID
     ) {
         this.medlemskapstatus = when (medlemskapstatus) {
             Medlemskapsvurdering.Medlemskapstatus.Ja -> MedlemskapstatusDTO.JA

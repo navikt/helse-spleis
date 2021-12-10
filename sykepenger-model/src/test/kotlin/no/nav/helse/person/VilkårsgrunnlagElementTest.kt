@@ -1,6 +1,7 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Prosent.Companion.prosent
@@ -42,9 +43,21 @@ internal class VilkårsgrunnlagElementTest {
     }
 
     private fun grunnlagsdata(avviksprosent: Prosent? = null): VilkårsgrunnlagHistorikk.Grunnlagsdata {
-        return VilkårsgrunnlagHistorikk.Grunnlagsdata(Sykepengegrunnlag(1000.daglig, emptyList(), 1000.daglig, Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET), 1000.daglig, avviksprosent, 0, true, Medlemskapsvurdering.Medlemskapstatus.Ja, true, true, UUID.randomUUID())
+        return VilkårsgrunnlagHistorikk.Grunnlagsdata(
+            skjæringstidspunkt = 1.januar,
+            sykepengegrunnlag = Sykepengegrunnlag(1000.daglig, emptyList(), 1000.daglig, Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET),
+            sammenligningsgrunnlag = 1000.daglig,
+            avviksprosent = avviksprosent,
+            antallOpptjeningsdagerErMinst = 0,
+            harOpptjening = true,
+            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+            harMinimumInntekt = true,
+            vurdertOk = true,
+            meldingsreferanseId = UUID.randomUUID(),
+            vilkårsgrunnlagId = UUID.randomUUID()
+        )
     }
 
     private fun infotrygdgrunnlag() =
-        VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(Sykepengegrunnlag(1000.daglig, emptyList(), 1000.daglig, Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET))
+        VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(1.januar, Sykepengegrunnlag(1000.daglig, emptyList(), 1000.daglig, Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET))
 }

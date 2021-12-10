@@ -307,6 +307,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         )
 
         val vilkårsgrunnlagElement = VilkårsgrunnlagHistorikk.Grunnlagsdata(
+            skjæringstidspunkt = 1.januar,
             sykepengegrunnlag = sykepengegrunnlag(inntekt, listOf(
                 ArbeidsgiverInntektsopplysning(
                     ORGNUMMER,
@@ -320,7 +321,8 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             harMinimumInntekt = null,
             vurdertOk = true,
-            meldingsreferanseId = UUID.randomUUID()
+            meldingsreferanseId = UUID.randomUUID(),
+            vilkårsgrunnlagId = UUID.randomUUID()
         )
 
         // Gjøres utelukkende for å teste oppførsel som ikke skal kunne skje lenger
@@ -363,6 +365,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt)
         val vilkårsgrunnlagElement = VilkårsgrunnlagHistorikk.Grunnlagsdata(
+            skjæringstidspunkt = 1.januar,
             sykepengegrunnlag = sykepengegrunnlag(
                 inntekt,
                 listOf(
@@ -379,7 +382,8 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             harMinimumInntekt = null,
             vurdertOk = true,
-            meldingsreferanseId = UUID.randomUUID()
+            meldingsreferanseId = UUID.randomUUID(),
+            vilkårsgrunnlagId = UUID.randomUUID()
         )
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -432,6 +436,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt)
         val vilkårsgrunnlagElement = VilkårsgrunnlagHistorikk.Grunnlagsdata(
+            skjæringstidspunkt = 1.januar,
             sykepengegrunnlag = sykepengegrunnlag(
                 inntekt,
                 listOf(
@@ -448,7 +453,8 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             harMinimumInntekt = null,
             vurdertOk = true,
-            meldingsreferanseId = UUID.randomUUID()
+            meldingsreferanseId = UUID.randomUUID(),
+            vilkårsgrunnlagId = UUID.randomUUID()
         )
         håndterYtelser(1.vedtaksperiode)
 

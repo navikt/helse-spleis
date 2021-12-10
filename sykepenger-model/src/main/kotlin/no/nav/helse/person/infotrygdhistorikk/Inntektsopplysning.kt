@@ -113,7 +113,7 @@ class Inntektsopplysning private constructor(
             forEach {
                 vilkårsgrunnlagHistorikk.lagre(
                     it.sykepengerFom,
-                    VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(sykepengegrunnlagFor(it.sykepengerFom))
+                    VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(it.sykepengerFom, sykepengegrunnlagFor(it.sykepengerFom))
                 )
             }
         }
