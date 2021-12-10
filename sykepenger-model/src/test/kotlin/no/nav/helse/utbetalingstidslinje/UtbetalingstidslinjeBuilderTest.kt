@@ -32,6 +32,30 @@ internal class UtbetalingstidslinjeBuilderTest {
     }
 
     @Test
+    fun `avgrenser ikke dersom arbeidsgiverperioden er ukjent`() {
+        32.F.utbetalingslinjer()
+        assertEquals(tidslinje.periode(), tidslinje.avgrensSisteArbeidsgiverperiode(tidslinje.periode()).periode())
+    }
+
+    @Test
+    fun `avgrenser ikke dersom arbeidsgiverperioden er i perioden`() {
+        15.S.utbetalingslinjer()
+        assertEquals(tidslinje.periode(), tidslinje.avgrensSisteArbeidsgiverperiode(tidslinje.periode()).periode())
+    }
+
+    @Test
+    fun `avgrenser til siste arbeidsgiverperiode selv med arbeidsdager mellom`() {
+        (16.S + 4.A + 5.S).utbetalingslinjer()
+        assertEquals(tidslinje.periode(), tidslinje.avgrensSisteArbeidsgiverperiode(21.januar til 25.januar).periode())
+    }
+
+    @Test
+    fun `avgrenser ikke til siste arbeidsgiverperiode dersom det er utbetalingsdager mellom`() {
+        (16.S + 4.A + 5.S + 10.S).utbetalingslinjer()
+        assertEquals(26.januar til 4.februar, tidslinje.avgrensSisteArbeidsgiverperiode(26.januar til 4.februar).periode())
+    }
+
+    @Test
     fun `to dager blir betalt av arbeidsgiver`() {
         2.S.utbetalingslinjer()
         assertEquals(1, tidslinje.inspektør.unikedager.size)

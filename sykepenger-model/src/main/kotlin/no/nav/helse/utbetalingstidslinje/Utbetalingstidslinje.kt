@@ -19,6 +19,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
+import no.nav.helse.økonomi.Økonomi.Companion.avgrensTilArbeidsgiverperiode
 import java.time.DayOfWeek
 import java.time.LocalDate
 import kotlin.reflect.KClass
@@ -259,6 +260,15 @@ internal class Utbetalingstidslinje private constructor(
         if (isEmpty()) return Utbetalingstidslinje()
         if (periode == periode()) return this
         return Utbetalingstidslinje(utbetalingsdager.filter { it.dato in periode }.toMutableList())
+    }
+
+    internal fun avgrensSisteArbeidsgiverperiode(periode: Periode): Utbetalingstidslinje {
+        val tidslinje = subset(periode)
+        val oppdatertPeriode = tidslinje.map { it.økonomi }.avgrensTilArbeidsgiverperiode(periode)?.takeUnless { justertForArbeidsgiverperiode ->
+            val periodeMellom = justertForArbeidsgiverperiode.start til periode.start.minusDays(1)
+            subset(periodeMellom).any { it is NavDag || it is NavHelgDag || it is ForeldetDag }
+        } ?: return tidslinje
+        return subset(oppdatertPeriode)
     }
 
     internal fun kutt(sisteDato: LocalDate) = subset(LocalDate.MIN til sisteDato)

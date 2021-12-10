@@ -1,6 +1,7 @@
 package no.nav.helse.økonomi
 
 import no.nav.helse.Grunnbeløp
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.UtbetalingsdagVisitor
@@ -41,6 +42,12 @@ internal class Økonomi private constructor(
 
         internal fun totalSykdomsgrad(økonomiList: List<Økonomi>) =
             Inntekt.vektlagtGjennomsnitt(økonomiList.map { it.grad() to it.dekningsgrunnlag!! })
+
+        internal fun List<Økonomi>.avgrensTilArbeidsgiverperiode(periode: Periode): Periode? {
+            return map { it.arbeidsgiverperiode }.firstOrNull()?.firstOrNull()?.let { førsteArbeidsgiverperiodedag ->
+                Periode(førsteArbeidsgiverperiodedag, periode.endInclusive)
+            }?.takeUnless { it == periode }
+        }
 
         internal fun betal(økonomiList: List<Økonomi>, virkningsdato: LocalDate): List<Økonomi> = økonomiList.also {
             delteUtbetalinger(it)

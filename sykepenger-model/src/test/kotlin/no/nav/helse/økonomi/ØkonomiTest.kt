@@ -1,14 +1,44 @@
 package no.nav.helse.økonomi
 
+import no.nav.helse.hendelser.til
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import no.nav.helse.økonomi.Økonomi.Companion.avgrensTilArbeidsgiverperiode
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 internal class ØkonomiTest {
+
+    @Test
+    fun `avgrenser ikke periode dersom arbeidsgiverperioden er null`() {
+        val periode = 1.januar til 31.januar
+        val økonomi = Økonomi.sykdomsgrad(100.prosent).arbeidsgiverperiode(null)
+        assertNull(listOf(økonomi).avgrensTilArbeidsgiverperiode(periode))
+        assertEquals(periode, periode) { "periode skal ikke muteres" }
+    }
+
+    @Test
+    fun `avgrenser ikke periode dersom arbeidsgiverperioden lik perioden`() {
+        val periode = 1.januar til 31.januar
+        val økonomi = Økonomi.sykdomsgrad(100.prosent).arbeidsgiverperiode(Arbeidsgiverperiode(listOf(
+            periode.start til periode.start.plusDays(16)
+        )))
+        assertNull(listOf(økonomi).avgrensTilArbeidsgiverperiode(periode))
+        assertEquals(periode, periode) { "periode skal ikke muteres" }
+    }
+
+    @Test
+    fun `avgrenser periode til arbeidsgiverperioden`() {
+        val arbeidsgiverperiode = 1.januar til 16.januar
+        val periode = 17.januar til 31.januar
+        val økonomi = Økonomi.sykdomsgrad(100.prosent).arbeidsgiverperiode(Arbeidsgiverperiode(listOf(arbeidsgiverperiode)))
+        assertEquals(arbeidsgiverperiode.merge(periode), listOf(økonomi).avgrensTilArbeidsgiverperiode(periode))
+        assertEquals(periode, periode) { "periode skal ikke muteres" }
+    }
 
     @Test
     fun `kan ikke sette dagsats mer enn en gang`() {
