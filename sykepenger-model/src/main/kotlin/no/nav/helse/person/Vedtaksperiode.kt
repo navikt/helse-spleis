@@ -2696,7 +2696,9 @@ internal class Vedtaksperiode private constructor(
             filter { it.utbetalinger.harId(utbetalingId) }.map { it.id }
 
         internal fun List<Vedtaksperiode>.harOverlappendeUtbetaling(periode: Periode) =
-            flatMap { it.utbetalinger }.any { it.periode.overlapperMed(periode) }
+            filter { it.tilstand !is AvsluttetUtenUtbetaling }
+                .flatMap { it.utbetalinger }
+                .any { it.periode.overlapperMed(periode) }
 
         internal fun List<Vedtaksperiode>.periode(): Periode {
             val fom = minOf { it.periode.start }

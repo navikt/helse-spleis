@@ -10,7 +10,8 @@ import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
@@ -28,6 +29,24 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
 
         assertTrue(observatør.opprettOppgaveEvent().isEmpty())
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any{søknadHendelseId in it.hendelser})
+    }
+
+    @Test
+    fun `søknad som er nære utbetalingsperioden avsluttet uten utbetaling skal ikke til ny kø `() {
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 15.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 15.februar, 100.prosent), Søknad.Søknadsperiode.Ferie(1.februar, 15.februar))
+        håndterInntektsmelding(listOf(1.februar til 15.februar), førsteFraværsdag = 1.februar)
+        håndterYtelser()
+        håndterVilkårsgrunnlag()
+        håndterYtelser()
+
+        håndterSykmelding(Sykmeldingsperiode(16.februar, 25.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(16.februar, 20.februar, 80.prosent))
+        // Søknad som ikke støttes pga dekker ikke 21- 25.februar
+        val søknadHendelseId = håndterSøknad(Sykdom(16.februar, 20.februar, 80.prosent))
+
+        assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().isEmpty())
+        assertTrue(observatør.opprettOppgaveEvent().any { søknadHendelseId in it.hendelser })
     }
 
     @Test
