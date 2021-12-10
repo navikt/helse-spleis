@@ -150,7 +150,8 @@ class SerialisertPerson(val json: String) {
             V128FjerneUgyldigSimuleringsResultat(),
             V129KopiereSimuleringsResultatTilOppdrag(),
             V130TrimmeUtbetalingstidslinje(),
-            V131FjernHelgedagFraSykdomstidslinje()
+            V131FjernHelgedagFraSykdomstidslinje(),
+            V132FiksSykdomshistorikkPeriode()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)
