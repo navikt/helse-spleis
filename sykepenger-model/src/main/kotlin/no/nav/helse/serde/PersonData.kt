@@ -24,7 +24,6 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
-import no.nav.helse.utbetalingstidslinje.*
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
@@ -617,6 +616,7 @@ internal data class PersonData(
                             aktuellDagsinntekt?.daglig,
                             dekningsgrunnlag?.daglig,
                             skjæringstidspunkt,
+                            null,
                             totalGrad?.prosent,
                             arbeidsgiverbeløp?.daglig,
                             personbeløp?.daglig,
@@ -1246,6 +1246,7 @@ internal data class PersonData(
             private val aktuellDagsinntekt: Double,
             private val dekningsgrunnlag: Double,
             private val skjæringstidspunkt: LocalDate?,
+            private val grunnbeløpgrense: Double?,
             private val totalGrad: Double?,
             private val begrunnelse: BegrunnelseData?,
             private val begrunnelser: List<BegrunnelseData>?,
@@ -1269,6 +1270,7 @@ internal data class PersonData(
                         aktuellDagsinntekt.daglig,
                         dekningsgrunnlag.daglig,
                         skjæringstidspunkt,
+                        grunnbeløpgrense?.årlig,
                         totalGrad?.prosent,
                         arbeidsgiverbeløp?.daglig,
                         personbeløp?.daglig,

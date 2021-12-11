@@ -106,6 +106,7 @@ internal class CreateØkonomiTest {
         aktuellDagsinntekt,
         dekningsgrunnlag,
         1.januar,
+        null,
         totalGrad?.toDouble(),
         null,
         null,

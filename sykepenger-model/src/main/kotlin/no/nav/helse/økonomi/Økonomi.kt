@@ -24,6 +24,7 @@ internal class Økonomi private constructor(
     private val aktuellDagsinntekt: Inntekt? = null,
     private val dekningsgrunnlag: Inntekt? = null,
     private val skjæringstidspunkt: LocalDate? = null,
+    private var grunnbeløpgrense: Inntekt? = null,
     private var totalGrad: Prosentdel? = null,
     private var arbeidsgiverbeløp: Inntekt? = null,
     private var personbeløp: Inntekt? = null,
@@ -51,17 +52,14 @@ internal class Økonomi private constructor(
 
         internal fun betal(økonomiList: List<Økonomi>, virkningsdato: LocalDate): List<Økonomi> = økonomiList.also {
             delteUtbetalinger(it)
+            val skjæringstidspunkt = requireNotNull(it.firstNotNullOfOrNull { it.skjæringstidspunkt }) { "Fant ingen økonomiobjekter med skjæringstidspunkt" }
+            økonomiList.forEach { it.grunnbeløpgrense = Grunnbeløp.`6G`.beløp(skjæringstidspunkt, virkningsdato) }
             økonomiList.forEach { it.totalGrad = totalSykdomsgrad(økonomiList) }
-            fordelBeløp(
-                it,
-                maksbeløp(requireNotNull(it.firstOrNull { it.skjæringstidspunkt != null }) { "Fant ingen økonomiobjekter med skjæringstidspunkt" },
-                    virkningsdato
-                )
-            )
+            fordelBeløp(it, maksbeløp(økonomiList.first()))
         }
 
-        private fun maksbeløp(økonomi: Økonomi, virkningsdato: LocalDate) =
-            (Grunnbeløp.`6G`.dagsats(økonomi.skjæringstidspunkt!!, virkningsdato) * økonomi.totalGrad!!).rundTilDaglig()
+        private fun maksbeløp(økonomi: Økonomi) =
+            (økonomi.grunnbeløpgrense?.rundTilDaglig()!! * økonomi.totalGrad!!).rundTilDaglig()
 
         private fun delteUtbetalinger(økonomiList: List<Økonomi>) = økonomiList.forEach { it.betal() }
 
@@ -199,6 +197,7 @@ internal class Økonomi private constructor(
             }
             map["arbeidsgiverRefusjonsbeløp"] = arbeidsgiverRefusjonsbeløp
             map.compute("skjæringstidspunkt") { _, _ -> skjæringstidspunkt }
+            map.compute("grunnbeløpgrense") { _, _ -> grunnbeløpgrense?.reflection { årlig, _, _, _ -> årlig } }
             map.compute("totalGrad") { _, _ -> totalGrad }
             map.compute("dekningsgrunnlag") { _, _ -> dekningsgrunnlag }
             map.compute("aktuellDagsinntekt") { _, _ -> aktuellDagsinntekt }
@@ -427,6 +426,7 @@ internal class Økonomi private constructor(
                 aktuellDagsinntekt = aktuellDagsinntekt,
                 dekningsgrunnlag = dekningsgrunnlag,
                 skjæringstidspunkt = skjæringstidspunkt,
+                grunnbeløpgrense = skjæringstidspunkt?.let { Grunnbeløp.`6G`.beløp(it) },
                 tilstand = HarInntekt
             )
 
