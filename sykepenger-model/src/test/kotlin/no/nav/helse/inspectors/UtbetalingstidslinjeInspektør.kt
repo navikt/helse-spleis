@@ -35,6 +35,7 @@ internal class UtbetalingstidslinjeInspektør(utbetalingstidslinje: Utbetalingst
     val avvistedatoer = mutableListOf<LocalDate>()
     val avvistedager = mutableListOf<AvvistDag>()
 
+    val økonomi = mutableListOf<Økonomi>()
     val unikedager = mutableSetOf<KClass<out Utbetalingstidslinje.Utbetalingsdag>>()
 
     internal val size get() =
@@ -62,6 +63,7 @@ internal class UtbetalingstidslinjeInspektør(utbetalingstidslinje: Utbetalingst
     internal fun totalInntekt() = totalInntekt
 
     private fun collect(dag: Utbetalingstidslinje.Utbetalingsdag, dato: LocalDate) {
+        økonomi.add(dag.økonomi)
         unikedager.add(dag::class)
         første(dag, dato)
         sistedag = dag
