@@ -1,6 +1,5 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.ForventetFeil
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Aktivitetslogg
@@ -21,7 +20,6 @@ internal class MaksimumUtbetalingFlereArbeidsgivereTest {
         aktivitetslogg = Aktivitetslogg()
     }
 
-    @ForventetFeil("https://trello.com/c/zqE9l5Bh")
     @Test
     fun `betaler flere arbeidsgivere over mai -- nytt grunnbeløp skal ikke gjelde`() {
         val ag1 = { tidslinjeOf(10.NAV(dekningsgrunnlag = 3000), startDato = 25.april) to 21610.0 }

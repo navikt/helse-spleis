@@ -16,7 +16,6 @@ import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
-import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 import no.nav.helse.økonomi.Økonomi.Companion.avgrensTilArbeidsgiverperiode
@@ -148,7 +147,7 @@ internal class Utbetalingstidslinje private constructor(
     }
 
     private fun addUkjentDag(dato: LocalDate) =
-        Økonomi.ikkeBetalt().inntekt(Inntekt.INGEN, skjæringstidspunkt = dato).let { økonomi ->
+        Økonomi.ikkeBetalt().let { økonomi ->
             if (dato.erHelg()) addFridag(dato, økonomi) else addUkjentDag(dato, økonomi)
         }
 
@@ -279,10 +278,7 @@ internal class Utbetalingstidslinje private constructor(
     internal fun kutt(sisteDato: LocalDate) = subset(LocalDate.MIN til sisteDato)
 
     internal operator fun get(dato: LocalDate) =
-        if (isEmpty() || dato !in periode()) UkjentDag(
-            dato,
-            Økonomi.ikkeBetalt().inntekt(Inntekt.INGEN, skjæringstidspunkt = dato)
-        )
+        if (isEmpty() || dato !in periode()) UkjentDag(dato, Økonomi.ikkeBetalt())
         else utbetalingsdager.first { it.dato == dato }
 
     override fun toString(): String {

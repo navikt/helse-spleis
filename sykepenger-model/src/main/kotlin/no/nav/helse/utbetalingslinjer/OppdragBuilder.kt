@@ -72,9 +72,9 @@ internal class OppdragBuilder(
     ) {
         økonomi.medData { grad, aktuellDagsinntekt ->
             if (utbetalingslinjer.isNotEmpty() && fagområde.kanLinjeUtvides(linje, dag.økonomi, grad))
-                tilstand.betalingsdag(dag, dato, grad, aktuellDagsinntekt!!)
+                tilstand.betalingsdag(dag, dato, grad, aktuellDagsinntekt)
             else
-                tilstand.nyLinje(dag, dato, grad, aktuellDagsinntekt!!)
+                tilstand.nyLinje(dag, dato, grad, aktuellDagsinntekt)
         }
     }
 

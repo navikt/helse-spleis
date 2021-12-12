@@ -23,7 +23,7 @@ internal class UtbetalingstidslinjeBuilder(
             utbetalingstidslinjeMap.add(
                 IkkeUtbetaltDagDTO(
                     type = DagtypeDTO.Arbeidsdag,
-                    inntekt = aktuellDagsinntekt!!,
+                    inntekt = aktuellDagsinntekt,
                     dato = dato
                 )
             )
@@ -39,7 +39,7 @@ internal class UtbetalingstidslinjeBuilder(
             utbetalingstidslinjeMap.add(
                 IkkeUtbetaltDagDTO(
                     type = DagtypeDTO.ArbeidsgiverperiodeDag,
-                    inntekt = aktuellDagsinntekt!!,
+                    inntekt = aktuellDagsinntekt,
                     dato = dato
                 )
             )

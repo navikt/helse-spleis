@@ -24,12 +24,8 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
-import no.nav.helse.utbetalingstidslinje.Begrunnelse
-import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
+import no.nav.helse.utbetalingstidslinje.*
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.*
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
@@ -584,9 +580,10 @@ internal data class PersonData(
                 private val type: JsonDagType,
                 private val kilde: KildeData,
                 private val grad: Double,
+                private val arbeidsgiverperiode: List<ArbeidsgiverData.PeriodeData>?,
                 private val arbeidsgiverRefusjonsbeløp: Double,
-                private val aktuellDagsinntekt: Double?,
-                private val dekningsgrunnlag: Double?,
+                private val aktuellDagsinntekt: Double,
+                private val dekningsgrunnlag: Double,
                 private val skjæringstidspunkt: LocalDate?,
                 private val totalGrad: Double?,
                 private val arbeidsgiverbeløp: Int?,
@@ -612,9 +609,9 @@ internal data class PersonData(
                         .call(
                             grad.prosent,
                             arbeidsgiverRefusjonsbeløp.daglig,
-                            null,
-                            aktuellDagsinntekt?.daglig,
-                            dekningsgrunnlag?.daglig,
+                            arbeidsgiverperiode?.map { it.tilPeriode() }?.let { Arbeidsgiverperiode(it) },
+                            aktuellDagsinntekt.daglig,
+                            dekningsgrunnlag.daglig,
                             skjæringstidspunkt,
                             null,
                             totalGrad?.prosent,

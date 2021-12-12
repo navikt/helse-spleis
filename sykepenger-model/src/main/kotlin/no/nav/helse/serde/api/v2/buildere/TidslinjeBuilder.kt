@@ -1,8 +1,6 @@
 package no.nav.helse.serde.api.v2.buildere
 
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.person.*
 import no.nav.helse.serde.PersonData
 import no.nav.helse.serde.api.BegrunnelseDTO
@@ -175,7 +173,7 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
             utbetalingstidslinje.add(
                 UtbetalingstidslinjedagUtenGrad(
                     type = UtbetalingstidslinjedagType.ArbeidsgiverperiodeDag,
-                    inntekt = aktuellDagsinntekt!!,
+                    inntekt = aktuellDagsinntekt,
                     dato = dato
                 )
             )

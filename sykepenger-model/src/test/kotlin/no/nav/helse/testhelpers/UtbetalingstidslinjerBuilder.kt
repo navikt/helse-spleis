@@ -22,7 +22,6 @@ internal fun tidslinjeOf(
         var dato = startDato
         repeat(antallDager) {
             val økonomi = Økonomi.sykdomsgrad(grad.prosent)
-                .arbeidsgiverperiode(null)
                 .inntekt(dekningsgrunnlag.daglig, skjæringstidspunkt = skjæringstidspunkt(dato))
                 .arbeidsgiverRefusjon(arbeidsgiverbeløp.daglig)
             if (helgedag != null && dato.erHelg()) this.helgedag(dato, økonomi)

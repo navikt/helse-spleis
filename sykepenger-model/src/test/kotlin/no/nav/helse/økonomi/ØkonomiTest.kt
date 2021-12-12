@@ -16,7 +16,7 @@ internal class ØkonomiTest {
     @Test
     fun `avgrenser ikke periode dersom arbeidsgiverperioden er null`() {
         val periode = 1.januar til 31.januar
-        val økonomi = Økonomi.sykdomsgrad(100.prosent).arbeidsgiverperiode(null)
+        val økonomi = Økonomi.sykdomsgrad(100.prosent)
         assertNull(listOf(økonomi).avgrensTilArbeidsgiverperiode(periode))
         assertEquals(periode, periode) { "periode skal ikke muteres" }
     }
@@ -146,9 +146,20 @@ internal class ØkonomiTest {
     }
 
     @Test
-    fun `kan ikke sette arbeidsgiverrefusjon uten inntekt`() {
-        assertThrows<IllegalStateException> { 100.prosent.sykdomsgrad.arbeidsgiverRefusjon(1000.daglig) }
-        assertDoesNotThrow { 100.prosent.sykdomsgrad.inntekt(1000.daglig, skjæringstidspunkt = 1.januar).arbeidsgiverRefusjon(1000.daglig) }
+    fun `arbeidsgiverrefusjon uten inntekt`() {
+        100.prosent.sykdomsgrad.arbeidsgiverRefusjon(1000.daglig).medData { _, arbeidsgiverRefusjonsbeløp, _, _, _, _, _, _, _ ->
+            assertEquals(0.0, arbeidsgiverRefusjonsbeløp)
+        }
+    }
+
+    @Test
+    fun `arbeidsgiverrefusjon med inntekt`() {
+        100.prosent.sykdomsgrad.arbeidsgiverRefusjon(1000.daglig).medData { _, arbeidsgiverRefusjonsbeløp, _, _, _, _, _, _, _ ->
+            assertEquals(0.0, arbeidsgiverRefusjonsbeløp)
+        }
+        100.prosent.sykdomsgrad.inntekt(1000.daglig, skjæringstidspunkt = 1.januar).arbeidsgiverRefusjon(1000.daglig).medData { _, arbeidsgiverRefusjonsbeløp, _, _, _, _, _, _, _ ->
+            assertEquals(1000.0, arbeidsgiverRefusjonsbeløp)
+        }
     }
 
     @Test
@@ -203,9 +214,10 @@ internal class ØkonomiTest {
     @Test
     fun `toMap uten dekningsgrunnlag`() {
         79.5.prosent.sykdomsgrad
-            .medData { grad, _, dekningsgrunnlag, _, _, _, _, _, _ ->
+            .medData { grad, _, dekningsgrunnlag, _, _, aktuellDagsinntekt, _, _, _ ->
                 assertEquals(79.5, grad)
-                assertNull(dekningsgrunnlag)
+                assertEquals(0.0, dekningsgrunnlag)
+                assertEquals(0.0, aktuellDagsinntekt)
             }
     }
 
@@ -397,5 +409,5 @@ internal class ØkonomiTest {
         }
     }
 
-    private val Prosentdel.sykdomsgrad get() = Økonomi.sykdomsgrad(this).arbeidsgiverperiode(null)
+    private val Prosentdel.sykdomsgrad get() = Økonomi.sykdomsgrad(this)
 }
