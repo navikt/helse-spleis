@@ -73,8 +73,7 @@ internal class CreateØkonomiTest {
         val data = sykdomstidslinjedag(79.5)
         createØkonomi(data).also { økonomi ->
             assertDoesNotThrow { økonomi
-                .arbeidsgiverperiode(Arbeidsgiverperiode(listOf(1.januar til 16.januar)))
-                .inntekt(1200.daglig, skjæringstidspunkt = 1.januar)
+                .inntekt(1200.daglig, skjæringstidspunkt = 1.januar, arbeidsgiverperiode = Arbeidsgiverperiode(listOf(1.januar til 16.januar)))
             }
         }
     }
@@ -108,18 +107,19 @@ internal class CreateØkonomiTest {
 
     @Test
     fun `har betalinger`() {
-        val data = utbetalingsdag(79.5, 420.0, 1500.0, 1199.6, 640.0, 320.0, null, true)
+        val data = utbetalingsdag(79.5, 420.0, 1500.0, 1199.6, 640.0, 320.0, 79.5, true)
         createØkonomi(data).also { økonomi ->
             økonomi.medData { grad,
                               arbeidsgiverRefusjon,
                               dekningsgrunnlag,
                               _,
-                              _,
+                              totalGrad,
                               aktuellDagsinntekt,
                               arbeidsgiverbeløp,
                               personbeløp,
                               er6GBegrenset ->
                 assertEquals(79.5, grad)
+                assertEquals(79.5, totalGrad)
                 assertEquals(420.0, arbeidsgiverRefusjon)
                 assertEquals(1500.0, aktuellDagsinntekt)
                 assertEquals(1199.6, dekningsgrunnlag)
@@ -140,7 +140,7 @@ internal class CreateØkonomiTest {
         dekningsgrunnlag: Double,
         arbeidsgiverbeløp: Double? = null,
         personbeløp: Double? = null,
-        totalGrad: Prosentdel? = null,
+        totalGrad: Double = grad,
         er6GBegrenset: Boolean = false,
         arbeidsgiverperiode: List<Periode>? = null
     ) = UtbetalingstidslinjeData.UtbetalingsdagData(
@@ -150,10 +150,10 @@ internal class CreateØkonomiTest {
         dekningsgrunnlag,
         1.januar,
         Grunnbeløp.`6G`.beløp(1.januar).reflection { årlig, _, _, _ -> årlig },
-        totalGrad?.toDouble(),
         null,
         null,
         grad,
+        totalGrad,
         arbeidsgiverRefusjonsbeløp,
         arbeidsgiverbeløp,
         personbeløp,
@@ -166,15 +166,6 @@ internal class CreateØkonomiTest {
         PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG,
         PersonData.ArbeidsgiverData.SykdomstidslinjeData.KildeData("type", UUID.randomUUID(), 1.januar.atStartOfDay()),
         grad,
-        null,
-        0.0,
-        0.0,
-        0.0,
-        null,
-        null,
-        null,
-        null,
-        false,
         null
     )
 

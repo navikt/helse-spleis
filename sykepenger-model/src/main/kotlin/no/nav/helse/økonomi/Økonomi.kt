@@ -7,7 +7,6 @@ import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -19,13 +18,13 @@ import kotlin.math.roundToInt
 
 internal class Økonomi private constructor(
     private val grad: Prosentdel,
+    private var totalGrad: Prosentdel = grad,
     private var arbeidsgiverRefusjonsbeløp: Inntekt = INGEN,
     private var arbeidsgiverperiode: Arbeidsgiverperiode? = null,
     private val aktuellDagsinntekt: Inntekt = INGEN,
     private val dekningsgrunnlag: Inntekt = INGEN,
     private val skjæringstidspunkt: LocalDate? = null,
     private var grunnbeløpgrense: Inntekt? = null,
-    private var totalGrad: Prosentdel? = null,
     private var arbeidsgiverbeløp: Inntekt? = null,
     private var personbeløp: Inntekt? = null,
     private var er6GBegrenset: Boolean? = null,
@@ -40,6 +39,10 @@ internal class Økonomi private constructor(
             Økonomi(grad)
 
         internal fun ikkeBetalt() = sykdomsgrad(0.prosent)
+
+        internal fun ikkeBetalt(arbeidsgiverperiode: Arbeidsgiverperiode?) = ikkeBetalt().also {
+            it.arbeidsgiverperiode = arbeidsgiverperiode
+        }
 
         internal fun totalSykdomsgrad(økonomiList: List<Økonomi>) =
             Inntekt.vektlagtGjennomsnitt(økonomiList.map { it.grad() to it.dekningsgrunnlag })
@@ -57,7 +60,7 @@ internal class Økonomi private constructor(
         }
 
         private fun maksbeløp(økonomi: Økonomi) =
-            (økonomi.grunnbeløpgrense?.rundTilDaglig()!! * økonomi.totalGrad!!).rundTilDaglig()
+            (økonomi.grunnbeløpgrense?.rundTilDaglig()!! * økonomi.totalGrad).rundTilDaglig()
 
         private fun delteUtbetalinger(økonomiList: List<Økonomi>) = økonomiList.forEach { it.betal() }
 
@@ -157,13 +160,6 @@ internal class Økonomi private constructor(
                 .map { it.personbeløp ?: throw IllegalStateException("utbetalinger ennå ikke beregnet") }
                 .summer()
 
-        private fun totalGradertDekningsgrunnlag(økonomiList: List<Økonomi>) =
-            totalArbeidsgiver(økonomiList) + totalPerson(økonomiList)
-
-        internal fun erUnderInntektsgrensen(økonomiList: List<Økonomi>, alder: Alder, dato: LocalDate): Boolean {
-            return økonomiList.map { it.aktuellDagsinntekt }.summer() < alder.minimumInntekt(dato)
-        }
-
         internal fun er6GBegrenset(økonomiList: List<Økonomi>) =
             økonomiList.any { it.er6GBegrenset() }
     }
@@ -172,21 +168,26 @@ internal class Økonomi private constructor(
         require(dekningsgrunnlag >= INGEN) { "dekningsgrunnlag kan ikke være negativ." }
     }
 
-    internal fun inntekt(aktuellDagsinntekt: Inntekt, dekningsgrunnlag: Inntekt = aktuellDagsinntekt, skjæringstidspunkt: LocalDate): Økonomi =
-        tilstand.inntekt(this, aktuellDagsinntekt, dekningsgrunnlag, skjæringstidspunkt)
+    internal fun inntekt(aktuellDagsinntekt: Inntekt, dekningsgrunnlag: Inntekt = aktuellDagsinntekt, skjæringstidspunkt: LocalDate, arbeidsgiverperiode: Arbeidsgiverperiode? = null): Økonomi =
+        tilstand.inntekt(this, aktuellDagsinntekt, dekningsgrunnlag, skjæringstidspunkt, arbeidsgiverperiode)
 
     internal fun arbeidsgiverRefusjon(refusjonsbeløp: Inntekt?) =
         tilstand.arbeidsgiverRefusjon(this, refusjonsbeløp)
-
-    internal fun arbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode) = this.also {
-        tilstand.arbeidsgiverperiode(this, arbeidsgiverperiode)
-    }
 
     internal fun lås() = tilstand.lås(this)
 
     internal fun låsOpp() = tilstand.låsOpp(this)
 
-    internal fun toMap() = mutableMapOf<String, Any>().also { map ->
+    internal fun toMap() = tilstand.toMap(this)
+
+    private fun _toMapKunGrad() = mutableMapOf<String, Any>().also { map ->
+        medData { grad, _, _, _, _, _, _, _, _ ->
+            /* ikke legg på flere felter - alle er enten null eller har defaultverdi */
+            map["grad"] = grad
+        }
+    }
+
+    private fun _toMap() = mutableMapOf<String, Any>().also { map ->
         medData { grad,
                   arbeidsgiverRefusjonsbeløp,
                   dekningsgrunnlag,
@@ -197,6 +198,7 @@ internal class Økonomi private constructor(
                   personbeløp,
                   er6GBegrenset ->
             map["grad"] = grad
+            map["totalGrad"] = totalGrad
             map.compute("arbeidsgiverperiode") { _, _ ->
                 arbeidsgiverperiode?.toList()?.grupperSammenhengendePerioder()?.map {
                     mapOf("fom" to it.start, "tom" to it.endInclusive)
@@ -205,7 +207,6 @@ internal class Økonomi private constructor(
             map["arbeidsgiverRefusjonsbeløp"] = arbeidsgiverRefusjonsbeløp
             map.compute("skjæringstidspunkt") { _, _ -> skjæringstidspunkt }
             map.compute("grunnbeløpgrense") { _, _ -> grunnbeløpgrense?.reflection { årlig, _, _, _ -> årlig } }
-            map.compute("totalGrad") { _, _ -> totalGrad }
             map.compute("dekningsgrunnlag") { _, _ -> dekningsgrunnlag }
             map.compute("aktuellDagsinntekt") { _, _ -> aktuellDagsinntekt }
             map.compute("arbeidsgiverbeløp") { _, _ -> arbeidsgiverbeløp }
@@ -213,7 +214,6 @@ internal class Økonomi private constructor(
             map.compute("er6GBegrenset") { _, _ -> er6GBegrenset }
         }
     }
-
     internal fun <R> medData(lambda: MedØkonomiData<R>) = tilstand.medData(this, lambda)
 
     internal fun <R> medAvrundetData(
@@ -231,7 +231,7 @@ internal class Økonomi private constructor(
                   arbeidsgiverRefusjonsbeløp: Double,
                   dekningsgrunnlag: Double,
                   _: LocalDate?,
-                  _: Double?,
+                  _: Double,
                   aktuellDagsinntekt: Double,
                   arbeidsgiverbeløp: Double?,
                   personbeløp: Double?,
@@ -252,7 +252,7 @@ internal class Økonomi private constructor(
                   _: Double,
                   _: Double?,
                   _: LocalDate?,
-                  _: Double?,
+                  _: Double,
                   aktuellDagsinntekt: Double,
                   _: Double?,
                   _: Double?,
@@ -277,7 +277,7 @@ internal class Økonomi private constructor(
         arbeidsgiverRefusjonsbeløp.reflection { _, _, daglig, _ -> daglig },
         dekningsgrunnlag.reflection { _, _, daglig, _ -> daglig },
         skjæringstidspunkt,
-        totalGrad?.toDouble(),
+        totalGrad.toDouble(),
         aktuellDagsinntekt.reflection { _, _, daglig, _ -> daglig },
         arbeidsgiverbeløp!!.reflection { _, _, daglig, _ -> daglig },
         personbeløp!!.reflection { _, _, daglig, _ -> daglig },
@@ -289,7 +289,7 @@ internal class Økonomi private constructor(
         arbeidsgiverRefusjonsbeløp.reflection { _, _, daglig, _ -> daglig },
         dekningsgrunnlag.reflection { _, _, daglig, _ -> daglig },
         skjæringstidspunkt,
-        totalGrad?.toDouble(),
+        totalGrad.toDouble(),
         aktuellDagsinntekt.reflection { _, _, daglig, _ -> daglig },
         null, null, null
     )
@@ -370,11 +370,16 @@ internal class Økonomi private constructor(
 
         internal abstract fun <R> medData(økonomi: Økonomi, lambda: MedØkonomiData<R>): R
 
+        internal open fun toMap(økonomi: Økonomi): Map<String, Any> {
+            return økonomi._toMap()
+        }
+
         internal open fun inntekt(
             økonomi: Økonomi,
             aktuellDagsinntekt: Inntekt,
             dekningsgrunnlag: Inntekt,
-            skjæringstidspunkt: LocalDate?
+            skjæringstidspunkt: LocalDate,
+            arbeidsgiverperiode: Arbeidsgiverperiode?
         ): Økonomi {
             throw IllegalStateException("Kan ikke sette inntekt i tilstand ${this::class.simpleName}")
         }
@@ -395,10 +400,6 @@ internal class Økonomi private constructor(
             throw IllegalStateException("Kan ikke låse opp Økonomi i tilstand ${this::class.simpleName}")
         }
 
-        internal open fun arbeidsgiverperiode(økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode) {
-            throw IllegalStateException("Kan ikke sette arbeidsgiverperiode i tilstand ${this::class.simpleName}")
-        }
-
         internal open fun arbeidsgiverRefusjon(økonomi: Økonomi, refusjonsbeløp: Inntekt?): Økonomi {
             throw IllegalStateException("Kan ikke sette arbeidsgiverrefusjonsbeløp i tilstand ${this::class.simpleName}")
         }
@@ -407,9 +408,7 @@ internal class Økonomi private constructor(
 
             override fun lås(økonomi: Økonomi) = økonomi
 
-            override fun arbeidsgiverperiode(økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode) {
-                økonomi.arbeidsgiverperiode = arbeidsgiverperiode
-            }
+            override fun toMap(økonomi: Økonomi) = økonomi._toMapKunGrad()
 
             override fun arbeidsgiverRefusjon(økonomi: Økonomi, refusjonsbeløp: Inntekt?) = økonomi
 
@@ -417,15 +416,17 @@ internal class Økonomi private constructor(
                 økonomi: Økonomi,
                 aktuellDagsinntekt: Inntekt,
                 dekningsgrunnlag: Inntekt,
-                skjæringstidspunkt: LocalDate?
+                skjæringstidspunkt: LocalDate,
+                arbeidsgiverperiode: Arbeidsgiverperiode?
             ) = Økonomi(
                 grad = økonomi.grad,
-                arbeidsgiverperiode = økonomi.arbeidsgiverperiode,
+                totalGrad = økonomi.totalGrad,
+                arbeidsgiverperiode = arbeidsgiverperiode ?: økonomi.arbeidsgiverperiode,
                 arbeidsgiverRefusjonsbeløp = økonomi.arbeidsgiverRefusjonsbeløp,
                 aktuellDagsinntekt = aktuellDagsinntekt,
                 dekningsgrunnlag = dekningsgrunnlag,
                 skjæringstidspunkt = skjæringstidspunkt,
-                grunnbeløpgrense = skjæringstidspunkt?.let { Grunnbeløp.`6G`.beløp(it) },
+                grunnbeløpgrense = Grunnbeløp.`6G`.beløp(skjæringstidspunkt),
                 tilstand = HarInntekt
             )
 
@@ -441,7 +442,7 @@ internal class Økonomi private constructor(
                     arbeidsgiverRefusjonsbeløp = økonomi.arbeidsgiverRefusjonsbeløp.reflection { _, _, daglig, _ -> daglig },
                     dekningsgrunnlag = økonomi.dekningsgrunnlag.reflection { _, _, daglig, _ -> daglig },
                     skjæringstidspunkt = null,
-                    totalGrad = null,
+                    totalGrad = økonomi.totalGrad.toDouble(),
                     aktuellDagsinntekt = økonomi.aktuellDagsinntekt.reflection { _, _, daglig, _ -> daglig },
                     arbeidsgiverbeløp = null,
                     personbeløp = null,
@@ -528,7 +529,7 @@ internal fun interface MedØkonomiData<R> {
         arbeidsgiverRefusjonsbeløp: Double,
         dekningsgrunnlag: Double,
         skjæringstidspunkt: LocalDate?,
-        totalGrad: Double?,
+        totalGrad: Double,
         aktuellDagsinntekt: Double,
         arbeidsgiverbeløp: Double?,
         personbeløp: Double?,

@@ -587,15 +587,6 @@ internal data class PersonData(
                 private val type: JsonDagType,
                 private val kilde: KildeData,
                 private val grad: Double,
-                private val arbeidsgiverperiode: List<ArbeidsgiverData.PeriodeData>?,
-                private val arbeidsgiverRefusjonsbeløp: Double,
-                private val aktuellDagsinntekt: Double,
-                private val dekningsgrunnlag: Double,
-                private val skjæringstidspunkt: LocalDate?,
-                private val totalGrad: Double?,
-                private val arbeidsgiverbeløp: Int?,
-                private val personbeløp: Int?,
-                private val er6GBegrenset: Boolean?,
                 private val melding: String?
             ) {
                 // Gjør så vi kan ha dato/fom og tom på samme nivå som resten av verdiene i dag
@@ -610,23 +601,7 @@ internal data class PersonData(
                             .toSortedMap()
                 }
 
-                private val økonomi
-                    get() = Økonomi::class.primaryConstructor!!
-                        .apply { isAccessible = true }
-                        .call(
-                            grad.prosent,
-                            arbeidsgiverRefusjonsbeløp.daglig,
-                            arbeidsgiverperiode?.map { it.tilPeriode() }?.let { Arbeidsgiverperiode(it) },
-                            aktuellDagsinntekt.daglig,
-                            dekningsgrunnlag.daglig,
-                            skjæringstidspunkt,
-                            null,
-                            totalGrad?.prosent,
-                            arbeidsgiverbeløp?.daglig,
-                            personbeløp?.daglig,
-                            er6GBegrenset,
-                            Økonomi.Tilstand.KunGrad
-                        )
+                private val økonomi get() = Økonomi.sykdomsgrad(grad.prosent)
 
                 private val hendelseskilde get() = kilde.parseKilde()
 
@@ -1251,10 +1226,10 @@ internal data class PersonData(
             private val dekningsgrunnlag: Double,
             private val skjæringstidspunkt: LocalDate?,
             private val grunnbeløpgrense: Double?,
-            private val totalGrad: Double?,
             private val begrunnelse: BegrunnelseData?,
             private val begrunnelser: List<BegrunnelseData>?,
-            private val grad: Double?,
+            private val grad: Double,
+            private val totalGrad: Double,
             private val arbeidsgiverRefusjonsbeløp: Double,
             private val arbeidsgiverbeløp: Double?,
             private val personbeløp: Double?,
@@ -1268,14 +1243,14 @@ internal data class PersonData(
                 get() = Økonomi::class.primaryConstructor!!
                     .apply { isAccessible = true }
                     .call(
-                        grad?.prosent,
+                        grad.prosent,
+                        totalGrad.prosent,
                         arbeidsgiverRefusjonsbeløp.daglig,
                         arbeidsgiverperiode?.map { it.tilPeriode() }?.let { Arbeidsgiverperiode(it) },
                         aktuellDagsinntekt.daglig,
                         dekningsgrunnlag.daglig,
                         skjæringstidspunkt,
                         grunnbeløpgrense?.årlig,
-                        totalGrad?.prosent,
                         arbeidsgiverbeløp?.daglig,
                         personbeløp?.daglig,
                         er6GBegrenset,

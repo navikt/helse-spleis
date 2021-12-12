@@ -104,29 +104,24 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         addArbeidsgiverdag(dato, arbeidsgiverperiode)
     }
     private fun sykedagEtterArbeidsgiverperioden(arbeidsgiverperiode: Arbeidsgiverperiode?, dato: LocalDate, økonomi: Økonomi) {
-        if (arbeidsgiverperiode != null) økonomi.arbeidsgiverperiode(arbeidsgiverperiode)
         addNAVdag(dato, arbeidsgiverperiode, økonomi)
     }
     private fun sykHelgedagEtterArbeidsgiverperioden(arbeidsgiverperiode: Arbeidsgiverperiode?, dato: LocalDate, økonomi: Økonomi) {
-        if (arbeidsgiverperiode != null) økonomi.arbeidsgiverperiode(arbeidsgiverperiode)
-        addNAVHelgedag(dato, økonomi)
+        addNAVHelgedag(dato, arbeidsgiverperiode, økonomi)
     }
     private fun foreldetSykedagEtterArbeidsgiverperioden(arbeidsgiverperiode: Arbeidsgiverperiode?, dato: LocalDate, økonomi: Økonomi) {
-        if (arbeidsgiverperiode != null) økonomi.arbeidsgiverperiode(arbeidsgiverperiode)
-        addForeldetDag(dato, økonomi)
+        addForeldetDag(dato, arbeidsgiverperiode, økonomi)
     }
 
     private fun egenmeldingsdagEtterArbeidsgiverperioden(arbeidsgiverperiode: Arbeidsgiverperiode?, dato: LocalDate) {
-        val økonomi = Økonomi.ikkeBetalt()
-        if (arbeidsgiverperiode != null) økonomi.arbeidsgiverperiode(arbeidsgiverperiode)
+        val økonomi = Økonomi.ikkeBetalt(arbeidsgiverperiode)
         addAvvistDag(dato, økonomi)
     }
 
     private fun fridagIArbeidsgiverperioden(arbeidsgiverperiode: Arbeidsgiverperiode, dato: LocalDate) = sykedagIArbeidsgiverperioden(arbeidsgiverperiode, dato)
 
     private fun fridagUtenforArbeidsgiverperioden(arbeidsgiverperiode: Arbeidsgiverperiode?, dato: LocalDate) {
-        val økonomi = Økonomi.ikkeBetalt()
-        if (arbeidsgiverperiode != null) økonomi.arbeidsgiverperiode(arbeidsgiverperiode)
+        val økonomi = Økonomi.ikkeBetalt(arbeidsgiverperiode)
         addFridag(dato, økonomi)
     }
 
@@ -238,19 +233,20 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         melding: String
     ) = throw UforventetDagException(dag, melding)
 
-    private fun addForeldetDag(dagen: LocalDate, økonomi: Økonomi) {
+    private fun addForeldetDag(dagen: LocalDate, arbeidsgiverperiode: Arbeidsgiverperiode?, økonomi: Økonomi) {
         val (skjæringstidspunkt, inntekt) = inntektForDato(dagen)
         tidslinje.addForeldetDag(
             dagen, økonomi.inntekt(
                 aktuellDagsinntekt = inntekt,
                 dekningsgrunnlag = dekningsgrunnlag(inntekt, dagen, skjæringstidspunkt),
-                skjæringstidspunkt = skjæringstidspunkt
+                skjæringstidspunkt = skjæringstidspunkt,
+                arbeidsgiverperiode = arbeidsgiverperiode
             )
         )
     }
 
     private fun addArbeidsgiverdag(dato: LocalDate, arbeidsgiverperiode: Arbeidsgiverperiode) {
-        tidslinje.addArbeidsgiverperiodedag(dato, Økonomi.ikkeBetalt().arbeidsgiverperiode(arbeidsgiverperiode).inntektIfNotNull(dato))
+        tidslinje.addArbeidsgiverperiodedag(dato, Økonomi.ikkeBetalt(arbeidsgiverperiode).inntektIfNotNull(dato))
     }
 
     private fun addNAVdag(dato: LocalDate, arbeidsgiverperiode: Arbeidsgiverperiode?, økonomi: Økonomi) {
@@ -265,16 +261,22 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
             økonomi.inntekt(
                 aktuellDagsinntekt = inntekt,
                 dekningsgrunnlag = dekningsgrunnlag(inntekt, dato, skjæringstidspunkt),
-                skjæringstidspunkt = skjæringstidspunkt
+                skjæringstidspunkt = skjæringstidspunkt,
+                arbeidsgiverperiode = arbeidsgiverperiode
             )
         )
     }
 
-    private fun addNAVHelgedag(dato: LocalDate, økonomi: Økonomi) {
+    private fun addNAVHelgedag(dato: LocalDate, arbeidsgiverperiode: Arbeidsgiverperiode?, økonomi: Økonomi) {
         val skjæringstidspunkt = inntektForDatoOrNull(dato)?.let { (skjæringstidspunkt) -> skjæringstidspunkt } ?: dato
         tidslinje.addHelg(
             dato,
-            økonomi.inntekt(aktuellDagsinntekt = INGEN, dekningsgrunnlag = INGEN, skjæringstidspunkt = skjæringstidspunkt)
+            økonomi.inntekt(
+                aktuellDagsinntekt = INGEN,
+                dekningsgrunnlag = INGEN,
+                skjæringstidspunkt = skjæringstidspunkt,
+                arbeidsgiverperiode = arbeidsgiverperiode
+            )
         )
     }
 
