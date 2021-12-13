@@ -328,6 +328,17 @@ internal class Vedtaksperiode private constructor(
         return AvventerHistorikk
     }
 
+    private fun skalHaWarningForFlereArbeidsforholdUtenSykdomEllerUlikStartdato(
+        vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
+    ) =
+        arbeidsgiver.erFørstegangsbehandling(periode, skjæringstidspunkt)
+            && (flereArbeidsforholdUtenSykdom(vilkårsgrunnlag) || flereArbeidsforholdUlikStartdato())
+
+    private fun flereArbeidsforholdUtenSykdom(vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement) =
+        vilkårsgrunnlag is VilkårsgrunnlagHistorikk.Grunnlagsdata && vilkårsgrunnlag.harInntektFraSkatt()
+
+    private fun flereArbeidsforholdUlikStartdato() = person.harFlereArbeidsforholdMedUlikStartdato(skjæringstidspunkt)
+
     internal fun forkast(hendelse: IAktivitetslogg, årsak: ForkastetÅrsak) {
         kontekst(hendelse)
         hendelse.info("Forkaster vedtaksperiode: %s", this.id.toString())
@@ -2027,8 +2038,7 @@ internal class Vedtaksperiode private constructor(
                 onSuccess {
                     if (vedtaksperiode.person.harKunEtAnnetAktivtArbeidsforholdEnn(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer)) {
                         ytelser.warn("Den sykmeldte har skiftet arbeidsgiver, og det er beregnet at den nye arbeidsgiveren mottar refusjon lik forrige. Kontroller at dagsatsen blir riktig.")
-                    } else if (vedtaksperiode.arbeidsgiver.erFørstegangsbehandling(vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt) && vilkårsgrunnlag is VilkårsgrunnlagHistorikk.Grunnlagsdata && vilkårsgrunnlag.harInntektFraSkatt()) {
-                        // TODO: sjekken om at inntekt er fra skatt er ikke bra nok lenger - det kan være IM om fom er i samme måned
+                    } else if (vedtaksperiode.skalHaWarningForFlereArbeidsforholdUtenSykdomEllerUlikStartdato(vilkårsgrunnlag!!)) {
                         ytelser.warn("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold")
                     }
                     if (vedtaksperiode.person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt)!!.gjelderFlereArbeidsgivere()) {

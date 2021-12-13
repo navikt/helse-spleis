@@ -632,6 +632,9 @@ class Person private constructor(
         .filter { it.harAktivtArbeidsforhold(skjæringstidspunkt) }
         .map { it.organisasjonsnummer() }
 
+    internal fun harFlereArbeidsforholdMedUlikStartdato(skjæringstidspunkt: LocalDate) =
+        arbeidsgivere.mapNotNull { it.finnFørsteFraværsdag(skjæringstidspunkt) }.sorted().distinct().count() > 1
+
     internal fun harAktivtArbeidsforholdEllerInntekt(skjæringstidspunkt: LocalDate, orgnummer: String) = arbeidsgivere
         .firstOrNull { it.organisasjonsnummer() == orgnummer }
         ?.let { it.harAktivtArbeidsforhold(skjæringstidspunkt) || it.harGrunnlagForSykepengegrunnlagEllerSammenligningsgrunnlag(skjæringstidspunkt, it.finnFørsteFraværsdag(skjæringstidspunkt)) } ?: false
