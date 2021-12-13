@@ -80,8 +80,8 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     private fun inntektForDato(dato: LocalDate) =
         inntektForDatoOrNull(dato) ?: throw ManglerInntektException(dato, skjæringstidspunkter)
 
-    private fun dekningsgrunnlag(inntekt: Inntekt, dagen: LocalDate, skjæringstidspunkt: LocalDate): Inntekt {
-        val dekningsgrunnlag = inntekt.dekningsgrunnlag(arbeidsgiverRegler)
+    private fun dekningsgrunnlag(inntekt: Inntekt, dagen: LocalDate, skjæringstidspunkt: LocalDate, aktivitetslogg: IAktivitetslogg): Inntekt {
+        val dekningsgrunnlag = inntekt.dekningsgrunnlag(arbeidsgiverRegler, aktivitetslogg)
         if (dekningsgrunnlag < INGEN) {
             throw NegativDekningsgrunnlagException(dekningsgrunnlag, dagen, skjæringstidspunkt)
         }
@@ -93,7 +93,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
             ?.let { (skjæringstidspunkt, inntekt) ->
                 inntekt(
                     aktuellDagsinntekt = inntekt,
-                    dekningsgrunnlag = dekningsgrunnlag(inntekt, dato, skjæringstidspunkt),
+                    dekningsgrunnlag = dekningsgrunnlag(inntekt, dato, skjæringstidspunkt, aktivitetslogg),
                     skjæringstidspunkt = skjæringstidspunkt
                 )
             }
@@ -238,7 +238,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         tidslinje.addForeldetDag(
             dagen, økonomi.inntekt(
                 aktuellDagsinntekt = inntekt,
-                dekningsgrunnlag = dekningsgrunnlag(inntekt, dagen, skjæringstidspunkt),
+                dekningsgrunnlag = dekningsgrunnlag(inntekt, dagen, skjæringstidspunkt, aktivitetslogg),
                 skjæringstidspunkt = skjæringstidspunkt,
                 arbeidsgiverperiode = arbeidsgiverperiode
             )
@@ -260,7 +260,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
             dato,
             økonomi.inntekt(
                 aktuellDagsinntekt = inntekt,
-                dekningsgrunnlag = dekningsgrunnlag(inntekt, dato, skjæringstidspunkt),
+                dekningsgrunnlag = dekningsgrunnlag(inntekt, dato, skjæringstidspunkt, aktivitetslogg),
                 skjæringstidspunkt = skjæringstidspunkt,
                 arbeidsgiverperiode = arbeidsgiverperiode
             )

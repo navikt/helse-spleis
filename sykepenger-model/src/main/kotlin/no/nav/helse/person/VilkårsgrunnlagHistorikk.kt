@@ -91,7 +91,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         }
     }
 
-    internal interface VilkårsgrunnlagElement {
+    internal interface VilkårsgrunnlagElement: Aktivitetskontekst {
         fun skjæringstidspunkt(): LocalDate
         fun valider(aktivitetslogg: Aktivitetslogg)
         fun accept(skjæringstidspunkt: LocalDate, vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor)
@@ -185,6 +185,15 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             return begrunnelser
         }
 
+        override fun toSpesifikkKontekst() = SpesifikkKontekst(
+            kontekstType = "vilkårsgrunnlag",
+            kontekstMap = mapOf(
+                "vilkårsgrunnlagId" to vilkårsgrunnlagId.toString(),
+                "skjæringstidspunkt" to skjæringstidspunkt.toString(),
+                "vilkårsgrunnlagtype" to "Spleis"
+            )
+        )
+
         internal fun kopierMedMinimumInntektsvurdering(minimumInntektVurdering: Boolean) = Grunnlagsdata(
             skjæringstidspunkt = skjæringstidspunkt,
             sykepengegrunnlag = sykepengegrunnlag,
@@ -251,5 +260,13 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         // Vi har ingen avviste vilkår dersom vilkårsprøving er gjort i Infotrygd
         override fun begrunnelserForAvvisteVilkår(alder: Alder, skjæringstidspunkt: LocalDate): List<Begrunnelse> = emptyList()
+        override fun toSpesifikkKontekst() = SpesifikkKontekst(
+            kontekstType = "vilkårsgrunnlag",
+            kontekstMap = mapOf(
+                "vilkårsgrunnlagId" to vilkårsgrunnlagId.toString(),
+                "skjæringstidspunkt" to skjæringstidspunkt.toString(),
+                "vilkårsgrunnlagtype" to "Infotrygd"
+            )
+        )
     }
 }

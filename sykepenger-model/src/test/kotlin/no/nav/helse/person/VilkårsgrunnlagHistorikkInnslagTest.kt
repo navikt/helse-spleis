@@ -107,5 +107,12 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
             override fun skjæringstidspunkt() = 1.januar
 
             override fun valider(aktivitetslogg: Aktivitetslogg) {}
+
+            override fun toSpesifikkKontekst(): SpesifikkKontekst {
+                return SpesifikkKontekst(
+                    "testgrunnlag",
+                    emptyMap()
+                )
+            }
         }
 }

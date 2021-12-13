@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.ForventetFeil
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.*
@@ -536,6 +537,31 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
                 "avvisteDager" to avvisteDager
             ),
             outputdata = emptyMap()
+        )
+    }
+
+    @ForventetFeil("Mangler gruppering av hjemler i aktivitetsloggen")
+    @Test
+    fun `§8-16 ledd 1 - dekningsgrad`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+
+        assertOppfylt(
+            PARAGRAF_8_16,
+            ledd = 1.ledd,
+            punktum = 1.punktum,
+            versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
+            inputdata = mapOf(
+                "dekningsgrad" to 1.0,
+                "inntekt" to 372000.0
+            ),
+            outputdata = mapOf(
+                "dekningsgrunnlag" to 372000.0
+            )
         )
     }
 

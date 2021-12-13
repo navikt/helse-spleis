@@ -1,5 +1,7 @@
 package no.nav.helse.økonomi
 
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-16 ledd 1`
+import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import kotlin.math.absoluteValue
 import kotlin.math.floor
@@ -57,7 +59,11 @@ class Inntekt private constructor(private val årlig: Double) : Comparable<Innte
 
     internal fun rundNedTilDaglig() = Inntekt(floor(tilDagligDouble()) * ARBEIDSDAGER_PER_ÅR)
 
-    internal fun dekningsgrunnlag(regler: ArbeidsgiverRegler) = Inntekt(this.årlig * regler.dekningsgrad())
+    internal fun dekningsgrunnlag(regler: ArbeidsgiverRegler, aktivitetslogg: IAktivitetslogg): Inntekt {
+        val dekningsgrunnlag = Inntekt(this.årlig * regler.dekningsgrad())
+        aktivitetslogg.`§8-16 ledd 1`(oppfylt = true, regler.dekningsgrad(), this.årlig, dekningsgrunnlag.årlig)
+        return dekningsgrunnlag
+    }
 
     internal operator fun times(scalar: Number) = Inntekt(this.årlig * scalar.toDouble())
 

@@ -728,7 +728,30 @@ class Aktivitetslogg(
                         )
                     }
 
-                    internal fun IAktivitetslogg.`§8-16 ledd 1`(oppfylt: Boolean) {} // Én gang, med periode over hvilke dager vi har satt dekningsgrad
+                    internal fun IAktivitetslogg.`§8-16 ledd 1`(
+                        oppfylt: Boolean,
+                        dekningsgrad: Double,
+                        inntekt: Double,
+                        dekningsgrunnlag: Double
+                    ) {
+                        juridiskVurdering(
+                            "",
+                            Vurderingsresultat(
+                                oppfylt,
+                                versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
+                                paragraf = PARAGRAF_8_16,
+                                ledd = LEDD_1,
+                                punktum = 1.punktum,
+                                inputdata = mapOf(
+                                    "dekningsgrad" to dekningsgrad,
+                                    "inntekt" to inntekt
+                                ),
+                                outputdata = mapOf(
+                                    "dekningsgrunnlag" to dekningsgrunnlag
+                                )
+                            )
+                        )
+                    }
 
                     internal fun IAktivitetslogg.`§8-17 ledd 1 bokstav a`(oppfylt: Boolean, arbeidsgiverperioder: List<LocalDate>, førsteNavdag: LocalDate) {
                         juridiskVurdering(
@@ -766,7 +789,7 @@ class Aktivitetslogg(
                         grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Inntekt>,
                         grunnlagForSykepengegrunnlag: Inntekt
                     ) {
-                    val beregnetMånedsinntektPerArbeidsgiver = grunnlagForSykepengegrunnlagPerArbeidsgiver
+                        val beregnetMånedsinntektPerArbeidsgiver = grunnlagForSykepengegrunnlagPerArbeidsgiver
                             .mapValues { it.value.reflection { _, månedlig, _, _ -> månedlig } }
                         juridiskVurdering(
                             "",

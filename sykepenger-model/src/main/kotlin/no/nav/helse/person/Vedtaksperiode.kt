@@ -2007,9 +2007,13 @@ internal class Vedtaksperiode private constructor(
                         info("Mangler vilkårsgrunnlag for ${vedtaksperiode.skjæringstidspunkt}")
                     }
                 }
-                val vilkårsgrunnlag = person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt)
-                validerHvis("Har for mye avvik i inntekt", { vilkårsgrunnlag != null }) {
-                    vilkårsgrunnlag!!.sjekkAvviksprosent(ytelser)
+                lateinit var vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
+                onSuccess {
+                    vilkårsgrunnlag = requireNotNull(person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt))
+                    ytelser.kontekst(vilkårsgrunnlag)
+                }
+                valider("Har for mye avvik i inntekt") {
+                    vilkårsgrunnlag.sjekkAvviksprosent(ytelser)
                 }
                 onSuccess {
                     when (periodetype) {
@@ -2017,7 +2021,7 @@ internal class Vedtaksperiode private constructor(
                             vedtaksperiode.forlengelseFraInfotrygd = JA
                             if(vedtaksperiode.skjæringstidspunktFraInfotrygd in LocalDate.of(2021, 5, 1) til LocalDate.of(2021, 5, 16)) {
                                 val gammeltGrunnbeløp = Grunnbeløp.`6G`.beløp(LocalDate.of(2021, 4, 30))
-                                val sykepengegrunnlag = vilkårsgrunnlag!!.sykepengegrunnlag()
+                                val sykepengegrunnlag = vilkårsgrunnlag.sykepengegrunnlag()
                                 if (sykepengegrunnlag >= gammeltGrunnbeløp) ytelser.warn("Første utbetalingsdag er i Infotrygd og mellom 1. og 16. mai. Kontroller at riktig grunnbeløp er brukt.")
                             }
                         }
@@ -2038,7 +2042,7 @@ internal class Vedtaksperiode private constructor(
                 onSuccess {
                     if (vedtaksperiode.person.harKunEtAnnetAktivtArbeidsforholdEnn(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer)) {
                         ytelser.warn("Den sykmeldte har skiftet arbeidsgiver, og det er beregnet at den nye arbeidsgiveren mottar refusjon lik forrige. Kontroller at dagsatsen blir riktig.")
-                    } else if (vedtaksperiode.skalHaWarningForFlereArbeidsforholdUtenSykdomEllerUlikStartdato(vilkårsgrunnlag!!)) {
+                    } else if (vedtaksperiode.skalHaWarningForFlereArbeidsforholdUtenSykdomEllerUlikStartdato(vilkårsgrunnlag)) {
                         ytelser.warn("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold")
                     }
                     if (vedtaksperiode.person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt)!!.gjelderFlereArbeidsgivere()) {
