@@ -289,7 +289,9 @@ internal class VilkårsgrunnlagTest {
     )
 
     private fun sykepengegrunnlag(inntekt: Inntekt = INNTEKT) = Sykepengegrunnlag(
-        arbeidsgiverInntektsopplysninger = listOf(),
+        arbeidsgiverInntektsopplysninger = listOf(
+            ArbeidsgiverInntektsopplysning("orgnummer", Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), LocalDate.now(), UUID.randomUUID(), inntekt)
+        )),
         sykepengegrunnlag = inntekt,
         grunnlagForSykepengegrunnlag = inntekt,
         begrensning = ER_IKKE_6G_BEGRENSET

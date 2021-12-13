@@ -3,6 +3,7 @@ package no.nav.helse.person
 import no.nav.helse.hendelser.*
 import no.nav.helse.inspectors.GrunnlagsdataInspektør
 import no.nav.helse.inspectors.Vilkårgrunnlagsinspektør
+import no.nav.helse.person.Inntektshistorikk.Inntektsmelding
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
@@ -15,24 +16,17 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
 internal class VilkårsgrunnlagHistorikkTest {
-
-    private lateinit var historikk: VilkårsgrunnlagHistorikk
+    private val historikk = VilkårsgrunnlagHistorikk()
     private val inspektør get() = Vilkårgrunnlagsinspektør(historikk)
 
     companion object {
         private val arbeidsforhold = listOf(Arbeidsforhold("123456789", 1.desember(2017)))
-    }
-
-    @BeforeEach
-    fun beforEach() {
-        historikk = VilkårsgrunnlagHistorikk()
     }
 
     @Test
@@ -421,7 +415,9 @@ internal class VilkårsgrunnlagHistorikkTest {
 
     private fun sykepengegrunnlag(inntekt: Inntekt) =
         Sykepengegrunnlag(
-            arbeidsgiverInntektsopplysninger = listOf(),
+            arbeidsgiverInntektsopplysninger = listOf(
+                ArbeidsgiverInntektsopplysning("orgnummer", Inntektsmelding(UUID.randomUUID(), LocalDate.now(), UUID.randomUUID(), inntekt))
+            ),
             sykepengegrunnlag = inntekt,
             grunnlagForSykepengegrunnlag = inntekt,
             begrensning = ER_IKKE_6G_BEGRENSET
@@ -429,7 +425,9 @@ internal class VilkårsgrunnlagHistorikkTest {
 
     private fun sykepengegrunnlagFor(inntekt: Inntekt): (LocalDate) -> Sykepengegrunnlag = {
         Sykepengegrunnlag(
-            arbeidsgiverInntektsopplysninger = listOf(),
+            arbeidsgiverInntektsopplysninger = listOf(
+                ArbeidsgiverInntektsopplysning("orgnummer", Inntektsmelding(UUID.randomUUID(), LocalDate.now(), UUID.randomUUID(), inntekt))
+            ),
             sykepengegrunnlag = inntekt,
             grunnlagForSykepengegrunnlag = inntekt,
             begrensning = ER_IKKE_6G_BEGRENSET
