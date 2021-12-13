@@ -483,7 +483,7 @@ class Person private constructor(
     }
 
     internal fun beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate, aktivitetslogg: IAktivitetslogg): Sykepengegrunnlag {
-        return Sykepengegrunnlag(arbeidsgivere.beregnSykepengegrunnlag(skjæringstidspunkt), skjæringstidspunkt, aktivitetslogg) // TODO: se på denne med fungerende hjerner
+        return Sykepengegrunnlag(arbeidsgivere.beregnSykepengegrunnlag(skjæringstidspunkt), skjæringstidspunkt, aktivitetslogg)
     }
 
     private fun beregnSykepengegrunnlagForInfotrygd(

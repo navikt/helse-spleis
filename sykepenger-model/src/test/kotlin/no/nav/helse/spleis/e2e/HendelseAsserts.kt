@@ -13,7 +13,7 @@ import java.util.*
 import kotlin.reflect.KClass
 
 
-internal fun assertInntektForDato(forventetInntekt: Inntekt?, dato: LocalDate, førsteFraværsdag: LocalDate = dato, inspektør: TestArbeidsgiverInspektør) { // TODO: se på
+internal fun assertInntektForDato(forventetInntekt: Inntekt?, dato: LocalDate, førsteFraværsdag: LocalDate = dato, inspektør: TestArbeidsgiverInspektør) {
     Assertions.assertEquals(forventetInntekt, inspektør.inntektInspektør.grunnlagForSykepengegrunnlag(dato, førsteFraværsdag)?.grunnlagForSykepengegrunnlag())
 }
 

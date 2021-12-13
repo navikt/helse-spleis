@@ -685,7 +685,7 @@ internal class Arbeidsgiver private constructor(
     private fun fjernDager(periode: Periode) = sykdomshistorikk.fjernDager(periode)
 
     internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, periodeStart: LocalDate) =
-        inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periodeStart, finnFørsteFraværsdag(skjæringstidspunkt))?.grunnlagForSykepengegrunnlag() // TODO: se på med fungerende hjerner
+        inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periodeStart, finnFørsteFraværsdag(skjæringstidspunkt))?.grunnlagForSykepengegrunnlag()
 
     internal fun addInntekt(inntektsmelding: Inntektsmelding, skjæringstidspunkt: LocalDate) {
         inntektsmelding.addInntekt(inntektshistorikk, skjæringstidspunkt)

@@ -77,10 +77,10 @@ internal class Inntektshistorikk {
             }
         }
 
-        internal fun grunnlagForSykepengegrunnlag(dato: LocalDate, førsteFraværsdag: LocalDate?) =
+        internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) =
             inntekter
                 .sorted()
-                .mapNotNull { it.grunnlagForSykepengegrunnlag(dato, førsteFraværsdag) }
+                .mapNotNull { it.grunnlagForSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag) }
                 .firstOrNull()
 
         internal fun grunnlagForSammenligningsgrunnlag(dato: LocalDate) =
@@ -105,7 +105,7 @@ internal class Inntektshistorikk {
         val dato: LocalDate
         val prioritet: Int
         fun accept(visitor: InntekthistorikkVisitor)
-        fun grunnlagForSykepengegrunnlag(dato: LocalDate, førsteFraværsdag: LocalDate?): Inntektsopplysning? = null
+        fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?): Inntektsopplysning? = null
         fun grunnlagForSykepengegrunnlag(): Inntekt
         fun grunnlagForSammenligningsgrunnlag(dato: LocalDate): Inntektsopplysning? = null
         fun grunnlagForSammenligningsgrunnlag(): Inntekt
@@ -129,7 +129,7 @@ internal class Inntektshistorikk {
             visitor.visitSaksbehandler(this, dato, hendelseId, beløp, tidsstempel)
         }
 
-        override fun grunnlagForSykepengegrunnlag(dato: LocalDate, førsteFraværsdag: LocalDate?) = takeIf { it.dato == dato }
+        override fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) = takeIf { it.dato == skjæringstidspunkt }
         override fun grunnlagForSykepengegrunnlag(): Inntekt = beløp
 
         override fun grunnlagForSammenligningsgrunnlag(): Inntekt = error("Saksbehandler har ikke grunnlag for sammenligningsgrunnlag")
@@ -160,8 +160,8 @@ internal class Inntektshistorikk {
             visitor.visitInfotrygd(this, dato, hendelseId, beløp, tidsstempel)
         }
 
-        // TODO: egen test for å bruke førstefraværsdag her
-        override fun grunnlagForSykepengegrunnlag(dato: LocalDate, førsteFraværsdag: LocalDate?) = takeIf { it.dato == dato }
+        // TODO: egen test for å bruke førstefraværsdag her: https://trello.com/c/QFYSoFOs
+        override fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) = takeIf { it.dato == skjæringstidspunkt }
         override fun grunnlagForSykepengegrunnlag(): Inntekt = beløp
 
         internal fun grunnlagForSykepengegrunnlag(periode: Periode) = takeIf { it.dato in periode }
@@ -194,8 +194,8 @@ internal class Inntektshistorikk {
             visitor.visitInntektsmelding(this, dato, hendelseId, beløp, tidsstempel)
         }
 
-        override fun grunnlagForSykepengegrunnlag(dato: LocalDate, førsteFraværsdag: LocalDate?) =
-            takeIf { førsteFraværsdag != null && YearMonth.from(dato) == YearMonth.from(førsteFraværsdag) && it.dato == førsteFraværsdag }
+        override fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) =
+            takeIf { førsteFraværsdag != null && YearMonth.from(skjæringstidspunkt) == YearMonth.from(førsteFraværsdag) && it.dato == førsteFraværsdag }
 
         override fun grunnlagForSykepengegrunnlag(): Inntekt = beløp
 
@@ -231,8 +231,8 @@ internal class Inntektshistorikk {
             visitor.postVisitSkatt(this, id, dato)
         }
 
-        override fun grunnlagForSykepengegrunnlag(dato: LocalDate, førsteFraværsdag: LocalDate?) =
-            takeIf { inntektsopplysninger.any { it.grunnlagForSykepengegrunnlag(dato, førsteFraværsdag) != null } }
+        override fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) =
+            takeIf { inntektsopplysninger.any { it.grunnlagForSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag) != null } }
 
         override fun grunnlagForSykepengegrunnlag(): Inntekt {
             val (inntekterSisteTreMåneder, alleAndre) = inntektsopplysninger.partition { it.erRelevant(3) }
@@ -317,8 +317,8 @@ internal class Inntektshistorikk {
                 )
             }
 
-            override fun grunnlagForSykepengegrunnlag(dato: LocalDate, førsteFraværsdag: LocalDate?) =
-                takeIf { this.dato == dato && måned.isWithinRangeOf(dato, 3) }
+            override fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) =
+                takeIf { this.dato == skjæringstidspunkt && måned.isWithinRangeOf(skjæringstidspunkt, 3) }
 
             override fun grunnlagForSykepengegrunnlag(): Inntekt = beløp
 

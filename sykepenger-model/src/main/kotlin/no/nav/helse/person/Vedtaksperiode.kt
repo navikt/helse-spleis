@@ -321,7 +321,7 @@ internal class Vedtaksperiode private constructor(
     internal fun periodetype() = arbeidsgiver.periodetype(periode)
 
     internal fun inntektskilde() = inntektskilde
-    // TODO: Kan byttes med en sjekk på vilkårsgrunnlag når AvsluttetUtenUtbetaling går gjennom vilkårsprøving
+    // TODO: Kan byttes med en sjekk på vilkårsgrunnlag når AvsluttetUtenUtbetaling går gjennom vilkårsprøving https://trello.com/c/mQ4ZKeEG
     private fun harInntekt() = arbeidsgiver.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periode.start) != null
     private fun avgjørTilstandForInntekt(): Vedtaksperiodetilstand {
         if (!harInntekt()) return AvventerInntektsmeldingFerdigForlengelse
