@@ -28,30 +28,33 @@ class Inntektsvurdering(private val inntekter: List<ArbeidsgiverInntekt>) {
             aktivitetslogg.warn("Bruker har flere inntektskilder de siste tre månedene enn arbeidsforhold som er oppdaget i Aa-registeret.")
         }
         avviksprosent = grunnlagForSykepengegrunnlag.avviksprosent(sammenligningsgrunnlag)
-        return validerAvvik(aktivitetslogg, avviksprosent, grunnlagForSykepengegrunnlag.grunnlagForSykepengegrunnlag, sammenligningsgrunnlag)
+        return validerAvvik(aktivitetslogg, avviksprosent, grunnlagForSykepengegrunnlag.grunnlagForSykepengegrunnlag, sammenligningsgrunnlag) { melding, tillattAvvik ->
+            error(melding, tillattAvvik)
+        }
     }
 
     internal fun lagreInntekter(person: Person, skjæringstidspunkt: LocalDate, hendelse: PersonHendelse) =
         ArbeidsgiverInntekt.lagreSammenligningsgrunnlag(inntekter, person, skjæringstidspunkt, hendelse)
 
-    private fun validerAvvik(
-        aktivitetslogg: IAktivitetslogg,
-        avvik: Prosent,
-        grunnlagForSykepengegrunnlag: Inntekt,
-        sammenligningsgrunnlag: Inntekt
-    ): Boolean {
-        val harAkseptabeltAvvik = sjekkAvvik(avvik, aktivitetslogg)
-        aktivitetslogg.`§8-30 ledd 2 punktum 1`(harAkseptabeltAvvik, MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT, grunnlagForSykepengegrunnlag, sammenligningsgrunnlag, avvik)
-        return harAkseptabeltAvvik
-    }
-
     internal companion object {
-        internal fun sjekkAvvik(avvik: Prosent, aktivitetslogg: IAktivitetslogg): Boolean {
+        internal fun validerAvvik(
+            aktivitetslogg: IAktivitetslogg,
+            avvik: Prosent,
+            grunnlagForSykepengegrunnlag: Inntekt,
+            sammenligningsgrunnlag: Inntekt,
+            onFailure: IAktivitetslogg.(melding: String, tillattAvvik: Double) -> Unit
+        ): Boolean {
+            val harAkseptabeltAvvik = sjekkAvvik(avvik, aktivitetslogg, onFailure)
+            aktivitetslogg.`§8-30 ledd 2 punktum 1`(harAkseptabeltAvvik, MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT, grunnlagForSykepengegrunnlag, sammenligningsgrunnlag, avvik)
+            return harAkseptabeltAvvik
+        }
+
+        internal fun sjekkAvvik(avvik: Prosent, aktivitetslogg: IAktivitetslogg, onFailure: IAktivitetslogg.(melding: String, tillattAvvik: Double) -> Unit): Boolean {
             val harAkseptabeltAvvik = harAkseptabeltAvvik(avvik)
             if (harAkseptabeltAvvik) {
                 aktivitetslogg.info("Har %.0f %% eller mindre avvik i inntekt (%.2f %%)", MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT.prosent(), avvik.prosent())
             } else {
-                aktivitetslogg.error("Har mer enn %.0f %% avvik", MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT.prosent())
+                onFailure(aktivitetslogg, "Har mer enn %.0f %% avvik", MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT.prosent())
             }
             return harAkseptabeltAvvik
         }

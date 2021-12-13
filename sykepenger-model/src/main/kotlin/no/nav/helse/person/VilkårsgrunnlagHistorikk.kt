@@ -128,7 +128,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         override fun sjekkAvviksprosent(aktivitetslogg: IAktivitetslogg): Boolean {
             if (avviksprosent == null) return true
-            return Inntektsvurdering.sjekkAvvik(avviksprosent, aktivitetslogg)
+            return Inntektsvurdering.sjekkAvvik(avviksprosent, aktivitetslogg, IAktivitetslogg::error)
         }
 
         override fun oppdaterManglendeMinimumInntekt(person: Person, skjæringstidspunkt: LocalDate) {

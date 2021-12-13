@@ -4,7 +4,6 @@ import no.nav.helse.Fødselsnummer
 import no.nav.helse.Toggle
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.utbetaling.*
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-30 ledd 2 punktum 1`
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSammenligningsgrunnlag
@@ -24,7 +23,6 @@ import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbe
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Prosent
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -646,33 +644,24 @@ class Person private constructor(
 
     internal fun vilkårsprøvEtterNyInntekt(hendelse: OverstyrInntekt) {
         val skjæringstidspunkt = hendelse.skjæringstidspunkt
-        val grunnlagForSykepengegrunnlag = beregnSykepengegrunnlag(skjæringstidspunkt, hendelse)
+        val sykepengegrunnlag = beregnSykepengegrunnlag(skjæringstidspunkt, hendelse)
         val sammenligningsgrunnlag = sammenligningsgrunnlag(skjæringstidspunkt)
             ?: hendelse.severe("Fant ikke sammenligningsgrunnlag for skjæringstidspunkt: ${skjæringstidspunkt}. Kan ikke revurdere inntekt.")
-        val avviksprosent = grunnlagForSykepengegrunnlag.avviksprosent(sammenligningsgrunnlag)
-        val akseptabeltAvvik = avviksprosent <= Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT
+        val avviksprosent = sykepengegrunnlag.avviksprosent(sammenligningsgrunnlag)
 
-        hendelse.`§8-30 ledd 2 punktum 1`(akseptabeltAvvik, Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT, grunnlagForSykepengegrunnlag.grunnlagForSykepengegrunnlag, sammenligningsgrunnlag, avviksprosent)
-
-        if (akseptabeltAvvik) {
-            hendelse.info(
-                "Har %.0f %% eller mindre avvik i inntekt (%.2f %%)",
-                Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT.prosent(),
-                avviksprosent.prosent()
-            )
-        } else {
-            hendelse.warn("Har mer enn %.0f %% avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.", Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT.prosent())
+        val harAkseptabeltAvvik = Inntektsvurdering.validerAvvik(hendelse, avviksprosent, sykepengegrunnlag.grunnlagForSykepengegrunnlag, sammenligningsgrunnlag) { _, maksimaltTillattAvvik ->
+            warn("Har mer enn %.0f %% avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.", maksimaltTillattAvvik)
         }
 
         when (val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)) {
             is VilkårsgrunnlagHistorikk.Grunnlagsdata -> {
                 val harMinimumInntekt =
-                    validerMinimumInntekt(hendelse, fødselsnummer, hendelse.skjæringstidspunkt, grunnlagForSykepengegrunnlag)
+                    validerMinimumInntekt(hendelse, fødselsnummer, hendelse.skjæringstidspunkt, sykepengegrunnlag)
                 vilkårsgrunnlagHistorikk.lagre(
                     skjæringstidspunkt, grunnlag.kopierGrunnlagsdataMed(
-                        sykepengegrunnlag = grunnlagForSykepengegrunnlag,
+                        sykepengegrunnlag = sykepengegrunnlag,
                         sammenligningsgrunnlag = sammenligningsgrunnlag,
-                        sammenligningsgrunnlagVurdering = akseptabeltAvvik,
+                        sammenligningsgrunnlagVurdering = harAkseptabeltAvvik,
                         avviksprosent = avviksprosent,
                         minimumInntektVurdering = harMinimumInntekt,
                         meldingsreferanseId = hendelse.meldingsreferanseId()
