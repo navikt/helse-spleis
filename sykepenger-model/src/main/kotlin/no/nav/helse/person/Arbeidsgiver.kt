@@ -870,11 +870,10 @@ internal class Arbeidsgiver private constructor(
     internal fun harSykdomFor(skjæringstidspunkt: LocalDate) = vedtaksperioder.any { it.gjelder(skjæringstidspunkt) }
 
     fun finnFørsteFraværsdag(skjæringstidspunkt: LocalDate): LocalDate? {
-        if(harSykdomFor(skjæringstidspunkt)) {
-            //return sykdomstidslinje().sisteSkjæringstidspunkt() // TODO: y dis work (feilende test: inntektsmelding i feil rekkefølge)
+        if (harSykdomFor(skjæringstidspunkt)) {
             return sykdomstidslinje().subset(finnSammenhengendePeriode(skjæringstidspunkt).periode()).sisteSkjæringstidspunkt()
         }
-       return null
+        return null
     }
 
     internal fun periodetype(periode: Periode): Periodetype {

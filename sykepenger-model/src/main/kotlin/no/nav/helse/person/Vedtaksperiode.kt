@@ -398,7 +398,8 @@ internal class Vedtaksperiode private constructor(
     private fun håndterInntektsmelding(hendelse: Inntektsmelding, hvisIngenErrors: () -> Unit) {
         periode = periode.oppdaterFom(hendelse.periode())
         oppdaterHistorikk(hendelse)
-        arbeidsgiver.addInntekt(hendelse, arbeidsgiver.finnFørsteFraværsdag(skjæringstidspunkt)!!)
+        val førsteFraværsdag = arbeidsgiver.finnFørsteFraværsdag(skjæringstidspunkt)
+        if (førsteFraværsdag != null) arbeidsgiver.addInntekt(hendelse, førsteFraværsdag)
         inntektsmeldingInfo = InntektsmeldingInfo(id = hendelse.meldingsreferanseId(), arbeidsforholdId = hendelse.arbeidsforholdId)
 
         if (hendelse.førsteFraværsdag != null && hendelse.førsteFraværsdag != skjæringstidspunkt) {

@@ -958,7 +958,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Inntekstmelding kommer i feil rekkefølge - her kommer en lur tekst når jeg skjønner greia`() {
+    fun `Inntekstmelding kommer i feil rekkefølge - riktig inntektsmelding skal bli valgt i vilkårgrunnlaget`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(5.februar, 28.februar, 100.prosent))
@@ -970,9 +970,9 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
 
-        val inntektsopplysning = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.grunnlagForSykepengegrunnlag()
-        assertEquals(INNTEKT, inntektsopplysning)
-        assertInstanceOf(Inntektsmelding::class.java, inntektsopplysning)
+        val inntektsopplysning = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inntektsopplysningPerArbeidsgiver()?.get(ORGNUMMER)
+        assertEquals(INNTEKT, inntektsopplysning?.grunnlagForSykepengegrunnlag())
+        assertInstanceOf(Inntektshistorikk.Inntektsmelding::class.java, inntektsopplysning)
     }
 
     @Test
@@ -1193,7 +1193,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
             AVVENTER_HISTORIKK
         )
-        assertInntektForDato(INNTEKT, 1.februar, inspektør)
+        assertInntektForDato(INNTEKT, 1.februar, inspektør=inspektør)
     }
 
     @Test
