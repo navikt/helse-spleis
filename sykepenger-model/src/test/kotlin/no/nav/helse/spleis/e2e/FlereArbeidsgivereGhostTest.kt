@@ -256,7 +256,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         val a1Linje = inspektør(a1).utbetalinger.last().inspektør.arbeidsgiverOppdrag.last()
         assertEquals(17.mars, a1Linje.fom)
-        assertEquals(31.mars, a1Linje.tom)
+        assertEquals(30.mars, a1Linje.tom)
         assertEquals(997, a1Linje.beløp)
 
         assertTrue(inspektør(a2).utbetalinger.isEmpty())
@@ -306,7 +306,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         val a1Linje = inspektør(a1).utbetalinger.last().inspektør.arbeidsgiverOppdrag.last()
         assertEquals(17.mars, a1Linje.fom)
-        assertEquals(31.mars, a1Linje.tom)
+        assertEquals(30.mars, a1Linje.tom)
         assertEquals(499, a1Linje.beløp)
 
         assertTrue(inspektør(a2).utbetalinger.isEmpty())

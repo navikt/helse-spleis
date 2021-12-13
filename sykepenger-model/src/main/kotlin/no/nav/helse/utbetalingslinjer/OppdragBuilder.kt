@@ -84,7 +84,7 @@ internal class OppdragBuilder(
         økonomi: Økonomi
     ) {
         økonomi.medData { grad, _ ->
-            if (utbetalingslinjer.isEmpty() || grad != linje.grad)
+           if (utbetalingslinjer.isNotEmpty() && grad != linje.grad)
                 tilstand.nyLinje(dag, dato, grad)
             else
                 tilstand.helgedag(dag, dato, grad)
@@ -208,8 +208,8 @@ internal class OppdragBuilder(
             dato: LocalDate,
             grad: Double
         ) {
-            addLinje(dato, grad)
-            tilstand = LinjeUtenSats()
+            //addLinje(dato, grad)
+            //tilstand = LinjeUtenSats()
         }
 
         override fun nyLinje(

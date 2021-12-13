@@ -1928,8 +1928,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         val utbetaltEvent = observatør.utbetaltEventer.last()
 
         assertEquals(13, observatør.utbetaltEventer.size)
-        assertEquals(30.desember, observatør.utbetaltEventer[11].oppdrag.first().utbetalingslinjer.first().tom)
-        assertEquals(30.desember, utbetaltEvent.oppdrag.first().utbetalingslinjer.first().tom)
+        assertEquals(28.desember, observatør.utbetaltEventer[11].oppdrag.first().utbetalingslinjer.first().tom)
+        assertEquals(28.desember, utbetaltEvent.oppdrag.first().utbetalingslinjer.first().tom)
     }
 
     @Test

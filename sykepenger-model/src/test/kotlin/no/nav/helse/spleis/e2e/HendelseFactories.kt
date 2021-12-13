@@ -417,7 +417,8 @@ internal fun manuellArbeidsgiverdag(dato: LocalDate) = ManuellOverskrivingDag(da
 internal fun AbstractEndToEndTest.simulering(
     vedtaksperiodeIdInnhenter: IdInnhenter,
     simuleringOK: Boolean = true,
-    orgnummer: String = AbstractPersonTest.ORGNUMMER
+    orgnummer: String = AbstractPersonTest.ORGNUMMER,
+    simuleringsresultat: Simulering.SimuleringResultat? = standardSimuleringsresultat(orgnummer)
 ) = inspektør(orgnummer).etterspurteBehov(vedtaksperiodeIdInnhenter).filter { it.type == Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering }.map { simuleringsBehov ->
     Simulering(
         meldingsreferanseId = UUID.randomUUID(),
@@ -430,48 +431,50 @@ internal fun AbstractEndToEndTest.simulering(
         simuleringOK = simuleringOK,
         melding = "",
         utbetalingId = UUID.fromString(simuleringsBehov.kontekst().getValue("utbetalingId")),
-        simuleringResultat = Simulering.SimuleringResultat(
-            totalbeløp = 2000,
-            perioder = listOf(
-                Simulering.SimulertPeriode(
-                    periode = Periode(17.januar, 20.januar),
-                    utbetalinger = listOf(
-                        Simulering.SimulertUtbetaling(
-                            forfallsdato = 21.januar,
-                            utbetalesTil = Simulering.Mottaker(
-                                id = orgnummer,
-                                navn = "Org Orgesen AS"
+        simuleringResultat = simuleringsresultat
+    ).apply {
+        hendelselogg = this
+    }
+}
+
+internal fun standardSimuleringsresultat(orgnummer: String) = Simulering.SimuleringResultat(
+    totalbeløp = 2000,
+    perioder = listOf(
+        Simulering.SimulertPeriode(
+            periode = Periode(17.januar, 20.januar),
+            utbetalinger = listOf(
+                Simulering.SimulertUtbetaling(
+                    forfallsdato = 21.januar,
+                    utbetalesTil = Simulering.Mottaker(
+                        id = orgnummer,
+                        navn = "Org Orgesen AS"
+                    ),
+                    feilkonto = false,
+                    detaljer = listOf(
+                        Simulering.Detaljer(
+                            periode = Periode(17.januar, 20.januar),
+                            konto = "81549300",
+                            beløp = 2000,
+                            klassekode = Simulering.Klassekode(
+                                kode = "SPREFAG-IOP",
+                                beskrivelse = "Sykepenger, Refusjon arbeidsgiver"
                             ),
-                            feilkonto = false,
-                            detaljer = listOf(
-                                Simulering.Detaljer(
-                                    periode = Periode(17.januar, 20.januar),
-                                    konto = "81549300",
-                                    beløp = 2000,
-                                    klassekode = Simulering.Klassekode(
-                                        kode = "SPREFAG-IOP",
-                                        beskrivelse = "Sykepenger, Refusjon arbeidsgiver"
-                                    ),
-                                    uføregrad = 100,
-                                    utbetalingstype = "YTEL",
-                                    tilbakeføring = false,
-                                    sats = Simulering.Sats(
-                                        sats = 1000,
-                                        antall = 2,
-                                        type = "DAG"
-                                    ),
-                                    refunderesOrgnummer = orgnummer
-                                )
-                            )
+                            uføregrad = 100,
+                            utbetalingstype = "YTEL",
+                            tilbakeføring = false,
+                            sats = Simulering.Sats(
+                                sats = 1000,
+                                antall = 2,
+                                type = "DAG"
+                            ),
+                            refunderesOrgnummer = orgnummer
                         )
                     )
                 )
             )
         )
-    ).apply {
-        hendelselogg = this
-    }
-}
+    )
+)
 
 internal fun AbstractEndToEndTest.utbetalingsgodkjenning(
     vedtaksperiodeIdInnhenter: IdInnhenter,

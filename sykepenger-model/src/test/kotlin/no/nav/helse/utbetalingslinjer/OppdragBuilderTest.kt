@@ -35,12 +35,21 @@ internal class OppdragBuilderTest {
     }
 
     @Test
-    fun `helg ved start og slutt i perioden utelates ikke`() {
-        val oppdrag = tilArbeidsgiver(1.AP, 1.HELG(1200), 5.NAV(1200), 2.HELG(1200))
+    fun `helg i slutt utelates, men ikke helg i start`() {
+        val oppdrag = tilArbeidsgiver(6.AP, 1.HELG, 5.NAV, 2.HELG)
 
         assertEquals(1, oppdrag.size)
-        assertEquals(6, oppdrag.antallDager)
-        oppdrag.assertLinje(0, 2.januar, 9.januar, null, sats = 1200, grad = 100.0)
+        assertEquals(5, oppdrag.antallDager)
+        oppdrag.assertLinje(0, 7.januar, 12.januar, null)
+    }
+
+    @Test
+    fun `helg i midten utelates ikke`() {
+        val oppdrag = tilArbeidsgiver(5.NAV, 2.HELG, 5.NAV, 2.HELG)
+
+        assertEquals(1, oppdrag.size)
+        assertEquals(10, oppdrag.antallDager)
+        oppdrag.assertLinje(0, 1.januar, 12.januar, null)
     }
 
     @Test
@@ -165,8 +174,8 @@ internal class OppdragBuilderTest {
         assertEquals(3, oppdragTilUtbetaling3.size)
         oppdragTilUtbetaling3.apply {
             assertLinje(0, 1.januar, 18.januar, delytelseId = 1, refDelytelseId = null, refFagsystemId = null)
-            assertLinje(1, 20.januar, 27.januar, delytelseId = 2, refDelytelseId = null, endringskode = ENDR, datoStatusFom = 20.januar, refFagsystemId = null)
-            assertLinje(2, 24.januar, 28.januar, delytelseId = 3, refDelytelseId = 2, endringskode = NY, refFagsystemId = oppdragTilUtbetaling3.fagsystemId())
+            assertLinje(1, 20.januar, 26.januar, delytelseId = 2, refDelytelseId = null, endringskode = ENDR, datoStatusFom = 20.januar, refFagsystemId = null)
+            assertLinje(2, 24.januar, 26.januar, delytelseId = 3, refDelytelseId = 2, endringskode = NY, refFagsystemId = oppdragTilUtbetaling3.fagsystemId())
         }
     }
 
@@ -294,7 +303,7 @@ internal class OppdragBuilderTest {
                 refFagsystemId = null
             ) //Opphører linje som har blitt overskrevet av nytt oppdrag
             assertLinje(2, 24.januar, 29.januar, delytelseId = 3, refDelytelseId = 2, endringskode = NY)
-            assertLinje(3, 30.januar, 3.februar, delytelseId = 4, refDelytelseId = 3, endringskode = NY, sats = 520, grad = 40.0)
+            assertLinje(3, 30.januar, 2.februar, delytelseId = 4, refDelytelseId = 3, endringskode = NY, sats = 520, grad = 40.0)
         }
 
         oppdragTilUtbetaling4.apply {
@@ -304,7 +313,7 @@ internal class OppdragBuilderTest {
             assertLinje(
                 2,
                 30.januar,
-                3.februar,
+                2.februar,
                 delytelseId = 4,
                 refDelytelseId = null,
                 refFagsystemId = null,
@@ -312,7 +321,7 @@ internal class OppdragBuilderTest {
                 datoStatusFom = 30.januar,
                 sats = 520
             )
-            assertLinje(3, 1.februar, 3.februar, delytelseId = 5, refDelytelseId = 4, endringskode = NY, sats = 520, grad = 40.0)
+            assertLinje(3, 1.februar, 2.februar, delytelseId = 5, refDelytelseId = 4, endringskode = NY, sats = 520, grad = 40.0)
         }
     }
 
@@ -395,14 +404,6 @@ internal class OppdragBuilderTest {
         assertEquals(2, oppdrag.size)
         oppdrag.assertLinje(0, 1.januar, 3.januar, null, sats = 1500, grad = 100.0)
         oppdrag.assertLinje(1, 4.januar, 9.januar, sats = (1500 * 0.8).toInt(), grad = 80.0)
-    }
-
-    @Test
-    fun `Utbetalingslinje kan starte og ende på helgedag`() {
-        val oppdrag = tilArbeidsgiver(1.AP, 1.FRI, 1.HELG, 5.NAV, 2.HELG)
-
-        assertEquals(1, oppdrag.size)
-        oppdrag.assertLinje(0, 3.januar, 10.januar, null)
     }
 
     @Test

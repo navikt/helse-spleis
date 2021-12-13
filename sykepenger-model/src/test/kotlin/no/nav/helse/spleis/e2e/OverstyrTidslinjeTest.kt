@@ -124,7 +124,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
 
         assertEquals(2, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.size)
-        assertEquals(21.januar, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag[0].tom)
+        assertEquals(19.januar, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag[0].tom)
         assertEquals(23.januar, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag[1].fom)
     }
 
@@ -145,7 +145,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
 
         assertEquals(2, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.size)
-        assertEquals(21.januar, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag[0].tom)
+        assertEquals(19.januar, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag[0].tom)
         assertEquals(24.januar, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag[1].fom)
     }
 

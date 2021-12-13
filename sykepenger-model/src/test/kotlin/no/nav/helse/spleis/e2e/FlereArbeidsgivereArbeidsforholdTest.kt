@@ -347,7 +347,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
 
         val a2Linje = inspektør(a2).utbetalinger.last().inspektør.arbeidsgiverOppdrag.last()
         assertEquals(17.mars, a2Linje.fom)
-        assertEquals(31.mars, a2Linje.tom)
+        assertEquals(30.mars, a2Linje.tom)
         assertEquals(692, a2Linje.beløp)
 
         assertNoWarnings(inspektør(a2))

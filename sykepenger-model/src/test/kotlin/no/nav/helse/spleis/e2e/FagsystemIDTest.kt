@@ -59,7 +59,7 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         første.linjerUtenOpphør().also { linjer ->
             assertEquals(1, linjer.size)
             assertEquals(30.mai, linjer.first().fom)
-            assertEquals(23.juni, linjer.first().tom)
+            assertEquals(22.juni, linjer.first().tom)
         }
         siste.linjerUtenOpphør().also { linjer ->
             assertEquals(1, linjer.size)
@@ -271,7 +271,7 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         siste.linjerUtenOpphør().also { linjer ->
             assertEquals(1, linjer.size)
             assertEquals(30.mai, linjer.first().fom)
-            assertEquals(30.juni, linjer.first().tom)
+            assertEquals(29.juni, linjer.first().tom)
         }
     }
 

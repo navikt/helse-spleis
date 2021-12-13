@@ -18,7 +18,7 @@ internal class OverstyrVilkårsvurderingPerDagTest : AbstractEndToEndTest() {
 
         val linjer = inspektør.utbetalingslinjer(1).linjerUtenOpphør()
         assertEquals(2, linjer.size)
-        assertEquals(21.januar, linjer[0].tom)
+        assertEquals(19.januar, linjer[0].tom)
         assertEquals(23.januar, linjer[1].fom)
     }
 }

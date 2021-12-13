@@ -90,7 +90,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         assertEquals(2, (behov.detaljer()["linjer"] as List<*>).size)
 
         assertEquals("2021-04-17", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["fom"])
-        assertEquals("2021-04-25", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["tom"])
+        assertEquals("2021-04-23", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["tom"])
         assertEquals("2021-04-28", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[1]["fom"])
         assertEquals("2021-05-07", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[1]["tom"])
     }
@@ -264,7 +264,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         // Ny fagsystemId fordi perioden vi forlenger har blitt opphørt
         assertEquals(inspektør.arbeidsgiverOppdrag.first().fagsystemId(), inspektør.arbeidsgiverOppdrag.last().fagsystemId())
         assertEquals(15, inspektør.arbeidsgiverOppdrag.last().stønadsdager())
-        assertEquals(24.april(2021) til 15.mai(2021), Oppdrag.periode(inspektør.arbeidsgiverOppdrag.last()))
+        assertEquals(24.april(2021) til 14.mai(2021), Oppdrag.periode(inspektør.arbeidsgiverOppdrag.last()))
     }
 
     @Test
@@ -311,7 +311,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
 
         assertEquals(inspektør.arbeidsgiverOppdrag.first().fagsystemId(), inspektør.arbeidsgiverOppdrag.last().fagsystemId())
         assertEquals(15, inspektør.arbeidsgiverOppdrag.last().stønadsdager())
-        assertEquals(24.april(2021) til 15.mai(2021), Oppdrag.periode(inspektør.arbeidsgiverOppdrag.last()))
+        assertEquals(24.april(2021) til 14.mai(2021), Oppdrag.periode(inspektør.arbeidsgiverOppdrag.last()))
     }
 
     @Test
@@ -359,7 +359,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
 
         assertEquals(inspektør.arbeidsgiverOppdrag.first().fagsystemId(), inspektør.arbeidsgiverOppdrag.last().fagsystemId())
         assertEquals(15, inspektør.arbeidsgiverOppdrag.last().stønadsdager())
-        assertEquals(24.april(2021) til 15.mai(2021), Oppdrag.periode(inspektør.arbeidsgiverOppdrag.last()))
+        assertEquals(24.april(2021) til 14.mai(2021), Oppdrag.periode(inspektør.arbeidsgiverOppdrag.last()))
     }
 
     @Test

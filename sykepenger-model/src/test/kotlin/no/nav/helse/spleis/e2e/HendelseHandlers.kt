@@ -383,10 +383,11 @@ internal fun AbstractEndToEndTest.håndterVilkårsgrunnlag(
 internal fun AbstractEndToEndTest.håndterSimulering(
     vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
     simuleringOK: Boolean = true,
-    orgnummer: String = AbstractPersonTest.ORGNUMMER
+    orgnummer: String = AbstractPersonTest.ORGNUMMER,
+    simuleringsresultat: Simulering.SimuleringResultat? = standardSimuleringsresultat(orgnummer)
 ) {
     assertEtterspurt(Simulering::class, Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering, vedtaksperiodeIdInnhenter, orgnummer)
-    simulering(vedtaksperiodeIdInnhenter, simuleringOK, orgnummer).forEach { simulering -> simulering.håndter(Person::håndter) }
+    simulering(vedtaksperiodeIdInnhenter, simuleringOK, orgnummer, simuleringsresultat).forEach { simulering -> simulering.håndter(Person::håndter) }
 }
 
 internal fun AbstractEndToEndTest.håndterUtbetalingshistorikk(

@@ -398,7 +398,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         }
         inspektør.utbetaling(0).also { utbetaling ->
             assertEquals(26.juni, utbetaling.inspektør.arbeidsgiverOppdrag.førstedato)
-            assertEquals(30.juni, utbetaling.inspektør.arbeidsgiverOppdrag.sistedato)
+            assertEquals(29.juni, utbetaling.inspektør.arbeidsgiverOppdrag.sistedato)
             assertEquals(1, utbetaling.inspektør.arbeidsgiverOppdrag.size)
         }
         inspektør.utbetalingUtbetalingstidslinje(1).also { utbetalingUtbetalingstidslinje ->
