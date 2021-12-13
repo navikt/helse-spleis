@@ -208,8 +208,7 @@ internal class OppdragBuilder(
             dato: LocalDate,
             grad: Double
         ) {
-            //addLinje(dato, grad)
-            //tilstand = LinjeUtenSats()
+            /* ønsker ikke slutte en linje på helg */
         }
 
         override fun nyLinje(
