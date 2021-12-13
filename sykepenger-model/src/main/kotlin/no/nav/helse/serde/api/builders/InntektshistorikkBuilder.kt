@@ -114,6 +114,7 @@ internal class InntektshistorikkBuilder(private val person: Person) {
 
         override fun visitSaksbehandler(
             saksbehandler: Inntektshistorikk.Saksbehandler,
+            id: UUID,
             dato: LocalDate,
             hendelseId: UUID,
             beløp: Inntekt,
@@ -128,6 +129,7 @@ internal class InntektshistorikkBuilder(private val person: Person) {
 
         override fun visitInntektsmelding(
             inntektsmelding: Inntektshistorikk.Inntektsmelding,
+            id: UUID,
             dato: LocalDate,
             hendelseId: UUID,
             beløp: Inntekt,
@@ -142,6 +144,7 @@ internal class InntektshistorikkBuilder(private val person: Person) {
 
         override fun visitInfotrygd(
             infotrygd: Inntektshistorikk.Infotrygd,
+            id: UUID,
             dato: LocalDate,
             hendelseId: UUID,
             beløp: Inntekt,

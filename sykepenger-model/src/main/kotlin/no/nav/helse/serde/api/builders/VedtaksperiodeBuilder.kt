@@ -231,6 +231,7 @@ internal class VedtaksperiodeBuilder(
         korrelasjonsId: UUID,
         type: Utbetalingtype,
         tilstand: Utbetaling.Tilstand,
+        periode: Periode,
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,
         arbeidsgiverNettoBeløp: Int,
@@ -239,7 +240,10 @@ internal class VedtaksperiodeBuilder(
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?,
         stønadsdager: Int,
-        beregningId: UUID
+        beregningId: UUID,
+        overføringstidspunkt: LocalDateTime?,
+        avsluttet: LocalDateTime?,
+        avstemmingsnøkkel: Long?
     ) {
         this.inUtbetaling = true
         if (tilstand is Utbetaling.Forkastet) return
@@ -258,6 +262,7 @@ internal class VedtaksperiodeBuilder(
         korrelasjonsId: UUID,
         type: Utbetalingtype,
         tilstand: Utbetaling.Tilstand,
+        periode: Periode,
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,
         arbeidsgiverNettoBeløp: Int,
@@ -266,7 +271,10 @@ internal class VedtaksperiodeBuilder(
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?,
         stønadsdager: Int,
-        beregningId: UUID
+        beregningId: UUID,
+        overføringstidspunkt: LocalDateTime?,
+        avsluttet: LocalDateTime?,
+        avstemmingsnøkkel: Long?
     ) {
         this.inUtbetaling = false
     }
@@ -280,6 +288,7 @@ internal class VedtaksperiodeBuilder(
         periode: Periode,
         opprinneligPeriode: Periode,
         skjæringstidspunkt: LocalDate,
+        skjæringstidspunktFraInfotrygd: LocalDate?,
         periodetype: Periodetype,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: Set<UUID>,

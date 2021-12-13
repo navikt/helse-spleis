@@ -1,5 +1,6 @@
 package no.nav.helse.serde.api.v2.buildere
 
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.UtbetalingVisitor
 import no.nav.helse.person.Vedtaksperiode
@@ -31,6 +32,7 @@ internal class UtbetalingerBuilder(vedtaksperiode: Vedtaksperiode): Vedtaksperio
         korrelasjonsId: UUID,
         type: Utbetalingtype,
         tilstand: no.nav.helse.utbetalingslinjer.Utbetaling.Tilstand,
+        periode: Periode,
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,
         arbeidsgiverNettoBeløp: Int,
@@ -39,7 +41,10 @@ internal class UtbetalingerBuilder(vedtaksperiode: Vedtaksperiode): Vedtaksperio
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?,
         stønadsdager: Int,
-        beregningId: UUID
+        beregningId: UUID,
+        overføringstidspunkt: LocalDateTime?,
+        avsluttet: LocalDateTime?,
+        avstemmingsnøkkel: Long?
     ) {
         if (tilstand == Forkastet) return
         utbetalinger.putIfAbsent(beregningId, UtbetalingBuilder(utbetaling).build())
@@ -61,6 +66,7 @@ internal class UtbetalingBuilder(utbetaling: InternUtbetaling): UtbetalingVisito
         korrelasjonsId: UUID,
         type: Utbetalingtype,
         tilstand: no.nav.helse.utbetalingslinjer.Utbetaling.Tilstand,
+        periode: Periode,
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,
         arbeidsgiverNettoBeløp: Int,
@@ -69,7 +75,10 @@ internal class UtbetalingBuilder(utbetaling: InternUtbetaling): UtbetalingVisito
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?,
         stønadsdager: Int,
-        beregningId: UUID
+        beregningId: UUID,
+        overføringstidspunkt: LocalDateTime?,
+        avsluttet: LocalDateTime?,
+        avstemmingsnøkkel: Long?
     ) {
         val tidslinje = UtbetalingstidslinjeBuilder(utbetaling).build()
         val vurdering = VurderingBuilder(utbetaling).build()

@@ -150,9 +150,10 @@ internal class TestArbeidsgiverInspektør(
         forkastetPeriode = false
     }
 
-    override fun visitUtbetalingstidslinjeberegning(
+    override fun preVisitUtbetalingstidslinjeberegning(
         id: UUID,
         tidsstempel: LocalDateTime,
+        organisasjonsnummer: String,
         sykdomshistorikkElementId: UUID,
         inntektshistorikkInnslagId: UUID,
         vilkårsgrunnlagHistorikkInnslagId: UUID
@@ -177,6 +178,7 @@ internal class TestArbeidsgiverInspektør(
         periode: Periode,
         opprinneligPeriode: Periode,
         skjæringstidspunkt: LocalDate,
+        skjæringstidspunktFraInfotrygd: LocalDate?,
         periodetype: Periodetype,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: Set<UUID>,
@@ -212,6 +214,7 @@ internal class TestArbeidsgiverInspektør(
         periode: Periode,
         opprinneligPeriode: Periode,
         skjæringstidspunkt: LocalDate,
+        skjæringstidspunktFraInfotrygd: LocalDate?,
         periodetype: Periodetype,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: Set<UUID>,
@@ -233,7 +236,13 @@ internal class TestArbeidsgiverInspektør(
 
     override fun preVisitOppdrag(
         oppdrag: Oppdrag,
+        fagområde: Fagområde,
         fagsystemId: String,
+        mottaker: String,
+        førstedato: LocalDate,
+        sistedato: LocalDate,
+        sisteArbeidsgiverdag: LocalDate?,
+        stønadsdager: Int,
         totalBeløp: Int,
         nettoBeløp: Int,
         tidsstempel: LocalDateTime,
@@ -254,6 +263,8 @@ internal class TestArbeidsgiverInspektør(
         linje: Utbetalingslinje,
         fom: LocalDate,
         tom: LocalDate,
+        stønadsdager: Int,
+        totalbeløp: Int,
         satstype: Satstype,
         beløp: Int?,
         aktuellDagsinntekt: Int?,
@@ -263,6 +274,7 @@ internal class TestArbeidsgiverInspektør(
         refFagsystemId: String?,
         endringskode: Endringskode,
         datoStatusFom: LocalDate?,
+        statuskode: String?,
         klassekode: Klassekode
     ) {
         if(inFeriepengeutbetaling) {
@@ -294,6 +306,7 @@ internal class TestArbeidsgiverInspektør(
         korrelasjonsId: UUID,
         type: Utbetalingtype,
         tilstand: Utbetaling.Tilstand,
+        periode: Periode,
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,
         arbeidsgiverNettoBeløp: Int,
@@ -302,7 +315,10 @@ internal class TestArbeidsgiverInspektør(
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?,
         stønadsdager: Int,
-        beregningId: UUID
+        beregningId: UUID,
+        overføringstidspunkt: LocalDateTime?,
+        avsluttet: LocalDateTime?,
+        avstemmingsnøkkel: Long?
     ) {
         inUtbetaling = true
         if (!inVedtaksperiode) {
@@ -322,6 +338,7 @@ internal class TestArbeidsgiverInspektør(
         korrelasjonsId: UUID,
         type: Utbetalingtype,
         tilstand: Utbetaling.Tilstand,
+        periode: Periode,
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,
         arbeidsgiverNettoBeløp: Int,
@@ -330,7 +347,10 @@ internal class TestArbeidsgiverInspektør(
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?,
         stønadsdager: Int,
-        beregningId: UUID
+        beregningId: UUID,
+        overføringstidspunkt: LocalDateTime?,
+        avsluttet: LocalDateTime?,
+        avstemmingsnøkkel: Long?
     ) {
         inUtbetaling = false
     }
@@ -357,6 +377,7 @@ internal class TestArbeidsgiverInspektør(
         spleisFeriepengebeløpArbeidsgiver: Double,
         overføringstidspunkt: LocalDateTime?,
         avstemmingsnøkkel: Long?,
+        utbetalingId: UUID,
     ) {
         inFeriepengeutbetaling = false
     }
@@ -380,6 +401,7 @@ internal class TestArbeidsgiverInspektør(
             periode: Periode,
             opprinneligPeriode: Periode,
             skjæringstidspunkt: LocalDate,
+            skjæringstidspunktFraInfotrygd: LocalDate?,
             periodetype: Periodetype,
             forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
             hendelseIder: Set<UUID>,

@@ -51,7 +51,7 @@ internal class Feriepengeberegner(
         visitor.preVisitFeriepengedager()
         feriepengedager().forEach { it.accept(visitor) }
         visitor.postVisitFeriepengedager()
-        visitor.postVisitFeriepengeberegner(this)
+        visitor.postVisitFeriepengeberegner(this, feriepengedager(), opptjeningsår, utbetalteDager)
     }
     internal fun gjelderForÅr(år: Year) = opptjeningsår == år
     internal fun feriepengedatoer() = feriepengedager().tilDato()
@@ -216,6 +216,7 @@ internal class Feriepengeberegner(
                 korrelasjonsId: UUID,
                 type: Utbetalingtype,
                 tilstand: Utbetaling.Tilstand,
+                periode: Periode,
                 tidsstempel: LocalDateTime,
                 oppdatert: LocalDateTime,
                 arbeidsgiverNettoBeløp: Int,
@@ -224,7 +225,10 @@ internal class Feriepengeberegner(
                 forbrukteSykedager: Int?,
                 gjenståendeSykedager: Int?,
                 stønadsdager: Int,
-                beregningId: UUID
+                beregningId: UUID,
+                overføringstidspunkt: LocalDateTime?,
+                avsluttet: LocalDateTime?,
+                avstemmingsnøkkel: Long?
             ) {
                 utbetaltUtbetaling = tilstand == Utbetaling.Utbetalt
                 annullertUtbetaling = tilstand == Utbetaling.Annullert
@@ -232,7 +236,13 @@ internal class Feriepengeberegner(
 
             override fun preVisitOppdrag(
                 oppdrag: Oppdrag,
+                fagområde: Fagområde,
                 fagsystemId: String,
+                mottaker: String,
+                førstedato: LocalDate,
+                sistedato: LocalDate,
+                sisteArbeidsgiverdag: LocalDate?,
+                stønadsdager: Int,
                 totalBeløp: Int,
                 nettoBeløp: Int,
                 tidsstempel: LocalDateTime,
@@ -252,6 +262,8 @@ internal class Feriepengeberegner(
                 linje: Utbetalingslinje,
                 fom: LocalDate,
                 tom: LocalDate,
+                stønadsdager: Int,
+                totalbeløp: Int,
                 satstype: Satstype,
                 beløp: Int?,
                 aktuellDagsinntekt: Int?,
@@ -261,6 +273,7 @@ internal class Feriepengeberegner(
                 refFagsystemId: String?,
                 endringskode: Endringskode,
                 datoStatusFom: LocalDate?,
+                statuskode: String?,
                 klassekode: Klassekode
             ) {
                 if (inUtbetalinger && utbetaltUtbetaling && beløp != null && datoStatusFom == null) {
@@ -276,6 +289,7 @@ internal class Feriepengeberegner(
                 korrelasjonsId: UUID,
                 type: Utbetalingtype,
                 tilstand: Utbetaling.Tilstand,
+                periode: Periode,
                 tidsstempel: LocalDateTime,
                 oppdatert: LocalDateTime,
                 arbeidsgiverNettoBeløp: Int,
@@ -284,7 +298,10 @@ internal class Feriepengeberegner(
                 forbrukteSykedager: Int?,
                 gjenståendeSykedager: Int?,
                 stønadsdager: Int,
-                beregningId: UUID
+                beregningId: UUID,
+                overføringstidspunkt: LocalDateTime?,
+                avsluttet: LocalDateTime?,
+                avstemmingsnøkkel: Long?
             ) {
                 utbetaltUtbetaling = false
             }

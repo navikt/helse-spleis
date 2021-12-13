@@ -37,18 +37,10 @@ internal class Utbetalingstidslinjeberegning private constructor(
     internal fun utbetalingstidslinje() = utbetalingstidslinje
 
     internal fun accept(visitor: UtbetalingstidslinjeberegningVisitor) {
-        visitor.visitUtbetalingstidslinjeberegning(id, tidsstempel, sykdomshistorikkElementId, inntektshistorikkInnslagId, vilkårsgrunnlagHistorikkInnslagId)
+        visitor.preVisitUtbetalingstidslinjeberegning(id, tidsstempel, organisasjonsnummer, sykdomshistorikkElementId, inntektshistorikkInnslagId, vilkårsgrunnlagHistorikkInnslagId)
+        utbetalingstidslinje.accept(visitor)
+        visitor.postVisitUtbetalingstidslinjeberegning(id, tidsstempel, organisasjonsnummer, sykdomshistorikkElementId, inntektshistorikkInnslagId, vilkårsgrunnlagHistorikkInnslagId)
     }
-
-    internal fun toMap(): Map<String, Any?> = mapOf(
-        "id" to id,
-        "sykdomshistorikkElementId" to sykdomshistorikkElementId,
-        "vilkårsgrunnlagHistorikkInnslagId" to vilkårsgrunnlagHistorikkInnslagId,
-        "inntektshistorikkInnslagId" to inntektshistorikkInnslagId,
-        "tidsstempel" to tidsstempel,
-        "organisasjonsnummer" to organisasjonsnummer,
-        "utbetalingstidslinje" to utbetalingstidslinje.toMap()
-    )
 
     internal companion object {
         internal fun lagUtbetaling(
@@ -124,7 +116,5 @@ internal class Utbetalingstidslinjeberegning private constructor(
             organisasjonsnummer = organisasjonsnummer,
             utbetalingstidslinje = utbetalingstidslinje
         )
-
-        internal fun save(utbetalingstidslinjeberegning: Utbetalingstidslinjeberegning) = utbetalingstidslinjeberegning.toMap()
     }
 }

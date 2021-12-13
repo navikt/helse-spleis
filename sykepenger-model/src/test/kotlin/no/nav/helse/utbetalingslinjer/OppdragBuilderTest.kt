@@ -346,7 +346,13 @@ internal class OppdragBuilderTest {
     object AssertAtOppdragErENDR : OppdragVisitor {
         override fun preVisitOppdrag(
             oppdrag: Oppdrag,
+            fagområde: Fagområde,
             fagsystemId: String,
+            mottaker: String,
+            førstedato: LocalDate,
+            sistedato: LocalDate,
+            sisteArbeidsgiverdag: LocalDate?,
+            stønadsdager: Int,
             totalBeløp: Int,
             nettoBeløp: Int,
             tidsstempel: LocalDateTime,

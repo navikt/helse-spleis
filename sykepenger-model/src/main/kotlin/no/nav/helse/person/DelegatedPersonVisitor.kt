@@ -115,14 +115,30 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.postVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning, orgnummer)
     }
 
-    override fun visitUtbetalingstidslinjeberegning(
+    override fun preVisitUtbetalingstidslinjeberegning(
         id: UUID,
         tidsstempel: LocalDateTime,
+        organisasjonsnummer: String,
         sykdomshistorikkElementId: UUID,
         inntektshistorikkInnslagId: UUID,
         vilkårsgrunnlagHistorikkInnslagId: UUID
     ) {
-        delegatee.visitUtbetalingstidslinjeberegning(id, tidsstempel, sykdomshistorikkElementId, inntektshistorikkInnslagId, vilkårsgrunnlagHistorikkInnslagId)
+        delegatee.preVisitUtbetalingstidslinjeberegning(id, tidsstempel, organisasjonsnummer, sykdomshistorikkElementId, inntektshistorikkInnslagId, vilkårsgrunnlagHistorikkInnslagId)
+    }
+
+    override fun postVisitUtbetalingstidslinjeberegning(
+        id: UUID,
+        tidsstempel: LocalDateTime,
+        organisasjonsnummer: String,
+        sykdomshistorikkElementId: UUID,
+        inntektshistorikkInnslagId: UUID,
+        vilkårsgrunnlagHistorikkInnslagId: UUID
+    ) {
+        delegatee.postVisitUtbetalingstidslinjeberegning(id, tidsstempel, organisasjonsnummer, sykdomshistorikkElementId, inntektshistorikkInnslagId, vilkårsgrunnlagHistorikkInnslagId)
+    }
+
+    override fun visitRefusjonOpphører(refusjonOpphører: List<LocalDate?>) {
+        delegatee.visitRefusjonOpphører(refusjonOpphører)
     }
 
     override fun visitBehov(
@@ -369,6 +385,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         periode: Periode,
         opprinneligPeriode: Periode,
         skjæringstidspunkt: LocalDate,
+        skjæringstidspunktFraInfotrygd: LocalDate?,
         periodetype: Periodetype,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: Set<UUID>,
@@ -384,6 +401,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             periode,
             opprinneligPeriode,
             skjæringstidspunkt,
+            skjæringstidspunktFraInfotrygd,
             periodetype,
             forlengelseFraInfotrygd,
             hendelseIder,
@@ -434,7 +452,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         infotrygdFeriepengebeløpArbeidsgiver: Double,
         spleisFeriepengebeløpArbeidsgiver: Double,
         overføringstidspunkt: LocalDateTime?,
-        avstemmingsnøkkel: Long?
+        avstemmingsnøkkel: Long?,
+        utbetalingId: UUID
     ) {
         delegatee.postVisitFeriepengeutbetaling(
             feriepengeutbetaling,
@@ -442,7 +461,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             infotrygdFeriepengebeløpArbeidsgiver,
             spleisFeriepengebeløpArbeidsgiver,
             overføringstidspunkt,
-            avstemmingsnøkkel
+            avstemmingsnøkkel,
+            utbetalingId
         )
     }
 
@@ -455,8 +475,13 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.preVisitFeriepengeberegner(feriepengeberegner, feriepengedager, opptjeningsår, utbetalteDager)
     }
 
-    override fun postVisitFeriepengeberegner(feriepengeberegner: Feriepengeberegner) {
-        delegatee.postVisitFeriepengeberegner(feriepengeberegner)
+    override fun postVisitFeriepengeberegner(
+        feriepengeberegner: Feriepengeberegner,
+        feriepengedager: List<Feriepengeberegner.UtbetaltDag>,
+        opptjeningsår: Year,
+        utbetalteDager: List<Feriepengeberegner.UtbetaltDag>
+    ) {
+        delegatee.postVisitFeriepengeberegner(feriepengeberegner, feriepengedager, opptjeningsår, utbetalteDager)
     }
 
     override fun preVisitUtbetaleDager() {
@@ -506,6 +531,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         periode: Periode,
         opprinneligPeriode: Periode,
         skjæringstidspunkt: LocalDate,
+        skjæringstidspunktFraInfotrygd: LocalDate?,
         periodetype: Periodetype,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: Set<UUID>,
@@ -521,6 +547,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             periode,
             opprinneligPeriode,
             skjæringstidspunkt,
+            skjæringstidspunktFraInfotrygd,
             periodetype,
             forlengelseFraInfotrygd,
             hendelseIder,
@@ -649,6 +676,10 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.visitDag(dag, dato, kilde, melding)
     }
 
+    override fun visitDag(dag: Dag.AvslåttDag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+        delegatee.visitDag(dag, dato, kilde)
+    }
+
     override fun postVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: MutableList<Periode>) {
         delegatee.postVisitSykdomstidslinje(tidslinje, låstePerioder)
     }
@@ -683,26 +714,28 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
 
     override fun visitSaksbehandler(
         saksbehandler: Inntektshistorikk.Saksbehandler,
+        id: UUID,
         dato: LocalDate,
         hendelseId: UUID,
         beløp: Inntekt,
         tidsstempel: LocalDateTime
     ) {
-        delegatee.visitSaksbehandler(saksbehandler, dato, hendelseId, beløp, tidsstempel)
+        delegatee.visitSaksbehandler(saksbehandler, id, dato, hendelseId, beløp, tidsstempel)
     }
 
     override fun visitInntektsmelding(
         inntektsmelding: Inntektshistorikk.Inntektsmelding,
+        id: UUID,
         dato: LocalDate,
         hendelseId: UUID,
         beløp: Inntekt,
         tidsstempel: LocalDateTime
     ) {
-        delegatee.visitInntektsmelding(inntektsmelding, dato, hendelseId, beløp, tidsstempel)
+        delegatee.visitInntektsmelding(inntektsmelding, id, dato, hendelseId, beløp, tidsstempel)
     }
 
-    override fun visitInfotrygd(infotrygd: Inntektshistorikk.Infotrygd, dato: LocalDate, hendelseId: UUID, beløp: Inntekt, tidsstempel: LocalDateTime) {
-        delegatee.visitInfotrygd(infotrygd, dato, hendelseId, beløp, tidsstempel)
+    override fun visitInfotrygd(infotrygd: Inntektshistorikk.Infotrygd, id: UUID, dato: LocalDate, hendelseId: UUID, beløp: Inntekt, tidsstempel: LocalDateTime) {
+        delegatee.visitInfotrygd(infotrygd, id, dato, hendelseId, beløp, tidsstempel)
     }
 
     override fun preVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID, dato: LocalDate) {
@@ -747,6 +780,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         korrelasjonsId: UUID,
         type: Utbetalingtype,
         tilstand: Utbetaling.Tilstand,
+        periode: Periode,
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,
         arbeidsgiverNettoBeløp: Int,
@@ -755,7 +789,10 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?,
         stønadsdager: Int,
-        beregningId: UUID
+        beregningId: UUID,
+        overføringstidspunkt: LocalDateTime?,
+        avsluttet: LocalDateTime?,
+        avstemmingsnøkkel: Long?
     ) {
         delegatee.preVisitUtbetaling(
             utbetaling,
@@ -763,6 +800,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             korrelasjonsId,
             type,
             tilstand,
+            periode,
             tidsstempel,
             oppdatert,
             arbeidsgiverNettoBeløp,
@@ -771,7 +809,10 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             forbrukteSykedager,
             gjenståendeSykedager,
             stønadsdager,
-            beregningId
+            beregningId,
+            overføringstidspunkt,
+            avsluttet,
+            avstemmingsnøkkel
         )
     }
 
@@ -824,6 +865,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         korrelasjonsId: UUID,
         type: Utbetalingtype,
         tilstand: Utbetaling.Tilstand,
+        periode: Periode,
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,
         arbeidsgiverNettoBeløp: Int,
@@ -832,7 +874,10 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?,
         stønadsdager: Int,
-        beregningId: UUID
+        beregningId: UUID,
+        overføringstidspunkt: LocalDateTime?,
+        avsluttet: LocalDateTime?,
+        avstemmingsnøkkel: Long?
     ) {
         delegatee.postVisitUtbetaling(
             utbetaling,
@@ -840,6 +885,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             korrelasjonsId,
             type,
             tilstand,
+            periode,
             tidsstempel,
             oppdatert,
             arbeidsgiverNettoBeløp,
@@ -848,13 +894,22 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             forbrukteSykedager,
             gjenståendeSykedager,
             stønadsdager,
-            beregningId
+            beregningId,
+            overføringstidspunkt,
+            avsluttet,
+            avstemmingsnøkkel
         )
     }
 
     override fun preVisitOppdrag(
         oppdrag: Oppdrag,
+        fagområde: Fagområde,
         fagsystemId: String,
+        mottaker: String,
+        førstedato: LocalDate,
+        sistedato: LocalDate,
+        sisteArbeidsgiverdag: LocalDate?,
+        stønadsdager: Int,
         totalBeløp: Int,
         nettoBeløp: Int,
         tidsstempel: LocalDateTime,
@@ -866,7 +921,13 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
     ) {
         delegatee.preVisitOppdrag(
             oppdrag,
+            fagområde,
             fagsystemId,
+            mottaker,
+            førstedato,
+            sistedato,
+            sisteArbeidsgiverdag,
+            stønadsdager,
             totalBeløp,
             nettoBeløp,
             tidsstempel,
@@ -880,7 +941,13 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
 
     override fun postVisitOppdrag(
         oppdrag: Oppdrag,
+        fagområde: Fagområde,
         fagsystemId: String,
+        mottaker: String,
+        førstedato: LocalDate,
+        sistedato: LocalDate,
+        sisteArbeidsgiverdag: LocalDate?,
+        stønadsdager: Int,
         totalBeløp: Int,
         nettoBeløp: Int,
         tidsstempel: LocalDateTime,
@@ -892,7 +959,13 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
     ) {
         delegatee.postVisitOppdrag(
             oppdrag,
+            fagområde,
             fagsystemId,
+            mottaker,
+            førstedato,
+            sistedato,
+            sisteArbeidsgiverdag,
+            stønadsdager,
             totalBeløp,
             nettoBeløp,
             tidsstempel,
@@ -908,6 +981,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         linje: Utbetalingslinje,
         fom: LocalDate,
         tom: LocalDate,
+        stønadsdager: Int,
+        totalbeløp: Int,
         satstype: Satstype,
         beløp: Int?,
         aktuellDagsinntekt: Int?,
@@ -917,12 +992,15 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         refFagsystemId: String?,
         endringskode: Endringskode,
         datoStatusFom: LocalDate?,
+        statuskode: String?,
         klassekode: Klassekode
     ) {
         delegatee.visitUtbetalingslinje(
             linje,
             fom,
             tom,
+            stønadsdager,
+            totalbeløp,
             satstype,
             beløp,
             aktuellDagsinntekt,
@@ -932,6 +1010,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             refFagsystemId,
             endringskode,
             datoStatusFom,
+            statuskode,
             klassekode
         )
     }

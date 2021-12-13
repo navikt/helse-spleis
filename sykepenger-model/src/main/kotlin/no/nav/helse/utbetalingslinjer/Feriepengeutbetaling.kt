@@ -50,6 +50,7 @@ internal class Feriepengeutbetaling private constructor(
             spleisFeriepengebeløpArbeidsgiver,
             overføringstidspunkt,
             avstemmingsnøkkel,
+            utbetalingId
         )
     }
 
@@ -69,7 +70,7 @@ internal class Feriepengeutbetaling private constructor(
         person.feriepengerUtbetalt(
             utbetalingHendelse.hendelseskontekst(),
             PersonObserver.FeriepengerUtbetaltEvent(
-                arbeidsgiverOppdrag = oppdrag.toMap(),
+                arbeidsgiverOppdrag = oppdrag.toHendelseMap(),
             )
         )
 
@@ -78,8 +79,8 @@ internal class Feriepengeutbetaling private constructor(
             PersonObserver.UtbetalingEndretEvent(
                 utbetalingId = utbetalingId,
                 type = Utbetalingtype.FERIEPENGER.name,
-                arbeidsgiverOppdrag = oppdrag.toMap(),
-                personOppdrag = Oppdrag(utbetalingHendelse.fødselsnummer(), Fagområde.SykepengerRefusjon).toMap(),
+                arbeidsgiverOppdrag = oppdrag.toHendelseMap(),
+                personOppdrag = Oppdrag(utbetalingHendelse.fødselsnummer(), Fagområde.SykepengerRefusjon).toHendelseMap(),
                 forrigeStatus = Utbetalingstatus.fraTilstand(Utbetaling.Ubetalt).name,
                 gjeldendeStatus = Utbetalingstatus.fraTilstand(Utbetaling.Utbetalt).name
             )
@@ -186,7 +187,7 @@ internal class Feriepengeutbetaling private constructor(
                 Spleis sin arbeidsgiverandel: $spleisFeriepengebeløpArbeidsgiver
                 Totalt feriepengebeløp: $totaltFeriepengebeløpArbeidsgiver
                 Differanse: $differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd
-                Oppdrag: ${oppdrag.toMap()}
+                Oppdrag: ${oppdrag.toHendelseMap()}
                 Datoer: ${feriepengeberegner.feriepengedatoer()}
                 Differanse fra forrige sendte oppdrag: ${forrigeSendteOppdrag?.totalbeløp()?.minus(oppdrag.totalbeløp())}
                 Skal sendes til oppdrag: $sendTilOppdrag

@@ -61,7 +61,11 @@ class DateRanges {
         var range: DateRange,
         val extraData: Map<String, Any?>
     ) {
-        fun toMap() = extraData + range.toMap()
+        init {
+            val forbiddenKeys = range.toMap().keys
+            require(extraData.keys.none { it in forbiddenKeys }) { "kan ikke gjenbruke nøkler: $forbiddenKeys" }
+        }
+        fun toMap() = range.toMap() + extraData
 
         fun canBeJoinedBy(date: LocalDate, data: Map<String, Any?>) =
             range.canBeJoinedBy(date) && extraData == data

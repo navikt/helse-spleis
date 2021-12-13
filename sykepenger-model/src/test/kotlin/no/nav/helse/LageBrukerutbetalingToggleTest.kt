@@ -1,6 +1,7 @@
 package no.nav.helse
 
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.testhelpers.AP
@@ -102,7 +103,7 @@ internal class LageBrukerutbetalingToggleTest {
             aktørId = "ignore",
             fødselsnummer = "ignore",
             organisasjonsnummer = "ignore",
-            utbetalingId = utbetaling.toMap()["id"] as UUID,
+            utbetalingId = utbetaling.inspektør.utbetalingId,
             vedtaksperiodeId = "ignore",
             saksbehandler = "Z999999",
             saksbehandlerEpost = "mille.mellomleder@nav.no",

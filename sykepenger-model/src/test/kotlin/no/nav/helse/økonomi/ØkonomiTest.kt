@@ -19,7 +19,12 @@ internal class ØkonomiTest {
         val arbeidsgiverperiode = Arbeidsgiverperiode(listOf(1.januar til 16.januar))
         val økonomi = Økonomi.ikkeBetalt(arbeidsgiverperiode)
             .inntekt(INGEN, skjæringstidspunkt = 1.januar) // spesifiserer ikke agp
-        assertNotNull(økonomi.toMap()["arbeidsgiverperiode"])
+
+        val builder = object : ØkonomiBuilder() {
+            fun arbeidsgiverperiode() = arbeidsgiverperiode
+        }
+        økonomi.builder(builder)
+        assertNotNull(builder.arbeidsgiverperiode())
     }
 
     @Test

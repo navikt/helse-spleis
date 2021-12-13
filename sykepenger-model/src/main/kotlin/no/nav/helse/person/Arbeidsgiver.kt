@@ -181,8 +181,8 @@ internal class Arbeidsgiver private constructor(
         visitor.postVisitFeriepengeutbetalinger(feriepengeutbetalinger)
         refusjonshistorikk.accept(visitor)
         arbeidsforholdhistorikk.accept(visitor)
+        visitor.visitRefusjonOpphører(refusjonOpphører)
         visitor.postVisitArbeidsgiver(this, id, organisasjonsnummer)
-
     }
 
     internal fun organisasjonsnummer() = organisasjonsnummer
@@ -524,8 +524,8 @@ internal class Arbeidsgiver private constructor(
                 epost = epost,
                 tidspunkt = tidspunkt,
                 automatiskBehandling = automatiskBehandling,
-                arbeidsgiverOppdrag = arbeidsgiverOppdrag.toMap(),
-                personOppdrag = personOppdrag.toMap(),
+                arbeidsgiverOppdrag = arbeidsgiverOppdrag.toHendelseMap(),
+                personOppdrag = personOppdrag.toHendelseMap(),
                 utbetalingsdager = utbetalingstidslinje.tilUtbetalingsdager(fridagplog(sykdomshistorikk.sykdomstidslinje())),
                 vedtaksperiodeIder = vedtaksperioder.iderMedUtbetaling(id) + forkastede.iderMedUtbetaling(id),
                 ident = ident
@@ -565,8 +565,8 @@ internal class Arbeidsgiver private constructor(
                 epost = epost,
                 tidspunkt = tidspunkt,
                 automatiskBehandling = automatiskBehandling,
-                arbeidsgiverOppdrag = arbeidsgiverOppdrag.toMap(),
-                personOppdrag = personOppdrag.toMap(),
+                arbeidsgiverOppdrag = arbeidsgiverOppdrag.toHendelseMap(),
+                personOppdrag = personOppdrag.toHendelseMap(),
                 utbetalingsdager = utbetalingstidslinje.tilUtbetalingsdager(fridagplog(sykdomshistorikk.sykdomstidslinje())),
                 vedtaksperiodeIder = vedtaksperioder.iderMedUtbetaling(id) + forkastede.iderMedUtbetaling(id),
                 ident = ident,
@@ -591,8 +591,8 @@ internal class Arbeidsgiver private constructor(
                 type = type.name,
                 forrigeStatus = Utbetalingstatus.fraTilstand(forrigeTilstand).name,
                 gjeldendeStatus = Utbetalingstatus.fraTilstand(nesteTilstand).name,
-                arbeidsgiverOppdrag = arbeidsgiverOppdrag.toMap(),
-                personOppdrag = personOppdrag.toMap(),
+                arbeidsgiverOppdrag = arbeidsgiverOppdrag.toHendelseMap(),
+                personOppdrag = personOppdrag.toHendelseMap(),
             )
         )
     }
@@ -999,13 +999,6 @@ internal class Arbeidsgiver private constructor(
         inntektshistorikk.harGrunnlagForSykepengegrunnlagEllerSammenligningsgrunnlag(skjæringstidspunkt, førsteFraværsdag) || vedtaksperioder.medSkjæringstidspunkt(
             skjæringstidspunkt
         ).harInntekt()
-
-    internal fun toMap(): Map<String, Any?> = mapOf(
-        "organisasjonsnummer" to organisasjonsnummer,
-        "id" to id,
-        "beregnetUtbetalingstidslinjer" to beregnetUtbetalingstidslinjer.map { Utbetalingstidslinjeberegning.save(it) },
-        "refusjonOpphører" to refusjonOpphører
-    )
 
     internal fun erSykmeldingenDenSistSkrevne(sykmelding: Sykmelding, hendelseIder: Set<UUID>): Boolean =
         sykdomshistorikk.erSykmeldingenDenSistSkrevne(sykmelding, hendelseIder)

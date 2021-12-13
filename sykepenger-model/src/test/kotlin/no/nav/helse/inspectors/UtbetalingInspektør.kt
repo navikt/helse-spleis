@@ -1,5 +1,6 @@
 package no.nav.helse.inspectors
 
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.UtbetalingVisitor
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -21,7 +22,7 @@ internal class UtbetalingInspektør(utbetaling: Utbetaling) : UtbetalingVisitor 
     lateinit var utbetalingstidslinje: Utbetalingstidslinje
     private lateinit var status: Utbetaling.Tilstand
     private lateinit var type: Utbetalingtype
-
+    var avstemmingsnøkkel: Long? = null
     val erUbetalt get() = status == Utbetaling.Ubetalt
     val erForkastet get() = status == Utbetaling.Forkastet
     val erEtterutbetaling get() = type == Utbetalingtype.ETTERUTBETALING
@@ -38,6 +39,7 @@ internal class UtbetalingInspektør(utbetaling: Utbetaling) : UtbetalingVisitor 
         korrelasjonsId: UUID,
         type: Utbetalingtype,
         tilstand: Utbetaling.Tilstand,
+        periode: Periode,
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,
         arbeidsgiverNettoBeløp: Int,
@@ -46,13 +48,17 @@ internal class UtbetalingInspektør(utbetaling: Utbetaling) : UtbetalingVisitor 
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?,
         stønadsdager: Int,
-        beregningId: UUID
+        beregningId: UUID,
+        overføringstidspunkt: LocalDateTime?,
+        avsluttet: LocalDateTime?,
+        avstemmingsnøkkel: Long?
     ) {
         utbetalingId = id
         this.korrelasjonsId = korrelasjonsId
         this.tilstand = tilstand
         this.type = type
         this.status = tilstand
+        this.avstemmingsnøkkel = avstemmingsnøkkel
     }
 
     override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {

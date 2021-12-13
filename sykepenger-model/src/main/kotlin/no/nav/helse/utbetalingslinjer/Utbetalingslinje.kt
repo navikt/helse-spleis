@@ -34,6 +34,8 @@ internal class Utbetalingslinje internal constructor(
         }
     }
 
+    private val statuskode get() = datoStatusFom?.let { "OPPH" }
+
     internal val periode get() = fom til tom
 
     override operator fun iterator() = periode.iterator()
@@ -45,6 +47,8 @@ internal class Utbetalingslinje internal constructor(
             this,
             fom,
             tom,
+            stønadsdager(),
+            totalbeløp(),
             satstype,
             beløp,
             aktuellDagsinntekt,
@@ -54,6 +58,7 @@ internal class Utbetalingslinje internal constructor(
             refFagsystemId,
             endringskode,
             datoStatusFom,
+            statuskode,
             klassekode
         )
     }
@@ -138,7 +143,7 @@ internal class Utbetalingslinje internal constructor(
 
     internal fun erOpphør() = datoStatusFom != null
 
-    internal fun toMap() = mapOf<String, Any?>(
+    internal fun toHendelseMap() = mapOf<String, Any?>(
         "fom" to fom.toString(),
         "tom" to tom.toString(),
         "satstype" to satstype.name,
@@ -153,7 +158,7 @@ internal class Utbetalingslinje internal constructor(
         "delytelseId" to delytelseId,
         "refDelytelseId" to refDelytelseId,
         "refFagsystemId" to refFagsystemId,
-        "statuskode" to datoStatusFom?.let { "OPPH" },
+        "statuskode" to statuskode,
         "datoStatusFom" to datoStatusFom?.toString(),
         "klassekode" to klassekode.verdi
     )

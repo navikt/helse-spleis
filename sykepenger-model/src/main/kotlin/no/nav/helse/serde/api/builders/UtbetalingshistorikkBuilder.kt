@@ -1,5 +1,6 @@
 package no.nav.helse.serde.api.builders
 
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.UtbetalingVisitor
 import no.nav.helse.serde.api.builders.UtbetalingshistorikkBuilder.SykdomshistorikkElementBuilder.Companion.build
 import no.nav.helse.serde.api.dto.UtbetalingshistorikkElementDTO
@@ -94,6 +95,7 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
             korrelasjonsId: UUID,
             type: Utbetalingtype,
             tilstand: Utbetaling.Tilstand,
+            periode: Periode,
             tidsstempel: LocalDateTime,
             oppdatert: LocalDateTime,
             arbeidsgiverNettoBeløp: Int,
@@ -102,7 +104,10 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
             forbrukteSykedager: Int?,
             gjenståendeSykedager: Int?,
             stønadsdager: Int,
-            beregningId: UUID
+            beregningId: UUID,
+            overføringstidspunkt: LocalDateTime?,
+            avsluttet: LocalDateTime?,
+            avstemmingsnøkkel: Long?
         ) {
             popState()
         }
@@ -147,6 +152,7 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
         korrelasjonsId: UUID,
         type: Utbetalingtype,
         tilstand: Utbetaling.Tilstand,
+        periode: Periode,
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,
         arbeidsgiverNettoBeløp: Int,
@@ -155,7 +161,10 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?,
         stønadsdager: Int,
-        beregningId: UUID
+        beregningId: UUID,
+        overføringstidspunkt: LocalDateTime?,
+        avsluttet: LocalDateTime?,
+        avstemmingsnøkkel: Long?
     ) {
         if (tilstand is Utbetaling.Forkastet) return
 
@@ -185,9 +194,10 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
         popState()
     }
 
-    override fun visitUtbetalingstidslinjeberegning(
+    override fun preVisitUtbetalingstidslinjeberegning(
         id: UUID,
         tidsstempel: LocalDateTime,
+        organisasjonsnummer: String,
         sykdomshistorikkElementId: UUID,
         inntektshistorikkInnslagId: UUID,
         vilkårsgrunnlagHistorikkInnslagId: UUID

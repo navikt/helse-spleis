@@ -184,6 +184,7 @@ internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, Sykdomshistori
     fun preVisitForkastetPeriode(vedtaksperiode: Vedtaksperiode, forkastetÅrsak: ForkastetÅrsak) {}
     fun postVisitForkastetPeriode(vedtaksperiode: Vedtaksperiode, forkastetÅrsak: ForkastetÅrsak) {}
     fun postVisitForkastedePerioder(vedtaksperioder: List<ForkastetVedtaksperiode>) {}
+    fun visitRefusjonOpphører(refusjonOpphører: List<LocalDate?>) {}
     fun postVisitArbeidsgiver(
         arbeidsgiver: Arbeidsgiver,
         id: UUID,
@@ -228,24 +229,41 @@ internal interface FeriepengeutbetalingVisitor : OppdragVisitor {
     }
 
     fun visitSpleisArbeidsgiverDag(spleisArbeidsgiver: Feriepengeberegner.UtbetaltDag.SpleisArbeidsgiver, orgnummer: String, dato: LocalDate, beløp: Int) {}
-    fun postVisitFeriepengeberegner(feriepengeberegner: Feriepengeberegner) {}
+    fun postVisitFeriepengeberegner(
+        feriepengeberegner: Feriepengeberegner,
+        feriepengedager: List<Feriepengeberegner.UtbetaltDag>,
+        opptjeningsår: Year,
+        utbetalteDager: List<Feriepengeberegner.UtbetaltDag>
+    ) {}
     fun postVisitFeriepengeutbetaling(
         feriepengeutbetaling: Feriepengeutbetaling,
         infotrygdFeriepengebeløpPerson: Double,
         infotrygdFeriepengebeløpArbeidsgiver: Double,
         spleisFeriepengebeløpArbeidsgiver: Double,
         overføringstidspunkt: LocalDateTime?,
-        avstemmingsnøkkel: Long?
+        avstemmingsnøkkel: Long?,
+        utbetalingId: UUID
     ) {
     }
 
     fun postVisitFeriepengeutbetalinger(feriepengeutbetalinger: List<Feriepengeutbetaling>) {}
 }
 
-internal interface UtbetalingstidslinjeberegningVisitor {
-    fun visitUtbetalingstidslinjeberegning(
+internal interface UtbetalingstidslinjeberegningVisitor : UtbetalingsdagVisitor {
+    fun preVisitUtbetalingstidslinjeberegning(
         id: UUID,
         tidsstempel: LocalDateTime,
+        organisasjonsnummer: String,
+        sykdomshistorikkElementId: UUID,
+        inntektshistorikkInnslagId: UUID,
+        vilkårsgrunnlagHistorikkInnslagId: UUID
+    ) {
+    }
+
+    fun postVisitUtbetalingstidslinjeberegning(
+        id: UUID,
+        tidsstempel: LocalDateTime,
+        organisasjonsnummer: String,
         sykdomshistorikkElementId: UUID,
         inntektshistorikkInnslagId: UUID,
         vilkårsgrunnlagHistorikkInnslagId: UUID
@@ -263,6 +281,7 @@ internal interface VedtaksperiodeVisitor : UtbetalingVisitor, SykdomstidslinjeVi
         periode: Periode,
         opprinneligPeriode: Periode,
         skjæringstidspunkt: LocalDate,
+        skjæringstidspunktFraInfotrygd: LocalDate?,
         periodetype: Periodetype,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: Set<UUID>,
@@ -284,6 +303,7 @@ internal interface VedtaksperiodeVisitor : UtbetalingVisitor, SykdomstidslinjeVi
         periode: Periode,
         opprinneligPeriode: Periode,
         skjæringstidspunkt: LocalDate,
+        skjæringstidspunktFraInfotrygd: LocalDate?,
         periodetype: Periodetype,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: Set<UUID>,
@@ -504,6 +524,7 @@ internal interface InntekthistorikkVisitor {
     fun postVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {}
     fun visitSaksbehandler(
         saksbehandler: Inntektshistorikk.Saksbehandler,
+        id: UUID,
         dato: LocalDate,
         hendelseId: UUID,
         beløp: Inntekt,
@@ -513,6 +534,7 @@ internal interface InntekthistorikkVisitor {
 
     fun visitInntektsmelding(
         inntektsmelding: Inntektshistorikk.Inntektsmelding,
+        id: UUID,
         dato: LocalDate,
         hendelseId: UUID,
         beløp: Inntekt,
@@ -522,6 +544,7 @@ internal interface InntekthistorikkVisitor {
 
     fun visitInfotrygd(
         infotrygd: Inntektshistorikk.Infotrygd,
+        id: UUID,
         dato: LocalDate,
         hendelseId: UUID,
         beløp: Inntekt,
@@ -566,6 +589,7 @@ internal interface UtbetalingVisitor : UtbetalingsdagVisitor, OppdragVisitor {
         korrelasjonsId: UUID,
         type: Utbetalingtype,
         tilstand: Utbetaling.Tilstand,
+        periode: Periode,
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,
         arbeidsgiverNettoBeløp: Int,
@@ -574,7 +598,10 @@ internal interface UtbetalingVisitor : UtbetalingsdagVisitor, OppdragVisitor {
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?,
         stønadsdager: Int,
-        beregningId: UUID
+        beregningId: UUID,
+        overføringstidspunkt: LocalDateTime?,
+        avsluttet: LocalDateTime?,
+        avstemmingsnøkkel: Long?
     ) {
     }
 
@@ -600,6 +627,7 @@ internal interface UtbetalingVisitor : UtbetalingsdagVisitor, OppdragVisitor {
         korrelasjonsId: UUID,
         type: Utbetalingtype,
         tilstand: Utbetaling.Tilstand,
+        periode: Periode,
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,
         arbeidsgiverNettoBeløp: Int,
@@ -608,7 +636,10 @@ internal interface UtbetalingVisitor : UtbetalingsdagVisitor, OppdragVisitor {
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?,
         stønadsdager: Int,
-        beregningId: UUID
+        beregningId: UUID,
+        overføringstidspunkt: LocalDateTime?,
+        avsluttet: LocalDateTime?,
+        avstemmingsnøkkel: Long?
     ) {
     }
 }
@@ -616,7 +647,13 @@ internal interface UtbetalingVisitor : UtbetalingsdagVisitor, OppdragVisitor {
 internal interface OppdragVisitor {
     fun preVisitOppdrag(
         oppdrag: Oppdrag,
+        fagområde: Fagområde,
         fagsystemId: String,
+        mottaker: String,
+        førstedato: LocalDate,
+        sistedato: LocalDate,
+        sisteArbeidsgiverdag: LocalDate?,
+        stønadsdager: Int,
         totalBeløp: Int,
         nettoBeløp: Int,
         tidsstempel: LocalDateTime,
@@ -632,6 +669,8 @@ internal interface OppdragVisitor {
         linje: Utbetalingslinje,
         fom: LocalDate,
         tom: LocalDate,
+        stønadsdager: Int,
+        totalbeløp: Int,
         satstype: Satstype,
         beløp: Int?,
         aktuellDagsinntekt: Int?,
@@ -641,13 +680,20 @@ internal interface OppdragVisitor {
         refFagsystemId: String?,
         endringskode: Endringskode,
         datoStatusFom: LocalDate?,
+        statuskode: String?,
         klassekode: Klassekode
     ) {
     }
 
     fun postVisitOppdrag(
         oppdrag: Oppdrag,
+        fagområde: Fagområde,
         fagsystemId: String,
+        mottaker: String,
+        førstedato: LocalDate,
+        sistedato: LocalDate,
+        sisteArbeidsgiverdag: LocalDate?,
+        stønadsdager: Int,
         totalBeløp: Int,
         nettoBeløp: Int,
         tidsstempel: LocalDateTime,

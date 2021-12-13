@@ -19,6 +19,9 @@ internal class OppdragInspektør(oppdrag: Oppdrag) : UtbetalingVisitor {
     private val delytelseIder = mutableListOf<Int>()
     private val refDelytelseIder = mutableListOf<Int?>()
     private val refFagsystemIder = mutableListOf<String?>()
+    internal var sisteArbeidsgiverdag: LocalDate? = null
+    internal var overføringstidspunkt: LocalDateTime? = null
+    internal var avstemmingsnøkkel: Long? = null
     private var status: Oppdragstatus? = null
     private var simuleringsResultat: Simulering.SimuleringResultat? = null
 
@@ -28,7 +31,13 @@ internal class OppdragInspektør(oppdrag: Oppdrag) : UtbetalingVisitor {
 
     override fun preVisitOppdrag(
         oppdrag: Oppdrag,
+        fagområde: Fagområde,
         fagsystemId: String,
+        mottaker: String,
+        førstedato: LocalDate,
+        sistedato: LocalDate,
+        sisteArbeidsgiverdag: LocalDate?,
+        stønadsdager: Int,
         totalBeløp: Int,
         nettoBeløp: Int,
         tidsstempel: LocalDateTime,
@@ -42,12 +51,17 @@ internal class OppdragInspektør(oppdrag: Oppdrag) : UtbetalingVisitor {
         this.nettoBeløp.add(nettoBeløp)
         this.status = status
         this.simuleringsResultat = simuleringsResultat
+        this.sisteArbeidsgiverdag = sisteArbeidsgiverdag
+        this.avstemmingsnøkkel = avstemmingsnøkkel
+        this.overføringstidspunkt = overføringstidspunkt
     }
 
     override fun visitUtbetalingslinje(
         linje: Utbetalingslinje,
         fom: LocalDate,
         tom: LocalDate,
+        stønadsdager: Int,
+        totalbeløp: Int,
         satstype: Satstype,
         beløp: Int?,
         aktuellDagsinntekt: Int?,
@@ -57,6 +71,7 @@ internal class OppdragInspektør(oppdrag: Oppdrag) : UtbetalingVisitor {
         refFagsystemId: String?,
         endringskode: Endringskode,
         datoStatusFom: LocalDate?,
+        statuskode: String?,
         klassekode: Klassekode
     ) {
         linjeteller += 1

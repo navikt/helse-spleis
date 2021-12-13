@@ -4,7 +4,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.*
 import no.nav.helse.serde.api.dto.UtbetalingshistorikkElementDTO
 import no.nav.helse.serde.api.v2.HendelseDTO
-import no.nav.helse.utbetalingslinjer.Utbetaling
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -37,6 +36,7 @@ internal class VedtaksperioderBuilder(
         periode: Periode,
         opprinneligPeriode: Periode,
         skjæringstidspunkt: LocalDate,
+        skjæringstidspunktFraInfotrygd: LocalDate?,
         periodetype: Periodetype,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: Set<UUID>,

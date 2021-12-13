@@ -104,6 +104,7 @@ internal class Vedtaksperiode private constructor(
             periode,
             sykmeldingsperiode,
             skjæringstidspunkt,
+            skjæringstidspunktFraInfotrygd,
             periodetype,
             forlengelseFraInfotrygd,
             hendelseIder,
@@ -125,6 +126,7 @@ internal class Vedtaksperiode private constructor(
             periode,
             sykmeldingsperiode,
             skjæringstidspunkt,
+            skjæringstidspunktFraInfotrygd,
             periodetype,
             forlengelseFraInfotrygd,
             hendelseIder,
@@ -886,20 +888,6 @@ internal class Vedtaksperiode private constructor(
     }
 
     override fun toString() = "${this.periode.start} - ${this.periode.endInclusive} (${this.tilstand::class.simpleName})"
-
-    internal fun toMap() = mutableMapOf(
-        "id" to id,
-        "tilstand" to tilstand.type.name,
-        "skjæringstidspunktFraInfotrygd" to skjæringstidspunktFraInfotrygd,
-        "inntektsmeldingInfo" to inntektsmeldingInfo?.toMap(),
-        "skjæringstidspunkt" to skjæringstidspunkt,
-        "dataForSimulering" to dataForSimulering?.toMap(),
-        "utbetalinger" to utbetalinger.map { it.toMap().getValue("id") as UUID },
-        "utbetalingstidslinje" to utbetalingstidslinje.toMap(),
-        "forlengelseFraInfotrygd" to forlengelseFraInfotrygd,
-        "opprettet" to opprettet,
-        "oppdatert" to oppdatert
-    )
 
     // Gang of four State pattern
     internal interface Vedtaksperiodetilstand : Aktivitetskontekst {

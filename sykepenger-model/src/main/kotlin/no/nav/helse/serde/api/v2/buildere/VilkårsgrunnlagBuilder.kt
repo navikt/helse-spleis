@@ -265,13 +265,14 @@ internal class VilkårsgrunnlagBuilder(
                 sammenligningsgrunnlag = sammenligningsgrunnlagBuilder.sammenligningsgrunnlag(organisasjonsnummer, skjæringstidspunkt)
             )
 
-            override fun visitInfotrygd(infotrygd: Infotrygd, dato: LocalDate, hendelseId: UUID, beløp: Inntekt, tidsstempel: LocalDateTime) {
+            override fun visitInfotrygd(infotrygd: Infotrygd, id: UUID, dato: LocalDate, hendelseId: UUID, beløp: Inntekt, tidsstempel: LocalDateTime) {
                 val inntekt = InntektBuilder(beløp).build()
                 this.inntekt = nyArbeidsgiverInntekt(IInntektkilde.Infotrygd, inntekt, dato)
             }
 
             override fun visitSaksbehandler(
                 saksbehandler: Saksbehandler,
+                id: UUID,
                 dato: LocalDate,
                 hendelseId: UUID,
                 beløp: Inntekt,
@@ -283,6 +284,7 @@ internal class VilkårsgrunnlagBuilder(
 
             override fun visitInntektsmelding(
                 inntektsmelding: Inntektsmelding,
+                id: UUID,
                 dato: LocalDate,
                 hendelseId: UUID,
                 beløp: Inntekt,

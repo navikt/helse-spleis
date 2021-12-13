@@ -325,9 +325,9 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         val andre = inspektør.utbetalinger[1].inspektør.arbeidsgiverOppdrag
         val siste = inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag
 
-        assertEquals(16.april, første.toMap().getValue("sisteArbeidsgiverdag"))
-        assertEquals(29.mai, andre.toMap().getValue("sisteArbeidsgiverdag"))
-        assertEquals(29.mai, siste.toMap().getValue("sisteArbeidsgiverdag"))
+        assertEquals(16.april, første.inspektør.sisteArbeidsgiverdag)
+        assertEquals(29.mai, andre.inspektør.sisteArbeidsgiverdag)
+        assertEquals(29.mai, siste.inspektør.sisteArbeidsgiverdag)
         assertNotEquals(første.fagsystemId(), siste.fagsystemId())
         assertEquals(andre.fagsystemId(), siste.fagsystemId())
         siste.linjerUtenOpphør().also { linjer ->

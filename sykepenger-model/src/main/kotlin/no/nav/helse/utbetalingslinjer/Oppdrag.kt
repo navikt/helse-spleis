@@ -77,7 +77,13 @@ internal class Oppdrag private constructor(
     internal fun accept(visitor: OppdragVisitor) {
         visitor.preVisitOppdrag(
             this,
+            fagområde,
             fagsystemId,
+            mottaker,
+            førstedato,
+            sistedato,
+            sisteArbeidsgiverdag,
+            stønadsdager(),
             totalbeløp(),
             nettoBeløp,
             tidsstempel,
@@ -90,7 +96,13 @@ internal class Oppdrag private constructor(
         linjer.forEach { it.accept(visitor) }
         visitor.postVisitOppdrag(
             this,
+            fagområde,
             fagsystemId,
+            mottaker,
+            førstedato,
+            sistedato,
+            sisteArbeidsgiverdag,
+            stønadsdager(),
             totalbeløp(),
             nettoBeløp,
             tidsstempel,
@@ -140,7 +152,7 @@ internal class Oppdrag private constructor(
         return mutableMapOf(
             "mottaker" to mottaker,
             "fagområde" to "$fagområde",
-            "linjer" to kopierKunLinjerMedEndring().map(Utbetalingslinje::toMap),
+            "linjer" to kopierKunLinjerMedEndring().map(Utbetalingslinje::toHendelseMap),
             "fagsystemId" to fagsystemId,
             "endringskode" to "$endringskode",
             "saksbehandler" to saksbehandler
@@ -350,10 +362,10 @@ internal class Oppdrag private constructor(
         tilstand = Ny()
     }
 
-    internal fun toMap() = mapOf(
+    internal fun toHendelseMap() = mapOf(
         "mottaker" to mottaker,
         "fagområde" to "$fagområde",
-        "linjer" to map(Utbetalingslinje::toMap),
+        "linjer" to map(Utbetalingslinje::toHendelseMap),
         "fagsystemId" to fagsystemId,
         "endringskode" to "$endringskode",
         "sisteArbeidsgiverdag" to sisteArbeidsgiverdag,

@@ -514,6 +514,7 @@ internal class Utbetaling private constructor(
             korrelasjonsId,
             type,
             tilstand,
+            periode,
             tidsstempel,
             oppdatert,
             arbeidsgiverOppdrag.nettoBeløp(),
@@ -522,7 +523,10 @@ internal class Utbetaling private constructor(
             forbrukteSykedager,
             gjenståendeSykedager,
             stønadsdager,
-            beregningId
+            beregningId,
+            overføringstidspunkt,
+            avsluttet,
+            avstemmingsnøkkel
         )
         utbetalingstidslinje.accept(visitor)
         visitor.preVisitArbeidsgiverOppdrag(arbeidsgiverOppdrag)
@@ -538,6 +542,7 @@ internal class Utbetaling private constructor(
             korrelasjonsId,
             type,
             tilstand,
+            periode,
             tidsstempel,
             oppdatert,
             arbeidsgiverOppdrag.nettoBeløp(),
@@ -546,7 +551,10 @@ internal class Utbetaling private constructor(
             forbrukteSykedager,
             gjenståendeSykedager,
             stønadsdager,
-            beregningId
+            beregningId,
+            overføringstidspunkt,
+            avsluttet,
+            avstemmingsnøkkel
         )
     }
 
@@ -596,29 +604,6 @@ internal class Utbetaling private constructor(
     internal fun erEldreEnn(other: LocalDateTime): Boolean {
         return other > tidsstempel
     }
-
-    internal fun toMap(): MutableMap<String, Any?> = mutableMapOf(
-        "id" to id,
-        "korrelasjonsId" to korrelasjonsId,
-        "beregningId" to beregningId,
-        "utbetalingstidslinje" to utbetalingstidslinje.toMap(),
-        "arbeidsgiverOppdrag" to arbeidsgiverOppdrag.toMap(),
-        "personOppdrag" to personOppdrag.toMap(),
-        "fom" to periode.start,
-        "tom" to periode.endInclusive,
-        "stønadsdager" to stønadsdager,
-        "tidsstempel" to tidsstempel,
-        "status" to Utbetalingstatus.fraTilstand(tilstand),
-        "type" to type,
-        "maksdato" to maksdato,
-        "forbrukteSykedager" to forbrukteSykedager,
-        "gjenståendeSykedager" to gjenståendeSykedager,
-        "vurdering" to vurdering?.toMap(),
-        "overføringstidspunkt" to overføringstidspunkt,
-        "avstemmingsnøkkel" to avstemmingsnøkkel?.let { "$it" },
-        "avsluttet" to avsluttet,
-        "oppdatert" to oppdatert
-    )
 
     private fun lagreOverføringsinformasjon(hendelse: ArbeidstakerHendelse, avstemmingsnøkkel: Long, tidspunkt: LocalDateTime) {
         hendelse.info("Utbetalingen ble overført til Oppdrag/UR $tidspunkt, og har fått avstemmingsnøkkel $avstemmingsnøkkel.\n")
@@ -1075,14 +1060,6 @@ internal class Utbetaling private constructor(
                 )
             )
         }
-
-        internal fun toMap() = mapOf(
-            "godkjent" to godkjent,
-            "ident" to ident,
-            "epost" to epost,
-            "tidspunkt" to tidspunkt,
-            "automatiskBehandling" to automatiskBehandling
-        )
     }
 
     enum class Utbetalingtype { UTBETALING, ETTERUTBETALING, ANNULLERING, REVURDERING, FERIEPENGER }

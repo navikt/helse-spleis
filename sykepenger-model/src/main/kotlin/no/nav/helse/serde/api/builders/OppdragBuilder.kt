@@ -22,7 +22,13 @@ internal class OppdragBuilder : BuilderState() {
 
     override fun preVisitOppdrag(
         oppdrag: Oppdrag,
+        fagområde: Fagområde,
         fagsystemId: String,
+        mottaker: String,
+        førstedato: LocalDate,
+        sistedato: LocalDate,
+        sisteArbeidsgiverdag: LocalDate?,
+        stønadsdager: Int,
         totalBeløp: Int,
         nettoBeløp: Int,
         tidsstempel: LocalDateTime,
@@ -76,6 +82,8 @@ internal class OppdragBuilder : BuilderState() {
         linje: Utbetalingslinje,
         fom: LocalDate,
         tom: LocalDate,
+        stønadsdager: Int,
+        totalbeløp: Int,
         satstype: Satstype,
         beløp: Int?,
         aktuellDagsinntekt: Int?,
@@ -85,6 +93,7 @@ internal class OppdragBuilder : BuilderState() {
         refFagsystemId: String?,
         endringskode: Endringskode,
         datoStatusFom: LocalDate?,
+        statuskode: String?,
         klassekode: Klassekode
     ) {
         if (datoStatusFom != null) return
@@ -98,7 +107,13 @@ internal class OppdragBuilder : BuilderState() {
 
     override fun postVisitOppdrag(
         oppdrag: Oppdrag,
+        fagområde: Fagområde,
         fagsystemId: String,
+        mottaker: String,
+        førstedato: LocalDate,
+        sistedato: LocalDate,
+        sisteArbeidsgiverdag: LocalDate?,
+        stønadsdager: Int,
         totalBeløp: Int,
         nettoBeløp: Int,
         tidsstempel: LocalDateTime,

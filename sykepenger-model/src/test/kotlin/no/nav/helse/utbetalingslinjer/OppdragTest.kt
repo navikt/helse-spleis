@@ -2,6 +2,7 @@ package no.nav.helse.utbetalingslinjer
 
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
@@ -286,9 +287,9 @@ internal class OppdragTest {
             overføringstidspunkt = overføringstidspunkt
         ))
 
-        assertEquals("$avstemmingsnøkkel", oppdrag.toMap()["avstemmingsnøkkel"])
-        assertEquals(overføringstidspunkt, oppdrag.toMap()["overføringstidspunkt"])
-        assertEquals("${Oppdragstatus.OVERFØRT}", oppdrag.toMap()["status"])
+        assertEquals(avstemmingsnøkkel, oppdrag.inspektør.avstemmingsnøkkel)
+        assertEquals(overføringstidspunkt, oppdrag.inspektør.overføringstidspunkt)
+        assertEquals(Oppdragstatus.OVERFØRT, oppdrag.inspektør.status())
     }
 
     @Test
@@ -322,9 +323,9 @@ internal class OppdragTest {
             status = Oppdragstatus.AKSEPTERT
         ))
 
-        assertEquals("$avstemmingsnøkkel", oppdrag.toMap()["avstemmingsnøkkel"])
-        assertEquals(overføringstidspunkt, oppdrag.toMap()["overføringstidspunkt"])
-        assertEquals("${Oppdragstatus.AKSEPTERT}", oppdrag.toMap()["status"])
+        assertEquals(avstemmingsnøkkel, oppdrag.inspektør.avstemmingsnøkkel)
+        assertEquals(overføringstidspunkt, oppdrag.inspektør.overføringstidspunkt)
+        assertEquals(Oppdragstatus.AKSEPTERT, oppdrag.inspektør.status())
     }
 
     @Test
@@ -370,9 +371,9 @@ internal class OppdragTest {
             status = Oppdragstatus.AKSEPTERT
         ))
 
-        assertEquals("$avstemmingsnøkkel", oppdrag.toMap()["avstemmingsnøkkel"])
-        assertEquals(overføringstidspunkt, oppdrag.toMap()["overføringstidspunkt"])
-        assertEquals("${Oppdragstatus.AKSEPTERT}", oppdrag.toMap()["status"])
+        assertEquals(avstemmingsnøkkel, oppdrag.inspektør.avstemmingsnøkkel)
+        assertEquals(overføringstidspunkt, oppdrag.inspektør.overføringstidspunkt)
+        assertEquals(Oppdragstatus.AKSEPTERT, oppdrag.inspektør.status())
     }
 
     @Test
@@ -415,8 +416,8 @@ internal class OppdragTest {
             status = Oppdragstatus.AKSEPTERT
         ))
 
-        assertNull(oppdrag.toMap()["avstemmingsnøkkel"])
-        assertNull(oppdrag.toMap()["overføringstidspunkt"])
-        assertNull(oppdrag.toMap()["status"])
+        assertNull(oppdrag.inspektør.avstemmingsnøkkel)
+        assertNull(oppdrag.inspektør.overføringstidspunkt)
+        assertNull(oppdrag.inspektør.status())
     }
 }

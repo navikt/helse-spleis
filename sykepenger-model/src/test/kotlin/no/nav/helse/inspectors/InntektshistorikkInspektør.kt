@@ -58,6 +58,7 @@ internal class InntektshistorikkInspektør(arbeidsgiver: Arbeidsgiver) : Arbeids
 
     override fun visitInntektsmelding(
         inntektsmelding: Inntektshistorikk.Inntektsmelding,
+        id: UUID,
         dato: LocalDate,
         hendelseId: UUID,
         beløp: Inntekt,
@@ -75,6 +76,7 @@ internal class InntektshistorikkInspektør(arbeidsgiver: Arbeidsgiver) : Arbeids
 
     override fun visitInfotrygd(
         infotrygd: Inntektshistorikk.Infotrygd,
+        id: UUID,
         dato: LocalDate,
         hendelseId: UUID,
         beløp: Inntekt,
@@ -133,6 +135,7 @@ internal class InntektshistorikkInspektør(arbeidsgiver: Arbeidsgiver) : Arbeids
 
     override fun visitSaksbehandler(
         saksbehandler: Inntektshistorikk.Saksbehandler,
+        id: UUID,
         dato: LocalDate,
         hendelseId: UUID,
         beløp: Inntekt,

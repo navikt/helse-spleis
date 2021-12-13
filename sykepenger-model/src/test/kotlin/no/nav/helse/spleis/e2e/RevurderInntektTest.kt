@@ -793,7 +793,13 @@ private fun Oppdrag.skalHaEndringskode(kode: Endringskode, message: String = "")
 private class UtbetalingSkalHaEndringskode(private val ønsketEndringskode: Endringskode, private val message: String = "") : OppdragVisitor {
     override fun preVisitOppdrag(
         oppdrag: Oppdrag,
+        fagområde: Fagområde,
         fagsystemId: String,
+        mottaker: String,
+        førstedato: LocalDate,
+        sistedato: LocalDate,
+        sisteArbeidsgiverdag: LocalDate?,
+        stønadsdager: Int,
         totalBeløp: Int,
         nettoBeløp: Int,
         tidsstempel: LocalDateTime,
@@ -819,6 +825,8 @@ private fun Utbetalingslinje.assertUtbetalingslinje(
             linje: Utbetalingslinje,
             fom: LocalDate,
             tom: LocalDate,
+            stønadsdager: Int,
+            totalbeløp: Int,
             satstype: Satstype,
             beløp: Int?,
             aktuellDagsinntekt: Int?,
@@ -828,6 +836,7 @@ private fun Utbetalingslinje.assertUtbetalingslinje(
             refFagsystemId: String?,
             endringskode: Endringskode,
             datoStatusFom: LocalDate?,
+            statuskode: String?,
             klassekode: Klassekode
         ) {
             assertEquals(ønsketEndringskode, endringskode)

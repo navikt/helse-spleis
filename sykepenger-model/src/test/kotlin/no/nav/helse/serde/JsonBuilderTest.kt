@@ -485,6 +485,7 @@ class JsonBuilderTest {
                 periode: Periode,
                 opprinneligPeriode: Periode,
                 skjæringstidspunkt: LocalDate,
+                skjæringstidspunktFraInfotrygd: LocalDate?,
                 periodetype: Periodetype,
                 forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
                 hendelseIder: Set<UUID>,

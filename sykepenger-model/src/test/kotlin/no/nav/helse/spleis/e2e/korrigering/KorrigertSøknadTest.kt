@@ -112,6 +112,8 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
                 linje: Utbetalingslinje,
                 fom: LocalDate,
                 tom: LocalDate,
+                stønadsdager: Int,
+                totalbeløp: Int,
                 satstype: Satstype,
                 beløp: Int?,
                 aktuellDagsinntekt: Int?,
@@ -121,6 +123,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
                 refFagsystemId: String?,
                 endringskode: Endringskode,
                 datoStatusFom: LocalDate?,
+                statuskode: String?,
                 klassekode: Klassekode
             ) {
                 this.grad = grad

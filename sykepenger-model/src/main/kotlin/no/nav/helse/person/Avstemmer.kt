@@ -69,6 +69,7 @@ internal class Avstemmer(person: Person) {
             korrelasjonsId: UUID,
             type: Utbetalingtype,
             tilstand: Utbetaling.Tilstand,
+            periode: Periode,
             tidsstempel: LocalDateTime,
             oppdatert: LocalDateTime,
             arbeidsgiverNettoBeløp: Int,
@@ -77,7 +78,10 @@ internal class Avstemmer(person: Person) {
             forbrukteSykedager: Int?,
             gjenståendeSykedager: Int?,
             stønadsdager: Int,
-            beregningId: UUID
+            beregningId: UUID,
+            overføringstidspunkt: LocalDateTime?,
+            avsluttet: LocalDateTime?,
+            avstemmingsnøkkel: Long?
         ) {
             utbetalinger.add(mapOf(
                 "id" to id,
@@ -102,6 +106,7 @@ internal class Avstemmer(person: Person) {
             periode: Periode,
             opprinneligPeriode: Periode,
             skjæringstidspunkt: LocalDate,
+            skjæringstidspunktFraInfotrygd: LocalDate?,
             periodetype: Periodetype,
             forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
             hendelseIder: Set<UUID>,

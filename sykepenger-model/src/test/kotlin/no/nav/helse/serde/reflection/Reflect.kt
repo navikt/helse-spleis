@@ -8,6 +8,12 @@ import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.isAccessible
 
 @Suppress("UNCHECKED_CAST")
+inline fun <reified T : Any> Any?.castAsList() = this as List<T>
+
+@Suppress("UNCHECKED_CAST")
+inline fun <reified T : Any, U : Any> Any?.castAsMap() = this as Map<T, U>
+
+@Suppress("UNCHECKED_CAST")
 internal class ReflectClass private constructor(
     private val kClass: KClass<*>
 ) {

@@ -26,7 +26,6 @@ import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.*
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.*
-import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosent.Companion.ratio
@@ -1235,25 +1234,21 @@ internal data class PersonData(
             private val personbeløp: Double?,
             private val er6GBegrenset: Boolean?
         ) {
-            // Gjør så vi kan ha dato/fom og tom på samme nivå som resten av verdiene i utbetalingsdata
-            @JsonUnwrapped
-            private lateinit var datoer: DateRange
+            private val builder: Økonomi.Builder = Økonomi.Builder()
 
-            private val økonomi
-                get() = Økonomi::class.primaryConstructor!!
-                    .apply { isAccessible = true }
-                    .call(
-                        grad.prosent,
-                        totalGrad.prosent,
-                        arbeidsgiverRefusjonsbeløp.daglig,
-                        arbeidsgiverperiode?.map { it.tilPeriode() }?.let { Arbeidsgiverperiode(it) },
-                        aktuellDagsinntekt.daglig,
-                        dekningsgrunnlag.daglig,
-                        skjæringstidspunkt,
-                        grunnbeløpgrense?.årlig,
-                        arbeidsgiverbeløp?.daglig,
-                        personbeløp?.daglig,
-                        er6GBegrenset,
+            init {
+                builder.grad(grad)
+                    .totalGrad(totalGrad)
+                    .arbeidsgiverperiode(arbeidsgiverperiode?.map { it.tilPeriode() }?.let { Arbeidsgiverperiode(it) })
+                    .aktuellDagsinntekt(aktuellDagsinntekt)
+                    .dekningsgrunnlag(dekningsgrunnlag)
+                    .skjæringstidspunkt(skjæringstidspunkt)
+                    .grunnbeløpsgrense(grunnbeløpgrense)
+                    .arbeidsgiverRefusjonsbeløp(arbeidsgiverRefusjonsbeløp)
+                    .arbeidsgiverbeløp(arbeidsgiverbeløp)
+                    .personbeløp(personbeløp)
+                    .er6GBegrenset(er6GBegrenset)
+                    .tilstand(
                         when {
                             arbeidsgiverbeløp == null && type == TypeData.AvvistDag -> Økonomi.Tilstand.Låst
                             arbeidsgiverbeløp == null -> Økonomi.Tilstand.HarInntekt
@@ -1261,6 +1256,13 @@ internal data class PersonData(
                             else -> Økonomi.Tilstand.HarBeløp
                         }
                     )
+            }
+
+            // Gjør så vi kan ha dato/fom og tom på samme nivå som resten av verdiene i utbetalingsdata
+            @JsonUnwrapped
+            private lateinit var datoer: DateRange
+
+            private val økonomi get() = builder.build()
 
             internal fun parseDager() = datoer.dates().map(::parseDag)
 

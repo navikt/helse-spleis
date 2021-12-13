@@ -636,7 +636,7 @@ internal class UtbetalingTest {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000))
         beregnUtbetalinger(tidslinje)
         val utbetaling = opprettUbetaltUtbetaling(tidslinje)
-        assertNull(utbetaling.toMap()["avstemmingsnøkkel"])
+        assertNull(utbetaling.inspektør.avstemmingsnøkkel)
     }
 
     @Test

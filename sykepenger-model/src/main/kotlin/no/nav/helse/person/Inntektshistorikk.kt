@@ -5,7 +5,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-28 ledd 3 bokstav a`
 import no.nav.helse.person.Inntektshistorikk.Innslag.Companion.nyesteId
-import no.nav.helse.serde.reflection.Inntektsopplysningskilde
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import java.time.LocalDate
@@ -126,7 +125,7 @@ internal class Inntektshistorikk {
         override val prioritet = 100
 
         override fun accept(visitor: InntekthistorikkVisitor) {
-            visitor.visitSaksbehandler(this, dato, hendelseId, beløp, tidsstempel)
+            visitor.visitSaksbehandler(this, id, dato, hendelseId, beløp, tidsstempel)
         }
 
         override fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) = takeIf { it.dato == skjæringstidspunkt }
@@ -137,14 +136,6 @@ internal class Inntektshistorikk {
         override fun skalErstattesAv(other: Inntektsopplysning) =
             other is Saksbehandler && this.dato == other.dato
 
-        internal fun toMap(): Map<String, Any?> = mapOf(
-            "id" to id,
-            "dato" to dato,
-            "hendelseId" to hendelseId,
-            "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
-            "kilde" to Inntektsopplysningskilde.SAKSBEHANDLER,
-            "tidsstempel" to tidsstempel
-        )
     }
 
     internal class Infotrygd(
@@ -157,7 +148,7 @@ internal class Inntektshistorikk {
         override val prioritet = 80
 
         override fun accept(visitor: InntekthistorikkVisitor) {
-            visitor.visitInfotrygd(this, dato, hendelseId, beløp, tidsstempel)
+            visitor.visitInfotrygd(this, id, dato, hendelseId, beløp, tidsstempel)
         }
 
         // TODO: egen test for å bruke førstefraværsdag her: https://trello.com/c/QFYSoFOs
@@ -170,15 +161,6 @@ internal class Inntektshistorikk {
 
         override fun skalErstattesAv(other: Inntektsopplysning) =
             other is Infotrygd && this.dato == other.dato
-
-        internal fun toMap(): Map<String, Any?> = mapOf(
-            "id" to id,
-            "dato" to dato,
-            "hendelseId" to hendelseId,
-            "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
-            "kilde" to Inntektsopplysningskilde.INFOTRYGD,
-            "tidsstempel" to tidsstempel
-        )
     }
 
     internal class Inntektsmelding(
@@ -191,7 +173,7 @@ internal class Inntektshistorikk {
         override val prioritet = 60
 
         override fun accept(visitor: InntekthistorikkVisitor) {
-            visitor.visitInntektsmelding(this, dato, hendelseId, beløp, tidsstempel)
+            visitor.visitInntektsmelding(this, id, dato, hendelseId, beløp, tidsstempel)
         }
 
         override fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) =
@@ -206,15 +188,6 @@ internal class Inntektshistorikk {
 
         override fun kanLagres(other: Inntektsopplysning) =
             other !is Inntektsmelding || this.dato != other.dato
-
-        internal fun toMap(): Map<String, Any?> = mapOf(
-            "id" to id,
-            "dato" to dato,
-            "hendelseId" to hendelseId,
-            "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
-            "kilde" to Inntektsopplysningskilde.INNTEKTSMELDING,
-            "tidsstempel" to tidsstempel
-        )
     }
 
     internal class SkattComposite(
@@ -365,19 +338,6 @@ internal class Inntektshistorikk {
             override fun skalErstattesAv(other: Inntektsopplysning) =
                 other is Sammenligningsgrunnlag && this.dato == other.dato
         }
-
-        internal fun toMap(kilde: Inntektsopplysningskilde): Map<String, Any?> = mapOf(
-            "dato" to dato,
-            "hendelseId" to hendelseId,
-            "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
-            "kilde" to kilde,
-            "tidsstempel" to tidsstempel,
-
-            "måned" to måned,
-            "type" to type,
-            "fordel" to fordel,
-            "beskrivelse" to beskrivelse
-        )
     }
 
     internal fun append(block: AppendMode.() -> Unit) {
