@@ -63,6 +63,9 @@ abstract class Infotrygdperiode(fom: LocalDate, tom: LocalDate) : Periode(fom, t
             .filter { it.overlapperMed(periode) }
             .any(Infotrygdperiode::harBrukerutbetaling)
 
+        internal fun sorter(perioder: List<Infotrygdperiode>) =
+            perioder.sortedBy { it.start }.sortedBy { it.hashCode() }
+
     }
 
     protected open fun harBrukerutbetaling() = false

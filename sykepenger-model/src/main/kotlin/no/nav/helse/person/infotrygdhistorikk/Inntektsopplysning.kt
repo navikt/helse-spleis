@@ -117,5 +117,8 @@ class Inntektsopplysning private constructor(
                 )
             }
         }
+
+        internal fun sorter(inntekter: List<Inntektsopplysning>) =
+            inntekter.sortedBy { it.sykepengerFom }.sortedBy { it.hashCode() }
     }
 }

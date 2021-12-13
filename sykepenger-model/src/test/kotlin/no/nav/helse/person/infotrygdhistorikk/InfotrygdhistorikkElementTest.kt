@@ -88,6 +88,18 @@ internal class InfotrygdhistorikkElementTest {
     }
 
     @Test
+    fun `sortering på inntekter har ikke betydning`() {
+        val inntekt1 = Inntektsopplysning("orgnr", 1.januar, 1000.daglig, true)
+        val inntekt2 = Inntektsopplysning("orgnr", 1.januar, 0.daglig, true)
+
+        val element1 = historikkelement(inntekter = listOf(inntekt1, inntekt2))
+        val identiskElement = historikkelement(inntekter = listOf(inntekt2, inntekt1))
+        assertEquals(element1, identiskElement)
+        assertEquals(element1.hashCode(), identiskElement.hashCode())
+        assertTrue(identiskElement.erstatter(element1))
+    }
+
+    @Test
     fun `lik ugyldig periode`() {
         val element1 = historikkelement(ugyldigePerioder = listOf(UgyldigPeriode(1.januar, 1.januar, 100)))
         val identiskElement = historikkelement(ugyldigePerioder = listOf(UgyldigPeriode(1.januar, 1.januar, 100)))

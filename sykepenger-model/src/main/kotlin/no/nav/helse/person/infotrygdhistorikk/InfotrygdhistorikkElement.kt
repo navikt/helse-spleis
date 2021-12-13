@@ -21,7 +21,7 @@ internal class InfotrygdhistorikkElement private constructor(
     private val tidsstempel: LocalDateTime,
     private val hendelseId: UUID? = null,
     perioder: List<Infotrygdperiode>,
-    private val inntekter: List<Inntektsopplysning>,
+    inntekter: List<Inntektsopplysning>,
     private val arbeidskategorikoder: Map<String, LocalDate>,
     private val ugyldigePerioder: List<UgyldigPeriode>,
     private val harStatslønn: Boolean,
@@ -29,7 +29,8 @@ internal class InfotrygdhistorikkElement private constructor(
     private var lagretInntekter: Boolean,
     private var lagretVilkårsgrunnlag: Boolean
 ) {
-    private val perioder = perioder.sortedBy { it.start }.sortedBy { it::class.qualifiedName }
+    private val inntekter = Inntektsopplysning.sorter(inntekter)
+    private val perioder = Infotrygdperiode.sorter(perioder)
     private val kilde = SykdomstidslinjeHendelse.Hendelseskilde("Infotrygdhistorikk", id, tidsstempel)
 
     init {
