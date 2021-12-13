@@ -655,18 +655,17 @@ class Person private constructor(
 
         when (val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)) {
             is VilkårsgrunnlagHistorikk.Grunnlagsdata -> {
-                val harMinimumInntekt =
-                    validerMinimumInntekt(hendelse, fødselsnummer, hendelse.skjæringstidspunkt, sykepengegrunnlag)
-                vilkårsgrunnlagHistorikk.lagre(
-                    skjæringstidspunkt, grunnlag.kopierGrunnlagsdataMed(
-                        sykepengegrunnlag = sykepengegrunnlag,
-                        sammenligningsgrunnlag = sammenligningsgrunnlag,
-                        sammenligningsgrunnlagVurdering = harAkseptabeltAvvik,
-                        avviksprosent = avviksprosent,
-                        minimumInntektVurdering = harMinimumInntekt,
-                        meldingsreferanseId = hendelse.meldingsreferanseId()
-                    )
+                val harMinimumInntekt = validerMinimumInntekt(hendelse, fødselsnummer, hendelse.skjæringstidspunkt, sykepengegrunnlag)
+                val grunnlagselement = grunnlag.kopierGrunnlagsdataMed(
+                    sykepengegrunnlag = sykepengegrunnlag,
+                    sammenligningsgrunnlag = sammenligningsgrunnlag,
+                    sammenligningsgrunnlagVurdering = harAkseptabeltAvvik,
+                    avviksprosent = avviksprosent,
+                    minimumInntektVurdering = harMinimumInntekt,
+                    meldingsreferanseId = hendelse.meldingsreferanseId()
                 )
+                hendelse.kontekst(grunnlagselement)
+                vilkårsgrunnlagHistorikk.lagre(skjæringstidspunkt, grunnlagselement)
             }
             is VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag -> hendelse.error("Vilkårsgrunnlaget ligger i infotrygd. Det er ikke støttet i revurdering.")
             else -> hendelse.error("Fant ikke vilkårsgrunnlag. Kan ikke revurdere inntekt.")
