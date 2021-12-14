@@ -111,7 +111,7 @@ internal abstract class HistorieTest {
             arbeidsgiverRegler = regler,
             aktivitetslogg = Aktivitetslogg()
         )
-        return infotrygdhistorikk.builder(orgnr, builder).result(sykdomstidslinje, periode)
+        return infotrygdhistorikk.builder(orgnr, builder).also { it.build(sykdomstidslinje, periode) }.result()
     }
 
     protected fun skjæringstidspunkt(fom: LocalDate) = infotrygdhistorikk.skjæringstidspunkt(Periode(fom, fom), arbeidsgiverSykdomstidslinje.values.toList())

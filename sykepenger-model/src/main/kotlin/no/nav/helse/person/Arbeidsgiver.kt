@@ -923,8 +923,9 @@ internal class Arbeidsgiver private constructor(
         arbeidsforholdhistorikk.lagre(arbeidsforhold.filter { it.erRelevant(this) }, skjæringstidspunkt)
     }
 
-    internal fun build(builder: IUtbetalingstidslinjeBuilder, periode: Periode) =
-        builder.result(sykdomstidslinje(), periode)
+    internal fun build(builder: IArbeidsgiverperiodetelling, periode: Periode) {
+        builder.build(sykdomstidslinje(), periode)
+    }
 
     internal fun beregn(aktivitetslogg: IAktivitetslogg, arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger, periode: Periode): Boolean {
         try {

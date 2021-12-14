@@ -10,6 +10,7 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.somFødselsnummer
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.økonomi.Inntekt
@@ -427,7 +428,10 @@ internal class ArbeidsgiverUtbetalingerTest {
 
         ArbeidsgiverUtbetalinger(
             NormalArbeidstaker,
-            mapOf(person.arbeidsgiver(ORGNUMMER) to IUtbetalingstidslinjeBuilder { _, _ -> arbeidsgiverTidslinje }),
+            mapOf(person.arbeidsgiver(ORGNUMMER) to object : IUtbetalingstidslinjeBuilder {
+                override fun build(sykdomstidslinje: Sykdomstidslinje, periode: Periode) {}
+                override fun result() = arbeidsgiverTidslinje
+            }),
             infotrygdhistorikk,
             fnr.alder(),
             null,

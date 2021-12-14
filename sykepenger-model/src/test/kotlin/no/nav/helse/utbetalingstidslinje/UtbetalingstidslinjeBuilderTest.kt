@@ -940,7 +940,7 @@ internal class UtbetalingstidslinjeBuilderTest {
             skjæringstidspunkter = skjæringstidspunkter,
             inntektPerSkjæringstidspunkt = inntektsopplysningPerSkjæringstidspunkt,
             aktivitetslogg = Aktivitetslogg()
-        ).apply { forlengelsestrategi(strategi) }.result(this, periode()!!)
+        ).apply { forlengelsestrategi(strategi) }.also { it.build(this, periode()!!) }.result()
         verifiserRekkefølge(tidslinje)
     }
 

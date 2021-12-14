@@ -347,7 +347,7 @@ internal class RefusjonsgjødslerTest {
                 skjæringstidspunkter = inntektsopplysning.keys.toList(),
                 inntektPerSkjæringstidspunkt = inntektsopplysning,
                 aktivitetslogg = Aktivitetslogg()
-            ).apply { forlengelsestrategi(strategi) }.result(this, periode()!!)
+            ).apply { forlengelsestrategi(strategi)}.also { it.build(this, periode()!!) }.result()
             verifiserRekkefølge(tidslinje)
             return tidslinje
         }
