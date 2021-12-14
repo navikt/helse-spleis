@@ -246,7 +246,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         val utbetaling = inspektør.utbetalinger.first()
         val vilkårsgrunnlagIder = inspektør.vilkårsgrunnlagHistorikkInnslag()
 
-        assertEquals(1, personDTO.arbeidsgivere.first().utbetalingshistorikk.size)
+        assertEquals(1, personDTO.arbeidsgivere.single().utbetalingshistorikk.size)
         assertEquals(31, tidslinje.beregnettidslinje.size)
         assertEquals(31, tidslinje.hendelsetidslinje.size)
         assertEquals(31, tidslinje.utbetaling.utbetalingstidslinje.size)
@@ -1316,7 +1316,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Begge arbeidsgivere har beregningsId og tilsvarende utbetalingshistorikkelement når første sendes til godkjenning`() {
+    fun `Begge arbeidsgivere har     beregningsId og tilsvarende utbetalingshistorikkelement når første sendes til godkjenning`() {
         val fom = 1.januar
         val tom = 31.januar
 
@@ -1425,7 +1425,8 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                 listOf(
                     grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(3)),
-                    grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), listOf(31000.månedlig, 32000.månedlig, 33000.månedlig))
+                    grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), listOf(31000.månedlig, 32000.månedlig, 33000.månedlig)),
+                    grunnlag(a4, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 1000.månedlig.repeat(2)),
                 )
             ),
             arbeidsforhold = listOf(
@@ -1445,7 +1446,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             .single().inntekter
             .single { it.arbeidsgiver == a2 }.omregnetÅrsinntekt!!.inntekterFraAOrdningen!!
 
-        assertEquals(listOf(a1, a2, a3, a4), personDto.arbeidsgivere.map { it.organisasjonsnummer })
+        assertEquals(listOf(a1, a2), personDto.arbeidsgivere.map { it.organisasjonsnummer })
         assertEquals(listOf(a1, a2, a3, a4), personDto.inntektsgrunnlag.single().inntekter.map { it.arbeidsgiver })
         assertEquals(3, inntekterFraAordningen.size)
         assertEquals(listOf(33000.0, 32000.0, 31000.0), inntekterFraAordningen.map { it.sum })

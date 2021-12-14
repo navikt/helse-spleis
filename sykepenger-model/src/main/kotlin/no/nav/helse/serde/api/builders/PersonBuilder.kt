@@ -27,17 +27,13 @@ internal class PersonBuilder(
 
     internal fun build(hendelser: List<HendelseDTO>): PersonDTO {
 
-        fun skalVises(orgnummer: String) = person.skjæringstidspunkter().any { person.harAktivtArbeidsforholdEllerInntekt(it, orgnummer) }
-
         val sammenligningsgrunnlagBuilder = OppsamletSammenligningsgrunnlagBuilder(person)
         val vilkårsgrunnlagHistorikk = VilkårsgrunnlagBuilder(person, sammenligningsgrunnlagBuilder).build()
 
         return PersonDTO(
             fødselsnummer = fødselsnummer.toString(),
             aktørId = aktørId,
-            arbeidsgivere = arbeidsgivere.map { it.build(hendelser, fødselsnummer.toString(), vilkårsgrunnlagHistorikk) }.filter {
-                it.vedtaksperioder.isNotEmpty() || skalVises(it.organisasjonsnummer)
-            },
+            arbeidsgivere = arbeidsgivere.map { it.build(hendelser, fødselsnummer.toString(), vilkårsgrunnlagHistorikk) },
             vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk.toDTO(),
             inntektsgrunnlag = inntektshistorikkBuilder.build(),
             dødsdato = dødsdato,
@@ -52,7 +48,9 @@ internal class PersonBuilder(
     ) {
         val arbeidsgiverBuilder =
             ArbeidsgiverBuilder(arbeidsgiver, vilkårsgrunnlagHistorikk, id, organisasjonsnummer, fødselsnummer.toString(), inntektshistorikkBuilder)
-        arbeidsgivere.add(arbeidsgiverBuilder)
+        if (vilkårsgrunnlagHistorikk.erRelevant(organisasjonsnummer, person.skjæringstidspunkter()) || arbeidsgiver.harFerdigstiltPeriode() || arbeidsgiver.harSpleisSykdom()) {
+            arbeidsgivere.add(arbeidsgiverBuilder)
+        }
         pushState(arbeidsgiverBuilder)
     }
 

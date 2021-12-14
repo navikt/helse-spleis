@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Sykmelding
+import no.nav.helse.person.Vedtaksperiode.Companion.ER_ELLER_HAR_VÆRT_AVSLUTTET
 import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
 import java.util.*
 
@@ -17,6 +18,8 @@ internal class ForkastetVedtaksperiode(
 
     internal companion object {
         private fun Iterable<ForkastetVedtaksperiode>.perioder() = map { it.vedtaksperiode }
+
+        internal fun Iterable<ForkastetVedtaksperiode>.harAvsluttedePerioder() = this.perioder().any(ER_ELLER_HAR_VÆRT_AVSLUTTET)
 
         internal fun overlapperMedForkastet(forkastede: Iterable<ForkastetVedtaksperiode>, sykmelding: Sykmelding) {
             Vedtaksperiode.overlapperMedForkastet(forkastede.perioder(), sykmelding)

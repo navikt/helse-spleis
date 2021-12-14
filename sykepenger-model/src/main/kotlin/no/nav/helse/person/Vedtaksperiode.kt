@@ -2603,6 +2603,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         internal val IKKE_FERDIG_BEHANDLET: VedtaksperiodeFilter = { !it.tilstand.erFerdigBehandlet }
+        internal val ER_ELLER_HAR_VÆRT_AVSLUTTET: VedtaksperiodeFilter = { it.tilstand is AvsluttetUtenUtbetaling || it.utbetalinger.any { it.erAvsluttet() } }
 
         internal val ALLE: VedtaksperiodeFilter = { true }
 

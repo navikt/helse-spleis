@@ -18,8 +18,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
     internal constructor() : this(mutableListOf())
 
-    private val innslag
-        get() = (historikk.firstOrNull()?.clone() ?: Innslag(UUID.randomUUID(), LocalDateTime.now()))
+    private fun nyttInnslag() = (historikk.firstOrNull()?.clone() ?: Innslag(UUID.randomUUID(), LocalDateTime.now()))
             .also { historikk.add(0, it) }
 
     internal fun accept(visitor: VilkårsgrunnlagHistorikkVisitor) {
@@ -31,11 +30,11 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
     internal fun lagre(skjæringstidspunkt: LocalDate, vilkårsgrunnlag: Vilkårsgrunnlag) = lagre(skjæringstidspunkt, vilkårsgrunnlag.grunnlagsdata())
 
     internal fun lagre(skjæringstidspunkt: LocalDate, grunnlagselement: VilkårsgrunnlagElement) {
-        innslag.add(skjæringstidspunkt, grunnlagselement)
+        nyttInnslag().add(skjæringstidspunkt, grunnlagselement)
     }
 
     internal fun oppdaterMinimumInntektsvurdering(skjæringstidspunkt: LocalDate, grunnlagsdata: Grunnlagsdata, oppfyllerKravTilMinimumInntekt: Boolean) {
-        innslag.add(skjæringstidspunkt, grunnlagsdata.kopierMedMinimumInntektsvurdering(oppfyllerKravTilMinimumInntekt))
+        nyttInnslag().add(skjæringstidspunkt, grunnlagsdata.kopierMedMinimumInntektsvurdering(oppfyllerKravTilMinimumInntekt))
     }
 
     internal fun sisteId() = historikk.sisteId()
@@ -50,6 +49,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
     internal fun inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver() = historikk.firstOrNull()?.inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver()
 
+    internal fun erRelevant(organisasjonsnummer: String, skjæringstidspunkter: List<LocalDate>) = historikk.firstOrNull()?.erRelevant(organisasjonsnummer, skjæringstidspunkter) ?: false
 
     internal class Innslag(private val id: UUID, private val opprettet: LocalDateTime) {
         private val vilkårsgrunnlag = mutableMapOf<LocalDate, VilkårsgrunnlagElement>()
@@ -85,6 +85,10 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             vilkårsgrunnlag.mapValues { (_, vilkårsgrunnlagElement) ->
                 vilkårsgrunnlagElement.inntektsopplysningPerArbeidsgiver()
             }
+
+        fun erRelevant(organisasjonsnummer: String, skjæringstidspunkter: List<LocalDate>) =
+            skjæringstidspunkter.mapNotNull(vilkårsgrunnlag::get)
+                .any { it.inntektsopplysningPerArbeidsgiver().containsKey(organisasjonsnummer) }
 
         internal companion object {
             internal fun List<Innslag>.sisteId() = this.first().id
