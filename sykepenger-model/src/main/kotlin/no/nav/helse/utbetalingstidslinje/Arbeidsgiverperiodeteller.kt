@@ -34,34 +34,6 @@ internal interface Arbeidsgiverperiodestrategi {
     }
 }
 
-internal class Arbeidsgiverperiode(private val perioder: List<Periode>) : Iterable<LocalDate>, Comparable<LocalDate> {
-    init {
-        check(perioder.isNotEmpty())
-    }
-
-    override fun compareTo(other: LocalDate) =
-        perioder.first().start.compareTo(other)
-
-    override fun iterator(): Iterator<LocalDate> {
-        return object : Iterator<LocalDate> {
-            private val periodeIterators = perioder.map { it.iterator() }.iterator()
-            private var current: Iterator<LocalDate>? = null
-
-            override fun hasNext(): Boolean {
-                val iterator = current
-                if (iterator != null && iterator.hasNext()) return true
-                if (!periodeIterators.hasNext()) return false
-                current = periodeIterators.next()
-                return true
-            }
-
-            override fun next(): LocalDate {
-                return current?.next() ?: throw NoSuchElementException()
-            }
-        }
-    }
-}
-
 /**
  * Forstår hvordan man teller arbeidsgiverperiode
  *
