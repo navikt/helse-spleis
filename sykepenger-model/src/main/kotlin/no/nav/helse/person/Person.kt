@@ -18,10 +18,8 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
+import no.nav.helse.utbetalingstidslinje.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
-import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.økonomi.Inntekt
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -128,6 +126,12 @@ class Person private constructor(
         ytelser.lagreDødsdato(this)
 
         finnArbeidsgiver(ytelser).håndter(ytelser, { arbeidsgiverUtbetalinger(hendelse = it) }, infotrygdhistorikk)
+    }
+
+    internal fun arbeidsgiverperioderFor(orgnummer: String, sykdomstidslinje: Sykdomstidslinje, kuttdato: LocalDate): List<Arbeidsgiverperiode> {
+        val builder = ArbeidsgiverperiodeBuilder(NormalArbeidstaker)
+        infotrygdhistorikk.builder(orgnummer, builder).build(sykdomstidslinje, kuttdato til kuttdato)
+        return builder.result()
     }
 
     private fun arbeidsgiverUtbetalinger(regler: ArbeidsgiverRegler = NormalArbeidstaker, hendelse: IAktivitetslogg): ArbeidsgiverUtbetalinger {

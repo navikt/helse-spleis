@@ -1814,21 +1814,16 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     @Test
     fun `'arbeidGjenopptatt' i løpet av arbeidsgiverperioden i arbeidsgiversøknad medfører ikke forbrukte sykedager`() {
         nyttVedtak(1.januar, 31.januar)
-
-        assertEquals(LocalDate.of(2018, 12, 28), inspektør.maksdatoVedSisteVedtak())
-
+        assertEquals(28.desember, inspektør.maksdatoVedSisteVedtak())
         håndterSykmelding(Sykmeldingsperiode(1.mars, 21.mars, 100.prosent))
         håndterSøknadArbeidsgiver(
             SøknadArbeidsgiver.Sykdom(1.mars, 21.mars, 100.prosent),
             arbeidsperiode = SøknadArbeidsgiver.Arbeid(12.mars, 21.mars)
         )
         håndterInntektsmelding(listOf(1.mars til 16.mars))
-
-        assertEquals(LocalDate.of(2018, 12, 28), inspektør.maksdatoVedSisteVedtak())
-
+        assertEquals(28.desember, inspektør.maksdatoVedSisteVedtak())
         nyttVedtak(1.mai, 21.mai)
-
-        assertEquals(LocalDate.of(2019, 4, 12), inspektør.maksdatoVedSisteVedtak())
+        assertEquals(12.april(2019), inspektør.maksdatoVedSisteVedtak())
     }
 
     @Test

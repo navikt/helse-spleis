@@ -141,6 +141,11 @@ internal class Infotrygdhistorikk private constructor(
         return Utbetalingstidslinjedekoratør(builder, organisasjonsnummer)
     }
 
+    internal fun builder(organisasjonsnummer: String, builder: ArbeidsgiverperiodeBuilder): IArbeidsgiverperiodetelling {
+        if (!harHistorikk()) return builder
+        return Arbeidsgiverperiodetellingdekoratør(builder, organisasjonsnummer)
+    }
+
     private fun oppfrisket(cutoff: LocalDateTime) =
         elementer.firstOrNull()?.oppfrisket(cutoff) ?: false
 

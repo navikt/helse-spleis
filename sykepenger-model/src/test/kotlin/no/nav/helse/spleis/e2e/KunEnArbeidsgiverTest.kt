@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.ForventetFeil
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
@@ -17,7 +16,6 @@ import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -2489,18 +2487,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
     @Test
     fun `Periode som kommer inn som SøknadArbeidsgiver selv om det er mindre enn 16 dager gap til forrige periode`() {
-        /*
-        Trello-lapp: https://trello.com/c/ZYUyYFFW
-        Det er mindre enn 16 dagers gap (fordi vi ikke skal telle med helgen som forlenger nyttVedtak) mellom nytt vedtak og de korte periodene
-        Så det burde ikke være ny arbeidsgiverperiode fra 12. oktober.
-
-        * 1. Søknaden fra 12. oktober skulle ikke vært en søknad arbeidsgiver. Helgen 25.-26 september skulle ikke telt som gap fordi det er trailing helg på
-        sykdom. Dette er en bug hos team flex
-
-        * 2. Vi viser ikke utbetaling av AVSLUTTET_UTEN_UTBETALING i speil. Veldig vanskelig for saksbehandlere å oppdage at vi betaler ut i AGP i denne
-        perioden
-
-        */
         nyttVedtak(1.september(2021), 24.september(2021))
 
         håndterSykmelding(Sykmeldingsperiode(12.oktober(2021), 22.oktober(2021), 100.prosent))
@@ -2508,33 +2494,10 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(23.oktober(2021), 29.oktober(2021), 100.prosent))
         håndterSøknad(Sykdom(23.oktober(2021), 29.oktober(2021), 100.prosent))
-        håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(
-                12.oktober(2021) til 27.oktober(2021)),
-            førsteFraværsdag = 12.oktober(2021)
-        )
-        håndterYtelser(3.vedtaksperiode)
-        håndterVilkårsgrunnlag(3.vedtaksperiode)
-        håndterYtelser(3.vedtaksperiode)
-        håndterSimulering(3.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
-        håndterUtbetalt(3.vedtaksperiode)
 
-        assertTrue(inspektør.utbetalinger.last().utbetalingstidslinje()[18.oktober(2021)] is NavDag)
-    }
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE)
 
-    @ForventetFeil("https://trello.com/c/ZYUyYFFW")
-    @Test
-    fun `Kan vi sende perioder i AVSLUTTET_UTEN_UTBETALING til AVVENTER_HISTORIKK om det kommer en inntektsmelding som treffer den!?`() {
-        // TODO: Burde ha en guard for perioder som er AVSLUTTET
-        // TODO: Ikke sende perioder til AVVENTER_HISTORIKK dersom inntektsmeldingen ikke gjelder for perioden
-        nyttVedtak(1.september(2021), 24.september(2021))
-
-        håndterSykmelding(Sykmeldingsperiode(12.oktober(2021), 22.oktober(2021), 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(12.oktober(2021), 22.oktober(2021), 100.prosent))
-
-        håndterSykmelding(Sykmeldingsperiode(23.oktober(2021), 29.oktober(2021), 100.prosent))
-        håndterSøknad(Sykdom(23.oktober(2021), 29.oktober(2021), 100.prosent))
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(
                 12.oktober(2021) til 27.oktober(2021)),
@@ -2551,7 +2514,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt(2.vedtaksperiode)
 
-        assertTrue(inspektør.utbetalinger.last().utbetalingstidslinje()[18.oktober(2021)] is NavDag)
+        assertTrue(inspektør.utbetalinger.last().inspektør.utbetalingstidslinje.inspektør.erNavdag(18.oktober(2021)))
     }
 
     @Test

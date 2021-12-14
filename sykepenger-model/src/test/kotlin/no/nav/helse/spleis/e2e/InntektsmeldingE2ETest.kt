@@ -878,7 +878,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         håndterInntektsmeldingMedValidering(
             1.vedtaksperiode,
-            listOf(Periode(29.mars(2021), 31.mars(2021)), Periode(1.april(2021), 12.april(2021))),
+            arbeidsgiverperioder = listOf(29.mars(2021) til 31.mars(2021), 1.april(2021) til 12.april(2021)),
             beregnetInntekt = INGEN,
             refusjon = Refusjon(INNTEKT, null, emptyList())
         )
@@ -890,20 +890,20 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             AVSLUTTET_UTEN_UTBETALING,
         )
 
-        assertTilstander(
+        assertForkastetPeriodeTilstander(
             2.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-            AVSLUTTET_UTEN_UTBETALING
+            AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE,
+            TIL_INFOTRYGD
         )
 
         assertForkastetPeriodeTilstander(
             3.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
-            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-            AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
             TIL_INFOTRYGD
         )
     }

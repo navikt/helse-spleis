@@ -10,7 +10,7 @@ import kotlin.reflect.KClass
 internal val Utbetalingstidslinje.inspektør get() = UtbetalingstidslinjeInspektør(this)
 
 // Collects assertable statistics for a Utbetalingstidslinje
-internal class UtbetalingstidslinjeInspektør(utbetalingstidslinje: Utbetalingstidslinje): UtbetalingsdagVisitor {
+internal class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalingstidslinje): UtbetalingsdagVisitor {
     var førstedato = LocalDate.MIN
     var sistedato = LocalDate.MAX
     lateinit var førstedag: Utbetalingstidslinje.Utbetalingsdag
@@ -61,6 +61,8 @@ internal class UtbetalingstidslinjeInspektør(utbetalingstidslinje: Utbetalingst
 
     internal fun totalUtbetaling() = totalUtbetaling
     internal fun totalInntekt() = totalInntekt
+
+    internal fun erNavdag(dato: LocalDate) = utbetalingstidslinje[dato] is NavDag
 
     private fun collect(dag: Utbetalingstidslinje.Utbetalingsdag, dato: LocalDate) {
         økonomi.add(dag.økonomi)
