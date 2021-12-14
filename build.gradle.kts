@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "1.6.0"
+    kotlin("jvm") version "1.6.10"
 }
 
 val flywayVersion = "8.0.2"
@@ -48,15 +48,15 @@ allprojects {
 
     tasks {
         compileKotlin {
-            kotlinOptions.jvmTarget = "16"
+            kotlinOptions.jvmTarget = "17"
         }
 
         compileTestKotlin {
-            kotlinOptions.jvmTarget = "16"
+            kotlinOptions.jvmTarget = "17"
         }
 
         withType<Wrapper> {
-            gradleVersion = "7.3"
+            gradleVersion = "7.3.1"
         }
     }
 }
