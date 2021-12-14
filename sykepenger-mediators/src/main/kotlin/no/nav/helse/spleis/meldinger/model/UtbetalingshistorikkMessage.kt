@@ -69,7 +69,7 @@ internal class UtbetalingshistorikkMessage(packet: JsonMessage) : BehovMessage(p
                     element.path("arbeidsKategoriKode").asText() to it
                 }
             }
-        }.toMap()
+        }.sortedBy { (_, dato) -> dato }.toMap()
 
     private val inntektshistorikk = packet["@løsning.${Sykepengehistorikk.name}"]
         .flatMap { it.path("inntektsopplysninger") }

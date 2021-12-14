@@ -100,6 +100,25 @@ internal class InfotrygdhistorikkElementTest {
     }
 
     @Test
+    fun `sortering på arbeidsgiverkategorikode har ikke betydning`() {
+        val arbeidskategorikoder1 = mapOf(
+            "01" to 1.januar,
+            "02" to 2.januar
+        )
+        val arbeidskategorikoder2 = mapOf(
+            "02" to 2.januar,
+            "01" to 1.januar
+        )
+        val element1 = historikkelement(arbeidskategorikoder = arbeidskategorikoder1)
+        val identiskElement = historikkelement(arbeidskategorikoder = arbeidskategorikoder2)
+        assertEquals(arbeidskategorikoder1, arbeidskategorikoder2)
+        assertEquals(arbeidskategorikoder1.hashCode(), arbeidskategorikoder2.hashCode())
+        assertEquals(element1, identiskElement)
+        assertEquals(element1.hashCode(), identiskElement.hashCode())
+        assertTrue(identiskElement.erstatter(element1))
+    }
+
+    @Test
     fun `lik ugyldig periode`() {
         val element1 = historikkelement(ugyldigePerioder = listOf(UgyldigPeriode(1.januar, 1.januar, 100)))
         val identiskElement = historikkelement(ugyldigePerioder = listOf(UgyldigPeriode(1.januar, 1.januar, 100)))
