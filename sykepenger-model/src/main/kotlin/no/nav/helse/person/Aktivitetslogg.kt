@@ -526,8 +526,26 @@ class Aktivitetslogg(
                         return aktiviteter.filterIsInstance<Etterlevelse>()
                     }
 
+                    /**
+                     * Vurdering av medlemskap
+                     *
+                     * Lovdata: [lenke](https://lovdata.no/dokument/NL/lov/1997-02-28-19/KAPITTEL_2-2#KAPITTEL_2-2)
+                     *
+                     * @param oppfylt hvorvidt sykmeldte har oppfylt krav til medlemskap i folketrygden
+                     */
                     internal fun IAktivitetslogg.`§2`(oppfylt: Boolean) {}
 
+                    /**
+                     * Vurdering av opptjeningstid
+                     *
+                     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-2)
+                     *
+                     * @param oppfylt hvorvidt sykmeldte har oppfylt krav om opptjeningstid
+                     * @param skjæringstidspunkt dato som antall opptjeningsdager regnes mot
+                     * @param tilstrekkeligAntallOpptjeningsdager antall opptjeningsdager som kreves for at vilkåret skal være [oppfylt]
+                     * @param arbeidsforhold hvilke arbeidsforhold det er tatt utgangspunkt i ved beregning av opptjeningstid
+                     * @param antallOpptjeningsdager antall opptjeningsdager sykmeldte faktisk har på [skjæringstidspunkt]
+                     */
                     internal fun IAktivitetslogg.`§8-2 ledd 1`(
                         oppfylt: Boolean,
                         skjæringstidspunkt: LocalDate,
@@ -554,6 +572,19 @@ class Aktivitetslogg(
                         )
                     }
 
+                    /**
+                     * Vurdering av rett til sykepenger ved fylte 70 år
+                     *
+                     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-3)
+                     *
+                     * @param oppfylt hvorvidt sykmeldte har fylt 70 år. Oppfylt så lenge sykmeldte ikke er 70 år eller eldre
+                     * @param syttiårsdagen dato sykmeldte fyller 70 år
+                     * @param vurderingFom fra-og-med-dato [oppfylt]-vurderingen gjelder for
+                     * @param vurderingTom til-og-med-dato [oppfylt]-vurderingen gjelder for
+                     * @param tidslinjeFom fra-og-med-dato for [oppfylt]-tidslinje vurderingen gjøres mot
+                     * @param tidslinjeTom til-og-med-dato for [oppfylt]-tidslinje vurderingen gjøres mot
+                     * @param avvisteDager alle dager vurderingen ikke er [oppfylt] for. Tom dersom sykmeldte ikke fyller 70 år mellom [tidslinjeFom] og [tidslinjeTom]
+                     */
                     internal fun IAktivitetslogg.`§8-3 ledd 1 punktum 2`(
                         oppfylt: Boolean,
                         syttiårsdagen: LocalDate,
@@ -585,6 +616,16 @@ class Aktivitetslogg(
                         )
                     }
 
+                    /**
+                     * Vurdering av krav til minimum inntekt
+                     *
+                     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-3)
+                     *
+                     * @param oppfylt hvorvidt sykmeldte har inntekt lik eller større enn minimum inntekt
+                     * @param skjæringstidspunkt dato som minimum inntekt settes ut fra
+                     * @param grunnlagForSykepengegrunnlag total inntekt på tvers av alle relevante arbeidsgivere
+                     * @param minimumInntekt beløpet som settes basert på [skjæringstidspunkt], og som vurderes mot [grunnlagForSykepengegrunnlag]
+                     */
                     internal fun IAktivitetslogg.`§8-3 ledd 2 punktum 1`(
                         oppfylt: Boolean,
                         skjæringstidspunkt: LocalDate,
@@ -608,7 +649,18 @@ class Aktivitetslogg(
                         )
                     }
 
-                    internal fun IAktivitetslogg.`§8-10 ledd 2`(
+                    /**
+                     * Vurdering av maksimalt sykepengegrunnlag
+                     *
+                     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-10)
+                     *
+                     * @param oppfylt alltid oppfylt
+                     * @param funnetRelevant dersom hjemlen slår inn ved at [grunnlagForSykepengegrunnlag] blir begrenset til [maksimaltSykepengegrunnlag]
+                     * @param maksimaltSykepengegrunnlag maksimalt årlig beløp utbetaling skal beregnes ut fra
+                     * @param skjæringstidspunkt dato [maksimaltSykepengegrunnlag] settes ut fra
+                     * @param grunnlagForSykepengegrunnlag total inntekt på tvers av alle relevante arbeidsgivere
+                     */
+                    internal fun IAktivitetslogg.`§8-10 ledd 2 punktum 1`(
                         oppfylt: Boolean,
                         funnetRelevant: Boolean,
                         maksimaltSykepengegrunnlag: Inntekt,
@@ -653,6 +705,20 @@ class Aktivitetslogg(
                         )
                     }
 
+                    /**
+                     * Vurdering av maksimalt antall sykepengedager
+                     *
+                     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-12)
+                     *
+                     * @param oppfylt **true** dersom vedtaksperioden ikke inneholder [avvisteDager] som følge av at man har nådd [maksdato]
+                     * @param fom første NAV-dag i et helt sykepengeforløp dersom vilkåret er [oppfylt], ellers første avviste dag
+                     * @param tom hittil siste NAV-dag i et helt sykepengeforløp dersom vilkåret er [oppfylt], ellers siste avviste dag
+                     * @param tidslinjegrunnlag tidslinje det tas utgangspunkt i når man beregner [gjenståendeSykedager], [forbrukteSykedager] og [maksdato]
+                     * @param gjenståendeSykedager antall gjenstående sykepengedager ved siste utbetalte dag. 0 dersom vilkåret ikke er [oppfylt]
+                     * @param forbrukteSykedager antall forbrukte sykepengedager
+                     * @param maksdato dato for opphør av rett til sykepenger
+                     * @param avvisteDager dager vilkåret ikke er [oppfylt] for
+                     */
                     internal fun IAktivitetslogg.`§8-12 ledd 1 punktum 1`(
                         oppfylt: Boolean,
                         fom: LocalDate,
@@ -688,6 +754,17 @@ class Aktivitetslogg(
                         )
                     }
 
+                    /**
+                     * Vurdering av ny rett til sykepenger
+                     *
+                     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-12)
+                     *
+                     * Merk: ikke noe oppfylt-parameter, da denne alltid er oppfylt, fordi vurderingen kun gjøres når ny rett til sykepenger oppnås
+                     * @param dato dato vurdering av hjemmel gjøres
+                     * @param tilstrekkeligOppholdISykedager antall dager med opphold i ytelsen som nødvendig for å oppnå ny rett til sykepenger
+                     * @param tidslinjegrunnlag alle tidslinjer det tas utgangspunkt i ved bygging av [beregnetTidslinje]
+                     * @param beregnetTidslinje tidslinje det tas utgangspunkt i ved utbetaling for aktuell vedtaksperiode
+                     */
                     internal fun IAktivitetslogg.`§8-12 ledd 2`(
                         dato: LocalDate,
                         tilstrekkeligOppholdISykedager: Int,
@@ -713,6 +790,14 @@ class Aktivitetslogg(
                         )
                     }
 
+                    /**
+                     * Vurdering av graderte sykepenger
+                     *
+                     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-13)
+                     *
+                     * @param oppfylt **true** dersom uføregraden er minst 20%
+                     * @param avvisteDager dager som ikke møter kriterie for [oppfylt]
+                     */
                     internal fun IAktivitetslogg.`§8-13 ledd 1`(oppfylt: Boolean, avvisteDager: List<LocalDate>) {
                         juridiskVurdering(
                             "",
