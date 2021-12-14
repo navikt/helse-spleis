@@ -976,6 +976,24 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `Ikke klipp inntektsmelding dersom vi overlapper med forkastet vedtaksperiode`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 11.januar, 100.prosent))
+
+        håndterSykmelding(Sykmeldingsperiode(11.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(11.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(
+            listOf(
+                1.januar til 16.januar
+            ), førsteFraværsdag = 1.januar
+        )
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+
+        assertEquals(1.januar til 31.januar, inspektør.vedtaksperioder(2.vedtaksperiode).periode())
+    }
+
+    @Test
     fun `sender med arbeidsforholdId på godkjenningsbehov`() {
         val arbeidsforholdId = UUID.randomUUID().toString()
 

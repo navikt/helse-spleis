@@ -28,10 +28,6 @@ internal class ForkastetVedtaksperiode(
         internal fun sjekkOmOverlapperMedForkastet(forkastede: Iterable<ForkastetVedtaksperiode>, inntektsmelding: Inntektsmelding) =
             Vedtaksperiode.sjekkOmOverlapperMedForkastet(forkastede.perioder(), inntektsmelding)
 
-        internal fun trimTidligereBehandletDager(aktive: Iterable<Vedtaksperiode>, forkastede: Iterable<ForkastetVedtaksperiode>, inntektsmelding: Inntektsmelding) {
-            Vedtaksperiode.trimTidligereBehandletDager(aktive, forkastede.perioder(), inntektsmelding)
-        }
-
         internal fun finnForkastetSykeperiodeRettFør(forkastede: Iterable<ForkastetVedtaksperiode>, other: Vedtaksperiode) =
             forkastede.perioder().firstOrNull { vedtaksperiode -> vedtaksperiode.erSykeperiodeRettFør(other) }
 

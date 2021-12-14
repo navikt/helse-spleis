@@ -342,7 +342,6 @@ internal class Arbeidsgiver private constructor(
         inntektsmelding.kontekst(this)
         inntektsmelding.cacheRefusjon(this)
         inntektsmelding.cacheRefusjon(refusjonshistorikk)
-        trimTidligereBehandletDager(inntektsmelding)
         if (vedtaksperiodeId != null) {
             if (!énHarHåndtert(inntektsmelding) { håndter(inntektsmelding, vedtaksperiodeId) })
                 return inntektsmelding.info("Vedtaksperiode overlapper ikke med replayet Inntektsmelding")
@@ -940,10 +939,6 @@ internal class Arbeidsgiver private constructor(
         return Vedtaksperiode.finnForrigeAvsluttaPeriode(vedtaksperioder, vedtaksperiode) ?:
         // TODO: leiter frem fra forkasta perioder — vilkårsgrunnlag ol. felles data bør lagres på Arbeidsgivernivå
         ForkastetVedtaksperiode.finnForrigeAvsluttaPeriode(forkastede, vedtaksperiode)
-    }
-
-    private fun trimTidligereBehandletDager(hendelse: Inntektsmelding) {
-        ForkastetVedtaksperiode.trimTidligereBehandletDager(vedtaksperioder, forkastede, hendelse)
     }
 
     internal fun harDagUtenSøknad(periode: Periode) =

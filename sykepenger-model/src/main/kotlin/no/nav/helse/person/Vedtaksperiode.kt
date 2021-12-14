@@ -2653,14 +2653,6 @@ internal class Vedtaksperiode private constructor(
         internal fun sjekkOmOverlapperMedForkastet(forkastede: Iterable<Vedtaksperiode>, inntektsmelding: Inntektsmelding) =
             forkastede.any { it.periode.overlapperMed(inntektsmelding.periode()) }
 
-        internal fun trimTidligereBehandletDager(aktive: Iterable<Vedtaksperiode>, forkastede: Iterable<Vedtaksperiode>, inntektsmelding: Inntektsmelding) {
-            forkastede
-                .map { it.periode }
-                .filterNot { forkastet -> aktive.any { aktiv -> forkastet.overlapperMed(aktiv.periode) } }
-                .filter { it.overlapperMed(inntektsmelding.periode()) }
-                .forEach { inntektsmelding.trimLeft(it.endInclusive) }
-        }
-
         private fun List<Vedtaksperiode>.alleNåværendeErKlare(første: Vedtaksperiode, klarTilstand: Vedtaksperiodetilstand) =
             this
                 .filter { første.periode.overlapperMed(it.periode) }
