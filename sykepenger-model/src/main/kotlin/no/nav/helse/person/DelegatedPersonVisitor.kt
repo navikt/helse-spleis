@@ -917,6 +917,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         avstemmingsnøkkel: Long?,
         status: Oppdragstatus?,
         overføringstidspunkt: LocalDateTime?,
+        erSimulert: Boolean,
         simuleringsResultat: Simulering.SimuleringResultat?
     ) {
         delegatee.preVisitOppdrag(
@@ -935,6 +936,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             avstemmingsnøkkel,
             status,
             overføringstidspunkt,
+            erSimulert,
             simuleringsResultat
         )
     }
@@ -955,6 +957,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         avstemmingsnøkkel: Long?,
         status: Oppdragstatus?,
         overføringstidspunkt: LocalDateTime?,
+        erSimulert: Boolean,
         simuleringsResultat: Simulering.SimuleringResultat?
     ) {
         delegatee.postVisitOppdrag(
@@ -973,6 +976,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             avstemmingsnøkkel,
             status,
             overføringstidspunkt,
+            erSimulert,
             simuleringsResultat
         )
     }

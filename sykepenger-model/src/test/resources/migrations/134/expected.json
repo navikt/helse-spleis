@@ -1,0 +1,42 @@
+{
+    "arbeidsgivere": [
+        {
+            "feriepengeutbetalinger": [
+                {
+                    "oppdrag": {
+                        "simuleringsResultat": null,
+                        "erSimulert": false
+                    }
+                },
+                {
+                    "oppdrag": {
+                        "simuleringsResultat": "not null",
+                        "erSimulert": true
+                    }
+                }
+            ],
+            "utbetalinger": [
+                {
+                    "arbeidsgiverOppdrag": {
+                        "simuleringsResultat": null,
+                        "erSimulert": false
+                    },
+                    "personOppdrag": {
+                        "erSimulert": false
+                    }
+                },
+                {
+                    "arbeidsgiverOppdrag": {
+                        "simuleringsResultat": "not null",
+                        "erSimulert": true
+                    },
+                    "personOppdrag": {
+                        "simuleringsResultat": "not null",
+                        "erSimulert": true
+                    }
+                }
+            ]
+        }
+    ],
+    "skjemaVersjon": 134
+}

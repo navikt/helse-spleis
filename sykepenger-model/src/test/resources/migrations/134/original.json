@@ -1,0 +1,35 @@
+{
+    "arbeidsgivere": [
+        {
+            "feriepengeutbetalinger": [
+                {
+                    "oppdrag": {
+                        "simuleringsResultat": null
+                    }
+                },
+                {
+                    "oppdrag": {
+                        "simuleringsResultat": "not null"
+                    }
+                }
+            ],
+            "utbetalinger": [
+                {
+                    "arbeidsgiverOppdrag": {
+                        "simuleringsResultat": null
+                    },
+                    "personOppdrag": {}
+                },
+                {
+                    "arbeidsgiverOppdrag": {
+                        "simuleringsResultat": "not null"
+                    },
+                    "personOppdrag": {
+                        "simuleringsResultat": "not null"
+                    }
+                }
+            ]
+        }
+    ],
+    "skjemaVersjon": 133
+}

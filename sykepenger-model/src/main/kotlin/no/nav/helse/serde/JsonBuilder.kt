@@ -323,6 +323,7 @@ internal class JsonBuilder : AbstractBuilder() {
             avstemmingsnøkkel: Long?,
             status: Oppdragstatus?,
             overføringstidspunkt: LocalDateTime?,
+            erSimulert: Boolean,
             simuleringsResultat: Simulering.SimuleringResultat?
         ) {
             pushState(OppdragState(oppdragMap))
@@ -466,6 +467,7 @@ internal class JsonBuilder : AbstractBuilder() {
             avstemmingsnøkkel: Long?,
             status: Oppdragstatus?,
             overføringstidspunkt: LocalDateTime?,
+            erSimulert: Boolean,
             simuleringsResultat: Simulering.SimuleringResultat?
         ) {
             oppdragMap["mottaker"] = mottaker
@@ -482,6 +484,7 @@ internal class JsonBuilder : AbstractBuilder() {
             oppdragMap["overføringstidspunkt"] = overføringstidspunkt
             oppdragMap["fom"] = førstedato
             oppdragMap["tom"] = sistedato
+            oppdragMap["erSimulert"] = erSimulert
             oppdragMap["simuleringsResultat"] = simuleringsResultat?.toMap()
 
             popState()

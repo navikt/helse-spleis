@@ -250,6 +250,7 @@ internal class Feriepengeberegner(
                 avstemmingsnøkkel: Long?,
                 status: Oppdragstatus?,
                 overføringstidspunkt: LocalDateTime?,
+                erSimulert: Boolean,
                 simuleringsResultat: Simulering.SimuleringResultat?
             ) {
                 if (utbetaltUtbetaling || annullertUtbetaling) {

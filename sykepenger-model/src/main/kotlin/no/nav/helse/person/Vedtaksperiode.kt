@@ -2081,9 +2081,8 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
             if (vedtaksperiode.utbetaling().valider(simulering).hasErrorsOrWorse())
                 return vedtaksperiode.tilstand(simulering, TilInfotrygd)
-            vedtaksperiode.dataForSimulering = simulering.simuleringResultat ?: return vedtaksperiode.tilstand(simulering, AvventerHistorikk) {
-                simulering.info("Mangler simulering når vi egentlig forventer det. Reberegner periode")
-            }
+            vedtaksperiode.dataForSimulering = simulering.simuleringResultat
+
             if (!vedtaksperiode.utbetaling().erKlarForGodkjenning()) return
 
             vedtaksperiode.tilstand(simulering, AvventerGodkjenning)

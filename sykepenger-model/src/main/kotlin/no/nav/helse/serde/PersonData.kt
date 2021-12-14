@@ -1102,6 +1102,7 @@ internal data class PersonData(
         private val avstemmingsnøkkel: Long?,
         private val status: Oppdragstatus?,
         private val overføringstidspunkt: LocalDateTime?,
+        private val erSimulert: Boolean,
         private val simuleringsResultat: ArbeidsgiverData.VedtaksperiodeData.DataForSimuleringData?
     ) {
         internal fun konverterTilOppdrag(): Oppdrag {
@@ -1119,6 +1120,7 @@ internal data class PersonData(
                     avstemmingsnøkkel,
                     status,
                     tidsstempel,
+                    erSimulert,
                     simuleringsResultat?.parseDataForSimulering()
                 )
         }

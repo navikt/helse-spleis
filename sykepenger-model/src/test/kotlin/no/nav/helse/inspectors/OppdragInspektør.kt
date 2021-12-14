@@ -45,6 +45,7 @@ internal class OppdragInspektør(oppdrag: Oppdrag) : UtbetalingVisitor {
         avstemmingsnøkkel: Long?,
         status: Oppdragstatus?,
         overføringstidspunkt: LocalDateTime?,
+        erSimulert: Boolean,
         simuleringsResultat: Simulering.SimuleringResultat?
     ) {
         this.fagsystemId = fagsystemId

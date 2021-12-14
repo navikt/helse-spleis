@@ -360,6 +360,7 @@ internal class OppdragBuilderTest {
             avstemmingsnøkkel: Long?,
             status: Oppdragstatus?,
             overføringstidspunkt: LocalDateTime?,
+            erSimulert: Boolean,
             simuleringsResultat: Simulering.SimuleringResultat?
         ) {
             assertEquals(ENDR, endringskode)

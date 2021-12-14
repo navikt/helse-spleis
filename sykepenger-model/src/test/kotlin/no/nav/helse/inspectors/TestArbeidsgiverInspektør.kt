@@ -250,6 +250,7 @@ internal class TestArbeidsgiverInspektør(
         avstemmingsnøkkel: Long?,
         status: Oppdragstatus?,
         overføringstidspunkt: LocalDateTime?,
+        erSimulert: Boolean,
         simuleringsResultat: Simulering.SimuleringResultat?
     ) {
         if (inFeriepengeutbetaling) feriepengeoppdrag.add(Feriepengeoppdrag(oppdrag.fagsystemId()))

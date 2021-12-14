@@ -29,6 +29,7 @@ internal class Oppdrag private constructor(
     private var avstemmingsnøkkel: Long? = null,
     private var status: Oppdragstatus? = null,
     private val tidsstempel: LocalDateTime,
+    private var erSimulert: Boolean = false,
     private var simuleringsResultat: Simulering.SimuleringResultat? = null
 ) : MutableList<Utbetalingslinje> by linjer, Aktivitetskontekst {
     internal companion object {
@@ -91,6 +92,7 @@ internal class Oppdrag private constructor(
             avstemmingsnøkkel,
             status,
             overføringstidspunkt,
+            erSimulert,
             simuleringsResultat
         )
         linjer.forEach { it.accept(visitor) }
@@ -110,6 +112,7 @@ internal class Oppdrag private constructor(
             avstemmingsnøkkel,
             status,
             overføringstidspunkt,
+            erSimulert,
             simuleringsResultat
         )
     }
@@ -396,10 +399,11 @@ internal class Oppdrag private constructor(
 
     internal fun håndter(simulering: Simulering) {
         if (!simulering.erRelevantFor(fagområde, fagsystemId)) return
+        this.erSimulert = true
         this.simuleringsResultat = simulering.simuleringResultat
     }
 
-    internal fun erKlarForGodkjenning() = !harUtbetalinger() || simuleringsResultat != null
+    internal fun erKlarForGodkjenning() = !harUtbetalinger() || erSimulert
 
     private interface Tilstand {
         fun håndterForskjell(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje, aktivitetslogg: IAktivitetslogg)

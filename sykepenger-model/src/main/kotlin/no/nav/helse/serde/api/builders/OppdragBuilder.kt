@@ -36,6 +36,7 @@ internal class OppdragBuilder : BuilderState() {
         avstemmingsnøkkel: Long?,
         status: Oppdragstatus?,
         overføringstidspunkt: LocalDateTime?,
+        erSimulert: Boolean,
         simuleringsResultat: Simulering.SimuleringResultat?
     ) {
         this.fagsystemId = fagsystemId
@@ -121,6 +122,7 @@ internal class OppdragBuilder : BuilderState() {
         avstemmingsnøkkel: Long?,
         status: Oppdragstatus?,
         overføringstidspunkt: LocalDateTime?,
+        erSimulert: Boolean,
         simuleringsResultat: Simulering.SimuleringResultat?
     ) {
         popState()
