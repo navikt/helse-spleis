@@ -2393,6 +2393,9 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            if (vedtaksperiode.utbetaling().kanIkkeForsøkesPåNy()) return vedtaksperiode.tilstand(påminnelse, AvventerHistorikk) {
+                påminnelse.info("Reberegner periode ettersom utbetaling er avvist og ikke kan forsøkes på nytt")
+            }
             sjekkUtbetalingstatus(vedtaksperiode, påminnelse)
         }
 

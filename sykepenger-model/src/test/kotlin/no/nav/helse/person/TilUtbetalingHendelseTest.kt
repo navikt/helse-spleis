@@ -6,6 +6,8 @@ import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
+import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.UTBETALING_FEILET
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.testhelpers.*
@@ -33,7 +35,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
     fun `utbetaling er godkjent av saksbehandler`() {
         håndterGodkjenning(SAKSBEHANDLER_IDENT, false)
         person.håndter(utbetaling(Oppdragstatus.AKSEPTERT))
-        assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
+        assertEquals(AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
 
         assertEquals(2, observatør.utbetaltEventer.first().oppdrag.size)
 
@@ -85,7 +87,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
     fun `utbetaling er godkjent automatisk`() {
         håndterGodkjenning("SYSTEM", true)
         person.håndter(utbetaling(Oppdragstatus.AKSEPTERT))
-        assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
+        assertEquals(AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
 
         assertEquals(2, observatør.utbetaltEventer.first().oppdrag.size)
 
@@ -134,10 +136,10 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
     }
 
     @Test
-    fun `utbetaling ikke godkjent`() {
+    fun `utbetaling avvist`() {
         håndterGodkjenning()
         person.håndter(utbetaling(Oppdragstatus.AVVIST))
-        assertEquals(TilstandType.UTBETALING_FEILET, inspektør.sisteTilstand(1.vedtaksperiode))
+        assertEquals(UTBETALING_FEILET, inspektør.sisteTilstand(1.vedtaksperiode))
         assertTrue(observatør.utbetaltEventer.isEmpty())
     }
 

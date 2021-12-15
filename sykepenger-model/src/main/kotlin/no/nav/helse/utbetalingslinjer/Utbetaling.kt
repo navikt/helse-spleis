@@ -114,6 +114,7 @@ internal class Utbetaling private constructor(
     internal fun erAvsluttet() = tilstand in listOf(GodkjentUtenUtbetaling, Utbetalt, Annullert)
     internal fun erAvvist() = tilstand in listOf(IkkeGodkjent)
     internal fun harFeilet() = tilstand == UtbetalingFeilet
+    internal fun kanIkkeForsøkesPåNy() = Oppdrag.kanIkkeForsøkesPåNy(arbeidsgiverOppdrag, personOppdrag)
     private fun erAnnullering() = type == Utbetalingtype.ANNULLERING
 
     // this kan revurdere other gitt at fagsystemId == other.fagsystemId,
@@ -419,7 +420,7 @@ internal class Utbetaling private constructor(
                 maksdato,
                 forbrukteSykedager,
                 gjenståendeSykedager,
-                forrige?.takeIf(Utbetaling::erAktiv)
+                forrige?.takeIf { it.erAktiv() || it.kanIkkeForsøkesPåNy() }
             )
         }
 
@@ -457,7 +458,7 @@ internal class Utbetaling private constructor(
             aktivitetslogg: IAktivitetslogg,
             forrige: Oppdrag?,
             fagområde: Fagområde
-        ): Oppdrag = OppdragBuilder(tidslinje, mottaker, fagområde, sisteDato, forrige?.fagsystemId()).build(forrige ?: sisteAktive, aktivitetslogg)
+        ): Oppdrag = OppdragBuilder(tidslinje, mottaker, fagområde, sisteDato, forrige?.fagsystemId()).build(forrige?.takeUnless { Oppdrag.kanIkkeForsøkesPåNy(it) } ?: sisteAktive, aktivitetslogg)
 
         private fun byggArbeidsgiveroppdrag(
             sisteAktive: Oppdrag?,
@@ -924,6 +925,11 @@ internal class Utbetaling private constructor(
     }
 
     internal object UtbetalingFeilet : Tilstand {
+        override fun forkast(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
+            hendelse.info("Forkaster feilet utbetaling")
+            utbetaling.tilstand(Forkastet, hendelse)
+        }
+
         override fun håndter(utbetaling: Utbetaling, påminnelse: Utbetalingpåminnelse) {
             påminnelse.info("Forsøker å sende utbetalingen på nytt")
             utbetaling.overfør(Overført, påminnelse)

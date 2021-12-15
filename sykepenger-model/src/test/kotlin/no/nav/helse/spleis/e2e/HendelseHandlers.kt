@@ -8,6 +8,7 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.testhelpers.*
+import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -393,6 +394,33 @@ internal fun AbstractEndToEndTest.håndterSimulering(
 ) {
     assertEtterspurt(Simulering::class, Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering, vedtaksperiodeIdInnhenter, orgnummer)
     simulering(vedtaksperiodeIdInnhenter, simuleringOK, orgnummer, simuleringsresultat).forEach { simulering -> simulering.håndter(Person::håndter) }
+}
+
+internal fun AbstractEndToEndTest.håndterSimulering(
+    vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
+    utbetalingId: UUID,
+    fagsystemId: String,
+    fagområde: Fagområde,
+    simuleringOK: Boolean = true,
+    orgnummer: String = AbstractPersonTest.ORGNUMMER,
+    simuleringsresultat: Simulering.SimuleringResultat? = standardSimuleringsresultat(orgnummer)
+) {
+    assertEtterspurt(Simulering::class, Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering, vedtaksperiodeIdInnhenter, orgnummer)
+    Simulering(
+        meldingsreferanseId = UUID.randomUUID(),
+        vedtaksperiodeId = vedtaksperiodeIdInnhenter(orgnummer).toString(),
+        aktørId = AbstractPersonTest.AKTØRID,
+        fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018,
+        orgnummer = orgnummer,
+        fagsystemId = fagsystemId,
+        fagområde = fagområde.toString(),
+        simuleringOK = simuleringOK,
+        melding = "",
+        utbetalingId = utbetalingId,
+        simuleringResultat = simuleringsresultat
+    ).apply {
+        hendelselogg = this
+    }.håndter(Person::håndter)
 }
 
 internal fun AbstractEndToEndTest.håndterUtbetalingshistorikk(
