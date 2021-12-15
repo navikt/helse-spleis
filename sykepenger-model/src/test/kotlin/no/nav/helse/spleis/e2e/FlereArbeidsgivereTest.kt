@@ -1952,4 +1952,15 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer=a1)
         assertTilstand(2.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer=a2)
     }
+
+    @ForventetFeil("https://trello.com/c/ooU4rAQx")
+    @Test
+    fun `Burde ikke håndtere sykmelding dersom vi har forkastede vedtaksperioder i andre arbeidsforhold`() {
+        håndterSykmelding(Sykmeldingsperiode(2.januar, 1.februar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+
+        assertTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD, orgnummer = a2)
+    }
 }
