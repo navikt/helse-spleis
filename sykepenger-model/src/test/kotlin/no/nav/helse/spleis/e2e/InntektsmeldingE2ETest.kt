@@ -1559,4 +1559,21 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
         assertEquals(17.januar til 31.mars, inspektør.utbetalinger.last().periode)
     }
+
+    @ForventetFeil("https://trello.com/c/FXcJ4Fhc")
+    @Test
+    fun `vedtaksperiode i AVSLUTTET_UTEN_UTBETALING burde utvides ved replay av inntektsmelding`() {
+        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
+        håndterSykmelding(Sykmeldingsperiode(4.januar, 10.januar, 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(4.januar, 10.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(11.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(11.januar, 31.januar, 100.prosent))
+        håndterInntektsmeldingReplay(inntektsmeldingId, 2.vedtaksperiode(ORGNUMMER))
+
+        assertEquals(1.januar til 10.januar, inspektør.vedtaksperioder(1.vedtaksperiode).periode())
+
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        assertNoErrors(2.vedtaksperiode, orgnummer = ORGNUMMER)
+    }
 }
