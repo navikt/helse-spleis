@@ -5,11 +5,14 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
+import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
+import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.testhelpers.april
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -37,9 +40,6 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 15.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 15.februar, 100.prosent), Søknad.Søknadsperiode.Ferie(1.februar, 15.februar))
         håndterInntektsmelding(listOf(1.februar til 15.februar), førsteFraværsdag = 1.februar)
-        håndterYtelser()
-        håndterVilkårsgrunnlag()
-        håndterYtelser()
 
         håndterSykmelding(Sykmeldingsperiode(16.februar, 25.februar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(16.februar, 20.februar, 80.prosent))
@@ -53,9 +53,11 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
     @Test
     fun `søknad som er lange nok etter utbetalingsperioden skal ikke til ny kø`() {
         nyttVedtak(1.januar, 31.januar)
-
         håndterSykmelding(Sykmeldingsperiode(17.februar, 25.februar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(17.februar, 20.februar, 80.prosent))
+        håndterUtbetalingshistorikk(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.februar, 3.februar, 100.prosent, 2000.daglig), inntektshistorikk = listOf(
+            Inntektsopplysning(ORGNUMMER.toString(), 1.februar, 2000.daglig, true)
+        ))
         val søknadHendelseId = håndterSøknad(Sykdom(17.februar, 20.februar, 80.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), 17.februar)
 

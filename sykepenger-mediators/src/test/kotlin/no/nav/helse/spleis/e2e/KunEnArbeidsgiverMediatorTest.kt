@@ -9,13 +9,12 @@ import no.nav.helse.Toggle.Companion.enable
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
-import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spleis.MessageMediator
 import no.nav.helse.spleis.TestHendelseMediator
 import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
-import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.januar
 import no.nav.inntektsmeldingkontrakt.Naturalytelse
 import no.nav.inntektsmeldingkontrakt.OpphoerAvNaturalytelse
 import no.nav.inntektsmeldingkontrakt.Periode
@@ -28,7 +27,6 @@ import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.YearMonth
 import java.util.*
 
 internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
@@ -421,20 +419,14 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 16.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 16.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
-        sendYtelser(0)
-        sendVilkårsgrunnlag(0)
-        sendYtelserUtenSykepengehistorikk(0)
         assertTilstander(
             0,
             "MOTTATT_SYKMELDING_FERDIG_GAP",
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
-            "AVVENTER_HISTORIKK",
-            "AVVENTER_VILKÅRSPRØVING",
-            "AVVENTER_HISTORIKK",
             "AVSLUTTET_UTEN_UTBETALING"
         )
-        assertUtbetalingTilstander(0, "IKKE_UTBETALT", "GODKJENT_UTEN_UTBETALING")
 
+        assertEquals(0, testRapid.inspektør.meldinger("utbetaling_endret").size)
         assertEquals(1, testRapid.inspektør.meldinger("vedtak_fattet").size)
         // Sjekker på localdate fordi modellen slenger på LocalDateTime.now() ved automatisk godkjenning, og det er vanskelig å teste på.
         assertEquals(LocalDate.now(), testRapid.inspektør.siste("vedtak_fattet")["vedtakFattetTidspunkt"].asLocalDateTime().toLocalDate())

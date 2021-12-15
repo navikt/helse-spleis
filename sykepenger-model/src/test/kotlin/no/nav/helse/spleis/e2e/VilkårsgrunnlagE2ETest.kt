@@ -60,8 +60,9 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `Forkaster etterfølgende perioder dersom vilkårsprøving feilet pga avvik i inntekt på første periode`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar(2021), 1.januar(2021), 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar(2021), 1.januar(2021), 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar(2021), 17.januar(2021), 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar(2021), 17.januar(2021), 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(18.januar(2021), 20.januar(2021), 100.prosent))
 
         val arbeidsgiverperioder = listOf(
             1.januar(2021) til 16.januar(2021)
@@ -80,13 +81,6 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             }
         ))
 
-        håndterSykmelding(Sykmeldingsperiode(2.januar(2021), 20.januar(2021), 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(2.januar(2021), 20.januar(2021), 100.prosent))
-
-        håndterInntektsmeldingReplay(inntektsmeldingId, 2.vedtaksperiode(ORGNUMMER))
-
-        håndterYtelser(2.vedtaksperiode)
-
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
             TilstandType.START,
@@ -100,17 +94,15 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         assertForkastetPeriodeTilstander(
             2.vedtaksperiode,
             TilstandType.START,
-            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
-            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            TilstandType.AVVENTER_HISTORIKK,
+            TilstandType.MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             TilstandType.TIL_INFOTRYGD
         )
     }
 
     @Test
     fun `Forkaster ikke etterfølgende perioder dersom vilkårsprøving feiler pga minimum inntekt på første periode`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar(2021), 1.januar(2021), 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar(2021), 1.januar(2021), 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar(2021), 17.januar(2021), 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar(2021), 17.januar(2021), 100.prosent))
 
         val arbeidsgiverperioder = listOf(
             1.januar(2021) til 16.januar(2021)
@@ -133,8 +125,8 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             }
         ))
 
-        håndterSykmelding(Sykmeldingsperiode(2.januar(2021), 20.januar(2021), 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(2.januar(2021), 20.januar(2021), 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(18.januar(2021), 20.januar(2021), 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(18.januar(2021), 20.januar(2021), 100.prosent))
 
         assertTilstander(
             1.vedtaksperiode,
@@ -154,11 +146,10 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         )
     }
 
-
     @Test
     fun `25 % avvik i inntekt lager error`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar(2021), 1.januar(2021), 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar(2021), 1.januar(2021), 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar(2021), 17.januar(2021), 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar(2021), 17.januar(2021), 100.prosent))
         val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021)), førsteFraværsdag = 1.januar(2021))
 
         håndterYtelser(1.vedtaksperiode)
@@ -170,13 +161,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
                 }
             }
         ))
-        håndterSykmelding(Sykmeldingsperiode(2.januar(2021), 20.januar(2021), 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(2.januar(2021), 20.januar(2021), 100.prosent))
 
-        håndterInntektsmeldingReplay(inntektsmeldingId, 2.vedtaksperiode(ORGNUMMER))
-
-        håndterYtelser(2.vedtaksperiode)
-
-        assertErrorTekst(inspektør, "Har mer enn 25 % avvik", "Har for mye avvik i inntekt")
+        assertErrorTekst(inspektør, "Har mer enn 25 % avvik")
     }
 }

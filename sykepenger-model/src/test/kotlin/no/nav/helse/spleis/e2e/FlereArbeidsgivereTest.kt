@@ -81,9 +81,8 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             refusjon = Refusjon(30000.månedlig, null, emptyList()),
             orgnummer = a1
         )
-        person.håndter(ytelser(1.vedtaksperiode, orgnummer = a1, inntektshistorikk = emptyList()))
-        person.håndter(vilkårsgrunnlag(
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1, inntektshistorikk = emptyList())
+        håndterVilkårsgrunnlag(1.vedtaksperiode,
             orgnummer = a1,
             inntektsvurdering = Inntektsvurdering(
                 inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -98,8 +97,8 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
                 }
             ),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList())
-        ))
-
+        )
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, TIL_INFOTRYGD)
         assertEquals(282500.årlig, person.sammenligningsgrunnlag(2.februar))
     }
 

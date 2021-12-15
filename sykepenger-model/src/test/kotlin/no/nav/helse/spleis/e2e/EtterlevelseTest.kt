@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test
 import java.time.DayOfWeek.SATURDAY
 import java.time.DayOfWeek.SUNDAY
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 
 internal class EtterlevelseTest : AbstractEndToEndTest() {
@@ -193,6 +192,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         )
     }
 
+    @ForventetFeil("Perioden avsluttes automatisk -- usikker på hva vi ønsker av etterlevelse da")
     @Test
     fun `§8-3 ledd 1 punktum 2 - er alltid 70 uten NAVdager`() {
         val fnr = "01014835841".somFødselsnummer()
@@ -628,11 +628,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
-        håndterYtelser(1.vedtaksperiode)
-        håndterVilkårsgrunnlag()
-        håndterYtelser()
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-
         assertIkkeVurdert(paragraf = PARAGRAF_8_17, ledd = 1.ledd)
     }
 
@@ -829,20 +825,18 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 1.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 1.januar, 100.prosent))
         val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterYtelser()
-        håndterVilkårsgrunnlag()
-        håndterPåminnelse(1.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK, LocalDateTime.MIN)
 
         håndterSykmelding(Sykmeldingsperiode(2.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmeldingReplay(inntektsmeldingId, 2.vedtaksperiode(ORGNUMMER))
+        håndterSøknad(Sykdom(2.januar, 31.januar, 100.prosent))
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt(2.vedtaksperiode)
 
-        assertVurdert(PARAGRAF_8_30, LEDD_2, vedtaksperiodeId = 1.vedtaksperiode)
-        assertIkkeVurdert(PARAGRAF_8_30, LEDD_2, vedtaksperiodeId = 2.vedtaksperiode)
+        assertIkkeVurdert(PARAGRAF_8_30, LEDD_2, vedtaksperiodeId = 1.vedtaksperiode)
+        assertVurdert(PARAGRAF_8_30, LEDD_2, vedtaksperiodeId = 2.vedtaksperiode)
     }
 
     @Test

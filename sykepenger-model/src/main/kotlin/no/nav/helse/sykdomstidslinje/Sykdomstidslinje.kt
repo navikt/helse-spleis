@@ -174,8 +174,12 @@ internal class Sykdomstidslinje private constructor(
     internal fun førsteSykedagEtter(dato: LocalDate) =
         periode?.firstOrNull { it >= dato && erEnSykedag(this[it]) }
 
-    internal fun sisteSykedagEtter(dato: LocalDate) =
+    private fun sisteSykedagEtter(dato: LocalDate) =
         periode?.lastOrNull { it >= dato && erEnSykedag(this[it]) }
+
+    internal fun sisteIkkeOppholdsdag(dato: LocalDate): LocalDate? {
+        return periode?.lastOrNull { it >= dato && !erOppholdsdag(it) }
+    }
 
     internal fun harDagUtenSøknad(periode: Periode) = subset(periode).any { it.kommerFra(Sykmelding::class) }
 

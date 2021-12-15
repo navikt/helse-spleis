@@ -355,8 +355,8 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
     @Test
     fun `når vilkårsgrunnlag mangler sjekk på minimum inntekt gjøres denne sjekken`() {
         val inntekt = 93634.årlig / 2 - 1.årlig
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
-        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 16.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar, 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 17.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(17.januar, 17.januar))
         håndterInntektsmeldingMedValidering(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
@@ -398,8 +398,8 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, AVSLUTTET_UTEN_UTBETALING
         )
-        håndterSykmelding(Sykmeldingsperiode(17.januar, 17.februar, 100.prosent))
-        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(17.januar, 17.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(18.januar, 18.februar, 100.prosent))
+        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(18.januar, 18.februar, 100.prosent))
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
@@ -409,7 +409,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         inspektør.utbetalingUtbetalingstidslinje(1).inspektør.also {
             assertEquals(0, it.navDagTeller)
             assertEquals(16, it.arbeidsgiverperiodeDagTeller)
-            assertEquals(23, it.avvistDagTeller)
+            assertEquals(22, it.avvistDagTeller)
         }
         assertTilstander(
             2.vedtaksperiode,
@@ -426,8 +426,8 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
     @Test
     fun `når vilkårsgrunnlag mangler sjekk på minimum inntekt gjøres denne sjekken - inntekt er lik minimum inntekt`() {
         val inntekt = 93634.årlig / 2
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
-        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 16.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar, 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 17.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(17.januar, 17.januar))
         håndterInntektsmeldingMedValidering(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
@@ -463,8 +463,8 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         val vilkårsgrunnlagHistorikk = PersonInspektør(person).vilkårsgrunnlagHistorikk
         vilkårsgrunnlagHistorikk.lagre(1.januar, vilkårsgrunnlagElement)
 
-        håndterSykmelding(Sykmeldingsperiode(17.januar, 17.februar, 100.prosent))
-        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(17.januar, 17.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(18.januar, 18.februar, 100.prosent))
+        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(18.januar, 18.februar, 100.prosent))
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)

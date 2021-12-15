@@ -601,15 +601,6 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(6.juni(2020), 7.juni(2020), 100.prosent))
             håndterUtbetalingshistorikk(1.vedtaksperiode)
             håndterInntektsmelding(listOf(6.juni(2020) til 7.juni(2020)))
-            håndterYtelser(1.vedtaksperiode)
-            håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-                inntekter = inntektperioderForSammenligningsgrunnlag {
-                    1.juni(2019) til 1.mai(2020) inntekter {
-                        ORGNUMMER inntekt INNTEKT
-                    }
-                }
-            ))
-            håndterYtelser(1.vedtaksperiode)
 
             håndterUtbetalingshistorikkForFeriepenger(
                 opptjeningsår = Year.of(2020)

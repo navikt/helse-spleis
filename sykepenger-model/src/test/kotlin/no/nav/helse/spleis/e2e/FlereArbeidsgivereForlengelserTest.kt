@@ -653,9 +653,7 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
         assertTilstand(a3, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
         håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a3)
         håndterInntektsmelding(listOf(forlengelseperiode.start til forlengelseperiode.endInclusive), forlengelseperiode.start, orgnummer = a3)
-        assertTilstand(a3, AVVENTER_HISTORIKK)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a3)
-        assertTilstand(a3, TIL_INFOTRYGD)
+        assertTilstand(a3, AVSLUTTET_UTEN_UTBETALING)
 
         //Her starter forlengelsen av forlengelsen
         val forlengelsesforlengelseperiode = 11.februar(2021) til 20.februar(2021)
@@ -673,7 +671,7 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
         )
         assertTilstand(a1, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, 3)
         assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, 3)
-        assertTilstand(a3, MOTTATT_SYKMELDING_FERDIG_GAP, 2)
+        assertTilstand(a3, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, 2)
 
         håndterSøknad(
             Sykdom(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent),

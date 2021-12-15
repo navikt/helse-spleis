@@ -125,8 +125,9 @@ internal fun AbstractEndToEndTest.assertTilstand(
     tilstand: TilstandType,
     orgnummer: Organisasjonsnummer = AbstractPersonTest.ORGNUMMER,
 ) {
-    Assertions.assertEquals(tilstand, inspektør(orgnummer).sisteTilstand(vedtaksperiodeIdInnhenter)) {
-        inspektør.personLogg.toString()
+    val sisteTilstand = inspektør(orgnummer).sisteTilstand(vedtaksperiodeIdInnhenter)
+    Assertions.assertEquals(tilstand, sisteTilstand) {
+        "Forventet at perioden skal stå i tilstand $tilstand, mens den står faktisk i $sisteTilstand\n${inspektør.personLogg}"
     }
 }
 

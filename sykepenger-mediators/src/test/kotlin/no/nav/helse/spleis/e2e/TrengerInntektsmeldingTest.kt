@@ -16,29 +16,27 @@ internal class TrengerInntektsmeldingTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 21.juli(2021), tom = 4.august(2021), sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 21.juli(2021), tom = 4.august(2021), sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 21.juli(2021), tom =  5.august(2021))), førsteFraværsdag = 21.juli(2021))
-        sendYtelser(0)
-        sendVilkårsgrunnlag(0, 1.rangeTo(6).map { YearMonth.of(2021, it) to INNTEKT * 2 })
-        sendYtelserUtenSykepengehistorikk(0)
         assertTilstander(
             0,
             "MOTTATT_SYKMELDING_FERDIG_GAP",
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
-            "AVVENTER_HISTORIKK",
-            "AVVENTER_VILKÅRSPRØVING",
-            "AVVENTER_HISTORIKK",
             "AVSLUTTET_UTEN_UTBETALING"
         )
 
         sendNySøknad(SoknadsperiodeDTO(fom = 5.august(2021), tom = 3.september(2021), sykmeldingsgrad = 100))
         sendSøknad(1, listOf(SoknadsperiodeDTO(fom = 5.august(2021), tom = 3.september(2021), sykmeldingsgrad = 100)))
         sendYtelserUtenSykepengehistorikk(1)
+        sendVilkårsgrunnlag(1, 1.rangeTo(6).map { YearMonth.of(2021, it) to INNTEKT * 2 })
+        sendYtelserUtenSykepengehistorikk(1)
         sendSimulering(1, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenning(1)
         sendUtbetaling()
-        assertUtbetalingTilstander(1, "IKKE_UTBETALT", "GODKJENT", "SENDT", "OVERFØRT", "UTBETALT")
+        assertUtbetalingTilstander(0, "IKKE_UTBETALT", "GODKJENT", "SENDT", "OVERFØRT", "UTBETALT")
         assertTilstander(
             1,
             "MOTTATT_SYKMELDING_FERDIG_FORLENGELSE",
+            "AVVENTER_HISTORIKK",
+            "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
             "AVVENTER_SIMULERING",
             "AVVENTER_GODKJENNING",

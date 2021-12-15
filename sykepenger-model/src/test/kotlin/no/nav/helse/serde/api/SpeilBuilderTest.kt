@@ -355,20 +355,12 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 9.januar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 9.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterYtelser(1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
 
         val personDTO = speilApi()
-
-        assertEquals(
-            TilstandstypeDTO.IngenUtbetaling,
-            (personDTO.arbeidsgivere.first().vedtaksperioder.first()).tilstand
-        )
-
-        val vedtaksperiode = personDTO.arbeidsgivere.first().vedtaksperioder.first() as VedtaksperiodeDTO
-        assertTrue(vedtaksperiode.fullstendig)
-        assertEquals(9, vedtaksperiode.utbetalingstidslinje.size)
+        assertEquals(TilstandstypeDTO.IngenUtbetaling, (personDTO.arbeidsgivere.first().vedtaksperioder.first()).tilstand)
+        val vedtaksperiode = personDTO.arbeidsgivere.first().vedtaksperioder.first()
+        assertFalse(vedtaksperiode.fullstendig)
+        assertEquals(0, vedtaksperiode.utbetalingstidslinje.size)
     }
 
     @Test
@@ -604,15 +596,11 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     fun `hvis første vedtaksperiode er ferdigbehandlet arbeidsgiverperiode vises den som ferdigbehandlet`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 9.januar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 9.januar, 100.prosent))
-
         håndterSykmelding(Sykmeldingsperiode(10.januar, 25.januar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(10.januar, 25.januar, 100.prosent))
-
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterYtelser(1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -623,12 +611,12 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         val vedtaksperiodeDTO = personDTO.arbeidsgivere[0].vedtaksperioder[1] as VedtaksperiodeDTO
         assertNotNull(vedtaksperiodeDTO.dataForVilkårsvurdering)
         assertNotNull(vedtaksperiodeDTO.vilkår.opptjening)
-        assertTrue(personDTO.arbeidsgivere[0].vedtaksperioder[0].fullstendig)
+        assertFalse(personDTO.arbeidsgivere[0].vedtaksperioder[0].fullstendig)
         assertTrue(personDTO.arbeidsgivere[0].vedtaksperioder[1].fullstendig)
     }
 
     @Test
-    fun `perioder uten utbetaling får utbetalingstidslinje`() {
+    fun `perioder uten utbetaling får ikke utbetalingstidslinje`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 9.januar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 9.januar, 100.prosent))
 
@@ -636,19 +624,16 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(10.januar, 25.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
 
-        håndterYtelser(1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt(2.vedtaksperiode)
 
         val personDTO = speilApi()
-        assertEquals(9, personDTO.arbeidsgivere.first().vedtaksperioder.first().utbetalingstidslinje.size)
+        assertEquals(0, personDTO.arbeidsgivere.first().vedtaksperioder.first().utbetalingstidslinje.size)
     }
-
 
     @Test
     fun `null gjenstående dager ved oppnådd maksdato`() {
@@ -821,11 +806,8 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(10.januar, 25.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
 
-        håndterYtelser(1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -846,17 +828,11 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(10.januar, 14.januar, 100.prosent), Søknad.Søknadsperiode.Utlandsopphold(11.januar, 12.januar)) // Warning
         håndterInntektsmelding(listOf(1.januar til 16.januar))
 
-        håndterYtelser(1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-
-        håndterYtelser(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-
         håndterSykmelding(Sykmeldingsperiode(15.januar, 25.januar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(15.januar, 25.januar, 100.prosent))
 
+        håndterYtelser(3.vedtaksperiode)
+        håndterVilkårsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
