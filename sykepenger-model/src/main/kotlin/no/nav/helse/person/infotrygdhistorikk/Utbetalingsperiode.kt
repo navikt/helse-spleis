@@ -36,12 +36,11 @@ abstract class Utbetalingsperiode(
         utbetalingstidslinje.addNAVdag(dato, økonomi.inntekt(inntekt, skjæringstidspunkt = dato).arbeidsgiverRefusjon(refusjon))
     }
 
-    override fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode, nødnummer: Nødnummer) {
-        validerOverlapp(aktivitetslogg, periode, nødnummer)
+    override fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode) {
+        validerOverlapp(aktivitetslogg, periode)
     }
 
-    override fun validerOverlapp(aktivitetslogg: IAktivitetslogg, periode: Periode, nødnummer: Nødnummer) {
-        nødnummer.valider(aktivitetslogg, orgnr)
+    override fun validerOverlapp(aktivitetslogg: IAktivitetslogg, periode: Periode) {
         if (!overlapperMed(periode)) return
         aktivitetslogg.info("Utbetaling i Infotrygd %s til %s overlapper med vedtaksperioden", start, endInclusive)
         aktivitetslogg.error("Utbetaling i Infotrygd overlapper med vedtaksperioden")

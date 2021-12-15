@@ -150,7 +150,7 @@ internal class InfotrygdhistorikkElement private constructor(
 
     private fun valider(aktivitetslogg: IAktivitetslogg, perioder: List<Infotrygdperiode>, periode: Periode, skjæringstidspunkt: LocalDate?): Boolean {
         aktivitetslogg.info("Sjekker utbetalte perioder")
-        perioder.filterIsInstance<Utbetalingsperiode>().forEach { it.valider(aktivitetslogg, periode, nødnummer) }
+        perioder.filterIsInstance<Utbetalingsperiode>().forEach { it.valider(aktivitetslogg, periode) }
 
         aktivitetslogg.info("Sjekker inntektsopplysninger")
         Inntektsopplysning.valider(inntekter, aktivitetslogg, periode, skjæringstidspunkt, nødnummer)
