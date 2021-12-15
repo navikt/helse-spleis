@@ -148,12 +148,13 @@ internal fun AbstractEndToEndTest.nyttVedtak(
     tom: LocalDate,
     grad: Prosentdel = 100.prosent,
     førsteFraværsdag: LocalDate = fom,
+    fnr: String = AbstractPersonTest.UNG_PERSON_FNR_2018,
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(AbstractEndToEndTest.INNTEKT, null, emptyList()),
     inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, fom) }
 ) {
-    val id = tilGodkjent(fom, tom, grad, førsteFraværsdag, orgnummer = orgnummer, refusjon = refusjon, inntekterBlock = inntekterBlock)
-    håndterUtbetalt({ id }, status = Oppdragstatus.AKSEPTERT, orgnummer = orgnummer)
+    val id = tilGodkjent(fom, tom, grad, førsteFraværsdag, fnr = fnr, orgnummer = orgnummer, refusjon = refusjon, inntekterBlock = inntekterBlock)
+    håndterUtbetalt({ id }, status = Oppdragstatus.AKSEPTERT, fnr = fnr, orgnummer = orgnummer)
 }
 
 internal fun AbstractEndToEndTest.tilGodkjent(
@@ -161,12 +162,13 @@ internal fun AbstractEndToEndTest.tilGodkjent(
     tom: LocalDate,
     grad: Prosentdel,
     førsteFraværsdag: LocalDate,
+    fnr: String = AbstractPersonTest.UNG_PERSON_FNR_2018,
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(AbstractEndToEndTest.INNTEKT, null, emptyList()),
     inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, fom) }
 ): UUID {
-    val id = tilGodkjenning(fom, tom, grad, førsteFraværsdag, orgnummer = orgnummer, refusjon = refusjon, inntekterBlock = inntekterBlock)
-    håndterUtbetalingsgodkjenning({ id }, true, orgnummer = orgnummer)
+    val id = tilGodkjenning(fom, tom, grad, førsteFraværsdag, fnr = fnr, orgnummer = orgnummer, refusjon = refusjon, inntekterBlock = inntekterBlock)
+    håndterUtbetalingsgodkjenning({ id }, true, fnr = fnr, orgnummer = orgnummer)
     return id
 }
 
@@ -175,12 +177,13 @@ internal fun AbstractEndToEndTest.tilGodkjenning(
     tom: LocalDate,
     grad: Prosentdel,
     førsteFraværsdag: LocalDate,
+    fnr: String = AbstractPersonTest.UNG_PERSON_FNR_2018,
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(AbstractEndToEndTest.INNTEKT, null, emptyList()),
     inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, fom) }
 ): UUID {
-    val id = tilYtelser(fom, tom, grad, førsteFraværsdag, orgnummer = orgnummer, refusjon = refusjon, inntekterBlock = inntekterBlock)
-    håndterSimulering({ id }, orgnummer = orgnummer)
+    val id = tilYtelser(fom, tom, grad, førsteFraværsdag, fnr = fnr, orgnummer = orgnummer, refusjon = refusjon, inntekterBlock = inntekterBlock)
+    håndterSimulering({ id }, fnr = fnr, orgnummer = orgnummer)
     return id
 }
 
@@ -189,6 +192,7 @@ internal fun AbstractEndToEndTest.tilYtelser(
     tom: LocalDate,
     grad: Prosentdel,
     førsteFraværsdag: LocalDate,
+    fnr: String = AbstractPersonTest.UNG_PERSON_FNR_2018,
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(AbstractEndToEndTest.INNTEKT, null, emptyList()),
     inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, fom) },
@@ -200,49 +204,64 @@ internal fun AbstractEndToEndTest.tilYtelser(
         }
     )
 ): UUID {
-    håndterSykmelding(Sykmeldingsperiode(fom, tom, grad), orgnummer = orgnummer)
+    håndterSykmelding(Sykmeldingsperiode(fom, tom, grad), fnr = fnr, orgnummer = orgnummer)
     val id: IdInnhenter = { observatør.sisteVedtaksperiode() }
     håndterInntektsmeldingMedValidering(
         id,
         listOf(Periode(fom, fom.plusDays(15))),
         førsteFraværsdag = førsteFraværsdag,
+        fnr = fnr,
         orgnummer = orgnummer,
         refusjon = refusjon
     )
-    håndterSøknadMedValidering(id, Søknad.Søknadsperiode.Sykdom(fom, tom, grad), orgnummer = orgnummer)
-    håndterYtelser(id, orgnummer = orgnummer)
+    håndterSøknadMedValidering(id, Søknad.Søknadsperiode.Sykdom(fom, tom, grad), fnr = fnr, orgnummer = orgnummer)
+    håndterYtelser(id, fnr = fnr, orgnummer = orgnummer)
     håndterVilkårsgrunnlag(
         id,
         AbstractEndToEndTest.INNTEKT,
+        fnr = fnr,
         orgnummer = orgnummer,
         inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag(inntekterBlock)
         ),
         inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag
     )
-    håndterYtelser(id, orgnummer = orgnummer)
+    håndterYtelser(id, fnr = fnr, orgnummer = orgnummer)
     return id(orgnummer)
 }
 
-internal fun AbstractEndToEndTest.forlengTilGodkjentVedtak(fom: LocalDate, tom: LocalDate, grad: Prosentdel = 100.prosent, orgnummer: String = AbstractPersonTest.ORGNUMMER, skalSimuleres: Boolean = true) {
-    håndterSykmelding(Sykmeldingsperiode(fom, tom, grad), orgnummer = orgnummer)
+internal fun AbstractEndToEndTest.forlengTilGodkjentVedtak(
+    fom: LocalDate,
+    tom: LocalDate,
+    grad: Prosentdel = 100.prosent,
+    fnr: String = AbstractPersonTest.UNG_PERSON_FNR_2018,
+    orgnummer: String = AbstractPersonTest.ORGNUMMER,
+    skalSimuleres: Boolean = true
+) {
+    håndterSykmelding(Sykmeldingsperiode(fom, tom, grad), fnr = fnr, orgnummer = orgnummer)
     val id: IdInnhenter = { observatør.sisteVedtaksperiode() }
-    håndterSøknadMedValidering(id, Søknad.Søknadsperiode.Sykdom(fom, tom, grad), orgnummer = orgnummer)
-    håndterYtelser(id, orgnummer = orgnummer)
-    if (skalSimuleres) håndterSimulering(id, orgnummer = orgnummer)
-    håndterUtbetalingsgodkjenning(id, true, orgnummer = orgnummer)
+    håndterSøknadMedValidering(id, Søknad.Søknadsperiode.Sykdom(fom, tom, grad), fnr = fnr, orgnummer = orgnummer)
+    håndterYtelser(id, fnr = fnr, orgnummer = orgnummer)
+    if (skalSimuleres) håndterSimulering(id, fnr = fnr, orgnummer = orgnummer)
+    håndterUtbetalingsgodkjenning(id, true, fnr = fnr, orgnummer = orgnummer)
 }
 
 internal fun AbstractEndToEndTest.forlengVedtak(fom: LocalDate, tom: LocalDate, grad: Prosentdel = 100.prosent, orgnummer: String = AbstractPersonTest.ORGNUMMER, skalSimuleres: Boolean = true) {
     forlengTilGodkjentVedtak(fom, tom, grad, orgnummer, skalSimuleres)
     val id: IdInnhenter = { observatør.sisteVedtaksperiode() }
-    håndterUtbetalt(id, status = Oppdragstatus.AKSEPTERT, orgnummer = orgnummer)
+    håndterUtbetalt(id, status = Oppdragstatus.AKSEPTERT, fnr = fnr, orgnummer = orgnummer)
 }
 
-internal fun AbstractEndToEndTest.forlengPeriode(fom: LocalDate, tom: LocalDate, grad: Prosentdel = 100.prosent, orgnummer: String = AbstractPersonTest.ORGNUMMER) {
-    håndterSykmelding(Sykmeldingsperiode(fom, tom, grad), orgnummer = orgnummer)
+internal fun AbstractEndToEndTest.forlengPeriode(
+    fom: LocalDate,
+    tom: LocalDate,
+    grad: Prosentdel = 100.prosent,
+    fnr: String = AbstractPersonTest.UNG_PERSON_FNR_2018,
+    orgnummer: String = AbstractPersonTest.ORGNUMMER
+) {
+    håndterSykmelding(Sykmeldingsperiode(fom, tom, grad), fnr = fnr, orgnummer = orgnummer)
     val id: IdInnhenter = { observatør.sisteVedtaksperiode() }
-    håndterSøknadMedValidering(id, Søknad.Søknadsperiode.Sykdom(fom, tom, grad), orgnummer = orgnummer)
+    håndterSøknadMedValidering(id, Søknad.Søknadsperiode.Sykdom(fom, tom, grad), fnr = fnr, orgnummer = orgnummer)
 }
 
 internal fun AbstractEndToEndTest.håndterSøknadMedValidering(
@@ -389,11 +408,12 @@ internal fun AbstractEndToEndTest.håndterVilkårsgrunnlag(
 internal fun AbstractEndToEndTest.håndterSimulering(
     vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
     simuleringOK: Boolean = true,
+    fnr: String = AbstractPersonTest.UNG_PERSON_FNR_2018,
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     simuleringsresultat: Simulering.SimuleringResultat? = standardSimuleringsresultat(orgnummer)
 ) {
     assertEtterspurt(Simulering::class, Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering, vedtaksperiodeIdInnhenter, orgnummer)
-    simulering(vedtaksperiodeIdInnhenter, simuleringOK, orgnummer, simuleringsresultat).forEach { simulering -> simulering.håndter(Person::håndter) }
+    simulering(vedtaksperiodeIdInnhenter, simuleringOK, fnr, orgnummer, simuleringsresultat).forEach { simulering -> simulering.håndter(Person::håndter) }
 }
 
 internal fun AbstractEndToEndTest.håndterSimulering(
@@ -529,6 +549,7 @@ internal fun AbstractEndToEndTest.håndterPåminnelse(
 internal fun AbstractEndToEndTest.håndterUtbetalingsgodkjenning(
     vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
     utbetalingGodkjent: Boolean = true,
+    fnr: String = AbstractPersonTest.UNG_PERSON_FNR_2018,
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     automatiskBehandling: Boolean = false,
     utbetalingId: UUID = UUID.fromString(
@@ -537,13 +558,14 @@ internal fun AbstractEndToEndTest.håndterUtbetalingsgodkjenning(
     ),
 ) {
     assertEtterspurt(Utbetalingsgodkjenning::class, Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning, vedtaksperiodeIdInnhenter, orgnummer)
-    utbetalingsgodkjenning(vedtaksperiodeIdInnhenter, utbetalingGodkjent, orgnummer, automatiskBehandling, utbetalingId).håndter(Person::håndter)
+    utbetalingsgodkjenning(vedtaksperiodeIdInnhenter, utbetalingGodkjent, fnr, orgnummer, automatiskBehandling, utbetalingId).håndter(Person::håndter)
 }
 
 internal fun AbstractEndToEndTest.håndterUtbetalt(
     vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
     status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
     sendOverførtKvittering: Boolean = true,
+    fnr: String = AbstractPersonTest.UNG_PERSON_FNR_2018,
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     fagsystemId: String = inspektør(orgnummer).fagsystemId(vedtaksperiodeIdInnhenter),
     meldingsreferanseId: UUID = UUID.randomUUID()
@@ -552,7 +574,7 @@ internal fun AbstractEndToEndTest.håndterUtbetalt(
         UtbetalingOverført(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = AbstractPersonTest.AKTØRID,
-            fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018,
+            fødselsnummer = fnr,
             orgnummer = orgnummer,
             fagsystemId = fagsystemId,
             utbetalingId = inspektør.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling).kontekst()["utbetalingId"]
@@ -564,6 +586,7 @@ internal fun AbstractEndToEndTest.håndterUtbetalt(
     return utbetaling(
         fagsystemId = fagsystemId,
         status = status,
+        fnr = fnr,
         orgnummer = orgnummer,
         meldingsreferanseId = meldingsreferanseId
     ).håndter(Person::håndter)

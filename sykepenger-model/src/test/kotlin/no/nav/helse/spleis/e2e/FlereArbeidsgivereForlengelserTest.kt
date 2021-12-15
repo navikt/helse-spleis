@@ -49,11 +49,11 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
         ))
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a1)
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a2)
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
 
         //Forlengelsen starter her
@@ -87,7 +87,7 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
         assertTilstand(a1, AVVENTER_GODKJENNING, 2)
         assertTilstand(a2, AVVENTER_ARBEIDSGIVERE, 2)
 
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true, a1)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true, orgnummer = a1)
         assertTilstand(a1, TIL_UTBETALING, 2)
         assertTilstand(a2, AVVENTER_ARBEIDSGIVERE, 2)
         håndterUtbetalt(2.vedtaksperiode, orgnummer = a1)
@@ -101,7 +101,7 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode, orgnummer = a2)
         assertTilstand(a1, AVSLUTTET, 2)
         assertTilstand(a2, AVVENTER_GODKJENNING, 2)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true, a2)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true, orgnummer = a2)
         assertTilstand(a1, AVSLUTTET, 2)
         assertTilstand(a2, TIL_UTBETALING, 2)
         håndterUtbetalt(2.vedtaksperiode, orgnummer = a2)
@@ -844,11 +844,11 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
         ))
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a1)
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a2)
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
 
         //Forlengelsen starter her
