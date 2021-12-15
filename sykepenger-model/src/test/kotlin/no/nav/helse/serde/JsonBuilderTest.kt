@@ -437,18 +437,18 @@ class JsonBuilderTest {
                     inntektsvurdering = inntektperioderForSammenligningsgrunnlag {
                         1.januar(2017) til 1.desember(2017) inntekter {
                             orgnummer inntekt 31000.månedlig
-                            "04201337" inntekt 32000.månedlig
+                            "654321987" inntekt 32000.månedlig
                         }
                     },
                     inntektsvurderingForSykepengegrunnlag = inntektperioderForSykepengegrunnlag {
                         1.oktober(2017) til 1.desember(2017) inntekter {
                             orgnummer inntekt 31000.månedlig
-                            "04201337" inntekt 32000.månedlig
+                            "654321987" inntekt 32000.månedlig
                         }
                     },
                     arbeidsforhold = listOf(
                         Arbeidsforhold(orgnummer.toString(), LocalDate.EPOCH, null),
-                        Arbeidsforhold("04201337", LocalDate.EPOCH, null)
+                        Arbeidsforhold("654321987", LocalDate.EPOCH, null)
                     )
                 )
             )

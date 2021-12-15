@@ -4,7 +4,6 @@ import no.nav.helse.ForventetFeil
 import no.nav.helse.hendelser.*
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Inntektshistorikk
-import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.testhelpers.april
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
@@ -17,12 +16,6 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
-    private companion object {
-        private val a1 = "arbeidsgiver 1".somOrganisasjonsnummer()
-        private val a2 = "arbeidsgiver 2".somOrganisasjonsnummer()
-        private val a3 = "arbeidsgiver 3".somOrganisasjonsnummer()
-        private val a4 = "arbeidsgiver 4".somOrganisasjonsnummer()
-    }
 
     @Test
     fun `To førstegangsbehandlinger med ulik fom i forskjellige måneder - skal bruke skatteinntekter for arbeidsgiver med senest fom`() {

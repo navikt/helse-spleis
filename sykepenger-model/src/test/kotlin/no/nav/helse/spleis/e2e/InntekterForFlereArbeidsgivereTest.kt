@@ -10,7 +10,6 @@ import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -26,13 +25,6 @@ import java.util.*
 
 // TODO: tester for at sykepengegrunnlaget er riktig
 internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
-
-    internal companion object {
-        private val a1 = "arbeidsgiver 1".somOrganisasjonsnummer()
-        private val a2 = "arbeidsgiver 2".somOrganisasjonsnummer()
-        private val a3 = "arbeidsgiver 3".somOrganisasjonsnummer()
-        private val a4 = "arbeidsgiver 4".somOrganisasjonsnummer()
-    }
 
     private val a1Inspektør get() = TestArbeidsgiverInspektør(person, a1)
     private val a2Inspektør get() = TestArbeidsgiverInspektør(person, a2)

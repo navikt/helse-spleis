@@ -7,7 +7,6 @@ import no.nav.helse.person.Inntektshistorikk.Skatt.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -18,10 +17,6 @@ import java.time.YearMonth
 import java.util.*
 
 internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
-    private companion object {
-        private val a1 = "arbeidsgiver 1".somOrganisasjonsnummer()
-        private val a2 = "arbeidsgiver 2".somOrganisasjonsnummer()
-    }
 
     @Test
     fun `ghost n stuff`() {

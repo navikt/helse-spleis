@@ -8,7 +8,6 @@ import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.reflection.castAsList
 import no.nav.helse.serde.reflection.castAsMap
-import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -19,10 +18,6 @@ import java.time.LocalDate
 import java.util.*
 
 internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
-    private companion object {
-        private val a1 = "arbeidsgiver 1".somOrganisasjonsnummer()
-        private val a2 = "arbeidsgiver 2".somOrganisasjonsnummer()
-    }
 
     @Test
     fun `Førstegangsbehandling med ekstra arbeidsforhold som ikke er aktivt - skal ikke få warning hvis det er flere arbeidsforhold`() {
@@ -55,8 +50,10 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             orgnummer = a1
         )
 
-        assertFalse(a1.inspektør.personLogg.toString().contains("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold"))
-        assertWarn( "Bruker har flere inntektskilder de siste tre månedene enn arbeidsforhold som er oppdaget i Aa-registeret.", a1.inspektør.personLogg)
+        assertFalse(
+            a1.inspektør.personLogg.toString().contains("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold")
+        )
+        assertWarn("Bruker har flere inntektskilder de siste tre månedene enn arbeidsforhold som er oppdaget i Aa-registeret.", a1.inspektør.personLogg)
     }
 
     @Test
@@ -630,10 +627,12 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3)),
             grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 1000.månedlig.repeat(3))
         )
-        val inntektsvurdering = Inntektsvurdering(listOf(
-            sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(12)),
-            sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 1000.månedlig.repeat(12))
-        ))
+        val inntektsvurdering = Inntektsvurdering(
+            listOf(
+                sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(12)),
+                sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 1000.månedlig.repeat(12))
+            )
+        )
 
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,

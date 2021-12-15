@@ -12,7 +12,6 @@ import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -479,8 +478,8 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
 
     @Test
     fun `avviser revurdering av inntekt for saker med flere arbeidsgivere`() {
-        nyeVedtak(1.januar, 31.januar, "ag1".somOrganisasjonsnummer(), "ag2".somOrganisasjonsnummer())
-        håndterOverstyrInntekt(inntekt = 32000.månedlig, "ag1".somOrganisasjonsnummer(), 1.januar)
+        nyeVedtak(1.januar, 31.januar, a1, a2)
+        håndterOverstyrInntekt(inntekt = 32000.månedlig, a1, 1.januar)
 
         assertEquals(1, observatør.avvisteRevurderinger.size)
         assertErrorTekst(inspektør, "Forespurt overstyring av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
@@ -488,46 +487,44 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
 
     @Test
     fun `avviser revurdering av inntekt for saker med 1 arbeidsgiver og ghost`() {
-        val ag1 = "ag1".somOrganisasjonsnummer()
-        val ag2 = "ag2".somOrganisasjonsnummer()
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = ag1)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = ag1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             førsteFraværsdag = 1.januar,
             refusjon = Refusjon(31000.månedlig, null, emptyList()),
-            orgnummer = ag1
+            orgnummer = a1
         )
 
         val inntekter = listOf(
-            grunnlag(ag1, finnSkjæringstidspunkt(ag1, 1.vedtaksperiode), 31000.månedlig.repeat(3)),
-            grunnlag(ag2, finnSkjæringstidspunkt(ag1, 1.vedtaksperiode), 32000.månedlig.repeat(3))
+            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(3)),
+            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 32000.månedlig.repeat(3))
         )
 
         val arbeidsforhold = listOf(
-            Arbeidsforhold(ag1.toString(), LocalDate.EPOCH, null),
-            Arbeidsforhold(ag2.toString(), LocalDate.EPOCH, null)
+            Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),
+            Arbeidsforhold(a2.toString(), LocalDate.EPOCH, null)
         )
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = ag1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             inntektsvurdering = Inntektsvurdering(
                 listOf(
-                    sammenligningsgrunnlag(ag1, finnSkjæringstidspunkt(ag1, 1.vedtaksperiode), 31000.månedlig.repeat(12)),
-                    sammenligningsgrunnlag(ag2, finnSkjæringstidspunkt(ag1, 1.vedtaksperiode), 32000.månedlig.repeat(12))
+                    sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(12)),
+                    sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 32000.månedlig.repeat(12))
                 )
             ),
-            orgnummer = ag1,
+            orgnummer = a1,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter),
             arbeidsforhold = arbeidsforhold
         )
-        håndterYtelser(1.vedtaksperiode, orgnummer = ag1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = ag1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = ag1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = ag1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
 
-        håndterOverstyrInntekt(32000.månedlig, ag1, 1.januar)
+        håndterOverstyrInntekt(32000.månedlig, a1, 1.januar)
         assertEquals(1, observatør.avvisteRevurderinger.size)
         assertErrorTekst(inspektør, "Forespurt overstyring av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
     }

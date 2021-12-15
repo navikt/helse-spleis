@@ -1398,7 +1398,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
 
     @Test
     fun `Flere arbeidsgivere med ghosts`() {
-        val a5 = "gammmeltorgnummer:)".somOrganisasjonsnummer()
+        val a5 = "567891234".somOrganisasjonsnummer()
         håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars, 100.prosent), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 15.mars, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
