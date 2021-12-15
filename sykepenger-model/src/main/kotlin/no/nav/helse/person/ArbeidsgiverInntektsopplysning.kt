@@ -18,7 +18,7 @@ internal class ArbeidsgiverInntektsopplysning(private val orgnummer: String, pri
             val grunnlagForSykepengegrunnlagPerArbeidsgiver = this
                 .associateBy { it.orgnummer }
                 .mapValues { it.value.inntektsopplysning.grunnlagForSykepengegrunnlag() }
-            aktivitetslogg.`§8-30 ledd 1`(true, grunnlagForSykepengegrunnlagPerArbeidsgiver, grunnlagForSykepengegrunnlag)
+            aktivitetslogg.`§8-30 ledd 1`(grunnlagForSykepengegrunnlagPerArbeidsgiver, grunnlagForSykepengegrunnlag)
             return grunnlagForSykepengegrunnlag
         }
         internal fun List<ArbeidsgiverInntektsopplysning>.inntektsopplysningPerArbeidsgiver() = associate { it.orgnummer to it.inntektsopplysning }

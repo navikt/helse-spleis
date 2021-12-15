@@ -581,8 +581,8 @@ class Aktivitetslogg(
                      * @param syttiårsdagen dato sykmeldte fyller 70 år
                      * @param vurderingFom fra-og-med-dato [oppfylt]-vurderingen gjelder for
                      * @param vurderingTom til-og-med-dato [oppfylt]-vurderingen gjelder for
-                     * @param tidslinjeFom fra-og-med-dato for [oppfylt]-tidslinje vurderingen gjøres mot
-                     * @param tidslinjeTom til-og-med-dato for [oppfylt]-tidslinje vurderingen gjøres mot
+                     * @param tidslinjeFom fra-og-med-dato vurderingen gjøres for
+                     * @param tidslinjeTom til-og-med-dato vurderingen gjøres for
                      * @param avvisteDager alle dager vurderingen ikke er [oppfylt] for. Tom dersom sykmeldte ikke fyller 70 år mellom [tidslinjeFom] og [tidslinjeTom]
                      */
                     internal fun IAktivitetslogg.`§8-3 ledd 1 punktum 2`(
@@ -813,8 +813,18 @@ class Aktivitetslogg(
                         )
                     }
 
+                    /**
+                     * Fastsettelse av dekningsgrunnlag
+                     *
+                     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-16)
+                     *
+                     * Merk: Alltid oppfylt
+                     *
+                     * @param dekningsgrad hvor stor andel av inntekten det ytes sykepenger av
+                     * @param inntekt inntekt for aktuell arbeidsgiver
+                     * @param dekningsgrunnlag maks dagsats før reduksjon til 6G og reduksjon for sykmeldingsgrad
+                     */
                     internal fun IAktivitetslogg.`§8-16 ledd 1`(
-                        oppfylt: Boolean,
                         dekningsgrad: Double,
                         inntekt: Double,
                         dekningsgrunnlag: Double
@@ -822,7 +832,7 @@ class Aktivitetslogg(
                         juridiskVurdering(
                             "",
                             Vurderingsresultat(
-                                oppfylt,
+                                true,
                                 versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
                                 paragraf = PARAGRAF_8_16,
                                 ledd = LEDD_1,
@@ -838,11 +848,24 @@ class Aktivitetslogg(
                         )
                     }
 
-                    internal fun IAktivitetslogg.`§8-17 ledd 1 bokstav a`(oppfylt: Boolean, arbeidsgiverperioder: List<LocalDate>, førsteNavdag: LocalDate) {
+                    /**
+                     * Vurdering av når
+                     *
+                     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-16)
+                     *
+                     * Merk: Alltid oppfylt
+                     *
+                     * @param arbeidsgiverperiode alle arbeidsgiverperiode-dager
+                     * @param førsteNavdag første dag NAV skal utbetale
+                     */
+                    internal fun IAktivitetslogg.`§8-17 ledd 1 bokstav a`(
+                        arbeidsgiverperiode: List<LocalDate>,
+                        førsteNavdag: LocalDate
+                    ) {
                         juridiskVurdering(
                             "",
                             Vurderingsresultat(
-                                oppfylt = oppfylt,
+                                oppfylt = true,
                                 versjon = LocalDate.of(2018, 1, 1),
                                 paragraf = PARAGRAF_8_17,
                                 ledd = LEDD_1,
@@ -850,7 +873,7 @@ class Aktivitetslogg(
                                 bokstaver = listOf(BOKSTAV_A),
                                 inputdata = mapOf(
                                     "førsteNavdag" to førsteNavdag,
-                                    "arbeidsgiverperioder" to arbeidsgiverperioder.grupperSammenhengendePerioder().map {
+                                    "arbeidsgiverperioder" to arbeidsgiverperiode.grupperSammenhengendePerioder().map {
                                         mapOf("fom" to it.start, "tom" to it.endInclusive)
                                     }
                                 ),
@@ -869,8 +892,17 @@ class Aktivitetslogg(
                     ) {
                     }
 
+                    /**
+                     * Fastsettelse av sykepengegrunnlaget
+                     *
+                     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-30)
+                     *
+                     * Merk: Alltid oppfylt
+                     *
+                     * @param grunnlagForSykepengegrunnlagPerArbeidsgiver beregnet inntekt per arbeidsgiver
+                     * @param grunnlagForSykepengegrunnlag beregnet inntekt på tvers av arbeidsgivere
+                     */
                     internal fun IAktivitetslogg.`§8-30 ledd 1`(
-                        oppfylt: Boolean,
                         grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Inntekt>,
                         grunnlagForSykepengegrunnlag: Inntekt
                     ) {
@@ -879,7 +911,7 @@ class Aktivitetslogg(
                         juridiskVurdering(
                             "",
                             Vurderingsresultat(
-                                oppfylt = oppfylt,
+                                oppfylt = true,
                                 versjon = LocalDate.of(2019, 1, 1),
                                 paragraf = PARAGRAF_8_30,
                                 ledd = LEDD_1,

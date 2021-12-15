@@ -61,7 +61,7 @@ class Inntekt private constructor(private val årlig: Double) : Comparable<Innte
 
     internal fun dekningsgrunnlag(regler: ArbeidsgiverRegler, aktivitetslogg: IAktivitetslogg): Inntekt {
         val dekningsgrunnlag = Inntekt(this.årlig * regler.dekningsgrad())
-        aktivitetslogg.`§8-16 ledd 1`(oppfylt = true, regler.dekningsgrad(), this.årlig, dekningsgrunnlag.årlig)
+        aktivitetslogg.`§8-16 ledd 1`(regler.dekningsgrad(), this.årlig, dekningsgrunnlag.årlig)
         return dekningsgrunnlag
     }
 
