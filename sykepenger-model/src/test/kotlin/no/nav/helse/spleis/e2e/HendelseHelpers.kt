@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Organisasjonsnummer
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.person.*
@@ -9,6 +10,7 @@ import no.nav.helse.serde.api.v2.HendelseDTO
 import no.nav.helse.serde.api.v2.InntektsmeldingDTO
 import no.nav.helse.serde.api.v2.SykmeldingDTO
 import no.nav.helse.serde.api.v2.SøknadNavDTO
+import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -21,11 +23,11 @@ import java.util.*
 internal class EtterspurtBehov(
     private val type: Aktivitetslogg.Aktivitet.Behov.Behovtype,
     private val tilstand: TilstandType,
-    private val orgnummer: String,
+    private val orgnummer: Organisasjonsnummer,
     private val vedtaksperiodeId: UUID
 ) {
     companion object {
-        internal fun fjern(liste: MutableList<EtterspurtBehov>, orgnummer: String, type: Aktivitetslogg.Aktivitet.Behov.Behovtype) {
+        internal fun fjern(liste: MutableList<EtterspurtBehov>, orgnummer: Organisasjonsnummer, type: Aktivitetslogg.Aktivitet.Behov.Behovtype) {
             liste.removeIf { it.orgnummer == orgnummer && it.type == type }
         }
 
@@ -38,7 +40,7 @@ internal class EtterspurtBehov(
                     EtterspurtBehov(
                         type = it.type,
                         tilstand = enumValueOf(it.kontekst()["tilstand"] as String),
-                        orgnummer = it.kontekst()["organisasjonsnummer"] as String,
+                        orgnummer = (it.kontekst()["organisasjonsnummer"] as String).somOrganisasjonsnummer(),
                         vedtaksperiodeId = UUID.fromString(it.kontekst()["vedtaksperiodeId"] as String)
                     )
                 }
@@ -47,7 +49,7 @@ internal class EtterspurtBehov(
             ikkeBesvarteBehov: MutableList<EtterspurtBehov>,
             type: Aktivitetslogg.Aktivitet.Behov.Behovtype,
             vedtaksperiodeIdInnhenter: IdInnhenter,
-            orgnummer: String
+            orgnummer: Organisasjonsnummer
         ) =
             ikkeBesvarteBehov.firstOrNull { it.type == type && it.orgnummer == orgnummer && it.vedtaksperiodeId == vedtaksperiodeIdInnhenter(orgnummer) }
 
@@ -55,7 +57,7 @@ internal class EtterspurtBehov(
             ikkeBesvarteBehov: MutableList<EtterspurtBehov>,
             type: Aktivitetslogg.Aktivitet.Behov.Behovtype,
             vedtaksperiodeIdInnhenter: IdInnhenter,
-            orgnummer: String,
+            orgnummer: Organisasjonsnummer,
             tilstand: TilstandType
         ) =
             ikkeBesvarteBehov.firstOrNull {
@@ -66,13 +68,13 @@ internal class EtterspurtBehov(
     override fun toString() = "$type ($tilstand)"
 }
 
-internal fun AbstractEndToEndTest.tellArbeidsforholdhistorikkinnslag(orgnummer: String? = null): MutableList<UUID> {
+internal fun AbstractEndToEndTest.tellArbeidsforholdhistorikkinnslag(orgnummer: Organisasjonsnummer? = null): MutableList<UUID> {
     val arbeidsforholdIder = mutableListOf<UUID>()
     var erIRiktigArbeidsgiver = true
     person.accept(object : PersonVisitor {
 
         override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
-            erIRiktigArbeidsgiver = orgnummer == null || orgnummer == organisasjonsnummer
+            erIRiktigArbeidsgiver = orgnummer == null || orgnummer.toString() == organisasjonsnummer
         }
 
         override fun preVisitArbeidsforholdinnslag(arbeidsforholdinnslag: Arbeidsforholdhistorikk.Innslag, id: UUID, skjæringstidspunkt: LocalDate) {
@@ -85,7 +87,7 @@ internal fun AbstractEndToEndTest.tellArbeidsforholdhistorikkinnslag(orgnummer: 
     return arbeidsforholdIder
 }
 
-internal fun AbstractEndToEndTest.tellArbeidsforholdINyesteHistorikkInnslag(orgnummer: String): Int {
+internal fun AbstractEndToEndTest.tellArbeidsforholdINyesteHistorikkInnslag(orgnummer: Organisasjonsnummer): Int {
     var antall = 0
     var erIRiktigArbeidsgiver = true
     var erIFørsteHistorikkinnslag = true
@@ -93,7 +95,7 @@ internal fun AbstractEndToEndTest.tellArbeidsforholdINyesteHistorikkInnslag(orgn
     person.accept(object : PersonVisitor {
 
         override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
-            erIRiktigArbeidsgiver = orgnummer == organisasjonsnummer
+            erIRiktigArbeidsgiver = orgnummer.toString() == organisasjonsnummer
         }
 
         override fun visitArbeidsforhold(orgnummer: String, fom: LocalDate, tom: LocalDate?) {
@@ -108,7 +110,7 @@ internal fun AbstractEndToEndTest.tellArbeidsforholdINyesteHistorikkInnslag(orgn
     return antall
 }
 
-internal fun AbstractEndToEndTest.historikk(orgnummer: String, sykedagstelling: Int = 0) {
+internal fun AbstractEndToEndTest.historikk(orgnummer: Organisasjonsnummer, sykedagstelling: Int = 0) {
     person.håndter(
         ytelser(
             1.vedtaksperiode,
@@ -118,14 +120,14 @@ internal fun AbstractEndToEndTest.historikk(orgnummer: String, sykedagstelling: 
     )
 }
 
-private fun utbetalinger(dagTeller: Int, orgnummer: String): List<ArbeidsgiverUtbetalingsperiode> {
+private fun utbetalinger(dagTeller: Int, orgnummer: Organisasjonsnummer): List<ArbeidsgiverUtbetalingsperiode> {
     if (dagTeller == 0) return emptyList()
     val førsteDato = 2.desember(2017).minusDays(
         (
             (dagTeller / 5 * 7) + dagTeller % 5
             ).toLong()
     )
-    return listOf(ArbeidsgiverUtbetalingsperiode(orgnummer, førsteDato, 1.desember(2017), 100.prosent, 100.daglig))
+    return listOf(ArbeidsgiverUtbetalingsperiode(orgnummer.toString(), førsteDato, 1.desember(2017), 100.prosent, 100.daglig))
 }
 
 infix fun <T> T?.er(expected: T?) =
@@ -142,7 +144,7 @@ infix fun Boolean.ellers(message: String) {
     if (!this) fail(message)
 }
 
-internal fun AbstractEndToEndTest.finnSkjæringstidspunkt(orgnummer: String, vedtaksperiodeIdInnhenter: IdInnhenter) =
+internal fun AbstractEndToEndTest.finnSkjæringstidspunkt(orgnummer: Organisasjonsnummer, vedtaksperiodeIdInnhenter: IdInnhenter) =
     inspektør(orgnummer).skjæringstidspunkt(vedtaksperiodeIdInnhenter)
 
 internal fun AbstractEndToEndTest.speilApi(hendelser: List<HendelseDTO> = søknadDTOer + sykmeldingDTOer + inntektsmeldingDTOer) = serializePersonForSpeil(person, hendelser)

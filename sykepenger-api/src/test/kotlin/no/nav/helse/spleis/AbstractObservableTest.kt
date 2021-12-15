@@ -106,7 +106,7 @@ abstract class AbstractObservableTest {
         vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
         orgnummer: String = ORGNUMMER,
-        arbeidsforhold: List<Arbeidsforhold> = listOf(Arbeidsforhold(orgnummer, FOM.minusYears(1))),
+        arbeidsforhold: List<Arbeidsforhold> = listOf(Arbeidsforhold(orgnummer.toString(), FOM.minusYears(1))),
         opptjening: Opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
         inntektsvurdering: Inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {

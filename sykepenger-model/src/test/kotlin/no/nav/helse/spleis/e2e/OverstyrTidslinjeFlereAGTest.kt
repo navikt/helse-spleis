@@ -1,14 +1,15 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.til
+import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Test
 
 internal class OverstyrTidslinjeFlereAGTest : AbstractEndToEndTest() {
 
     private companion object {
-        private val AG1 = "987654321"
-        private val AG2 = "123456789"
+        private val AG1 = "987654321".somOrganisasjonsnummer()
+        private val AG2 = "123456789".somOrganisasjonsnummer()
     }
 
     @Test

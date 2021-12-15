@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Organisasjonsnummer
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.person.*
@@ -17,11 +18,11 @@ internal fun assertInntektForDato(forventetInntekt: Inntekt?, dato: LocalDate, f
     Assertions.assertEquals(forventetInntekt, inspektør.inntektInspektør.grunnlagForSykepengegrunnlag(dato, førsteFraværsdag)?.grunnlagForSykepengegrunnlag())
 }
 
-internal fun AbstractEndToEndTest.erEtterspurt(type: Aktivitetslogg.Aktivitet.Behov.Behovtype, vedtaksperiodeIdInnhenter: IdInnhenter, orgnummer: String, tilstand: TilstandType): Boolean {
+internal fun AbstractEndToEndTest.erEtterspurt(type: Aktivitetslogg.Aktivitet.Behov.Behovtype, vedtaksperiodeIdInnhenter: IdInnhenter, orgnummer: Organisasjonsnummer, tilstand: TilstandType): Boolean {
     return EtterspurtBehov.finnEtterspurtBehov(ikkeBesvarteBehov, type, vedtaksperiodeIdInnhenter, orgnummer, tilstand) != null
 }
 
-internal fun <T : ArbeidstakerHendelse> AbstractEndToEndTest.assertEtterspurt(løsning: KClass<T>, type: Aktivitetslogg.Aktivitet.Behov.Behovtype, vedtaksperiodeIdInnhenter: IdInnhenter, orgnummer: String) {
+internal fun <T : ArbeidstakerHendelse> AbstractEndToEndTest.assertEtterspurt(løsning: KClass<T>, type: Aktivitetslogg.Aktivitet.Behov.Behovtype, vedtaksperiodeIdInnhenter: IdInnhenter, orgnummer: Organisasjonsnummer) {
     val etterspurtBehov = EtterspurtBehov.finnEtterspurtBehov(ikkeBesvarteBehov, type, vedtaksperiodeIdInnhenter, orgnummer)
     assertTrue(ikkeBesvarteBehov.remove(etterspurtBehov)) {
         "Forventer at $type skal være etterspurt før ${løsning.simpleName} håndteres. Perioden er i ${
@@ -30,7 +31,7 @@ internal fun <T : ArbeidstakerHendelse> AbstractEndToEndTest.assertEtterspurt(l�
     }
 }
 
-internal fun <T : ArbeidstakerHendelse> AbstractEndToEndTest.assertIkkeEtterspurt(løsning: KClass<T>, type: Aktivitetslogg.Aktivitet.Behov.Behovtype, vedtaksperiodeIdInnhenter: IdInnhenter, orgnummer: String) {
+internal fun <T : ArbeidstakerHendelse> AbstractEndToEndTest.assertIkkeEtterspurt(løsning: KClass<T>, type: Aktivitetslogg.Aktivitet.Behov.Behovtype, vedtaksperiodeIdInnhenter: IdInnhenter, orgnummer: Organisasjonsnummer) {
     val etterspurtBehov = EtterspurtBehov.finnEtterspurtBehov(ikkeBesvarteBehov, type, vedtaksperiodeIdInnhenter, orgnummer)
     Assertions.assertFalse(etterspurtBehov in ikkeBesvarteBehov) {
         "Forventer ikke at $type skal være etterspurt før ${løsning.simpleName} håndteres. Perioden er i ${
@@ -59,7 +60,7 @@ internal fun AbstractEndToEndTest.assertUtbetalingsbeløp(
     forventetArbeidsgiverbeløp: Int,
     forventetArbeidsgiverRefusjonsbeløp: Int,
     subset: Periode? = null,
-    orgnummer: String = AbstractPersonTest.ORGNUMMER
+    orgnummer: Organisasjonsnummer = AbstractPersonTest.ORGNUMMER
 ) {
     val utbetalingstidslinje = inspektør(orgnummer).utbetalingstidslinjer(vedtaksperiodeIdInnhenter).let { subset?.let(it::subset) ?: it }
 
@@ -83,7 +84,7 @@ internal fun assertWarn(message: String, aktivitetslogg: Aktivitetslogg) {
 }
 internal fun AbstractEndToEndTest.assertHendelseIder(
     vararg hendelseIder: UUID,
-    orgnummer: String,
+    orgnummer: Organisasjonsnummer,
     vedtaksperiodeIndeks: Int = 2,
 ) {
     Assertions.assertEquals(
@@ -95,7 +96,7 @@ internal fun AbstractEndToEndTest.assertHendelseIder(
 internal fun AbstractEndToEndTest.assertHarHendelseIder(
     vedtaksperiodeIdInnhenter: IdInnhenter,
     vararg hendelseIder: UUID,
-    orgnummer: String = AbstractPersonTest.ORGNUMMER
+    orgnummer: Organisasjonsnummer = AbstractPersonTest.ORGNUMMER
 ) {
     assertTrue(
         inspektør(orgnummer).hendelseIder(vedtaksperiodeIdInnhenter).containsAll(hendelseIder.toList())
@@ -105,14 +106,14 @@ internal fun AbstractEndToEndTest.assertHarHendelseIder(
 internal fun AbstractEndToEndTest.assertHarIkkeHendelseIder(
     vedtaksperiodeIdInnhenter: IdInnhenter,
     vararg hendelseIder: UUID,
-    orgnummer: String = AbstractPersonTest.ORGNUMMER
+    orgnummer: Organisasjonsnummer = AbstractPersonTest.ORGNUMMER
 ) {
     assertTrue(
         inspektør(orgnummer).hendelseIder(vedtaksperiodeIdInnhenter).none { it in hendelseIder.toList() }) { "Perioden inneholder ikke alle hendelseidene" }
 }
 
 internal fun AbstractEndToEndTest.assertTilstand(
-    orgnummer: String,
+    orgnummer: Organisasjonsnummer,
     tilstand: TilstandType,
     vedtaksperiodeIndeks: Int = 1
 ) {
@@ -122,7 +123,7 @@ internal fun AbstractEndToEndTest.assertTilstand(
 internal fun AbstractEndToEndTest.assertTilstand(
     vedtaksperiodeIdInnhenter: IdInnhenter,
     tilstand: TilstandType,
-    orgnummer: String = AbstractPersonTest.ORGNUMMER,
+    orgnummer: Organisasjonsnummer = AbstractPersonTest.ORGNUMMER,
 ) {
     Assertions.assertEquals(tilstand, inspektør(orgnummer).sisteTilstand(vedtaksperiodeIdInnhenter)) {
         inspektør.personLogg.toString()
@@ -130,7 +131,7 @@ internal fun AbstractEndToEndTest.assertTilstand(
 }
 
 internal fun AbstractEndToEndTest.assertInntektskilde(
-    orgnummer: String,
+    orgnummer: Organisasjonsnummer,
     inntektskilde: Inntektskilde,
     vedtaksperiodeIndeks: Int = 1
 ) {
@@ -138,38 +139,38 @@ internal fun AbstractEndToEndTest.assertInntektskilde(
 }
 
 
-internal fun AbstractEndToEndTest.assertSisteTilstand(vedtaksperiodeIdInnhenter: IdInnhenter, tilstand: TilstandType, orgnummer: String = AbstractPersonTest.ORGNUMMER) {
+internal fun AbstractEndToEndTest.assertSisteTilstand(vedtaksperiodeIdInnhenter: IdInnhenter, tilstand: TilstandType, orgnummer: Organisasjonsnummer = AbstractPersonTest.ORGNUMMER) {
     Assertions.assertEquals(tilstand, observatør.tilstandsendringer[vedtaksperiodeIdInnhenter(orgnummer)]?.last())
 }
 
-internal fun AbstractEndToEndTest.assertTilstander(indeks: Int, vararg tilstander: TilstandType, orgnummer: String = AbstractPersonTest.ORGNUMMER) {
+internal fun AbstractEndToEndTest.assertTilstander(indeks: Int, vararg tilstander: TilstandType, orgnummer: Organisasjonsnummer = AbstractPersonTest.ORGNUMMER) {
     assertTilstander(vedtaksperiodeIdInnhenter = (indeks + 1).vedtaksperiode, tilstander = tilstander, orgnummer = orgnummer)
 }
 
-internal fun AbstractEndToEndTest.assertTilstander(vedtaksperiodeIdInnhenter: IdInnhenter, vararg tilstander: TilstandType, orgnummer: String = AbstractPersonTest.ORGNUMMER, inspektør: TestArbeidsgiverInspektør = inspektør(orgnummer), message: String? = null) {
+internal fun AbstractEndToEndTest.assertTilstander(vedtaksperiodeIdInnhenter: IdInnhenter, vararg tilstander: TilstandType, orgnummer: Organisasjonsnummer = AbstractPersonTest.ORGNUMMER, inspektør: TestArbeidsgiverInspektør = inspektør(orgnummer), message: String? = null) {
     val id = vedtaksperiodeIdInnhenter(orgnummer)
     Assertions.assertFalse(inspektør.periodeErForkastet(vedtaksperiodeIdInnhenter)) { "Perioden er forkastet med tilstander: ${observatør.tilstandsendringer[id]}" }
     assertTrue(inspektør.periodeErIkkeForkastet(vedtaksperiodeIdInnhenter)) { "Perioden er forkastet med tilstander: ${observatør.tilstandsendringer[id]}" }
     Assertions.assertEquals(tilstander.asList(), observatør.tilstandsendringer[id], message)
 }
 
-internal fun AbstractEndToEndTest.assertForkastetPeriodeTilstander(indeks: Int, vararg tilstander: TilstandType, orgnummer: String = AbstractPersonTest.ORGNUMMER) {
+internal fun AbstractEndToEndTest.assertForkastetPeriodeTilstander(indeks: Int, vararg tilstander: TilstandType, orgnummer: Organisasjonsnummer = AbstractPersonTest.ORGNUMMER) {
     assertForkastetPeriodeTilstander(vedtaksperiodeIdInnhenter = indeks.vedtaksperiode, tilstander = tilstander, orgnummer = orgnummer)
 }
 
-internal fun AbstractEndToEndTest.assertForkastetPeriodeTilstander(vedtaksperiodeIdInnhenter: IdInnhenter, vararg tilstander: TilstandType, orgnummer: String = AbstractPersonTest.ORGNUMMER, inspektør: TestArbeidsgiverInspektør = inspektør(orgnummer)) {
+internal fun AbstractEndToEndTest.assertForkastetPeriodeTilstander(vedtaksperiodeIdInnhenter: IdInnhenter, vararg tilstander: TilstandType, orgnummer: Organisasjonsnummer = AbstractPersonTest.ORGNUMMER, inspektør: TestArbeidsgiverInspektør = inspektør(orgnummer)) {
     assertTrue(inspektør.periodeErForkastet(vedtaksperiodeIdInnhenter)) { "Perioden er ikke forkastet" }
     Assertions.assertFalse(inspektør.periodeErIkkeForkastet(vedtaksperiodeIdInnhenter)) { "Perioden er ikke forkastet" }
     Assertions.assertEquals(tilstander.asList(), observatør.tilstandsendringer[vedtaksperiodeIdInnhenter(orgnummer)])
 }
 
-internal fun AbstractEndToEndTest.assertForkastetPeriodeTilstander(orgnummer: String, vedtaksperiodeIdInnhenter: IdInnhenter, vararg tilstander: TilstandType) {
+internal fun AbstractEndToEndTest.assertForkastetPeriodeTilstander(orgnummer: Organisasjonsnummer, vedtaksperiodeIdInnhenter: IdInnhenter, vararg tilstander: TilstandType) {
     assertTrue(inspektør(orgnummer).periodeErForkastet(vedtaksperiodeIdInnhenter)) { "Perioden er ikke forkastet" }
     Assertions.assertFalse(inspektør(orgnummer).periodeErIkkeForkastet(vedtaksperiodeIdInnhenter)) { "Perioden er ikke forkastet" }
     Assertions.assertEquals(tilstander.asList(), observatør.tilstandsendringer[vedtaksperiodeIdInnhenter(orgnummer)])
 }
 
-internal fun AbstractEndToEndTest.assertSisteForkastetPeriodeTilstand(orgnummer: String, vedtaksperiodeIdInnhenter: IdInnhenter, tilstand: TilstandType) {
+internal fun AbstractEndToEndTest.assertSisteForkastetPeriodeTilstand(orgnummer: Organisasjonsnummer, vedtaksperiodeIdInnhenter: IdInnhenter, tilstand: TilstandType) {
     assertTrue(inspektør(orgnummer).periodeErForkastet(vedtaksperiodeIdInnhenter)) { "Perioden er ikke forkastet" }
     Assertions.assertFalse(inspektør(orgnummer).periodeErIkkeForkastet(vedtaksperiodeIdInnhenter)) { "Perioden er ikke forkastet" }
     Assertions.assertEquals(tilstand, observatør.tilstandsendringer[vedtaksperiodeIdInnhenter(orgnummer)]?.last())
@@ -187,17 +188,17 @@ internal fun assertWarnings(inspektør: TestArbeidsgiverInspektør) {
     assertTrue(inspektør.personLogg.hasWarningsOrWorse(), inspektør.personLogg.toString())
 }
 
-internal fun AbstractEndToEndTest.assertNoWarnings(idInnhenter: IdInnhenter, orgnummer: String = AbstractPersonTest.ORGNUMMER) {
+internal fun AbstractEndToEndTest.assertNoWarnings(idInnhenter: IdInnhenter, orgnummer: Organisasjonsnummer = AbstractPersonTest.ORGNUMMER) {
     val warnings = collectWarnings(idInnhenter, orgnummer)
     assertTrue(warnings.isEmpty(), "forventet ingen warnings for orgnummer $orgnummer. Warnings:\n${warnings.joinToString("\n")}")
 }
 
-internal fun AbstractEndToEndTest.assertWarning(idInnhenter: IdInnhenter, warning: String, orgnummer: String = AbstractPersonTest.ORGNUMMER) {
+internal fun AbstractEndToEndTest.assertWarning(idInnhenter: IdInnhenter, warning: String, orgnummer: Organisasjonsnummer = AbstractPersonTest.ORGNUMMER) {
     val warnings = collectWarnings(idInnhenter, orgnummer)
     assertTrue(warnings.contains(warning), "fant ikke forventet warning for $orgnummer. Warnings:\n${warnings.joinToString("\n")}")
 }
 
-private fun AbstractEndToEndTest.collectWarnings(idInnhenter: IdInnhenter, orgnummer: String): MutableList<String> {
+private fun AbstractEndToEndTest.collectWarnings(idInnhenter: IdInnhenter, orgnummer: Organisasjonsnummer): MutableList<String> {
     val warnings = mutableListOf<String>()
     inspektør.personLogg.accept(object : AktivitetsloggVisitor {
         override fun visitWarn(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Warn, melding: String, tidsstempel: String) {
@@ -209,12 +210,12 @@ private fun AbstractEndToEndTest.collectWarnings(idInnhenter: IdInnhenter, orgnu
     return warnings
 }
 
-internal fun AbstractEndToEndTest.assertInfo(idInnhenter: IdInnhenter, forventet: String, orgnummer: String = AbstractPersonTest.ORGNUMMER) {
+internal fun AbstractEndToEndTest.assertInfo(idInnhenter: IdInnhenter, forventet: String, orgnummer: Organisasjonsnummer = AbstractPersonTest.ORGNUMMER) {
     val info = collectInfo(idInnhenter, orgnummer)
     Assertions.assertEquals(1, info.count { it == forventet }, "fant ikke ett tilfelle av info for $orgnummer. Info:\n${info.joinToString("\n")}")
 }
 
-private fun AbstractEndToEndTest.collectInfo(idInnhenter: IdInnhenter, orgnummer: String): MutableList<String> {
+private fun AbstractEndToEndTest.collectInfo(idInnhenter: IdInnhenter, orgnummer: Organisasjonsnummer): MutableList<String> {
     val info = mutableListOf<String>()
     inspektør.personLogg.accept(object : AktivitetsloggVisitor {
         override fun visitInfo(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Info, melding: String, tidsstempel: String) {
@@ -226,12 +227,12 @@ private fun AbstractEndToEndTest.collectInfo(idInnhenter: IdInnhenter, orgnummer
     return info
 }
 
-internal fun AbstractEndToEndTest.assertError(idInnhenter: IdInnhenter, error: String, orgnummer: String = AbstractPersonTest.ORGNUMMER) {
+internal fun AbstractEndToEndTest.assertError(idInnhenter: IdInnhenter, error: String, orgnummer: Organisasjonsnummer = AbstractPersonTest.ORGNUMMER) {
     val errors = collectErrors(idInnhenter, orgnummer)
     assertTrue(errors.contains(error), "fant ikke forventet error for $orgnummer. Errors:\n${errors.joinToString("\n")}")
 }
 
-internal fun AbstractEndToEndTest.collectErrors(idInnhenter: IdInnhenter, orgnummer: String): MutableList<String> {
+internal fun AbstractEndToEndTest.collectErrors(idInnhenter: IdInnhenter, orgnummer: Organisasjonsnummer): MutableList<String> {
     val errors = mutableListOf<String>()
     inspektør.personLogg.accept(object : AktivitetsloggVisitor {
         override fun visitError(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Error, melding: String, tidsstempel: String) {
@@ -243,7 +244,7 @@ internal fun AbstractEndToEndTest.collectErrors(idInnhenter: IdInnhenter, orgnum
     return errors
 }
 
-internal fun AbstractEndToEndTest.assertNoErrors(idInnhenter: IdInnhenter, orgnummer: String = AbstractPersonTest.ORGNUMMER) {
+internal fun AbstractEndToEndTest.assertNoErrors(idInnhenter: IdInnhenter, orgnummer: Organisasjonsnummer = AbstractPersonTest.ORGNUMMER) {
     val errors = mutableListOf<String>()
     inspektør.personLogg.accept(object : AktivitetsloggVisitor {
         override fun visitError(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Error, melding: String, tidsstempel: String) {

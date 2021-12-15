@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.TilstandType.*
+import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
@@ -18,8 +19,8 @@ import org.junit.jupiter.api.Test
 internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() {
 
     private companion object {
-        private const val aadvokatene = "123456789"
-        private const val haandtverkerne = "987612345"
+        private val aadvokatene = "123456789".somOrganisasjonsnummer()
+        private val haandtverkerne = "987612345".somOrganisasjonsnummer()
     }
 
     @Test

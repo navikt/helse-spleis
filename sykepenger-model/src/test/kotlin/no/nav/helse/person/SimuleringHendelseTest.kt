@@ -5,7 +5,6 @@ import no.nav.helse.Toggle.Companion.enable
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
-import no.nav.helse.somFødselsnummer
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -99,14 +98,14 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
         Ytelser(
             meldingsreferanseId = meldingsreferanseId,
             aktørId = "aktørId",
-            fødselsnummer = UNG_PERSON_FNR_2018,
-            organisasjonsnummer = ORGNUMMER,
+            fødselsnummer = UNG_PERSON_FNR_2018.toString(),
+            organisasjonsnummer = ORGNUMMER.toString(),
             vedtaksperiodeId = "${1.vedtaksperiode(ORGNUMMER)}",
             utbetalingshistorikk = Utbetalingshistorikk(
                 meldingsreferanseId = meldingsreferanseId,
                 aktørId = "aktørId",
-                fødselsnummer = UNG_PERSON_FNR_2018,
-                organisasjonsnummer = ORGNUMMER,
+                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
+                organisasjonsnummer = ORGNUMMER.toString(),
                 vedtaksperiodeId = "${1.vedtaksperiode(ORGNUMMER)}",
                 arbeidskategorikoder = emptyMap(),
                 harStatslønn = false,
@@ -149,9 +148,9 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
     private fun sykmelding() =
         Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
-            fnr = UNG_PERSON_FNR_2018,
+            fnr = UNG_PERSON_FNR_2018.toString(),
             aktørId = "aktørId",
-            orgnummer = ORGNUMMER,
+            orgnummer = ORGNUMMER.toString(),
             sykeperioder = listOf(Sykmeldingsperiode(førsteSykedag, sisteSykedag, 100.prosent)),
             sykmeldingSkrevet = førsteSykedag.atStartOfDay(),
             mottatt = sisteSykedag.atStartOfDay()
@@ -162,9 +161,9 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
     private fun søknad() =
         Søknad(
             meldingsreferanseId = UUID.randomUUID(),
-            fnr = UNG_PERSON_FNR_2018,
+            fnr = UNG_PERSON_FNR_2018.toString(),
             aktørId = "aktørId",
-            orgnummer = ORGNUMMER,
+            orgnummer = ORGNUMMER.toString(),
             perioder = listOf(Søknad.Søknadsperiode.Sykdom(førsteSykedag, sisteSykedag, 100.prosent)),
             andreInntektskilder = emptyList(),
             sendtTilNAV = sisteSykedag.atStartOfDay(),
@@ -181,8 +180,8 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
         Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
             refusjon = refusjon,
-            orgnummer = ORGNUMMER,
-            fødselsnummer = UNG_PERSON_FNR_2018,
+            orgnummer = ORGNUMMER.toString(),
+            fødselsnummer = UNG_PERSON_FNR_2018.toString(),
             aktørId = "aktørId",
             førsteFraværsdag = førsteSykedag,
             beregnetInntekt = 31000.månedlig,
@@ -199,8 +198,8 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = "${1.vedtaksperiode(ORGNUMMER)}",
             aktørId = "aktørId",
-            fødselsnummer = UNG_PERSON_FNR_2018.somFødselsnummer(),
-            orgnummer = ORGNUMMER,
+            fødselsnummer = UNG_PERSON_FNR_2018,
+            orgnummer = ORGNUMMER.toString(),
             inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
                 1.januar(2017) til 1.desember(2017) inntekter {
                     ORGNUMMER inntekt 31000.månedlig
@@ -210,7 +209,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
             opptjeningvurdering = Opptjeningvurdering(
                 listOf(
                     Arbeidsforhold(
-                        ORGNUMMER,
+                        ORGNUMMER.toString(),
                         1.januar(2017)
                     )
                 )
@@ -223,7 +222,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
                 }),
             arbeidsforhold = listOf(
                 Arbeidsforhold(
-                    ORGNUMMER,
+                    ORGNUMMER.toString(),
                     1.januar(2017)
                 )
             )
@@ -252,8 +251,8 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = "${1.vedtaksperiode(ORGNUMMER)}",
             aktørId = "aktørId",
-            fødselsnummer = UNG_PERSON_FNR_2018,
-            orgnummer = ORGNUMMER,
+            fødselsnummer = UNG_PERSON_FNR_2018.toString(),
+            orgnummer = ORGNUMMER.toString(),
             fagsystemId = fagsystemId,
             fagområde = fagområde.verdi,
             simuleringOK = simuleringOK,
@@ -267,7 +266,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
                         utbetalinger = listOf(
                             Simulering.SimulertUtbetaling(
                                 forfallsdato = 1.februar,
-                                utbetalesTil = Simulering.Mottaker(UNG_PERSON_FNR_2018, "Ung Person"),
+                                utbetalesTil = Simulering.Mottaker(UNG_PERSON_FNR_2018.toString(), "Ung Person"),
                                 feilkonto = false,
                                 detaljer = listOf(
                                     Simulering.Detaljer(
@@ -282,7 +281,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
                                         utbetalingstype = "YTELSE",
                                         tilbakeføring = false,
                                         sats = Simulering.Sats(dagsats, 11, "DAGLIG"),
-                                        refunderesOrgnummer = ORGNUMMER
+                                        refunderesOrgnummer = ORGNUMMER.toString()
                                     )
                                 )
                             )
@@ -293,7 +292,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
                         utbetalinger = listOf(
                             Simulering.SimulertUtbetaling(
                                 forfallsdato = 1.mars,
-                                utbetalesTil = Simulering.Mottaker(UNG_PERSON_FNR_2018, "Ung Person"),
+                                utbetalesTil = Simulering.Mottaker(UNG_PERSON_FNR_2018.toString(), "Ung Person"),
                                 feilkonto = false,
                                 detaljer = listOf(
                                     Simulering.Detaljer(
@@ -308,7 +307,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
                                         utbetalingstype = "YTELSE",
                                         tilbakeføring = false,
                                         sats = Simulering.Sats(dagsats, 20, "DAGLIG"),
-                                        refunderesOrgnummer = ORGNUMMER
+                                        refunderesOrgnummer = ORGNUMMER.toString()
                                     )
                                 )
                             )

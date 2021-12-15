@@ -7,6 +7,7 @@ import no.nav.helse.person.Inntektshistorikk.Skatt.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -18,8 +19,8 @@ import java.util.*
 
 internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
     private companion object {
-        private const val a1 = "arbeidsgiver 1"
-        private const val a2 = "arbeidsgiver 2"
+        private val a1 = "arbeidsgiver 1".somOrganisasjonsnummer()
+        private val a2 = "arbeidsgiver 2".somOrganisasjonsnummer()
     }
 
     @Test
@@ -39,8 +40,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         )
 
         val arbeidsforhold = listOf(
-            Arbeidsforhold(a1, LocalDate.EPOCH, null),
-            Arbeidsforhold(a2, LocalDate.EPOCH, null)
+            Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),
+            Arbeidsforhold(a2.toString(), LocalDate.EPOCH, null)
         )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -94,8 +95,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             )
         )
         val arbeidsforhold = listOf(
-            Arbeidsforhold(orgnummer = a1, fom = LocalDate.EPOCH, tom = null),
-            Arbeidsforhold(orgnummer = a2, fom = LocalDate.EPOCH, tom = null)
+            Arbeidsforhold(orgnummer = a1.toString(), fom = LocalDate.EPOCH, tom = null),
+            Arbeidsforhold(orgnummer = a2.toString(), fom = LocalDate.EPOCH, tom = null)
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
@@ -138,8 +139,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         )
 
         val arbeidsforhold = listOf(
-            Arbeidsforhold(a1, LocalDate.EPOCH, null),
-            Arbeidsforhold(a2, 2.januar, null)
+            Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),
+            Arbeidsforhold(a2.toString(), 2.januar, null)
         )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -183,8 +184,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         )
 
         val arbeidsforhold = listOf(
-            Arbeidsforhold(a1, LocalDate.EPOCH, null),
-            Arbeidsforhold(a2, 1.desember(2017), 31.desember(2017))
+            Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),
+            Arbeidsforhold(a2.toString(), 1.desember(2017), 31.desember(2017))
         )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -230,8 +231,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         )
 
         val arbeidsforhold = listOf(
-            Arbeidsforhold(orgnummer = a1, fom = LocalDate.EPOCH, tom = null),
-            Arbeidsforhold(orgnummer = a2, fom = LocalDate.EPOCH, tom = null)
+            Arbeidsforhold(orgnummer = a1.toString(), fom = LocalDate.EPOCH, tom = null),
+            Arbeidsforhold(orgnummer = a2.toString(), fom = LocalDate.EPOCH, tom = null)
         )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -281,8 +282,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         )
 
         val arbeidsforhold = listOf(
-            Arbeidsforhold(orgnummer = a1, fom = LocalDate.EPOCH, tom = null),
-            Arbeidsforhold(orgnummer = a2, fom = LocalDate.EPOCH, tom = null)
+            Arbeidsforhold(orgnummer = a1.toString(), fom = LocalDate.EPOCH, tom = null),
+            Arbeidsforhold(orgnummer = a2.toString(), fom = LocalDate.EPOCH, tom = null)
         )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -330,8 +331,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         )
 
         val arbeidsforhold = listOf(
-            Arbeidsforhold(orgnummer = a1, fom = LocalDate.EPOCH, tom = null),
-            Arbeidsforhold(orgnummer = a2, fom = LocalDate.EPOCH, tom = null)
+            Arbeidsforhold(orgnummer = a1.toString(), fom = LocalDate.EPOCH, tom = null),
+            Arbeidsforhold(orgnummer = a2.toString(), fom = LocalDate.EPOCH, tom = null)
         )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -384,8 +385,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 10000.månedlig.repeat(3))
         )
         val arbeidsforhold = listOf(
-            Arbeidsforhold(orgnummer = a1, fom = LocalDate.EPOCH, tom = null),
-            Arbeidsforhold(orgnummer = a2, fom = LocalDate.EPOCH, tom = null)
+            Arbeidsforhold(orgnummer = a1.toString(), fom = LocalDate.EPOCH, tom = null),
+            Arbeidsforhold(orgnummer = a2.toString(), fom = LocalDate.EPOCH, tom = null)
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
@@ -442,13 +443,13 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
 
-        val utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar, 100.prosent, INNTEKT))
-        val inntektshistorikk = listOf(Inntektsopplysning(a1, 17.januar, INNTEKT, true))
+        val utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(a1.toString(), 17.januar, 31.januar, 100.prosent, INNTEKT))
+        val inntektshistorikk = listOf(Inntektsopplysning(a1.toString(), 17.januar, INNTEKT, true))
 
         håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a1, utbetalinger = utbetalinger, inntektshistorikk = inntektshistorikk)
 
-        person.lagreArbeidsforhold(a1, listOf(Arbeidsforhold(a1, LocalDate.EPOCH)), person.aktivitetslogg, 17.januar)
-        person.lagreArbeidsforhold(a2, listOf(Arbeidsforhold(a2, LocalDate.EPOCH)), person.aktivitetslogg, 17.januar)
+        person.lagreArbeidsforhold(a1.toString(), listOf(Arbeidsforhold(a1.toString(), LocalDate.EPOCH)), person.aktivitetslogg, 17.januar)
+        person.lagreArbeidsforhold(a2.toString(), listOf(Arbeidsforhold(a2.toString(), LocalDate.EPOCH)), person.aktivitetslogg, 17.januar)
 
         inspektør(a2).inntektInspektør.inntektshistorikk.append {
             val hendelseId = UUID.randomUUID()
@@ -468,13 +469,13 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
 
-        val utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar, 100.prosent, INNTEKT))
-        val inntektshistorikk = listOf(Inntektsopplysning(a1, 17.januar, INNTEKT, true))
+        val utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(a1.toString(), 17.januar, 31.januar, 100.prosent, INNTEKT))
+        val inntektshistorikk = listOf(Inntektsopplysning(a1.toString(), 17.januar, INNTEKT, true))
 
         håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a1, utbetalinger = utbetalinger, inntektshistorikk = inntektshistorikk)
 
-        person.lagreArbeidsforhold(a1, listOf(Arbeidsforhold(a1, LocalDate.EPOCH)), person.aktivitetslogg, 17.januar)
-        person.lagreArbeidsforhold(a2, listOf(Arbeidsforhold(a2, LocalDate.EPOCH)), person.aktivitetslogg, 17.januar)
+        person.lagreArbeidsforhold(a1.toString(), listOf(Arbeidsforhold(a1.toString(), LocalDate.EPOCH)), person.aktivitetslogg, 17.januar)
+        person.lagreArbeidsforhold(a2.toString(), listOf(Arbeidsforhold(a2.toString(), LocalDate.EPOCH)), person.aktivitetslogg, 17.januar)
 
         inspektør(a2).inntektInspektør.inntektshistorikk.append {
             val hendelseId = UUID.randomUUID()
@@ -507,8 +508,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         )
 
         val arbeidsforhold = listOf(
-            Arbeidsforhold(orgnummer = a1, fom = LocalDate.EPOCH, tom = null),
-            Arbeidsforhold(orgnummer = a2, fom = LocalDate.EPOCH, tom = null)
+            Arbeidsforhold(orgnummer = a1.toString(), fom = LocalDate.EPOCH, tom = null),
+            Arbeidsforhold(orgnummer = a2.toString(), fom = LocalDate.EPOCH, tom = null)
         )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -533,8 +534,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
 
-        val utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(a1, 1.februar, 28.februar, 100.prosent, 30000.månedlig))
-        val inntektshistorikk = listOf(Inntektsopplysning(a1, 1.februar, 30000.månedlig, true))
+        val utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(a1.toString(), 1.februar, 28.februar, 100.prosent, 30000.månedlig))
+        val inntektshistorikk = listOf(Inntektsopplysning(a1.toString(), 1.februar, 30000.månedlig, true))
 
         håndterUtbetalingshistorikk(2.vedtaksperiode, orgnummer = a1, utbetalinger = utbetalinger, inntektshistorikk = inntektshistorikk)
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
@@ -563,8 +564,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         )
 
         val arbeidsforhold = listOf(
-            Arbeidsforhold(orgnummer = a1, fom = LocalDate.EPOCH, tom = null),
-            Arbeidsforhold(orgnummer = a2, fom = LocalDate.EPOCH, tom = null)
+            Arbeidsforhold(orgnummer = a1.toString(), fom = LocalDate.EPOCH, tom = null),
+            Arbeidsforhold(orgnummer = a2.toString(), fom = LocalDate.EPOCH, tom = null)
         )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -613,8 +614,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         )
 
         val arbeidsforhold = listOf(
-            Arbeidsforhold(orgnummer = a1, fom = LocalDate.EPOCH, tom = null),
-            Arbeidsforhold(orgnummer = a2, fom = LocalDate.EPOCH, tom = null)
+            Arbeidsforhold(orgnummer = a1.toString(), fom = LocalDate.EPOCH, tom = null),
+            Arbeidsforhold(orgnummer = a2.toString(), fom = LocalDate.EPOCH, tom = null)
         )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)

@@ -20,7 +20,7 @@ internal class OpptjeningvurderingTest {
 
     @Test
     fun `27 dager opptjening gir ikke rett til opptjening`() {
-        assertFalse(undersøke(listOf(Arbeidsforhold(ORGNUMMER, 5.desember(2017)))) {
+        assertFalse(undersøke(listOf(Arbeidsforhold(ORGNUMMER.toString(), 5.desember(2017)))) {
             assertEquals(27, it.antallOpptjeningsdager)
             assertFalse(it.harOpptjening())
         })
@@ -29,8 +29,8 @@ internal class OpptjeningvurderingTest {
     @Test
     fun `tom eldre enn fom`() {
         assertTrue(undersøke(listOf(
-            Arbeidsforhold(ORGNUMMER, 1.november(2017)),
-            Arbeidsforhold(ORGNUMMER, 10.desember(2017), 1.desember(2017))
+            Arbeidsforhold(ORGNUMMER.toString(), 1.november(2017)),
+            Arbeidsforhold(ORGNUMMER.toString(), 10.desember(2017), 1.desember(2017))
         )) {
             assertEquals(61, it.antallOpptjeningsdager)
             assertTrue(it.harOpptjening())
@@ -41,7 +41,7 @@ internal class OpptjeningvurderingTest {
 
     @Test
     fun `arbeidsforhold nyere enn skjæringstidspunkt`() {
-        assertFalse(undersøke(listOf(Arbeidsforhold(ORGNUMMER, SKJÆRINGSTIDSPUNKT.plusDays(1)))) {
+        assertFalse(undersøke(listOf(Arbeidsforhold(ORGNUMMER.toString(), SKJÆRINGSTIDSPUNKT.plusDays(1)))) {
             assertEquals(0, it.antallOpptjeningsdager)
             assertFalse(it.harOpptjening())
         })
@@ -49,7 +49,7 @@ internal class OpptjeningvurderingTest {
 
     @Test
     fun `arbeidsforhold avsluttet før skjæringstidspunkt`() {
-        assertFalse(undersøke(listOf(Arbeidsforhold(ORGNUMMER, LocalDate.EPOCH, SKJÆRINGSTIDSPUNKT.minusDays(1)))) {
+        assertFalse(undersøke(listOf(Arbeidsforhold(ORGNUMMER.toString(), LocalDate.EPOCH, SKJÆRINGSTIDSPUNKT.minusDays(1)))) {
             assertEquals(0, it.antallOpptjeningsdager)
             assertFalse(it.harOpptjening())
         })
@@ -57,7 +57,7 @@ internal class OpptjeningvurderingTest {
 
     @Test
     fun `28 dager opptjening fører til OK opptjening`() {
-        assertTrue(undersøke(listOf(Arbeidsforhold(ORGNUMMER, 4.desember(2017)))) {
+        assertTrue(undersøke(listOf(Arbeidsforhold(ORGNUMMER.toString(), 4.desember(2017)))) {
             assertEquals(28, it.antallOpptjeningsdager)
             assertTrue(it.harOpptjening())
         })
@@ -66,9 +66,9 @@ internal class OpptjeningvurderingTest {
     @Test
     fun `flere arbeidsforhold i samme bedrift`() {
         assertTrue(undersøke(listOf(
-            Arbeidsforhold(ORGNUMMER, 4.desember(2017)),
-            Arbeidsforhold(ORGNUMMER, 4.desember(2017), 1.januar(2018)),
-            Arbeidsforhold(ORGNUMMER, 1.januar(2018), 1.september(2018))
+            Arbeidsforhold(ORGNUMMER.toString(), 4.desember(2017)),
+            Arbeidsforhold(ORGNUMMER.toString(), 4.desember(2017), 1.januar(2018)),
+            Arbeidsforhold(ORGNUMMER.toString(), 1.januar(2018), 1.september(2018))
         )) {
             assertEquals(28, it.antallOpptjeningsdager)
             assertTrue(it.harOpptjening())

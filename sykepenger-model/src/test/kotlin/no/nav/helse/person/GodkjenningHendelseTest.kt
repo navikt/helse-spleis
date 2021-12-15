@@ -6,7 +6,6 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
-import no.nav.helse.somFødselsnummer
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -82,8 +81,8 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
     private fun utbetalingsgodkjenning(godkjent: Boolean) = Utbetalingsgodkjenning(
         meldingsreferanseId = UUID.randomUUID(),
         aktørId = "aktørId",
-        fødselsnummer = UNG_PERSON_FNR_2018,
-        organisasjonsnummer = ORGNUMMER,
+        fødselsnummer = UNG_PERSON_FNR_2018.toString(),
+        organisasjonsnummer = ORGNUMMER.toString(),
         utbetalingId = UUID.fromString(
             inspektør.sisteBehov(Behovtype.Godkjenning).kontekst()["utbetalingId"] ?: throw IllegalStateException(
                 "Finner ikke utbetalingId i: ${
@@ -112,14 +111,14 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
         Ytelser(
             meldingsreferanseId = meldingsreferanseId,
             aktørId = "aktørId",
-            fødselsnummer = UNG_PERSON_FNR_2018,
-            organisasjonsnummer = ORGNUMMER,
+            fødselsnummer = UNG_PERSON_FNR_2018.toString(),
+            organisasjonsnummer = ORGNUMMER.toString(),
             vedtaksperiodeId = "${1.vedtaksperiode(ORGNUMMER)}",
             utbetalingshistorikk = Utbetalingshistorikk(
                 meldingsreferanseId = meldingsreferanseId,
                 aktørId = "aktørId",
-                fødselsnummer = UNG_PERSON_FNR_2018,
-                organisasjonsnummer = ORGNUMMER,
+                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
+                organisasjonsnummer = ORGNUMMER.toString(),
                 vedtaksperiodeId = "${1.vedtaksperiode(ORGNUMMER)}",
                 arbeidskategorikoder = emptyMap(),
                 harStatslønn = false,
@@ -162,9 +161,9 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
     private fun sykmelding() =
         Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
-            fnr = UNG_PERSON_FNR_2018,
+            fnr = UNG_PERSON_FNR_2018.toString(),
             aktørId = "aktørId",
-            orgnummer = ORGNUMMER,
+            orgnummer = ORGNUMMER.toString(),
             sykeperioder = listOf(Sykmeldingsperiode(førsteSykedag, sisteSykedag, 100.prosent)),
             sykmeldingSkrevet = førsteSykedag.atStartOfDay(),
             mottatt = sisteSykedag.atStartOfDay()
@@ -175,9 +174,9 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
     private fun søknad() =
         Søknad(
             meldingsreferanseId = UUID.randomUUID(),
-            fnr = UNG_PERSON_FNR_2018,
+            fnr = UNG_PERSON_FNR_2018.toString(),
             aktørId = "aktørId",
-            orgnummer = ORGNUMMER,
+            orgnummer = ORGNUMMER.toString(),
             perioder = listOf(Søknad.Søknadsperiode.Sykdom(førsteSykedag, sisteSykedag, 100.prosent)),
             andreInntektskilder = emptyList(),
             sendtTilNAV = sisteSykedag.atStartOfDay(),
@@ -192,8 +191,8 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
         Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
-            orgnummer = ORGNUMMER,
-            fødselsnummer = UNG_PERSON_FNR_2018,
+            orgnummer = ORGNUMMER.toString(),
+            fødselsnummer = UNG_PERSON_FNR_2018.toString(),
             aktørId = "aktørId",
             førsteFraværsdag = førsteSykedag,
             beregnetInntekt = 31000.månedlig,
@@ -210,8 +209,8 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = "${1.vedtaksperiode(ORGNUMMER)}",
             aktørId = "aktørId",
-            fødselsnummer = UNG_PERSON_FNR_2018.somFødselsnummer(),
-            orgnummer = ORGNUMMER,
+            fødselsnummer = UNG_PERSON_FNR_2018,
+            orgnummer = ORGNUMMER.toString(),
             inntektsvurdering = Inntektsvurdering(
                 inntektperioderForSammenligningsgrunnlag {
                     1.januar(2017) til 1.desember(2017) inntekter {
@@ -228,14 +227,14 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
             opptjeningvurdering = Opptjeningvurdering(
                 listOf(
                     Arbeidsforhold(
-                        ORGNUMMER,
+                        ORGNUMMER.toString(),
                         1.januar(2017)
                     )
                 )
             ),
             arbeidsforhold = listOf(
                 Arbeidsforhold(
-                    ORGNUMMER,
+                    ORGNUMMER.toString(),
                     1.januar(2017)
                 )
             )
@@ -248,8 +247,8 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = "${1.vedtaksperiode(ORGNUMMER)}",
             aktørId = "aktørId",
-            fødselsnummer = UNG_PERSON_FNR_2018,
-            orgnummer = ORGNUMMER,
+            fødselsnummer = UNG_PERSON_FNR_2018.toString(),
+            orgnummer = ORGNUMMER.toString(),
             fagsystemId = inspektør.sisteBehov(Behovtype.Simulering).detaljer().getValue("fagsystemId") as String,
             fagområde = inspektør.sisteBehov(Behovtype.Simulering).detaljer().getValue("fagområde") as String,
             simuleringOK = true,

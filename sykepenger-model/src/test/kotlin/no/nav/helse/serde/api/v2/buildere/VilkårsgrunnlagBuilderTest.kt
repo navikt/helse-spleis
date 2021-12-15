@@ -1,11 +1,13 @@
 package no.nav.helse.serde.api.v2.buildere
 
+import no.nav.helse.Organisasjonsnummer
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.api.v2.*
 import no.nav.helse.serde.api.v2.Vilkårsgrunnlag
+import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.spleis.e2e.*
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
@@ -25,8 +27,8 @@ import java.util.*
 internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
 
     private companion object {
-        private const val AG1 = "987654321"
-        private const val AG2 = "123456789"
+        private val AG1 = "987654321".somOrganisasjonsnummer()
+        private val AG2 = "123456789".somOrganisasjonsnummer()
     }
 
     private val vilkårsgrunnlag get() = VilkårsgrunnlagBuilder(person, OppsamletSammenligningsgrunnlagBuilder(person))
@@ -91,10 +93,10 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         )
 
         assertEquals(2, vilkårsgrunnlag.inntekter.size)
-        val inntektAg1 = vilkårsgrunnlag.inntekter.first { it.organisasjonsnummer == AG1 }
+        val inntektAg1 = vilkårsgrunnlag.inntekter.first { it.organisasjonsnummer == AG1.toString() }
         assertEquals(228000.0, inntektAg1.sammenligningsgrunnlag)
 
-        val inntektAg2 = vilkårsgrunnlag.inntekter.first { it.organisasjonsnummer == AG2 }
+        val inntektAg2 = vilkårsgrunnlag.inntekter.first { it.organisasjonsnummer == AG2.toString() }
         assertEquals(252000.0, inntektAg2.sammenligningsgrunnlag)
     }
 
@@ -178,7 +180,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         )
 
         assertEquals(2, førsteGenerasjon.inntekter.size)
-        val inntektAg1 = førsteGenerasjon.inntekter.first { it.organisasjonsnummer == AG1 }
+        val inntektAg1 = førsteGenerasjon.inntekter.first { it.organisasjonsnummer == AG1.toString() }
         assertInntekt(
             inntektAg1,
             sammenligningsgrunnlag = 228000.0,
@@ -188,7 +190,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
             omregnetÅrsinntektMånedsbeløp = 20000.0
         )
 
-        val inntektAg2 = førsteGenerasjon.inntekter.first { it.organisasjonsnummer == AG2 }
+        val inntektAg2 = førsteGenerasjon.inntekter.first { it.organisasjonsnummer == AG2.toString() }
         assertInntekt(
             inntektAg2,
             sammenligningsgrunnlag = 252000.0,
@@ -213,7 +215,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         )
 
         assertEquals(2, andreGenerasjon.inntekter.size)
-        val inntekt2Ag1 = andreGenerasjon.inntekter.first { it.organisasjonsnummer == AG1 }
+        val inntekt2Ag1 = andreGenerasjon.inntekter.first { it.organisasjonsnummer == AG1.toString() }
         assertInntekt(
             inntekt2Ag1,
             sammenligningsgrunnlag = 228000.0,
@@ -223,7 +225,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
             omregnetÅrsinntektMånedsbeløp = 18000.0
         )
 
-        val inntekt2Ag2 = andreGenerasjon.inntekter.first { it.organisasjonsnummer == AG2 }
+        val inntekt2Ag2 = andreGenerasjon.inntekter.first { it.organisasjonsnummer == AG2.toString() }
         assertEquals(inntektAg2, inntekt2Ag2)
     }
 
@@ -277,8 +279,8 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `har ikke sammenligningsgrunnlag etter overgang fra Infotrygd`() {
         val skjæringstidspunkt = 1.desember(2017)
-        val infotrygdperioder = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, skjæringstidspunkt, 31.desember(2017), 100.prosent, inntekt))
-        val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, skjæringstidspunkt, inntekt, true))
+        val infotrygdperioder = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), skjæringstidspunkt, 31.desember(2017), 100.prosent, inntekt))
+        val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER.toString(), skjæringstidspunkt, inntekt, true))
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
@@ -312,8 +314,8 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         )
 
         val arbeidsforhold = listOf(
-            Arbeidsforhold(AG1, LocalDate.EPOCH, null),
-            Arbeidsforhold(AG2, LocalDate.EPOCH, null)
+            Arbeidsforhold(AG1.toString(), LocalDate.EPOCH, null),
+            Arbeidsforhold(AG2.toString(), LocalDate.EPOCH, null)
         )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
@@ -346,7 +348,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
             oppfyllerKravOmMedlemskap = true
         )
         assertEquals(2, generasjon.inntekter.size)
-        val inntektAg1 = generasjon.inntekter.first { it.organisasjonsnummer == AG1 }
+        val inntektAg1 = generasjon.inntekter.first { it.organisasjonsnummer == AG1.toString() }
         assertInntekt(
             inntektAg1,
             sammenligningsgrunnlag = 372000.0,
@@ -355,7 +357,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
             inntektskilde = Inntektkilde.Inntektsmelding,
             omregnetÅrsinntektMånedsbeløp = 31000.0
         )
-        val inntektGhost = generasjon.inntekter.first { it.organisasjonsnummer == AG2 }
+        val inntektGhost = generasjon.inntekter.first { it.organisasjonsnummer == AG2.toString() }
         assertInntekt(
             inntektGhost,
             AG2, 384000.0, omregnetÅrsinntekt = 384000.0, Inntektkilde.AOrdningen, 32000.0, inntekterFraAOrdningen(1.januar, 32000.0)
@@ -399,14 +401,14 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
 
     private fun assertInntekt(
         inntekt: Arbeidsgiverinntekt,
-        orgnummer: String,
+        orgnummer: Organisasjonsnummer,
         sammenligningsgrunnlag: Double?,
         omregnetÅrsinntekt: Double,
         inntektskilde: Inntektkilde,
         omregnetÅrsinntektMånedsbeløp: Double,
         inntektFraAOrdningen: List<InntekterFraAOrdningen>? = null
     ) {
-        assertEquals(orgnummer, inntekt.organisasjonsnummer)
+        assertEquals(orgnummer.toString(), inntekt.organisasjonsnummer)
         assertEquals(sammenligningsgrunnlag, inntekt.sammenligningsgrunnlag)
         assertEquals(omregnetÅrsinntekt, inntekt.omregnetÅrsinntekt?.beløp)
         assertEquals(inntektskilde, inntekt.omregnetÅrsinntekt?.kilde)

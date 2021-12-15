@@ -330,13 +330,13 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
 
         val inntektshistorikk = listOf(
-            Inntektsopplysning(a1, 20.januar(2021), INNTEKT, true),
-            Inntektsopplysning(a2, 20.januar(2021), INNTEKT, true)
+            Inntektsopplysning(a1.toString(), 20.januar(2021), INNTEKT, true),
+            Inntektsopplysning(a2.toString(), 20.januar(2021), INNTEKT, true)
         )
 
         val utbetalinger = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(a1, 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT),
-            ArbeidsgiverUtbetalingsperiode(a2, 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT)
+            ArbeidsgiverUtbetalingsperiode(a1.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(a2.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT)
         )
 
         håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
@@ -410,13 +410,13 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(a2, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
 
         val inntektshistorikk = listOf(
-            Inntektsopplysning(a1, 20.januar(2021), INNTEKT, true),
-            Inntektsopplysning(a2, 20.januar(2021), INNTEKT, true)
+            Inntektsopplysning(a1.toString(), 20.januar(2021), INNTEKT, true),
+            Inntektsopplysning(a2.toString(), 20.januar(2021), INNTEKT, true)
         )
 
         val utbetalinger = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(a1, 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT),
-            ArbeidsgiverUtbetalingsperiode(a2, 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT)
+            ArbeidsgiverUtbetalingsperiode(a1.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(a2.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT)
         )
 
         håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
@@ -483,13 +483,13 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
 
         val inntektshistorikk = listOf(
-            Inntektsopplysning(a1, 20.januar(2021), INNTEKT, true),
-            Inntektsopplysning(a2, 20.januar(2021), INNTEKT, true)
+            Inntektsopplysning(a1.toString(), 20.januar(2021), INNTEKT, true),
+            Inntektsopplysning(a2.toString(), 20.januar(2021), INNTEKT, true)
         )
 
         val utbetalinger = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(a1, 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT),
-            ArbeidsgiverUtbetalingsperiode(a2, 20.januar(2021), 25.januar(2021), 100.prosent, INNTEKT)
+            ArbeidsgiverUtbetalingsperiode(a1.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(a2.toString(), 20.januar(2021), 25.januar(2021), 100.prosent, INNTEKT)
         )
 
         håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
@@ -515,13 +515,13 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
 
         val inntektshistorikk = listOf(
-            Inntektsopplysning(a1, 20.januar(2021), INNTEKT, true),
-            Inntektsopplysning(a2, 20.januar(2021), INNTEKT, true)
+            Inntektsopplysning(a1.toString(), 20.januar(2021), INNTEKT, true),
+            Inntektsopplysning(a2.toString(), 20.januar(2021), INNTEKT, true)
         )
 
         val utbetalinger = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(a1, 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT),
-            ArbeidsgiverUtbetalingsperiode(a2, 20.januar(2021), 25.januar(2021), 100.prosent, INNTEKT)
+            ArbeidsgiverUtbetalingsperiode(a1.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(a2.toString(), 20.januar(2021), 25.januar(2021), 100.prosent, INNTEKT)
         )
 
         håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
@@ -585,13 +585,13 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
 
         val inntektshistorikk = listOf(
-            Inntektsopplysning(a1, 20.januar(2021), INNTEKT, true),
-            Inntektsopplysning(a2, 20.januar(2021), INNTEKT, true)
+            Inntektsopplysning(a1.toString(), 20.januar(2021), INNTEKT, true),
+            Inntektsopplysning(a2.toString(), 20.januar(2021), INNTEKT, true)
         )
 
         val utbetalinger = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(a1, 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT),
-            ArbeidsgiverUtbetalingsperiode(a2, 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT)
+            ArbeidsgiverUtbetalingsperiode(a1.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(a2.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT)
         )
 
         håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
@@ -686,13 +686,13 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
 
         val inntektshistorikk = listOf(
-            Inntektsopplysning(a1, 20.januar(2021), INNTEKT, true),
-            Inntektsopplysning(a2, 20.januar(2021), INNTEKT, true)
+            Inntektsopplysning(a1.toString(), 20.januar(2021), INNTEKT, true),
+            Inntektsopplysning(a2.toString(), 20.januar(2021), INNTEKT, true)
         )
 
         val utbetalinger = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(a1, 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT),
-            ArbeidsgiverUtbetalingsperiode(a2, 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT)
+            ArbeidsgiverUtbetalingsperiode(a1.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(a2.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT)
         )
 
         håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
@@ -770,21 +770,21 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, 25.februar, 100.prosent), orgnummer = a2)
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar, 100.prosent, INNTEKT),
-            ArbeidsgiverUtbetalingsperiode(a2, 1.januar, 31.januar, 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(a1.toString(), 1.januar, 31.januar, 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(a2.toString(), 1.januar, 31.januar, 100.prosent, INNTEKT),
             inntektshistorikk = listOf(
-                Inntektsopplysning(a1, 1.januar, INNTEKT, true),
-                Inntektsopplysning(a2, 1.januar, INNTEKT, true)
+                Inntektsopplysning(a1.toString(), 1.januar, INNTEKT, true),
+                Inntektsopplysning(a2.toString(), 1.januar, INNTEKT, true)
             ),
             orgnummer = a1
         )
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar, 100.prosent, INNTEKT),
-            ArbeidsgiverUtbetalingsperiode(a2, 1.januar, 31.januar, 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(a1.toString(), 1.januar, 31.januar, 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(a2.toString(), 1.januar, 31.januar, 100.prosent, INNTEKT),
             inntektshistorikk = listOf(
-                Inntektsopplysning(a1, 1.januar, INNTEKT, true),
-                Inntektsopplysning(a2, 1.januar, INNTEKT, true)
+                Inntektsopplysning(a1.toString(), 1.januar, INNTEKT, true),
+                Inntektsopplysning(a2.toString(), 1.januar, INNTEKT, true)
             ),
             orgnummer = a2
         )
@@ -810,8 +810,8 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 20.februar, 100.prosent), orgnummer = a2)
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(a2, 1.januar, 31.januar, 100.prosent, INNTEKT),
-            inntektshistorikk = listOf(Inntektsopplysning(a2, 1.januar, INNTEKT, true)),
+            ArbeidsgiverUtbetalingsperiode(a2.toString(), 1.januar, 31.januar, 100.prosent, INNTEKT),
+            inntektshistorikk = listOf(Inntektsopplysning(a2.toString(), 1.januar, INNTEKT, true)),
             orgnummer = a2
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
@@ -825,11 +825,11 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
 
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar, 100.prosent, INNTEKT),
-            ArbeidsgiverUtbetalingsperiode(a2, 1.januar, 31.januar, 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(a1.toString(), 1.januar, 31.januar, 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(a2.toString(), 1.januar, 31.januar, 100.prosent, INNTEKT),
             inntektshistorikk = listOf(
-                Inntektsopplysning(a1, 1.januar, INNTEKT, true),
-                Inntektsopplysning(a2, 1.januar, INNTEKT, true)
+                Inntektsopplysning(a1.toString(), 1.januar, INNTEKT, true),
+                Inntektsopplysning(a2.toString(), 1.januar, INNTEKT, true)
             ),
             orgnummer = a1
         )
@@ -855,13 +855,13 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
 
         val inntektshistorikk = listOf(
-            Inntektsopplysning(a1, 20.januar(2021), INNTEKT, true),
-            Inntektsopplysning(a2, 20.januar(2021), INNTEKT, true)
+            Inntektsopplysning(a1.toString(), 20.januar(2021), INNTEKT, true),
+            Inntektsopplysning(a2.toString(), 20.januar(2021), INNTEKT, true)
         )
 
         val utbetalinger = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(a1, 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT),
-            ArbeidsgiverUtbetalingsperiode(a2, 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT)
+            ArbeidsgiverUtbetalingsperiode(a1.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(a2.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT)
         )
 
         håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
@@ -877,8 +877,8 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTrue(
             aktiveVedtaksperioder.containsAll(
                 listOf(
-                    mapOf("orgnummer" to a1, "vedtaksperiodeId" to 1.vedtaksperiode(a1).toString(), "periodetype" to Periodetype.OVERGANG_FRA_IT.name),
-                    mapOf("orgnummer" to a2, "vedtaksperiodeId" to 1.vedtaksperiode(a2).toString(), "periodetype" to Periodetype.OVERGANG_FRA_IT.name)
+                    mapOf("orgnummer" to a1.toString(), "vedtaksperiodeId" to 1.vedtaksperiode(a1).toString(), "periodetype" to Periodetype.OVERGANG_FRA_IT.name),
+                    mapOf("orgnummer" to a2.toString(), "vedtaksperiodeId" to 1.vedtaksperiode(a2).toString(), "periodetype" to Periodetype.OVERGANG_FRA_IT.name)
                 )
             )
         )
@@ -893,13 +893,13 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
 
         val inntektshistorikk = listOf(
-            Inntektsopplysning(a1, 20.januar(2021), INNTEKT, true),
-            Inntektsopplysning(a2, 20.januar(2021), INNTEKT, true)
+            Inntektsopplysning(a1.toString(), 20.januar(2021), INNTEKT, true),
+            Inntektsopplysning(a2.toString(), 20.januar(2021), INNTEKT, true)
         )
 
         val utbetalinger = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(a1, 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT),
-            ArbeidsgiverUtbetalingsperiode(a2, 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT)
+            ArbeidsgiverUtbetalingsperiode(a1.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(a2.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT)
         )
 
         håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
@@ -927,13 +927,13 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
 
         val inntektshistorikk = listOf(
-            Inntektsopplysning(a1, 20.januar(2021), INNTEKT, true),
-            Inntektsopplysning(a2, 20.januar(2021), INNTEKT, true)
+            Inntektsopplysning(a1.toString(), 20.januar(2021), INNTEKT, true),
+            Inntektsopplysning(a2.toString(), 20.januar(2021), INNTEKT, true)
         )
 
         val utbetalinger = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(a1, 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT),
-            ArbeidsgiverUtbetalingsperiode(a2, 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT)
+            ArbeidsgiverUtbetalingsperiode(a1.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(a2.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT)
         )
 
         håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
@@ -966,11 +966,11 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
 
         val inntektshistorikk = listOf(
-            Inntektsopplysning(a2, 20.januar(2021), INNTEKT, true)
+            Inntektsopplysning(a2.toString(), 20.januar(2021), INNTEKT, true)
         )
 
         val utbetalinger = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(a2, 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT)
+            ArbeidsgiverUtbetalingsperiode(a2.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT)
         )
 
         håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
@@ -1153,10 +1153,10 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         val inntektshistorikk = listOf(
-            Inntektsopplysning(a1, 1.januar(2021), INNTEKT, true)
+            Inntektsopplysning(a1.toString(), 1.januar(2021), INNTEKT, true)
         )
         val utbetalinger = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(a1, 1.januar(2021), 31.januar(2021), 100.prosent, INNTEKT)
+            ArbeidsgiverUtbetalingsperiode(a1.toString(), 1.januar(2021), 31.januar(2021), 100.prosent, INNTEKT)
         )
         håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1, inntektshistorikk = inntektshistorikk)
@@ -1173,7 +1173,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode2.start, periode2.endInclusive, 100.prosent), orgnummer = a1)
         håndterYtelser(2.vedtaksperiode, orgnummer = a1, inntektshistorikk = inntektshistorikk)
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true, a1)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true, orgnummer = a1)
         håndterUtbetalt(2.vedtaksperiode, orgnummer = a1)
 
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(a2Periode.start, a2Periode.endInclusive, 100.prosent), orgnummer = a2)
@@ -1206,10 +1206,10 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         val inntektshistorikk = listOf(
-            Inntektsopplysning(a1, 1.januar(2021), INNTEKT, true)
+            Inntektsopplysning(a1.toString(), 1.januar(2021), INNTEKT, true)
         )
         val utbetalinger = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(a1, 1.januar(2021), 31.januar(2021), 100.prosent, INNTEKT)
+            ArbeidsgiverUtbetalingsperiode(a1.toString(), 1.januar(2021), 31.januar(2021), 100.prosent, INNTEKT)
         )
         håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1, inntektshistorikk = inntektshistorikk)
@@ -1273,7 +1273,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         ))
         håndterYtelser(2.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true, a1)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true, orgnummer = a1)
 
         håndterUtbetalt(2.vedtaksperiode, orgnummer = a1)
         assertTilstand(a1, AVSLUTTET, 2)
@@ -1301,13 +1301,13 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
 
         val inntektshistorikk = listOf(
-            Inntektsopplysning(a1, 20.januar(2021), INNTEKT, true),
-            Inntektsopplysning(a2, 20.januar(2021), INNTEKT, true)
+            Inntektsopplysning(a1.toString(), 20.januar(2021), INNTEKT, true),
+            Inntektsopplysning(a2.toString(), 20.januar(2021), INNTEKT, true)
         )
 
         val utbetalinger = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(a1, 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT),
-            ArbeidsgiverUtbetalingsperiode(a2, 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT)
+            ArbeidsgiverUtbetalingsperiode(a1.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(a2.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT)
         )
 
         håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
@@ -1518,7 +1518,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
                     grunnlag(a2, 1.januar(2021), 1000.månedlig.repeat(3))
                 )
             ),
-            arbeidsforhold = listOf(Arbeidsforhold(a1, LocalDate.EPOCH, null), Arbeidsforhold(a2, LocalDate.EPOCH, null))
+            arbeidsforhold = listOf(Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null), Arbeidsforhold(a2.toString(), LocalDate.EPOCH, null))
         )
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -1571,7 +1571,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
                     grunnlag(a2, 1.januar(2021), 1000.månedlig.repeat(3))
                 )
             ),
-            arbeidsforhold = listOf(Arbeidsforhold(a1, LocalDate.EPOCH, null), Arbeidsforhold(a2, LocalDate.EPOCH, null))
+            arbeidsforhold = listOf(Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null), Arbeidsforhold(a2.toString(), LocalDate.EPOCH, null))
         )
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -1606,11 +1606,11 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         //3/5/21	20/5/21	 BS     14	     248	        0	        32
 
         val inntektshistorikkA1 = listOf(
-            Inntektsopplysning(a1, 1.januar, INNTEKT, true),
+            Inntektsopplysning(a1.toString(), 1.januar, INNTEKT, true),
         )
         val inntektshistorikkA2 = listOf(
-            Inntektsopplysning(a1, 1.januar, INNTEKT, true),
-            Inntektsopplysning(a2, 1.juli, INNTEKT, true),
+            Inntektsopplysning(a1.toString(), 1.januar, INNTEKT, true),
+            Inntektsopplysning(a2.toString(), 1.juli, INNTEKT, true),
         )
         val ITPeriodeA1 = 1.januar til 31.januar
         val ITPeriodeA2 = 1.juli til 31.juli
@@ -1618,11 +1618,11 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         val spleisPeriodeA1 = 1.februar til 28.februar
         val spleisPeriodeA2 = 1.august til 31.august
         val utbetalingerA1 = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(a1, ITPeriodeA1.start, ITPeriodeA1.endInclusive, 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(a1.toString(), ITPeriodeA1.start, ITPeriodeA1.endInclusive, 100.prosent, INNTEKT),
         )
         val utbetalingerA2 = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(a1, ITPeriodeA1.start, ITPeriodeA1.endInclusive, 100.prosent, INNTEKT),
-            ArbeidsgiverUtbetalingsperiode(a2, ITPeriodeA2.start, ITPeriodeA2.endInclusive, 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(a1.toString(), ITPeriodeA1.start, ITPeriodeA1.endInclusive, 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(a2.toString(), ITPeriodeA2.start, ITPeriodeA2.endInclusive, 100.prosent, INNTEKT),
         )
 
         håndterSykmelding(Sykmeldingsperiode(spleisPeriodeA1.start, spleisPeriodeA1.endInclusive, 100.prosent), orgnummer = a1)
@@ -1788,10 +1788,10 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
 
         inspektør(a1).utbetalinger.forEach {
-            assertEquals(a1, it.inspektør.arbeidsgiverOppdrag.mottaker())
+            assertEquals(a1.toString(), it.inspektør.arbeidsgiverOppdrag.mottaker())
         }
         inspektør(a2).utbetalinger.forEach {
-            assertEquals(a2, it.inspektør.arbeidsgiverOppdrag.mottaker())
+            assertEquals(a2.toString(), it.inspektør.arbeidsgiverOppdrag.mottaker())
         }
     }
 
@@ -1804,13 +1804,13 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
 
         val inntektshistorikk = listOf(
-            Inntektsopplysning(a1, 20.januar(2021), INNTEKT, true),
-            Inntektsopplysning(a2, 20.januar(2021), 1000.00.månedlig, true)
+            Inntektsopplysning(a1.toString(), 20.januar(2021), INNTEKT, true),
+            Inntektsopplysning(a2.toString(), 20.januar(2021), 1000.00.månedlig, true)
         )
 
         val utbetalinger = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(a1, 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT),
-            ArbeidsgiverUtbetalingsperiode(a2, 20.januar(2021), 26.januar(2021), 100.prosent, 1000.00.månedlig)
+            ArbeidsgiverUtbetalingsperiode(a1.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(a2.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, 1000.00.månedlig)
         )
 
         håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
@@ -1825,8 +1825,8 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a1)
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
 
-        assertEquals(31000.00 * 12, observatør.vedtakFattetEvent[1.vedtaksperiode(a1)]?.grunnlagForSykepengegrunnlagPerArbeidsgiver?.get(a1))
-        assertEquals(12000.00, observatør.vedtakFattetEvent[1.vedtaksperiode(a1)]?.grunnlagForSykepengegrunnlagPerArbeidsgiver?.get(a2))
+        assertEquals(31000.00 * 12, observatør.vedtakFattetEvent[1.vedtaksperiode(a1)]?.grunnlagForSykepengegrunnlagPerArbeidsgiver?.get(a1.toString()))
+        assertEquals(12000.00, observatør.vedtakFattetEvent[1.vedtaksperiode(a1)]?.grunnlagForSykepengegrunnlagPerArbeidsgiver?.get(a2.toString()))
     }
 
     @Test

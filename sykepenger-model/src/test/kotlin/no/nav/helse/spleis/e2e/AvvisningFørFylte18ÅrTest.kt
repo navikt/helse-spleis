@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.person.TilstandType.*
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.testhelpers.november
 import no.nav.helse.testhelpers.oktober
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -13,7 +14,7 @@ import org.junit.jupiter.api.Test
 
 internal class AvvisningFørFylte18ÅrTest : AbstractEndToEndTest() {
     private companion object {
-        const val FYLLER_18_ÅR_2_NOVEMBER = "02110075045"
+        val FYLLER_18_ÅR_2_NOVEMBER = "02110075045".somFødselsnummer()
     }
 
     @BeforeEach

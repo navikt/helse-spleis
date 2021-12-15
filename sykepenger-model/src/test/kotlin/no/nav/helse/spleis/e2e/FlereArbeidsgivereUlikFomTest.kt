@@ -4,6 +4,7 @@ import no.nav.helse.ForventetFeil
 import no.nav.helse.hendelser.*
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Inntektshistorikk
+import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.testhelpers.april
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
@@ -17,10 +18,10 @@ import java.time.LocalDate
 
 internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
     private companion object {
-        private const val a1 = "arbeidsgiver 1"
-        private const val a2 = "arbeidsgiver 2"
-        private const val a3 = "arbeidsgiver 3"
-        private const val a4 = "arbeidsgiver 4"
+        private val a1 = "arbeidsgiver 1".somOrganisasjonsnummer()
+        private val a2 = "arbeidsgiver 2".somOrganisasjonsnummer()
+        private val a3 = "arbeidsgiver 3".somOrganisasjonsnummer()
+        private val a4 = "arbeidsgiver 4".somOrganisasjonsnummer()
     }
 
     @Test
@@ -839,8 +840,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             )
         )
         val arbeidsforhold = listOf(
-            Arbeidsforhold(orgnummer = a1, fom = LocalDate.EPOCH, tom = null),
-            Arbeidsforhold(orgnummer = a2, fom = LocalDate.EPOCH, tom = null)
+            Arbeidsforhold(orgnummer = a1.toString(), fom = LocalDate.EPOCH, tom = null),
+            Arbeidsforhold(orgnummer = a2.toString(), fom = LocalDate.EPOCH, tom = null)
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
@@ -895,8 +896,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             )
         )
         val arbeidsforhold = listOf(
-            Arbeidsforhold(orgnummer = a1, fom = LocalDate.EPOCH, tom = null),
-            Arbeidsforhold(orgnummer = a2, fom = LocalDate.EPOCH, tom = null)
+            Arbeidsforhold(orgnummer = a1.toString(), fom = LocalDate.EPOCH, tom = null),
+            Arbeidsforhold(orgnummer = a2.toString(), fom = LocalDate.EPOCH, tom = null)
         )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -1158,7 +1159,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             orgnummer = a1
         )
 
-        val inntektsopplysning = inspektør(a1).vilkårsgrunnlag(2.vedtaksperiode)?.inntektsopplysningPerArbeidsgiver()?.get(a2)
+        val inntektsopplysning = inspektør(a1).vilkårsgrunnlag(2.vedtaksperiode)?.inntektsopplysningPerArbeidsgiver()?.get(a2.toString())
         assertInstanceOf(Inntektshistorikk.Inntektsmelding::class.java, inntektsopplysning)
         assertEquals(32000.månedlig, inntektsopplysning?.grunnlagForSykepengegrunnlag())
     }

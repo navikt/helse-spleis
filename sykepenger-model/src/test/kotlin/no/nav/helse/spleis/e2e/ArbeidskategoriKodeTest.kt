@@ -20,7 +20,7 @@ internal class ArbeidskategoriKodeTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
         håndterYtelser(
-            1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.desember(2017), 31.desember(2017), 100.prosent, 15000.daglig),
+            1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.desember(2017), 31.desember(2017), 100.prosent, 15000.daglig),
             arbeidskategorikoder = mapOf("05" to 1.desember(2017))
         )
         assertForkastetPeriodeTilstander(
@@ -35,8 +35,8 @@ internal class ArbeidskategoriKodeTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
         val arbeidskategorier = mapOf("05" to 1.desember(2017))
-        val historikk = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.desember(2017), 28.desember(2017), 100.prosent, 15000.daglig))
-        håndterYtelser(1.vedtaksperiode, *historikk, arbeidskategorikoder = arbeidskategorier, inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.desember(2017), INNTEKT, true)))
+        val historikk = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.desember(2017), 28.desember(2017), 100.prosent, 15000.daglig))
+        håndterYtelser(1.vedtaksperiode, *historikk, arbeidskategorikoder = arbeidskategorier, inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER.toString(), 1.desember(2017), INNTEKT, true)))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         assertTilstander(

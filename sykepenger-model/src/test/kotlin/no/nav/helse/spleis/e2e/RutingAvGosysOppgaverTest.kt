@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
+import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.testhelpers.april
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
@@ -111,7 +112,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
     @Test
     fun `sjekker mot utbetalinger på tvers av arbeidsgivere`() {
         // Utbetaling 17. mars til 31. mars (AGP 1-16. mars)
-        nyttVedtak(1.mars, 31.mars, orgnummer = "999999999")
+        nyttVedtak(1.mars, 31.mars, orgnummer = "999999999".somOrganisasjonsnummer())
 
         håndterSykmelding(Sykmeldingsperiode(20.februar, 2.mars, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(20.februar, 1.mars, 80.prosent))

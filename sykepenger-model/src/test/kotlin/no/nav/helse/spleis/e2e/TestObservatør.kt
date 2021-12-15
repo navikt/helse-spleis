@@ -1,10 +1,12 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Fødselsnummer
+import no.nav.helse.Organisasjonsnummer
 import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.VedtaksperiodeEndretEvent
 import no.nav.helse.person.TilstandType
+import no.nav.helse.somOrganisasjonsnummer
 import org.junit.jupiter.api.fail
 import java.util.*
 
@@ -24,7 +26,7 @@ internal class TestObservatør : PersonObserver {
     val opprettOppgaverEventer = mutableListOf<PersonObserver.OpprettOppgaveEvent>()
 
     private lateinit var sisteVedtaksperiode: UUID
-    private val vedtaksperioder = mutableMapOf<String, MutableSet<UUID>>()
+    private val vedtaksperioder = mutableMapOf<Organisasjonsnummer, MutableSet<UUID>>()
     private val vedtaksperiodeendringer = mutableMapOf<UUID, MutableList<VedtaksperiodeEndretEvent>>()
 
     val utbetaltEventer = mutableListOf<PersonObserver.UtbetaltEvent>()
@@ -39,9 +41,9 @@ internal class TestObservatør : PersonObserver {
         vedtaksperiodeendringer[vedtaksperiodeId]?.last()?.hendelser ?: fail { "VedtaksperiodeId $vedtaksperiodeId har ingen hendelser tilknyttet" }
 
     fun sisteVedtaksperiode() = sisteVedtaksperiode
-    fun sisteVedtaksperiode(orgnummer: String) = vedtaksperioder.getValue(orgnummer).last()
-    fun vedtaksperiode(orgnummer: String, indeks: Int) = vedtaksperioder.getValue(orgnummer).toList()[indeks]
-    fun vedtaksperiodeIndeks(orgnummer: String, id: UUID) = vedtaksperioder.getValue(orgnummer).indexOf(id)
+    fun sisteVedtaksperiode(orgnummer: Organisasjonsnummer) = vedtaksperioder.getValue(orgnummer).last()
+    fun vedtaksperiode(orgnummer: Organisasjonsnummer, indeks: Int) = vedtaksperioder.getValue(orgnummer).toList()[indeks]
+    fun vedtaksperiodeIndeks(orgnummer: Organisasjonsnummer, id: UUID) = vedtaksperioder.getValue(orgnummer).indexOf(id)
     fun bedtOmInntektsmeldingReplay(vedtaksperiodeId: UUID) = vedtaksperiodeId in inntektsmeldingReplayEventer
 
     fun avbruttePerioder() = avbruttEventer.size
@@ -135,9 +137,7 @@ internal class TestObservatør : PersonObserver {
             return UUID.fromString(toMap()["vedtaksperiodeId"])
         }
 
-        private fun Hendelseskontekst.orgnummer(): String {
-            return toMap()["organisasjonsnummer"]!!
-        }
+        private fun Hendelseskontekst.orgnummer() = toMap()["organisasjonsnummer"]!!.somOrganisasjonsnummer()
 
         data class ObservedEvent<EventType>(val event: EventType, private val kontekst: Hendelseskontekst) {
             fun vedtaksperiodeId() = kontekst.vedtaksperiodeId()

@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.somFødselsnummer
+import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.september
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -16,7 +17,7 @@ import java.util.*
 
 internal class ArbeidsgiverTest {
     private companion object {
-        const val ORGNUMMER = "888888888"
+        val ORGNUMMER = "888888888".somOrganisasjonsnummer()
     }
     @Test
     fun `ny inntektsmelding legger på inntekt på inntektHistorie`() {
@@ -26,7 +27,7 @@ internal class ArbeidsgiverTest {
                 beløp = 12000.månedlig,
                 opphørsdato = null
             ),
-            orgnummer = ORGNUMMER,
+            orgnummer = ORGNUMMER.toString(),
             fødselsnummer = "fnr",
             aktørId = "aktørId",
             førsteFraværsdag = 1.januar,
@@ -51,7 +52,7 @@ internal class ArbeidsgiverTest {
             meldingsreferanseId = UUID.randomUUID(),
             fnr = "fnr",
             aktørId = "aktørId",
-            orgnummer = ORGNUMMER,
+            orgnummer = ORGNUMMER.toString(),
             sykeperioder = sykeperioder.toList(),
             sykmeldingSkrevet = periode?.start!!.atStartOfDay(),
             mottatt = periode.endInclusive.atStartOfDay()

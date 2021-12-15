@@ -48,7 +48,7 @@ internal abstract class HistorieTest {
     }
 
     protected fun utbetaling(fom: LocalDate, tom: LocalDate, inntekt: Inntekt = 1000.daglig, grad: Prosentdel = 100.prosent, orgnr: String = AG1) =
-        ArbeidsgiverUtbetalingsperiode(orgnr, fom,  tom, grad, inntekt)
+        ArbeidsgiverUtbetalingsperiode(orgnr.toString(), fom,  tom, grad, inntekt)
 
     protected fun ferie(fom: LocalDate, tom: LocalDate) =
         Friperiode(fom,  tom)

@@ -12,6 +12,7 @@ import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -367,19 +368,19 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     @Test
     fun `revurdering ved skjæringstidspunkt hos infotrygd`() {
         val historikk1 = listOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 29.januar(2018), 18.februar(2018), 100.prosent, 1000.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 19.februar(2018), 18.mars(2018), 100.prosent, 1000.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 19.mars(2018), 2.april(2018), 100.prosent, 1000.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 3.april(2018), 14.mai(2018), 100.prosent, 1000.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 15.mai(2018), 3.juni(2018), 100.prosent, 1000.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 4.juni(2018), 22.juni(2018), 100.prosent, 1000.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 18.mars(2020), 31.mars(2020), 100.prosent, 1000.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.april(2020), 30.april(2020), 100.prosent, 1000.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.mai(2020), 31.mai(2020), 100.prosent, 1000.daglig)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 29.januar(2018), 18.februar(2018), 100.prosent, 1000.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 19.februar(2018), 18.mars(2018), 100.prosent, 1000.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 19.mars(2018), 2.april(2018), 100.prosent, 1000.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 3.april(2018), 14.mai(2018), 100.prosent, 1000.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 15.mai(2018), 3.juni(2018), 100.prosent, 1000.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 4.juni(2018), 22.juni(2018), 100.prosent, 1000.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 18.mars(2020), 31.mars(2020), 100.prosent, 1000.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.april(2020), 30.april(2020), 100.prosent, 1000.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.mai(2020), 31.mai(2020), 100.prosent, 1000.daglig)
         )
         val inntektsopplysning1 = listOf(
-            Inntektsopplysning(ORGNUMMER, 18.mars(2020), INNTEKT, true),
-            Inntektsopplysning(ORGNUMMER, 29.januar(2018), INNTEKT, true)
+            Inntektsopplysning(ORGNUMMER.toString(), 18.mars(2020), INNTEKT, true),
+            Inntektsopplysning(ORGNUMMER.toString(), 29.januar(2018), INNTEKT, true)
         )
 
         håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 30.juni(2020), 100.prosent))
@@ -478,8 +479,8 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
 
     @Test
     fun `avviser revurdering av inntekt for saker med flere arbeidsgivere`() {
-        nyeVedtak(1.januar, 31.januar, "ag1", "ag2")
-        håndterOverstyrInntekt(inntekt = 32000.månedlig, "ag1", 1.januar)
+        nyeVedtak(1.januar, 31.januar, "ag1".somOrganisasjonsnummer(), "ag2".somOrganisasjonsnummer())
+        håndterOverstyrInntekt(inntekt = 32000.månedlig, "ag1".somOrganisasjonsnummer(), 1.januar)
 
         assertEquals(1, observatør.avvisteRevurderinger.size)
         assertErrorTekst(inspektør, "Forespurt overstyring av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
@@ -487,8 +488,8 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
 
     @Test
     fun `avviser revurdering av inntekt for saker med 1 arbeidsgiver og ghost`() {
-        val ag1 = "ag1"
-        val ag2 = "ag2"
+        val ag1 = "ag1".somOrganisasjonsnummer()
+        val ag2 = "ag2".somOrganisasjonsnummer()
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = ag1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = ag1)
         håndterInntektsmelding(
@@ -504,8 +505,8 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         )
 
         val arbeidsforhold = listOf(
-            Arbeidsforhold(ag1, LocalDate.EPOCH, null),
-            Arbeidsforhold(ag2, LocalDate.EPOCH, null)
+            Arbeidsforhold(ag1.toString(), LocalDate.EPOCH, null),
+            Arbeidsforhold(ag2.toString(), LocalDate.EPOCH, null)
         )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = ag1)

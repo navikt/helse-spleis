@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.TilstandType.*
+import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Fridag
@@ -11,8 +12,8 @@ import org.junit.jupiter.api.Test
 internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() {
 
     private companion object {
-        private const val AG1 = "123456789"
-        private const val AG2 = "987612345"
+        private val AG1 = "123456789".somOrganisasjonsnummer()
+        private val AG2 = "987612345".somOrganisasjonsnummer()
     }
 
     @Test

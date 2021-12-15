@@ -161,7 +161,7 @@ internal class SøknadArbeidsgiverHendelseTest : AbstractPersonTest() {
     private fun søknad(vararg perioder: Søknad.Søknadsperiode, orgnummer: String = "987654321") =
         Søknad(
             meldingsreferanseId = UUID.randomUUID(),
-            fnr = UNG_PERSON_FNR_2018,
+            fnr = UNG_PERSON_FNR_2018.toString(),
             aktørId = "12345",
             orgnummer = orgnummer,
             perioder = listOf(*perioder),
@@ -179,7 +179,7 @@ internal class SøknadArbeidsgiverHendelseTest : AbstractPersonTest() {
     ) =
         SøknadArbeidsgiver(
             meldingsreferanseId = UUID.randomUUID(),
-            fnr = UNG_PERSON_FNR_2018,
+            fnr = UNG_PERSON_FNR_2018.toString(),
             aktørId = "12345",
             orgnummer = orgnummer,
             sykdomsperioder = listOf(*perioder),
@@ -190,7 +190,7 @@ internal class SøknadArbeidsgiverHendelseTest : AbstractPersonTest() {
     private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode, orgnummer: String = "987654321") =
         Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
-            fnr = UNG_PERSON_FNR_2018,
+            fnr = UNG_PERSON_FNR_2018.toString(),
             aktørId = "12345",
             orgnummer = orgnummer,
             sykeperioder = sykeperioder.toList(),

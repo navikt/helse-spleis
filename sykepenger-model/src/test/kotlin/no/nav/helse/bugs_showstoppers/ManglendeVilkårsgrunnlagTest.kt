@@ -150,9 +150,9 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
     @Test
     fun `periode etter en periode med ferie - opphav i Infotrygd`() {
         håndterInntektsmelding(listOf(15.november(2017) til 30.november(2017)))
-        val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.desember(2017), 31.desember(2017), 100.prosent, INNTEKT)
+        val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.desember(2017), 31.desember(2017), 100.prosent, INNTEKT)
         val inntektshistorikk = listOf(
-            Inntektsopplysning(ORGNUMMER, 1.desember(2017), INNTEKT, true)
+            Inntektsopplysning(ORGNUMMER.toString(), 1.desember(2017), INNTEKT, true)
         )
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
@@ -187,9 +187,9 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
 
     @Test
     fun `periode etter en periode med permisjon (gir warning) - opphav i Infotrygd`() {
-        val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.desember(2017), 31.desember(2017), 100.prosent, INNTEKT)
+        val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.desember(2017), 31.desember(2017), 100.prosent, INNTEKT)
         val inntektshistorikk = listOf(
-            Inntektsopplysning(ORGNUMMER, 1.desember(2017), INNTEKT, true)
+            Inntektsopplysning(ORGNUMMER.toString(), 1.desember(2017), INNTEKT, true)
         )
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))

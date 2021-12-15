@@ -150,7 +150,7 @@ internal class HistoriePeriodetypeTest {
     }
 
     private fun utbetaling(fom: LocalDate, tom: LocalDate, inntekt: Inntekt = 1000.daglig, grad: Prosentdel = 100.prosent, orgnr: String = AG1) =
-        ArbeidsgiverUtbetalingsperiode(orgnr, fom,  tom, grad, inntekt)
+        ArbeidsgiverUtbetalingsperiode(orgnr.toString(), fom,  tom, grad, inntekt)
 
     private fun ferie(fom: LocalDate, tom: LocalDate) =
         Friperiode(fom,  tom)
@@ -214,7 +214,7 @@ internal class HistoriePeriodetypeTest {
                 meldingsreferanseId = UUID.randomUUID(),
                 refusjon = Inntektsmelding.Refusjon(30000.månedlig, null),
                 orgnummer = arbeidsgiver.organisasjonsnummer(),
-                fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018,
+                fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018.toString(),
                 aktørId = AbstractPersonTest.AKTØRID,
                 førsteFraværsdag = 1.januar,
                 beregnetInntekt = 30000.månedlig,

@@ -10,6 +10,7 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.somFødselsnummer
+import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
@@ -34,7 +35,7 @@ internal class ArbeidsgiverUtbetalingerTest {
     private companion object {
         val UNG_PERSON_FNR_2018 = "12029240045".somFødselsnummer()
         val PERSON_67_ÅR_FNR_2018 = "05015112345".somFødselsnummer()
-        const val ORGNUMMER = "888888888"
+        val ORGNUMMER = "888888888".somOrganisasjonsnummer()
     }
 
     @Test
@@ -369,7 +370,7 @@ internal class ArbeidsgiverUtbetalingerTest {
                 meldingsreferanseId = UUID.randomUUID(),
                 fnr = UNG_PERSON_FNR_2018.toString(),
                 aktørId = "",
-                orgnummer = ORGNUMMER,
+                orgnummer = ORGNUMMER.toString(),
                 sykeperioder = listOf(Sykmeldingsperiode(1.januar, 2.januar, 100.prosent)),
                 sykmeldingSkrevet = 1.januar.atStartOfDay(),
                 mottatt = 1.januar.atStartOfDay()
@@ -398,8 +399,8 @@ internal class ArbeidsgiverUtbetalingerTest {
             inntektsmelding = Inntektsmelding(
                 meldingsreferanseId = UUID.randomUUID(),
                 refusjon = Inntektsmelding.Refusjon(30000.månedlig, null),
-                orgnummer = ORGNUMMER,
-                fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018,
+                orgnummer = ORGNUMMER.toString(),
+                fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018.toString(),
                 aktørId = AbstractPersonTest.AKTØRID,
                 førsteFraværsdag = 1.januar,
                 beregnetInntekt = 30000.månedlig,

@@ -101,8 +101,8 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
             håndterUtbetalingshistorikk(
-                1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
-                    Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true)
+                1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 17.januar, 31.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
+                    Inntektsopplysning(ORGNUMMER.toString(), 17.januar, INNTEKT, true)
                 )
             )
             håndterYtelser(1.vedtaksperiode)
@@ -120,8 +120,8 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
             håndterUtbetalingshistorikk(
-                1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
-                    Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true)
+                1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 17.januar, 31.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
+                    Inntektsopplysning(ORGNUMMER.toString(), 17.januar, INNTEKT, true)
                 )
             )
             håndterYtelser(1.vedtaksperiode)
@@ -140,10 +140,10 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, INNTEKT),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 28.februar, 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 17.januar, 31.januar, 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.februar, 28.februar, 100.prosent, INNTEKT),
             inntektshistorikk = listOf(
-                Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true)
+                Inntektsopplysning(ORGNUMMER.toString(), 17.januar, INNTEKT, true)
             )
         )
         håndterYtelser(1.vedtaksperiode)
@@ -641,9 +641,9 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 50.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 50.prosent))
         håndterUtbetalingshistorikk(
-            1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 50.prosent, INNTEKT / 2),
+            1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 17.januar, 31.januar, 50.prosent, INNTEKT / 2),
             inntektshistorikk = listOf(
-                Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true)
+                Inntektsopplysning(ORGNUMMER.toString(), 17.januar, INNTEKT, true)
             )
         )
         håndterYtelser(1.vedtaksperiode)
@@ -670,9 +670,9 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 50.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 50.prosent))
         håndterUtbetalingshistorikk(
-            1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 18.januar, 31.januar, 50.prosent, INNTEKT / 2),
+            1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 18.januar, 31.januar, 50.prosent, INNTEKT / 2),
             inntektshistorikk = listOf(
-                Inntektsopplysning(ORGNUMMER, 18.januar, INNTEKT, true)
+                Inntektsopplysning(ORGNUMMER.toString(), 18.januar, INNTEKT, true)
             )
         )
         håndterYtelser(1.vedtaksperiode)
@@ -746,10 +746,10 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
             inntektshistorikk = listOf(
-                Inntektsopplysning(orgnummer = ORGNUMMER, sykepengerFom = 17.januar, inntekt = INNTEKT, refusjonTilArbeidsgiver = true)
+                Inntektsopplysning(orgnummer = ORGNUMMER.toString(), sykepengerFom = 17.januar, inntekt = INNTEKT, refusjonTilArbeidsgiver = true)
             ),
             utbetalinger = arrayOf(
-                ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, INNTEKT)
+                ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 17.januar, 31.januar, 100.prosent, INNTEKT)
             )
         )
 
@@ -769,10 +769,10 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
             inntektshistorikk = listOf(
-                Inntektsopplysning(orgnummer = ORGNUMMER, sykepengerFom = 17.januar, inntekt = INNTEKT, refusjonTilArbeidsgiver = true)
+                Inntektsopplysning(orgnummer = ORGNUMMER.toString(), sykepengerFom = 17.januar, inntekt = INNTEKT, refusjonTilArbeidsgiver = true)
             ),
             utbetalinger = arrayOf(
-                ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, INNTEKT)
+                ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 17.januar, 31.januar, 100.prosent, INNTEKT)
             )
         )
 
@@ -795,10 +795,10 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
             inntektshistorikk = listOf(
-                Inntektsopplysning(orgnummer = ORGNUMMER, sykepengerFom = 17.januar, inntekt = INNTEKT, refusjonTilArbeidsgiver = true)
+                Inntektsopplysning(orgnummer = ORGNUMMER.toString(), sykepengerFom = 17.januar, inntekt = INNTEKT, refusjonTilArbeidsgiver = true)
             ),
             utbetalinger = arrayOf(
-                ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, INNTEKT)
+                ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 17.januar, 31.januar, 100.prosent, INNTEKT)
             )
         )
 
@@ -826,12 +826,12 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             orgnummer = a1,
             inntektshistorikk = listOf(
-                Inntektsopplysning(orgnummer = a1, sykepengerFom = 17.januar, inntekt = INNTEKT, refusjonTilArbeidsgiver = true),
-                Inntektsopplysning(orgnummer = a2, sykepengerFom = 17.januar, inntekt = INNTEKT, refusjonTilArbeidsgiver = true)
+                Inntektsopplysning(orgnummer = a1.toString(), sykepengerFom = 17.januar, inntekt = INNTEKT, refusjonTilArbeidsgiver = true),
+                Inntektsopplysning(orgnummer = a2.toString(), sykepengerFom = 17.januar, inntekt = INNTEKT, refusjonTilArbeidsgiver = true)
             ),
             utbetalinger = arrayOf(
-                ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar, 100.prosent, INNTEKT),
-                ArbeidsgiverUtbetalingsperiode(a2, 17.januar, 31.januar, 100.prosent, INNTEKT)
+                ArbeidsgiverUtbetalingsperiode(a1.toString(), 17.januar, 31.januar, 100.prosent, INNTEKT),
+                ArbeidsgiverUtbetalingsperiode(a2.toString(), 17.januar, 31.januar, 100.prosent, INNTEKT)
             )
         )
 
@@ -863,8 +863,8 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(22.januar, 31.januar, 100.prosent))
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 21.januar, 100.prosent, 1000.daglig),
-            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.januar, 21.januar, 100.prosent, 1000.daglig),
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER.toString(), 1.januar, INNTEKT, true))
         )
 
         håndterYtelser(1.vedtaksperiode)

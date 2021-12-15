@@ -41,9 +41,9 @@ internal class InfotrygdInntektsopplysningTest {
         assertEquals(inntektsopplysning(1.januar).hashCode(), inntektsopplysning(1.januar).hashCode())
         assertNotEquals(inntektsopplysning().hashCode(), inntektsopplysning(1.januar).hashCode())
         assertNotEquals(inntektsopplysning(1.januar).hashCode(), inntektsopplysning(2.januar).hashCode())
-        assertNotEquals(Inntektsopplysning(ORGNR, DATO, 1000.månedlig, true, null).hashCode(), Inntektsopplysning(ORGNR, DATO, 1000.månedlig, false, null).hashCode())
-        assertNotEquals(Inntektsopplysning(ORGNR, DATO, 1000.månedlig, true, null).hashCode(), Inntektsopplysning(ORGNR, DATO, 2000.månedlig, true, null).hashCode())
-        assertNotEquals(Inntektsopplysning(ORGNR, 1.januar, 1000.månedlig, true, null).hashCode(), Inntektsopplysning(ORGNR, 2.januar, 2100.månedlig, true, null).hashCode())
+        assertNotEquals(Inntektsopplysning(ORGNR.toString(), DATO, 1000.månedlig, true, null).hashCode(), Inntektsopplysning(ORGNR.toString(), DATO, 1000.månedlig, false, null).hashCode())
+        assertNotEquals(Inntektsopplysning(ORGNR.toString(), DATO, 1000.månedlig, true, null).hashCode(), Inntektsopplysning(ORGNR.toString(), DATO, 2000.månedlig, true, null).hashCode())
+        assertNotEquals(Inntektsopplysning(ORGNR.toString(), 1.januar, 1000.månedlig, true, null).hashCode(), Inntektsopplysning(ORGNR.toString(), 2.januar, 2100.månedlig, true, null).hashCode())
         assertNotEquals(Inntektsopplysning("ag1", DATO, 1000.månedlig, true, null).hashCode(), Inntektsopplysning("ag2", DATO, 2100.månedlig, true, null).hashCode())
         assertEquals(Inntektsopplysning("ag1", DATO, 123.6667.månedlig, true, null).hashCode(), Inntektsopplysning("ag1", DATO, 123.6667.månedlig, true, null).hashCode())
     }
@@ -69,7 +69,7 @@ internal class InfotrygdInntektsopplysningTest {
     @Test
     fun `Inntekt fra infotrygd brukes til å beregne sykepengegrunnlaget`() {
         Inntektsopplysning.lagreInntekter(
-            listOf(Inntektsopplysning(ORGNR, 1.januar, INNTEKT, true)),
+            listOf(Inntektsopplysning(ORGNR.toString(), 1.januar, INNTEKT, true)),
             historikk,
             UUID.randomUUID()
         )
@@ -82,7 +82,7 @@ internal class InfotrygdInntektsopplysningTest {
     fun `Bruker inntekt fra infotrygd fremfor inntekt fra inntektsmelding for å beregne sykepengegrunnlaget`() {
         inntektsmelding(beregnetInntekt = 20000.månedlig).addInntekt(historikk, 1.januar)
         Inntektsopplysning.lagreInntekter(
-            listOf(Inntektsopplysning(ORGNR, 1.januar, 25000.månedlig, true)),
+            listOf(Inntektsopplysning(ORGNR.toString(), 1.januar, 25000.månedlig, true)),
             historikk,
             UUID.randomUUID()
         )
@@ -103,7 +103,7 @@ internal class InfotrygdInntektsopplysningTest {
             }
         }.forEach { it.lagreInntekter(historikk, 1.januar, UUID.randomUUID()) }
         Inntektsopplysning.lagreInntekter(
-            listOf(Inntektsopplysning(ORGNR, 1.januar, 25000.månedlig, true)),
+            listOf(Inntektsopplysning(ORGNR.toString(), 1.januar, 25000.månedlig, true)),
             historikk,
             UUID.randomUUID()
         )
@@ -116,7 +116,7 @@ internal class InfotrygdInntektsopplysningTest {
     @Test
     fun `Bruker inntekt fra infotrygd fremfor inntekt fra skatt for å beregne sykepengegrunnlaget - skatt kommer sist`() {
         Inntektsopplysning.lagreInntekter(
-            listOf(Inntektsopplysning(ORGNR, 1.januar, 25000.månedlig, true)),
+            listOf(Inntektsopplysning(ORGNR.toString(), 1.januar, 25000.månedlig, true)),
             historikk,
             UUID.randomUUID()
         )
@@ -138,7 +138,7 @@ internal class InfotrygdInntektsopplysningTest {
     fun `Inntekt for samme dato og annen kilde erstatter ikke eksisterende`() {
         inntektsmelding().addInntekt(historikk, 1.januar)
         Inntektsopplysning.lagreInntekter(
-            listOf(Inntektsopplysning(ORGNR, 1.januar, INNTEKT, true)),
+            listOf(Inntektsopplysning(ORGNR.toString(), 1.januar, INNTEKT, true)),
             historikk,
             UUID.randomUUID()
         )
@@ -151,8 +151,8 @@ internal class InfotrygdInntektsopplysningTest {
     fun `Finner nærmeste inntekt fra Infotrygd, hvis det ikke finnes inntekt for skjæringstidspunkt`() {
         Inntektsopplysning.lagreInntekter(
             listOf(
-                Inntektsopplysning(ORGNR, 10.januar, 30000.månedlig, true),
-                Inntektsopplysning(ORGNR, 5.januar, 25000.månedlig, true)
+                Inntektsopplysning(ORGNR.toString(), 10.januar, 30000.månedlig, true),
+                Inntektsopplysning(ORGNR.toString(), 5.januar, 25000.månedlig, true)
             ),
             historikk,
             UUID.randomUUID()
@@ -163,7 +163,7 @@ internal class InfotrygdInntektsopplysningTest {
     }
 
     private fun inntektsopplysning(refusjonTom: LocalDate? = null) =
-        Inntektsopplysning(ORGNR, DATO, 1000.månedlig, true, refusjonTom)
+        Inntektsopplysning(ORGNR.toString(), DATO, 1000.månedlig, true, refusjonTom)
 
     private fun inntektsmelding(
         beregnetInntekt: Inntekt = INNTEKT,

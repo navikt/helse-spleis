@@ -255,12 +255,12 @@ internal class InfotrygdhistorikkElementTest {
     @Test
     fun `hver første utbetalingsdag har en tilhørende inntekt`() {
         val utbetalinger = listOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 3.januar, 100.prosent, 1234.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 5.januar, 10.januar, 100.prosent, 1234.daglig)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.januar, 3.januar, 100.prosent, 1234.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 5.januar, 10.januar, 100.prosent, 1234.daglig)
         )
         val inntekter = listOf(
-            Inntektsopplysning(ORGNUMMER, 1.januar, 1234.månedlig, true),
-            Inntektsopplysning(ORGNUMMER, 5.januar, 1234.månedlig, true)
+            Inntektsopplysning(ORGNUMMER.toString(), 1.januar, 1234.månedlig, true),
+            Inntektsopplysning(ORGNUMMER.toString(), 5.januar, 1234.månedlig, true)
         )
 
         val element = historikkelement(perioder = utbetalinger, inntekter = inntekter)
@@ -273,11 +273,11 @@ internal class InfotrygdhistorikkElementTest {
     @Test
     fun `første utbetalingsdag mangler en tilhørende inntekt`() {
         val utbetalinger = listOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 3.januar, 100.prosent, 1234.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 5.januar, 10.januar, 100.prosent, 1234.daglig)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.januar, 3.januar, 100.prosent, 1234.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 5.januar, 10.januar, 100.prosent, 1234.daglig)
         )
         val inntekter = listOf(
-            Inntektsopplysning(ORGNUMMER, 1.januar, 1234.månedlig, true)
+            Inntektsopplysning(ORGNUMMER.toString(), 1.januar, 1234.månedlig, true)
         )
 
         val element = historikkelement(perioder = utbetalinger, inntekter = inntekter)
@@ -291,9 +291,9 @@ internal class InfotrygdhistorikkElementTest {
     fun `sjekker at vi har inntekt fra første dag i periodeb som har en utbetaling`() {
         val utbetalinger = listOf(
             Friperiode(1.januar, 4.januar),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 5.januar, 10.januar, 100.prosent, 1234.daglig)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 5.januar, 10.januar, 100.prosent, 1234.daglig)
         )
-        val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 5.januar, 1234.månedlig, true))
+        val inntekter = listOf(Inntektsopplysning(ORGNUMMER.toString(), 5.januar, 1234.månedlig, true))
 
         val element = historikkelement(perioder = utbetalinger, inntekter = inntekter)
 
@@ -305,10 +305,10 @@ internal class InfotrygdhistorikkElementTest {
     @Test
     fun `perioder fra infortrygd slås sammen dersom gapet kun er helg`() {
         val utbetalinger = listOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 5.januar, 100.prosent, 1234.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 8.januar, 12.januar, 100.prosent, 1234.daglig)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.januar, 5.januar, 100.prosent, 1234.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 8.januar, 12.januar, 100.prosent, 1234.daglig)
         )
-        val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, 1234.månedlig, true))
+        val inntekter = listOf(Inntektsopplysning(ORGNUMMER.toString(), 1.januar, 1234.månedlig, true))
         val element = historikkelement(perioder = utbetalinger, inntekter = inntekter)
 
         aktivitetslogg.barn().also {
@@ -336,10 +336,10 @@ internal class InfotrygdhistorikkElementTest {
     fun `validering skal ikke feile når bruker har redusert utbetaling i Infotrygd, men skjæringstidspunkt i Spleis`() {
         val arbeidskategorikoder = mapOf("07" to 1.januar)
         val utbetalinger = listOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 5.januar, 100.prosent, 1234.daglig)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.januar, 5.januar, 100.prosent, 1234.daglig)
         )
         val inntekter = listOf(
-            Inntektsopplysning(ORGNUMMER, 1.januar, 1234.daglig, true)
+            Inntektsopplysning(ORGNUMMER.toString(), 1.januar, 1234.daglig, true)
         )
         val element = historikkelement(perioder = utbetalinger, arbeidskategorikoder = arbeidskategorikoder, inntekter = inntekter)
         assertTrue(element.valider(aktivitetslogg, Periodetype.FØRSTEGANGSBEHANDLING, Periode(7.januar, 23.januar), 7.januar))
@@ -373,9 +373,9 @@ internal class InfotrygdhistorikkElementTest {
     fun `forlengelser fra infotrygd med tilstøtende periode med samme orgnr er ok`() {
         val utbetalinger = listOf(
             ArbeidsgiverUtbetalingsperiode("1234", 1.januar, 3.januar, 100.prosent, 1234.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 5.januar, 100.prosent, 1234.daglig)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.januar, 5.januar, 100.prosent, 1234.daglig)
         )
-        val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, 1234.daglig, true))
+        val inntekter = listOf(Inntektsopplysning(ORGNUMMER.toString(), 1.januar, 1234.daglig, true))
 
         val element = historikkelement(utbetalinger, inntekter)
 
@@ -386,7 +386,7 @@ internal class InfotrygdhistorikkElementTest {
     @Test
     fun `flere inntektsopplysninger på samme orgnr er ok`() {
         val utbetalinger = listOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 5.januar, 100.prosent, 1234.daglig)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.januar, 5.januar, 100.prosent, 1234.daglig)
         )
         val element = historikkelement(
             perioder = utbetalinger,
@@ -403,7 +403,7 @@ internal class InfotrygdhistorikkElementTest {
     @Test
     fun `flere inntektsopplysninger gir ikke feil dersom de er gamle`() {
         val utbetalinger = listOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 5.januar, 100.prosent, 1234.daglig)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.januar, 5.januar, 100.prosent, 1234.daglig)
         )
         val element = historikkelement(
             perioder = utbetalinger,
@@ -420,12 +420,12 @@ internal class InfotrygdhistorikkElementTest {
     @Test
     fun `lager ikke warning når dagsats endrer seg i en sammenhengende periode som følge av Grunnbeløpjustering`() {
         val utbetalinger = listOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.april, 30.april, 100.prosent, 2161.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.mai, 31.mai, 100.prosent, 2236.daglig)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.april, 30.april, 100.prosent, 2161.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.mai, 31.mai, 100.prosent, 2236.daglig)
         )
         val inntekter = listOf(
-            Inntektsopplysning(ORGNUMMER, 1.april, 2161.daglig, true),
-            Inntektsopplysning(ORGNUMMER, 1.mai, 2161.daglig, true)
+            Inntektsopplysning(ORGNUMMER.toString(), 1.april, 2161.daglig, true),
+            Inntektsopplysning(ORGNUMMER.toString(), 1.mai, 2161.daglig, true)
         )
 
         val element = historikkelement(utbetalinger, inntekter)
@@ -441,12 +441,12 @@ internal class InfotrygdhistorikkElementTest {
             ArbeidsgiverUtbetalingsperiode(
                 ORGNUMMER, 1.januar, 31.januar, (100 * gradering).roundToInt().prosent, (dagsats * gradering).roundToInt().daglig
             ),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 28.februar, 100.prosent, dagsats.daglig)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.februar, 28.februar, 100.prosent, dagsats.daglig)
         )
 
         val inntekter = listOf(
-            Inntektsopplysning(ORGNUMMER, 1.januar, (dagsats * gradering).roundToInt().daglig, true),
-            Inntektsopplysning(ORGNUMMER, 1.februar, dagsats.daglig, true)
+            Inntektsopplysning(ORGNUMMER.toString(), 1.januar, (dagsats * gradering).roundToInt().daglig, true),
+            Inntektsopplysning(ORGNUMMER.toString(), 1.februar, dagsats.daglig, true)
         )
 
         val element = historikkelement(utbetalinger, inntekter)
@@ -457,12 +457,12 @@ internal class InfotrygdhistorikkElementTest {
     @Test
     fun `lager ikke warning når dagsats ikke endrer seg i en sammenhengende periode`() {
         val utbetalinger = listOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, 1234.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 28.februar, 100.prosent, 1234.daglig)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.januar, 31.januar, 100.prosent, 1234.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.februar, 28.februar, 100.prosent, 1234.daglig)
         )
         val inntekter = listOf(
-            Inntektsopplysning(ORGNUMMER, 1.januar, 1234.daglig, true),
-            Inntektsopplysning(ORGNUMMER, 1.februar, 1234.daglig, true)
+            Inntektsopplysning(ORGNUMMER.toString(), 1.januar, 1234.daglig, true),
+            Inntektsopplysning(ORGNUMMER.toString(), 1.februar, 1234.daglig, true)
         )
         val element = historikkelement(utbetalinger, inntekter)
         assertTrue(element.valider(aktivitetslogg, Periodetype.FØRSTEGANGSBEHANDLING, Periode(1.april, 30.april), 1.april))
@@ -472,8 +472,8 @@ internal class InfotrygdhistorikkElementTest {
     @Test
     fun `RefusjonTilArbeidsgiver mappes til utbetalingstidslinje`() {
         val utbetalinger = listOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 10.januar, 100.prosent, 1234.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 10.januar, 100.prosent, 1234.daglig)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.januar, 10.januar, 100.prosent, 1234.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.januar, 10.januar, 100.prosent, 1234.daglig)
         )
 
         val tidslinje = utbetalinger.map { it.utbetalingstidslinje() }.reduce(Utbetalingstidslinje::plus)
@@ -489,7 +489,7 @@ internal class InfotrygdhistorikkElementTest {
     @Test
     fun `Feiler selv om ugyldig dag overlappes helt av ReduksjonArbeidsgiverRefusjon`() {
         val utbetalinger = listOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 10.januar, 100.prosent, 1234.daglig)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.januar, 10.januar, 100.prosent, 1234.daglig)
         )
         val element = historikkelement(
             perioder = utbetalinger,
@@ -503,9 +503,9 @@ internal class InfotrygdhistorikkElementTest {
     @Test
     fun `RefusjonTilArbeidsgiver regnes som utbetalingsdag selv om den overlapper med ferie`() {
         val utbetalinger = listOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 10.januar, 100.prosent, 1234.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.januar, 10.januar, 100.prosent, 1234.daglig),
             Friperiode(5.januar, 20.januar),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 15.januar, 25.januar, 100.prosent, 1234.daglig)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 15.januar, 25.januar, 100.prosent, 1234.daglig)
         )
 
         val tidslinje = utbetalinger.map { it.utbetalingstidslinje() }.reduce(Utbetalingstidslinje::plus)
@@ -521,7 +521,7 @@ internal class InfotrygdhistorikkElementTest {
     @Test
     fun `Feiler ikke selv om ukjent dag overlappes helt av ReduksjonArbeidsgiverRefusjon`() {
         val utbetalinger = listOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 10.januar, 100.prosent, 1234.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.januar, 10.januar, 100.prosent, 1234.daglig),
             UkjentInfotrygdperiode(5.januar, 5.januar)
         )
 
@@ -542,7 +542,7 @@ internal class InfotrygdhistorikkElementTest {
     @Test
     fun `Utbetalinger i Infotrygd som overlapper med tidslinjen`() {
         val utbetalinger = listOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 10.januar, 100.prosent, 1234.daglig)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.januar, 10.januar, 100.prosent, 1234.daglig)
         )
         val element = historikkelement(utbetalinger)
         assertFalse(element.valider(aktivitetslogg, Periodetype.FØRSTEGANGSBEHANDLING, Periode(1.januar, 1.januar), 1.januar))
@@ -552,9 +552,9 @@ internal class InfotrygdhistorikkElementTest {
     @Test
     fun `Utbetalinger i Infotrygd som er nærmere enn 18 dager fra tidslinjen`() {
         val utbetalinger = listOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 10.januar, 100.prosent, 1234.daglig)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.januar, 10.januar, 100.prosent, 1234.daglig)
         )
-        val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, 1234.daglig, true))
+        val inntekter = listOf(Inntektsopplysning(ORGNUMMER.toString(), 1.januar, 1234.daglig, true))
 
         val element = historikkelement(utbetalinger, inntekter)
         assertTrue(element.valider(aktivitetslogg, Periodetype.FØRSTEGANGSBEHANDLING, Periode(28.januar, 28.januar), 28.januar))
@@ -564,9 +564,9 @@ internal class InfotrygdhistorikkElementTest {
     @Test
     fun `Utbetalinger i Infotrygd som er eldre enn 18 dager fra tidslinjen`() {
         val utbetalinger = listOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 10.januar, 100.prosent, 1234.daglig)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.januar, 10.januar, 100.prosent, 1234.daglig)
         )
-        val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, 1234.daglig, true))
+        val inntekter = listOf(Inntektsopplysning(ORGNUMMER.toString(), 1.januar, 1234.daglig, true))
         val element = historikkelement(utbetalinger, inntekter)
         assertTrue(element.valider(aktivitetslogg, Periodetype.FØRSTEGANGSBEHANDLING, Periode(29.januar, 29.januar), 29.januar))
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
@@ -575,11 +575,11 @@ internal class InfotrygdhistorikkElementTest {
     @Test
     fun `Validerer ok hvis perioder er eldre enn 26 uker før første fraværsdag`() {
         val utbetalinger = listOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 10.januar, 100.prosent, 1234.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.januar, 10.januar, 100.prosent, 1234.daglig),
             UkjentInfotrygdperiode(1.januar, 10.januar)
         )
 
-        val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, 1234.daglig, true))
+        val inntekter = listOf(Inntektsopplysning(ORGNUMMER.toString(), 1.januar, 1234.daglig, true))
         val element = historikkelement(utbetalinger, inntekter)
         assertTrue(element.valider(aktivitetslogg, Periodetype.FØRSTEGANGSBEHANDLING, Periode(1.august, 1.august), 1.august))
         assertFalse(aktivitetslogg.hasWarningsOrWorse()) { aktivitetslogg.toString() }
@@ -588,9 +588,9 @@ internal class InfotrygdhistorikkElementTest {
     @Test
     fun `Validering ignorerer maksdato hvis perioder er eldre enn 26 uker før første fraværsdag`() {
         val utbetalinger = listOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 10.januar, 100.prosent, 1234.daglig)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.januar, 10.januar, 100.prosent, 1234.daglig)
         )
-        val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, 1234.daglig, true))
+        val inntekter = listOf(Inntektsopplysning(ORGNUMMER.toString(), 1.januar, 1234.daglig, true))
         val element = historikkelement(utbetalinger, inntekter)
         assertTrue(element.valider(aktivitetslogg, Periodetype.FØRSTEGANGSBEHANDLING, Periode(1.august, 1.august), 1.august))
         assertFalse(aktivitetslogg.hasWarningsOrWorse()) { aktivitetslogg.toString() }
@@ -600,8 +600,8 @@ internal class InfotrygdhistorikkElementTest {
     fun `validering gir warning hvis vi har to inntekter for samme arbeidsgiver på samme dato`() {
         val element = historikkelement(
             inntekter = listOf(
-                Inntektsopplysning(ORGNUMMER, 1.januar, 1234.månedlig, true),
-                Inntektsopplysning(ORGNUMMER, 1.januar, 4321.månedlig, true),
+                Inntektsopplysning(ORGNUMMER.toString(), 1.januar, 1234.månedlig, true),
+                Inntektsopplysning(ORGNUMMER.toString(), 1.januar, 4321.månedlig, true),
             )
         )
 
@@ -615,8 +615,8 @@ internal class InfotrygdhistorikkElementTest {
     fun `validering gir ikke warning hvis vi har to inntekter for samme arbeidsgiver på forskjellig dato`() {
         val element = historikkelement(
             inntekter = listOf(
-                Inntektsopplysning(ORGNUMMER, 2.januar, 1234.månedlig, true),
-                Inntektsopplysning(ORGNUMMER, 1.januar, 4321.månedlig, true),
+                Inntektsopplysning(ORGNUMMER.toString(), 2.januar, 1234.månedlig, true),
+                Inntektsopplysning(ORGNUMMER.toString(), 1.januar, 4321.månedlig, true),
             )
         )
         assertTrue(element.valider(aktivitetslogg, Periodetype.FØRSTEGANGSBEHANDLING, Periode(1.januar, 31.januar), 1.januar))
@@ -627,8 +627,8 @@ internal class InfotrygdhistorikkElementTest {
     fun `validering gir ikke warning hvis vi har to inntekter for samme arbeidsgiver på samme dato, men dato er 12 måneder før perioden`() {
         val element = historikkelement(
             inntekter = listOf(
-                Inntektsopplysning(ORGNUMMER, 1.januar(2018), 1234.månedlig, true),
-                Inntektsopplysning(ORGNUMMER, 1.januar(2018), 4321.månedlig, true),
+                Inntektsopplysning(ORGNUMMER.toString(), 1.januar(2018), 1234.månedlig, true),
+                Inntektsopplysning(ORGNUMMER.toString(), 1.januar(2018), 4321.månedlig, true),
             )
         )
         assertTrue(element.valider(aktivitetslogg, Periodetype.FØRSTEGANGSBEHANDLING, Periode(1.februar(2019), 28.februar(2019)), 1.februar(2019)))
@@ -639,8 +639,8 @@ internal class InfotrygdhistorikkElementTest {
     fun `validering gir ikke warning hvis vi har to inntekter for samme arbeidsgiver på samme dato, men dato er før skjæringstidspunkt`() {
         val element = historikkelement(
             inntekter = listOf(
-                Inntektsopplysning(ORGNUMMER, 1.januar, 1234.månedlig, true),
-                Inntektsopplysning(ORGNUMMER, 1.januar, 4321.månedlig, true),
+                Inntektsopplysning(ORGNUMMER.toString(), 1.januar, 1234.månedlig, true),
+                Inntektsopplysning(ORGNUMMER.toString(), 1.januar, 4321.månedlig, true),
             )
         )
         assertTrue(element.valider(aktivitetslogg, Periodetype.FØRSTEGANGSBEHANDLING, Periode(2.januar, 31.januar), 2.januar))
@@ -671,7 +671,7 @@ internal class InfotrygdhistorikkElementTest {
     fun `lagrer inntekter låser elementet`() {
         val element = historikkelement(
             inntekter = listOf(
-                Inntektsopplysning(ORGNUMMER, 1.januar, 1234.månedlig, true)
+                Inntektsopplysning(ORGNUMMER.toString(), 1.januar, 1234.månedlig, true)
             )
         )
         element.addInntekter(Person("", "01010112345".somFødselsnummer()), aktivitetslogg)
@@ -683,8 +683,8 @@ internal class InfotrygdhistorikkElementTest {
         val inntektshistorikk = Inntektshistorikk()
         Inntektsopplysning.lagreInntekter(
             listOf(
-                Inntektsopplysning(ORGNUMMER, 1.januar, 1234.månedlig, true),
-                Inntektsopplysning(ORGNUMMER, 1.januar, 4321.månedlig, true),
+                Inntektsopplysning(ORGNUMMER.toString(), 1.januar, 1234.månedlig, true),
+                Inntektsopplysning(ORGNUMMER.toString(), 1.januar, 4321.månedlig, true),
             ), inntektshistorikk, UUID.randomUUID()
         )
         assertEquals(1234.månedlig, inntektshistorikk.grunnlagForSykepengegrunnlag(1.januar, 1.januar)?.grunnlagForSykepengegrunnlag())

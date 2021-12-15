@@ -1,5 +1,6 @@
 package no.nav.helse.person
 
+import no.nav.helse.Organisasjonsnummer
 import no.nav.helse.hendelser.*
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt
@@ -85,8 +86,8 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
         val inntektsmelding = Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(INNTEKT_PR_MÅNED, null, emptyList()),
-            orgnummer = ORGNUMMER,
-            fødselsnummer = UNG_PERSON_FNR_2018,
+            orgnummer = ORGNUMMER.toString(),
+            fødselsnummer = UNG_PERSON_FNR_2018.toString(),
             aktørId = AKTØRID,
             førsteFraværsdag = 1.januar,
             beregnetInntekt = INNTEKT_PR_MÅNED,
@@ -104,13 +105,13 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
     private fun inntektsmelding(
         beregnetInntekt: Inntekt = 1000.månedlig,
         førsteFraværsdag: LocalDate = 1.januar,
-        virksomhetsnummer: String = ORGNUMMER
+        virksomhetsnummer: Organisasjonsnummer = ORGNUMMER
     ) =
         Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
-            orgnummer = virksomhetsnummer,
-            fødselsnummer = UNG_PERSON_FNR_2018,
+            orgnummer = virksomhetsnummer.toString(),
+            fødselsnummer = UNG_PERSON_FNR_2018.toString(),
             aktørId = AKTØRID,
             førsteFraværsdag = førsteFraværsdag,
             beregnetInntekt = beregnetInntekt,
@@ -120,22 +121,22 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
             mottatt = LocalDateTime.now()
         )
 
-    private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode, orgnr: String = ORGNUMMER) = Sykmelding(
+    private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode, orgnr: Organisasjonsnummer = ORGNUMMER) = Sykmelding(
         meldingsreferanseId = UUID.randomUUID(),
-        fnr = UNG_PERSON_FNR_2018,
+        fnr = UNG_PERSON_FNR_2018.toString(),
         aktørId = AKTØRID,
-        orgnummer = orgnr,
+        orgnummer = orgnr.toString(),
         sykeperioder = sykeperioder.toList(),
         sykmeldingSkrevet = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now(),
         mottatt = Sykmeldingsperiode.periode(sykeperioder.toList())!!.endInclusive.atStartOfDay()
     )
 
-    private fun søknad(vararg perioder: Søknad.Søknadsperiode, orgnummer: String = ORGNUMMER) =
+    private fun søknad(vararg perioder: Søknad.Søknadsperiode, orgnummer: Organisasjonsnummer = ORGNUMMER) =
         Søknad(
             meldingsreferanseId = UUID.randomUUID(),
-            fnr = UNG_PERSON_FNR_2018,
+            fnr = UNG_PERSON_FNR_2018.toString(),
             aktørId = "12345",
-            orgnummer = orgnummer,
+            orgnummer = orgnummer.toString(),
             perioder = listOf(*perioder),
             andreInntektskilder = emptyList(),
             sendtTilNAV = Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay(),

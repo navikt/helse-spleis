@@ -236,7 +236,7 @@ internal class RefusjonsgjødslerTest {
         val gjødsler = refusjonsgjødsler(
             utbetalingstidslinje = (31.S).utbetalingstidslinje(inntektsopplysning(1.januar, 690.daglig)),
             refusjonshistorikk = refusjonshistorikk(),
-            infotrygdhistorikk = infotrygdhistorikk(listOf(PersonUtbetalingsperiode(ORGNUMMER, 1.desember(2017), 31.desember(2017), 100.prosent, 10000.månedlig))),
+            infotrygdhistorikk = infotrygdhistorikk(listOf(PersonUtbetalingsperiode(ORGNUMMER.toString(), 1.desember(2017), 31.desember(2017), 100.prosent, 10000.månedlig))),
             organisasjonsnummer = ORGNUMMER
         )
         val aktivitetslogg = Aktivitetslogg()
@@ -266,7 +266,7 @@ internal class RefusjonsgjødslerTest {
         val gjødsler = refusjonsgjødsler(
             utbetalingstidslinje = (31.S).utbetalingstidslinje(inntektsopplysning(1.januar, 690.daglig)),
             refusjonshistorikk = refusjonshistorikk(),
-            infotrygdhistorikk = infotrygdhistorikk(listOf(PersonUtbetalingsperiode(ORGNUMMER, 1.januar, 10.januar, 100.prosent, 10000.månedlig))),
+            infotrygdhistorikk = infotrygdhistorikk(listOf(PersonUtbetalingsperiode(ORGNUMMER.toString(), 1.januar, 10.januar, 100.prosent, 10000.månedlig))),
             organisasjonsnummer = ORGNUMMER
         )
         val aktivitetslogg = Aktivitetslogg()

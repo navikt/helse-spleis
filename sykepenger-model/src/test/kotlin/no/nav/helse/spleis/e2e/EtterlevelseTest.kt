@@ -1,18 +1,20 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.ForventetFeil
+import no.nav.helse.Organisasjonsnummer
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.*
 import no.nav.helse.person.Bokstav.BOKSTAV_A
+import no.nav.helse.person.Ledd.*
 import no.nav.helse.person.Ledd.Companion.ledd
-import no.nav.helse.person.Ledd.LEDD_1
-import no.nav.helse.person.Ledd.LEDD_2
 import no.nav.helse.person.Paragraf.*
 import no.nav.helse.person.Punktum.Companion.punktum
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.somFødselsnummer
+import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
@@ -33,7 +35,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterYtelser()
-        val arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER, 4.desember(2017), 31.januar))
+        val arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER.toString(), 4.desember(2017), 31.januar))
         håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold)
 
         assertOppfylt(
@@ -46,7 +48,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
                 "tilstrekkeligAntallOpptjeningsdager" to 28,
                 "arbeidsforhold" to listOf(
                     mapOf(
-                        "orgnummer" to ORGNUMMER,
+                        "orgnummer" to ORGNUMMER.toString(),
                         "fom" to 4.desember(2017),
                         "tom" to 31.januar
                     )
@@ -62,7 +64,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterYtelser()
-        val arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER, 5.desember(2017), 31.januar))
+        val arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER.toString(), 5.desember(2017), 31.januar))
         håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold)
 
         assertIkkeOppfylt(
@@ -75,7 +77,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
                 "tilstrekkeligAntallOpptjeningsdager" to 28,
                 "arbeidsforhold" to listOf(
                     mapOf(
-                        "orgnummer" to ORGNUMMER,
+                        "orgnummer" to ORGNUMMER.toString(),
                         "fom" to 5.desember(2017),
                         "tom" to 31.januar
                     )
@@ -87,7 +89,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
 
     @Test
     fun `§8-3 ledd 1 punktum 2 - fyller 70`() {
-        val fnr = "20014835841"
+        val fnr = "20014835841".somFødselsnummer()
         createTestPerson(fnr)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), fnr = fnr)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), fnr = fnr)
@@ -135,7 +137,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
 
     @Test
     fun `§8-3 ledd 1 punktum 2 - blir aldri 70`() {
-        val fnr = "01024835841"
+        val fnr = "01024835841".somFødselsnummer()
         createTestPerson(fnr)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), fnr = fnr)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), fnr = fnr)
@@ -164,7 +166,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
 
     @Test
     fun `§8-3 ledd 1 punktum 2 - er alltid 70`() {
-        val fnr = "01014835841"
+        val fnr = "01014835841".somFødselsnummer()
         createTestPerson(fnr)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), fnr = fnr)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), fnr = fnr)
@@ -193,7 +195,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
 
     @Test
     fun `§8-3 ledd 1 punktum 2 - er alltid 70 uten NAVdager`() {
-        val fnr = "01014835841"
+        val fnr = "01014835841".somFødselsnummer()
         createTestPerson(fnr)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent), fnr = fnr)
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), fnr = fnr)
@@ -226,7 +228,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 46817.årlig)
         håndterYtelser()
-        val arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER, 5.desember(2017), 31.januar))
+        val arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER.toString().toString(), 5.desember(2017), 31.januar))
         håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold)
 
         assertOppfylt(
@@ -250,7 +252,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 46816.årlig)
         håndterYtelser()
-        val arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER, 5.desember(2017), 31.januar))
+        val arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER.toString().toString(), 5.desember(2017), 31.januar))
         håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold)
 
         assertIkkeOppfylt(
@@ -321,9 +323,9 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
-            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, inntekt)),
+            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString().toString(), 1.januar, 31.januar, 100.prosent, inntekt)),
             inntektshistorikk = listOf(
-                Inntektsopplysning(ORGNUMMER, 1.januar, inntekt, true)
+                Inntektsopplysning(ORGNUMMER.toString().toString(), 1.januar, inntekt, true)
             )
         )
         håndterYtelser()
@@ -650,7 +652,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
             versjon = 1.januar(2019),
             inputdata = mapOf(
                 "beregnetMånedsinntektPerArbeidsgiver" to mapOf(
-                    ORGNUMMER to 31000.0
+                    ORGNUMMER.toString() to 31000.0
                 )
             ),
             outputdata = mapOf(
@@ -676,7 +678,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
             versjon = 1.januar(2019),
             inputdata = mapOf(
                 "beregnetMånedsinntektPerArbeidsgiver" to mapOf(
-                    ORGNUMMER to 60000.0
+                    ORGNUMMER.toString() to 60000.0
                 )
             ),
             outputdata = mapOf(
@@ -687,8 +689,8 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
 
     @Test
     fun `§8-30 ledd 1 - sykepengegrunnlaget utgjør aktuell månedsinntekt omregnet til årsinntekt i kontekst av §8-30 ledd 1 - flere AG`() {
-        val AG1 = "987654321"
-        val AG2 = "123456789"
+        val AG1 = "987654321".somOrganisasjonsnummer()
+        val AG2 = "123456789".somOrganisasjonsnummer()
         val inntekt = 60000
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = AG1)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = AG2)
@@ -726,8 +728,8 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
             versjon = 1.januar(2019),
             inputdata = mapOf(
                 "beregnetMånedsinntektPerArbeidsgiver" to mapOf(
-                    AG1 to 60000.0,
-                    AG2 to 60000.0
+                    AG1.toString() to 60000.0,
+                    AG2.toString() to 60000.0
                 )
             ),
             outputdata = mapOf(
@@ -845,13 +847,13 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
 
     @Test
     fun `§8-51 ledd 2 - har minimum inntekt 2G - over 67 år`() {
-        val GAMMEL = "01014500065"
+        val GAMMEL = "01014500065".somFødselsnummer()
         createTestPerson(GAMMEL)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), fnr = GAMMEL)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), fnr = GAMMEL)
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 187268.årlig, fnr = GAMMEL)
         håndterYtelser(fnr = GAMMEL)
-        val arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER, 5.desember(2017), 31.januar))
+        val arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER.toString().toString(), 5.desember(2017), 31.januar))
         håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold, fnr = GAMMEL)
 
         assertOppfylt(
@@ -871,13 +873,13 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
 
     @Test
     fun `§8-51 ledd 2 - har inntekt mindre enn 2G - over 67 år`() {
-        val GAMMEL = "01014500065"
+        val GAMMEL = "01014500065".somFødselsnummer()
         createTestPerson(GAMMEL)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), fnr = GAMMEL)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), fnr = GAMMEL)
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 187267.årlig, fnr = GAMMEL)
         håndterYtelser(fnr = GAMMEL)
-        val arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER, 5.desember(2017), 31.januar))
+        val arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER.toString().toString(), 5.desember(2017), 31.januar))
         håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold, fnr = GAMMEL)
 
         assertIkkeOppfylt(
@@ -935,7 +937,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         punktum: List<Punktum>? = null,
         bokstaver: List<Bokstav>? = null,
         vedtaksperiodeId: IdInnhenter? = null,
-        organisasjonsnummer: String = ORGNUMMER,
+        organisasjonsnummer: Organisasjonsnummer = ORGNUMMER,
         inspektør: EtterlevelseInspektør = EtterlevelseInspektør(person.aktivitetslogg)
     ) {
         val resultat = inspektør.resultat(paragraf, ledd, punktum, bokstaver, vedtaksperiodeId?.invoke(organisasjonsnummer))
@@ -948,7 +950,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         punktum: List<Punktum>? = null,
         bokstav: List<Bokstav>? = null,
         vedtaksperiodeId: IdInnhenter? = null,
-        organisasjonsnummer: String = ORGNUMMER,
+        organisasjonsnummer: Organisasjonsnummer = ORGNUMMER,
         inspektør: EtterlevelseInspektør = EtterlevelseInspektør(person.aktivitetslogg)
     ) {
         val resultat = inspektør.resultat(paragraf, ledd, punktum, bokstav, vedtaksperiodeId?.invoke(organisasjonsnummer))

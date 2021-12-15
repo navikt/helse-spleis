@@ -24,8 +24,8 @@ internal class UtbetalingsperiodeTest {
         val orgnr = "orgnr"
         val fom = 1.januar
         val tom = 2.januar
-        val periode1 = ArbeidsgiverUtbetalingsperiode(orgnr, fom, tom, prosent, inntekt1)
-        val periode2 = PersonUtbetalingsperiode(orgnr, fom, tom, prosent, inntekt1)
+        val periode1 = ArbeidsgiverUtbetalingsperiode(orgnr.toString(), fom, tom, prosent, inntekt1)
+        val periode2 = PersonUtbetalingsperiode(orgnr.toString(), fom, tom, prosent, inntekt1)
         assertNotEquals(periode1, periode2)
         assertNotEquals(periode1.hashCode(), periode2.hashCode())
     }

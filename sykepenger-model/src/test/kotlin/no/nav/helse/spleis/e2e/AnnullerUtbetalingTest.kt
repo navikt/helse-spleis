@@ -8,6 +8,7 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType
 import no.nav.helse.serde.api.TilstandstypeDTO
+import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
@@ -21,7 +22,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
     @Test
     fun `avvis hvis arbeidsgiver er ukjent`() {
         nyttVedtak(3.januar, 26.januar, 100.prosent, 3.januar)
-        håndterAnnullerUtbetaling(orgnummer = "999999")
+        håndterAnnullerUtbetaling(orgnummer = "999999".somOrganisasjonsnummer())
         inspektør.also {
             assertTrue(it.personLogg.hasErrorsOrWorse(), it.personLogg.toString())
         }

@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.Kilde
+import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -15,8 +16,8 @@ import java.util.*
 
 internal class RevurderInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
     private companion object {
-        const val AG1 = "123456789"
-        const val AG2 = "987654321"
+        val AG1 = "123456789".somOrganisasjonsnummer()
+        val AG2 = "987654321".somOrganisasjonsnummer()
     }
 
     @Test

@@ -1,7 +1,10 @@
 package no.nav.helse.person
 
+import no.nav.helse.Fødselsnummer
+import no.nav.helse.Organisasjonsnummer
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.somFødselsnummer
+import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.spleis.e2e.TestObservatør
 import org.junit.jupiter.api.BeforeEach
 import java.util.*
@@ -9,37 +12,37 @@ import java.util.*
 internal abstract class AbstractPersonTest {
 
     internal companion object {
-        const val UNG_PERSON_FNR_2018 = "12029240045"
+        val UNG_PERSON_FNR_2018: Fødselsnummer = "12029240045".somFødselsnummer()
         const val AKTØRID = "42"
-        const val ORGNUMMER = "987654321"
+        val ORGNUMMER: Organisasjonsnummer = "987654321".somOrganisasjonsnummer()
 
-        const val a1 = ORGNUMMER
-        const val a2 = "654321987"
-        const val a3 = "321987654"
-        const val a4 = "456789123"
+        val a1: Organisasjonsnummer = ORGNUMMER
+        val a2: Organisasjonsnummer = "654321987".somOrganisasjonsnummer()
+        val a3: Organisasjonsnummer = "321987654".somOrganisasjonsnummer()
+        val a4: Organisasjonsnummer = "456789123".somOrganisasjonsnummer()
     }
 
     lateinit var person: Person
     lateinit var observatør: TestObservatør
     val inspektør get() = inspektør(ORGNUMMER)
-    val String.inspektør get() = inspektør(this)
+    val Organisasjonsnummer.inspektør get() = inspektør(this)
 
-    val Int.vedtaksperiode: IdInnhenter get() = { orgnummer -> this.vedtaksperiode(orgnummer) }
+    val Int.vedtaksperiode: IdInnhenter get() = { orgnummer: Organisasjonsnummer -> this.vedtaksperiode(orgnummer) }
 
     @BeforeEach
     internal fun createTestPerson() {
         createTestPerson(UNG_PERSON_FNR_2018)
     }
 
-    protected fun createTestPerson(fødselsnummer: String) {
-        person = Person(AKTØRID, fødselsnummer.somFødselsnummer())
+    protected fun createTestPerson(fødselsnummer: Fødselsnummer) {
+        person = Person(AKTØRID, fødselsnummer)
         observatør = TestObservatør().also { person.addObserver(it) }
     }
 
-    private fun Int.vedtaksperiode(orgnummer: String) = observatør.vedtaksperiode(orgnummer, this - 1)
-    fun Int.utbetaling(orgnummer: String) = inspektør(orgnummer).utbetalingId(this - 1)
-    fun inspektør(orgnummer: String) = TestArbeidsgiverInspektør(person, orgnummer)
-    fun inspektør(orgnummer: String, block: TestArbeidsgiverInspektør.() -> Unit) = inspektør(orgnummer).run(block)
+    private fun Int.vedtaksperiode(orgnummer: Organisasjonsnummer) = observatør.vedtaksperiode(orgnummer, this - 1)
+    fun Int.utbetaling(orgnummer: Organisasjonsnummer) = inspektør(orgnummer).utbetalingId(this - 1)
+    fun inspektør(orgnummer: Organisasjonsnummer) = TestArbeidsgiverInspektør(person, orgnummer)
+    fun inspektør(orgnummer: Organisasjonsnummer, block: TestArbeidsgiverInspektør.() -> Unit) = inspektør(orgnummer).run(block)
 }
 
-internal typealias IdInnhenter = (orgnummer: String) -> UUID
+internal typealias IdInnhenter = (orgnummer: Organisasjonsnummer) -> UUID

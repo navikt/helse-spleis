@@ -9,7 +9,6 @@ import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.reflection.Utbetalingstatus
-import no.nav.helse.somFødselsnummer
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -224,9 +223,9 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
     ) =
         Søknad(
             meldingsreferanseId = UUID.randomUUID(),
-            fnr = UNG_PERSON_FNR_2018,
+            fnr = UNG_PERSON_FNR_2018.toString(),
             aktørId = "12345",
-            orgnummer = ORGNUMMER,
+            orgnummer = ORGNUMMER.toString(),
             perioder = perioder.toList(),
             andreInntektskilder = emptyList(),
             sendtTilNAV = 20.januar.atStartOfDay(),
@@ -248,9 +247,9 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
     ) =
         Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
-            fnr = UNG_PERSON_FNR_2018,
+            fnr = UNG_PERSON_FNR_2018.toString(),
             aktørId = "12345",
-            orgnummer = ORGNUMMER,
+            orgnummer = ORGNUMMER.toString(),
             sykeperioder = perioder.toList(),
             sykmeldingSkrevet = Sykmeldingsperiode.periode(perioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now(),
             mottatt = Sykmeldingsperiode.periode(perioder.toList())!!.endInclusive.atStartOfDay()
@@ -265,8 +264,8 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
-            orgnummer = ORGNUMMER,
-            fødselsnummer = UNG_PERSON_FNR_2018,
+            orgnummer = ORGNUMMER.toString(),
+            fødselsnummer = UNG_PERSON_FNR_2018.toString(),
             aktørId = "aktørId",
             førsteFraværsdag = førsteFraværsdag,
             beregnetInntekt = 31000.månedlig,
@@ -283,8 +282,8 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = "${1.vedtaksperiode(ORGNUMMER)}",
             aktørId = "aktørId",
-            fødselsnummer = UNG_PERSON_FNR_2018.somFødselsnummer(),
-            orgnummer = ORGNUMMER,
+            fødselsnummer = UNG_PERSON_FNR_2018,
+            orgnummer = ORGNUMMER.toString(),
             inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
                 1.januar(2017) til 1.desember(2017) inntekter {
                     ORGNUMMER inntekt 31000.månedlig
@@ -294,7 +293,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
             opptjeningvurdering = Opptjeningvurdering(
                 listOf(
                     Arbeidsforhold(
-                        ORGNUMMER,
+                        ORGNUMMER.toString(),
                         1.januar(2017)
                     )
                 )
@@ -307,7 +306,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
             }),
             arbeidsforhold = listOf(
                 Arbeidsforhold(
-                    ORGNUMMER,
+                    ORGNUMMER.toString(),
                     1.januar(2017)
                 )
             )
@@ -320,8 +319,8 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = "${1.vedtaksperiode(ORGNUMMER)}",
             aktørId = "aktørId",
-            fødselsnummer = UNG_PERSON_FNR_2018,
-            orgnummer = ORGNUMMER,
+            fødselsnummer = UNG_PERSON_FNR_2018.toString(),
+            orgnummer = ORGNUMMER.toString(),
             fagsystemId = inspektør(ORGNUMMER).sisteBehov(Behovtype.Simulering).detaljer().getValue("fagsystemId") as String,
             fagområde = inspektør(ORGNUMMER).sisteBehov(Behovtype.Simulering).detaljer().getValue("fagområde") as String,
             simuleringOK = true,
@@ -336,7 +335,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
                             Simulering.SimulertUtbetaling(
                                 forfallsdato = 21.januar,
                                 utbetalesTil = Simulering.Mottaker(
-                                    id = ORGNUMMER,
+                                    id = ORGNUMMER.toString(),
                                     navn = "Org Orgesen AS"
                                 ),
                                 feilkonto = false,
@@ -357,7 +356,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
                                             antall = 2,
                                             type = "DAGLIG"
                                         ),
-                                        refunderesOrgnummer = ORGNUMMER
+                                        refunderesOrgnummer = ORGNUMMER.toString()
                                     )
                                 )
                             )
@@ -374,20 +373,20 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         return Ytelser(
             meldingsreferanseId = meldingsreferanseId,
             aktørId = "aktørId",
-            fødselsnummer = UNG_PERSON_FNR_2018,
-            organisasjonsnummer = ORGNUMMER,
+            fødselsnummer = UNG_PERSON_FNR_2018.toString(),
+            organisasjonsnummer = ORGNUMMER.toString(),
             vedtaksperiodeId = "${1.vedtaksperiode(ORGNUMMER)}",
             utbetalingshistorikk = Utbetalingshistorikk(
                 meldingsreferanseId = meldingsreferanseId,
                 aktørId = "aktørId",
-                fødselsnummer = UNG_PERSON_FNR_2018,
-                organisasjonsnummer = ORGNUMMER,
+                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
+                organisasjonsnummer = ORGNUMMER.toString(),
                 vedtaksperiodeId = "${1.vedtaksperiode(ORGNUMMER)}",
                 arbeidskategorikoder = emptyMap(),
                 harStatslønn = false,
-                perioder = listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER,17.januar(2017),  20.januar(2017),  100.prosent, 1000.daglig)),
+                perioder = listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(),17.januar(2017),  20.januar(2017),  100.prosent, 1000.daglig)),
                 inntektshistorikk = listOf(
-                    Inntektsopplysning(ORGNUMMER, 17.januar(2017), 31000.månedlig, true)
+                    Inntektsopplysning(ORGNUMMER.toString(), 17.januar(2017), 31000.månedlig, true)
                 ),
                 ugyldigePerioder = emptyList(),
                 aktivitetslogg = Aktivitetslogg(),
@@ -426,8 +425,8 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
     private fun utbetalingsgodkjenning() = Utbetalingsgodkjenning(
         meldingsreferanseId = UUID.randomUUID(),
         aktørId = "aktørId",
-        fødselsnummer = UNG_PERSON_FNR_2018,
-        organisasjonsnummer = ORGNUMMER,
+        fødselsnummer = UNG_PERSON_FNR_2018.toString(),
+        organisasjonsnummer = ORGNUMMER.toString(),
         utbetalingId = UUID.fromString(inspektør.sisteBehov(Behovtype.Godkjenning).kontekst()["utbetalingId"] ?: throw IllegalStateException("Finner ikke utbetalingId i: ${inspektør.sisteBehov(
             Behovtype.Godkjenning
         ).kontekst()}")),
@@ -444,8 +443,8 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
     private fun påminnelse(tilstandType: TilstandType, vedtaksperiodeIdInnhenter: IdInnhenter) = Påminnelse(
         meldingsreferanseId = UUID.randomUUID(),
         aktørId = "aktørId",
-        fødselsnummer = UNG_PERSON_FNR_2018,
-        organisasjonsnummer = ORGNUMMER,
+        fødselsnummer = UNG_PERSON_FNR_2018.toString(),
+        organisasjonsnummer = ORGNUMMER.toString(),
         vedtaksperiodeId = "${vedtaksperiodeIdInnhenter(ORGNUMMER)}",
         tilstand = tilstandType,
         antallGangerPåminnet = 1,
@@ -459,8 +458,8 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
     private fun utbetalingpåminnelse(utbetalingId: UUID, status: Utbetalingstatus) = Utbetalingpåminnelse(
         meldingsreferanseId = UUID.randomUUID(),
         aktørId = "aktørId",
-        fødselsnummer = UNG_PERSON_FNR_2018,
-        organisasjonsnummer = ORGNUMMER,
+        fødselsnummer = UNG_PERSON_FNR_2018.toString(),
+        organisasjonsnummer = ORGNUMMER.toString(),
         utbetalingId = utbetalingId,
         status = status,
         antallGangerPåminnet = 1,

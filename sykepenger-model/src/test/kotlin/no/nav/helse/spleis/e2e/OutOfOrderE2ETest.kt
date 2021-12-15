@@ -876,8 +876,8 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(10.februar, 28.februar, 100.prosent))
         håndterUtbetalingshistorikk(
             vedtaksperiodeIdInnhenter = 4.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 9.februar, 100.prosent, 1000.daglig),
-            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.januar, 9.februar, 100.prosent, 1000.daglig),
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER.toString(), 1.januar, INNTEKT, true))
         )
         assertTrue(inspektør.periodeErForkastet(4.vedtaksperiode))
     }

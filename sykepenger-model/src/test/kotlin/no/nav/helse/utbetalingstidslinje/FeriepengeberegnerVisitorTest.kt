@@ -1,9 +1,10 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.Organisasjonsnummer
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.somFødselsnummer
+import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.spleis.e2e.*
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.testhelpers.*
@@ -18,15 +19,15 @@ import java.util.*
 
 internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
     private companion object {
-        private val alder = UNG_PERSON_FNR_2018.somFødselsnummer().alder()
-        private const val a1 = "456789123"
-        private const val a2 = "789456213"
+        private val alder = UNG_PERSON_FNR_2018.alder()
+        private val a1 = "456789123".somOrganisasjonsnummer()
+        private val a2 = "789456213".somOrganisasjonsnummer()
     }
 
     @Test
     fun `Finner datoer for feriepengeberegning med 48 sammenhengende utbetalingsdager i IT fra første januar`() {
         val historikk = utbetalingshistorikkForFeriepenger(
-            listOf(UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(ORGNUMMER, 1.januar, 7.mars, 1000, 7.mars))
+            listOf(UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(ORGNUMMER.toString(), 1.januar, 7.mars, 1000, 7.mars))
         )
 
         val beregner = Feriepengeberegner(alder, Year.of(2018), historikk, person)
@@ -36,7 +37,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
     @Test
     fun `Finner datoer for feriepengeberegning med 49 sammenhengende utbetalingsdager i IT fra første januar`() {
         val historikk = utbetalingshistorikkForFeriepenger(
-            listOf(UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(ORGNUMMER, 1.januar, 8.mars, 1000, 8.mars))
+            listOf(UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(ORGNUMMER.toString(), 1.januar, 8.mars, 1000, 8.mars))
         )
 
         val beregner = Feriepengeberegner(alder, Year.of(2018), historikk, person)
@@ -46,7 +47,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
     @Test
     fun `Finner datoer for feriepengeberegning med 47 sammenhengende utbetalingsdager i IT fra første januar`() {
         val historikk = utbetalingshistorikkForFeriepenger(
-            listOf(UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(ORGNUMMER, 1.januar, 6.mars, 1000, 6.mars))
+            listOf(UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(ORGNUMMER.toString(), 1.januar, 6.mars, 1000, 6.mars))
         )
 
         val beregner = Feriepengeberegner(alder, Year.of(2018), historikk, person)
@@ -58,7 +59,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
         val historikk = utbetalingshistorikkForFeriepenger(
             listOf(
                 UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(
-                    ORGNUMMER,
+                    ORGNUMMER.toString(),
                     1.desember(2017),
                     31.januar(2018),
                     1000,
@@ -76,7 +77,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
         val historikk = utbetalingshistorikkForFeriepenger(
             listOf(
                 UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(
-                    ORGNUMMER,
+                    ORGNUMMER.toString(),
                     1.desember(2017),
                     31.januar(2018),
                     1000,
@@ -94,7 +95,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
         val historikk = utbetalingshistorikkForFeriepenger(
             utbetalinger = listOf(
                 UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(
-                    ORGNUMMER,
+                    ORGNUMMER.toString(),
                     1.desember(2017),
                     31.januar(2018),
                     1000,
@@ -127,7 +128,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
                     31.januar(2018)
                 ),
                 UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(
-                    ORGNUMMER,
+                    ORGNUMMER.toString(),
                     1.desember(2017),
                     31.januar(2018),
                     1000,
@@ -165,7 +166,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
                     31.desember(2018)
                 ),
                 UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(
-                    ORGNUMMER,
+                    ORGNUMMER.toString(),
                     1.desember(2018),
                     31.desember(2018),
                     1000,
@@ -342,7 +343,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
         UtbetalingshistorikkForFeriepenger(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = AKTØRID,
-            fødselsnummer = ORGNUMMER,
+            fødselsnummer = UNG_PERSON_FNR_2018.toString(),
             utbetalinger = utbetalinger,
             feriepengehistorikk = emptyList(),
             arbeidskategorikoder = arbeidskategorikoder,
@@ -353,7 +354,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
     private fun byggPerson(
         arbeidsgiverperiode: Periode = 1.januar til 16.januar,
         syktil: LocalDate = 31.januar,
-        orgnummer: String = ORGNUMMER
+        orgnummer: Organisasjonsnummer = ORGNUMMER
     ) {
         håndterSykmelding(Sykmeldingsperiode(arbeidsgiverperiode.start, syktil, 100.prosent), orgnummer = orgnummer)
         håndterSøknadMedValidering(
@@ -380,7 +381,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
     private fun byggPersonMedAnnullering(
         arbeidsgiverperiode: Periode = 1.januar til 16.januar,
         syktil: LocalDate = 31.januar,
-        orgnummer: String = ORGNUMMER
+        orgnummer: Organisasjonsnummer = ORGNUMMER
     ) {
         håndterSykmelding(Sykmeldingsperiode(arbeidsgiverperiode.start, syktil, 100.prosent), orgnummer = orgnummer)
         håndterSøknadMedValidering(
@@ -441,7 +442,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
     private fun byggPersonMedOpphør(
         arbeidsgiverperiode: Periode = 1.januar til 16.januar,
         syktil: LocalDate = 31.januar,
-        orgnummer: String = ORGNUMMER
+        orgnummer: Organisasjonsnummer = ORGNUMMER
     ) {
         håndterSykmelding(Sykmeldingsperiode(arbeidsgiverperiode.start, syktil, 100.prosent), orgnummer = orgnummer)
         håndterSøknadMedValidering(
@@ -452,16 +453,16 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(
             { observatør.sisteVedtaksperiode() },
             orgnummer = orgnummer,
-            inntektshistorikk = listOf(Inntektsopplysning(orgnummer, 1.desember(2017), INNTEKT, true)),
+            inntektshistorikk = listOf(Inntektsopplysning(orgnummer.toString(), 1.desember(2017), INNTEKT, true)),
             besvart = LocalDateTime.now().minusMonths(1),
-            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(orgnummer, 1.desember(2017), 31.desember(2017), 100.prosent, INNTEKT))
+            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(orgnummer.toString(), 1.desember(2017), 31.desember(2017), 100.prosent, INNTEKT))
         )
         håndterYtelser(
             { observatør.sisteVedtaksperiode() },
             orgnummer = orgnummer,
-            inntektshistorikk = listOf(Inntektsopplysning(orgnummer, 1.desember(2017), INNTEKT, true)),
+            inntektshistorikk = listOf(Inntektsopplysning(orgnummer.toString(), 1.desember(2017), INNTEKT, true)),
             besvart = LocalDateTime.now().minusMonths(1),
-            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(orgnummer, 1.desember(2017), 31.desember(2017), 100.prosent, INNTEKT))
+            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(orgnummer.toString(), 1.desember(2017), 31.desember(2017), 100.prosent, INNTEKT))
         )
 
         håndterSimulering({ observatør.sisteVedtaksperiode() }, orgnummer = orgnummer)
@@ -477,8 +478,8 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
         håndterYtelser(
             { observatør.sisteVedtaksperiode() },
             orgnummer = orgnummer,
-            inntektshistorikk = listOf(Inntektsopplysning(orgnummer, 1.desember(2017), 40000.månedlig, true)),
-            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(orgnummer, 1.desember(2017), 15.januar, 50.prosent, 40000.månedlig))
+            inntektshistorikk = listOf(Inntektsopplysning(orgnummer.toString(), 1.desember(2017), 40000.månedlig, true)),
+            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(orgnummer.toString(), 1.desember(2017), 15.januar, 50.prosent, 40000.månedlig))
         )
 
         håndterSimulering({ observatør.sisteVedtaksperiode() }, orgnummer = orgnummer)

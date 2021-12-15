@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.TilstandType
+import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -88,8 +89,8 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
 
     @Test
     fun `avviser revurdering av inntekt for saker med flere arbeidsgivere`() {
-        val ag1 = "ag1"
-        val ag2 = "ag2"
+        val ag1 = "ag1".somOrganisasjonsnummer()
+        val ag2 = "ag2".somOrganisasjonsnummer()
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = ag1)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = ag2)
 
@@ -119,15 +120,15 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = ag1)
         håndterSimulering(1.vedtaksperiode, orgnummer = ag1)
 
-        håndterOverstyrInntekt(inntekt = 33000.månedlig, "ag1", 1.januar)
+        håndterOverstyrInntekt(inntekt = 33000.månedlig, ag1, 1.januar)
         assertEquals(1, observatør.avvisteRevurderinger.size)
         assertErrorTekst(inspektør, "Forespurt overstyring av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
     }
 
     @Test
     fun `avviser revurdering av inntekt for saker med 1 arbeidsgiver og ghost`() {
-        val ag1 = "ag1"
-        val ag2 = "ag2"
+        val ag1 = "ag1".somOrganisasjonsnummer()
+        val ag2 = "ag2".somOrganisasjonsnummer()
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = ag1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = ag1)
         håndterInntektsmelding(
@@ -143,8 +144,8 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         )
 
         val arbeidsforhold = listOf(
-            Arbeidsforhold(ag1, LocalDate.EPOCH, null),
-            Arbeidsforhold(ag2, LocalDate.EPOCH, null)
+            Arbeidsforhold(ag1.toString(), LocalDate.EPOCH, null),
+            Arbeidsforhold(ag2.toString(), LocalDate.EPOCH, null)
         )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = ag1)

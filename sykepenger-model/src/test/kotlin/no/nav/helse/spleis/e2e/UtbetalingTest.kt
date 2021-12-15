@@ -22,9 +22,9 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterYtelser(
             1.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ANNET_ORGNUMMER, 1.januar(2016), 31.januar(2016), 100.prosent, 1000.daglig),
+            ArbeidsgiverUtbetalingsperiode(ANNET_ORGNUMMER.toString(), 1.januar(2016), 31.januar(2016), 100.prosent, 1000.daglig),
             inntektshistorikk = listOf(
-                Inntektsopplysning(ANNET_ORGNUMMER, 1.januar(2016), 1000.daglig, true)
+                Inntektsopplysning(ANNET_ORGNUMMER.toString(), 1.januar(2016), 1000.daglig, true)
             )
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)

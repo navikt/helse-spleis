@@ -1,5 +1,6 @@
 package no.nav.helse.inspectors
 
+import no.nav.helse.Organisasjonsnummer
 import no.nav.helse.antallEtterspurteBehov
 import no.nav.helse.etterspurteBehov
 import no.nav.helse.etterspurteBehovFinnes
@@ -22,7 +23,7 @@ import java.util.*
 
 internal class TestArbeidsgiverInspektør(
     private val person: Person,
-    val orgnummer: String
+    val orgnummer: Organisasjonsnummer
 ) : ArbeidsgiverVisitor, VilkårsgrunnlagHistorikkVisitor {
     internal var vedtaksperiodeTeller: Int = 0
         private set
@@ -83,7 +84,7 @@ internal class TestArbeidsgiverInspektør(
         }
     }
 
-    private class HentAktivitetslogg(person: Person, private val valgfriOrgnummer: String?) : PersonVisitor {
+    private class HentAktivitetslogg(person: Person, private val valgfriOrgnummer: Organisasjonsnummer?) : PersonVisitor {
         lateinit var aktivitetslogg: Aktivitetslogg
         lateinit var arbeidsgiver: Arbeidsgiver
         val vilkårsgrunnlagHistorikk = mutableListOf<Pair<LocalDate,VilkårsgrunnlagHistorikk.Grunnlagsdata>>()
@@ -99,7 +100,7 @@ internal class TestArbeidsgiverInspektør(
         }
 
         override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
-            if (organisasjonsnummer == valgfriOrgnummer) this.arbeidsgiver = arbeidsgiver
+            if (organisasjonsnummer == valgfriOrgnummer?.toString()) this.arbeidsgiver = arbeidsgiver
             if (this::arbeidsgiver.isInitialized) return
             this.arbeidsgiver = arbeidsgiver
         }
