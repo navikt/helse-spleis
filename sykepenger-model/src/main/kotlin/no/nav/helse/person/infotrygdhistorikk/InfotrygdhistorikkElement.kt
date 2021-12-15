@@ -29,6 +29,7 @@ internal class InfotrygdhistorikkElement private constructor(
     private var lagretInntekter: Boolean,
     private var lagretVilkårsgrunnlag: Boolean
 ) {
+    private val nødnummer = Nødnummer.Sykepenger
     private val inntekter = Inntektsopplysning.sorter(inntekter)
     private val perioder = Infotrygdperiode.sorter(perioder)
     private val kilde = SykdomstidslinjeHendelse.Hendelseskilde("Infotrygdhistorikk", id, tidsstempel)
@@ -149,10 +150,10 @@ internal class InfotrygdhistorikkElement private constructor(
 
     private fun valider(aktivitetslogg: IAktivitetslogg, perioder: List<Infotrygdperiode>, periode: Periode, skjæringstidspunkt: LocalDate?): Boolean {
         aktivitetslogg.info("Sjekker utbetalte perioder")
-        perioder.filterIsInstance<Utbetalingsperiode>().forEach { it.valider(aktivitetslogg, periode) }
+        perioder.filterIsInstance<Utbetalingsperiode>().forEach { it.valider(aktivitetslogg, periode, nødnummer) }
 
         aktivitetslogg.info("Sjekker inntektsopplysninger")
-        Inntektsopplysning.valider(inntekter, aktivitetslogg, periode, skjæringstidspunkt)
+        Inntektsopplysning.valider(inntekter, aktivitetslogg, periode, skjæringstidspunkt, nødnummer)
 
         aktivitetslogg.info("Sjekker at alle utbetalte perioder har inntektsopplysninger")
         perioder.validerInntektForPerioder(aktivitetslogg, inntekter)

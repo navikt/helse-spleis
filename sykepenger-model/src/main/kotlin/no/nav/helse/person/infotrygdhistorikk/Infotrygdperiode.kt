@@ -17,8 +17,8 @@ abstract class Infotrygdperiode(fom: LocalDate, tom: LocalDate) : Periode(fom, t
     internal open fun utbetalingstidslinje(): Utbetalingstidslinje = Utbetalingstidslinje()
 
     internal abstract fun accept(visitor: InfotrygdhistorikkVisitor)
-    internal open fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode) {}
-    internal open fun validerOverlapp(aktivitetslogg: IAktivitetslogg, periode: Periode) {}
+    internal open fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode, nødnummer: Nødnummer) {}
+    internal open fun validerOverlapp(aktivitetslogg: IAktivitetslogg, periode: Periode, nødnummer: Nødnummer) {}
 
     internal fun historikkFor(orgnummer: String, sykdomstidslinje: Sykdomstidslinje, kilde: SykdomstidslinjeHendelse.Hendelseskilde): Sykdomstidslinje {
         if (!gjelder(orgnummer)) return sykdomstidslinje

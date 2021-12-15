@@ -23,7 +23,8 @@ class Inntektsopplysning private constructor(
         refusjonTom: LocalDate? = null
     ) : this(orgnummer, sykepengerFom, inntekt, refusjonTilArbeidsgiver, refusjonTom, null)
 
-    internal fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode, skjæringstidspunkt: LocalDate?): Boolean {
+    internal fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode, skjæringstidspunkt: LocalDate?, nødnummer: Nødnummer): Boolean {
+        nødnummer.valider(aktivitetslogg, orgnummer)
         if (!erRelevant(periode, skjæringstidspunkt)) return true
         if (orgnummer.isBlank()) aktivitetslogg.error("Organisasjonsnummer for inntektsopplysning fra Infotrygd mangler")
         return !aktivitetslogg.hasErrorsOrWorse()
@@ -73,9 +74,10 @@ class Inntektsopplysning private constructor(
             liste: List<Inntektsopplysning>,
             aktivitetslogg: IAktivitetslogg,
             periode: Periode,
-            skjæringstidspunkt: LocalDate?
+            skjæringstidspunkt: LocalDate?,
+            nødnummer: Nødnummer
         ) {
-            liste.forEach { it.valider(aktivitetslogg, periode, skjæringstidspunkt) }
+            liste.forEach { it.valider(aktivitetslogg, periode, skjæringstidspunkt, nødnummer) }
             liste.validerAlleInntekterForSammenhengendePeriode(skjæringstidspunkt, aktivitetslogg, periode)
             liste.validerAntallInntekterPerArbeidsgiverPerDato(skjæringstidspunkt, aktivitetslogg, periode)
         }
