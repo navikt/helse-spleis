@@ -3,7 +3,6 @@ package no.nav.helse.hendelser
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Arbeidsforhold.Companion.grupperArbeidsforholdPerOrgnummer
 import no.nav.helse.person.*
-import no.nav.helse.somFødselsnummer
 import no.nav.helse.økonomi.Inntekt
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -39,7 +38,9 @@ class Vilkårsgrunnlag(
         antallArbeidsgivereFraAareg: Int,
         periodetype: Periodetype
     ): IAktivitetslogg {
-        require(!grunnlagForSykepengegrunnlag.inntektsopplysningPerArbeidsgiver().values.all { it is Inntektshistorikk.SkattComposite })
+        if (grunnlagForSykepengegrunnlag.inntektsopplysningPerArbeidsgiver().values.all { it is Inntektshistorikk.SkattComposite }) {
+            error("Bruker mangler nødvendig inntekt ved validering av Vilkårsgrunnlag")
+        }
         val inntektsvurderingOk = inntektsvurdering.valider(
             this,
             grunnlagForSykepengegrunnlag,
