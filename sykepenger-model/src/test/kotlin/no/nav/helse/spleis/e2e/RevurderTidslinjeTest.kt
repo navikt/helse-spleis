@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.ForventetFeil
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -21,6 +22,16 @@ import java.time.LocalDateTime
 import java.util.*
 
 internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
+
+    @ForventetFeil("Vi skal ikke kunne utbetale en tidligere periode samtidig som en annen periode utbetales")
+    @Test
+    fun `revurdere mens en periode er til utbetaling`() {
+        nyttVedtak(1.januar, 31.januar)
+        forlengTilGodkjentVedtak(1.februar, 28.februar)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING)
+    }
 
     @Test
     fun `to perioder - revurder dager i eldste`() {

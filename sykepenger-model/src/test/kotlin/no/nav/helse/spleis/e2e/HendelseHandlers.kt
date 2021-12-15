@@ -223,13 +223,18 @@ internal fun AbstractEndToEndTest.tilYtelser(
     return id(orgnummer)
 }
 
-internal fun AbstractEndToEndTest.forlengVedtak(fom: LocalDate, tom: LocalDate, grad: Prosentdel = 100.prosent, orgnummer: String = AbstractPersonTest.ORGNUMMER, skalSimuleres: Boolean = true) {
+internal fun AbstractEndToEndTest.forlengTilGodkjentVedtak(fom: LocalDate, tom: LocalDate, grad: Prosentdel = 100.prosent, orgnummer: String = AbstractPersonTest.ORGNUMMER, skalSimuleres: Boolean = true) {
     håndterSykmelding(Sykmeldingsperiode(fom, tom, grad), orgnummer = orgnummer)
     val id: IdInnhenter = { observatør.sisteVedtaksperiode() }
     håndterSøknadMedValidering(id, Søknad.Søknadsperiode.Sykdom(fom, tom, grad), orgnummer = orgnummer)
     håndterYtelser(id, orgnummer = orgnummer)
     if (skalSimuleres) håndterSimulering(id, orgnummer = orgnummer)
     håndterUtbetalingsgodkjenning(id, true, orgnummer = orgnummer)
+}
+
+internal fun AbstractEndToEndTest.forlengVedtak(fom: LocalDate, tom: LocalDate, grad: Prosentdel = 100.prosent, orgnummer: String = AbstractPersonTest.ORGNUMMER, skalSimuleres: Boolean = true) {
+    forlengTilGodkjentVedtak(fom, tom, grad, orgnummer, skalSimuleres)
+    val id: IdInnhenter = { observatør.sisteVedtaksperiode() }
     håndterUtbetalt(id, status = Oppdragstatus.AKSEPTERT, orgnummer = orgnummer)
 }
 
