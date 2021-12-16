@@ -784,6 +784,25 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
                 assertSisteTilstand(1.vedtaksperiode, REVURDERING_FEILET)
             }
         }
+
+    @Test
+    fun `revurdere mens en periode er til utbetaling`() {
+        nyttVedtak(1.januar, 31.januar)
+        forlengTilGodkjentVedtak(1.februar, 28.februar)
+        håndterOverstyrInntekt(INNTEKT/2, skjæringstidspunkt = 1.januar)
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING)
+    }
+
+    @Test
+    fun `revurdere mens en periode har feilet i utbetaling`() {
+        nyttVedtak(1.januar, 31.januar)
+        forlengTilGodkjentVedtak(1.februar, 28.februar)
+        håndterUtbetalt(2.vedtaksperiode, status = Oppdragstatus.FEIL)
+        håndterOverstyrInntekt(INNTEKT/2, skjæringstidspunkt = 1.januar)
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, UTBETALING_FEILET)
+    }
 }
 
 private fun Oppdrag.skalHaEndringskode(kode: Endringskode, message: String = "") = accept(UtbetalingSkalHaEndringskode(kode, message))
