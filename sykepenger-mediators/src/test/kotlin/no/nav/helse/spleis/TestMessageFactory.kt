@@ -359,6 +359,24 @@ internal class TestMessageFactory(
         val ansattTil: LocalDate?
     )
 
+    data class InntekterForSykepengegrunnlagFraLøsning(
+        val måned: YearMonth,
+        val inntekter: List<Inntekt>,
+        val arbeidsforhold: List<Arbeidsforhold>
+        ) {
+
+        data class Inntekt(
+            val beløp: Double,
+            val orgnummer: String
+        )
+
+        data class Arbeidsforhold(
+            val orgnummer: String,
+            val type: String = "frilanserOppdragstakerHonorarPersonerMm"
+        )
+    }
+
+
     fun lagYtelser(
         vedtaksperiodeId: UUID,
         tilstand: TilstandType,
@@ -448,10 +466,9 @@ internal class TestMessageFactory(
         vedtaksperiodeId: UUID,
         tilstand: TilstandType,
         inntekter: List<Pair<YearMonth, Double>>,
-        inntekterForSykepengegrunnlag: List<Pair<YearMonth, Double>>,
+        inntekterForSykepengegrunnlag: List<InntekterForSykepengegrunnlagFraLøsning>,
         arbeidsforhold: List<Arbeidsforhold>,
-        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
-
+        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
     ): String {
         return lagBehovMedLøsning(
             behov = listOf(
@@ -490,17 +507,22 @@ internal class TestMessageFactory(
                     )
                 ),
                 InntekterForSykepengegrunnlag.name to inntekterForSykepengegrunnlag
-                    .groupBy { it.first }
                     .map {
                         mapOf(
-                            "årMåned" to it.key,
-                            "inntektsliste" to it.value.map {
+                            "årMåned" to it.måned,
+                            "inntektsliste" to it.inntekter.map { inntekt ->
                                 mapOf(
-                                    "beløp" to it.second,
+                                    "beløp" to inntekt.beløp,
                                     "inntektstype" to "LOENNSINNTEKT",
-                                    "orgnummer" to organisasjonsnummer,
+                                    "orgnummer" to inntekt.orgnummer,
                                     "fordel" to "kontantytelse",
                                     "beskrivelse" to "fastloenn"
+                                )
+                            },
+                            "arbeidsforholdliste" to it.arbeidsforhold.map { arbeidsforhold ->
+                                mapOf(
+                                    "orgnummer" to arbeidsforhold.orgnummer,
+                                    "type" to arbeidsforhold.type
                                 )
                             }
                         )

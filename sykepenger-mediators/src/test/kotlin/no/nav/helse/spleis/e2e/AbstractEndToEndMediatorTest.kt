@@ -319,7 +319,15 @@ internal abstract class AbstractEndToEndMediatorTest {
             )
         ),
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-        inntekterForSykepengegrunnlag: List<Pair<YearMonth, Double>> = 1.rangeTo(12).map { YearMonth.of(2017, it) to INNTEKT },
+        inntekterForSykepengegrunnlag: List<InntekterForSykepengegrunnlagFraLøsning> = 1.rangeTo(12).map {
+            InntekterForSykepengegrunnlagFraLøsning(
+                måned = YearMonth.of(2017, it),
+                inntekter = listOf(
+                    InntekterForSykepengegrunnlagFraLøsning.Inntekt(INNTEKT, ORGNUMMER)
+                ),
+                arbeidsforhold = emptyList()
+            )
+        },
     ) {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, InntekterForSammenligningsgrunnlag))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Medlemskap))
