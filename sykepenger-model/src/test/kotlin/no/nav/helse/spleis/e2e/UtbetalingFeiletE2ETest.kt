@@ -2,15 +2,13 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Toggle
 import no.nav.helse.Toggle.Companion.enable
-import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
-import no.nav.helse.hendelser.til
+import no.nav.helse.hendelser.*
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
+import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -19,6 +17,45 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
+
+    @Test
+    fun `revurdering feilet med ett oppdrag status avvist som bygger på tidligere`() {
+        nyttVedtak(1.januar, 31.januar)
+        forlengVedtak(1.februar, 28.februar)
+        håndterOverstyrTidslinje(listOf(
+            ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)
+        ))
+        håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt(2.vedtaksperiode, Oppdragstatus.AVVIST)
+        håndterPåminnelse(2.vedtaksperiode, UTBETALING_FEILET)
+        håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt(2.vedtaksperiode)
+        val første = inspektør.utbetaling(0)
+        assertEquals(Utbetaling.Forkastet, inspektør.utbetalingtilstand(2))
+        inspektør.utbetaling(3).inspektør.also { utbetalingInspektør ->
+            assertEquals(utbetalingInspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), første.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+            assertEquals(Endringskode.ENDR, utbetalingInspektør.arbeidsgiverOppdrag.inspektør.endringskode)
+            assertEquals(2, utbetalingInspektør.arbeidsgiverOppdrag.size)
+            assertTrue(utbetalingInspektør.arbeidsgiverOppdrag.harUtbetalinger())
+            assertEquals(17.januar, utbetalingInspektør.arbeidsgiverOppdrag[0].fom)
+            assertEquals(30.januar, utbetalingInspektør.arbeidsgiverOppdrag[0].tom)
+            assertEquals(1.februar, utbetalingInspektør.arbeidsgiverOppdrag[1].fom)
+            assertEquals(28.februar, utbetalingInspektør.arbeidsgiverOppdrag[1].tom)
+            assertTrue(utbetalingInspektør.arbeidsgiverOppdrag[0].erForskjell())
+            assertTrue(utbetalingInspektør.arbeidsgiverOppdrag[1].erForskjell())
+        }
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET,
+            AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVSLUTTET)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET,
+            AVVENTER_ARBEIDSGIVERE_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, UTBETALING_FEILET, AVVENTER_ARBEIDSGIVERE_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
+    }
 
     @Test
     fun `utbetaling feilet med ett oppdrag status avvist`() {

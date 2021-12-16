@@ -117,6 +117,12 @@ internal class Utbetaling private constructor(
     internal fun kanIkkeForsøkesPåNy() = Oppdrag.kanIkkeForsøkesPåNy(arbeidsgiverOppdrag, personOppdrag)
     private fun erAnnullering() = type == Utbetalingtype.ANNULLERING
 
+    internal fun reberegnUtbetaling(hvisRevurdering: () -> Unit, hvisUtbetaling: () -> Unit) {
+        check(kanIkkeForsøkesPåNy())
+        if (type == Utbetalingtype.REVURDERING) return hvisRevurdering()
+        return hvisUtbetaling()
+    }
+
     // this kan revurdere other gitt at fagsystemId == other.fagsystemId,
     // og at this er lik den siste aktive utbetalingen for fagsystemIden
     internal fun hørerSammen(other: Utbetaling) =
@@ -124,8 +130,8 @@ internal class Utbetaling private constructor(
 
     internal fun harUtbetalinger() =
         arbeidsgiverOppdrag.harUtbetalinger() || personOppdrag.harUtbetalinger()
-
     internal fun harDelvisRefusjon() = arbeidsgiverOppdrag.harUtbetalinger () && personOppdrag.harUtbetalinger()
+
     internal fun harBrukerutbetaling() = personOppdrag.harUtbetalinger()
 
     internal fun erKlarForGodkjenning() = personOppdrag.erKlarForGodkjenning() && arbeidsgiverOppdrag.erKlarForGodkjenning()

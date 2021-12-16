@@ -11,6 +11,8 @@ internal val Oppdrag.inspektør get() = OppdragInspektør(this)
 internal class OppdragInspektør(oppdrag: Oppdrag) : UtbetalingVisitor {
     private var linjeteller = 0
     private lateinit var fagsystemId: String
+    internal lateinit var endringskode: Endringskode
+        private set
     private val totalBeløp = mutableListOf<Int>()
     private val nettoBeløp = mutableListOf<Int>()
     private val fom = mutableListOf<LocalDate>()
@@ -49,6 +51,7 @@ internal class OppdragInspektør(oppdrag: Oppdrag) : UtbetalingVisitor {
         simuleringsResultat: Simulering.SimuleringResultat?
     ) {
         this.fagsystemId = fagsystemId
+        this.endringskode = endringskode
         this.nettoBeløp.add(nettoBeløp)
         this.status = status
         this.simuleringsResultat = simuleringsResultat

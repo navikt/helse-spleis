@@ -755,16 +755,7 @@ internal class Arbeidsgiver private constructor(
         return results
     }
 
-    internal fun startRevurderingForAlleBerørtePerioder(hendelse: OverstyrTidslinje, vedtaksperiode: Vedtaksperiode) {
-        hendelse.kontekst(this)
-        håndter(hendelse) { nyRevurderingFør(vedtaksperiode, hendelse) }
-        if (hendelse.hasErrorsOrWorse()) {
-            hendelse.info("Revurdering blokkeres, gjenopptar behandling")
-            return gjenopptaBehandling()
-        }
-    }
-
-    internal fun startRevurderingForAlleBerørtePerioder(hendelse: OverstyrInntekt, vedtaksperiode: Vedtaksperiode) {
+    internal fun startRevurderingForAlleBerørtePerioder(hendelse: ArbeidstakerHendelse, vedtaksperiode: Vedtaksperiode) {
         hendelse.kontekst(this)
         håndter(hendelse) { nyRevurderingFør(vedtaksperiode, hendelse) }
         if (hendelse.hasErrorsOrWorse()) {
