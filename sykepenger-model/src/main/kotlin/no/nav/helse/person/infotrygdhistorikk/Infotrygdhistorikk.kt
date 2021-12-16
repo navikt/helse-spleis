@@ -24,17 +24,17 @@ internal class Infotrygdhistorikk private constructor(
             tidligsteDato.minusYears(4) til LocalDate.now()
     }
 
-    internal fun valider(aktivitetslogg: IAktivitetslogg, arbeidsgiver: Arbeidsgiver, periode: Periode, skjæringstidspunkt: LocalDate?): Boolean {
+    internal fun valider(aktivitetslogg: IAktivitetslogg, arbeidsgiver: Arbeidsgiver, periode: Periode, skjæringstidspunkt: LocalDate): Boolean {
         val avgrensetPeriode = arbeidsgiver.avgrensetPeriode(periode)
         return valider(aktivitetslogg, arbeidsgiver.periodetype(periode), avgrensetPeriode, skjæringstidspunkt)
     }
 
-    internal fun valider(aktivitetslogg: IAktivitetslogg, periodetype: Periodetype, periode: Periode, skjæringstidspunkt: LocalDate?): Boolean {
+    internal fun valider(aktivitetslogg: IAktivitetslogg, periodetype: Periodetype, periode: Periode, skjæringstidspunkt: LocalDate): Boolean {
         if (!harHistorikk()) return true
         return siste.valider(aktivitetslogg, periodetype, periode, skjæringstidspunkt)
     }
 
-    internal fun validerOverlappende(aktivitetslogg: IAktivitetslogg, periode: Periode, skjæringstidspunkt: LocalDate?): Boolean {
+    internal fun validerOverlappende(aktivitetslogg: IAktivitetslogg, periode: Periode, skjæringstidspunkt: LocalDate): Boolean {
         if (!harHistorikk()) return true
         return siste.validerOverlappende(aktivitetslogg, periode, skjæringstidspunkt)
     }

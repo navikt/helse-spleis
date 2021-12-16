@@ -150,11 +150,11 @@ internal class InfotrygdhistorikkElementTest {
                 ArbeidsgiverUtbetalingsperiode("ag1", 1.februar, 28.februar, 100.prosent, 25000.månedlig)
             )
         )
-        element.fjernHistorikk(tidslinjeOf(10.NAV, 10.FRI, 11.NAV, 28.NAV, 31.NAV), "ag1", 1.januar).also {
-            assertEquals(11.januar til 31.mars, it.periode())
-            assertTrue(it.subset(11.januar til 20.januar).all { it is Fridag })
-            assertTrue(it.subset(21.januar til 28.februar).all { it is UkjentDag })
-            assertTrue(it.subset(1.mars til 31.mars).all { it is NavDag })
+        element.fjernHistorikk(tidslinjeOf(10.NAV, 10.FRI, 11.NAV, 28.NAV, 31.NAV), "ag1", 1.januar).also { utbetalingstidslinje ->
+            assertEquals(11.januar til 31.mars, utbetalingstidslinje.periode())
+            assertTrue(utbetalingstidslinje.subset(11.januar til 20.januar).all { it is Fridag })
+            assertTrue(utbetalingstidslinje.subset(21.januar til 28.februar).all { it is UkjentDag })
+            assertTrue(utbetalingstidslinje.subset(1.mars til 31.mars).all { it is NavDag })
         }
         element.fjernHistorikk(tidslinjeOf(10.NAV, 10.FRI, 11.NAV, 28.NAV, 31.NAV), "ag1", 1.februar).also {
             assertEquals(1.mars til 31.mars, it.periode())
@@ -169,11 +169,11 @@ internal class InfotrygdhistorikkElementTest {
                 Friperiode(11.januar, 20.januar)
             )
         )
-        element.fjernHistorikk(tidslinjeOf(10.NAV, 10.FRI, 11.NAV), "ag1", 1.januar).also {
-            assertEquals(1.januar til 31.januar, it.periode())
-            assertTrue(it.subset(1.januar til 10.januar).all { it is NavDag })
-            assertTrue(it.subset(11.januar til 20.januar).all { it is Fridag })
-            assertTrue(it.subset(21.januar til 31.januar).all { it is NavDag })
+        element.fjernHistorikk(tidslinjeOf(10.NAV, 10.FRI, 11.NAV), "ag1", 1.januar).also { utbetalingstidslinje ->
+            assertEquals(1.januar til 31.januar, utbetalingstidslinje.periode())
+            assertTrue(utbetalingstidslinje.subset(1.januar til 10.januar).all { it is NavDag })
+            assertTrue(utbetalingstidslinje.subset(11.januar til 20.januar).all { it is Fridag })
+            assertTrue(utbetalingstidslinje.subset(21.januar til 31.januar).all { it is NavDag })
         }
     }
 
@@ -314,14 +314,6 @@ internal class InfotrygdhistorikkElementTest {
         aktivitetslogg.barn().also {
             assertTrue(element.valider(it, Periodetype.FØRSTEGANGSBEHANDLING, 1.februar til 28.februar, 1.februar))
         }
-    }
-
-    @Test
-    fun `skjæringstidspunkt lik null resulterer i passert validering av redusert utbetaling`() {
-        val arbeidskategorikoder = mapOf("01" to 1.januar)
-        val element = historikkelement(arbeidskategorikoder = arbeidskategorikoder)
-        assertTrue(element.valider(aktivitetslogg, Periodetype.FØRSTEGANGSBEHANDLING, Periode(2.januar, 31.januar), null))
-        assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test
@@ -605,20 +597,6 @@ internal class InfotrygdhistorikkElementTest {
     }
 
     @Test
-    fun `validering av inntektsopplysninger feiler ikke for skjæringstidspunkt null`() {
-        val utbetalinger = listOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 5.januar, 100.prosent, 1234.daglig)
-        )
-        val element = historikkelement(
-            utbetalinger, listOf(
-                Inntektsopplysning(ORGNUMMER, 1.januar, 1234.månedlig, true),
-            )
-        )
-        assertTrue(element.valider(aktivitetslogg, Periodetype.FØRSTEGANGSBEHANDLING, Periode(10.januar, 31.januar), null))
-        assertFalse(aktivitetslogg.hasErrorsOrWorse())
-    }
-
-    @Test
     fun `validering gir warning hvis vi har to inntekter for samme arbeidsgiver på samme dato`() {
         val element = historikkelement(
             inntekter = listOf(
@@ -627,9 +605,9 @@ internal class InfotrygdhistorikkElementTest {
             )
         )
 
-        assertTrue(element.valider(aktivitetslogg, Periodetype.FØRSTEGANGSBEHANDLING, Periode(1.januar, 31.januar), null))
+        assertTrue(element.valider(aktivitetslogg, Periodetype.FØRSTEGANGSBEHANDLING, Periode(1.januar, 31.januar), 1.januar))
         assertTrue(aktivitetslogg.hasWarningsOrWorse())
-        assertTrue(element.valider(aktivitetslogg, Periodetype.FØRSTEGANGSBEHANDLING, Periode(1.januar, 31.januar), null))
+        assertTrue(element.valider(aktivitetslogg, Periodetype.FØRSTEGANGSBEHANDLING, Periode(1.januar, 31.januar), 1.januar))
         assertFalse(aktivitetslogg.hasErrorsOrWorse())
     }
 
@@ -641,7 +619,7 @@ internal class InfotrygdhistorikkElementTest {
                 Inntektsopplysning(ORGNUMMER, 1.januar, 4321.månedlig, true),
             )
         )
-        assertTrue(element.valider(aktivitetslogg, Periodetype.FØRSTEGANGSBEHANDLING, Periode(1.januar, 31.januar), null))
+        assertTrue(element.valider(aktivitetslogg, Periodetype.FØRSTEGANGSBEHANDLING, Periode(1.januar, 31.januar), 1.januar))
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
@@ -653,7 +631,7 @@ internal class InfotrygdhistorikkElementTest {
                 Inntektsopplysning(ORGNUMMER, 1.januar(2018), 4321.månedlig, true),
             )
         )
-        assertTrue(element.valider(aktivitetslogg, Periodetype.FØRSTEGANGSBEHANDLING, Periode(1.februar(2019), 28.februar(2019)), null))
+        assertTrue(element.valider(aktivitetslogg, Periodetype.FØRSTEGANGSBEHANDLING, Periode(1.februar(2019), 28.februar(2019)), 1.februar(2019)))
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 

@@ -23,8 +23,8 @@ class Inntektsopplysning private constructor(
         refusjonTom: LocalDate? = null
     ) : this(orgnummer, sykepengerFom, inntekt, refusjonTilArbeidsgiver, refusjonTom, null)
 
-    internal fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode, skjæringstidspunkt: LocalDate?, nødnummer: Nødnummer): Boolean {
-        if (!erRelevant(periode, skjæringstidspunkt)) return true
+    internal fun valider(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate, nødnummer: Nødnummer): Boolean {
+        if (!erRelevant(skjæringstidspunkt)) return true
         if (orgnummer.isBlank()) aktivitetslogg.error("Organisasjonsnummer for inntektsopplysning fra Infotrygd mangler")
         nødnummer.valider(aktivitetslogg, orgnummer)
         return !aktivitetslogg.hasErrorsOrWorse()
@@ -34,8 +34,7 @@ class Inntektsopplysning private constructor(
         visitor.visitInfotrygdhistorikkInntektsopplysning(orgnummer, sykepengerFom, inntekt, refusjonTilArbeidsgiver, refusjonTom, lagret)
     }
 
-    private fun erRelevant(periode: Periode, skjæringstidspunkt: LocalDate?) =
-        sykepengerFom >= (skjæringstidspunkt ?: periode.start.minusMonths(12))
+    private fun erRelevant(skjæringstidspunkt: LocalDate) = sykepengerFom >= skjæringstidspunkt
 
     private fun addInntekt(appendMode: Inntektshistorikk.AppendMode, hendelseId: UUID) {
         lagret = LocalDateTime.now()
@@ -74,10 +73,10 @@ class Inntektsopplysning private constructor(
             liste: List<Inntektsopplysning>,
             aktivitetslogg: IAktivitetslogg,
             periode: Periode,
-            skjæringstidspunkt: LocalDate?,
+            skjæringstidspunkt: LocalDate,
             nødnummer: Nødnummer
         ) {
-            liste.forEach { it.valider(aktivitetslogg, periode, skjæringstidspunkt, nødnummer) }
+            liste.forEach { it.valider(aktivitetslogg, skjæringstidspunkt, nødnummer) }
             liste.validerAlleInntekterForSammenhengendePeriode(skjæringstidspunkt, aktivitetslogg, periode)
             liste.validerAntallInntekterPerArbeidsgiverPerDato(skjæringstidspunkt, aktivitetslogg, periode)
         }
@@ -85,23 +84,22 @@ class Inntektsopplysning private constructor(
         internal fun Iterable<Inntektsopplysning>.harInntekterFor(datoer: List<LocalDate>) = map { it.sykepengerFom }.containsAll(datoer)
 
         private fun List<Inntektsopplysning>.validerAlleInntekterForSammenhengendePeriode(
-            skjæringstidspunkt: LocalDate?,
+            skjæringstidspunkt: LocalDate,
             aktivitetslogg: IAktivitetslogg,
             periode: Periode
         ) {
-            val relevanteInntektsopplysninger = filter { it.erRelevant(periode, skjæringstidspunkt) }
+            val relevanteInntektsopplysninger = filter { it.erRelevant(skjæringstidspunkt) }
             val harFlereArbeidsgivere = relevanteInntektsopplysninger.distinctBy { it.orgnummer }.size > 1
             val harFlereSkjæringstidspunkt = relevanteInntektsopplysninger.distinctBy { it.sykepengerFom }.size > 1
             if (harFlereArbeidsgivere && harFlereSkjæringstidspunkt) aktivitetslogg.error("Har inntekt på flere arbeidsgivere med forskjellig fom dato")
-            if (this.isNotEmpty() && skjæringstidspunkt == null) aktivitetslogg.info("Har inntekt i Infotrygd og skjæringstidspunkt er null")
         }
 
         private fun List<Inntektsopplysning>.validerAntallInntekterPerArbeidsgiverPerDato(
-            skjæringstidspunkt: LocalDate?,
+            skjæringstidspunkt: LocalDate,
             aktivitetslogg: IAktivitetslogg,
             periode: Periode
         ) {
-            val harFlereInntekterPåSammeAGogDato = filter { it.erRelevant(periode, skjæringstidspunkt) }
+            val harFlereInntekterPåSammeAGogDato = filter { it.erRelevant(skjæringstidspunkt) }
                 .groupBy { it.orgnummer to it.sykepengerFom }
                 .any { (_, inntekter) -> inntekter.size > 1 }
             if (harFlereInntekterPåSammeAGogDato)

@@ -126,13 +126,13 @@ internal class InfotrygdhistorikkElement private constructor(
         inntekter.lagreVilkårsgrunnlag(vilkårsgrunnlagHistorikk, sykepengegrunnlagFor)
     }
 
-    internal fun valider(aktivitetslogg: IAktivitetslogg, periodetype: Periodetype, periode: Periode, skjæringstidspunkt: LocalDate?): Boolean {
+    internal fun valider(aktivitetslogg: IAktivitetslogg, periodetype: Periodetype, periode: Periode, skjæringstidspunkt: LocalDate): Boolean {
         validerUgyldigePerioder(aktivitetslogg)
         validerStatslønn(aktivitetslogg, periodetype)
         return valider(aktivitetslogg, perioder, periode, skjæringstidspunkt)
     }
 
-    internal fun validerOverlappende(aktivitetslogg: IAktivitetslogg, periode: Periode, skjæringstidspunkt: LocalDate?): Boolean {
+    internal fun validerOverlappende(aktivitetslogg: IAktivitetslogg, periode: Periode, skjæringstidspunkt: LocalDate): Boolean {
         aktivitetslogg.info("Sjekker utbetalte perioder for overlapp mot %s", periode)
         return valider(aktivitetslogg, perioder, periode, skjæringstidspunkt)
     }
@@ -148,7 +148,7 @@ internal class InfotrygdhistorikkElement private constructor(
         aktivitetslogg.error("Det er lagt inn statslønn i Infotrygd, undersøk at utbetalingen blir riktig.")
     }
 
-    private fun valider(aktivitetslogg: IAktivitetslogg, perioder: List<Infotrygdperiode>, periode: Periode, skjæringstidspunkt: LocalDate?): Boolean {
+    private fun valider(aktivitetslogg: IAktivitetslogg, perioder: List<Infotrygdperiode>, periode: Periode, skjæringstidspunkt: LocalDate): Boolean {
         aktivitetslogg.info("Sjekker utbetalte perioder")
         perioder.filterIsInstance<Utbetalingsperiode>().forEach { it.valider(aktivitetslogg, periode) }
 
