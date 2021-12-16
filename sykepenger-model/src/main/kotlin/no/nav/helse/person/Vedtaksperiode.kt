@@ -533,6 +533,7 @@ internal class Vedtaksperiode private constructor(
     private fun trengerInntektsmelding(hendelseskontekst: Hendelseskontekst) {
         this.person.trengerInntektsmelding(
             hendelseskontekst,
+            this.organisasjonsnummer,
             PersonObserver.ManglendeInntektsmeldingEvent(
                 fom = this.periode.start,
                 tom = this.periode.endInclusive

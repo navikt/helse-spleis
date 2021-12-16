@@ -88,7 +88,7 @@ internal class TestObservatør : PersonObserver {
         reberegnedeVedtaksperioder.add(hendelseskontekst.vedtaksperiodeId())
     }
 
-    override fun manglerInntektsmelding(hendelseskontekst: Hendelseskontekst, event: PersonObserver.ManglendeInntektsmeldingEvent) {
+    override fun manglerInntektsmelding(hendelseskontekst: Hendelseskontekst, orgnr: String, event: PersonObserver.ManglendeInntektsmeldingEvent) {
         manglendeInntektsmeldingVedtaksperioder.add(hendelseskontekst.vedtaksperiodeId())
     }
 

@@ -304,8 +304,8 @@ class Person private constructor(
         }
     }
 
-    fun trengerInntektsmelding(hendelseskontekst: Hendelseskontekst, event: PersonObserver.ManglendeInntektsmeldingEvent) {
-        observers.forEach { it.manglerInntektsmelding(hendelseskontekst, event) }
+    fun trengerInntektsmelding(hendelseskontekst: Hendelseskontekst, orgnr: String, event: PersonObserver.ManglendeInntektsmeldingEvent) {
+        observers.forEach { it.manglerInntektsmelding(hendelseskontekst, orgnr, event) }
     }
 
     fun trengerIkkeInntektsmelding(hendelseskontekst: Hendelseskontekst, event: PersonObserver.TrengerIkkeInntektsmeldingEvent) {

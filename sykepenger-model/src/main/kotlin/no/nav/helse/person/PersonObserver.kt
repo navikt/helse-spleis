@@ -209,7 +209,7 @@ interface PersonObserver {
     fun vedtaksperiodeUtbetalt(hendelseskontekst: Hendelseskontekst, event: UtbetaltEvent) {}
     fun personEndret(hendelseskontekst: Hendelseskontekst) {}
     fun vedtaksperiodeIkkeFunnet(hendelseskontekst: Hendelseskontekst, vedtaksperiodeEvent: VedtaksperiodeIkkeFunnetEvent) {}
-    fun manglerInntektsmelding(hendelseskontekst: Hendelseskontekst, event: ManglendeInntektsmeldingEvent) {}
+    fun manglerInntektsmelding(hendelseskontekst: Hendelseskontekst, orgnr: String, event: ManglendeInntektsmeldingEvent) {}
     fun trengerIkkeInntektsmelding(hendelseskontekst: Hendelseskontekst, event: TrengerIkkeInntektsmeldingEvent) {}
     fun utbetalingEndret(hendelseskontekst: Hendelseskontekst, event: UtbetalingEndretEvent) {}
     fun utbetalingUtbetalt(hendelseskontekst: Hendelseskontekst, event: UtbetalingUtbetaltEvent) {}

@@ -345,12 +345,11 @@ internal class PersonMediator(
         )
     }
 
-    override fun manglerInntektsmelding(hendelseskontekst: Hendelseskontekst, event: PersonObserver.ManglendeInntektsmeldingEvent) {
-        if (skalIkkeMasePåArbeidsgiver(hendelse.fødselsnummer(), event.fom, event.tom)) {
+    override fun manglerInntektsmelding(hendelseskontekst: Hendelseskontekst, orgnr: String, event: PersonObserver.ManglendeInntektsmeldingEvent) {
+        if (skalIkkeMasePåArbeidsgiver(hendelse.fødselsnummer(), orgnr, event.fom, event.tom)) {
             hendelse.info("Hindrer publisering av trenger_inntektsmelding - har allerede fått inntektsmelding, men perioden er mistolket som gap")
             return
         }
-
         queueMessage(
             hendelseskontekst,
             "trenger_inntektsmelding", JsonMessage.newMessage(
@@ -404,7 +403,7 @@ internal class PersonMediator(
         }
     }
 
-    private fun skalIkkeMasePåArbeidsgiver(fnr: String, fom: LocalDate, tom: LocalDate): Boolean {
+    private fun skalIkkeMasePåArbeidsgiver(fnr: String, orgnr: String, fom: LocalDate, tom: LocalDate): Boolean {
         val gjeldendePeriode = hendelseRepository.finnSøknader(Fødselsnummer.tilFødselsnummer(fnr))
             .flatMap { søknad -> Periode(søknad["fom"].asLocalDate(), søknad["tom"].asLocalDate()) }
             .grupperSammenhengendePerioder()
@@ -413,6 +412,7 @@ internal class PersonMediator(
         return hendelseRepository
             .finnInntektsmeldinger(Fødselsnummer.tilFødselsnummer(fnr))
             .filterNot { it["foersteFravaersdag"] == null }
+            .filter { it["virksomhetsnummer"].asText() == orgnr }
             .map { inntektsmelding ->
                 inntektsmelding["foersteFravaersdag"].asOptionalLocalDate() to
                     if (inntektsmelding["arbeidsgiverperioder"].isEmpty) Periode(LocalDate.MIN, LocalDate.MIN)
