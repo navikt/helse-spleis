@@ -23,10 +23,9 @@ class Inntektsopplysning private constructor(
         refusjonTom: LocalDate? = null
     ) : this(orgnummer, sykepengerFom, inntekt, refusjonTilArbeidsgiver, refusjonTom, null)
 
-    internal fun valider(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate, nødnummer: Nødnummer): Boolean {
+    internal fun valider(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate): Boolean {
         if (!erRelevant(skjæringstidspunkt)) return true
         if (orgnummer.isBlank()) aktivitetslogg.error("Organisasjonsnummer for inntektsopplysning fra Infotrygd mangler")
-        nødnummer.valider(aktivitetslogg, orgnummer)
         return !aktivitetslogg.hasErrorsOrWorse()
     }
 
@@ -58,25 +57,26 @@ class Inntektsopplysning private constructor(
     }
 
     internal companion object {
-        internal fun addInntekter(liste: List<Inntektsopplysning>, person: Person, aktivitetslogg: IAktivitetslogg, hendelseId: UUID) {
-            liste.groupBy { it.orgnummer }
-                .forEach { (orgnummer, opplysninger) -> person.lagreSykepengegrunnlagFraInfotrygd(orgnummer, opplysninger, aktivitetslogg, hendelseId) }
-        }
+        internal fun addInntekter(liste: List<Inntektsopplysning>, person: Person, aktivitetslogg: IAktivitetslogg, hendelseId: UUID, nødnummer: Nødnummer) =
+            liste
+                .filterNot { it.orgnummer in nødnummer }
+                .groupBy { it.orgnummer }
+                .onEach { (orgnummer, opplysninger) -> person.lagreSykepengegrunnlagFraInfotrygd(orgnummer, opplysninger, aktivitetslogg, hendelseId) }
+                .isNotEmpty()
 
-        fun lagreInntekter(list: List<Inntektsopplysning>, inntektshistorikk: Inntektshistorikk, hendelseId: UUID) {
+        internal fun lagreInntekter(list: List<Inntektsopplysning>, inntektshistorikk: Inntektshistorikk, hendelseId: UUID) {
             inntektshistorikk.append {
                 list.reversed().forEach { it.addInntekt(this, hendelseId) }
             }
         }
 
-        fun valider(
+        internal fun valider(
             liste: List<Inntektsopplysning>,
             aktivitetslogg: IAktivitetslogg,
             periode: Periode,
-            skjæringstidspunkt: LocalDate,
-            nødnummer: Nødnummer
+            skjæringstidspunkt: LocalDate
         ) {
-            liste.forEach { it.valider(aktivitetslogg, skjæringstidspunkt, nødnummer) }
+            liste.forEach { it.valider(aktivitetslogg, skjæringstidspunkt) }
             liste.validerAlleInntekterForSammenhengendePeriode(skjæringstidspunkt, aktivitetslogg, periode)
             liste.validerAntallInntekterPerArbeidsgiverPerDato(skjæringstidspunkt, aktivitetslogg, periode)
         }
@@ -117,6 +117,8 @@ class Inntektsopplysning private constructor(
                 )
             }
         }
+
+        internal fun List<Inntektsopplysning>.fjern(nødnummer: Nødnummer) = filterNot { it.orgnummer in nødnummer }
 
         internal fun sorter(inntekter: List<Inntektsopplysning>) =
             inntekter.sortedBy { it.sykepengerFom }.sortedBy { it.hashCode() }

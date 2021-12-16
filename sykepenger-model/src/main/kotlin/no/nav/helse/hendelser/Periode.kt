@@ -7,8 +7,8 @@ import java.time.format.DateTimeFormatter
 // Understands beginning and end of a time interval
 open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable<LocalDate> {
 
-    override val start: LocalDate = fom
-    override val endInclusive: LocalDate = tom
+    final override val start: LocalDate = fom
+    final override val endInclusive: LocalDate = tom
 
     init {
         require(start <= endInclusive) { "fom ($start) kan ikke være etter tom ($endInclusive)" }

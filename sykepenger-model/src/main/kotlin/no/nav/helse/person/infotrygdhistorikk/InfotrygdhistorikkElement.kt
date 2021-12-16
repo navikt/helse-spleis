@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.*
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.harBrukerutbetalingFor
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.validerInntektForPerioder
+import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning.Companion.fjern
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning.Companion.lagreVilkårsgrunnlag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -114,8 +115,7 @@ internal class InfotrygdhistorikkElement private constructor(
         perioder.isEmpty() && inntekter.isEmpty() && arbeidskategorikoder.isEmpty()
 
     internal fun addInntekter(person: Person, aktivitetslogg: IAktivitetslogg) {
-        if (inntekter.isNotEmpty()) lagretInntekter = true
-        Inntektsopplysning.addInntekter(inntekter, person, aktivitetslogg, id)
+        lagretInntekter = Inntektsopplysning.addInntekter(inntekter, person, aktivitetslogg, id, nødnummer)
     }
 
     internal fun lagreVilkårsgrunnlag(
@@ -123,7 +123,7 @@ internal class InfotrygdhistorikkElement private constructor(
         sykepengegrunnlagFor: (skjæringstidspunkt: LocalDate) -> Sykepengegrunnlag
     ) {
         lagretVilkårsgrunnlag = true
-        inntekter.lagreVilkårsgrunnlag(vilkårsgrunnlagHistorikk, sykepengegrunnlagFor)
+        inntekter.fjern(nødnummer).lagreVilkårsgrunnlag(vilkårsgrunnlagHistorikk, sykepengegrunnlagFor)
     }
 
     internal fun valider(aktivitetslogg: IAktivitetslogg, periodetype: Periodetype, periode: Periode, skjæringstidspunkt: LocalDate): Boolean {
@@ -150,13 +150,13 @@ internal class InfotrygdhistorikkElement private constructor(
 
     private fun valider(aktivitetslogg: IAktivitetslogg, perioder: List<Infotrygdperiode>, periode: Periode, skjæringstidspunkt: LocalDate): Boolean {
         aktivitetslogg.info("Sjekker utbetalte perioder")
-        perioder.filterIsInstance<Utbetalingsperiode>().forEach { it.valider(aktivitetslogg, periode) }
+        perioder.filterIsInstance<Utbetalingsperiode>().forEach { it.valider(aktivitetslogg, periode, skjæringstidspunkt, nødnummer) }
 
         aktivitetslogg.info("Sjekker inntektsopplysninger")
-        Inntektsopplysning.valider(inntekter, aktivitetslogg, periode, skjæringstidspunkt, nødnummer)
+        Inntektsopplysning.valider(inntekter.fjern(nødnummer), aktivitetslogg, periode, skjæringstidspunkt)
 
         aktivitetslogg.info("Sjekker at alle utbetalte perioder har inntektsopplysninger")
-        perioder.validerInntektForPerioder(aktivitetslogg, inntekter)
+        perioder.validerInntektForPerioder(aktivitetslogg, inntekter, nødnummer)
 
         aktivitetslogg.info("Sjekker arbeidskategorikoder")
         if (!erNormalArbeidstaker(skjæringstidspunkt)) aktivitetslogg.error("Personen er ikke registrert som normal arbeidstaker i Infotrygd")

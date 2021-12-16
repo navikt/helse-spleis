@@ -36,8 +36,14 @@ abstract class Utbetalingsperiode(
         utbetalingstidslinje.addNAVdag(dato, økonomi.inntekt(inntekt, skjæringstidspunkt = dato).arbeidsgiverRefusjon(refusjon))
     }
 
-    override fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode) {
+    override fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode, skjæringstidspunkt: LocalDate, nødnummer: Nødnummer) {
         validerOverlapp(aktivitetslogg, periode)
+        if (aktivitetslogg.hasErrorsOrWorse() || this.endInclusive < skjæringstidspunkt) return
+        validerRelevant(aktivitetslogg, nødnummer)
+    }
+
+    private fun validerRelevant(aktivitetslogg: IAktivitetslogg, nødnummer: Nødnummer) {
+        nødnummer.valider(aktivitetslogg, orgnr)
     }
 
     override fun validerOverlapp(aktivitetslogg: IAktivitetslogg, periode: Periode) {
@@ -46,6 +52,7 @@ abstract class Utbetalingsperiode(
         aktivitetslogg.error("Utbetaling i Infotrygd overlapper med vedtaksperioden")
     }
 
+    override fun gjelder(nødnummer: Nødnummer) = this.orgnr in nødnummer
     override fun gjelder(orgnummer: String) = orgnummer == this.orgnr
     override fun utbetalingEtter(orgnumre: List<String>, dato: LocalDate) =
         start >= dato && this.orgnr !in orgnumre
