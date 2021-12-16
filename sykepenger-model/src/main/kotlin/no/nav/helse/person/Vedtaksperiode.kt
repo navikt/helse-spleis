@@ -984,7 +984,7 @@ internal class Vedtaksperiode private constructor(
             return graderEksisterendeSykmelding != graderNySykmelding
         }
 
-        fun overlappendeSykmeldingIkkeStøttet(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
+        private fun overlappendeSykmeldingIkkeStøttet(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
             sykmelding.overlappIkkeStøttet(vedtaksperiode.periode)
             if (!kanForkastes) return
             vedtaksperiode.tilstand(sykmelding, TilInfotrygd)
