@@ -229,7 +229,6 @@ data class GraphQLBeregnetPeriode(
     val maksdato: LocalDate,
     val utbetaling: GraphQLUtbetaling,
     val hendelser: List<GraphQLHendelse>,
-    val simulering: GraphQLSimulering?,
     val vilkarsgrunnlaghistorikkId: UUID,
     val periodevilkar: GraphQLPeriodevilkar,
     val aktivitetslogg: List<GraphQLAktivitet>

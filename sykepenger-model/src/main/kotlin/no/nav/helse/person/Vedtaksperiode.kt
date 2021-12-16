@@ -50,7 +50,6 @@ internal class Vedtaksperiode private constructor(
     private val organisasjonsnummer: String,
     private var tilstand: Vedtaksperiodetilstand,
     private var skjæringstidspunktFraInfotrygd: LocalDate?,
-    private var dataForSimulering: Simulering.SimuleringResultat?,
     private var sykdomstidslinje: Sykdomstidslinje,
     private val hendelseIder: MutableSet<UUID>,
     private var inntektsmeldingInfo: InntektsmeldingInfo?,
@@ -81,7 +80,6 @@ internal class Vedtaksperiode private constructor(
         organisasjonsnummer = hendelse.organisasjonsnummer(),
         tilstand = Start,
         skjæringstidspunktFraInfotrygd = null,
-        dataForSimulering = null,
         sykdomstidslinje = hendelse.sykdomstidslinje(),
         hendelseIder = mutableSetOf(),
         inntektsmeldingInfo = inntektsmeldingInfo,
@@ -116,7 +114,6 @@ internal class Vedtaksperiode private constructor(
         visitor.preVisitVedtakserperiodeUtbetalinger(utbetalinger)
         utbetalinger.forEach { it.accept(visitor) }
         visitor.postVisitVedtakserperiodeUtbetalinger(utbetalinger)
-        visitor.visitDataForSimulering(dataForSimulering)
         visitor.postVisitVedtaksperiode(
             this,
             id,
@@ -2082,7 +2079,6 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
             if (vedtaksperiode.utbetaling().valider(simulering).hasErrorsOrWorse())
                 return vedtaksperiode.tilstand(simulering, TilInfotrygd)
-            vedtaksperiode.dataForSimulering = simulering.simuleringResultat
 
             if (!vedtaksperiode.utbetaling().erKlarForGodkjenning()) return
 
@@ -2112,7 +2108,6 @@ internal class Vedtaksperiode private constructor(
                 simulering.warn("Simulering av revurdert utbetaling feilet. Utbetalingen må annulleres")
                 return vedtaksperiode.tilstand(simulering, RevurderingFeilet)
             }
-            vedtaksperiode.dataForSimulering = simulering.simuleringResultat
 
             if (!vedtaksperiode.utbetaling().erKlarForGodkjenning()) {
                 return

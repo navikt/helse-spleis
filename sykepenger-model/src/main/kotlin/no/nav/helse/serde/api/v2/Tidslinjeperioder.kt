@@ -7,7 +7,6 @@ import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.AvsluttetUtenUtbetaling
 import no.nav.helse.serde.api.v2.HendelseDTO.Companion.finn
-import no.nav.helse.serde.api.SimuleringsdataDTO
 import no.nav.helse.serde.api.v2.Behandlingstype.UBEREGNET
 import no.nav.helse.serde.api.v2.Behandlingstype.VENTER
 import no.nav.helse.serde.api.v2.Generasjoner.Generasjon.Companion.fjernErstattede
@@ -163,7 +162,6 @@ internal class Tidslinjeperioder(
             inntektskilde = periode.inntektskilde,
             skjæringstidspunkt = periode.skjæringstidspunkt,
             hendelser = periode.hendelser,
-            simulering = periode.simuleringsdataDTO,
             maksdato = utbetaling.maksdato,
             opprettet = utbetaling.opprettet,
             periodevilkår = periodevilkår(periode, utbetaling, sammenslåttTidslinje, periode.hendelser),
@@ -215,7 +213,6 @@ internal class IVedtaksperiode(
     val behandlingstype: Behandlingstype,
     val inntektskilde: Inntektskilde,
     val hendelser: List<HendelseDTO>,
-    val simuleringsdataDTO: SimuleringsdataDTO?,
     utbetalinger: List<IUtbetaling>,
     val periodetype: Periodetype,
     val sykdomstidslinje: List<Sykdomstidslinjedag>,

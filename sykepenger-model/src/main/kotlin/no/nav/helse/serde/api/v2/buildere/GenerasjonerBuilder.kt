@@ -74,7 +74,6 @@ internal class GenerasjonerBuilder(
     ) {
         val sykdomstidslinje = VedtaksperiodeSykdomstidslinjeBuilder(vedtaksperiode).build()
         val utbetalinger = UtbetalingerBuilder(vedtaksperiode).build()
-        val simulering = SimuleringBuilder(vedtaksperiode).build()
         val aktivetsloggForPeriode = Vedtaksperiode.aktivitetsloggMedForegåendeUtenUtbetaling(vedtaksperiode)
         val aktivitetsloggForVilkårsprøving = Vedtaksperiode.hentVilkårsgrunnlagAktiviteter(vedtaksperiode)
         vedtaksperiodeAkkumulator.leggTil(
@@ -85,7 +84,6 @@ internal class GenerasjonerBuilder(
                 behandlingstype = Behandlingstype.BEHANDLET,
                 inntektskilde = inntektskilde,
                 hendelser = hendelser.filter { it.id in hendelseIder.map { id -> id.toString() } },
-                simuleringsdataDTO = simulering,
                 utbetalinger = utbetalinger,
                 periodetype = periodetype,
                 sykdomstidslinje = sykdomstidslinje,

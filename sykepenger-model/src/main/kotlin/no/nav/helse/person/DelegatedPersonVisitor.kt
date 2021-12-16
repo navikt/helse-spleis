@@ -414,10 +414,6 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.visitDataForVilkårsvurdering(dataForVilkårsvurdering)
     }
 
-    override fun visitDataForSimulering(dataForSimuleringResultat: Simulering.SimuleringResultat?) {
-        delegatee.visitDataForSimulering(dataForSimuleringResultat)
-    }
-
     override fun preVisitFeriepengeutbetalinger(feriepengeutbetalinger: List<Feriepengeutbetaling>) {
         delegatee.preVisitFeriepengeutbetalinger(feriepengeutbetalinger)
     }

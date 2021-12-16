@@ -157,34 +157,6 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                                             rapportertDato
                                         }
                                     },
-                                    simulering {
-                                        totalbelop,
-                                        perioder {
-                                            fom,
-                                            tom,
-                                            utbetalinger {
-                                                utbetalesTilId,
-                                                utbetalesTilNavn,
-                                                forfall,
-                                                feilkonto,
-                                                detaljer {
-                                                    faktiskFom,
-                                                    faktiskTom,
-                                                    konto,
-                                                    belop,
-                                                    tilbakeforing,
-                                                    sats,
-                                                    typeSats,
-                                                    antallSats,
-                                                    uforegrad,
-                                                    klassekode,
-                                                    klassekodeBeskrivelse,
-                                                    utbetalingstype,
-                                                    refunderesOrgNr
-                                                }
-                                            }
-                                        }
-                                    },
                                     vilkarsgrunnlaghistorikkId,
                                     periodevilkar {
                                         sykepengedager {
@@ -374,34 +346,6 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                                             fom,
                                             tom,
                                             rapportertDato
-                                        }
-                                    },
-                                    simulering {
-                                        totalbelop,
-                                        perioder {
-                                            fom,
-                                            tom,
-                                            utbetalinger {
-                                                utbetalesTilId,
-                                                utbetalesTilNavn,
-                                                forfall,
-                                                feilkonto,
-                                                detaljer {
-                                                    faktiskFom,
-                                                    faktiskTom,
-                                                    konto,
-                                                    belop,
-                                                    tilbakeforing,
-                                                    sats,
-                                                    typeSats,
-                                                    antallSats,
-                                                    uforegrad,
-                                                    klassekode,
-                                                    klassekodeBeskrivelse,
-                                                    utbetalingstype,
-                                                    refunderesOrgNr
-                                                }
-                                            }
                                         }
                                     },
                                     vilkarsgrunnlaghistorikkId,

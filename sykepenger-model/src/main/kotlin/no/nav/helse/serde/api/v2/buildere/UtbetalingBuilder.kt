@@ -1,11 +1,9 @@
 package no.nav.helse.serde.api.v2.buildere
 
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.UtbetalingVisitor
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VedtaksperiodeVisitor
-import no.nav.helse.serde.api.SimuleringsdataDTO
 import no.nav.helse.serde.api.v2.IUtbetaling
 import no.nav.helse.serde.api.v2.Utbetaling
 import no.nav.helse.utbetalingslinjer.Oppdrag
@@ -148,52 +146,3 @@ internal class OppdragBuilder(utbetaling: InternUtbetaling) : UtbetalingVisitor 
         personFagsystemId = oppdrag.fagsystemId()
     }
 }
-
-// Besøker hele vedtaksperiode-treet
-internal class SimuleringBuilder(vedtaksperiode: Vedtaksperiode): VedtaksperiodeVisitor {
-    private var simulering: SimuleringsdataDTO? = null
-    init {
-        vedtaksperiode.accept(this)
-    }
-
-    internal fun build() = simulering
-
-    override fun visitDataForSimulering(dataForSimuleringResultat: Simulering.SimuleringResultat?) {
-        if (dataForSimuleringResultat == null) return
-        simulering = SimuleringsdataDTO(
-            totalbeløp = dataForSimuleringResultat.totalbeløp,
-            perioder = dataForSimuleringResultat.perioder.map { periode ->
-                SimuleringsdataDTO.PeriodeDTO(
-                    fom = periode.periode.start,
-                    tom = periode.periode.endInclusive,
-                    utbetalinger = periode.utbetalinger.map { utbetaling ->
-                        SimuleringsdataDTO.UtbetalingDTO(
-                            utbetalesTilId = utbetaling.utbetalesTil.id,
-                            utbetalesTilNavn = utbetaling.utbetalesTil.navn,
-                            forfall = utbetaling.forfallsdato,
-                            detaljer = utbetaling.detaljer.map { detaljer ->
-                                SimuleringsdataDTO.DetaljerDTO(
-                                    faktiskFom = detaljer.periode.start,
-                                    faktiskTom = detaljer.periode.endInclusive,
-                                    konto = detaljer.konto,
-                                    beløp = detaljer.beløp,
-                                    tilbakeføring = detaljer.tilbakeføring,
-                                    sats = detaljer.sats.sats,
-                                    typeSats = detaljer.sats.type,
-                                    antallSats = detaljer.sats.antall,
-                                    uføregrad = detaljer.uføregrad,
-                                    klassekode = detaljer.klassekode.kode,
-                                    klassekodeBeskrivelse = detaljer.klassekode.beskrivelse,
-                                    utbetalingstype = detaljer.utbetalingstype,
-                                    refunderesOrgNr = detaljer.refunderesOrgnummer
-                                )
-                            },
-                            feilkonto = utbetaling.feilkonto
-                        )
-                    }
-                )
-            }
-        )
-    }
-}
-

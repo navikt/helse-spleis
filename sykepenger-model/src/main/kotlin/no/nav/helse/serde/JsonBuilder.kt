@@ -1238,10 +1238,6 @@ internal class JsonBuilder : AbstractBuilder() {
 
         private var inUtbetaling = false
 
-        override fun visitDataForSimulering(dataForSimuleringResultat: Simulering.SimuleringResultat?) {
-            vedtaksperiodeMap.compute("dataForSimulering") { _, _ -> dataForSimuleringResultat?.toMap() }
-        }
-
         override fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: List<Periode>) {
             val sykdomstidslinje = mutableMapOf<String, Any?>()
 

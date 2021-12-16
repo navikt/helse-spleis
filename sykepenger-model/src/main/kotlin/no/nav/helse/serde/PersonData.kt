@@ -741,7 +741,6 @@ internal data class PersonData(
         data class VedtaksperiodeData(
             private val id: UUID,
             private val skjæringstidspunktFraInfotrygd: LocalDate?,
-            private val dataForSimulering: DataForSimuleringData?,
             private val sykdomstidslinje: SykdomstidslinjeData,
             private val hendelseIder: MutableSet<UUID>,
             private val inntektsmeldingInfo: InntektsmeldingInfoData?,
@@ -777,7 +776,6 @@ internal data class PersonData(
                         organisasjonsnummer,
                         parseTilstand(this.tilstand),
                         skjæringstidspunktFraInfotrygd,
-                        dataForSimulering?.parseDataForSimulering(),
                         sykdomstidslinje.createSykdomstidslinje(),
                         hendelseIder,
                         inntektsmeldingInfo?.parseInntektsmeldingInfo(),

@@ -4,7 +4,6 @@ import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
 import no.nav.helse.serde.api.BegrunnelseDTO
 import no.nav.helse.serde.api.InntektsgrunnlagDTO
-import no.nav.helse.serde.api.SimuleringsdataDTO
 import no.nav.helse.serde.api.v2.*
 import no.nav.helse.spleis.graphql.dto.*
 import java.util.*
@@ -120,41 +119,6 @@ private fun mapHendelse(hendelse: HendelseDTO) = when (hendelse) {
     }
 }
 
-private fun mapSimulering(simulering: SimuleringsdataDTO) = GraphQLSimulering(
-    totalbelop = simulering.totalbeløp,
-    perioder = simulering.perioder.map { periode ->
-        GraphQLSimuleringsperiode(
-            fom = periode.fom,
-            tom = periode.tom,
-            utbetalinger = periode.utbetalinger.map { utbetaling ->
-                GraphQLSimuleringsutbetaling(
-                    utbetalesTilId = utbetaling.utbetalesTilId,
-                    utbetalesTilNavn = utbetaling.utbetalesTilNavn,
-                    forfall = utbetaling.forfall,
-                    feilkonto = utbetaling.feilkonto,
-                    detaljer = utbetaling.detaljer.map {
-                        GraphQLSimuleringsdetaljer(
-                            faktiskFom = it.faktiskFom,
-                            faktiskTom = it.faktiskTom,
-                            konto = it.konto,
-                            belop = it.beløp,
-                            tilbakeforing = it.tilbakeføring,
-                            sats = it.sats,
-                            typeSats = it.typeSats,
-                            antallSats = it.antallSats,
-                            uforegrad = it.uføregrad,
-                            klassekode = it.klassekode,
-                            klassekodeBeskrivelse = it.klassekodeBeskrivelse,
-                            utbetalingstype = it.utbetalingstype,
-                            refunderesOrgNr = it.refunderesOrgNr
-                        )
-                    }
-                )
-            }
-        )
-    }
-)
-
 private fun mapPeriodevilkår(vilkår: BeregnetPeriode.Vilkår) = GraphQLPeriodevilkar(
     sykepengedager = vilkår.sykepengedager.let {
         GraphQLPeriodevilkar.Sykepengedager(
@@ -216,7 +180,6 @@ internal fun mapTidslinjeperiode(periode: Tidslinjeperiode) =
             vilkarsgrunnlaghistorikkId = periode.vilkårsgrunnlagshistorikkId,
             utbetaling = mapUtbetaling(periode.utbetaling),
             hendelser = periode.hendelser.map { mapHendelse(it) },
-            simulering = periode.simulering?.let { mapSimulering(it) },
             periodevilkar = mapPeriodevilkår(periode.periodevilkår),
             aktivitetslogg = periode.aktivitetslogg.map {
                 GraphQLAktivitet(
