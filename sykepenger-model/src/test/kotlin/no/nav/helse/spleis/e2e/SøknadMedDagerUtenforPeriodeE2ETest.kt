@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.TilstandType.*
@@ -20,7 +19,7 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
     fun `søppelbøtter dersom ny søknad inneholder permisjon som overlapper med tidligere sykmelding`(){
         nyttVedtak(1.januar, 31.januar)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Permisjon(20.januar, 31.januar))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), SendtSøknad.Søknadsperiode.Permisjon(20.januar, 31.januar))
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -46,8 +45,8 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
     fun `eldgammel ferieperiode før sykdomsperioden klippes bort`() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 28.mars, 100.prosent))
         håndterSøknad(
-            Søknad.Søknadsperiode.Sykdom(1.mars, 28.mars, 100.prosent),
-            Søknad.Søknadsperiode.Ferie(1.juli(2015), 10.juli(2015)),
+            SendtSøknad.Søknadsperiode.Sykdom(1.mars, 28.mars, 100.prosent),
+            SendtSøknad.Søknadsperiode.Ferie(1.juli(2015), 10.juli(2015)),
         )
         assertEquals(null, inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode).inspektør.dagteller[Feriedag::class])
     }
@@ -56,7 +55,7 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
     fun `søknad med arbeidsdager mellom to perioder bridger ikke de to periodene`(){
         nyttVedtak(1.januar, 19.januar)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Arbeid(20.januar, 31.januar))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), SendtSøknad.Søknadsperiode.Arbeid(20.januar, 31.januar))
         assertWarningTekst(inspektør, "Søknaden inneholder Arbeidsdager utenfor sykdomsvindu")
         assertTilstander(
             1.vedtaksperiode,
@@ -83,7 +82,7 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
     fun `søknad med permisjon mellom to perioder bridger ikke de to periodene`() {
         nyttVedtak(1.januar, 19.januar)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Permisjon(20.januar, 31.januar))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), SendtSøknad.Søknadsperiode.Permisjon(20.januar, 31.januar))
         assertWarningTekst(
             inspektør,
             "Søknaden inneholder Permisjonsdager utenfor sykdomsvindu",
@@ -114,10 +113,10 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
     @Test
     fun `feriedager som vi allerede vet om fra forrige periode, trimme bort ferie, ingen warning`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(25.januar, 31.januar))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), SendtSøknad.Søknadsperiode.Ferie(25.januar, 31.januar))
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Ferie(25.januar, 31.januar))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), SendtSøknad.Søknadsperiode.Ferie(25.januar, 31.januar))
 
         assertEquals(1.januar til 31.januar, inspektør.periode(1.vedtaksperiode) )
         assertEquals(1.februar til 28.februar, inspektør.periode(2.vedtaksperiode) )
@@ -131,10 +130,10 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
     fun `klipper bare ferie - ikke ferie i perioden`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(
-            Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent),
-            Søknad.Søknadsperiode.Ferie(1.januar, 16.januar),
-            Søknad.Søknadsperiode.Permisjon(17.januar, 25.januar),
-            Søknad.Søknadsperiode.Ferie(26.januar, 31.januar)
+            SendtSøknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent),
+            SendtSøknad.Søknadsperiode.Ferie(1.januar, 16.januar),
+            SendtSøknad.Søknadsperiode.Permisjon(17.januar, 25.januar),
+            SendtSøknad.Søknadsperiode.Ferie(26.januar, 31.januar)
         )
         assertEquals(17.januar til 28.februar, inspektør.periode(1.vedtaksperiode) )
         assertEquals(null, inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode).inspektør.dagteller[Feriedag::class])
@@ -144,10 +143,10 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
     fun `klipper bare ferie - ferie litt inn i perioden`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(
-            Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent),
-            Søknad.Søknadsperiode.Ferie(1.januar, 16.januar),
-            Søknad.Søknadsperiode.Permisjon(17.januar, 25.januar),
-            Søknad.Søknadsperiode.Ferie(26.januar, 2.februar)
+            SendtSøknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent),
+            SendtSøknad.Søknadsperiode.Ferie(1.januar, 16.januar),
+            SendtSøknad.Søknadsperiode.Permisjon(17.januar, 25.januar),
+            SendtSøknad.Søknadsperiode.Ferie(26.januar, 2.februar)
         )
         assertEquals(17.januar til 28.februar, inspektør.periode(1.vedtaksperiode) )
         assertEquals(2, inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode).inspektør.dagteller[Feriedag::class])
@@ -156,10 +155,10 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
     @Test
     fun `feriedager som vi ikke vet om fra forrige periode, trimme bort ferie, warning`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Ferie(25.januar, 31.januar))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), SendtSøknad.Søknadsperiode.Ferie(25.januar, 31.januar))
 
         assertEquals(1.januar til 31.januar, inspektør.periode(1.vedtaksperiode) )
         assertEquals(1.februar til 28.februar, inspektør.periode(2.vedtaksperiode) )
@@ -173,10 +172,10 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
     @Test
     fun `feriedager som vi ikke vet om midt i forrige periode, trimme bort ferie, warning`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Ferie(25.januar, 30.januar))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), SendtSøknad.Søknadsperiode.Ferie(25.januar, 30.januar))
 
         assertEquals(1.januar til 31.januar, inspektør.periode(1.vedtaksperiode) )
         assertEquals(1.februar til 28.februar, inspektør.periode(2.vedtaksperiode) )
@@ -190,10 +189,10 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
     @Test
     fun `feriedager som vi ikke vet om og ikke treffer forrige periode, trimme bort ferie, ingen warning`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 22.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 22.januar, 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 22.januar, 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Ferie(25.januar, 31.januar))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), SendtSøknad.Søknadsperiode.Ferie(25.januar, 31.januar))
 
         assertEquals(1.januar til 22.januar, inspektør.periode(1.vedtaksperiode) )
         assertEquals(1.februar til 28.februar, inspektør.periode(2.vedtaksperiode) )
@@ -206,10 +205,10 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
     @Test
     fun `feriedager som vi ikke vet om og bridger gapet til forrige periode, trimme bort ferie, ingen warning`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 22.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 22.januar, 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 22.januar, 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Ferie(23.januar, 31.januar))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), SendtSøknad.Søknadsperiode.Ferie(23.januar, 31.januar))
 
         assertEquals(1.januar til 22.januar, inspektør.periode(1.vedtaksperiode) )
         assertEquals(1.februar til 28.februar, inspektør.periode(2.vedtaksperiode) )
@@ -222,10 +221,10 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
     @Test
     fun `feriedager som vi ikke vet om og treffer forrige periode, trimme bort ferie, warning`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 22.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 22.januar, 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 22.januar, 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Ferie(18.januar, 31.januar))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), SendtSøknad.Søknadsperiode.Ferie(18.januar, 31.januar))
 
         assertEquals(1.januar til 22.januar, inspektør.periode(1.vedtaksperiode) )
         assertEquals(1.februar til 28.februar, inspektør.periode(2.vedtaksperiode) )
@@ -239,10 +238,10 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
     @Test
     fun `feriedager som vi vet om og treffer forrige periode`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 22.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 22.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(18.januar, 22.januar))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 22.januar, 100.prosent), SendtSøknad.Søknadsperiode.Ferie(18.januar, 22.januar))
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Ferie(18.januar, 31.januar))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), SendtSøknad.Søknadsperiode.Ferie(18.januar, 31.januar))
 
         assertEquals(1.januar til 22.januar, inspektør.periode(1.vedtaksperiode) )
         assertEquals(1.februar til 28.februar, inspektør.periode(2.vedtaksperiode) )

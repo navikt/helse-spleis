@@ -11,8 +11,8 @@ internal abstract class SøknadBuilder {
     protected lateinit var aktørId: String
     protected lateinit var organisasjonsnummer: String
     protected lateinit var opprettet: LocalDateTime
-    protected lateinit var fom: LocalDate
-    protected lateinit var tom: LocalDate
+    private lateinit var fom: LocalDate
+    private lateinit var tom: LocalDate
     protected var permittert = false
     protected var innsendt: LocalDateTime? = null
 
@@ -23,29 +23,24 @@ internal abstract class SøknadBuilder {
     internal fun organisasjonsnummer(organisasjonsnummer: String) = apply { this.organisasjonsnummer = organisasjonsnummer }
     internal fun opprettet(opprettet: LocalDateTime) = apply { this.opprettet = opprettet }
     internal fun fom(fom: LocalDate) = apply { this.fom = fom }
-
     internal fun tom(tom: LocalDate) = apply { this.tom = tom }
-
-    internal fun sendt(tidspunkt: LocalDateTime) = apply {
-        this.innsendt = tidspunkt
-    }
-
-    internal open fun inntektskilde(sykmeldt: Boolean, type: String) = apply {}
-
+    internal fun sendt(tidspunkt: LocalDateTime) = apply { this.innsendt = tidspunkt }
     internal fun permittert(permittert: Boolean) = apply { this.permittert = permittert }
 
     internal fun fravær(type: String, fom: LocalDate, tom: LocalDate?) {
         when (type) {
-            "UTDANNING_FULLTID", "UTDANNING_DELTID" -> utdanning(fom)
+            "UTDANNING_FULLTID", "UTDANNING_DELTID" -> utdanning(fom, this.tom)
             "PERMISJON" -> permisjon(fom, tom!!)
             "FERIE" -> ferie(fom, tom!!)
             "UTLANDSOPPHOLD" -> utlandsopphold(fom, tom!!)
         }
     }
 
+    internal open fun inntektskilde(sykmeldt: Boolean, type: String) = apply {}
+
     internal abstract fun periode(fom: LocalDate, tom: LocalDate, grad: Int, arbeidshelse: Int?): SøknadBuilder
 
-    internal open fun utdanning(fom: LocalDate) = apply {}
+    internal open fun utdanning(fom: LocalDate, tom: LocalDate) = apply {}
     internal open fun permisjon(fom: LocalDate, tom: LocalDate) = apply {}
     internal open fun ferie(fom: LocalDate, tom: LocalDate) = apply {}
     internal open fun utlandsopphold(fom: LocalDate, tom: LocalDate) = apply {}

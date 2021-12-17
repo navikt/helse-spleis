@@ -16,7 +16,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(28.oktober(2020), 8.november(2020), 100.prosent))
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(28.oktober(2020), 8.november(2020), 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(9.november(2020), 22.november(2020), 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(9.november(2020), 22.november(2020), 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(9.november(2020), 22.november(2020), 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(28.oktober(2021), 8.november(2021), 100.prosent))
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(28.oktober(2021), 8.november(2021), 100.prosent))
@@ -31,7 +31,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
     @Test
     fun `mer enn 25% avvik lager kun én errormelding i aktivitetsloggen`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 31.januar))
 
         håndterYtelser(1.vedtaksperiode)
@@ -49,7 +49,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
     @Test
     fun `ingen sammenligningsgrunlag fører til error om 25% avvik`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 31.januar))
 
         håndterYtelser(1.vedtaksperiode)
@@ -61,7 +61,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Forkaster etterfølgende perioder dersom vilkårsprøving feilet pga avvik i inntekt på første periode`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2021), 17.januar(2021), 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar(2021), 17.januar(2021), 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar(2021), 17.januar(2021), 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(18.januar(2021), 20.januar(2021), 100.prosent))
 
         val arbeidsgiverperioder = listOf(
@@ -102,7 +102,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Forkaster ikke etterfølgende perioder dersom vilkårsprøving feiler pga minimum inntekt på første periode`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2021), 17.januar(2021), 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar(2021), 17.januar(2021), 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar(2021), 17.januar(2021), 100.prosent))
 
         val arbeidsgiverperioder = listOf(
             1.januar(2021) til 16.januar(2021)
@@ -126,7 +126,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         ))
 
         håndterSykmelding(Sykmeldingsperiode(18.januar(2021), 20.januar(2021), 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(18.januar(2021), 20.januar(2021), 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(18.januar(2021), 20.januar(2021), 100.prosent))
 
         assertTilstander(
             1.vedtaksperiode,
@@ -149,7 +149,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
     @Test
     fun `25 % avvik i inntekt lager error`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2021), 17.januar(2021), 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar(2021), 17.januar(2021), 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar(2021), 17.januar(2021), 100.prosent))
         val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021)), førsteFraværsdag = 1.januar(2021))
 
         håndterYtelser(1.vedtaksperiode)

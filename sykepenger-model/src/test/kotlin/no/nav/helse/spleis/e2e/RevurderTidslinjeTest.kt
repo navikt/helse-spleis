@@ -2,7 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.IdInnhenter
@@ -1177,7 +1177,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         nyttVedtak(3.januar, 26.januar)
 
         håndterSykmelding(Sykmeldingsperiode(2.februar, 27.februar, 100.prosent))
-        håndterSøknad(Sykdom(2.februar, 27.februar, 100.prosent), Søknad.Søknadsperiode.Ferie(2.februar, 20.februar))
+        håndterSøknad(Sykdom(2.februar, 27.februar, 100.prosent), SendtSøknad.Søknadsperiode.Ferie(2.februar, 20.februar))
 
         håndterOverstyrTidslinje((25.januar til 26.januar).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)

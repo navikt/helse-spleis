@@ -58,7 +58,7 @@ abstract class AbstractObservableTest {
 
     protected fun søknad(
         id: UUID = SØKNAD_ID,
-        vararg perioder: Søknad.Søknadsperiode = arrayOf(Søknad.Søknadsperiode.Sykdom(FOM, TOM, 100.prosent)),
+        vararg perioder: Søknad.Søknadsperiode = arrayOf(SendtSøknad.Søknadsperiode.Sykdom(FOM, TOM, 100.prosent)),
         andreInntektskilder: List<Søknad.Inntektskilde> = emptyList(),
         sendtTilNav: LocalDate = TOM.plusDays(1),
         orgnummer: String = ORGNUMMER,

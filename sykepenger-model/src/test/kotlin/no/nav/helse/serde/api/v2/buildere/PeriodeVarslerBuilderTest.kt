@@ -21,7 +21,7 @@ internal class PeriodeVarslerBuilderTest: AbstractEndToEndTest() {
     fun `varsel på samme skjæringstidspunkt kopieres`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar)) // Warning
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         håndterYtelser()
         håndterVilkårsgrunnlag(1.vedtaksperiode, medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.VetIkke)
 
@@ -35,7 +35,7 @@ internal class PeriodeVarslerBuilderTest: AbstractEndToEndTest() {
     fun `periode med varsel`(){
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 2.januar) // Warning
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         håndterYtelser()
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser()
@@ -51,7 +51,7 @@ internal class PeriodeVarslerBuilderTest: AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 2.januar) // Warning
 
         håndterSykmelding(Sykmeldingsperiode(16.januar, 31.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(16.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Utdanning(30.januar, 31.januar))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(16.januar, 31.januar, 100.prosent), SendtSøknad.Søknadsperiode.Utdanning(30.januar, 31.januar))
 
         assertEquals(1, aktiviteter(1.vedtaksperiode).size)
         assertEquals(2, aktiviteter(2.vedtaksperiode).size)
@@ -61,7 +61,7 @@ internal class PeriodeVarslerBuilderTest: AbstractEndToEndTest() {
     fun `plukker riktig vilkårsgrunnlag`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         håndterYtelser()
         håndterVilkårsgrunnlag(1.vedtaksperiode, medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.VetIkke) // Warning på vilkårsgrunnlag
         håndterYtelser()

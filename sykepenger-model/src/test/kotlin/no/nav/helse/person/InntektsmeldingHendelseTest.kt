@@ -46,7 +46,7 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
     @Test
     fun `inntektsmelding etter søknad`() {
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100.prosent)))
-        person.håndter(søknad(Søknad.Søknadsperiode.Sykdom(6.januar,  20.januar, 100.prosent)))
+        person.håndter(søknad(SendtSøknad.Søknadsperiode.Sykdom(6.januar,  20.januar, 100.prosent)))
         person.håndter(inntektsmelding())
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
@@ -57,7 +57,7 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
     fun `søknad etter inntektsmelding`() {
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100.prosent)))
         person.håndter(inntektsmelding())
-        person.håndter(søknad(Søknad.Søknadsperiode.Sykdom(6.januar,  20.januar, 100.prosent)))
+        person.håndter(søknad(SendtSøknad.Søknadsperiode.Sykdom(6.januar,  20.januar, 100.prosent)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse(), inspektør.personLogg.toString())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.AVVENTER_HISTORIKK, inspektør.sisteTilstand(1.vedtaksperiode))
@@ -139,7 +139,7 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
             orgnummer = orgnummer.toString(),
             perioder = listOf(*perioder),
             andreInntektskilder = emptyList(),
-            sendtTilNAV = Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay(),
+            sendtTilNAV = SendtSøknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay(),
             permittert = false,
             merknaderFraSykmelding = emptyList(),
             sykmeldingSkrevet = LocalDateTime.now()

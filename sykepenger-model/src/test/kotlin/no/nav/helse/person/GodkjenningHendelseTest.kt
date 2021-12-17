@@ -177,7 +177,7 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
             fnr = UNG_PERSON_FNR_2018.toString(),
             aktørId = "aktørId",
             orgnummer = ORGNUMMER.toString(),
-            perioder = listOf(Søknad.Søknadsperiode.Sykdom(førsteSykedag, sisteSykedag, 100.prosent)),
+            perioder = listOf(SendtSøknad.Søknadsperiode.Sykdom(førsteSykedag, sisteSykedag, 100.prosent)),
             andreInntektskilder = emptyList(),
             sendtTilNAV = sisteSykedag.atStartOfDay(),
             permittert = false,

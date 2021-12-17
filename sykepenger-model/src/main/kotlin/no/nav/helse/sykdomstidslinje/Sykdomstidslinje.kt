@@ -194,8 +194,12 @@ internal class Sykdomstidslinje private constructor(
 
     internal fun harProblemdager() = any { it is ProblemDag }
 
-    internal fun kunFeriedager() =
-        this.dager.filter { erFeriedag(it.key) }
+    internal fun kunFeriedagerFør(kuttdato: LocalDate) =
+        this.dager
+            .filter { erFeriedag(it.key) }
+            .filter { it.key < kuttdato }
+            .takeUnless { it.isEmpty() }
+            ?.let { Sykdomstidslinje(it) }
 
     private fun sisteOppholdsdag() = periode?.lastOrNull { erOppholdsdag(it) }
     private fun sisteOppholdsdag(før: LocalDate) = periode?.filter { erOppholdsdag(it) }?.lastOrNull { it.isBefore(før) }

@@ -111,7 +111,7 @@ internal fun AbstractEndToEndTest.søknad(
     id: UUID,
     vararg perioder: Søknad.Søknadsperiode,
     andreInntektskilder: List<Søknad.Inntektskilde> = emptyList(),
-    sendtTilNav: LocalDate = Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive,
+    sendtTilNav: LocalDate = SendtSøknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive,
     orgnummer: Organisasjonsnummer = AbstractPersonTest.ORGNUMMER,
     sykmeldingSkrevet: LocalDateTime? = null,
     fnr: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018
@@ -126,7 +126,7 @@ internal fun AbstractEndToEndTest.søknad(
         sendtTilNAV = sendtTilNav.atStartOfDay(),
         permittert = false,
         merknaderFraSykmelding = emptyList(),
-        sykmeldingSkrevet = sykmeldingSkrevet ?: Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.start.atStartOfDay()
+        sykmeldingSkrevet = sykmeldingSkrevet ?: SendtSøknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.start.atStartOfDay()
     ).apply {
         hendelselogg = this
     }

@@ -17,11 +17,11 @@ internal class VarselOmFlereInntektsmeldingerTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(29.mars(2021), 5.april(2021), 100.prosent))
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(29.mars(2021), 5.april(2021), 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(29.mars(2021), 5.april(2021), 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(29.mars(2021), 5.april(2021), 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(6.april(2021), 16.april(2021), 50.prosent))
         håndterInntektsmelding(arbeidsgiverperioder = listOf(22.mars(2021) til 6.april(2021)), førsteFraværsdag = 22.mars(2021))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(6.april(2021), 16.april(2021), 50.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(6.april(2021), 16.april(2021), 50.prosent))
 
         håndterYtelser(3.vedtaksperiode)
         håndterVilkårsgrunnlag(
@@ -44,7 +44,7 @@ internal class VarselOmFlereInntektsmeldingerTest : AbstractEndToEndTest() {
     @Test
     fun `Varsel om flere inntektsmeldinger hvis vi forlenger en avsluttet periode uten inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent))
         håndterUtbetalingshistorikk(
             1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 17.januar, 31.januar, 100.prosent, INNTEKT),
             inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER.toString(), 17.januar, INNTEKT, true))
@@ -65,7 +65,7 @@ internal class VarselOmFlereInntektsmeldingerTest : AbstractEndToEndTest() {
     @Test
     fun `Varsel om flere inntektsmeldinger hvis vi forlenger en avsluttet periode med inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent))
         håndterInntektsmelding(arbeidsgiverperioder = listOf(1.februar til 16.februar), førsteFraværsdag = 1.februar)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, inntekt = INNTEKT, inntektsvurdering = Inntektsvurdering(

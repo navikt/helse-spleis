@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
@@ -419,7 +418,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
     fun `annuller over ikke utbetalt forlengelse`() {
         nyttVedtak(3.januar, 26.januar, 100.prosent, 3.januar)
         håndterSykmelding(Sykmeldingsperiode(27.januar, 31.januar, 100.prosent))
-        håndterSøknadMedValidering(2.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(27.januar, 31.januar, 100.prosent))
+        håndterSøknadMedValidering(2.vedtaksperiode, SendtSøknad.Søknadsperiode.Sykdom(27.januar, 31.januar, 100.prosent))
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, false)
@@ -443,7 +442,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
 
         håndterSykmelding(Sykmeldingsperiode(27.januar, 14.februar, 100.prosent))
-        håndterSøknadMedValidering(2.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(27.januar, 14.februar, 100.prosent))
+        håndterSøknadMedValidering(2.vedtaksperiode, SendtSøknad.Søknadsperiode.Sykdom(27.januar, 14.februar, 100.prosent))
         assertTilstander(2.vedtaksperiode, TilstandType.START, TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP, TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
     }
 

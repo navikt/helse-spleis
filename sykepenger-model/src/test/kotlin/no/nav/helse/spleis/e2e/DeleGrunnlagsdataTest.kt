@@ -1,8 +1,8 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Arbeid
+import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
 import no.nav.helse.inspectors.GrunnlagsdataInspektør
 import no.nav.helse.inspectors.PersonInspektør
 import no.nav.helse.inspectors.inspektør
@@ -356,7 +356,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
     fun `når vilkårsgrunnlag mangler sjekk på minimum inntekt gjøres denne sjekken`() {
         val inntekt = 93634.årlig / 2 - 1.årlig
         håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar, 100.prosent))
-        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 17.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(17.januar, 17.januar))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 17.januar, 100.prosent), SendtSøknad.Søknadsperiode.Ferie(17.januar, 17.januar))
         håndterInntektsmeldingMedValidering(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
@@ -427,7 +427,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
     fun `når vilkårsgrunnlag mangler sjekk på minimum inntekt gjøres denne sjekken - inntekt er lik minimum inntekt`() {
         val inntekt = 93634.årlig / 2
         håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar, 100.prosent))
-        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 17.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(17.januar, 17.januar))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 17.januar, 100.prosent), SendtSøknad.Søknadsperiode.Ferie(17.januar, 17.januar))
         håndterInntektsmeldingMedValidering(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),

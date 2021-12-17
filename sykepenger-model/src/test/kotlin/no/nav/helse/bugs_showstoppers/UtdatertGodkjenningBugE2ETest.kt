@@ -1,6 +1,5 @@
 package no.nav.helse.bugs_showstoppers
 
-import no.nav.helse.hendelser.Søknad
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.spleis.e2e.*
 import no.nav.helse.testhelpers.januar
@@ -31,7 +30,7 @@ internal class UtdatertGodkjenningBugE2ETest: AbstractEndToEndTest() {
     @Test
     fun `Ignorerer løsning på godkjenningsbehov dersom utbetalingid på løsningen ikke samsvarer med periodens gjeldende utbetaling`() {
         tilGodkjenning(1.januar, 31.januar, 100.prosent, 1.januar)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent)) // reberegner vedtaksperioden
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent)) // reberegner vedtaksperioden
         håndterYtelser()
         håndterSimulering()
         håndterUtbetalingsgodkjenning(utbetalingId = UUID.randomUUID())

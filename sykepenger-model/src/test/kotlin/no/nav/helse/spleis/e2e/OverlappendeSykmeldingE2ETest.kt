@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.TilstandType.*
@@ -147,7 +146,7 @@ internal class OverlappendeSykmeldingE2ETest : AbstractEndToEndTest() {
         val sykmelding2Skrevet = 10.januar.atStartOfDay()
         håndterSykmelding(Sykmeldingsperiode(3.januar, 15.januar, 100.prosent), mottatt = sykmelding1Skrevet)
         håndterSykmelding(Sykmeldingsperiode(10.januar, 25.januar, 50.prosent), mottatt = sykmelding2Skrevet)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.januar, 15.januar, 100.prosent), sykmeldingSkrevet = sykmelding1Skrevet)
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(3.januar, 15.januar, 100.prosent), sykmeldingSkrevet = sykmelding1Skrevet)
 
         assertTilstander(
             1.vedtaksperiode,
@@ -170,7 +169,7 @@ internal class OverlappendeSykmeldingE2ETest : AbstractEndToEndTest() {
     fun `søknad for nyere sykmelding overskriver eldre sykmelding`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 15.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(10.januar, 25.januar, 50.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(10.januar, 25.januar, 40.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(10.januar, 25.januar, 40.prosent))
 
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE)

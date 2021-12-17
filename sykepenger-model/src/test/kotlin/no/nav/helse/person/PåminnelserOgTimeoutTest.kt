@@ -52,7 +52,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
     fun `påminnelse i mottatt søknad innenfor makstid`() {
         person.håndter(sykmelding(Sykmeldingsperiode(nå.minusDays(60), nå.minusDays(31), 100.prosent)))
         person.håndter(sykmelding(Sykmeldingsperiode(nå.minusDays(30), nå, 100.prosent)))
-        person.håndter(søknad(Søknad.Søknadsperiode.Sykdom(nå.minusDays(30), nå, 100.prosent)))
+        person.håndter(søknad(SendtSøknad.Søknadsperiode.Sykdom(nå.minusDays(30), nå, 100.prosent)))
         assertEquals(AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, inspektør.sisteTilstand(2.vedtaksperiode))
         person.håndter(påminnelse(AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, 2.vedtaksperiode))
         assertEquals(AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, inspektør.sisteTilstand(2.vedtaksperiode))
@@ -214,7 +214,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
 
     private fun søknad(
         vararg perioder: Søknad.Søknadsperiode = arrayOf(
-            Søknad.Søknadsperiode.Sykdom(
+            SendtSøknad.Søknadsperiode.Sykdom(
                 1.januar,
                 20.januar,
                 100.prosent

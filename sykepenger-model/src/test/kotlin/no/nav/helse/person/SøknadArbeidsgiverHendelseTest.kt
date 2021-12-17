@@ -63,7 +63,7 @@ internal class SøknadArbeidsgiverHendelseTest : AbstractPersonTest() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent)))
         person.håndter(søknadArbeidsgiver(Sykdom(1.januar, 5.januar, 100.prosent)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
-        person.håndter(søknad(Søknad.Søknadsperiode.Sykdom(1.januar, 5.januar, 100.prosent, 0.prosent)))
+        person.håndter(søknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 5.januar, 100.prosent, 0.prosent)))
         assertTrue(inspektør.personLogg.hasErrorsOrWorse(), inspektør.personLogg.toString())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(1.vedtaksperiode)) // bytter ikke tilstand pga den er avsluttet - men det burde den kanskje?
@@ -72,7 +72,7 @@ internal class SøknadArbeidsgiverHendelseTest : AbstractPersonTest() {
     @Test
     fun `søknad til arbeidsgiver som overlapper fører til utkasting`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent)))
-        person.håndter(søknad(Søknad.Søknadsperiode.Sykdom(1.januar, 5.januar, 100.prosent, 0.prosent)))
+        person.håndter(søknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 5.januar, 100.prosent, 0.prosent)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         person.håndter(søknadArbeidsgiver(Sykdom(1.januar, 5.januar, 100.prosent)))
         assertTrue(inspektør.personLogg.hasErrorsOrWorse(), inspektør.personLogg.toString())
@@ -140,7 +140,7 @@ internal class SøknadArbeidsgiverHendelseTest : AbstractPersonTest() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent)))
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 10.januar, 100.prosent)))
         person.håndter(søknadArbeidsgiver(Sykdom(6.januar, 10.januar, 100.prosent)))
-        person.håndter(søknad(Søknad.Søknadsperiode.Sykdom(1.januar, 5.januar, 100.prosent, 0.prosent)))
+        person.håndter(søknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 5.januar, 100.prosent, 0.prosent)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(2, inspektør.vedtaksperiodeTeller)
         assertEquals(AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
@@ -166,7 +166,7 @@ internal class SøknadArbeidsgiverHendelseTest : AbstractPersonTest() {
             orgnummer = orgnummer,
             perioder = listOf(*perioder),
             andreInntektskilder = emptyList(),
-            sendtTilNAV = Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay(),
+            sendtTilNAV = SendtSøknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay(),
             permittert = false,
             merknaderFraSykmelding = emptyList(),
             sykmeldingSkrevet = LocalDateTime.now()

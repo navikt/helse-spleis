@@ -1,7 +1,7 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.hentErrors
 import no.nav.helse.hentWarnings
 import no.nav.helse.person.Aktivitetslogg

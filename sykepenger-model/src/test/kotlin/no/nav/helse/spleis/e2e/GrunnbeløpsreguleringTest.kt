@@ -104,7 +104,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
     fun `ubetalt periode, etter utbetalt, etterutbetales ikke`() {
         (10.juni(2020) to 30.juni(2020)).also { (fom, tom) ->
             håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
-            håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent), sendtTilNav = tom)
+            håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent), sendtTilNav = tom)
             håndterInntektsmeldingMedValidering(
                 1.vedtaksperiode,
                 listOf(fom til fom.plusDays(15)),
@@ -287,7 +287,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
         )
     ) {
         håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent), sendtTilNav = tom)
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent), sendtTilNav = tom)
         håndterInntektsmeldingMedValidering(
             vedtaksperiodeIndeks.vedtaksperiode,
             arbeidsgiverperiode,
@@ -328,7 +328,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
         tom: LocalDate
     ) {
         håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent), sendtTilNav = tom)
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent), sendtTilNav = tom)
         håndterYtelser(vedtaksperiodeIndeks.vedtaksperiode)
         håndterSimulering(vedtaksperiodeIndeks.vedtaksperiode)
         håndterUtbetalingsgodkjenning(vedtaksperiodeIndeks.vedtaksperiode, true)

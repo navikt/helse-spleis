@@ -4,8 +4,8 @@ import no.nav.helse.Organisasjonsnummer
 import no.nav.helse.Toggle
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Dagtype.Feriedag
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
+import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Ferie
+import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Permisjon
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.Inntektskilde
@@ -80,7 +80,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         val hendelser = listOf(sykmelding, søknad, inntektsmelding)
 
         håndterSykmelding(Sykmeldingsperiode(sykmelding.fom, sykmelding.tom, 100.prosent), id = sykmeldingId)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(søknad.fom, søknad.tom, 100.prosent), id = søknadId, sendtTilNav = 1.februar)
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(søknad.fom, søknad.tom, 100.prosent), id = søknadId, sendtTilNav = 1.februar)
         håndterInntektsmelding(listOf(1.januar til 16.januar), id = inntektsmeldingId)
 
         håndterYtelser(1.vedtaksperiode)
@@ -273,11 +273,11 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `generer ett utbetalingshistorikkelement per utbetaling, selv om utbetalingene peker på samme sykdomshistorikk`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent))
 
         //Spill igjennom første
         håndterYtelser(1.vedtaksperiode)
@@ -322,7 +322,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 14.februar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 14.februar, 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.februar, 14.februar, 100.prosent))
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
 
@@ -353,7 +353,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `person uten utbetalingsdager`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 9.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 9.januar, 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 9.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
 
         val personDTO = speilApi()
@@ -366,7 +366,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `person med foreldet dager`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNav = 1.juni)
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNav = 1.juni)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -418,7 +418,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         val hendelser = listOf(sykmelding1, søknad1, inntektsmelding, sykmelding2, søknad2)
 
         håndterSykmelding(Sykmeldingsperiode(sykmelding1.fom, sykmelding1.tom, 100.prosent), id = sykmelding1Id)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(søknad1.fom, søknad1.tom, 100.prosent), id = søknad1Id)
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(søknad1.fom, søknad1.tom, 100.prosent), id = søknad1Id)
         håndterInntektsmelding(listOf(1.januar til 16.januar), id = inntektsmeldingId)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -428,7 +428,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(sykmelding2.fom, sykmelding2.tom, 100.prosent), id = sykmelding2Id)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(søknad2.fom, søknad2.tom, 100.prosent), id = søknad2Id)
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(søknad2.fom, søknad2.tom, 100.prosent), id = søknad2Id)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -450,7 +450,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     fun `Utbetalinger blir lagt riktig på hver vedtaksperiode`() {
         nyttVedtak(1.januar, 31.januar)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 14.februar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 14.februar, 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.februar, 14.februar, 100.prosent))
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -509,7 +509,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER.toString(), skjæringstidspunktFraInfotrygd, 31000.månedlig, true))
 
         håndterSykmelding(Sykmeldingsperiode(fom1Periode, tom1Periode, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom1Periode, tom1Periode, 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(fom1Periode, tom1Periode, 100.prosent))
         // Til infotrygd pga overlapp
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
@@ -517,7 +517,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         )
 
         håndterSykmelding(Sykmeldingsperiode(fom2Periode, tom2Periode, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom2Periode, tom2Periode, 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(fom2Periode, tom2Periode, 100.prosent))
         håndterUtbetalingshistorikk(
             2.vedtaksperiode, besvart = 16.februar.atStartOfDay(), inntektshistorikk = inntektshistorikk, utbetalinger = arrayOf(
                 ArbeidsgiverUtbetalingsperiode(
@@ -565,7 +565,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         val tom2Periode = 14.februar
 
         håndterSykmelding(Sykmeldingsperiode(fom1Periode, tom1Periode, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom1Periode, tom1Periode, 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(fom1Periode, tom1Periode, 100.prosent))
 
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
@@ -577,8 +577,8 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(fom2Periode, tom2Periode, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom2Periode, tom2Periode, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom2Periode, tom2Periode, 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(fom2Periode, tom2Periode, 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(fom2Periode, tom2Periode, 100.prosent))
 
         val personDTO = speilApi()
 
@@ -595,9 +595,9 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `hvis første vedtaksperiode er ferdigbehandlet arbeidsgiverperiode vises den som ferdigbehandlet`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 9.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 9.januar, 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 9.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(10.januar, 25.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(10.januar, 25.januar, 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(10.januar, 25.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
@@ -618,10 +618,10 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `perioder uten utbetaling får ikke utbetalingstidslinje`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 9.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 9.januar, 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 9.januar, 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(10.januar, 25.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(10.januar, 25.januar, 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(10.januar, 25.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
 
         håndterYtelser(2.vedtaksperiode)
@@ -651,7 +651,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         forlengVedtak(1.desember, 31.desember) //Maksdato nådd
 
         håndterSykmelding(Sykmeldingsperiode(1.januar(2019), 31.januar(2019), 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar(2019), 31.januar(2019), 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar(2019), 31.januar(2019), 100.prosent))
         håndterYtelser(13.vedtaksperiode)
         håndterUtbetalingsgodkjenning(13.vedtaksperiode)
         håndterUtbetalt(13.vedtaksperiode)
@@ -665,7 +665,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     fun `ta med personoppdrag`() {
         Toggle.LageBrukerutbetaling.enable {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
             håndterInntektsmelding(
                 refusjon = Inntektsmelding.Refusjon(0.månedlig, null),
                 førsteFraværsdag = 1.januar,
@@ -721,7 +721,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent))
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, utbetalingGodkjent = false) // Avvist av saksbehandler
@@ -745,7 +745,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `lager ikke utbetalingshistorikkelement av forkastet utbetaling`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -772,7 +772,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     fun `Setter tilstand Utbetalt på vedtaksperioden uavhengig av utbetaling i påfølgende vedtaksperioder`() {
         nyttVedtak(1.januar, 31.januar)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 10.februar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 10.februar, 100.prosent), Søknad.Søknadsperiode.Arbeid(1.februar, 10.februar))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.februar, 10.februar, 100.prosent), SendtSøknad.Søknadsperiode.Arbeid(1.februar, 10.februar))
 
         håndterYtelser(2.vedtaksperiode)
 
@@ -783,7 +783,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `Sender unike advarsler per periode`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2018), 31.januar(2018), 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar(2018), 31.januar(2018), 100.prosent), sendtTilNav = 1.april)
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar(2018), 31.januar(2018), 100.prosent), sendtTilNav = 1.april)
         håndterInntektsmelding(listOf(1.januar(2018) til 16.januar(2018)))
 
         håndterYtelser(1.vedtaksperiode, arbeidsavklaringspenger = listOf(1.januar(2018).minusDays(60) til 31.januar(2018).minusDays(60)))
@@ -800,10 +800,10 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `Sender med varsler for tidligere periode som er avsluttet uten utbetaling`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 9.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 9.januar, 100.prosent), Søknad.Søknadsperiode.Utdanning(3.januar, 4.januar))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 9.januar, 100.prosent), SendtSøknad.Søknadsperiode.Utdanning(3.januar, 4.januar))
 
         håndterSykmelding(Sykmeldingsperiode(10.januar, 25.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(10.januar, 25.januar, 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(10.januar, 25.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
 
         håndterYtelser(2.vedtaksperiode)
@@ -822,14 +822,14 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `Sender med varsler for alle tidligere tilstøtende perioder som er avsluttet uten utbetaling`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 9.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 9.januar, 100.prosent), Søknad.Søknadsperiode.Utdanning(3.januar, 4.januar)) // Warning
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 9.januar, 100.prosent), SendtSøknad.Søknadsperiode.Utdanning(3.januar, 4.januar)) // Warning
 
         håndterSykmelding(Sykmeldingsperiode(10.januar, 14.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(10.januar, 14.januar, 100.prosent), Søknad.Søknadsperiode.Utlandsopphold(11.januar, 12.januar)) // Warning
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(10.januar, 14.januar, 100.prosent), SendtSøknad.Søknadsperiode.Utlandsopphold(11.januar, 12.januar)) // Warning
         håndterInntektsmelding(listOf(1.januar til 16.januar))
 
         håndterSykmelding(Sykmeldingsperiode(15.januar, 25.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(15.januar, 25.januar, 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(15.januar, 25.januar, 100.prosent))
 
         håndterYtelser(3.vedtaksperiode)
         håndterVilkårsgrunnlag(3.vedtaksperiode)
@@ -858,7 +858,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         val søknadNavDTO = SøknadNavDTO(UUID.randomUUID().toString(), 1.januar, 31.januar, 1.januar.atStartOfDay(), sendtNav = 31.januar.atStartOfDay())
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), id = UUID.fromString(søknadNavDTO.id))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), id = UUID.fromString(søknadNavDTO.id))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
 
         håndterYtelser(1.vedtaksperiode)
@@ -874,7 +874,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `egen tilstandstype for perioder med kun fravær - feriedager`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 24.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 24.januar, 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 24.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -884,7 +884,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(25.januar, 31.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(25.januar, 31.januar, 100.prosent), Ferie(25.januar, 31.januar))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(25.januar, 31.januar, 100.prosent), Ferie(25.januar, 31.januar))
         håndterYtelser(2.vedtaksperiode)
 
         val personDTO = serializePersonForSpeil(person)
@@ -896,7 +896,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `egen tilstandstype for perioder med kun fravær - permisjonsdager (gir warning) `() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 24.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 24.januar, 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 24.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -906,7 +906,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(25.januar, 31.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(25.januar, 31.januar, 100.prosent), Permisjon(25.januar, 31.januar))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(25.januar, 31.januar, 100.prosent), Permisjon(25.januar, 31.januar))
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
@@ -930,7 +930,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `ny inntekt inkluderes`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -974,7 +974,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         val forlengelseTom = 15.februar
 
         håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent))
         håndterInntektsmelding(listOf(fom til fom.plusDays(15)))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -989,7 +989,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         assertNotNull(vedtaksperiode.godkjentAv)
 
         håndterSykmelding(Sykmeldingsperiode(forlengelseFom, forlengelseTom, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(forlengelseFom, forlengelseTom, 100.prosent), sendtTilNav = forlengelseFom.plusDays(1))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(forlengelseFom, forlengelseTom, 100.prosent), sendtTilNav = forlengelseFom.plusDays(1))
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
 
@@ -1001,7 +1001,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `Total sykdomsgrad ved en arbeidsgiver`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -1024,7 +1024,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 50.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 50.prosent), orgnummer = a1)
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 50.prosent), orgnummer = a1)
 
         val inntektshistorikk = listOf(
             Inntektsopplysning(a1.toString(), 20.januar(2021), inntekt, true),
@@ -1039,7 +1039,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(1.vedtaksperiode, utbetalinger = utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
         håndterUtbetalingshistorikk(1.vedtaksperiode, utbetalinger = utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
 
@@ -1057,7 +1057,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `markerer forkastede vedtaksperioder som forkastet`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
 
         håndterYtelser(1.vedtaksperiode)
@@ -1078,7 +1078,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `markerer vedtaksperioder som ikke forkastet`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 50.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 50.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
 
         håndterYtelser(1.vedtaksperiode)
@@ -1100,7 +1100,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 50.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 50.prosent), orgnummer = a1)
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 50.prosent), orgnummer = a1)
 
         val inntektshistorikk = listOf(
             Inntektsopplysning(a1.toString(), 20.januar(2021), inntekt, true),
@@ -1115,7 +1115,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(1.vedtaksperiode, utbetalinger = utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
         håndterUtbetalingshistorikk(1.vedtaksperiode, utbetalinger = utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -1131,7 +1131,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `arbeidsgivere uten vedtaksperioder som skal vises i speil, filtreres bort`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), andreInntektskilder = listOf(Søknad.Inntektskilde(true, "ANNET")))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), andreInntektskilder = listOf(Søknad.Inntektskilde(true, "ANNET")))
         assertTrue(serializePersonForSpeil(person).arbeidsgivere.isEmpty())
     }
 
@@ -1140,7 +1140,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         val fom = 1.januar
         val tom = 31.januar
         håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent), sendtTilNav = fom.plusDays(1))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent), sendtTilNav = fom.plusDays(1))
         håndterInntektsmelding(listOf(fom til fom.plusDays(15)))
         håndterYtelser(1.vedtaksperiode, dødsdato = 1.januar)
 
@@ -1155,7 +1155,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         val forlengelseTom = 28.februar
 
         håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent), sendtTilNav = fom.plusDays(1))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent), sendtTilNav = fom.plusDays(1))
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(fom til fom.plusDays(15)),
             refusjon = Inntektsmelding.Refusjon(beløp = 1000.månedlig, opphørsdato = null, endringerIRefusjon = emptyList()),
@@ -1174,7 +1174,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, automatiskBehandling = false)
 
         håndterSykmelding(Sykmeldingsperiode(forlengelseFom, forlengelseTom, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(forlengelseFom, forlengelseTom, 100.prosent), sendtTilNav = forlengelseTom)
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(forlengelseFom, forlengelseTom, 100.prosent), sendtTilNav = forlengelseTom)
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, automatiskBehandling = false)
 
@@ -1189,7 +1189,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent), orgnummer = a2)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent), sendtTilNav = fom.plusDays(1), orgnummer = a1)
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent), sendtTilNav = fom.plusDays(1), orgnummer = a1)
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(fom til fom.plusDays(15)),
             refusjon = Inntektsmelding.Refusjon(beløp = 1000.månedlig, opphørsdato = null, endringerIRefusjon = emptyList()),
@@ -1203,7 +1203,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             orgnummer = a2
         )
 
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent), orgnummer = a2)
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent), orgnummer = a2)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
@@ -1236,7 +1236,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         val tom = 31.januar
 
         håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent), orgnummer = a1)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent), sendtTilNav = fom.plusDays(1), orgnummer = a1)
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent), sendtTilNav = fom.plusDays(1), orgnummer = a1)
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(fom til fom.plusDays(15)),
             refusjon = Inntektsmelding.Refusjon(beløp = 1000.månedlig, opphørsdato = null, endringerIRefusjon = emptyList()),
@@ -1300,7 +1300,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent), orgnummer = a2)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent), sendtTilNav = fom.plusDays(1), orgnummer = a1)
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent), sendtTilNav = fom.plusDays(1), orgnummer = a1)
 
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(fom til fom.plusDays(15)),
@@ -1315,7 +1315,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             orgnummer = a2
         )
 
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent), sendtTilNav = fom.plusDays(1), orgnummer = a2)
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent), sendtTilNav = fom.plusDays(1), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
@@ -1348,7 +1348,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `tar med annulleringer som separate historikkelementer()`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -1358,7 +1358,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent))
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -1376,7 +1376,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     fun `Flere arbeidsgivere med ghosts`() {
         val a5 = "567891234".somOrganisasjonsnummer()
         håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars, 100.prosent), orgnummer = a1)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 15.mars, 100.prosent), orgnummer = a1)
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 15.mars, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
 
         val gamleITPerioder = arrayOf(

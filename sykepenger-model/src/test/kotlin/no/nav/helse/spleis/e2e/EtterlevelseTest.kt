@@ -3,11 +3,12 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.ForventetFeil
 import no.nav.helse.Organisasjonsnummer
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.*
 import no.nav.helse.person.Bokstav.BOKSTAV_A
-import no.nav.helse.person.Ledd.*
 import no.nav.helse.person.Ledd.Companion.ledd
+import no.nav.helse.person.Ledd.LEDD_1
+import no.nav.helse.person.Ledd.LEDD_2
 import no.nav.helse.person.Paragraf.*
 import no.nav.helse.person.Punktum.Companion.punktum
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING

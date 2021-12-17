@@ -51,7 +51,7 @@ internal fun AbstractEndToEndTest.tilGodkjenning(fom: LocalDate, tom: LocalDate,
         håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent), orgnummer = it)
     }
     organisasjonsnummere.forEach {
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent), orgnummer = it)
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent), orgnummer = it)
 
     }
     organisasjonsnummere.forEach {
@@ -96,7 +96,7 @@ internal fun AbstractEndToEndTest.nyeVedtak(
         håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent), orgnummer = it)
     }
     organisasjonsnummere.forEach {
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent), orgnummer = it)
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent), orgnummer = it)
 
     }
     organisasjonsnummere.forEach {
@@ -134,7 +134,7 @@ internal fun AbstractEndToEndTest.nyeVedtak(
 internal fun AbstractEndToEndTest.forlengVedtak(fom: LocalDate, tom: LocalDate, vararg organisasjonsnumre: Organisasjonsnummer) {
     require(organisasjonsnumre.isNotEmpty()) { "Må inneholde minst ett organisasjonsnummer" }
     organisasjonsnumre.forEach { håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent), orgnummer = it) }
-    organisasjonsnumre.forEach { håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent), orgnummer = it) }
+    organisasjonsnumre.forEach { håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent), orgnummer = it) }
     organisasjonsnumre.forEach { håndterYtelser(vedtaksperiodeIdInnhenter = { _ -> observatør.sisteVedtaksperiode(it) }, orgnummer = it) }
     organisasjonsnumre.forEach { organisasjonsnummer ->
         val vedtaksperiodeIdInnhenter: IdInnhenter = { observatør.sisteVedtaksperiode(organisasjonsnummer) }
@@ -216,7 +216,7 @@ internal fun AbstractEndToEndTest.tilYtelser(
         orgnummer = orgnummer,
         refusjon = refusjon
     )
-    håndterSøknadMedValidering(id, Søknad.Søknadsperiode.Sykdom(fom, tom, grad), fnr = fnr, orgnummer = orgnummer)
+    håndterSøknadMedValidering(id, SendtSøknad.Søknadsperiode.Sykdom(fom, tom, grad), fnr = fnr, orgnummer = orgnummer)
     håndterYtelser(id, fnr = fnr, orgnummer = orgnummer)
     håndterVilkårsgrunnlag(
         id,
@@ -242,7 +242,7 @@ internal fun AbstractEndToEndTest.forlengTilGodkjentVedtak(
 ) {
     håndterSykmelding(Sykmeldingsperiode(fom, tom, grad), fnr = fnr, orgnummer = orgnummer)
     val id: IdInnhenter = { observatør.sisteVedtaksperiode() }
-    håndterSøknadMedValidering(id, Søknad.Søknadsperiode.Sykdom(fom, tom, grad), fnr = fnr, orgnummer = orgnummer)
+    håndterSøknadMedValidering(id, SendtSøknad.Søknadsperiode.Sykdom(fom, tom, grad), fnr = fnr, orgnummer = orgnummer)
     håndterYtelser(id, fnr = fnr, orgnummer = orgnummer)
     if (skalSimuleres) håndterSimulering(id, fnr = fnr, orgnummer = orgnummer)
     håndterUtbetalingsgodkjenning(id, true, fnr = fnr, orgnummer = orgnummer)
@@ -270,14 +270,14 @@ internal fun AbstractEndToEndTest.forlengPeriode(
 ) {
     håndterSykmelding(Sykmeldingsperiode(fom, tom, grad), fnr = fnr, orgnummer = orgnummer)
     val id: IdInnhenter = { observatør.sisteVedtaksperiode() }
-    håndterSøknadMedValidering(id, Søknad.Søknadsperiode.Sykdom(fom, tom, grad), fnr = fnr, orgnummer = orgnummer)
+    håndterSøknadMedValidering(id, SendtSøknad.Søknadsperiode.Sykdom(fom, tom, grad), fnr = fnr, orgnummer = orgnummer)
 }
 
 internal fun AbstractEndToEndTest.håndterSøknadMedValidering(
     vedtaksperiodeIdInnhenter: IdInnhenter,
     vararg perioder: Søknad.Søknadsperiode,
     andreInntektskilder: List<Søknad.Inntektskilde> = emptyList(),
-    sendtTilNav: LocalDate = Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive,
+    sendtTilNav: LocalDate = SendtSøknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive,
     orgnummer: Organisasjonsnummer = AbstractPersonTest.ORGNUMMER,
     fnr: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018,
 ) {
@@ -291,7 +291,7 @@ internal fun AbstractEndToEndTest.håndterSøknadMedValidering(
 internal fun AbstractEndToEndTest.håndterSøknad(
     vararg perioder: Søknad.Søknadsperiode,
     andreInntektskilder: List<Søknad.Inntektskilde> = emptyList(),
-    sendtTilNav: LocalDate = Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive,
+    sendtTilNav: LocalDate = SendtSøknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive,
     id: UUID = UUID.randomUUID(),
     orgnummer: Organisasjonsnummer = AbstractPersonTest.ORGNUMMER,
     sykmeldingSkrevet: LocalDateTime? = null,
@@ -804,7 +804,7 @@ internal fun AbstractEndToEndTest.nyPeriode(periode: Periode, orgnummer: Organis
     person.håndter(
         søknad(
             UUID.randomUUID(),
-            Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent),
+            SendtSøknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent),
             orgnummer = orgnummer
         )
     )

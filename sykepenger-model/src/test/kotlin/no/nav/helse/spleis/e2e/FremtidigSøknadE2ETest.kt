@@ -22,7 +22,7 @@ internal class FremtidigSøknadE2ETest : AbstractEndToEndTest() {
     @Test
     fun `kan sende inn søknad før periode er gått ut`() {
         håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent))
         håndterInntektsmelding(listOf(Periode(fom, sisteArbeidsgiverdag)), førsteFraværsdag = fom)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(

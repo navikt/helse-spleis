@@ -21,7 +21,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
     fun `kun den arbeidsgiveren som har fått overstyrt inntekt som faktisk lagrer inntekten`() {
         nyttVedtak(1.januar(2017), 31.januar(2017), 100.prosent, orgnummer= AG2) // gammelt vedtak
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = AG1)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = AG1)
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = AG1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = AG1)
         håndterYtelser(orgnummer = AG1)
         val skjæringstidspunkt = inspektør(AG1).skjæringstidspunkt(1.vedtaksperiode)

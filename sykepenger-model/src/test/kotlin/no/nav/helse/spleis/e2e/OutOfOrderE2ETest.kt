@@ -1,8 +1,7 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.SøknadArbeidsgiver
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.TilstandType.*
@@ -843,7 +842,7 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
     fun `oppretter ikke periode fra søknad om det allerede finnes en utbetaling (med utdanning som ikke var vesentlig)`() {
         nyttVedtak(1.januar, 31.januar)
         håndterSykmelding(Sykmeldingsperiode(1.november(2017), 30.november(2017), 100.prosent)) // out of order som forkaster periodene
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Utdanning(27.januar, 31.januar))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), SendtSøknad.Søknadsperiode.Utdanning(27.januar, 31.januar))
         assertTilstander(
             1.vedtaksperiode,
             START,

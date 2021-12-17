@@ -2,7 +2,10 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.april
+import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
+import no.nav.helse.testhelpers.mai
+import no.nav.helse.testhelpers.mars
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -18,8 +21,8 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.april(2021), 23.april(2021), 100.prosent))
         håndterSøknadMedValidering(
             1.vedtaksperiode,
-            Søknad.Søknadsperiode.Sykdom(1.april(2021), 23.april(2021), 100.prosent),
-            Søknad.Søknadsperiode.Ferie(23.april(2021), 23.april(2021))
+            SendtSøknad.Søknadsperiode.Sykdom(1.april(2021), 23.april(2021), 100.prosent),
+            SendtSøknad.Søknadsperiode.Ferie(23.april(2021), 23.april(2021))
         )
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.april(2021), 16.april(2021))), førsteFraværsdag = 1.april(2021))
         håndterYtelser(
@@ -61,7 +64,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.april(2021), 23.april(2021), 100.prosent))
         håndterSøknadMedValidering(
             1.vedtaksperiode,
-            Søknad.Søknadsperiode.Sykdom(1.april(2021), 23.april(2021), 100.prosent)
+            SendtSøknad.Søknadsperiode.Sykdom(1.april(2021), 23.april(2021), 100.prosent)
         )
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.april(2021), 16.april(2021))), førsteFraværsdag = 1.april(2021))
         håndterYtelser(
@@ -100,8 +103,8 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.april(2021), 23.april(2021), 100.prosent))
         håndterSøknadMedValidering(
             1.vedtaksperiode,
-            Søknad.Søknadsperiode.Sykdom(1.april(2021), 23.april(2021), 100.prosent),
-            Søknad.Søknadsperiode.Ferie(23.april(2021), 23.april(2021))
+            SendtSøknad.Søknadsperiode.Sykdom(1.april(2021), 23.april(2021), 100.prosent),
+            SendtSøknad.Søknadsperiode.Ferie(23.april(2021), 23.april(2021))
         )
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.april(2021), 16.april(2021))), førsteFraværsdag = 1.april(2021))
         håndterYtelser(
@@ -147,8 +150,8 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         )
         håndterSøknadMedValidering(
             1.vedtaksperiode,
-            Søknad.Søknadsperiode.Sykdom(1.april(2021), 23.april(2021), 60.prosent),
-            Søknad.Søknadsperiode.Sykdom(24.april(2021), 30.april(2021), 40.prosent)
+            SendtSøknad.Søknadsperiode.Sykdom(1.april(2021), 23.april(2021), 60.prosent),
+            SendtSøknad.Søknadsperiode.Sykdom(24.april(2021), 30.april(2021), 40.prosent)
         )
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.april(2021), 16.april(2021))), førsteFraværsdag = 1.april(2021))
         håndterYtelser(
@@ -189,7 +192,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.april(2021), 23.april(2021), 100.prosent))
         håndterSøknadMedValidering(
             1.vedtaksperiode,
-            Søknad.Søknadsperiode.Sykdom(1.april(2021), 23.april(2021), 60.prosent)
+            SendtSøknad.Søknadsperiode.Sykdom(1.april(2021), 23.april(2021), 60.prosent)
         )
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.april(2021), 16.april(2021))), førsteFraværsdag = 1.april(2021))
         håndterYtelser(
@@ -230,7 +233,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.april(2021), 23.april(2021), 100.prosent))
         håndterSøknadMedValidering(
             1.vedtaksperiode,
-            Søknad.Søknadsperiode.Sykdom(1.april(2021), 23.april(2021), 60.prosent)
+            SendtSøknad.Søknadsperiode.Sykdom(1.april(2021), 23.april(2021), 60.prosent)
         )
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.april(2021), 16.april(2021))), førsteFraværsdag = 1.april(2021))
         håndterYtelser(
@@ -272,7 +275,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.april(2021), 23.april(2021), 100.prosent))
         håndterSøknadMedValidering(
             1.vedtaksperiode,
-            Søknad.Søknadsperiode.Sykdom(1.april(2021), 23.april(2021), 60.prosent)
+            SendtSøknad.Søknadsperiode.Sykdom(1.april(2021), 23.april(2021), 60.prosent)
         )
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.april(2021), 16.april(2021))), førsteFraværsdag = 1.april(2021))
         håndterYtelser(
@@ -295,7 +298,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(24.april(2021), 15.mai(2021), 100.prosent))
         håndterSøknadMedValidering(
             2.vedtaksperiode,
-            Søknad.Søknadsperiode.Sykdom(24.april(2021), 15.mai(2021), 100.prosent)
+            SendtSøknad.Søknadsperiode.Sykdom(24.april(2021), 15.mai(2021), 100.prosent)
         )
 
         håndterOverstyrTidslinje((17.april(2021) til 23.april(2021)).map { manuellFeriedag(it) })
@@ -319,7 +322,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.april(2021), 23.april(2021), 100.prosent))
         håndterSøknadMedValidering(
             1.vedtaksperiode,
-            Søknad.Søknadsperiode.Sykdom(1.april(2021), 23.april(2021), 60.prosent)
+            SendtSøknad.Søknadsperiode.Sykdom(1.april(2021), 23.april(2021), 60.prosent)
         )
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.april(2021), 16.april(2021))), førsteFraværsdag = 1.april(2021))
         håndterYtelser(
@@ -342,7 +345,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(24.april(2021), 15.mai(2021), 100.prosent))
         håndterSøknadMedValidering(
             2.vedtaksperiode,
-            Søknad.Søknadsperiode.Sykdom(24.april(2021), 15.mai(2021), 100.prosent)
+            SendtSøknad.Søknadsperiode.Sykdom(24.april(2021), 15.mai(2021), 100.prosent)
         )
         håndterYtelser(2.vedtaksperiode) // 2. periode har beregnet utbetalingen sin som en forlengelse
 
@@ -367,7 +370,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.april(2021), 23.april(2021), 100.prosent))
         håndterSøknadMedValidering(
             1.vedtaksperiode,
-            Søknad.Søknadsperiode.Sykdom(1.april(2021), 23.april(2021), 60.prosent)
+            SendtSøknad.Søknadsperiode.Sykdom(1.april(2021), 23.april(2021), 60.prosent)
         )
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.april(2021), 16.april(2021))), førsteFraværsdag = 1.april(2021))
         håndterYtelser(

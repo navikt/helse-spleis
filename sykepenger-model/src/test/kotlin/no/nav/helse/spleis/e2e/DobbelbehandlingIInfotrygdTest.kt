@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -41,7 +40,7 @@ internal class DobbelbehandlingIInfotrygdTest : AbstractEndToEndTest() {
     @Test
     fun `utbetalt i Infotrygd`() {
         håndterSykmelding(Sykmeldingsperiode(9.november(2020), 4.desember(2020), 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(9.november(2020), 4.desember(2020), 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(9.november(2020), 4.desember(2020), 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode,
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 5.desember(2020),  23.desember(2020), 100.prosent, 1000.daglig),
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.januar(2021),  3.januar(2021), 100.prosent, 1000.daglig),
@@ -57,7 +56,7 @@ internal class DobbelbehandlingIInfotrygdTest : AbstractEndToEndTest() {
     @Test
     fun `utbetalt i infotrygd mens vi venter på inntektsmelding - oppdaget i AVVENTER_HISTORIKK`() {
         håndterSykmelding(Sykmeldingsperiode(9.november(2020), 4.desember(2020), 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(9.november(2020), 4.desember(2020), 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(9.november(2020), 4.desember(2020), 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(24))
         håndterInntektsmelding(listOf(9.november(2020) til 24.november(2020)))
         val historikk = arrayOf(ArbeidsgiverUtbetalingsperiode("456789123", 1.desember(2020),   4.desember(2020), 100.prosent, 1000.daglig))
@@ -71,7 +70,7 @@ internal class DobbelbehandlingIInfotrygdTest : AbstractEndToEndTest() {
     @Test
     fun `utbetalt i infotrygd mens vi venter på inntektsmelding - oppdaget ved påminnelse`() {
         håndterSykmelding(Sykmeldingsperiode(9.november(2020), 4.desember(2020), 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(9.november(2020), 4.desember(2020), 100.prosent))
+        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(9.november(2020), 4.desember(2020), 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(24))
         håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
         håndterUtbetalingshistorikk(1.vedtaksperiode,
