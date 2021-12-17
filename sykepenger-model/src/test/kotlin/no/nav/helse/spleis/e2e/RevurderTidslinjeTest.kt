@@ -1342,6 +1342,9 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
         håndterOverstyrTidslinje((31.januar til 2.mars).map { manuellFeriedag(it) })
 
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+
         assertEquals(1, observatør.avvisteRevurderinger.size)
     }
 
