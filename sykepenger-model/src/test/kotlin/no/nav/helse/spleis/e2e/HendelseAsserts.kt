@@ -7,15 +7,14 @@ import no.nav.helse.person.*
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import java.time.LocalDate
 import java.util.*
 import kotlin.reflect.KClass
 
 
 internal fun assertInntektForDato(forventetInntekt: Inntekt?, dato: LocalDate, førsteFraværsdag: LocalDate = dato, inspektør: TestArbeidsgiverInspektør) {
-    Assertions.assertEquals(forventetInntekt, inspektør.inntektInspektør.grunnlagForSykepengegrunnlag(dato, førsteFraværsdag)?.grunnlagForSykepengegrunnlag())
+    assertEquals(forventetInntekt, inspektør.inntektInspektør.grunnlagForSykepengegrunnlag(dato, førsteFraværsdag)?.grunnlagForSykepengegrunnlag())
 }
 
 internal fun AbstractEndToEndTest.erEtterspurt(type: Aktivitetslogg.Aktivitet.Behov.Behovtype, vedtaksperiodeIdInnhenter: IdInnhenter, orgnummer: Organisasjonsnummer, tilstand: TilstandType): Boolean {
@@ -33,7 +32,7 @@ internal fun <T : ArbeidstakerHendelse> AbstractEndToEndTest.assertEtterspurt(l�
 
 internal fun <T : ArbeidstakerHendelse> AbstractEndToEndTest.assertIkkeEtterspurt(løsning: KClass<T>, type: Aktivitetslogg.Aktivitet.Behov.Behovtype, vedtaksperiodeIdInnhenter: IdInnhenter, orgnummer: Organisasjonsnummer) {
     val etterspurtBehov = EtterspurtBehov.finnEtterspurtBehov(ikkeBesvarteBehov, type, vedtaksperiodeIdInnhenter, orgnummer)
-    Assertions.assertFalse(etterspurtBehov in ikkeBesvarteBehov) {
+    assertFalse(etterspurtBehov in ikkeBesvarteBehov) {
         "Forventer ikke at $type skal være etterspurt før ${løsning.simpleName} håndteres. Perioden er i ${
             observatør.tilstandsendringer[vedtaksperiodeIdInnhenter(orgnummer)]?.last()
         }"
@@ -49,9 +48,9 @@ internal fun AbstractEndToEndTest.assertAlleBehovBesvart() {
 internal inline fun <reified R : Utbetalingstidslinje.Utbetalingsdag> assertUtbetalingsdag(dag: Utbetalingstidslinje.Utbetalingsdag, expectedDagtype: KClass<R>, expectedTotalgrad: Double = 100.0) {
     dag.let {
         it.økonomi.medData { _, _, _, _, totalGrad, _, _, _, _ ->
-            Assertions.assertEquals(expectedTotalgrad, totalGrad)
+            assertEquals(expectedTotalgrad, totalGrad)
         }
-        Assertions.assertEquals(it::class, expectedDagtype)
+        assertEquals(it::class, expectedDagtype)
     }
 }
 
@@ -66,9 +65,9 @@ internal fun AbstractEndToEndTest.assertUtbetalingsbeløp(
 
     utbetalingstidslinje.filterNot { it.dato.erHelg() }.forEach {
         it.økonomi.medAvrundetData { _, arbeidsgiverRefusjonsbeløp, _, _, arbeidsgiverbeløp, personbeløp, _ ->
-            Assertions.assertEquals(forventetArbeidsgiverbeløp, arbeidsgiverbeløp)
-            Assertions.assertEquals(forventetArbeidsgiverRefusjonsbeløp, arbeidsgiverRefusjonsbeløp)
-            Assertions.assertEquals(0, personbeløp)
+            assertEquals(forventetArbeidsgiverbeløp, arbeidsgiverbeløp)
+            assertEquals(forventetArbeidsgiverRefusjonsbeløp, arbeidsgiverRefusjonsbeløp)
+            assertEquals(0, personbeløp)
         }
     }
 }
@@ -87,7 +86,7 @@ internal fun AbstractEndToEndTest.assertHendelseIder(
     orgnummer: Organisasjonsnummer,
     vedtaksperiodeIndeks: Int = 2,
 ) {
-    Assertions.assertEquals(
+    assertEquals(
         hendelseIder.toSet(),
         inspektør(orgnummer).hendelseIder(vedtaksperiodeIndeks.vedtaksperiode)
     )
@@ -126,7 +125,7 @@ internal fun AbstractEndToEndTest.assertTilstand(
     orgnummer: Organisasjonsnummer = AbstractPersonTest.ORGNUMMER,
 ) {
     val sisteTilstand = inspektør(orgnummer).sisteTilstand(vedtaksperiodeIdInnhenter)
-    Assertions.assertEquals(tilstand, sisteTilstand) {
+    assertEquals(tilstand, sisteTilstand) {
         "Forventet at perioden skal stå i tilstand $tilstand, mens den står faktisk i $sisteTilstand\n${inspektør.personLogg}"
     }
 }
@@ -136,12 +135,12 @@ internal fun AbstractEndToEndTest.assertInntektskilde(
     inntektskilde: Inntektskilde,
     vedtaksperiodeIndeks: Int = 1
 ) {
-    Assertions.assertEquals(inntektskilde, inspektør(orgnummer).inntektskilde(vedtaksperiodeIndeks.vedtaksperiode))
+    assertEquals(inntektskilde, inspektør(orgnummer).inntektskilde(vedtaksperiodeIndeks.vedtaksperiode))
 }
 
 
 internal fun AbstractEndToEndTest.assertSisteTilstand(vedtaksperiodeIdInnhenter: IdInnhenter, tilstand: TilstandType, orgnummer: Organisasjonsnummer = AbstractPersonTest.ORGNUMMER) {
-    Assertions.assertEquals(tilstand, observatør.tilstandsendringer[vedtaksperiodeIdInnhenter(orgnummer)]?.last())
+    assertEquals(tilstand, observatør.tilstandsendringer[vedtaksperiodeIdInnhenter(orgnummer)]?.last())
 }
 
 internal fun AbstractEndToEndTest.assertTilstander(indeks: Int, vararg tilstander: TilstandType, orgnummer: Organisasjonsnummer = AbstractPersonTest.ORGNUMMER) {
@@ -150,9 +149,9 @@ internal fun AbstractEndToEndTest.assertTilstander(indeks: Int, vararg tilstande
 
 internal fun AbstractEndToEndTest.assertTilstander(vedtaksperiodeIdInnhenter: IdInnhenter, vararg tilstander: TilstandType, orgnummer: Organisasjonsnummer = AbstractPersonTest.ORGNUMMER, inspektør: TestArbeidsgiverInspektør = inspektør(orgnummer), message: String? = null) {
     val id = vedtaksperiodeIdInnhenter(orgnummer)
-    Assertions.assertFalse(inspektør.periodeErForkastet(vedtaksperiodeIdInnhenter)) { "Perioden er forkastet med tilstander: ${observatør.tilstandsendringer[id]}" }
+    assertFalse(inspektør.periodeErForkastet(vedtaksperiodeIdInnhenter)) { "Perioden er forkastet med tilstander: ${observatør.tilstandsendringer[id]}" }
     assertTrue(inspektør.periodeErIkkeForkastet(vedtaksperiodeIdInnhenter)) { "Perioden er forkastet med tilstander: ${observatør.tilstandsendringer[id]}" }
-    Assertions.assertEquals(tilstander.asList(), observatør.tilstandsendringer[id], message)
+    assertEquals(tilstander.asList(), observatør.tilstandsendringer[id], message)
 }
 
 internal fun AbstractEndToEndTest.assertForkastetPeriodeTilstander(indeks: Int, vararg tilstander: TilstandType, orgnummer: Organisasjonsnummer = AbstractPersonTest.ORGNUMMER) {
@@ -161,28 +160,28 @@ internal fun AbstractEndToEndTest.assertForkastetPeriodeTilstander(indeks: Int, 
 
 internal fun AbstractEndToEndTest.assertForkastetPeriodeTilstander(vedtaksperiodeIdInnhenter: IdInnhenter, vararg tilstander: TilstandType, orgnummer: Organisasjonsnummer = AbstractPersonTest.ORGNUMMER, inspektør: TestArbeidsgiverInspektør = inspektør(orgnummer)) {
     assertTrue(inspektør.periodeErForkastet(vedtaksperiodeIdInnhenter)) { "Perioden er ikke forkastet" }
-    Assertions.assertFalse(inspektør.periodeErIkkeForkastet(vedtaksperiodeIdInnhenter)) { "Perioden er ikke forkastet" }
-    Assertions.assertEquals(tilstander.asList(), observatør.tilstandsendringer[vedtaksperiodeIdInnhenter(orgnummer)])
+    assertFalse(inspektør.periodeErIkkeForkastet(vedtaksperiodeIdInnhenter)) { "Perioden er ikke forkastet" }
+    assertEquals(tilstander.asList(), observatør.tilstandsendringer[vedtaksperiodeIdInnhenter(orgnummer)])
 }
 
 internal fun AbstractEndToEndTest.assertForkastetPeriodeTilstander(orgnummer: Organisasjonsnummer, vedtaksperiodeIdInnhenter: IdInnhenter, vararg tilstander: TilstandType) {
     assertTrue(inspektør(orgnummer).periodeErForkastet(vedtaksperiodeIdInnhenter)) { "Perioden er ikke forkastet" }
-    Assertions.assertFalse(inspektør(orgnummer).periodeErIkkeForkastet(vedtaksperiodeIdInnhenter)) { "Perioden er ikke forkastet" }
-    Assertions.assertEquals(tilstander.asList(), observatør.tilstandsendringer[vedtaksperiodeIdInnhenter(orgnummer)])
+    assertFalse(inspektør(orgnummer).periodeErIkkeForkastet(vedtaksperiodeIdInnhenter)) { "Perioden er ikke forkastet" }
+    assertEquals(tilstander.asList(), observatør.tilstandsendringer[vedtaksperiodeIdInnhenter(orgnummer)])
 }
 
 internal fun AbstractEndToEndTest.assertSisteForkastetPeriodeTilstand(orgnummer: Organisasjonsnummer, vedtaksperiodeIdInnhenter: IdInnhenter, tilstand: TilstandType) {
     assertTrue(inspektør(orgnummer).periodeErForkastet(vedtaksperiodeIdInnhenter)) { "Perioden er ikke forkastet" }
-    Assertions.assertFalse(inspektør(orgnummer).periodeErIkkeForkastet(vedtaksperiodeIdInnhenter)) { "Perioden er ikke forkastet" }
-    Assertions.assertEquals(tilstand, observatør.tilstandsendringer[vedtaksperiodeIdInnhenter(orgnummer)]?.last())
+    assertFalse(inspektør(orgnummer).periodeErIkkeForkastet(vedtaksperiodeIdInnhenter)) { "Perioden er ikke forkastet" }
+    assertEquals(tilstand, observatør.tilstandsendringer[vedtaksperiodeIdInnhenter(orgnummer)]?.last())
 }
 
 internal fun assertNoErrors(inspektør: TestArbeidsgiverInspektør) {
-    Assertions.assertFalse(inspektør.personLogg.hasErrorsOrWorse(), inspektør.personLogg.toString())
+    assertFalse(inspektør.personLogg.hasErrorsOrWorse(), inspektør.personLogg.toString())
 }
 
 internal fun assertNoWarnings(inspektør: TestArbeidsgiverInspektør) {
-    Assertions.assertFalse(inspektør.personLogg.hasWarningsOrWorse(), inspektør.personLogg.toString())
+    assertFalse(inspektør.personLogg.hasWarningsOrWorse(), inspektør.personLogg.toString())
 }
 
 internal fun assertWarnings(inspektør: TestArbeidsgiverInspektør) {
@@ -213,7 +212,7 @@ private fun AbstractEndToEndTest.collectWarnings(idInnhenter: IdInnhenter, orgnu
 
 internal fun AbstractEndToEndTest.assertInfo(idInnhenter: IdInnhenter, forventet: String, orgnummer: Organisasjonsnummer = AbstractPersonTest.ORGNUMMER) {
     val info = collectInfo(idInnhenter, orgnummer)
-    Assertions.assertEquals(1, info.count { it == forventet }, "fant ikke ett tilfelle av info for $orgnummer. Info:\n${info.joinToString("\n")}")
+    assertEquals(1, info.count { it == forventet }, "fant ikke ett tilfelle av info for $orgnummer. Info:\n${info.joinToString("\n")}")
 }
 
 private fun AbstractEndToEndTest.collectInfo(idInnhenter: IdInnhenter, orgnummer: Organisasjonsnummer): MutableList<String> {
