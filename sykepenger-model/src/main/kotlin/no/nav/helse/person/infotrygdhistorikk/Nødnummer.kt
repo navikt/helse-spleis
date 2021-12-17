@@ -12,7 +12,20 @@ internal class Nødnummer private constructor(private val nødnumre: Set<String>
             "971278439",
             "971373032",
             "871400172", // Kun ment for registrering av hyre ved fiskere kategori 17
-            "973626116"
+            "973626116",
+            "873764252",
+            "973695061",
+            "973934554",
+            "973713752",
+            "971255366",
+            "974810018",
+            "871256322",
+            "974858517",
+            "973540017",
+            "973739360",
+            "971364254",
+            "973542524",
+            "971315563"
         ))
     }
 
