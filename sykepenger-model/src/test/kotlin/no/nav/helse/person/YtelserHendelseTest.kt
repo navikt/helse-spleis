@@ -1,6 +1,7 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
@@ -33,7 +34,7 @@ internal class YtelserHendelseTest : AbstractEndToEndTest() {
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
 
-        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         person.håndter(ytelser(1.vedtaksperiode))
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
@@ -126,7 +127,7 @@ internal class YtelserHendelseTest : AbstractEndToEndTest() {
         ugyldigePerioder: List<UgyldigPeriode> = emptyList()
     ) : Ytelser {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)))
         val ytelser = ytelser(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
@@ -149,7 +150,7 @@ internal class YtelserHendelseTest : AbstractEndToEndTest() {
 
     private fun håndterUgyldigYtelser() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)))
         person.håndter(
             ytelser(

@@ -2,6 +2,8 @@ package no.nav.helse.person
 
 import no.nav.helse.etterspurteBehov
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode
+import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
@@ -52,7 +54,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
     fun `påminnelse i mottatt søknad innenfor makstid`() {
         person.håndter(sykmelding(Sykmeldingsperiode(nå.minusDays(60), nå.minusDays(31), 100.prosent)))
         person.håndter(sykmelding(Sykmeldingsperiode(nå.minusDays(30), nå, 100.prosent)))
-        person.håndter(søknad(SendtSøknad.Søknadsperiode.Sykdom(nå.minusDays(30), nå, 100.prosent)))
+        person.håndter(søknad(Sykdom(nå.minusDays(30), nå, 100.prosent)))
         assertEquals(AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, inspektør.sisteTilstand(2.vedtaksperiode))
         person.håndter(påminnelse(AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, 2.vedtaksperiode))
         assertEquals(AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, inspektør.sisteTilstand(2.vedtaksperiode))
@@ -213,8 +215,8 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
     }
 
     private fun søknad(
-        vararg perioder: Søknad.Søknadsperiode = arrayOf(
-            SendtSøknad.Søknadsperiode.Sykdom(
+        vararg perioder: Søknadsperiode = arrayOf(
+            Sykdom(
                 1.januar,
                 20.januar,
                 100.prosent

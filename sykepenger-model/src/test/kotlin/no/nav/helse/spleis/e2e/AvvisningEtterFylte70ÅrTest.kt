@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Toggle
+import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Person
@@ -40,7 +41,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
         observatør = TestObservatør().also { person.addObserver(it) }
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknadMedValidering(1.vedtaksperiode, SendtSøknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 31.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterYtelser(1.vedtaksperiode)
@@ -76,7 +77,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
         observatør = TestObservatør().also { person.addObserver(it) }
 
         håndterSykmelding(Sykmeldingsperiode(20.desember(2017), 9.januar, 100.prosent))
-        håndterSøknadMedValidering(1.vedtaksperiode, SendtSøknad.Søknadsperiode.Sykdom(20.desember(2017), 9.januar, 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(20.desember(2017), 9.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmelding(listOf(20.desember(2017) til 4.januar))
         håndterYtelser(1.vedtaksperiode)
@@ -87,7 +88,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(11.juli, 31.juli, 100.prosent))
-        håndterSøknadMedValidering(2.vedtaksperiode, SendtSøknad.Søknadsperiode.Sykdom(11.juli, 31.juli, 100.prosent))
+        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(11.juli, 31.juli, 100.prosent))
         håndterUtbetalingshistorikk(2.vedtaksperiode)
         håndterInntektsmelding(listOf(11.juli til 26.juli))
         håndterYtelser(2.vedtaksperiode)
@@ -110,7 +111,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
         observatør = TestObservatør().also { person.addObserver(it) }
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknadMedValidering(1.vedtaksperiode, SendtSøknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 31.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterYtelser(1.vedtaksperiode)
@@ -127,7 +128,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
         observatør = TestObservatør().also { person.addObserver(it) }
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
-        håndterSøknadMedValidering(1.vedtaksperiode, SendtSøknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.mars, 31.mars, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmelding(listOf(1.mars til 16.mars))
         håndterYtelser(1.vedtaksperiode)
@@ -144,7 +145,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
         observatør = TestObservatør().also { person.addObserver(it) }
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknadMedValidering(1.vedtaksperiode, SendtSøknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 31.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterYtelser(1.vedtaksperiode)
@@ -160,7 +161,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
         observatør = TestObservatør().also { person.addObserver(it) }
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknadMedValidering(1.vedtaksperiode, SendtSøknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 31.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterYtelser(1.vedtaksperiode)

@@ -1,6 +1,7 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
@@ -283,7 +284,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
             fnr = UNG_PERSON_FNR_2018.toString(),
             aktørId = AKTØRID,
             orgnummer = ORGNUMMER.toString(),
-            perioder = listOf(SendtSøknad.Søknadsperiode.Sykdom(førsteSykedag, sisteSykedag, 100.prosent)),
+            perioder = listOf(Sykdom(førsteSykedag, sisteSykedag, 100.prosent)),
             andreInntektskilder = emptyList(),
             sendtTilNAV = sisteSykedag.atStartOfDay(),
             permittert = false,

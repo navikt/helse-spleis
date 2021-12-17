@@ -1,6 +1,8 @@
 package no.nav.helse.spleis
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode
+import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Aktivitetslogg
@@ -58,8 +60,8 @@ abstract class AbstractObservableTest {
 
     protected fun søknad(
         id: UUID = SØKNAD_ID,
-        vararg perioder: Søknad.Søknadsperiode = arrayOf(SendtSøknad.Søknadsperiode.Sykdom(FOM, TOM, 100.prosent)),
-        andreInntektskilder: List<Søknad.Inntektskilde> = emptyList(),
+        vararg perioder: Søknadsperiode = arrayOf(Sykdom(FOM, TOM, 100.prosent)),
+        andreInntektskilder: List<SendtSøknad.Inntektskilde> = emptyList(),
         sendtTilNav: LocalDate = TOM.plusDays(1),
         orgnummer: String = ORGNUMMER,
         sykmeldingSkrevet: LocalDateTime = FOM.atStartOfDay(),

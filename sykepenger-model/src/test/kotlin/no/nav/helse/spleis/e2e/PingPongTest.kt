@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.SøknadArbeidsgiver
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
@@ -75,7 +74,7 @@ internal class PingPongTest : AbstractEndToEndTest() {
     @Test
     fun `kort periode - infotrygd - spleis --- inntekt kommer fra infotrygd`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(1.januar, 16.januar, 100.prosent))
+        håndterSøknadArbeidsgiver(Sykdom(1.januar, 16.januar, 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(17.januar, 26.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(17.januar, 27.januar, 100.prosent))

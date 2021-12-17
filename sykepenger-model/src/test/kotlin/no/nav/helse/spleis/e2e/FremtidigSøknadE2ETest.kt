@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
@@ -22,7 +23,7 @@ internal class FremtidigSøknadE2ETest : AbstractEndToEndTest() {
     @Test
     fun `kan sende inn søknad før periode er gått ut`() {
         håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
-        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent))
+        håndterSøknad(Sykdom(fom, tom, 100.prosent))
         håndterInntektsmelding(listOf(Periode(fom, sisteArbeidsgiverdag)), førsteFraværsdag = fom)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(

@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.ForventetFeil
-import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.*
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -37,7 +37,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
     @Test
     fun `søknad som er nære utbetalingsperioden avsluttet uten utbetaling skal ikke til ny kø `() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 15.februar, 100.prosent))
-        håndterSøknad(Sykdom(1.februar, 15.februar, 100.prosent), SendtSøknad.Søknadsperiode.Ferie(1.februar, 15.februar))
+        håndterSøknad(Sykdom(1.februar, 15.februar, 100.prosent), Ferie(1.februar, 15.februar))
         håndterInntektsmelding(listOf(1.februar til 15.februar), førsteFraværsdag = 1.februar)
 
         håndterSykmelding(Sykmeldingsperiode(16.februar, 25.februar, 100.prosent))
@@ -132,7 +132,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         tilGodkjenning(1.mars, 31.mars, ORGNUMMER)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
         håndterSykmelding(Sykmeldingsperiode(11.april, 19.april, 80.prosent))
-        val søknadHendelseId = håndterSøknad(Sykdom(11.april, 19.april, 80.prosent), SendtSøknad.Søknadsperiode.Papirsykmelding(11.april, 19.april))
+        val søknadHendelseId = håndterSøknad(Sykdom(11.april, 19.april, 80.prosent), Papirsykmelding(11.april, 19.april))
 
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().isEmpty())
         assertTrue(observatør.opprettOppgaveEvent().any { søknadHendelseId in it.hendelser })
@@ -145,7 +145,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         nyttVedtak(1.mars, 31.mars)
         håndterAnnullerUtbetaling()
         håndterSykmelding(Sykmeldingsperiode(11.april, 19.april, 80.prosent))
-        val søknadHendelseId = håndterSøknad(Sykdom(11.april, 19.april, 80.prosent), SendtSøknad.Søknadsperiode.Papirsykmelding(11.april, 19.april))
+        val søknadHendelseId = håndterSøknad(Sykdom(11.april, 19.april, 80.prosent), Papirsykmelding(11.april, 19.april))
 
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().isEmpty())
         assertTrue(observatør.opprettOppgaveEvent().any { søknadHendelseId in it.hendelser })

@@ -2,6 +2,7 @@ package no.nav.helse.serde.api
 
 import no.nav.helse.Organisasjonsnummer
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Person
@@ -56,7 +57,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
             }
         }
 
-        håndterSøknadMedValidering(1.vedtaksperiode, SendtSøknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
 
         håndterYtelser(1.vedtaksperiode)
@@ -92,7 +93,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
     fun `Finner inntektsgrunnlag for en arbeidsgiver med en inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
 
-        håndterSøknadMedValidering(1.vedtaksperiode, SendtSøknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
 
         håndterYtelser(1.vedtaksperiode)
@@ -142,7 +143,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
     @Test
     fun `Finner inntektsgrunnlag for en arbeidsgiver med inntekt fra Infotrygd`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknadMedValidering(1.vedtaksperiode, SendtSøknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 31.januar, 100.prosent))
 
         val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.oktober(2017),  31.desember(2017), 100.prosent, 1000.daglig)
         val inntekter = listOf(Inntektsopplysning(ORGNUMMER.toString(), 1.oktober(2017), INNTEKT, true))
@@ -174,11 +175,11 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
     @Test
     fun `Finner inntektsgrunnlag for en arbeidsgiver med inntekt fra Infotrygd på senere dato enn skjærinstidspunkt`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(1.januar, 16.januar, 100.prosent))
+        håndterSøknadArbeidsgiver(Sykdom(1.januar, 16.januar, 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(25.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 25.januar)
-        håndterSøknadMedValidering(2.vedtaksperiode, SendtSøknad.Søknadsperiode.Sykdom(25.januar, 31.januar, 100.prosent))
+        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(25.januar, 31.januar, 100.prosent))
         håndterYtelser(
             2.vedtaksperiode,
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 17.januar,  24.januar, 100.prosent, 1000.daglig),

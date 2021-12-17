@@ -2,6 +2,7 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.Organisasjonsnummer
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.somOrganisasjonsnummer
@@ -359,7 +360,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(arbeidsgiverperiode.start, syktil, 100.prosent), orgnummer = orgnummer)
         håndterSøknadMedValidering(
             { observatør.sisteVedtaksperiode() },
-            SendtSøknad.Søknadsperiode.Sykdom(arbeidsgiverperiode.start, syktil, 100.prosent),
+            Sykdom(arbeidsgiverperiode.start, syktil, 100.prosent),
             orgnummer = orgnummer
         )
         håndterUtbetalingshistorikk({ observatør.sisteVedtaksperiode() }, orgnummer = orgnummer)
@@ -386,7 +387,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(arbeidsgiverperiode.start, syktil, 100.prosent), orgnummer = orgnummer)
         håndterSøknadMedValidering(
             { observatør.sisteVedtaksperiode() },
-            SendtSøknad.Søknadsperiode.Sykdom(arbeidsgiverperiode.start, syktil, 100.prosent),
+            Sykdom(arbeidsgiverperiode.start, syktil, 100.prosent),
             orgnummer = orgnummer
         )
         håndterUtbetalingshistorikk({ observatør.sisteVedtaksperiode() }, orgnummer = orgnummer)
@@ -413,8 +414,8 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
     ) {
         håndterSykmelding(Sykmeldingsperiode(arbeidsgiverperiode.start, syktil, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(arbeidsgiverperiode.start, syktil, 100.prosent), orgnummer = a2)
-        håndterSøknadMedValidering(1.vedtaksperiode, SendtSøknad.Søknadsperiode.Sykdom(arbeidsgiverperiode.start, syktil, 100.prosent), orgnummer = a1)
-        håndterSøknadMedValidering(1.vedtaksperiode, SendtSøknad.Søknadsperiode.Sykdom(arbeidsgiverperiode.start, syktil, 100.prosent), orgnummer = a2)
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(arbeidsgiverperiode.start, syktil, 100.prosent), orgnummer = a1)
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(arbeidsgiverperiode.start, syktil, 100.prosent), orgnummer = a2)
         håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a2)
         håndterInntektsmelding(listOf(arbeidsgiverperiode), orgnummer = a1)
@@ -447,7 +448,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(arbeidsgiverperiode.start, syktil, 100.prosent), orgnummer = orgnummer)
         håndterSøknadMedValidering(
             { observatør.sisteVedtaksperiode() },
-            SendtSøknad.Søknadsperiode.Sykdom(arbeidsgiverperiode.start, syktil, 100.prosent),
+            Sykdom(arbeidsgiverperiode.start, syktil, 100.prosent),
             orgnummer = orgnummer
         )
         håndterUtbetalingshistorikk(
@@ -472,7 +473,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 60.prosent), orgnummer = orgnummer)
         håndterSøknadMedValidering(
             { observatør.sisteVedtaksperiode() },
-            SendtSøknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 60.prosent),
+            Sykdom(1.februar, 28.februar, 60.prosent),
             orgnummer = orgnummer
         )
         håndterYtelser(

@@ -1,7 +1,7 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.hendelser.SendtSøknad.*
 import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.*
-import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.hentErrors
 import no.nav.helse.hentWarnings
 import no.nav.helse.person.Aktivitetslogg
@@ -33,7 +33,7 @@ internal class SøknadTest {
 
     @Test
     fun `tillater ikke andre inntektskilder dersom én arbeidsgiver`() {
-        søknad(Sykdom(1.januar, 10.januar, 100.prosent), andreInntektskilder = listOf(Søknad.Inntektskilde(true, "ANDRE_ARBEIDSFORHOLD")))
+        søknad(Sykdom(1.januar, 10.januar, 100.prosent), andreInntektskilder = listOf(Inntektskilde(true, "ANDRE_ARBEIDSFORHOLD")))
         assertFalse(søknad.valider(EN_PERIODE).hasErrorsOrWorse())
         assertTrue(søknad.validerIkkeOppgittFlereArbeidsforholdMedSykmelding().hasErrorsOrWorse())
     }
@@ -197,7 +197,7 @@ internal class SøknadTest {
 
     @Test
     fun `søknad med tilbakedateringmerknad får warning`() {
-        søknad(Sykdom(1.januar, 31.januar, 20.prosent, 80.prosent), merknaderFraSykmelding = listOf(Søknad.Merknad("UGYLDIG_TILBAKEDATERING", null)))
+        søknad(Sykdom(1.januar, 31.januar, 20.prosent, 80.prosent), merknaderFraSykmelding = listOf(Merknad("UGYLDIG_TILBAKEDATERING", null)))
         søknad.valider(EN_PERIODE)
         assertTrue(søknad.hasWarningsOrWorse())
     }
@@ -231,7 +231,7 @@ internal class SøknadTest {
 
     @Test
     fun `inntektskilde med type ANNET skal gi warning istedenfor error`() {
-        søknad(Sykdom(1.januar, 31.januar, 100.prosent), andreInntektskilder = listOf(Søknad.Inntektskilde(true, "ANNET")))
+        søknad(Sykdom(1.januar, 31.januar, 100.prosent), andreInntektskilder = listOf(Inntektskilde(true, "ANNET")))
         søknad.valider(EN_PERIODE)
         assertTrue(søknad.hentWarnings().contains("Det er oppgitt annen inntektskilde i søknaden. Vurder inntekt."))
         assertTrue(søknad.hentErrors().isEmpty())
@@ -239,12 +239,12 @@ internal class SøknadTest {
 
     @Test
     fun `inntektskilde med type FRILANSER skal gi error`() {
-        søknad(Sykdom(1.januar, 31.januar, 100.prosent), andreInntektskilder = listOf(Søknad.Inntektskilde(true, "FRILANSER")))
+        søknad(Sykdom(1.januar, 31.januar, 100.prosent), andreInntektskilder = listOf(Inntektskilde(true, "FRILANSER")))
         søknad.valider(EN_PERIODE)
         assertTrue(søknad.hentErrors().contains("Søknaden inneholder andre inntektskilder enn ANDRE_ARBEIDSFORHOLD"))
     }
 
-    private fun søknad(vararg perioder: Søknadsperiode, andreInntektskilder: List<Søknad.Inntektskilde> = emptyList(), permittert: Boolean = false, merknaderFraSykmelding: List<Søknad.Merknad> = emptyList(), fnr: String = UNG_PERSON_FNR_2018, sendtTilNav: LocalDateTime? = null) {
+    private fun søknad(vararg perioder: Søknadsperiode, andreInntektskilder: List<Inntektskilde> = emptyList(), permittert: Boolean = false, merknaderFraSykmelding: List<Merknad> = emptyList(), fnr: String = UNG_PERSON_FNR_2018, sendtTilNav: LocalDateTime? = null) {
         søknad = Søknad(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = fnr,

@@ -1,11 +1,9 @@
 package no.nav.helse.person
 
-import no.nav.helse.hendelser.Sykmelding
-import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
-import no.nav.helse.hendelser.SøknadArbeidsgiver
-import no.nav.helse.hendelser.SøknadArbeidsgiver.Arbeid
-import no.nav.helse.hendelser.SøknadArbeidsgiver.Sykdom
+import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode
+import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Arbeid
+import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.testhelpers.januar
@@ -63,7 +61,7 @@ internal class SøknadArbeidsgiverHendelseTest : AbstractPersonTest() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent)))
         person.håndter(søknadArbeidsgiver(Sykdom(1.januar, 5.januar, 100.prosent)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
-        person.håndter(søknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 5.januar, 100.prosent, 0.prosent)))
+        person.håndter(søknad(Sykdom(1.januar, 5.januar, 100.prosent, 0.prosent)))
         assertTrue(inspektør.personLogg.hasErrorsOrWorse(), inspektør.personLogg.toString())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(1.vedtaksperiode)) // bytter ikke tilstand pga den er avsluttet - men det burde den kanskje?
@@ -72,7 +70,7 @@ internal class SøknadArbeidsgiverHendelseTest : AbstractPersonTest() {
     @Test
     fun `søknad til arbeidsgiver som overlapper fører til utkasting`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent)))
-        person.håndter(søknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 5.januar, 100.prosent, 0.prosent)))
+        person.håndter(søknad(Sykdom(1.januar, 5.januar, 100.prosent, 0.prosent)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         person.håndter(søknadArbeidsgiver(Sykdom(1.januar, 5.januar, 100.prosent)))
         assertTrue(inspektør.personLogg.hasErrorsOrWorse(), inspektør.personLogg.toString())
@@ -140,7 +138,7 @@ internal class SøknadArbeidsgiverHendelseTest : AbstractPersonTest() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent)))
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 10.januar, 100.prosent)))
         person.håndter(søknadArbeidsgiver(Sykdom(6.januar, 10.januar, 100.prosent)))
-        person.håndter(søknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 5.januar, 100.prosent, 0.prosent)))
+        person.håndter(søknad(Sykdom(1.januar, 5.januar, 100.prosent, 0.prosent)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(2, inspektør.vedtaksperiodeTeller)
         assertEquals(AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
@@ -158,7 +156,7 @@ internal class SøknadArbeidsgiverHendelseTest : AbstractPersonTest() {
         assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(1.vedtaksperiode))
     }
 
-    private fun søknad(vararg perioder: Søknad.Søknadsperiode, orgnummer: String = "987654321") =
+    private fun søknad(vararg perioder: Søknadsperiode, orgnummer: String = "987654321") =
         Søknad(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018.toString(),
@@ -166,7 +164,7 @@ internal class SøknadArbeidsgiverHendelseTest : AbstractPersonTest() {
             orgnummer = orgnummer,
             perioder = listOf(*perioder),
             andreInntektskilder = emptyList(),
-            sendtTilNAV = SendtSøknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay(),
+            sendtTilNAV = Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay(),
             permittert = false,
             merknaderFraSykmelding = emptyList(),
             sykmeldingSkrevet = LocalDateTime.now()
@@ -182,9 +180,16 @@ internal class SøknadArbeidsgiverHendelseTest : AbstractPersonTest() {
             fnr = UNG_PERSON_FNR_2018.toString(),
             aktørId = "12345",
             orgnummer = orgnummer,
-            sykdomsperioder = listOf(*perioder),
-            arbeidsperiode = arbeidsperiode?.let(::listOf) ?: emptyList(),
-            sykmeldingSkrevet = LocalDateTime.now()
+            perioder = perioder.toList().let { when (arbeidsperiode) {
+                null -> it
+                else -> it.plus(arbeidsperiode)
+            }},
+            sykmeldingSkrevet = LocalDateTime.now(),
+            sendtTilArbeidsgiver = LocalDateTime.now(),
+            // TODO: Nye parametre vi nå mapper
+            andreInntektskilder = emptyList(),
+            merknaderFraSykmelding = emptyList(),
+            permittert = false
         )
 
     private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode, orgnummer: String = "987654321") =

@@ -1,8 +1,8 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Utdanning
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.SøknadArbeidsgiver
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -18,9 +18,9 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
     @Test
     fun `korte arbeidsgiversøknader - forlengelse`() {
         håndterSykmelding(Sykmeldingsperiode(11.januar, 12.januar, 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(11.januar, 12.januar, 100.prosent))
+        håndterSøknadArbeidsgiver(Sykdom(11.januar, 12.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(8.januar, 10.januar, 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(8.januar, 10.januar, 100.prosent))
+        håndterSøknadArbeidsgiver(Sykdom(8.januar, 10.januar, 100.prosent))
 
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
@@ -29,9 +29,9 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
     @Test
     fun `korte arbeidsgiversøknader - gap`() {
         håndterSykmelding(Sykmeldingsperiode(11.januar, 12.januar, 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(11.januar, 12.januar, 100.prosent))
+        håndterSøknadArbeidsgiver(Sykdom(11.januar, 12.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(8.januar, 9.januar, 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(8.januar, 9.januar, 100.prosent))
+        håndterSøknadArbeidsgiver(Sykdom(8.januar, 9.januar, 100.prosent))
 
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
@@ -695,7 +695,7 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
     fun `ny sykmelding før en ferdig forlengelse som avventer søknad (inntektsmelding etter søknad arbeidsgiver)`() {
         håndterSykmelding(Sykmeldingsperiode(8.februar, 15.februar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(16.februar, 25.februar, 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(8.februar, 15.februar, 100.prosent))
+        håndterSøknadArbeidsgiver(Sykdom(8.februar, 15.februar, 100.prosent))
         håndterInntektsmelding(listOf(8.februar til 23.februar))
         håndterSykmelding(Sykmeldingsperiode(3.januar, 9.januar, 100.prosent))
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
@@ -715,7 +715,7 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(8.februar, 15.februar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(16.februar, 25.februar, 100.prosent))
         håndterInntektsmelding(listOf(8.februar til 23.februar))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(8.februar, 15.februar, 100.prosent))
+        håndterSøknadArbeidsgiver(Sykdom(8.februar, 15.februar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(3.januar, 9.januar, 100.prosent))
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_ARBEIDSGIVERSØKNAD_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(
@@ -806,7 +806,7 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
     fun `ny sykmelding før en ferdig forlengelse`() {
         håndterSykmelding(Sykmeldingsperiode(10.februar, 15.februar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(16.februar, 25.februar, 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(10.februar, 15.februar, 100.prosent))
+        håndterSøknadArbeidsgiver(Sykdom(10.februar, 15.februar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(3.januar, 9.januar, 100.prosent))
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(
@@ -823,7 +823,7 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
     fun `ny sykmelding før en ferdig forlengelse med inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(10.februar, 15.februar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(16.februar, 25.februar, 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(10.februar, 15.februar, 100.prosent))
+        håndterSøknadArbeidsgiver(Sykdom(10.februar, 15.februar, 100.prosent))
         håndterSøknad(Sykdom(16.februar, 25.februar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(3.januar, 9.januar, 100.prosent))
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
@@ -842,7 +842,7 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
     fun `oppretter ikke periode fra søknad om det allerede finnes en utbetaling (med utdanning som ikke var vesentlig)`() {
         nyttVedtak(1.januar, 31.januar)
         håndterSykmelding(Sykmeldingsperiode(1.november(2017), 30.november(2017), 100.prosent)) // out of order som forkaster periodene
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), SendtSøknad.Søknadsperiode.Utdanning(27.januar, 31.januar))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Utdanning(27.januar, 31.januar))
         assertTilstander(
             1.vedtaksperiode,
             START,

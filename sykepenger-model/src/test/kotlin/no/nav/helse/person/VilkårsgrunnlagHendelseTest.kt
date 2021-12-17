@@ -2,6 +2,8 @@ package no.nav.helse.person
 
 import no.nav.helse.etterspurtBehov
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode
+import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
 import no.nav.helse.inspectors.GrunnlagsdataInspektør
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
@@ -88,7 +90,7 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
     @Test
     fun `benytter forrige måned som utgangspunkt for inntektsberegning`() {
         person.håndter(sykmelding(perioder = listOf(Sykmeldingsperiode(8.januar, 31.januar, 100.prosent))))
-        person.håndter(søknad(perioder = listOf(SendtSøknad.Søknadsperiode.Sykdom(8.januar, 31.januar, 100.prosent))))
+        person.håndter(søknad(perioder = listOf(Sykdom(8.januar, 31.januar, 100.prosent))))
         person.håndter(
             inntektsmelding(
                 beregnetInntekt = 30000.månedlig,
@@ -180,7 +182,7 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
     }
 
     private fun søknad(
-        perioder: List<Søknad.Søknadsperiode> = listOf(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        perioder: List<Søknadsperiode> = listOf(Sykdom(1.januar, 31.januar, 100.prosent))
     ) = Søknad(
         meldingsreferanseId = UUID.randomUUID(),
         fnr = UNG_PERSON_FNR_2018.toString(),

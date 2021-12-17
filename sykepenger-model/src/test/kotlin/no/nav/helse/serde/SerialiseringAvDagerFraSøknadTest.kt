@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.PropertyAccessor
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.*
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
@@ -104,12 +105,12 @@ internal class SerialiseringAvDagerFraSøknadTest {
         aktørId = aktørId,
         orgnummer = orgnummer,
         perioder = listOf(
-            SendtSøknad.Søknadsperiode.Sykdom(1.januar,  2.januar, 100.prosent),
-            SendtSøknad.Søknadsperiode.Egenmelding(2.januar, 2.januar),
-            SendtSøknad.Søknadsperiode.Arbeid(3.januar, 3.januar),
-            SendtSøknad.Søknadsperiode.Ferie(4.januar, 4.januar),
-            SendtSøknad.Søknadsperiode.Permisjon(5.januar, 5.januar),
-            SendtSøknad.Søknadsperiode.Utdanning(5.januar, 5.januar)
+            Sykdom(1.januar,  2.januar, 100.prosent),
+            Egenmelding(2.januar, 2.januar),
+            Arbeid(3.januar, 3.januar),
+            Ferie(4.januar, 4.januar),
+            Permisjon(5.januar, 5.januar),
+            Utdanning(5.januar, 5.januar)
         ),
         andreInntektskilder = emptyList(),
         sendtTilNAV = 5.januar.atStartOfDay(),

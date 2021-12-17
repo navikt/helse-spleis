@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import no.nav.helse.Organisasjonsnummer
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -46,7 +47,7 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
     @Test
     fun `inntektsmelding etter søknad`() {
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100.prosent)))
-        person.håndter(søknad(SendtSøknad.Søknadsperiode.Sykdom(6.januar,  20.januar, 100.prosent)))
+        person.håndter(søknad(Søknadsperiode.Sykdom(6.januar,  20.januar, 100.prosent)))
         person.håndter(inntektsmelding())
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
@@ -57,7 +58,7 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
     fun `søknad etter inntektsmelding`() {
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100.prosent)))
         person.håndter(inntektsmelding())
-        person.håndter(søknad(SendtSøknad.Søknadsperiode.Sykdom(6.januar,  20.januar, 100.prosent)))
+        person.håndter(søknad(Søknadsperiode.Sykdom(6.januar,  20.januar, 100.prosent)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse(), inspektør.personLogg.toString())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.AVVENTER_HISTORIKK, inspektør.sisteTilstand(1.vedtaksperiode))
@@ -131,7 +132,7 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
         mottatt = Sykmeldingsperiode.periode(sykeperioder.toList())!!.endInclusive.atStartOfDay()
     )
 
-    private fun søknad(vararg perioder: Søknad.Søknadsperiode, orgnummer: Organisasjonsnummer = ORGNUMMER) =
+    private fun søknad(vararg perioder: Søknadsperiode, orgnummer: Organisasjonsnummer = ORGNUMMER) =
         Søknad(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018.toString(),
@@ -139,7 +140,7 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
             orgnummer = orgnummer.toString(),
             perioder = listOf(*perioder),
             andreInntektskilder = emptyList(),
-            sendtTilNAV = SendtSøknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay(),
+            sendtTilNAV = Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay(),
             permittert = false,
             merknaderFraSykmelding = emptyList(),
             sykmeldingSkrevet = LocalDateTime.now()

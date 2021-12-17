@@ -1,8 +1,9 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.SendtSøknad
+import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.person.*
 import no.nav.helse.somOrganisasjonsnummer
@@ -22,7 +23,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     internal lateinit var hendelselogg: IAktivitetslogg
     internal var forventetEndringTeller = 0
     internal val sykmeldinger = mutableMapOf<UUID, Array<out Sykmeldingsperiode>>()
-    internal val søknader = mutableMapOf<UUID, Triple<LocalDate, List<Søknad.Inntektskilde>, Array<out Søknad.Søknadsperiode>>>()
+    internal val søknader = mutableMapOf<UUID, Triple<LocalDate, List<SendtSøknad.Inntektskilde>, Array<out Søknadsperiode>>>()
     internal val inntektsmeldinger = mutableMapOf<UUID, () -> Inntektsmelding>()
 
     @BeforeEach

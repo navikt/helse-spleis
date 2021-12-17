@@ -2,6 +2,7 @@ package no.nav.helse.serde.api.v2.buildere
 
 import no.nav.helse.Toggle
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.serde.api.v2.BeregnetPeriode
@@ -406,7 +407,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `korte perioder - arbeidsgiversøknader`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 15.januar, 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(1.januar, 15.januar, 100.prosent))
+        håndterSøknadArbeidsgiver(Sykdom(1.januar, 15.januar, 100.prosent))
 
         0.generasjon {
             uberegnetPeriode(0) fra (1.januar til 15.januar) medAntallDager 15 forkastet false
@@ -416,7 +417,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `kort periode med forlengelse`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 15.januar, 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(1.januar, 15.januar, 100.prosent))
+        håndterSøknadArbeidsgiver(Sykdom(1.januar, 15.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(16.januar, 15.februar, 100.prosent))
         håndterSøknad(Sykdom(16.januar, 15.februar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
@@ -436,7 +437,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `kort periode med forlengelse og revurdering av siste periode`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 15.januar, 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(1.januar, 15.januar, 100.prosent))
+        håndterSøknadArbeidsgiver(Sykdom(1.januar, 15.januar, 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(16.januar, 15.februar, 100.prosent))
         håndterSøknad(Sykdom(16.januar, 15.februar, 100.prosent))
@@ -506,7 +507,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `periode uten utbetaling - kun ferie`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), SendtSøknad.Søknadsperiode.Ferie(17.januar, 31.januar))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(17.januar, 31.januar))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterYtelser()
         håndterVilkårsgrunnlag(1.vedtaksperiode)

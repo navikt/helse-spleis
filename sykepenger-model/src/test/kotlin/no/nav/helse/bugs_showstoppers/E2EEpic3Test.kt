@@ -688,7 +688,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     fun `simulering av periode der tilstøtende ikke ble utbetalt`() {
         håndterSykmelding(Sykmeldingsperiode(28.januar(2020), 10.februar(2020), 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(11.februar(2020), 21.februar(2020), 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(28.januar(2020), 10.februar(2020), 100.prosent))
+        håndterSøknadArbeidsgiver(Sykdom(28.januar(2020), 10.februar(2020), 100.prosent))
         håndterSøknad(Sykdom(11.februar(2020), 21.februar(2020), 100.prosent))
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(28.januar(2020), 12.februar(2020))),
@@ -1523,8 +1523,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(23.mars(2020), 29.mars(2020), 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(30.mars(2020), 12.april(2020), 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(19.mars(2020), 22.mars(2020), 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(23.mars(2020), 29.mars(2020), 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(19.mars(2020), 22.mars(2020), 100.prosent))
+        håndterSøknadArbeidsgiver(Sykdom(23.mars(2020), 29.mars(2020), 100.prosent))
+        håndterSøknadArbeidsgiver(Sykdom(19.mars(2020), 22.mars(2020), 100.prosent))
         håndterSøknad(Sykdom(30.mars(2020), 12.april(2020), 100.prosent))
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(17.mars(2020), 1.april(2020))),
@@ -1535,9 +1535,9 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     @Test
     fun `Forkasting skal ikke påvirke tilstanden til AVSLUTTET_UTEN_UTBETALING`() {
         håndterSykmelding(Sykmeldingsperiode(31.mars(2020), 13.april(2020), 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(31.mars(2020), 13.april(2020), 100.prosent))
+        håndterSøknadArbeidsgiver(Sykdom(31.mars(2020), 13.april(2020), 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(4.juni(2020), 11.juni(2020), 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(4.juni(2020), 11.juni(2020), 100.prosent))
+        håndterSøknadArbeidsgiver(Sykdom(4.juni(2020), 11.juni(2020), 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(12.juni(2020), 25.juni(2020), 100.prosent))
         håndterSøknad(Sykdom(12.juni(2020), 25.juni(2020), 100.prosent))
         håndterInntektsmelding(
@@ -1634,7 +1634,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     @Test
     fun `skal ikke lage ny arbeidsgiverperiode ved forkasting`() {
         håndterSykmelding(Sykmeldingsperiode(30.juni(2020), 14.august(2020), 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(30.juni(2020), 14.august(2020), 100.prosent))
+        håndterSøknadArbeidsgiver(Sykdom(30.juni(2020), 14.august(2020), 100.prosent))
         håndterSøknad(Sykdom(30.juni(2020), 14.august(2020), 100.prosent))
 
         håndterInntektsmelding(listOf(Periode(30.juni(2020), 14.august(2020))), førsteFraværsdag = 30.juni(2020))
@@ -1745,8 +1745,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 21.mars, 100.prosent))
         håndterSøknadArbeidsgiver(
-            SøknadArbeidsgiver.Sykdom(1.mars, 21.mars, 100.prosent),
-            arbeidsperiode = SøknadArbeidsgiver.Arbeid(12.mars, 21.mars)
+            Sykdom(1.mars, 21.mars, 100.prosent),
+            arbeidsperiode = Arbeid(12.mars, 21.mars)
         )
         håndterInntektsmelding(listOf(1.mars til 16.mars))
 
@@ -1776,8 +1776,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         assertEquals(28.desember, inspektør.maksdatoVedSisteVedtak())
         håndterSykmelding(Sykmeldingsperiode(1.mars, 21.mars, 100.prosent))
         håndterSøknadArbeidsgiver(
-            SøknadArbeidsgiver.Sykdom(1.mars, 21.mars, 100.prosent),
-            arbeidsperiode = SøknadArbeidsgiver.Arbeid(12.mars, 21.mars)
+            Sykdom(1.mars, 21.mars, 100.prosent),
+            arbeidsperiode = Arbeid(12.mars, 21.mars)
         )
         håndterInntektsmelding(listOf(1.mars til 16.mars))
         assertEquals(28.desember, inspektør.maksdatoVedSisteVedtak())

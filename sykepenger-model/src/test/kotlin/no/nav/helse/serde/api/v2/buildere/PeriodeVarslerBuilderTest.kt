@@ -1,6 +1,8 @@
 package no.nav.helse.serde.api.v2.buildere
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Utdanning
 import no.nav.helse.inspectors.GrunnlagsdataInspektør
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Vedtaksperiode
@@ -21,7 +23,7 @@ internal class PeriodeVarslerBuilderTest: AbstractEndToEndTest() {
     fun `varsel på samme skjæringstidspunkt kopieres`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar)) // Warning
-        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterYtelser()
         håndterVilkårsgrunnlag(1.vedtaksperiode, medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.VetIkke)
 
@@ -35,7 +37,7 @@ internal class PeriodeVarslerBuilderTest: AbstractEndToEndTest() {
     fun `periode med varsel`(){
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 2.januar) // Warning
-        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterYtelser()
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser()
@@ -47,11 +49,11 @@ internal class PeriodeVarslerBuilderTest: AbstractEndToEndTest() {
     @Test
     fun `foregående uten utbetaling med warning og warning på periode to`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 15.januar, 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(1.januar, 15.januar, 100.prosent))
+        håndterSøknadArbeidsgiver(Sykdom(1.januar, 15.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 2.januar) // Warning
 
         håndterSykmelding(Sykmeldingsperiode(16.januar, 31.januar, 100.prosent))
-        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(16.januar, 31.januar, 100.prosent), SendtSøknad.Søknadsperiode.Utdanning(30.januar, 31.januar))
+        håndterSøknad(Sykdom(16.januar, 31.januar, 100.prosent), Utdanning(30.januar, 31.januar))
 
         assertEquals(1, aktiviteter(1.vedtaksperiode).size)
         assertEquals(2, aktiviteter(2.vedtaksperiode).size)
@@ -61,7 +63,7 @@ internal class PeriodeVarslerBuilderTest: AbstractEndToEndTest() {
     fun `plukker riktig vilkårsgrunnlag`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterYtelser()
         håndterVilkårsgrunnlag(1.vedtaksperiode, medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.VetIkke) // Warning på vilkårsgrunnlag
         håndterYtelser()

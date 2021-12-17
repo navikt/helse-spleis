@@ -90,8 +90,13 @@ internal class ForeldetSykedagTest {
             fnr = UNG_PERSON_FNR_2018,
             aktørId = AKTØRID,
             orgnummer = ORGNUMMER,
-            sykdomsperioder = listOf(SøknadArbeidsgiver.Sykdom(18.januar, 14.februar, 100.prosent)), // 10 sykedag januar & februar
-            sykmeldingSkrevet = LocalDateTime.now()
+            perioder = listOf(Sykdom(18.januar, 14.februar, 100.prosent)), // 10 sykedag januar & februar
+            sykmeldingSkrevet = LocalDateTime.now(),
+            sendtTilArbeidsgiver = LocalDateTime.now(),
+            // TODO: Nye parametre vi nå mapper
+            andreInntektskilder = emptyList(),
+            merknaderFraSykmelding = emptyList(),
+            permittert = false
         )
     }
 

@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Organisasjonsnummer
+import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.person.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -149,7 +150,7 @@ internal fun AbstractEndToEndTest.finnSkjæringstidspunkt(orgnummer: Organisasjo
 internal fun AbstractEndToEndTest.speilApi(hendelser: List<HendelseDTO> = søknadDTOer + sykmeldingDTOer + inntektsmeldingDTOer) = serializePersonForSpeil(person, hendelser)
 
 internal val AbstractEndToEndTest.søknadDTOer get() = søknader.map { (id, triple) ->
-    val søknadsperiode = SendtSøknad.Søknadsperiode.søknadsperiode(triple.third.toList())!!
+    val søknadsperiode = Søknadsperiode.søknadsperiode(triple.third.toList())!!
     SøknadNavDTO(
         id = id.toString(),
         fom = søknadsperiode.first(),

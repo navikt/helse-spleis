@@ -1,6 +1,8 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Ferie
+import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.TilstandType.*
@@ -15,7 +17,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
     @Test
     fun `perioden får warnings dersom bruker har fått Dagpenger innenfor 4 uker før skjæringstidspunkt`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 19.januar, 100.prosent))
-        håndterSøknadMedValidering(1.vedtaksperiode, SendtSøknad.Søknadsperiode.Sykdom(3.januar, 19.januar, 100.prosent), SendtSøknad.Søknadsperiode.Ferie(19.januar, 19.januar))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 19.januar, 100.prosent), Ferie(19.januar, 19.januar))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(3.januar til 18.januar), 3.januar)
 
@@ -49,7 +51,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
     @Test
     fun `perioden får warnings dersom bruker har fått AAP innenfor 6 måneder før skjæringstidspunkt`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 19.januar, 100.prosent))
-        håndterSøknadMedValidering(1.vedtaksperiode, SendtSøknad.Søknadsperiode.Sykdom(3.januar, 19.januar, 100.prosent), SendtSøknad.Søknadsperiode.Ferie(19.januar, 19.januar))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 19.januar, 100.prosent), Ferie(19.januar, 19.januar))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)), 3.januar)
 

@@ -1,11 +1,11 @@
 package no.nav.helse.person
 
+import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode
 import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Egenmelding
 import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
-import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar

@@ -19,7 +19,7 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
     fun `periodetype settes til førstegangs hvis foregående ikke hadde utbetalingsdager`() {
         håndterSykmelding(Sykmeldingsperiode(28.januar(2020), 10.februar(2020), 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(11.februar(2020), 21.februar(2020), 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(28.januar(2020), 10.februar(2020), 100.prosent))
+        håndterSøknadArbeidsgiver(Sykdom(28.januar(2020), 10.februar(2020), 100.prosent))
         håndterSøknad(Sykdom(11.februar(2020), 21.februar(2020), 100.prosent))
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(28.januar(2020), 12.februar(2020))),

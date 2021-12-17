@@ -3,6 +3,8 @@ package no.nav.helse.serde
 import no.nav.helse.Organisasjonsnummer
 import no.nav.helse.Toggle
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode
+import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.*
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.Arbeidskategorikode
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.KodePeriode
@@ -251,10 +253,10 @@ class JsonBuilderTest {
                     tom = 9.januar,
                     sendtSøknad = sendtSøknad.atStartOfDay(),
                     perioder = listOf(
-                        SendtSøknad.Søknadsperiode.Sykdom(1.januar, 9.januar, 100.prosent)
+                        Sykdom(1.januar, 9.januar, 100.prosent)
                     ),
                     hendelseId = søknadhendelseId,
-                    andreInntektsKilder = listOf(Søknad.Inntektskilde(true, "ANDRE_ARBEIDSFORHOLD"))
+                    andreInntektsKilder = listOf(SendtSøknad.Inntektskilde(true, "ANDRE_ARBEIDSFORHOLD"))
                 )
             )
         }
@@ -540,8 +542,8 @@ class JsonBuilderTest {
         fom: LocalDate = 1.januar,
         tom: LocalDate = 31.januar,
         sendtSøknad: LocalDateTime = tom.plusDays(5).atTime(LocalTime.NOON),
-        perioder: List<Søknad.Søknadsperiode> = listOf(SendtSøknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent)),
-        andreInntektsKilder: List<Søknad.Inntektskilde> = emptyList()
+        perioder: List<Søknadsperiode> = listOf(Sykdom(fom, tom, 100.prosent)),
+        andreInntektsKilder: List<SendtSøknad.Inntektskilde> = emptyList()
     ) = Søknad(
         meldingsreferanseId = hendelseId,
         fnr = fnr.toString(),

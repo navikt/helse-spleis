@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.*
@@ -13,15 +14,15 @@ internal class VarselOmFlereInntektsmeldingerTest : AbstractEndToEndTest() {
     @Test
     fun `Prodbug - Feilaktig varsel om flere inntektsmeldinger`() {
         håndterSykmelding(Sykmeldingsperiode(22.mars(2021), 28.mars(2021), 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(22.mars(2021), 28.mars(2021), 100.prosent))
+        håndterSøknadArbeidsgiver(Sykdom(22.mars(2021), 28.mars(2021), 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(29.mars(2021), 5.april(2021), 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Sykdom(29.mars(2021), 5.april(2021), 100.prosent))
-        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(29.mars(2021), 5.april(2021), 100.prosent))
+        håndterSøknadArbeidsgiver(Sykdom(29.mars(2021), 5.april(2021), 100.prosent))
+        håndterSøknad(Sykdom(29.mars(2021), 5.april(2021), 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(6.april(2021), 16.april(2021), 50.prosent))
         håndterInntektsmelding(arbeidsgiverperioder = listOf(22.mars(2021) til 6.april(2021)), førsteFraværsdag = 22.mars(2021))
-        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(6.april(2021), 16.april(2021), 50.prosent))
+        håndterSøknad(Sykdom(6.april(2021), 16.april(2021), 50.prosent))
 
         håndterYtelser(3.vedtaksperiode)
         håndterVilkårsgrunnlag(
@@ -44,7 +45,7 @@ internal class VarselOmFlereInntektsmeldingerTest : AbstractEndToEndTest() {
     @Test
     fun `Varsel om flere inntektsmeldinger hvis vi forlenger en avsluttet periode uten inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         håndterUtbetalingshistorikk(
             1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 17.januar, 31.januar, 100.prosent, INNTEKT),
             inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER.toString(), 17.januar, INNTEKT, true))
@@ -65,7 +66,7 @@ internal class VarselOmFlereInntektsmeldingerTest : AbstractEndToEndTest() {
     @Test
     fun `Varsel om flere inntektsmeldinger hvis vi forlenger en avsluttet periode med inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         håndterInntektsmelding(arbeidsgiverperioder = listOf(1.februar til 16.februar), førsteFraværsdag = 1.februar)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, inntekt = INNTEKT, inntektsvurdering = Inntektsvurdering(

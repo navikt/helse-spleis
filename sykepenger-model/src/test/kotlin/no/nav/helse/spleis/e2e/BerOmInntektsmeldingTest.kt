@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.*
@@ -16,7 +17,7 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
     @Test
     fun `Ber om inntektsmelding når vi ankommer AVVENTER_INNTEKTSMELDING_FERDIG_GAP`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
 
         assertNoErrors(inspektør)
@@ -33,7 +34,7 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
     fun `Ber om inntektsmelding når vi ankommer AVVENTER_INNTEKTSMELDING_UFERDIG_GAP`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
 
         assertNoErrors(inspektør)
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
@@ -50,7 +51,7 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
     fun `Ber ikke om inntektsmelding når vi ankommer AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(21.januar, 28.februar, 100.prosent))
-        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
 
         assertNoErrors(inspektør)
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
@@ -74,7 +75,7 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
     @Test
     fun `Sender ut event om at vi ikke trenger inntektsmelding når vi forlater AVVENTER_INNTEKTSMELDING_FERDIG_GAP`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
 
@@ -93,7 +94,7 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
     fun `Sender ut event om at vi ikke trenger inntektsmelding når vi forlater AVVENTER_INNTEKTSMELDING_UFERDIG_GAP`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(2.februar, 28.februar, 100.prosent))
-        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(2.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(2.februar, 28.februar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), 2.februar)
 
         assertTilstander(
@@ -110,7 +111,7 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
     @Test
     fun `Sender ikke ut ManglendeInntektsmeldingEvent hvis vi har en tilstøtende forkastet sykeperiode - AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 21.januar, 100.prosent))
-        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.januar, 21.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 21.januar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 1.januar)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -123,7 +124,7 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(22.januar, 1.februar, 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 25.februar, 100.prosent))
-        håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.februar, 25.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 25.februar, 100.prosent))
 
         assertFalse(3.vedtaksperiode(ORGNUMMER) in observatør.manglendeInntektsmeldingVedtaksperioder)
 

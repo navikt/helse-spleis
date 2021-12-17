@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
 import no.nav.helse.inspectors.GrunnlagsdataInspektør
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.person.*
@@ -238,7 +239,7 @@ internal class VilkårsgrunnlagTest {
         fnr = UNG_PERSON_FNR_2018.toString(),
         aktørId = aktørId,
         orgnummer = orgnummer.toString(),
-        perioder = listOf(SendtSøknad.Søknadsperiode.Sykdom(16.januar, 30.januar, 100.prosent)),
+        perioder = listOf(Sykdom(16.januar, 30.januar, 100.prosent)),
         andreInntektskilder = emptyList(),
         sendtTilNAV = 30.januar.atStartOfDay(),
         permittert = false,
