@@ -27,7 +27,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.januar(2020) til 1.mars(2021) inntekter {
+                1.april(2020) til 1.mars(2021) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
             }
@@ -69,7 +69,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.januar(2020) til 1.mars(2021) inntekter {
+                1.april(2020) til 1.mars(2021) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
             }
@@ -109,7 +109,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.januar(2020) til 1.mars(2021) inntekter {
+                1.april(2020) til 1.mars(2021) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
             }
@@ -156,7 +156,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.januar(2020) til 1.mars(2021) inntekter {
+                1.april(2020) til 1.mars(2021) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
             }
@@ -197,7 +197,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.januar(2020) til 1.mars(2021) inntekter {
+                1.april(2020) til 1.mars(2021) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
             }
@@ -238,7 +238,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.januar(2020) til 1.mars(2021) inntekter {
+                1.april(2020) til 1.mars(2021) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
             }
@@ -280,7 +280,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.januar(2020) til 1.mars(2021) inntekter {
+                1.april(2020) til 1.mars(2021) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
             }
@@ -327,7 +327,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.januar(2020) til 1.mars(2021) inntekter {
+                1.april(2020) til 1.mars(2021) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
             }
@@ -375,7 +375,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.januar(2020) til 1.mars(2021) inntekter {
+                1.april(2020) til 1.mars(2021) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
             }

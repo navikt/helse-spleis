@@ -127,7 +127,7 @@ class ArbeidsgiverInntekt(
 
             internal fun antallMåneder(inntekter: List<MånedligInntekt>): Long {
                 if (inntekter.isEmpty()) return 0
-                return ChronoUnit.MONTHS.between(inntekter.maxMonth(), inntekter.minMonth())
+                return ChronoUnit.MONTHS.between(inntekter.minMonth(), inntekter.maxMonth()) + 1
             }
 
             private fun List<MånedligInntekt>.minMonth() = minOfOrNull { it.yearMonth }

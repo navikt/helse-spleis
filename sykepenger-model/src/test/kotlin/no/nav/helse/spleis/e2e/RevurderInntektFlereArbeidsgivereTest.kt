@@ -1,17 +1,14 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Toggle
-import no.nav.helse.hendelser.Inntektsvurdering
-import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
-import no.nav.helse.hendelser.til
+import no.nav.helse.hendelser.*
 import no.nav.helse.inspectors.Kilde
 import no.nav.helse.somOrganisasjonsnummer
-import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.util.*
 
 internal class RevurderInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
@@ -22,20 +19,27 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
 
     @Test
     fun `kun den arbeidsgiveren som har fått overstyrt inntekt som faktisk lagrer inntekten`() {
+        nyttVedtak(1.januar(2017), 31.januar(2017), 100.prosent, orgnummer= AG2) // gammelt vedtak
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = AG1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = AG1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = AG1)
         håndterYtelser(orgnummer = AG1)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = AG1, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioderForSammenligningsgrunnlag {
-                val skjæringstidspunkt = inspektør(AG1).skjæringstidspunkt(1.vedtaksperiode)
-                skjæringstidspunkt.minusMonths(12L).withDayOfMonth(1) til skjæringstidspunkt.minusMonths(1L).withDayOfMonth(1) inntekter {
-                    AG1 inntekt INNTEKT
-                }
-                skjæringstidspunkt.minusMonths(24L).withDayOfMonth(1) til skjæringstidspunkt.minusMonths(13L).withDayOfMonth(1) inntekter {
-                    AG2 inntekt INNTEKT
-                }
-            })
+        val skjæringstidspunkt = inspektør(AG1).skjæringstidspunkt(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode, orgnummer = AG1, inntektsvurdering = Inntektsvurdering(
+                inntekter = listOf(
+                    sammenligningsgrunnlag(AG1, skjæringstidspunkt, INNTEKT.repeat(12))
+                )
+            ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                inntekter = listOf(
+                    grunnlag(AG1, skjæringstidspunkt, INNTEKT.repeat(3))
+                )
+            ),
+            arbeidsforhold = listOf(
+                Arbeidsforhold(AG1.toString(), LocalDate.EPOCH, null),
+                Arbeidsforhold(AG2.toString(), LocalDate.EPOCH, null)
+            )
         )
         håndterYtelser(orgnummer = AG1)
         håndterSimulering(orgnummer = AG1)

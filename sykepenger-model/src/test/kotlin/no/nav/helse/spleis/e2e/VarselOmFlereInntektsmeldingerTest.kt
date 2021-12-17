@@ -27,7 +27,7 @@ internal class VarselOmFlereInntektsmeldingerTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 3.vedtaksperiode, inntekt = INNTEKT, inntektsvurdering = Inntektsvurdering(
                 inntekter = inntektperioderForSammenligningsgrunnlag {
-                    1.januar(2020) til 1.april(2021) inntekter {
+                    1.mars(2020) til 1.februar(2021) inntekter {
                         ORGNUMMER inntekt INNTEKT
                     }
                 })

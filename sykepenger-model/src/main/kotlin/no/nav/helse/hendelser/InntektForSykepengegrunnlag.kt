@@ -12,10 +12,10 @@ class InntektForSykepengegrunnlag(
 
     internal fun valider(
         aktivitetslogg: IAktivitetslogg,
-    ): Boolean {
+    ): IAktivitetslogg {
 
-        if (inntekter.antallMåneder() == 3L) aktivitetslogg.error("Forventer 3 inntektsmåneder")
-        return aktivitetslogg.hasErrorsOrWorse()
+        if (inntekter.antallMåneder() > 3L) aktivitetslogg.error("Forventer maks 3 inntektsmåneder")
+        return aktivitetslogg
     }
 
     internal fun lagreInntekter(person: Person, skjæringstidspunkt: LocalDate, hendelse: PersonHendelse) =
