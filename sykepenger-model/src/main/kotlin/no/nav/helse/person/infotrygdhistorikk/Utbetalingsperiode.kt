@@ -43,7 +43,7 @@ abstract class Utbetalingsperiode(
     }
 
     private fun validerRelevant(aktivitetslogg: IAktivitetslogg, nødnummer: Nødnummer) {
-        nødnummer.valider(aktivitetslogg, orgnr)
+        if (orgnr in nødnummer) aktivitetslogg.error("Det er registrert utbetaling på nødnummer")
     }
 
     override fun validerOverlapp(aktivitetslogg: IAktivitetslogg, periode: Periode) {

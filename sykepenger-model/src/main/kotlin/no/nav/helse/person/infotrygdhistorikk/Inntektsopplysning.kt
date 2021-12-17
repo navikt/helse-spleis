@@ -23,9 +23,10 @@ class Inntektsopplysning private constructor(
         refusjonTom: LocalDate? = null
     ) : this(orgnummer, sykepengerFom, inntekt, refusjonTilArbeidsgiver, refusjonTom, null)
 
-    internal fun valider(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate): Boolean {
+    internal fun valider(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate, nødnummer: Nødnummer): Boolean {
         if (!erRelevant(skjæringstidspunkt)) return true
         if (orgnummer.isBlank()) aktivitetslogg.error("Organisasjonsnummer for inntektsopplysning fra Infotrygd mangler")
+        else if (orgnummer in nødnummer) aktivitetslogg.error("Det er registrert bruk av på nødnummer")
         return !aktivitetslogg.hasErrorsOrWorse()
     }
 
@@ -74,11 +75,12 @@ class Inntektsopplysning private constructor(
             liste: List<Inntektsopplysning>,
             aktivitetslogg: IAktivitetslogg,
             periode: Periode,
-            skjæringstidspunkt: LocalDate
+            skjæringstidspunkt: LocalDate,
+            nødnummer: Nødnummer
         ) {
-            liste.forEach { it.valider(aktivitetslogg, skjæringstidspunkt) }
-            liste.validerAlleInntekterForSammenhengendePeriode(skjæringstidspunkt, aktivitetslogg, periode)
-            liste.validerAntallInntekterPerArbeidsgiverPerDato(skjæringstidspunkt, aktivitetslogg, periode)
+            liste.forEach { it.valider(aktivitetslogg, skjæringstidspunkt, nødnummer) }
+            liste.fjern(nødnummer).validerAlleInntekterForSammenhengendePeriode(skjæringstidspunkt, aktivitetslogg, periode)
+            liste.fjern(nødnummer).validerAntallInntekterPerArbeidsgiverPerDato(skjæringstidspunkt, aktivitetslogg, periode)
         }
 
         internal fun Iterable<Inntektsopplysning>.harInntekterFor(datoer: List<LocalDate>) = map { it.sykepengerFom }.containsAll(datoer)

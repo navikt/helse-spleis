@@ -54,14 +54,15 @@ internal class NødnummerE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `slår ikke ut på forlengelse med inntektsopplysning med nødnummer`() {
+    fun `slår ut på forlengelse med inntektsopplysning med nødnummer`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 17.januar, 31.januar, 100.prosent, 500.daglig), inntektshistorikk = listOf(
             Inntektsopplysning(nødnummer, 17.januar, 500.daglig, false),
             Inntektsopplysning(ORGNUMMER.toString(), 17.januar, 500.daglig, true)
         ))
-        assertFalse(inspektør.periodeErForkastet(1.vedtaksperiode)) { inspektør.personLogg.toString() }
+        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode)) { inspektør.personLogg.toString() }
+        assertError(1.vedtaksperiode, "Det er registrert bruk av på nødnummer")
     }
 
     @Test
@@ -80,6 +81,8 @@ internal class NødnummerE2ETest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode, PersonUtbetalingsperiode(nødnummer, 17.januar, 31.januar, 100.prosent, 500.daglig), inntektshistorikk = listOf(Inntektsopplysning(nødnummer, 17.januar, 500.daglig, false)))
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
+        assertError(1.vedtaksperiode, "Det er registrert utbetaling på nødnummer")
+        assertError(1.vedtaksperiode, "Det er registrert bruk av på nødnummer")
     }
 
     @Test
@@ -92,5 +95,7 @@ internal class NødnummerE2ETest : AbstractEndToEndTest() {
             Inntektsopplysning(ORGNUMMER.toString(), 20.januar, 500.daglig, true)
         ))
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
+        assertError(1.vedtaksperiode, "Det er registrert utbetaling på nødnummer")
+        assertError(1.vedtaksperiode, "Det er registrert bruk av på nødnummer")
     }
 }

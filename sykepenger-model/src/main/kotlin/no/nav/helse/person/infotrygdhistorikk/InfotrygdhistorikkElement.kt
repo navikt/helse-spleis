@@ -153,7 +153,7 @@ internal class InfotrygdhistorikkElement private constructor(
         perioder.filterIsInstance<Utbetalingsperiode>().forEach { it.valider(aktivitetslogg, periode, skjæringstidspunkt, nødnummer) }
 
         aktivitetslogg.info("Sjekker inntektsopplysninger")
-        Inntektsopplysning.valider(inntekter.fjern(nødnummer), aktivitetslogg, periode, skjæringstidspunkt)
+        Inntektsopplysning.valider(inntekter, aktivitetslogg, periode, skjæringstidspunkt, nødnummer)
 
         aktivitetslogg.info("Sjekker at alle utbetalte perioder har inntektsopplysninger")
         perioder.validerInntektForPerioder(aktivitetslogg, inntekter, nødnummer)
