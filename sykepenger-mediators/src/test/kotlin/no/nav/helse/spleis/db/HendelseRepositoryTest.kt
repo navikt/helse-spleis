@@ -12,8 +12,11 @@ import no.nav.helse.spleis.meldinger.SøknadRiver
 import no.nav.helse.spleis.meldinger.TestMessageMediator
 import no.nav.helse.spleis.meldinger.TestRapid
 import no.nav.helse.spleis.meldinger.model.NySøknadMessage
-import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
@@ -56,6 +59,8 @@ private object TestMessages {
             "fnr": "${fnr.toString()}",
             "aktorId": "aktorId",
             "sykmeldingSkrevet": "$now",
+            "fom": "2020-01-01",
+            "tom": "2020-01-31",
             "arbeidsgiver": {
                 "orgnummer": "orgnummer"
             },
@@ -83,6 +88,8 @@ internal class FalskeNyeSøknaderRiver(
         packet.requireKey("@event_name")
         packet.requireKey("@opprettet")
         packet.requireKey("sykmeldingSkrevet")
+        packet.requireKey("fom")
+        packet.requireKey("tom")
         packet.requireKey("fnr")
         packet.requireKey("aktorId")
         packet.requireKey("arbeidsgiver")

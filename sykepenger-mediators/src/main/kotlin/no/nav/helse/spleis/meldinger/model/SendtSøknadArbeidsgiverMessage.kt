@@ -39,7 +39,7 @@ internal class SendtSøknadArbeidsgiverMessage(packet: JsonMessage) : SøknadMes
         sykmeldingSkrevet = sykmeldingSkrevet
     )
 
-    override fun behandle(mediator: IHendelseMediator) {
+    override fun _behandle(mediator: IHendelseMediator) {
         mediator.behandle(this, søknad)
     }
 }

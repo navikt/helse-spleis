@@ -23,5 +23,5 @@ internal abstract class SøknadBuilder {
     internal fun fom(fom: LocalDate) = apply { this.fom = fom }
     internal fun tom(tom: LocalDate) = apply { this.tom = tom }
 
-    internal abstract fun periode(fom: LocalDate, tom: LocalDate, grad: Int): SøknadBuilder
+    internal abstract fun periode(fom: LocalDate, tom: LocalDate, grad: Int, arbeidshelse: Int?): SøknadBuilder
 }
