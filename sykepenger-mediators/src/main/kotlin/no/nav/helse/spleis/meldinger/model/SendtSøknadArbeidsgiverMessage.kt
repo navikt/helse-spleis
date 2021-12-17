@@ -10,7 +10,7 @@ import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 // Understands a JSON message representing a Søknad that is only sent to the employer
-internal class SendtSøknadArbeidsgiverMessage(packet: JsonMessage) : SøknadMessage(packet) {
+internal class SendtSøknadArbeidsgiverMessage(packet: JsonMessage) : SøknadMessage(packet, NySøknadBuilder()) {
     private val søknadTom = packet["tom"].asLocalDate()
     private val aktørId = packet["aktorId"].asText()
     private val orgnummer = packet["arbeidsgiver.orgnummer"].asText()

@@ -11,7 +11,7 @@ import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 // Understands a JSON message representing a Søknad that is sent to NAV
-internal class SendtSøknadNavMessage(private val packet: JsonMessage) : SøknadMessage(packet) {
+internal class SendtSøknadNavMessage(private val packet: JsonMessage) : SøknadMessage(packet, NySøknadBuilder()) {
     private val søknadTom get() = packet["tom"].asLocalDate()
     private val aktørId get() = packet["aktorId"].asText()
     private val orgnummer get() = packet["arbeidsgiver.orgnummer"].asText()
