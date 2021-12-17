@@ -2449,7 +2449,15 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             if (vedtaksperiode.utbetaling().kanIkkeForsøkesPåNy()) {
                 return vedtaksperiode.utbetaling().reberegnUtbetaling({
-                    vedtaksperiode.person.overstyrUtkastRevurdering(påminnelse)
+                    when (vedtaksperiode.id) {
+                        UUID.fromString("b01e0cc9-ac0d-41e2-bcbe-72736683cbec") -> {
+                            vedtaksperiode.utbetaling().forkast(påminnelse)
+                            vedtaksperiode.tilstand(påminnelse, Avsluttet)
+                        }
+                        else -> {
+                            vedtaksperiode.person.overstyrUtkastRevurdering(påminnelse)
+                        }
+                    }
                 }) {
                     vedtaksperiode.tilstand(påminnelse, AvventerHistorikk) {
                         påminnelse.info("Reberegner periode ettersom utbetaling er avvist og ikke kan forsøkes på nytt")
