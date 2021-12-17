@@ -31,8 +31,6 @@ class Påminnelse(
     internal fun gjelderTilstand(tilstandType: TilstandType) = (tilstandType == tilstand).also {
         if (!it) {
             info("Påminnelse var ikke aktuell i tilstand: ${tilstandType.name} da den gjaldt: ${tilstand.name}")
-        } else {
-            info("Vedtaksperiode blir påminnet")
         }
     }
 
