@@ -24,7 +24,7 @@ abstract class SendtSøknad(
     private val permittert: Boolean,
     private val merknaderFraSykmelding: List<Merknad>,
     sykmeldingSkrevet: LocalDateTime
-) : SykdomstidslinjeHendelse(meldingsreferanseId, sykmeldingSkrevet) {
+) : SykdomstidslinjeHendelse(meldingsreferanseId, sykmeldingSkrevet, Søknad::class) {
 
     protected val sykdomsperiode: Periode
     private val sykdomstidslinje: Sykdomstidslinje

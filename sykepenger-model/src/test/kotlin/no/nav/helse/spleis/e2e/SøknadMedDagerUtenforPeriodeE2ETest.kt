@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.hendelser.SendtSøknad
 import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.*
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.til
@@ -57,7 +56,6 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
     fun `søknad med arbeidsdager mellom to perioder bridger ikke de to periodene`(){
         nyttVedtak(1.januar, 19.januar)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Arbeid(20.januar, 31.januar))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Arbeid(20.januar, 31.januar))
         assertWarningTekst(inspektør, "Søknaden inneholder Arbeidsdager utenfor sykdomsvindu")
         assertTilstander(

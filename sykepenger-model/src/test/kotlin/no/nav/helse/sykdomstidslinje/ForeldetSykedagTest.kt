@@ -62,9 +62,18 @@ internal class ForeldetSykedagTest {
     }
 
     @Test fun `Søknad til arbeidsgiver lager Sykedager og SykHelgedag`() {
-        undersøke(søknadArbeidsgiver()).also {
+        undersøke(søknadArbeidsgiver(1.mars)).also {
             assertEquals(28, it.dagerTeller)
             assertEquals(20, it.dagstypeTeller[Sykedag::class])
+            assertEquals(8, it.dagstypeTeller[SykHelgedag::class])
+        }
+    }
+
+    @Test fun `Søknad til arbeidsgiver lager foreldet dager`() {
+        undersøke(søknadArbeidsgiver(1.mai)).also {
+            assertEquals(28, it.dagerTeller)
+            assertEquals(10, it.dagstypeTeller[Sykedag::class])
+            assertEquals(10, it.dagstypeTeller[ForeldetSykedag::class])
             assertEquals(8, it.dagstypeTeller[SykHelgedag::class])
         }
     }
@@ -84,7 +93,7 @@ internal class ForeldetSykedagTest {
         )
     }
 
-    private fun søknadArbeidsgiver(): SøknadArbeidsgiver {
+    private fun søknadArbeidsgiver(sendtTilArbeidsgiver: LocalDate): SøknadArbeidsgiver {
         return SøknadArbeidsgiver(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
@@ -92,7 +101,7 @@ internal class ForeldetSykedagTest {
             orgnummer = ORGNUMMER,
             perioder = listOf(Sykdom(18.januar, 14.februar, 100.prosent)), // 10 sykedag januar & februar
             sykmeldingSkrevet = LocalDateTime.now(),
-            sendtTilArbeidsgiver = LocalDateTime.now(),
+            sendtTilArbeidsgiver = sendtTilArbeidsgiver.atStartOfDay(),
             // TODO: Nye parametre vi nå mapper
             andreInntektskilder = emptyList(),
             merknaderFraSykmelding = emptyList(),

@@ -1,9 +1,12 @@
 package no.nav.helse.person
 
-import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode
 import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Sykmelding
+import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.SøknadArbeidsgiver
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.testhelpers.januar
@@ -185,7 +188,7 @@ internal class SøknadArbeidsgiverHendelseTest : AbstractPersonTest() {
                 else -> it.plus(arbeidsperiode)
             }},
             sykmeldingSkrevet = LocalDateTime.now(),
-            sendtTilArbeidsgiver = LocalDateTime.now(),
+            sendtTilArbeidsgiver = Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay(),
             // TODO: Nye parametre vi nå mapper
             andreInntektskilder = emptyList(),
             merknaderFraSykmelding = emptyList(),

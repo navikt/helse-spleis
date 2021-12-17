@@ -151,7 +151,7 @@ internal fun AbstractEndToEndTest.søknadArbeidsgiver(
             else -> it.plus(arbeidsperiode)
         }},
         sykmeldingSkrevet = LocalDateTime.now(),
-        sendtTilArbeidsgiver = LocalDateTime.now(),
+        sendtTilArbeidsgiver = Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay(),
         // TODO: Nye parametre vi nå mapper
         andreInntektskilder = emptyList(),
         merknaderFraSykmelding = emptyList(),
