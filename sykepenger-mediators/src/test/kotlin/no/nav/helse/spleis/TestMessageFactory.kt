@@ -80,6 +80,7 @@ internal class TestMessageFactory(
             type = SoknadstypeDTO.ARBEIDSTAKERE,
             startSyketilfelle = LocalDate.now(),
             sendtArbeidsgiver = perioder.maxOfOrNull { it.tom!! }?.atStartOfDay(),
+            papirsykmeldinger = emptyList(),
             egenmeldinger = egenmeldinger,
             fravar = emptyList(),
             soknadsperioder = perioder.toList(),

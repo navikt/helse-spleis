@@ -8,31 +8,33 @@ import no.nav.helse.spleis.IHendelseMediator
 internal class SendtSøknadNavMessage(private val packet: JsonMessage, private val builder: NavSøknadBuilder = NavSøknadBuilder()) : SøknadMessage(packet, builder) {
 
     override fun _behandle(mediator: IHendelseMediator) {
-        bygg()
+        builder.sendt(packet["sendtNav"].asLocalDateTime())
+        byggSendtSøknad(builder, packet)
         mediator.behandle(this, builder.build())
     }
 
-    private fun bygg() {
-        builder.sendt(packet["sendtNav"].asLocalDateTime())
-        builder.permittert(packet["permitteringer"].takeIf(JsonNode::isArray)?.takeUnless { it.isEmpty }?.let { true } ?: false)
-        packet["merknaderFraSykmelding"].takeIf(JsonNode::isArray)?.forEach {
-            builder.merknader(it.path("type").asText(), it.path("beskrivelse").asText())
+    internal companion object {
+        internal fun byggSendtSøknad(builder: SøknadBuilder, packet: JsonMessage) {
+            builder.permittert(packet["permitteringer"].takeIf(JsonNode::isArray)?.takeUnless { it.isEmpty }?.let { true } ?: false)
+            packet["merknaderFraSykmelding"].takeIf(JsonNode::isArray)?.forEach {
+                builder.merknader(it.path("type").asText(), it.path("beskrivelse").asText())
+            }
+            packet["papirsykmeldinger"].forEach {
+                builder.papirsykmelding(fom = it.path("fom").asLocalDate(), tom = it.path("tom").asLocalDate())
+            }
+            packet["andreInntektskilder"].forEach {
+                builder.inntektskilde(sykmeldt = it["sykmeldt"].asBoolean(), type = it["type"].asText())
+            }
+            packet["egenmeldinger"].forEach {
+                builder.egenmelding(fom = it.path("fom").asLocalDate(), tom = it.path("tom").asLocalDate())
+            }
+            packet["fravar"].forEach {
+                val fraværstype = it["type"].asText()
+                val fom = it.path("fom").asLocalDate()
+                val tom = it.path("tom").takeUnless { it.isMissingOrNull() }?.asLocalDate()
+                builder.fravær(fraværstype, fom, tom)
+            }
+            builder.arbeidsgjennopptatt(packet["arbeidGjenopptatt"].asOptionalLocalDate())
         }
-        packet["papirsykmeldinger"].forEach {
-            builder.papirsykmelding(fom = it.path("fom").asLocalDate(), tom = it.path("tom").asLocalDate())
-        }
-        packet["andreInntektskilder"].forEach {
-            builder.inntektskilde(sykmeldt = it["sykmeldt"].asBoolean(), type = it["type"].asText())
-        }
-        packet["egenmeldinger"].forEach {
-            builder.egenmelding(fom = it.path("fom").asLocalDate(), tom = it.path("tom").asLocalDate())
-        }
-        packet["fravar"].forEach {
-            val fraværstype = it["type"].asText()
-            val fom = it.path("fom").asLocalDate()
-            val tom = it.path("tom").takeUnless { it.isMissingOrNull() }?.asLocalDate()
-            builder.fravær(fraværstype, fom, tom)
-        }
-        builder.arbeidsgjennopptatt(packet["arbeidGjenopptatt"].asOptionalLocalDate())
     }
 }
