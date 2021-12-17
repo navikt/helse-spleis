@@ -2228,6 +2228,7 @@ internal class Vedtaksperiode private constructor(
         ) {
             if (infotrygdhistorikk.harEndretHistorikk(vedtaksperiode.utbetaling())) return vedtaksperiode.tilstand(hendelse, AvventerHistorikk) {
                 hendelse.info("Infotrygdhistorikken har endret seg, reberegner periode")
+                vedtaksperiode.emitVedtaksperiodeReberegnet(hendelse.hendelseskontekst())
             }
 
             vedtaksperiode.trengerGodkjenning(hendelse)

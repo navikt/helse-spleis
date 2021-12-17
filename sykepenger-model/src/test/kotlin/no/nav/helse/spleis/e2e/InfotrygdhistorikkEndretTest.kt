@@ -3,14 +3,15 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.mai
 import no.nav.helse.testhelpers.mars
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 
@@ -24,6 +25,18 @@ internal class InfotrygdhistorikkEndretTest: AbstractEndToEndTest() {
         periodeTilGodkjenning()
         håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger.toTypedArray(), inntektshistorikk = inntektshistorikk)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
+        assertTrue(observatør.reberegnedeVedtaksperioder.contains(1.vedtaksperiode(ORGNUMMER)))
+    }
+
+    @Test
+    fun `cachet infotrygdhistorikk på relevant periode grunnet påminnelse på annen vedtaksperiode, skal fortsatt reberegne`() {
+        periodeTilGodkjenning()
+        håndterSykmelding(Sykmeldingsperiode(1.mai, 31.mai, 100.prosent))
+        håndterPåminnelse(2.vedtaksperiode, MOTTATT_SYKMELDING_UFERDIG_GAP)
+        håndterUtbetalingshistorikk(2.vedtaksperiode, *utbetalinger.toTypedArray(), inntektshistorikk = inntektshistorikk)
+        håndterPåminnelse(1.vedtaksperiode, AVVENTER_GODKJENNING)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
+        assertTrue(observatør.reberegnedeVedtaksperioder.contains(1.vedtaksperiode(ORGNUMMER)))
     }
 
     @Test
@@ -31,6 +44,7 @@ internal class InfotrygdhistorikkEndretTest: AbstractEndToEndTest() {
         periodeTilGodkjenning(utbetalinger, inntektshistorikk)
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
+        assertTrue(observatør.reberegnedeVedtaksperioder.contains(1.vedtaksperiode(ORGNUMMER)))
     }
 
     @Test
