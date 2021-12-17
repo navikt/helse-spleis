@@ -116,7 +116,8 @@ internal class TestMessageFactory(
             andreInntektskilder = andreInntektskilder,
             soknadsperioder = perioder.toList(),
             opprettet = LocalDateTime.now(),
-            sykmeldingSkrevet = fom!!.atStartOfDay()
+            sykmeldingSkrevet = fom!!.atStartOfDay(),
+            merknaderFraSykmelding = listOf(MerknadDTO("EN_MERKANDSTYPE", null), MerknadDTO("EN_ANNEN_MERKANDSTYPE", "tekstlig begrunnelse"))
         )
         return nyHendelse("sendt_søknad_nav", sendtSøknad.toMap())
     }

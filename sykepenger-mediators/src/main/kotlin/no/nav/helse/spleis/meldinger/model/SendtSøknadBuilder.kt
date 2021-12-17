@@ -30,7 +30,7 @@ internal abstract class SendtSøknadBuilder : SøknadBuilder() {
         perioder.add(Utlandsopphold(fom, tom))
     }
 
-    override fun merknader(type: String, beskrivelse: String) = apply {
+    override fun merknader(type: String, beskrivelse: String?) = apply {
         merkander.add(Merknad(type, beskrivelse))
     }
 

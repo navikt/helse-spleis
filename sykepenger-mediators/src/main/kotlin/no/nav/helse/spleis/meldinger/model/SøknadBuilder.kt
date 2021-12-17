@@ -44,7 +44,7 @@ internal abstract class SøknadBuilder {
     internal open fun permisjon(fom: LocalDate, tom: LocalDate) = apply {}
     internal open fun ferie(fom: LocalDate, tom: LocalDate) = apply {}
     internal open fun utlandsopphold(fom: LocalDate, tom: LocalDate) = apply {}
-    internal open fun merknader(type: String, beskrivelse: String) = apply {}
+    internal open fun merknader(type: String, beskrivelse: String?) = apply {}
     internal open fun papirsykmelding(fom: LocalDate, tom: LocalDate) = apply {}
     internal open fun egenmelding(fom: LocalDate, tom: LocalDate) = apply {}
     internal open fun arbeidsgjennopptatt(fom: LocalDate, tom: LocalDate) = apply { }

@@ -61,9 +61,7 @@ abstract class SendtSøknad(
         andreInntektskilder.forEach { it.valider(this) }
         forUng(fnr.somFødselsnummer().alder())
         if (permittert) warn("Søknaden inneholder permittering. Vurder om permittering har konsekvens for rett til sykepenger")
-        if (merknaderFraSykmelding.any { it.type == "UGYLDIG_TILBAKEDATERING" || it.type == "TILBAKEDATERING_KREVER_FLERE_OPPLYSNINGER" }) {
-            warn("Sykmeldingen er tilbakedatert, vurder fra og med dato for utbetaling.")
-        }
+        merknaderFraSykmelding.forEach { it.valider(this) }
         if (sykdomstidslinje.any { it is Dag.ForeldetSykedag }) warn("Minst én dag er avslått på grunn av foreldelse. Vurder å sende vedtaksbrev fra Infotrygd")
         return this
     }
@@ -74,7 +72,14 @@ abstract class SendtSøknad(
 
     private fun avskjæringsdato(): LocalDate = sendtTilNAVEllerArbeidsgiver.toLocalDate().minusMonths(3).withDayOfMonth(1)
 
-    data class Merknad(val type: String, val beskrivelse: String?)
+    class Merknad(private val type: String, beskrivelse: String?) {
+        private val beskrivelse = beskrivelse.takeUnless { it.isNullOrBlank() }
+        internal fun valider(aktivitetslogg: IAktivitetslogg) {
+            if (type == "UGYLDIG_TILBAKEDATERING" || type == "TILBAKEDATERING_KREVER_FLERE_OPPLYSNINGER") {
+                aktivitetslogg.warn("Sykmeldingen er tilbakedatert, vurder fra og med dato for utbetaling.")
+            }
+        }
+    }
 
     sealed class Søknadsperiode(fom: LocalDate, tom: LocalDate) {
         protected val periode = Periode(fom, tom)
@@ -97,7 +102,7 @@ abstract class SendtSøknad(
                     }
         }
 
-        internal open fun sykdomstidslinje(avskjæringsdato: LocalDate, kilde: Hendelseskilde): Sykdomstidslinje =
+        internal open fun sykdomstidslinje(avskjæringsdato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde): Sykdomstidslinje =
             Sykdomstidslinje.problemdager(periode.start, periode.endInclusive, kilde, "Dagtype støttes ikke av systemet")
 
         internal open fun valider(søknad: SendtSøknad) {}
@@ -119,7 +124,7 @@ abstract class SendtSøknad(
                 if (søknadsgrad != null && søknadsgrad > sykmeldingsgrad) søknad.error("Bruker har oppgitt at de har jobbet mindre enn sykmelding tilsier")
             }
 
-            override fun sykdomstidslinje(avskjæringsdato: LocalDate, kilde: Hendelseskilde) =
+            override fun sykdomstidslinje(avskjæringsdato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
                 Sykdomstidslinje.sykedager(periode.start, periode.endInclusive, avskjæringsdato, sykdomsgrad, kilde)
         }
 

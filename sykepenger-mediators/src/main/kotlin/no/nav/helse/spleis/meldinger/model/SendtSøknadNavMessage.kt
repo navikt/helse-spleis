@@ -17,7 +17,7 @@ internal class SendtSøknadNavMessage(private val packet: JsonMessage, private v
         internal fun byggSendtSøknad(builder: SøknadBuilder, packet: JsonMessage) {
             builder.permittert(packet["permitteringer"].takeIf(JsonNode::isArray)?.takeUnless { it.isEmpty }?.let { true } ?: false)
             packet["merknaderFraSykmelding"].takeIf(JsonNode::isArray)?.forEach {
-                builder.merknader(it.path("type").asText(), it.path("beskrivelse").asText())
+                builder.merknader(it.path("type").asText(), it.path("beskrivelse").takeUnless { it.isMissingOrNull() }?.asText())
             }
             packet["papirsykmeldinger"].forEach {
                 builder.papirsykmelding(fom = it.path("fom").asLocalDate(), tom = it.path("tom").asLocalDate())
