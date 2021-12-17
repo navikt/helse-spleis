@@ -21,7 +21,8 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.pleiepenger
 import no.nav.helse.person.Arbeidsgiver.GjenopptaBehandling
 import no.nav.helse.person.ForkastetÅrsak.ERSTATTES
 import no.nav.helse.person.ForkastetÅrsak.IKKE_STØTTET
-import no.nav.helse.person.ForlengelseFraInfotrygd.*
+import no.nav.helse.person.ForlengelseFraInfotrygd.JA
+import no.nav.helse.person.ForlengelseFraInfotrygd.NEI
 import no.nav.helse.person.Periodetype.*
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
@@ -57,7 +58,7 @@ internal class Vedtaksperiode private constructor(
     private val sykmeldingsperiode: Periode,
     private val utbetalinger: MutableList<Utbetaling>,
     private var utbetalingstidslinje: Utbetalingstidslinje = Utbetalingstidslinje(),
-    private var forlengelseFraInfotrygd: ForlengelseFraInfotrygd = IKKE_ETTERSPURT,
+    private var forlengelseFraInfotrygd: ForlengelseFraInfotrygd = ForlengelseFraInfotrygd.IKKE_ETTERSPURT,
     private var inntektskilde: Inntektskilde,
     private val opprettet: LocalDateTime,
     private var oppdatert: LocalDateTime = opprettet
@@ -609,41 +610,34 @@ internal class Vedtaksperiode private constructor(
     private fun alleAndreAvventerArbeidsgivere() = overlappendeVedtaksperioder().all { it == this || it.tilstand == AvventerArbeidsgivere }
 
     private fun forberedMuligUtbetaling(vilkårsgrunnlag: Vilkårsgrunnlag) {
-        val overlappendeVedtaksperioder = overlappendeVedtaksperioder()
-        håndter(
-            vilkårsgrunnlag, when {
-                overlappendeVedtaksperioder.kanGåTilNesteTilstand() -> AvventerHistorikk
-                else -> AvventerArbeidsgivere
-            }
-        )
-        if (vilkårsgrunnlag.grunnlagsdata().gjelderFlereArbeidsgivere()) {
-            overlappendeVedtaksperioder.forEach { it.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE }
+        forberedMuligUtbetaling(vilkårsgrunnlag) { nesteTilstand ->
+            håndter(vilkårsgrunnlag, nesteTilstand)
         }
-
-        Companion.gjenopptaBehandling(vilkårsgrunnlag, person, AvventerArbeidsgivere, AvventerHistorikk)
     }
 
     private fun forberedMuligUtbetaling(inntektsmelding: Inntektsmelding) {
-        val overlappendeVedtaksperioder = overlappendeVedtaksperioder()
-        håndterInntektsmelding(inntektsmelding, AvsluttetUtenUtbetaling, when {
-            overlappendeVedtaksperioder.kanGåTilNesteTilstand() -> AvventerHistorikk
-            else -> AvventerArbeidsgivere
-        })
-        if (tilstand == AvventerArbeidsgivere) {
-            overlappendeVedtaksperioder.forEach { it.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE }
+        forberedMuligUtbetaling(inntektsmelding) { nesteTilstand ->
+            håndterInntektsmelding(inntektsmelding, AvsluttetUtenUtbetaling, nesteTilstand)
         }
-        Companion.gjenopptaBehandling(inntektsmelding, person, AvventerArbeidsgivere, AvventerHistorikk)
     }
 
-    private fun forberedMuligUtbetaling(søknad: SykdomstidslinjeHendelse) {
-        val overlappendeVedtaksperioder = overlappendeVedtaksperioder()
-        val nesteTilstand = if (overlappendeVedtaksperioder.kanGåTilNesteTilstand()) AvventerHistorikk else AvventerArbeidsgivere
+    private fun forberedMuligUtbetaling(søknad: SendtSøknad) {
+        forberedMuligUtbetaling(søknad) { nesteTilstand ->
+            håndterSøknad(søknad, nesteTilstand)
+        }
+    }
 
-        håndterSøknad(søknad, nesteTilstand)
-        if (tilstand == AvventerArbeidsgivere) {
+    private fun forberedMuligUtbetaling(hendelse: ArbeidstakerHendelse, håndterer: (nesteTilstand: Vedtaksperiodetilstand) -> Unit) {
+        val overlappendeVedtaksperioder = overlappendeVedtaksperioder()
+        val nesteTilstand = when {
+            overlappendeVedtaksperioder.kanGåTilNesteTilstand() -> AvventerHistorikk
+            else -> AvventerArbeidsgivere
+        }
+        håndterer(nesteTilstand)
+        if (tilstand == AvventerArbeidsgivere || person.vilkårsgrunnlagFor(skjæringstidspunkt)?.gjelderFlereArbeidsgivere() == true) {
             overlappendeVedtaksperioder.forEach { it.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE }
         }
-        Companion.gjenopptaBehandling(søknad, person, AvventerArbeidsgivere, AvventerHistorikk)
+        Companion.gjenopptaBehandling(hendelse, person, AvventerArbeidsgivere, AvventerHistorikk)
     }
 
     /**
