@@ -1698,8 +1698,9 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingUferdigForlengelse)
         }
 
+        // TODO: kan fjernes nå https://trello.com/c/Eoug7QnR er gjort
         override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
-            //FIXME: https://trello.com/c/pY0WYUC0
+            if (!vedtaksperiode.harInntekt()) return
             vedtaksperiode.tilstand(gjenopptaBehandling, AvventerHistorikk)
         }
 
@@ -2053,6 +2054,7 @@ internal class Vedtaksperiode private constructor(
                     }
                 }
                 // TODO: forventer at denne ikke trengs lenger, sjekk om dette stemmer når lagring av sykepengegrunnlaget er stabilt. Kan hvertfall ikke fjernes før https://trello.com/c/pY0WYUC0
+                // TODO: https://trello.com/c/pY0WYUC0 er løst - kan denne fjernes nå?
                 harNødvendigInntekt(person, vedtaksperiode.skjæringstidspunkt)
                 lateinit var arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger
                 valider("Feil ved kalkulering av utbetalingstidslinjer") {

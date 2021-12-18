@@ -1,33 +1,20 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.TilstandType
-import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.desember
+import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
+import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
 internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
-
-    @Test
-    fun `gjør ikke vilkårsprøving om vi ikke har inntekt fra inntektsmelding`() {
-        håndterSykmelding(Sykmeldingsperiode(28.oktober(2020), 8.november(2020), 100.prosent))
-        håndterSøknadArbeidsgiver(Sykdom(28.oktober(2020), 8.november(2020), 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(9.november(2020), 22.november(2020), 100.prosent))
-        håndterSøknad(Sykdom(9.november(2020), 22.november(2020), 100.prosent))
-
-        håndterSykmelding(Sykmeldingsperiode(28.oktober(2021), 8.november(2021), 100.prosent))
-        håndterSøknadArbeidsgiver(Sykdom(28.oktober(2021), 8.november(2021), 100.prosent))
-
-        håndterYtelser(2.vedtaksperiode)
-
-        assertNull(inspektør.vilkårsgrunnlag(2.vedtaksperiode))
-        assertError(2.vedtaksperiode, "Forventer minst ett sykepengegrunnlag som er fra inntektsmelding eller Infotrygd")
-        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 2.vedtaksperiode, TilstandType.TIL_INFOTRYGD)
-    }
 
     @Test
     fun `mer enn 25% avvik lager kun én errormelding i aktivitetsloggen`() {

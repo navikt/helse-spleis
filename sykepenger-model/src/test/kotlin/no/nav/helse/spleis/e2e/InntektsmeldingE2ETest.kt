@@ -1,10 +1,13 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.ForventetFeil
-import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
+import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.TilstandType.*
@@ -1096,57 +1099,32 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         observatør.hendelseider(2.vedtaksperiode(ORGNUMMER)).contains(inntektsmeldingId)
     }
 
-    @ForventetFeil("https://trello.com/c/pY0WYUC0")
     @Test
-    fun `Avventer inntektsmelding venter faktisk på inntektsmelding, går ikke videre før inntektsmelding kommer`() {
-        håndterSykmelding(Sykmeldingsperiode(28.oktober(2020), 8.november(2020), 100.prosent))
-        håndterSøknadArbeidsgiver(Sykdom(28.oktober(2020), 8.november(2020), 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(9.november(2020), 22.november(2020), 100.prosent))
-        håndterSøknad(Sykdom(9.november(2020), 22.november(2020), 100.prosent))
-
-        håndterSykmelding(Sykmeldingsperiode(28.oktober(2021), 8.november(2021), 100.prosent))
-        håndterSøknadArbeidsgiver(Sykdom(28.oktober(2021), 8.november(2021), 100.prosent))
-
-        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(
-            2.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-            AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE
-        )
-        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
-
-        håndterInntektsmelding(listOf(Periode(27.oktober(2020), 8.november(2020))), 27.oktober(2020))
+    fun `Avventer inntektsmelding venter faktisk på inntektsmelding, går ikke videre selv om senere periode avsluttes`() {
+        håndterSykmelding(Sykmeldingsperiode(28.oktober, 8.november, 100.prosent))
+        håndterSøknadArbeidsgiver(Sykdom(28.oktober, 8.november, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(9.november, 22.november, 100.prosent))
+        håndterSøknad(Sykdom(9.november, 22.november, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(10.desember, 14.desember, 100.prosent))
+        håndterSøknadArbeidsgiver(Sykdom(10.desember, 14.desember, 100.prosent))
 
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(
-            2.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-            AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE,
-            AVVENTER_HISTORIKK
-        )
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE)
         assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
     }
 
     @Test
-    fun `Inntektsmelding er gyldig dersom den utvider perioden`() {
-        håndterSykmelding(Sykmeldingsperiode(28.oktober(2020), 8.november(2020), 100.prosent))
-        håndterSøknadArbeidsgiver(Sykdom(28.oktober(2020), 8.november(2020), 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(9.november(2020), 22.november(2020), 100.prosent))
-        håndterSøknad(Sykdom(9.november(2020), 22.november(2020), 100.prosent))
-
-        håndterInntektsmelding(listOf(Periode(27.oktober(2020), 8.november(2020))), 27.oktober(2020))
+    fun `Inntektsmelding treffer periode som dekker hele arbeidsgiverperioden`() {
+        håndterSykmelding(Sykmeldingsperiode(28.oktober, 8.november, 100.prosent))
+        håndterSøknadArbeidsgiver(Sykdom(28.oktober, 8.november, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(9.november, 22.november, 100.prosent))
+        håndterSøknad(Sykdom(9.november, 22.november, 100.prosent))
+        håndterInntektsmelding(listOf(Periode(27.oktober, 8.november)), 27.oktober)
 
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(
-            2.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-            AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE,
-            AVVENTER_HISTORIKK
-        )
-        assertTrue(inspektør.sykdomstidslinje[27.oktober(2020)] is Dag.Arbeidsgiverdag)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK)
+        assertEquals(27.oktober til 8.november, inspektør.periode(1.vedtaksperiode))
+        assertTrue(inspektør.sykdomstidslinje[27.oktober] is Dag.ArbeidsgiverHelgedag)
     }
 
     @Test
