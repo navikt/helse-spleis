@@ -1,11 +1,9 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.ForventetFeil
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.til
-import no.nav.helse.person.TilstandType
+import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.januar
@@ -13,8 +11,51 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.time.YearMonth
 
 internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
+
+    @ForventetFeil("Vilkårsvurderingen har med inntekt for arbeidsgiver 1 og arbeidsgiver 2; da Vedtaksperiode #2 hos arbeidsgiver #1 sjekker historikken fra Infotrygd oppdager den at den har inntekt, " +
+        "og endrer tilstand til AVVENTER_HISTORIKK. Dette skal ikke skje - vedtaksperioden må vente til inntektsmeldingen har kommet")
+    @Test
+    fun `vilkårsvurdering med flere arbeidsgivere`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent), orgnummer = a1)
+        håndterSøknadArbeidsgiver(Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
+        håndterSøknadArbeidsgiver(Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a2)
+        val skjæringstidspunkt = inspektør(a2).skjæringstidspunkt(2.vedtaksperiode)
+        val inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
+            skjæringstidspunkt.minusMonths(12L).withDayOfMonth(1) til skjæringstidspunkt.minusMonths(1L).withDayOfMonth(1) inntekter {
+                a1 inntekt INNTEKT
+                a2 inntekt INNTEKT
+            }
+        })
+        val inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(listOf(a1, a2).map { arbeidsgiver ->
+            ArbeidsgiverInntekt(arbeidsgiver.toString(), (0..2).map {
+                val yearMonth = YearMonth.from(skjæringstidspunkt).minusMonths(3L - it)
+                ArbeidsgiverInntekt.MånedligInntekt.Sykepengegrunnlag(
+                    yearMonth = yearMonth,
+                    type = ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
+                    inntekt = INNTEKT,
+                    fordel = "fordel",
+                    beskrivelse = "beskrivelse"
+                )
+            })
+        })
+        håndterVilkårsgrunnlag(2.vedtaksperiode, inntektsvurdering = inntektsvurdering, inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag, orgnummer = a2)
+        håndterUtbetalingshistorikk(2.vedtaksperiode, orgnummer = a1)
+
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_ARBEIDSGIVERSØKNAD_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
+    }
 
     @Test
     fun `mer enn 25% avvik lager kun én errormelding i aktivitetsloggen`() {
@@ -71,19 +112,19 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
-            TilstandType.START,
-            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
-            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_VILKÅRSPRØVING,
-            TilstandType.TIL_INFOTRYGD
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            TIL_INFOTRYGD
         )
 
         assertForkastetPeriodeTilstander(
             2.vedtaksperiode,
-            TilstandType.START,
-            TilstandType.MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
-            TilstandType.TIL_INFOTRYGD
+            START,
+            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
+            TIL_INFOTRYGD
         )
     }
 
@@ -118,19 +159,19 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
         assertTilstander(
             1.vedtaksperiode,
-            TilstandType.START,
-            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
-            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_VILKÅRSPRØVING,
-            TilstandType.AVVENTER_HISTORIKK,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
         )
 
         assertTilstander(
             2.vedtaksperiode,
-            TilstandType.START,
-            TilstandType.MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
-            TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE
+            START,
+            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
+            AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE
         )
     }
 
