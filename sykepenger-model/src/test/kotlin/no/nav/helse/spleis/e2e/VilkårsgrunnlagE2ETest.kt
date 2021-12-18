@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.ForventetFeil
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.TilstandType.*
@@ -15,8 +14,6 @@ import java.time.YearMonth
 
 internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
-    @ForventetFeil("Vilkårsvurderingen har med inntekt for arbeidsgiver 1 og arbeidsgiver 2; da Vedtaksperiode #2 hos arbeidsgiver #1 sjekker historikken fra Infotrygd oppdager den at den har inntekt, " +
-        "og endrer tilstand til AVVENTER_HISTORIKK. Dette skal ikke skje - vedtaksperioden må vente til inntektsmeldingen har kommet")
     @Test
     fun `vilkårsvurdering med flere arbeidsgivere`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent), orgnummer = a1)

@@ -40,19 +40,7 @@ internal class RareFeilOgBugs : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
         håndterSøknad(SendtSøknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent))
-        håndterPåminnelse(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE) // trigger henting av infotrygdhistorikk
-        håndterUtbetalingshistorikk(
-            2.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.januar, 31.januar, 100.prosent, INNTEKT),
-            inntektshistorikk = inntektshistorikk
-        )
 
-        assertTilstander(
-            2.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-            AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE,
-            AVVENTER_HISTORIKK
-        )
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK)
     }
 }

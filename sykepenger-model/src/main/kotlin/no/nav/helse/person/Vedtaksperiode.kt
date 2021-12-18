@@ -311,8 +311,9 @@ internal class Vedtaksperiode private constructor(
     // TODO: Kan byttes med en sjekk på vilkårsgrunnlag når AvsluttetUtenUtbetaling går gjennom vilkårsprøving https://trello.com/c/mQ4ZKeEG
     private fun harInntekt() = arbeidsgiver.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periode.start) != null
     private fun avgjørTilstandForInntekt(): Vedtaksperiodetilstand {
-        if (!harInntekt()) return AvventerInntektsmeldingFerdigForlengelse
-        return AvventerHistorikk
+        val rettFør = arbeidsgiver.finnSykeperiodeRettFør(this)
+        if (harInntekt() || rettFør?.harInntekt() == true) return AvventerHistorikk
+        return AvventerInntektsmeldingFerdigForlengelse
     }
 
     private fun skalHaWarningForFlereArbeidsforholdUtenSykdomEllerUlikStartdato(
@@ -1710,19 +1711,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             vedtaksperiode.forberedMuligUtbetaling(inntektsmelding)
-        }
-
-        override fun håndter(
-            person: Person,
-            arbeidsgiver: Arbeidsgiver,
-            vedtaksperiode: Vedtaksperiode,
-            hendelse: IAktivitetslogg,
-            infotrygdhistorikk: Infotrygdhistorikk
-        ) {
-            val nesteTilstand = vedtaksperiode.avgjørTilstandForInntekt()
-            if (nesteTilstand == this) return super.håndter(person, arbeidsgiver, vedtaksperiode, hendelse, infotrygdhistorikk)
-            hendelse.info("Oppfrisking av infotrygdhistorikk medførte at vi har inntekt og kan gå videre.")
-            vedtaksperiode.tilstand(hendelse, nesteTilstand)
         }
     }
 
