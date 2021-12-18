@@ -1,13 +1,10 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.ForventetFeil
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
-import no.nav.helse.hendelser.Inntektsvurdering
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.til
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.TilstandType.*
@@ -24,6 +21,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.*
 
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
@@ -1125,6 +1123,48 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK)
         assertEquals(27.oktober til 8.november, inspektør.periode(1.vedtaksperiode))
         assertTrue(inspektør.sykdomstidslinje[27.oktober] is Dag.ArbeidsgiverHelgedag)
+    }
+
+    @Test
+    fun `vilkårsvurdering med flere arbeidsgivere gjør ikke at vi går ut av avventer inntektsmelding ferdig forlengelse pga GjennopptaBehandling`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent), orgnummer = a1)
+        håndterSøknadArbeidsgiver(Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
+        håndterSøknadArbeidsgiver(Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a2)
+        val skjæringstidspunkt = inspektør(a2).skjæringstidspunkt(2.vedtaksperiode)
+        val inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
+            skjæringstidspunkt.minusMonths(12L).withDayOfMonth(1) til skjæringstidspunkt.minusMonths(1L).withDayOfMonth(1) inntekter {
+                a1 inntekt INNTEKT
+                a2 inntekt INNTEKT
+            }
+        })
+        val inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(listOf(a1, a2).map { arbeidsgiver ->
+            ArbeidsgiverInntekt(arbeidsgiver.toString(), (0..2).map {
+                val yearMonth = YearMonth.from(skjæringstidspunkt).minusMonths(3L - it)
+                ArbeidsgiverInntekt.MånedligInntekt.Sykepengegrunnlag(
+                    yearMonth = yearMonth,
+                    type = ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
+                    inntekt = INNTEKT,
+                    fordel = "fordel",
+                    beskrivelse = "beskrivelse"
+                )
+            })
+        })
+        håndterVilkårsgrunnlag(2.vedtaksperiode, inntektsvurdering = inntektsvurdering, inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag, orgnummer = a2)
+
+        håndterSykmelding(Sykmeldingsperiode(17.februar, 20.februar, 100.prosent), orgnummer = a1)
+        håndterSøknadArbeidsgiver(Sykdom(17.februar, 20.februar, 100.prosent), orgnummer = a1)
+
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_ARBEIDSGIVERSØKNAD_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
     }
 
     @Test

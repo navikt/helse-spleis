@@ -689,6 +689,11 @@ internal class Arbeidsgiver private constructor(
 
     private fun fjernDager(periode: Periode) = sykdomshistorikk.fjernDager(periode)
 
+    internal fun harInntektsmelding(skjæringstidspunkt: LocalDate): Boolean {
+        val førsteFraværsdag = finnFørsteFraværsdag(skjæringstidspunkt) ?: return false
+        return inntektshistorikk.harInntektsmelding(skjæringstidspunkt, førsteFraværsdag)
+    }
+
     internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, periodeStart: LocalDate) =
         inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periodeStart, finnFørsteFraværsdag(skjæringstidspunkt))?.grunnlagForSykepengegrunnlag()
 

@@ -8,8 +8,7 @@ import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -38,6 +37,10 @@ internal class InntektshistorikkTest {
         inntektsmelding().addInntekt(historikk, 1.januar)
         assertEquals(1, inspektør.inntektTeller.size)
         assertEquals(1, inspektør.inntektTeller.first())
+        assertTrue(historikk.harInntektsmelding(1.januar, 1.januar))
+        assertFalse(historikk.harInntektsmelding(1.januar, 2.januar))
+        assertTrue(historikk.harInntektsmelding(31.januar, 1.januar))
+        assertFalse(historikk.harInntektsmelding(1.februar, 1.januar))
     }
 
     @Test

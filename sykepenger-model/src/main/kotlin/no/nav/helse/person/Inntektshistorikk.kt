@@ -34,6 +34,10 @@ internal class Inntektshistorikk {
 
     internal fun isNotEmpty() = historikk.isNotEmpty()
 
+    internal fun harInntektsmelding(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate) = historikk.any {
+        it.harInntektsmelding(skjæringstidspunkt, førsteFraværsdag)
+    }
+
     internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, dato: LocalDate, førsteFraværsdag: LocalDate?): Inntektsopplysning? =
         grunnlagForSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag) ?: skjæringstidspunkt
             .takeIf { it <= dato }
@@ -76,6 +80,10 @@ internal class Inntektshistorikk {
             }
         }
 
+        internal fun harInntektsmelding(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate) = inntekter
+            .sorted()
+            .any { it.harInntektsmelding(skjæringstidspunkt, førsteFraværsdag) }
+
         internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) =
             inntekter
                 .sorted()
@@ -113,6 +121,7 @@ internal class Inntektshistorikk {
             (-this.dato.compareTo(other.dato)).takeUnless { it == 0 } ?: -this.prioritet.compareTo(other.prioritet)
 
         fun kanLagres(other: Inntektsopplysning) = true
+        fun harInntektsmelding(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate) = false
     }
 
     internal class Saksbehandler(
@@ -175,6 +184,9 @@ internal class Inntektshistorikk {
         override fun accept(visitor: InntekthistorikkVisitor) {
             visitor.visitInntektsmelding(this, id, dato, hendelseId, beløp, tidsstempel)
         }
+
+        override fun harInntektsmelding(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate) =
+            grunnlagForSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag) != null
 
         override fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) =
             takeIf { førsteFraværsdag != null && YearMonth.from(skjæringstidspunkt) == YearMonth.from(førsteFraværsdag) && it.dato == førsteFraværsdag }

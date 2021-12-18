@@ -309,7 +309,8 @@ internal class Vedtaksperiode private constructor(
 
     internal fun inntektskilde() = inntektskilde
     // TODO: Kan byttes med en sjekk på vilkårsgrunnlag når AvsluttetUtenUtbetaling går gjennom vilkårsprøving https://trello.com/c/mQ4ZKeEG
-    private fun harInntekt() = arbeidsgiver.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periode.start) != null
+    private fun harInntekt() = harInntektsmelding() || arbeidsgiver.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periode.start) != null
+    private fun harInntektsmelding() = arbeidsgiver.harInntektsmelding(skjæringstidspunkt)
     private fun avgjørTilstandForInntekt(): Vedtaksperiodetilstand {
         val rettFør = arbeidsgiver.finnSykeperiodeRettFør(this)
         if (harInntekt() || rettFør?.harInntekt() == true) return AvventerHistorikk
@@ -1701,7 +1702,7 @@ internal class Vedtaksperiode private constructor(
 
         // TODO: kan fjernes nå https://trello.com/c/Eoug7QnR er gjort
         override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
-            if (!vedtaksperiode.harInntekt()) return
+            if (!vedtaksperiode.harInntektsmelding()) return
             vedtaksperiode.tilstand(gjenopptaBehandling, AvventerHistorikk)
         }
 
