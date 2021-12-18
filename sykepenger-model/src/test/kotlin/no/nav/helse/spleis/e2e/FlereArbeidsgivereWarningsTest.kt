@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.ForventetFeil
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
 import no.nav.helse.testhelpers.desember
@@ -12,6 +13,15 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
+
+    @ForventetFeil("Periode nr. 1 hos AG2 får warning fordi den overlapper med kort arbeidsgiverperiodesøknad")
+    @Test
+    fun `overlapper med kort arbeidsgiverperiodesøknad`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent), orgnummer = a1)
+        håndterSøknadArbeidsgiver(Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent), orgnummer = a2)
+        assertNoWarnings(1.vedtaksperiode, orgnummer = a2)
+    }
 
     @Test
     fun `En arbeidsgiver med inntekter fra flere arbeidsgivere de siste tre månedene - får ikke warning om at det er flere arbeidsgivere, får warning om at det er flere inntektskilder enn arbeidsforhold`() {
