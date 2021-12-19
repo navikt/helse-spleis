@@ -54,7 +54,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
                             tom = 31.januar,
                             sats = 1431,
                             beløp = 1431,
-                            grad = 100.0,
+                            grad = 100,
                             sykedager = 11
                         )
                     )
@@ -106,7 +106,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
                             tom = 31.januar,
                             sats = 1431,
                             beløp = 1431,
-                            grad = 100.0,
+                            grad = 100,
                             sykedager = 11
                         )
                     )

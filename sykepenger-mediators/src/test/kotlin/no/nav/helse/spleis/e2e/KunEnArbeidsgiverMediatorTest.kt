@@ -22,7 +22,6 @@ import no.nav.syfo.kafka.felles.FravarDTO
 import no.nav.syfo.kafka.felles.FravarstypeDTO
 import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -493,7 +492,6 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         verify(exactly = 2) { hendelseRepository.markerSomBehandlet(meldingId) }
     }
 
-    @Disabled("https://trello.com/c/Ob6kSelp")
     @Test
     fun `spleis sender korrekt grad (avrundet) ut`() {
         sendNySøknad(

@@ -15,10 +15,10 @@ internal enum class Fagområde(
 
     override fun toString() = verdi
 
-    internal fun linje(fagsystemId: String, økonomi: Økonomi, dato: LocalDate, grad: Double, beløp: Int) =
+    internal fun linje(fagsystemId: String, økonomi: Økonomi, dato: LocalDate, grad: Int, beløp: Int) =
         Utbetalingslinje(dato, dato, Satstype.DAG, beløpStrategy(økonomi), beløp, grad, fagsystemId, klassekode = klassekode)
 
-    internal fun linje(fagsystemId: String, dato: LocalDate, grad: Double) =
+    internal fun linje(fagsystemId: String, dato: LocalDate, grad: Int) =
         Utbetalingslinje(dato, dato, Satstype.DAG, null, 0, grad, fagsystemId, klassekode = klassekode)
 
     internal fun oppdaterLinje(linje: Utbetalingslinje, dato: LocalDate, økonomi: Økonomi, beløp: Int) {
@@ -27,7 +27,7 @@ internal enum class Fagområde(
         linje.fom = dato
     }
 
-    internal fun kanLinjeUtvides(linje: Utbetalingslinje, økonomi: Økonomi, grad: Double) =
+    internal fun kanLinjeUtvides(linje: Utbetalingslinje, økonomi: Økonomi, grad: Int) =
         grad == linje.grad && (linje.beløp == null || linje.beløp == beløpStrategy(økonomi))
 
     internal companion object {

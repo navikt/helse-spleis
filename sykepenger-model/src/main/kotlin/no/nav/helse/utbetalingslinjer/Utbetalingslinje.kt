@@ -14,7 +14,7 @@ internal class Utbetalingslinje internal constructor(
     internal var satstype: Satstype = Satstype.DAG,
     internal var beløp: Int?,
     internal var aktuellDagsinntekt: Int?,
-    internal val grad: Double?,
+    internal val grad: Int?,
     internal var refFagsystemId: String? = null,
     private var delytelseId: Int = 1,
     private var refDelytelseId: Int? = null,

@@ -62,7 +62,7 @@ interface PersonObserver {
                 val tom: LocalDate,
                 val sats: Int,
                 val beløp: Int,
-                val grad: Double,
+                val grad: Int,
                 val sykedager: Int
             )
         }

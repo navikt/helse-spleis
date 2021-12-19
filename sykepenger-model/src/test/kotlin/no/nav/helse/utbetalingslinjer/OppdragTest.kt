@@ -30,7 +30,7 @@ internal class OppdragTest {
                 endringskode = Endringskode.NY,
                 aktuellDagsinntekt = 1000,
                 beløp = 1000,
-                grad = 100.0
+                grad = 100
             )
         ), sisteArbeidsgiverdag = 31.desember(2017))
         val oppdrag2 = Oppdrag("mottaker", Fagområde.Sykepenger)
@@ -47,7 +47,7 @@ internal class OppdragTest {
                 endringskode = Endringskode.NY,
                 aktuellDagsinntekt = 1000,
                 beløp = 1000,
-                grad = 100.0
+                grad = 100
             )
         ), sisteArbeidsgiverdag = 31.desember(2017))
         val oppdrag2 = Oppdrag("mottaker", Fagområde.Sykepenger)
@@ -65,7 +65,7 @@ internal class OppdragTest {
                 endringskode = Endringskode.NY,
                 aktuellDagsinntekt = 1000,
                 beløp = 1000,
-                grad = 100.0
+                grad = 100
             )
         ), sisteArbeidsgiverdag = 31.desember(2017))
         val oppdrag2 = Oppdrag("mottaker", Fagområde.Sykepenger, listOf(
@@ -75,7 +75,7 @@ internal class OppdragTest {
                 endringskode = Endringskode.NY,
                 aktuellDagsinntekt = 1000,
                 beløp = 1000,
-                grad = 100.0
+                grad = 100
             )
         ), sisteArbeidsgiverdag = 31.desember(2017))
         oppdrag1.lagreOverføringsinformasjon(UtbetalingOverført(UUID.randomUUID(), "aktør", "fnr", "orgnr", oppdrag1.fagsystemId(), UUID.randomUUID().toString(), 1234L, LocalDateTime.now()))
@@ -91,7 +91,7 @@ internal class OppdragTest {
                 endringskode = Endringskode.NY,
                 aktuellDagsinntekt = 1000,
                 beløp = 1000,
-                grad = 100.0
+                grad = 100
             )
         ), sisteArbeidsgiverdag = 31.desember(2017))
         val oppdrag2 = Oppdrag("mottaker", Fagområde.Sykepenger, listOf(
@@ -101,7 +101,7 @@ internal class OppdragTest {
                 endringskode = Endringskode.NY,
                 aktuellDagsinntekt = 1000,
                 beløp = 1000,
-                grad = 100.0
+                grad = 100
             )
         ), sisteArbeidsgiverdag = 31.desember(2017))
         oppdrag1.lagreOverføringsinformasjon(UtbetalingOverført(UUID.randomUUID(), "aktør", "fnr", "orgnr", oppdrag1.fagsystemId(), UUID.randomUUID().toString(), 1234L, LocalDateTime.now()))
@@ -119,7 +119,7 @@ internal class OppdragTest {
                 endringskode = Endringskode.NY,
                 aktuellDagsinntekt = 1000,
                 beløp = 1000,
-                grad = 100.0
+                grad = 100
             )
         ), sisteArbeidsgiverdag = 31.desember(2017))
         val oppdrag2 = Oppdrag("mottaker", Fagområde.Sykepenger, listOf(
@@ -129,7 +129,7 @@ internal class OppdragTest {
                 endringskode = Endringskode.NY,
                 aktuellDagsinntekt = 1000,
                 beløp = 1000,
-                grad = 100.0
+                grad = 100
             )
         ), sisteArbeidsgiverdag = 31.desember(2017))
         oppdrag1.lagreOverføringsinformasjon(UtbetalingOverført(UUID.randomUUID(), "aktør", "fnr", "orgnr", oppdrag1.fagsystemId(), UUID.randomUUID().toString(), 1234L, LocalDateTime.now()))
@@ -155,7 +155,7 @@ internal class OppdragTest {
                     endringskode = Endringskode.UEND,
                     aktuellDagsinntekt = 1000,
                     beløp = 1000,
-                    grad = 100.0
+                    grad = 100
                 )
 
             ), sisteArbeidsgiverdag = 16.januar
@@ -174,7 +174,7 @@ internal class OppdragTest {
                     endringskode = Endringskode.UEND,
                     aktuellDagsinntekt = 1000,
                     beløp = 1000,
-                    grad = 100.0
+                    grad = 100
                 )
 
             ), sisteArbeidsgiverdag = 16.januar
@@ -228,7 +228,7 @@ internal class OppdragTest {
                     endringskode = Endringskode.NY,
                     aktuellDagsinntekt = 1000,
                     beløp = 1000,
-                    grad = 100.0
+                    grad = 100
                 )
 
             ), sisteArbeidsgiverdag = 16.januar
@@ -248,7 +248,7 @@ internal class OppdragTest {
                     endringskode = Endringskode.NY,
                     aktuellDagsinntekt = 1000,
                     beløp = 1000,
-                    grad = 100.0
+                    grad = 100
                 )
 
             ), sisteArbeidsgiverdag = 16.januar
@@ -268,7 +268,7 @@ internal class OppdragTest {
                     endringskode = Endringskode.NY,
                     aktuellDagsinntekt = 1000,
                     beløp = 1000,
-                    grad = 100.0
+                    grad = 100
                 )
 
             ), sisteArbeidsgiverdag = 16.januar
@@ -302,7 +302,7 @@ internal class OppdragTest {
                     endringskode = Endringskode.NY,
                     aktuellDagsinntekt = 1000,
                     beløp = 1000,
-                    grad = 100.0
+                    grad = 100
                 )
 
             ), sisteArbeidsgiverdag = 16.januar
@@ -338,7 +338,7 @@ internal class OppdragTest {
                     endringskode = Endringskode.NY,
                     aktuellDagsinntekt = 1000,
                     beløp = 1000,
-                    grad = 100.0
+                    grad = 100
                 )
 
             ), sisteArbeidsgiverdag = 16.januar
@@ -386,7 +386,7 @@ internal class OppdragTest {
                     endringskode = Endringskode.NY,
                     aktuellDagsinntekt = 1000,
                     beløp = 1000,
-                    grad = 100.0
+                    grad = 100
                 )
 
             ), sisteArbeidsgiverdag = 16.januar

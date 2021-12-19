@@ -1,0 +1,45 @@
+{
+    "arbeidsgivere": [
+        {
+            "feriepengeutbetalinger": [
+                {
+                    "oppdrag": {
+                        "linjer": [
+                            {
+                                "grad": 19.999999999999996
+                            },
+                            {
+                                "grad": 20.11
+                            }
+                        ]
+                    }
+                }
+            ],
+            "utbetalinger": [
+                {
+                    "arbeidsgiverOppdrag": {
+                        "linjer": [
+                            {
+                                "grad": 19.999999999999996
+                            },
+                            {
+                                "grad": 20.11
+                            }
+                        ]
+                    },
+                    "personOppdrag": {
+                        "linjer": [
+                            {
+                                "grad": 19.999999999999996
+                            },
+                            {
+                                "grad": 50.0
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ],
+    "skjemaVersjon": 134
+}

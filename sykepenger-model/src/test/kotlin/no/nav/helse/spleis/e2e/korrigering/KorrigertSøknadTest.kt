@@ -107,7 +107,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         object : OppdragVisitor {
-            var grad: Double? = null
+            var grad: Int? = null
             override fun visitUtbetalingslinje(
                 linje: Utbetalingslinje,
                 fom: LocalDate,
@@ -117,7 +117,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
                 satstype: Satstype,
                 beløp: Int?,
                 aktuellDagsinntekt: Int?,
-                grad: Double?,
+                grad: Int?,
                 delytelseId: Int,
                 refDelytelseId: Int?,
                 refFagsystemId: String?,
@@ -130,7 +130,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
             }
         }.also {
             inspektør.arbeidsgiverOppdrag.first().accept(it)
-            assertEquals(50.0, it.grad)
+            assertEquals(50, it.grad)
         }
     }
 

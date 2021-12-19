@@ -1371,11 +1371,11 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             assertEquals(2, oppdrag.size)
             assertEquals(18.januar, oppdrag[0].fom)
             assertEquals(25.januar, oppdrag[0].tom)
-            assertEquals(100.0, oppdrag[0].grad)
+            assertEquals(100, oppdrag[0].grad)
 
             assertEquals(26.januar, oppdrag[1].fom)
             assertEquals(26.januar, oppdrag[1].tom)
-            assertEquals(80.0, oppdrag[1].grad)
+            assertEquals(80, oppdrag[1].grad)
         }
     }
 
@@ -1411,7 +1411,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             assertEquals(18.januar, oppdrag[0].fom)
             assertEquals(26.januar, oppdrag[0].tom)
             assertTrue(oppdrag[0].erForskjell())
-            assertEquals(100.0, oppdrag[0].grad)
+            assertEquals(100, oppdrag[0].grad)
         }
     }
 
