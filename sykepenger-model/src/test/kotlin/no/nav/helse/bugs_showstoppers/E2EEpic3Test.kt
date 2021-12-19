@@ -21,7 +21,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -1506,29 +1505,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING
-        )
-    }
-
-    @Disabled("Tester ingenting, men viser et out of order-scenario")
-    @Test
-    fun `Out of order sykmeldinger gjør at vedtaksperiodene feilaktig får forskjellig gruppe-id`() {
-        /*Sykmelding for 19-22.mars får en annen gruppeId enn de to foregående,
-        selv om den i virkeligheten er en invers forlengelse av disse.
-        Inntektsmeldingen som senere kommer inn treffer denne og blir markert som qualified.
-        Når neste søknad (23 - 29.mars) plukker opp inntektsmeldingen ser den denne som allerede vurdert
-        og går til "AvsluttetUtenUtbetalingMedInntektsmelding" i stedet for "AvventerVilkårsprøvingArbeidsgiversøknad".
-        Dette gjør at denne "gruppen" ender opp med å ikke ha vilkårsvurdering.
-        Når SpeilBuilder senere henter ut dataForVilkårsvurdering basert på den første perioden knyttet til en gruppeId,
-        finner den null. Dermed blir sykepengegrunnlaget null. */
-        håndterSykmelding(Sykmeldingsperiode(23.mars(2020), 29.mars(2020), 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(30.mars(2020), 12.april(2020), 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(19.mars(2020), 22.mars(2020), 100.prosent))
-        håndterSøknadArbeidsgiver(Sykdom(23.mars(2020), 29.mars(2020), 100.prosent))
-        håndterSøknadArbeidsgiver(Sykdom(19.mars(2020), 22.mars(2020), 100.prosent))
-        håndterSøknad(Sykdom(30.mars(2020), 12.april(2020), 100.prosent))
-        håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(Periode(17.mars(2020), 1.april(2020))),
-            førsteFraværsdag = 17.mars(2020)
         )
     }
 
