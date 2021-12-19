@@ -222,6 +222,8 @@ internal class Økonomi private constructor(
             grad: Int,
             arbeidsgiverRefusjonsbeløp: Int,
             dekningsgrunnlag: Int,
+            skjæringstidspunkt: LocalDate?,
+            totalGrad: Int,
             aktuellDagsinntekt: Int,
             arbeidsgiverbeløp: Int?,
             personbeløp: Int?,
@@ -231,8 +233,8 @@ internal class Økonomi private constructor(
         medData { grad: Double,
                   arbeidsgiverRefusjonsbeløp: Double,
                   dekningsgrunnlag: Double,
-                  _: LocalDate?,
-                  _: Double,
+                  skjæringstidspunkt: LocalDate?,
+                  totalGrad: Double,
                   aktuellDagsinntekt: Double,
                   arbeidsgiverbeløp: Double?,
                   personbeløp: Double?,
@@ -241,6 +243,8 @@ internal class Økonomi private constructor(
                 grad.roundToInt(),
                 arbeidsgiverRefusjonsbeløp.roundToInt(),
                 dekningsgrunnlag.roundToInt(),
+                skjæringstidspunkt,
+                totalGrad.roundToInt(),
                 aktuellDagsinntekt.roundToInt(),
                 arbeidsgiverbeløp?.roundToInt(),
                 personbeløp?.roundToInt(),
@@ -248,29 +252,21 @@ internal class Økonomi private constructor(
             )
         }
 
-    internal fun <R> medData(block: (grad: Double, aktuellDagsinntekt: Double) -> R) =
+    internal fun <R> medData(block: (grad: Double, totalGrad: Double, aktuellDagsinntekt: Double) -> R) =
         medData { grad: Double,
                   _: Double,
                   _: Double?,
                   _: LocalDate?,
-                  _: Double,
+                  totalGrad: Double,
                   aktuellDagsinntekt: Double,
                   _: Double?,
                   _: Double?,
                   _: Boolean? ->
-            block(grad, aktuellDagsinntekt)
+            block(grad, totalGrad, aktuellDagsinntekt)
         }
 
     internal fun medAvrundetData(block: (grad: Int, aktuellDagsinntekt: Int) -> Unit) {
-        medAvrundetData { grad: Int,
-                          _: Int,
-                          _: Int?,
-                          aktuellDagsinntekt: Int,
-                          _: Int?,
-                          _: Int?,
-                          _: Boolean? ->
-            block(grad, aktuellDagsinntekt)
-        }
+        medAvrundetData { grad, _, _, _, _, aktuellDagsinntekt, _, _, _ -> block(grad, aktuellDagsinntekt) }
     }
 
     private fun <R> medDataFraBeløp(lambda: MedØkonomiData<R>) = lambda(

@@ -1,6 +1,5 @@
 package no.nav.helse.serde.migration
 
-import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -11,7 +10,6 @@ import org.junit.jupiter.api.Test
 internal class V69SetteOpprettetOgOppdatertTidspunktTest {
     private val objectMapper = jacksonObjectMapper()
         .registerModule(JavaTimeModule())
-        .enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY)
         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
     @Test

@@ -253,7 +253,7 @@ internal class ØkonomiTest {
     @Test
     fun `toIntMap med dekningsgrunnlag`() {
         79.5.prosent.sykdomsgrad.inntekt(1200.4.daglig, 1200.4.daglig, skjæringstidspunkt = 1.januar)
-            .medAvrundetData { grad, _, dekningsgrunnlag, _, _, _, _ ->
+            .medAvrundetData { grad, _, dekningsgrunnlag, _, _, _, _, _, _ ->
                 assertEquals(80, grad)
                 assertEquals(1200, dekningsgrunnlag)
             }
@@ -276,7 +276,7 @@ internal class ØkonomiTest {
                 assertEquals(960.0, arbeidsgiverbeløp)
                 assertEquals(0.0, personbeløp)
             }
-            it.medAvrundetData { grad, _, dekningsgrunnlag, _, arbeidsgiverbeløp, personbeløp, _ ->
+            it.medAvrundetData { grad, _, dekningsgrunnlag, _, _, _, arbeidsgiverbeløp, personbeløp, _ ->
                 assertEquals(80, grad)
                 assertEquals(1200, dekningsgrunnlag)
                 assertEquals(960, arbeidsgiverbeløp)

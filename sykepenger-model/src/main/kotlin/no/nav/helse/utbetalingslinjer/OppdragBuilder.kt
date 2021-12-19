@@ -70,7 +70,8 @@ internal class OppdragBuilder(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        økonomi.medData { grad, aktuellDagsinntekt ->
+        // TODO: OppdragBuilder må bruke grad som Int, altså avrundetData
+        økonomi.medData { grad, _, aktuellDagsinntekt ->
             if (utbetalingslinjer.isNotEmpty() && fagområde.kanLinjeUtvides(linje, dag.økonomi, grad))
                 tilstand.betalingsdag(dag, dato, grad, aktuellDagsinntekt)
             else
@@ -83,7 +84,8 @@ internal class OppdragBuilder(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        økonomi.medData { grad, _ ->
+        // TODO: OppdragBuilder må bruke grad som Int, altså avrundetData
+        økonomi.medData { grad, _, _ ->
            if (utbetalingslinjer.isNotEmpty() && grad != linje.grad)
                 tilstand.nyLinje(dag, dato, grad)
             else

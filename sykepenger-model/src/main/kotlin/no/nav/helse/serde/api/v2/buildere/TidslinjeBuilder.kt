@@ -11,7 +11,6 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.util.*
-import kotlin.math.roundToInt
 
 // Besøker hele sykdomshistorikk-treet
 internal class VedtaksperiodeSykdomstidslinjeBuilder(vedtaksperiode: Vedtaksperiode): VedtaksperiodeVisitor {
@@ -108,7 +107,7 @@ internal class SykdomstidslinjeBuilder(tidslinje: Sykdomstidslinje): Sykdomstids
             dato,
             dag.toDagtypeDTO(),
             Sykdomstidslinjedag.SykdomstidslinjedagKilde(kilde.toKildetypeDTO(), kilde.meldingsreferanseId()),
-            økonomi?.medData { grad, _, _, _, _, _, _, _, _ -> grad }
+            økonomi?.medData { grad, _, _ -> grad }
         )
 
         tidslinje.add(dagDto)
@@ -157,7 +156,7 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
             utbetalingstidslinje.add(
                 UtbetalingstidslinjedagUtenGrad(
                     type = UtbetalingstidslinjedagType.Arbeidsdag,
-                    inntekt = aktuellDagsinntekt!!,
+                    inntekt = aktuellDagsinntekt,
                     dato = dato
                 )
             )
@@ -185,16 +184,18 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        økonomi.medData { grad, refusjonsbeløp, _, _, totalGrad, aktuellDagsinntekt, arbeidsgiverbeløp, personbeløp, _ ->
+        // TODO: Trenger speil _egentlig_ doubles?
+        val (grad, totalGrad) = økonomi.medData { grad, totalGrad, _ -> grad to totalGrad }
+        økonomi.medAvrundetData { _, refusjonsbeløp, _, _, _, aktuellDagsinntekt, arbeidsgiverbeløp, personbeløp, _ ->
             utbetalingstidslinje.add(
                 NavDag(
                     type = UtbetalingstidslinjedagType.NavDag,
-                    inntekt = aktuellDagsinntekt!!.roundToInt(),
+                    inntekt = aktuellDagsinntekt,
                     dato = dato,
-                    utbetaling = arbeidsgiverbeløp!!.roundToInt(),
-                    arbeidsgiverbeløp = arbeidsgiverbeløp.roundToInt(),
-                    personbeløp = personbeløp!!.roundToInt(),
-                    refusjonsbeløp = refusjonsbeløp?.roundToInt(),
+                    utbetaling = arbeidsgiverbeløp!!,
+                    arbeidsgiverbeløp = arbeidsgiverbeløp,
+                    personbeløp = personbeløp!!,
+                    refusjonsbeløp = refusjonsbeløp,
                     grad = grad,
                     totalGrad = totalGrad
                 )
@@ -207,7 +208,7 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        økonomi.medData { grad, _ ->
+        økonomi.medData { grad, _, _ ->
             utbetalingstidslinje.add(
                 UtbetalingstidslinjedagMedGrad(
                     type = UtbetalingstidslinjedagType.NavHelgDag,
@@ -252,7 +253,7 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        økonomi.medData { _, _, _, _, totalGrad, _, _, _, _ ->
+        økonomi.medData { _, totalGrad, _ ->
             utbetalingstidslinje.add(
                 AvvistDag(
                     type = UtbetalingstidslinjedagType.AvvistDag,

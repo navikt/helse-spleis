@@ -6,7 +6,6 @@ import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
-import kotlin.math.roundToInt
 
 internal class UtbetalingstidslinjeBuilder(
     private val utbetalingstidslinjeMap: MutableList<UtbetalingstidslinjedagDTO>
@@ -51,16 +50,18 @@ internal class UtbetalingstidslinjeBuilder(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        økonomi.medData { grad, arbeidsgiverRefusjonsbeløp, _, _, totalGrad, aktuellDagsinntekt, arbeidsgiverbeløp, personbeløp, _ ->
+        // TODO: Trenger speil _egentlig_ doubles?
+        val (grad, totalGrad) = økonomi.medData { grad, totalGrad, _ -> grad to totalGrad }
+        økonomi.medAvrundetData { _, arbeidsgiverRefusjonsbeløp, _, _, _, aktuellDagsinntekt, arbeidsgiverbeløp, personbeløp, _ ->
             utbetalingstidslinjeMap.add(
                 NavDagDTO(
                     type = DagtypeDTO.NavDag,
-                    inntekt = aktuellDagsinntekt!!.roundToInt(),
+                    inntekt = aktuellDagsinntekt,
                     dato = dato,
-                    utbetaling = arbeidsgiverbeløp!!.roundToInt(),
-                    arbeidsgiverbeløp = arbeidsgiverbeløp.roundToInt(),
-                    personbeløp = personbeløp!!.roundToInt(),
-                    refusjonsbeløp = arbeidsgiverRefusjonsbeløp.roundToInt(),
+                    utbetaling = arbeidsgiverbeløp!!,
+                    arbeidsgiverbeløp = arbeidsgiverbeløp,
+                    personbeløp = personbeløp!!,
+                    refusjonsbeløp = arbeidsgiverRefusjonsbeløp,
                     grad = grad,
                     totalGrad = totalGrad
                 )
@@ -73,7 +74,7 @@ internal class UtbetalingstidslinjeBuilder(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        økonomi.medData { grad, _ ->
+        økonomi.medData { grad, _, _ ->
             utbetalingstidslinjeMap.add(
                 NavHelgedagDTO(
                     type = DagtypeDTO.NavHelgDag,

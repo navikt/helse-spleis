@@ -127,7 +127,7 @@ internal class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: 
         økonomi.medData { _, _, _, _, _, aktuellDagsinntekt, arbeidsgiverbeløp, personbeløp, _ ->
             totalUtbetaling += arbeidsgiverbeløp ?: 0.0
             totalUtbetaling += personbeløp ?: 0.0
-            totalInntekt += aktuellDagsinntekt ?: 0.0
+            totalInntekt += aktuellDagsinntekt
         }
         navDagTeller += 1
         navdager.add(dag)

@@ -915,7 +915,7 @@ internal class UtbetalingstidslinjeBuilderTest {
 
     private fun assertInntekter(dekningsgrunnlaget: Int? = null, aktuelleDagsinntekten: Int? = null) {
         tidslinje.inspektør.navdager.forEach { navDag ->
-            navDag.økonomi.medAvrundetData { _, _, dekningsgrunnlag, aktuellDagsinntekt, _, _, _ ->
+            navDag.økonomi.medAvrundetData { _, _, dekningsgrunnlag, _, _, aktuellDagsinntekt, _, _, _ ->
                 dekningsgrunnlaget?.let { assertEquals(it, dekningsgrunnlag) }
                 aktuelleDagsinntekten?.let { assertEquals(it, aktuellDagsinntekt) }
             }
@@ -926,7 +926,7 @@ internal class UtbetalingstidslinjeBuilderTest {
         filter { it.dato in periode }
             .forEach { utbetalingsdag ->
                 val daglig = dekningsgrunnlaget?.reflection { _, _, _, daglig -> daglig }
-                utbetalingsdag.økonomi.medAvrundetData { _, _, dekningsgrunnlag, _, _, _, _ ->
+                utbetalingsdag.økonomi.medAvrundetData { _, _, dekningsgrunnlag, _, _, _, _, _, _ ->
                     assertEquals(daglig, dekningsgrunnlag)
                 }
             }

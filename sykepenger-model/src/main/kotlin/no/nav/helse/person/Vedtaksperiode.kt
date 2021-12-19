@@ -967,7 +967,7 @@ internal class Vedtaksperiode private constructor(
             sykdomstidslinje.forEach { dag ->
                 dag.accept(object : SykdomstidslinjeVisitor {
                     override fun visitDag(dag: Dag.Sykedag, dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
-                        økonomi.medData { grad, _ -> grader.add(grad) }
+                        økonomi.medData { grad, _, _ -> grader.add(grad) }
                     }
                 })
             }

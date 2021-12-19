@@ -825,7 +825,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
     fun `§8-30 ledd 2 - gjør ikke ny juridisk vurdering ved sjekk av inntektsavvik i forlengelse av kort periode`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 1.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 1.januar, 100.prosent))
-        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
 
         håndterSykmelding(Sykmeldingsperiode(2.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(2.januar, 31.januar, 100.prosent))

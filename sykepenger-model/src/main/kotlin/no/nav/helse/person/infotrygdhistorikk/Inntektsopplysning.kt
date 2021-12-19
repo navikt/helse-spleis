@@ -79,16 +79,15 @@ class Inntektsopplysning private constructor(
             nødnummer: Nødnummer
         ) {
             liste.forEach { it.valider(aktivitetslogg, skjæringstidspunkt, nødnummer) }
-            liste.fjern(nødnummer).validerAlleInntekterForSammenhengendePeriode(skjæringstidspunkt, aktivitetslogg, periode)
-            liste.fjern(nødnummer).validerAntallInntekterPerArbeidsgiverPerDato(skjæringstidspunkt, aktivitetslogg, periode)
+            liste.fjern(nødnummer).validerAlleInntekterForSammenhengendePeriode(skjæringstidspunkt, aktivitetslogg)
+            liste.fjern(nødnummer).validerAntallInntekterPerArbeidsgiverPerDato(skjæringstidspunkt, aktivitetslogg)
         }
 
         internal fun Iterable<Inntektsopplysning>.harInntekterFor(datoer: List<LocalDate>) = map { it.sykepengerFom }.containsAll(datoer)
 
         private fun List<Inntektsopplysning>.validerAlleInntekterForSammenhengendePeriode(
             skjæringstidspunkt: LocalDate,
-            aktivitetslogg: IAktivitetslogg,
-            periode: Periode
+            aktivitetslogg: IAktivitetslogg
         ) {
             val relevanteInntektsopplysninger = filter { it.erRelevant(skjæringstidspunkt) }
             val harFlereArbeidsgivere = relevanteInntektsopplysninger.distinctBy { it.orgnummer }.size > 1
@@ -98,8 +97,7 @@ class Inntektsopplysning private constructor(
 
         private fun List<Inntektsopplysning>.validerAntallInntekterPerArbeidsgiverPerDato(
             skjæringstidspunkt: LocalDate,
-            aktivitetslogg: IAktivitetslogg,
-            periode: Periode
+            aktivitetslogg: IAktivitetslogg
         ) {
             val harFlereInntekterPåSammeAGogDato = filter { it.erRelevant(skjæringstidspunkt) }
                 .groupBy { it.orgnummer to it.sykepengerFom }

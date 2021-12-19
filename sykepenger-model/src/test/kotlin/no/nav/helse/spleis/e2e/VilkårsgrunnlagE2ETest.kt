@@ -93,12 +93,8 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         val arbeidsgiverperioder = listOf(
             1.januar(2021) til 16.januar(2021)
         )
-        val inntektsmeldingId = håndterInntektsmelding(
-            arbeidsgiverperioder, førsteFraværsdag = 1.januar(2021)
-        )
-
+        håndterInntektsmelding(arbeidsgiverperioder, førsteFraværsdag = 1.januar(2021))
         håndterYtelser(1.vedtaksperiode)
-
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2020) til 1.desember(2020) inntekter {
@@ -176,7 +172,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
     fun `25 % avvik i inntekt lager error`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2021), 17.januar(2021), 100.prosent))
         håndterSøknad(Sykdom(1.januar(2021), 17.januar(2021), 100.prosent))
-        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021)), førsteFraværsdag = 1.januar(2021))
+        håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021)), førsteFraværsdag = 1.januar(2021))
 
         håndterYtelser(1.vedtaksperiode)
 

@@ -6,6 +6,7 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.april
 import no.nav.helse.testhelpers.tidslinjeOf
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag.Companion.reflectedArbeidsgiverBeløp
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -32,10 +33,10 @@ internal class MaksimumUtbetalingFlereArbeidsgivereTest {
         val dato = Utbetalingstidslinje.periode(listOf(ag1.first, ag2.first)).start
         val maksDagsats = Grunnbeløp.`6G`.dagsats(dato)
         MaksimumUtbetaling(listOf(ag2.first, ag1.first), aktivitetslogg, dato).betal()
-        assertTrue(ag1.first.inspektør.økonomi.all { it.medAvrundetData { _, _, _, _, arbeidsgiverbeløp, _, _ -> arbeidsgiverbeløp?.daglig == maksDagsats } }) {
+        assertTrue(ag1.first.inspektør.økonomi.all { reflectedArbeidsgiverBeløp(it).daglig == maksDagsats }) {
             "noen dager har fått nytt grunnbeløp"
         }
-        assertTrue(ag2.first.inspektør.økonomi.all { it.medAvrundetData { _, _, _, _, arbeidsgiverbeløp, _, _ -> arbeidsgiverbeløp?.daglig == maksDagsats } }) {
+        assertTrue(ag2.first.inspektør.økonomi.all { reflectedArbeidsgiverBeløp(it).daglig == maksDagsats }) {
             "noen dager har fått nytt grunnbeløp"
         }
         assertEquals(ag1.second, ag1.first.inspektør.totalUtbetaling())

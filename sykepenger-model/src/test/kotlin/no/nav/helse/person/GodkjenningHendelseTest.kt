@@ -258,7 +258,7 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
                 totalbeløp = 1000,
                 perioder = emptyList()
             ),
-            utbetalingId = UUID.fromString(inspektør.sisteBehov(Behovtype.Simulering).kontekst().getValue("utbetalingId") as String)
+            utbetalingId = UUID.fromString(inspektør.sisteBehov(Behovtype.Simulering).kontekst().getValue("utbetalingId"))
         ).apply {
             hendelse = this
         }
