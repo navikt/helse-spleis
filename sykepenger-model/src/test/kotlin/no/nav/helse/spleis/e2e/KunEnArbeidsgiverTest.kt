@@ -21,7 +21,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -1697,61 +1696,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE
-        )
-    }
-
-    @Disabled("Håndtering av overlapp skal medføre at overlappende sykmeldinger blir delt opp i egne perioder")
-    @Test
-    fun `Overlapp-scenario fra prod`() {
-        håndterSykmelding(Sykmeldingsperiode(27.mai(2020), 14.juni(2020), 100.prosent))
-        håndterSøknad(Sykdom(27.mai(2020), 14.juni(2020), 100.prosent))
-        håndterYtelser(
-            1.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.mai(2020), 26.mai(2020), 100.prosent, 2000.daglig)
-        )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode)
-
-        håndterPåminnelse(
-            1.vedtaksperiode,
-            AVVENTER_SIMULERING,
-            LocalDateTime.now().minusDays(200)
-        ) // <-- TIL_INFOTRYGD
-        assertEquals(TIL_INFOTRYGD, inspektør.sisteTilstand(1.vedtaksperiode))
-        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
-
-        håndterSykmelding(Sykmeldingsperiode(29.mai(2020), 18.juni(2020), 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(15.juni(2020), 3.juli(2020), 100.prosent))
-
-        // Håndtering av overlapp skal medføre at sykmelding fra 15.juni til 3.juli blir en ny vedtaksperiode og at den foregående sykmeldingen blir trimmet
-        // Blir p.t. ignorert
-        assertEquals(3, inspektør.vedtaksperiodeTeller)
-
-        håndterSøknad(Sykdom(15.juni(2020), 3.juli(2020), 100.prosent))
-
-        håndterYtelser(
-            1.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.mai(2020), 26.mai(2020), 100.prosent, 2000.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 27.mai(2020), 14.juni(2020), 100.prosent, 2000.daglig)
-        )
-
-        håndterSykmelding(Sykmeldingsperiode(4.juli(2020), 20.juli(2020), 100.prosent))
-        håndterSøknad(Sykdom(4.juli(2020), 20.juli(2020), 100.prosent))
-
-        håndterYtelser(
-            1.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.mai(2020), 26.mai(2020), 100.prosent, 2000.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 27.mai(2020), 14.juni(2020), 100.prosent, 2000.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 15.juni(2020), 3.juli(2020), 100.prosent, 2000.daglig)
-        )
-
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-
-        håndterYtelser(
-            1.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.mai(2020), 26.mai(2020), 100.prosent, 2000.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 27.mai(2020), 14.juni(2020), 100.prosent, 2000.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 15.juni(2020), 3.juli(2020), 100.prosent, 2000.daglig)
         )
     }
 
