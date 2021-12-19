@@ -16,8 +16,6 @@ internal sealed class Dag(
     private fun name() = javaClass.canonicalName.split('.').last()
 
     companion object {
-        internal fun Collection<Dag>.toDatoDagMap(): Map<LocalDate, Dag> = this.associateBy { it.dato }
-
         internal fun Map<LocalDate, Dag>.sykmeldingSkrevet(): LocalDateTime {
             check(all { it.value.kommerFra(Sykmelding::class) })
             return values.first().kilde.tidsstempel()

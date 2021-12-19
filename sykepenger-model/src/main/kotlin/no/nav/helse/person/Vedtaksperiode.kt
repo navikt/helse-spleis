@@ -2259,10 +2259,7 @@ internal class Vedtaksperiode private constructor(
     internal fun avventerRevurdering() = tilstand in listOf(AvventerGjennomførtRevurdering, AvventerGodkjenningRevurdering)
     internal fun erITilstandForRevurdering() = tilstand == AvventerSimuleringRevurdering || ikkeFerdigRevurdert() || avventerRevurdering()
 
-    internal fun overlapperMenUlikFerieinformasjon(ferie: Sykdomstidslinje): Boolean {
-        val merge = this.sykdomstidslinje.merge(ferie)
-        return merge.harProblemdager()
-    }
+    internal fun overlapperMenUlikFerieinformasjon(søknad: SendtSøknad) = søknad.harUlikFerieinformasjon(sykdomstidslinje)
 
     internal fun loggførHendelsesreferanse(meldingsreferanseId: UUID) = hendelseIder.add(meldingsreferanseId)
 

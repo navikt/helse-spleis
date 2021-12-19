@@ -188,6 +188,23 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
     }
 
     @Test
+    fun `feriedager fra søknad arbeidsgiver som vi ikke vet om midt i forrige periode, trimme bort ferie, warning`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+
+        håndterSykmelding(Sykmeldingsperiode(20.februar, 28.februar, 100.prosent))
+        håndterSøknadArbeidsgiver(Sykdom(20.februar, 28.februar, 100.prosent), Ferie(25.januar, 30.januar))
+
+        assertEquals(1.januar til 31.januar, inspektør.periode(1.vedtaksperiode) )
+        assertEquals(20.februar til 28.februar, inspektør.periode(2.vedtaksperiode) )
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
+        assertEquals(null, inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode).inspektør.dagteller[Feriedag::class])
+        assertEquals(null, inspektør.vedtaksperiodeSykdomstidslinje(2.vedtaksperiode).inspektør.dagteller[Feriedag::class])
+        assertWarningTekst(inspektør, "Det er oppgitt ny informasjon om ferie i søknaden som det ikke har blitt opplyst om tidligere. Tidligere periode må revurderes.")
+    }
+
+    @Test
     fun `feriedager som vi ikke vet om og ikke treffer forrige periode, trimme bort ferie, ingen warning`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 22.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 22.januar, 100.prosent))

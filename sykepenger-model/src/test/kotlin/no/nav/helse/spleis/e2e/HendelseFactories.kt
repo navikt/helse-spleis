@@ -4,8 +4,6 @@ import no.nav.helse.Fødselsnummer
 import no.nav.helse.Organisasjonsnummer
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode
-import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Arbeid
-import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
@@ -136,8 +134,7 @@ internal fun AbstractEndToEndTest.søknad(
 }
 
 internal fun AbstractEndToEndTest.søknadArbeidsgiver(
-    vararg perioder: Sykdom,
-    arbeidsperiode: Arbeid? = null,
+    vararg perioder: Søknadsperiode,
     fnr: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018,
     orgnummer: Organisasjonsnummer
 ): SøknadArbeidsgiver {
@@ -146,10 +143,7 @@ internal fun AbstractEndToEndTest.søknadArbeidsgiver(
         fnr = fnr.toString(),
         aktørId = AbstractPersonTest.AKTØRID,
         orgnummer = orgnummer.toString(),
-        perioder = perioder.toList().let { when (arbeidsperiode) {
-            null -> it
-            else -> it.plus(arbeidsperiode)
-        }},
+        perioder = perioder.toList(),
         sykmeldingSkrevet = LocalDateTime.now(),
         sendtTilArbeidsgiver = Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay(),
         // TODO: Nye parametre vi nå mapper

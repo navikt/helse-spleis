@@ -1679,7 +1679,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 21.mars, 100.prosent))
         håndterSøknadArbeidsgiver(
             Sykdom(1.mars, 21.mars, 100.prosent),
-            arbeidsperiode = Arbeid(12.mars, 21.mars)
+            Arbeid(12.mars, 21.mars)
         )
         håndterInntektsmelding(listOf(1.mars til 16.mars))
 
@@ -1710,7 +1710,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 21.mars, 100.prosent))
         håndterSøknadArbeidsgiver(
             Sykdom(1.mars, 21.mars, 100.prosent),
-            arbeidsperiode = Arbeid(12.mars, 21.mars)
+            Arbeid(12.mars, 21.mars)
         )
         håndterInntektsmelding(listOf(1.mars til 16.mars))
         assertEquals(28.desember, inspektør.maksdatoVedSisteVedtak())

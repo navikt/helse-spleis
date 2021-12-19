@@ -30,6 +30,16 @@ internal class PeriodeTest {
     }
 
     @Test
+    fun `inneholder med periode`() {
+        assertTrue(periode.inneholder(periode))
+        assertTrue(periode.inneholder(2.juli til 9.juli))
+        assertFalse(periode.inneholder(periode.oppdaterFom(30.juni)))
+        assertFalse(periode.inneholder(periode.oppdaterTom(11.juli)))
+        assertFalse(periode.inneholder(29.juni til 30.juni))
+        assertFalse(periode.inneholder(11.juli til 12.juli))
+    }
+
+    @Test
     fun `overlapper ikke med periode`() {
         assertFalse(periode.overlapperMed(Periode(1.april, 10.april)))
         assertFalse(periode.overlapperMed(Periode(1.april, 30.juni)))
@@ -188,8 +198,12 @@ internal class PeriodeTest {
 
     @Test
     fun subset() {
-        assertEquals(10.januar til 15.januar, (10.januar til 15.januar).subset(1.januar til 31.januar))
-        assertEquals(11.januar til 12.januar, (10.januar til 15.januar).subset(11.januar til 12.januar))
+        val periode1 = 10.januar til 15.januar
+        assertEquals(periode1, periode1.subset(1.januar til 31.januar))
+        assertEquals(11.januar til 12.januar, periode1.subset(11.januar til 12.januar))
+        assertEquals(2.januar til 2.januar, (1.januar til 2.januar).subset(2.januar til 12.januar))
+        assertEquals(2.januar til 2.januar, (2.januar til 3.januar).subset(1.januar til 2.januar))
+        assertThrows<IllegalArgumentException> { (1.januar til 2.januar).subset(11.januar til 12.januar) }
     }
 
     private fun assertSize(expected: Int, periode: Periode) {

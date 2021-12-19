@@ -10,7 +10,6 @@ import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.sykdomstidslinje.Dag.Companion.default
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sykmeldingSkrevet
-import no.nav.helse.sykdomstidslinje.Dag.Companion.toDatoDagMap
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
@@ -34,8 +33,6 @@ internal class Sykdomstidslinje private constructor(
     private val periode: Periode? = periode ?: if (dager.size > 0) Periode(dager.firstKey(), dager.lastKey()) else null
 
     internal constructor(dager: Map<LocalDate, Dag> = emptyMap()) : this(dager.toSortedMap())
-
-    internal constructor(dager: Collection<Dag>) : this(dager.toDatoDagMap())
 
     internal constructor(original: Sykdomstidslinje, spanningPeriode: Periode) :
         this(original.dager, original.periode?.merge(spanningPeriode), original.låstePerioder)
@@ -68,11 +65,6 @@ internal class Sykdomstidslinje private constructor(
         )
     }
 
-    internal fun filtrerVekk(other: Sykdomstidslinje): Sykdomstidslinje {
-        val nyeDager = dager.toMap(mutableMapOf<LocalDate, Dag>()).filterNot { it.key in other.dager.keys }
-        return Sykdomstidslinje(nyeDager.toSortedMap())
-    }
-
     private class ProblemDagVisitor(val problemmeldinger: MutableList<String>) : SykdomstidslinjeVisitor {
         override fun visitDag(
             dag: ProblemDag,
@@ -102,7 +94,8 @@ internal class Sykdomstidslinje private constructor(
     internal operator fun plus(other: Sykdomstidslinje) = this.merge(other)
     internal operator fun get(dato: LocalDate): Dag = dager[dato] ?: UkjentDag(dato, INGEN)
     internal fun subset(periode: Periode) =
-        Sykdomstidslinje(dager.filter { it.key in periode }.toSortedMap(), this.periode?.subset(periode))
+        if (this.periode == null || !periode.overlapperMed(this.periode)) Sykdomstidslinje()
+        else Sykdomstidslinje(dager.filter { it.key in periode }.toSortedMap(), this.periode?.subset(periode))
 
     /**
      * Uten å utvide tidslinjen
@@ -430,6 +423,9 @@ internal class Sykdomstidslinje private constructor(
             førsteDato.datesUntil(sisteDato.plusDays(1))
                 .collect(toMap<LocalDate, LocalDate, Dag>({ it }, { AvslåttDag(it, kilde) }))
         )
+
+        internal fun ulikFerieinformasjon(sykdomstidslinje: Sykdomstidslinje, ferieperiode: Periode) =
+            ferieperiode.any { sykdomstidslinje[it] !is Feriedag }
     }
 }
 

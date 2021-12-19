@@ -34,8 +34,8 @@ open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Ite
 
     internal fun utenfor(other: Periode) =
         this.start < other.start || this.endInclusive > other.endInclusive
-    internal fun inneholder(other: Periode) =
-        this.start <= other.start && this.endInclusive >= other.endInclusive
+
+    internal fun inneholder(other: Periode) = other in this
 
     internal fun erRettFør(other: Periode) = erRettFør(other.start)
     internal fun erRettFør(other: LocalDate) = this.endInclusive.erRettFør(other)
@@ -82,7 +82,8 @@ open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Ite
             currentDate.also { currentDate = it.plusDays(1) }
     }
 
-    fun subset(periode: Periode) = Periode(start.coerceAtLeast(periode.start), endInclusive.coerceAtMost(periode.endInclusive))
+    internal fun subset(periode: Periode) =
+        Periode(start.coerceAtLeast(periode.start), endInclusive.coerceAtMost(periode.endInclusive))
 }
 
 internal operator fun List<Periode>.contains(dato: LocalDate) = this.any { dato in it }

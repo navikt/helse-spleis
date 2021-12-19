@@ -22,6 +22,21 @@ internal class SykdomstidslinjeTest {
     }
 
     @Test
+    fun subset() {
+        assertNull(Sykdomstidslinje().subset(1.januar til 5.januar).periode())
+        resetSeed()
+        assertEquals(1.januar til 5.januar, 10.S.subset(1.januar til 5.januar).periode())
+        resetSeed()
+        assertEquals(1.januar til 1.januar, 10.S.subset(31.desember(2017) til 1.januar).periode())
+        resetSeed()
+        assertEquals(10.januar til 10.januar, 10.S.subset(10.januar til 11.januar).periode())
+        resetSeed()
+        assertNull(10.S.subset(11.januar til 11.januar).periode())
+        resetSeed()
+        assertNull(10.S.subset(31.desember(2017) til 31.desember(2017)).periode())
+    }
+
+    @Test
     fun `sykdomstidslinje er rett før når det ikke er arbeidsdag mellom`() {
         assertTrue(1.S.erRettFør(1.S))
         assertTrue(1.F.erRettFør(1.F))

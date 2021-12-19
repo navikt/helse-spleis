@@ -4,7 +4,6 @@ import no.nav.helse.Fødselsnummer
 import no.nav.helse.Organisasjonsnummer
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode
-import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Companion
 import no.nav.helse.hendelser.utbetaling.*
 import no.nav.helse.person.*
 import no.nav.helse.person.TilstandType.*
@@ -313,10 +312,9 @@ internal fun AbstractEndToEndTest.håndterSøknad(
 }
 
 internal fun AbstractEndToEndTest.håndterSøknadArbeidsgiver(
-    vararg sykdomsperioder: Søknadsperiode.Sykdom,
-    arbeidsperiode: Søknadsperiode.Arbeid? = null,
+    vararg sykdomsperioder: Søknadsperiode,
     orgnummer: Organisasjonsnummer = AbstractPersonTest.ORGNUMMER
-) = søknadArbeidsgiver(*sykdomsperioder, arbeidsperiode = arbeidsperiode, orgnummer = orgnummer).håndter(Person::håndter)
+) = søknadArbeidsgiver(*sykdomsperioder, orgnummer = orgnummer).håndter(Person::håndter)
 
 internal fun AbstractEndToEndTest.håndterInntektsmeldingMedValidering(
     vedtaksperiodeIdInnhenter: IdInnhenter,

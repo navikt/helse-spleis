@@ -302,16 +302,7 @@ internal class Arbeidsgiver private constructor(
         finalize(sykmelding)
     }
 
-    private fun korrigerFerieIForkant(søknad: Søknad) {
-        val feriedagerPåStartAvSøknad = søknad.feriedagerIForkantAvSykmeldingsperiode() ?: return
-        søknad.leggTilFeriedagerSomIkkeSkalVæreMedISykdomstidslinja(feriedagerPåStartAvSøknad)
-        if (vedtaksperioder.any { it.overlapperMenUlikFerieinformasjon(feriedagerPåStartAvSøknad) }) {
-            søknad.warn("Det er oppgitt ny informasjon om ferie i søknaden som det ikke har blitt opplyst om tidligere. Tidligere periode må revurderes.")
-        }
-    }
-
     internal fun håndter(søknad: Søknad) {
-        korrigerFerieIForkant(søknad)
         håndterSøknad(søknad, Vedtaksperiode::håndter)
     }
 
@@ -319,8 +310,11 @@ internal class Arbeidsgiver private constructor(
         håndterSøknad(søknad, Vedtaksperiode::håndter)
     }
 
-    private fun <Hendelse : SykdomstidslinjeHendelse> håndterSøknad(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean) {
+    private fun <Hendelse : SendtSøknad> håndterSøknad(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean) {
         hendelse.kontekst(this)
+        if (vedtaksperioder.any { it.overlapperMenUlikFerieinformasjon(hendelse) }) {
+            hendelse.warn("Det er oppgitt ny informasjon om ferie i søknaden som det ikke har blitt opplyst om tidligere. Tidligere periode må revurderes.")
+        }
         noenHarHåndtert(hendelse, håndterer, "Forventet ikke ${hendelse.kilde}. Har nok ikke mottatt sykmelding")
         if (hendelse.hasErrorsOrWorse()) {
             val harNærliggendeUtbetaling = hendelse.sykdomstidslinje().periode()?.let(person::harNærliggendeUtbetaling) ?: false
