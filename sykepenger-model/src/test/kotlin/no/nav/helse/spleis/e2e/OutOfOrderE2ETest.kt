@@ -5,13 +5,9 @@ import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Utdanning
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.TilstandType.*
-import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.*
-import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
@@ -691,7 +687,6 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    @Disabled("MottattSykmeldingFerdigForlengelse tar ikke i mot Inntektsmelding")
     fun `ny sykmelding før en ferdig forlengelse som avventer søknad (inntektsmelding etter søknad arbeidsgiver)`() {
         håndterSykmelding(Sykmeldingsperiode(8.februar, 15.februar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(16.februar, 25.februar, 100.prosent))
@@ -861,24 +856,17 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    @Disabled("Vi har forkastet et sett med utbetalte perioder pga overlappende sykmelding, allikevel tar vi inn en tidligere periode som går til utbetaling")
-    fun `forlengelse fra IT før et utbetalt løp`() {
+    fun `sykmelding fra periode før en tidligere utbetalt periode`() {
         nyttVedtak(1.mars, 31.mars)
         forlengVedtak(1.april, 14.april)
         forlengPeriode(15.april, 20.april)
         håndterSykmelding(Sykmeldingsperiode(15.april, 25.april, 50.prosent)) // overlapp som forkaster
 
-        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
-        assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
+        assertFalse(inspektør.periodeErForkastet(1.vedtaksperiode))
+        assertFalse(inspektør.periodeErForkastet(2.vedtaksperiode))
         assertTrue(inspektør.periodeErForkastet(3.vedtaksperiode))
 
-        håndterSykmelding(Sykmeldingsperiode(10.februar, 28.februar, 100.prosent))
-        håndterSøknad(Sykdom(10.februar, 28.februar, 100.prosent))
-        håndterUtbetalingshistorikk(
-            vedtaksperiodeIdInnhenter = 4.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.januar, 9.februar, 100.prosent, 1000.daglig),
-            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER.toString(), 1.januar, INNTEKT, true))
-        )
+        håndterSykmelding(Sykmeldingsperiode(10.februar, 27.februar, 100.prosent))
         assertTrue(inspektør.periodeErForkastet(4.vedtaksperiode))
     }
 }
