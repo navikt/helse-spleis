@@ -1125,8 +1125,47 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertTrue(inspektør.sykdomstidslinje[27.oktober] is Dag.ArbeidsgiverHelgedag)
     }
 
+    @ForventetFeil("Vilkårsgrunnlag for arbeidsgiver 1 gjør at vedtaksperiode hos arbeidsgiver 2 ikke venter på inntektsmelding")
     @Test
-    fun `vilkårsvurdering med flere arbeidsgivere gjør ikke at vi går ut av avventer inntektsmelding ferdig forlengelse pga GjennopptaBehandling`() {
+    fun `vilkårsvurdering med flere arbeidsgivere skal ikke medføre at vi går til avventer historikk fra mottatt sykmelding ferdig forlengelse uten IM`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent), orgnummer = a2)
+        håndterSøknadArbeidsgiver(Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        val skjæringstidspunkt = inspektør(a1).skjæringstidspunkt(1.vedtaksperiode)
+        val inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
+            skjæringstidspunkt.minusMonths(12L).withDayOfMonth(1) til skjæringstidspunkt.minusMonths(1L).withDayOfMonth(1) inntekter {
+                a1 inntekt INNTEKT
+                a2 inntekt INNTEKT
+            }
+        })
+        val inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(listOf(a1, a2).map { arbeidsgiver ->
+            ArbeidsgiverInntekt(arbeidsgiver.toString(), (0..2).map {
+                val yearMonth = YearMonth.from(skjæringstidspunkt).minusMonths(3L - it)
+                ArbeidsgiverInntekt.MånedligInntekt.Sykepengegrunnlag(
+                    yearMonth = yearMonth,
+                    type = ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
+                    inntekt = INNTEKT,
+                    fordel = "fordel",
+                    beskrivelse = "beskrivelse"
+                )
+            })
+        })
+        håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = inntektsvurdering, inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent), orgnummer = a2)
+
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, orgnummer = a2)
+    }
+
+    @Test
+    fun `vilkårsvurdering med flere arbeidsgivere skal ikke medføre at vi går ut av avventer inntektsmelding ferdig forlengelse pga GjennopptaBehandling`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent), orgnummer = a1)
         håndterSøknadArbeidsgiver(Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar, 100.prosent), orgnummer = a1)
