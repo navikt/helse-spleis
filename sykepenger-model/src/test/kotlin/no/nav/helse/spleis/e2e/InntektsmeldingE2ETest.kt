@@ -1042,29 +1042,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    @Disabled
-    fun `gammel inntektsmelding med endring i refusjon kaster ut ny periode etter gap via replay`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 30.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 30.januar, 100.prosent))
-        val inntektsmeldingUUID = håndterInntektsmelding(
-            listOf(1.januar til 16.januar),
-            beregnetInntekt = 26000.månedlig,
-            refusjon = Refusjon(16000.månedlig, null)
-        )
-
-        håndterSykmelding(Sykmeldingsperiode(1.mai, 30.mai, 100.prosent))
-        håndterSøknad(Sykdom(1.mai, 30.mai, 100.prosent))
-        håndterInntektsmeldingReplay(inntektsmeldingUUID, 2.vedtaksperiode(ORGNUMMER))
-
-        assertTilstander(
-            2.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP
-        )
-    }
-
-    @Test
     fun `legger ved inntektsmeldingId på vedtaksperiode_endret-event for forlengende vedtaksperioder`() {
         val inntektsmeldingId = UUID.randomUUID()
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
