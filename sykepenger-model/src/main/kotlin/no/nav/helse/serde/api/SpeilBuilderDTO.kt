@@ -109,7 +109,7 @@ data class UtbetalingerDTO(
         val fom: LocalDate,
         val tom: LocalDate,
         val dagsats: Int,
-        val grad: Double
+        val grad: Int
     )
 }
 

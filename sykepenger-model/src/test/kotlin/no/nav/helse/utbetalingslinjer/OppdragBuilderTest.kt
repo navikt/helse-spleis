@@ -110,8 +110,8 @@ internal class OppdragBuilderTest {
         val oppdrag = tilArbeidsgiver(5.NAV(1500), 1.HELG(1500), 1.HELG(1500, 80.0), 5.NAV(1500, 80.0))
 
         assertEquals(2, oppdrag.size)
-        oppdrag.assertLinje(0, 1.januar, 6.januar, null, sats = 1500, grad = 100.0)
-        oppdrag.assertLinje(1, 7.januar, 12.januar, sats = (1500 * 0.8).toInt(), grad = 80.0)
+        oppdrag.assertLinje(0, 1.januar, 6.januar, null, sats = 1500, grad = 100)
+        oppdrag.assertLinje(1, 7.januar, 12.januar, sats = (1500 * 0.8).toInt(), grad = 80)
     }
 
     @Test
@@ -303,7 +303,7 @@ internal class OppdragBuilderTest {
                 refFagsystemId = null
             ) //Opphører linje som har blitt overskrevet av nytt oppdrag
             assertLinje(2, 24.januar, 29.januar, delytelseId = 3, refDelytelseId = 2, endringskode = NY)
-            assertLinje(3, 30.januar, 2.februar, delytelseId = 4, refDelytelseId = 3, endringskode = NY, sats = 520, grad = 40.0)
+            assertLinje(3, 30.januar, 2.februar, delytelseId = 4, refDelytelseId = 3, endringskode = NY, sats = 520, grad = 40)
         }
 
         oppdragTilUtbetaling4.apply {
@@ -321,7 +321,7 @@ internal class OppdragBuilderTest {
                 datoStatusFom = 30.januar,
                 sats = 520
             )
-            assertLinje(3, 1.februar, 2.februar, delytelseId = 5, refDelytelseId = 4, endringskode = NY, sats = 520, grad = 40.0)
+            assertLinje(3, 1.februar, 2.februar, delytelseId = 5, refDelytelseId = 4, endringskode = NY, sats = 520, grad = 40)
         }
     }
 
@@ -375,8 +375,8 @@ internal class OppdragBuilderTest {
         )
 
         assertEquals(2, oppdrag.size)
-        oppdrag.assertLinje(0, 1.januar, 3.januar, null, sats = 1500, grad = 100.0)
-        oppdrag.assertLinje(1, 4.januar, 9.januar, sats = (1500 * 0.6).toInt(), grad = 60.0)
+        oppdrag.assertLinje(0, 1.januar, 3.januar, null, sats = 1500, grad = 100)
+        oppdrag.assertLinje(1, 4.januar, 9.januar, sats = (1500 * 0.6).toInt(), grad = 60)
     }
 
     @Test
@@ -388,14 +388,14 @@ internal class OppdragBuilderTest {
         )
 
         assertEquals(3, oppdrag.size)
-        oppdrag.assertLinje(0, 1.januar, 3.januar, null, sats = 1500, grad = 100.0, delytelseId = 1)
-        oppdrag.assertLinje(1, 4.januar, 5.januar, sats = 1500, grad = 80.0, delytelseId = 2, refDelytelseId = 1)
+        oppdrag.assertLinje(0, 1.januar, 3.januar, null, sats = 1500, grad = 100, delytelseId = 1)
+        oppdrag.assertLinje(1, 4.januar, 5.januar, sats = 1500, grad = 80, delytelseId = 2, refDelytelseId = 1)
         oppdrag.assertLinje(
             2,
             6.januar,
             9.januar,
             sats = (1500 * 0.8).toInt(),
-            grad = 80.0,
+            grad = 80,
             delytelseId = 3,
             refDelytelseId = 2
         )
@@ -409,8 +409,8 @@ internal class OppdragBuilderTest {
         )
 
         assertEquals(2, oppdrag.size)
-        oppdrag.assertLinje(0, 1.januar, 3.januar, null, sats = 1500, grad = 100.0)
-        oppdrag.assertLinje(1, 4.januar, 9.januar, sats = (1500 * 0.8).toInt(), grad = 80.0)
+        oppdrag.assertLinje(0, 1.januar, 3.januar, null, sats = 1500, grad = 100)
+        oppdrag.assertLinje(1, 4.januar, 9.januar, sats = (1500 * 0.8).toInt(), grad = 80)
     }
 
     @Test
@@ -450,7 +450,7 @@ internal class OppdragBuilderTest {
         val oppdrag = tilSykmeldte(16.AP, 15.NAV.medRefusjon(0))
         assertEquals(1, oppdrag.size)
         assertEquals(Fagområde.Sykepenger, oppdrag.fagområde())
-        oppdrag.assertLinje(0, 17.januar, 31.januar, null, 1200, 100.0, endringskode = NY, klassekode = Klassekode.SykepengerArbeidstakerOrdinær)
+        oppdrag.assertLinje(0, 17.januar, 31.januar, null, 1200, 100, endringskode = NY, klassekode = Klassekode.SykepengerArbeidstakerOrdinær)
     }
 
     private val Utbetalingslinje.klassekode get() = this.get<Klassekode>("klassekode")
@@ -461,7 +461,7 @@ internal class OppdragBuilderTest {
         tom: LocalDate,
         refFagsystemId: String? = this.fagsystemId(),
         sats: Int? = this[index].beløp,
-        grad: Double? = this[index].grad,
+        grad: Int? = this[index].grad,
         delytelseId: Int = this[index]["delytelseId"],
         refDelytelseId: Int? = this[index]["refDelytelseId"],
         datoStatusFom: LocalDate? = null,

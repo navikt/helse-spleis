@@ -39,6 +39,20 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `grad rundes av`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent, 80.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+        assertEquals(20, inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag[0].grad)
+    }
+
+    @Test
     fun `første periode er kun arbeidsgiverperiode og helg`() {
         håndterSykmelding(Sykmeldingsperiode(4.januar, 21.januar, 100.prosent))
         håndterSøknad(Sykdom(4.januar, 21.januar, 100.prosent))

@@ -270,7 +270,7 @@ internal class TestArbeidsgiverInspektør(
         satstype: Satstype,
         beløp: Int?,
         aktuellDagsinntekt: Int?,
-        grad: Double?,
+        grad: Int?,
         delytelseId: Int,
         refDelytelseId: Int?,
         refFagsystemId: String?,
@@ -297,7 +297,7 @@ internal class TestArbeidsgiverInspektør(
         val tom: LocalDate,
         val satstype: Satstype,
         val beløp: Int?,
-        val grad: Double?,
+        val grad: Int?,
         val klassekode: Klassekode,
         val endringskode: Endringskode
     )

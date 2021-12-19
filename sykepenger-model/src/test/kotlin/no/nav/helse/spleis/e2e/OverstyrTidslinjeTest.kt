@@ -1,7 +1,9 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.TilstandType
@@ -104,7 +106,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
 
         assertEquals(3, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.size)
         assertEquals(21.januar, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag[0].tom)
-        assertEquals(30.0, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag[1].grad)
+        assertEquals(30, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag[1].grad)
         assertEquals(23.januar, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag[2].fom)
     }
 

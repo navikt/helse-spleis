@@ -9,7 +9,6 @@ import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.util.*
-import kotlin.math.roundToInt
 
 internal class OppdragBuilder(
     private val tidslinje: Utbetalingstidslinje,
@@ -71,7 +70,7 @@ internal class OppdragBuilder(
         økonomi: Økonomi
     ) {
         // TODO: OppdragBuilder må bruke grad som Int, altså avrundetData
-        økonomi.medData { grad, _, aktuellDagsinntekt ->
+        økonomi.medAvrundetData { grad, _, _, _, _, aktuellDagsinntekt, _, _, _ ->
             if (utbetalingslinjer.isNotEmpty() && fagområde.kanLinjeUtvides(linje, dag.økonomi, grad))
                 tilstand.betalingsdag(dag, dato, grad, aktuellDagsinntekt)
             else
@@ -85,7 +84,7 @@ internal class OppdragBuilder(
         økonomi: Økonomi
     ) {
         // TODO: OppdragBuilder må bruke grad som Int, altså avrundetData
-        økonomi.medData { grad, _, _ ->
+        økonomi.medAvrundetData { grad, _ ->
            if (utbetalingslinjer.isNotEmpty() && grad != linje.grad)
                 tilstand.nyLinje(dag, dato, grad)
             else
@@ -134,11 +133,11 @@ internal class OppdragBuilder(
         tilstand.ikkeBetalingsdag()
     }
 
-    private fun addLinje(dag: Utbetalingsdag, dato: LocalDate, grad: Double, aktuellDagsinntekt: Double) {
-        utbetalingslinjer.add(0, fagområde.linje(fagsystemId, dag.økonomi, dato, grad, aktuellDagsinntekt.roundToInt()))
+    private fun addLinje(dag: Utbetalingsdag, dato: LocalDate, grad: Int, aktuellDagsinntekt: Int) {
+        utbetalingslinjer.add(0, fagområde.linje(fagsystemId, dag.økonomi, dato, grad, aktuellDagsinntekt))
     }
 
-    private fun addLinje(dato: LocalDate, grad: Double) {
+    private fun addLinje(dato: LocalDate, grad: Int) {
         utbetalingslinjer.add(0, fagområde.linje(fagsystemId, dato, grad))
     }
 
@@ -148,30 +147,30 @@ internal class OppdragBuilder(
         fun betalingsdag(
             dag: Utbetalingsdag,
             dato: LocalDate,
-            grad: Double,
-            aktuellDagsinntekt: Double
+            grad: Int,
+            aktuellDagsinntekt: Int
         ) {
         }
 
         fun helgedag(
             dag: NavHelgDag,
             dato: LocalDate,
-            grad: Double
+            grad: Int
         ) {
         }
 
         fun nyLinje(
             dag: Utbetalingsdag,
             dato: LocalDate,
-            grad: Double,
-            aktuellDagsinntekt: Double
+            grad: Int,
+            aktuellDagsinntekt: Int
         ) {
         }
 
         fun nyLinje(
             dag: NavHelgDag,
             dato: LocalDate,
-            grad: Double
+            grad: Int
         ) {
         }
 
@@ -186,8 +185,8 @@ internal class OppdragBuilder(
         override fun betalingsdag(
             dag: Utbetalingsdag,
             dato: LocalDate,
-            grad: Double,
-            aktuellDagsinntekt: Double
+            grad: Int,
+            aktuellDagsinntekt: Int
         ) {
             addLinje(dag, dato, grad, aktuellDagsinntekt)
             tilstand = LinjeMedSats()
@@ -197,8 +196,8 @@ internal class OppdragBuilder(
         override fun nyLinje(
             dag: Utbetalingsdag,
             dato: LocalDate,
-            grad: Double,
-            aktuellDagsinntekt: Double
+            grad: Int,
+            aktuellDagsinntekt: Int
         ) {
             addLinje(dag, dato, grad, aktuellDagsinntekt)
             tilstand = LinjeMedSats()
@@ -208,7 +207,7 @@ internal class OppdragBuilder(
         override fun helgedag(
             dag: NavHelgDag,
             dato: LocalDate,
-            grad: Double
+            grad: Int
         ) {
             /* ønsker ikke slutte en linje på helg */
         }
@@ -216,7 +215,7 @@ internal class OppdragBuilder(
         override fun nyLinje(
             dag: NavHelgDag,
             dato: LocalDate,
-            grad: Double
+            grad: Int
         ) {
             addLinje(dato, grad)
             tilstand = LinjeUtenSats()
@@ -235,8 +234,8 @@ internal class OppdragBuilder(
         override fun betalingsdag(
             dag: Utbetalingsdag,
             dato: LocalDate,
-            grad: Double,
-            aktuellDagsinntekt: Double
+            grad: Int,
+            aktuellDagsinntekt: Int
         ) {
             linje.fom = dag.dato
         }
@@ -244,8 +243,8 @@ internal class OppdragBuilder(
         override fun nyLinje(
             dag: Utbetalingsdag,
             dato: LocalDate,
-            grad: Double,
-            aktuellDagsinntekt: Double
+            grad: Int,
+            aktuellDagsinntekt: Int
         ) {
             addLinje(dag, dato, grad, aktuellDagsinntekt)
         }
@@ -253,7 +252,7 @@ internal class OppdragBuilder(
         override fun helgedag(
             dag: NavHelgDag,
             dato: LocalDate,
-            grad: Double
+            grad: Int
         ) {
             linje.fom = dag.dato
         }
@@ -261,7 +260,7 @@ internal class OppdragBuilder(
         override fun nyLinje(
             dag: NavHelgDag,
             dato: LocalDate,
-            grad: Double
+            grad: Int
         ) {
             addLinje(dato, grad)
             tilstand = LinjeUtenSats()
@@ -280,18 +279,18 @@ internal class OppdragBuilder(
         override fun betalingsdag(
             dag: Utbetalingsdag,
             dato: LocalDate,
-            grad: Double,
-            aktuellDagsinntekt: Double
+            grad: Int,
+            aktuellDagsinntekt: Int
         ) {
-            fagområde.oppdaterLinje(linje, dag.dato, dag.økonomi, aktuellDagsinntekt.roundToInt())
+            fagområde.oppdaterLinje(linje, dag.dato, dag.økonomi, aktuellDagsinntekt)
             tilstand = LinjeMedSats()
         }
 
         override fun nyLinje(
             dag: Utbetalingsdag,
             dato: LocalDate,
-            grad: Double,
-            aktuellDagsinntekt: Double
+            grad: Int,
+            aktuellDagsinntekt: Int
         ) {
             addLinje(dag, dato, grad, aktuellDagsinntekt)
             tilstand = LinjeMedSats()
@@ -300,7 +299,7 @@ internal class OppdragBuilder(
         override fun helgedag(
             dag: NavHelgDag,
             dato: LocalDate,
-            grad: Double
+            grad: Int
         ) {
             linje.fom = dag.dato
         }
@@ -308,7 +307,7 @@ internal class OppdragBuilder(
         override fun nyLinje(
             dag: NavHelgDag,
             dato: LocalDate,
-            grad: Double
+            grad: Int
         ) {
             addLinje(dato, grad)
         }

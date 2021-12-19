@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
+import kotlin.math.roundToInt
 
 internal class UtbetalingslinjeForskjellTest {
 
@@ -1005,13 +1006,13 @@ internal class UtbetalingslinjeForskjellTest {
     ) {
         private var delytelseId = 1
         private var endringskode: Endringskode = NY
-        private var grad: Double = 100.0
+        private var grad: Int = 100
         private var dagsats = 1200
         private var datoStatusFom: LocalDate? = null
         private var refDelytelseId: Int? = null
 
         internal infix fun grad(percentage: Number): TestUtbetalingslinje {
-            grad = percentage.toDouble()
+            grad = percentage.toDouble().roundToInt()
             return this
         }
 

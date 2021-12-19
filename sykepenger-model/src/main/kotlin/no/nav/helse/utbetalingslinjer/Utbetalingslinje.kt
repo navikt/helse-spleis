@@ -14,7 +14,7 @@ internal class Utbetalingslinje internal constructor(
     internal var satstype: Satstype = Satstype.DAG,
     internal var beløp: Int?,
     internal var aktuellDagsinntekt: Int?,
-    internal val grad: Double?,
+    internal val grad: Int?,
     internal var refFagsystemId: String? = null,
     private var delytelseId: Int = 1,
     private var refDelytelseId: Int? = null,
@@ -151,7 +151,7 @@ internal class Utbetalingslinje internal constructor(
         // TODO: Skal bort etter apper er migrert over til sats
         "dagsats" to beløp,
         "lønn" to aktuellDagsinntekt,
-        "grad" to grad,
+        "grad" to grad?.toDouble(), // backwards-compatibility mot andre systemer som forventer double: må gjennomgås
         "stønadsdager" to stønadsdager(),
         "totalbeløp" to totalbeløp(),
         "endringskode" to endringskode.toString(),

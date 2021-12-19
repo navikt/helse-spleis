@@ -1130,7 +1130,7 @@ internal data class PersonData(
         private val satstype: String,
         private val sats: Int,
         private val lønn: Int?,
-        private val grad: Double?,
+        private val grad: Int?,
         private val refFagsystemId: String?,
         private val delytelseId: Int,
         private val refDelytelseId: Int?,

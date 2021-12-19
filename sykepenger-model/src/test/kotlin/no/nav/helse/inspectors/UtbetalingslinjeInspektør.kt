@@ -31,7 +31,7 @@ internal class UtbetalingslinjeInspektør(utbetalingslinje: Utbetalingslinje) : 
         satstype: Satstype,
         beløp: Int?,
         aktuellDagsinntekt: Int?,
-        grad: Double?,
+        grad: Int?,
         delytelseId: Int,
         refDelytelseId: Int?,
         refFagsystemId: String?,
