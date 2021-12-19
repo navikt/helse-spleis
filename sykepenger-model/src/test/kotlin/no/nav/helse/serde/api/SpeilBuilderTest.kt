@@ -28,7 +28,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -505,40 +504,26 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         val skjæringstidspunktFraInfotrygd = 1.desember(2017)
         val fom2Periode = 1.februar
         val tom2Periode = 14.februar
-        val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER.toString(), skjæringstidspunktFraInfotrygd, 31000.månedlig, true))
+        val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER.toString(), skjæringstidspunktFraInfotrygd, INNTEKT, true))
 
         håndterSykmelding(Sykmeldingsperiode(fom1Periode, tom1Periode, 100.prosent))
         håndterSøknad(Sykdom(fom1Periode, tom1Periode, 100.prosent))
         // Til infotrygd pga overlapp
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
-            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), skjæringstidspunktFraInfotrygd, 4.januar, 100.prosent, 31000.månedlig))
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), skjæringstidspunktFraInfotrygd, 4.januar, 100.prosent, INNTEKT),
+            inntektshistorikk = inntektshistorikk,
+            besvart = 16.februar.atStartOfDay()
         )
 
         håndterSykmelding(Sykmeldingsperiode(fom2Periode, tom2Periode, 100.prosent))
         håndterSøknad(Sykdom(fom2Periode, tom2Periode, 100.prosent))
         håndterUtbetalingshistorikk(
-            2.vedtaksperiode, besvart = 16.februar.atStartOfDay(), inntektshistorikk = inntektshistorikk, utbetalinger = arrayOf(
-                ArbeidsgiverUtbetalingsperiode(
-                    ORGNUMMER.toString(),
-                    skjæringstidspunktFraInfotrygd,
-                    tom1Periode,
-                    100.prosent,
-                    31000.månedlig
-                )
-            )
+            2.vedtaksperiode,
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), skjæringstidspunktFraInfotrygd, tom1Periode, 100.prosent, INNTEKT),
+            inntektshistorikk = inntektshistorikk
         )
-        håndterYtelser(
-            2.vedtaksperiode, besvart = 17.februar.atStartOfDay(), inntektshistorikk = inntektshistorikk, utbetalinger = arrayOf(
-                ArbeidsgiverUtbetalingsperiode(
-                    ORGNUMMER.toString(),
-                    skjæringstidspunktFraInfotrygd,
-                    tom1Periode,
-                    100.prosent,
-                    31000.månedlig
-                )
-            )
-        )
+        håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
@@ -554,7 +539,6 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         assertEquals(Periodetype.OVERGANG_FRA_IT, vedtaksperioder.first().periodetype)
     }
 
-    @Disabled
     @Test
     fun `overgang fra infotrygd får ikke riktig periodetype ved forkasting`() {
         val fom1Periode = 1.januar
@@ -568,7 +552,8 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
 
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
-            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), skjæringstidspunktFraInfotrygd, 31.desember(2017), 100.prosent, 31000.månedlig))
+            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), skjæringstidspunktFraInfotrygd, 31.desember(2017), 100.prosent, INNTEKT)),
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER.toString(), skjæringstidspunktFraInfotrygd, INNTEKT, true))
         )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -577,7 +562,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(fom2Periode, tom2Periode, 100.prosent))
         håndterSøknad(Sykdom(fom2Periode, tom2Periode, 100.prosent))
-        håndterSøknad(Sykdom(fom2Periode, tom2Periode, 100.prosent))
+        person.søppelbøtte(hendelselogg, inspektør.periode(2.vedtaksperiode))
 
         val personDTO = speilApi()
 
@@ -587,7 +572,6 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             }
 
         assertEquals(ForlengelseFraInfotrygd.JA, vedtaksperioder.first().forlengelseFraInfotrygd)
-        assertEquals(true, vedtaksperioder.first().erForkastet)
         assertEquals(Periodetype.OVERGANG_FRA_IT, vedtaksperioder.first().periodetype)
     }
 

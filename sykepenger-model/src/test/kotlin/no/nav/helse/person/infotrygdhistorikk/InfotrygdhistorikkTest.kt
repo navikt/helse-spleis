@@ -71,9 +71,9 @@ internal class InfotrygdhistorikkTest {
         val tidsstempel = LocalDateTime.now()
         historikk.oppdaterHistorikk(historikkelement(oppdatert = tidsstempel))
         historikk.tøm()
-        assertTrue(historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato))
-        assertTrue(aktivitetslogg.behov().isNotEmpty()) { aktivitetslogg.toString() }
-        assertEquals(0, historikk.inspektør.elementer())
+        assertFalse(historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato))
+        assertFalse(aktivitetslogg.behov().isNotEmpty()) { aktivitetslogg.toString() }
+        assertEquals(1, historikk.inspektør.elementer())
     }
 
     @Test
@@ -84,9 +84,29 @@ internal class InfotrygdhistorikkTest {
             perioder = listOf(Friperiode(1.januar,  10.januar))
         ))
         historikk.tøm()
-        assertTrue(historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato))
-        assertTrue(aktivitetslogg.behov().isNotEmpty()) { aktivitetslogg.toString() }
-        assertEquals(0, historikk.inspektør.elementer())
+        assertFalse(historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato))
+        assertFalse(aktivitetslogg.behov().isNotEmpty()) { aktivitetslogg.toString() }
+        assertEquals(1, historikk.inspektør.elementer())
+    }
+
+    @Test
+    fun `tømme historikk - med flere ulagret data`() {
+        val tidsstempel1 = LocalDateTime.now().minusHours(1)
+        val tidsstempel2 = LocalDateTime.now()
+        historikk.oppdaterHistorikk(historikkelement(
+            oppdatert = tidsstempel1,
+            perioder = listOf(Friperiode(1.januar,  5.januar))
+        ))
+        historikk.oppdaterHistorikk(historikkelement(
+            oppdatert = tidsstempel2,
+            perioder = listOf(Friperiode(1.januar,  10.januar))
+        ))
+        historikk.tøm()
+        assertFalse(historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato))
+        assertFalse(aktivitetslogg.behov().isNotEmpty()) { aktivitetslogg.toString() }
+        assertEquals(1, historikk.inspektør.elementer())
+        assertTrue(tidsstempel2 < historikk.inspektør.opprettet(0))
+        assertEquals(tidsstempel2, historikk.inspektør.oppdatert(0))
     }
 
     @Test
@@ -98,9 +118,9 @@ internal class InfotrygdhistorikkTest {
         ))
         historikk.addInntekter(Person("", "01010112345".somFødselsnummer()), aktivitetslogg)
         historikk.tøm()
-        assertTrue(historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato))
-        assertTrue(aktivitetslogg.behov().isNotEmpty()) { aktivitetslogg.toString() }
-        assertEquals(0, historikk.inspektør.elementer())
+        assertFalse(historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato))
+        assertFalse(aktivitetslogg.behov().isNotEmpty()) { aktivitetslogg.toString() }
+        assertEquals(1, historikk.inspektør.elementer())
     }
 
     @Test
@@ -112,11 +132,10 @@ internal class InfotrygdhistorikkTest {
         ))
         historikk.addInntekter(Person("", "10101012345".somFødselsnummer()), aktivitetslogg)
         historikk.tøm()
-        assertTrue(historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato))
-        assertTrue(aktivitetslogg.behov().isNotEmpty()) { aktivitetslogg.toString() }
-        assertEquals(2, historikk.inspektør.elementer())
-        assertEquals(LocalDateTime.MIN, historikk.inspektør.oppdatert(0))
-        assertEquals(tidsstempel, historikk.inspektør.oppdatert(1))
+        assertFalse(historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato))
+        assertFalse(aktivitetslogg.behov().isNotEmpty()) { aktivitetslogg.toString() }
+        assertEquals(1, historikk.inspektør.elementer())
+        assertEquals(tidsstempel, historikk.inspektør.oppdatert(0))
     }
 
     @Test
@@ -128,13 +147,11 @@ internal class InfotrygdhistorikkTest {
         ))
         historikk.lagreVilkårsgrunnlag(1.januar, VilkårsgrunnlagHistorikk(), sykepengegrunnlagFor(INGEN))
         historikk.tøm()
-        assertTrue(historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato))
-        assertTrue(aktivitetslogg.behov().isNotEmpty()) { aktivitetslogg.toString() }
-        assertEquals(2, historikk.inspektør.elementer())
+        assertFalse(historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato))
+        assertFalse(aktivitetslogg.behov().isNotEmpty()) { aktivitetslogg.toString() }
+        assertEquals(1, historikk.inspektør.elementer())
         assertTrue(tidsstempel < historikk.inspektør.opprettet(0))
-        assertEquals(LocalDateTime.MIN, historikk.inspektør.oppdatert(0))
-        assertTrue(tidsstempel < historikk.inspektør.opprettet(1))
-        assertEquals(tidsstempel, historikk.inspektør.oppdatert(1))
+        assertEquals(tidsstempel, historikk.inspektør.oppdatert(0))
     }
 
     @Test
@@ -151,12 +168,12 @@ internal class InfotrygdhistorikkTest {
             perioder = listOf(ArbeidsgiverUtbetalingsperiode("orgnr", 1.januar,  10.januar, 100.prosent, 1000.daglig))
         ))
         historikk.tøm()
-        assertTrue(historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato))
-        assertTrue(aktivitetslogg.behov().isNotEmpty()) { aktivitetslogg.toString() }
+        assertFalse(historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato))
+        assertFalse(aktivitetslogg.behov().isNotEmpty()) { aktivitetslogg.toString() }
         assertEquals(2, historikk.inspektør.elementer())
         assertTrue(tidsstempel2 < historikk.inspektør.opprettet(0))
-        assertEquals(LocalDateTime.MIN, historikk.inspektør.oppdatert(0))
-        assertTrue(tidsstempel2 < historikk.inspektør.opprettet(1))
+        assertEquals(tidsstempel2, historikk.inspektør.oppdatert(0))
+        assertTrue(tidsstempel1 < historikk.inspektør.opprettet(1))
         assertEquals(tidsstempel1, historikk.inspektør.oppdatert(1))
     }
 

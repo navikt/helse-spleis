@@ -433,7 +433,7 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
         )
         assertTilstand(a3, AVVENTER_HISTORIKK, 1)
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a3, utbetalinger = utbetalinger, inntektshistorikk = inntektshistorikk)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a3)
         assertTilstand(a3, TIL_INFOTRYGD, 1)
     }
 
