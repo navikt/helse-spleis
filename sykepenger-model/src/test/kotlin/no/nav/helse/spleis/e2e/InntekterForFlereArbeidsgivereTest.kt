@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.ForventetFeil
 import no.nav.helse.Organisasjonsnummer
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
@@ -17,7 +18,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -242,7 +242,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
 
     }
 
-    @Disabled("8-28 b")
+    @ForventetFeil("8-28 b")
     @Test
     fun `Skatteinntekter og inntektsmelding for en arbeidsgiver og kun skatt (i to måneder) for andre arbeidsgiver - gir korrekt sykepenge- og sammenligningsgrunnlag`() {
         val inntekterForSykepengegrunnlag = inntektperioderForSykepengegrunnlag {
