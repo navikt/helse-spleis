@@ -12,9 +12,6 @@ import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sykmeldingSkrevet
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeBuilder
-import no.nav.helse.utbetalingstidslinje.Forlengelsestrategi
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import java.time.DayOfWeek
@@ -47,13 +44,6 @@ internal class Sykdomstidslinje private constructor(
             this.periode == null || other.periode == null -> false
             else -> this.periode.overlapperMed(other.periode)
         }
-
-    internal fun arbeidsgiverperioder(kuttdato: LocalDate, strategi: Forlengelsestrategi): List<Arbeidsgiverperiode> {
-        val builder = ArbeidsgiverperiodeBuilder()
-        builder.forlengelsestrategi(strategi)
-        fremTilOgMed(kuttdato).accept(builder)
-        return builder.result()
-    }
 
     internal fun merge(other: Sykdomstidslinje, beste: BesteStrategy = default): Sykdomstidslinje {
         val nyeDager = dager.toMap(mutableMapOf<LocalDate, Dag>())

@@ -17,6 +17,12 @@ internal class ArbeidsgiverperiodeTest {
     }
 
     @Test
+    fun `arbeidsgiverperiode er den samme hvis første dag er lik`() {
+        assertEquals(agp(1.januar til 5.januar), agp(1.januar til 16.januar))
+        assertNotEquals(agp(1.januar til 5.januar), agp(2.januar til 17.januar))
+    }
+
+    @Test
     fun `dekker hele perioden`() {
         val periode = 2.januar til 5.januar
         val arbeidsgiverperiode = agp(periode)

@@ -9,10 +9,11 @@ internal class Arbeidsgiverperiode(private val perioder: List<Periode>) : Iterab
         check(perioder.isNotEmpty())
     }
 
+    private val første = perioder.first().start
     private val hele = perioder.first().start til perioder.last().endInclusive
 
     override fun compareTo(other: LocalDate) =
-        perioder.first().start.compareTo(other)
+        første.compareTo(other)
 
     operator fun contains(dato: LocalDate) =
         dato in hele
@@ -22,6 +23,9 @@ internal class Arbeidsgiverperiode(private val perioder: List<Periode>) : Iterab
 
     internal fun dekker(periode: Periode) =
         hele.inneholder(periode)
+
+    override fun equals(other: Any?) = other is Arbeidsgiverperiode && other.første == this.første
+    override fun hashCode() = første.hashCode()
 
     override fun iterator(): Iterator<LocalDate> {
         return object : Iterator<LocalDate> {

@@ -882,10 +882,12 @@ internal class Vedtaksperiode private constructor(
 
     override fun toString() = "${this.periode.start} - ${this.periode.endInclusive} (${this.tilstand::class.simpleName})"
 
+    private fun finnArbeidsgiverperiode() =
+        arbeidsgiver.arbeidsgiverperiode(periode)
+
     private fun erInnenforArbeidsgiverperioden(): Boolean {
         val kuttdato = sykdomstidslinje.sisteIkkeOppholdsdag(periode.start) ?: periode.endInclusive
-        val arbeidsgiverperioder = arbeidsgiver.arbeidsgiverperioder()
-        return arbeidsgiverperioder.any { it.dekker(periode.start til kuttdato) }
+        return finnArbeidsgiverperiode()?.dekker(periode.start til kuttdato) ?: false
     }
 
     // Gang of four State pattern

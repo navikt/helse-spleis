@@ -665,9 +665,9 @@ internal class Arbeidsgiver private constructor(
         return Utbetaling.sykdomstidslinje(utbetalinger, sykdomstidslinje)
     }
 
-    internal fun arbeidsgiverperioder(): List<Arbeidsgiverperiode> {
+    internal fun arbeidsgiverperiode(periode: Periode): Arbeidsgiverperiode? {
         val sykdomstidslinje = sykdomstidslinje()
-        return person.arbeidsgiverperioderFor(organisasjonsnummer, sykdomstidslinje, sykdomstidslinje.sisteDag())
+        return person.arbeidsgiverperiodeFor(organisasjonsnummer, sykdomstidslinje, sykdomstidslinje.sisteDag(), periode)
     }
 
     internal fun infotrygdUtbetalingstidslinje() = person.infotrygdUtbetalingstidslinje(organisasjonsnummer)

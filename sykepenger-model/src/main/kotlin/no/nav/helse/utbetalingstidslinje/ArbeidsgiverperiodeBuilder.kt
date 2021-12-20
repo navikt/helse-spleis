@@ -1,32 +1,36 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 
 internal class ArbeidsgiverperiodeBuilder internal constructor(regler: ArbeidsgiverRegler = NormalArbeidstaker) : AbstractArbeidsgiverperiodetelling(regler) {
-    private val arbeidsgiverperioder = mutableListOf<Arbeidsgiverperiode>()
-    private var pågåendeArbeidsgiverperiode: Arbeidsgiverperiode? = null
+    private val arbeidsgiverperioder = mutableMapOf<Arbeidsgiverperiode, MutableList<LocalDate>>()
 
-    override fun arbeidsgiverperiodeFerdig(arbeidsgiverperiode: Arbeidsgiverperiode, dagen: LocalDate) {
-        pågåendeArbeidsgiverperiode = null
-        arbeidsgiverperioder.add(arbeidsgiverperiode)
+    fun result(periode: Periode): Arbeidsgiverperiode? {
+        return finnArbeidsgiverperiode(periode)
     }
 
-    fun result(): List<Arbeidsgiverperiode> {
-        pågåendeArbeidsgiverperiode?.also { arbeidsgiverperioder.add(it) }
-        return arbeidsgiverperioder.toList()
-    }
+    private fun finnArbeidsgiverperiode(periode: Periode) =
+        arbeidsgiverperioder.firstNotNullOfOrNull { (arbeidsgiverperiode, nedslagsfelt) ->
+            arbeidsgiverperiode.takeIf { periode in it || nedslagsfelt in periode }
+        }
 
+    private fun kanskje(dato: LocalDate, arbeidsgiverperiode: Arbeidsgiverperiode?) {
+        if (arbeidsgiverperiode == null) return
+        arbeidsgiverperioder.getOrPut(arbeidsgiverperiode) { mutableListOf() }.add(dato)
+    }
 
     override fun sykedagIArbeidsgiverperioden(arbeidsgiverperiode: Arbeidsgiverperiode, dato: LocalDate) {
-        pågåendeArbeidsgiverperiode = arbeidsgiverperiode
+        arbeidsgiverperioder.remove(arbeidsgiverperiode)
+        arbeidsgiverperioder[arbeidsgiverperiode] = mutableListOf()
     }
 
-    override fun sykedagEtterArbeidsgiverperioden(arbeidsgiverperiode: Arbeidsgiverperiode?, dato: LocalDate, økonomi: Økonomi) {}
-    override fun sykHelgedagEtterArbeidsgiverperioden(arbeidsgiverperiode: Arbeidsgiverperiode?, dato: LocalDate, økonomi: Økonomi) {}
-    override fun foreldetSykedagEtterArbeidsgiverperioden(arbeidsgiverperiode: Arbeidsgiverperiode?, dato: LocalDate, økonomi: Økonomi) {}
-    override fun egenmeldingsdagEtterArbeidsgiverperioden(arbeidsgiverperiode: Arbeidsgiverperiode?, dato: LocalDate) {}
-    override fun fridagUtenforArbeidsgiverperioden(arbeidsgiverperiode: Arbeidsgiverperiode?, dato: LocalDate) {}
+    override fun sykedagEtterArbeidsgiverperioden(arbeidsgiverperiode: Arbeidsgiverperiode?, dato: LocalDate, økonomi: Økonomi) = kanskje(dato, arbeidsgiverperiode)
+    override fun sykHelgedagEtterArbeidsgiverperioden(arbeidsgiverperiode: Arbeidsgiverperiode?, dato: LocalDate, økonomi: Økonomi) = kanskje(dato, arbeidsgiverperiode)
+    override fun foreldetSykedagEtterArbeidsgiverperioden(arbeidsgiverperiode: Arbeidsgiverperiode?, dato: LocalDate, økonomi: Økonomi) = kanskje(dato, arbeidsgiverperiode)
+    override fun egenmeldingsdagEtterArbeidsgiverperioden(arbeidsgiverperiode: Arbeidsgiverperiode?, dato: LocalDate) = kanskje(dato, arbeidsgiverperiode)
+    override fun fridagUtenforArbeidsgiverperioden(arbeidsgiverperiode: Arbeidsgiverperiode?, dato: LocalDate) = kanskje(dato, arbeidsgiverperiode)
     override fun arbeidsdag(dato: LocalDate) {}
 }

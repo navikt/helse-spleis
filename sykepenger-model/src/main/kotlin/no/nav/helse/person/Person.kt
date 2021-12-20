@@ -128,10 +128,10 @@ class Person private constructor(
         finnArbeidsgiver(ytelser).håndter(ytelser, { arbeidsgiverUtbetalinger(hendelse = it) }, infotrygdhistorikk)
     }
 
-    internal fun arbeidsgiverperioderFor(orgnummer: String, sykdomstidslinje: Sykdomstidslinje, kuttdato: LocalDate): List<Arbeidsgiverperiode> {
+    internal fun arbeidsgiverperiodeFor(orgnummer: String, sykdomstidslinje: Sykdomstidslinje, kuttdato: LocalDate, periode: Periode): Arbeidsgiverperiode? {
         val builder = ArbeidsgiverperiodeBuilder(NormalArbeidstaker)
         infotrygdhistorikk.builder(orgnummer, builder).build(sykdomstidslinje, kuttdato til kuttdato)
-        return builder.result()
+        return builder.result(periode)
     }
 
     private fun arbeidsgiverUtbetalinger(regler: ArbeidsgiverRegler = NormalArbeidstaker, hendelse: IAktivitetslogg): ArbeidsgiverUtbetalinger {
