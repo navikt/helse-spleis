@@ -1115,8 +1115,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         )
         val sykepengegrunnlag = InntektForSykepengegrunnlag(
             inntekter = listOf(
-                grunnlag(a1, 1.januar, INNTEKT.repeat(12)),
-                grunnlag(a2, 1.januar, INNTEKT.repeat(12))
+                grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
+                grunnlag(a2, 1.januar, INNTEKT.repeat(3))
             )
         , arbeidsforhold = emptyList()
         )
