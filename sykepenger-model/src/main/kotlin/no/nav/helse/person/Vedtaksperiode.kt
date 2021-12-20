@@ -442,7 +442,7 @@ internal class Vedtaksperiode private constructor(
         sykdomstidslinje = arbeidsgiver.oppdaterSykdom(hendelse).subset(periode)
     }
 
-    private fun håndterSøknadArbeidsgiver(hendelse: SøknadArbeidsgiver, hvisUtenforArbeidsgiverperioden: Vedtaksperiodetilstand) {
+    private fun håndterSøknadArbeidsgiver(hendelse: SendtSøknad, hvisUtenforArbeidsgiverperioden: Vedtaksperiodetilstand) {
         håndterSøknad(hendelse) {
             if (erInnenforArbeidsgiverperioden()) AvsluttetUtenUtbetaling
             else hvisUtenforArbeidsgiverperioden
@@ -1342,18 +1342,12 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            vedtaksperiode.håndterSøknad(søknad) {
-                if (vedtaksperiode.erInnenforArbeidsgiverperioden()) AvsluttetUtenUtbetaling
-                else AvventerHistorikk
-            }
+            vedtaksperiode.håndterSøknadArbeidsgiver(søknad, AvventerHistorikk)
             søknad.info("Fullført behandling av søknad")
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: SøknadArbeidsgiver) {
-            vedtaksperiode.håndterSøknad(søknad) {
-                if (vedtaksperiode.erInnenforArbeidsgiverperioden()) AvsluttetUtenUtbetaling
-                else AvventerHistorikk
-            }
+            vedtaksperiode.håndterSøknadArbeidsgiver(søknad, AvventerHistorikk)
             søknad.info("Fullført behandling av søknad til arbeidsgiver")
         }
 
@@ -1375,18 +1369,12 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            vedtaksperiode.håndterSøknad(søknad) {
-                if (vedtaksperiode.erInnenforArbeidsgiverperioden()) AvsluttetUtenUtbetaling
-                else AvventerUferdigGap
-            }
+            vedtaksperiode.håndterSøknadArbeidsgiver(søknad, AvventerUferdigGap)
             søknad.info("Fullført behandling av søknad")
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: SøknadArbeidsgiver) {
-            vedtaksperiode.håndterSøknad(søknad) {
-                if (vedtaksperiode.erInnenforArbeidsgiverperioden()) AvsluttetUtenUtbetaling
-                else AvventerUferdigGap
-            }
+            vedtaksperiode.håndterSøknadArbeidsgiver(søknad, AvventerUferdigGap)
             søknad.info("Fullført behandling av søknad til arbeidsgiver")
         }
     }
