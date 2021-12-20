@@ -596,7 +596,7 @@ class JsonBuilderTest {
         fødselsnummer = fnr,
         orgnummer = orgnummer.toString(),
         inntektsvurdering = Inntektsvurdering(inntektsvurdering),
-        inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektsvurderingForSykepengegrunnlag),
+        inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntektsvurderingForSykepengegrunnlag, arbeidsforhold = emptyList()),
         opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
         arbeidsforhold = arbeidsforhold,
         medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja)

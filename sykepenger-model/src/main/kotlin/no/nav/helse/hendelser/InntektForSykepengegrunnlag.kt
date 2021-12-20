@@ -9,7 +9,7 @@ import java.time.LocalDate
 
 class InntektForSykepengegrunnlag(
     private val inntekter: List<ArbeidsgiverInntekt>,
-    private val arbeidsforhold: List<Arbeidsforhold> = emptyList()
+    private val arbeidsforhold: List<Arbeidsforhold>
 ) {
 
     internal fun valider(

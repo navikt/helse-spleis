@@ -111,7 +111,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
                     sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(12))
                 )
             ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList()),
             orgnummer = a1
         )
 
@@ -154,7 +154,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
                 )
             ),
             orgnummer = a1,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -337,7 +337,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
                     sammenligningsgrunnlag(ORGNUMMER, 1.januar, OverMinstegrense.repeat(12)),
                 )
             ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter)
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList())
         )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -350,7 +350,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
                     sammenligningsgrunnlag(ORGNUMMER, 1.januar, OverMinstegrense.repeat(12)),
                 )
             ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter)
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList())
         )
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -375,7 +375,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
                     sammenligningsgrunnlag(ORGNUMMER, 1.januar, 50000.årlig.repeat(12)),
                 )
             ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter)
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList())
         )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)

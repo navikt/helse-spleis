@@ -518,7 +518,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
                 )
             ),
             orgnummer = a1,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -544,7 +544,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
                     sammenligningsgrunnlag(ORGNUMMER, 1.januar, 50000.årlig.repeat(12)),
                 )
             ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter)
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList())
         )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -576,7 +576,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
                     sammenligningsgrunnlag(ORGNUMMER, 1.januar, OverMinstegrense.repeat(12)),
                 )
             ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter)
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList())
         )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)

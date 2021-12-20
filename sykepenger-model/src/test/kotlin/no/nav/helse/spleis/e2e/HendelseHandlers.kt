@@ -205,7 +205,7 @@ internal fun AbstractEndToEndTest.tilYtelser(
                 orgnummer inntekt AbstractEndToEndTest.INNTEKT
             }
         }
-    )
+    , arbeidsforhold = emptyList())
 ): UUID {
     håndterSykmelding(Sykmeldingsperiode(fom, tom, grad), fnr = fnr, orgnummer = orgnummer)
     val id: IdInnhenter = { observatør.sisteVedtaksperiode() }
@@ -378,7 +378,7 @@ internal fun AbstractEndToEndTest.håndterVilkårsgrunnlag(
         }
     ),
     inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag = InntektForSykepengegrunnlag(
-        listOf(
+        inntekter = listOf(
             ArbeidsgiverInntekt(orgnummer.toString(), (0..2).map {
                 val yearMonth = YearMonth.from(inspektør(orgnummer).skjæringstidspunkt(vedtaksperiodeIdInnhenter)).minusMonths(3L - it)
                 ArbeidsgiverInntekt.MånedligInntekt.Sykepengegrunnlag(
@@ -390,7 +390,7 @@ internal fun AbstractEndToEndTest.håndterVilkårsgrunnlag(
                 )
             })
         )
-    ),
+    , arbeidsforhold = emptyList()),
     arbeidsforhold: List<Arbeidsforhold> = finnArbeidsgivere().map { Arbeidsforhold(it.toString(), LocalDate.EPOCH, null) },
     opptjening: Opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
     fnr: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018
@@ -789,7 +789,7 @@ internal fun AbstractEndToEndTest.gapPeriode(periode: Periode, orgnummer: Organi
                     orgnummer inntekt AbstractEndToEndTest.INNTEKT
                 }
             }
-        )
+        , arbeidsforhold = emptyList())
     ))
 }
 

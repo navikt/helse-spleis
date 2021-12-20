@@ -220,7 +220,7 @@ internal class VilkårsgrunnlagTest {
         inntektsvurdering = Inntektsvurdering(inntektsmåneder),
         opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
         medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-        inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(skatteinntekter),
+        inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = skatteinntekter, arbeidsforhold = emptyList()),
         arbeidsforhold = arbeidsforhold
     )
 

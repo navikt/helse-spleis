@@ -123,7 +123,7 @@ abstract class AbstractObservableTest {
                     ORGNUMMER inntekt INNTEKT
                 }
             }
-        ),
+        , arbeidsforhold = emptyList()),
         fnr: String = UNG_PERSON_FNR
     ): Vilkårsgrunnlag = Vilkårsgrunnlag(
         meldingsreferanseId = UUID.randomUUID(),

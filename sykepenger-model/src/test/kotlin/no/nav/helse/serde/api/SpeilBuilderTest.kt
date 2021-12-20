@@ -1237,13 +1237,13 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
                     a2 inntekt 400.månedlig
                 }
             }),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektperioderForSykepengegrunnlag {
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntektperioderForSykepengegrunnlag {
                 1.oktober(2017) til 1.desember(2017) inntekter {
                     a1 inntekt 1000.månedlig
                     a2 inntekt 600.månedlig
                     a2 inntekt 400.månedlig
                 }
-            }),
+            }, arbeidsforhold = emptyList()),
             arbeidsforhold = listOf(Arbeidsforhold(a1.toString(), LocalDate.EPOCH), Arbeidsforhold(a2.toString(), LocalDate.EPOCH)),
             orgnummer = a1
         )
@@ -1308,12 +1308,12 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
                     a2 inntekt 31000.månedlig
                 }
             }),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektperioderForSykepengegrunnlag {
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntektperioderForSykepengegrunnlag {
                 1.oktober(2017) til 1.desember(2017) inntekter {
                     a1 inntekt 31000.månedlig
                     a2 inntekt 31000.månedlig
                 }
-            }),
+            }, arbeidsforhold = emptyList()),
             orgnummer = a1
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -1384,11 +1384,12 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             ),
             orgnummer = a1,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                listOf(
+                inntekter = listOf(
                     grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(3)),
                     grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), listOf(31000.månedlig, 32000.månedlig, 33000.månedlig)),
                     grunnlag(a4, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 1000.månedlig.repeat(2)),
                 )
+            , arbeidsforhold = emptyList()
             ),
             arbeidsforhold = listOf(
                 Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),

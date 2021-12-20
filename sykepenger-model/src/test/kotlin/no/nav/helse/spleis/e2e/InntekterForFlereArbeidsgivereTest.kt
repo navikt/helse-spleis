@@ -339,10 +339,11 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             )
         )
         val ivForSykepengegrunnlag = InntektForSykepengegrunnlag(
-            listOf(
+            inntekter = listOf(
                 grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3)),
                 grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 35000.månedlig.repeat(3))
             )
+        , arbeidsforhold = emptyList()
         )
         val arbeidsforhold = listOf(Arbeidsforhold(a1.toString(), LocalDate.EPOCH), Arbeidsforhold(a2.toString(), LocalDate.EPOCH))
 
@@ -428,7 +429,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
                 inntekter = inntekter
             ),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekterForSykepengegrunnlag
+                inntekter = inntekterForSykepengegrunnlag, arbeidsforhold = emptyList()
             ),
             medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
             opptjeningvurdering = Opptjeningvurdering(

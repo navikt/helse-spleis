@@ -35,7 +35,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                 inntekter = listOf(
                     grunnlag(AG1, skjæringstidspunkt, INNTEKT.repeat(3))
-                )
+                ), arbeidsforhold = emptyList()
             ),
             arbeidsforhold = listOf(
                 Arbeidsforhold(AG1.toString(), LocalDate.EPOCH, null),

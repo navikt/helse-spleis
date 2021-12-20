@@ -219,11 +219,12 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
                     }
                 }),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntektperioderForSykepengegrunnlag {
+                inntekter = inntektperioderForSykepengegrunnlag {
                     1.oktober(2017) til 1.desember(2017) inntekter {
                         ORGNUMMER inntekt 31000.månedlig
                     }
-                }),
+                }, arbeidsforhold = emptyList()
+            ),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             opptjeningvurdering = Opptjeningvurdering(
                 listOf(

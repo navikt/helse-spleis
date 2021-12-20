@@ -58,7 +58,7 @@ internal class UtbetalingsgrunnlagMessage(packet: JsonMessage) : BehovMessage(pa
             aktørId = aktørId,
             orgnummer = orgnummer,
             fødselsnummer = fødselsnummer,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekterForSykepengegrunnlag),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekterForSykepengegrunnlag, arbeidsforhold = emptyList()),
             vedtaksperiodeId = vedtaksperiodeId,
             arbeidsforhold = arbeidsforhold
         )

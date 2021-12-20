@@ -135,7 +135,7 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
                     sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 35000.månedlig.repeat(12))
                 )
             ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold,
             orgnummer = a1
         )

@@ -1118,7 +1118,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
                 a2 inntekt INNTEKT
             }
         })
-        val inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(listOf(a1, a2).map { arbeidsgiver ->
+        val inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = listOf(a1, a2).map { arbeidsgiver ->
             ArbeidsgiverInntekt(arbeidsgiver.toString(), (0..2).map {
                 val yearMonth = YearMonth.from(skjæringstidspunkt).minusMonths(3L - it)
                 ArbeidsgiverInntekt.MånedligInntekt.Sykepengegrunnlag(
@@ -1129,7 +1129,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
                     beskrivelse = "beskrivelse"
                 )
             })
-        })
+        }, arbeidsforhold = emptyList())
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = inntektsvurdering, inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
@@ -1160,7 +1160,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
                 a2 inntekt INNTEKT
             }
         })
-        val inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(listOf(a1, a2).map { arbeidsgiver ->
+        val inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = listOf(a1, a2).map { arbeidsgiver ->
             ArbeidsgiverInntekt(arbeidsgiver.toString(), (0..2).map {
                 val yearMonth = YearMonth.from(skjæringstidspunkt).minusMonths(3L - it)
                 ArbeidsgiverInntekt.MånedligInntekt.Sykepengegrunnlag(
@@ -1171,7 +1171,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
                     beskrivelse = "beskrivelse"
                 )
             })
-        })
+        }, arbeidsforhold = emptyList())
         håndterVilkårsgrunnlag(2.vedtaksperiode, inntektsvurdering = inntektsvurdering, inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag, orgnummer = a2)
 
         håndterSykmelding(Sykmeldingsperiode(17.februar, 20.februar, 100.prosent), orgnummer = a1)

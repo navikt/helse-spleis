@@ -42,7 +42,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
                     sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 20000.månedlig.repeat(12))
                 )
             ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList()),
             orgnummer = a1
         )
 
@@ -94,7 +94,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
                     sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 20000.månedlig.repeat(12))
                 )
             ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList()),
             orgnummer = a1
         )
 
@@ -135,7 +135,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
                     sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 20000.månedlig.repeat(11) + 23000.månedlig)
                 )
             ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList()),
             orgnummer = a1
         )
 
@@ -185,7 +185,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
                     sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 20000.månedlig.repeat(12))
                 )
             ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList()),
             orgnummer = a1
         )
 
@@ -245,7 +245,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
                     sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 35000.månedlig.repeat(12))
                 )
             ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList()),
             orgnummer = a1
         )
 
@@ -305,7 +305,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
                     sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 35000.månedlig.repeat(12))
                 )
             ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList()),
             orgnummer = a1
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -364,7 +364,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
                     sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 35000.månedlig.repeat(12))
                 )
             ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList()),
             orgnummer = a1
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -447,7 +447,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
                     sammenligningsgrunnlag(a4, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 34000.månedlig.repeat(12))
                 ),
             ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList()),
             orgnummer = a1
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -548,7 +548,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
                     sammenligningsgrunnlag(a4, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 34000.månedlig.repeat(12))
                 )
             ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList()),
             orgnummer = a1
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -648,7 +648,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
                     sammenligningsgrunnlag(a4, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 34000.månedlig.repeat(12))
                 )
             ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList()),
             orgnummer = a1
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -755,7 +755,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
                     sammenligningsgrunnlag(a4, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 34000.månedlig.repeat(12))
                 )
             ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList()),
             orgnummer = a1
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -845,7 +845,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
                     sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 20000.månedlig.repeat(12))
                 )
             ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold,
             orgnummer = a1
         )
@@ -899,7 +899,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             orgnummer = a1,
             arbeidsforhold = arbeidsforhold,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter)
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList())
         )
 
         assertNoWarnings(inspektør(a1))
@@ -940,7 +940,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
                     sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 35000.månedlig.repeat(12))
                 )
             ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList()),
             orgnummer = a1
         )
 
@@ -1001,7 +1001,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
                     sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 35000.månedlig.repeat(12))
                 )
             ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList()),
             orgnummer = a1
         )
 
@@ -1051,7 +1051,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
                     sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 20000.månedlig.repeat(12))
                 )
             ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekterFraSkatt),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekterFraSkatt, arbeidsforhold = emptyList()),
             orgnummer = a1
         )
 
@@ -1086,7 +1086,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
                     sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 20000.månedlig.repeat(12))
                 )
             ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekterFraSkatt),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekterFraSkatt, arbeidsforhold = emptyList()),
             orgnummer = a1
         )
 
@@ -1114,10 +1114,11 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             )
         )
         val sykepengegrunnlag = InntektForSykepengegrunnlag(
-            listOf(
+            inntekter = listOf(
                 grunnlag(a1, 1.januar, INNTEKT.repeat(12)),
                 grunnlag(a2, 1.januar, INNTEKT.repeat(12))
             )
+        , arbeidsforhold = emptyList()
         )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -1184,10 +1185,11 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             )
         )
         val sykepengegrunnlag = InntektForSykepengegrunnlag(
-            listOf(
+            inntekter = listOf(
                 grunnlag(a1, 20.januar, INNTEKT.repeat(12)),
                 grunnlag(a2, 20.januar, INNTEKT.repeat(12))
             )
+        , arbeidsforhold = emptyList()
         )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -1289,7 +1291,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
                     sammenligningsgrunnlag(a4, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 34000.månedlig.repeat(12))
                 ),
             ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList()),
             orgnummer = a1
         )
 

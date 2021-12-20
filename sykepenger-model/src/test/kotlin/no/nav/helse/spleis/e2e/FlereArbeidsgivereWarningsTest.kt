@@ -74,7 +74,7 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
                     grunnlag(a1, 1.januar(2021), INNTEKT.repeat(3)),
                     grunnlag(a2, 1.januar(2021), 1000.månedlig.repeat(3))
                 )
-            ),
+            , arbeidsforhold = emptyList()),
             arbeidsforhold = listOf(Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null), Arbeidsforhold(a2.toString(), LocalDate.EPOCH, null))
         )
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
@@ -123,11 +123,11 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
                 }
             ),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                listOf(
+                inntekter = listOf(
                     grunnlag(a1, 1.januar(2021), INNTEKT.repeat(3)),
                     grunnlag(a2, 1.januar(2021), 1000.månedlig.repeat(3))
                 )
-            ),
+            , arbeidsforhold = emptyList()),
             arbeidsforhold = listOf(Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null), Arbeidsforhold(a2.toString(), LocalDate.EPOCH, null))
         )
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)

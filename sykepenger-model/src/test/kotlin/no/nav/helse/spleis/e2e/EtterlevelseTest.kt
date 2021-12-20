@@ -708,13 +708,13 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
                 }
             ),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntektperioderForSykepengegrunnlag {
+                inntekter = inntektperioderForSykepengegrunnlag {
                     1.oktober(2017) til 1.desember(2017) inntekter {
                         AG1 inntekt inntekt
                         AG2 inntekt inntekt
                     }
                 }
-            )
+            , arbeidsforhold = emptyList())
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
 

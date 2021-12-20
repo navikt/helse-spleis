@@ -329,7 +329,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
                 )
             ),
             orgnummer = AG1,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = AG1)

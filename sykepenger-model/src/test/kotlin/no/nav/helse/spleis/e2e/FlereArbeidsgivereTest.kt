@@ -51,7 +51,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
                     }
                 }
             ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList())
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList())
         )
         )
 
@@ -94,7 +94,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
                     }
                 }
             ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList())
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList())
         )
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, TIL_INFOTRYGD)
         assertEquals(282500.årlig, person.sammenligningsgrunnlag(2.februar))
@@ -132,7 +132,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
                     }
                 }
             ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList())
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList())
         ))
 
         person.håndter(
@@ -1403,7 +1403,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
                         }
                     },
                 ),
-                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),
+                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
                 medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Nei
             )
         )
@@ -1766,13 +1766,13 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
                 }
             ),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntektperioderForSykepengegrunnlag {
+                inntekter = inntektperioderForSykepengegrunnlag {
                     1.oktober(2017) til 1.desember(2017) inntekter {
                         a1 inntekt INNTEKT
                         a2 inntekt INNTEKT
                     }
                 }
-            )
+            , arbeidsforhold = emptyList())
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         assertEquals(0, a1.inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistDagTeller)
@@ -1802,10 +1802,12 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             sammenligningsgrunnlag(a1, 20.januar, INNTEKT.repeat(12)),
             sammenligningsgrunnlag(a2, 20.januar, 32000.månedlig.repeat(12))
         ))
-        val sykepengegrunnlag = InntektForSykepengegrunnlag(listOf(
-            grunnlag(a1, 20.januar, INNTEKT.repeat(12)),
-            grunnlag(a2, 20.januar, INNTEKT.repeat(12))
-        ))
+        val sykepengegrunnlag = InntektForSykepengegrunnlag(
+            inntekter = listOf(
+                grunnlag(a1, 20.januar, INNTEKT.repeat(12)),
+                grunnlag(a2, 20.januar, INNTEKT.repeat(12))
+            ), arbeidsforhold = emptyList()
+        )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = sammenligningsgrunnlag, inntektsvurderingForSykepengegrunnlag = sykepengegrunnlag, orgnummer = a1)

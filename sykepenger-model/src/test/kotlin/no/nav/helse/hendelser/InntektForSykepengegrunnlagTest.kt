@@ -57,7 +57,7 @@ internal class InntektForSykepengegrunnlagTest {
                 }
             )
         )
-        val inntektForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter)
+        val inntektForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList())
         assertFalse(inntektForSykepengegrunnlag.valider(aktivitetslogg).hasErrorsOrWorse())
     }
 
@@ -75,7 +75,7 @@ internal class InntektForSykepengegrunnlagTest {
                 }
             ),
         )
-        val inntektForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter)
+        val inntektForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList())
         assertTrue(inntektForSykepengegrunnlag.valider(aktivitetslogg).hasErrorsOrWorse())
     }
 
@@ -93,7 +93,7 @@ internal class InntektForSykepengegrunnlagTest {
                 }
             ),
         )
-        val inntektForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter)
+        val inntektForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList())
         assertFalse(inntektForSykepengegrunnlag.valider(aktivitetslogg).hasErrorsOrWorse())
     }
 

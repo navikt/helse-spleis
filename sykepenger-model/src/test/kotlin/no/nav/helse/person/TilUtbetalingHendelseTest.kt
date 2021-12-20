@@ -333,11 +333,12 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
                 )
             ),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntektperioderForSykepengegrunnlag {
+                inntekter = inntektperioderForSykepengegrunnlag {
                     1.oktober(2017) til 1.desember(2017) inntekter {
                         ORGNUMMER inntekt 31000.månedlig
                     }
-                }),
+                }, arbeidsforhold = emptyList()
+            ),
             arbeidsforhold = listOf(
                 Arbeidsforhold(
                     ORGNUMMER.toString(),

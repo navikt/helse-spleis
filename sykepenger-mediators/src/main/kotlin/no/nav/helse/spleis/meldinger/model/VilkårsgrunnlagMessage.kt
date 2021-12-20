@@ -81,7 +81,8 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packe
                 inntekter = inntekterForSammenligningsgrunnlag
             ),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekterForSykepengegrunnlag
+                inntekter = inntekterForSykepengegrunnlag,
+                arbeidsforhold = emptyList()
             ),
             opptjeningvurdering = Opptjeningvurdering(
                 arbeidsforhold = arbeidsforhold

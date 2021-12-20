@@ -46,7 +46,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             inntektsvurdering = Inntektsvurdering(sammenligningsgrunnlag),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(grunnlagForSykepengegrunnlag),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = grunnlagForSykepengegrunnlag, arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold,
             orgnummer = a1
         )
@@ -78,7 +78,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold,
             orgnummer = a1
         )
@@ -122,7 +122,8 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
                 listOf(sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 10000.månedlig.repeat(12)))
             ),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                listOf(grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 10000.månedlig.repeat(3)))
+                inntekter = listOf(grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 10000.månedlig.repeat(3)))
+            , arbeidsforhold = emptyList()
             ),
             arbeidsforhold = listOf(Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null))
         )
@@ -177,7 +178,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             orgnummer = a1,
             inntektsvurdering = Inntektsvurdering(sammenligningsgrunnlag1),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter1),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter1, arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold1,
             opptjening = Opptjeningvurdering(listOf(Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null)))
         )
@@ -225,7 +226,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
                     sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(12))
                 )
             ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold,
             orgnummer = a1
         )
@@ -260,7 +261,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             orgnummer = a1,
             inntektsvurdering = Inntektsvurdering(sammenligningsgrunnlag),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -303,7 +304,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             inntektsvurdering = Inntektsvurdering(
                 listOf(sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 35000.månedlig.repeat(12)))
             ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekterA1),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekterA1, arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforholdA1,
             orgnummer = a1
         )
@@ -336,7 +337,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
                     sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a2, 1.vedtaksperiode), 35000.månedlig.repeat(12))
                 )
             ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekterA2),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekterA2, arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforholdA2,
             orgnummer = a2
         )
@@ -376,7 +377,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             orgnummer = a1,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter1),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter1, arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold1
         )
         assertEquals(3, tellArbeidsforholdINyesteHistorikkInnslag(a1))
@@ -411,7 +412,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             orgnummer = a1,
             inntektsvurdering = Inntektsvurdering(sammenligningsgrunnlag1),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter1),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter1, arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold1
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -448,7 +449,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             2.vedtaksperiode,
             orgnummer = a1,
             inntektsvurdering = Inntektsvurdering(sammenligningsgrunnlag2),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter2),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter2, arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold2
         )
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
@@ -480,7 +481,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             orgnummer = a2,
             inntektsvurdering = Inntektsvurdering(sammenligningsgrunnlag3),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter3),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter3, arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold2
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
@@ -519,7 +520,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             orgnummer = a1,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold
         )
 
@@ -551,7 +552,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             orgnummer = a1,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold
         )
         assertEquals(listOf(a1, a2).map(Organisasjonsnummer::toString), arbeidsgivere())
@@ -574,7 +575,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             orgnummer = a1,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold
         )
         assertFalse(person.harVedtaksperiodeForArbeidsgiverMedUkjentArbeidsforhold(1.januar))
@@ -598,7 +599,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             inntektsvurdering = Inntektsvurdering(
                 listOf(sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(12)))
             ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
             arbeidsforhold = emptyList(),
             opptjening = Opptjeningvurdering(
                 listOf(Arbeidsforhold(a1.toString(), 1.januar(2016), null))
@@ -639,7 +640,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             orgnummer = a1,
             inntektsvurdering = inntektsvurdering,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(sykepengegrunnlag),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = sykepengegrunnlag, arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold,
             opptjening = Opptjeningvurdering(arbeidsforhold)
         )
