@@ -6,9 +6,8 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.*
 import no.nav.helse.person.Bokstav.BOKSTAV_A
+import no.nav.helse.person.Ledd.*
 import no.nav.helse.person.Ledd.Companion.ledd
-import no.nav.helse.person.Ledd.LEDD_1
-import no.nav.helse.person.Ledd.LEDD_2
 import no.nav.helse.person.Paragraf.*
 import no.nav.helse.person.Punktum.Companion.punktum
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -229,7 +228,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 46817.årlig)
         håndterYtelser()
-        val arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER.toString().toString(), 5.desember(2017), 31.januar))
+        val arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER.toString(), 5.desember(2017), 31.januar))
         håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold)
 
         assertOppfylt(
@@ -253,7 +252,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 46816.årlig)
         håndterYtelser()
-        val arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER.toString().toString(), 5.desember(2017), 31.januar))
+        val arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER.toString(), 5.desember(2017), 31.januar))
         håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold)
 
         assertIkkeOppfylt(
@@ -324,9 +323,9 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
-            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString().toString(), 1.januar, 31.januar, 100.prosent, inntekt)),
+            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.januar, 31.januar, 100.prosent, inntekt)),
             inntektshistorikk = listOf(
-                Inntektsopplysning(ORGNUMMER.toString().toString(), 1.januar, inntekt, true)
+                Inntektsopplysning(ORGNUMMER.toString(), 1.januar, inntekt, true)
             )
         )
         håndterYtelser()
@@ -713,8 +712,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
                         AG1 inntekt inntekt
                         AG2 inntekt inntekt
                     }
-                }
-            , arbeidsforhold = emptyList())
+                }, arbeidsforhold = emptyList())
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
 
@@ -848,7 +846,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), fnr = GAMMEL)
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 187268.årlig, fnr = GAMMEL)
         håndterYtelser(fnr = GAMMEL)
-        val arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER.toString().toString(), 5.desember(2017), 31.januar))
+        val arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER.toString(), 5.desember(2017), 31.januar))
         håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold, fnr = GAMMEL)
 
         assertOppfylt(
@@ -874,7 +872,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), fnr = GAMMEL)
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 187267.årlig, fnr = GAMMEL)
         håndterYtelser(fnr = GAMMEL)
-        val arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER.toString().toString(), 5.desember(2017), 31.januar))
+        val arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER.toString(), 5.desember(2017), 31.januar))
         håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold, fnr = GAMMEL)
 
         assertIkkeOppfylt(
@@ -890,6 +888,286 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
             outputdata = emptyMap()
         )
         assertIkkeVurdert(PARAGRAF_8_3, ledd = LEDD_2, 1.punktum)
+    }
+
+    @Test
+    fun `§8-51 ledd 3 - 60 sykedager etter fylte 67 år - syk 61 dager etter fylte 67 år`() {
+        val GAMMEL = "01025100065".somFødselsnummer()
+        createTestPerson(GAMMEL)
+        nyttVedtak(1.januar, 31.januar, fnr = GAMMEL)
+        forlengVedtak(1.februar, 28.februar, fnr = GAMMEL)
+        forlengVedtak(1.mars, 31.mars, fnr = GAMMEL)
+        forlengVedtak(1.april, 27.april, fnr = GAMMEL)
+
+        assertOppfylt(
+            resultatvelger = 1.resultat,
+            paragraf = PARAGRAF_8_51,
+            ledd = LEDD_3,
+            punktum = 1.punktum,
+            versjon = 16.desember(2011),
+            inputdata = mapOf(
+                "maksSykepengedagerOver67" to 60
+            ),
+            outputdata = mapOf(
+                "gjenståendeSykedager" to 61,
+                "forbrukteSykedager" to 11,
+                "maksdato" to 26.april
+            )
+        )
+
+        assertOppfylt(
+            resultatvelger = 2.resultat,
+            paragraf = PARAGRAF_8_51,
+            ledd = LEDD_3,
+            punktum = 1.punktum,
+            versjon = 16.desember(2011),
+            inputdata = mapOf(
+                "maksSykepengedagerOver67" to 60
+            ),
+            outputdata = mapOf(
+                "gjenståendeSykedager" to 41,
+                "forbrukteSykedager" to 31,
+                "maksdato" to 26.april
+            )
+        )
+
+        assertOppfylt(
+            resultatvelger = 3.resultat,
+            paragraf = PARAGRAF_8_51,
+            ledd = LEDD_3,
+            punktum = 1.punktum,
+            versjon = 16.desember(2011),
+            inputdata = mapOf(
+                "maksSykepengedagerOver67" to 60
+            ),
+            outputdata = mapOf(
+                "gjenståendeSykedager" to 19,
+                "forbrukteSykedager" to 53,
+                "maksdato" to 26.april
+            )
+        )
+
+        assertIkkeOppfylt(
+            resultatvelger = 4.resultat,
+            paragraf = PARAGRAF_8_51,
+            ledd = LEDD_3,
+            punktum = 1.punktum,
+            versjon = 16.desember(2011),
+            inputdata = mapOf(
+                "maksSykepengedagerOver67" to 60
+            ),
+            outputdata = mapOf(
+                "gjenståendeSykedager" to 0,
+                "forbrukteSykedager" to 72,
+                "maksdato" to 26.april
+            )
+        )
+
+        assertOppfylt(
+            resultatvelger = 5.resultat,
+            paragraf = PARAGRAF_8_51,
+            ledd = LEDD_3,
+            punktum = 1.punktum,
+            versjon = 16.desember(2011),
+            inputdata = mapOf(
+                "maksSykepengedagerOver67" to 60
+            ),
+            outputdata = mapOf(
+                "gjenståendeSykedager" to 0,
+                "forbrukteSykedager" to 72,
+                "maksdato" to 26.april
+            )
+        )
+    }
+
+    @Test
+    fun `§8-51 ledd 3 - 60 sykedager etter fylte 67 år - frisk på 60-årsdagen så total sykedager blir en dag mindre uten at maksdato endres`() {
+        val GAMMEL = "01025100065".somFødselsnummer()
+        createTestPerson(GAMMEL)
+
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), fnr = GAMMEL)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), fnr = GAMMEL)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, fnr = GAMMEL)
+        håndterYtelser(1.vedtaksperiode, fnr = GAMMEL)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, fnr = GAMMEL)
+        håndterYtelser(1.vedtaksperiode, fnr = GAMMEL)
+        håndterSimulering(1.vedtaksperiode, fnr = GAMMEL)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, fnr = GAMMEL)
+        håndterUtbetalt(1.vedtaksperiode, fnr = GAMMEL)
+
+        håndterSykmelding(Sykmeldingsperiode(2.februar, 28.februar, 100.prosent), fnr = GAMMEL)
+        håndterSøknad(Sykdom(2.februar, 28.februar, 100.prosent), fnr = GAMMEL)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 2.februar, fnr = GAMMEL)
+        håndterYtelser(2.vedtaksperiode, fnr = GAMMEL)
+        håndterVilkårsgrunnlag(2.vedtaksperiode, fnr = GAMMEL)
+        håndterYtelser(2.vedtaksperiode, fnr = GAMMEL)
+        håndterSimulering(2.vedtaksperiode, fnr = GAMMEL)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, fnr = GAMMEL)
+        håndterUtbetalt(2.vedtaksperiode, fnr = GAMMEL)
+
+        assertOppfylt(
+            resultatvelger = 1.resultat,
+            paragraf = PARAGRAF_8_51,
+            ledd = LEDD_3,
+            punktum = 1.punktum,
+            versjon = 16.desember(2011),
+            inputdata = mapOf(
+                "maksSykepengedagerOver67" to 60
+            ),
+            outputdata = mapOf(
+                "gjenståendeSykedager" to 61,
+                "forbrukteSykedager" to 11,
+                "maksdato" to 26.april
+            )
+        )
+
+        assertOppfylt(
+            resultatvelger = 2.resultat,
+            paragraf = PARAGRAF_8_51,
+            ledd = LEDD_3,
+            punktum = 1.punktum,
+            versjon = 16.desember(2011),
+            inputdata = mapOf(
+                "maksSykepengedagerOver67" to 60
+            ),
+            outputdata = mapOf(
+                "gjenståendeSykedager" to 41,
+                "forbrukteSykedager" to 30,
+                "maksdato" to 26.april
+            )
+        )
+    }
+
+    @Test
+    fun `§8-51 ledd 3 - 60 sykedager etter fylte 67 år - frisk dagen etter 60-årsdagen så maksdato flyttes en dag`() {
+        val GAMMEL = "01025100065".somFødselsnummer()
+        createTestPerson(GAMMEL)
+
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 1.februar, 100.prosent), fnr = GAMMEL)
+        håndterSøknad(Sykdom(1.januar, 1.februar, 100.prosent), fnr = GAMMEL)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, fnr = GAMMEL)
+        håndterYtelser(1.vedtaksperiode, fnr = GAMMEL)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, fnr = GAMMEL)
+        håndterYtelser(1.vedtaksperiode, fnr = GAMMEL)
+        håndterSimulering(1.vedtaksperiode, fnr = GAMMEL)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, fnr = GAMMEL)
+        håndterUtbetalt(1.vedtaksperiode, fnr = GAMMEL)
+
+        håndterSykmelding(Sykmeldingsperiode(3.februar, 28.februar, 100.prosent), fnr = GAMMEL)
+        håndterSøknad(Sykdom(3.februar, 28.februar, 100.prosent), fnr = GAMMEL)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 3.februar, fnr = GAMMEL)
+        håndterYtelser(2.vedtaksperiode, fnr = GAMMEL)
+        håndterVilkårsgrunnlag(2.vedtaksperiode, fnr = GAMMEL)
+        håndterYtelser(2.vedtaksperiode, fnr = GAMMEL)
+        håndterSimulering(2.vedtaksperiode, fnr = GAMMEL)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, fnr = GAMMEL)
+        håndterUtbetalt(2.vedtaksperiode, fnr = GAMMEL)
+
+        assertOppfylt(
+            resultatvelger = 1.resultat,
+            paragraf = PARAGRAF_8_51,
+            ledd = LEDD_3,
+            punktum = 1.punktum,
+            versjon = 16.desember(2011),
+            inputdata = mapOf(
+                "maksSykepengedagerOver67" to 60
+            ),
+            outputdata = mapOf(
+                "gjenståendeSykedager" to 60,
+                "forbrukteSykedager" to 12,
+                "maksdato" to 26.april
+            )
+        )
+
+        assertOppfylt(
+            resultatvelger = 2.resultat,
+            paragraf = PARAGRAF_8_51,
+            ledd = LEDD_3,
+            punktum = 1.punktum,
+            versjon = 16.desember(2011),
+            inputdata = mapOf(
+                "maksSykepengedagerOver67" to 60
+            ),
+            outputdata = mapOf(
+                "gjenståendeSykedager" to 42,
+                "forbrukteSykedager" to 30,
+                "maksdato" to 27.april
+            )
+        )
+    }
+
+    @Test
+    fun `§8-51 ledd 3 - 60 sykedager etter fylte 67 år - syk 60 dager etter fylte 67 år`() {
+        val GAMMEL = "01025100065".somFødselsnummer()
+        createTestPerson(GAMMEL)
+        nyttVedtak(1.januar, 31.januar, fnr = GAMMEL)
+        forlengVedtak(1.februar, 28.februar, fnr = GAMMEL)
+        forlengVedtak(1.mars, 31.mars, fnr = GAMMEL)
+        forlengVedtak(1.april, 26.april, fnr = GAMMEL)
+
+        assertOppfylt(
+            resultatvelger = 1.resultat,
+            paragraf = PARAGRAF_8_51,
+            ledd = LEDD_3,
+            punktum = 1.punktum,
+            versjon = 16.desember(2011),
+            inputdata = mapOf(
+                "maksSykepengedagerOver67" to 60
+            ),
+            outputdata = mapOf(
+                "gjenståendeSykedager" to 61,
+                "forbrukteSykedager" to 11,
+                "maksdato" to 26.april
+            )
+        )
+
+        assertOppfylt(
+            resultatvelger = 2.resultat,
+            paragraf = PARAGRAF_8_51,
+            ledd = LEDD_3,
+            punktum = 1.punktum,
+            versjon = 16.desember(2011),
+            inputdata = mapOf(
+                "maksSykepengedagerOver67" to 60
+            ),
+            outputdata = mapOf(
+                "gjenståendeSykedager" to 41,
+                "forbrukteSykedager" to 31,
+                "maksdato" to 26.april
+            )
+        )
+
+        assertOppfylt(
+            resultatvelger = 3.resultat,
+            paragraf = PARAGRAF_8_51,
+            ledd = LEDD_3,
+            punktum = 1.punktum,
+            versjon = 16.desember(2011),
+            inputdata = mapOf(
+                "maksSykepengedagerOver67" to 60
+            ),
+            outputdata = mapOf(
+                "gjenståendeSykedager" to 19,
+                "forbrukteSykedager" to 53,
+                "maksdato" to 26.april
+            )
+        )
+
+        assertOppfylt(
+            resultatvelger = 4.resultat,
+            paragraf = PARAGRAF_8_51,
+            ledd = LEDD_3,
+            punktum = 1.punktum,
+            versjon = 16.desember(2011),
+            inputdata = mapOf(
+                "maksSykepengedagerOver67" to 60
+            ),
+            outputdata = mapOf(
+                "gjenståendeSykedager" to 0,
+                "forbrukteSykedager" to 72,
+                "maksdato" to 26.april
+            )
+        )
     }
 
     private val Int.resultat: (List<Resultat>) -> Resultat get() = { it[this - 1] }

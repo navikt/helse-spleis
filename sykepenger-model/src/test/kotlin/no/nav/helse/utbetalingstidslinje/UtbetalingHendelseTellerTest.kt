@@ -19,53 +19,53 @@ internal class UtbetalingHendelseTellerTest {
     @Test
     fun `Person under 67 år får utbetalt 248 dager`() {
         grense(UNG_PERSON_FNR_2018, 247)
-        assertFalse(grense.påGrensen(31.desember))
+        assertTrue(grense.erFørMaksdato(31.desember))
         grense.inkrementer(31.desember)
-        assertTrue(grense.påGrensen(31.desember))
+        assertFalse(grense.erFørMaksdato(31.desember))
     }
 
     @Test
     fun `Person som blir 67 år får utbetalt 60 dager etter 67 årsdagen`() {
         grense(PERSON_67_ÅR_FNR_2018, 15 + 59)
-        assertFalse(grense.påGrensen(31.desember))
+        assertTrue(grense.erFørMaksdato(31.desember))
         grense.inkrementer(31.desember)
-        assertTrue(grense.påGrensen(31.desember))
+        assertFalse(grense.erFørMaksdato(31.desember))
     }
 
     @Test
     fun `Person som blir 70 år har ikke utbetaling på 70 årsdagen`() {
         grense(PERSON_70_ÅR_FNR_2018, 11)
-        assertFalse(grense.påGrensen(11.januar))
+        assertTrue(grense.erFørMaksdato(11.januar))
         grense.inkrementer(12.januar)
-        assertTrue(grense.påGrensen(12.januar))
+        assertFalse(grense.erFørMaksdato(12.januar))
     }
 
     @Test
     fun `Person under 67 år får utbetalt 248 `() {
         grense(UNG_PERSON_FNR_2018, 248)
-        assertTrue(grense.påGrensen(31.desember))
+        assertFalse(grense.erFørMaksdato(31.desember))
         grense.resett(31.desember)
-        assertFalse(grense.påGrensen(31.desember))
+        assertTrue(grense.erFørMaksdato(31.desember))
     }
 
     @Test
     fun `Person under 67`() {
         grense(UNG_PERSON_FNR_2018, 247)
-        assertFalse(grense.påGrensen(30.desember))
+        assertTrue(grense.erFørMaksdato(30.desember))
         grense.dekrementer(1.januar)
         grense.inkrementer(30.desember)
-        assertFalse(grense.påGrensen(30.desember))
+        assertTrue(grense.erFørMaksdato(30.desember))
         grense.inkrementer(31.desember)
-        assertTrue(grense.påGrensen(31.desember))
+        assertFalse(grense.erFørMaksdato(31.desember))
     }
 
     @Test
     fun `Reset decrement impact`() {
         grense(UNG_PERSON_FNR_2018, 247)
-        assertFalse(grense.påGrensen(30.desember))
+        assertTrue(grense.erFørMaksdato(30.desember))
         grense.dekrementer(1.januar.minusDays(1))
         grense.inkrementer(31.desember)
-        assertTrue(grense.påGrensen(31.desember))
+        assertFalse(grense.erFørMaksdato(31.desember))
     }
 
     @Test

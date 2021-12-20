@@ -992,11 +992,13 @@ class Aktivitetslogg(
 
                     internal fun IAktivitetslogg.`§8-51 ledd 3`(
                         oppfylt: Boolean,
-                        skjæringstidspunkt: LocalDate,
-                        grunnlagForSykepengegrunnlag: Inntekt,
-                        minimumInntekt: Inntekt
+                        maksSykepengedagerOver67: Int,
+                        gjenståendeSykedager: Int,
+                        forbrukteSykedager: Int,
+                        maksdato: LocalDate
                     ) {
-                        juridiskVurdering("",
+                        juridiskVurdering(
+                            "",
                             Vurderingsresultat(
                                 oppfylt = oppfylt,
                                 versjon = LocalDate.of(2011, 12, 16),
@@ -1004,11 +1006,13 @@ class Aktivitetslogg(
                                 ledd = LEDD_3,
                                 punktum = 1.punktum,
                                 inputdata = mapOf(
-                                    "skjæringstidspunkt" to skjæringstidspunkt,
-                                    "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
-                                    "minimumInntekt" to minimumInntekt.reflection { årlig, _, _, _ -> årlig }
+                                    "maksSykepengedagerOver67" to maksSykepengedagerOver67
                                 ),
-                                outputdata = emptyMap()
+                                outputdata = mapOf(
+                                    "gjenståendeSykedager" to gjenståendeSykedager,
+                                    "forbrukteSykedager" to forbrukteSykedager,
+                                    "maksdato" to maksdato
+                                )
                             )
                         )
                     }
