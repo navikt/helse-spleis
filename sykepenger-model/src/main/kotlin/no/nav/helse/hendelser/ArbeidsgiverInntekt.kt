@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Companion.harInntektFor
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Companion.nylig
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Person
@@ -43,6 +44,9 @@ class ArbeidsgiverInntekt(
             .count { it.harInntekter() }
 
         internal fun List<ArbeidsgiverInntekt>.harInntektFor(orgnummer: String) = this.any { it.arbeidsgiver == orgnummer }
+
+        internal fun List<ArbeidsgiverInntekt>.harInntektFor(orgnummer: String, måned: YearMonth) =
+            this.any { it.arbeidsgiver == orgnummer && it.inntekter.harInntektFor(måned) }
 
         private fun månedFørSlutt(inntekter: List<ArbeidsgiverInntekt>, antallMåneder: Int) =
             MånedligInntekt.månedFørSlutt(inntekter.flatMap { it.inntekter }, antallMåneder)
@@ -121,6 +125,8 @@ class ArbeidsgiverInntekt(
                     ?.let { førsteMåned -> this@nylig.filter { it.yearMonth >= førsteMåned } }
                     ?: emptyList()
             }
+
+            internal fun List<MånedligInntekt>.harInntektFor(måned: YearMonth) = this.any { it.yearMonth == måned }
 
             internal fun månedFørSlutt(inntekter: List<MånedligInntekt>, antallMåneder: Int) =
                 inntekter.maxOfOrNull { it.yearMonth }?.minusMonths(antallMåneder.toLong() - 1)

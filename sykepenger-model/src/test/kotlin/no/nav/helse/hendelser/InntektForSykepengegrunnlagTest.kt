@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.antallMåneder
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Sykepengegrunnlag
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.testhelpers.april
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -161,6 +162,52 @@ internal class InntektForSykepengegrunnlagTest {
         )
         val inntektForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter, emptyList())
         assertFalse(inntektForSykepengegrunnlag.valider(aktivitetslogg).hasErrorsOrWorse())
+    }
+
+    @Test
+    fun `Finner frilansinntekt måneden før skjæringstidspunkt`() {
+        val inntekter = listOf(
+            ArbeidsgiverInntekt(
+                "orgnummer",
+                (1..3).map {
+                    Sykepengegrunnlag(
+                        YearMonth.of(2017, it),
+                        31000.månedlig, LØNNSINNTEKT, "hva som helst", "hva som helst"
+                    )
+                }
+            ),
+        )
+        val arbeidsforhold = listOf(
+            InntektForSykepengegrunnlag.Arbeidsforhold(
+                orgnummer = "orgnummer",
+                erFrilanser = true
+            )
+        )
+        val inntektForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter, arbeidsforhold)
+        assertTrue(inntektForSykepengegrunnlag.finnerFrilansinntektDenSisteMåneden(skjæringstidspunkt = 1.april(2017)))
+    }
+
+    @Test
+    fun `Finner ikke frilansinntekt måneden før skjæringstidspunkt`() {
+        val inntekter = listOf(
+            ArbeidsgiverInntekt(
+                "orgnummer",
+                (1..2).map {
+                    Sykepengegrunnlag(
+                        YearMonth.of(2017, it),
+                        31000.månedlig, LØNNSINNTEKT, "hva som helst", "hva som helst"
+                    )
+                }
+            ),
+        )
+        val arbeidsforhold = listOf(
+            InntektForSykepengegrunnlag.Arbeidsforhold(
+                orgnummer = "orgnummer",
+                erFrilanser = true
+            )
+        )
+        val inntektForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter, arbeidsforhold)
+        assertFalse(inntektForSykepengegrunnlag.finnerFrilansinntektDenSisteMåneden(skjæringstidspunkt = 1.april(2017)))
     }
 
 }

@@ -42,6 +42,7 @@ class Vilkårsgrunnlag(
             error("Bruker mangler nødvendig inntekt ved validering av Vilkårsgrunnlag")
         }
         inntektsvurderingForSykepengegrunnlag.valider(this)
+        inntektsvurderingForSykepengegrunnlag.loggInteressantFrilanserInformasjon(skjæringstidspunkt)
 
         val inntektsvurderingOk = inntektsvurdering.valider(
             this,
