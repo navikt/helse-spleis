@@ -133,6 +133,7 @@ internal class UtbetalingTest {
         assertTrue(andre.inspektør.arbeidsgiverOppdrag.isNotEmpty())
         assertEquals(første.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), andre.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
         assertEquals(første.inspektør.korrelasjonsId, andre.inspektør.korrelasjonsId)
+        assertEquals(Endringskode.NY, andre.inspektør.arbeidsgiverOppdrag.inspektør.endringskode)
         assertEquals(Endringskode.NY, andre.inspektør.arbeidsgiverOppdrag[0].inspektør.endringskode)
         assertEquals(17.januar, andre.inspektør.arbeidsgiverOppdrag[0].inspektør.fom)
         assertEquals(26.januar, andre.inspektør.arbeidsgiverOppdrag[0].inspektør.tom)
