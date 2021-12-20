@@ -24,6 +24,9 @@ internal class Arbeidsgiverperiode(private val perioder: List<Periode>) : Iterab
     internal fun dekker(periode: Periode) =
         hele.inneholder(periode)
 
+    internal fun hørerTil(periode: Periode, sisteKjente: LocalDate) =
+        periode.overlapperMed(første til sisteKjente)
+
     override fun equals(other: Any?) = other is Arbeidsgiverperiode && other.første == this.første
     override fun hashCode() = første.hashCode()
 

@@ -34,6 +34,19 @@ internal class ArbeidsgiverperiodeTest {
     }
 
     @Test
+    fun `hører til`() {
+        val periode = 2.januar til 5.januar
+        val arbeidsgiverperiode = agp(periode)
+        assertTrue(arbeidsgiverperiode.hørerTil(periode, 5.januar))
+        assertTrue(arbeidsgiverperiode.hørerTil(1.januar til 2.januar, 5.januar))
+        assertFalse(arbeidsgiverperiode.hørerTil(6.januar til 9.januar, 5.januar))
+        assertFalse(arbeidsgiverperiode.hørerTil(1.januar til 1.januar, 5.januar))
+        assertTrue(arbeidsgiverperiode.hørerTil(6.januar til 9.januar, 6.januar))
+        assertTrue(arbeidsgiverperiode.hørerTil(6.januar til 9.januar, 10.januar))
+        assertFalse(arbeidsgiverperiode.hørerTil(11.januar til 12.januar, 10.januar))
+    }
+
+    @Test
     fun `inneholder periode`() {
         val periode = 2.januar til 5.januar
         val arbeidsgiverperiode = agp(periode)

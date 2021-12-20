@@ -6,25 +6,25 @@ import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 
 internal class ArbeidsgiverperiodeBuilder internal constructor(regler: ArbeidsgiverRegler = NormalArbeidstaker) : AbstractArbeidsgiverperiodetelling(regler) {
-    private val arbeidsgiverperioder = mutableMapOf<Arbeidsgiverperiode, MutableList<LocalDate>>()
+    private val arbeidsgiverperioder = mutableMapOf<Arbeidsgiverperiode, LocalDate>()
 
     fun result(periode: Periode): Arbeidsgiverperiode? {
         return finnArbeidsgiverperiode(periode)
     }
 
     private fun finnArbeidsgiverperiode(periode: Periode) =
-        arbeidsgiverperioder.firstNotNullOfOrNull { (arbeidsgiverperiode, nedslagsfelt) ->
-            arbeidsgiverperiode.takeIf { periode in it || nedslagsfelt in periode }
+        arbeidsgiverperioder.firstNotNullOfOrNull { (arbeidsgiverperiode, sisteDag) ->
+            arbeidsgiverperiode.takeIf { it.hørerTil(periode, sisteDag) }
         }
 
     private fun kanskje(dato: LocalDate, arbeidsgiverperiode: Arbeidsgiverperiode?) {
         if (arbeidsgiverperiode == null) return
-        arbeidsgiverperioder.getOrPut(arbeidsgiverperiode) { mutableListOf() }.add(dato)
+        arbeidsgiverperioder.compute(arbeidsgiverperiode) { _, _ -> dato }
     }
 
     override fun sykedagIArbeidsgiverperioden(arbeidsgiverperiode: Arbeidsgiverperiode, dato: LocalDate) {
         arbeidsgiverperioder.remove(arbeidsgiverperiode)
-        arbeidsgiverperioder[arbeidsgiverperiode] = mutableListOf()
+        arbeidsgiverperioder.compute(arbeidsgiverperiode) { _, _ -> dato }
     }
 
     override fun sykedagEtterArbeidsgiverperioden(arbeidsgiverperiode: Arbeidsgiverperiode?, dato: LocalDate, økonomi: Økonomi) = kanskje(dato, arbeidsgiverperiode)
