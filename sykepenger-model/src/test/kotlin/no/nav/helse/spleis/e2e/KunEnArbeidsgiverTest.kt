@@ -480,28 +480,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `ingen nav utbetaling kreves, blir automatisk behandlet og avsluttet`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 5.januar, 100.prosent))
-        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 5.januar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
-        inspektør.also {
-            assertNoErrors(it)
-            assertActivities(it)
-        }
-        assertFalse(hendelselogg.hasErrorsOrWorse())
-
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)), 3.januar)
-        assertFalse(person.aktivitetslogg.logg(inspektør.vedtaksperioder(1.vedtaksperiode)).hasWarningsOrWorse())
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVSLUTTET_UTEN_UTBETALING
-        )
-    }
-
-    @Test
     fun `perioden avsluttes ikke automatisk hvis warnings`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 19.januar, 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 18.januar, 100.prosent), Ferie(19.januar, 19.januar))
@@ -2003,15 +1981,16 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
     @Test
     fun `beregner ikke skjæringstidspunktet på nytt for å finne sykepengegrunnlag`() {
+        val inntekt = 22000.månedlig
         håndterSykmelding(Sykmeldingsperiode(1.november(2020), 10.november(2020), 100.prosent))
-        håndterSøknad(Sykdom(1.november(2020), 10.november(2020), 100.prosent))
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 20.oktober(2020), 31.oktober(2020), 100.prosent, 1000.daglig),
             inntektshistorikk = listOf(
-                Inntektsopplysning(ORGNUMMER.toString(), 20.oktober(2020), 22000.månedlig, true)
+                Inntektsopplysning(ORGNUMMER.toString(), 20.oktober(2020), inntekt, true)
             )
         )
+        håndterSøknad(Sykdom(1.november(2020), 10.november(2020), 100.prosent))
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -2019,7 +1998,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         val utbetaltEvent = observatør.utbetaltEventer.last()
 
-        assertEquals(264000.0, utbetaltEvent.sykepengegrunnlag)
+        assertEquals(inntekt.reflection { årlig, _, _, _ -> årlig }, utbetaltEvent.sykepengegrunnlag)
     }
 
     @Test

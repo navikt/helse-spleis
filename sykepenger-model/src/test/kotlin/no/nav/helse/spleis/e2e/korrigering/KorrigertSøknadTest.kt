@@ -8,6 +8,7 @@ import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.spleis.e2e.*
 import no.nav.helse.sykdomstidslinje.Dag.*
+import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.utbetalingslinjer.Endringskode
@@ -203,6 +204,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
 
     @Test
     fun `Blir værende i nåværende tilstand dersom søknad kommer inn i AVVENTER_UFERDIG_FORLENGELSE`() {
+        håndterSykmelding(Sykmeldingsperiode(1.desember(2017), 11.desember(2017), 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
 
@@ -210,15 +212,19 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(11.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
         håndterSøknad(Sykdom(11.januar, 31.januar, 100.prosent), Ferie(31.januar, 31.januar))
+        håndterSøknad(Sykdom(1.desember(2017), 11.desember(2017), 100.prosent))
 
         inspektør.sykdomstidslinje.inspektør.also {
             assertTrue(it[31.januar] is Feriedag)
         }
         assertTilstander(
-            1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING
+            1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING
         )
         assertTilstander(
-            2.vedtaksperiode,
+            2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVSLUTTET_UTEN_UTBETALING
+        )
+        assertTilstander(
+            3.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,

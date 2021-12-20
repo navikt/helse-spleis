@@ -660,10 +660,10 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Inntektsmelding utvider ikke vedtaksperiode bakover over tidligere utbetalt periode i IT - IT-historikk kommer først`() {
         håndterSykmelding(Sykmeldingsperiode(3.februar, 18.februar, 100.prosent))
-        håndterSøknad(Sykdom(3.februar, 18.februar, 100.prosent))
         val utbetalinger = ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 17.januar, 21.januar, 100.prosent, 1000.daglig)
         val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER.toString(), 17.januar, INNTEKT, true))
         håndterUtbetalingshistorikk(1.vedtaksperiode, utbetalinger, inntektshistorikk = inntektshistorikk)
+        håndterSøknad(Sykdom(3.februar, 18.februar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 3.februar)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)

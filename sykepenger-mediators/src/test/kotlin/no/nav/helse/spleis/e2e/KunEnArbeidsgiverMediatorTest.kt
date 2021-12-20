@@ -75,6 +75,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             "AVVENTER_HISTORIKK",
             "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
+            "AVSLUTTET_UTEN_UTBETALING",
             "AVSLUTTET_UTEN_UTBETALING"
         )
     }
@@ -100,6 +101,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
             "AVVENTER_GODKJENNING",
+            "AVSLUTTET_UTEN_UTBETALING",
             "AVSLUTTET_UTEN_UTBETALING"
         )
     }
@@ -421,7 +423,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         assertTilstander(
             0,
             "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVSLUTTET_UTEN_UTBETALING",
             "AVSLUTTET_UTEN_UTBETALING"
         )
 

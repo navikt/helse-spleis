@@ -310,9 +310,9 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(2.vedtaksperiode, orgnummer = a1)
 
-        assertTilstand(a1, AVSLUTTET, vedtaksperiodeIndeks = 1)
-        assertTilstand(a1, AVSLUTTET, vedtaksperiodeIndeks = 2)
-        assertTilstand(a2, AVSLUTTET, vedtaksperiodeIndeks = 1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
         assertEquals(1.januar, a1.inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(1.januar, a1.inspektør.skjæringstidspunkt(2.vedtaksperiode))
         assertEquals(1.januar, a2.inspektør.skjæringstidspunkt(1.vedtaksperiode))
@@ -372,8 +372,8 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
 
 
-        assertTilstand(a1, AVSLUTTET, vedtaksperiodeIndeks = 1)
-        assertTilstand(a2, AVSLUTTET, vedtaksperiodeIndeks = 1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
 
         assertEquals(1, a1.inspektør.arbeidsgiverOppdrag.size)
         assertEquals(1, a2.inspektør.arbeidsgiverOppdrag.size)

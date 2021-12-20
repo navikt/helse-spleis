@@ -100,7 +100,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
 
-        assertTilstand(a1, TilstandType.AVSLUTTET)
+        assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET, orgnummer = a1)
         assertNoWarnings(1.vedtaksperiode, a1)
     }
 
@@ -149,7 +149,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
 
-        assertTilstand(a2, TilstandType.AVSLUTTET)
+        assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET, orgnummer = a2)
         assertNoWarnings(1.vedtaksperiode, a1)
         assertNoErrors(1.vedtaksperiode, a1)
         assertNoWarnings(1.vedtaksperiode, a2)
@@ -194,7 +194,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(2.vedtaksperiode, orgnummer = a1)
 
-        assertTilstand(a1, TilstandType.AVSLUTTET, 2)
+        assertSisteTilstand(2.vedtaksperiode, TilstandType.AVSLUTTET, orgnummer = a1)
 
         val sisteGodkjenningsbehov = inspektør(a1).sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning).detaljer()
         assertEquals(0, sisteGodkjenningsbehov["warnings"].castAsMap<String, Any>()["aktiviteter"].castAsList<Any>().size)
@@ -650,7 +650,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
 
         assertWarn("Bruker har flere inntektskilder de siste tre månedene enn arbeidsforhold som er oppdaget i Aa-registeret.", inspektør(a1).personLogg)
-        assertTilstand(a1, TilstandType.AVSLUTTET)
+        assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET, orgnummer = a1)
     }
 
     fun arbeidsgivere(): List<String> {

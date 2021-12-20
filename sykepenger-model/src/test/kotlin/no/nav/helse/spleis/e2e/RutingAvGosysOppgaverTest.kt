@@ -7,12 +7,8 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.somOrganisasjonsnummer
-import no.nav.helse.testhelpers.april
-import no.nav.helse.testhelpers.februar
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.mars
-import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.testhelpers.*
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
@@ -116,9 +112,9 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         // Utbetaling 17. mars til 31. mars (AGP 1-16. mars)
         nyttVedtak(1.mars, 31.mars, orgnummer = "999999999".somOrganisasjonsnummer())
 
-        håndterSykmelding(Sykmeldingsperiode(20.februar, 2.mars, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(20.februar, 1.mars, 80.prosent))
-        val søknadHendelseId = håndterSøknad(Sykdom(20.februar, 1.mars, 80.prosent))
+        håndterSykmelding(Sykmeldingsperiode(20.februar, 12.mars, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(20.februar, 11.mars, 80.prosent))
+        val søknadHendelseId = håndterSøknad(Sykdom(20.februar, 11.mars, 80.prosent))
 
         // kastes ut pga at søknaden ikke dekker hele vedtaksperioden
         håndterInntektsmelding(listOf(5.februar til 20.februar))

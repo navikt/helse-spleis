@@ -160,19 +160,19 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         historikk(a1)
         assertNoErrors(a1.inspektør)
         assertNoErrors(a2.inspektør)
-        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
-        assertTilstand(a2, AVVENTER_HISTORIKK)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
     }
 
     @Test
     fun `vedtaksperioder atskilt med betydelig tid`() {
         prosessperiode(1.januar til 31.januar, a1)
         assertNoErrors(a1.inspektør)
-        assertTilstand(a1, AVSLUTTET)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
 
         prosessperiode(1.mars til 31.mars, a2)
         assertNoErrors(a2.inspektør)
-        assertTilstand(a1, AVSLUTTET)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
     }
 
     @Test
@@ -184,76 +184,76 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         gapPeriode(15.april til 15.mai, a4)
 
         historikk(a1)
-        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
-        assertTilstand(a2, AVVENTER_HISTORIKK)
-        assertTilstand(a3, AVVENTER_HISTORIKK)
-        assertTilstand(a4, AVVENTER_HISTORIKK)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a3)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a4)
 
         historikk(a3)
-        assertTilstand(a1, AVVENTER_HISTORIKK)
-        assertTilstand(a2, AVVENTER_HISTORIKK)
-        assertTilstand(a3, AVVENTER_ARBEIDSGIVERE)
-        assertTilstand(a4, AVVENTER_HISTORIKK)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a3)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a4)
 
         historikk(a1)
-        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
-        assertTilstand(a2, AVVENTER_HISTORIKK)
-        assertTilstand(a3, AVVENTER_ARBEIDSGIVERE)
-        assertTilstand(a4, AVVENTER_HISTORIKK)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a3)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a4)
 
         historikk(a2)
-        assertTilstand(a1, AVVENTER_HISTORIKK)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
-        assertTilstand(a3, AVVENTER_ARBEIDSGIVERE)
-        assertTilstand(a4, AVVENTER_HISTORIKK)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a3)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a4)
 
         historikk(a1)
-        assertTilstand(a1, AVVENTER_SIMULERING)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
-        assertTilstand(a3, AVVENTER_ARBEIDSGIVERE)
-        assertTilstand(a4, AVVENTER_HISTORIKK)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a3)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a4)
 
         betale(a1)
-        assertTilstand(a1, AVSLUTTET)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
-        assertTilstand(a3, AVVENTER_HISTORIKK)
-        assertTilstand(a4, AVVENTER_HISTORIKK)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a3)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a4)
 
         historikk(a3)
-        assertTilstand(a1, AVSLUTTET)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
-        assertTilstand(a3, AVVENTER_SIMULERING)
-        assertTilstand(a4, AVVENTER_HISTORIKK)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a3)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a4)
 
         betale(a3)
-        assertTilstand(a1, AVSLUTTET)
-        assertTilstand(a2, AVVENTER_HISTORIKK)
-        assertTilstand(a3, AVSLUTTET)
-        assertTilstand(a4, AVVENTER_HISTORIKK)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a3)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a4)
 
         historikk(a2)
-        assertTilstand(a1, AVSLUTTET)
-        assertTilstand(a2, AVVENTER_SIMULERING)
-        assertTilstand(a3, AVSLUTTET)
-        assertTilstand(a4, AVVENTER_HISTORIKK)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a3)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a4)
 
         betale(a2)
-        assertTilstand(a1, AVSLUTTET)
-        assertTilstand(a2, AVSLUTTET)
-        assertTilstand(a3, AVSLUTTET)
-        assertTilstand(a4, AVVENTER_HISTORIKK)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a3)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a4)
 
         historikk(a4)
-        assertTilstand(a1, AVSLUTTET)
-        assertTilstand(a2, AVSLUTTET)
-        assertTilstand(a3, AVSLUTTET)
-        assertTilstand(a4, AVVENTER_SIMULERING)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a3)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a4)
 
         betale(a4)
-        assertTilstand(a1, AVSLUTTET)
-        assertTilstand(a2, AVSLUTTET)
-        assertTilstand(a3, AVSLUTTET)
-        assertTilstand(a4, AVSLUTTET)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a3)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a4)
     }
 
     @Test
@@ -264,68 +264,60 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         gapPeriode(2.januar til 31.januar, a3)
 
         historikk(a1)
-        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
-        assertTilstand(a2, AVVENTER_HISTORIKK)
-        assertTilstand(a3, AVVENTER_HISTORIKK)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a3)
 
         historikk(a2)
-        assertTilstand(a1, AVVENTER_HISTORIKK)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
-        assertTilstand(a3, AVVENTER_HISTORIKK)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a3)
 
         historikk(a1)
-        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
-        assertTilstand(a3, AVVENTER_HISTORIKK)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a3)
 
         historikk(a3)
-        assertTilstand(a1, AVVENTER_HISTORIKK)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
-        assertTilstand(a3, AVVENTER_ARBEIDSGIVERE)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a3)
 
         historikk(a1)
-        assertTilstand(a1, AVVENTER_SIMULERING)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
-        assertTilstand(a3, AVVENTER_ARBEIDSGIVERE)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a3)
 
         betale(a1)
-        assertTilstand(a1, AVSLUTTET)
-        assertTilstand(a2, AVVENTER_HISTORIKK)
-        assertTilstand(a3, AVVENTER_ARBEIDSGIVERE)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a3)
 
         historikk(a2)
-        assertTilstand(a1, AVSLUTTET)
-        assertTilstand(a2, AVVENTER_SIMULERING)
-        assertTilstand(a3, AVVENTER_ARBEIDSGIVERE)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a3)
 
         betale(a2)
-        assertTilstand(a1, AVSLUTTET)
-        assertTilstand(a2, AVSLUTTET)
-        assertTilstand(a3, AVVENTER_HISTORIKK)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a3)
 
         historikk(a3)
-        assertTilstand(a1, AVSLUTTET)
-        assertTilstand(a2, AVSLUTTET)
-        assertTilstand(a3, AVVENTER_SIMULERING)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a3)
 
         betale(a3)
-        assertTilstand(a1, AVSLUTTET)
-        assertTilstand(a2, AVSLUTTET)
-        assertTilstand(a3, AVSLUTTET)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a3)
     }
 
     @Test
     fun `Tillater overgang fra infotrygd for flere arbeidsgivere - a1 kommer til AVVENTER_HISTORIKK først`() {
         val periode = 27.januar(2021) til 31.januar(2021)
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        assertTilstand(a1, MOTTATT_SYKMELDING_FERDIG_GAP)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
-
-        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        assertTilstand(a1, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
-
         val inntektshistorikk = listOf(
             Inntektsopplysning(a1.toString(), 20.januar(2021), INNTEKT, true),
             Inntektsopplysning(a2.toString(), 20.januar(2021), INNTEKT, true)
@@ -337,75 +329,73 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
 
         håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
-        assertTilstand(a1, AVVENTER_HISTORIKK)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
+
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a2)
+
+        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a2)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a2)
 
         håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
-        assertTilstand(a2, AVVENTER_HISTORIKK)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
-        assertTilstand(a1, AVVENTER_HISTORIKK)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
         assertInntektskilde(a1, FLERE_ARBEIDSGIVERE)
         assertInntektskilde(a2, FLERE_ARBEIDSGIVERE)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        assertTilstand(a1, AVVENTER_SIMULERING)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
 
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        assertTilstand(a1, AVVENTER_GODKJENNING)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
         assertInntektskilde(a1, FLERE_ARBEIDSGIVERE)
         assertInntektskilde(a2, FLERE_ARBEIDSGIVERE)
         assertEquals("FLERE_ARBEIDSGIVERE", a1.inspektør.sisteBehov(1.vedtaksperiode).detaljer()["inntektskilde"])
 
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        assertTilstand(a1, TIL_UTBETALING)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+        assertSisteTilstand(1.vedtaksperiode, TIL_UTBETALING, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
 
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
-        assertTilstand(a1, AVSLUTTET)
-        assertTilstand(a2, AVVENTER_HISTORIKK)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
-        assertTilstand(a1, AVSLUTTET)
-        assertTilstand(a2, AVVENTER_SIMULERING)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a2)
 
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        assertTilstand(a1, AVSLUTTET)
-        assertTilstand(a2, AVVENTER_GODKJENNING)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a2)
 
         assertInntektskilde(a1, FLERE_ARBEIDSGIVERE)
         assertInntektskilde(a2, FLERE_ARBEIDSGIVERE)
         assertEquals("FLERE_ARBEIDSGIVERE", a2.inspektør.sisteBehov(1.vedtaksperiode).detaljer()["inntektskilde"])
 
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
-        assertTilstand(a1, AVSLUTTET)
-        assertTilstand(a2, TIL_UTBETALING)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, TIL_UTBETALING, orgnummer = a2)
 
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
-        assertTilstand(a1, AVSLUTTET)
-        assertTilstand(a2, AVSLUTTET)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
     }
 
     @Test
     fun `Tillater overgang fra infotrygd for flere arbeidsgivere - a2 kommer til AVVENTER_HISTORIKK først`() {
         val periode = 27.januar(2021) til 31.januar(2021)
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        assertTilstand(a1, MOTTATT_SYKMELDING_FERDIG_GAP)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
-
-        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        assertTilstand(a1, MOTTATT_SYKMELDING_FERDIG_GAP)
-        assertTilstand(a2, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
-
         val inntektshistorikk = listOf(
             Inntektsopplysning(a1.toString(), 20.januar(2021), INNTEKT, true),
             Inntektsopplysning(a2.toString(), 20.januar(2021), INNTEKT, true)
@@ -416,69 +406,67 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             ArbeidsgiverUtbetalingsperiode(a2.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT)
         )
 
-        håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
-        assertTilstand(a1, MOTTATT_SYKMELDING_FERDIG_GAP)
-        assertTilstand(a2, AVVENTER_HISTORIKK)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a2)
+
+        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
-        assertTilstand(a1, MOTTATT_SYKMELDING_FERDIG_GAP)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+        assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
         assertInntektskilde(a1, FLERE_ARBEIDSGIVERE)
         assertInntektskilde(a2, FLERE_ARBEIDSGIVERE)
 
         håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        assertTilstand(a1, AVVENTER_HISTORIKK)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        assertTilstand(a1, AVVENTER_SIMULERING)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
 
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        assertTilstand(a1, AVVENTER_GODKJENNING)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
         assertInntektskilde(a1, FLERE_ARBEIDSGIVERE)
         assertInntektskilde(a2, FLERE_ARBEIDSGIVERE)
 
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        assertTilstand(a1, TIL_UTBETALING)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+        assertSisteTilstand(1.vedtaksperiode, TIL_UTBETALING, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
 
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
-        assertTilstand(a1, AVSLUTTET)
-        assertTilstand(a2, AVVENTER_HISTORIKK)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
-        assertTilstand(a1, AVSLUTTET)
-        assertTilstand(a2, AVVENTER_SIMULERING)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a2)
 
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        assertTilstand(a1, AVSLUTTET)
-        assertTilstand(a2, AVVENTER_GODKJENNING)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a2)
         assertInntektskilde(a1, FLERE_ARBEIDSGIVERE)
         assertInntektskilde(a2, FLERE_ARBEIDSGIVERE)
 
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
-        assertTilstand(a1, AVSLUTTET)
-        assertTilstand(a2, TIL_UTBETALING)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, TIL_UTBETALING, orgnummer = a2)
 
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
-        assertTilstand(a1, AVSLUTTET)
-        assertTilstand(a2, AVSLUTTET)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
     }
 
     @Test
     fun `Tillater ikke flere arbeidsgivere hvis ikke alle er overgang fra Infotrygd`() {
         val periode = 27.januar(2021) til 31.januar(2021)
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        assertTilstand(a1, MOTTATT_SYKMELDING_FERDIG_GAP)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
-
-        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        assertTilstand(a1, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
-
         val inntektshistorikk = listOf(
             Inntektsopplysning(a1.toString(), 20.januar(2021), INNTEKT, true),
             Inntektsopplysning(a2.toString(), 20.januar(2021), INNTEKT, true)
@@ -490,12 +478,18 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
 
         håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
-        assertTilstand(a1, AVVENTER_HISTORIKK)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
+
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a2)
+
+        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a2)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        assertTilstand(a1, TIL_INFOTRYGD)
-        assertTilstand(a2, TIL_INFOTRYGD)
+        assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a2)
     }
 
     @ForventetFeil("Det finnes ikke inntekt for skjæringstidspunktet (4. januar)")
@@ -504,12 +498,12 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         val periode = 27.januar(2021) til 31.januar(2021)
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        assertTilstand(a1, MOTTATT_SYKMELDING_FERDIG_GAP)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a2)
 
         håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        assertTilstand(a1, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a2)
 
         val inntektshistorikk = listOf(
             Inntektsopplysning(a1.toString(), 20.januar(2021), INNTEKT, true),
@@ -522,76 +516,76 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
 
         håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
-        assertTilstand(a1, AVVENTER_HISTORIKK)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a2)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a2)
 
         håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
-        assertTilstand(a2, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, orgnummer = a2)
 
         håndterInntektsmelding(listOf(4.januar(2021) til 19.januar(2021)), førsteFraværsdag = 27.januar(2021), orgnummer = a2)
-        assertTilstand(a1, AVVENTER_HISTORIKK)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        assertTilstand(a1, AVVENTER_SIMULERING)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
 
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        assertTilstand(a1, AVVENTER_GODKJENNING)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
         assertInntektskilde(a1, FLERE_ARBEIDSGIVERE)
         assertInntektskilde(a2, FLERE_ARBEIDSGIVERE)
 
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        assertTilstand(a1, TIL_UTBETALING)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+        assertSisteTilstand(1.vedtaksperiode, TIL_UTBETALING, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
 
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
-        assertTilstand(a1, AVSLUTTET)
-        assertTilstand(a2, AVVENTER_HISTORIKK)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
-        assertTilstand(a1, AVSLUTTET)
-        assertTilstand(a2, AVVENTER_SIMULERING)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a2)
 
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        assertTilstand(a1, AVSLUTTET)
-        assertTilstand(a2, AVVENTER_GODKJENNING)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a2)
         assertInntektskilde(a1, FLERE_ARBEIDSGIVERE)
         assertInntektskilde(a2, FLERE_ARBEIDSGIVERE)
 
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
-        assertTilstand(a1, AVSLUTTET)
-        assertTilstand(a2, TIL_UTBETALING)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, TIL_UTBETALING, orgnummer = a2)
 
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
-        assertTilstand(a1, AVSLUTTET)
-        assertTilstand(a2, AVSLUTTET)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
     }
 
     @Test
     fun `Tillater forlengelse av overgang fra infotrygd for flere arbeidsgivere - a1 kommer til AVVENTER_HISTORIKK først`() {
         val periode = 27.januar(2021) til 31.januar(2021)
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-
         val inntektshistorikk = listOf(
             Inntektsopplysning(a1.toString(), 20.januar(2021), INNTEKT, true),
             Inntektsopplysning(a2.toString(), 20.januar(2021), INNTEKT, true)
         )
-
         val utbetalinger = arrayOf(
             ArbeidsgiverUtbetalingsperiode(a1.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT),
             ArbeidsgiverUtbetalingsperiode(a2.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT)
         )
 
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
@@ -608,80 +602,67 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         val forlengelseperiode = 1.februar(2021) til 10.februar(2021)
         håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a2)
-        assertTilstand(a1, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, 2)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, 2)
+        assertSisteTilstand(2.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, orgnummer = a2)
 
         håndterSøknad(Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
-        assertTilstand(a1, AVVENTER_HISTORIKK, 2)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, 2)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, orgnummer = a2)
 
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
-        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE, 2)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, 2)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, orgnummer = a2)
 
         håndterSøknad(Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a2)
-        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE, 2)
-        assertTilstand(a2, AVVENTER_HISTORIKK, 2)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
 
         håndterYtelser(2.vedtaksperiode, orgnummer = a2)
         assertInntektskilde(a1, FLERE_ARBEIDSGIVERE, 2)
         assertInntektskilde(a2, FLERE_ARBEIDSGIVERE, 2)
-        assertTilstand(a1, AVVENTER_HISTORIKK, 2)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE, 2)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
 
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
-        assertTilstand(a1, AVVENTER_SIMULERING, 2)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE, 2)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
 
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
-        assertTilstand(a1, AVVENTER_GODKJENNING, 2)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE, 2)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
         assertInntektskilde(a1, FLERE_ARBEIDSGIVERE, 2)
         assertInntektskilde(a2, FLERE_ARBEIDSGIVERE, 2)
 
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
-        assertTilstand(a1, TIL_UTBETALING, 2)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE, 2)
+        assertSisteTilstand(2.vedtaksperiode, TIL_UTBETALING, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
 
         håndterUtbetalt(2.vedtaksperiode, orgnummer = a1)
-        assertTilstand(a1, AVSLUTTET, 2)
-        assertTilstand(a2, AVVENTER_HISTORIKK, 2)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
 
         håndterYtelser(2.vedtaksperiode, orgnummer = a2)
-        assertTilstand(a1, AVSLUTTET, 2)
-        assertTilstand(a2, AVVENTER_SIMULERING, 2)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a2)
 
         håndterSimulering(2.vedtaksperiode, orgnummer = a2)
-        assertTilstand(a1, AVSLUTTET, 2)
-        assertTilstand(a2, AVVENTER_GODKJENNING, 2)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a2)
         assertInntektskilde(a1, FLERE_ARBEIDSGIVERE, 2)
         assertInntektskilde(a2, FLERE_ARBEIDSGIVERE, 2)
 
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a2)
-        assertTilstand(a1, AVSLUTTET, 2)
-        assertTilstand(a2, TIL_UTBETALING, 2)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, TIL_UTBETALING, orgnummer = a2)
 
         håndterUtbetalt(2.vedtaksperiode, orgnummer = a2)
-        assertTilstand(a1, AVSLUTTET, 2)
-        assertTilstand(a2, AVSLUTTET, 2)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a2)
     }
 
     @Test
     fun `Håndterer søknader i ikke-kronologisk rekkefølge for flere arbeidsgivere`() {
         val periode = 27.januar(2021) til 31.januar(2021)
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-
-        val forlengelseperiode = 1.februar(2021) til 10.februar(2021)
-        håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a2)
-        håndterSøknad(Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a2)
-        assertTilstand(a1, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, 2)
-        assertTilstand(a2, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, 2)
-
-        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-
         val inntektshistorikk = listOf(
             Inntektsopplysning(a1.toString(), 20.januar(2021), INNTEKT, true),
             Inntektsopplysning(a2.toString(), 20.januar(2021), INNTEKT, true)
@@ -692,7 +673,20 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             ArbeidsgiverUtbetalingsperiode(a2.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT)
         )
 
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+
+        val forlengelseperiode = 1.februar(2021) til 10.februar(2021)
+        håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a2)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, orgnummer = a2)
+
+        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
         håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
@@ -701,59 +695,59 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
-        assertTilstand(a1, AVSLUTTET, 1)
-        assertTilstand(a1, AVVENTER_HISTORIKK, 2)
-        assertTilstand(a2, AVVENTER_HISTORIKK, 1)
-        assertTilstand(a2, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, 2)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, orgnummer = a2)
 
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
-        assertTilstand(a1, AVSLUTTET, 1)
-        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE, 2)
-        assertTilstand(a2, AVVENTER_HISTORIKK, 1)
-        assertTilstand(a2, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, 2)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, orgnummer = a2)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
-        assertTilstand(a1, AVSLUTTET, 1)
-        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE, 2)
-        assertTilstand(a2, AVVENTER_SIMULERING, 1)
-        assertTilstand(a2, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, 2)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a2)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, orgnummer = a2)
 
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
-        assertTilstand(a1, AVSLUTTET, 1)
-        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE, 2)
-        assertTilstand(a2, AVSLUTTET, 1)
-        assertTilstand(a2, AVVENTER_HISTORIKK, 2)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
 
         håndterYtelser(2.vedtaksperiode, orgnummer = a2)
-        assertTilstand(a1, AVSLUTTET, 1)
-        assertTilstand(a1, AVVENTER_HISTORIKK, 2)
-        assertTilstand(a2, AVSLUTTET, 1)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE, 2)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
 
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
-        assertTilstand(a1, AVSLUTTET, 1)
-        assertTilstand(a1, AVVENTER_SIMULERING, 2)
-        assertTilstand(a2, AVSLUTTET, 1)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE, 2)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
 
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(2.vedtaksperiode, orgnummer = a1)
-        assertTilstand(a1, AVSLUTTET, 1)
-        assertTilstand(a1, AVSLUTTET, 2)
-        assertTilstand(a2, AVSLUTTET, 1)
-        assertTilstand(a2, AVVENTER_HISTORIKK, 2)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
 
         håndterYtelser(2.vedtaksperiode, orgnummer = a2)
         håndterSimulering(2.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(2.vedtaksperiode, orgnummer = a2)
-        assertTilstand(a1, AVSLUTTET, 1)
-        assertTilstand(a1, AVSLUTTET, 2)
-        assertTilstand(a2, AVSLUTTET, 1)
-        assertTilstand(a2, AVSLUTTET, 2)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a2)
 
         assertAlleBehovBesvart()
     }
@@ -787,8 +781,8 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
-        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE, 1)
-        assertTilstand(a2, AVVENTER_SIMULERING, 1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a2)
 
         //Utbetalingstidslinjen blir like lang som den som går til AvventerGodkjenning
         assertEquals(25, a1.inspektør.utbetalingstidslinjer(1.vedtaksperiode).size)
@@ -847,10 +841,6 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     fun `Orgnummer, vedtaksperiodeIder og vedtaksperiodetyper ligger på godkjenningsbehov`() {
         val periode = 27.januar(2021) til 31.januar(2021)
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-
-        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-
         val inntektshistorikk = listOf(
             Inntektsopplysning(a1.toString(), 20.januar(2021), INNTEKT, true),
             Inntektsopplysning(a2.toString(), 20.januar(2021), INNTEKT, true)
@@ -862,6 +852,11 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
 
         håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+
+        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
         håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
@@ -884,22 +879,22 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     @Test
     fun `forkast alle aktive vedtaksperioder for alle arbeidsgivere dersom en periode til godkjenning avises`() {
         val periode = 27.januar(2021) til 31.januar(2021)
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-
-        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-
         val inntektshistorikk = listOf(
             Inntektsopplysning(a1.toString(), 20.januar(2021), INNTEKT, true),
             Inntektsopplysning(a2.toString(), 20.januar(2021), INNTEKT, true)
         )
-
         val utbetalinger = arrayOf(
             ArbeidsgiverUtbetalingsperiode(a1.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT),
             ArbeidsgiverUtbetalingsperiode(a2.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT)
         )
 
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+
+        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
         håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
@@ -918,11 +913,6 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     @Test
     fun `forkast ettergølgende vedtaksperioder for alle arbeidsgivere dersom en periode til godkjenning avises`() {
         val periode = 27.januar(2021) til 31.januar(2021)
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-
-        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-
         val inntektshistorikk = listOf(
             Inntektsopplysning(a1.toString(), 20.januar(2021), INNTEKT, true),
             Inntektsopplysning(a2.toString(), 20.januar(2021), INNTEKT, true)
@@ -933,7 +923,13 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             ArbeidsgiverUtbetalingsperiode(a2.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT)
         )
 
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+
+        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
         håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
@@ -958,18 +954,14 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     @Test
     fun `forkast periode som overlapper med annen arbeidsgiver i infotrygd`() {
         val periode = 22.januar(2021) til 31.januar(2021)
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-
-        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-
         val inntektshistorikk = listOf(
             Inntektsopplysning(a2.toString(), 20.januar(2021), INNTEKT, true)
         )
-
         val utbetalinger = arrayOf(
             ArbeidsgiverUtbetalingsperiode(a2.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT)
         )
 
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
 
         assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
@@ -980,32 +972,32 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         val periode = 1.januar(2021) til 31.januar(2021)
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        assertTilstand(a1, MOTTATT_SYKMELDING_FERDIG_GAP)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a2)
 
         håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        assertTilstand(a1, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a2)
 
         håndterUtbetalingshistorikk(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
-        assertTilstand(a1, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a2)
 
         håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        assertTilstand(a1, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
-        assertTilstand(a2, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, orgnummer = a2)
 
         håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021)), førsteFraværsdag = 1.januar(2021), orgnummer = a1)
-        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
-        assertTilstand(a2, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, orgnummer = a2)
 
         håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021)), førsteFraværsdag = 1.januar(2021), orgnummer = a2)
-        assertTilstand(a1, AVVENTER_HISTORIKK)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
 
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
-        assertTilstand(a1, AVVENTER_VILKÅRSPRØVING)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
 
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -1015,33 +1007,33 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
                 }
             }
         ))
-        assertTilstand(a1, AVVENTER_HISTORIKK)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
-        assertTilstand(a1, AVVENTER_SIMULERING)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        assertTilstand(a1, AVVENTER_GODKJENNING)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
 
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a1)
-        assertTilstand(a1, TIL_UTBETALING)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+        assertSisteTilstand(1.vedtaksperiode, TIL_UTBETALING, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
-        assertTilstand(a1, AVSLUTTET)
-        assertTilstand(a2, AVVENTER_HISTORIKK)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a2)
-        assertTilstand(a1, AVSLUTTET)
-        assertTilstand(a2, AVVENTER_SIMULERING)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        assertTilstand(a1, AVSLUTTET)
-        assertTilstand(a2, AVVENTER_GODKJENNING)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a2)
-        assertTilstand(a1, AVSLUTTET)
-        assertTilstand(a2, TIL_UTBETALING)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, TIL_UTBETALING, orgnummer = a2)
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
-        assertTilstand(a1, AVSLUTTET)
-        assertTilstand(a2, AVSLUTTET)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
     }
 
     @Test
@@ -1049,28 +1041,28 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         val periode = 1.januar(2021) til 31.januar(2021)
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        assertTilstand(a1, MOTTATT_SYKMELDING_FERDIG_GAP)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a2)
 
         håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        assertTilstand(a1, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a2)
 
         håndterUtbetalingshistorikk(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
-        assertTilstand(a1, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a2)
 
         håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        assertTilstand(a1, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
-        assertTilstand(a2, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, orgnummer = a2)
 
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.januar(2021) til 16.januar(2021)),
             førsteFraværsdag = 1.januar(2021),
             orgnummer = a1
         )
-        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
-        assertTilstand(a2, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, orgnummer = a2)
 
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.januar(2021) til 3.januar(2021), 6.januar(2021) til 18.januar(2021)),
@@ -1078,8 +1070,8 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             beregnetInntekt = 1000.månedlig,
             orgnummer = a2
         )
-        assertTilstand(a1, AVVENTER_HISTORIKK)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -1090,8 +1082,8 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             }
         ))
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
-        assertTilstand(a1, AVVENTER_SIMULERING)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
     }
 
     @Test
@@ -1099,28 +1091,28 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         val periode = 31.desember(2020) til 31.januar(2021)
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        assertTilstand(a1, MOTTATT_SYKMELDING_FERDIG_GAP)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a2)
 
         håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        assertTilstand(a1, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a2)
 
         håndterUtbetalingshistorikk(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
-        assertTilstand(a1, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a2)
 
         håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        assertTilstand(a1, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
-        assertTilstand(a2, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, orgnummer = a2)
 
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(31.desember(2020) til 15.januar(2021)),
             førsteFraværsdag = 31.desember(2020),
             orgnummer = a1
         )
-        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
-        assertTilstand(a2, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, orgnummer = a2)
 
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.januar(2021) til 3.januar(2021), 6.januar(2021) til 18.januar(2021)),
@@ -1128,8 +1120,8 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             beregnetInntekt = 1000.månedlig,
             orgnummer = a2
         )
-        assertTilstand(a1, AVVENTER_HISTORIKK)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -1140,8 +1132,8 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             }
         ))
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
-        assertTilstand(a1, TIL_INFOTRYGD)
-        assertTilstand(a2, TIL_INFOTRYGD)
+        assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a2)
     }
 
     @Test
@@ -1164,8 +1156,8 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         val a2Periode = 2.april(2021) til 30.april(2021)
         håndterSykmelding(Sykmeldingsperiode(periode2.start, periode2.endInclusive, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(a2Periode.start, a2Periode.endInclusive, 100.prosent), orgnummer = a2)
-        assertTilstand(a1, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, 2)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP, 1)
+        assertSisteTilstand(2.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a2)
 
         håndterSøknad(Sykdom(periode2.start, periode2.endInclusive, 100.prosent), orgnummer = a1)
         håndterYtelser(2.vedtaksperiode, orgnummer = a1, inntektshistorikk = inntektshistorikk)
@@ -1217,8 +1209,8 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         val a2Periode = 2.april(2021) til 30.april(2021)
         håndterSykmelding(Sykmeldingsperiode(periode2.start, periode2.endInclusive, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(a2Periode.start, a2Periode.endInclusive, 100.prosent), orgnummer = a2)
-        assertTilstand(a1, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, 2)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP, 1)
+        assertSisteTilstand(2.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a2)
 
         håndterSøknad(Sykdom(periode2.start, periode2.endInclusive, 100.prosent), orgnummer = a1)
         håndterYtelser(2.vedtaksperiode, orgnummer = a1, inntektshistorikk = inntektshistorikk)
@@ -1246,8 +1238,8 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             orgnummer = a1
         )
 
-        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE, 2)
-        assertTilstand(a2, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, 2)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, orgnummer = a2)
 
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.januar(2021) til 16.januar(2021)),
@@ -1255,8 +1247,8 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             orgnummer = a2
         )
 
-        assertTilstand(a1, AVVENTER_HISTORIKK, 2)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE, 2)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
 
         håndterYtelser(2.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
 
@@ -1273,30 +1265,21 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true, orgnummer = a1)
 
         håndterUtbetalt(2.vedtaksperiode, orgnummer = a1)
-        assertTilstand(a1, AVSLUTTET, 2)
-        assertTilstand(a2, AVVENTER_HISTORIKK, 2)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
 
         håndterYtelser(2.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a2)
         håndterSimulering(2.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true, orgnummer = a2)
         håndterUtbetalt(2.vedtaksperiode, orgnummer = a2)
 
-        assertTilstand(a1, AVSLUTTET, 2)
-        assertTilstand(a2, AVSLUTTET, 2)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a2)
     }
 
     @Test
     fun `går ikke i loop mellom AVVENTER_ARBEIDSGIVERE og AVVENTER_HISTORIKK`() {
         val periode = 27.januar(2021) til 31.januar(2021)
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        assertTilstand(a1, MOTTATT_SYKMELDING_FERDIG_GAP)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
-
-        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        assertTilstand(a1, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
-
         val inntektshistorikk = listOf(
             Inntektsopplysning(a1.toString(), 20.januar(2021), INNTEKT, true),
             Inntektsopplysning(a2.toString(), 20.januar(2021), INNTEKT, true)
@@ -1307,66 +1290,72 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             ArbeidsgiverUtbetalingsperiode(a2.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT)
         )
 
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
-        assertTilstand(a1, AVVENTER_HISTORIKK)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a2)
+
+        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a2)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a2)
 
         håndterPåminnelse(1.vedtaksperiode, orgnummer = a1, påminnetTilstand = AVVENTER_ARBEIDSGIVERE)
-        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a2)
 
         håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
-        assertTilstand(a1, AVVENTER_HISTORIKK)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
         assertInntektskilde(a1, FLERE_ARBEIDSGIVERE)
         assertInntektskilde(a2, FLERE_ARBEIDSGIVERE)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        assertTilstand(a1, AVVENTER_SIMULERING)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
 
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        assertTilstand(a1, AVVENTER_GODKJENNING)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
         assertInntektskilde(a1, FLERE_ARBEIDSGIVERE)
         assertInntektskilde(a2, FLERE_ARBEIDSGIVERE)
         assertEquals("FLERE_ARBEIDSGIVERE", a1.inspektør.sisteBehov(1.vedtaksperiode).detaljer()["inntektskilde"])
 
         håndterPåminnelse(1.vedtaksperiode, orgnummer = a2, påminnetTilstand = AVVENTER_ARBEIDSGIVERE)
-        assertTilstand(a1, AVVENTER_GODKJENNING)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
 
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        assertTilstand(a1, TIL_UTBETALING)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+        assertSisteTilstand(1.vedtaksperiode, TIL_UTBETALING, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
 
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
-        assertTilstand(a1, AVSLUTTET)
-        assertTilstand(a2, AVVENTER_HISTORIKK)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
-        assertTilstand(a1, AVSLUTTET)
-        assertTilstand(a2, AVVENTER_SIMULERING)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a2)
 
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        assertTilstand(a1, AVSLUTTET)
-        assertTilstand(a2, AVVENTER_GODKJENNING)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a2)
         assertInntektskilde(a1, FLERE_ARBEIDSGIVERE)
         assertInntektskilde(a2, FLERE_ARBEIDSGIVERE)
         assertEquals("FLERE_ARBEIDSGIVERE", a2.inspektør.sisteBehov(1.vedtaksperiode).detaljer()["inntektskilde"])
 
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
-        assertTilstand(a1, AVSLUTTET)
-        assertTilstand(a2, TIL_UTBETALING)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, TIL_UTBETALING, orgnummer = a2)
 
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
-        assertTilstand(a1, AVSLUTTET)
-        assertTilstand(a2, AVSLUTTET)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
     }
 
 
@@ -1409,8 +1398,8 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
         historikk(a1)
 
-        assertTilstand(a1, AVVENTER_GODKJENNING)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
 
         a1.inspektør.also {
             assertTrue(it.personLogg.hasWarningsOrWorse())
@@ -1669,10 +1658,6 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     fun `sykepengegrunnlag settes per arbeidsgiver i vedtakfattet-event`() {
         val periode = 27.januar(2021) til 31.januar(2021)
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-
-        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-
         val inntektshistorikk = listOf(
             Inntektsopplysning(a1.toString(), 20.januar(2021), INNTEKT, true),
             Inntektsopplysning(a2.toString(), 20.januar(2021), 1000.00.månedlig, true)
@@ -1684,6 +1669,10 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
 
         håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+
+        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
         håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)

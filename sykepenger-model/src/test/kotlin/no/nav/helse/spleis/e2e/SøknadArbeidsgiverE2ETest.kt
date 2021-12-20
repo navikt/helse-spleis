@@ -1,8 +1,10 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.ForventetFeil
-import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.*
+import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -27,7 +29,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), Arbeid(17.januar, 20.januar))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(1.januar til 16.januar))
-        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
     }
 
     @Test
@@ -164,9 +166,9 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
             9.januar til 12.januar,
             16.januar til 22.januar
         ), førsteFraværsdag = 16.januar)
-        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP, UTEN_UTBETALING_MED_INNTEKTSMELDING_UFERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP, AVVENTER_UFERDIG_GAP, AVVENTER_HISTORIKK)
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_HISTORIKK)
     }
 
 
@@ -214,9 +216,9 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
             1.januar til 5.januar,
             9.januar til 19.januar
         ), førsteFraværsdag = 9.januar)
-        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP, UTEN_UTBETALING_MED_INNTEKTSMELDING_UFERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, AVVENTER_UFERDIG_FORLENGELSE, AVVENTER_HISTORIKK)
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK)
     }
 
     @Test
@@ -234,5 +236,50 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_ARBEIDSGIVERSØKNAD_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_ARBEIDSGIVERSØKNAD_UFERDIG_GAP, AVVENTER_ARBEIDSGIVERSØKNAD_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_SØKNAD_UFERDIG_FORLENGELSE, AVVENTER_SØKNAD_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK)
+    }
+
+    @Test
+    fun `Inntektsmelding for to perioder som utvider periode 2 slik at de blir tilstøtende sender ikke periode 2 til AVSLUTTET_UTEN_UTBETALING - inntektsmelding først`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 1.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(5.januar, 20.januar, 100.prosent))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(1.januar til 16.januar), 1.januar)
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 1.januar, 100.prosent))
+        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(5.januar, 20.januar, 100.prosent))
+
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_ARBEIDSGIVERSØKNAD_FERDIG_GAP,
+            AVSLUTTET_UTEN_UTBETALING
+        )
+
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_UFERDIG_GAP,
+            AVVENTER_SØKNAD_UFERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_HISTORIKK
+        )
+    }
+
+    @Test
+    fun `Inntektsmelding for to perioder som utvider periode 2 slik at de blir tilstøtende sender ikke periode 2 til AVSLUTTET_UTEN_UTBETALING - søknad først`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 1.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(5.januar, 20.januar, 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 1.januar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(5.januar, 20.januar, 100.prosent))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(1.januar til 16.januar), 1.januar)
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_UFERDIG_GAP,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_HISTORIKK
+        )
     }
 }

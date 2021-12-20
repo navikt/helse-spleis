@@ -55,53 +55,53 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
         val forlengelseperiode = 1.februar(2021) til 28.februar(2021)
         håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a2)
-        assertTilstand(a1, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, 2)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, 2)
+        assertSisteTilstand(2.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, orgnummer = a2)
 
         håndterSøknad(Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
-        assertTilstand(a1, AVVENTER_HISTORIKK, 2)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, 2)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, orgnummer = a2)
 
         håndterYtelser(2.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
-        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE, 2)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, 2)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, orgnummer = a2)
 
         håndterSøknad(Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a2)
-        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE, 2)
-        assertTilstand(a2, AVVENTER_HISTORIKK, 2)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
 
         håndterYtelser(2.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a2)
-        assertTilstand(a1, AVVENTER_HISTORIKK, 2)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE, 2)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
 
         håndterYtelser(2.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
-        assertTilstand(a1, AVVENTER_SIMULERING, 2)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE, 2)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
 
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
-        assertTilstand(a1, AVVENTER_GODKJENNING, 2)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE, 2)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
 
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true, orgnummer = a1)
-        assertTilstand(a1, TIL_UTBETALING, 2)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE, 2)
+        assertSisteTilstand(2.vedtaksperiode, TIL_UTBETALING, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
         håndterUtbetalt(2.vedtaksperiode, orgnummer = a1)
 
-        assertTilstand(a1, AVSLUTTET, 2)
-        assertTilstand(a2, AVVENTER_HISTORIKK, 2)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
         håndterYtelser(2.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a2)
 
-        assertTilstand(a1, AVSLUTTET, 2)
-        assertTilstand(a2, AVVENTER_SIMULERING, 2)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a2)
         håndterSimulering(2.vedtaksperiode, orgnummer = a2)
-        assertTilstand(a1, AVSLUTTET, 2)
-        assertTilstand(a2, AVVENTER_GODKJENNING, 2)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a2)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true, orgnummer = a2)
-        assertTilstand(a1, AVSLUTTET, 2)
-        assertTilstand(a2, TIL_UTBETALING, 2)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, TIL_UTBETALING, orgnummer = a2)
         håndterUtbetalt(2.vedtaksperiode, orgnummer = a2)
-        assertTilstand(a1, AVSLUTTET, 2)
-        assertTilstand(a2, AVSLUTTET, 2)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a2)
     }
 
     @Test
@@ -158,8 +158,8 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
 
-        assertTilstand(a1, AVSLUTTET)
-        assertTilstand(a2, AVSLUTTET)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
         assertEquals(1.januar, a1.inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(1.januar, a2.inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(
@@ -171,21 +171,21 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
     @Test
     fun `Tillater forlengelse av overgang fra infotrygd for flere arbeidsgivere selv om sykmelding og søknad for en arbeidsgiver kommer før sykmelding for den andre arbeidsgiveren`() {
         val periode = 27.januar(2021) til 31.januar(2021)
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-
         val inntektshistorikk = listOf(
             Inntektsopplysning(a1.toString(), 20.januar(2021), INNTEKT, true),
             Inntektsopplysning(a2.toString(), 20.januar(2021), INNTEKT, true)
         )
-
         val utbetalinger = arrayOf(
             ArbeidsgiverUtbetalingsperiode(a1.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT),
             ArbeidsgiverUtbetalingsperiode(a2.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT)
         )
 
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
@@ -201,51 +201,50 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
         //Her starter forlengelsen
         val forlengelseperiode = 1.februar(2021) til 10.februar(2021)
         håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
-        assertTilstand(a1, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, 2)
+        assertSisteTilstand(2.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, orgnummer = a1)
 
         håndterSøknad(Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
-        assertTilstand(a1, AVVENTER_HISTORIKK, 2)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
 
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(2.vedtaksperiode, orgnummer = a1)
-        assertTilstand(a1, AVSLUTTET, 2)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
 
         håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a2)
-        assertTilstand(a1, AVSLUTTET, 2)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, 2)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, orgnummer = a2)
 
         håndterSøknad(Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a2)
-        assertTilstand(a1, AVSLUTTET, 2)
-        assertTilstand(a2, AVVENTER_HISTORIKK, 2)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
 
         håndterYtelser(2.vedtaksperiode, orgnummer = a2)
         håndterSimulering(2.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(2.vedtaksperiode, orgnummer = a2)
-        assertTilstand(a1, AVSLUTTET, 2)
-        assertTilstand(a2, AVSLUTTET, 2)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a2)
     }
 
     @Test
     fun `Tillater forlengelse av overgang fra infotrygd for flere arbeidsgivere selv om sykmelding og søknad for en arbeidsgiver kommer før sykmelding for den andre arbeidsgiveren - påvirker ikke uferdige perioder`() {
         val periode = 27.januar(2021) til 31.januar(2021)
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-
         val inntektshistorikk = listOf(
             Inntektsopplysning(a1.toString(), 20.januar(2021), INNTEKT, true),
             Inntektsopplysning(a2.toString(), 20.januar(2021), INNTEKT, true)
         )
-
         val utbetalinger = arrayOf(
             ArbeidsgiverUtbetalingsperiode(a1.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT),
             ArbeidsgiverUtbetalingsperiode(a2.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT)
         )
 
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
@@ -254,34 +253,34 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
 
         val forlengelseperiode = 1.februar(2021) til 10.februar(2021)
         håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
-        assertTilstand(a1, AVVENTER_GODKJENNING, 1)
-        assertTilstand(a1, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, 2)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE, 1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
 
         håndterSøknad(Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
-        assertTilstand(a1, AVVENTER_GODKJENNING, 1)
-        assertTilstand(a1, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, 2)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE, 1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
     }
 
     @Test
     fun `Tillater forlengelse av forlengelse av overgang fra infotrygd for flere arbeidsgivere selv om sykmelding og søknad for en arbeidsgiver kommer før sykmelding for den andre arbeidsgiveren`() {
         val periode = 27.januar(2021) til 31.januar(2021)
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-
         val inntektshistorikk = listOf(
             Inntektsopplysning(a1.toString(), 20.januar(2021), INNTEKT, true),
             Inntektsopplysning(a2.toString(), 20.januar(2021), INNTEKT, true)
         )
-
         val utbetalinger = arrayOf(
             ArbeidsgiverUtbetalingsperiode(a1.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT),
             ArbeidsgiverUtbetalingsperiode(a2.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT)
         )
 
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
@@ -314,29 +313,29 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
         //Her starter forlengelsen av forlengelsen
         val forlengelsesforlengelseperiode = 11.februar(2021) til 20.februar(2021)
         håndterSykmelding(Sykmeldingsperiode(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
-        assertTilstand(a1, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, 3)
+        assertSisteTilstand(3.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, orgnummer = a1)
 
         håndterSøknad(
             Sykdom(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent),
             orgnummer = a1
         )
-        assertTilstand(a1, AVVENTER_HISTORIKK, 3)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
 
         håndterYtelser(3.vedtaksperiode, orgnummer = a1)
         håndterSimulering(3.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(3.vedtaksperiode, orgnummer = a1)
-        assertTilstand(a1, AVSLUTTET, 3)
+        assertSisteTilstand(3.vedtaksperiode, AVSLUTTET, orgnummer = a1)
 
         håndterSykmelding(Sykmeldingsperiode(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent), orgnummer = a2)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, 3)
+        assertSisteTilstand(3.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, orgnummer = a2)
 
         håndterSøknad(
             Sykdom(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent),
             orgnummer = a2
         )
-        assertTilstand(a1, AVSLUTTET, 3)
-        assertTilstand(a2, AVVENTER_HISTORIKK, 3)
+        assertSisteTilstand(3.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
     }
 
     @Test
@@ -349,21 +348,20 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
         * Her kommer a3 inn etter at a1 og a2 er ferdig.
         */
         val periode = 27.januar(2021) til 31.januar(2021)
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-
         val inntektshistorikk = listOf(
             Inntektsopplysning(a1.toString(), 20.januar(2021), INNTEKT, true),
             Inntektsopplysning(a2.toString(), 20.januar(2021), INNTEKT, true)
         )
-
         val utbetalinger = arrayOf(
             ArbeidsgiverUtbetalingsperiode(a1.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT),
             ArbeidsgiverUtbetalingsperiode(a2.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT)
         )
 
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
@@ -394,33 +392,33 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
         håndterUtbetalt(2.vedtaksperiode, orgnummer = a2)
 
         håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a3)
-        assertTilstand(a3, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a3)
 
         //Her starter forlengelsen av forlengelsen
         val forlengelsesforlengelseperiode = 1.mars(2021) til 31.mars(2021)
         håndterSykmelding(Sykmeldingsperiode(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent), orgnummer = a2)
-        assertTilstand(a1, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, 3)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, 3)
+        assertSisteTilstand(3.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, orgnummer = a1)
+        assertSisteTilstand(3.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, orgnummer = a2)
 
         håndterSøknad(
             Sykdom(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent),
             orgnummer = a1
         )
-        assertTilstand(a1, AVVENTER_HISTORIKK, 3)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, 3)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertSisteTilstand(3.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, orgnummer = a2)
 
         håndterYtelser(3.vedtaksperiode, orgnummer = a1)
-        assertTilstand(a1, TIL_INFOTRYGD, 3)
-        assertTilstand(a2, TIL_INFOTRYGD, 3)
-        assertTilstand(a3, MOTTATT_SYKMELDING_FERDIG_GAP, 1)
+        assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a1)
+        assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a3)
 
         håndterSøknad(
             Sykdom(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent),
             orgnummer = a2
         )
-        assertTilstand(a1, TIL_INFOTRYGD, 3)
-        assertTilstand(a2, TIL_INFOTRYGD, 3)
+        assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a1)
+        assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a2)
 
         håndterSøknad(
             Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent),
@@ -431,10 +429,10 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
             førsteFraværsdag = forlengelseperiode.start,
             orgnummer = a3
         )
-        assertTilstand(a3, AVVENTER_HISTORIKK, 1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a3)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a3)
-        assertTilstand(a3, TIL_INFOTRYGD, 1)
+        assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a3)
     }
 
     @Test
@@ -446,10 +444,6 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
         * Her kommer a3 inn før a1 og a2 er ferdig og alle blir kastet ut fordi a3 ikke har inntekt på skjæringstidspunktet.
         * */
         val periode = 27.januar(2021) til 31.januar(2021)
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-
         val inntektshistorikk = listOf(
             Inntektsopplysning(a1.toString(), 20.januar(2021), INNTEKT, true),
             Inntektsopplysning(a2.toString(), 20.januar(2021), INNTEKT, true)
@@ -460,7 +454,12 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
             ArbeidsgiverUtbetalingsperiode(a2.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT)
         )
 
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
@@ -480,30 +479,30 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a3)
         håndterSøknad(Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
-        assertTilstand(a1, TIL_INFOTRYGD, 2)
-        assertTilstand(a2, TIL_INFOTRYGD, 2)
-        assertTilstand(a3, TIL_INFOTRYGD, 1)
+        assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a3)
     }
 
     @Test
     fun `Tredje arbeidsgiver som tidligere var ghost blir syk midt i en forlengelse - Alle vedtaksperioder går igjennom`() {
         val periode = 27.januar(2021) til 31.januar(2021)
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-
         val inntektshistorikk = listOf(
             Inntektsopplysning(a1.toString(), 20.januar(2021), INNTEKT, true),
             Inntektsopplysning(a2.toString(), 20.januar(2021), INNTEKT, true),
             Inntektsopplysning(a3.toString(), 20.januar(2021), INNTEKT, true)
         )
-
         val utbetalinger = arrayOf(
             ArbeidsgiverUtbetalingsperiode(a1.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT),
             ArbeidsgiverUtbetalingsperiode(a2.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT)
         )
 
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
         håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+
+        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
@@ -538,29 +537,29 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent), orgnummer = a3)
         håndterSykmelding(Sykmeldingsperiode(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent), orgnummer = a2)
-        assertTilstand(a1, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, 3)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, 3)
-        assertTilstand(a3, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertSisteTilstand(3.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, orgnummer = a1)
+        assertSisteTilstand(3.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a3)
 
         håndterSøknad(
             Sykdom(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent),
             orgnummer = a1
         )
-        assertTilstand(a1, AVVENTER_HISTORIKK, 3)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, 3)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertSisteTilstand(3.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, orgnummer = a2)
 
         håndterYtelser(3.vedtaksperiode, orgnummer = a1)
-        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE, 3)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, 3)
-        assertTilstand(a3, MOTTATT_SYKMELDING_FERDIG_GAP, 1)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a1)
+        assertSisteTilstand(3.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a3)
 
         håndterSøknad(
             Sykdom(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent),
             orgnummer = a2
         )
-        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE, 3)
-        assertTilstand(a2, AVVENTER_HISTORIKK, 3)
-        assertTilstand(a3, MOTTATT_SYKMELDING_FERDIG_GAP, 1)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a1)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a3)
 
         håndterYtelser(3.vedtaksperiode, orgnummer = a2)
 
@@ -574,9 +573,9 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
             orgnummer = a3
         )
 
-        assertTilstand(a1, AVVENTER_HISTORIKK, 3)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE, 3)
-        assertTilstand(a3, AVVENTER_ARBEIDSGIVERE, 1)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a3)
 
         håndterYtelser(3.vedtaksperiode, orgnummer = a1)
         håndterSimulering(3.vedtaksperiode, orgnummer = a1)
@@ -591,9 +590,9 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a3)
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a3)
 
-        assertTilstand(a1, AVSLUTTET, 3)
-        assertTilstand(a2, AVSLUTTET, 3)
-        assertTilstand(a3, AVSLUTTET, 1)
+        assertSisteTilstand(3.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(3.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a3)
     }
 
     @Test
@@ -603,10 +602,6 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
         * Alle forlengelsene blir derfor kastet ut når det viser seg at vi ikke har inntekt for alle arbeidsgiverne.
         * */
         val periode = 27.januar(2021) til 31.januar(2021)
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-
         val inntektshistorikk = listOf(
             Inntektsopplysning(a1.toString(), 20.januar(2021), INNTEKT, true),
             Inntektsopplysning(a2.toString(), 20.januar(2021), INNTEKT, true)
@@ -617,7 +612,12 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
             ArbeidsgiverUtbetalingsperiode(a2.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT)
         )
 
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
@@ -648,12 +648,11 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
         håndterUtbetalt(2.vedtaksperiode, orgnummer = a2)
 
         håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a3)
-        assertTilstand(a3, MOTTATT_SYKMELDING_FERDIG_GAP)
-        håndterSøknad(Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a3)
-        assertTilstand(a3, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+        assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a3)
         håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a3)
+        håndterSøknad(Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a3)
         håndterInntektsmelding(listOf(forlengelseperiode.start til forlengelseperiode.endInclusive), forlengelseperiode.start, orgnummer = a3)
-        assertTilstand(a3, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a3)
 
         //Her starter forlengelsen av forlengelsen
         val forlengelsesforlengelseperiode = 11.februar(2021) til 20.februar(2021)
@@ -669,9 +668,9 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
             Sykmeldingsperiode(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent),
             orgnummer = a3
         )
-        assertTilstand(a1, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, 3)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, 3)
-        assertTilstand(a3, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, 2)
+        assertSisteTilstand(3.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, orgnummer = a1)
+        assertSisteTilstand(3.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, orgnummer = a2)
+        assertSisteTilstand(2.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, orgnummer = a3)
 
         håndterSøknad(
             Sykdom(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent),
@@ -679,18 +678,14 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
         )
         håndterUtbetalingshistorikk(3.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
         håndterYtelser(3.vedtaksperiode, orgnummer = a1)
-        assertTilstand(a1, TIL_INFOTRYGD, 3)
-        assertTilstand(a2, TIL_INFOTRYGD, 3)
-        assertTilstand(a3, TIL_INFOTRYGD, 2)
+        assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a1)
+        assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a2)
+        assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a3)
     }
 
     @Test
     fun `Ghost blir sykmeldt i en forlengelse og alle vedtaksperioder forlenges igjen - Alt går fint`() {
         val periode = 27.januar(2021) til 31.januar(2021)
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-
         val inntektshistorikk = listOf(
             Inntektsopplysning(a1.toString(), 20.januar(2021), INNTEKT, true),
             Inntektsopplysning(a2.toString(), 20.januar(2021), INNTEKT, true),
@@ -702,7 +697,12 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
             ArbeidsgiverUtbetalingsperiode(a2.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, INNTEKT)
         )
 
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
@@ -733,20 +733,20 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
         håndterUtbetalt(2.vedtaksperiode, orgnummer = a2)
 
         håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a3)
-        assertTilstand(a3, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a3)
         håndterSøknad(Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a3)
-        assertTilstand(a3, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, orgnummer = a3)
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(forlengelseperiode.start til forlengelseperiode.start.plusDays(16)),
             førsteFraværsdag = forlengelseperiode.start,
             orgnummer = a3
         )
-        assertTilstand(a3, AVVENTER_HISTORIKK)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a3)
         håndterYtelser(1.vedtaksperiode, orgnummer = a3)
         håndterSimulering(1.vedtaksperiode, orgnummer = a3)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a3)
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a3)
-        assertTilstand(a3, AVSLUTTET)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a3)
 
         //Her starter forlengelsen av forlengelsen
         val forlengelsesforlengelseperiode = 1.mars(2021) til 20.mars(2021)
@@ -762,18 +762,18 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
             Sykmeldingsperiode(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent),
             orgnummer = a3
         )
-        assertTilstand(a1, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, 3)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, 3)
-        assertTilstand(a3, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, 2)
+        assertSisteTilstand(3.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, orgnummer = a1)
+        assertSisteTilstand(3.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, orgnummer = a2)
+        assertSisteTilstand(2.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, orgnummer = a3)
 
         håndterSøknad(
             Sykdom(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent),
             orgnummer = a1
         )
         håndterYtelser(3.vedtaksperiode, orgnummer = a1)
-        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE, 3)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, 3)
-        assertTilstand(a3, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, 2)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a1)
+        assertSisteTilstand(3.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, orgnummer = a2)
+        assertSisteTilstand(2.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, orgnummer = a3)
 
         håndterSøknad(
             Sykdom(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent),
@@ -786,9 +786,9 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
         )
         håndterYtelser(2.vedtaksperiode, orgnummer = a3)
 
-        assertTilstand(a1, AVVENTER_HISTORIKK, 3)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE, 3)
-        assertTilstand(a3, AVVENTER_ARBEIDSGIVERE, 2)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a3)
 
         håndterYtelser(3.vedtaksperiode, orgnummer = a1)
         håndterSimulering(3.vedtaksperiode, orgnummer = a1)
@@ -803,9 +803,9 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a3)
         håndterUtbetalt(2.vedtaksperiode, orgnummer = a3)
 
-        assertTilstand(a1, AVSLUTTET, 3)
-        assertTilstand(a2, AVSLUTTET, 3)
-        assertTilstand(a3, AVSLUTTET, 2)
+        assertSisteTilstand(3.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(3.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a3)
     }
 
     @Test
@@ -854,7 +854,7 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
             orgnummer = a1,
             id = søknadHendelseId
         )
-        assertTilstand(a1, AVVENTER_HISTORIKK, 2)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
         assertHendelseIder(sykmeldingHendelseId, søknadHendelseId, orgnummer = a1)
     }
 
@@ -880,8 +880,8 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.april(2021), 30.april(2021), 100.prosent), orgnummer = a2)
         håndterInntektsmelding(listOf(1.april(2021) til 30.april(2021)), førsteFraværsdag = 1.april(2021), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
-        assertTilstand(a1, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, 2)
-        assertTilstand(a2, TIL_INFOTRYGD, 1)
+        assertSisteTilstand(2.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a2)
 
         håndterSøknad(Sykdom(periode2.start, periode2.endInclusive, 100.prosent), orgnummer = a1)
         håndterUtbetalingshistorikk(2.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
@@ -889,7 +889,7 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(2.vedtaksperiode, orgnummer = a1)
-        assertTilstand(a1, AVSLUTTET, 2)
-        assertTilstand(a2, TIL_INFOTRYGD, 1)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a2)
     }
 }

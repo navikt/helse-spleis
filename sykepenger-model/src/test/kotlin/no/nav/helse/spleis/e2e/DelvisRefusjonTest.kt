@@ -314,12 +314,12 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             håndterSøknad(Sykdom(21.januar, 10.februar, 100.prosent), orgnummer = a2)
 
             håndterInntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), orgnummer = a1)
-            assertTilstand(orgnummer = a1, tilstand = AVVENTER_ARBEIDSGIVERE)
-            assertTilstand(orgnummer = a2, tilstand = AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a1)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, orgnummer = a2)
 
             håndterInntektsmelding(arbeidsgiverperioder = listOf(21.januar til 5.februar), orgnummer = a2)
-            assertTilstand(orgnummer = a1, tilstand = AVVENTER_HISTORIKK)
-            assertTilstand(orgnummer = a2, tilstand = AVVENTER_ARBEIDSGIVERE)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
 
             håndterYtelser(1.vedtaksperiode, orgnummer = a1)
             håndterVilkårsgrunnlag(
@@ -342,15 +342,15 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             håndterSimulering(1.vedtaksperiode, orgnummer = a1)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
             håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
-            assertTilstand(orgnummer = a1, tilstand = AVSLUTTET)
-            assertTilstand(orgnummer = a2, tilstand = AVVENTER_HISTORIKK)
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
 
             håndterYtelser(1.vedtaksperiode, orgnummer = a2)
             håndterSimulering(1.vedtaksperiode, orgnummer = a2)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
             håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
-            assertTilstand(orgnummer = a1, tilstand = AVSLUTTET)
-            assertTilstand(orgnummer = a2, tilstand = AVSLUTTET)
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
 
             assertUtbetalingsbeløp(
                 vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
@@ -405,12 +405,12 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             håndterSøknad(Sykdom(21.januar, 10.februar, 100.prosent), orgnummer = a2)
 
             håndterInntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), orgnummer = a1)
-            assertTilstand(orgnummer = a1, tilstand = AVVENTER_ARBEIDSGIVERE)
-            assertTilstand(orgnummer = a2, tilstand = AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a1)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, orgnummer = a2)
 
             håndterInntektsmelding(arbeidsgiverperioder = listOf(21.januar til 5.februar), orgnummer = a2)
-            assertTilstand(orgnummer = a1, tilstand = AVVENTER_HISTORIKK)
-            assertTilstand(orgnummer = a2, tilstand = AVVENTER_ARBEIDSGIVERE)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
 
             håndterYtelser(1.vedtaksperiode, orgnummer = a1)
             håndterVilkårsgrunnlag(
@@ -433,15 +433,15 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             håndterSimulering(1.vedtaksperiode, orgnummer = a1)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
             håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
-            assertTilstand(orgnummer = a1, tilstand = AVSLUTTET)
-            assertTilstand(orgnummer = a2, tilstand = AVVENTER_HISTORIKK)
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
 
             håndterYtelser(1.vedtaksperiode, orgnummer = a2)
             håndterSimulering(1.vedtaksperiode, orgnummer = a2)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
             håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
-            assertTilstand(orgnummer = a1, tilstand = AVSLUTTET)
-            assertTilstand(orgnummer = a2, tilstand = AVSLUTTET)
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
 
             assertUtbetalingsbeløp(
                 vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
@@ -489,12 +489,12 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             håndterSøknad(Sykdom(1.januar, 10.februar, 100.prosent), orgnummer = a2)
 
             håndterInntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), orgnummer = a2)
-            assertTilstand(orgnummer = a2, tilstand = AVVENTER_ARBEIDSGIVERE)
-            assertTilstand(orgnummer = a1, tilstand = AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, orgnummer = a1)
 
             håndterInntektsmelding(arbeidsgiverperioder = listOf(21.januar til 5.februar), orgnummer = a1)
-            assertTilstand(orgnummer = a1, tilstand = AVVENTER_HISTORIKK)
-            assertTilstand(orgnummer = a2, tilstand = AVVENTER_ARBEIDSGIVERE)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
 
             håndterYtelser(1.vedtaksperiode, orgnummer = a1)
             håndterVilkårsgrunnlag(
@@ -517,15 +517,15 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             håndterSimulering(1.vedtaksperiode, orgnummer = a1)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
             håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
-            assertTilstand(orgnummer = a1, tilstand = AVSLUTTET)
-            assertTilstand(orgnummer = a2, tilstand = AVVENTER_HISTORIKK)
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
 
             håndterYtelser(1.vedtaksperiode, orgnummer = a2)
             håndterSimulering(1.vedtaksperiode, orgnummer = a2)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
             håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
-            assertTilstand(orgnummer = a1, tilstand = AVSLUTTET)
-            assertTilstand(orgnummer = a2, tilstand = AVSLUTTET)
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
 
             assertUtbetalingsbeløp(
                 vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
@@ -741,8 +741,6 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     @Test
     fun `en overgang fra Infotrygd uten inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 10.februar, 100.prosent))
-        håndterSøknad(Sykdom(1.februar, 10.februar, 100.prosent))
-
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
             inntektshistorikk = listOf(
@@ -752,6 +750,8 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
                 ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 17.januar, 31.januar, 100.prosent, INNTEKT)
             )
         )
+
+        håndterSøknad(Sykdom(1.februar, 10.februar, 100.prosent))
 
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -764,8 +764,6 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     @Test
     fun `en forlengelse av overgang fra Infotrygd uten inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 10.februar, 100.prosent))
-        håndterSøknad(Sykdom(1.februar, 10.februar, 100.prosent))
-
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
             inntektshistorikk = listOf(
@@ -775,6 +773,8 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
                 ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 17.januar, 31.januar, 100.prosent, INNTEKT)
             )
         )
+
+        håndterSøknad(Sykdom(1.februar, 10.februar, 100.prosent))
 
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -790,8 +790,6 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     @Test
     fun `førstegangsbehandling i Spleis etter en overgang fra Infotrygd uten inntektsmelding `() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 10.februar, 100.prosent))
-        håndterSøknad(Sykdom(1.februar, 10.februar, 100.prosent))
-
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
             inntektshistorikk = listOf(
@@ -801,6 +799,8 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
                 ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 17.januar, 31.januar, 100.prosent, INNTEKT)
             )
         )
+
+        håndterSøknad(Sykdom(1.februar, 10.februar, 100.prosent))
 
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -818,10 +818,6 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterInntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), orgnummer = a1)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 10.februar, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 10.februar, 100.prosent), orgnummer = a2)
-
-        håndterSøknad(Sykdom(1.februar, 10.februar, 100.prosent), orgnummer = a1)
-
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
             orgnummer = a1,
@@ -834,6 +830,10 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
                 ArbeidsgiverUtbetalingsperiode(a2.toString(), 17.januar, 31.januar, 100.prosent, INNTEKT)
             )
         )
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 10.februar, 100.prosent), orgnummer = a2)
+
+        håndterSøknad(Sykdom(1.februar, 10.februar, 100.prosent), orgnummer = a1)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSøknad(Sykdom(1.februar, 10.februar, 100.prosent), orgnummer = a2)
@@ -860,12 +860,12 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         // Når vi ser etter refusjon for Infotrygdperioden finner vi alikevel frem til denne inntektsmeldingen og forsøker å finne
         // refusjonsbeløp på 1-5.Januar som er før arbeidsgiverperioden
         håndterInntektsmelding(listOf(Periode(6.januar, 21.januar)))
-        håndterSøknad(Sykdom(22.januar, 31.januar, 100.prosent))
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.januar, 21.januar, 100.prosent, 1000.daglig),
             inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER.toString(), 1.januar, INNTEKT, true))
         )
+        håndterSøknad(Sykdom(22.januar, 31.januar, 100.prosent))
 
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)

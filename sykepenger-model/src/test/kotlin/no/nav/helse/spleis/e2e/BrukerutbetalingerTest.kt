@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
@@ -95,7 +96,7 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
             håndterUtbetalingsgodkjenning()
             håndterUtbetalt()
 
-            assertTilstand(ORGNUMMER, TilstandType.AVSLUTTET)
+            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET, orgnummer = ORGNUMMER)
         }
     }
 
@@ -109,7 +110,7 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser()
 
-            assertTilstand(ORGNUMMER, TilstandType.TIL_INFOTRYGD)
+            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = ORGNUMMER)
         }
     }
 
@@ -123,7 +124,7 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser()
 
-            assertTilstand(ORGNUMMER, TilstandType.TIL_INFOTRYGD)
+            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = ORGNUMMER)
         }
     }
 
@@ -137,7 +138,7 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser()
 
-            assertTilstand(ORGNUMMER, TilstandType.TIL_INFOTRYGD)
+            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = ORGNUMMER)
         }
     }
 
@@ -145,7 +146,7 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
     fun `utbetaling med full refusjon til arbeidsgiver toggle på`() {
         Toggle.LageBrukerutbetaling.enable {
             nyttVedtak(1.januar, 31.januar)
-            assertTilstand(ORGNUMMER, TilstandType.AVSLUTTET)
+            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET, orgnummer = ORGNUMMER)
         }
     }
 
@@ -153,7 +154,7 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
     fun `utbetaling med full refusjon til arbeidsgiver toggle av`() {
         Toggle.LageBrukerutbetaling.disable {
             nyttVedtak(1.januar, 31.januar)
-            assertTilstand(ORGNUMMER, TilstandType.AVSLUTTET)
+            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET, orgnummer = ORGNUMMER)
         }
     }
 }

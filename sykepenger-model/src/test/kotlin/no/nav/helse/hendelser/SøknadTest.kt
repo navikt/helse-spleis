@@ -141,6 +141,17 @@ internal class SøknadTest {
         assertEquals(8, søknad.sykdomstidslinje().count())
         assertEquals(6, søknad.sykdomstidslinje().filterIsInstance<Sykedag>().size)
         assertEquals(2, søknad.sykdomstidslinje().filterIsInstance<SykHelgedag>().size)
+        assertEquals(5.januar til 12.januar, søknad.sykdomstidslinje().periode())
+    }
+
+    @Test
+    fun `egenmelding ligger etter sykdomsvindu`() {
+        søknad(Sykdom(5.januar, 12.januar, 100.prosent), Egenmelding(13.januar, 17.januar))
+        assertFalse(søknad.valider(EN_PERIODE).hasErrorsOrWorse())
+        assertEquals(8, søknad.sykdomstidslinje().count())
+        assertEquals(6, søknad.sykdomstidslinje().filterIsInstance<Sykedag>().size)
+        assertEquals(2, søknad.sykdomstidslinje().filterIsInstance<SykHelgedag>().size)
+        assertEquals(5.januar til 12.januar, søknad.sykdomstidslinje().periode())
     }
 
     @Test

@@ -65,8 +65,8 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
 
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE)
-        assertTilstander(4.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE)
+        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(4.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE)
 
         // 6. og 7. januar blir FriskHelg og medfører brudd i arbeidsgiverperioden
         // og dermed ble også skjæringstidspunktet forskjøvet til 8. januar
@@ -77,28 +77,21 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
                 // 6. og 7. januar er helg
                 8.januar til 12.januar,
                 13.januar til 18.januar
-            ), 1.januar
+            ), 8.januar
         )
 
-        håndterYtelser(3.vedtaksperiode)
+        håndterYtelser(4.vedtaksperiode)
 
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(
-            3.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-            AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING
-        )
-        assertTilstander(4.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE)
+        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(4.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING)
 
         assertTrue(inspektør.etterspurteBehov(1.vedtaksperiode).isEmpty())
         assertTrue(inspektør.etterspurteBehov(2.vedtaksperiode).isEmpty())
-        assertTrue(inspektør.etterspurteBehov(3.vedtaksperiode).map { it.type }
+        assertTrue(inspektør.etterspurteBehov(3.vedtaksperiode).isEmpty())
+        assertTrue(inspektør.etterspurteBehov(4.vedtaksperiode).map { it.type }
             .containsAll(listOf(InntekterForSammenligningsgrunnlag, Medlemskap, InntekterForSykepengegrunnlag, ArbeidsforholdV2)))
-        assertTrue(inspektør.etterspurteBehov(4.vedtaksperiode).isEmpty())
     }
 
     @Test

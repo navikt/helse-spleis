@@ -38,8 +38,8 @@ internal class VilkårsgrunnlagTest {
         person = Person(aktørId, UNG_PERSON_FNR_2018)
         person.addObserver(observatør)
         person.håndter(sykmelding())
-        person.håndter(søknad())
         person.håndter(inntektsmelding())
+        person.håndter(søknad())
         person.håndter(ytelser())
     }
 

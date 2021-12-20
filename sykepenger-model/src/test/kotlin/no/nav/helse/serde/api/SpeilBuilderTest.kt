@@ -507,7 +507,6 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER.toString(), skjæringstidspunktFraInfotrygd, INNTEKT, true))
 
         håndterSykmelding(Sykmeldingsperiode(fom1Periode, tom1Periode, 100.prosent))
-        håndterSøknad(Sykdom(fom1Periode, tom1Periode, 100.prosent))
         // Til infotrygd pga overlapp
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
@@ -515,14 +514,15 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             inntektshistorikk = inntektshistorikk,
             besvart = 16.februar.atStartOfDay()
         )
+        håndterSøknad(Sykdom(fom1Periode, tom1Periode, 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(fom2Periode, tom2Periode, 100.prosent))
-        håndterSøknad(Sykdom(fom2Periode, tom2Periode, 100.prosent))
         håndterUtbetalingshistorikk(
             2.vedtaksperiode,
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), skjæringstidspunktFraInfotrygd, tom1Periode, 100.prosent, INNTEKT),
             inntektshistorikk = inntektshistorikk
         )
+        håndterSøknad(Sykdom(fom2Periode, tom2Periode, 100.prosent))
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -1006,9 +1006,6 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         val inntekt = 30000.månedlig
 
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 50.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 50.prosent), orgnummer = a1)
-
         val inntektshistorikk = listOf(
             Inntektsopplysning(a1.toString(), 20.januar(2021), inntekt, true),
             Inntektsopplysning(a2.toString(), 20.januar(2021), inntekt, true)
@@ -1020,10 +1017,14 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         )
 
         håndterUtbetalingshistorikk(1.vedtaksperiode, utbetalinger = utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, utbetalinger = utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
+        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 50.prosent), orgnummer = a1)
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
         håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        håndterUtbetalingshistorikk(1.vedtaksperiode, utbetalinger = utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -1080,11 +1081,6 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     fun `Inntektskilde ved flere arbeidsgivere`() {
         val periode = 27.januar(2021) til 31.januar(2021)
         val inntekt = 30000.månedlig
-
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 50.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 50.prosent), orgnummer = a1)
-
         val inntektshistorikk = listOf(
             Inntektsopplysning(a1.toString(), 20.januar(2021), inntekt, true),
             Inntektsopplysning(a2.toString(), 20.januar(2021), inntekt, true)
@@ -1095,11 +1091,15 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             ArbeidsgiverUtbetalingsperiode(a2.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, inntekt)
         )
 
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 50.prosent), orgnummer = a1)
         håndterUtbetalingshistorikk(1.vedtaksperiode, utbetalinger = utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, utbetalinger = utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
+        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 50.prosent), orgnummer = a1)
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
         håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        håndterUtbetalingshistorikk(1.vedtaksperiode, utbetalinger = utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)

@@ -177,8 +177,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             3.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_UFERDIG_GAP,
-            AVVENTER_INNTEKTSMELDING_UFERDIG_GAP,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP
+            AVSLUTTET_UTEN_UTBETALING
         )
     }
 
@@ -609,8 +608,8 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         )
 
         håndterSykmelding(Sykmeldingsperiode(18.august(2020), 2.september(2020), 100.prosent))
-        håndterSøknad(Sykdom(18.august(2020), 2.september(2020), 100.prosent))
         håndterUtbetalingshistorikk(2.vedtaksperiode, *historikk2.toTypedArray(), inntektshistorikk = inntektsopplysning2)
+        håndterSøknad(Sykdom(18.august(2020), 2.september(2020), 100.prosent))
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)

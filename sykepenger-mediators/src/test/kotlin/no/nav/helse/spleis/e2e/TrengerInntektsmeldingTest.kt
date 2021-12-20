@@ -19,7 +19,7 @@ internal class TrengerInntektsmeldingTest : AbstractEndToEndMediatorTest() {
         assertTilstander(
             0,
             "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVSLUTTET_UTEN_UTBETALING",
             "AVSLUTTET_UTEN_UTBETALING"
         )
 
@@ -58,8 +58,7 @@ internal class TrengerInntektsmeldingTest : AbstractEndToEndMediatorTest() {
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
         )
 
-        assertEquals(1, testRapid.inspektør.meldinger("trenger_inntektsmelding").size)
-        assertEquals(21.juli(2021), testRapid.inspektør.siste("trenger_inntektsmelding")["fom"].asLocalDate())
+        assertEquals(0, testRapid.inspektør.meldinger("trenger_inntektsmelding").size)
     }
 
     @Test

@@ -45,16 +45,6 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
     }
 
     @Test
-    fun `inntektsmelding etter søknad`() {
-        person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100.prosent)))
-        person.håndter(søknad(Søknadsperiode.Sykdom(6.januar,  20.januar, 100.prosent)))
-        person.håndter(inntektsmelding())
-        assertFalse(inspektør.personLogg.hasErrorsOrWorse())
-        assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.AVVENTER_HISTORIKK, inspektør.sisteTilstand(1.vedtaksperiode))
-    }
-
-    @Test
     fun `søknad etter inntektsmelding`() {
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100.prosent)))
         person.håndter(inntektsmelding())

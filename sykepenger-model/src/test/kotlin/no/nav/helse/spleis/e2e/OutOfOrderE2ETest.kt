@@ -168,7 +168,7 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             MOTTATT_SYKMELDING_UFERDIG_GAP,
-            AVVENTER_ARBEIDSGIVERSØKNAD_UFERDIG_GAP,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_ARBEIDSGIVERSØKNAD_FERDIG_GAP,
             AVSLUTTET_UTEN_UTBETALING
         )
@@ -176,11 +176,9 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
             2.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_UFERDIG_GAP,
-            AVVENTER_INNTEKTSMELDING_UFERDIG_GAP,
-            UTEN_UTBETALING_MED_INNTEKTSMELDING_UFERDIG_GAP,
             AVSLUTTET_UTEN_UTBETALING
         )
-        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
     }
 
     @Test
@@ -212,8 +210,7 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
             2.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_UFERDIG_GAP,
-            AVVENTER_INNTEKTSMELDING_UFERDIG_GAP,
-            UTEN_UTBETALING_MED_INNTEKTSMELDING_UFERDIG_GAP
+            AVSLUTTET_UTEN_UTBETALING
         )
         assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP)
     }
@@ -226,7 +223,7 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 17.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(11.mars, 11.mars, 100.prosent))
-        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(12.mars, 19.mars, 100.prosent))
+        håndterSøknadMedValidering(3.vedtaksperiode, Sykdom(12.mars, 19.mars, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(1.januar til 17.januar), 1.januar)
         håndterInntektsmeldingMedValidering(
             2.vedtaksperiode,
@@ -250,15 +247,13 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
             2.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_UFERDIG_GAP,
-            AVVENTER_INNTEKTSMELDING_UFERDIG_GAP,
-            UTEN_UTBETALING_MED_INNTEKTSMELDING_UFERDIG_GAP
+            AVSLUTTET_UTEN_UTBETALING
         )
         assertTilstander(
             3.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
-            AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
-            UTEN_UTBETALING_MED_INNTEKTSMELDING_UFERDIG_FORLENGELSE
+            AVSLUTTET_UTEN_UTBETALING
         )
         assertTilstander(4.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP)
     }
@@ -290,11 +285,16 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE
+            AVSLUTTET_UTEN_UTBETALING
         )
-        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE)
-        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(
+            3.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_UFERDIG_GAP
+        )
         assertTilstander(4.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
     }
 
@@ -315,7 +315,7 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVSLUTTET_UTEN_UTBETALING,
             AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE
         )
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
@@ -342,7 +342,7 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
             2.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_UFERDIG_GAP,
-            AVVENTER_INNTEKTSMELDING_UFERDIG_GAP,
+            AVSLUTTET_UTEN_UTBETALING,
             AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE
         )
         assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP)
@@ -360,7 +360,7 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
             2.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_UFERDIG_GAP,
-            AVVENTER_INNTEKTSMELDING_UFERDIG_GAP,
+            AVSLUTTET_UTEN_UTBETALING,
             AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE
         )
         assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP)
@@ -608,6 +608,7 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(19.februar, 6.mars, 100.prosent))
         håndterSøknad(Sykdom(19.februar, 6.mars, 100.prosent))
+        håndterInntektsmeldingReplay(inntektsmelding, 2.vedtaksperiode(ORGNUMMER))
         håndterInntektsmeldingReplay(inntektsmelding, 3.vedtaksperiode(ORGNUMMER))
 
         assertFalse(inspektør.periodeErForkastet(1.vedtaksperiode))
@@ -617,13 +618,13 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
+            AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE,
             AVVENTER_HISTORIKK
         )
         assertTilstander(
             3.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
             AVSLUTTET_UTEN_UTBETALING
         )
     }
@@ -817,9 +818,9 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
     @Test
     fun `ny sykmelding før en ferdig forlengelse med inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(10.februar, 15.februar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(16.februar, 25.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(16.februar, 28.februar, 100.prosent))
         håndterSøknadArbeidsgiver(Sykdom(10.februar, 15.februar, 100.prosent))
-        håndterSøknad(Sykdom(16.februar, 25.februar, 100.prosent))
+        håndterSøknad(Sykdom(16.februar, 28.februar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(3.januar, 9.januar, 100.prosent))
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(

@@ -112,14 +112,6 @@ internal fun AbstractEndToEndTest.assertHarIkkeHendelseIder(
 }
 
 internal fun AbstractEndToEndTest.assertTilstand(
-    orgnummer: Organisasjonsnummer,
-    tilstand: TilstandType,
-    vedtaksperiodeIndeks: Int = 1
-) {
-    assertTilstand(vedtaksperiodeIndeks.vedtaksperiode, tilstand, orgnummer)
-}
-
-internal fun AbstractEndToEndTest.assertTilstand(
     vedtaksperiodeIdInnhenter: IdInnhenter,
     tilstand: TilstandType,
     orgnummer: Organisasjonsnummer = AbstractPersonTest.ORGNUMMER,
