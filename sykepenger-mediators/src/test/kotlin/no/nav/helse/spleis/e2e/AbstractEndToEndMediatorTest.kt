@@ -310,7 +310,7 @@ internal abstract class AbstractEndToEndMediatorTest {
 
     protected fun sendVilkårsgrunnlag(
         vedtaksperiodeIndeks: Int,
-        inntekter: List<Pair<YearMonth, Double>> = 1.rangeTo(12).map { YearMonth.of(2017, it) to INNTEKT },
+        inntekter: List<Pair<YearMonth, Double>> = (1..12).map { YearMonth.of(2017, it) to INNTEKT },
         arbeidsforhold: List<Arbeidsforhold> = listOf(
             Arbeidsforhold(
                 ORGNUMMER,
@@ -319,7 +319,7 @@ internal abstract class AbstractEndToEndMediatorTest {
             )
         ),
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-        inntekterForSykepengegrunnlag: List<InntekterForSykepengegrunnlagFraLøsning> = 1.rangeTo(12).map {
+        inntekterForSykepengegrunnlag: List<InntekterForSykepengegrunnlagFraLøsning> = (1..3).map {
             InntekterForSykepengegrunnlagFraLøsning(
                 måned = YearMonth.of(2017, it),
                 inntekter = listOf(

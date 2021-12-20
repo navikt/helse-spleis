@@ -41,6 +41,8 @@ class Vilkårsgrunnlag(
         if (grunnlagForSykepengegrunnlag.inntektsopplysningPerArbeidsgiver().values.all { it is Inntektshistorikk.SkattComposite }) {
             error("Bruker mangler nødvendig inntekt ved validering av Vilkårsgrunnlag")
         }
+        inntektsvurderingForSykepengegrunnlag.valider(this)
+
         val inntektsvurderingOk = inntektsvurdering.valider(
             this,
             grunnlagForSykepengegrunnlag,

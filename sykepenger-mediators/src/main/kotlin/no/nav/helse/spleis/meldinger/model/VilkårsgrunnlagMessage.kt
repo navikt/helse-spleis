@@ -55,6 +55,17 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packe
             ArbeidsgiverInntekt(arbeidsgiver, inntekter.flatten())
         }
 
+    private val arbeidsforholdForSykepengegrunnlag = packet["@løsning.${InntekterForSykepengegrunnlag.name}"]
+        .flatMap { måned ->
+            måned["arbeidsforholdliste"]
+                .map {
+                    InntektForSykepengegrunnlag.Arbeidsforhold(
+                        orgnummer = it["orgnummer"].asText(),
+                        erFrilanser = it["type"].asText() == "frilanserOppdragstakerHonorarPersonerMm"
+                    )
+                }
+        }
+
     private val arbeidsforhold = packet["@løsning.${ArbeidsforholdV2.name}"]
         .map {
             Arbeidsforhold(
@@ -82,7 +93,7 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packe
             ),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                 inntekter = inntekterForSykepengegrunnlag,
-                arbeidsforhold = emptyList()
+                arbeidsforhold = arbeidsforholdForSykepengegrunnlag
             ),
             opptjeningvurdering = Opptjeningvurdering(
                 arbeidsforhold = arbeidsforhold
