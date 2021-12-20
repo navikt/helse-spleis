@@ -1,7 +1,10 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -160,22 +163,16 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
 
     @Test
     fun `periodetype settes til førstegangs hvis foregående ikke hadde utbetalingsdager pga lav sykdomsgrad`() {
-        håndterSykmelding(Sykmeldingsperiode(20.januar(2020), 10.februar(2020), 15.prosent))
-        håndterSykmelding(Sykmeldingsperiode(11.februar(2020), 21.februar(2020), 100.prosent))
-        håndterSøknad(Sykdom(20.januar(2020), 10.februar(2020), 15.prosent))
-        håndterSøknad(Sykdom(11.februar(2020), 21.februar(2020), 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(20.januar, 10.februar, 15.prosent))
+        håndterSykmelding(Sykmeldingsperiode(11.februar, 21.februar, 100.prosent))
+        håndterSøknad(Sykdom(20.januar, 10.februar, 15.prosent))
+        håndterSøknad(Sykdom(11.februar, 21.februar, 100.prosent))
         håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(Periode(20.januar(2020), 4.februar(2020))),
-            førsteFraværsdag = 20.januar(2020)
+            arbeidsgiverperioder = listOf(Periode(20.januar, 4.februar)),
+            førsteFraværsdag = 20.januar
         )
         håndterYtelser(1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.januar(2019) til 1.desember(2019) inntekter {
-                    ORGNUMMER inntekt INNTEKT
-                }
-            }
-        ))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterYtelser(2.vedtaksperiode)
@@ -202,10 +199,27 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING
         )
 
-        assertEquals(
-            Periodetype.FØRSTEGANGSBEHANDLING.name,
-            hendelselogg.behov().first().detaljer()["periodetype"]
-        )
+        assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
+        assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, inspektør.periodetype(2.vedtaksperiode))
+    }
+
+    @Test
+    fun `første periode er kun arbeidsgiverperiode og helg`() {
+        håndterSykmelding(Sykmeldingsperiode(4.januar, 21.januar, 100.prosent))
+        håndterSøknad(Sykdom(4.januar, 21.januar, 100.prosent))
+        håndterInntektsmelding(listOf(4.januar til 19.januar))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSykmelding(Sykmeldingsperiode(22.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(22.januar, 31.januar, 100.prosent))
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt(2.vedtaksperiode)
+
+        assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
+        assertEquals(Periodetype.FORLENGELSE, inspektør.periodetype(2.vedtaksperiode))
     }
 
 }

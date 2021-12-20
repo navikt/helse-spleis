@@ -110,9 +110,10 @@ internal class Utbetaling private constructor(
 
     internal fun erUbetalt() = tilstand == Ubetalt
     internal fun erUtbetalt() = tilstand == Utbetalt || tilstand == Annullert
-    private fun erAktiv() = erUtbetalt() || tilstand in listOf(Godkjent, Sendt, Overført, UtbetalingFeilet)
-    internal fun erAvsluttet() = tilstand in listOf(GodkjentUtenUtbetaling, Utbetalt, Annullert)
-    internal fun erAvvist() = tilstand in listOf(IkkeGodkjent)
+    private fun erAktiv() = erAvsluttet() || erInFlight()
+    private fun erInFlight() = tilstand in listOf(Godkjent, Sendt, Overført, UtbetalingFeilet)
+    internal fun erAvsluttet() = erUtbetalt() || tilstand == GodkjentUtenUtbetaling
+    internal fun erAvvist() = tilstand == IkkeGodkjent
     internal fun harFeilet() = tilstand == UtbetalingFeilet
     internal fun kanIkkeForsøkesPåNy() = Oppdrag.kanIkkeForsøkesPåNy(arbeidsgiverOppdrag, personOppdrag)
     private fun erAnnullering() = type == Utbetalingtype.ANNULLERING
@@ -178,13 +179,14 @@ internal class Utbetaling private constructor(
         hendelse: IAktivitetslogg,
         vedtaksperiode: Vedtaksperiode,
         skjæringstidspunkt: LocalDate,
+        periodetype: Periodetype,
         aktiveVedtaksperioder: List<Aktivitetslogg.Aktivitet.AktivVedtaksperiode>,
         orgnummereMedAktiveArbeidsforhold: List<String>,
         arbeidsforholdId: String?,
         aktivitetslogg: Aktivitetslogg
     ) {
         hendelse.kontekst(this)
-        tilstand.godkjenning(this, vedtaksperiode, skjæringstidspunkt, aktiveVedtaksperioder, orgnummereMedAktiveArbeidsforhold, arbeidsforholdId, aktivitetslogg, hendelse)
+        tilstand.godkjenning(this, vedtaksperiode, skjæringstidspunkt, periodetype, aktiveVedtaksperioder, orgnummereMedAktiveArbeidsforhold, arbeidsforholdId, aktivitetslogg, hendelse)
     }
 
     internal fun håndter(påminnelse: Utbetalingpåminnelse) {
@@ -486,15 +488,17 @@ internal class Utbetaling private constructor(
             return byggOppdrag(sisteAktive, fødselsnummer, tidslinje, sisteDato, aktivitetslogg, forrige, Sykepenger)
         }
 
-        internal fun List<Utbetaling>.aktive() =
+        internal fun List<Utbetaling>.aktive() = grupperUtbetalinger(Utbetaling::erAktiv)
+        private fun List<Utbetaling>.utbetalte() = grupperUtbetalinger { it.erUtbetalt() || it.erInFlight() }
+        private fun List<Utbetaling>.grupperUtbetalinger(filter: (Utbetaling) -> Boolean) =
             this.groupBy { it.arbeidsgiverOppdrag.fagsystemId() }
                 .map { (_, utbetalinger) -> utbetalinger.kronologisk() }
                 .sortedBy { it.first().tidsstempel }
-                .mapNotNull { it.lastOrNull(Utbetaling::erAktiv) }
+                .mapNotNull { it.lastOrNull(filter) }
                 .filterNot(Utbetaling::erAnnullering)
 
         internal fun sykdomstidslinje(utbetalinger: List<Utbetaling>, sykdomstidslinje: Sykdomstidslinje): Sykdomstidslinje {
-            return utbetalinger.aktive().fold(sykdomstidslinje) { result, utbetaling ->
+            return utbetalinger.utbetalte().fold(sykdomstidslinje) { result, utbetaling ->
                 utbetaling.sykdomstidslinje(result)
             }
         }
@@ -508,9 +512,10 @@ internal class Utbetaling private constructor(
         }
 
         internal fun List<Utbetaling>.utbetaltTidslinje() =
-            aktive()
+            utbetalte()
                 .map { it.utbetalingstidslinje }
                 .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
+
         internal fun List<Utbetaling>.harId(id: UUID) = any { it.id == id }
     }
 
@@ -665,6 +670,7 @@ internal class Utbetaling private constructor(
             utbetaling: Utbetaling,
             vedtaksperiode: Vedtaksperiode,
             skjæringstidspunkt: LocalDate,
+            periodetype: Periodetype,
             aktiveVedtaksperioder: List<Aktivitetslogg.Aktivitet.AktivVedtaksperiode>,
             orgnummereMedAktiveArbeidsforhold: List<String>,
             arbeidsforholdId: String?,
@@ -740,6 +746,7 @@ internal class Utbetaling private constructor(
             utbetaling: Utbetaling,
             vedtaksperiode: Vedtaksperiode,
             skjæringstidspunkt: LocalDate,
+            periodetype: Periodetype,
             aktiveVedtaksperioder: List<Aktivitetslogg.Aktivitet.AktivVedtaksperiode>,
             orgnummereMedAktiveArbeidsforhold: List<String>,
             arbeidsforholdId: String?,
@@ -752,7 +759,7 @@ internal class Utbetaling private constructor(
                 periodeTom = vedtaksperiode.periode().endInclusive,
                 skjæringstidspunkt = skjæringstidspunkt,
                 vedtaksperiodeaktivitetslogg = aktivitetslogg.logg(vedtaksperiode),
-                periodetype = vedtaksperiode.periodetype(),
+                periodetype = periodetype,
                 utbetalingtype = utbetaling.type,
                 inntektskilde = vedtaksperiode.inntektskilde(),
                 aktiveVedtaksperioder =  aktiveVedtaksperioder,
@@ -765,6 +772,7 @@ internal class Utbetaling private constructor(
     internal object GodkjentUtenUtbetaling : Tilstand {
 
         override fun entering(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
+            check(!utbetaling.harUtbetalinger())
             utbetaling.vurdering?.avsluttetUtenUtbetaling(hendelse.hendelseskontekst(), utbetaling)
             utbetaling.avsluttet = LocalDateTime.now()
         }

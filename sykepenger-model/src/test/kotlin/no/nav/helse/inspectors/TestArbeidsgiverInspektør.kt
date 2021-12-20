@@ -490,7 +490,7 @@ internal class TestArbeidsgiverInspektør(
 
     internal fun inntektskilde(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(inntektskilder)
 
-    internal fun periodetype(id: UUID) = id.finn(periodetyper)
+    internal fun periodetype(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(periodetyper)
 
     internal fun vedtaksperiodeId(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter(orgnummer)
 

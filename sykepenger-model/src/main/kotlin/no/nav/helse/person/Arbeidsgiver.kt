@@ -129,10 +129,7 @@ internal class Arbeidsgiver private constructor(
         internal fun kunOvergangFraInfotrygd(
             arbeidsgivere: Iterable<Arbeidsgiver>,
             vedtaksperiode: Vedtaksperiode
-        ) = arbeidsgivere
-            .flatMap { it.vedtaksperioder }
-            .filter { it.periode().overlapperMed(vedtaksperiode.periode()) }
-            .all { it.periodetype() == Periodetype.OVERGANG_FRA_IT }
+        ) = Vedtaksperiode.kunOvergangFraInfotrygd(vedtaksperiode, arbeidsgivere.flatMap { it.vedtaksperioder })
 
         internal fun ingenUkjenteArbeidsgivere(
             arbeidsgivere: Iterable<Arbeidsgiver>,

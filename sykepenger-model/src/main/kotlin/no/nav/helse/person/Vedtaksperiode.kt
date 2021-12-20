@@ -66,6 +66,7 @@ internal class Vedtaksperiode private constructor(
 
     private val skjæringstidspunkt get() = skjæringstidspunktFraInfotrygd ?: person.skjæringstidspunkt(periode)
     private val utbetaling get() = utbetalinger.lastOrNull()
+    private val periodetype get() = arbeidsgiver.periodetype(periode)
 
     internal constructor(
         person: Person,
@@ -93,7 +94,6 @@ internal class Vedtaksperiode private constructor(
     )
 
     internal fun accept(visitor: VedtaksperiodeVisitor) {
-        val periodetype = periodetype()
         visitor.preVisitVedtaksperiode(
             this,
             id,
@@ -305,8 +305,6 @@ internal class Vedtaksperiode private constructor(
 
     internal fun gjelder(skjæringstidspunkt: LocalDate) = this.skjæringstidspunkt == skjæringstidspunkt
 
-    internal fun periodetype() = arbeidsgiver.periodetype(periode)
-
     internal fun inntektskilde() = inntektskilde
     // TODO: Kan byttes med en sjekk på vilkårsgrunnlag når AvsluttetUtenUtbetaling går gjennom vilkårsprøving https://trello.com/c/mQ4ZKeEG
     private fun harInntekt() = harInntektsmelding() || arbeidsgiver.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periode.start) != null
@@ -500,7 +498,7 @@ internal class Vedtaksperiode private constructor(
             sammenligningsgrunnlag ?: Inntekt.INGEN,
             skjæringstidspunkt,
             person.antallArbeidsgivereMedAktivtArbeidsforhold(skjæringstidspunkt),
-            periodetype()
+            periodetype
         )
         person.lagreVilkårsgrunnlag(skjæringstidspunkt, vilkårsgrunnlag)
         if (vilkårsgrunnlag.hasErrorsOrWorse()) {
@@ -705,7 +703,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         val filter = person.brukerutbetalingfilter()
-            .periodetype(periodetype())
+            .periodetype(periodetype)
             .utbetaling(utbetaling())
             .inntektkilde(inntektskilde())
             .build()
@@ -839,7 +837,7 @@ internal class Vedtaksperiode private constructor(
         .all { it.tilstand == AvventerArbeidsgivereRevurdering }
 
     private fun loggHvisForlengelse(logg: IAktivitetslogg) {
-        periodetype().also { periodetype ->
+        periodetype.also { periodetype ->
             if (periodetype != FØRSTEGANGSBEHANDLING) {
                 logg.info("Perioden er en forlengelse, av type $periodetype")
             }
@@ -1967,7 +1965,7 @@ internal class Vedtaksperiode private constructor(
             infotrygdhistorikk: Infotrygdhistorikk,
             arbeidsgiverUtbetalingerFun: (IAktivitetslogg) -> ArbeidsgiverUtbetalinger
         ) {
-            val periodetype = vedtaksperiode.periodetype()
+            val periodetype = vedtaksperiode.periodetype
             validation(ytelser) {
                 onValidationFailed {
                     if (!ytelser.hasErrorsOrWorse()) error("Behandling av Ytelser feilet, årsak ukjent")
@@ -2215,16 +2213,18 @@ internal class Vedtaksperiode private constructor(
 
     private fun trengerGodkjenning(hendelse: IAktivitetslogg) {
         val aktiveVedtaksperioder = person.nåværendeVedtaksperioder(IKKE_FERDIG_BEHANDLET).map {
+            val periodetype = it.periodetype
             Aktivitetslogg.Aktivitet.AktivVedtaksperiode(
                 it.arbeidsgiver.organisasjonsnummer(),
                 it.id,
-                it.periodetype()
+                periodetype
             )
         }
         utbetaling().godkjenning(
             hendelse = hendelse,
             vedtaksperiode = this,
             skjæringstidspunkt = skjæringstidspunkt,
+            periodetype = periodetype,
             aktiveVedtaksperioder = aktiveVedtaksperioder,
             arbeidsforholdId = inntektsmeldingInfo?.arbeidsforholdId,
             orgnummereMedAktiveArbeidsforhold = person.orgnummereMedAktiveArbeidsforhold(skjæringstidspunkt),
@@ -2723,6 +2723,11 @@ internal class Vedtaksperiode private constructor(
             val tom = maxOf { it.periode.endInclusive }
             return Periode(fom, tom)
         }
+
+        internal fun kunOvergangFraInfotrygd(vedtaksperiode: Vedtaksperiode, vedtaksperioder: List<Vedtaksperiode>) =
+            vedtaksperioder
+                .filter { it.periode().overlapperMed(vedtaksperiode.periode()) }
+                .all { it.periodetype == OVERGANG_FRA_IT }
     }
 }
 

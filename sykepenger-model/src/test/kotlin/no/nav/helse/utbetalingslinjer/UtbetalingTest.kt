@@ -102,7 +102,7 @@ internal class UtbetalingTest {
         no.nav.helse.testhelpers.assertNotNull(annullering)
         val andre = opprettUtbetaling(tidslinje, annullering)
         assertNotEquals(første.inspektør.korrelasjonsId, andre.inspektør.korrelasjonsId)
-        assertNotEquals(første.inspektør.arbeidsgiverOppdrag.fagsystemId(), andre.inspektør.arbeidsgiverOppdrag.fagsystemId())
+        assertNotEquals(første.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), andre.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
     }
 
     @Test
@@ -113,12 +113,29 @@ internal class UtbetalingTest {
         val første = opprettUtbetaling(tidslinje)
         val andre = opprettUtbetaling(ferietidslinje, første)
         val tredje = opprettUtbetaling(tidslinje, andre)
-        assertEquals(første.inspektør.arbeidsgiverOppdrag.fagsystemId(), andre.inspektør.arbeidsgiverOppdrag.fagsystemId())
+        assertEquals(første.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), andre.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
         assertEquals(første.inspektør.korrelasjonsId, andre.inspektør.korrelasjonsId)
         assertTrue(andre.inspektør.arbeidsgiverOppdrag[0].erOpphør())
-        assertEquals(første.inspektør.arbeidsgiverOppdrag.fagsystemId(), tredje.inspektør.arbeidsgiverOppdrag.fagsystemId())
+        assertEquals(første.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), tredje.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
         assertEquals(første.inspektør.korrelasjonsId, tredje.inspektør.korrelasjonsId)
         assertEquals(17.januar, tredje.inspektør.arbeidsgiverOppdrag.førstedato)
+    }
+
+    @Test
+    fun `forlenge en utbetaling uten utbetaling`() {
+        val tidslinje = tidslinjeOf(16.AP, 3.NAV, 2.HELG, 5.NAV)
+        beregnUtbetalinger(tidslinje)
+        val første = opprettUtbetaling(tidslinje.kutt(16.januar))
+        val andre = opprettUtbetaling(tidslinje, første)
+        assertEquals(første.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), andre.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+        assertEquals(første.inspektør.korrelasjonsId, andre.inspektør.korrelasjonsId)
+        assertTrue(første.inspektør.arbeidsgiverOppdrag.isEmpty())
+        assertTrue(andre.inspektør.arbeidsgiverOppdrag.isNotEmpty())
+        assertEquals(første.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), andre.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+        assertEquals(første.inspektør.korrelasjonsId, andre.inspektør.korrelasjonsId)
+        assertEquals(Endringskode.NY, andre.inspektør.arbeidsgiverOppdrag[0].inspektør.endringskode)
+        assertEquals(17.januar, andre.inspektør.arbeidsgiverOppdrag[0].inspektør.fom)
+        assertEquals(26.januar, andre.inspektør.arbeidsgiverOppdrag[0].inspektør.tom)
     }
 
     @Test
@@ -129,10 +146,10 @@ internal class UtbetalingTest {
         val første = opprettUtbetaling(tidslinje)
         val andre = opprettUtbetaling(ferietidslinje, første)
         val tredje = opprettUtbetaling(beregnUtbetalinger(ferietidslinje + tidslinjeOf(10.NAV, startDato = 27.januar)), andre)
-        assertEquals(første.inspektør.arbeidsgiverOppdrag.fagsystemId(), andre.inspektør.arbeidsgiverOppdrag.fagsystemId())
+        assertEquals(første.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), andre.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
         assertEquals(første.inspektør.korrelasjonsId, andre.inspektør.korrelasjonsId)
         assertTrue(andre.inspektør.arbeidsgiverOppdrag[0].erOpphør())
-        assertEquals(første.inspektør.arbeidsgiverOppdrag.fagsystemId(), tredje.inspektør.arbeidsgiverOppdrag.fagsystemId())
+        assertEquals(første.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), tredje.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
         assertEquals(første.inspektør.korrelasjonsId, tredje.inspektør.korrelasjonsId)
         assertEquals(27.januar, tredje.inspektør.arbeidsgiverOppdrag.førstedato)
     }
@@ -339,7 +356,7 @@ internal class UtbetalingTest {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600))
         beregnUtbetalinger(tidslinje)
         val utbetaling = opprettGodkjentUtbetaling(tidslinje)
-        kvittèr(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId(), AVVIST)
+        kvittèr(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), AVVIST)
         assertEquals(Utbetaling.UtbetalingFeilet, utbetaling.inspektør.tilstand)
     }
 
@@ -348,7 +365,7 @@ internal class UtbetalingTest {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600))
         beregnUtbetalinger(tidslinje)
         val utbetaling = opprettGodkjentUtbetaling(tidslinje)
-        kvittèr(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId(), AVVIST)
+        kvittèr(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), AVVIST)
         kvittèr(utbetaling, utbetaling.inspektør.personOppdrag.fagsystemId(), AKSEPTERT)
         assertEquals(AVVIST, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.status())
         assertEquals(AKSEPTERT, utbetaling.inspektør.personOppdrag.inspektør.status())
@@ -360,7 +377,7 @@ internal class UtbetalingTest {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600))
         beregnUtbetalinger(tidslinje)
         val utbetaling = opprettGodkjentUtbetaling(tidslinje)
-        kvittèr(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId(), AVVIST)
+        kvittèr(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), AVVIST)
         overfør(utbetaling, utbetaling.inspektør.personOppdrag.fagsystemId())
         assertEquals(AVVIST, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.status())
         assertEquals(OVERFØRT, utbetaling.inspektør.personOppdrag.inspektør.status())
@@ -372,7 +389,7 @@ internal class UtbetalingTest {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600))
         beregnUtbetalinger(tidslinje)
         val utbetaling = opprettGodkjentUtbetaling(tidslinje)
-        kvittèr(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId(), AKSEPTERT)
+        kvittèr(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), AKSEPTERT)
         kvittèr(utbetaling, utbetaling.inspektør.personOppdrag.fagsystemId(), AVVIST)
         assertEquals(Utbetaling.UtbetalingFeilet, utbetaling.inspektør.tilstand)
     }
@@ -435,7 +452,7 @@ internal class UtbetalingTest {
         val første = opprettUtbetaling(tidslinje.kutt(21.januar))
         val andre = opprettUtbetaling(tidslinje, første)
         assertEquals(første.inspektør.personOppdrag.fagsystemId(), andre.inspektør.personOppdrag.fagsystemId())
-        assertEquals(første.inspektør.arbeidsgiverOppdrag.fagsystemId(), andre.inspektør.arbeidsgiverOppdrag.fagsystemId())
+        assertEquals(første.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), andre.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
         assertEquals(første.inspektør.korrelasjonsId, andre.inspektør.korrelasjonsId)
     }
 
@@ -450,7 +467,7 @@ internal class UtbetalingTest {
         val tredje = opprettUtbetaling(tidslinje, andre)
         assertNotEquals(første.inspektør.korrelasjonsId, andre.inspektør.korrelasjonsId)
         assertEquals(andre.inspektør.personOppdrag.fagsystemId(), tredje.inspektør.personOppdrag.fagsystemId())
-        assertEquals(andre.inspektør.arbeidsgiverOppdrag.fagsystemId(), tredje.inspektør.arbeidsgiverOppdrag.fagsystemId())
+        assertEquals(andre.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), tredje.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
         assertEquals(andre.inspektør.korrelasjonsId, tredje.inspektør.korrelasjonsId)
     }
 
@@ -459,7 +476,7 @@ internal class UtbetalingTest {
         val tidslinje = beregnUtbetalinger(tidslinjeOf(31.NAV), infotrygdtidslinje = tidslinjeOf(5.NAV, startDato = 1.januar))
         val første = opprettUtbetaling(tidslinje.kutt(21.januar))
         val andre = opprettUtbetaling(tidslinje, første)
-        assertEquals(første.inspektør.arbeidsgiverOppdrag.fagsystemId(), andre.inspektør.arbeidsgiverOppdrag.fagsystemId())
+        assertEquals(første.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), andre.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
         assertEquals(første.inspektør.personOppdrag.fagsystemId(), andre.inspektør.personOppdrag.fagsystemId())
         assertEquals(første.inspektør.korrelasjonsId, andre.inspektør.korrelasjonsId)
     }
@@ -471,7 +488,7 @@ internal class UtbetalingTest {
         val andre = opprettUtbetaling(tidslinje.kutt(20.februar), første)
         val tredje = opprettUtbetaling(tidslinje, andre)
         assertNotEquals(første.inspektør.korrelasjonsId, andre.inspektør.korrelasjonsId)
-        assertEquals(andre.inspektør.arbeidsgiverOppdrag.fagsystemId(), tredje.inspektør.arbeidsgiverOppdrag.fagsystemId())
+        assertEquals(andre.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), tredje.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
         assertEquals(andre.inspektør.personOppdrag.fagsystemId(), tredje.inspektør.personOppdrag.fagsystemId())
         assertEquals(andre.inspektør.korrelasjonsId, tredje.inspektør.korrelasjonsId)
     }
@@ -525,8 +542,8 @@ internal class UtbetalingTest {
         assertEquals(inspektør.delytelseId(0), inspektør.refDelytelseId(1))
         assertEquals(inspektør.delytelseId(1), inspektør.refDelytelseId(2))
 
-        assertEquals(første.inspektør.arbeidsgiverOppdrag.fagsystemId(), inspektør.refFagsystemId(1))
-        assertEquals(andre.inspektør.arbeidsgiverOppdrag.fagsystemId(), inspektør.refFagsystemId(2))
+        assertEquals(første.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), inspektør.refFagsystemId(1))
+        assertEquals(andre.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), inspektør.refFagsystemId(2))
     }
 
     @Test
@@ -555,16 +572,16 @@ internal class UtbetalingTest {
         val fjerde = opprettUtbetaling(tidslinje.kutt(14.februar), tidligere = tredje)
         val femte = opprettUtbetaling(tidslinje.kutt(21.februar), tidligere = fjerde)
 
-        assertEquals(første.inspektør.arbeidsgiverOppdrag.fagsystemId(), andre.inspektør.arbeidsgiverOppdrag.fagsystemId())
+        assertEquals(første.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), andre.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
         assertEquals(første.inspektør.korrelasjonsId, andre.inspektør.korrelasjonsId)
-        assertEquals(andre.inspektør.arbeidsgiverOppdrag.fagsystemId(), tredje.inspektør.arbeidsgiverOppdrag.fagsystemId())
+        assertEquals(andre.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), tredje.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
         assertEquals(andre.inspektør.korrelasjonsId, tredje.inspektør.korrelasjonsId)
-        assertEquals(tredje.inspektør.arbeidsgiverOppdrag.fagsystemId(), fjerde.inspektør.arbeidsgiverOppdrag.fagsystemId())
+        assertEquals(tredje.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), fjerde.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
         assertEquals(tredje.inspektør.korrelasjonsId, fjerde.inspektør.korrelasjonsId)
-        assertEquals(fjerde.inspektør.arbeidsgiverOppdrag.fagsystemId(), femte.inspektør.arbeidsgiverOppdrag.fagsystemId())
+        assertEquals(fjerde.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), femte.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
         assertEquals(fjerde.inspektør.korrelasjonsId, femte.inspektør.korrelasjonsId)
 
-        assertNotEquals(første.inspektør.arbeidsgiverOppdrag.fagsystemId(), første.inspektør.personOppdrag.fagsystemId())
+        assertNotEquals(første.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), første.inspektør.personOppdrag.fagsystemId())
 
         assertEquals(første.inspektør.personOppdrag.fagsystemId(), andre.inspektør.personOppdrag.fagsystemId())
         assertEquals(andre.inspektør.personOppdrag.fagsystemId(), tredje.inspektør.personOppdrag.fagsystemId())
@@ -618,7 +635,7 @@ internal class UtbetalingTest {
     fun `g-regulering skal treffe personOppdrag`() {
         val utbetalingMedPersonOppdragMatch = opprettGodkjentUtbetaling()
         val personFagsystemId = utbetalingMedPersonOppdragMatch.inspektør.personOppdrag.fagsystemId()
-        val arbeidsgiverFagsystemId = utbetalingMedPersonOppdragMatch.inspektør.arbeidsgiverOppdrag.fagsystemId()
+        val arbeidsgiverFagsystemId = utbetalingMedPersonOppdragMatch.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId()
         val utbetalingUtenMatch = opprettGodkjentUtbetaling()
         val utbetalinger = listOf(utbetalingUtenMatch, utbetalingMedPersonOppdragMatch)
 
@@ -683,7 +700,7 @@ internal class UtbetalingTest {
         beregnUtbetalinger(tidslinje)
         val utbetaling = opprettUbetaltUtbetaling(tidslinje)
         val simulering = opprettSimulering(
-            utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId(), Fagområde.SykepengerRefusjon, utbetaling.inspektør.utbetalingId, Simulering.SimuleringResultat(
+            utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), Fagområde.SykepengerRefusjon, utbetaling.inspektør.utbetalingId, Simulering.SimuleringResultat(
                 totalbeløp = 1000,
                 perioder = emptyList()
             )
@@ -700,7 +717,7 @@ internal class UtbetalingTest {
         val utbetaling = opprettUbetaltUtbetaling(tidslinje)
 
         val simuleringArbeidsgiver = opprettSimulering(
-            utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId(), Fagområde.SykepengerRefusjon, utbetaling.inspektør.utbetalingId, Simulering.SimuleringResultat(
+            utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), Fagområde.SykepengerRefusjon, utbetaling.inspektør.utbetalingId, Simulering.SimuleringResultat(
                 totalbeløp = 500,
                 perioder = emptyList()
             )
@@ -794,7 +811,7 @@ internal class UtbetalingTest {
 
     private fun overfør(
         utbetaling: Utbetaling,
-        fagsystemId: String = utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId(),
+        fagsystemId: String = utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(),
         utbetalingId: UUID = utbetaling.inspektør.utbetalingId
     ) {
         utbetaling.håndter(
@@ -813,7 +830,7 @@ internal class UtbetalingTest {
 
     private fun kvittèr(
         utbetaling: Utbetaling,
-        fagsystemId: String = utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId(),
+        fagsystemId: String = utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(),
         status: Oppdragstatus = AKSEPTERT
     ) {
         utbetaling.håndter(
@@ -849,6 +866,6 @@ internal class UtbetalingTest {
             utbetaling.håndter(it)
         }
 
-    private fun annuller(utbetaling: Utbetaling, fagsystemId: String = utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId()) =
+    private fun annuller(utbetaling: Utbetaling, fagsystemId: String = utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId()) =
         utbetaling.annuller(AnnullerUtbetaling(UUID.randomUUID(), "aktør", "fnr", "orgnr", fagsystemId, "Z123456", "tbd@nav.no", LocalDateTime.now()))
 }
