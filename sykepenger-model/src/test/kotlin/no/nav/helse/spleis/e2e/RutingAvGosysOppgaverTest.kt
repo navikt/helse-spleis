@@ -12,9 +12,10 @@ import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
+import no.nav.helse.testhelpers.*
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
@@ -31,7 +32,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), 16.februar)
 
         assertTrue(observatør.opprettOppgaveEvent().isEmpty())
-        assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any{søknadHendelseId in it.hendelser})
+        assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any { søknadHendelseId in it.hendelser })
     }
 
     @Test
@@ -72,7 +73,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         val søknadHendelseId = håndterSøknad(Sykdom(20.februar, 1.mars, 80.prosent))
 
         assertTrue(observatør.opprettOppgaveEvent().isEmpty())
-        assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any{søknadHendelseId in it.hendelser})
+        assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any { søknadHendelseId in it.hendelser })
     }
 
     @Test
@@ -95,7 +96,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         val søknadHendelseId = håndterSøknad(Sykdom(20.februar(2016), 28.februar(2016), 80.prosent))
 
         assertTrue(observatør.opprettOppgaveEvent().isEmpty())
-        assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any{søknadHendelseId in it.hendelser})
+        assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any { søknadHendelseId in it.hendelser })
     }
 
     @Test
@@ -136,7 +137,6 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
 
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().isEmpty())
         assertTrue(observatør.opprettOppgaveEvent().any { søknadHendelseId in it.hendelser })
-
     }
 
     @Test
@@ -150,6 +150,137 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().isEmpty())
         assertTrue(observatør.opprettOppgaveEvent().any { søknadHendelseId in it.hendelser })
     }
+
+    @Test
+    fun `arbeidsgiversøknad + inntektsmelding + søknad som blir forkastet`() {
+
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar, 100.prosent))
+        håndterSøknadArbeidsgiver(Sykdom(1.januar, 10.januar, 100.prosent))
+        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
+
+        håndterSykmelding(Sykmeldingsperiode(11.januar, 20.januar, 100.prosent))
+        håndterSøknad(Sykdom(11.januar, 20.januar, 100.prosent))
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, false)
+
+        assertTrue(observatør.opprettOppgaveEvent().any { inntektsmeldingId in it.hendelser })
+    }
+
+    @ForventetFeil("Må sjekke inntektsmeldinger i forbindelse med forkasting. Løses i steg 3 - https://trello.com/c/yVDkucVG")
+    @Test
+    fun `inntektsmelding som kommer før periode som forkastes`() {
+        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
+
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 11.januar, 100.prosent))
+
+        assertTrue(observatør.opprettOppgaveEvent().any { inntektsmeldingId in it.hendelser })
+    }
+
+    @Test
+    fun `overlappende sykmelding kaster ut perioden`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar, 100.prosent))
+        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterSykmelding(Sykmeldingsperiode(2.januar, 11.januar, 100.prosent))
+
+        assertTrue(observatør.opprettOppgaveEvent().any { inntektsmeldingId in it.hendelser })
+    }
+
+    @ForventetFeil("Inntektsmelding må sjekke mot forkastede. Løses i steg 2 - https://trello.com/c/yVDkucVG")
+    @Test
+    fun `inntektsmelding som treffer forkastet periode`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 11.januar, 100.prosent))
+
+        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
+
+        assertTrue(observatør.opprettOppgaveEvent().any { inntektsmeldingId in it.hendelser })
+    }
+
+    @Test
+    fun `avvik i inntekt kaster ut perioden`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar, 100.prosent))
+        håndterSøknadArbeidsgiver(Sykdom(1.januar, 10.januar, 100.prosent))
+
+        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 10000.månedlig)
+        håndterSykmelding(Sykmeldingsperiode(11.januar, 20.januar, 100.prosent))
+        håndterSøknad(Sykdom(11.januar, 20.januar, 100.prosent))
+
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+
+        assertTrue(observatør.opprettOppgaveEvent().any { inntektsmeldingId in it.hendelser })
+    }
+
+    @Test
+    fun `søknad med ferie hele perioden + inntektsmelding`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 17.januar, 100.prosent), Ferie(1.januar, 17.januar))
+        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+
+        håndterSykmelding(Sykmeldingsperiode(18.januar, 20.januar, 100.prosent))
+        håndterSøknad(Sykdom(18.januar, 20.januar, 100.prosent))
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, false)
+
+        assertTrue(observatør.opprettOppgaveEvent().any { inntektsmeldingId in it.hendelser })
+    }
+
+    @Test
+    fun `søknad innenfor AGP + inntektsmelding + ny søknad som blir kasta ut`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
+        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
+
+        håndterSykmelding(Sykmeldingsperiode(11.januar, 20.januar, 100.prosent))
+        håndterSøknad(Sykdom(11.januar, 20.januar, 100.prosent))
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, false)
+
+        assertTrue(observatør.opprettOppgaveEvent().any { inntektsmeldingId in it.hendelser })
+    }
+
+    @Test
+    fun `søknad + inntektsmelding + ny søknad som blir kasta ut`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 17.januar, 100.prosent))
+        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        håndterSykmelding(Sykmeldingsperiode(18.januar, 20.januar, 100.prosent))
+        håndterSøknad(Sykdom(18.januar, 20.januar, 100.prosent))
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, false)
+
+        assertFalse(observatør.opprettOppgaveEvent().any { inntektsmeldingId in it.hendelser })
+    }
+
+    @ForventetFeil("Inntektsmelding feilet fordi vi trenger søknad for å finne nærliggende utbetaling. Løses i steg 4 - https://trello.com/c/yVDkucVG")
+    @Test
+    fun `Inntektsmelding og forkasting uten søknad skal til egen kø`() {
+        nyttVedtak(1.mars, 31.mars)
+
+        håndterSykmelding(Sykmeldingsperiode(5.april, 25.mai, 100.prosent))
+        val inntektsmeldingId = håndterInntektsmelding(listOf(5.april til 20.april))
+        håndterSykmelding(Sykmeldingsperiode(5.april, 26.mai, 100.prosent))
+
+        assertTrue(observatør.opprettOppgaveEvent().isEmpty())
+        assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any{inntektsmeldingId in it.hendelser})
+    }
 }
-
-

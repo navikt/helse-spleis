@@ -2585,25 +2585,29 @@ internal class Vedtaksperiode private constructor(
         }
 
         private fun sendOppgaveEvent(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            val inntektsmeldingIds =
+                vedtaksperiode.arbeidsgiver.finnSammenhengendePeriode(vedtaksperiode.skjæringstidspunkt).mapNotNull { it.inntektsmeldingInfo?.id }
             if (vedtaksperiode.harNærliggendeUtbetaling()) {
                 vedtaksperiode.person.opprettOppgaveForSpeilsaksbehandlere(
                     hendelse,
                     PersonObserver.OpprettOppgaveForSpeilsaksbehandlereEvent(
-                        hendelser = vedtaksperiode.hendelseIder,
+                        hendelser = vedtaksperiode.hendelseIder + inntektsmeldingIds,
                     )
                 )
             } else {
                 vedtaksperiode.person.opprettOppgave(
                     hendelse,
                     PersonObserver.OpprettOppgaveEvent(
-                        hendelser = vedtaksperiode.hendelseIder,
+                        hendelser = vedtaksperiode.hendelseIder + inntektsmeldingIds,
                     )
                 )
             }
         }
 
         private fun skalOppretteOppgave(vedtaksperiode: Vedtaksperiode) =
-            vedtaksperiode.inntektsmeldingInfo != null || vedtaksperiode.arbeidsgiver.søknadsperioder(vedtaksperiode.hendelseIder).isNotEmpty()
+            vedtaksperiode.inntektsmeldingInfo != null ||
+            vedtaksperiode.arbeidsgiver.finnSammenhengendePeriode(vedtaksperiode.skjæringstidspunkt).any { it.inntektsmeldingInfo != null } ||
+                vedtaksperiode.arbeidsgiver.søknadsperioder(vedtaksperiode.hendelseIder).isNotEmpty()
 
         override fun håndter(
             person: Person,
