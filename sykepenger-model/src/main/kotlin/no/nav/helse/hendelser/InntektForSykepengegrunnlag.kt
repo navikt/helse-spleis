@@ -27,7 +27,11 @@ class InntektForSykepengegrunnlag(
     }
 
     private fun finnerFrilansinntektDeSiste3Månedene() =
-        arbeidsforhold.any { it.erFrilanser && inntekter.harInntektFor(it.orgnummer) }
+        arbeidsforhold.any { arbeidsforhold ->
+            arbeidsforhold.månedligeArbeidsforhold.any {
+                it.erFrilanser && inntekter.harInntektFor(arbeidsforhold.orgnummer, it.yearMonth)
+            }
+        }
 
     internal fun loggInteressantFrilanserInformasjon(skjæringstidspunkt: LocalDate) {
         if (finnerFrilansinntektDenSisteMåneden(skjæringstidspunkt)) sikkerLogg.info("Fant frilanserinntekt på en arbeidsgiver den siste måneden")
@@ -35,7 +39,11 @@ class InntektForSykepengegrunnlag(
 
     internal fun finnerFrilansinntektDenSisteMåneden(skjæringstidspunkt: LocalDate): Boolean {
         val månedFørSkjæringstidspunkt = YearMonth.from(skjæringstidspunkt.minusMonths(1))
-        return arbeidsforhold.any { it.erFrilanser && inntekter.harInntektFor(it.orgnummer, månedFørSkjæringstidspunkt) }
+        return arbeidsforhold.any { arbeidsforhold ->
+            arbeidsforhold.månedligeArbeidsforhold.any {
+                it.erFrilanser && inntekter.harInntektFor(arbeidsforhold.orgnummer, månedFørSkjæringstidspunkt)
+            }
+        }
     }
 
     internal fun lagreInntekter(person: Person, skjæringstidspunkt: LocalDate, hendelse: PersonHendelse) =
@@ -43,6 +51,11 @@ class InntektForSykepengegrunnlag(
 
     class Arbeidsforhold(
         val orgnummer: String,
+        val månedligeArbeidsforhold: List<MånedligArbeidsforhold>
+    )
+
+    class MånedligArbeidsforhold(
+        val yearMonth: YearMonth,
         val erFrilanser: Boolean
     )
 }

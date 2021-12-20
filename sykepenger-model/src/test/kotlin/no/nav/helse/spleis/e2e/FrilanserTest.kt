@@ -35,7 +35,14 @@ internal class FrilanserTest : AbstractEndToEndTest() {
                     })
                 ),
                 arbeidsforhold = listOf(
-                    Arbeidsforhold(ORGNUMMER.toString(), true)
+                    Arbeidsforhold(
+                        ORGNUMMER.toString(), listOf(
+                            InntektForSykepengegrunnlag.MånedligArbeidsforhold(
+                                yearMonth = YearMonth.of(2017, 10),
+                                erFrilanser = true
+                            )
+                        )
+                    )
                 )
             )
         )
@@ -80,7 +87,14 @@ internal class FrilanserTest : AbstractEndToEndTest() {
                     })
                 ),
                 arbeidsforhold = listOf(
-                    Arbeidsforhold(a3.toString(), true)
+                    Arbeidsforhold(
+                        a3.toString(), listOf(
+                            InntektForSykepengegrunnlag.MånedligArbeidsforhold(
+                                yearMonth = YearMonth.of(2017, 1),
+                                erFrilanser = true
+                            )
+                        )
+                    )
                 )
             )
         )

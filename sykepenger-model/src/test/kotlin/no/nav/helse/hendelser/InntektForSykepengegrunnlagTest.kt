@@ -115,11 +115,49 @@ internal class InntektForSykepengegrunnlagTest {
         val arbeidsforhold = listOf(
             InntektForSykepengegrunnlag.Arbeidsforhold(
                 orgnummer = "orgnummer",
-                erFrilanser = true
+                månedligeArbeidsforhold = listOf(
+                    InntektForSykepengegrunnlag.MånedligArbeidsforhold(
+                        yearMonth = YearMonth.of(2017, 1),
+                        erFrilanser = true
+                    ),
+                    InntektForSykepengegrunnlag.MånedligArbeidsforhold(
+                        yearMonth = YearMonth.of(2017, 2),
+                        erFrilanser = true
+                    )
+                ),
             )
         )
         val inntektForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter, arbeidsforhold)
         assertTrue(inntektForSykepengegrunnlag.valider(aktivitetslogg).hasErrorsOrWorse())
+    }
+
+    @Test
+    fun `Frilanserarbeidsforhold og frilanserinntekt i forskjellige måneder gir ikke error`() {
+        val aktivitetslogg = Aktivitetslogg()
+        val inntekter = listOf(
+            ArbeidsgiverInntekt(
+                "orgnummer",
+                listOf(
+                    Sykepengegrunnlag(
+                        YearMonth.of(2017, 1),
+                        31000.månedlig, LØNNSINNTEKT, "hva som helst", "hva som helst"
+                    )
+                )
+            ),
+        )
+        val arbeidsforhold = listOf(
+            InntektForSykepengegrunnlag.Arbeidsforhold(
+                orgnummer = "orgnummer",
+                månedligeArbeidsforhold = listOf(
+                    InntektForSykepengegrunnlag.MånedligArbeidsforhold(
+                        yearMonth = YearMonth.of(2017, 2),
+                        erFrilanser = true
+                    )
+                ),
+            )
+        )
+        val inntektForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter, arbeidsforhold)
+        assertFalse(inntektForSykepengegrunnlag.valider(aktivitetslogg).hasErrorsOrWorse())
     }
 
     @Test
@@ -139,9 +177,15 @@ internal class InntektForSykepengegrunnlagTest {
         val arbeidsforhold = listOf(
             InntektForSykepengegrunnlag.Arbeidsforhold(
                 orgnummer = "orgnummer2",
-                erFrilanser = true
+                månedligeArbeidsforhold = listOf(
+                    InntektForSykepengegrunnlag.MånedligArbeidsforhold(
+                        yearMonth = YearMonth.of(2017, 1),
+                        erFrilanser = true
+                    )
+                )
             )
         )
+
         val inntektForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter, arbeidsforhold)
         assertFalse(inntektForSykepengegrunnlag.valider(aktivitetslogg).hasErrorsOrWorse())
     }
@@ -180,9 +224,15 @@ internal class InntektForSykepengegrunnlagTest {
         val arbeidsforhold = listOf(
             InntektForSykepengegrunnlag.Arbeidsforhold(
                 orgnummer = "orgnummer",
-                erFrilanser = true
+                månedligeArbeidsforhold = listOf(
+                    InntektForSykepengegrunnlag.MånedligArbeidsforhold(
+                        yearMonth = YearMonth.of(2017, 1),
+                        erFrilanser = true
+                    )
+                )
             )
         )
+
         val inntektForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter, arbeidsforhold)
         assertTrue(inntektForSykepengegrunnlag.finnerFrilansinntektDenSisteMåneden(skjæringstidspunkt = 1.april(2017)))
     }
@@ -202,8 +252,13 @@ internal class InntektForSykepengegrunnlagTest {
         )
         val arbeidsforhold = listOf(
             InntektForSykepengegrunnlag.Arbeidsforhold(
-                orgnummer = "orgnummer",
-                erFrilanser = true
+                orgnummer = "orgnummer2",
+                månedligeArbeidsforhold = listOf(
+                    InntektForSykepengegrunnlag.MånedligArbeidsforhold(
+                        yearMonth = YearMonth.of(2017, 1),
+                        erFrilanser = true
+                    )
+                )
             )
         )
         val inntektForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter, arbeidsforhold)

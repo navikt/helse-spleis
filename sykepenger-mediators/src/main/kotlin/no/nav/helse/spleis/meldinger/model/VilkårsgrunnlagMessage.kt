@@ -58,12 +58,16 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packe
     private val arbeidsforholdForSykepengegrunnlag = packet["@løsning.${InntekterForSykepengegrunnlag.name}"]
         .flatMap { måned ->
             måned["arbeidsforholdliste"]
-                .map {
-                    InntektForSykepengegrunnlag.Arbeidsforhold(
-                        orgnummer = it["orgnummer"].asText(),
-                        erFrilanser = it["type"].asText() == "frilanserOppdragstakerHonorarPersonerMm"
+                .groupBy({ arbeidsforhold -> arbeidsforhold["orgnummer"].asText() }) { arbeidsforhold ->
+                    InntektForSykepengegrunnlag.MånedligArbeidsforhold(
+                        yearMonth = måned["årMåned"].asYearMonth(),
+                        erFrilanser = arbeidsforhold["type"].asText() == "frilanserOppdragstakerHonorarPersonerMm"
                     )
-                }
+                }.toList()
+        }
+        .groupBy({ (orgnummer, _) -> orgnummer }) { (_, arbeidsforhold) -> arbeidsforhold }
+        .map { (orgnummer, arbeidsforhold) ->
+            InntektForSykepengegrunnlag.Arbeidsforhold(orgnummer, arbeidsforhold.flatten())
         }
 
     private val arbeidsforhold = packet["@løsning.${ArbeidsforholdV2.name}"]
