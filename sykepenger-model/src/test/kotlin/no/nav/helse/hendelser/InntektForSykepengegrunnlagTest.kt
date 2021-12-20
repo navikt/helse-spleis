@@ -97,5 +97,70 @@ internal class InntektForSykepengegrunnlagTest {
         assertFalse(inntektForSykepengegrunnlag.valider(aktivitetslogg).hasErrorsOrWorse())
     }
 
+    @Test
+    fun `Frilanserinntekt i løpet av de 3 månedene gir error`() {
+        val aktivitetslogg = Aktivitetslogg()
+        val inntekter = listOf(
+            ArbeidsgiverInntekt(
+                "orgnummer",
+                (1..3).map {
+                    Sykepengegrunnlag(
+                        YearMonth.of(2017, it),
+                        31000.månedlig, LØNNSINNTEKT, "hva som helst", "hva som helst"
+                    )
+                }
+            ),
+        )
+        val arbeidsforhold = listOf(
+            InntektForSykepengegrunnlag.Arbeidsforhold(
+                orgnummer = "orgnummer",
+                erFrilanser = true
+            )
+        )
+        val inntektForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter, arbeidsforhold)
+        assertTrue(inntektForSykepengegrunnlag.valider(aktivitetslogg).hasErrorsOrWorse())
+    }
+
+    @Test
+    fun `Frilanser-arbeidsforhold uten inntekt de siste 3 månedene gir ikke error`() {
+        val aktivitetslogg = Aktivitetslogg()
+        val inntekter = listOf(
+            ArbeidsgiverInntekt(
+                "orgnummer",
+                (1..3).map {
+                    Sykepengegrunnlag(
+                        YearMonth.of(2017, it),
+                        31000.månedlig, LØNNSINNTEKT, "hva som helst", "hva som helst"
+                    )
+                }
+            ),
+        )
+        val arbeidsforhold = listOf(
+            InntektForSykepengegrunnlag.Arbeidsforhold(
+                orgnummer = "orgnummer2",
+                erFrilanser = true
+            )
+        )
+        val inntektForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter, arbeidsforhold)
+        assertFalse(inntektForSykepengegrunnlag.valider(aktivitetslogg).hasErrorsOrWorse())
+    }
+
+    @Test
+    fun `Person som ikke er frilanser gir ikke error`() {
+        val aktivitetslogg = Aktivitetslogg()
+        val inntekter = listOf(
+            ArbeidsgiverInntekt(
+                "orgnummer",
+                (1..3).map {
+                    Sykepengegrunnlag(
+                        YearMonth.of(2017, it),
+                        31000.månedlig, LØNNSINNTEKT, "hva som helst", "hva som helst"
+                    )
+                }
+            ),
+        )
+        val inntektForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter, emptyList())
+        assertFalse(inntektForSykepengegrunnlag.valider(aktivitetslogg).hasErrorsOrWorse())
+    }
 
 }

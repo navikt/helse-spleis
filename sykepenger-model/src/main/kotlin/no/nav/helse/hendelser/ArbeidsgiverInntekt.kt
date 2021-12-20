@@ -42,6 +42,8 @@ class ArbeidsgiverInntekt(
             .map { ArbeidsgiverInntekt(it.arbeidsgiver, it.inntekter.nylig(månedFørSlutt(this, antallMåneder))) }
             .count { it.harInntekter() }
 
+        internal fun List<ArbeidsgiverInntekt>.harInntektFor(orgnummer: String) = this.any { it.arbeidsgiver == orgnummer }
+
         private fun månedFørSlutt(inntekter: List<ArbeidsgiverInntekt>, antallMåneder: Int) =
             MånedligInntekt.månedFørSlutt(inntekter.flatMap { it.inntekter }, antallMåneder)
 
