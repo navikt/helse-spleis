@@ -1291,6 +1291,10 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.tilstand(hendelse, AvventerSøknadUferdigForlengelse)
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            vedtaksperiode.tilstand(påminnelse, AvventerSøknadFerdigGap)
+        }
+
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             vedtaksperiode.håndterSøknad(søknad, AvventerHistorikk)
             søknad.info("Fullført behandling av søknad")
@@ -1309,6 +1313,10 @@ internal class Vedtaksperiode private constructor(
         }
         override fun håndterTidligereTilstøtendeUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, AvventerSøknadUferdigForlengelse)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            vedtaksperiode.tilstand(påminnelse, AvventerSøknadUferdigGap)
         }
 
         override fun håndter(
@@ -1599,8 +1607,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode))
-                vedtaksperiode.tilstand(påminnelse, AvsluttetUtenUtbetaling)
+            vedtaksperiode.tilstand(påminnelse, AvsluttetUtenUtbetaling)
         }
     }
 
@@ -1622,8 +1629,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode))
-                vedtaksperiode.tilstand(påminnelse, AvsluttetUtenUtbetaling)
+            vedtaksperiode.tilstand(påminnelse, AvsluttetUtenUtbetaling)
         }
     }
 
