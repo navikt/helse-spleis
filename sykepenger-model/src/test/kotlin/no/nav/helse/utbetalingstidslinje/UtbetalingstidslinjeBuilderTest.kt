@@ -108,10 +108,10 @@ internal class UtbetalingstidslinjeBuilderTest {
     fun `alt infotrygd`() {
         (20.S + 32.A + 20.S).utbetalingslinjer(strategi = infotrygdUtbetaling(listOf(2.januar, 22.februar)))
         assertEquals(4, tidslinje.inspektør.unikedager.size)
-        assertEquals(16, tidslinje.inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(1, tidslinje.inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(32, tidslinje.inspektør.arbeidsdagTeller)
-        assertEquals(17, tidslinje.inspektør.navDagTeller)
-        assertEquals(7, tidslinje.inspektør.navHelgDagTeller)
+        assertEquals(28, tidslinje.inspektør.navDagTeller)
+        assertEquals(11, tidslinje.inspektør.navHelgDagTeller)
     }
 
     @Test
