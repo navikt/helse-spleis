@@ -285,6 +285,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun håndter(sykmelding: Sykmelding) {
+        sykmelding.kontekst(this)
         ForkastetVedtaksperiode.overlapperMedForkastet(forkastede, sykmelding)
         if (!sykmelding.forGammel() && !sykmelding.hasErrorsOrWorse()) {
             if (!noenHarHåndtert(sykmelding, Vedtaksperiode::håndter)) {
