@@ -1,0 +1,219 @@
+{
+    "arbeidsgivere": [
+        {
+            "forkastede": [
+                {
+                    "vedtaksperiode": {
+                        "tilstand": "AVVENTER_HISTORIKK"
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "tilstand": "AVVENTER_GODKJENNING"
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "tilstand": "AVVENTER_SIMULERING"
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "tilstand": "TIL_UTBETALING"
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "tilstand": "TIL_INFOTRYGD"
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "tilstand": "TIL_INFOTRYGD"
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "tilstand": "AVSLUTTET"
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "tilstand": "AVSLUTTET_UTEN_UTBETALING"
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "tilstand": "TIL_INFOTRYGD"
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "tilstand": "REVURDERING_FEILET"
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "tilstand": "TIL_INFOTRYGD"
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "tilstand": "TIL_INFOTRYGD"
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "tilstand": "UTBETALING_FEILET"
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "tilstand": "MOTTATT_SYKMELDING_FERDIG_FORLENGELSE"
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "tilstand": "MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE"
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "tilstand": "MOTTATT_SYKMELDING_FERDIG_GAP"
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "tilstand": "MOTTATT_SYKMELDING_UFERDIG_GAP"
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "tilstand": "AVVENTER_SØKNAD_FERDIG_GAP"
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "tilstand": "TIL_INFOTRYGD"
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "tilstand": "TIL_INFOTRYGD"
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "tilstand": "AVVENTER_SØKNAD_UFERDIG_GAP"
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "tilstand": "AVVENTER_VILKÅRSPRØVING"
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "tilstand": "TIL_INFOTRYGD"
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "tilstand": "TIL_INFOTRYGD"
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "tilstand": "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP"
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "tilstand": "AVVENTER_INNTEKTSMELDING_UFERDIG_GAP"
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "tilstand": "TIL_INFOTRYGD"
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "tilstand": "AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE"
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "tilstand": "AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE"
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "tilstand": "AVVENTER_SØKNAD_UFERDIG_FORLENGELSE"
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "tilstand": "AVVENTER_SØKNAD_FERDIG_FORLENGELSE"
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "tilstand": "TIL_INFOTRYGD"
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "tilstand": "AVVENTER_UFERDIG"
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "tilstand": "AVVENTER_ARBEIDSGIVERE"
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "tilstand": "AVVENTER_REVURDERING"
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "tilstand": "AVVENTER_GJENNOMFØRT_REVURDERING"
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "tilstand": "AVVENTER_HISTORIKK_REVURDERING"
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "tilstand": "AVVENTER_VILKÅRSPRØVING_REVURDERING"
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "tilstand": "AVVENTER_SIMULERING_REVURDERING"
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "tilstand": "AVVENTER_GODKJENNING_REVURDERING"
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "tilstand": "AVVENTER_ARBEIDSGIVERE_REVURDERING"
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "tilstand": "TIL_INFOTRYGD"
+                    }
+                }
+            ]
+        }
+    ],
+    "skjemaVersjon": 136
+}
