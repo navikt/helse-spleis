@@ -55,9 +55,12 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         assertEquals(
             31000.månedlig,
-            inspektør(a1).inntektInspektør.grunnlagForSykepengegrunnlag(28.februar, 28.februar)?.grunnlagForSykepengegrunnlag()
-        ) // TODO
-        assertEquals(20000.månedlig, inspektør(a2).inntektInspektør.grunnlagForSykepengegrunnlag(28.februar, 5.mars)?.grunnlagForSykepengegrunnlag())
+            inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inntektsopplysningPerArbeidsgiver()?.get(a1.toString())?.grunnlagForSykepengegrunnlag()
+        )
+        assertEquals(
+            20000.månedlig,
+            inspektør(a2).vilkårsgrunnlag(1.vedtaksperiode)?.inntektsopplysningPerArbeidsgiver()?.get(a2.toString())?.grunnlagForSykepengegrunnlag()
+        )
     }
 
     @Test
@@ -106,8 +109,14 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a2)
 
 
-        assertEquals(30000.månedlig, inspektør(a1).inntektInspektør.grunnlagForSykepengegrunnlag(1.mars, 1.mars)?.grunnlagForSykepengegrunnlag())
-        assertEquals(18000.månedlig, inspektør(a2).inntektInspektør.grunnlagForSykepengegrunnlag(1.mars, 1.mars)?.grunnlagForSykepengegrunnlag())
+        assertEquals(
+            30000.månedlig,
+            inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inntektsopplysningPerArbeidsgiver()?.get(a1.toString())?.grunnlagForSykepengegrunnlag()
+        )
+        assertEquals(
+            18000.månedlig,
+            inspektør(a2).vilkårsgrunnlag(1.vedtaksperiode)?.inntektsopplysningPerArbeidsgiver()?.get(a2.toString())?.grunnlagForSykepengegrunnlag()
+        )
 
     }
 
@@ -147,8 +156,14 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a2)
 
 
-        assertEquals(31000.månedlig, inspektør(a1).inntektInspektør.grunnlagForSykepengegrunnlag(28.februar, 28.februar)?.grunnlagForSykepengegrunnlag())
-        assertEquals(21000.månedlig, inspektør(a2).inntektInspektør.grunnlagForSykepengegrunnlag(28.februar, 5.mars)?.grunnlagForSykepengegrunnlag())
+        assertEquals(
+            31000.månedlig,
+            inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inntektsopplysningPerArbeidsgiver()?.get(a1.toString())?.grunnlagForSykepengegrunnlag()
+        )
+        assertEquals(
+            21000.månedlig,
+            inspektør(a2).vilkårsgrunnlag(1.vedtaksperiode)?.inntektsopplysningPerArbeidsgiver()?.get(a2.toString())?.grunnlagForSykepengegrunnlag()
+        )
     }
 
     @Test
@@ -390,7 +405,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
     }
 
-    @Test // TODO: halvparten i en måned - halvparten i en annen - test riktig IM og skatt
+    @Test
     fun `Fire arbeidsgivere - overlappende perioder med ulik fom`() {
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
@@ -492,7 +507,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
     }
 
-    @Test // TODO: update
+    @Test
     fun `Fire arbeidsgivere - overlappende perioder med ulik fom men lik slutt`() {
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars, 100.prosent), orgnummer = a1)
@@ -533,10 +548,10 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         )
 
         val inntekter = listOf(
-            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(3)),
-            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 32000.månedlig.repeat(3)),
-            grunnlag(a3, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 33000.månedlig.repeat(3)),
-            grunnlag(a4, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 34000.månedlig.repeat(3))
+            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31500.månedlig.repeat(3)),
+            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 32500.månedlig.repeat(3)),
+            grunnlag(a3, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 33500.månedlig.repeat(3)),
+            grunnlag(a4, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 34500.månedlig.repeat(3))
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
@@ -593,7 +608,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
     }
 
-    @Test // TODO: update
+    @Test
     fun `Fire arbeidsgivere - overlappende perioder med ulik fom men lik slutt, nå med gradert sykmelding!`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 15.mars, 100.prosent), orgnummer = a1)
@@ -633,10 +648,10 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         )
 
         val inntekter = listOf(
-            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(3)),
-            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 32000.månedlig.repeat(3)),
-            grunnlag(a3, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 33000.månedlig.repeat(3)),
-            grunnlag(a4, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 34000.månedlig.repeat(3))
+            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31500.månedlig.repeat(3)),
+            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 32500.månedlig.repeat(3)),
+            grunnlag(a3, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 33500.månedlig.repeat(3)),
+            grunnlag(a4, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 34500.månedlig.repeat(3))
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
@@ -699,8 +714,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
     }
 
-    @Test // TODO: update
-    fun `Wow! Her var det mye greier!!`() {
+    @Test
+    fun `Wow! Her var det mye greier - ulik fom, lik tom, forskjellig gradering for alle arbeidsgivere`() {
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars, 22.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 15.mars, 22.prosent), orgnummer = a1)
@@ -740,10 +755,10 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         )
 
         val inntekter = listOf(
-            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(3)),
-            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 32000.månedlig.repeat(3)),
-            grunnlag(a3, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 33000.månedlig.repeat(3)),
-            grunnlag(a4, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 34000.månedlig.repeat(3))
+            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31500.månedlig.repeat(3)),
+            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 32500.månedlig.repeat(3)),
+            grunnlag(a3, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 33500.månedlig.repeat(3)),
+            grunnlag(a4, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 34500.månedlig.repeat(3))
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
@@ -1055,11 +1070,17 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             orgnummer = a1
         )
 
-        assertEquals(31000.månedlig, inspektør(a1).inntektInspektør.grunnlagForSykepengegrunnlag(1.mars, 1.mars)?.grunnlagForSykepengegrunnlag())
-        assertInstanceOf(Inntektshistorikk.Inntektsmelding::class.java, inspektør(a1).inntektInspektør.grunnlagForSykepengegrunnlag(1.mars, 1.mars))
+        assertEquals(
+            31000.månedlig,
+            inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inntektsopplysningPerArbeidsgiver()?.get(a1.toString())?.grunnlagForSykepengegrunnlag()
+        )
+        assertInstanceOf(Inntektshistorikk.Inntektsmelding::class.java, inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inntektsopplysningPerArbeidsgiver()?.get(a1.toString()))
 
-        assertEquals(21000.månedlig, inspektør(a2).inntektInspektør.grunnlagForSykepengegrunnlag(1.mars, 5.mars)?.grunnlagForSykepengegrunnlag())
-        assertInstanceOf(Inntektshistorikk.Inntektsmelding::class.java, inspektør(a2).inntektInspektør.grunnlagForSykepengegrunnlag(1.mars, 5.mars))
+        assertEquals(
+            21000.månedlig,
+            inspektør(a2).vilkårsgrunnlag(1.vedtaksperiode)?.inntektsopplysningPerArbeidsgiver()?.get(a2.toString())?.grunnlagForSykepengegrunnlag()
+        )
+        assertInstanceOf(Inntektshistorikk.Inntektsmelding::class.java, inspektør(a2).vilkårsgrunnlag(1.vedtaksperiode)?.inntektsopplysningPerArbeidsgiver()?.get(a2.toString()))
     }
 
     @Test
@@ -1090,11 +1111,11 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             orgnummer = a1
         )
 
-        assertEquals(31000.månedlig, inspektør(a1).inntektInspektør.grunnlagForSykepengegrunnlag(28.februar, 28.februar)?.grunnlagForSykepengegrunnlag())
-        assertInstanceOf(Inntektshistorikk.Inntektsmelding::class.java, inspektør(a1).inntektInspektør.grunnlagForSykepengegrunnlag(28.februar, 28.februar))
+        assertEquals(31000.månedlig, inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inntektsopplysningPerArbeidsgiver()?.get(a1.toString())?.grunnlagForSykepengegrunnlag())
+        assertInstanceOf(Inntektshistorikk.Inntektsmelding::class.java, inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inntektsopplysningPerArbeidsgiver()?.get(a1.toString()))
 
-        assertEquals(20000.månedlig, inspektør(a2).inntektInspektør.grunnlagForSykepengegrunnlag(28.februar, 1.mars)?.grunnlagForSykepengegrunnlag())
-        assertInstanceOf(Inntektshistorikk.SkattComposite::class.java, inspektør(a2).inntektInspektør.grunnlagForSykepengegrunnlag(28.februar, 1.mars))
+        assertEquals(20000.månedlig, inspektør(a2).vilkårsgrunnlag(1.vedtaksperiode)?.inntektsopplysningPerArbeidsgiver()?.get(a2.toString())?.grunnlagForSykepengegrunnlag())
+        assertInstanceOf(Inntektshistorikk.SkattComposite::class.java, inspektør(a2).vilkårsgrunnlag(1.vedtaksperiode)?.inntektsopplysningPerArbeidsgiver()?.get(a2.toString()))
     }
 
     @Test
@@ -1117,8 +1138,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             inntekter = listOf(
                 grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
                 grunnlag(a2, 1.januar, INNTEKT.repeat(3))
-            )
-        , arbeidsforhold = emptyList()
+            ), arbeidsforhold = emptyList()
         )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -1159,7 +1179,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(32000.månedlig, inntektsopplysning?.grunnlagForSykepengegrunnlag())
     }
 
-    @ForventetFeil("https://trello.com/c/k21yUamv: kan ikke teste dette før denne lappen er fikset")
+    @ForventetFeil("https://trello.com/c/k21yUamv kan ikke teste dette før denne lappen er fikset")
     @Test
     fun `To arbeidsgivere med ulik fom - med tidligere periode med gap i samme måned - velger riktig inntektsmelding for AG med senest fom`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 18.januar, 100.prosent), orgnummer = a1)
@@ -1188,8 +1208,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             inntekter = listOf(
                 grunnlag(a1, 20.januar, INNTEKT.repeat(12)),
                 grunnlag(a2, 20.januar, INNTEKT.repeat(12))
-            )
-        , arbeidsforhold = emptyList()
+            ), arbeidsforhold = emptyList()
         )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -1229,10 +1248,13 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(2.vedtaksperiode, orgnummer = a2)
 
-        assertEquals(32000.månedlig, inspektør(a2).inntektInspektør.grunnlagForSykepengegrunnlag(20.januar, 22.januar)?.grunnlagForSykepengegrunnlag())
+        assertEquals(
+            32000.månedlig,
+            inspektør(a2).vilkårsgrunnlag(1.vedtaksperiode)?.inntektsopplysningPerArbeidsgiver()?.get(a2.toString())?.grunnlagForSykepengegrunnlag()
+        )
     }
 
-    @Disabled("TODO: fordi den ikke ferri vel!!!!")
+    @Disabled("TODO: Utbetalingstidslinjen gir ikke mening")
     @Test
     fun `Fire arbeidsgivere, to med fom i januar og to med fom i februar `() {
         // Arbeidsgiverne med fom i januar skal bruke inntektsmelding
@@ -1315,15 +1337,39 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a4)
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a4)
 
-        assertInstanceOf(Inntektshistorikk.Inntektsmelding::class.java, inspektør(a1).inntektInspektør.grunnlagForSykepengegrunnlag(28.januar, 28.januar))
-        assertInstanceOf(Inntektshistorikk.Inntektsmelding::class.java, inspektør(a2).inntektInspektør.grunnlagForSykepengegrunnlag(28.januar, 30.januar))
-        assertInstanceOf(Inntektshistorikk.SkattComposite::class.java, inspektør(a3).inntektInspektør.grunnlagForSykepengegrunnlag(28.januar, 1.februar))
-        assertInstanceOf(Inntektshistorikk.SkattComposite::class.java, inspektør(a4).inntektInspektør.grunnlagForSykepengegrunnlag(28.januar, 4.februar))
+        assertInstanceOf(
+            Inntektshistorikk.Inntektsmelding::class.java,
+            inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inntektsopplysningPerArbeidsgiver()?.get(a1.toString())
+        )
+        assertInstanceOf(
+            Inntektshistorikk.Inntektsmelding::class.java,
+            inspektør(a2).vilkårsgrunnlag(1.vedtaksperiode)?.inntektsopplysningPerArbeidsgiver()?.get(a2.toString())
+        )
+        assertInstanceOf(
+            Inntektshistorikk.SkattComposite::class.java,
+            inspektør(a3).vilkårsgrunnlag(1.vedtaksperiode)?.inntektsopplysningPerArbeidsgiver()?.get(a3.toString())
+        )
+        assertInstanceOf(
+            Inntektshistorikk.SkattComposite::class.java,
+            inspektør(a4).vilkårsgrunnlag(1.vedtaksperiode)?.inntektsopplysningPerArbeidsgiver()?.get(a4.toString())
+        )
 
-        assertEquals(31000.månedlig, inspektør(a1).inntektInspektør.grunnlagForSykepengegrunnlag(28.januar, 28.januar)?.grunnlagForSykepengegrunnlag())
-        assertEquals(32000.månedlig, inspektør(a2).inntektInspektør.grunnlagForSykepengegrunnlag(28.januar, 30.januar)?.grunnlagForSykepengegrunnlag())
-        assertEquals(33500.månedlig, inspektør(a3).inntektInspektør.grunnlagForSykepengegrunnlag(28.januar, 1.februar)?.grunnlagForSykepengegrunnlag())
-        assertEquals(34500.månedlig, inspektør(a4).inntektInspektør.grunnlagForSykepengegrunnlag(28.januar, 4.februar)?.grunnlagForSykepengegrunnlag())
+        assertEquals(
+            31000.månedlig,
+            inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inntektsopplysningPerArbeidsgiver()?.get(a1.toString())?.grunnlagForSykepengegrunnlag()
+        )
+        assertEquals(
+            32000.månedlig,
+            inspektør(a2).vilkårsgrunnlag(1.vedtaksperiode)?.inntektsopplysningPerArbeidsgiver()?.get(a2.toString())?.grunnlagForSykepengegrunnlag()
+        )
+        assertEquals(
+            33500.månedlig,
+            inspektør(a3).vilkårsgrunnlag(1.vedtaksperiode)?.inntektsopplysningPerArbeidsgiver()?.get(a3.toString())?.grunnlagForSykepengegrunnlag()
+        )
+        assertEquals(
+            34500.månedlig,
+            inspektør(a4).vilkårsgrunnlag(1.vedtaksperiode)?.inntektsopplysningPerArbeidsgiver()?.get(a4.toString())?.grunnlagForSykepengegrunnlag()
+        )
 
         val a1Linjer = inspektør(a1).utbetalinger.last().arbeidsgiverOppdrag()
         assertEquals(511, a1Linjer[0].beløp)
