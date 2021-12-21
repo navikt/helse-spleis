@@ -185,7 +185,6 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         assertTrue(observatør.opprettOppgaveEvent().any { inntektsmeldingId in it.hendelser })
     }
 
-    @ForventetFeil("Inntektsmelding må sjekke mot forkastede. Løses i steg 2 - https://trello.com/c/yVDkucVG")
     @Test
     fun `inntektsmelding som treffer forkastet periode`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar, 100.prosent))

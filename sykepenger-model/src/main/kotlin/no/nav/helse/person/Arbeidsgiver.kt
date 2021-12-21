@@ -333,8 +333,15 @@ internal class Arbeidsgiver private constructor(
         }
         if (!noenHarHåndtert(inntektsmelding, Vedtaksperiode::håndter) && vedtaksperiodeId == null) {
             inntektsmelding.error("Forventet ikke inntektsmelding. Har nok ikke mottatt sykmelding")
-            if (ForkastetVedtaksperiode.sjekkOmOverlapperMedForkastet(forkastede, inntektsmelding))
+            if (ForkastetVedtaksperiode.sjekkOmOverlapperMedForkastet(forkastede, inntektsmelding)) {
+                person.opprettOppgave(
+                    inntektsmelding,
+                    PersonObserver.OpprettOppgaveEvent(
+                        hendelser = setOf(inntektsmelding.meldingsreferanseId()),
+                    )
+                )
                 inntektsmelding.info("Forkastet vedtaksperiode overlapper med uforventet inntektsmelding")
+            }
             else
                 inntektsmelding.info("Ingen forkastede vedtaksperioder overlapper med uforventet inntektsmelding")
         }
