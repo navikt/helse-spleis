@@ -1,7 +1,9 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.januar
@@ -125,7 +127,7 @@ internal class EnTilEnOverlappendeSykmeldingE2ETest : AbstractEndToEndTest() {
     @Test
     fun `mottar inntektsmelding før sykemelding nummer 2 kommer` () {
         håndterSykmelding(Sykmeldingsperiode(27.september, 3.oktober, 100.prosent))
-        håndterSøknadArbeidsgiver(Sykdom(27.september, 3.oktober, 100.prosent))
+        håndterSøknad(Sykdom(27.september, 3.oktober, 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(4.oktober, 8.oktober, 100.prosent))
         håndterInntektsmelding(listOf(Periode(27.september, 12.oktober)))

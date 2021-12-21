@@ -1,8 +1,8 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Arbeidsgiver
@@ -175,7 +175,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     fun `Overstyring av sykHelgDag`() {
         håndterSykmelding(Sykmeldingsperiode(17.desember(2017), 31.desember(2017), 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(17.desember(2017), 1.januar)), førsteFraværsdag = 17.desember(2017))
-        håndterSøknadArbeidsgiver(Sykdom(17.desember(2017), 31.desember(2017), 100.prosent))
+        håndterSøknad(Sykdom(17.desember(2017), 31.desember(2017), 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(10.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(17.desember(2017), 1.januar)), førsteFraværsdag = 10.januar)

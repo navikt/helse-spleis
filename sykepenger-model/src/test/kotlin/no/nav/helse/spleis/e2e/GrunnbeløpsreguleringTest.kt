@@ -1,8 +1,11 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Grunnbeløp
-import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.TilstandType
 import no.nav.helse.testhelpers.*
@@ -105,7 +108,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
     fun `ubetalt periode, etter utbetalt, etterutbetales ikke`() {
         (10.juni(2020) to 30.juni(2020)).also { (fom, tom) ->
             håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
-            håndterSøknad(Sykdom(fom, tom, 100.prosent), sendtTilNav = tom)
+            håndterSøknad(Sykdom(fom, tom, 100.prosent), sendtTilNAVEllerArbeidsgiver = tom)
             håndterInntektsmeldingMedValidering(
                 1.vedtaksperiode,
                 listOf(fom til fom.plusDays(15)),
@@ -288,7 +291,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
         )
     ) {
         håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
-        håndterSøknad(Sykdom(fom, tom, 100.prosent), sendtTilNav = tom)
+        håndterSøknad(Sykdom(fom, tom, 100.prosent), sendtTilNAVEllerArbeidsgiver = tom)
         håndterInntektsmeldingMedValidering(
             vedtaksperiodeIndeks.vedtaksperiode,
             arbeidsgiverperiode,
@@ -329,7 +332,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
         tom: LocalDate
     ) {
         håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
-        håndterSøknad(Sykdom(fom, tom, 100.prosent), sendtTilNav = tom)
+        håndterSøknad(Sykdom(fom, tom, 100.prosent), sendtTilNAVEllerArbeidsgiver = tom)
         håndterYtelser(vedtaksperiodeIndeks.vedtaksperiode)
         håndterSimulering(vedtaksperiodeIndeks.vedtaksperiode)
         håndterUtbetalingsgodkjenning(vedtaksperiodeIndeks.vedtaksperiode, true)

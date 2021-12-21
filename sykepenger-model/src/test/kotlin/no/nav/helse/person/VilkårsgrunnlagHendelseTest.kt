@@ -2,8 +2,8 @@ package no.nav.helse.person
 
 import no.nav.helse.etterspurtBehov
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode
-import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Søknad.Søknadsperiode
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.inspectors.GrunnlagsdataInspektør
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
@@ -190,7 +190,7 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
         orgnummer = ORGNUMMER.toString(),
         perioder = perioder,
         andreInntektskilder = emptyList(),
-        sendtTilNAV = 31.januar.atStartOfDay(),
+        sendtTilNAVEllerArbeidsgiver = 31.januar.atStartOfDay(),
         permittert = false,
         merknaderFraSykmelding = emptyList(),
         sykmeldingSkrevet = LocalDateTime.now()

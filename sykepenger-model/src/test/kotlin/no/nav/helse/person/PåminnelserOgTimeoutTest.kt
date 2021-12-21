@@ -2,8 +2,8 @@ package no.nav.helse.person
 
 import no.nav.helse.etterspurteBehov
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode
-import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Søknad.Søknadsperiode
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
@@ -230,7 +230,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
             orgnummer = ORGNUMMER.toString(),
             perioder = perioder.toList(),
             andreInntektskilder = emptyList(),
-            sendtTilNAV = 20.januar.atStartOfDay(),
+            sendtTilNAVEllerArbeidsgiver = 20.januar.atStartOfDay(),
             permittert = false,
             merknaderFraSykmelding = emptyList(),
             sykmeldingSkrevet = LocalDateTime.now()

@@ -2,7 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -360,7 +360,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
     fun `ubetalt periode, etter utbetalt, etterutbetales ikke`() {
         (10.juni to 30.juni).also { (fom, tom) ->
             håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
-            håndterSøknad(Sykdom(fom, tom, 100.prosent), sendtTilNav = tom)
+            håndterSøknad(Sykdom(fom, tom, 100.prosent), sendtTilNAVEllerArbeidsgiver = tom)
             håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(fom til fom.plusDays(15)))
         }
         (1.juli to 31.juli).also { (fom, tom) ->

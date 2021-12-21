@@ -1,7 +1,7 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode
+import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.perioder
 import no.nav.helse.testhelpers.*
 import no.nav.helse.tournament.Dagturnering
@@ -386,7 +386,7 @@ internal class SkjæringstidspunktTest {
             orgnummer = ORGNUMMER,
             perioder = listOf(*perioder),
             andreInntektskilder = emptyList(),
-            sendtTilNAV = Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay(),
+            sendtTilNAVEllerArbeidsgiver = Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay(),
             permittert = false,
             merknaderFraSykmelding = emptyList(),
             sykmeldingSkrevet = LocalDateTime.now()

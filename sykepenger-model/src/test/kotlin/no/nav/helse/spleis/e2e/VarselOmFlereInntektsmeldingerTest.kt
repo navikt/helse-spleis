@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.*
@@ -14,10 +14,10 @@ internal class VarselOmFlereInntektsmeldingerTest : AbstractEndToEndTest() {
     @Test
     fun `Prodbug - Feilaktig varsel om flere inntektsmeldinger`() {
         håndterSykmelding(Sykmeldingsperiode(22.mars(2021), 28.mars(2021), 100.prosent))
-        håndterSøknadArbeidsgiver(Sykdom(22.mars(2021), 28.mars(2021), 100.prosent))
+        håndterSøknad(Sykdom(22.mars(2021), 28.mars(2021), 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(29.mars(2021), 5.april(2021), 100.prosent))
-        håndterSøknadArbeidsgiver(Sykdom(29.mars(2021), 5.april(2021), 100.prosent))
+        håndterSøknad(Sykdom(29.mars(2021), 5.april(2021), 100.prosent))
         håndterSøknad(Sykdom(29.mars(2021), 5.april(2021), 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(6.april(2021), 16.april(2021), 50.prosent))

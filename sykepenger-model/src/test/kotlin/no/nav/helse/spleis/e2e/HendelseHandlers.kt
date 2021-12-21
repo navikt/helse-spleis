@@ -3,7 +3,7 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.Organisasjonsnummer
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode
+import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.hendelser.utbetaling.*
 import no.nav.helse.person.*
 import no.nav.helse.person.TilstandType.*
@@ -277,8 +277,8 @@ internal fun AbstractEndToEndTest.forlengPeriode(
 internal fun AbstractEndToEndTest.håndterSøknadMedValidering(
     vedtaksperiodeIdInnhenter: IdInnhenter,
     vararg perioder: Søknadsperiode,
-    andreInntektskilder: List<SendtSøknad.Inntektskilde> = emptyList(),
-    sendtTilNav: LocalDate = Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive,
+    andreInntektskilder: List<Søknad.Inntektskilde> = emptyList(),
+    sendtTilNAVEllerArbeidsgiver: LocalDate = Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive,
     orgnummer: Organisasjonsnummer = AbstractPersonTest.ORGNUMMER,
     fnr: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018,
 ) {
@@ -286,13 +286,13 @@ internal fun AbstractEndToEndTest.håndterSøknadMedValidering(
         Søknad::class, Aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSammenligningsgrunnlag, vedtaksperiodeIdInnhenter,
         AbstractPersonTest.ORGNUMMER
     )
-    håndterSøknad(*perioder, andreInntektskilder = andreInntektskilder, sendtTilNav = sendtTilNav, orgnummer = orgnummer, fnr = fnr)
+    håndterSøknad(*perioder, andreInntektskilder = andreInntektskilder, sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver, orgnummer = orgnummer, fnr = fnr)
 }
 
 internal fun AbstractEndToEndTest.håndterSøknad(
     vararg perioder: Søknadsperiode,
-    andreInntektskilder: List<SendtSøknad.Inntektskilde> = emptyList(),
-    sendtTilNav: LocalDate = Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive,
+    andreInntektskilder: List<Søknad.Inntektskilde> = emptyList(),
+    sendtTilNAVEllerArbeidsgiver: LocalDate = Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive,
     id: UUID = UUID.randomUUID(),
     orgnummer: Organisasjonsnummer = AbstractPersonTest.ORGNUMMER,
     sykmeldingSkrevet: LocalDateTime? = null,
@@ -302,19 +302,14 @@ internal fun AbstractEndToEndTest.håndterSøknad(
         id,
         *perioder,
         andreInntektskilder = andreInntektskilder,
-        sendtTilNav = sendtTilNav,
+        sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver,
         orgnummer = orgnummer,
         sykmeldingSkrevet = sykmeldingSkrevet,
         fnr = fnr
     ).håndter(Person::håndter)
-    søknader[id] = Triple(sendtTilNav, andreInntektskilder, perioder)
+    søknader[id] = Triple(sendtTilNAVEllerArbeidsgiver, andreInntektskilder, perioder)
     return id
 }
-
-internal fun AbstractEndToEndTest.håndterSøknadArbeidsgiver(
-    vararg sykdomsperioder: Søknadsperiode,
-    orgnummer: Organisasjonsnummer = AbstractPersonTest.ORGNUMMER
-) = søknadArbeidsgiver(*sykdomsperioder, orgnummer = orgnummer).håndter(Person::håndter)
 
 internal fun AbstractEndToEndTest.håndterInntektsmeldingMedValidering(
     vedtaksperiodeIdInnhenter: IdInnhenter,

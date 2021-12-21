@@ -3,7 +3,7 @@ package no.nav.helse.person
 import no.nav.helse.Toggle
 import no.nav.helse.Toggle.Companion.enable
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.testhelpers.*
@@ -167,7 +167,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
             orgnummer = ORGNUMMER.toString(),
             perioder = listOf(Sykdom(førsteSykedag, sisteSykedag, 100.prosent)),
             andreInntektskilder = emptyList(),
-            sendtTilNAV = sisteSykedag.atStartOfDay(),
+            sendtTilNAVEllerArbeidsgiver = sisteSykedag.atStartOfDay(),
             permittert = false,
             merknaderFraSykmelding = emptyList(),
             sykmeldingSkrevet = LocalDateTime.now()

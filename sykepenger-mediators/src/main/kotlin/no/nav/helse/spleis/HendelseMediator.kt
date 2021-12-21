@@ -43,7 +43,7 @@ internal class HendelseMediator(
         }
     }
 
-    override fun behandle(message: SendtSøknadArbeidsgiverMessage, søknad: SøknadArbeidsgiver) {
+    override fun behandle(message: SendtSøknadArbeidsgiverMessage, søknad: Søknad) {
         håndter(message, søknad) { person ->
             HendelseProbe.onSøknadArbeidsgiver()
             person.håndter(søknad)
@@ -220,7 +220,7 @@ internal class HendelseMediator(
 internal interface IHendelseMediator {
     fun behandle(message: HendelseMessage)
     fun behandle(message: NySøknadMessage, sykmelding: Sykmelding)
-    fun behandle(message: SendtSøknadArbeidsgiverMessage, søknad: SøknadArbeidsgiver)
+    fun behandle(message: SendtSøknadArbeidsgiverMessage, søknad: Søknad)
     fun behandle(message: SendtSøknadNavMessage, søknad: Søknad)
     fun behandle(message: InntektsmeldingMessage, inntektsmelding: Inntektsmelding)
     fun behandle(message: InntektsmeldingReplayMessage, inntektsmelding: InntektsmeldingReplay)

@@ -6,8 +6,8 @@ import no.nav.helse.Toggle.Companion.disable
 import no.nav.helse.Toggle.Companion.enable
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
-import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Ferie
-import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.inspectors.GrunnlagsdataInspektør
 import no.nav.helse.inspectors.Kilde
 import no.nav.helse.inspectors.inspektør
@@ -468,7 +468,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     @Test
     fun `utbetaling_utbetalt tar med vedtaksperiode-ider for forkastede perioder`() {
         tilGodkjent(1.januar, 31.januar, 100.prosent, 1.januar)
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), andreInntektskilder = listOf(SendtSøknad.Inntektskilde(true, "FRILANSER")))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), andreInntektskilder = listOf(Søknad.Inntektskilde(true, "FRILANSER")))
         håndterUtbetalt(1.vedtaksperiode)
 
         val utbetalingEvent = observatør.utbetalingMedUtbetalingEventer.first()
@@ -618,7 +618,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     @Test
     fun `revurdering av inntekt delegeres til den første perioden som har en utbetalingstidslinje - arbeidsgiversøknad først`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 15.januar, 100.prosent))
-        håndterSøknadArbeidsgiver(Sykdom(1.januar, 15.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(16.januar, 15.februar, 100.prosent))
         håndterSøknad(Sykdom(16.januar, 15.februar, 100.prosent))
         håndterInntektsmelding(

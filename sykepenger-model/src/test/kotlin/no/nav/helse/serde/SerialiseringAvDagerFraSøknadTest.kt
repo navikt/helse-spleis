@@ -6,10 +6,10 @@ import com.fasterxml.jackson.annotation.PropertyAccessor
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.*
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Person
@@ -113,7 +113,7 @@ internal class SerialiseringAvDagerFraSøknadTest {
             Utdanning(5.januar, 5.januar)
         ),
         andreInntektskilder = emptyList(),
-        sendtTilNAV = 5.januar.atStartOfDay(),
+        sendtTilNAVEllerArbeidsgiver = 5.januar.atStartOfDay(),
         permittert = false,
         merknaderFraSykmelding = emptyList(),
         sykmeldingSkrevet = LocalDateTime.now()

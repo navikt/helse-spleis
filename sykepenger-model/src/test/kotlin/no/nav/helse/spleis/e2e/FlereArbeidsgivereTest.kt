@@ -3,7 +3,7 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.ForventetFeil
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
-import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.Inntektskilde.FLERE_ARBEIDSGIVERE
@@ -1224,8 +1224,8 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         val periode = 1.januar(2021) til 14.januar(2021)
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        håndterSøknadArbeidsgiver(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        håndterSøknadArbeidsgiver(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
 
         val forlengelseperiode = 15.januar(2021) til 31.januar(2021)
         håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
@@ -1692,7 +1692,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     fun `Beregning av utbetaling over flere arbeidsgivere hvor en arbeidsgiver ikke har utbetaling`() {
         // Oppretter en arbeidsgiverperiode tilbake i tid som ikke skal ha utbetaling
         håndterSykmelding(Sykmeldingsperiode(1.januar(2017), 16.januar(2017), 100.prosent), orgnummer = a2)
-        håndterSøknadArbeidsgiver(Sykdom(1.januar(2017), 16.januar(2017), 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(1.januar(2017), 16.januar(2017), 100.prosent), orgnummer = a2)
 
         assertDoesNotThrow { nyttVedtak(1.januar, 31.januar, orgnummer = a1) }
     }

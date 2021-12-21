@@ -1,7 +1,7 @@
 package no.nav.helse.bugs_showstoppers
 
-import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.*
 import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.person.TilstandType.*
@@ -18,9 +18,9 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
     @Test
     fun `inntektsmelding avslutter to korte perioder og flytter nav-perioden uten å utføre vilkårsprøving`() {
         håndterSykmelding(Sykmeldingsperiode(9.januar, 15.januar, 100.prosent))
-        håndterSøknadArbeidsgiver(Sykdom(9.januar, 15.januar, 100.prosent))
+        håndterSøknad(Sykdom(9.januar, 15.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(19.januar, 26.januar, 100.prosent))
-        håndterSøknadArbeidsgiver(Sykdom(19.januar, 26.januar, 100.prosent))
+        håndterSøknad(Sykdom(19.januar, 26.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(29.januar, 2.februar, 100.prosent))
         håndterSøknad(Sykdom(29.januar, 2.februar, 100.prosent))
         // inntektsmeldingen lukker de to korte periodene og gjør samtidig at
@@ -55,9 +55,9 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
     @Test
     fun `arbeidsgiverperiode med brudd i helg`() {
         håndterSykmelding(Sykmeldingsperiode(4.januar, 5.januar, 100.prosent))
-        håndterSøknadArbeidsgiver(Sykdom(4.januar, 5.januar, 100.prosent))
+        håndterSøknad(Sykdom(4.januar, 5.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(8.januar, 12.januar, 100.prosent))
-        håndterSøknadArbeidsgiver(Sykdom(8.januar, 12.januar, 100.prosent))
+        håndterSøknad(Sykdom(8.januar, 12.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(13.januar, 19.januar, 100.prosent))
         håndterSøknad(Sykdom(13.januar, 19.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(20.januar, 1.februar, 100.prosent))
@@ -97,10 +97,10 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
     @Test
     fun `inntektsmelding drar periode tilbake og lager tilstøtende`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent))
-        håndterSøknadArbeidsgiver(Sykdom(1.januar, 5.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 5.januar, 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(26.januar, 2.februar, 100.prosent))
-        håndterSøknadArbeidsgiver(Sykdom(26.januar, 2.februar, 100.prosent))
+        håndterSøknad(Sykdom(26.januar, 2.februar, 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(5.februar, 21.februar, 100.prosent))
         håndterSøknad(Sykdom(5.februar, 21.februar, 100.prosent))

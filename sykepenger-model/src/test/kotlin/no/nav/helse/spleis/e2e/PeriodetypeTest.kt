@@ -2,8 +2,8 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.TilstandType.*
@@ -22,7 +22,7 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
     fun `periodetype settes til førstegangs hvis foregående ikke hadde utbetalingsdager`() {
         håndterSykmelding(Sykmeldingsperiode(28.januar(2020), 10.februar(2020), 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(11.februar(2020), 21.februar(2020), 100.prosent))
-        håndterSøknadArbeidsgiver(Sykdom(28.januar(2020), 10.februar(2020), 100.prosent))
+        håndterSøknad(Sykdom(28.januar(2020), 10.februar(2020), 100.prosent))
         håndterSøknad(Sykdom(11.februar(2020), 21.februar(2020), 100.prosent))
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(28.januar(2020), 12.februar(2020))),

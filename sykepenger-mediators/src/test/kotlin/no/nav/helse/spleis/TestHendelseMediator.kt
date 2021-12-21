@@ -83,7 +83,7 @@ internal class TestHendelseMediator : IHendelseMediator {
         lestNySøknad = true
     }
 
-    override fun behandle(message: SendtSøknadArbeidsgiverMessage, søknad: SøknadArbeidsgiver) {
+    override fun behandle(message: SendtSøknadArbeidsgiverMessage, søknad: Søknad) {
         lestSendtSøknadArbeidsgiver = true
     }
 

@@ -1,7 +1,7 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.hendelser.SendtSøknad.*
-import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.*
+import no.nav.helse.hendelser.Søknad.*
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.hentErrors
 import no.nav.helse.hentWarnings
 import no.nav.helse.person.Aktivitetslogg
@@ -49,13 +49,13 @@ internal class SøknadTest {
 
     @Test
     fun `17 år på søknadstidspunkt gir error`() {
-        søknad(Sykdom(1.januar, 10.januar, 100.prosent), fnr = FYLLER_18_ÅR_2_NOVEMBER, sendtTilNav = 1.november.atStartOfDay())
+        søknad(Sykdom(1.januar, 10.januar, 100.prosent), fnr = FYLLER_18_ÅR_2_NOVEMBER, sendtTilNAVEllerArbeidsgiver = 1.november.atStartOfDay())
         assertTrue(søknad.valider(EN_PERIODE).hasErrorsOrWorse())
     }
 
     @Test
     fun `18 år på søknadstidspunkt gir ikke error`() {
-        søknad(Sykdom(1.januar, 10.januar, 100.prosent), fnr = FYLLER_18_ÅR_2_NOVEMBER, sendtTilNav = 2.november.atStartOfDay())
+        søknad(Sykdom(1.januar, 10.januar, 100.prosent), fnr = FYLLER_18_ÅR_2_NOVEMBER, sendtTilNAVEllerArbeidsgiver = 2.november.atStartOfDay())
         assertFalse(søknad.valider(EN_PERIODE).hasErrorsOrWorse())
     }
 
@@ -268,7 +268,7 @@ internal class SøknadTest {
         assertTrue(søknad.hentErrors().contains("Søknaden inneholder andre inntektskilder enn ANDRE_ARBEIDSFORHOLD"))
     }
 
-    private fun søknad(vararg perioder: Søknadsperiode, andreInntektskilder: List<Inntektskilde> = emptyList(), permittert: Boolean = false, merknaderFraSykmelding: List<Merknad> = emptyList(), fnr: String = UNG_PERSON_FNR_2018, sendtTilNav: LocalDateTime? = null) {
+    private fun søknad(vararg perioder: Søknadsperiode, andreInntektskilder: List<Inntektskilde> = emptyList(), permittert: Boolean = false, merknaderFraSykmelding: List<Merknad> = emptyList(), fnr: String = UNG_PERSON_FNR_2018, sendtTilNAVEllerArbeidsgiver: LocalDateTime? = null) {
         søknad = Søknad(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = fnr,
@@ -276,7 +276,7 @@ internal class SøknadTest {
             orgnummer = "987654321",
             perioder = listOf(*perioder),
             andreInntektskilder = andreInntektskilder,
-            sendtTilNAV = sendtTilNav ?: Søknadsperiode.søknadsperiode(perioder.toList())?.endInclusive?.atStartOfDay() ?: LocalDateTime.now(),
+            sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver ?: Søknadsperiode.søknadsperiode(perioder.toList())?.endInclusive?.atStartOfDay() ?: LocalDateTime.now(),
             permittert = permittert,
             merknaderFraSykmelding = merknaderFraSykmelding,
             sykmeldingSkrevet = LocalDateTime.now()

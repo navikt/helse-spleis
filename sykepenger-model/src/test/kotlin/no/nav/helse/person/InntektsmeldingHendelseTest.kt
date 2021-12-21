@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import no.nav.helse.Organisasjonsnummer
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode
+import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -130,7 +130,7 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
             orgnummer = orgnummer.toString(),
             perioder = listOf(*perioder),
             andreInntektskilder = emptyList(),
-            sendtTilNAV = Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay(),
+            sendtTilNAVEllerArbeidsgiver = Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay(),
             permittert = false,
             merknaderFraSykmelding = emptyList(),
             sykmeldingSkrevet = LocalDateTime.now()

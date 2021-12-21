@@ -52,8 +52,6 @@ class Person private constructor(
 
     fun håndter(søknad: Søknad) = håndter(søknad, "søknad")
 
-    fun håndter(søknad: SøknadArbeidsgiver) = håndter(søknad, "søknad til arbeidsgiver")
-
     fun håndter(inntektsmelding: Inntektsmelding) = håndter(inntektsmelding, "inntektsmelding")
 
     fun håndter(inntektsmelding: InntektsmeldingReplay) {

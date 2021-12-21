@@ -184,7 +184,7 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
         assertTilstander(
             0,
             "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVVENTER_ARBEIDSGIVERSØKNAD_FERDIG_GAP",
+            "AVVENTER_SØKNAD_FERDIG_GAP",
             "TIL_INFOTRYGD"
         )
         assertTilstander(

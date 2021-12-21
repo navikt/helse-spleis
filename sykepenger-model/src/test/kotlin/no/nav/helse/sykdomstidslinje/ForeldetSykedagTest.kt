@@ -1,9 +1,8 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Søknad
-import no.nav.helse.hendelser.SøknadArbeidsgiver
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.testhelpers.*
@@ -61,23 +60,6 @@ internal class ForeldetSykedagTest {
         }
     }
 
-    @Test fun `Søknad til arbeidsgiver lager Sykedager og SykHelgedag`() {
-        undersøke(søknadArbeidsgiver(1.mars)).also {
-            assertEquals(28, it.dagerTeller)
-            assertEquals(20, it.dagstypeTeller[Sykedag::class])
-            assertEquals(8, it.dagstypeTeller[SykHelgedag::class])
-        }
-    }
-
-    @Test fun `Søknad til arbeidsgiver lager foreldet dager`() {
-        undersøke(søknadArbeidsgiver(1.mai)).also {
-            assertEquals(28, it.dagerTeller)
-            assertEquals(10, it.dagstypeTeller[Sykedag::class])
-            assertEquals(10, it.dagstypeTeller[ForeldetSykedag::class])
-            assertEquals(8, it.dagstypeTeller[SykHelgedag::class])
-        }
-    }
-
     private fun søknad(sendtTilNAV: LocalDate): Søknad {
         return Søknad(
             meldingsreferanseId = UUID.randomUUID(),
@@ -86,26 +68,10 @@ internal class ForeldetSykedagTest {
             orgnummer = ORGNUMMER,
             perioder = listOf(Sykdom(18.januar, 14.februar, 100.prosent)), // 10 sykedag januar & februar
             andreInntektskilder = emptyList(),
-            sendtTilNAV = sendtTilNAV.atStartOfDay(),
+            sendtTilNAVEllerArbeidsgiver = sendtTilNAV.atStartOfDay(),
             permittert = false,
             merknaderFraSykmelding = emptyList(),
             sykmeldingSkrevet = LocalDateTime.now()
-        )
-    }
-
-    private fun søknadArbeidsgiver(sendtTilArbeidsgiver: LocalDate): SøknadArbeidsgiver {
-        return SøknadArbeidsgiver(
-            meldingsreferanseId = UUID.randomUUID(),
-            fnr = UNG_PERSON_FNR_2018,
-            aktørId = AKTØRID,
-            orgnummer = ORGNUMMER,
-            perioder = listOf(Sykdom(18.januar, 14.februar, 100.prosent)), // 10 sykedag januar & februar
-            sykmeldingSkrevet = LocalDateTime.now(),
-            sendtTilArbeidsgiver = sendtTilArbeidsgiver.atStartOfDay(),
-            // TODO: Nye parametre vi nå mapper
-            andreInntektskilder = emptyList(),
-            merknaderFraSykmelding = emptyList(),
-            permittert = false
         )
     }
 

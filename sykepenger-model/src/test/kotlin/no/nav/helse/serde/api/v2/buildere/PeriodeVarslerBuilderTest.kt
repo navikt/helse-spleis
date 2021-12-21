@@ -1,8 +1,10 @@
 package no.nav.helse.serde.api.v2.buildere
 
-import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Utdanning
+import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utdanning
+import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.GrunnlagsdataInspektør
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Vedtaksperiode
@@ -49,7 +51,7 @@ internal class PeriodeVarslerBuilderTest: AbstractEndToEndTest() {
     @Test
     fun `foregående uten utbetaling med warning og warning på periode to`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 15.januar, 100.prosent))
-        håndterSøknadArbeidsgiver(Sykdom(1.januar, 15.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 2.januar) // Warning
 
         håndterSykmelding(Sykmeldingsperiode(16.januar, 31.januar, 100.prosent))

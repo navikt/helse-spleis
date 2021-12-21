@@ -2,7 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
-import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Inntektshistorikk.Skatt.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.person.Inntektskilde
@@ -406,7 +406,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         håndterSøknad(
             Sykdom(1.mars, 31.mars, 100.prosent),
-            andreInntektskilder = listOf(SendtSøknad.Inntektskilde(false, "ANDRE_ARBEIDSFORHOLD")),
+            andreInntektskilder = listOf(Søknad.Inntektskilde(false, "ANDRE_ARBEIDSFORHOLD")),
             orgnummer = a1
         )
 
@@ -419,7 +419,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         håndterSøknad(
             Sykdom(1.mars, 31.mars, 100.prosent),
-            andreInntektskilder = listOf(SendtSøknad.Inntektskilde(true, "ANDRE_ARBEIDSFORHOLD")),
+            andreInntektskilder = listOf(Søknad.Inntektskilde(true, "ANDRE_ARBEIDSFORHOLD")),
             orgnummer = a1
         )
 

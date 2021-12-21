@@ -1,14 +1,28 @@
 package no.nav.helse.spleis.meldinger.model
 
-import no.nav.helse.hendelser.SendtSøknad.*
-import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.*
+import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.Søknad.*
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import java.time.LocalDate
 
-internal abstract class SendtSøknadBuilder : SøknadBuilder() {
-    protected val perioder = mutableListOf<Søknadsperiode>()
-    protected val merkander = mutableListOf<Merknad>()
-    protected val inntektskilder = mutableListOf<Inntektskilde>()
+internal class SendtSøknadBuilder : SøknadBuilder() {
+    private val perioder = mutableListOf<Søknadsperiode>()
+    private val merkander = mutableListOf<Merknad>()
+    private val inntektskilder = mutableListOf<Inntektskilde>()
+
+    internal fun build() = Søknad(
+        meldingsreferanseId = meldingsreferanseId,
+        fnr = fnr,
+        aktørId = aktørId,
+        orgnummer = organisasjonsnummer,
+        perioder = perioder,
+        andreInntektskilder = inntektskilder,
+        sendtTilNAVEllerArbeidsgiver = innsendt!!,
+        permittert = permittert,
+        merknaderFraSykmelding = merkander,
+        sykmeldingSkrevet = sykmeldingSkrevet
+    )
 
     override fun inntektskilde(sykmeldt: Boolean, type: String) = apply {
         inntektskilder.add(Inntektskilde(sykmeldt = sykmeldt, type = type))

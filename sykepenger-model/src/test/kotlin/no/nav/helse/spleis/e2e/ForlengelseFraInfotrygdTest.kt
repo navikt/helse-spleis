@@ -2,8 +2,8 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Toggle
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Ferie
-import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ForlengelseFraInfotrygd
@@ -200,7 +200,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(
             Sykdom(1.februar, 28.februar, 100.prosent),
-            andreInntektskilder = listOf(SendtSøknad.Inntektskilde(true, "ANDRE_ARBEIDSFORHOLD")) // <-- for å sende til Infotrygd
+            andreInntektskilder = listOf(Søknad.Inntektskilde(true, "ANDRE_ARBEIDSFORHOLD")) // <-- for å sende til Infotrygd
         )
         inspektør.sykdomstidslinje.inspektør.låstePerioder.also {
             assertEquals(0, it.size)
@@ -255,7 +255,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
     @Test
     fun `lager ikke ny arbeidsgiverperiode når det er tilstøtende historikk`() {
         håndterSykmelding(Sykmeldingsperiode(18.februar(2020), 3.mars(2020), 100.prosent))
-        håndterSøknadArbeidsgiver(Sykdom(18.februar(2020), 3.mars(2020), 100.prosent))
+        håndterSøknad(Sykdom(18.februar(2020), 3.mars(2020), 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(4.mars(2020), 17.mars(2020), 100.prosent))
         håndterSøknad(Sykdom(4.mars(2020), 17.mars(2020), 100.prosent))
@@ -444,7 +444,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
     fun `Forlengelse av søknad uten utbetaling med opphold betalt i Infotrygd`() {
         // Inspirert av et case i P der en overlappende sykmelding ble kastet
         håndterSykmelding(Sykmeldingsperiode(26.mai(2020), 2.juni(2020), 100.prosent))
-        håndterSøknadArbeidsgiver(Sykdom(26.mai(2020), 2.juni(2020), 100.prosent))
+        håndterSøknad(Sykdom(26.mai(2020), 2.juni(2020), 100.prosent))
         håndterInntektsmelding(listOf(Periode(26.mai(2020), 2.juni(2020))), førsteFraværsdag = 26.mai(2020))
 
         håndterSykmelding(Sykmeldingsperiode(22.juni(2020), 11.juli(2020), 100.prosent))

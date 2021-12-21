@@ -300,25 +300,17 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun håndter(søknad: Søknad) {
-        håndterSøknad(søknad, Vedtaksperiode::håndter)
-    }
-
-    internal fun håndter(søknad: SøknadArbeidsgiver) {
-        håndterSøknad(søknad, Vedtaksperiode::håndter)
-    }
-
-    private fun <Hendelse : SendtSøknad> håndterSøknad(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean) {
-        hendelse.kontekst(this)
-        if (vedtaksperioder.any { it.overlapperMenUlikFerieinformasjon(hendelse) }) {
-            hendelse.warn("Det er oppgitt ny informasjon om ferie i søknaden som det ikke har blitt opplyst om tidligere. Tidligere periode må revurderes.")
+        søknad.kontekst(this)
+        if (vedtaksperioder.any { it.overlapperMenUlikFerieinformasjon(søknad) }) {
+            søknad.warn("Det er oppgitt ny informasjon om ferie i søknaden som det ikke har blitt opplyst om tidligere. Tidligere periode må revurderes.")
         }
-        noenHarHåndtert(hendelse, håndterer, "Forventet ikke ${hendelse.kilde}. Har nok ikke mottatt sykmelding")
-        if (hendelse.hasErrorsOrWorse()) {
-            val harNærliggendeUtbetaling = hendelse.sykdomstidslinje().periode()?.let(person::harNærliggendeUtbetaling) ?: false
-            if (harNærliggendeUtbetaling) person.emitOpprettOppgaveForSpeilsaksbehandlereEvent(hendelse) else person.emitOpprettOppgaveEvent(hendelse)
-            person.emitHendelseIkkeHåndtert(hendelse)
+        noenHarHåndtert(søknad, Vedtaksperiode::håndter, "Forventet ikke ${søknad.kilde}. Har nok ikke mottatt sykmelding")
+        if (søknad.hasErrorsOrWorse()) {
+            val harNærliggendeUtbetaling = søknad.sykdomstidslinje().periode()?.let(person::harNærliggendeUtbetaling) ?: false
+            if (harNærliggendeUtbetaling) person.emitOpprettOppgaveForSpeilsaksbehandlereEvent(søknad) else person.emitOpprettOppgaveEvent(søknad)
+            person.emitHendelseIkkeHåndtert(søknad)
         }
-        finalize(hendelse)
+        finalize(søknad)
     }
 
     internal fun harRefusjonOpphørt(periodeTom: LocalDate): Boolean {

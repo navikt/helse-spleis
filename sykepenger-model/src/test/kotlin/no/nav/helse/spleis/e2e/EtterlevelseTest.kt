@@ -3,7 +3,7 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.ForventetFeil
 import no.nav.helse.Organisasjonsnummer
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.*
 import no.nav.helse.person.Bokstav.BOKSTAV_A
 import no.nav.helse.person.Ledd.Companion.ledd
@@ -371,7 +371,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(
             1.vedtaksperiode,
             Sykdom(3.januar(2018), 11.januar(2019), 50.prosent, 50.prosent),
-            sendtTilNav = 3.januar(2018)
+            sendtTilNAVEllerArbeidsgiver = 3.januar(2018)
         )
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar(2018), 18.januar(2018))))
         håndterYtelser(1.vedtaksperiode)

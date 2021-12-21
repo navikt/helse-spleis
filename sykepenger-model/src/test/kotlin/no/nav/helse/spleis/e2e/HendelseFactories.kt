@@ -3,7 +3,7 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.Organisasjonsnummer
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode
+import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
@@ -111,8 +111,8 @@ internal fun AbstractEndToEndTest.sentSykmelding(
 internal fun AbstractEndToEndTest.søknad(
     id: UUID,
     vararg perioder: Søknadsperiode,
-    andreInntektskilder: List<SendtSøknad.Inntektskilde> = emptyList(),
-    sendtTilNav: LocalDate = Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive,
+    andreInntektskilder: List<Søknad.Inntektskilde> = emptyList(),
+    sendtTilNAVEllerArbeidsgiver: LocalDate = Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive,
     orgnummer: Organisasjonsnummer = AbstractPersonTest.ORGNUMMER,
     sykmeldingSkrevet: LocalDateTime? = null,
     fnr: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018
@@ -124,32 +124,10 @@ internal fun AbstractEndToEndTest.søknad(
         orgnummer = orgnummer.toString(),
         perioder = listOf(*perioder),
         andreInntektskilder = andreInntektskilder,
-        sendtTilNAV = sendtTilNav.atStartOfDay(),
+        sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver.atStartOfDay(),
         permittert = false,
         merknaderFraSykmelding = emptyList(),
         sykmeldingSkrevet = sykmeldingSkrevet ?: Søknadsperiode.søknadsperiode(perioder.toList())!!.start.atStartOfDay()
-    ).apply {
-        hendelselogg = this
-    }
-}
-
-internal fun AbstractEndToEndTest.søknadArbeidsgiver(
-    vararg perioder: Søknadsperiode,
-    fnr: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018,
-    orgnummer: Organisasjonsnummer
-): SøknadArbeidsgiver {
-    return SøknadArbeidsgiver(
-        meldingsreferanseId = UUID.randomUUID(),
-        fnr = fnr.toString(),
-        aktørId = AbstractPersonTest.AKTØRID,
-        orgnummer = orgnummer.toString(),
-        perioder = perioder.toList(),
-        sykmeldingSkrevet = LocalDateTime.now(),
-        sendtTilArbeidsgiver = Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay(),
-        // TODO: Nye parametre vi nå mapper
-        andreInntektskilder = emptyList(),
-        merknaderFraSykmelding = emptyList(),
-        permittert = false
     ).apply {
         hendelselogg = this
     }

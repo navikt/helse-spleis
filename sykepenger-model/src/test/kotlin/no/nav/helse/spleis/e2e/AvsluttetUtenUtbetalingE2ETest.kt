@@ -1,7 +1,9 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.TilstandType
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
@@ -18,7 +20,7 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
     @Test
     fun `kort periode blokkerer neste periode i ny arbeidsgiverperiode`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 10.januar, 100.prosent))
-        håndterSøknadArbeidsgiver(Sykdom(3.januar, 10.januar, 100.prosent))
+        håndterSøknad(Sykdom(3.januar, 10.januar, 100.prosent))
         assertTilstander(
             0,
             TilstandType.START,
@@ -58,7 +60,7 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
     @Test
     fun `kort periode setter senere periode fast i AVVENTER_HISTORIKK`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 10.januar, 100.prosent))
-        håndterSøknadArbeidsgiver(Sykdom(3.januar, 10.januar, 100.prosent))
+        håndterSøknad(Sykdom(3.januar, 10.januar, 100.prosent))
         assertTilstander(
             1.vedtaksperiode,
             TilstandType.START,
@@ -67,7 +69,7 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
         )
 
         håndterSykmelding(Sykmeldingsperiode(3.mars, 7.mars, 100.prosent))
-        håndterSøknadArbeidsgiver(Sykdom(3.mars, 7.mars, 100.prosent))
+        håndterSøknad(Sykdom(3.mars, 7.mars, 100.prosent))
         assertTilstander(
             2.vedtaksperiode,
             TilstandType.START,
@@ -111,7 +113,7 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
     @Test
     fun `Sender vedtaksperiode_endret når inntektsmelidng kommer i AVSLUTTET_UTEN_UTBETALING`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2021), 1.januar(2021), 100.prosent))
-        håndterSøknadArbeidsgiver(Sykdom(1.januar(2021), 1.januar(2021), 100.prosent))
+        håndterSøknad(Sykdom(1.januar(2021), 1.januar(2021), 100.prosent))
 
         Assertions.assertEquals(2, observatør.hendelseider(1.vedtaksperiode(ORGNUMMER)).size)
 

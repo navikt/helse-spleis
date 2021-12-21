@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.hendelser.SendtSøknad.Søknadsperiode.*
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -193,7 +193,7 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(20.februar, 28.februar, 100.prosent))
-        håndterSøknadArbeidsgiver(Sykdom(20.februar, 28.februar, 100.prosent), Ferie(25.januar, 30.januar))
+        håndterSøknad(Sykdom(20.februar, 28.februar, 100.prosent), Ferie(25.januar, 30.januar))
 
         assertEquals(1.januar til 31.januar, inspektør.periode(1.vedtaksperiode) )
         assertEquals(20.februar til 28.februar, inspektør.periode(2.vedtaksperiode) )
