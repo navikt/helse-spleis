@@ -15,11 +15,19 @@ internal val Utbetaling.inspektør get() = UtbetalingInspektør(this)
 
 internal class UtbetalingInspektør(utbetaling: Utbetaling) : UtbetalingVisitor {
     lateinit var utbetalingId: UUID
+        private set
     lateinit var korrelasjonsId: UUID
+        private set
+    lateinit var periode: Periode
+        private set
     lateinit var tilstand: Utbetaling.Tilstand
+        private set
     lateinit var arbeidsgiverOppdrag: Oppdrag
+        private set
     lateinit var personOppdrag: Oppdrag
+        private set
     lateinit var utbetalingstidslinje: Utbetalingstidslinje
+        private set
     private lateinit var status: Utbetaling.Tilstand
     private lateinit var type: Utbetalingtype
     var avstemmingsnøkkel: Long? = null
@@ -54,6 +62,7 @@ internal class UtbetalingInspektør(utbetaling: Utbetaling) : UtbetalingVisitor 
         avstemmingsnøkkel: Long?
     ) {
         utbetalingId = id
+        this.periode = periode
         this.korrelasjonsId = korrelasjonsId
         this.tilstand = tilstand
         this.type = type

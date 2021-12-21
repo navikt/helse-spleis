@@ -827,4 +827,60 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
         assertEquals(2, inspektør.arbeidsgiverOppdrag[1].linjerUtenOpphør().size)
     }
+
+    @Test
+    fun `infotrygd overtar periode med arbeidsgiverperiode 2`() {
+        håndterSykmelding(Sykmeldingsperiode(22.januar, 28.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(29.januar, 6.februar, 100.prosent))
+        håndterSøknad(Sykdom(29.januar, 6.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(7.februar, 7.februar, 100.prosent))
+        håndterSøknad(Sykdom(7.februar, 7.februar, 100.prosent))
+        person.søppelbøtte(hendelselogg, 7.februar til 7.februar) // perioden fikk en error som trigget utkastelse
+        håndterSykmelding(Sykmeldingsperiode(8.februar, 25.februar, 100.prosent))
+        håndterSøknad(Sykdom(8.februar, 25.februar, 100.prosent))
+        håndterUtbetalingshistorikk(4.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 7.februar, 7.februar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
+            Inntektsopplysning(ORGNUMMER.toString(), 7.februar, INNTEKT, true)
+        ))
+        håndterYtelser(4.vedtaksperiode)
+        val utbetaling = inspektør.utbetaling(0).inspektør
+        assertEquals(8.februar til 25.februar, utbetaling.periode)
+        assertTrue(utbetaling.utbetalingstidslinje[8.februar] is NavDag)
+    }
+
+    @Test
+    fun `infotrygd overtar periode med arbeidsgiverperiode`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(11.januar, 18.januar, 100.prosent))
+        håndterSøknad(Sykdom(11.januar, 18.januar, 100.prosent))
+        person.søppelbøtte(hendelselogg, 11.januar til 18.januar) // perioden fikk en error som trigget utkastelse
+        håndterSykmelding(Sykmeldingsperiode(19.januar, 25.januar, 100.prosent))
+        håndterSøknad(Sykdom(19.januar, 25.januar, 100.prosent))
+        håndterUtbetalingshistorikk(3.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 17.januar, 18.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
+            Inntektsopplysning(ORGNUMMER.toString(), 17.januar, INNTEKT, true)
+        ))
+        håndterYtelser(3.vedtaksperiode)
+        val utbetaling = inspektør.utbetaling(0).inspektør
+        assertEquals(19.januar til 25.januar, utbetaling.periode)
+        assertTrue(utbetaling.utbetalingstidslinje[19.januar] is NavDag)
+    }
+
+    @Test
+    fun `infotrygd overtar periode med arbeidsgiverperiode med opphold`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 2.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 12.januar, 100.prosent))
+        håndterSøknad(Sykdom(3.januar, 12.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(18.januar, 22.januar, 100.prosent))
+        håndterSøknad(Sykdom(18.januar, 22.januar, 100.prosent))
+        person.søppelbøtte(hendelselogg, 18.januar til 22.januar) // perioden fikk en error som trigget utkastelse
+        håndterSykmelding(Sykmeldingsperiode(23.januar, 31.januar, 100.prosent))
+        håndterUtbetalingshistorikk(4.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 22.januar, 22.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
+            Inntektsopplysning(ORGNUMMER.toString(), 22.januar, INNTEKT, true)
+        ))
+        håndterSøknad(Sykdom(23.januar, 31.januar, 100.prosent))
+        håndterYtelser(4.vedtaksperiode)
+        val utbetaling = inspektør.utbetaling(0).inspektør
+        assertEquals(23.januar til 31.januar, utbetaling.periode)
+        assertTrue(utbetaling.utbetalingstidslinje[23.januar] is NavDag)
+    }
 }

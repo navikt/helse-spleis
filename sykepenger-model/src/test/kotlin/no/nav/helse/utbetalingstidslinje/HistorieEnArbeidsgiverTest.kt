@@ -184,7 +184,7 @@ internal class HistorieEnArbeidsgiverTest : HistorieTest() {
         assertTrue(utbetalingstidslinje[7.januar] is ArbeidsgiverperiodeDag)
         assertTrue(utbetalingstidslinje[8.januar] is UkjentDag)
         assertTrue(utbetalingstidslinje[12.januar] is UkjentDag)
-        assertTrue(utbetalingstidslinje[13.januar] is ArbeidsgiverperiodeDag)
+        assertTrue(utbetalingstidslinje[13.januar] is NavHelgDag)
         assertEquals(1.januar til 21.januar, utbetalingstidslinje.periode())
     }
 

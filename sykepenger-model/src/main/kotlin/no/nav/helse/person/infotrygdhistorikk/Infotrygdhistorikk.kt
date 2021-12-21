@@ -165,7 +165,8 @@ internal class Infotrygdhistorikk private constructor(
         private lateinit var samletSykdomstidslinje: Sykdomstidslinje
         init {
             builder.forlengelsestrategi { dagen ->
-                harBetalt(organisasjonsnummer, samletSykdomstidslinje.sisteSkjæringstidspunktTidligereEnn(dagen) ?: dagen)
+                val skjæringstidspunkt = samletSykdomstidslinje.sisteSkjæringstidspunktTidligereEnn(dagen)
+                harBetalt(organisasjonsnummer, dagen) || (skjæringstidspunkt != null && harBetalt(organisasjonsnummer, skjæringstidspunkt))
             }
         }
 

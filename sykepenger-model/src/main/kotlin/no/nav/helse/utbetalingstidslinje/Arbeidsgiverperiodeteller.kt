@@ -87,6 +87,10 @@ internal class Arbeidsgiverperiodeteller(private val regler: ArbeidsgiverRegler,
     }
 
     private fun _inkrementer(dagen: LocalDate, strategi: Arbeidsgiverperiodestrategi) {
+        if (forlengelsestrategi.erArbeidsgiverperiodenGjennomførtFør(dagen)) {
+            strategi.dagenInngårIkkeIArbeidsgiverperiodetelling(null, dagen)
+            return tilstand(HarFullstendigInfotrygdArbeidsgiverperiode, dagen)
+        }
         oppholdsdager = 0
         arbeidsgiverperiodedager += 1
         builder.nyDag(dagen)
@@ -167,13 +171,8 @@ internal class Arbeidsgiverperiodeteller(private val regler: ArbeidsgiverRegler,
         }
 
         override fun inkrementer(teller: Arbeidsgiverperiodeteller, dagen: LocalDate, strategi: Arbeidsgiverperiodestrategi) {
-            if (teller.forlengelsestrategi.erArbeidsgiverperiodenGjennomførtFør(dagen)) {
-                strategi.dagenInngårIkkeIArbeidsgiverperiodetelling(null, dagen)
-                return teller.tilstand(HarFullstendigInfotrygdArbeidsgiverperiode, dagen)
-            }
-
-            teller._inkrementer(dagen, strategi)
             teller.tilstand(PåbegyntArbeidsgiverperiode, dagen)
+            teller._inkrementer(dagen, strategi)
         }
     }
 
@@ -204,12 +203,6 @@ internal class Arbeidsgiverperiodeteller(private val regler: ArbeidsgiverRegler,
         }
 
         override fun inkrementer(teller: Arbeidsgiverperiodeteller, dagen: LocalDate, strategi: Arbeidsgiverperiodestrategi) {
-            if (teller.forlengelsestrategi.erArbeidsgiverperiodenGjennomførtFør(dagen)) {
-                strategi.dagenInngårIkkeIArbeidsgiverperiodetelling(null, dagen)
-                teller.arbeidsgiverperiodedager = 0
-                teller.pågåendeArbeidsgiverperiode = null
-                return teller.tilstand(HarFullstendigInfotrygdArbeidsgiverperiode, dagen)
-            }
             teller._inkrementer(dagen, strategi)
         }
     }
@@ -290,8 +283,8 @@ internal class Arbeidsgiverperiodeteller(private val regler: ArbeidsgiverRegler,
     private object HarFullstendigInfotrygdArbeidsgiverperiode : Tilstand {
         override fun entering(teller: Arbeidsgiverperiodeteller, dagen: LocalDate) {
             teller.oppholdsdager = 0 // om oppholdsdager > 0 betyr det at vi kommer tilbake fra et opphold i arbeidsgiverperioden
-            check(teller.arbeidsgiverperiodedager == 0)
-            check(teller.pågåendeArbeidsgiverperiode == null)
+            teller.arbeidsgiverperiodedager = 0
+            teller.pågåendeArbeidsgiverperiode =null
         }
 
         override fun dekrementerer(teller: Arbeidsgiverperiodeteller, dagen: LocalDate) {
