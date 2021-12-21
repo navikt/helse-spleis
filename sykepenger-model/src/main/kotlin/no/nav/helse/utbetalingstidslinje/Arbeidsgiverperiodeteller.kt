@@ -204,6 +204,12 @@ internal class Arbeidsgiverperiodeteller(private val regler: ArbeidsgiverRegler,
         }
 
         override fun inkrementer(teller: Arbeidsgiverperiodeteller, dagen: LocalDate, strategi: Arbeidsgiverperiodestrategi) {
+            if (teller.forlengelsestrategi.erArbeidsgiverperiodenGjennomførtFør(dagen)) {
+                strategi.dagenInngårIkkeIArbeidsgiverperiodetelling(null, dagen)
+                teller.arbeidsgiverperiodedager = 0
+                teller.pågåendeArbeidsgiverperiode = null
+                return teller.tilstand(HarFullstendigInfotrygdArbeidsgiverperiode, dagen)
+            }
             teller._inkrementer(dagen, strategi)
         }
     }

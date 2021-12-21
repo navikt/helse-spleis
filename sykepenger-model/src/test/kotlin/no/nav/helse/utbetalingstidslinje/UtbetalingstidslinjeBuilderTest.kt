@@ -70,6 +70,15 @@ internal class UtbetalingstidslinjeBuilderTest {
     }
 
     @Test
+    fun `infotrygd utbetaler etter vi har startet arbeidsgiverperiodetelling`() {
+        (31.S).utbetalingslinjer(strategi = infotrygdUtbetaling(listOf(10.januar)))
+        assertEquals(3, tidslinje.inspektør.unikedager.size)
+        assertEquals(9, tidslinje.inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(16, tidslinje.inspektør.navDagTeller)
+        assertEquals(6, tidslinje.inspektør.navHelgDagTeller)
+    }
+
+    @Test
     fun `sammenblandet infotrygd og spleis`() {
         (2.S + 15.A + 2.S).utbetalingslinjer(strategi = infotrygdUtbetaling(listOf(1.januar)))
         assertEquals(2, tidslinje.inspektør.unikedager.size)

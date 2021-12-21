@@ -247,6 +247,18 @@ internal class ArbeidsgiverperiodetellerTest {
     }
 
     @Test
+    fun `påbegynt arbeidsgiverperiode så utbetalt periode i infotrygd`() {
+        teller { dagen -> dagen == 17.januar }
+        (2.januar til 10.januar).tell()
+        (11.januar til 15.januar).oppholdsdager()
+        (16.januar til 31.januar).tell()
+        assertEquals(10, strategi.antallDagerSomInngårIArbeidsgiverperiodetelling)
+        assertEquals(15, strategi.antallSykedagerEllerFridagerSomIkkeInngårIArbeidsgiverperiodetelling)
+        assertEquals(0, observatør.arbeidsgiverperioder())
+        (17.januar til 31.januar).forEach { assertNull(strategi.arbeidsgiverperiodeFor(it)) }
+    }
+
+    @Test
     fun `noen oppholdsdager etter arbeidsgiverperiode gjennomført i infotrygd - ikke nok til tilbakestilling`() {
         teller { dagen -> dagen == 1.januar }
         (1.januar til 31.januar).tell()
