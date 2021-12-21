@@ -123,6 +123,7 @@ data class UtbetalingshistorikkElementDTO(
                     TilstandType.AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE,
                     TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_GAP,
                     TilstandType.AVVENTER_UFERDIG_GAP,
+                    TilstandType.AVVENTER_UFERDIG,
                     TilstandType.AVVENTER_SØKNAD_UFERDIG_FORLENGELSE,
                     TilstandType.AVVENTER_SØKNAD_FERDIG_FORLENGELSE,
                     TilstandType.AVVENTER_UFERDIG_FORLENGELSE,

@@ -169,23 +169,6 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Blir værende i nåværende tilstand dersom søknad kommer inn i AVVENTER_UFERDIG_GAP`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-
-        håndterSykmelding(Sykmeldingsperiode(2.februar, 28.februar, 100.prosent))
-        håndterSøknad(Sykdom(2.februar, 28.februar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 2.februar)
-        håndterSøknad(Sykdom(2.februar, 28.februar, 100.prosent), Ferie(28.februar, 28.februar))
-        inspektør.sykdomstidslinje.inspektør.also {
-            assertTrue(it[28.februar] is Feriedag)
-        }
-        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
-        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP, AVVENTER_UFERDIG_GAP)
-        assertEquals(1, inspektør.personLogg.warn().size)
-    }
-
-    @Test
     fun `Blir værende i nåværende tilstand dersom søknad kommer inn i AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
@@ -203,7 +186,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Blir værende i nåværende tilstand dersom søknad kommer inn i AVVENTER_UFERDIG_FORLENGELSE`() {
+    fun `Blir værende i nåværende tilstand dersom søknad kommer inn i AVVENTER_UFERDIG`() {
         håndterSykmelding(Sykmeldingsperiode(1.desember(2017), 11.desember(2017), 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
@@ -228,7 +211,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
-            AVVENTER_UFERDIG_FORLENGELSE,
+            AVVENTER_UFERDIG,
             AVVENTER_HISTORIKK
         )
         assertEquals(1, inspektør.personLogg.warn().size)

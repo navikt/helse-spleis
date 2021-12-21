@@ -328,7 +328,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
-            AVVENTER_UFERDIG_FORLENGELSE,
+            AVVENTER_UFERDIG,
             AVVENTER_HISTORIKK
         )
 
@@ -378,7 +378,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
-            AVVENTER_UFERDIG_FORLENGELSE,
+            AVVENTER_UFERDIG,
             AVVENTER_HISTORIKK
         )
         val revurdering = inspektør.utbetaling(2)
@@ -647,7 +647,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
-            AVVENTER_UFERDIG_GAP
+            AVVENTER_UFERDIG
         )
         assertTilstander(
             3.vedtaksperiode,
@@ -912,7 +912,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
             AVVENTER_HISTORIKK,
-            AVVENTER_UFERDIG_FORLENGELSE,
+            AVVENTER_UFERDIG,
             AVVENTER_HISTORIKK
         )
         assertNoErrors(inspektør)
@@ -1138,7 +1138,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_UFERDIG_GAP,
             AVVENTER_SØKNAD_UFERDIG_GAP,
-            AVVENTER_UFERDIG_GAP,
+            AVVENTER_UFERDIG,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,

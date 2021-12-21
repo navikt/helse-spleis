@@ -820,6 +820,7 @@ internal data class PersonData(
                 TilstandType.AVVENTER_SØKNAD_UFERDIG_FORLENGELSE -> Vedtaksperiode.AvventerSøknadUferdigForlengelse
                 TilstandType.AVVENTER_SØKNAD_FERDIG_FORLENGELSE -> Vedtaksperiode.AvventerSøknadFerdigForlengelse
                 TilstandType.AVVENTER_UFERDIG_FORLENGELSE -> Vedtaksperiode.AvventerUferdigForlengelse
+                TilstandType.AVVENTER_UFERDIG -> Vedtaksperiode.AvventerUferdig
                 TilstandType.AVVENTER_ARBEIDSGIVERE -> Vedtaksperiode.AvventerArbeidsgivere
                 TilstandType.AVVENTER_REVURDERING -> Vedtaksperiode.AvventerRevurdering
                 TilstandType.AVVENTER_HISTORIKK_REVURDERING -> Vedtaksperiode.AvventerHistorikkRevurdering

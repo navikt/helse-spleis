@@ -671,7 +671,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_UFERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_UFERDIG_GAP,
-            AVVENTER_UFERDIG_GAP,
+            AVVENTER_UFERDIG,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -729,7 +729,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_UFERDIG_GAP,
             AVVENTER_SØKNAD_UFERDIG_GAP,
-            AVVENTER_UFERDIG_GAP,
+            AVVENTER_UFERDIG,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -869,7 +869,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_UFERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_UFERDIG_GAP,
-            AVVENTER_UFERDIG_GAP,
+            AVVENTER_UFERDIG,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -1173,7 +1173,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
-            AVVENTER_UFERDIG_FORLENGELSE,
+            AVVENTER_UFERDIG,
             AVVENTER_HISTORIKK
         )
     }
@@ -1793,7 +1793,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_UFERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_UFERDIG_GAP,
-            AVVENTER_UFERDIG_GAP
+            AVVENTER_UFERDIG
         )
     }
 
@@ -2410,7 +2410,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         )
 
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
-        assertSisteTilstand(3.vedtaksperiode, AVVENTER_UFERDIG_FORLENGELSE)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_UFERDIG)
 
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)

@@ -102,7 +102,7 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_UFERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_UFERDIG_GAP,
-            AVVENTER_UFERDIG_GAP
+            AVVENTER_UFERDIG
         )
 
         assertEquals(1, observatør.trengerIkkeInntektsmeldingVedtaksperioder.size)

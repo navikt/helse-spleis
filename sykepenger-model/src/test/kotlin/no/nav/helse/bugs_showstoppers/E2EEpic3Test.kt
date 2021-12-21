@@ -189,7 +189,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             5.januar
         )
 
-        assertSisteTilstand(3.vedtaksperiode, AVVENTER_UFERDIG_GAP)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_UFERDIG)
 
         håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, LocalDateTime.now().minusDays(111))
 
@@ -213,7 +213,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_UFERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_UFERDIG_GAP,
-            AVVENTER_UFERDIG_GAP,
+            AVVENTER_UFERDIG,
             AVVENTER_HISTORIKK
         )
     }
@@ -256,7 +256,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_UFERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_UFERDIG_GAP,
-            AVVENTER_UFERDIG_GAP,
+            AVVENTER_UFERDIG,
             AVVENTER_HISTORIKK
         )
     }
