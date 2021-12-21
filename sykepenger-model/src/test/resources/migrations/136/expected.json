@@ -184,7 +184,7 @@
                 },
                 {
                     "vedtaksperiode": {
-                        "tilstand": "AVVENTER_HISTORIKK_REVURDERING"
+                        "tilstand": "TIL_INFOTRYGD"
                     }
                 },
                 {

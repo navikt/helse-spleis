@@ -797,8 +797,6 @@ internal data class PersonData(
                 TilstandType.TIL_UTBETALING -> Vedtaksperiode.TilUtbetaling
                 TilstandType.AVSLUTTET -> Vedtaksperiode.Avsluttet
                 TilstandType.AVSLUTTET_UTEN_UTBETALING -> Vedtaksperiode.AvsluttetUtenUtbetaling
-                TilstandType.UTEN_UTBETALING_MED_INNTEKTSMELDING_UFERDIG_GAP -> Vedtaksperiode.UtenUtbetalingMedInntektsmeldingUferdigGap
-                TilstandType.UTEN_UTBETALING_MED_INNTEKTSMELDING_UFERDIG_FORLENGELSE -> Vedtaksperiode.UtenUtbetalingMedInntektsmeldingUferdigForlengelse
                 TilstandType.UTBETALING_FEILET -> Vedtaksperiode.UtbetalingFeilet
                 TilstandType.REVURDERING_FEILET -> Vedtaksperiode.RevurderingFeilet
                 TilstandType.TIL_INFOTRYGD -> Vedtaksperiode.TilInfotrygd
@@ -807,19 +805,15 @@ internal data class PersonData(
                 TilstandType.MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE -> Vedtaksperiode.MottattSykmeldingUferdigForlengelse
                 TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP -> Vedtaksperiode.MottattSykmeldingFerdigGap
                 TilstandType.MOTTATT_SYKMELDING_UFERDIG_GAP -> Vedtaksperiode.MottattSykmeldingUferdigGap
-                TilstandType.AVVENTER_ARBEIDSGIVERSØKNAD_FERDIG_GAP -> Vedtaksperiode.AvventerArbeidsgiversøknadFerdigGap
-                TilstandType.AVVENTER_ARBEIDSGIVERSØKNAD_UFERDIG_GAP -> Vedtaksperiode.AvventerArbeidsgiversøknadUferdigGap
                 TilstandType.AVVENTER_SØKNAD_FERDIG_GAP -> Vedtaksperiode.AvventerSøknadFerdigGap
                 TilstandType.AVVENTER_VILKÅRSPRØVING -> Vedtaksperiode.AvventerVilkårsprøving
                 TilstandType.AVVENTER_SØKNAD_UFERDIG_GAP -> Vedtaksperiode.AvventerSøknadUferdigGap
                 TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP -> Vedtaksperiode.AvventerInntektsmeldingEllerHistorikkFerdigGap
                 TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_GAP -> Vedtaksperiode.AvventerInntektsmeldingUferdigGap
-                TilstandType.AVVENTER_UFERDIG_GAP -> Vedtaksperiode.AvventerUferdigGap
                 TilstandType.AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE -> Vedtaksperiode.AvventerInntektsmeldingFerdigForlengelse
                 TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE -> Vedtaksperiode.AvventerInntektsmeldingUferdigForlengelse
                 TilstandType.AVVENTER_SØKNAD_UFERDIG_FORLENGELSE -> Vedtaksperiode.AvventerSøknadUferdigForlengelse
                 TilstandType.AVVENTER_SØKNAD_FERDIG_FORLENGELSE -> Vedtaksperiode.AvventerSøknadFerdigForlengelse
-                TilstandType.AVVENTER_UFERDIG_FORLENGELSE -> Vedtaksperiode.AvventerUferdigForlengelse
                 TilstandType.AVVENTER_UFERDIG -> Vedtaksperiode.AvventerUferdig
                 TilstandType.AVVENTER_ARBEIDSGIVERE -> Vedtaksperiode.AvventerArbeidsgivere
                 TilstandType.AVVENTER_REVURDERING -> Vedtaksperiode.AvventerRevurdering
@@ -829,7 +823,6 @@ internal data class PersonData(
                 TilstandType.AVVENTER_GODKJENNING_REVURDERING -> Vedtaksperiode.AvventerGodkjenningRevurdering
                 TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING -> Vedtaksperiode.AvventerArbeidsgivereRevurdering
                 TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING -> Vedtaksperiode.AvventerGjennomførtRevurdering
-                TilstandType.AVVENTER_UTBETALINGSGRUNNLAG -> Vedtaksperiode.AvventerUtbetalingsgrunnlag
             }
 
             data class InntektsmeldingInfoData(

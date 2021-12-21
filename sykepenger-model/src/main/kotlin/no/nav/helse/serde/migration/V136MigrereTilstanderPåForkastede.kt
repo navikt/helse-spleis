@@ -15,7 +15,9 @@ internal class V136MigrereTilstanderPåForkastede : JsonMigration(version = 136)
             "AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD",
             "AVVENTER_UFERDIG_GAP",
             "AVVENTER_UFERDIG_FORLENGELSE",
-            "AVVENTER_UTBETALINGSGRUNNLAG"
+            "AVVENTER_UTBETALINGSGRUNNLAG",
+            "AVVENTER_HISTORIKK_REVURDERING",
+            "AVVENTER_GAP"
         )
     }
 

@@ -114,19 +114,15 @@ data class UtbetalingshistorikkElementDTO(
                     TilstandType.MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
                     TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
                     TilstandType.MOTTATT_SYKMELDING_UFERDIG_GAP,
-                    TilstandType.AVVENTER_ARBEIDSGIVERSØKNAD_FERDIG_GAP,
-                    TilstandType.AVVENTER_ARBEIDSGIVERSØKNAD_UFERDIG_GAP,
                     TilstandType.AVVENTER_SØKNAD_FERDIG_GAP,
                     TilstandType.AVVENTER_SØKNAD_UFERDIG_GAP,
                     TilstandType.AVVENTER_VILKÅRSPRØVING,
                     TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
                     TilstandType.AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE,
                     TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_GAP,
-                    TilstandType.AVVENTER_UFERDIG_GAP,
                     TilstandType.AVVENTER_UFERDIG,
                     TilstandType.AVVENTER_SØKNAD_UFERDIG_FORLENGELSE,
                     TilstandType.AVVENTER_SØKNAD_FERDIG_FORLENGELSE,
-                    TilstandType.AVVENTER_UFERDIG_FORLENGELSE,
                     TilstandType.AVVENTER_SIMULERING,
                     TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING,
                     TilstandType.AVVENTER_SIMULERING_REVURDERING,
@@ -134,7 +130,6 @@ data class UtbetalingshistorikkElementDTO(
                     TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING,
                     TilstandType.AVVENTER_HISTORIKK_REVURDERING,
                     TilstandType.AVVENTER_REVURDERING,
-                    TilstandType.AVVENTER_UTBETALINGSGRUNNLAG,
                     TilstandType.AVVENTER_HISTORIKK -> TilstandstypeDTO.Venter
                     TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
                     TilstandType.AVVENTER_ARBEIDSGIVERE -> TilstandstypeDTO.VenterPåKiling
@@ -145,9 +140,7 @@ data class UtbetalingshistorikkElementDTO(
                     TilstandType.AVVENTER_GODKJENNING_REVURDERING,
                     TilstandType.AVVENTER_GODKJENNING -> TilstandstypeDTO.Oppgaver
                     TilstandType.AVSLUTTET,
-                    TilstandType.AVSLUTTET_UTEN_UTBETALING,
-                    TilstandType.UTEN_UTBETALING_MED_INNTEKTSMELDING_UFERDIG_GAP,
-                    TilstandType.UTEN_UTBETALING_MED_INNTEKTSMELDING_UFERDIG_FORLENGELSE -> when {
+                    TilstandType.AVSLUTTET_UTEN_UTBETALING -> when {
                         annullering != null -> annullering.tilstandFor(periode)
                         else -> utbetaling?.tilstandFor(periode) ?: TilstandstypeDTO.IngenUtbetaling
                     }

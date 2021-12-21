@@ -1277,62 +1277,6 @@ internal class Vedtaksperiode private constructor(
 
     }
 
-    // TODO: Skal fjernes når alle vedtaksperioder er ute av tilstanden
-    internal object AvventerArbeidsgiversøknadFerdigGap : Vedtaksperiodetilstand {
-        override val type = AVVENTER_ARBEIDSGIVERSØKNAD_FERDIG_GAP
-
-        override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
-
-        override fun håndterTidligereUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.tilstand(hendelse, AvventerSøknadUferdigGap)
-        }
-
-        override fun håndterTidligereTilstøtendeUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.tilstand(hendelse, AvventerSøknadUferdigForlengelse)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.tilstand(påminnelse, AvventerSøknadFerdigGap)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            vedtaksperiode.håndterSøknad(søknad, AvventerHistorikk)
-            søknad.info("Fullført behandling av søknad")
-        }
-
-    }
-
-    // TODO: Skal fjernes når alle vedtaksperioder er ute av tilstanden
-    internal object AvventerArbeidsgiversøknadUferdigGap : Vedtaksperiodetilstand {
-        override val type = AVVENTER_ARBEIDSGIVERSØKNAD_UFERDIG_GAP
-
-        override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
-
-        override fun håndterTidligereUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.tilstand(hendelse, AvventerSøknadUferdigGap)
-        }
-        override fun håndterTidligereTilstøtendeUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.tilstand(hendelse, AvventerSøknadUferdigForlengelse)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.tilstand(påminnelse, AvventerSøknadUferdigGap)
-        }
-
-        override fun håndter(
-            vedtaksperiode: Vedtaksperiode,
-            gjenopptaBehandling: GjenopptaBehandling
-        ) {
-            vedtaksperiode.tilstand(gjenopptaBehandling, AvventerSøknadFerdigGap)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            vedtaksperiode.håndterSøknad(søknad, AvventerUferdig)
-            søknad.info("Fullført behandling av søknad")
-        }
-
-    }
-
     internal object AvventerRevurdering : Vedtaksperiodetilstand {
         override val type = AVVENTER_REVURDERING
 
@@ -1568,71 +1512,6 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    //  TODO: Fjerne når alle perioder er ute av den
-    internal object AvventerUferdigGap : Vedtaksperiodetilstand {
-        override val type = AVVENTER_UFERDIG_GAP
-
-        override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {
-            vedtaksperiode.tilstand(hendelse, AvventerUferdig)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.tilstand(påminnelse, AvventerUferdig)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
-            vedtaksperiode.tilstand(gjenopptaBehandling, AvventerHistorikk)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            vedtaksperiode.håndterOverlappendeSøknad(søknad, AvventerUferdig)
-        }
-    }
-
-    // TODO: Skal fjernes når alle vedtaksperioder er ute av tilstanden
-    internal object UtenUtbetalingMedInntektsmeldingUferdigGap : Vedtaksperiodetilstand {
-        override val type = UTEN_UTBETALING_MED_INNTEKTSMELDING_UFERDIG_GAP
-
-        override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
-
-        override fun håndterTidligereUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.tilstand(hendelse, AvsluttetUtenUtbetaling)
-        }
-        override fun håndterTidligereTilstøtendeUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.tilstand(hendelse, AvsluttetUtenUtbetaling)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
-            vedtaksperiode.tilstand(gjenopptaBehandling, AvsluttetUtenUtbetaling)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.tilstand(påminnelse, AvsluttetUtenUtbetaling)
-        }
-    }
-
-    // TODO: Skal fjernes når alle vedtaksperioder er ute av tilstanden
-    internal object UtenUtbetalingMedInntektsmeldingUferdigForlengelse : Vedtaksperiodetilstand {
-        override val type = UTEN_UTBETALING_MED_INNTEKTSMELDING_UFERDIG_FORLENGELSE
-
-        override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
-
-        override fun håndterTidligereUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.tilstand(hendelse, AvsluttetUtenUtbetaling)
-        }
-        override fun håndterTidligereTilstøtendeUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.tilstand(hendelse, AvsluttetUtenUtbetaling)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
-            vedtaksperiode.tilstand(gjenopptaBehandling, AvsluttetUtenUtbetaling)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.tilstand(påminnelse, AvsluttetUtenUtbetaling)
-        }
-    }
-
     internal object AvventerInntektsmeldingFerdigForlengelse : Vedtaksperiodetilstand {
         override val type = AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE
 
@@ -1684,27 +1563,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             vedtaksperiode.håndterInntektsmelding(inntektsmelding, AvsluttetUtenUtbetaling, AvventerUferdig)
-        }
-    }
-
-    //  TODO: Fjerne når alle perioder er ute av den
-    internal object AvventerUferdigForlengelse : Vedtaksperiodetilstand {
-        override val type = AVVENTER_UFERDIG_FORLENGELSE
-
-        override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {
-            vedtaksperiode.tilstand(hendelse, AvventerUferdig)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.tilstand(påminnelse, AvventerUferdig)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            vedtaksperiode.håndterOverlappendeSøknad(søknad, AvventerUferdig)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
-            vedtaksperiode.tilstand(gjenopptaBehandling, AvventerHistorikk)
         }
     }
 
@@ -1863,23 +1721,6 @@ internal class Vedtaksperiode private constructor(
                 vilkårsgrunnlag.warn("Arbeidsgiver er ikke registrert i Aa-registeret.")
             }
             vedtaksperiode.forberedMuligUtbetaling(vilkårsgrunnlag)
-        }
-    }
-
-    // TODO: sjekk om denne kan fjernes (gammel tilstand)
-    internal object AvventerUtbetalingsgrunnlag : Vedtaksperiodetilstand {
-        override val type = AVVENTER_UTBETALINGSGRUNNLAG
-
-        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.tilstand(påminnelse, AvventerHistorikk)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: Utbetalingsgrunnlag) {
-            vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
         }
     }
 
