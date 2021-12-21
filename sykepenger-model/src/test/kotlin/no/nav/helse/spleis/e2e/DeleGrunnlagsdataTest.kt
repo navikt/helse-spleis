@@ -395,7 +395,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         assertTilstander(
             1.vedtaksperiode,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, AVSLUTTET_UTEN_UTBETALING
+            AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, AVSLUTTET
         )
         håndterSykmelding(Sykmeldingsperiode(18.januar, 18.februar, 100.prosent))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(18.januar, 18.februar, 100.prosent))

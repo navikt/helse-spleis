@@ -4,6 +4,8 @@ import no.nav.helse.ForventetFeil
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.hendelser.til
+import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.somOrganisasjonsnummer
@@ -225,7 +227,10 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, false)
 
-        assertTrue(observatør.opprettOppgaveEvent().any { inntektsmeldingId in it.hendelser })
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
+        assertFalse(observatør.opprettOppgaveEvent().any { inntektsmeldingId in it.hendelser })
+        assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any { inntektsmeldingId in it.hendelser })
     }
 
     @Test

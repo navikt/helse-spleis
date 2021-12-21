@@ -1570,7 +1570,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         )
     }
 
-    @ForventetFeil("https://trello.com/c/XIOyu6UI/1644-inntektsmelding-med-ny-arbeidsgiverperiode-midt-i-forlengelse-%C3%B8delegger-for-tidligere-utbetaling")
     @Test
     fun `IM som treffer periode i AVSLUTTET_UTEN_UTBETALING etter en utbetalt periode skal ikke fylle perioden med arbeidsdager fra fom til skjæringstidspunktet`() {
         nyttVedtak(1.januar, 31.januar)

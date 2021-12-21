@@ -682,6 +682,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt(2.vedtaksperiode)
 
+        assertEquals(Utbetaling.GodkjentUtenUtbetaling, inspektør.utbetalingtilstand(0))
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -690,11 +691,11 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
-            AVSLUTTET_UTEN_UTBETALING,
+            AVSLUTTET,
             AVVENTER_VILKÅRSPRØVING_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
-            AVSLUTTET_UTEN_UTBETALING
+            AVSLUTTET
         )
         assertTilstander(
             2.vedtaksperiode,

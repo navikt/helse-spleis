@@ -6,7 +6,9 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class IngentingÅSimulereE2ETest : AbstractEndToEndTest() {
@@ -17,7 +19,8 @@ internal class IngentingÅSimulereE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(20.januar, 21.januar, 100.prosent))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(20.januar, 21.januar, 100.prosent))
         håndterYtelser(2.vedtaksperiode)
-        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVSLUTTET)
+        assertEquals(Utbetaling.GodkjentUtenUtbetaling, inspektør.utbetalingtilstand(1))
     }
 
     @Test
@@ -29,7 +32,8 @@ internal class IngentingÅSimulereE2ETest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
-        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVSLUTTET)
+        assertEquals(Utbetaling.GodkjentUtenUtbetaling, inspektør.utbetalingtilstand(1))
     }
 
     @Test
@@ -38,7 +42,8 @@ internal class IngentingÅSimulereE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(20.januar, 23.januar, 100.prosent))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(20.januar, 21.januar, 100.prosent), Ferie(22.januar, 23.januar))
         håndterYtelser(2.vedtaksperiode)
-        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVSLUTTET)
+        assertEquals(Utbetaling.GodkjentUtenUtbetaling, inspektør.utbetalingtilstand(1))
     }
 
     @Test

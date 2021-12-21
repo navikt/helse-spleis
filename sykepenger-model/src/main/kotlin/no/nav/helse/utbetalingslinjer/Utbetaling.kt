@@ -732,6 +732,18 @@ internal class Utbetaling private constructor(
             sendVedtakFattet(hendelse.hendelseskontekst(), utbetaling, person, periode, hendelseIder, skjæringstidspunkt, sykepengegrunnlag, grunnlagForSykepengegrunnlag, grunnlagForSykepengegrunnlagPerArbeidsgiver, begrensning)
         }
 
+        override fun avslutt(
+            utbetaling: Utbetaling,
+            hendelse: IAktivitetslogg,
+            person: Person,
+            periode: Periode,
+            sykepengegrunnlag: Inntekt,
+            inntekt: Inntekt,
+            hendelseIder: Set<UUID>
+        ) {
+            /* sender ikke ut deprecated "utbetalt"-event når det ikke skal utbetales noe */
+        }
+
         override fun godkjenn(utbetaling: Utbetaling, hendelse: IAktivitetslogg, vurdering: Vurdering) {
             utbetaling.vurdering = vurdering
             utbetaling.tilstand(vurdering.avgjør(utbetaling), hendelse)

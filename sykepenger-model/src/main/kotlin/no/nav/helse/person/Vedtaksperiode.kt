@@ -700,7 +700,7 @@ internal class Vedtaksperiode private constructor(
                 person.invaliderAllePerioder(hendelse, "Kan ikke fortsette på grunn av manglende funksjonalitet for utbetaling til bruker")
             }
             ingenUtbetaling && kunArbeidsgiverdager && ingenWarnings -> {
-                tilstand(hendelse, AvsluttetUtenUtbetaling) {
+                tilstand(hendelse, Avsluttet) {
                     hendelse.info("""Saken inneholder ingen utbetalingsdager for Nav og avsluttes""")
                 }
             }
@@ -783,7 +783,7 @@ internal class Vedtaksperiode private constructor(
                 }
             }
             !utbetaling().harUtbetalinger() && utbetalingstidslinje.kunArbeidsgiverdager() && !person.aktivitetslogg.logg(this).hasWarningsOrWorse() -> {
-                tilstand(hendelse, AvsluttetUtenUtbetaling) {
+                tilstand(hendelse, Avsluttet) {
                     hendelse.info("""Saken inneholder ingen utbetalingsdager for Nav og avsluttes""")
                 }
             }
@@ -1312,18 +1312,9 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
-            val ingenUtbetaling = !vedtaksperiode.utbetaling().harUtbetalinger()
-            val kunArbeidsgiverdager = vedtaksperiode.utbetalingstidslinje.kunArbeidsgiverdager()
-            when {
-                ingenUtbetaling && kunArbeidsgiverdager -> {
-                    gjenopptaBehandling.info("Går til avsluttet uten utbetaling fordi revurdering er fullført via en annen vedtaksperiode")
-                    vedtaksperiode.tilstand(gjenopptaBehandling, AvsluttetUtenUtbetaling)
-                }
-                vedtaksperiode.utbetaling().erAvsluttet() -> {
-                    gjenopptaBehandling.info("Går til avsluttet fordi revurdering er fullført via en annen vedtaksperiode")
-                    vedtaksperiode.tilstand(gjenopptaBehandling, Avsluttet)
-                }
-            }
+            if (!vedtaksperiode.utbetaling().erAvsluttet()) return
+            gjenopptaBehandling.info("Går til avsluttet fordi revurdering er fullført via en annen vedtaksperiode")
+            vedtaksperiode.tilstand(gjenopptaBehandling, Avsluttet)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: UtbetalingHendelse) {
@@ -1993,7 +1984,6 @@ internal class Vedtaksperiode private constructor(
                 when {
                     vedtaksperiode.utbetaling().erAvvist() -> TilInfotrygd
                     vedtaksperiode.utbetaling().harUtbetalinger() -> TilUtbetaling
-                    vedtaksperiode.utbetalingstidslinje.kunArbeidsgiverdager() -> AvsluttetUtenUtbetaling
                     else -> Avsluttet
                 }
             )
@@ -2120,7 +2110,6 @@ internal class Vedtaksperiode private constructor(
                     vedtaksperiode.utbetaling()
                         .erAvvist() -> RevurderingFeilet.also { utbetalingsgodkjenning.warn("Utbetaling av revurdert periode ble avvist av saksbehandler. Utbetalingen må annulleres") }
                     vedtaksperiode.utbetaling().harUtbetalinger() -> TilUtbetaling
-                    vedtaksperiode.utbetalingstidslinje.kunArbeidsgiverdager() -> AvsluttetUtenUtbetaling
                     else -> Avsluttet
                 }
             )
@@ -2269,6 +2258,7 @@ internal class Vedtaksperiode private constructor(
             LocalDateTime.MAX
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            check(vedtaksperiode.utbetaling == null) { "Kun perioder innenfor arbeidsgiverperioden skal sendes hit" }
             vedtaksperiode.vedtakFattet(hendelse)
             vedtaksperiode.arbeidsgiver.gjenopptaBehandling()
             vedtaksperiode.person.inntektsmeldingReplay(vedtaksperiode.id)

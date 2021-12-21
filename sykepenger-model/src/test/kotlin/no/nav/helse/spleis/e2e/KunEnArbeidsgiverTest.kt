@@ -16,6 +16,7 @@ import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
+import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -1650,13 +1651,14 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         assertNoWarnings(1.vedtaksperiode)
         assertNoErrors(1.vedtaksperiode)
+        assertEquals(Utbetaling.GodkjentUtenUtbetaling, inspektør.utbetalingtilstand(0))
         assertTilstander(
             0,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
             AVVENTER_HISTORIKK,
-            AVSLUTTET_UTEN_UTBETALING
+            AVSLUTTET
         )
 
         assertTilstander(

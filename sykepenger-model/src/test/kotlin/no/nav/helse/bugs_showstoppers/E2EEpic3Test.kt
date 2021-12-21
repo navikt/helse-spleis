@@ -17,6 +17,7 @@ import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
+import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -406,6 +407,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
         assertTrue(inspektør.utbetalingslinjer(0).isEmpty())
+        assertEquals(Utbetaling.GodkjentUtenUtbetaling, inspektør.utbetalingtilstand(0))
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -414,7 +416,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
-            AVSLUTTET_UTEN_UTBETALING
+            AVSLUTTET
         )
     }
 
