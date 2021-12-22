@@ -129,6 +129,7 @@ abstract class Toggle internal constructor(enabled: Boolean = false, private val
     object OverlappendeSykmelding : Toggle(true)
     object SendFeriepengeOppdrag : Toggle(false)
     object DatoRangeJson : Toggle(true)
+    object FlereArbeidsgivereFraInfotrygd : Toggle(false)
     object Etterlevelse : Toggle()
     object SpeilApiV2 : Toggle("SPEIL_API_V2")
     object GraphQLPlayground : Toggle("GraphQLPlayground")

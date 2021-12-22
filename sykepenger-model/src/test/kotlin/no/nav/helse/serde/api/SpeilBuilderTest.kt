@@ -1001,7 +1001,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Total sykdomsgrad ved flere arbeidsgivere`() {
+    fun `Total sykdomsgrad ved flere arbeidsgivere`() = Toggle.FlereArbeidsgivereFraInfotrygd.enable {
         val periode = 27.januar(2021) til 31.januar(2021)
         val inntekt = 30000.månedlig
 
@@ -1078,7 +1078,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Inntektskilde ved flere arbeidsgivere`() {
+    fun `Inntektskilde ved flere arbeidsgivere`() = Toggle.FlereArbeidsgivereFraInfotrygd.enable {
         val periode = 27.januar(2021) til 31.januar(2021)
         val inntekt = 30000.månedlig
         val inntektshistorikk = listOf(

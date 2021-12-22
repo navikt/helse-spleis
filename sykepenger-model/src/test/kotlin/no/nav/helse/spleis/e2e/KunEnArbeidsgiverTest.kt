@@ -75,6 +75,59 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `Tillater førstegangsbehandling hos annen arbeidsgiver, hvis gap til foregående`() {
+        val periode = 1.februar(2021) til 28.februar(2021)
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+        val inntektshistorikk = listOf(
+            Inntektsopplysning(a1.toString(), 1.januar(2021), INNTEKT, true)
+        )
+        val utbetalinger = arrayOf(
+            ArbeidsgiverUtbetalingsperiode(a1.toString(), 1.januar(2021), 31.januar(2021), 100.prosent, INNTEKT)
+        )
+        håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1, inntektshistorikk = inntektshistorikk)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a1)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        val periode2 = 1.mars(2021) til 31.mars(2021)
+        val a2Periode = 2.april(2021) til 30.april(2021)
+        håndterSykmelding(Sykmeldingsperiode(periode2.start, periode2.endInclusive, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(a2Periode.start, a2Periode.endInclusive, 100.prosent), orgnummer = a2)
+        assertSisteTilstand(2.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a2)
+
+        håndterSøknad(Sykdom(periode2.start, periode2.endInclusive, 100.prosent), orgnummer = a1)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1, inntektshistorikk = inntektshistorikk)
+        håndterSimulering(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true, orgnummer = a1)
+        håndterUtbetalt(2.vedtaksperiode, orgnummer = a1)
+
+        håndterSøknad(Sykdom(a2Periode.start, a2Periode.endInclusive, 100.prosent), orgnummer = a2)
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(2.april(2021) til 17.april(2021)),
+            førsteFraværsdag = 2.april(2021),
+            orgnummer = a2
+        )
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2, inntektshistorikk = inntektshistorikk)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a2, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioderForSammenligningsgrunnlag {
+                1.april(2020) til 1.mars(2021) inntekter {
+                    a1 inntekt INNTEKT
+                    a2 inntekt Inntekt.INGEN
+                }
+            }
+        ))
+        assertNoWarnings(1.vedtaksperiode, a2)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2, inntektshistorikk = inntektshistorikk)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a2)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
+    }
+
+    @Test
     fun `ingen historie med søknad til arbeidsgiver først`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 8.januar, 100.prosent))
         håndterSøknad(Sykdom(3.januar, 8.januar, 100.prosent))
