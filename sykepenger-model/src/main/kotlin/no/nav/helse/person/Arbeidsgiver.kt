@@ -714,8 +714,8 @@ internal class Arbeidsgiver private constructor(
         hendelse: IAktivitetslogg,
         filter: VedtaksperiodeFilter,
         årsak: ForkastetÅrsak
-    ): List<Vedtaksperiode> {
-        return forkast(filter, årsak)
+    ) {
+        forkast(filter, årsak)
             .takeIf { it.isNotEmpty() }
             ?.also { perioder ->
                 hendelse.kontekst(this)
@@ -727,7 +727,6 @@ internal class Arbeidsgiver private constructor(
                 if (vedtaksperioder.isEmpty()) sykdomshistorikk.tøm()
                 gjenopptaBehandling()
             }
-            ?: listOf()
     }
 
     private fun forkast(filter: VedtaksperiodeFilter, årsak: ForkastetÅrsak) = vedtaksperioder

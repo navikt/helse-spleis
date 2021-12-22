@@ -83,7 +83,7 @@ internal class NyOgFremtidigSøknadOutOfOrder : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 5.januar, 100.prosent))
 
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_SØKNAD_UFERDIG_GAP, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_SØKNAD_UFERDIG_FORLENGELSE, TIL_INFOTRYGD)
     }
 
     @Test
@@ -94,6 +94,6 @@ internal class NyOgFremtidigSøknadOutOfOrder : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 9.januar, 100.prosent))
 
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_SØKNAD_UFERDIG_GAP, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_SØKNAD_UFERDIG_FORLENGELSE, TIL_INFOTRYGD)
     }
 }

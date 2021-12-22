@@ -311,6 +311,7 @@ internal class Vedtaksperiode private constructor(
         if (harInntekt() || rettFør?.harInntekt() == true) return AvventerHistorikk
         return AvventerInntektsmeldingFerdigForlengelse
     }
+    private fun avgjørTilstandForGap(hvisForlengelse: Vedtaksperiodetilstand, hvisGap: Vedtaksperiodetilstand) = if (harSykeperiodeRettFør()) hvisForlengelse else hvisGap
 
     private fun skalHaWarningForFlereArbeidsforholdUtenSykdomEllerUlikStartdato(
         vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
@@ -395,7 +396,7 @@ internal class Vedtaksperiode private constructor(
         tilstand.entering(this, event)
     }
 
-    private fun håndterInntektsmelding(hendelse: Inntektsmelding, hvisIngenErrors: () -> Unit) {
+    private fun håndterInntektsmelding(hendelse: Inntektsmelding, hvisIngenErrors: () -> Unit = {}, nesteTilstand: () -> Vedtaksperiodetilstand) {
         periode = periode.oppdaterFom(hendelse.periode())
         oppdaterHistorikk(hendelse)
         val førsteFraværsdag = arbeidsgiver.finnFørsteFraværsdag(skjæringstidspunkt)
@@ -407,27 +408,19 @@ internal class Vedtaksperiode private constructor(
         }
 
         hendelse.valider(periode)
-        if (hendelse.hasErrorsOrWorse()) {
-            arbeidsgiver.søppelbøtte(hendelse, SENERE_INCLUSIVE(this), IKKE_STØTTET)
-            return
-        }
+        if (hendelse.hasErrorsOrWorse()) return arbeidsgiver.søppelbøtte(hendelse, SENERE_INCLUSIVE(this), IKKE_STØTTET)
         hvisIngenErrors()
         hendelse.info("Fullført behandling av inntektsmelding")
+        if (hendelse.hasErrorsOrWorse()) return
+        tilstand(hendelse, nesteTilstand())
     }
 
-    private fun håndterInntektsmelding(hendelse: Inntektsmelding, hvisInnenforArbeidsgiverperioden: Vedtaksperiodetilstand, hvisUtenforArbeidsgiverperioden: Vedtaksperiodetilstand) {
-        håndterInntektsmelding(hendelse) {
-            val nyTilstand = if (erInnenforArbeidsgiverperioden()) hvisInnenforArbeidsgiverperioden else hvisUtenforArbeidsgiverperioden
-
-            if (!alleAndreAvventerArbeidsgivere()) {
-                hendelse.validerMuligBrukerutbetaling()
-            }
-
-            if (hendelse.hasErrorsOrWorse()) {
-                person.invaliderAllePerioder(hendelse, null)
-            } else {
-                tilstand(hendelse, nyTilstand)
-            }
+    private fun håndterInntektsmelding(hendelse: Inntektsmelding, hvisUtenforArbeidsgiverperioden: Vedtaksperiodetilstand) {
+        håndterInntektsmelding(hendelse, hvisIngenErrors = {
+            if (!alleAndreAvventerArbeidsgivere()) hendelse.validerMuligBrukerutbetaling()
+            if (hendelse.hasErrorsOrWorse()) person.invaliderAllePerioder(hendelse, null)
+        }) {
+            if (erInnenforArbeidsgiverperioden()) AvsluttetUtenUtbetaling else hvisUtenforArbeidsgiverperioden
         }
     }
 
@@ -582,21 +575,15 @@ internal class Vedtaksperiode private constructor(
     private fun alleAndreAvventerArbeidsgivere() = overlappendeVedtaksperioder().all { it == this || it.tilstand == AvventerArbeidsgivere }
 
     private fun forberedMuligUtbetaling(vilkårsgrunnlag: Vilkårsgrunnlag) {
-        forberedMuligUtbetaling(vilkårsgrunnlag) { nesteTilstand ->
-            håndter(vilkårsgrunnlag, nesteTilstand)
-        }
+        forberedMuligUtbetaling(vilkårsgrunnlag) { nesteTilstand -> håndter(vilkårsgrunnlag, nesteTilstand) }
     }
 
     private fun forberedMuligUtbetaling(inntektsmelding: Inntektsmelding) {
-        forberedMuligUtbetaling(inntektsmelding) { nesteTilstand ->
-            håndterInntektsmelding(inntektsmelding, AvsluttetUtenUtbetaling, nesteTilstand)
-        }
+        forberedMuligUtbetaling(inntektsmelding) { nesteTilstand -> håndterInntektsmelding(inntektsmelding, nesteTilstand) }
     }
 
     private fun forberedMuligUtbetaling(søknad: Søknad) {
-        forberedMuligUtbetaling(søknad) { nesteTilstand ->
-            håndterSøknad(søknad, nesteTilstand)
-        }
+        forberedMuligUtbetaling(søknad) { nesteTilstand -> håndterSøknad(søknad, nesteTilstand) }
     }
 
     private fun forberedMuligUtbetaling(hendelse: ArbeidstakerHendelse, håndterer: (nesteTilstand: Vedtaksperiodetilstand) -> Unit) {
@@ -832,7 +819,7 @@ internal class Vedtaksperiode private constructor(
         tilstandHvisForlengelse: Vedtaksperiodetilstand,
         tilstandHvisGap: Vedtaksperiodetilstand
     ) {
-        tilstand(hendelse, if (harSykeperiodeRettFør()) tilstandHvisForlengelse else tilstandHvisGap)
+        tilstand(hendelse, avgjørTilstandForGap(tilstandHvisForlengelse, tilstandHvisGap))
     }
 
     private fun validerSenerePerioderIInfotrygd(infotrygdhistorikk: Infotrygdhistorikk): Boolean {
@@ -1139,9 +1126,7 @@ internal class Vedtaksperiode private constructor(
             if (vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)?.inntektsmeldingInfo?.id != inntektsmelding.meldingsreferanseId()) {
                 inntektsmelding.warn("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
             }
-            vedtaksperiode.håndterInntektsmelding(inntektsmelding) {
-                vedtaksperiode.tilstand(inntektsmelding, AvventerSøknadFerdigForlengelse)
-            }
+            vedtaksperiode.håndterInntektsmelding(inntektsmelding) { AvventerSøknadFerdigForlengelse }
         }
     }
 
@@ -1167,9 +1152,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             inntektsmelding: Inntektsmelding
         ) {
-            vedtaksperiode.håndterInntektsmelding(inntektsmelding) {
-                vedtaksperiode.tilstand(inntektsmelding, AvventerSøknadUferdigForlengelse)
-            }
+            vedtaksperiode.håndterInntektsmelding(inntektsmelding) { AvventerSøknadUferdigForlengelse }
         }
 
         override fun håndter(
@@ -1203,7 +1186,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             inntektsmelding: Inntektsmelding
         ) {
-            vedtaksperiode.håndterInntektsmelding(inntektsmelding, AvventerSøknadFerdigGap, AvventerSøknadFerdigGap)
+            vedtaksperiode.håndterInntektsmelding(inntektsmelding) { vedtaksperiode.avgjørTilstandForGap(AvventerSøknadFerdigForlengelse, AvventerSøknadFerdigGap) }
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
@@ -1244,7 +1227,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             inntektsmelding: Inntektsmelding
         ) {
-            vedtaksperiode.håndterInntektsmelding(inntektsmelding, AvventerSøknadUferdigGap, AvventerSøknadUferdigGap)
+            vedtaksperiode.håndterInntektsmelding(inntektsmelding) { vedtaksperiode.avgjørTilstandForGap(AvventerSøknadUferdigForlengelse, AvventerSøknadUferdigGap) }
         }
     }
 
@@ -1474,7 +1457,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            vedtaksperiode.håndterInntektsmelding(inntektsmelding, AvsluttetUtenUtbetaling, AvventerUferdig)
+            vedtaksperiode.håndterInntektsmelding(inntektsmelding, AvventerUferdig)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
@@ -1536,15 +1519,11 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
-            vedtaksperiode.håndterMuligForlengelse(
-                gjenopptaBehandling,
-                vedtaksperiode.avgjørTilstandForInntekt(),
-                AvventerInntektsmeldingEllerHistorikkFerdigGap
-            )
+            vedtaksperiode.håndterMuligForlengelse(gjenopptaBehandling, vedtaksperiode.avgjørTilstandForInntekt(), AvventerInntektsmeldingEllerHistorikkFerdigGap)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            vedtaksperiode.håndterInntektsmelding(inntektsmelding, AvsluttetUtenUtbetaling, AvventerUferdig)
+            vedtaksperiode.håndterInntektsmelding(inntektsmelding, AvventerUferdig)
         }
     }
 
@@ -2268,10 +2247,10 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            vedtaksperiode.håndterInntektsmelding(inntektsmelding) {
+            vedtaksperiode.håndterInntektsmelding(inntektsmelding, hvisIngenErrors = {
                 vedtaksperiode.emitVedtaksperiodeEndret(inntektsmelding)
                 vedtaksperiode.arbeidsgiver.gjenopptaBehandling()
-            }
+            }) { this }
         }
 
         override fun håndter(

@@ -238,48 +238,4 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_SØKNAD_UFERDIG_FORLENGELSE, AVVENTER_SØKNAD_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK)
     }
 
-    @Test
-    fun `Inntektsmelding for to perioder som utvider periode 2 slik at de blir tilstøtende sender ikke periode 2 til AVSLUTTET_UTEN_UTBETALING - inntektsmelding først`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 1.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(5.januar, 20.januar, 100.prosent))
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(1.januar til 16.januar), 1.januar)
-        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 1.januar, 100.prosent))
-        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(5.januar, 20.januar, 100.prosent))
-
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_SØKNAD_FERDIG_GAP,
-            AVSLUTTET_UTEN_UTBETALING
-        )
-
-        assertTilstander(
-            2.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_UFERDIG_GAP,
-            AVVENTER_SØKNAD_UFERDIG_GAP,
-            AVVENTER_SØKNAD_FERDIG_GAP,
-            AVVENTER_HISTORIKK
-        )
-    }
-
-    @Test
-    fun `Inntektsmelding for to perioder som utvider periode 2 slik at de blir tilstøtende sender ikke periode 2 til AVSLUTTET_UTEN_UTBETALING - søknad først`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 1.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(5.januar, 20.januar, 100.prosent))
-        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 1.januar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
-        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(5.januar, 20.januar, 100.prosent))
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(1.januar til 16.januar), 1.januar)
-        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(
-            2.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_UFERDIG_GAP,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_HISTORIKK
-        )
-    }
 }
