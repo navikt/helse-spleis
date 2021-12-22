@@ -2,8 +2,8 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Aktivitetslogg
@@ -411,31 +411,6 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
             assertEquals(31.august, utbetaling.inspektør.arbeidsgiverOppdrag.sistedato)
             assertEquals(1, utbetaling.inspektør.arbeidsgiverOppdrag.size)
         }
-    }
-
-    @Test
-    fun `vedtak_fattet skal peke på utbetaling_uten_utbetaling`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar, 15.prosent))
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
-        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 17.januar, 15.prosent))
-        håndterYtelser(1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_SØKNAD_FERDIG_GAP,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_GODKJENNING,
-            AVSLUTTET
-        )
-        assertEquals(1, observatør.utbetalingUtenUtbetalingEventer.size)
-        assertEquals(observatør.vedtakFattetEvent[1.vedtaksperiode(ORGNUMMER)]?.utbetalingId, observatør.utbetalingUtenUtbetalingEventer.last().utbetalingId)
     }
 
     @Test

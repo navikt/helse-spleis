@@ -26,6 +26,7 @@ import no.nav.helse.person.ForlengelseFraInfotrygd.JA
 import no.nav.helse.person.ForlengelseFraInfotrygd.NEI
 import no.nav.helse.person.Periodetype.*
 import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -559,24 +560,9 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun vedtakFattet(hendelse: IAktivitetslogg) {
-        val vilkårsgrunnlag = person.vilkårsgrunnlagFor(skjæringstidspunkt)
-        val sykepengegrunnlag = vilkårsgrunnlag?.sykepengegrunnlag() ?: Inntekt.INGEN
-        val grunnlagForSykepengegrunnlag = vilkårsgrunnlag?.grunnlagForSykepengegrunnlag() ?: Inntekt.INGEN
-        val begrensning = vilkårsgrunnlag?.grunnlagsBegrensning()
-        val grunnlagForSykepengegrunnlagPerArbeidsgiver = vilkårsgrunnlag?.inntektsopplysningPerArbeidsgiver() ?: emptyMap()
-        Utbetaling.vedtakFattet(
-            utbetaling,
-            hendelse,
-            person,
-            id,
-            periode,
-            hendelseIder,
-            skjæringstidspunkt,
-            sykepengegrunnlag,
-            grunnlagForSykepengegrunnlag,
-            grunnlagForSykepengegrunnlagPerArbeidsgiver.mapValues { (_, inntektsopplysning) -> inntektsopplysning.grunnlagForSykepengegrunnlag() },
-            begrensning
-        )
+        val builder = VedtakFattetBuilder(periode, hendelseIder, skjæringstidspunkt, person.vilkårsgrunnlagFor(skjæringstidspunkt))
+        utbetaling?.build(builder)
+        person.vedtakFattet(hendelse.hendelseskontekst(), builder.result())
     }
 
     private fun tickleForArbeidsgiveravhengighet(påminnelse: Påminnelse) {
@@ -2109,8 +2095,9 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.tilstand(
                 utbetalingsgodkjenning,
                 when {
-                    vedtaksperiode.utbetaling()
-                        .erAvvist() -> RevurderingFeilet.also { utbetalingsgodkjenning.warn("Utbetaling av revurdert periode ble avvist av saksbehandler. Utbetalingen må annulleres") }
+                    vedtaksperiode.utbetaling().erAvvist() -> RevurderingFeilet.also {
+                        utbetalingsgodkjenning.warn("Utbetaling av revurdert periode ble avvist av saksbehandler. Utbetalingen må annulleres")
+                    }
                     vedtaksperiode.utbetaling().harUtbetalinger() -> TilUtbetaling
                     else -> Avsluttet
                 }
@@ -2331,8 +2318,10 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.arbeidsgiver.lås(vedtaksperiode.periode)
-            vedtaksperiode.sendUtbetaltEvent(hendelse) // TODO: Fjerne når konsumentene lytter på vedtak fattet
+            vedtaksperiode.utbetaling().vedtakFattet(hendelse)
+            check(vedtaksperiode.utbetaling().erAvsluttet()) { "forventer at utbetaling skal være avsluttet" }
             vedtaksperiode.vedtakFattet(hendelse)
+            vedtaksperiode.sendUtbetaltEvent(hendelse) // TODO: Fjerne når konsumentene lytter på vedtak fattet
             vedtaksperiode.arbeidsgiver.gjenopptaBehandling()
         }
 
