@@ -100,6 +100,8 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
 
             override fun grunnlagForSykepengegrunnlag() = Inntekt.INGEN
 
+            override fun sammenligningsgrunnlag() = Inntekt.INGEN
+
             override fun inntektsopplysningPerArbeidsgiver(): Map<String, Inntektshistorikk.Inntektsopplysning> = emptyMap()
 
             override fun gjelderFlereArbeidsgivere() = false
