@@ -1,5 +1,6 @@
 package no.nav.helse.person
 
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Toggle
 import no.nav.helse.hendelser.*
@@ -37,6 +38,7 @@ import no.nav.helse.utbetalingstidslinje.Sykepengerettighet
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Økonomi
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -2267,14 +2269,12 @@ internal class Vedtaksperiode private constructor(
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
 
         override fun håndterTidligereUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            if (!vedtaksperiode.erInnenforArbeidsgiverperioden()) {
-                vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingUferdigGap)
-            }
+            if (vedtaksperiode.erInnenforArbeidsgiverperioden()) return
+            vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingUferdigGap)
         }
         override fun håndterTidligereTilstøtendeUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            if (!vedtaksperiode.erInnenforArbeidsgiverperioden()) {
-                vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingUferdigForlengelse)
-            }
+            if (vedtaksperiode.erInnenforArbeidsgiverperioden()) return
+            vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingUferdigForlengelse)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
@@ -2293,18 +2293,25 @@ internal class Vedtaksperiode private constructor(
         ) {
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
+        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            if (vedtaksperiode.utbetaling == null) return
+            sikkerlogg.info(
+                "Vedtaksperiode {} vil bytte fra {} til {} fordi den har utbetaling ({})",
+                keyValue("vedtaksperiodeId", vedtaksperiode.id),
+                keyValue("forrigeTilstand", type),
+                keyValue("nesteTilstand", AVSLUTTET),
+                keyValue("innenforArbeidsgiverperioden", if (vedtaksperiode.erInnenforArbeidsgiverperioden()) "JA" else "NEI"),
+            )
+        }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
             hendelse.info("Overstyrer ikke en vedtaksperiode som er avsluttet uten utbetaling")
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
-            if (vedtaksperiode.person.kanRevurdereInntekt(hendelse.skjæringstidspunkt)) {
-                vedtaksperiode.person.igangsettRevurdering(hendelse, vedtaksperiode)
-            } else {
-                hendelse.error("Kan ikke revurdere inntekt, da vi mangler datagrunnlag på skjæringstidspunktet")
-            }
+            if (!vedtaksperiode.person.kanRevurdereInntekt(hendelse.skjæringstidspunkt)) return hendelse.error("Kan ikke revurdere inntekt, da vi mangler datagrunnlag på skjæringstidspunktet")
+            vedtaksperiode.person.igangsettRevurdering(hendelse, vedtaksperiode)
         }
 
         override fun revurder(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
