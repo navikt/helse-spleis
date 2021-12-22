@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.sykdomstidslinje.Dag.Companion.default
 import no.nav.helse.testhelpers.*
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -34,6 +35,19 @@ internal class SykdomstidslinjeTest {
         assertNull(10.S.subset(11.januar til 11.januar).periode())
         resetSeed()
         assertNull(10.S.subset(31.desember(2017) til 31.desember(2017)).periode())
+    }
+
+    @Test
+    fun `er innenfor arbeidsgiverperiode`() {
+        assertTrue(16.S.erInnenforArbeidsgiverperiode(Arbeidsgiverperiode(listOf(1.januar til 16.januar)), 1.januar til 16.januar))
+        resetSeed()
+        assertTrue((16.S + 1.A).erInnenforArbeidsgiverperiode(Arbeidsgiverperiode(listOf(1.januar til 16.januar)), 1.januar til 17.januar))
+        resetSeed()
+        assertFalse(17.S.erInnenforArbeidsgiverperiode(Arbeidsgiverperiode(listOf(1.januar til 16.januar)), 1.januar til 17.januar))
+        resetSeed(4.januar)
+        assertTrue(18.S.erInnenforArbeidsgiverperiode(Arbeidsgiverperiode(listOf(4.januar til 19.januar)), 4.januar til 21.januar))
+        resetSeed(4.januar)
+        assertFalse(19.S.erInnenforArbeidsgiverperiode(Arbeidsgiverperiode(listOf(4.januar til 19.januar)), 4.januar til 22.januar))
     }
 
     @Test

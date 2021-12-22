@@ -86,18 +86,18 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `Forkaster etterfølgende perioder dersom vilkårsprøving feilet pga avvik i inntekt på første periode`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar(2021), 17.januar(2021), 100.prosent))
-        håndterSøknad(Sykdom(1.januar(2021), 17.januar(2021), 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(18.januar(2021), 20.januar(2021), 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 17.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(18.januar, 20.januar, 100.prosent))
 
         val arbeidsgiverperioder = listOf(
-            1.januar(2021) til 16.januar(2021)
+            1.januar til 16.januar
         )
-        håndterInntektsmelding(arbeidsgiverperioder, førsteFraværsdag = 1.januar(2021))
+        håndterInntektsmelding(arbeidsgiverperioder, førsteFraværsdag = 1.januar)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.januar(2020) til 1.desember(2020) inntekter {
+                1.januar(2017) til 1.desember(2017) inntekter {
                     ORGNUMMER inntekt INNTEKT * 2
                 }
             }
@@ -123,16 +123,16 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `Forkaster ikke etterfølgende perioder dersom vilkårsprøving feiler pga minimum inntekt på første periode`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar(2021), 17.januar(2021), 100.prosent))
-        håndterSøknad(Sykdom(1.januar(2021), 17.januar(2021), 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 17.januar, 100.prosent))
 
         val arbeidsgiverperioder = listOf(
-            1.januar(2021) til 16.januar(2021)
+            1.januar til 16.januar
         )
 
         håndterInntektsmelding(
             arbeidsgiverperioder = arbeidsgiverperioder,
-            førsteFraværsdag = 1.januar(2021),
+            førsteFraværsdag = 1.januar,
             beregnetInntekt = 1000.månedlig,
             refusjon = Inntektsmelding.Refusjon(1000.månedlig, null, emptyList())
         )
@@ -141,14 +141,14 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.januar(2020) til 1.desember(2020) inntekter {
+                1.januar(2017) til 1.desember(2017) inntekter {
                     ORGNUMMER inntekt 1000
                 }
             }
         ))
 
-        håndterSykmelding(Sykmeldingsperiode(18.januar(2021), 20.januar(2021), 100.prosent))
-        håndterSøknad(Sykdom(18.januar(2021), 20.januar(2021), 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(18.januar, 20.januar, 100.prosent))
+        håndterSøknad(Sykdom(18.januar, 20.januar, 100.prosent))
 
         assertTilstander(
             1.vedtaksperiode,
@@ -170,15 +170,15 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `25 % avvik i inntekt lager error`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar(2021), 17.januar(2021), 100.prosent))
-        håndterSøknad(Sykdom(1.januar(2021), 17.januar(2021), 100.prosent))
-        håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021)), førsteFraværsdag = 1.januar(2021))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 17.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
 
         håndterYtelser(1.vedtaksperiode)
 
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.januar(2020) til 1.desember(2020) inntekter {
+                1.januar(2017) til 1.desember(2017) inntekter {
                     ORGNUMMER inntekt INNTEKT * 2 // 25 % avvik vs inntekt i inntektsmeldingen
                 }
             }

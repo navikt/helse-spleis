@@ -24,7 +24,6 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVVENTER_HISTORIKK)
     }
 
-    @ForventetFeil("Denne trengs avklaring om vi ikke skal vente på inntektsmelding")
     @Test
     fun `avslutter søknad utenfor arbeidsgiverperioden dersom det kun er helg`() {
         håndterSykmelding(Sykmeldingsperiode(4.januar, 21.januar, 100.prosent))

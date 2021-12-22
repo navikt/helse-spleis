@@ -846,10 +846,7 @@ internal class Vedtaksperiode private constructor(
     private fun finnArbeidsgiverperiode() =
         arbeidsgiver.arbeidsgiverperiode(periode)
 
-    private fun erInnenforArbeidsgiverperioden(): Boolean {
-        val kuttdato = sykdomstidslinje.sisteIkkeOppholdsdag(periode.start) ?: periode.endInclusive
-        return finnArbeidsgiverperiode()?.dekker(periode.start til kuttdato) ?: false
-    }
+    private fun erInnenforArbeidsgiverperioden() = finnArbeidsgiverperiode()?.let { sykdomstidslinje.erInnenforArbeidsgiverperiode(it, periode) } ?: false
 
     // Gang of four State pattern
     internal interface Vedtaksperiodetilstand : Aktivitetskontekst {
@@ -1638,6 +1635,9 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            if (vedtaksperiode.erInnenforArbeidsgiverperioden()) return vedtaksperiode.tilstand(påminnelse, AvsluttetUtenUtbetaling) {
+                påminnelse.info("Oppdaget at perioden er innenfor arbeidsgiverperioden, saken avsluttes derfor uten utbetaling")
+            }
             vedtaksperiode.trengerHistorikkFraInfotrygd(påminnelse)
         }
 

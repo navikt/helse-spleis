@@ -12,6 +12,7 @@ import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sykmeldingSkrevet
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import java.time.DayOfWeek
@@ -85,7 +86,7 @@ internal class Sykdomstidslinje private constructor(
     internal operator fun get(dato: LocalDate): Dag = dager[dato] ?: UkjentDag(dato, INGEN)
     internal fun subset(periode: Periode) =
         if (this.periode == null || !periode.overlapperMed(this.periode)) Sykdomstidslinje()
-        else Sykdomstidslinje(dager.filter { it.key in periode }.toSortedMap(), this.periode?.subset(periode))
+        else Sykdomstidslinje(dager.filter { it.key in periode }.toSortedMap(), this.periode.subset(periode))
 
     /**
      * Uten å utvide tidslinjen
@@ -157,11 +158,17 @@ internal class Sykdomstidslinje private constructor(
     internal fun førsteSykedagEtter(dato: LocalDate) =
         periode?.firstOrNull { it >= dato && erEnSykedag(this[it]) }
 
-    private fun sisteSykedagEtter(dato: LocalDate) =
-        periode?.lastOrNull { it >= dato && erEnSykedag(this[it]) }
+    internal fun erInnenforArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode, periode: Periode): Boolean {
+        return arbeidsgiverperiode.dekker(sisteIkkeOppholdsdag(periode))
+    }
 
-    internal fun sisteIkkeOppholdsdag(dato: LocalDate): LocalDate? {
-        return periode?.lastOrNull { it >= dato && !erOppholdsdag(it) }
+    private fun sisteIkkeOppholdsdag(periode: Periode): Periode {
+        val siste = this.periode?.lastOrNull { it >= periode.start && !erOppholdsdag(it) } ?: periode.endInclusive
+        val justert = siste.takeUnless { it.erHelg() } ?: siste.minusDays(when (siste.dayOfWeek) {
+            DayOfWeek.SUNDAY -> 2
+            else -> 1
+        }).coerceAtLeast(periode.start)
+        return periode.start til justert
     }
 
     internal fun harDagUtenSøknad(periode: Periode) = subset(periode).any { it.kommerFra(Sykmelding::class) }
@@ -175,15 +182,6 @@ internal class Sykdomstidslinje private constructor(
 
     internal fun harSykedager() = any { it is Sykedag || it is SykHelgedag || it is ForeldetSykedag }
 
-    internal fun harProblemdager() = any { it is ProblemDag }
-
-    internal fun kunFeriedagerFør(kuttdato: LocalDate) =
-        this.dager
-            .filter { erFeriedag(it.key) }
-            .filter { it.key < kuttdato }
-            .takeUnless { it.isEmpty() }
-            ?.let { Sykdomstidslinje(it) }
-
     private fun sisteOppholdsdag() = periode?.lastOrNull { erOppholdsdag(it) }
     private fun sisteOppholdsdag(før: LocalDate) = periode?.filter { erOppholdsdag(it) }?.lastOrNull { it.isBefore(før) }
 
@@ -195,9 +193,6 @@ internal class Sykdomstidslinje private constructor(
 
     private fun erArbeidsdag(dato: LocalDate) =
         this[dato] is Arbeidsdag || this[dato] is FriskHelgedag
-
-    private fun erFeriedag(dato: LocalDate) =
-        this[dato] is Feriedag
 
     private fun erGyldigHelgegap(dato: LocalDate): Boolean {
         if (!dato.erHelg()) return false
