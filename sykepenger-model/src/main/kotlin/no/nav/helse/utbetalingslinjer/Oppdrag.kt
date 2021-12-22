@@ -62,7 +62,7 @@ internal class Oppdrag private constructor(
         fagområde: Fagområde,
         linjer: List<Utbetalingslinje> = listOf(),
         fagsystemId: String = genererUtbetalingsreferanse(UUID.randomUUID()),
-        sisteArbeidsgiverdag: LocalDate?
+        sisteArbeidsgiverdag: LocalDate? = null
     ) : this(
         mottaker,
         fagområde,
@@ -72,9 +72,6 @@ internal class Oppdrag private constructor(
         sisteArbeidsgiverdag,
         tidsstempel = LocalDateTime.now()
     )
-
-    internal constructor(mottaker: String, fagområde: Fagområde) :
-        this(mottaker, fagområde, sisteArbeidsgiverdag = null)
 
     internal fun accept(visitor: OppdragVisitor) {
         visitor.preVisitOppdrag(
@@ -118,8 +115,6 @@ internal class Oppdrag private constructor(
         )
     }
 
-    internal fun mottaker() = mottaker
-    internal fun fagområde() = fagområde
     internal fun fagsystemId() = fagsystemId
 
     private operator fun contains(other: Oppdrag) = this.tilhører(other) || this.overlapperMed(other) || sammenhengendeUtbetalingsperiode(other)

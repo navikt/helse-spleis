@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
@@ -449,7 +450,7 @@ internal class OppdragBuilderTest {
     fun `oppretter personoppdrag`() {
         val oppdrag = tilSykmeldte(16.AP, 15.NAV.medRefusjon(0))
         assertEquals(1, oppdrag.size)
-        assertEquals(Fagområde.Sykepenger, oppdrag.fagområde())
+        assertEquals(Fagområde.Sykepenger, oppdrag.inspektør.fagområde)
         oppdrag.assertLinje(0, 17.januar, 31.januar, null, 1200, 100, endringskode = NY, klassekode = Klassekode.SykepengerArbeidstakerOrdinær)
     }
 

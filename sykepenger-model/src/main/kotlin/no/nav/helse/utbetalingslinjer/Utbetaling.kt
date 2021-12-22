@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.utbetaling.*
 import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.godkjenning
+import no.nav.helse.person.builders.UtbetaltEventBuilder
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
@@ -13,7 +14,6 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Fagområde.Sykepenger
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.økonomi.Inntekt
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -213,21 +213,21 @@ internal class Utbetaling private constructor(
         vurdering?.build(builder)
     }
 
+    // TODO: fjerne når gamle "utbetalt"-event er borte
+    internal fun build(builder: UtbetaltEventBuilder) {
+        builder.utbetalingId(id)
+            .oppdrag(arbeidsgiverOppdrag, personOppdrag)
+            .utbetalingOpprettet(tidsstempel)
+            .utbetalingstidslinje(utbetalingstidslinje)
+            .forbrukteSykedager(forbrukteSykedager!!)
+            .gjenståendeSykedager(gjenståendeSykedager!!)
+            .maksdato(maksdato)
+        vurdering!!.build(builder)
+    }
+
     internal fun vedtakFattet(hendelse: IAktivitetslogg) {
         hendelse.kontekst(this)
         tilstand.vedtakFattet(this, hendelse)
-    }
-
-    // TODO: fjerne når gamle "utbetalt"-event er borte
-    internal fun ferdigstill(
-        hendelse: IAktivitetslogg,
-        person: Person,
-        periode: Periode,
-        sykepengegrunnlag: Inntekt,
-        inntekt: Inntekt,
-        hendelseIder: Set<UUID>
-    ) {
-        tilstand.avslutt(this, hendelse, person, periode, sykepengegrunnlag, inntekt, hendelseIder)
     }
 
     internal fun håndter(hendelse: AnnullerUtbetaling) {
@@ -523,19 +523,6 @@ internal class Utbetaling private constructor(
         vurdering?.overfør(hendelse, personOppdrag, maksdato.takeUnless { type == Utbetalingtype.ANNULLERING })
     }
 
-    // TODO: Fjerne når vi slutter å sende utbetalt-event fra vedtaksperiode d(-_-)b
-    private fun avslutt(
-        hendelseskontekst: Hendelseskontekst,
-        person: Person,
-        periode: Periode,
-        sykepengegrunnlag: Inntekt,
-        inntekt: Inntekt,
-        hendelseIder: Set<UUID>
-    ) {
-        val vurdering = checkNotNull(vurdering) { "Mangler vurdering" }
-        vurdering.ferdigstill(hendelseskontekst, this, person, periode, sykepengegrunnlag, inntekt, hendelseIder)
-    }
-
     private fun håndterKvittering(hendelse: UtbetalingHendelse) {
         hendelse.valider()
         val nesteTilstand = when {
@@ -621,17 +608,6 @@ internal class Utbetaling private constructor(
             hendelse.error("Forventet ikke å fatte vedtak på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
         }
 
-        fun avslutt(
-            utbetaling: Utbetaling,
-            hendelse: IAktivitetslogg,
-            person: Person,
-            periode: Periode,
-            sykepengegrunnlag: Inntekt,
-            inntekt: Inntekt,
-            hendelseIder: Set<UUID>
-        ) {
-            hendelse.error("Forventet ikke avslutte på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
-        }
         fun entering(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {}
     }
 
@@ -698,18 +674,6 @@ internal class Utbetaling private constructor(
             utbetaling: Utbetaling,
             hendelse: IAktivitetslogg
         ) {
-        }
-
-        override fun avslutt(
-            utbetaling: Utbetaling,
-            hendelse: IAktivitetslogg,
-            person: Person,
-            periode: Periode,
-            sykepengegrunnlag: Inntekt,
-            inntekt: Inntekt,
-            hendelseIder: Set<UUID>
-        ) {
-            utbetaling.avslutt(hendelse.hendelseskontekst(), person, periode, sykepengegrunnlag, inntekt, hendelseIder)
         }
     }
 
@@ -820,18 +784,6 @@ internal class Utbetaling private constructor(
             utbetaling: Utbetaling,
             hendelse: IAktivitetslogg
         ) {
-        }
-
-        override fun avslutt(
-            utbetaling: Utbetaling,
-            hendelse: IAktivitetslogg,
-            person: Person,
-            periode: Periode,
-            sykepengegrunnlag: Inntekt,
-            inntekt: Inntekt,
-            hendelseIder: Set<UUID>
-        ) {
-            utbetaling.avslutt(hendelse.hendelseskontekst(), person, periode, sykepengegrunnlag, inntekt, hendelseIder)
         }
     }
 
@@ -952,32 +904,9 @@ internal class Utbetaling private constructor(
             builder.utbetalingVurdert(tidspunkt)
         }
 
-        @Deprecated("Fjernes til fordel for utbetaling_utbetalt")
-        fun ferdigstill(
-            hendelseskontekst: Hendelseskontekst,
-            utbetaling: Utbetaling,
-            person: Person,
-            periode: Periode,
-            sykepengegrunnlag: Inntekt,
-            inntekt: Inntekt,
-            hendelseIder: Set<UUID>
-        ) {
-            person.vedtaksperiodeUtbetalt(
-                hendelseskontekst,
-                tilUtbetaltEvent(
-                    sykepengegrunnlag = sykepengegrunnlag,
-                    inntekt = inntekt,
-                    hendelseIder = hendelseIder,
-                    utbetaling = utbetaling,
-                    utbetalingstidslinje = utbetaling.utbetalingstidslinje(periode),
-                    periode = periode,
-                    forbrukteSykedager = requireNotNull(utbetaling.forbrukteSykedager),
-                    gjenståendeSykedager = requireNotNull(utbetaling.gjenståendeSykedager),
-                    godkjentAv = ident,
-                    automatiskBehandling = automatiskBehandling,
-                    maksdato = utbetaling.maksdato
-                )
-            )
+        internal fun build(builder: UtbetaltEventBuilder) {
+            builder.godkjentAv(ident)
+                .automatiskBehandling(automatiskBehandling)
         }
     }
 

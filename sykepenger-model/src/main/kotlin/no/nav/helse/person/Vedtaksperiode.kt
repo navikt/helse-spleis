@@ -26,6 +26,7 @@ import no.nav.helse.person.ForlengelseFraInfotrygd.JA
 import no.nav.helse.person.ForlengelseFraInfotrygd.NEI
 import no.nav.helse.person.Periodetype.*
 import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.builders.UtbetaltEventBuilder
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.sykdomstidslinje.Dag
@@ -821,7 +822,9 @@ internal class Vedtaksperiode private constructor(
         val vilkårsgrunnlag = requireNotNull(person.vilkårsgrunnlagFor(skjæringstidspunkt)) {
             "Forventet vilkårsgrunnlag ved opprettelse av utbetalt-event"
         }
-        utbetaling().ferdigstill(hendelse, person, periode, vilkårsgrunnlag.sykepengegrunnlag(), vilkårsgrunnlag.grunnlagForSykepengegrunnlag(), hendelseIder)
+        val builder = UtbetaltEventBuilder(hendelseIder, periode, vilkårsgrunnlag)
+        utbetaling().build(builder)
+        person.vedtaksperiodeUtbetalt(hendelse.hendelseskontekst(), builder.result())
     }
 
     private fun håndterMuligForlengelse(

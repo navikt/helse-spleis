@@ -854,10 +854,10 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
 
         inspektør(a1).utbetalinger.forEach {
-            assertEquals(a1.toString(), it.inspektør.arbeidsgiverOppdrag.mottaker())
+            assertEquals(a1.toString(), it.inspektør.arbeidsgiverOppdrag.inspektør.mottaker)
         }
         inspektør(a2).utbetalinger.forEach {
-            assertEquals(a2.toString(), it.inspektør.arbeidsgiverOppdrag.mottaker())
+            assertEquals(a2.toString(), it.inspektør.arbeidsgiverOppdrag.inspektør.mottaker)
         }
     }
 
