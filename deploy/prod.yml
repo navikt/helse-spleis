@@ -25,7 +25,7 @@ spec:
       memory: 2Gi
   replicas:
     min: 6
-    max: 12
+    max: 24
     cpuThresholdPercentage: 75
   prometheus:
     enabled: true
