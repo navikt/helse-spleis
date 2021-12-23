@@ -290,6 +290,7 @@ internal interface VedtaksperiodeVisitor : UtbetalingVisitor, SykdomstidslinjeVi
     ) {
     }
 
+    fun visitInntektsmeldinginfo(id: UUID, arbeidsforholdId: String?) {}
     fun preVisitVedtakserperiodeUtbetalinger(utbetalinger: List<Utbetaling>) {}
     fun postVisitVedtakserperiodeUtbetalinger(utbetalinger: List<Utbetaling>) {}
     fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: VilkårsgrunnlagHistorikk.Grunnlagsdata?) {}

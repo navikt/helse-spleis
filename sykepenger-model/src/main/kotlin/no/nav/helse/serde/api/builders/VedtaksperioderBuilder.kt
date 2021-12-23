@@ -59,7 +59,6 @@ internal class VedtaksperioderBuilder(
             gruppeId = gruppeId(vedtaksperiode),
             fødselsnummer = fødselsnummer,
             hendelseIder = hendelseIder,
-            inntektsmeldingId = inntektsmeldingInfo?.id,
             inntektshistorikkBuilder = inntektshistorikkBuilder,
             dataForVilkårsvurdering = vilkårsgrunnlag,
             forkastet = byggerForkastedePerioder

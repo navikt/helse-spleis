@@ -410,6 +410,10 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         )
     }
 
+    override fun visitInntektsmeldinginfo(id: UUID, arbeidsforholdId: String?) {
+        delegatee.visitInntektsmeldinginfo(id, arbeidsforholdId)
+    }
+
     override fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: VilkårsgrunnlagHistorikk.Grunnlagsdata?) {
         delegatee.visitDataForVilkårsvurdering(dataForVilkårsvurdering)
     }

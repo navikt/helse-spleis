@@ -33,7 +33,6 @@ internal class VedtaksperiodeBuilder(
     private val gruppeId: UUID,
     private val fødselsnummer: String,
     private val hendelseIder: Set<UUID>,
-    private val inntektsmeldingId: UUID?,
     private val inntektshistorikkBuilder: InntektshistorikkBuilder,
     private val forkastet: Boolean
 ) : BuilderState() {
@@ -61,6 +60,7 @@ internal class VedtaksperiodeBuilder(
     private var inUtbetaling = false
     private val beregnetSykdomstidslinje = mutableListOf<SykdomstidslinjedagDTO>()
 
+    private var inntektsmeldingId: UUID? = null
     private var utbetalingId: UUID? = null
 
     internal fun build(hendelser: List<HendelseDTO>, utbetalinger: List<UtbetalingshistorikkElementDTO>): VedtaksperiodeDTOBase {
@@ -219,6 +219,10 @@ internal class VedtaksperiodeBuilder(
             }
         })
         return aktiviteter.distinctBy { it.melding }
+    }
+
+    override fun visitInntektsmeldinginfo(id: UUID, arbeidsforholdId: String?) {
+        this.inntektsmeldingId = id
     }
 
     override fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: List<Periode>) {

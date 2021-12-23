@@ -1,5 +1,6 @@
 package no.nav.helse.person
 
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Toggle
 import no.nav.helse.hendelser.*
@@ -23,6 +24,7 @@ import no.nav.helse.person.ForkastetÅrsak.ERSTATTES
 import no.nav.helse.person.ForkastetÅrsak.IKKE_STØTTET
 import no.nav.helse.person.ForlengelseFraInfotrygd.JA
 import no.nav.helse.person.ForlengelseFraInfotrygd.NEI
+import no.nav.helse.person.InntektsmeldingInfo.Companion.ider
 import no.nav.helse.person.Periodetype.*
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.builders.UtbetaltEventBuilder
@@ -39,6 +41,7 @@ import no.nav.helse.utbetalingstidslinje.Sykepengerettighet
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Økonomi
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -112,6 +115,7 @@ internal class Vedtaksperiode private constructor(
             inntektsmeldingInfo,
             inntektskilde
         )
+        inntektsmeldingInfo?.accept(visitor)
         sykdomstidslinje.accept(visitor)
         utbetalingstidslinje.accept(visitor)
         visitor.preVisitVedtakserperiodeUtbetalinger(utbetalinger)
@@ -402,7 +406,7 @@ internal class Vedtaksperiode private constructor(
         oppdaterHistorikk(hendelse)
         val førsteFraværsdag = arbeidsgiver.finnFørsteFraværsdag(skjæringstidspunkt)
         if (førsteFraværsdag != null) arbeidsgiver.addInntekt(hendelse, førsteFraværsdag)
-        inntektsmeldingInfo = InntektsmeldingInfo(id = hendelse.meldingsreferanseId(), arbeidsforholdId = hendelse.arbeidsforholdId)
+        inntektsmeldingInfo = hendelse.inntektsmeldingsinfo()
 
         hendelse.validerFørsteFraværsdag(skjæringstidspunkt)
         finnArbeidsgiverperiode()?.also { hendelse.validerArbeidsgiverperiode(it) }
@@ -1119,9 +1123,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            if (vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)?.inntektsmeldingInfo?.id != inntektsmelding.meldingsreferanseId()) {
-                inntektsmelding.warn("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
-            }
+            vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)?.inntektsmeldingInfo?.erSamme(inntektsmelding)
             vedtaksperiode.håndterInntektsmelding(inntektsmelding) { AvventerSøknadFerdigForlengelse }
         }
     }
@@ -1832,8 +1834,13 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun kopierManglende(other: Vedtaksperiode) {
-        if (this.inntektsmeldingInfo == null)
-            this.inntektsmeldingInfo = other.inntektsmeldingInfo?.also { this.hendelseIder.add(it.id) }
+        if (this.inntektsmeldingInfo != null) return
+        sikkerlogg.info(
+            "kopierer manglende inntektsmeldinginfo til {} fra en {}",
+            keyValue("vedtaksperiodeId", id),
+            keyValue("otherVedtaksperiodeId", other.id)
+        )
+        this.inntektsmeldingInfo = other.inntektsmeldingInfo?.also { it.leggTil(this.hendelseIder) }
     }
 
     internal object AvventerSimulering : Vedtaksperiodetilstand {
@@ -2374,7 +2381,7 @@ internal class Vedtaksperiode private constructor(
 
         private fun sendOppgaveEvent(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             val inntektsmeldingIds =
-                vedtaksperiode.arbeidsgiver.finnSammenhengendePeriode(vedtaksperiode.skjæringstidspunkt).mapNotNull { it.inntektsmeldingInfo?.id }
+                vedtaksperiode.arbeidsgiver.finnSammenhengendePeriode(vedtaksperiode.skjæringstidspunkt).mapNotNull { it.inntektsmeldingInfo }.ider()
             if (vedtaksperiode.harNærliggendeUtbetaling()) {
                 vedtaksperiode.person.opprettOppgaveForSpeilsaksbehandlere(
                     hendelse,
@@ -2414,6 +2421,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal companion object {
+        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
         private const val IKKE_HÅNDTERT: Boolean = false
 
         internal val SENERE_INCLUSIVE = fun(senereEnnDenne: Vedtaksperiode): VedtaksperiodeFilter {
@@ -2550,11 +2558,26 @@ enum class Inntektskilde {
     FLERE_ARBEIDSGIVERE
 }
 
-data class InntektsmeldingInfo(
-    internal val id: UUID,
+internal class InntektsmeldingInfo(
+    private val id: UUID,
     internal val arbeidsforholdId: String?
 ) {
-    fun toMap() = mapOf("id" to id, "arbeidsforholdId" to arbeidsforholdId)
+    internal fun erSamme(inntektsmelding: Inntektsmelding) {
+        if (id == inntektsmelding.meldingsreferanseId()) return
+        inntektsmelding.warn("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
+    }
+
+    internal fun leggTil(hendelser: MutableSet<UUID>) {
+        hendelser.add(id)
+    }
+
+    internal fun accept(visitor: VedtaksperiodeVisitor) {
+        visitor.visitInntektsmeldinginfo(id, arbeidsforholdId)
+    }
+
+    internal companion object {
+        fun List<InntektsmeldingInfo>.ider() = map { it.id }
+    }
 }
 
 internal typealias VedtaksperiodeFilter = (Vedtaksperiode) -> Boolean

@@ -3,10 +3,7 @@ package no.nav.helse.hendelser
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companion.cacheRefusjon
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companion.endrerRefusjon
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companion.minOf
-import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.IAktivitetslogg
-import no.nav.helse.person.Inntektshistorikk
-import no.nav.helse.person.Refusjonshistorikk
+import no.nav.helse.person.*
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
@@ -29,7 +26,7 @@ class Inntektsmelding(
     private val førsteFraværsdag: LocalDate?,
     private val beregnetInntekt: Inntekt,
     private val arbeidsgiverperioder: List<Periode>,
-    internal val arbeidsforholdId: String?,
+    private val arbeidsforholdId: String?,
     private val begrunnelseForReduksjonEllerIkkeUtbetalt: String?,
     private val harOpphørAvNaturalytelser: Boolean = false,
     mottatt: LocalDateTime
@@ -181,6 +178,8 @@ class Inntektsmelding(
     internal fun validerMuligBrukerutbetaling() {
         refusjon.validerMuligBrukerutbetaling(this, beregnetInntekt)
     }
+
+    internal fun inntektsmeldingsinfo() = InntektsmeldingInfo(id = meldingsreferanseId(), arbeidsforholdId = arbeidsforholdId)
 
     class Refusjon(
         private val beløp: Inntekt?,

@@ -1236,8 +1236,6 @@ internal class JsonBuilder : AbstractBuilder() {
     private class VedtaksperiodeState(private val vedtaksperiodeMap: MutableMap<String, Any?>) : BuilderState() {
         private val utbetalinger = mutableListOf<UUID>()
 
-        private var inUtbetaling = false
-
         override fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: List<Periode>) {
             val sykdomstidslinje = mutableMapOf<String, Any?>()
 
@@ -1265,42 +1263,22 @@ internal class JsonBuilder : AbstractBuilder() {
             avsluttet: LocalDateTime?,
             avstemmingsnøkkel: Long?
         ) {
-            inUtbetaling = true
             utbetalinger.add(id)
+            pushState(UtbetalingState(mutableMapOf()))
         }
 
         override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
-            if (inUtbetaling) return
             val utbetalingstidslinjeMap = mutableMapOf<String, Any>()
             vedtaksperiodeMap["utbetalingstidslinje"] = utbetalingstidslinjeMap
             pushState(UtbetalingstidslinjeState(utbetalingstidslinjeMap))
         }
 
-        override fun postVisitUtbetaling(
-            utbetaling: Utbetaling,
-            id: UUID,
-            korrelasjonsId: UUID,
-            type: Utbetalingtype,
-            tilstand: Utbetaling.Tilstand,
-            periode: Periode,
-            tidsstempel: LocalDateTime,
-            oppdatert: LocalDateTime,
-            arbeidsgiverNettoBeløp: Int,
-            personNettoBeløp: Int,
-            maksdato: LocalDate,
-            forbrukteSykedager: Int?,
-            gjenståendeSykedager: Int?,
-            stønadsdager: Int,
-            beregningId: UUID,
-            overføringstidspunkt: LocalDateTime?,
-            avsluttet: LocalDateTime?,
-            avstemmingsnøkkel: Long?
-        ) {
-            inUtbetaling = false
-        }
-
         override fun postVisitVedtakserperiodeUtbetalinger(utbetalinger: List<Utbetaling>) {
             vedtaksperiodeMap["utbetalinger"] = this.utbetalinger
+        }
+
+        override fun visitInntektsmeldinginfo(id: UUID, arbeidsforholdId: String?) {
+            vedtaksperiodeMap["inntektsmeldingInfo"] = mapOf("id" to id, "arbeidsforholdId" to arbeidsforholdId)
         }
 
         override fun postVisitVedtaksperiode(
@@ -1331,7 +1309,6 @@ internal class JsonBuilder : AbstractBuilder() {
                 "tilstand" to tilstand.type.name,
                 "skjæringstidspunktFraInfotrygd" to skjæringstidspunktFraInfotrygd,
                 "skjæringstidspunkt" to skjæringstidspunkt,
-                "inntektsmeldingInfo" to inntektsmeldingInfo?.toMap(),
                 "forlengelseFraInfotrygd" to forlengelseFraInfotrygd,
                 "opprettet" to opprettet,
                 "oppdatert" to oppdatert
