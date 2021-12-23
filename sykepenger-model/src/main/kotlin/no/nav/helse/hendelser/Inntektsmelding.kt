@@ -13,6 +13,7 @@ import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.merge
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import java.time.LocalDate
@@ -33,6 +34,10 @@ class Inntektsmelding(
     private val harOpphørAvNaturalytelser: Boolean = false,
     mottatt: LocalDateTime
 ) : SykdomstidslinjeHendelse(meldingsreferanseId, mottatt) {
+
+    internal companion object {
+        internal const val WARN_UENIGHET_ARBEIDSGIVERPERIODE = "Inntektsmeldingen og vedtaksløsningen er uenige om beregningen av arbeidsgiverperioden. Undersøk hva som er riktig arbeidsgiverperiode."
+    }
 
     private val beste = { venstre: Dag, høyre: Dag ->
         when {
@@ -125,6 +130,11 @@ class Inntektsmelding(
         }
         if (harOpphørAvNaturalytelser) error("Brukeren har opphold i naturalytelser")
         return this
+    }
+
+    internal fun validerArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode) {
+        if (førsteFraværsdagErEtterArbeidsgiverperioden() || arbeidsgiverperiode.sammenlign(arbeidsgiverperioder)) return
+        warn(WARN_UENIGHET_ARBEIDSGIVERPERIODE)
     }
 
     override fun aktørId() = aktørId

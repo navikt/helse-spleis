@@ -23,6 +23,24 @@ internal class ArbeidsgiverperiodeTest {
     }
 
     @Test
+    fun `arbeidsgiverperiode anses som like om de slutter på samme dag`() {
+        assertTrue(agp(1.januar til 16.januar).sammenlign(listOf(16.januar til 16.januar)))
+        assertFalse(agp(1.januar til 16.januar).sammenlign(listOf(16.januar til 17.januar)))
+        assertFalse(agp(1.januar til 16.januar).sammenlign(listOf(15.januar til 15.januar)))
+    }
+
+    @Test
+    fun `arbeidsgiverperiode anses som like om de slutter på fredag eller helg`() {
+        assertTrue(agp(12.januar til 27.januar).sammenlign(listOf(11.januar til 26.januar)))
+        assertTrue(agp(12.januar til 27.januar).sammenlign(listOf(13.januar til 28.januar)))
+        assertFalse(agp(12.januar til 27.januar).sammenlign(listOf(14.januar til 29.januar)))
+
+        assertTrue(agp(11.januar til 26.januar).sammenlign(listOf(12.januar til 27.januar)))
+        assertTrue(agp(13.januar til 28.januar).sammenlign(listOf(12.januar til 27.januar)))
+        assertFalse(agp(14.januar til 29.januar).sammenlign(listOf(12.januar til 27.januar)))
+    }
+
+    @Test
     fun `dekker hele perioden`() {
         val periode = 2.januar til 5.januar
         val arbeidsgiverperiode = agp(periode)

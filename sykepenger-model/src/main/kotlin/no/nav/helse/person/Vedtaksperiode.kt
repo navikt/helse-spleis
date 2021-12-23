@@ -407,7 +407,7 @@ internal class Vedtaksperiode private constructor(
         if (hendelse.førsteFraværsdag != null && hendelse.førsteFraværsdag != skjæringstidspunkt) {
             hendelse.warn("Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.")
         }
-
+        finnArbeidsgiverperiode()?.also { hendelse.validerArbeidsgiverperiode(it) }
         hendelse.valider(periode)
         if (hendelse.hasErrorsOrWorse()) return arbeidsgiver.søppelbøtte(hendelse, SENERE_INCLUSIVE(this), IKKE_STØTTET)
         hvisIngenErrors()

@@ -74,7 +74,7 @@ internal class PeriodeVarslerBuilderTest: AbstractEndToEndTest() {
         håndterUtbetalt()
         forlengVedtak(1.februar, 15.februar)
 
-        nyttVedtak(1.mars, 31.mars)
+        nyttVedtak(4.mars, 31.mars)
 
         assertEquals(1, aktiviteter(1.vedtaksperiode).size)
         assertEquals(1, aktiviteter(2.vedtaksperiode).size)

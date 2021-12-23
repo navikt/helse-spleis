@@ -186,7 +186,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
             aktørId = "aktørId",
             førsteFraværsdag = førsteSykedag,
             beregnetInntekt = 31000.månedlig,
-            arbeidsgiverperioder = listOf(Periode(førsteSykedag, førsteSykedag.plusDays(16))),
+            arbeidsgiverperioder = listOf(Periode(førsteSykedag, førsteSykedag.plusDays(15))),
             arbeidsforholdId = null,
             begrunnelseForReduksjonEllerIkkeUtbetalt = null,
             mottatt = LocalDateTime.now()

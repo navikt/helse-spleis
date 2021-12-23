@@ -8,6 +8,7 @@ import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -64,6 +65,29 @@ internal class InntektsmeldingTest {
         val nyTidslinje = inntektsmelding.sykdomstidslinje()
         assertEquals(1.januar, nyTidslinje.periode()?.start)
         assertEquals(2.januar, nyTidslinje.periode()?.endInclusive)
+    }
+
+    @Test
+    fun `uenighet om arbeidsgiverperiode`() {
+        inntektsmelding(listOf(1.januar til 10.januar, 11.januar til 16.januar))
+        inntektsmelding.validerArbeidsgiverperiode(Arbeidsgiverperiode(listOf(1.januar til 16.januar)))
+        assertFalse(inntektsmelding.hasWarningsOrWorse())
+
+        inntektsmelding(listOf(1.januar til 10.januar, 12.januar til 17.januar))
+        inntektsmelding.validerArbeidsgiverperiode(Arbeidsgiverperiode(listOf(1.januar til 16.januar)))
+        assertTrue(inntektsmelding.hasWarningsOrWorse())
+
+        inntektsmelding(listOf(12.januar til 27.januar))
+        inntektsmelding.validerArbeidsgiverperiode(Arbeidsgiverperiode(listOf(11.januar til 27.januar)))
+        assertFalse(inntektsmelding.hasWarningsOrWorse())
+
+        inntektsmelding(listOf(12.januar til 27.januar))
+        inntektsmelding.validerArbeidsgiverperiode(Arbeidsgiverperiode(listOf(13.januar til 28.januar)))
+        assertFalse(inntektsmelding.hasWarningsOrWorse())
+
+        inntektsmelding(emptyList())
+        inntektsmelding.validerArbeidsgiverperiode(Arbeidsgiverperiode(listOf(1.januar til 16.januar)))
+        assertFalse(inntektsmelding.hasWarningsOrWorse())
     }
 
     @Test

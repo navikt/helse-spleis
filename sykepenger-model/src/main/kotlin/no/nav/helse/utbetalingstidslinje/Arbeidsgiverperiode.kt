@@ -2,6 +2,8 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
+import no.nav.helse.sykdomstidslinje.erHelg
+import no.nav.helse.sykdomstidslinje.erRettFør
 import java.time.LocalDate
 
 internal class Arbeidsgiverperiode(private val perioder: List<Periode>) : Iterable<LocalDate>, Comparable<LocalDate> {
@@ -26,6 +28,12 @@ internal class Arbeidsgiverperiode(private val perioder: List<Periode>) : Iterab
 
     internal fun hørerTil(periode: Periode, sisteKjente: LocalDate) =
         periode.overlapperMed(første til sisteKjente)
+
+    internal fun sammenlign(other: List<Periode>): Boolean {
+        val otherSiste = other.last().endInclusive
+        val thisSiste = this.perioder.last().endInclusive
+        return otherSiste == thisSiste || (thisSiste.erHelg() && otherSiste.erRettFør(thisSiste)) || (otherSiste.erHelg() && thisSiste.erRettFør(otherSiste))
+    }
 
     override fun equals(other: Any?) = other is Arbeidsgiverperiode && other.første == this.første
     override fun hashCode() = første.hashCode()
