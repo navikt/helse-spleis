@@ -1479,6 +1479,7 @@ internal class Vedtaksperiode private constructor(
         override val type = AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            vedtaksperiode.loggInnenforArbeidsgiverperiode()
             vedtaksperiode.person.inntektsmeldingReplay(vedtaksperiode.id)
         }
 
@@ -1584,6 +1585,7 @@ internal class Vedtaksperiode private constructor(
         override val type = AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            vedtaksperiode.loggInnenforArbeidsgiverperiode()
             vedtaksperiode.person.inntektsmeldingReplay(vedtaksperiode.id)
             if (vedtaksperiode.arbeidsgiver.finnForkastetSykeperiodeRettFør(vedtaksperiode) == null) {
                 vedtaksperiode.trengerInntektsmelding(hendelse.hendelseskontekst())
@@ -1710,6 +1712,7 @@ internal class Vedtaksperiode private constructor(
             .plusDays(4)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            vedtaksperiode.loggInnenforArbeidsgiverperiode()
             if (vedtaksperiode.arbeidsgiver.harDagUtenSøknad(vedtaksperiode.periode)) {
                 hendelse.error("Tidslinjen inneholder minst én dag med kilde sykmelding")
                 return vedtaksperiode.tilstand(hendelse, TilInfotrygd)
@@ -1831,6 +1834,11 @@ internal class Vedtaksperiode private constructor(
             }
         }
 
+    }
+
+    private fun loggInnenforArbeidsgiverperiode() {
+        if (!erInnenforArbeidsgiverperioden()) return
+        sikkerlogg.info("Vedtaksperioden {} er egentlig innenfor arbeidsgiverperioden ved {}", keyValue("vedtaksperiodeId", id), keyValue("tilstand", tilstand))
     }
 
     private fun kopierManglende(other: Vedtaksperiode) {
