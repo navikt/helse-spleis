@@ -9,9 +9,11 @@ import no.nav.helse.person.Vedtaksperiode.*
 import no.nav.helse.person.Vedtaksperiode.Companion.ALLE
 import no.nav.helse.person.Vedtaksperiode.Companion.AVVENTER_GODKJENT_REVURDERING
 import no.nav.helse.person.Vedtaksperiode.Companion.ER_ELLER_HAR_VÆRT_AVSLUTTET
+import no.nav.helse.person.Vedtaksperiode.Companion.FERDIG_BEHANDLET
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_REVURDERT
 import no.nav.helse.person.Vedtaksperiode.Companion.KLAR_TIL_BEHANDLING
 import no.nav.helse.person.Vedtaksperiode.Companion.REVURDERING_IGANGSATT
+import no.nav.helse.person.Vedtaksperiode.Companion.UTEN_UTBETALING
 import no.nav.helse.person.Vedtaksperiode.Companion.harInntekt
 import no.nav.helse.person.Vedtaksperiode.Companion.harNødvendigInntekt
 import no.nav.helse.person.Vedtaksperiode.Companion.harOverlappendeUtbetaling
@@ -1008,6 +1010,18 @@ internal class Arbeidsgiver private constructor(
     }
 
     fun harFerdigstiltPeriode() = vedtaksperioder.any(ER_ELLER_HAR_VÆRT_AVSLUTTET) || forkastede.harAvsluttedePerioder()
+
+    internal fun tilstøtendeBak(vedtaksperiode: Vedtaksperiode): Vedtaksperiode? {
+        return vedtaksperioder.firstOrNull { it > vedtaksperiode }?.takeIf { vedtaksperiode.erSykeperiodeRettFør(it) }
+    }
+
+    internal fun harPeriodeBak(vedtaksperiode: Vedtaksperiode) = vedtaksperioder.any { it > vedtaksperiode }
+    internal fun erAlleFerdigbehandletBak(vedtaksperiode: Vedtaksperiode) = vedtaksperioder
+        .filter { it > vedtaksperiode }
+        .all(FERDIG_BEHANDLET)
+    internal fun erAlleUtenUtbetaling(vedtaksperiode: Vedtaksperiode) = vedtaksperioder
+        .filter { it > vedtaksperiode }
+        .all(UTEN_UTBETALING)
 
     internal class JsonRestorer private constructor() {
         internal companion object {

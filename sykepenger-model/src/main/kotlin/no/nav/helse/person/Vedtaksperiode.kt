@@ -2277,7 +2277,20 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (vedtaksperiode.utbetaling == null || vedtaksperiode.erInnenforArbeidsgiverperioden()) return
+            if (vedtaksperiode.erInnenforArbeidsgiverperioden()) return
+            if (vedtaksperiode.utbetaling == null) {
+                val tilstøtendeBak = vedtaksperiode.arbeidsgiver.tilstøtendeBak(vedtaksperiode)
+                return sikkerlogg.info(
+                    "julegate: vedtaksperiode {} er utenfor arbeidsgiverperioden",
+                    keyValue("vedtaksperiodeId", vedtaksperiode.id),
+                    keyValue("aktørId", vedtaksperiode.aktørId),
+                    keyValue("harPerioderBak", if (vedtaksperiode.arbeidsgiver.harPeriodeBak(vedtaksperiode)) "JA" else "NEI"),
+                    keyValue("erAlleFerdigPerioderBak", if (vedtaksperiode.arbeidsgiver.erAlleFerdigbehandletBak(vedtaksperiode)) "JA" else "NEI"),
+                    keyValue("harTilstøtendeBak", if (tilstøtendeBak != null) "JA" else "NEI"),
+                    keyValue("tilstandTilstøtendeBak", tilstøtendeBak?.tilstand),
+                    keyValue("erAlleAvsluttetUtenUtbetaling", if (vedtaksperiode.arbeidsgiver.erAlleUtenUtbetaling(vedtaksperiode)) "JA" else "NEI")
+                )
+            }
             vedtaksperiode.tilstand(påminnelse, Avsluttet) {
                 påminnelse.info("Migrerer tilstand til Avsluttet fordi perioden har utbetaling og er utenfor arbeidsgiverperioden")
             }
@@ -2447,6 +2460,8 @@ internal class Vedtaksperiode private constructor(
         }
 
         internal val IKKE_FERDIG_BEHANDLET: VedtaksperiodeFilter = { !it.tilstand.erFerdigBehandlet }
+        internal val FERDIG_BEHANDLET: VedtaksperiodeFilter = { it.tilstand.erFerdigBehandlet }
+        internal val UTEN_UTBETALING: VedtaksperiodeFilter = { it.tilstand == AvsluttetUtenUtbetaling }
         internal val ER_ELLER_HAR_VÆRT_AVSLUTTET: VedtaksperiodeFilter = { it.tilstand is AvsluttetUtenUtbetaling || it.utbetalinger.any { it.erAvsluttet() } }
 
         internal val ALLE: VedtaksperiodeFilter = { true }
