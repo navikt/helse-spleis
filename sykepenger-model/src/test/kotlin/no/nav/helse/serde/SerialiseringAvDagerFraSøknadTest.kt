@@ -40,7 +40,7 @@ internal class SerialiseringAvDagerFraSøknadTest {
     @JsonIgnoreProperties("person")
     private class ArbeidsgiverMixin
 
-    @JsonIgnoreProperties("person", "arbeidsgiver", "kontekst")
+    @JsonIgnoreProperties("person", "arbeidsgiver", "kontekst", "forrigeTilstand")
     private class VedtaksperiodeMixin
 
     @Test

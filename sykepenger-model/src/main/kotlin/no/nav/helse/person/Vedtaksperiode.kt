@@ -1,6 +1,5 @@
 package no.nav.helse.person
 
-import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Toggle
 import no.nav.helse.hendelser.*
@@ -40,7 +39,6 @@ import no.nav.helse.utbetalingstidslinje.Sykepengerettighet
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Økonomi
-import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -377,6 +375,8 @@ internal class Vedtaksperiode private constructor(
         return inntektsmelding.erRelevant(arbeidsgiver.finnSammenhengendePeriode(skjæringstidspunkt).periode())
     }
 
+    private var forrigeTilstand: Vedtaksperiodetilstand? = null
+
     private fun tilstand(
         event: IAktivitetslogg,
         nyTilstand: Vedtaksperiodetilstand,
@@ -386,6 +386,7 @@ internal class Vedtaksperiode private constructor(
         tilstand.leaving(this, event)
 
         val previousState = tilstand
+        forrigeTilstand = tilstand
 
         tilstand = nyTilstand
         oppdatert = LocalDateTime.now()
@@ -553,7 +554,7 @@ internal class Vedtaksperiode private constructor(
         person.vedtaksperiodeEndret(aktivitetslogg, event)
     }
 
-    private fun vedtakFattet(hendelse: IAktivitetslogg) {
+    private fun sendVedtakFattet(hendelse: IAktivitetslogg) {
         val builder = VedtakFattetBuilder(periode, hendelseIder, skjæringstidspunkt, person.vilkårsgrunnlagFor(skjæringstidspunkt))
         utbetaling?.build(builder)
         person.vedtakFattet(hendelse.hendelseskontekst(), builder.result())
@@ -2230,7 +2231,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             check(vedtaksperiode.utbetaling == null) { "Kun perioder innenfor arbeidsgiverperioden skal sendes hit" }
-            vedtaksperiode.vedtakFattet(hendelse)
+            vedtaksperiode.sendVedtakFattet(hendelse)
             vedtaksperiode.arbeidsgiver.gjenopptaBehandling()
             vedtaksperiode.person.inntektsmeldingReplay(vedtaksperiode.id)
         }
@@ -2262,16 +2263,11 @@ internal class Vedtaksperiode private constructor(
         ) {
         }
 
-        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (vedtaksperiode.utbetaling == null) return
-            sikkerlogg.info(
-                "Vedtaksperiode {} vil bytte fra {} til {} fordi den har utbetaling ({})",
-                keyValue("vedtaksperiodeId", vedtaksperiode.id),
-                keyValue("forrigeTilstand", type),
-                keyValue("nesteTilstand", AVSLUTTET),
-                keyValue("innenforArbeidsgiverperioden", if (vedtaksperiode.erInnenforArbeidsgiverperioden()) "JA" else "NEI"),
-            )
+            if (vedtaksperiode.utbetaling == null || vedtaksperiode.erInnenforArbeidsgiverperioden()) return
+            vedtaksperiode.tilstand(påminnelse, Avsluttet) {
+                påminnelse.info("Migrerer tilstand til Avsluttet fordi perioden har utbetaling og er utenfor arbeidsgiverperioden")
+            }
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
@@ -2302,7 +2298,8 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.arbeidsgiver.lås(vedtaksperiode.periode)
             vedtaksperiode.utbetaling().vedtakFattet(hendelse)
             check(vedtaksperiode.utbetaling().erAvsluttet()) { "forventer at utbetaling skal være avsluttet" }
-            vedtaksperiode.vedtakFattet(hendelse)
+            if (vedtaksperiode.forrigeTilstand == AvsluttetUtenUtbetaling) return
+            vedtaksperiode.sendVedtakFattet(hendelse)
             vedtaksperiode.sendUtbetaltEvent(hendelse) // TODO: Fjerne når konsumentene lytter på vedtak fattet
             vedtaksperiode.arbeidsgiver.gjenopptaBehandling()
         }

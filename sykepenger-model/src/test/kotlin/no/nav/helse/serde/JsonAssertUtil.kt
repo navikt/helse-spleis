@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Assertions
 @JsonIgnoreProperties("person")
 private class ArbeidsgiverMixin
 
-@JsonIgnoreProperties("person", "arbeidsgiver")
+@JsonIgnoreProperties("person", "arbeidsgiver", "forrigeTilstand")
 private class VedtaksperiodeMixin
 
 @JsonIgnoreProperties("observers", "forrigeHendelse")
