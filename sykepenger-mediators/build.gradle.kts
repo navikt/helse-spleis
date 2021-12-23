@@ -1,7 +1,7 @@
 val mainClass = "no.nav.helse.AppKt"
 
 dependencies {
-    implementation("com.github.navikt:rapids-and-rivers:20210617121814-3e67e4d")
+    implementation("com.github.navikt:rapids-and-rivers:2021.12.23-14.25.03a3f6fe7709")
     implementation(project(":sykepenger-model"))
 
     testImplementation("org.testcontainers:postgresql:1.16.2") {
