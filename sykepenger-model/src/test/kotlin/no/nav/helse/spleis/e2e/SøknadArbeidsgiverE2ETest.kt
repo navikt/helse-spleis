@@ -32,6 +32,33 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `hensyntar forkastet historikk for å unngå å lage dårlig stemning`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent))
+        person.søppelbøtte(hendelselogg, 1.januar til 20.januar)
+        håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(21.januar, 31.januar, 100.prosent))
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+    }
+
+    @Test
+    fun `hensyntar forkastet historikk for å unngå å lage dårlig stemning - med gap til forkastet`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent))
+        person.søppelbøtte(hendelselogg, 1.januar til 20.januar)
+        håndterSykmelding(Sykmeldingsperiode(25.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent))
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+    }
+
+    @Test
+    fun `hensyntar forkastet historikk for å unngå å lage dårlig stemning - med mye gap til forkastet`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent))
+        person.søppelbøtte(hendelselogg, 1.januar til 20.januar)
+        håndterSykmelding(Sykmeldingsperiode(7.februar, 15.februar, 100.prosent))
+        håndterSøknad(Sykdom(7.februar, 15.februar, 100.prosent))
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
+    }
+
+    @Test
     fun `avslutter søknad innenfor arbeidsgiverperioden fordi arbeid er gjenopptatt`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), Arbeid(17.januar, 20.januar))

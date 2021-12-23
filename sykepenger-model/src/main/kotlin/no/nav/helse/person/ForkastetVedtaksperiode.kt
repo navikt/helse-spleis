@@ -1,9 +1,12 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.person.Vedtaksperiode.Companion.ER_ELLER_HAR_VÆRT_AVSLUTTET
 import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import java.util.*
 
 internal class ForkastetVedtaksperiode(
@@ -24,6 +27,14 @@ internal class ForkastetVedtaksperiode(
         internal fun overlapperMedForkastet(forkastede: Iterable<ForkastetVedtaksperiode>, sykmelding: Sykmelding) {
             Vedtaksperiode.overlapperMedForkastet(forkastede.perioder(), sykmelding)
         }
+
+        internal fun arbeidsgiverperiodeFor(
+            person: Person,
+            forkastede: List<ForkastetVedtaksperiode>,
+            organisasjonsnummer: String,
+            sykdomstidslinje: Sykdomstidslinje,
+            periode: Periode
+        ): Arbeidsgiverperiode? = Vedtaksperiode.arbeidsgiverperiodeFor(person, forkastede.perioder(), organisasjonsnummer, sykdomstidslinje, periode)
 
         internal fun sjekkOmOverlapperMedForkastet(forkastede: Iterable<ForkastetVedtaksperiode>, inntektsmelding: Inntektsmelding) =
             Vedtaksperiode.sjekkOmOverlapperMedForkastet(forkastede.perioder(), inntektsmelding)

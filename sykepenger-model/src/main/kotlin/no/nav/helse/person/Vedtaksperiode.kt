@@ -31,12 +31,15 @@ import no.nav.helse.person.builders.UtbetaltEventBuilder
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harId
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Sykepengerettighet
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
@@ -2535,6 +2538,17 @@ internal class Vedtaksperiode private constructor(
             vedtaksperioder
                 .filter { it.periode().overlapperMed(vedtaksperiode.periode()) }
                 .all { it.periodetype == OVERGANG_FRA_IT }
+
+        internal fun arbeidsgiverperiodeFor(
+            person: Person,
+            perioder: List<Vedtaksperiode>,
+            organisasjonsnummer: String,
+            sykdomstidslinje: Sykdomstidslinje,
+            periode: Periode
+        ): Arbeidsgiverperiode? {
+            val samletSykdomstidslinje = (perioder.map { it.sykdomstidslinje } + listOf(sykdomstidslinje)).merge(sammenhengendeSykdom)
+            return person.arbeidsgiverperiodeFor(organisasjonsnummer, samletSykdomstidslinje, samletSykdomstidslinje.sisteDag(), periode)
+        }
     }
 }
 
