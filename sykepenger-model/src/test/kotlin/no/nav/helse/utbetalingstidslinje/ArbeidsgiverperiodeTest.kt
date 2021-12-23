@@ -38,6 +38,7 @@ internal class ArbeidsgiverperiodeTest {
         assertTrue(agp(11.januar til 26.januar).sammenlign(listOf(12.januar til 27.januar)))
         assertTrue(agp(13.januar til 28.januar).sammenlign(listOf(12.januar til 27.januar)))
         assertFalse(agp(14.januar til 29.januar).sammenlign(listOf(12.januar til 27.januar)))
+        assertFalse(agp(14.januar til 29.januar).sammenlign(emptyList()))
     }
 
     @Test

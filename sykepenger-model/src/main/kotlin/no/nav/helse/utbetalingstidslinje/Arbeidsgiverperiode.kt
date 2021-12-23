@@ -30,7 +30,7 @@ internal class Arbeidsgiverperiode(private val perioder: List<Periode>) : Iterab
         periode.overlapperMed(første til sisteKjente)
 
     internal fun sammenlign(other: List<Periode>): Boolean {
-        val otherSiste = other.last().endInclusive
+        val otherSiste = other.lastOrNull()?.endInclusive ?: return false
         val thisSiste = this.perioder.last().endInclusive
         return otherSiste == thisSiste || (thisSiste.erHelg() && otherSiste.erRettFør(thisSiste)) || (otherSiste.erHelg() && thisSiste.erRettFør(otherSiste))
     }
