@@ -810,7 +810,13 @@ internal class Utbetaling private constructor(
     }
 
     internal object IkkeGodkjent : Tilstand
-    internal object Forkastet : Tilstand
+    internal object Forkastet : Tilstand {
+        override fun vedtakFattet(
+            utbetaling: Utbetaling,
+            hendelse: IAktivitetslogg
+        ) {
+        }
+    }
 
     internal class Vurdering(
         private val godkjent: Boolean,
