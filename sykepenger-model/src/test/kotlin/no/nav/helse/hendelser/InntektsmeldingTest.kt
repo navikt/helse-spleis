@@ -126,7 +126,6 @@ internal class InntektsmeldingTest {
         val nyTidslinje = inntektsmelding.sykdomstidslinje()
         assertEquals(1.januar, nyTidslinje.periode()?.start)
         assertEquals(17.januar, nyTidslinje.periode()?.endInclusive)
-        assertEquals(1.januar, inntektsmelding.førsteFraværsdag)
     }
 
     @Test

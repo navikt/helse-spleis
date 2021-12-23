@@ -173,6 +173,7 @@ internal fun AbstractEndToEndTest.inntektsmelding(
         )
     }
     inntektsmeldinger[id] = inntektsmeldinggenerator
+    inntekter[id] = beregnetInntekt
     EtterspurtBehov.fjern(ikkeBesvarteBehov, orgnummer, Aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk)
     return inntektsmeldinggenerator().apply { hendelselogg = this }
 }

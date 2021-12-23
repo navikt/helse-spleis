@@ -26,8 +26,8 @@ class Inntektsmelding(
     private val orgnummer: String,
     private val fødselsnummer: String,
     private val aktørId: String,
-    internal val førsteFraværsdag: LocalDate?,
-    internal val beregnetInntekt: Inntekt,
+    private val førsteFraværsdag: LocalDate?,
+    private val beregnetInntekt: Inntekt,
     private val arbeidsgiverperioder: List<Periode>,
     internal val arbeidsforholdId: String?,
     private val begrunnelseForReduksjonEllerIkkeUtbetalt: String?,
@@ -130,6 +130,11 @@ class Inntektsmelding(
         }
         if (harOpphørAvNaturalytelser) error("Brukeren har opphold i naturalytelser")
         return this
+    }
+
+    internal fun validerFørsteFraværsdag(skjæringstidspunkt: LocalDate) {
+        if (førsteFraværsdag == null || førsteFraværsdag == skjæringstidspunkt) return
+        warn("Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.")
     }
 
     internal fun validerArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode) {

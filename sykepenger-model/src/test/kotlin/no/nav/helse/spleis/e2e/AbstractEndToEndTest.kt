@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.person.*
 import no.nav.helse.somOrganisasjonsnummer
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.BeforeEach
 import java.time.LocalDate
@@ -25,6 +26,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     internal val sykmeldinger = mutableMapOf<UUID, Array<out Sykmeldingsperiode>>()
     internal val søknader = mutableMapOf<UUID, Triple<LocalDate, List<Søknad.Inntektskilde>, Array<out Søknadsperiode>>>()
     internal val inntektsmeldinger = mutableMapOf<UUID, () -> Inntektsmelding>()
+    internal val inntekter = mutableMapOf<UUID, Inntekt>()
 
     @BeforeEach
     internal fun abstractSetup() {
