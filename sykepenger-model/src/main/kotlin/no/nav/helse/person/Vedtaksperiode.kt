@@ -1638,9 +1638,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (vedtaksperiode.erInnenforArbeidsgiverperioden()) return vedtaksperiode.tilstand(påminnelse, AvsluttetUtenUtbetaling) {
-                påminnelse.info("Oppdaget at perioden er innenfor arbeidsgiverperioden, saken avsluttes derfor uten utbetaling")
-            }
             vedtaksperiode.trengerHistorikkFraInfotrygd(påminnelse)
         }
 
