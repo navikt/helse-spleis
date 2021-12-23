@@ -2297,8 +2297,8 @@ internal class Vedtaksperiode private constructor(
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.arbeidsgiver.lås(vedtaksperiode.periode)
             vedtaksperiode.utbetaling().vedtakFattet(hendelse)
-            check(vedtaksperiode.utbetaling().erAvsluttet()) { "forventer at utbetaling skal være avsluttet" }
             if (vedtaksperiode.forrigeTilstand == AvsluttetUtenUtbetaling) return
+            check(vedtaksperiode.utbetaling().erAvsluttet()) { "forventer at utbetaling skal være avsluttet" }
             vedtaksperiode.sendVedtakFattet(hendelse)
             vedtaksperiode.sendUtbetaltEvent(hendelse) // TODO: Fjerne når konsumentene lytter på vedtak fattet
             vedtaksperiode.arbeidsgiver.gjenopptaBehandling()
