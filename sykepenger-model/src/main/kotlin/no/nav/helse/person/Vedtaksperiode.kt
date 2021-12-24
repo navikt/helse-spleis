@@ -4,7 +4,6 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Toggle
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Validation.Companion.validation
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
@@ -263,9 +262,21 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun nyPeriode(ny: Vedtaksperiode, hendelse: Sykmelding) {
+        håndterEndringIEldrePeriode(ny, Vedtaksperiodetilstand::nyPeriodeFør, hendelse)
+    }
+
+    internal fun periodeReberegnetFør(ny: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+        håndterEndringIEldrePeriode(ny, Vedtaksperiodetilstand::reberegnetPeriodeFør, hendelse)
+    }
+
+    internal fun nyRevurderingFør(revurdert: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+        håndterEndringIEldrePeriode(revurdert, Vedtaksperiodetilstand::nyRevurderingFør, hendelse)
+    }
+
+    private fun <Hendelse: ArbeidstakerHendelse> håndterEndringIEldrePeriode(ny: Vedtaksperiode, håndterer: (Vedtaksperiodetilstand, Vedtaksperiode, Vedtaksperiode, Hendelse) -> Unit, hendelse: Hendelse) {
         if (ny > this || ny == this) return
         kontekst(hendelse)
-        tilstand.nyPeriodeFør(this, ny, hendelse)
+        håndterer(tilstand, this, ny, hendelse)
         if (hendelse.hasErrorsOrWorse()) return
         if (ny.erSykeperiodeRettFør(this)) return tilstand.håndterTidligereTilstøtendeUferdigPeriode(this, ny, hendelse)
         tilstand.håndterTidligereUferdigPeriode(this, ny, hendelse)
@@ -279,15 +290,6 @@ internal class Vedtaksperiode private constructor(
     private fun harSammeArbeidsgiverSom(vedtaksperiode: Vedtaksperiode) = vedtaksperiode.arbeidsgiver.organisasjonsnummer() == organisasjonsnummer
 
     private fun harUlikFagsystemId(other: Utbetaling) = utbetaling?.hørerSammen(other) == false
-
-    internal fun nyRevurderingFør(revurdert: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-        if (revurdert > this || revurdert == this) return
-        kontekst(hendelse)
-        tilstand.nyRevurderingFør(this, revurdert, hendelse)
-        if (hendelse.hasErrorsOrWorse()) return
-        if (revurdert.erSykeperiodeRettFør(this)) return tilstand.håndterTidligereTilstøtendeUferdigPeriode(this, revurdert, hendelse)
-        tilstand.håndterTidligereUferdigPeriode(this, revurdert, hendelse)
-    }
 
     internal fun håndterRevurdertUtbetaling(other: Utbetaling, hendelse: ArbeidstakerHendelse) {
         if (harUlikFagsystemId(other)) return
@@ -886,6 +888,11 @@ internal class Vedtaksperiode private constructor(
         fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {
             hendelse.error("Mottatt sykmelding eller søknad out of order")
             vedtaksperiode.arbeidsgiver.søppelbøtte(hendelse, SENERE_INCLUSIVE(ny), IKKE_STØTTET)
+        }
+
+        fun reberegnetPeriodeFør(vedtaksperiode: Vedtaksperiode, reberegnet: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+            if (this !in setOf(Avsluttet, TilUtbetaling, UtbetalingFeilet)) return
+            hendelse.error("Blokkerer reberegning av tidligere periode fordi jeg er i tilstand $type")
         }
 
         fun nyRevurderingFør(vedtaksperiode: Vedtaksperiode, revurdert: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
@@ -2281,6 +2288,12 @@ internal class Vedtaksperiode private constructor(
             if (vedtaksperiode.erInnenforArbeidsgiverperioden()) return
             if (vedtaksperiode.utbetaling == null) {
                 if (vedtaksperiode.oppdatert < julegate) return
+                vedtaksperiode.arbeidsgiver.periodeReberegnet(påminnelse, vedtaksperiode)
+                vedtaksperiode.kontekst(påminnelse)
+                if (påminnelse.hasErrorsOrWorse()) return påminnelse.info("En annen periode blokkerer rebregning")
+                påminnelse.info("Periode reberegnes ettersom vi er utenfor arbeidsgiverperioden")
+                return vedtaksperiode.tilstand(påminnelse, AvventerInntektsmeldingEllerHistorikkFerdigGap)
+                /*
                 val tilstøtendeBak = vedtaksperiode.arbeidsgiver.tilstøtendeBak(vedtaksperiode)
                 return sikkerlogg.info(
                     "julegate2: vedtaksperiode {} er utenfor arbeidsgiverperioden (${vedtaksperiode.finnArbeidsgiverperiode()?.toList()?.grupperSammenhengendePerioder()?.joinToString()})",
@@ -2291,7 +2304,7 @@ internal class Vedtaksperiode private constructor(
                     keyValue("harTilstøtendeBak", if (tilstøtendeBak != null) "JA" else "NEI"),
                     keyValue("tilstandTilstøtendeBak", tilstøtendeBak?.tilstand),
                     keyValue("erAlleAvsluttetUtenUtbetaling", if (vedtaksperiode.arbeidsgiver.erAlleUtenUtbetaling(vedtaksperiode)) "JA" else "NEI")
-                )
+                )*/
             }
             vedtaksperiode.tilstand(påminnelse, Avsluttet) {
                 påminnelse.info("Migrerer tilstand til Avsluttet fordi perioden har utbetaling og er utenfor arbeidsgiverperioden")

@@ -760,6 +760,13 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
+    internal fun periodeReberegnet(hendelse: ArbeidstakerHendelse, vedtaksperiode: Vedtaksperiode) {
+        håndter(hendelse) { periodeReberegnetFør(vedtaksperiode, hendelse) }
+        if (!hendelse.hasErrorsOrWorse()) return
+        hendelse.info("Reberegning blokkeres, gjenopptar behandling")
+        gjenopptaBehandling()
+    }
+
     // Fredet funksjonsnavn
     internal fun tidligereOgEttergølgende(segSelv: Periode): VedtaksperiodeFilter {
         val tidligereOgEttergølgende1 = vedtaksperioder.sorted().firstOrNull { it.periode().overlapperMed(segSelv) }?.let(::tidligereOgEttergølgende)
