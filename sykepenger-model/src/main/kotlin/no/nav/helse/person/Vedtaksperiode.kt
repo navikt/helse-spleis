@@ -4,6 +4,7 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Toggle
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Validation.Companion.validation
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
@@ -2279,9 +2280,10 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             if (vedtaksperiode.erInnenforArbeidsgiverperioden()) return
             if (vedtaksperiode.utbetaling == null) {
+                if (vedtaksperiode.oppdatert < julegate) return
                 val tilstøtendeBak = vedtaksperiode.arbeidsgiver.tilstøtendeBak(vedtaksperiode)
                 return sikkerlogg.info(
-                    "julegate: vedtaksperiode {} er utenfor arbeidsgiverperioden",
+                    "julegate2: vedtaksperiode {} er utenfor arbeidsgiverperioden (${vedtaksperiode.finnArbeidsgiverperiode()?.toList()?.grupperSammenhengendePerioder()?.joinToString()})",
                     keyValue("vedtaksperiodeId", vedtaksperiode.id),
                     keyValue("aktørId", vedtaksperiode.aktørId),
                     keyValue("harPerioderBak", if (vedtaksperiode.arbeidsgiver.harPeriodeBak(vedtaksperiode)) "JA" else "NEI"),
@@ -2442,6 +2444,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal companion object {
+        private val julegate = LocalDate.of(2021, 12, 21).atTime(8, 0, 0)
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
         private const val IKKE_HÅNDTERT: Boolean = false
 
