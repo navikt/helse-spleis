@@ -8,6 +8,7 @@ import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.mai
 import no.nav.helse.testhelpers.mars
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
@@ -32,6 +33,22 @@ internal class ReberegningAvAvsluttetUtenUtbetalingE2ETest : AbstractEndToEndTes
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(1.januar til 16.januar))
 
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
+    }
+
+    @Test
+    fun `gjenopptar ikke behandling dersom det er nyere periode som er utbetalt`() {
+        håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
+        håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
+        nyttVedtak(1.mars, 31.mars)
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(1.januar til 16.januar))
+
+        håndterSykmelding(Sykmeldingsperiode(1.mai, 15.mai, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(16.mai, 28.mai, 100.prosent))
+        håndterSøknad(Sykdom(1.mai, 15.mai, 100.prosent))
+
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(4.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE)
     }
 
     @Test
@@ -61,6 +78,22 @@ internal class ReberegningAvAvsluttetUtenUtbetalingE2ETest : AbstractEndToEndTes
 
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP)
+    }
+
+    @ForventetFeil("Dette er ikke støttet enda")
+    @Test
+    fun `avsluttet periode trenger egen inntektsmelding etter at inntektsmelding treffer forrige 2`() {
+        håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
+        håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(21.januar, 25.januar, 100.prosent))
+        håndterSøknad(Sykdom(21.januar, 25.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(29.januar, 29.januar, 100.prosent))
+        håndterSøknad(Sykdom(29.januar, 29.januar, 100.prosent))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(5.januar til 20.januar))
+
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVSLUTTET_UTEN_UTBETALING, AVVENTER_HISTORIKK)
         assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP)
     }
 
