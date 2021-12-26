@@ -2286,29 +2286,16 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             if (vedtaksperiode.erInnenforArbeidsgiverperioden()) return
-            if (vedtaksperiode.utbetaling == null) {
-                if (vedtaksperiode.oppdatert < julegate) return
-                vedtaksperiode.arbeidsgiver.periodeReberegnet(påminnelse, vedtaksperiode)
-                vedtaksperiode.kontekst(påminnelse)
-                if (påminnelse.hasErrorsOrWorse()) return påminnelse.info("En annen periode blokkerer rebregning")
-                påminnelse.info("Periode reberegnes ettersom vi er utenfor arbeidsgiverperioden")
-                return vedtaksperiode.tilstand(påminnelse, AvventerInntektsmeldingEllerHistorikkFerdigGap)
-                /*
-                val tilstøtendeBak = vedtaksperiode.arbeidsgiver.tilstøtendeBak(vedtaksperiode)
-                return sikkerlogg.info(
-                    "julegate2: vedtaksperiode {} er utenfor arbeidsgiverperioden (${vedtaksperiode.finnArbeidsgiverperiode()?.toList()?.grupperSammenhengendePerioder()?.joinToString()})",
-                    keyValue("vedtaksperiodeId", vedtaksperiode.id),
-                    keyValue("aktørId", vedtaksperiode.aktørId),
-                    keyValue("harPerioderBak", if (vedtaksperiode.arbeidsgiver.harPeriodeBak(vedtaksperiode)) "JA" else "NEI"),
-                    keyValue("erAlleFerdigPerioderBak", if (vedtaksperiode.arbeidsgiver.erAlleFerdigbehandletBak(vedtaksperiode)) "JA" else "NEI"),
-                    keyValue("harTilstøtendeBak", if (tilstøtendeBak != null) "JA" else "NEI"),
-                    keyValue("tilstandTilstøtendeBak", tilstøtendeBak?.tilstand),
-                    keyValue("erAlleAvsluttetUtenUtbetaling", if (vedtaksperiode.arbeidsgiver.erAlleUtenUtbetaling(vedtaksperiode)) "JA" else "NEI")
-                )*/
-            }
-            vedtaksperiode.tilstand(påminnelse, Avsluttet) {
+            if (vedtaksperiode.utbetaling != null) return vedtaksperiode.tilstand(påminnelse, Avsluttet) {
                 påminnelse.info("Migrerer tilstand til Avsluttet fordi perioden har utbetaling og er utenfor arbeidsgiverperioden")
             }
+            if (vedtaksperiode.oppdatert < julegate) return
+            if (vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)?.erInnenforArbeidsgiverperioden() == false) return påminnelse.info("Perioden har periode rett før som også er utenfor arbeidsgiverperioden. Den perioden må reberegnes")
+            vedtaksperiode.arbeidsgiver.periodeReberegnet(påminnelse, vedtaksperiode)
+            vedtaksperiode.kontekst(påminnelse)
+            if (påminnelse.hasErrorsOrWorse()) return påminnelse.info("En annen periode blokkerer rebregning")
+            påminnelse.info("Periode reberegnes ettersom vi er utenfor arbeidsgiverperioden")
+            vedtaksperiode.tilstand(påminnelse, if (vedtaksperiode.harInntektsmelding()) AvventerHistorikk else AvventerInntektsmeldingEllerHistorikkFerdigGap)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
