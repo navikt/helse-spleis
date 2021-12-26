@@ -48,6 +48,22 @@ internal class ReberegningAvAvsluttetUtenUtbetalingE2ETest : AbstractEndToEndTes
         assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE)
     }
 
+    @ForventetFeil("Dette er ikke støttet enda")
+    @Test
+    fun `avsluttet periode trenger egen inntektsmelding etter at inntektsmelding treffer forrige`() {
+        håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
+        håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(23.januar, 25.januar, 100.prosent))
+        håndterSøknad(Sykdom(23.januar, 25.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(29.januar, 29.januar, 100.prosent))
+        håndterSøknad(Sykdom(29.januar, 29.januar, 100.prosent))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(5.januar til 20.januar))
+
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP)
+    }
+
     @Test
     fun `gjenopptar behandling på neste periode dersom inntektsmelding treffer avsluttet periode`() {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
@@ -181,6 +197,25 @@ internal class ReberegningAvAvsluttetUtenUtbetalingE2ETest : AbstractEndToEndTes
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVSLUTTET_UTEN_UTBETALING)
+    }
+
+    @Test
+    fun `avsluttet periode trenger egen inntektsmelding`() {
+        håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
+        håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(23.januar, 25.januar, 100.prosent))
+        håndterSøknad(Sykdom(23.januar, 25.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(29.januar, 29.januar, 100.prosent))
+        håndterSøknad(Sykdom(29.januar, 29.januar, 100.prosent))
+
+        val inntektsmeldingId = UUID.randomUUID()
+        val inntektsmelding = inntektsmelding(inntektsmeldingId, listOf(5.januar til 20.januar))
+        person.arbeidsgiver(ORGNUMMER).oppdaterSykdom(inntektsmelding)
+
+        håndterPåminnelse(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP)
     }
 
     @Test
