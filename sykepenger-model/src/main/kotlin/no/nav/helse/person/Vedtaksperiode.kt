@@ -229,7 +229,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(hendelse: GjenopptaBehandling): Boolean {
-        if (tilstand.erFerdigBehandlet) return false
+        if (!tilstand.skalGjennopptaBehandling(this, hendelse)) return false
         kontekst(hendelse)
         tilstand.håndter(this, hendelse)
         return true
@@ -263,6 +263,11 @@ internal class Vedtaksperiode private constructor(
 
     internal fun nyPeriode(ny: Vedtaksperiode, hendelse: Sykmelding) {
         håndterEndringIEldrePeriode(ny, Vedtaksperiodetilstand::nyPeriodeFør, hendelse)
+    }
+
+    internal fun kanReberegne(other: Vedtaksperiode): Boolean {
+        if (other > this || other == this) return true
+        return tilstand !in setOf(TilUtbetaling, UtbetalingFeilet, Avsluttet)
     }
 
     internal fun periodeReberegnetFør(ny: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
@@ -1023,6 +1028,7 @@ internal class Vedtaksperiode private constructor(
             hendelse.error("Forventet ikke utbetaling i %s", type.name)
         }
 
+        fun skalGjennopptaBehandling(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) = !erFerdigBehandlet
         fun håndter(
             vedtaksperiode: Vedtaksperiode,
             gjenopptaBehandling: GjenopptaBehandling
@@ -2290,12 +2296,17 @@ internal class Vedtaksperiode private constructor(
                 påminnelse.info("Migrerer tilstand til Avsluttet fordi perioden har utbetaling og er utenfor arbeidsgiverperioden")
             }
             if (vedtaksperiode.oppdatert < julegate) return
+            val debugkeys = arrayOf(keyValue("vedtaksperiodeId", vedtaksperiode.id), keyValue("aktørId", vedtaksperiode.aktørId), keyValue("organisasjonsnummer", vedtaksperiode.organisasjonsnummer))
             if (vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)?.erInnenforArbeidsgiverperioden() == false) return påminnelse.info("Perioden har periode rett før som også er utenfor arbeidsgiverperioden. Den perioden må reberegnes")
             vedtaksperiode.arbeidsgiver.periodeReberegnet(påminnelse, vedtaksperiode)
             vedtaksperiode.kontekst(påminnelse)
-            if (påminnelse.hasErrorsOrWorse()) return påminnelse.info("En annen periode blokkerer rebregning")
+            if (påminnelse.hasErrorsOrWorse()) return påminnelse.info("En annen periode blokkerer rebregning").also {
+                sikkerlogg.info("Julegate3: Kan ikke reberegne {} for {} {}", *debugkeys)
+            }
             påminnelse.info("Periode reberegnes ettersom vi er utenfor arbeidsgiverperioden")
-            vedtaksperiode.tilstand(påminnelse, if (vedtaksperiode.harInntektsmelding()) AvventerHistorikk else AvventerInntektsmeldingEllerHistorikkFerdigGap)
+            val nesteTilstand = if (vedtaksperiode.harInntektsmelding()) AvventerHistorikk else AvventerInntektsmeldingEllerHistorikkFerdigGap
+            sikkerlogg.info("Julegate3: Reberegner periode {} for {} {}", *debugkeys, keyValue("nesteTilstand", nesteTilstand))
+            vedtaksperiode.tilstand(påminnelse, nesteTilstand)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
