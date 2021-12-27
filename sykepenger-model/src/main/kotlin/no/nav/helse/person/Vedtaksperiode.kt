@@ -229,7 +229,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(hendelse: GjenopptaBehandling): Boolean {
-        if (!tilstand.skalGjennopptaBehandling(this, hendelse)) return false
+        if (tilstand.erFerdigBehandlet) return false
         kontekst(hendelse)
         tilstand.håndter(this, hendelse)
         return true
@@ -263,11 +263,6 @@ internal class Vedtaksperiode private constructor(
 
     internal fun nyPeriode(ny: Vedtaksperiode, hendelse: Sykmelding) {
         håndterEndringIEldrePeriode(ny, Vedtaksperiodetilstand::nyPeriodeFør, hendelse)
-    }
-
-    internal fun kanReberegne(other: Vedtaksperiode): Boolean {
-        if (other > this || other == this) return true
-        return tilstand !in setOf(TilUtbetaling, UtbetalingFeilet, Avsluttet)
     }
 
     internal fun periodeReberegnetFør(ny: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
@@ -1028,7 +1023,6 @@ internal class Vedtaksperiode private constructor(
             hendelse.error("Forventet ikke utbetaling i %s", type.name)
         }
 
-        fun skalGjennopptaBehandling(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) = !erFerdigBehandlet
         fun håndter(
             vedtaksperiode: Vedtaksperiode,
             gjenopptaBehandling: GjenopptaBehandling
