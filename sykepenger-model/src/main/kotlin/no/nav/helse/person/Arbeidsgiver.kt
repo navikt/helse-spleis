@@ -220,7 +220,7 @@ internal class Arbeidsgiver private constructor(
         forbrukteSykedager: Int,
         gjenståendeSykedager: Int,
         periode: Periode,
-        forrige: Utbetaling?
+        forrige: List<Utbetaling>
     ): Utbetaling {
         return Utbetalingstidslinjeberegning.lagRevurdering(
             beregnetUtbetalingstidslinjer,
@@ -818,7 +818,7 @@ internal class Arbeidsgiver private constructor(
     internal fun alleAndrePerioderErKlare(vedtaksperiode: Vedtaksperiode) = vedtaksperioder.filterNot { it == vedtaksperiode }.none(IKKE_FERDIG_REVURDERT)
 
     internal fun fordelRevurdertUtbetaling(hendelse: ArbeidstakerHendelse, utbetaling: Utbetaling) {
-        fordelRevurdertUtbetaling(hendelse) { håndterRevurdertUtbetaling(utbetaling, hendelse) }
+        håndter(hendelse) { håndterRevurdertUtbetaling(utbetaling, hendelse) }
     }
 
     private var skalGjenopptaBehandling = false
@@ -952,10 +952,6 @@ internal class Arbeidsgiver private constructor(
     }
 
     private fun <Hendelse : IAktivitetslogg> håndter(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Unit) {
-        looper { håndterer(it, hendelse) }
-    }
-
-    private fun <Hendelse : IAktivitetslogg> fordelRevurdertUtbetaling(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Unit) {
         looper { håndterer(it, hendelse) }
     }
 

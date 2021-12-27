@@ -291,7 +291,7 @@ internal class Utbetaling private constructor(
             maksdato: LocalDate,
             forbrukteSykedager: Int,
             gjenståendeSykedager: Int,
-            forrige: Utbetaling? = null
+            forrige: List<Utbetaling> = emptyList()
         ): Utbetaling {
             return Utbetaling(
                 utbetalinger.aktive().lastOrNull(),
@@ -305,7 +305,7 @@ internal class Utbetaling private constructor(
                 maksdato,
                 forbrukteSykedager,
                 gjenståendeSykedager,
-                forrige?.takeIf(Utbetaling::erAktiv)
+                forrige.aktive().lastOrNull()
             )
         }
 

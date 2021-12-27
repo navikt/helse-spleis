@@ -80,7 +80,7 @@ internal class Utbetalingstidslinjeberegning private constructor(
             maksdato: LocalDate,
             forbrukteSykedager: Int,
             gjenståendeSykedager: Int,
-            forrige: Utbetaling?,
+            forrige: List<Utbetaling>,
             organisasjonsnummer: String
         ): Utbetaling {
             val beregning = beregnetUtbetalingstidslinjer.last()

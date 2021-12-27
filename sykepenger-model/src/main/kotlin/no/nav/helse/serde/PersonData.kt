@@ -781,7 +781,7 @@ internal data class PersonData(
                         inntektsmeldingInfo?.parseInntektsmeldingInfo(),
                         Periode(fom, tom),
                         Periode(sykmeldingFom, sykmeldingTom),
-                        this.utbetalinger.map { utbetalinger.getValue(it) }.toMutableList(),
+                        VedtaksperiodeUtbetalinger(arbeidsgiver, this.utbetalinger.map { utbetalinger.getValue(it) }),
                         this.utbetalingstidslinje.konverterTilUtbetalingstidslinje(),
                         forlengelseFraInfotrygd,
                         inntektskilde,

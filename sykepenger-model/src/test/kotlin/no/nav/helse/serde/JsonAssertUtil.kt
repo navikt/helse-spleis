@@ -8,6 +8,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.person.VedtaksperiodeUtbetalinger
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
@@ -16,8 +17,11 @@ import org.junit.jupiter.api.Assertions
 @JsonIgnoreProperties("person")
 private class ArbeidsgiverMixin
 
-@JsonIgnoreProperties("person", "arbeidsgiver", "forrigeTilstand")
+@JsonIgnoreProperties("person", "arbeidsgiver")
 private class VedtaksperiodeMixin
+
+@JsonIgnoreProperties("arbeidsgiver")
+private class VedtaksperiodeUtbetalingerMixin
 
 @JsonIgnoreProperties("observers", "forrigeHendelse")
 private class UtbetalingMixin
@@ -35,6 +39,7 @@ private val objectMapper = jacksonObjectMapper()
         mutableMapOf(
             Arbeidsgiver::class.java to ArbeidsgiverMixin::class.java,
             Vedtaksperiode::class.java to VedtaksperiodeMixin::class.java,
+            VedtaksperiodeUtbetalinger::class.java to VedtaksperiodeUtbetalingerMixin::class.java,
             Utbetaling::class.java to UtbetalingMixin::class.java,
             Begrunnelse::class.java to BegrunnelseMixin::class.java,
             InfotrygdhistorikkElement::class.java to InfotrygdhistorikkElementMixin::class.java

@@ -1,19 +1,11 @@
 package no.nav.helse.serde
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.fasterxml.jackson.annotation.PropertyAccessor
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Person
-import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.testhelpers.april
 import no.nav.helse.testhelpers.januar
@@ -26,34 +18,15 @@ import java.util.*
 
 internal class SerialiseringAvDagerFraSøknadTest {
 
-    private val objectMapper = jacksonObjectMapper()
-        .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-        .setMixIns(
-            mutableMapOf(
-                Arbeidsgiver::class.java to ArbeidsgiverMixin::class.java,
-                Vedtaksperiode::class.java to VedtaksperiodeMixin::class.java
-            )
-        )
-        .registerModule(JavaTimeModule())
-
-    @JsonIgnoreProperties("person")
-    private class ArbeidsgiverMixin
-
-    @JsonIgnoreProperties("person", "arbeidsgiver", "kontekst", "forrigeTilstand")
-    private class VedtaksperiodeMixin
-
     @Test
     fun `perioder fra søknaden skal serialiseres og deserialiseres riktig - jackson`() {
         val person = person
-        val personPre = objectMapper.writeValueAsString(person)
         val jsonBuilder = JsonBuilder()
         person.accept(jsonBuilder)
         val personDeserialisert = SerialisertPerson(jsonBuilder.toString())
             .deserialize()
-        val personPost = objectMapper.writeValueAsString(personDeserialisert)
 
-        assertEquals(personPre, personPost)
+        assertJsonEquals(person, personDeserialisert)
     }
 
     @Test
