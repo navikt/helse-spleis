@@ -390,8 +390,6 @@ internal class Vedtaksperiode private constructor(
         return inntektsmelding.erRelevant(arbeidsgiver.finnSammenhengendePeriode(skjæringstidspunkt).periode())
     }
 
-    private var forrigeTilstand: Vedtaksperiodetilstand? = null
-
     private fun tilstand(
         event: IAktivitetslogg,
         nyTilstand: Vedtaksperiodetilstand,
@@ -401,7 +399,6 @@ internal class Vedtaksperiode private constructor(
         tilstand.leaving(this, event)
 
         val previousState = tilstand
-        forrigeTilstand = tilstand
 
         tilstand = nyTilstand
         oppdatert = LocalDateTime.now()
@@ -2256,7 +2253,7 @@ internal class Vedtaksperiode private constructor(
             LocalDateTime.MAX
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            check(vedtaksperiode.utbetaling == null) { "Kun perioder innenfor arbeidsgiverperioden skal sendes hit" }
+            check(vedtaksperiode.utbetaling == null) { "Forventet ikke at perioden har fått utbetaling: kun perioder innenfor arbeidsgiverperioden skal sendes hit. " }
             vedtaksperiode.sendVedtakFattet(hendelse)
             vedtaksperiode.arbeidsgiver.gjenopptaBehandling()
             vedtaksperiode.person.inntektsmeldingReplay(vedtaksperiode.id)
@@ -2296,24 +2293,7 @@ internal class Vedtaksperiode private constructor(
         ) {
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (vedtaksperiode.erInnenforArbeidsgiverperioden()) return
-            if (vedtaksperiode.utbetaling != null) return vedtaksperiode.tilstand(påminnelse, Avsluttet) {
-                påminnelse.info("Migrerer tilstand til Avsluttet fordi perioden har utbetaling og er utenfor arbeidsgiverperioden")
-            }
-            if (vedtaksperiode.oppdatert < julegate) return
-            val debugkeys = arrayOf(keyValue("vedtaksperiodeId", vedtaksperiode.id), keyValue("aktørId", vedtaksperiode.aktørId), keyValue("organisasjonsnummer", vedtaksperiode.organisasjonsnummer))
-            if (vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)?.erInnenforArbeidsgiverperioden() == false) return påminnelse.info("Perioden har periode rett før som også er utenfor arbeidsgiverperioden. Den perioden må reberegnes")
-            vedtaksperiode.arbeidsgiver.periodeReberegnet(påminnelse, vedtaksperiode)
-            vedtaksperiode.kontekst(påminnelse)
-            if (påminnelse.hasErrorsOrWorse()) return påminnelse.info("En annen periode blokkerer rebregning").also {
-                sikkerlogg.info("Julegate3: Kan ikke reberegne {} for {} {}", *debugkeys)
-            }
-            påminnelse.info("Periode reberegnes ettersom vi er utenfor arbeidsgiverperioden")
-            val nesteTilstand = if (vedtaksperiode.harInntektsmelding()) AvventerHistorikk else AvventerInntektsmeldingEllerHistorikkFerdigGap
-            sikkerlogg.info("Julegate3: Reberegner periode {} for {} {}", *debugkeys, keyValue("nesteTilstand", nesteTilstand))
-            vedtaksperiode.tilstand(påminnelse, nesteTilstand)
-        }
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
             hendelse.info("Overstyrer ikke en vedtaksperiode som er avsluttet uten utbetaling")
@@ -2342,7 +2322,6 @@ internal class Vedtaksperiode private constructor(
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.arbeidsgiver.lås(vedtaksperiode.periode)
             vedtaksperiode.utbetaling().vedtakFattet(hendelse)
-            if (vedtaksperiode.forrigeTilstand == AvsluttetUtenUtbetaling) return
             check(vedtaksperiode.utbetaling().erAvsluttet()) { "forventer at utbetaling skal være avsluttet" }
             vedtaksperiode.sendVedtakFattet(hendelse)
             vedtaksperiode.sendUtbetaltEvent(hendelse) // TODO: Fjerne når konsumentene lytter på vedtak fattet
@@ -2461,7 +2440,6 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal companion object {
-        private val julegate = LocalDate.of(2021, 12, 21).atTime(8, 0, 0)
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
         private const val IKKE_HÅNDTERT: Boolean = false
 
