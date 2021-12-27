@@ -165,8 +165,19 @@ internal interface VilkårsgrunnlagHistorikkVisitor : InntekthistorikkVisitor {
     fun postVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {}
 }
 
+internal interface InntektsmeldingInfoVisitor {
+    fun visitInntektsmeldinginfo(id: UUID, arbeidsforholdId: String?) {}
+}
+
+internal interface InntektsmeldingInfoHistorikkVisitor : InntektsmeldingInfoVisitor {
+    fun preVisitInntektsmeldinginfoHistorikk(inntektsmeldingInfoHistorikk: InntektsmeldingInfoHistorikk) {}
+    fun preVisitInntektsmeldinginfoElement(dato: LocalDate, elementer: List<InntektsmeldingInfo>) {}
+    fun postVisitInntektsmeldinginfoElement(dato: LocalDate, elementer: List<InntektsmeldingInfo>) {}
+    fun postVisitInntektsmeldinginfoHistorikk(inntektsmeldingInfoHistorikk: InntektsmeldingInfoHistorikk) {}
+}
+
 internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, SykdomshistorikkVisitor, VedtaksperiodeVisitor, UtbetalingVisitor,
-    UtbetalingstidslinjeberegningVisitor, FeriepengeutbetalingVisitor, RefusjonshistorikkVisitor, ArbeidsforholdhistorikkVisitor {
+    UtbetalingstidslinjeberegningVisitor, FeriepengeutbetalingVisitor, RefusjonshistorikkVisitor, ArbeidsforholdhistorikkVisitor, InntektsmeldingInfoHistorikkVisitor {
     fun preVisitArbeidsgiver(
         arbeidsgiver: Arbeidsgiver,
         id: UUID,
@@ -271,7 +282,7 @@ internal interface UtbetalingstidslinjeberegningVisitor : UtbetalingsdagVisitor 
     }
 }
 
-internal interface VedtaksperiodeVisitor : UtbetalingVisitor, SykdomstidslinjeVisitor, UtbetalingsdagVisitor {
+internal interface VedtaksperiodeVisitor : UtbetalingVisitor, SykdomstidslinjeVisitor, UtbetalingsdagVisitor, InntektsmeldingInfoVisitor {
     fun preVisitVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,
         id: UUID,
@@ -290,7 +301,6 @@ internal interface VedtaksperiodeVisitor : UtbetalingVisitor, SykdomstidslinjeVi
     ) {
     }
 
-    fun visitInntektsmeldinginfo(id: UUID, arbeidsforholdId: String?) {}
     fun preVisitVedtakserperiodeUtbetalinger(utbetalinger: List<Utbetaling>) {}
     fun postVisitVedtakserperiodeUtbetalinger(utbetalinger: List<Utbetaling>) {}
     fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: VilkårsgrunnlagHistorikk.Grunnlagsdata?) {}

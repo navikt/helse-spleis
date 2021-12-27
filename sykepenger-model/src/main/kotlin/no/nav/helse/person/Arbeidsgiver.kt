@@ -55,7 +55,8 @@ internal class Arbeidsgiver private constructor(
     private val feriepengeutbetalinger: MutableList<Feriepengeutbetaling>,
     private val refusjonOpphører: MutableList<LocalDate?>,
     internal val refusjonshistorikk: Refusjonshistorikk,
-    private val arbeidsforholdhistorikk: Arbeidsforholdhistorikk
+    private val arbeidsforholdhistorikk: Arbeidsforholdhistorikk,
+    private val inntektsmeldingInfo: InntektsmeldingInfoHistorikk
 ) : Aktivitetskontekst, UtbetalingObserver {
     internal constructor(person: Person, organisasjonsnummer: String) : this(
         person = person,
@@ -70,7 +71,8 @@ internal class Arbeidsgiver private constructor(
         feriepengeutbetalinger = mutableListOf(),
         refusjonOpphører = mutableListOf(),
         refusjonshistorikk = Refusjonshistorikk(),
-        arbeidsforholdhistorikk = Arbeidsforholdhistorikk()
+        arbeidsforholdhistorikk = Arbeidsforholdhistorikk(),
+        inntektsmeldingInfo = InntektsmeldingInfoHistorikk()
     )
 
     init {
@@ -182,6 +184,7 @@ internal class Arbeidsgiver private constructor(
         visitor.postVisitFeriepengeutbetalinger(feriepengeutbetalinger)
         refusjonshistorikk.accept(visitor)
         arbeidsforholdhistorikk.accept(visitor)
+        inntektsmeldingInfo.accept(visitor)
         visitor.visitRefusjonOpphører(refusjonOpphører)
         visitor.postVisitArbeidsgiver(this, id, organisasjonsnummer)
     }
@@ -693,6 +696,14 @@ internal class Arbeidsgiver private constructor(
         inntektsmelding.addInntekt(inntektshistorikk, skjæringstidspunkt)
     }
 
+    internal fun finnTidligereInntektsmeldinginfo(skjæringstidspunkt: LocalDate) = inntektsmeldingInfo.finn(skjæringstidspunkt)
+
+    internal fun addInntektsmelding(skjæringstidspunkt: LocalDate, inntektsmelding: Inntektsmelding): InntektsmeldingInfo {
+        val førsteFraværsdag = finnFørsteFraværsdag(skjæringstidspunkt)
+        if (førsteFraværsdag != null) addInntekt(inntektsmelding, førsteFraværsdag)
+        return inntektsmeldingInfo.opprett(skjæringstidspunkt, inntektsmelding)
+    }
+
     internal fun addInntekt(hendelse: OverstyrInntekt) {
         hendelse.addInntekt(inntektshistorikk)
     }
@@ -937,12 +948,6 @@ internal class Arbeidsgiver private constructor(
         return !aktivitetslogg.hasErrorsOrWorse()
     }
 
-    internal fun forrigeAvsluttaPeriodeMedVilkårsvurdering(vedtaksperiode: Vedtaksperiode): Vedtaksperiode? {
-        return Vedtaksperiode.finnForrigeAvsluttaPeriode(vedtaksperioder, vedtaksperiode) ?:
-        // TODO: leiter frem fra forkasta perioder — vilkårsgrunnlag ol. felles data bør lagres på Arbeidsgivernivå
-        ForkastetVedtaksperiode.finnForrigeAvsluttaPeriode(forkastede, vedtaksperiode)
-    }
-
     internal fun harDagUtenSøknad(periode: Periode) =
         sykdomstidslinje().harDagUtenSøknad(periode)
 
@@ -1043,7 +1048,8 @@ internal class Arbeidsgiver private constructor(
                 feriepengeutbetalinger: List<Feriepengeutbetaling>,
                 refusjonOpphører: List<LocalDate?>,
                 refusjonshistorikk: Refusjonshistorikk,
-                arbeidsforholdhistorikk: Arbeidsforholdhistorikk
+                arbeidsforholdhistorikk: Arbeidsforholdhistorikk,
+                inntektsmeldingInfo: InntektsmeldingInfoHistorikk
             ) = Arbeidsgiver(
                 person,
                 organisasjonsnummer,
@@ -1057,7 +1063,8 @@ internal class Arbeidsgiver private constructor(
                 feriepengeutbetalinger.toMutableList(),
                 refusjonOpphører.toMutableList(),
                 refusjonshistorikk,
-                arbeidsforholdhistorikk
+                arbeidsforholdhistorikk,
+                inntektsmeldingInfo
             )
         }
     }

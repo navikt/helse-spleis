@@ -1,0 +1,120 @@
+{
+    "arbeidsgivere": [
+        {
+            "inntektsmeldingInfo": [
+                {
+                    "dato": "2020-01-01",
+                    "inntektsmeldinger": [
+                        {
+                            "id": "e62af67c-6744-11ec-90d6-0242ac120003"
+                        },
+                        {
+                            "id": "f141c37e-6744-11ec-90d6-0242ac120003",
+                            "arbeidsforholdId": "arbID1"
+                        },
+                        {
+                            "id": "f141c37e-6744-11ec-90d6-0242ac120003",
+                            "arbeidsforholdId": "arbID2"
+                        }
+                    ]
+                },
+                {
+                    "dato": "2020-05-01",
+                    "inntektsmeldinger": [
+                        {
+                            "id": "04e19788-6745-11ec-90d6-0242ac120003",
+                            "arbeidsforholdId": "arbID3"
+                        },
+                        {
+                            "id": "9844eb6e-6746-11ec-90d6-0242ac120003"
+                        }
+                    ]
+                }
+            ],
+            "vedtaksperioder": [
+                {
+                },
+                {
+                    "inntektsmeldingInfo": {
+                        "id": "8f60a9ca-6746-11ec-90d6-0242ac120003"
+                    }
+                },
+                {
+                    "skjæringstidspunktFraInfotrygd": "2020-05-01",
+                    "inntektsmeldingInfo": {
+                        "id": "9844eb6e-6746-11ec-90d6-0242ac120003"
+                    }
+                },
+                {
+                    "skjæringstidspunktFraInfotrygd": "2020-01-01",
+                    "inntektsmeldingInfo": {
+                        "id": "f141c37e-6744-11ec-90d6-0242ac120003",
+                        "arbeidsforholdId": "arbID1"
+                    }
+                },
+                {
+                    "skjæringstidspunktFraInfotrygd": "2020-01-01",
+                    "inntektsmeldingInfo": {
+                        "id": "f141c37e-6744-11ec-90d6-0242ac120003",
+                        "arbeidsforholdId": "arbID2"
+                    }
+                },
+                {
+                    "skjæringstidspunktFraInfotrygd": "2020-05-01",
+                    "inntektsmeldingInfo": {
+                        "id": "04e19788-6745-11ec-90d6-0242ac120003",
+                        "arbeidsforholdId": "arbID3"
+                    }
+                }
+            ],
+            "forkastede": [
+                {
+                    "vedtaksperiode": {}
+                },
+                {
+                    "vedtaksperiode": {
+                        "inntektsmeldingInfo": {
+                            "id": "f65a0e5d-bd44-42d6-af1e-9410b6365de8"
+                        }
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "skjæringstidspunktFraInfotrygd": "2020-01-01",
+                        "inntektsmeldingInfo": {
+                            "id": "e62af67c-6744-11ec-90d6-0242ac120003"
+                        }
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "skjæringstidspunktFraInfotrygd": "2020-01-01",
+                        "inntektsmeldingInfo": {
+                            "id": "f141c37e-6744-11ec-90d6-0242ac120003",
+                            "arbeidsforholdId": "arbID1"
+                        }
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "skjæringstidspunktFraInfotrygd": "2020-01-01",
+                        "inntektsmeldingInfo": {
+                            "id": "f141c37e-6744-11ec-90d6-0242ac120003",
+                            "arbeidsforholdId": "arbID2"
+                        }
+                    }
+                },
+                {
+                    "vedtaksperiode": {
+                        "skjæringstidspunktFraInfotrygd": "2020-05-01",
+                        "inntektsmeldingInfo": {
+                            "id": "04e19788-6745-11ec-90d6-0242ac120003",
+                            "arbeidsforholdId": "arbID3"
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "skjemaVersjon": 137
+}

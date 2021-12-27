@@ -42,11 +42,6 @@ internal class ForkastetVedtaksperiode(
         internal fun finnForkastetSykeperiodeRettFør(forkastede: Iterable<ForkastetVedtaksperiode>, other: Vedtaksperiode) =
             forkastede.perioder().firstOrNull { vedtaksperiode -> vedtaksperiode.erSykeperiodeRettFør(other) }
 
-        internal fun finnForrigeAvsluttaPeriode(
-            forkastede: Iterable<ForkastetVedtaksperiode>,
-            vedtaksperiode: Vedtaksperiode
-        ) = Vedtaksperiode.finnForrigeAvsluttaPeriode(forkastede.perioder(), vedtaksperiode)
-
         internal fun List<ForkastetVedtaksperiode>.iderMedUtbetaling(utbetalingId: UUID) =
             map { it.vedtaksperiode }.iderMedUtbetaling(utbetalingId)
 

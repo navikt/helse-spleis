@@ -372,6 +372,26 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.postVisitForkastedePerioder(vedtaksperioder)
     }
 
+    override fun preVisitInntektsmeldinginfoHistorikk(inntektsmeldingInfoHistorikk: InntektsmeldingInfoHistorikk) {
+        delegatee.preVisitInntektsmeldinginfoHistorikk(inntektsmeldingInfoHistorikk)
+    }
+
+    override fun preVisitInntektsmeldinginfoElement(dato: LocalDate, elementer: List<InntektsmeldingInfo>) {
+        delegatee.preVisitInntektsmeldinginfoElement(dato, elementer)
+    }
+
+    override fun visitInntektsmeldinginfo(id: UUID, arbeidsforholdId: String?) {
+        delegatee.visitInntektsmeldinginfo(id, arbeidsforholdId)
+    }
+
+    override fun postVisitInntektsmeldinginfoElement(dato: LocalDate, elementer: List<InntektsmeldingInfo>) {
+        delegatee.postVisitInntektsmeldinginfoElement(dato, elementer)
+    }
+
+    override fun postVisitInntektsmeldinginfoHistorikk(inntektsmeldingInfoHistorikk: InntektsmeldingInfoHistorikk) {
+        delegatee.postVisitInntektsmeldinginfoHistorikk(inntektsmeldingInfoHistorikk)
+    }
+
     override fun postVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
         delegatee.postVisitArbeidsgiver(arbeidsgiver, id, organisasjonsnummer)
     }
@@ -408,10 +428,6 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             inntektsmeldingInfo,
             inntektskilde
         )
-    }
-
-    override fun visitInntektsmeldinginfo(id: UUID, arbeidsforholdId: String?) {
-        delegatee.visitInntektsmeldinginfo(id, arbeidsforholdId)
     }
 
     override fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: VilkårsgrunnlagHistorikk.Grunnlagsdata?) {

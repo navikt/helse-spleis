@@ -9,6 +9,8 @@ import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.*
 import no.nav.helse.person.infotrygdhistorikk.*
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.ArbeidsforholdhistorikkInnslagData.Companion.tilArbeidsforholdhistorikk
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.InntektsmeldingInfoHistorikkElementData.Companion.finn
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.InntektsmeldingInfoHistorikkElementData.Companion.tilInntektsmeldingInfoHistorikk
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.RefusjonData.Companion.parseRefusjon
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.RefusjonData.EndringIRefusjonData.Companion.parseEndringerIRefusjon
 import no.nav.helse.serde.PersonData.InfotrygdhistorikkElementData.Companion.tilModellObjekt
@@ -377,7 +379,8 @@ internal data class PersonData(
         private val feriepengeutbetalinger: List<FeriepengeutbetalingData> = emptyList(),
         private val refusjonOpphører: List<LocalDate?> = emptyList(),
         private val refusjonshistorikk: List<RefusjonData>,
-        private val arbeidsforholdhistorikk: List<ArbeidsforholdhistorikkInnslagData> = listOf()
+        private val arbeidsforholdhistorikk: List<ArbeidsforholdhistorikkInnslagData> = listOf(),
+        private val inntektsmeldingInfo: List<InntektsmeldingInfoHistorikkElementData>
     ) {
         private val modelInntekthistorikk = Inntektshistorikk().apply {
             InntektshistorikkInnslagData.parseInntekter(inntektshistorikk, this)
@@ -406,7 +409,8 @@ internal data class PersonData(
                 feriepengeutbetalinger.map { it.createFeriepengeutbetaling(fødselsnummer) },
                 refusjonOpphører,
                 refusjonshistorikk.parseRefusjon(),
-                arbeidsforholdhistorikk.tilArbeidsforholdhistorikk()
+                arbeidsforholdhistorikk.tilArbeidsforholdhistorikk(),
+                inntektsmeldingInfo.tilInntektsmeldingInfoHistorikk()
             )
 
             vedtaksperiodeliste.addAll(this.vedtaksperioder.map {
@@ -416,7 +420,8 @@ internal data class PersonData(
                     aktørId,
                     fødselsnummer,
                     this.organisasjonsnummer,
-                    utbetalingMap
+                    utbetalingMap,
+                    inntektsmeldingInfo
                 )
             })
 
@@ -428,12 +433,46 @@ internal data class PersonData(
                         aktørId,
                         fødselsnummer,
                         this.organisasjonsnummer,
-                        utbetalingMap
+                        utbetalingMap,
+                        inntektsmeldingInfo
                     ), årsak
                 )
             })
             vedtaksperiodeliste.sort()
             return arbeidsgiver
+        }
+
+        data class InntektsmeldingInfoHistorikkElementData(
+            private val dato: LocalDate,
+            private val inntektsmeldinger: List<InntektsmeldingInfoData>
+        ) {
+            internal fun finn(dato: LocalDate, element: InntektsmeldingInfoData): InntektsmeldingInfo? {
+                if (this.dato != dato) return null
+                return inntektsmeldinger.firstNotNullOfOrNull { it.tilInntektsmeldingInfo(element) }
+            }
+            internal fun toMapPair() = dato to inntektsmeldinger.map { it.tilInntektsmeldingInfo() }.toMutableList()
+
+            data class InntektsmeldingInfoData(
+                private val id: UUID,
+                private val arbeidsforholdId: String?
+            ) {
+                private val modellobjekt by lazy { InntektsmeldingInfo(id, arbeidsforholdId) }
+                internal fun tilInntektsmeldingInfo(other: InntektsmeldingInfoData): InntektsmeldingInfo? {
+                    if (this.id != other.id || this.arbeidsforholdId != other.arbeidsforholdId) return null
+                    return modellobjekt
+                }
+
+                internal fun tilInntektsmeldingInfo() = modellobjekt
+
+            }
+
+            internal companion object {
+                internal fun List<InntektsmeldingInfoHistorikkElementData>.finn(dato: LocalDate?, element: InntektsmeldingInfoData) =
+                    (dato?.let { firstNotNullOfOrNull { it.finn(dato, element) } }) ?: element.tilInntektsmeldingInfo()
+
+                internal fun List<InntektsmeldingInfoHistorikkElementData>.tilInntektsmeldingInfoHistorikk() =
+                    InntektsmeldingInfoHistorikk(associate { it.toMapPair() }.toMutableMap())
+            }
         }
 
         data class BeregnetUtbetalingstidslinjeData(
@@ -741,9 +780,10 @@ internal data class PersonData(
         data class VedtaksperiodeData(
             private val id: UUID,
             private val skjæringstidspunktFraInfotrygd: LocalDate?,
+            private val skjæringstidspunkt: LocalDate?,
             private val sykdomstidslinje: SykdomstidslinjeData,
             private val hendelseIder: MutableSet<UUID>,
-            private val inntektsmeldingInfo: InntektsmeldingInfoData?,
+            private val inntektsmeldingInfo: InntektsmeldingInfoHistorikkElementData.InntektsmeldingInfoData?,
             private val fom: LocalDate,
             private val tom: LocalDate,
             private val sykmeldingFom: LocalDate,
@@ -763,7 +803,8 @@ internal data class PersonData(
                 aktørId: String,
                 fødselsnummer: String,
                 organisasjonsnummer: String,
-                utbetalinger: Map<UUID, Utbetaling>
+                utbetalinger: Map<UUID, Utbetaling>,
+                inntektsmeldingInfoHistorikk: List<InntektsmeldingInfoHistorikkElementData>
             ): Vedtaksperiode {
                 return Vedtaksperiode::class.primaryConstructor!!
                     .apply { isAccessible = true }
@@ -778,7 +819,7 @@ internal data class PersonData(
                         skjæringstidspunktFraInfotrygd,
                         sykdomstidslinje.createSykdomstidslinje(),
                         hendelseIder,
-                        inntektsmeldingInfo?.parseInntektsmeldingInfo(),
+                        inntektsmeldingInfo?.let { inntektsmeldingInfoHistorikk.finn(skjæringstidspunktFraInfotrygd ?: skjæringstidspunkt, it) },
                         Periode(fom, tom),
                         Periode(sykmeldingFom, sykmeldingTom),
                         VedtaksperiodeUtbetalinger(arbeidsgiver, this.utbetalinger.map { utbetalinger.getValue(it) }),
@@ -823,13 +864,6 @@ internal data class PersonData(
                 TilstandType.AVVENTER_GODKJENNING_REVURDERING -> Vedtaksperiode.AvventerGodkjenningRevurdering
                 TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING -> Vedtaksperiode.AvventerArbeidsgivereRevurdering
                 TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING -> Vedtaksperiode.AvventerGjennomførtRevurdering
-            }
-
-            data class InntektsmeldingInfoData(
-                private val id: UUID,
-                private val arbeidsforholdId: String?
-            ) {
-                internal fun parseInntektsmeldingInfo() = InntektsmeldingInfo(id, arbeidsforholdId)
             }
 
             data class DataForSimuleringData(

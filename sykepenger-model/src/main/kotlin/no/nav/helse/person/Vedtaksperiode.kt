@@ -75,8 +75,7 @@ internal class Vedtaksperiode private constructor(
     internal constructor(
         person: Person,
         arbeidsgiver: Arbeidsgiver,
-        hendelse: Sykmelding,
-        inntektsmeldingInfo: InntektsmeldingInfo? = null
+        hendelse: Sykmelding
     ) : this(
         person = person,
         arbeidsgiver = arbeidsgiver,
@@ -88,7 +87,7 @@ internal class Vedtaksperiode private constructor(
         skjæringstidspunktFraInfotrygd = null,
         sykdomstidslinje = hendelse.sykdomstidslinje(),
         hendelseIder = mutableSetOf(),
-        inntektsmeldingInfo = inntektsmeldingInfo,
+        inntektsmeldingInfo = null,
         periode = hendelse.periode(),
         sykmeldingsperiode = hendelse.periode(),
         utbetalinger = VedtaksperiodeUtbetalinger(arbeidsgiver),
@@ -404,9 +403,7 @@ internal class Vedtaksperiode private constructor(
     private fun håndterInntektsmelding(hendelse: Inntektsmelding, hvisIngenErrors: () -> Unit = {}, nesteTilstand: () -> Vedtaksperiodetilstand) {
         periode = periode.oppdaterFom(hendelse.periode())
         oppdaterHistorikk(hendelse)
-        val førsteFraværsdag = arbeidsgiver.finnFørsteFraværsdag(skjæringstidspunkt)
-        if (førsteFraværsdag != null) arbeidsgiver.addInntekt(hendelse, førsteFraværsdag)
-        inntektsmeldingInfo = hendelse.inntektsmeldingsinfo()
+        inntektsmeldingInfo = arbeidsgiver.addInntektsmelding(skjæringstidspunkt, hendelse)
 
         hendelse.validerFørsteFraværsdag(skjæringstidspunkt)
         finnArbeidsgiverperiode()?.also { hendelse.validerArbeidsgiverperiode(it) }
@@ -1779,7 +1776,7 @@ internal class Vedtaksperiode private constructor(
                         }
                         else -> {
                             vedtaksperiode.forlengelseFraInfotrygd = NEI
-                            arbeidsgiver.forrigeAvsluttaPeriodeMedVilkårsvurdering(vedtaksperiode)?.also { vedtaksperiode.kopierManglende(it) }
+                            if (vedtaksperiode.inntektsmeldingInfo == null) arbeidsgiver.finnTidligereInntektsmeldinginfo(vedtaksperiode.skjæringstidspunkt)?.also { vedtaksperiode.kopierManglende(it) }
                         }
                     }
                 }
@@ -1813,14 +1810,9 @@ internal class Vedtaksperiode private constructor(
         sikkerlogg.info("Vedtaksperioden {} er egentlig innenfor arbeidsgiverperioden ved {}", keyValue("vedtaksperiodeId", id), keyValue("tilstand", tilstand))
     }
 
-    private fun kopierManglende(other: Vedtaksperiode) {
-        if (this.inntektsmeldingInfo != null) return
-        sikkerlogg.info(
-            "kopierer manglende inntektsmeldinginfo til {} fra en {}",
-            keyValue("vedtaksperiodeId", id),
-            keyValue("otherVedtaksperiodeId", other.id)
-        )
-        this.inntektsmeldingInfo = other.inntektsmeldingInfo?.also { it.leggTil(this.hendelseIder) }
+    private fun kopierManglende(other: InntektsmeldingInfo) {
+        this.inntektsmeldingInfo = other
+        other.leggTil(this.hendelseIder)
     }
 
     internal object AvventerSimulering : Vedtaksperiodetilstand {
@@ -2424,14 +2416,6 @@ internal class Vedtaksperiode private constructor(
 
         internal val ALLE: VedtaksperiodeFilter = { true }
 
-        internal fun finnForrigeAvsluttaPeriode(
-            perioder: List<Vedtaksperiode>,
-            vedtaksperiode: Vedtaksperiode
-        ) = perioder
-            .filter { it < vedtaksperiode }
-            .filter { it.erAvsluttet() }
-            .lastOrNull { it.skjæringstidspunkt == vedtaksperiode.skjæringstidspunkt }
-
         internal fun aktivitetsloggMedForegåendeUtenUtbetaling(vedtaksperiode: Vedtaksperiode): Aktivitetslogg {
             val tidligereUbetalt = vedtaksperiode.arbeidsgiver.finnSykeperioderAvsluttetUtenUtbetalingRettFør(vedtaksperiode)
             val aktivitetskontekster = listOf(vedtaksperiode) + tidligereUbetalt
@@ -2562,9 +2546,16 @@ internal class InntektsmeldingInfo(
         hendelser.add(id)
     }
 
-    internal fun accept(visitor: VedtaksperiodeVisitor) {
+    internal fun accept(visitor: InntektsmeldingInfoVisitor) {
         visitor.visitInntektsmeldinginfo(id, arbeidsforholdId)
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is InntektsmeldingInfo) return false
+        return this.id == other.id && this.arbeidsforholdId == other.arbeidsforholdId
+    }
+
+    override fun hashCode() = Objects.hash(id, arbeidsforholdId)
 
     internal companion object {
         fun List<InntektsmeldingInfo>.ider() = map { it.id }

@@ -229,6 +229,12 @@ internal class JsonBuilder : AbstractBuilder() {
             pushState(ArbeidsforholdhistorikkState(historikk))
         }
 
+        override fun preVisitInntektsmeldinginfoHistorikk(inntektsmeldingInfoHistorikk: InntektsmeldingInfoHistorikk) {
+            val historikk = mutableListOf<Map<String, Any>>()
+            arbeidsgiverMap["inntektsmeldingInfo"] = historikk
+            pushState(InntektsmeldingInfoHistorikkState(historikk))
+        }
+
         override fun postVisitArbeidsgiver(
             arbeidsgiver: Arbeidsgiver,
             id: UUID,
@@ -408,6 +414,38 @@ internal class JsonBuilder : AbstractBuilder() {
 
         override fun postVisitArbeidsforholdhistorikk(arbeidsforholdhistorikk: Arbeidsforholdhistorikk) {
             popState()
+        }
+    }
+
+    private class InntektsmeldingInfoHistorikkState(private val historikk: MutableList<Map<String, Any>>) : BuilderState() {
+
+        override fun preVisitInntektsmeldinginfoElement(dato: LocalDate, elementer: List<InntektsmeldingInfo>) {
+            val element = mutableMapOf<String, Any>()
+            historikk.add(element)
+            pushState(InntektsmeldingInfoHistorikkElementState(dato, element))
+        }
+
+        override fun postVisitInntektsmeldinginfoHistorikk(inntektsmeldingInfoHistorikk: InntektsmeldingInfoHistorikk) {
+            popState()
+        }
+
+        private class InntektsmeldingInfoHistorikkElementState(dato: LocalDate, element: MutableMap<String, Any>) : BuilderState() {
+            private val elementer = mutableListOf<Map<String, Any>>()
+
+            init {
+                element["dato"] = dato
+                element["inntektsmeldinger"] = elementer
+            }
+
+            override fun visitInntektsmeldinginfo(id: UUID, arbeidsforholdId: String?) {
+                elementer.add(mutableMapOf<String, Any>("id" to id).apply {
+                    compute("arbeidsforholdId") { _, _ -> arbeidsforholdId }
+                })
+            }
+
+            override fun postVisitInntektsmeldinginfoElement(dato: LocalDate, elementer: List<InntektsmeldingInfo>) {
+                popState()
+            }
         }
     }
 
