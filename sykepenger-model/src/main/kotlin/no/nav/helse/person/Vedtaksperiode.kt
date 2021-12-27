@@ -1638,6 +1638,8 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            // migrerer perioder som feilaktig har gått videre
+            if (!vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode)) return vedtaksperiode.tilstand(påminnelse, AvventerUferdig)
             vedtaksperiode.trengerVilkårsgrunnlag(påminnelse)
         }
 
