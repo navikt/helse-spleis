@@ -31,10 +31,9 @@ import no.nav.helse.person.builders.UtbetaltEventBuilder
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.sykdomstidslinje.Dag
-import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
+import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
@@ -2519,7 +2518,7 @@ internal class Vedtaksperiode private constructor(
             sykdomstidslinje: Sykdomstidslinje,
             periode: Periode
         ): Arbeidsgiverperiode? {
-            val samletSykdomstidslinje = (perioder.map { it.sykdomstidslinje } + listOf(sykdomstidslinje)).merge(sammenhengendeSykdom)
+            val samletSykdomstidslinje = Sykdomstidslinje.gammelTidslinje(perioder.map { it.sykdomstidslinje }).merge(sykdomstidslinje, replace)
             return person.arbeidsgiverperiodeFor(organisasjonsnummer, samletSykdomstidslinje, samletSykdomstidslinje.sisteDag(), periode)
         }
     }

@@ -189,10 +189,6 @@ internal sealed class Dag(
 
         override fun accept(visitor: SykdomstidslinjeVisitor) =
             visitor.visitDag(this, dato, kilde, melding)
-
-        override fun toString(): String {
-            return "Problemdag(${kilde.meldingsreferanseId()})"
-        }
     }
 
     internal class AvslåttDag(
@@ -202,8 +198,6 @@ internal sealed class Dag(
         override fun accept(visitor: SykdomstidslinjeVisitor) {
             visitor.visitDag(this, dato, kilde)
         }
-
-        override fun toString() = "AvslåttDag(${kilde.meldingsreferanseId()})"
     }
 }
 

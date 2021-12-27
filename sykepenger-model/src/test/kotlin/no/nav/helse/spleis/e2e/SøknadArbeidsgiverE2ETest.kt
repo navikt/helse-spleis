@@ -7,9 +7,11 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
@@ -19,6 +21,16 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(4.januar, 21.januar, 100.prosent))
         håndterSøknad(Sykdom(4.januar, 21.januar, 100.prosent))
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
+    }
+
+    @Test
+    fun `forkastede problemdager skal ikke skape problem ved utregning av arbeidsgiverperiode`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), Papirsykmelding(27.desember(2017), 31.desember(2017)))
+        assertTrue(hendelselogg.hasErrorsOrWorse()) // perioden blir forkastet pga papirsykmelding
+        håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(21.januar, 31.januar, 100.prosent))
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
     }
 
     @Test

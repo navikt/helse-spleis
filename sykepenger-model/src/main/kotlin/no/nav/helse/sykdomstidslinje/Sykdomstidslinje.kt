@@ -411,6 +411,9 @@ internal class Sykdomstidslinje private constructor(
 
         internal fun ulikFerieinformasjon(sykdomstidslinje: Sykdomstidslinje, ferieperiode: Periode) =
             ferieperiode.any { sykdomstidslinje[it] !is Feriedag }
+
+        internal fun gammelTidslinje(tidslinjer: List<Sykdomstidslinje>) =
+            tidslinjer.map { Sykdomstidslinje(it.dager.filter { it.value !is ProblemDag }.toSortedMap(), it.periode) }.merge(Dag.sammenhengendeSykdom)
     }
 }
 
