@@ -760,6 +760,8 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
+    internal fun kanReberegnes(vedtaksperiode: Vedtaksperiode) = vedtaksperioder.all { it.kanReberegne(vedtaksperiode) }
+
     internal fun periodeReberegnet(hendelse: ArbeidstakerHendelse, vedtaksperiode: Vedtaksperiode) {
         håndter(hendelse) { periodeReberegnetFør(vedtaksperiode, hendelse) }
         if (!hendelse.hasErrorsOrWorse()) return

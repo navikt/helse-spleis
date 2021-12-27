@@ -265,6 +265,11 @@ internal class Vedtaksperiode private constructor(
         håndterEndringIEldrePeriode(ny, Vedtaksperiodetilstand::nyPeriodeFør, hendelse)
     }
 
+    internal fun kanReberegne(other: Vedtaksperiode): Boolean {
+        if (other > this || other == this) return true
+        return tilstand !in setOf(TilUtbetaling, UtbetalingFeilet, Avsluttet)
+    }
+
     internal fun periodeReberegnetFør(ny: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
         håndterEndringIEldrePeriode(ny, Vedtaksperiodetilstand::reberegnetPeriodeFør, hendelse)
     }
@@ -2272,6 +2277,13 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndterInntektsmelding(inntektsmelding, hvisIngenErrors = {
                 vedtaksperiode.emitVedtaksperiodeEndret(inntektsmelding)
                 vedtaksperiode.arbeidsgiver.gjenopptaBehandling()
+                val debugkeys = arrayOf(keyValue("vedtaksperiodeId", vedtaksperiode.id), keyValue("aktørId", vedtaksperiode.aktørId), keyValue("organisasjonsnummer", vedtaksperiode.organisasjonsnummer))
+                when {
+                    vedtaksperiode.finnArbeidsgiverperiode() == null -> sikkerlogg.info("inntektsmelding i auu: har ikke arbeidsgiverperiode etter mottak av im for {} {} {}. Perioden er mest sannsynlig erstattet med arbeidsdager", *debugkeys)
+                    vedtaksperiode.erInnenforArbeidsgiverperioden() -> sikkerlogg.info("inntektsmelding i auu: er fortsatt innenfor arbeidsgiverperioden etter mottak av im for {} {} {}", *debugkeys)
+                    !vedtaksperiode.arbeidsgiver.kanReberegnes(vedtaksperiode) -> sikkerlogg.info("inntektsmelding i auu: Kan ikke reberegne {} for {} {} fordi nyere periode blokkerer", *debugkeys)
+                    else -> sikkerlogg.info("inntektsmelding i auu: vil reberegne vedtaksperiode {} for {} {}", *debugkeys)
+                }
             }) { this }
         }
 
