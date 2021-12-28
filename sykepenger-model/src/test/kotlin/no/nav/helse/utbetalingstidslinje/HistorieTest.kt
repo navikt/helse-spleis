@@ -54,7 +54,7 @@ internal abstract class HistorieTest {
         Friperiode(fom,  tom)
 
     protected fun navdager(fom: LocalDate, tom: LocalDate) =
-        tidslinjeOf(fom.dagerMellom(tom).NAV, startDato = fom)
+        tidslinjeOf(fom.dagerMellom(tom).NAVv2, startDato = fom)
 
     protected fun arbeidsdager(fom: LocalDate, tom: LocalDate) =
         tidslinjeOf(fom.dagerMellom(tom).ARB, startDato = fom)

@@ -3,7 +3,7 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.testhelpers.NAV
+import no.nav.helse.testhelpers.NAVv2
 import no.nav.helse.testhelpers.april
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag.Companion.reflectedArbeidsgiverBeløp
@@ -23,7 +23,7 @@ internal class MaksimumUtbetalingFlereArbeidsgivereTest {
 
     @Test
     fun `betaler flere arbeidsgivere over mai -- nytt grunnbeløp skal ikke gjelde`() {
-        val ag1 = { tidslinjeOf(10.NAV(dekningsgrunnlag = 3000), startDato = 25.april) to 21610.0 }
+        val ag1 = { tidslinjeOf(14.NAVv2(dekningsgrunnlag = 3000), startDato = 25.april) to 21610.0 }
         val ag2 = { tidslinjeOf() to 0.0 }
         assert6GBegrensetUtbetaling(ag1(), ag2())
         assert6GBegrensetUtbetaling(ag2(), ag1())

@@ -2,7 +2,7 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.testhelpers.NAV
+import no.nav.helse.testhelpers.NAVv2
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.tidslinjeOf
 import org.junit.jupiter.api.Assertions.*
@@ -17,7 +17,7 @@ internal class MaksimumUtbetalingHendelseTest {
     }
 
     @Test fun `når inntekt er under 6G blir utbetaling lik inntekt`() {
-        val tidslinje = tidslinjeOf(10.NAV)
+        val tidslinje = tidslinjeOf(12.NAVv2)
         MaksimumUtbetaling(
             listOf(tidslinje),
             aktivitetslogg,
@@ -27,7 +27,7 @@ internal class MaksimumUtbetalingHendelseTest {
     }
 
     @Test fun `når inntekt er over 6G blir utbetaling lik 6G`() {
-        val tidslinje = tidslinjeOf(10.NAV(3500.0))
+        val tidslinje = tidslinjeOf(12.NAVv2(3500.0))
         MaksimumUtbetaling(
             listOf(tidslinje),
             aktivitetslogg,
@@ -37,7 +37,7 @@ internal class MaksimumUtbetalingHendelseTest {
     }
 
     @Test fun `utbetaling for tidslinje med ulike daginntekter blir kalkulert per dag`() {
-        val tidslinje = tidslinjeOf(10.NAV(3500.0), 10.NAV(1200.0))
+        val tidslinje = tidslinjeOf(12.NAVv2(3500.0), 14.NAVv2(1200.0))
         MaksimumUtbetaling(
             listOf(tidslinje),
             aktivitetslogg,
@@ -49,7 +49,7 @@ internal class MaksimumUtbetalingHendelseTest {
     }
 
     @Test fun `selv om utbetaling blir begrenset til 6G får utbetaling for tidslinje med gradert sykdom gradert utbetaling`() {
-        val tidslinje = tidslinjeOf(10.NAV(3500.0, 50.0))
+        val tidslinje = tidslinjeOf(12.NAVv2(3500.0, 50.0))
         MaksimumUtbetaling(
             listOf(tidslinje),
             aktivitetslogg,
@@ -60,7 +60,7 @@ internal class MaksimumUtbetalingHendelseTest {
     }
 
     @Test fun `utbetaling for tidslinje med gradert sykdom får gradert utbetaling`() {
-        val tidslinje = tidslinjeOf(10.NAV(1200.0, 50.0))
+        val tidslinje = tidslinjeOf(12.NAVv2(1200.0, 50.0))
         MaksimumUtbetaling(
             listOf(tidslinje),
             aktivitetslogg,

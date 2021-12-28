@@ -9,50 +9,40 @@ internal class TidslinjefusjonTest {
 
     @Test
     fun `slå sammen tilstøtende betalingstider`() {
-        val inspektør = (tidslinjeOf(10.NAV) + tidslinjeOf(
-            10.UTELATE,
-            10.NAV
-        )
-            ).inspektør
+        val inspektør = (tidslinjeOf(10.NAVv2) + tidslinjeOf(10.UTELATE, 10.NAVv2)).inspektør
         assertEquals(20, inspektør.size)
-        assertEquals(20, inspektør.navDagTeller)
+        assertEquals(15, inspektør.navDagTeller)
+        assertEquals(5, inspektør.navHelgDagTeller)
     }
 
     @Test
     fun `slå sammen betalingstidslinjer som ikke er tilstøtende`() {
-        val inspektør = (tidslinjeOf(15.NAV) + tidslinjeOf(
-            15.UTELATE,
-            3.UTELATE,
-            15.NAV
-        )
-            ).inspektør
+        val inspektør = (tidslinjeOf(15.NAVv2) + tidslinjeOf(15.UTELATE, 3.UTELATE, 15.NAVv2)).inspektør
         assertEquals(33, inspektør.size)
-        assertEquals(30, inspektør.navDagTeller)
+        assertEquals(22, inspektør.navDagTeller)
+        assertEquals(8, inspektør.navHelgDagTeller)
         assertEquals(3, inspektør.ukjentDagTeller)
     }
 
     @Test
     fun `slå sammen ikke-tilstøtende betalingstider med helger`() {
-        val inspektør = (tidslinjeOf(15.NAV) + tidslinjeOf(
-            15.UTELATE,
-            7.UTELATE,
-            15.NAV
-        )
-            ).inspektør
+        val inspektør = (tidslinjeOf(15.NAVv2) + tidslinjeOf(15.UTELATE, 7.UTELATE, 15.NAVv2)).inspektør
         assertEquals(37, inspektør.size)
-        assertEquals(30, inspektør.navDagTeller)
+        assertEquals(22, inspektør.navDagTeller)
+        assertEquals(8, inspektør.navHelgDagTeller)
         assertEquals(5, inspektør.ukjentDagTeller)
         assertEquals(2, inspektør.fridagTeller)
     }
 
     @Test
     fun `bli med i flere utbetalingstidslinjer`() {
-        val inspektør = (tidslinjeOf(15.NAV) +
-            tidslinjeOf(15.UTELATE, 7.UTELATE, 15.NAV) +
-            tidslinjeOf(15.UTELATE, 22.UTELATE, 7.UTELATE, 15.NAV)
+        val inspektør = (tidslinjeOf(15.NAVv2) +
+            tidslinjeOf(15.UTELATE, 7.UTELATE, 15.NAVv2) +
+            tidslinjeOf(15.UTELATE, 22.UTELATE, 7.UTELATE, 15.NAVv2)
             ).inspektør
         assertEquals(59, inspektør.size)
-        assertEquals(45, inspektør.navDagTeller)
+        assertEquals(33, inspektør.navDagTeller)
+        assertEquals(12, inspektør.navHelgDagTeller)
         assertEquals(10, inspektør.ukjentDagTeller)
         assertEquals(4, inspektør.fridagTeller)
     }
@@ -61,38 +51,36 @@ internal class TidslinjefusjonTest {
 
     @Test
     fun `NAV-utbetalinger har prioritet`() {
-        val inspektør = (tidslinjeOf(15.ARB) + tidslinjeOf(
-            15.NAV
-        )
-            ).inspektør
+        val inspektør = (tidslinjeOf(15.ARB) + tidslinjeOf(15.NAVv2)).inspektør
         assertEquals(15, inspektør.size)
-        assertEquals(15, inspektør.navDagTeller)
+        assertEquals(11, inspektør.navDagTeller)
+        assertEquals(4, inspektør.navHelgDagTeller)
         assertEquals(0, inspektør.arbeidsdagTeller)
     }
 
     @Test
     fun `NAV-utbetalinger for flere arbeidsgivere`() {
         val inspektør = (tidslinjeOf(
-            15.NAV,
+            15.NAVv2,
             15.ARB
-        ) + tidslinjeOf(10.ARB, 10.NAV, 10.ARB, 10.NAV)
-            ).inspektør
+        ) + tidslinjeOf(10.ARB, 10.NAVv2, 10.ARB, 10.NAVv2)).inspektør
         assertEquals(40, inspektør.size)
-        assertEquals(30, inspektør.navDagTeller)
+        assertEquals(23, inspektør.navDagTeller)
+        assertEquals(7, inspektør.navHelgDagTeller)
         assertEquals(10, inspektør.arbeidsdagTeller)
         assertEquals(0, inspektør.ukjentDagTeller)
     }
 
     @Test
     fun `dagens forrang`() {
-        val inspektør = (tidslinjeOf(1.FRI, 1.ARB, 1.AP, 1.HELG, 1.NAV) +
+        val inspektør = (tidslinjeOf(1.FRI, 1.ARB, 1.AP, 1.HELG, 1.NAVv2) +
             tidslinjeOf(
                 1.UTELATE,
                 1.FRI,
                 1.ARB,
                 1.AP,
                 1.HELG,
-                1.NAV
+                1.NAVv2
             ) +
             tidslinjeOf(
                 2.UTELATE,
@@ -100,7 +88,7 @@ internal class TidslinjefusjonTest {
                 1.ARB,
                 1.AP,
                 1.HELG,
-                1.NAV
+                1.NAVv2
             ) +
             tidslinjeOf(
                 3.UTELATE,
@@ -108,7 +96,7 @@ internal class TidslinjefusjonTest {
                 1.ARB,
                 1.AP,
                 1.HELG,
-                1.NAV
+                1.NAVv2
             ) +
             tidslinjeOf(
                 4.UTELATE,
@@ -116,12 +104,12 @@ internal class TidslinjefusjonTest {
                 1.ARB,
                 1.AP,
                 1.HELG,
-                1.NAV
+                1.NAVv2
             )
             ).inspektør
         assertEquals(9, inspektør.size)
-        assertEquals(5, inspektør.navDagTeller)
-        assertEquals(1, inspektør.navHelgDagTeller)
+        assertEquals(3, inspektør.navDagTeller)
+        assertEquals(3, inspektør.navHelgDagTeller)
         assertEquals(1, inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(1, inspektør.arbeidsdagTeller)
         assertEquals(1, inspektør.fridagTeller)
@@ -129,19 +117,18 @@ internal class TidslinjefusjonTest {
 
     @Test
     fun `legger til tom utbetalingstidslinje`() {
-        val inspektør = (tidslinjeOf(10.NAV) + tidslinjeOf()).inspektør
+        val inspektør = (tidslinjeOf(10.NAVv2) + tidslinjeOf()).inspektør
         assertEquals(10, inspektør.size)
-        assertEquals(10, inspektør.navDagTeller)
+        assertEquals(8, inspektør.navDagTeller)
+        assertEquals(2, inspektør.navHelgDagTeller)
     }
 
     @Test
     fun `legger utbetalingstidslinje til en tom tidslinje`() {
-        val inspektør = (tidslinjeOf() + tidslinjeOf(
-            10.NAV
-        )
-            ).inspektør
+        val inspektør = (tidslinjeOf() + tidslinjeOf(10.NAVv2)).inspektør
         assertEquals(10, inspektør.size)
-        assertEquals(10, inspektør.navDagTeller)
+        assertEquals(8, inspektør.navDagTeller)
+        assertEquals(2, inspektør.navHelgDagTeller)
     }
 
     @Test

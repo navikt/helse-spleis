@@ -94,12 +94,13 @@ internal val Int.UTELATE
     )
 
 internal val Int.NAVv2 get() = this.NAVv2(1200)
-internal fun Int.NAVv2(dekningsgrunnlag: Number, grad: Number = 100.0) = Utbetalingsdager(
+internal fun Int.NAVv2(dekningsgrunnlag: Number, grad: Number = 100.0, refusjonsbeløp: Number = dekningsgrunnlag) = Utbetalingsdager(
     antallDager = this,
     addDagFun = Utbetalingstidslinje::addNAVdag,
     addHelgFun = Utbetalingstidslinje::addHelg,
     dekningsgrunnlag = dekningsgrunnlag,
-    grad = grad
+    grad = grad,
+    arbeidsgiverbeløp = refusjonsbeløp
 )
 
 internal val Int.ARBv2 get() = this.ARBv2(1200)
