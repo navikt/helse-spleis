@@ -1,12 +1,10 @@
 package no.nav.helse.utbetalingslinjer
 
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Endringskode.*
@@ -18,7 +16,6 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 internal class OppdragBuilderTest {
 
@@ -28,7 +25,7 @@ internal class OppdragBuilderTest {
 
     @Test
     fun `konverter enkel Utbetalingstidslinje til Utbetalingslinjer`() {
-        val oppdrag = tilArbeidsgiver(1.AP, 4.NAV, 2.HELG, 3.NAV)
+        val oppdrag = tilArbeidsgiver(1.AP, 9.NAVv2)
 
         assertEquals(1, oppdrag.size)
         assertEquals(7, oppdrag.antallDager)
@@ -37,7 +34,7 @@ internal class OppdragBuilderTest {
 
     @Test
     fun `helg i slutt utelates, men ikke helg i start`() {
-        val oppdrag = tilArbeidsgiver(6.AP, 1.HELG, 5.NAV, 2.HELG)
+        val oppdrag = tilArbeidsgiver(6.AP, 8.NAVv2)
 
         assertEquals(1, oppdrag.size)
         assertEquals(5, oppdrag.antallDager)
@@ -46,7 +43,7 @@ internal class OppdragBuilderTest {
 
     @Test
     fun `helg i midten utelates ikke`() {
-        val oppdrag = tilArbeidsgiver(5.NAV, 2.HELG, 5.NAV, 2.HELG)
+        val oppdrag = tilArbeidsgiver(12.NAVv2)
 
         assertEquals(1, oppdrag.size)
         assertEquals(10, oppdrag.antallDager)
@@ -55,7 +52,7 @@ internal class OppdragBuilderTest {
 
     @Test
     fun `kun helgedager`() {
-        val oppdrag = tilArbeidsgiver(1.AP, 2.HELG)
+        val oppdrag = tilArbeidsgiver(5.AP, 2.NAVv2)
         assertEquals(0, oppdrag.antallDager)
         assertEquals(0, oppdrag.size)
     }
@@ -68,39 +65,38 @@ internal class OppdragBuilderTest {
 
     @Test
     fun `siste arbeidsgiverperiodedag er siste ukjent dag fra Infotrygd`() {
-        val oppdrag = tilArbeidsgiver(16.AP, 15.NAV, 10.NAV, 30.NAV, infotrygdtidslinje = tidslinjeOf(10.NAV, startDato = 1.februar))
+        val oppdrag = tilArbeidsgiver(16.AP, 15.NAVv2, 10.NAVv2, 30.NAVv2, infotrygdtidslinje = tidslinjeOf(10.NAVv2, startDato = 1.februar))
         assertEquals(10.februar, oppdrag.sisteArbeidsgiverperiodedag)
     }
 
     @Test
     fun `siste arbeidsgiverperiodedag er siste dag i arbeidsgiverperioden`() {
-        val oppdrag = tilArbeidsgiver(16.AP, 15.NAV)
+        val oppdrag = tilArbeidsgiver(16.AP, 15.NAVv2)
         assertEquals(16.januar, oppdrag.sisteArbeidsgiverperiodedag)
     }
 
     @Test
     fun `siste arbeidsgiverperiodedag er siste dag i arbeidsgiverperioden 2`() {
-        val oppdrag = tilArbeidsgiver(16.AP, 15.NAV, 17.ARB, 16.AP, 10.NAV)
+        val oppdrag = tilArbeidsgiver(16.AP, 15.NAVv2, 17.ARB, 16.AP, 10.NAVv2)
         assertEquals(5.mars, oppdrag.sisteArbeidsgiverperiodedag)
     }
 
     @Test
     fun `Blanding av dagtyper`() {
-        val oppdrag = tilArbeidsgiver(4.FRI, 2.NAV, 4.FRI, 2.HELG, 4.FRI)
-
+        val oppdrag = tilArbeidsgiver(3.FRI, 2.NAVv2, 7.FRI, 2.HELG, 4.FRI)
         assertEquals(1, oppdrag.size)
     }
 
     @Test
     fun `kun helge- og fridager`() {
-        val oppdrag = tilArbeidsgiver(4.FRI, 2.HELG, 4.FRI, 2.HELG, 4.FRI)
+        val oppdrag = tilArbeidsgiver(5.FRI, 2.HELG, 5.FRI, 2.HELG, 5.FRI)
 
         assertEquals(0, oppdrag.size)
     }
 
     @Test
     fun `gap-dag som første og siste dag i perioden`() {
-        val oppdrag = tilArbeidsgiver(1.ARB, 3.NAV, 1.ARB)
+        val oppdrag = tilArbeidsgiver(1.ARB, 3.NAVv2, 1.ARB)
 
         assertEquals(1, oppdrag.size)
         oppdrag.assertLinje(0, 2.januar, 4.januar, null)
@@ -108,8 +104,7 @@ internal class OppdragBuilderTest {
 
     @Test
     fun `grad endres i løpet av helgen`() {
-        val oppdrag = tilArbeidsgiver(5.NAV(1500), 1.HELG(1500), 1.HELG(1500, 80.0), 5.NAV(1500, 80.0))
-
+        val oppdrag = tilArbeidsgiver(6.NAVv2(1500), 6.NAVv2(1500, 80.0))
         assertEquals(2, oppdrag.size)
         oppdrag.assertLinje(0, 1.januar, 6.januar, null, sats = 1500, grad = 100)
         oppdrag.assertLinje(1, 7.januar, 12.januar, sats = (1500 * 0.8).toInt(), grad = 80)
@@ -125,7 +120,7 @@ internal class OppdragBuilderTest {
 
     @Test
     fun `Utbetalingslinjer genereres kun fra dagen etter siste AGP-dag`() {
-        val oppdrag = tilArbeidsgiver(2.NAV, 2.AP, 2.NAV, 2.HELG, 3.NAV)
+        val oppdrag = tilArbeidsgiver(2.NAVv2, 2.AP, 7.NAVv2)
 
         assertEquals(1, oppdrag.size)
         oppdrag.assertLinje(0, 5.januar, 11.januar, null)
@@ -134,16 +129,16 @@ internal class OppdragBuilderTest {
 
     @Test
     fun `Utbetalingslinjer genereres kun fra dagen etter siste AGP-dag 2`() {
-        val oppdrag = tilArbeidsgiver(2.NAV, 2.AP, 2.NAV, 2.HELG, 2.AP, 3.NAV)
+        val oppdrag = tilArbeidsgiver(2.NAVv2, 2.AP, 4.NAVv2, 2.AP, 4.NAVv2)
 
         assertEquals(1, oppdrag.size)
-        oppdrag.assertLinje(0, 11.januar, 13.januar, null, klassekode = Klassekode.RefusjonIkkeOpplysningspliktig)
+        oppdrag.assertLinje(0, 11.januar, 12.januar, null, klassekode = Klassekode.RefusjonIkkeOpplysningspliktig)
         assertEquals(10.januar, oppdrag.sisteArbeidsgiverperiodedag)
     }
 
     @Test
     fun `Endring i sats`() {
-        val oppdrag = tilArbeidsgiver(3.NAV(1200), 2.NAV(1500), 2.HELG, 2.NAV(1500))
+        val oppdrag = tilArbeidsgiver(3.NAVv2(1200), 6.NAVv2(1500))
 
         assertEquals(2, oppdrag.size)
         oppdrag.assertLinje(0, 1.januar, 3.januar, null, sats = 1200)
@@ -191,7 +186,7 @@ internal class OppdragBuilderTest {
             19.januar er FRI,
             20.januar til 26.januar er NAVDAGER
         )
-        val oppdragskladd3 = tilArbeidsgiver(18.NAV, 1.FRI, 2.HELG, 2.FRI, 5.NAV(1100), 5.NAV(1300, 40.0))
+        val oppdragskladd3 = tilArbeidsgiver(18.NAVv2, 1.FRI, 2.HELG, 2.FRI, 5.NAVv2(1100), 5.NAVv2(1300, 40.0))
 
         val oppdragTilUtbetaling2 = oppdragskladd2.minus(oppdragTilUtbetaling1, Aktivitetslogg())
         val oppdragTilUtbetaling3 = oppdragskladd3.minus(oppdragTilUtbetaling2, Aktivitetslogg())
@@ -336,35 +331,11 @@ internal class OppdragBuilderTest {
             21.januar til 31.januar er NAVDAGER
         ).minus(original, Aktivitetslogg())
 
+        assertEquals(ENDR, endret.inspektør.endringskode)
         endret.apply {
-            accept(AssertAtOppdragErENDR)
             assertLinje(0, 1.januar, 31.januar, delytelseId = 1, refDelytelseId = null, datoStatusFom = 1.januar, endringskode = ENDR, refFagsystemId = null)
             assertLinje(1, 6.januar, 15.januar, delytelseId = 2, refDelytelseId = 1, datoStatusFom = null, endringskode = NY)
             assertLinje(2, 21.januar, 31.januar, delytelseId = 3, refDelytelseId = 2, datoStatusFom = null, endringskode = NY)
-        }
-    }
-
-    object AssertAtOppdragErENDR : OppdragVisitor {
-        override fun preVisitOppdrag(
-            oppdrag: Oppdrag,
-            fagområde: Fagområde,
-            fagsystemId: String,
-            mottaker: String,
-            førstedato: LocalDate,
-            sistedato: LocalDate,
-            sisteArbeidsgiverdag: LocalDate?,
-            stønadsdager: Int,
-            totalBeløp: Int,
-            nettoBeløp: Int,
-            tidsstempel: LocalDateTime,
-            endringskode: Endringskode,
-            avstemmingsnøkkel: Long?,
-            status: Oppdragstatus?,
-            overføringstidspunkt: LocalDateTime?,
-            erSimulert: Boolean,
-            simuleringsResultat: Simulering.SimuleringResultat?
-        ) {
-            assertEquals(ENDR, endringskode)
         }
     }
 
@@ -448,7 +419,7 @@ internal class OppdragBuilderTest {
 
     @Test
     fun `oppretter personoppdrag`() {
-        val oppdrag = tilSykmeldte(16.AP, 15.NAV.medRefusjon(0))
+        val oppdrag = tilSykmeldte(16.AP, 15.NAVv2.medRefusjon(0))
         assertEquals(1, oppdrag.size)
         assertEquals(Fagområde.Sykepenger, oppdrag.inspektør.fagområde)
         oppdrag.assertLinje(0, 17.januar, 31.januar, null, 1200, 100, endringskode = NY, klassekode = Klassekode.SykepengerArbeidstakerOrdinær)
@@ -484,7 +455,7 @@ internal class OppdragBuilderTest {
     private val Oppdrag.sisteArbeidsgiverperiodedag get() = this.get<LocalDate?>("sisteArbeidsgiverdag")
 
     private fun assertNyLinjeVedGap(gapDay: Utbetalingsdager) {
-        val oppdrag = tilArbeidsgiver(2.NAV, gapDay, 2.NAV, 2.HELG, 3.NAV)
+        val oppdrag = tilArbeidsgiver(2.NAVv2, gapDay, 7.NAVv2)
 
         assertEquals(2, oppdrag.size)
         assertEquals(1.januar, oppdrag.first().fom)
