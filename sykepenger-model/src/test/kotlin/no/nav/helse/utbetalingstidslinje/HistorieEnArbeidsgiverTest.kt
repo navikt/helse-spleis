@@ -25,7 +25,7 @@ internal class HistorieEnArbeidsgiverTest : HistorieTest() {
             utbetaling(1.februar, 28.februar),
             utbetaling(5.april, 10.april),
         )
-        addTidligereUtbetaling(AG1, tidslinjeOf(16.AP, 15.NAVv2))
+        addTidligereUtbetaling(AG1, tidslinjeOf(16.AP, 15.NAV))
         addSykdomshistorikk(AG1, sykedager(11.april, 30.april))
         val utbetalingstidslinje = beregn(AG1, 11.april til 30.april, 1.januar, 5.april)
         assertAlleDager(utbetalingstidslinje, 1.januar til 16.januar, ArbeidsgiverperiodeDag::class)
@@ -128,7 +128,7 @@ internal class HistorieEnArbeidsgiverTest : HistorieTest() {
     @Test
     fun `Historisk utbetaling til bruker skal ikke bli med i utbetalingstidslinje for arbeidsgiver`() {
         historie(utbetaling(1.januar, 31.januar))
-        addTidligereUtbetaling(AG1, tidslinjeOf(2.NAVv2, 2.HELG, 5.NAVv2, startDato = 1.mars))
+        addTidligereUtbetaling(AG1, tidslinjeOf(2.NAV, 2.HELG, 5.NAV, startDato = 1.mars))
         beregn(AG1, 1.mars til 9.mars, 1.januar, 1.mars).also {
             assertEquals(1.mars til 9.mars, it.periode())
         }
@@ -178,7 +178,7 @@ internal class HistorieEnArbeidsgiverTest : HistorieTest() {
         historie(
             utbetaling(8.januar, 12.januar)
         )
-        addTidligereUtbetaling(AG1, tidslinjeOf(5.NAVv2, 2.HELG, 5.NAVv2, 2.HELG, 5.NAVv2, 2.HELG))
+        addTidligereUtbetaling(AG1, tidslinjeOf(5.NAV, 2.HELG, 5.NAV, 2.HELG, 5.NAV, 2.HELG))
         val utbetalingstidslinje = beregn(AG1, 1.januar til 21.januar, 1.januar)
         assertEquals(21, utbetalingstidslinje.size)
         assertTrue(utbetalingstidslinje[7.januar] is ArbeidsgiverperiodeDag)
@@ -292,7 +292,7 @@ internal class HistorieEnArbeidsgiverTest : HistorieTest() {
         historie(
             ferie(8.januar, 9.januar)
         )
-        addTidligereUtbetaling(AG1, tidslinjeOf(7.NAVv2, 2.FRIv2, 7.NAVv2))
+        addTidligereUtbetaling(AG1, tidslinjeOf(7.NAV, 2.FRI, 7.NAV))
         val utbetalingstidslinje = beregn(AG1, 1.januar til 17.januar, 1.januar)
         assertAlleDager(utbetalingstidslinje, 1.januar til 16.januar, ArbeidsgiverperiodeDag::class)
     }

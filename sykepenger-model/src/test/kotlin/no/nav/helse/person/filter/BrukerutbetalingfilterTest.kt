@@ -5,7 +5,7 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
 import no.nav.helse.testhelpers.AP
-import no.nav.helse.testhelpers.NAVv2
+import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
@@ -33,7 +33,7 @@ internal class BrukerutbetalingfilterTest {
 
     @Test
     fun `ingen refusjon passer filter`() {
-        val ingenRefusjon = lagUtbetaling(tidslinjeOf(16.AP, 15.NAVv2.copyWith(arbeidsgiverbeløp = 0)))
+        val ingenRefusjon = lagUtbetaling(tidslinjeOf(16.AP, 15.NAV.copyWith(arbeidsgiverbeløp = 0)))
         assertTrue(Brukerutbetalingfilter(Fødselsnummer.tilFødselsnummer("31108512345"), Periodetype.FØRSTEGANGSBEHANDLING, ingenRefusjon, Inntektskilde.EN_ARBEIDSGIVER))
     }
 
@@ -49,7 +49,7 @@ internal class BrukerutbetalingfilterTest {
 
     @Test
     fun `delvis refusjon passer ikke`() {
-        val delvisRefusjon = lagUtbetaling(tidslinjeOf(16.AP, 15.NAVv2.copyWith(arbeidsgiverbeløp = 600)))
+        val delvisRefusjon = lagUtbetaling(tidslinjeOf(16.AP, 15.NAV.copyWith(arbeidsgiverbeløp = 600)))
         assertFalse(Brukerutbetalingfilter(Fødselsnummer.tilFødselsnummer("31108512345"), Periodetype.FØRSTEGANGSBEHANDLING, delvisRefusjon, Inntektskilde.EN_ARBEIDSGIVER))
     }
 
@@ -66,7 +66,7 @@ internal class BrukerutbetalingfilterTest {
         assertFalse(filter.filtrer(aktivitetslogg)) { "Forventet at filteret skal være usant.\n$aktivitetslogg"}
     }
 
-    private fun lagUtbetaling(tidslinje: Utbetalingstidslinje = tidslinjeOf(16.AP, 15.NAVv2), forrige: Utbetaling? = null): Utbetaling {
+    private fun lagUtbetaling(tidslinje: Utbetalingstidslinje = tidslinjeOf(16.AP, 15.NAV), forrige: Utbetaling? = null): Utbetaling {
         MaksimumUtbetaling(
             listOf(tidslinje),
             aktivitetslogg,

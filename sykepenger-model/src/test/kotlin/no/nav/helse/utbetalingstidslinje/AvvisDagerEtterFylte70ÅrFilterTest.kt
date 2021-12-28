@@ -6,7 +6,7 @@ import no.nav.helse.inspectors.UtbetalingstidslinjeInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.somFødselsnummer
-import no.nav.helse.testhelpers.NAVv2
+import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.tidslinjeOf
@@ -65,7 +65,7 @@ internal class AvvisDagerEtterFylte70ÅrFilterTest {
 
     private fun undersøke(alder: Alder, periode: Periode) {
         aktivitetslogg = Aktivitetslogg()
-        val tidslinjer = listOf(tidslinjeOf(9001.NAVv2, startDato = periode.start).kutt(periode.endInclusive))
+        val tidslinjer = listOf(tidslinjeOf(9001.NAV, startDato = periode.start).kutt(periode.endInclusive))
         AvvisDagerEtterFylte70ÅrFilter(tidslinjer, periode, alder, aktivitetslogg).filter()
         inspektør = tidslinjer.first().inspektør
     }

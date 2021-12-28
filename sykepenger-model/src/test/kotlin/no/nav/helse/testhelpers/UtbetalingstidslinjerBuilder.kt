@@ -10,7 +10,7 @@ import java.time.LocalDate
 
 /**
  * Tar høyde for helg i dag-generering.
- * Eks: 12.NAVv2 fra en mandag gir 10 sykedager i 2 hele arbeidsuker + 2 sykHelg-dager
+ * Eks: 12.NAV fra en mandag gir 10 sykedager i 2 hele arbeidsuker + 2 sykHelg-dager
  * */
 internal fun tidslinjeOf(
     vararg utbetalingsdager: Utbetalingsdager,
@@ -41,6 +41,24 @@ internal fun Int.AP(dekningsgrunnlag: Int) = Utbetalingsdager(
 
 internal val Int.NAV get() = this.NAV(1200)
 internal fun Int.NAV(dekningsgrunnlag: Number, grad: Number = 100.0, refusjonsbeløp: Number = dekningsgrunnlag) = Utbetalingsdager(
+    antallDager = this,
+    addDagFun = Utbetalingstidslinje::addNAVdag,
+    addHelgFun = Utbetalingstidslinje::addHelg,
+    dekningsgrunnlag = dekningsgrunnlag,
+    grad = grad,
+    arbeidsgiverbeløp = refusjonsbeløp
+)
+
+internal val Int.HELG get() = this.HELG(1200)
+internal fun Int.HELG(dekningsgrunnlag: Int, grad: Number = 100.0) = Utbetalingsdager(
+    antallDager = this,
+    addDagFun = Utbetalingstidslinje::addHelg,
+    dekningsgrunnlag = dekningsgrunnlag,
+    grad = grad
+)
+
+internal val Int.NAVDAGER get() = this.NAVDAGER(1200)
+internal fun Int.NAVDAGER(dekningsgrunnlag: Number, grad: Number = 100.0, refusjonsbeløp: Number = dekningsgrunnlag) = Utbetalingsdager(
     antallDager = this,
     addDagFun = Utbetalingstidslinje::addNAVdag,
     dekningsgrunnlag = dekningsgrunnlag,
@@ -78,72 +96,12 @@ internal fun Int.AVV(dekningsgrunnlag: Int, grad: Number = 0) = Utbetalingsdager
     grad = grad
 )
 
-internal val Int.HELG get() = this.HELG(1200)
-internal fun Int.HELG(dekningsgrunnlag: Int, grad: Number = 100.0) = Utbetalingsdager(
-    antallDager = this,
-    addDagFun = Utbetalingstidslinje::addHelg,
-    dekningsgrunnlag = dekningsgrunnlag,
-    grad = grad
-)
-
 internal val Int.UTELATE
     get() = Utbetalingsdager(
         antallDager = this,
         addDagFun = { _, _ -> },
         dekningsgrunnlag = 0
     )
-
-internal val Int.NAVv2 get() = this.NAVv2(1200)
-internal fun Int.NAVv2(dekningsgrunnlag: Number, grad: Number = 100.0, refusjonsbeløp: Number = dekningsgrunnlag) = Utbetalingsdager(
-    antallDager = this,
-    addDagFun = Utbetalingstidslinje::addNAVdag,
-    addHelgFun = Utbetalingstidslinje::addHelg,
-    dekningsgrunnlag = dekningsgrunnlag,
-    grad = grad,
-    arbeidsgiverbeløp = refusjonsbeløp
-)
-
-internal val Int.ARBv2 get() = this.ARBv2(1200)
-internal fun Int.ARBv2(dekningsgrunnlag: Int) = Utbetalingsdager(
-    antallDager = this,
-    addDagFun = Utbetalingstidslinje::addArbeidsdag,
-    addHelgFun = Utbetalingstidslinje::addFridag,
-    dekningsgrunnlag = dekningsgrunnlag
-)
-
-internal val Int.FRIv2 get() = this.FRIv2(1200)
-internal fun Int.FRIv2(dekningsgrunnlag: Int) = Utbetalingsdager(
-    antallDager = this,
-    addDagFun = Utbetalingstidslinje::addFridag,
-    addHelgFun = Utbetalingstidslinje::addFridag,
-    dekningsgrunnlag = dekningsgrunnlag
-)
-
-internal val Int.FORv2 get() = this.FORv2(1200)
-internal fun Int.FORv2(dekningsgrunnlag: Int) = Utbetalingsdager(
-    antallDager = this,
-    addDagFun = Utbetalingstidslinje::addForeldetDag,
-    addHelgFun = Utbetalingstidslinje::addForeldetDag,
-    dekningsgrunnlag = dekningsgrunnlag
-)
-
-internal val Int.AVVv2 get() = this.AVVv2(1200)
-internal fun Int.AVVv2(dekningsgrunnlag: Int, grad: Number = 0) = Utbetalingsdager(
-    antallDager = this,
-    addDagFun = Utbetalingstidslinje::addAvvistDag,
-    addHelgFun = Utbetalingstidslinje::addAvvistDag,
-    dekningsgrunnlag = dekningsgrunnlag,
-    grad = grad
-)
-
-internal val Int.HELGv2 get() = this.HELGv2(1200)
-internal fun Int.HELGv2(dekningsgrunnlag: Int, grad: Number = 100.0) = Utbetalingsdager(
-    antallDager = this,
-    addDagFun = Utbetalingstidslinje::addHelg,
-    addHelgFun = Utbetalingstidslinje::addHelg,
-    dekningsgrunnlag = dekningsgrunnlag,
-    grad = grad
-)
 
 private fun Utbetalingstidslinje.addAvvistDag(dato: LocalDate, økonomi: Økonomi) =
     this.addAvvistDag(dato, økonomi, listOf(Begrunnelse.SykepengedagerOppbrukt))

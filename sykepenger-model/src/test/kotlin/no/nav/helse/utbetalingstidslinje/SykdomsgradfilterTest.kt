@@ -15,7 +15,7 @@ internal class SykdomsgradfilterTest {
 
     @Test
     fun `sykdomsgrad over 20 prosent`() {
-        val tidslinjer = listOf(tidslinjeOf(16.AP, 5.NAVv2(1200, 50.0)))
+        val tidslinjer = listOf(tidslinjeOf(16.AP, 5.NAV(1200, 50.0)))
         val periode = Periode(1.januar, 21.januar)
         undersøke(tidslinjer, periode)
         assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
@@ -26,7 +26,7 @@ internal class SykdomsgradfilterTest {
 
     @Test
     fun `alle dager fom første dag med total sykdomsgrad under 20 prosent skal avvises`() {
-        val tidslinjer = listOf(tidslinjeOf(16.AP, 5.NAVv2(1200, 19.0), 10.NAVv2))
+        val tidslinjer = listOf(tidslinjeOf(16.AP, 5.NAV(1200, 19.0), 10.NAV))
         val periode = Periode(1.januar, 31.januar)
         undersøke(tidslinjer, periode)
         assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
@@ -38,7 +38,7 @@ internal class SykdomsgradfilterTest {
 
     @Test
     fun `ikke warning når de avviste dagene er utenfor perioden`() {
-        val tidslinjer = listOf(tidslinjeOf(16.AP, 5.NAVv2(1200, 19.0), 10.NAVv2))
+        val tidslinjer = listOf(tidslinjeOf(16.AP, 5.NAV(1200, 19.0), 10.NAV))
         val periode = Periode(22.januar, 31.januar)
         undersøke(tidslinjer, periode)
         assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
@@ -50,7 +50,7 @@ internal class SykdomsgradfilterTest {
 
     @Test
     fun `ikke warning når de avviste dagene gjelder forrige arbeidsgiverperiode`() {
-        val tidslinjer = listOf(tidslinjeOf(16.AP, 5.NAVv2(1200, 19.0), 20.ARB, 16.AP, 10.NAVv2))
+        val tidslinjer = listOf(tidslinjeOf(16.AP, 5.NAV(1200, 19.0), 20.ARB, 16.AP, 10.NAV))
         val periode = Periode(11.februar, 9.mars)
         undersøke(tidslinjer, periode)
         assertEquals(32, inspektør.arbeidsgiverperiodeDagTeller)
@@ -63,8 +63,8 @@ internal class SykdomsgradfilterTest {
     @Test
     fun `avvis dager for begge tidslinjer`() {
         val tidslinjer = listOf(
-            tidslinjeOf(16.AP, 5.NAVv2(1200, 19.0)),
-            tidslinjeOf(16.AP, 5.NAVv2(1200, 19.0))
+            tidslinjeOf(16.AP, 5.NAV(1200, 19.0)),
+            tidslinjeOf(16.AP, 5.NAV(1200, 19.0))
         )
         val periode = Periode(1.januar, 21.januar)
         undersøke(tidslinjer, periode)
@@ -77,8 +77,8 @@ internal class SykdomsgradfilterTest {
     @Test
     fun `avviser utbetaling når samlet grad er under 20 prosent`() {
         val tidslinjer = listOf(
-            tidslinjeOf(16.AP, 5.NAVv2, 1.NAVv2(1200, 39)),
-            tidslinjeOf(16.AP, 5.NAVv2, 1.FRI)
+            tidslinjeOf(16.AP, 5.NAV, 1.NAV(1200, 39)),
+            tidslinjeOf(16.AP, 5.NAV, 1.FRI)
         )
         val periode = Periode(1.januar, 22.januar)
         undersøke(tidslinjer, periode)
@@ -93,8 +93,8 @@ internal class SykdomsgradfilterTest {
     @Test
     fun `avviser ikke utbetaling når samlet grad er minst 20 prosent`() {
         val tidslinjer = listOf(
-            tidslinjeOf(16.AP, 5.NAVv2, 1.NAVv2(1200, 40)),
-            tidslinjeOf(16.AP, 5.NAVv2, 1.FRI)
+            tidslinjeOf(16.AP, 5.NAV, 1.NAV(1200, 40)),
+            tidslinjeOf(16.AP, 5.NAV, 1.FRI)
         )
         val periode = Periode(1.januar, 22.januar)
         undersøke(tidslinjer, periode)

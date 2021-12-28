@@ -42,7 +42,7 @@ internal class ArbeidsgiverUtbetalingerTest {
 
     @Test
     fun `uavgrenset utbetaling`() {
-        undersøke(UNG_PERSON_FNR_2018, 12.NAVv2)
+        undersøke(UNG_PERSON_FNR_2018, 12.NAV)
         assertEquals(12, inspektør.size)
         assertEquals(10, inspektør.navDagTeller)
         assertEquals(2, inspektør.navHelgDagTeller)
@@ -68,7 +68,7 @@ internal class ArbeidsgiverUtbetalingerTest {
             meldingsreferanseId = UUID.randomUUID(),
             vilkårsgrunnlagId = UUID.randomUUID()
         )
-        undersøke(UNG_PERSON_FNR_2018, 5.NAVv2(12), 7.NAVv2, vilkårsgrunnlagElement = vilkårsgrunnlagElement)
+        undersøke(UNG_PERSON_FNR_2018, 5.NAV(12), 7.NAV, vilkårsgrunnlagElement = vilkårsgrunnlagElement)
 
         assertEquals(12, inspektør.size)
         assertEquals(0, inspektør.navDagTeller)
@@ -82,7 +82,7 @@ internal class ArbeidsgiverUtbetalingerTest {
 
     @Test
     fun `avgrenset betaling pga maksimum inntekt`() {
-        undersøke(UNG_PERSON_FNR_2018, 5.NAVv2(3500), 7.NAVv2)
+        undersøke(UNG_PERSON_FNR_2018, 5.NAV(3500), 7.NAV)
 
         assertEquals(12, inspektør.size)
         assertEquals(10, inspektør.navDagTeller)
@@ -95,7 +95,7 @@ internal class ArbeidsgiverUtbetalingerTest {
 
     @Test
     fun `avgrenset betaling pga minimun sykdomsgrad`() {
-        undersøke(UNG_PERSON_FNR_2018, 5.NAVv2(1200, 19.0), 2.ARB, 5.NAVv2)
+        undersøke(UNG_PERSON_FNR_2018, 5.NAV(1200, 19.0), 2.ARB, 5.NAV)
 
         assertEquals(12, inspektør.size)
         assertEquals(5, inspektør.avvistDagTeller)
@@ -107,7 +107,7 @@ internal class ArbeidsgiverUtbetalingerTest {
 
     @Test
     fun `avgrenset betaling pga oppbrukte sykepengedager`() {
-        undersøke(PERSON_67_ÅR_5_JANUAR_FNR_2018, 7.UTELATE, 91.NAVv2)
+        undersøke(PERSON_67_ÅR_5_JANUAR_FNR_2018, 7.UTELATE, 91.NAV)
 
         assertEquals(91, inspektør.size)
         assertEquals(60, inspektør.navDagTeller)
@@ -122,7 +122,7 @@ internal class ArbeidsgiverUtbetalingerTest {
 
     @Test
     fun `avgrenset betaling pga oppbrukte sykepengedager i tillegg til beløpsgrenser`() {
-        undersøke(PERSON_67_ÅR_5_JANUAR_FNR_2018, 7.UTELATE, 98.NAVv2)
+        undersøke(PERSON_67_ÅR_5_JANUAR_FNR_2018, 7.UTELATE, 98.NAV)
 
         assertEquals(98, inspektør.size)
         assertEquals(60, inspektør.navDagTeller)
@@ -139,8 +139,8 @@ internal class ArbeidsgiverUtbetalingerTest {
     fun `historiske utbetalingstidslinjer vurdert i 248 grense`() {
         undersøke(
             PERSON_67_ÅR_5_JANUAR_FNR_2018,
-            tidslinjeOf(35.UTELATE, 68.NAVv2),
-            tidslinjeOf(7.UTELATE, 26.NAVv2)
+            tidslinjeOf(35.UTELATE, 68.NAV),
+            tidslinjeOf(7.UTELATE, 26.NAV)
         )
 
         assertEquals(68, inspektør.size)
@@ -155,7 +155,7 @@ internal class ArbeidsgiverUtbetalingerTest {
 
     @Test
     fun `beregn maksdato i et sykdomsforløp som slutter på en fredag`() {
-        undersøke(UNG_PERSON_FNR_2018, 16.AP, 4.NAVv2)
+        undersøke(UNG_PERSON_FNR_2018, 16.AP, 4.NAV)
         assertEquals(28.desember, maksdato) // 3 dager already paid, 245 left. So should be fredag!
         assertEquals(245, gjenståendeSykedager)
         assertTrue(aktivitetslogg.hasActivities())
@@ -164,42 +164,42 @@ internal class ArbeidsgiverUtbetalingerTest {
 
     @Test
     fun `beregn maksdato i et sykdomsforløp med opphold i sykdom`() {
-        undersøke(UNG_PERSON_FNR_2018, 2.ARB, 16.AP, 7.ARB, 8.NAVv2)
+        undersøke(UNG_PERSON_FNR_2018, 2.ARB, 16.AP, 7.ARB, 8.NAV)
         assertEquals(8.januar(2019), maksdato)
         assertEquals(242, gjenståendeSykedager)
     }
 
     @Test
     fun `beregn maksdato (med rest) der den ville falt på en lørdag`() { //(351.S + 1.F + 1.S)
-        undersøke(UNG_PERSON_FNR_2018, 16.AP, 335.NAVv2, 1.FRI, 1.NAVv2)
+        undersøke(UNG_PERSON_FNR_2018, 16.AP, 335.NAV, 1.FRI, 1.NAV)
         assertEquals(31.desember, maksdato)
         assertEquals(8, gjenståendeSykedager)
     }
 
     @Test
     fun `beregn maksdato (med rest) der den ville falt på en søndag`() { //(23.S + 2.F + 1.S)
-        undersøke(UNG_PERSON_FNR_2018, 16.AP, 7.NAVv2, 2.FRI, 1.NAVv2)
+        undersøke(UNG_PERSON_FNR_2018, 16.AP, 7.NAV, 2.FRI, 1.NAV)
         assertEquals(1.januar(2019), maksdato)
         assertEquals(242, gjenståendeSykedager)
     }
 
     @Test
     fun `maksdato forskyves av ferie etterfulgt av sykedager`() { //21.S + 3.F + 1.S)
-        undersøke(UNG_PERSON_FNR_2018, 16.AP, 5.NAVv2, 3.FRI, 1.NAVv2)
+        undersøke(UNG_PERSON_FNR_2018, 16.AP, 5.NAV, 3.FRI, 1.NAV)
         assertEquals(2.januar(2019), maksdato)
         assertEquals(244, gjenståendeSykedager)
     }
 
     @Test
     fun `maksdato forskyves ikke av ferie på tampen av sykdomstidslinjen`() { //(21.S + 3.F)
-        undersøke(UNG_PERSON_FNR_2018, 16.AP, 5.NAVv2, 3.FRI)
+        undersøke(UNG_PERSON_FNR_2018, 16.AP, 5.NAV, 3.FRI)
         assertEquals(2.januar(2019), maksdato)
         assertEquals(245, gjenståendeSykedager)
     }
 
     @Test
     fun `maksdato forskyves ikke av ferie etterfulgt av arbeidsdag på tampen av sykdomstidslinjen`() { //(21.S + 3.F + 1.A)
-        undersøke(UNG_PERSON_FNR_2018, 16.AP, 5.NAVv2, 3.FRI, 1.ARB)
+        undersøke(UNG_PERSON_FNR_2018, 16.AP, 5.NAV, 3.FRI, 1.ARB)
         assertEquals(3.januar(2019), maksdato)
         assertEquals(245, gjenståendeSykedager)
     }
@@ -214,7 +214,7 @@ internal class ArbeidsgiverUtbetalingerTest {
 
     @Test
     fun `når sykepengeperioden går over maksdato, så skal utbetaling stoppe ved maksdato`() { //(249.NAV)
-        undersøke(UNG_PERSON_FNR_2018, 16.AP, 349.NAVv2)
+        undersøke(UNG_PERSON_FNR_2018, 16.AP, 349.NAV)
         assertEquals(28.desember, maksdato)
         assertEquals(0, gjenståendeSykedager)
         assertEquals(248, inspektør.navDagTeller)
@@ -224,7 +224,7 @@ internal class ArbeidsgiverUtbetalingerTest {
 
     @Test
     fun `når personen fyller 67 blir antall gjenværende dager 60`() {
-        undersøke(PERSON_67_ÅR_5_JANUAR_FNR_2018, 16.AP, 94.NAVv2)
+        undersøke(PERSON_67_ÅR_5_JANUAR_FNR_2018, 16.AP, 94.NAV)
         assertEquals(10.april, maksdato)
         assertEquals(0, gjenståendeSykedager)
         assertEquals(60, inspektør.navDagTeller)
@@ -234,7 +234,7 @@ internal class ArbeidsgiverUtbetalingerTest {
 
     @Test
     fun `når personen fyller 67 og 248 dager er brukt opp`() {
-        undersøke(PERSON_68_ÅR_1_DESEMBER_2018, 16.AP, 366.NAVv2)
+        undersøke(PERSON_68_ÅR_1_DESEMBER_2018, 16.AP, 366.NAV)
         assertEquals(28.desember, maksdato)
         assertEquals(0, gjenståendeSykedager)
         assertTrue(aktivitetslogg.hasWarningsOrWorse())
@@ -243,7 +243,7 @@ internal class ArbeidsgiverUtbetalingerTest {
 
     @Test
     fun `når personen fyller 70 skal det ikke utbetales sykepenger`() {
-        undersøke(PERSON_70_ÅR_1_FEBRUAR_2018, 16.AP, 405.NAVv2)
+        undersøke(PERSON_70_ÅR_1_FEBRUAR_2018, 16.AP, 405.NAV)
         assertEquals(31.januar, maksdato)
         assertEquals(0, gjenståendeSykedager)
         assertTrue(aktivitetslogg.hasWarningsOrWorse())

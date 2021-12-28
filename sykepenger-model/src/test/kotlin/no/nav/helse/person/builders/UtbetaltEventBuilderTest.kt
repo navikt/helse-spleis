@@ -5,7 +5,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.person.Sykepengegrunnlag
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.testhelpers.AP
-import no.nav.helse.testhelpers.NAVv2
+import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingslinjer.Fagområde
@@ -55,7 +55,7 @@ internal class UtbetaltEventBuilderTest {
             .utbetalingOpprettet(utbetalingOpprettet)
             .godkjentAv(ident)
             .automatiskBehandling(automatiskBehandling)
-            .utbetalingstidslinje(tidslinjeOf(16.AP, 2.NAVv2))
+            .utbetalingstidslinje(tidslinjeOf(16.AP, 2.NAV))
             .gjenståendeSykedager(gjenståendeSykedager)
             .forbrukteSykedager(forbrukteSykedager)
             .maksdato(maksdato)

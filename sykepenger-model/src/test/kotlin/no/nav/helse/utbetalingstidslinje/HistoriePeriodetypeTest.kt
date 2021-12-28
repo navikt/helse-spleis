@@ -172,7 +172,7 @@ internal class HistoriePeriodetypeTest {
     }
 
     private fun navdager(fom: LocalDate, tom: LocalDate) =
-        tidslinjeOf(fom.dagerMellom(tom).NAVv2, startDato = fom)
+        tidslinjeOf(fom.dagerMellom(tom).NAV, startDato = fom)
 
     private fun arbeidsdager(fom: LocalDate, tom: LocalDate) =
         tidslinjeOf(fom.dagerMellom(tom).ARB, startDato = fom)

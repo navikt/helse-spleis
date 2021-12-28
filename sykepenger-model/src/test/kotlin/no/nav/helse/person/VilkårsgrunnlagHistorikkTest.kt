@@ -308,7 +308,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         vilkårsgrunnlag2.valider(sykepengegrunnlag(10000.månedlig), 10000.månedlig, 1.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
         vilkårsgrunnlagHistorikk.lagre(10.januar, vilkårsgrunnlag1)
         vilkårsgrunnlagHistorikk.lagre(1.januar, vilkårsgrunnlag2)
-        val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 10.NAVv2)
+        val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 10.NAV)
         vilkårsgrunnlagHistorikk.avvisUtbetalingsdagerMedBegrunnelse(listOf(utbetalingstidslinjeMedNavDager), "20043769969".somFødselsnummer().alder())
         assertEquals(8, utbetalingstidslinjeMedNavDager.filterIsInstance<Utbetalingstidslinje.Utbetalingsdag.NavDag>().size)
     }
@@ -344,7 +344,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         vilkårsgrunnlag2.valider(sykepengegrunnlag(10000.månedlig), 10000.månedlig, 1.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
         vilkårsgrunnlagHistorikk.lagre(10.januar, vilkårsgrunnlag1)
         vilkårsgrunnlagHistorikk.lagre(1.januar, VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(1.januar, sykepengegrunnlag(10000.månedlig)))
-        val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 10.NAVv2)
+        val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 10.NAV)
         vilkårsgrunnlagHistorikk.avvisUtbetalingsdagerMedBegrunnelse(listOf(utbetalingstidslinjeMedNavDager), "20043769969".somFødselsnummer().alder())
         assertEquals(8, utbetalingstidslinjeMedNavDager.filterIsInstance<Utbetalingstidslinje.Utbetalingsdag.NavDag>().size)
     }
@@ -369,7 +369,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
         val grunnlagsdataInspektør = GrunnlagsdataInspektør(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!)
         assertFalse(grunnlagsdataInspektør.vurdertOk)
-        val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 10.NAVv2)
+        val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 10.NAV)
         vilkårsgrunnlagHistorikk.avvisUtbetalingsdagerMedBegrunnelse(listOf(utbetalingstidslinjeMedNavDager), "20043769969".somFødselsnummer().alder())
         utbetalingstidslinjeMedNavDager.filterIsInstance<Utbetalingstidslinje.Utbetalingsdag.AvvistDag>().let { avvisteDager ->
             assertEquals(8, avvisteDager.size)
@@ -401,7 +401,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
         val grunnlagsdataInspektør = GrunnlagsdataInspektør(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!)
         assertFalse(grunnlagsdataInspektør.vurdertOk)
-        val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 10.NAVv2)
+        val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 10.NAV)
         vilkårsgrunnlagHistorikk.avvisUtbetalingsdagerMedBegrunnelse(listOf(utbetalingstidslinjeMedNavDager), fødselsnummer.alder())
 
         utbetalingstidslinjeMedNavDager.filterIsInstance<Utbetalingstidslinje.Utbetalingsdag.AvvistDag>().let { avvisteDager ->

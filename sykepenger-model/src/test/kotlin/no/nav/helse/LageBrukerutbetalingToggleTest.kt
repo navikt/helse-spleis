@@ -5,7 +5,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.testhelpers.AP
-import no.nav.helse.testhelpers.NAVv2
+import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
@@ -48,7 +48,7 @@ internal class LageBrukerutbetalingToggleTest {
     @Test
     fun `slår ikke ut ved null refusjon`() {
         Toggle.LageBrukerutbetaling.enable {
-            val utbetaling = lagUtbetaling(tidslinjeOf(16.AP, 15.NAVv2.copyWith(arbeidsgiverbeløp = 0)))
+            val utbetaling = lagUtbetaling(tidslinjeOf(16.AP, 15.NAV.copyWith(arbeidsgiverbeløp = 0)))
             assertFalse(Toggle.LageBrukerutbetaling.kanIkkeFortsette(aktivitetslogg, utbetaling, true))
             assertFalse(utbetaling.harDelvisRefusjon())
         }
@@ -57,7 +57,7 @@ internal class LageBrukerutbetalingToggleTest {
     @Test
     fun `slår ut ved delvis refusjon`() {
         Toggle.LageBrukerutbetaling.enable {
-            val utbetaling = lagUtbetaling(tidslinjeOf(16.AP, 15.NAVv2.copyWith(arbeidsgiverbeløp = 600)))
+            val utbetaling = lagUtbetaling(tidslinjeOf(16.AP, 15.NAV.copyWith(arbeidsgiverbeløp = 600)))
             assertTrue(Toggle.LageBrukerutbetaling.kanIkkeFortsette(aktivitetslogg, utbetaling, true))
             assertTrue(utbetaling.harDelvisRefusjon())
         }
@@ -66,14 +66,14 @@ internal class LageBrukerutbetalingToggleTest {
     @Test
     fun `slår ikke ut ved overgang i refusjon`() {
         Toggle.LageBrukerutbetaling.enable {
-            val første = lagUtbetaling(tidslinjeOf(16.AP, 15.NAVv2))
-            val andre = lagUtbetaling(tidslinjeOf(16.AP, 15.NAVv2, 15.NAVv2(dekningsgrunnlag = 1200, refusjonsbeløp = 0)), forrige = første)
+            val første = lagUtbetaling(tidslinjeOf(16.AP, 15.NAV))
+            val andre = lagUtbetaling(tidslinjeOf(16.AP, 15.NAV, 15.NAV(dekningsgrunnlag = 1200, refusjonsbeløp = 0)), forrige = første)
             assertFalse(Toggle.LageBrukerutbetaling.kanIkkeFortsette(aktivitetslogg, andre, true))
             assertFalse(andre.harDelvisRefusjon())
         }
     }
 
-    private fun lagUtbetaling(tidslinje: Utbetalingstidslinje = tidslinjeOf(16.AP, 15.NAVv2), forrige: Utbetaling? = null): Utbetaling {
+    private fun lagUtbetaling(tidslinje: Utbetalingstidslinje = tidslinjeOf(16.AP, 15.NAV), forrige: Utbetaling? = null): Utbetaling {
         MaksimumUtbetaling(
             listOf(tidslinje),
             aktivitetslogg,
