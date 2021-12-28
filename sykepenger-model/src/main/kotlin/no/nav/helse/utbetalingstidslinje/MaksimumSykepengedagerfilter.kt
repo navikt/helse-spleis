@@ -108,7 +108,7 @@ internal class MaksimumSykepengedagerfilter(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        oppholdsdag(dag.dato)
+        state.mykOppholdsdag(this, dato)
     }
 
     override fun visit(
@@ -116,7 +116,7 @@ internal class MaksimumSykepengedagerfilter(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        oppholdsdag(dag.dato)
+        oppholdsdag(dato)
     }
 
     override fun visit(
@@ -124,7 +124,7 @@ internal class MaksimumSykepengedagerfilter(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        oppholdsdag(dag.dato)
+        oppholdsdag(dato)
     }
 
     override fun visit(
@@ -132,7 +132,7 @@ internal class MaksimumSykepengedagerfilter(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        oppholdsdag(dag.dato)
+        oppholdsdag(dato)
     }
 
     override fun visit(
@@ -140,7 +140,7 @@ internal class MaksimumSykepengedagerfilter(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        oppholdsdag(dag.dato)
+        oppholdsdag(dato)
     }
 
     override fun visit(
@@ -148,7 +148,7 @@ internal class MaksimumSykepengedagerfilter(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        oppholdsdag(dag.dato)
+        oppholdsdag(dato)
     }
 
     private fun oppholdsdag(dagen: LocalDate) {
@@ -171,9 +171,6 @@ internal class MaksimumSykepengedagerfilter(
                 avvisteDatoer.filter { sakensStartdato <= it }
             )
             aktivitetslogg.`§8-12 ledd 2`(dagen, TILSTREKKELIG_OPPHOLD_I_SYKEDAGER, tidslinjegrunnlag, beregnetTidslinje)
-            if (gjenståendeSykedager <= 0 && dagen in periode) {
-                aktivitetslogg.warn("26 uker siden forrige utbetaling av sykepenger, vurder om vilkårene for sykepenger er oppfylt")
-            }
             teller.resett(dagen.plusDays(1))
             return State.Initiell
         }
@@ -211,6 +208,7 @@ internal class MaksimumSykepengedagerfilter(
     private sealed class State {
         open fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {}
         open fun oppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {}
+        open fun mykOppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) = oppholdsdag(avgrenser, dagen)
         open fun entering(avgrenser: MaksimumSykepengedagerfilter) {}
         open fun leaving(avgrenser: MaksimumSykepengedagerfilter) {}
 
@@ -239,6 +237,10 @@ internal class MaksimumSykepengedagerfilter(
                 avgrenser.nextState(dagen)?.run { avgrenser.state(this) }
             }
 
+            override fun mykOppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
+                /* navhelg skal ikke forskyve 3årsvinduet */
+            }
+
             override fun oppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
                 avgrenser.state(Opphold)
             }
@@ -251,6 +253,11 @@ internal class MaksimumSykepengedagerfilter(
                 avgrenser.sisteBetalteDag = dagen
                 avgrenser.dekrementer(dagen)
                 avgrenser.state(avgrenser.nextState(dagen) ?: Syk)
+            }
+
+            override fun mykOppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
+                avgrenser.opphold += 1
+                oppholdsdag(avgrenser, dagen)
             }
 
             override fun oppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
@@ -267,6 +274,11 @@ internal class MaksimumSykepengedagerfilter(
                         avgrenser.teller.`§8-51 ledd 3`(maksdato)
                     }
                 )
+            }
+
+            override fun mykOppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
+                avgrenser.opphold += 1
+                /* helg skal ikke medføre ny rettighet */
             }
 
             override fun oppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {

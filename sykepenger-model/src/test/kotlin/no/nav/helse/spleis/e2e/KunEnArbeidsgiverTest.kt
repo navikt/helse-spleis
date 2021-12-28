@@ -16,6 +16,8 @@ import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.AvvistDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -2226,13 +2228,13 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             håndterUtbetalt(vedtaksperiodeIndex.vedtaksperiode)
         }
 
-        // Denne perioden skal egentlig ha nytt skjæringstidspunkt, få ny inntektsmelding og gå gjennom ny vilkårsprøving
         håndterSykmelding(Sykmeldingsperiode(1.juli(2019), 31.juli(2019), 100.prosent))
         håndterSøknad(Sykdom(1.juli(2019), 31.juli(2019), 100.prosent))
         håndterYtelser(19.vedtaksperiode)
-
+        val utbetalingstidslinje = inspektør.utbetalingstidslinjer(19.vedtaksperiode)
+        val dager = utbetalingstidslinje.filter { it !is AvvistDag && it !is NavHelgDag }
+        assertTrue(dager.isEmpty()) { "Forventet at alle dager er avvist: ${dager.joinToString()}"}
         assertWarnings(inspektør)
-        assertTrue(inspektør.personLogg.toString().contains("26 uker siden forrige utbetaling av sykepenger, vurder om vilkårene for sykepenger er oppfylt"))
     }
 
     @Test

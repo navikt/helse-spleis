@@ -245,19 +245,19 @@ internal class ArbeidsgiverUtbetalingerTest {
 
     @Test
     fun `når personen fyller 70 skal det ikke utbetales sykepenger`() {
-        undersøke(PERSON_70_ÅR_1_FEBRUAR_2018, 16.AP, 405.NAV)
+        undersøke(PERSON_70_ÅR_1_FEBRUAR_2018, 1.NAV, startdato = 1.februar)
         assertEquals(31.januar, maksdato)
         assertEquals(0, gjenståendeSykedager)
-        assertTrue(aktivitetslogg.hasWarningsOrWorse())
-        assertFalse(aktivitetslogg.hasErrorsOrWorse())
+        assertEquals(0, forbrukteSykedager)
     }
 
     private fun undersøke(
         fnr: Fødselsnummer,
         vararg utbetalingsdager: Utbetalingsdager,
-        vilkårsgrunnlagElement: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement? = null
+        vilkårsgrunnlagElement: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement? = null,
+        startdato: LocalDate = 1.januar
     ) {
-        val tidslinje = tidslinjeOf(*utbetalingsdager)
+        val tidslinje = tidslinjeOf(*utbetalingsdager, startDato = startdato)
         undersøke(fnr, tidslinje, tidslinjeOf(), vilkårsgrunnlagElement)
     }
 

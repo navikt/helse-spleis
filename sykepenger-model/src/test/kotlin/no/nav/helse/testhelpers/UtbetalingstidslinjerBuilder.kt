@@ -6,6 +6,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
+import java.time.DayOfWeek
 import java.time.LocalDate
 
 /**
@@ -24,9 +25,11 @@ internal fun tidslinjeOf(
             val økonomi = Økonomi.sykdomsgrad(grad.prosent)
                 .inntekt(dekningsgrunnlag.daglig, skjæringstidspunkt = skjæringstidspunkt(dato))
                 .arbeidsgiverRefusjon(arbeidsgiverbeløp.daglig)
+            val size = this.size
             if (helgedag != null && dato.erHelg()) this.helgedag(dato, økonomi)
             else this.utbetalingsdag(dato, økonomi)
-            dato = dato.plusDays(1)
+            val forskjell = this.size - size.toLong()
+            dato = dato.plusDays(forskjell.coerceAtLeast(1))
         }
         dato
     }
@@ -60,7 +63,18 @@ internal fun Int.HELG(dekningsgrunnlag: Int, grad: Number = 100.0) = Utbetalings
 internal val Int.NAVDAGER get() = this.NAVDAGER(1200)
 internal fun Int.NAVDAGER(dekningsgrunnlag: Number, grad: Number = 100.0, refusjonsbeløp: Number = dekningsgrunnlag) = Utbetalingsdager(
     antallDager = this,
-    addDagFun = Utbetalingstidslinje::addNAVdag,
+    addDagFun = { dagen, økonomi ->
+        var dato = dagen
+        repeat(when (dagen.dayOfWeek) {
+            DayOfWeek.SATURDAY -> 2
+            DayOfWeek.SUNDAY -> 1
+            else -> 0
+        }) {
+            addHelg(dato, økonomi)
+            dato = dato.plusDays(1)
+        }
+        addNAVdag(dato, økonomi)
+    },
     dekningsgrunnlag = dekningsgrunnlag,
     grad = grad,
     arbeidsgiverbeløp = refusjonsbeløp
