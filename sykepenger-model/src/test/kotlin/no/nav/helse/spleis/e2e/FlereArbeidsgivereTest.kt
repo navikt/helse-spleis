@@ -996,4 +996,28 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
 
         assertTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD, orgnummer = a2)
     }
+
+    @ForventetFeil("https://trello.com/c/OFgymppw Sjekker sykepengegrunnlag opp mot skjæringstidspunkt, mens inntekt lagres på 'første fraværsdag'")
+    @Test
+    fun `kastes ikke ut pga manglende inntekt etter inntektsmelding`() {
+        håndterSykmelding(Sykmeldingsperiode(31.januar, 7.februar, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 7.februar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(8.februar, 15.februar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(8.februar, 15.februar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(31.januar, 7.februar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(1.februar, 7.februar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(16.februar, 19.februar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(8.februar, 15.februar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(8.februar, 15.februar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(16.februar, 19.februar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a1)
+        håndterYtelser(3.vedtaksperiode, orgnummer = a1)
+
+        assertNoErrors(3.vedtaksperiode, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
+        assertSisteTilstand(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
+    }
 }
