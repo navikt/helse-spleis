@@ -20,6 +20,7 @@ internal class MaksimumSykepengedagerfilterTest {
         private const val PERSON_67_ÅR_11_JANUAR_2018 = "11015112345"
     }
 
+    private lateinit var rettighet: Sykepengerettighet
     private lateinit var aktivitetslogg: Aktivitetslogg
 
     @BeforeEach
@@ -29,14 +30,16 @@ internal class MaksimumSykepengedagerfilterTest {
 
     @Test
     fun `riktig antall dager`() {
-        val tidslinje = tidslinjeOf(10.AP, 10.NAVDAGER)
+        val tidslinje = tidslinjeOf(16.AP, 3.NAVDAGER, 2.HELG, 5.NAVDAGER)
         assertEquals(emptyList<LocalDate>(), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
+        assertEquals(28.desember, rettighet.maksdato)
     }
 
     @Test
     fun `stopper betaling etter 248 dager`() {
         val tidslinje = tidslinjeOf(249.NAVDAGER)
         assertEquals(listOf(6.september), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
+        assertEquals(5.september, rettighet.maksdato)
         assertTrue(aktivitetslogg.hasWarningsOrWorse())
     }
 
@@ -274,40 +277,34 @@ internal class MaksimumSykepengedagerfilterTest {
 
     @Test
     fun `teller sykedager med opphold i sykdom`() {
-        val gjeldendePerioder = listOf(tidslinjeOf(12.NAV, startDato = 1.mars))
+        val tidslinje = tidslinjeOf(12.NAV, startDato = 1.mars)
         val historikk = tidslinjeOf(45.NAV, startDato = 1.januar(2018))
-        val sykepengerettighet = maksimumSykepengedagerfilter().filter(gjeldendePerioder, historikk)
-        assertEquals(41, sykepengerettighet.forbrukteSykedager)
+        tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018, personTidslinje = historikk)
+        assertEquals(41, rettighet.forbrukteSykedager)
     }
 
     @Test
     fun `teller sykedager med overlapp`() {
-        val gjeldendePerioder = listOf(tidslinjeOf(12.NAV, startDato = 1.februar))
+        val tidslinje = tidslinjeOf(12.NAV, startDato = 1.februar)
         val historikk = tidslinjeOf(12.ARB, 45.NAV, startDato = 1.januar(2018))
-        val sykepengerettighet = maksimumSykepengedagerfilter().filter(gjeldendePerioder, historikk)
-        assertEquals(31, sykepengerettighet.forbrukteSykedager)
+        tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018, personTidslinje = historikk)
+        assertEquals(31, rettighet.forbrukteSykedager)
     }
 
     @Test
     fun `teller sykedager med konflikt`() {
-        val gjeldendePerioder = listOf(tidslinjeOf(12.NAV, startDato = 1.januar))
+        val tidslinje = tidslinjeOf(12.NAV, startDato = 1.januar)
         val historikk = tidslinjeOf(12.ARB, 45.NAV, startDato = 1.januar)
-        val sykepengerettighet = maksimumSykepengedagerfilter().filter(gjeldendePerioder, historikk)
-        assertEquals(41, sykepengerettighet.forbrukteSykedager)
+        tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018, personTidslinje = historikk)
+        assertEquals(41, rettighet.forbrukteSykedager)
     }
 
     @Test
     fun `teller sykedager med 26 uker`() {
-        val sykepengerettighet = maksimumSykepengedagerfilter().filter(listOf(enAnnenSykdom()), Utbetalingstidslinje())
-        assertEquals(54, sykepengerettighet.forbrukteSykedager)
+        val tidslinje = enAnnenSykdom()
+        tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018)
+        assertEquals(54, rettighet.forbrukteSykedager)
     }
-
-    private fun maksimumSykepengedagerfilter() = MaksimumSykepengedagerfilter(
-        UNG_PERSON_FNR_2018.somFødselsnummer().alder(),
-        NormalArbeidstaker,
-        Periode(1.januar, 10.januar),
-        Aktivitetslogg()
-    )
 
     // No 26 week gap with base of 246 NAV days
     private fun tilbakevendendeSykdom(vararg utbetalingsdager: Utbetalingsdager): Utbetalingstidslinje {
@@ -350,7 +347,7 @@ internal class MaksimumSykepengedagerfilterTest {
     }
 
     private fun Utbetalingstidslinje.utbetalingsavgrenser(fnr: String, periode: Periode = Periode(1.januar, 31.desember), personTidslinje: Utbetalingstidslinje = Utbetalingstidslinje()): List<LocalDate> {
-        MaksimumSykepengedagerfilter(
+        rettighet = MaksimumSykepengedagerfilter(
             fnr.somFødselsnummer().alder(),
             NormalArbeidstaker,
             periode,
