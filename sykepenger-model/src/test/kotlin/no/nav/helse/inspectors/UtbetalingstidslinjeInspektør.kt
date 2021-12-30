@@ -1,6 +1,7 @@
 package no.nav.helse.inspectors
 
 import no.nav.helse.person.UtbetalingsdagVisitor
+import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import no.nav.helse.økonomi.Økonomi
@@ -34,6 +35,7 @@ internal class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: 
     val fridager = mutableListOf<Fridag>()
     val avvistedatoer = mutableListOf<LocalDate>()
     val avvistedager = mutableListOf<AvvistDag>()
+    private val begrunnelser = mutableMapOf<LocalDate, List<Begrunnelse>>()
 
     val økonomi = mutableListOf<Økonomi>()
     val unikedager = mutableSetOf<KClass<out Utbetalingstidslinje.Utbetalingsdag>>()
@@ -61,6 +63,9 @@ internal class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: 
 
     internal fun totalUtbetaling() = totalUtbetaling
     internal fun totalInntekt() = totalInntekt
+
+    internal fun begrunnelse(dato: LocalDate) =
+        begrunnelser[dato] ?: emptyList()
 
     internal fun erNavdag(dato: LocalDate) = utbetalingstidslinje[dato] is NavDag
 
@@ -106,6 +111,7 @@ internal class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: 
         avvistDagTeller += 1
         avvistedatoer.add(dato)
         avvistedager.add(dag)
+        begrunnelser[dato] = dag.begrunnelser
         collect(dag, dato)
     }
 

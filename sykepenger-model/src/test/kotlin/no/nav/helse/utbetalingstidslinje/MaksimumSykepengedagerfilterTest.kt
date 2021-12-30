@@ -1,5 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.ForventetFeil
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -94,6 +95,20 @@ internal class MaksimumSykepengedagerfilterTest {
         assertEquals(listOf(10.januar, 11.januar), tidslinje.utbetalingsavgrenser(PERSON_70_ÅR_10_JANUAR_2018))
     }
 
+    @ForventetFeil("skal ikke kunne bli syk på 70årsdagen")
+    @Test
+    fun `kan ikke bli syk på 70årsdagen`() {
+        val tidslinje = tidslinjeOf(9.UTELATE, 2.NAVDAGER)
+        assertEquals(listOf(10.januar, 11.januar), tidslinje.utbetalingsavgrenser(PERSON_70_ÅR_10_JANUAR_2018))
+    }
+
+    @ForventetFeil("skal ikke kunne bli syk på 70årsdagen")
+    @Test
+    fun `kan ikke bli syk etter 70årsdagen`() {
+        val tidslinje = tidslinjeOf(10.UTELATE, 2.NAVDAGER)
+        assertEquals(listOf(11.januar, 12.januar), tidslinje.utbetalingsavgrenser(PERSON_70_ÅR_10_JANUAR_2018))
+    }
+
     @Test
     fun `noe som helst sykdom i opphold resetter teller`() {
         val tidslinje =
@@ -154,6 +169,16 @@ internal class MaksimumSykepengedagerfilterTest {
         val tidslinje = tidslinjeOf(248.NAVDAGER, 2.NAVDAGER, startDato = 11.januar.minusDays(222))
         assertEquals(2, tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018).size)
         assertTrue(tidslinje.inspektør.avvistedager.all { it.begrunnelser.single() == Begrunnelse.SykepengedagerOppbrukt })
+    }
+
+    @ForventetFeil("skal ikke kunne bli syk på 70årsdagen")
+    @Test
+    fun `bruke opp alt fom 67 år`() {
+        val tidslinje = tidslinjeOf(188.NAVDAGER, 61.NAVDAGER, (26 * 7).ARB, 61.NAVDAGER, 61.ARB, 365.ARB, 365.ARB, 1.NAVDAGER, startDato = 8.juli(2017))
+        assertEquals(listOf(13.mars, 11.november), tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018))
+        assertEquals(listOf(Begrunnelse.SykepengedagerOppbrukt), tidslinje.inspektør.begrunnelse(13.mars))
+        assertEquals(listOf(Begrunnelse.SykepengedagerOppbruktOver67), tidslinje.inspektør.begrunnelse(11.november))
+        assertEquals(listOf(Begrunnelse.Over70), tidslinje.inspektør.begrunnelse(11.januar(2022)))
     }
 
     @Test
