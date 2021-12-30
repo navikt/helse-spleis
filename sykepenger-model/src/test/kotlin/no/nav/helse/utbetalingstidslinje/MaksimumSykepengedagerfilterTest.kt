@@ -98,14 +98,12 @@ internal class MaksimumSykepengedagerfilterTest {
         assertEquals(listOf(10.januar, 11.januar), tidslinje.utbetalingsavgrenser(PERSON_70_ÅR_10_JANUAR_2018))
     }
 
-    @ForventetFeil("skal ikke kunne bli syk på 70årsdagen")
     @Test
     fun `kan ikke bli syk på 70årsdagen`() {
         val tidslinje = tidslinjeOf(9.UTELATE, 2.NAVDAGER)
         assertEquals(listOf(10.januar, 11.januar), tidslinje.utbetalingsavgrenser(PERSON_70_ÅR_10_JANUAR_2018))
     }
 
-    @ForventetFeil("skal ikke kunne bli syk på 70årsdagen")
     @Test
     fun `kan ikke bli syk etter 70årsdagen`() {
         val tidslinje = tidslinjeOf(10.UTELATE, 2.NAVDAGER)

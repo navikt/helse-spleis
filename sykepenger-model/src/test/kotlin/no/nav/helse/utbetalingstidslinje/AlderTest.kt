@@ -42,24 +42,24 @@ internal class AlderTest {
     fun `utbetaling skal stoppes selv om man reelt sett er 69 år - dersom 70årsdagen er i en helg`() {
         val dagen = 12.januar
         assertTrue(FYLLER_70_ÅR_13_JANUAR_2018.innenfor70årsgrense(dagen))
-        assertTrue(FYLLER_70_ÅR_13_JANUAR_2018.er70årsgrenseNådd(dagen))
+        assertTrue(FYLLER_70_ÅR_13_JANUAR_2018.harNådd70årsgrense(dagen))
     }
 
     @Test
     fun `har fylt 70 år`() {
-        assertFalse(FYLLER_70_ÅR_10_JANUAR_2018.er70årsgrenseNådd(8.januar))
-        assertTrue(FYLLER_70_ÅR_10_JANUAR_2018.er70årsgrenseNådd(9.januar))
-        assertTrue(FYLLER_70_ÅR_10_JANUAR_2018.er70årsgrenseNådd(10.januar))
+        assertFalse(FYLLER_70_ÅR_10_JANUAR_2018.harNådd70årsgrense(8.januar))
+        assertTrue(FYLLER_70_ÅR_10_JANUAR_2018.harNådd70årsgrense(9.januar))
+        assertTrue(FYLLER_70_ÅR_10_JANUAR_2018.harNådd70årsgrense(10.januar))
     }
 
     @Test
     fun `har fylt 70 år hensyntar helg`() {
-        assertFalse(FYLLER_70_ÅR_13_JANUAR_2018.er70årsgrenseNådd(11.januar))
-        assertFalse(FYLLER_70_ÅR_14_JANUAR_2018.er70årsgrenseNådd(11.januar))
-        assertFalse(FYLLER_70_ÅR_15_JANUAR_2018.er70årsgrenseNådd(11.januar))
-        assertTrue(FYLLER_70_ÅR_13_JANUAR_2018.er70årsgrenseNådd(12.januar))
-        assertTrue(FYLLER_70_ÅR_14_JANUAR_2018.er70årsgrenseNådd(12.januar))
-        assertTrue(FYLLER_70_ÅR_15_JANUAR_2018.er70årsgrenseNådd(12.januar))
+        assertFalse(FYLLER_70_ÅR_13_JANUAR_2018.harNådd70årsgrense(11.januar))
+        assertFalse(FYLLER_70_ÅR_14_JANUAR_2018.harNådd70årsgrense(11.januar))
+        assertFalse(FYLLER_70_ÅR_15_JANUAR_2018.harNådd70årsgrense(11.januar))
+        assertTrue(FYLLER_70_ÅR_13_JANUAR_2018.harNådd70årsgrense(12.januar))
+        assertTrue(FYLLER_70_ÅR_14_JANUAR_2018.harNådd70årsgrense(12.januar))
+        assertTrue(FYLLER_70_ÅR_15_JANUAR_2018.harNådd70årsgrense(12.januar))
     }
 
     @Test

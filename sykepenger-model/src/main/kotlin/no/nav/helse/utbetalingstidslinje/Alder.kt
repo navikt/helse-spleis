@@ -28,7 +28,8 @@ internal class Alder(private val fødselsdato: LocalDate) {
 
     internal fun innenfor67årsgrense(dato: LocalDate) = dato <= redusertYtelseAlder
     internal fun innenfor70årsgrense(dato: LocalDate) = dato <= sisteVirkedagFørFylte70år
-    internal fun er70årsgrenseNådd(dato: LocalDate) =  dato >= sisteVirkedagFørFylte70år
+    internal fun harNådd70årsgrense(dato: LocalDate) = dato >= sisteVirkedagFørFylte70år
+    internal fun mistetSykepengerett(dato: LocalDate) = dato > sisteVirkedagFørFylte70år
 
     internal fun alderPåDato(dato: LocalDate) = YEARS.between(fødselsdato, dato).toInt()
 

@@ -98,6 +98,7 @@ internal class MaksimumSykepengedagerfilter(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
+        if (alder.mistetSykepengerett(dato)) state = State.Karantene
         betalbarDager[dato] = dag
         state.betalbarDag(this, dato)
     }
