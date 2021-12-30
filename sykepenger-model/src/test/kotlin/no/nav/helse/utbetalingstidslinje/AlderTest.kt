@@ -12,8 +12,12 @@ import org.junit.jupiter.api.Test
 internal class AlderTest {
 
     private companion object {
-        val FYLLER_67_1_JANUAR_2018 = "01015149945".somFødselsnummer().alder()
-        val FYLLER_18_ÅR_2_NOVEMBER = "02110075045".somFødselsnummer().alder()
+        val FYLLER_67_ÅR_1_JANUAR_2018 = "01015149945".somFødselsnummer().alder()
+        val FYLLER_18_ÅR_2_NOVEMBER_2018 = "02110075045".somFødselsnummer().alder()
+        val FYLLER_70_ÅR_10_JANUAR_2018 = "10014812345".somFødselsnummer().alder()
+        val FYLLER_70_ÅR_13_JANUAR_2018 = "13014812345".somFødselsnummer().alder()
+        val FYLLER_70_ÅR_14_JANUAR_2018 = "14014812345".somFødselsnummer().alder()
+        val FYLLER_70_ÅR_15_JANUAR_2018 = "15014812345".somFødselsnummer().alder()
     }
 
     @Test
@@ -24,26 +28,53 @@ internal class AlderTest {
     }
 
     @Test
+    fun `mindre enn 70`() {
+        assertTrue(FYLLER_70_ÅR_10_JANUAR_2018.mindreEnn70(9.januar))
+        assertFalse(FYLLER_70_ÅR_10_JANUAR_2018.mindreEnn70(10.januar))
+        assertFalse(FYLLER_70_ÅR_10_JANUAR_2018.mindreEnn70(11.januar))
+        assertTrue(FYLLER_70_ÅR_13_JANUAR_2018.mindreEnn70(12.januar))
+        assertTrue(FYLLER_70_ÅR_14_JANUAR_2018.mindreEnn70(12.januar))
+        assertTrue(FYLLER_70_ÅR_15_JANUAR_2018.mindreEnn70(12.januar))
+    }
+
+    @Test
+    fun `har fylt 70 år`() {
+        assertFalse(FYLLER_70_ÅR_10_JANUAR_2018.harFylt70(8.januar))
+        assertTrue(FYLLER_70_ÅR_10_JANUAR_2018.harFylt70(9.januar))
+        assertTrue(FYLLER_70_ÅR_10_JANUAR_2018.harFylt70(10.januar))
+    }
+
+    @Test
+    fun `har fylt 70 år hensyntar helg`() {
+        assertFalse(FYLLER_70_ÅR_13_JANUAR_2018.harFylt70(11.januar))
+        assertFalse(FYLLER_70_ÅR_14_JANUAR_2018.harFylt70(11.januar))
+        assertFalse(FYLLER_70_ÅR_15_JANUAR_2018.harFylt70(11.januar))
+        assertTrue(FYLLER_70_ÅR_13_JANUAR_2018.harFylt70(12.januar))
+        assertTrue(FYLLER_70_ÅR_14_JANUAR_2018.harFylt70(12.januar))
+        assertTrue(FYLLER_70_ÅR_15_JANUAR_2018.harFylt70(12.januar))
+    }
+
+    @Test
     fun `får ikke lov å søke sykepenger dersom personen er mindre enn 18 år på søknadstidspunktet`() {
-        assertTrue(FYLLER_18_ÅR_2_NOVEMBER.forUngForÅSøke(1.november))
+        assertTrue(FYLLER_18_ÅR_2_NOVEMBER_2018.forUngForÅSøke(1.november))
     }
 
     @Test
     fun `får lov å søke dersom personen er minst 18 år`() {
-        assertFalse(FYLLER_18_ÅR_2_NOVEMBER.forUngForÅSøke(2.november))
+        assertFalse(FYLLER_18_ÅR_2_NOVEMBER_2018.forUngForÅSøke(2.november))
     }
     @Test
     fun `Minimum inntekt er en halv g hvis du akkurat har fylt 67`() {
-        assertEquals(67, FYLLER_67_1_JANUAR_2018.alderPåDato(1.januar))
-        assertEquals(Grunnbeløp.halvG.beløp(1.januar), FYLLER_67_1_JANUAR_2018.minimumInntekt(1.januar))
-        assertEquals((93634 / 2).årlig, FYLLER_67_1_JANUAR_2018.minimumInntekt(1.januar))
+        assertEquals(67, FYLLER_67_ÅR_1_JANUAR_2018.alderPåDato(1.januar))
+        assertEquals(Grunnbeløp.halvG.beløp(1.januar), FYLLER_67_ÅR_1_JANUAR_2018.minimumInntekt(1.januar))
+        assertEquals((93634 / 2).årlig, FYLLER_67_ÅR_1_JANUAR_2018.minimumInntekt(1.januar))
     }
 
     @Test
     fun `Minimum inntekt er 2g hvis du er en dag over 67`() {
-        assertEquals(67, FYLLER_67_1_JANUAR_2018.alderPåDato(2.januar))
-        assertEquals(Grunnbeløp.`2G`.beløp(2.januar), FYLLER_67_1_JANUAR_2018.minimumInntekt(2.januar))
-        assertEquals((93634 * 2).årlig, FYLLER_67_1_JANUAR_2018.minimumInntekt(2.januar))
+        assertEquals(67, FYLLER_67_ÅR_1_JANUAR_2018.alderPåDato(2.januar))
+        assertEquals(Grunnbeløp.`2G`.beløp(2.januar), FYLLER_67_ÅR_1_JANUAR_2018.minimumInntekt(2.januar))
+        assertEquals((93634 * 2).årlig, FYLLER_67_ÅR_1_JANUAR_2018.minimumInntekt(2.januar))
     }
 
     @Test
@@ -56,17 +87,17 @@ internal class AlderTest {
 
     @Test
     fun `forhøyet inntektskrav`() {
-        assertFalse(FYLLER_67_1_JANUAR_2018.forhøyetInntektskrav(1.januar))
-        assertTrue(FYLLER_67_1_JANUAR_2018.forhøyetInntektskrav(2.januar))
+        assertFalse(FYLLER_67_ÅR_1_JANUAR_2018.forhøyetInntektskrav(1.januar))
+        assertTrue(FYLLER_67_ÅR_1_JANUAR_2018.forhøyetInntektskrav(2.januar))
     }
 
     @Test
     fun `riktig begrunnelse for minimum inntekt ved alder over 67`() {
-        assertEquals(Begrunnelse.MinimumInntektOver67, FYLLER_67_1_JANUAR_2018.begrunnelseForMinimumInntekt(2.januar))
+        assertEquals(Begrunnelse.MinimumInntektOver67, FYLLER_67_ÅR_1_JANUAR_2018.begrunnelseForMinimumInntekt(2.januar))
     }
 
     @Test
     fun `riktig begrunnelse for minimum inntekt ved alder 67 eller under`() {
-        assertEquals(Begrunnelse.MinimumInntekt, FYLLER_67_1_JANUAR_2018.begrunnelseForMinimumInntekt(1.januar))
+        assertEquals(Begrunnelse.MinimumInntekt, FYLLER_67_ÅR_1_JANUAR_2018.begrunnelseForMinimumInntekt(1.januar))
     }
 }

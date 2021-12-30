@@ -3,6 +3,7 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-33 ledd 3`
+import no.nav.helse.sykdomstidslinje.erRettFør
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.Year
@@ -10,8 +11,7 @@ import java.time.temporal.ChronoUnit.YEARS
 
 internal class Alder(private val fødselsdato: LocalDate) {
     internal val søttiårsdagen: LocalDate = fødselsdato.plusYears(70)
-    internal val datoForØvreAldersgrense: LocalDate = søttiårsdagen.trimHelg()
-    internal val sisteVirkedagFørFylte70år: LocalDate = datoForØvreAldersgrense.minusDays(1)
+    internal val sisteVirkedagFørFylte70år: LocalDate = søttiårsdagen.sisteVirkedagFørFylte70år()
     internal val redusertYtelseAlder: LocalDate = fødselsdato.plusYears(67)
     private val forhøyetInntektskravAlder: LocalDate = fødselsdato.plusYears(67)
 
@@ -20,15 +20,19 @@ internal class Alder(private val fødselsdato: LocalDate) {
         private const val MINSTEALDER_UTEN_FULLMAKT_FRA_VERGE = 18
     }
 
-    private fun LocalDate.trimHelg(): LocalDate = this.minusDays(
+    private fun LocalDate.sisteVirkedagFørFylte70år(): LocalDate = this.minusDays(
         when (this.dayOfWeek) {
-            DayOfWeek.SUNDAY -> 1
-            DayOfWeek.MONDAY -> 2
-            else -> 0
+            DayOfWeek.SUNDAY -> 2
+            DayOfWeek.MONDAY -> 3
+            else -> 1
         }
     )
 
+    internal fun mindreEnn70(dato: LocalDate) = dato < søttiårsdagen // !harFylt70(dato.minusDays(1))
+    internal fun harFylt70(dato: LocalDate) =  dato >= søttiårsdagen || dato.erRettFør(søttiårsdagen)
+
     internal fun alderPåDato(dato: LocalDate) = YEARS.between(fødselsdato, dato).toInt()
+
     private fun alderVedSluttenAvÅret(year: Year) = YEARS.between(Year.from(fødselsdato), year).toInt()
 
     internal fun minimumInntekt(dato: LocalDate) = (if (forhøyetInntektskrav(dato)) Grunnbeløp.`2G` else Grunnbeløp.halvG).beløp(dato)

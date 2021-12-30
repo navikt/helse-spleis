@@ -110,7 +110,7 @@ internal class UtbetalingTeller private constructor(
     internal fun erFørMaksdato(dato: LocalDate): Boolean {
         val harNåddMaksSykepengedager = betalteDager >= arbeidsgiverRegler.maksSykepengedager()
         val harNåddMaksSykepengedagerOver67 = gammelpersonDager >= arbeidsgiverRegler.maksSykepengedagerOver67()
-        val harFylt70 = dato.plusDays(1) >= alder.datoForØvreAldersgrense
+        val harFylt70 = alder.harFylt70(dato)
         //TODO: Aktivitetslogg().`§8-12 ledd 1`(oppfylt = !harNåddMaksSykepengedager)
         when {
             harFylt70 -> påGrensenTilstand = Over70Tilstand(dato)

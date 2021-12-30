@@ -6,13 +6,13 @@ import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.AvsluttetUtenUtbetaling
-import no.nav.helse.serde.api.v2.HendelseDTO.Companion.finn
 import no.nav.helse.serde.api.v2.Behandlingstype.UBEREGNET
 import no.nav.helse.serde.api.v2.Behandlingstype.VENTER
 import no.nav.helse.serde.api.v2.Generasjoner.Generasjon.Companion.fjernErstattede
 import no.nav.helse.serde.api.v2.Generasjoner.Generasjon.Companion.sammenstillMedNeste
 import no.nav.helse.serde.api.v2.Generasjoner.Generasjon.Companion.sorterGenerasjoner
 import no.nav.helse.serde.api.v2.Generasjoner.Generasjon.Companion.toDTO
+import no.nav.helse.serde.api.v2.HendelseDTO.Companion.finn
 import no.nav.helse.serde.api.v2.Tidslinjeberegninger.ITidslinjeberegning
 import no.nav.helse.serde.api.v2.buildere.BeregningId
 import no.nav.helse.serde.api.v2.buildere.IVilkårsgrunnlagHistorikk
@@ -191,7 +191,7 @@ internal class Tidslinjeperioder(
             utbetaling.maksdato > sisteSykepengedag
         )
         val alder = fødselsnummer.alder().let {
-            BeregnetPeriode.Alder(it.alderPåDato(sisteSykepengedag), it.datoForØvreAldersgrense > sisteSykepengedag)
+            BeregnetPeriode.Alder(it.alderPåDato(sisteSykepengedag), it.mindreEnn70(sisteSykepengedag))
         }
         val søknadsfrist = hendelser.finn<SøknadNavDTO>()?.let {
             BeregnetPeriode.Søknadsfrist(
