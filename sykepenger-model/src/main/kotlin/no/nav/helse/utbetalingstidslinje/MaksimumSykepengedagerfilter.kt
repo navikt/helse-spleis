@@ -260,7 +260,7 @@ internal class MaksimumSykepengedagerfilter(
         object Karantene : State() {
             override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
                 avgrenser.opphold += 1
-                avgrenser.avvisteDatoerMedBegrunnelse[dagen] = avgrenser.teller.begrunnelse
+                avgrenser.avvisteDatoerMedBegrunnelse[dagen] = avgrenser.teller.begrunnelse(dagen)
                 avgrenser.teller.hvisGrensenErNådd(
                     hvis67År = { maksdato ->
                         avgrenser.teller.`§8-51 ledd 3`(maksdato)

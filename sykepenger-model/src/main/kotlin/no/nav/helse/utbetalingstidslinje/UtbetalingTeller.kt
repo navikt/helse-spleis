@@ -3,7 +3,6 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-51 ledd 3`
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.SykepengedagerOppbrukt
-import no.nav.helse.utbetalingstidslinje.Begrunnelse.SykepengedagerOppbruktOver67
 import java.time.DayOfWeek
 import java.time.LocalDate
 import kotlin.math.max
@@ -16,32 +15,27 @@ internal class UtbetalingTeller private constructor(
     private var gammelpersonDager: Int,
     private val aktivitetslogg: IAktivitetslogg
 ) {
-    // Til bruk under visitering av Utbetalingstidslinje
-    internal var begrunnelse: Begrunnelse = SykepengedagerOppbrukt
-
-    internal constructor(
-        alder: Alder,
-        arbeidsgiverRegler: ArbeidsgiverRegler,
-        aktivitetslogg: IAktivitetslogg
-    ) :
+    internal constructor(alder: Alder, arbeidsgiverRegler: ArbeidsgiverRegler, aktivitetslogg: IAktivitetslogg) :
         this(LocalDate.MIN, alder, arbeidsgiverRegler, 0, 0, aktivitetslogg)
 
-    private fun byttBegrunnelseFordiAntallGjenværendeDagerReduseresTil60EllerVedNyRettighet(): Boolean = gammelpersonDager == 0 && betalteDager < (248 - 60)
+    internal fun begrunnelse(dato: LocalDate): Begrunnelse {
+        // avslag skal begrunnes med SykepengedagerOppbrukt (§ 8-15) så lenge man har brukt ordinær kvote;
+        // uavhengig om man er over eller under 67
+        if (betalteDager >= arbeidsgiverRegler.maksSykepengedager()) return SykepengedagerOppbrukt
+        return alder.begrunnelseForAlder(dato)
+    }
 
     internal fun inkrementer(dato: LocalDate) {
         betalteDager += 1
-        if (dato > alder.redusertYtelseAlder) {
-            if (byttBegrunnelseFordiAntallGjenværendeDagerReduseresTil60EllerVedNyRettighet()) {
-                begrunnelse = SykepengedagerOppbruktOver67
-            }
-            gammelpersonDager += 1
-        }
+        if (alder.innenfor67årsgrense(dato)) return
+        gammelpersonDager += 1
     }
 
     internal fun dekrementer(dato: LocalDate) {
         if (dato < fom) return
         betalteDager = max(0, betalteDager - 1)
-        // gammelpersonDager kan ikke bli mer enn tre år gamle innen man fyller 70
+        // trenger ikke dekrementere gammelpersonDager fordi
+        // de ikke ikke bli mer enn tre år gamle innen man fyller 70
     }
 
     internal fun resett(dato: LocalDate) {

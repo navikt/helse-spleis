@@ -2,6 +2,7 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.somFødselsnummer
+import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.november
@@ -59,6 +60,22 @@ internal class AlderTest {
         assertTrue(FYLLER_70_ÅR_13_JANUAR_2018.er70årsgrenseNådd(12.januar))
         assertTrue(FYLLER_70_ÅR_14_JANUAR_2018.er70årsgrenseNådd(12.januar))
         assertTrue(FYLLER_70_ÅR_15_JANUAR_2018.er70årsgrenseNådd(12.januar))
+    }
+
+    @Test
+    fun `67årsgrense`() {
+        assertTrue(FYLLER_67_ÅR_1_JANUAR_2018.innenfor67årsgrense(31.desember(2017)))
+        assertTrue(FYLLER_67_ÅR_1_JANUAR_2018.innenfor67årsgrense(1.januar))
+        assertFalse(FYLLER_67_ÅR_1_JANUAR_2018.innenfor67årsgrense(2.januar))
+    }
+
+    @Test
+    fun `begrunnelse for alder`() {
+        assertEquals(Begrunnelse.SykepengedagerOppbrukt, FYLLER_67_ÅR_1_JANUAR_2018.begrunnelseForAlder(1.januar))
+        assertEquals(Begrunnelse.SykepengedagerOppbruktOver67, FYLLER_67_ÅR_1_JANUAR_2018.begrunnelseForAlder(2.januar))
+        assertEquals(Begrunnelse.SykepengedagerOppbruktOver67, FYLLER_67_ÅR_1_JANUAR_2018.begrunnelseForAlder(2.januar))
+        assertEquals(Begrunnelse.SykepengedagerOppbruktOver67, FYLLER_70_ÅR_10_JANUAR_2018.begrunnelseForAlder(9.januar))
+        assertEquals(Begrunnelse.Over70, FYLLER_70_ÅR_10_JANUAR_2018.begrunnelseForAlder(10.januar))
     }
 
     @Test

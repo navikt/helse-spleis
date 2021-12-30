@@ -1,6 +1,5 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.ForventetFeil
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -179,7 +178,6 @@ internal class MaksimumSykepengedagerfilterTest {
         assertEquals(Begrunnelse.SykepengedagerOppbruktOver67, tidslinje.inspektør.avvistedager.last().begrunnelser.single())
     }
 
-    @ForventetFeil("sette riktig begrunnelse")
     @Test
     fun `begrunnelse ved fylte 70`() {
         val tidslinje = tidslinjeOf(11.NAVDAGER)

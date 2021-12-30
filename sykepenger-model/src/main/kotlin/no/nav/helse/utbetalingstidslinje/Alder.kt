@@ -11,7 +11,7 @@ import java.time.temporal.ChronoUnit.YEARS
 internal class Alder(private val fødselsdato: LocalDate) {
     internal val søttiårsdagen: LocalDate = fødselsdato.plusYears(70)
     internal val sisteVirkedagFørFylte70år: LocalDate = søttiårsdagen.sisteVirkedagFør()
-    internal val redusertYtelseAlder: LocalDate = fødselsdato.plusYears(67)
+    private val redusertYtelseAlder: LocalDate = fødselsdato.plusYears(67)
     private val forhøyetInntektskravAlder: LocalDate = fødselsdato.plusYears(67)
 
     private companion object {
@@ -26,6 +26,7 @@ internal class Alder(private val fødselsdato: LocalDate) {
         )
     }
 
+    internal fun innenfor67årsgrense(dato: LocalDate) = dato <= redusertYtelseAlder
     internal fun innenfor70årsgrense(dato: LocalDate) = dato <= sisteVirkedagFørFylte70år
     internal fun er70årsgrenseNådd(dato: LocalDate) =  dato >= sisteVirkedagFørFylte70år
 
@@ -40,6 +41,12 @@ internal class Alder(private val fødselsdato: LocalDate) {
 
     internal fun begrunnelseForMinimumInntekt(skjæringstidspunkt: LocalDate) =
         if (forhøyetInntektskrav(skjæringstidspunkt)) Begrunnelse.MinimumInntektOver67 else Begrunnelse.MinimumInntekt
+
+    internal fun begrunnelseForAlder(dagen: LocalDate): Begrunnelse {
+        if (innenfor67årsgrense(dagen)) return Begrunnelse.SykepengedagerOppbrukt
+        if (innenfor70årsgrense(dagen)) return Begrunnelse.SykepengedagerOppbruktOver67
+        return Begrunnelse.Over70
+    }
 
     internal fun forUngForÅSøke(søknadstidspunkt: LocalDate) = alderPåDato(søknadstidspunkt) < MINSTEALDER_UTEN_FULLMAKT_FRA_VERGE
 
