@@ -159,7 +159,7 @@ internal class VedtaksperiodeBuilder(
         val alderSisteSykepengedag = personalder.alderPåDato(sisteSykepengedagEllerSisteDagIPerioden)
         val alder = AlderDTO(
             alderSisteSykedag = alderSisteSykepengedag,
-            oppfylt = personalder.mindreEnn70(sisteSykepengedagEllerSisteDagIPerioden)
+            oppfylt = personalder.innenfor70årsgrense(sisteSykepengedagEllerSisteDagIPerioden)
         )
         val søknadNav = hendelser.find { it.type == "SENDT_SØKNAD_NAV" } as? SøknadNavDTO
         val søknadsfrist = søknadNav?.let {

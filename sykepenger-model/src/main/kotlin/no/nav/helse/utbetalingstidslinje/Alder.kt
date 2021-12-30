@@ -3,7 +3,6 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-33 ledd 3`
-import no.nav.helse.sykdomstidslinje.erRettFør
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.Year
@@ -11,25 +10,24 @@ import java.time.temporal.ChronoUnit.YEARS
 
 internal class Alder(private val fødselsdato: LocalDate) {
     internal val søttiårsdagen: LocalDate = fødselsdato.plusYears(70)
-    internal val sisteVirkedagFørFylte70år: LocalDate = søttiårsdagen.sisteVirkedagFørFylte70år()
+    internal val sisteVirkedagFørFylte70år: LocalDate = søttiårsdagen.sisteVirkedagFør()
     internal val redusertYtelseAlder: LocalDate = fødselsdato.plusYears(67)
     private val forhøyetInntektskravAlder: LocalDate = fødselsdato.plusYears(67)
 
     private companion object {
         private const val ALDER_FOR_FORHØYET_FERIEPENGESATS = 59
         private const val MINSTEALDER_UTEN_FULLMAKT_FRA_VERGE = 18
+        private fun LocalDate.sisteVirkedagFør(): LocalDate = this.minusDays(
+            when (this.dayOfWeek) {
+                DayOfWeek.SUNDAY -> 2
+                DayOfWeek.MONDAY -> 3
+                else -> 1
+            }
+        )
     }
 
-    private fun LocalDate.sisteVirkedagFørFylte70år(): LocalDate = this.minusDays(
-        when (this.dayOfWeek) {
-            DayOfWeek.SUNDAY -> 2
-            DayOfWeek.MONDAY -> 3
-            else -> 1
-        }
-    )
-
-    internal fun mindreEnn70(dato: LocalDate) = dato < søttiårsdagen // !harFylt70(dato.minusDays(1))
-    internal fun harFylt70(dato: LocalDate) =  dato >= søttiårsdagen || dato.erRettFør(søttiårsdagen)
+    internal fun innenfor70årsgrense(dato: LocalDate) = dato <= sisteVirkedagFørFylte70år
+    internal fun er70årsgrenseNådd(dato: LocalDate) =  dato >= sisteVirkedagFørFylte70år
 
     internal fun alderPåDato(dato: LocalDate) = YEARS.between(fødselsdato, dato).toInt()
 

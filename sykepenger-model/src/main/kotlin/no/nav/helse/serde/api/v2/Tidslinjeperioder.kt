@@ -191,7 +191,7 @@ internal class Tidslinjeperioder(
             utbetaling.maksdato > sisteSykepengedag
         )
         val alder = fødselsnummer.alder().let {
-            BeregnetPeriode.Alder(it.alderPåDato(sisteSykepengedag), it.mindreEnn70(sisteSykepengedag))
+            BeregnetPeriode.Alder(it.alderPåDato(sisteSykepengedag), it.innenfor70årsgrense(sisteSykepengedag))
         }
         val søknadsfrist = hendelser.finn<SøknadNavDTO>()?.let {
             BeregnetPeriode.Søknadsfrist(
