@@ -642,7 +642,7 @@ class Person private constructor(
 
     internal fun harAktivtArbeidsforholdEllerInntekt(skjæringstidspunkt: LocalDate, orgnummer: String) = arbeidsgivere
         .firstOrNull { it.organisasjonsnummer() == orgnummer }
-        ?.let { it.harAktivtArbeidsforhold(skjæringstidspunkt) || it.harGrunnlagForSykepengegrunnlagEllerSammenligningsgrunnlag(skjæringstidspunkt, it.finnFørsteFraværsdag(skjæringstidspunkt)) } ?: false
+        ?.let { it.harAktivtArbeidsforhold(skjæringstidspunkt) || it.harSammenligningsgrunnlag(skjæringstidspunkt) } ?: false
 
     internal fun harKunEtAnnetAktivtArbeidsforholdEnn(skjæringstidspunkt: LocalDate, orgnummer: String): Boolean {
         val aktiveArbeidsforhold = arbeidsgivereMedAktiveArbeidsforhold(skjæringstidspunkt)
