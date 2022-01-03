@@ -755,8 +755,8 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun harNærliggendeUtbetaling() : Boolean {
-        val søknadsperioder = arbeidsgiver.søknadsperioder(hendelseIder).takeUnless { it.isEmpty() } ?: return false
-        val periode = søknadsperioder.minOf { it.start } til søknadsperioder.maxOf { it.endInclusive }
+        val periode = arbeidsgiver.søknadsperioder(hendelseIder).takeUnless { it.isEmpty() }
+            ?.let { perioder -> perioder.minOf { it.start } til perioder.maxOf { it.endInclusive } } ?: this.periode
         return person.harNærliggendeUtbetaling(periode)
     }
 

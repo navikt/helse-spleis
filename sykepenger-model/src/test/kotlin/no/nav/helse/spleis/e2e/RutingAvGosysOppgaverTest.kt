@@ -260,16 +260,43 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         assertFalse(observatør.opprettOppgaveEvent().any { inntektsmeldingId in it.hendelser })
     }
 
-    @ForventetFeil("Inntektsmelding feilet fordi vi trenger søknad for å finne nærliggende utbetaling. Løses i steg 4 - https://trello.com/c/yVDkucVG")
     @Test
-    fun `Inntektsmelding og forkasting uten søknad skal til egen kø`() {
+    fun `Ny inntektsmelding med samme AGP og forkasting uten søknad skal til egen kø`() {
         nyttVedtak(1.mars, 31.mars)
 
         håndterSykmelding(Sykmeldingsperiode(5.april, 25.mai, 100.prosent))
-        val inntektsmeldingId = håndterInntektsmelding(listOf(5.april til 20.april))
+        val inntektsmeldingId = håndterInntektsmelding(listOf(1.mars til 16.mars), førsteFraværsdag = 5.april)
         håndterSykmelding(Sykmeldingsperiode(5.april, 26.mai, 100.prosent))
 
         assertTrue(observatør.opprettOppgaveEvent().isEmpty())
-        assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any{inntektsmeldingId in it.hendelser})
+        assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any { inntektsmeldingId in it.hendelser })
+    }
+
+    @Test
+    fun `Ingen eksplisitt oppgave for korrigert inntektsmelding, håndteres vha timeout`() {
+        nyttVedtak(1.mars, 31.mars)
+
+        håndterSykmelding(Sykmeldingsperiode(5.april, 25.mai, 100.prosent))
+        val inntektsmeldingId = håndterInntektsmelding(listOf(1.mars til 16.mars), førsteFraværsdag = 1.mars)
+        håndterSykmelding(Sykmeldingsperiode(5.april, 26.mai, 100.prosent))
+
+        assertTrue(observatør.opprettOppgaveEvent().isEmpty())
+        assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().none { inntektsmeldingId in it.hendelser })
+    }
+
+    @Test
+    fun `Ferie teller likt som utbetaling når vi skal sjekke om vi har nærliggende utbetaling`() {
+        nyttVedtak(1.mars, 31.mars)
+
+        håndterSykmelding(Sykmeldingsperiode(1.april, 30.april, 100.prosent))
+        håndterSøknad(Sykdom(1.april, 30.april, 100.prosent), Ferie(1.april, 30.april))
+        håndterYtelser(2.vedtaksperiode)
+
+        håndterSykmelding(Sykmeldingsperiode(1.mai, 26.mai, 100.prosent))
+        val inntektsmeldingId = håndterInntektsmelding(listOf(1.mars til 16.mars), førsteFraværsdag = 1.mai)
+        håndterSykmelding(Sykmeldingsperiode(1.mai, 27.mai, 100.prosent))
+
+        assertTrue(observatør.opprettOppgaveEvent().isEmpty())
+        assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any { inntektsmeldingId in it.hendelser })
     }
 }
