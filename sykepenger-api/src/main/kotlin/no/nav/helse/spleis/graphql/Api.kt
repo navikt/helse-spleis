@@ -83,7 +83,7 @@ fun Application.installGraphQLApi(dataSource: DataSource, authProviderName: Stri
     val hendelseDao = HendelseDao(dataSource)
 
     install(GraphQL) {
-        endpoint = "/api/graphql"
+        endpoint = "/graphql"
 
         if (Toggle.GraphQLPlayground.enabled) {
             playground = true
