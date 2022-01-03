@@ -269,6 +269,31 @@ internal class MaksimumSykepengedagerfilterTest {
     }
 
     @Test
+    fun `248 dager nådd på 3 år med helg`() {
+        val tidslinje = tidslinjeOf(
+            48.NAVDAGER,
+            127.ARB,
+            48.NAVDAGER,
+            127.ARB,
+            48.NAVDAGER,
+            127.ARB,
+            19.NAVDAGER,
+            180.ARB,
+            2.HELG, // 2 helgedager pluss forrige 180 dager utgjør 182 dager gap => resett
+            48.NAVDAGER,
+            141.ARB,
+            6.NAVDAGER,
+            90.ARB, // 54 remaining days from here, outside 26 week gap
+            1.NAVDAGER,
+            3.ARB,
+            5.NAVDAGER,
+            (248 - 60).NAVDAGER,
+            1.NAVDAGER
+        )
+        assertEquals(listOf(6.oktober(2021)), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
+    }
+
+    @Test
     fun `helgedager teller som opphold hvis før og etter arbeidsdag`() {
         val tidslinje = tidslinjeOf(248.NAVDAGER, 1.ARB, (26 * 7 - 2).HELG, 1.ARB, 60.NAVDAGER)
         assertEquals(emptyList<LocalDate>(), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
@@ -404,7 +429,11 @@ internal class MaksimumSykepengedagerfilterTest {
             NormalArbeidstaker,
             periode ?: (this + personTidslinje).periode(),
             aktivitetslogg
-        ).filter(listOf(this), personTidslinje)
+        ).let {
+            val i = it.filter(listOf(this), personTidslinje)
+            val a = 1
+            i
+        }
         return inspektør.avvistedatoer
     }
 }
