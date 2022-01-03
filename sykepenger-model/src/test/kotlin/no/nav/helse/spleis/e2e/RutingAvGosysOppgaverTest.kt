@@ -167,17 +167,6 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         assertTrue(observatør.opprettOppgaveEvent().any { inntektsmeldingId in it.hendelser })
     }
 
-    @ForventetFeil("Må sjekke inntektsmeldinger i forbindelse med forkasting. Løses i steg 3 - https://trello.com/c/yVDkucVG")
-    @Test
-    fun `inntektsmelding som kommer før periode som forkastes`() {
-        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
-
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 11.januar, 100.prosent))
-
-        assertTrue(observatør.opprettOppgaveEvent().any { inntektsmeldingId in it.hendelser })
-    }
-
     @Test
     fun `overlappende sykmelding kaster ut perioden`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar, 100.prosent))
