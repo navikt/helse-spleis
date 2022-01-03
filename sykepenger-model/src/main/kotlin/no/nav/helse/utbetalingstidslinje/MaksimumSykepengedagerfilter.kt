@@ -98,8 +98,7 @@ internal class MaksimumSykepengedagerfilter(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        if (alder.mistetSykepengerett(dato)) state = State.Karantene
-        betalbarDager[dato] = dag
+        if (alder.mistetSykepengerett(dato)) state(State.Karantene) else betalbarDager[dato] = dag
         state.betalbarDag(this, dato)
     }
 
@@ -108,7 +107,7 @@ internal class MaksimumSykepengedagerfilter(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        state.mykOppholdsdag(this, dato)
+        state.sykdomshelg(this, dato)
     }
 
     override fun visit(
@@ -205,14 +204,14 @@ internal class MaksimumSykepengedagerfilter(
         dekrementerfom = dekrementertom
     }
 
-    private sealed class State {
-        open fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {}
-        open fun oppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {}
-        open fun mykOppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) = oppholdsdag(avgrenser, dagen)
-        open fun entering(avgrenser: MaksimumSykepengedagerfilter) {}
-        open fun leaving(avgrenser: MaksimumSykepengedagerfilter) {}
+    private interface State {
+        fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {}
+        fun oppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {}
+        fun sykdomshelg(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {}
+        fun entering(avgrenser: MaksimumSykepengedagerfilter) {}
+        fun leaving(avgrenser: MaksimumSykepengedagerfilter) {}
 
-        object Initiell : State() {
+        object Initiell : State {
             override fun entering(avgrenser: MaksimumSykepengedagerfilter) {
                 avgrenser.opphold = 0
             }
@@ -226,7 +225,7 @@ internal class MaksimumSykepengedagerfilter(
             }
         }
 
-        object Syk : State() {
+        object Syk : State {
             override fun entering(avgrenser: MaksimumSykepengedagerfilter) {
                 avgrenser.opphold = 0
             }
@@ -237,16 +236,12 @@ internal class MaksimumSykepengedagerfilter(
                 avgrenser.nextState(dagen)?.run { avgrenser.state(this) }
             }
 
-            override fun mykOppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
-                /* navhelg skal ikke forskyve 3årsvinduet */
-            }
-
             override fun oppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
                 avgrenser.state(Opphold)
             }
         }
 
-        object Opphold : State() {
+        object Opphold : State {
 
             override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
                 avgrenser.teller.inkrementer(dagen)
@@ -255,7 +250,7 @@ internal class MaksimumSykepengedagerfilter(
                 avgrenser.state(avgrenser.nextState(dagen) ?: Syk)
             }
 
-            override fun mykOppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
+            override fun sykdomshelg(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
                 avgrenser.opphold += 1
                 oppholdsdag(avgrenser, dagen)
             }
@@ -265,7 +260,7 @@ internal class MaksimumSykepengedagerfilter(
             }
         }
 
-        object Karantene : State() {
+        object Karantene : State {
             override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
                 avgrenser.opphold += 1
                 avgrenser.avvisteDatoerMedBegrunnelse[dagen] = avgrenser.teller.begrunnelse(dagen)
@@ -276,7 +271,7 @@ internal class MaksimumSykepengedagerfilter(
                 )
             }
 
-            override fun mykOppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
+            override fun sykdomshelg(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
                 avgrenser.opphold += 1
                 /* helg skal ikke medføre ny rettighet */
             }
