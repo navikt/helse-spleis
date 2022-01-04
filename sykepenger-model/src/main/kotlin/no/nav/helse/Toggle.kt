@@ -127,7 +127,7 @@ abstract class Toggle internal constructor(enabled: Boolean = false, private val
     }
 
     object OverlappendeSykmelding : Toggle(true)
-    object SendFeriepengeOppdrag : Toggle(false)
+    object SendFeriepengeOppdrag : Toggle(true)
     object DatoRangeJson : Toggle(true)
     object FlereArbeidsgivereFraInfotrygd : Toggle(false)
     object Etterlevelse : Toggle()
