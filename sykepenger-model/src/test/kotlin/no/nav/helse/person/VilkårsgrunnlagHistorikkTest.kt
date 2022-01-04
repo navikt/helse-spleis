@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.*
 
 internal class VilkårsgrunnlagHistorikkTest {
@@ -43,7 +44,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold
         )
-        vilkårsgrunnlag.valider(sykepengegrunnlag(10000.månedlig), 10000.månedlig, 1.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
+        vilkårsgrunnlag.valider(sykepengegrunnlag(10000.månedlig), sammenligningsgrunnlag(10000.månedlig, 1.januar), 1.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
         historikk.lagre(1.januar, vilkårsgrunnlag)
         assertNotNull(historikk.vilkårsgrunnlagFor(1.januar))
         val grunnlagsdataInspektør = GrunnlagsdataInspektør(historikk.vilkårsgrunnlagFor(1.januar)!!)
@@ -78,8 +79,8 @@ internal class VilkårsgrunnlagHistorikkTest {
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold
         )
-        vilkårsgrunnlag1.valider(sykepengegrunnlag(10000.månedlig), 10000.månedlig, 1.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
-        vilkårsgrunnlag2.valider(sykepengegrunnlag(10000.månedlig), 10000.månedlig, 1.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
+        vilkårsgrunnlag1.valider(sykepengegrunnlag(10000.månedlig), sammenligningsgrunnlag(10000.månedlig, 1.januar), 1.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
+        vilkårsgrunnlag2.valider(sykepengegrunnlag(10000.månedlig), sammenligningsgrunnlag(10000.månedlig, 1.januar), 1.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
 
         historikk.lagre(1.januar, vilkårsgrunnlag1)
         assertNotNull(historikk.vilkårsgrunnlagFor(1.januar))
@@ -109,7 +110,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold
         )
-        vilkårsgrunnlag.valider(sykepengegrunnlag(10000.månedlig), 10000.månedlig, 1.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
+        vilkårsgrunnlag.valider(sykepengegrunnlag(10000.månedlig), sammenligningsgrunnlag(10000.månedlig, 1.januar), 1.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
         historikk.lagre(1.januar, vilkårsgrunnlag)
         historikk.lagre(4.januar, vilkårsgrunnlag)
         assertEquals(1, inspektør.vilkårsgrunnlagTeller[1])
@@ -145,7 +146,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 )
             )
         }
-        vilkårsgrunnlag.valider(sykepengegrunnlag(10000.månedlig), 10000.månedlig, 1.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
+        vilkårsgrunnlag.valider(sykepengegrunnlag(10000.månedlig), sammenligningsgrunnlag(10000.månedlig, 1.januar), 1.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
 
         historikk.lagre(1.januar, vilkårsgrunnlag)
         infotrygdhistorikk.lagreVilkårsgrunnlag(4.januar, historikk, sykepengegrunnlagFor(INGEN))
@@ -168,7 +169,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold
         )
-        vilkårsgrunnlag.valider(sykepengegrunnlag(10000.månedlig), 10000.månedlig, 1.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
+        vilkårsgrunnlag.valider(sykepengegrunnlag(10000.månedlig), sammenligningsgrunnlag(10000.månedlig, 1.januar), 1.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
         vilkårsgrunnlagHistorikk.lagre(1.januar, vilkårsgrunnlag)
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
         val grunnlagsdataInspektør = GrunnlagsdataInspektør(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!)
@@ -190,7 +191,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold
         )
-        vilkårsgrunnlag.valider(sykepengegrunnlag(10000.månedlig), 10000.månedlig, 1.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
+        vilkårsgrunnlag.valider(sykepengegrunnlag(10000.månedlig), sammenligningsgrunnlag(10000.månedlig, 1.januar), 1.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
         vilkårsgrunnlagHistorikk.lagre(1.januar, vilkårsgrunnlag)
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
         val grunnlagsdataInspektør = GrunnlagsdataInspektør(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!)
@@ -292,7 +293,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold
         )
-        vilkårsgrunnlag1.valider(sykepengegrunnlag(10000.månedlig), 10000.månedlig, 1.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
+        vilkårsgrunnlag1.valider(sykepengegrunnlag(10000.månedlig), sammenligningsgrunnlag(10000.månedlig, 1.januar), 1.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
         val vilkårsgrunnlag2 = Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = UUID.randomUUID().toString(),
@@ -305,7 +306,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold
         )
-        vilkårsgrunnlag2.valider(sykepengegrunnlag(10000.månedlig), 10000.månedlig, 1.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
+        vilkårsgrunnlag2.valider(sykepengegrunnlag(10000.månedlig), sammenligningsgrunnlag(10000.månedlig, 1.januar), 1.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
         vilkårsgrunnlagHistorikk.lagre(10.januar, vilkårsgrunnlag1)
         vilkårsgrunnlagHistorikk.lagre(1.januar, vilkårsgrunnlag2)
         val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 10.NAV)
@@ -328,7 +329,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold
         )
-        vilkårsgrunnlag1.valider(sykepengegrunnlag(10000.månedlig), 10000.månedlig, 1.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
+        vilkårsgrunnlag1.valider(sykepengegrunnlag(10000.månedlig), sammenligningsgrunnlag(10000.månedlig, 1.januar), 1.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
         val vilkårsgrunnlag2 = Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = UUID.randomUUID().toString(),
@@ -341,7 +342,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold
         )
-        vilkårsgrunnlag2.valider(sykepengegrunnlag(10000.månedlig), 10000.månedlig, 1.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
+        vilkårsgrunnlag2.valider(sykepengegrunnlag(10000.månedlig), sammenligningsgrunnlag(10000.månedlig, 1.januar), 1.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
         vilkårsgrunnlagHistorikk.lagre(10.januar, vilkårsgrunnlag1)
         vilkårsgrunnlagHistorikk.lagre(1.januar, VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(1.januar, sykepengegrunnlag(10000.månedlig)))
         val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 10.NAV)
@@ -364,7 +365,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold
         )
-        vilkårsgrunnlag.valider(sykepengegrunnlag(10.månedlig), 10.månedlig, 1.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
+        vilkårsgrunnlag.valider(sykepengegrunnlag(10.månedlig), sammenligningsgrunnlag(10.månedlig, 1.januar), 1.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
         vilkårsgrunnlagHistorikk.lagre(1.januar, vilkårsgrunnlag)
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
         val grunnlagsdataInspektør = GrunnlagsdataInspektør(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!)
@@ -396,7 +397,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold
         )
-        vilkårsgrunnlag.valider(sykepengegrunnlag(10.månedlig), 10.månedlig, 1.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
+        vilkårsgrunnlag.valider(sykepengegrunnlag(10.månedlig), sammenligningsgrunnlag(10.månedlig, 1.januar), 1.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
         vilkårsgrunnlagHistorikk.lagre(1.januar, vilkårsgrunnlag)
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
         val grunnlagsdataInspektør = GrunnlagsdataInspektør(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!)
@@ -422,6 +423,23 @@ internal class VilkårsgrunnlagHistorikkTest {
             grunnlagForSykepengegrunnlag = inntekt,
             begrensning = ER_IKKE_6G_BEGRENSET
         )
+
+    private fun sammenligningsgrunnlag(inntekt: Inntekt, skjæringstidspunkt: LocalDate) = Sammenligningsgrunnlag(
+        arbeidsgiverInntektsopplysninger = listOf(
+            ArbeidsgiverInntektsopplysning("ORGNR1",
+                Inntektshistorikk.SkattComposite(UUID.randomUUID(), (0 until 12).map {
+                    Inntektshistorikk.Skatt.Sammenligningsgrunnlag(
+                        dato = skjæringstidspunkt,
+                        hendelseId = UUID.randomUUID(),
+                        beløp = inntekt,
+                        måned = YearMonth.from(skjæringstidspunkt).minusMonths(12L - it),
+                        type = Inntektshistorikk.Skatt.Inntekttype.LØNNSINNTEKT,
+                        fordel = "fordel",
+                        beskrivelse = "beskrivelse"
+                    )
+                })
+            )),
+    )
 
     private fun sykepengegrunnlagFor(inntekt: Inntekt): (LocalDate) -> Sykepengegrunnlag = {
         Sykepengegrunnlag(

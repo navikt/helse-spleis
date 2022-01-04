@@ -498,8 +498,8 @@ class Person private constructor(
     ) =
         Sykepengegrunnlag(arbeidsgivere.beregnSykepengegrunnlag(skjæringstidspunkt, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden), hendelse)
 
-    internal fun sammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =
-        arbeidsgivere.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt)
+    internal fun beregnSammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =
+        Sammenligningsgrunnlag(arbeidsgivere.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt))
 
     private fun finnArbeidsgiverForInntekter(arbeidsgiver: String, aktivitetslogg: IAktivitetslogg): Arbeidsgiver {
         return arbeidsgivere.finnEllerOpprett(arbeidsgiver) {
@@ -652,11 +652,16 @@ class Person private constructor(
     internal fun vilkårsprøvEtterNyInntekt(hendelse: OverstyrInntekt) {
         val skjæringstidspunkt = hendelse.skjæringstidspunkt
         val sykepengegrunnlag = beregnSykepengegrunnlag(skjæringstidspunkt, hendelse)
-        val sammenligningsgrunnlag = sammenligningsgrunnlag(skjæringstidspunkt)
+        val sammenligningsgrunnlag = beregnSammenligningsgrunnlag(skjæringstidspunkt)
             ?: hendelse.severe("Fant ikke sammenligningsgrunnlag for skjæringstidspunkt: ${skjæringstidspunkt}. Kan ikke revurdere inntekt.")
-        val avviksprosent = sykepengegrunnlag.avviksprosent(sammenligningsgrunnlag)
+        val avviksprosent = sykepengegrunnlag.avviksprosent(sammenligningsgrunnlag.sammenligningsgrunnlag)
 
-        val harAkseptabeltAvvik = Inntektsvurdering.validerAvvik(hendelse, avviksprosent, sykepengegrunnlag.grunnlagForSykepengegrunnlag, sammenligningsgrunnlag) { _, maksimaltTillattAvvik ->
+        val harAkseptabeltAvvik = Inntektsvurdering.validerAvvik(
+            hendelse,
+            avviksprosent,
+            sykepengegrunnlag.grunnlagForSykepengegrunnlag,
+            sammenligningsgrunnlag.sammenligningsgrunnlag
+        ) { _, maksimaltTillattAvvik ->
             warn("Har mer enn %.0f %% avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.", maksimaltTillattAvvik)
         }
 

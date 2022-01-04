@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 import java.util.*
 
@@ -199,7 +200,7 @@ internal class HistoriePeriodetypeTest {
         vilkårsgrunnlagHistorikk.lagre(1.januar, VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = 1.januar,
             sykepengegrunnlag = sykepengegrunnlag(30000.månedlig),
-            sammenligningsgrunnlag = 30000.månedlig,
+            sammenligningsgrunnlag = sammenligningsgrunnlag(30000.månedlig),
             avviksprosent = Prosent.prosent(0.0),
             antallOpptjeningsdagerErMinst = 28,
             harOpptjening = true,
@@ -262,5 +263,22 @@ internal class HistoriePeriodetypeTest {
         sykepengegrunnlag = inntekt,
         grunnlagForSykepengegrunnlag = inntekt,
         begrensning = ER_IKKE_6G_BEGRENSET
+    )
+
+    private fun sammenligningsgrunnlag(inntekt: Inntekt) = Sammenligningsgrunnlag(
+        arbeidsgiverInntektsopplysninger = listOf(
+            ArbeidsgiverInntektsopplysning("orgnummer",
+                Inntektshistorikk.SkattComposite(UUID.randomUUID(), (0 until 12).map {
+                    Inntektshistorikk.Skatt.Sammenligningsgrunnlag(
+                        dato = LocalDate.now(),
+                        hendelseId = UUID.randomUUID(),
+                        beløp = inntekt,
+                        måned = YearMonth.of(2017, it + 1),
+                        type = Inntektshistorikk.Skatt.Inntekttype.LØNNSINNTEKT,
+                        fordel = "fordel",
+                        beskrivelse = "beskrivelse"
+                    )
+                })
+            )),
     )
 }

@@ -19,6 +19,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.*
 
 internal class VilkårsgrunnlagTest {
@@ -123,7 +124,13 @@ internal class VilkårsgrunnlagTest {
             Arbeidsforhold("ORGNR1", 1.januar, 14.januar),
             Arbeidsforhold("ORGNR2", 15.januar, null)
         ))
-        vilkårsgrunnlag.valider(sykepengegrunnlag(), INNTEKT, 31.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
+        vilkårsgrunnlag.valider(
+            grunnlagForSykepengegrunnlag = sykepengegrunnlag(),
+            sammenligningsgrunnlag = sammenligningsgrunnlag(skjæringstidspunkt = 31.januar),
+            skjæringstidspunkt = 31.januar,
+            antallArbeidsgivereFraAareg = 1,
+            periodetype = Periodetype.FØRSTEGANGSBEHANDLING
+        )
 
         assertFalse(vilkårsgrunnlag.hasWarningsOrWorse())
     }
@@ -299,5 +306,22 @@ internal class VilkårsgrunnlagTest {
         sykepengegrunnlag = inntekt,
         grunnlagForSykepengegrunnlag = inntekt,
         begrensning = ER_IKKE_6G_BEGRENSET
+    )
+
+    private fun sammenligningsgrunnlag(inntekt: Inntekt = INNTEKT, skjæringstidspunkt: LocalDate) = Sammenligningsgrunnlag(
+        arbeidsgiverInntektsopplysninger = listOf(
+            ArbeidsgiverInntektsopplysning("ORGNR1",
+                Inntektshistorikk.SkattComposite(UUID.randomUUID(), (0 until 12).map {
+                    Inntektshistorikk.Skatt.Sammenligningsgrunnlag(
+                        dato = skjæringstidspunkt,
+                        hendelseId = UUID.randomUUID(),
+                        beløp = inntekt,
+                        måned = YearMonth.from(skjæringstidspunkt).minusMonths(12L - it),
+                        type = Inntektshistorikk.Skatt.Inntekttype.LØNNSINNTEKT,
+                        fordel = "fordel",
+                        beskrivelse = "beskrivelse"
+                    )
+                })
+            )),
     )
 }

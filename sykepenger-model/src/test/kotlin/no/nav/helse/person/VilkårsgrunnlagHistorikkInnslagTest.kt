@@ -79,7 +79,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
         VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = skjæringstidspunkt,
             sykepengegrunnlag = Sykepengegrunnlag(emptyList(), skjæringstidspunkt, Aktivitetslogg()),
-            sammenligningsgrunnlag = Inntekt.INGEN,
+            sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
             avviksprosent = 0.0.prosent,
             antallOpptjeningsdagerErMinst = 28,
             harOpptjening = harOpptjening,
@@ -101,6 +101,8 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
             override fun grunnlagForSykepengegrunnlag() = Inntekt.INGEN
 
             override fun sammenligningsgrunnlag() = Inntekt.INGEN
+
+            override fun sammenligningsgrunnlagPerArbeidsgiver(): Map<String, Inntektshistorikk.Inntektsopplysning> = emptyMap()
 
             override fun inntektsopplysningPerArbeidsgiver(): Map<String, Inntektshistorikk.Inntektsopplysning> = emptyMap()
 

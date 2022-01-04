@@ -3,7 +3,6 @@ package no.nav.helse.hendelser
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Arbeidsforhold.Companion.grupperArbeidsforholdPerOrgnummer
 import no.nav.helse.person.*
-import no.nav.helse.økonomi.Inntekt
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.*
@@ -33,7 +32,7 @@ class Vilkårsgrunnlag(
 
     internal fun valider(
         grunnlagForSykepengegrunnlag: Sykepengegrunnlag,
-        sammenligningsgrunnlag: Inntekt,
+        sammenligningsgrunnlag: Sammenligningsgrunnlag,
         skjæringstidspunkt: LocalDate,
         antallArbeidsgivereFraAareg: Int,
         periodetype: Periodetype
@@ -47,7 +46,7 @@ class Vilkårsgrunnlag(
         val inntektsvurderingOk = inntektsvurdering.valider(
             this,
             grunnlagForSykepengegrunnlag,
-            sammenligningsgrunnlag,
+            sammenligningsgrunnlag.sammenligningsgrunnlag,
             antallArbeidsgivereFraAareg
         )
         val opptjeningvurderingOk = opptjeningvurdering.valider(this, skjæringstidspunkt)

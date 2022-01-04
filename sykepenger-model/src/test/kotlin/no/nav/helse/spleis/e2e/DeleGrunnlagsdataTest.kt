@@ -5,24 +5,24 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.inspectors.GrunnlagsdataInspektør
 import no.nav.helse.inspectors.PersonInspektør
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.person.ArbeidsgiverInntektsopplysning
+import no.nav.helse.person.*
 import no.nav.helse.person.ForlengelseFraInfotrygd.JA
 import no.nav.helse.person.ForlengelseFraInfotrygd.NEI
-import no.nav.helse.person.Inntektshistorikk
-import no.nav.helse.person.Sykepengegrunnlag
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.TilstandType.*
-import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.YearMonth
 import java.util.*
 
 internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
@@ -313,7 +313,23 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
                     Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), inntekt)
                 )
             )),
-            sammenligningsgrunnlag = inntekt,
+            sammenligningsgrunnlag = Sammenligningsgrunnlag(
+                arbeidsgiverInntektsopplysninger = listOf(
+                    ArbeidsgiverInntektsopplysning("orgnummer",
+                        Inntektshistorikk.SkattComposite(UUID.randomUUID(), (0 until 12).map {
+                            Inntektshistorikk.Skatt.Sammenligningsgrunnlag(
+                                dato = LocalDate.now(),
+                                hendelseId = UUID.randomUUID(),
+                                beløp = inntekt,
+                                måned = YearMonth.of(2017, it + 1),
+                                type = Inntektshistorikk.Skatt.Inntekttype.LØNNSINNTEKT,
+                                fordel = "fordel",
+                                beskrivelse = "beskrivelse"
+                            )
+                        })
+                    )
+                ),
+            ),
             avviksprosent = Prosent.prosent(0.0),
             antallOpptjeningsdagerErMinst = 29,
             harOpptjening = true,
@@ -374,7 +390,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
                     )
                 )
             ),
-            sammenligningsgrunnlag = inntekt,
+            sammenligningsgrunnlag = sammenligningsgrunnlag(inntekt),
             avviksprosent = Prosent.prosent(0.0),
             antallOpptjeningsdagerErMinst = 29,
             harOpptjening = true,
@@ -445,7 +461,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
                     )
                 )
             ),
-            sammenligningsgrunnlag = inntekt,
+            sammenligningsgrunnlag = sammenligningsgrunnlag(inntekt),
             avviksprosent = Prosent.prosent(0.0),
             antallOpptjeningsdagerErMinst = 29,
             harOpptjening = true,
@@ -520,5 +536,22 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         sykepengegrunnlag = inntekt,
         grunnlagForSykepengegrunnlag = inntekt,
         begrensning = ER_IKKE_6G_BEGRENSET
+    )
+
+    private fun sammenligningsgrunnlag(inntekt: Inntekt) = Sammenligningsgrunnlag(
+        arbeidsgiverInntektsopplysninger = listOf(
+            ArbeidsgiverInntektsopplysning("orgnummer",
+                Inntektshistorikk.SkattComposite(UUID.randomUUID(), (0 until 12).map {
+                    Inntektshistorikk.Skatt.Sammenligningsgrunnlag(
+                        dato = LocalDate.now(),
+                        hendelseId = UUID.randomUUID(),
+                        beløp = inntekt,
+                        måned = YearMonth.of(2017, it + 1),
+                        type = Inntektshistorikk.Skatt.Inntekttype.LØNNSINNTEKT,
+                        fordel = "fordel",
+                        beskrivelse = "beskrivelse"
+                    )
+                })
+            )),
     )
 }

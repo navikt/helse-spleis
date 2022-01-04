@@ -124,7 +124,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
                 arbeidsforhold = arbeidsforhold
             )
         )
-        assertEquals(300000.årlig, person.sammenligningsgrunnlag(1.januar))
+        assertEquals(300000.årlig, person.beregnSammenligningsgrunnlag(1.januar).sammenligningsgrunnlag)
     }
 
     @Test
@@ -238,7 +238,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         ).håndter(Person::håndter)
 
         assertEquals(552000.årlig, person.vilkårsgrunnlagFor(1.januar)?.sykepengegrunnlag())
-        assertEquals(528000.årlig, person.sammenligningsgrunnlag(1.januar))
+        assertEquals(528000.årlig, person.beregnSammenligningsgrunnlag(1.januar).sammenligningsgrunnlag)
 
     }
 
@@ -273,7 +273,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         ).håndter(Person::håndter)
 
         assertEquals(552000.årlig, person.vilkårsgrunnlagFor(1.januar)?.sykepengegrunnlag())
-        assertEquals(528000.årlig, person.sammenligningsgrunnlag(1.januar))
+        assertEquals(528000.årlig, person.beregnSammenligningsgrunnlag(1.januar))
     }
 
     @Test

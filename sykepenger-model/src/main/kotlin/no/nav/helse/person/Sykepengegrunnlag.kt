@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-10 ledd 2 punktum 1`
-import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.inntekt
+import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.sykepengegrunnlag
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.inntektsopplysningPerArbeidsgiver
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.*
 import no.nav.helse.økonomi.Inntekt
@@ -47,7 +47,7 @@ internal class Sykepengegrunnlag(
         arbeidsgiverInntektsopplysninger,
         skjæringstidspunkt,
         aktivitetslogg,
-        arbeidsgiverInntektsopplysninger.inntekt(aktivitetslogg)
+        arbeidsgiverInntektsopplysninger.sykepengegrunnlag(aktivitetslogg)
     )
 
     constructor(
@@ -55,7 +55,7 @@ internal class Sykepengegrunnlag(
         aktivitetslogg: IAktivitetslogg
     ) : this(
         arbeidsgiverInntektsopplysninger,
-        arbeidsgiverInntektsopplysninger.inntekt(aktivitetslogg)
+        arbeidsgiverInntektsopplysninger.sykepengegrunnlag(aktivitetslogg)
     )
 
     private constructor(

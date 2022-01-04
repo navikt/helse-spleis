@@ -2,12 +2,15 @@ package no.nav.helse.person
 
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Prosent.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.YearMonth
 import java.util.*
 
 internal class VilkårsgrunnlagElementTest {
@@ -46,7 +49,7 @@ internal class VilkårsgrunnlagElementTest {
         return VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = 1.januar,
             sykepengegrunnlag = Sykepengegrunnlag(1000.daglig, emptyList(), 1000.daglig, Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET),
-            sammenligningsgrunnlag = 1000.daglig,
+            sammenligningsgrunnlag = sammenligningsgrunnlag(1000.daglig),
             avviksprosent = avviksprosent,
             antallOpptjeningsdagerErMinst = 0,
             harOpptjening = true,
@@ -60,4 +63,21 @@ internal class VilkårsgrunnlagElementTest {
 
     private fun infotrygdgrunnlag() =
         VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(1.januar, Sykepengegrunnlag(1000.daglig, emptyList(), 1000.daglig, Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET))
+
+    private fun sammenligningsgrunnlag(inntekt: Inntekt) = Sammenligningsgrunnlag(
+        arbeidsgiverInntektsopplysninger = listOf(
+            ArbeidsgiverInntektsopplysning("orgnummer",
+                Inntektshistorikk.SkattComposite(UUID.randomUUID(), (0 until 12).map {
+                    Inntektshistorikk.Skatt.Sammenligningsgrunnlag(
+                        dato = LocalDate.now(),
+                        hendelseId = UUID.randomUUID(),
+                        beløp = inntekt,
+                        måned = YearMonth.of(2017, it + 1),
+                        type = Inntektshistorikk.Skatt.Inntekttype.LØNNSINNTEKT,
+                        fordel = "fordel",
+                        beskrivelse = "beskrivelse"
+                    )
+                })
+            )),
+    )
 }

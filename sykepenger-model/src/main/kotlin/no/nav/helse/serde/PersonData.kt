@@ -225,7 +225,7 @@ internal data class PersonData(
             GrunnlagsdataType.Vilkårsprøving -> VilkårsgrunnlagHistorikk.Grunnlagsdata(
                 skjæringstidspunkt = skjæringstidspunkt,
                 sykepengegrunnlag = sykepengegrunnlag.parseSykepengegrunnlag(),
-                sammenligningsgrunnlag = sammenligningsgrunnlag!!.årlig,
+                sammenligningsgrunnlag = TODO(),
                 avviksprosent = avviksprosent?.ratio,
                 harOpptjening = harOpptjening!!,
                 antallOpptjeningsdagerErMinst = antallOpptjeningsdagerErMinst!!,

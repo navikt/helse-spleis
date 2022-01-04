@@ -101,6 +101,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         fun accept(skjæringstidspunkt: LocalDate, vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor)
         fun sykepengegrunnlag(): Inntekt
         fun sammenligningsgrunnlag(): Inntekt?
+        fun sammenligningsgrunnlagPerArbeidsgiver(): Map<String, Inntektshistorikk.Inntektsopplysning>
         fun grunnlagsBegrensning(): Sykepengegrunnlag.Begrensning
         fun grunnlagForSykepengegrunnlag(): Inntekt
         fun inntektsopplysningPerArbeidsgiver(): Map<String, Inntektshistorikk.Inntektsopplysning>
@@ -113,7 +114,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
     internal class Grunnlagsdata(
         private val skjæringstidspunkt: LocalDate,
         private val sykepengegrunnlag: Sykepengegrunnlag,
-        private val sammenligningsgrunnlag: Inntekt,
+        private val sammenligningsgrunnlag: Sammenligningsgrunnlag,
         private val avviksprosent: Prosent?,
         private val antallOpptjeningsdagerErMinst: Int,
         private val harOpptjening: Boolean,
@@ -147,7 +148,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 skjæringstidspunkt,
                 this,
                 sykepengegrunnlag,
-                sammenligningsgrunnlag,
+                sammenligningsgrunnlag.sammenligningsgrunnlag,
                 avviksprosent,
                 antallOpptjeningsdagerErMinst,
                 harOpptjening,
@@ -162,7 +163,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 skjæringstidspunkt,
                 this,
                 sykepengegrunnlag,
-                sammenligningsgrunnlag,
+                sammenligningsgrunnlag.sammenligningsgrunnlag,
                 avviksprosent,
                 antallOpptjeningsdagerErMinst,
                 harOpptjening,
@@ -177,7 +178,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         override fun sykepengegrunnlag() = sykepengegrunnlag.sykepengegrunnlag
         override fun grunnlagsBegrensning() = sykepengegrunnlag.begrensning
         override fun grunnlagForSykepengegrunnlag() = sykepengegrunnlag.grunnlagForSykepengegrunnlag
-        override fun sammenligningsgrunnlag() = sammenligningsgrunnlag
+        override fun sammenligningsgrunnlag() = sammenligningsgrunnlag.sammenligningsgrunnlag
+        override fun sammenligningsgrunnlagPerArbeidsgiver() = sammenligningsgrunnlag.inntektsopplysningPerArbeidsgiver()
 
         override fun inntektsopplysningPerArbeidsgiver() = sykepengegrunnlag.inntektsopplysningPerArbeidsgiver()
         override fun gjelderFlereArbeidsgivere() = inntektsopplysningPerArbeidsgiver().size > 1
@@ -218,7 +220,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         internal fun kopierGrunnlagsdataMed(
             sykepengegrunnlag: Sykepengegrunnlag,
-            sammenligningsgrunnlag: Inntekt,
+            sammenligningsgrunnlag: Sammenligningsgrunnlag,
             sammenligningsgrunnlagVurdering: Boolean,
             avviksprosent: Prosent,
             minimumInntektVurdering: Boolean,
@@ -259,6 +261,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         override fun sykepengegrunnlag() = sykepengegrunnlag.sykepengegrunnlag
         override fun grunnlagsBegrensning() = sykepengegrunnlag.begrensning
         override fun sammenligningsgrunnlag() = null
+        override fun sammenligningsgrunnlagPerArbeidsgiver() = emptyMap<String, Inntektshistorikk.Inntektsopplysning>()
 
         override fun grunnlagForSykepengegrunnlag() = sykepengegrunnlag.grunnlagForSykepengegrunnlag
 

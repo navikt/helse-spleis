@@ -1,21 +1,23 @@
 package no.nav.helse.person.builders
 
 import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.hendelser.VilkårsgrunnlagTest
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.Sykepengegrunnlag
-import no.nav.helse.person.VilkårsgrunnlagHistorikk
+import no.nav.helse.person.*
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Oppdrag
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.*
 
 internal class UtbetaltEventBuilderTest {
@@ -29,7 +31,23 @@ internal class UtbetaltEventBuilderTest {
         val vilkårsgrunnlag = VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = 1.januar,
             sykepengegrunnlag = Sykepengegrunnlag(sykepengegrunnlag, emptyList(), grunnlagForSykepengegrunnlag, Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET),
-            sammenligningsgrunnlag = 26000.månedlig,
+            sammenligningsgrunnlag = Sammenligningsgrunnlag(
+                arbeidsgiverInntektsopplysninger = listOf(
+                    ArbeidsgiverInntektsopplysning("orgnummer",
+                        Inntektshistorikk.SkattComposite(UUID.randomUUID(), (0 until 12).map {
+                            Inntektshistorikk.Skatt.Sammenligningsgrunnlag(
+                                dato = LocalDate.now(),
+                                hendelseId = UUID.randomUUID(),
+                                beløp = 26000.månedlig,
+                                måned = YearMonth.of(2017, it + 1),
+                                type = Inntektshistorikk.Skatt.Inntekttype.LØNNSINNTEKT,
+                                fordel = "fordel",
+                                beskrivelse = "beskrivelse"
+                            )
+                        })
+                    )
+                ),
+            ),
             avviksprosent = null,
             antallOpptjeningsdagerErMinst = 30,
             harOpptjening = true,

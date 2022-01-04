@@ -13,6 +13,7 @@ import no.nav.helse.somFødselsnummer
 import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.TestEvent.Companion.inntektsmelding
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -22,6 +23,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.*
 
 internal class ArbeidsgiverUtbetalingerTest {
@@ -58,7 +60,7 @@ internal class ArbeidsgiverUtbetalingerTest {
         val vilkårsgrunnlagElement = VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = 1.januar,
             sykepengegrunnlag = sykepengegrunnlag(1000.månedlig),
-            sammenligningsgrunnlag = 1000.månedlig,
+            sammenligningsgrunnlag = sammenligningsgrunnlag(1000.månedlig),
             avviksprosent = Prosent.prosent(0.0),
             antallOpptjeningsdagerErMinst = 28,
             harOpptjening = true,
@@ -285,7 +287,7 @@ internal class ArbeidsgiverUtbetalingerTest {
             1.januar, vilkårsgrunnlagElement ?: VilkårsgrunnlagHistorikk.Grunnlagsdata(
                 skjæringstidspunkt = 1.januar,
                 sykepengegrunnlag = sykepengegrunnlag(30000.månedlig),
-                sammenligningsgrunnlag = 30000.månedlig,
+                sammenligningsgrunnlag = sammenligningsgrunnlag(30000.månedlig),
                 avviksprosent = Prosent.prosent(0.0),
                 antallOpptjeningsdagerErMinst = 28,
                 harOpptjening = true,
@@ -359,6 +361,23 @@ internal class ArbeidsgiverUtbetalingerTest {
         sykepengegrunnlag = inntekt,
         grunnlagForSykepengegrunnlag = inntekt,
         begrensning = ER_IKKE_6G_BEGRENSET
+    )
+
+    private fun sammenligningsgrunnlag(inntekt: Inntekt) = Sammenligningsgrunnlag(
+        arbeidsgiverInntektsopplysninger = listOf(
+            ArbeidsgiverInntektsopplysning("orgnummer",
+                Inntektshistorikk.SkattComposite(UUID.randomUUID(), (0 until 12).map {
+                    Inntektshistorikk.Skatt.Sammenligningsgrunnlag(
+                        dato = LocalDate.now(),
+                        hendelseId = UUID.randomUUID(),
+                        beløp = inntekt,
+                        måned = YearMonth.of(2017, it + 1),
+                        type = Inntektshistorikk.Skatt.Inntekttype.LØNNSINNTEKT,
+                        fordel = "fordel",
+                        beskrivelse = "beskrivelse"
+                    )
+                })
+            )),
     )
 
 }
