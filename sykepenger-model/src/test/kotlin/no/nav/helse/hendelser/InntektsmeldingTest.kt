@@ -1,6 +1,7 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon
+import no.nav.helse.hentErrors
 import no.nav.helse.hentInfo
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntektshistorikk
@@ -230,7 +231,7 @@ internal class InntektsmeldingTest {
             listOf(Periode(1.januar, 10.januar)),
             begrunnelseForReduksjonEllerIkkeUtbetalt = "begrunnelse"
         )
-        assertTrue(inntektsmelding.valider(Periode(1.januar, 31.januar)).hasWarningsOrWorse())
+        assertTrue(inntektsmelding.valider(Periode(1.januar, 31.januar)).hentErrors().contains("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: begrunnelse"))
     }
 
     @Test
@@ -239,7 +240,7 @@ internal class InntektsmeldingTest {
             listOf(Periode(1.januar, 10.januar)),
             begrunnelseForReduksjonEllerIkkeUtbetalt = ""
         )
-        assertFalse(inntektsmelding.valider(Periode(1.januar, 31.januar)).hasWarningsOrWorse())
+        assertFalse(inntektsmelding.valider(Periode(1.januar, 31.januar)).hasErrorsOrWorse())
     }
 
     @Test

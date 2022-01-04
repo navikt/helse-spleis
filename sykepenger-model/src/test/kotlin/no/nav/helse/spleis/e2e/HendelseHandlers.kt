@@ -334,6 +334,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
     harOpphørAvNaturalytelser: Boolean = false,
     arbeidsforholdId: String? = null,
     fnr: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018,
+    begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
 ): UUID {
     inntektsmelding(
         id,
@@ -344,7 +345,8 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
         orgnummer = orgnummer,
         harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
         arbeidsforholdId = arbeidsforholdId,
-        fnr = fnr
+        fnr = fnr,
+        begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt
     ).håndter(Person::håndter)
     return id
 }

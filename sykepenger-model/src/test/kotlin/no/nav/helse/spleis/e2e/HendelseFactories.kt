@@ -154,7 +154,8 @@ internal fun AbstractEndToEndTest.inntektsmelding(
     orgnummer: Organisasjonsnummer = AbstractPersonTest.ORGNUMMER,
     harOpphørAvNaturalytelser: Boolean = false,
     arbeidsforholdId: String? = null,
-    fnr: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018
+    fnr: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018,
+    begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null
 ): Inntektsmelding {
     val inntektsmeldinggenerator = {
         Inntektsmelding(
@@ -167,7 +168,7 @@ internal fun AbstractEndToEndTest.inntektsmelding(
             beregnetInntekt = beregnetInntekt,
             arbeidsgiverperioder = arbeidsgiverperioder,
             arbeidsforholdId = arbeidsforholdId,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = null,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
             harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
             mottatt = LocalDateTime.now()
         )
