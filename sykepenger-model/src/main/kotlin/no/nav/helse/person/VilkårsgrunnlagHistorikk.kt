@@ -159,6 +159,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 vilkårsgrunnlagId
             )
             sykepengegrunnlag.accept(vilkårsgrunnlagHistorikkVisitor)
+            sammenligningsgrunnlag.accept(vilkårsgrunnlagHistorikkVisitor)
             vilkårsgrunnlagHistorikkVisitor.postVisitGrunnlagsdata(
                 skjæringstidspunkt,
                 this,

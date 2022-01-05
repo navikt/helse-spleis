@@ -15,7 +15,12 @@ internal class Sammenligningsgrunnlag(
     )
 
 
-    internal fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {
+    internal fun accept(visitor: VilkårsgrunnlagHistorikkVisitor) {
+        visitor.preVisitSammenligningsgrunnlag(this, sammenligningsgrunnlag)
+        visitor.preVisitArbeidsgiverInntektsopplysninger()
+        arbeidsgiverInntektsopplysninger.forEach { it.accept(visitor) }
+        visitor.postVisitArbeidsgiverInntektsopplysninger()
+        visitor.postVisitSammenligningsgrunnlag(this, sammenligningsgrunnlag)
     }
 
     internal fun inntektsopplysningPerArbeidsgiver(): Map<String, Inntektshistorikk.Inntektsopplysning> =

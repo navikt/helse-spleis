@@ -161,8 +161,18 @@ internal interface VilkårsgrunnlagHistorikkVisitor : InntekthistorikkVisitor {
         grunnlagForSykepengegrunnlag: Inntekt,
         begrensning: Sykepengegrunnlag.Begrensning
     ) {}
+    fun preVisitSammenligningsgrunnlag(
+        sammenligningsgrunnlag1: Sammenligningsgrunnlag,
+        sammenligningsgrunnlag: Inntekt
+    ) {}
+    fun postVisitSammenligningsgrunnlag(
+        sammenligningsgrunnlag1: Sammenligningsgrunnlag,
+        sammenligningsgrunnlag: Inntekt
+    ) {}
+    fun preVisitArbeidsgiverInntektsopplysninger() {}
     fun preVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {}
     fun postVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {}
+    fun postVisitArbeidsgiverInntektsopplysninger() {}
 }
 
 internal interface InntektsmeldingInfoVisitor {

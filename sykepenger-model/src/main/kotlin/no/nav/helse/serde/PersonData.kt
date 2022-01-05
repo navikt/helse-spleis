@@ -14,7 +14,7 @@ import no.nav.helse.serde.PersonData.ArbeidsgiverData.InntektsmeldingInfoHistori
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.RefusjonData.Companion.parseRefusjon
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.RefusjonData.EndringIRefusjonData.Companion.parseEndringerIRefusjon
 import no.nav.helse.serde.PersonData.InfotrygdhistorikkElementData.Companion.tilModellObjekt
-import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.SykepengegrunnlagData.ArbeidsgiverInntektsopplysningData.Companion.parseArbeidsgiverInntektsopplysninger
+import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.Companion.parseArbeidsgiverInntektsopplysninger
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagInnslagData.Companion.tilModellObjekt
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
 import no.nav.helse.serde.reflection.Inntektsopplysningskilde
@@ -211,7 +211,7 @@ internal data class PersonData(
         private val skjæringstidspunkt: LocalDate,
         private val type: GrunnlagsdataType,
         private val sykepengegrunnlag: SykepengegrunnlagData,
-        private val sammenligningsgrunnlag: Double?,
+        private val sammenligningsgrunnlag: SammenligningsgrunnlagData?,
         private val avviksprosent: Double?,
         private val harOpptjening: Boolean?,
         private val antallOpptjeningsdagerErMinst: Int?,
@@ -225,7 +225,7 @@ internal data class PersonData(
             GrunnlagsdataType.Vilkårsprøving -> VilkårsgrunnlagHistorikk.Grunnlagsdata(
                 skjæringstidspunkt = skjæringstidspunkt,
                 sykepengegrunnlag = sykepengegrunnlag.parseSykepengegrunnlag(),
-                sammenligningsgrunnlag = TODO(),
+                sammenligningsgrunnlag = sammenligningsgrunnlag!!.parseSammenligningsgrunnlag(),
                 avviksprosent = avviksprosent?.ratio,
                 harOpptjening = harOpptjening!!,
                 antallOpptjeningsdagerErMinst = antallOpptjeningsdagerErMinst!!,
@@ -251,7 +251,7 @@ internal data class PersonData(
             Vilkårsprøving
         }
 
-        class SykepengegrunnlagData(
+        data class SykepengegrunnlagData(
             private val sykepengegrunnlag: Double,
             private val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningData>,
             private val grunnlagForSykepengegrunnlag: Double,
@@ -264,22 +264,32 @@ internal data class PersonData(
                 grunnlagForSykepengegrunnlag.årlig,
                 begrensning
             )
+        }
 
-            class ArbeidsgiverInntektsopplysningData(
-                private val orgnummer: String,
-                private val inntektsopplysning: ArbeidsgiverData.InntektsopplysningData
-            ) {
-                companion object {
-                    internal fun List<ArbeidsgiverInntektsopplysningData>.parseArbeidsgiverInntektsopplysninger(): List<ArbeidsgiverInntektsopplysning> =
-                        map {
-                            ArbeidsgiverInntektsopplysning(
-                                it.orgnummer,
-                                ArbeidsgiverData.InntektsopplysningData.parseInntektsopplysningData(it.inntektsopplysning)
-                            )
-                        }
-                }
+        data class SammenligningsgrunnlagData(
+            private val sammenligningsgrunnlag: Double,
+            private val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningData>,
+        ) {
+
+            internal fun parseSammenligningsgrunnlag(): Sammenligningsgrunnlag = Sammenligningsgrunnlag(
+                sammenligningsgrunnlag.årlig,
+                arbeidsgiverInntektsopplysninger.parseArbeidsgiverInntektsopplysninger()
+            )
+        }
+
+        data class ArbeidsgiverInntektsopplysningData(
+            private val orgnummer: String,
+            private val inntektsopplysning: ArbeidsgiverData.InntektsopplysningData
+        ) {
+            companion object {
+                internal fun List<ArbeidsgiverInntektsopplysningData>.parseArbeidsgiverInntektsopplysninger(): List<ArbeidsgiverInntektsopplysning> =
+                    map {
+                        ArbeidsgiverInntektsopplysning(
+                            it.orgnummer,
+                            ArbeidsgiverData.InntektsopplysningData.parseInntektsopplysningData(it.inntektsopplysning)
+                        )
+                    }
             }
-
         }
     }
 
@@ -960,7 +970,7 @@ internal data class PersonData(
             }
         }
 
-        internal class RefusjonData(
+        data class RefusjonData(
             private val meldingsreferanseId: UUID,
             private val førsteFraværsdag: LocalDate?,
             private val arbeidsgiverperioder: List<Periode>,
@@ -987,7 +997,7 @@ internal data class PersonData(
                 }
             }
 
-            internal class EndringIRefusjonData(
+            data class EndringIRefusjonData(
                 private val beløp: Double,
                 private val endringsdato: LocalDate
             ) {
