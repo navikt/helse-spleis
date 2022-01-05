@@ -1,10 +1,20 @@
 package no.nav.helse.spleis
 
 import io.ktor.http.HttpMethod
+import kotlinx.coroutines.runBlocking
+import no.nav.helse.Toggle
+import no.nav.helse.spleis.testhelpers.ApiTestServer
 import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.ServerSocket
 import java.net.URL
+
+fun main() = runBlocking {
+    Toggle.SpeilApiV2.enable()
+    Toggle.GraphQLPlayground.enable()
+    val server = ApiTestServer(4321)
+    server.start()
+}
 
 fun randomPort(): Int = ServerSocket(0).use {
     it.localPort

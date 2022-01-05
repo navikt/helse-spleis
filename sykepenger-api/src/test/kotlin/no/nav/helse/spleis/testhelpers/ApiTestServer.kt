@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 import javax.sql.DataSource
 
-internal class ApiTestServer {
+internal class ApiTestServer(private val port: Int = randomPort()) {
     private val postgres = PostgreSQLContainer<Nothing>("postgres:13")
     private lateinit var dataSource: DataSource
     private lateinit var flyway: Flyway
@@ -84,8 +84,7 @@ internal class ApiTestServer {
         WireMock.stubFor(jwtStub.stubbedJwkProvider())
         WireMock.stubFor(jwtStub.stubbedConfigProvider())
 
-        val randomPort = randomPort()
-        appBaseUrl = "http://localhost:$randomPort"
+        appBaseUrl = "http://localhost:$port"
 
         dataSource = HikariDataSource(HikariConfig().apply {
             jdbcUrl = postgres.jdbcUrl
@@ -103,7 +102,7 @@ internal class ApiTestServer {
             .dataSource(dataSource)
             .load()
         app = createApp(
-            KtorConfig(httpPort = randomPort),
+            KtorConfig(httpPort = port),
             AzureAdAppConfig(
                 clientId = "spleis_azure_ad_app_id",
                 configurationUrl = "${wireMockServer.baseUrl()}/config"
@@ -149,7 +148,6 @@ internal class ApiTestServer {
             headers.forEach { (key, value) ->
                 setRequestProperty(key, value)
             }
-
             val input = body.toByteArray(Charsets.UTF_8)
             outputStream.write(input, 0, input.size)
         }
@@ -195,7 +193,7 @@ internal class ApiTestServer {
             meldingstype = HendelseDao.Meldingstype.INNTEKTSMELDING,
             data = """
                 {
-                    "beregnetInntekt": "${beregnetInntekt.toString()}",
+                    "beregnetInntekt": "$beregnetInntekt",
                     "mottattDato": "${LocalDateTime.now()}",
                     "@opprettet": "${LocalDateTime.now()}",
                     "foersteFravaersdag": "$førsteFraværsdag",
