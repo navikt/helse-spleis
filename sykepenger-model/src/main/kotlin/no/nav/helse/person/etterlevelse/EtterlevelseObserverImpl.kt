@@ -1,11 +1,18 @@
 package no.nav.helse.person.etterlevelse
 
+import no.nav.helse.person.Ledd.Companion.ledd
+import no.nav.helse.person.Paragraf
+import no.nav.helse.person.Punktum.Companion.punktum
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 import java.time.LocalDate
 import java.time.Year
 
-class EtterlevelseObserverImpl: EtterlevelseObserver {
+class EtterlevelseObserverImpl : EtterlevelseObserver {
+
+    private val vurderinger = mutableListOf<Vurdering>()
+
+
     override fun `§2`(oppfylt: Boolean) {
         super.`§2`(oppfylt)
     }
@@ -17,7 +24,24 @@ class EtterlevelseObserverImpl: EtterlevelseObserver {
         arbeidsforhold: List<Map<String, Any?>>,
         antallOpptjeningsdager: Int
     ) {
-        super.`§8-2 ledd 1`(oppfylt, skjæringstidspunkt, tilstrekkeligAntallOpptjeningsdager, arbeidsforhold, antallOpptjeningsdager)
+
+        vurderinger.add(
+            Vurdering(
+                oppfylt = oppfylt,
+                versjon = LocalDate.of(2020, 6, 12),
+                paragraf = Paragraf.PARAGRAF_8_2,
+                ledd = 1.ledd,
+                punktum = 1.punktum,
+                inputdata = mapOf(
+                    "skjæringstidspunkt" to skjæringstidspunkt,
+                    "tilstrekkeligAntallOpptjeningsdager" to tilstrekkeligAntallOpptjeningsdager,
+                    "arbeidsforhold" to arbeidsforhold
+                ),
+                outputdata = mapOf(
+                    "antallOpptjeningsdager" to antallOpptjeningsdager
+                )
+            )
+        )
     }
 
     override fun `§8-3 ledd 1 punktum 2`(
@@ -119,4 +143,6 @@ class EtterlevelseObserverImpl: EtterlevelseObserver {
     override fun `§8-51 ledd 3`(oppfylt: Boolean, maksSykepengedagerOver67: Int, gjenståendeSykedager: Int, forbrukteSykedager: Int, maksdato: LocalDate) {
         super.`§8-51 ledd 3`(oppfylt, maksSykepengedagerOver67, gjenståendeSykedager, forbrukteSykedager, maksdato)
     }
+
+    override fun vurderinger() = vurderinger
 }
