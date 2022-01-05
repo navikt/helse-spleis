@@ -3,6 +3,7 @@ package no.nav.helse.person.etterlevelse
 import no.nav.helse.person.Ledd.Companion.ledd
 import no.nav.helse.person.Paragraf
 import no.nav.helse.person.Punktum.Companion.punktum
+import no.nav.helse.sykdomstidslinje.Dag.Companion.override
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 import java.time.LocalDate
@@ -10,8 +11,7 @@ import java.time.Year
 
 class EtterlevelseObserverImpl : EtterlevelseObserver {
 
-    private val vurderinger = mutableListOf<Vurdering>()
-
+    private val vurderinger = mutableSetOf<Vurdering>()
 
     override fun `§2`(oppfylt: Boolean) {
         super.`§2`(oppfylt)
@@ -143,5 +143,5 @@ class EtterlevelseObserverImpl : EtterlevelseObserver {
         super.`§8-51 ledd 3`(oppfylt, maksSykepengedagerOver67, gjenståendeSykedager, forbrukteSykedager, maksdato)
     }
 
-    override fun vurderinger() = vurderinger
+    override fun vurderinger() = vurderinger.toList()
 }
