@@ -1172,7 +1172,7 @@ internal data class PersonData(
             .call(
                 fom,
                 tom,
-                Satstype.valueOf(satstype),
+                Satstype.fromString(satstype),
                 sats,
                 lønn,
                 grad,

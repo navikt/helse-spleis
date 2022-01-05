@@ -77,7 +77,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         val utbetalingslinje = TestArbeidsgiverInspektør.Feriepengeutbetalingslinje(
             1.mai(2021),
             31.mai(2021),
-            Satstype.ENG,
+            Satstype.Engang,
             1460,
             null,
             Klassekode.RefusjonFeriepengerIkkeOpplysningspliktig,
@@ -126,7 +126,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         val utbetalingslinje = TestArbeidsgiverInspektør.Feriepengeutbetalingslinje(
             1.mai(2021),
             31.mai(2021),
-            Satstype.ENG,
+            Satstype.Engang,
             1460,
             null,
             Klassekode.RefusjonFeriepengerIkkeOpplysningspliktig,
@@ -181,7 +181,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         val utbetalingslinje = TestArbeidsgiverInspektør.Feriepengeutbetalingslinje(
             1.mai(2021),
             31.mai(2021),
-            Satstype.ENG,
+            Satstype.Engang,
             1460,
             null,
             Klassekode.RefusjonFeriepengerIkkeOpplysningspliktig,

@@ -473,7 +473,7 @@ internal class JsonBuilder : AbstractBuilder() {
             linjer.add(mapOf(
                 "fom" to fom,
                 "tom" to tom,
-                "satstype" to satstype.name,
+                "satstype" to "$satstype",
                 "sats" to beløp,
                 "lønn" to aktuellDagsinntekt,
                 "grad" to grad,

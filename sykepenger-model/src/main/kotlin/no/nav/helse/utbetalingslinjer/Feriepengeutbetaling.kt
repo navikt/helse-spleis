@@ -154,7 +154,7 @@ internal class Feriepengeutbetaling private constructor(
                     Utbetalingslinje(
                         fom = utbetalingshistorikkForFeriepenger.opptjeningsår.plusYears(1).atMonth(Month.MAY).atDay(1),
                         tom = utbetalingshistorikkForFeriepenger.opptjeningsår.plusYears(1).atMonth(Month.MAY).atEndOfMonth(),
-                        satstype = Satstype.ENG,
+                        satstype = Satstype.Engang,
                         beløp = beløp,
                         aktuellDagsinntekt = null,
                         grad = null,

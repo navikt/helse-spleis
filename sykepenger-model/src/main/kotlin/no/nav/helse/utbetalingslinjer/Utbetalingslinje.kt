@@ -4,14 +4,13 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingslinjer.Endringskode.*
-import no.nav.helse.utbetalingslinjer.Klassekode.RefusjonFeriepengerIkkeOpplysningspliktig
 import no.nav.helse.utbetalingslinjer.Klassekode.RefusjonIkkeOpplysningspliktig
 import java.time.LocalDate
 
 internal class Utbetalingslinje internal constructor(
     internal var fom: LocalDate,
     internal var tom: LocalDate,
-    internal var satstype: Satstype = Satstype.DAG,
+    internal var satstype: Satstype = Satstype.Daglig,
     internal var beløp: Int?,
     internal var aktuellDagsinntekt: Int?,
     internal val grad: Int?,
@@ -69,7 +68,7 @@ internal class Utbetalingslinje internal constructor(
     }
 
     internal fun datoStatusFom() = datoStatusFom
-    internal fun totalbeløp() = beløp?.let { if (klassekode == RefusjonFeriepengerIkkeOpplysningspliktig) it else it * stønadsdager() } ?: 0
+    internal fun totalbeløp() = satstype.totalbeløp(beløp ?: 0, stønadsdager())
     internal fun stønadsdager() = if (!erOpphør()) filterNot(LocalDate::erHelg).size else 0
 
     internal fun dager() = fom
@@ -146,7 +145,7 @@ internal class Utbetalingslinje internal constructor(
     internal fun toHendelseMap() = mapOf<String, Any?>(
         "fom" to fom.toString(),
         "tom" to tom.toString(),
-        "satstype" to satstype.name,
+        "satstype" to "$satstype",
         "sats" to beløp,
         // TODO: Skal bort etter apper er migrert over til sats
         "dagsats" to beløp,
