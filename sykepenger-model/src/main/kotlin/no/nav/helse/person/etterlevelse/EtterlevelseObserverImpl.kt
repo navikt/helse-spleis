@@ -24,7 +24,6 @@ class EtterlevelseObserverImpl : EtterlevelseObserver {
         arbeidsforhold: List<Map<String, Any?>>,
         antallOpptjeningsdager: Int
     ) {
-
         vurderinger.add(
             Vurdering(
                 oppfylt = oppfylt,

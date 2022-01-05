@@ -25,6 +25,8 @@ class Vurdering internal constructor(
             && versjon == other.versjon
             && paragraf == other.paragraf
             && ledd == other.ledd
+            && punktum == other.punktum
+            && bokstaver == other.bokstaver
             && inputdata == other.inputdata
             && outputdata == other.outputdata
     }
@@ -34,6 +36,8 @@ class Vurdering internal constructor(
         result = 31 * result + versjon.hashCode()
         result = 31 * result + paragraf.hashCode()
         result = 31 * result + ledd.hashCode()
+        result = 31 * result + punktum.hashCode()
+        result = 31 * result + bokstaver.hashCode()
         result = 31 * result + inputdata.hashCode()
         result = 31 * result + outputdata.hashCode()
         return result
