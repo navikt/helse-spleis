@@ -22,6 +22,7 @@ internal class ProsentdelTest {
 
     @Test
     fun avrundingsfeil() {
+        // Fredet variabelnavn
         val karakterMedAvrunding = (1 / 7.0).prosent
         assertEquals(karakterMedAvrunding, !!karakterMedAvrunding)
         assertNotEquals(
