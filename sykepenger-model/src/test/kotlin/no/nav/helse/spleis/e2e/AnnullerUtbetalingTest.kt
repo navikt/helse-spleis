@@ -1,7 +1,9 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
@@ -471,6 +473,22 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         // sjekk at _nå_ er den forkasta
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
         assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
+    }
+
+    @Test
+    fun `skal kunne annullere tidligere utbetaling dersom siste utbetaling er uten utbetaling`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 20.mars, 100.prosent))
+        håndterSøknad(Sykdom(1.mars, 20.mars, 100.prosent), Søknad.Søknadsperiode.Ferie(17.mars, 20.mars))
+        håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(1.mars til 16.mars))
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterUtbetalt(2.vedtaksperiode)
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
+        assertFalse(hendelselogg.hasErrorsOrWorse())
+        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
+        assertFalse(inspektør.periodeErForkastet(2.vedtaksperiode))
     }
 
     fun <T> sjekkAt(t: T, init: T.() -> Unit) {

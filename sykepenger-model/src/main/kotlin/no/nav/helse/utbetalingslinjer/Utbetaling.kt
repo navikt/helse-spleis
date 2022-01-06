@@ -384,13 +384,11 @@ internal class Utbetaling private constructor(
         }
 
         internal fun finnUtbetalingForAnnullering(utbetalinger: List<Utbetaling>, hendelse: AnnullerUtbetaling): Utbetaling? {
-            return utbetalinger.aktive().lastOrNull() ?: run {
+            return utbetalinger.utbetalte().lastOrNull() ?: run {
                 hendelse.error("Finner ingen utbetaling å annullere")
                 return null
             }
         }
-
-        internal fun List<Utbetaling>.kronologisk() = this.sortedBy { it.tidsstempel }
 
         private fun byggOppdrag(
             sisteAktive: Oppdrag?,
@@ -426,7 +424,7 @@ internal class Utbetaling private constructor(
         private fun List<Utbetaling>.utbetalte() = grupperUtbetalinger { it.erUtbetalt() || it.erInFlight() }
         private fun List<Utbetaling>.grupperUtbetalinger(filter: (Utbetaling) -> Boolean) =
             this.groupBy { it.arbeidsgiverOppdrag.fagsystemId() }
-                .map { (_, utbetalinger) -> utbetalinger.kronologisk() }
+                .map { (_, utbetalinger) -> utbetalinger.sortedBy { it.tidsstempel } }
                 .sortedBy { it.first().tidsstempel }
                 .mapNotNull { it.lastOrNull(filter) }
                 .filterNot(Utbetaling::erAnnullering)
