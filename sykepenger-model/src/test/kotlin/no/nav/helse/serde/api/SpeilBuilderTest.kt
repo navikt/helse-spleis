@@ -1,5 +1,6 @@
 package no.nav.helse.serde.api
 
+import no.nav.helse.ForventetFeil
 import no.nav.helse.Organisasjonsnummer
 import no.nav.helse.Toggle
 import no.nav.helse.hendelser.*
@@ -1409,9 +1410,50 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             .single { it.arbeidsgiver == a2.toString() }.omregnetÅrsinntekt!!.inntekterFraAOrdningen!!
 
         assertEquals(listOf(a1, a2).map(Organisasjonsnummer::toString), personDto.arbeidsgivere.map { it.organisasjonsnummer })
-        assertEquals(listOf(a1, a2, a3, a4).map(Organisasjonsnummer::toString), personDto.inntektsgrunnlag.single().inntekter.map { it.arbeidsgiver })
+        assertEquals(listOf(a1, a2, a4).map(Organisasjonsnummer::toString), personDto.inntektsgrunnlag.single().inntekter.map { it.arbeidsgiver })
         assertEquals(3, inntekterFraAordningen.size)
         assertEquals(listOf(33000.0, 32000.0, 31000.0), inntekterFraAordningen.map { it.sum })
+    }
+
+    @ForventetFeil("https://trello.com/c/L2U0QoUr")
+    @Test
+    fun `Viser inntektsgrunnlag for arbeidsforhold som startet innen 3 måneder før skjæringstidspunktet, selvom vi ikke har inntekt`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 15.mars, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+
+        håndterYtelser(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            orgnummer = a1,
+        )
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            inntektsvurdering = Inntektsvurdering(
+                listOf(
+                    sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(12)),
+                )
+            ),
+            orgnummer = a1,
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                inntekter = listOf(
+                    grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(3)),
+                )
+            , arbeidsforhold = emptyList()
+            ),
+            arbeidsforhold = listOf(
+                Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),
+                Arbeidsforhold(a2.toString(), 25.november(2017), null),
+            )
+        )
+        håndterYtelser(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+
+        val personDto = serializePersonForSpeil(person)
+
+        //assertEquals(listOf(a1, a2).map(Organisasjonsnummer::toString), personDto.arbeidsgivere.map { it.organisasjonsnummer })
+        assertEquals(listOf(a1, a2).map(Organisasjonsnummer::toString), personDto.inntektsgrunnlag.single().inntekter.map { it.arbeidsgiver })
     }
 
     private fun <T> Collection<T>.assertOnNonEmptyCollection(func: (T) -> Unit) {

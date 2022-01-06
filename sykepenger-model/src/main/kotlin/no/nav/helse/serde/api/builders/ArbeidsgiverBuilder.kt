@@ -60,10 +60,6 @@ internal class ArbeidsgiverBuilder(
         pushState(forkastetPerioderBuilder)
     }
 
-    override fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {
-        inntektshistorikkBuilder.inntektshistorikk(organisasjonsnummer, inntektshistorikk)
-    }
-
     override fun preVisitUtbetalinger(utbetalinger: List<Utbetaling>) {
         this.utbetalinger.addAll(utbetalinger)
         pushState(utbetalingshistorikkBuilder)

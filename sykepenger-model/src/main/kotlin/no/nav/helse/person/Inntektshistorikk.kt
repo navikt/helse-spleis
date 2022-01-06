@@ -52,9 +52,6 @@ internal class Inntektshistorikk {
     internal fun sykepengegrunnlagKommerFraSkatt(skjæringstidspunkt: LocalDate) =
         grunnlagForSykepengegrunnlag(skjæringstidspunkt, skjæringstidspunkt).let { it == null || it is SkattComposite }
 
-    internal fun harSammenligningsgrunnlag(dato: LocalDate) =
-        grunnlagForSammenligningsgrunnlag(dato) != null
-
     internal class Innslag(private val id: UUID) {
         private val inntekter = mutableListOf<Inntektsopplysning>()
 

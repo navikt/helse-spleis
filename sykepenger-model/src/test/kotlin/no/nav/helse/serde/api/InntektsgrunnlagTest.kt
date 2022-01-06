@@ -42,7 +42,6 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
 
         override fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {
             this.inntektshistorikk[orgnummer] = inntektshistorikk
-            builder.inntektshistorikk(orgnummer.toString(), inntektshistorikk)
         }
     }
 

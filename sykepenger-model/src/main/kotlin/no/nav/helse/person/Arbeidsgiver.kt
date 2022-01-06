@@ -995,9 +995,6 @@ internal class Arbeidsgiver private constructor(
     internal fun harVedtaksperiodeMedUkjentArbeidsforhold(skjæringstidspunkt: LocalDate) =
         !harAktivtArbeidsforhold(skjæringstidspunkt) && vedtaksperioder.any { it.gjelder(skjæringstidspunkt) }
 
-    internal fun harSammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =
-        inntektshistorikk.harSammenligningsgrunnlag(skjæringstidspunkt)
-
     internal fun erSykmeldingenDenSistSkrevne(sykmelding: Sykmelding, hendelseIder: Set<UUID>): Boolean =
         sykdomshistorikk.erSykmeldingenDenSistSkrevne(sykmelding, hendelseIder)
 
