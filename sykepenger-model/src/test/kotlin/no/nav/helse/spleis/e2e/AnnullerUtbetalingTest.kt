@@ -43,74 +43,54 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         nyttVedtak(3.januar, 26.januar, 100.prosent, 3.januar)
         val behovTeller = inspektør.personLogg.behov().size
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
-        sjekkAt(inspektør) {
-            !personLogg.hasErrorsOrWorse() ellers personLogg.toString()
-            val behov = sisteBehov(Behovtype.Utbetaling)
-
-            @Suppress("UNCHECKED_CAST")
-            val statusForUtbetaling = (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["statuskode"]
-            statusForUtbetaling er "OPPH"
-        }
-
-        sjekkAt(speilApi().arbeidsgivere[0]) {
-            vedtaksperioder[0].tilstand er TilstandstypeDTO.TilAnnullering
-        }
-
+        assertFalse(inspektør.personLogg.hasErrorsOrWorse())
+        val behov = inspektør.sisteBehov(Behovtype.Utbetaling)
+        @Suppress("UNCHECKED_CAST")
+        val statusForUtbetaling = (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["statuskode"]
+        assertEquals("OPPH", statusForUtbetaling)
+        assertEquals(TilstandstypeDTO.TilAnnullering, speilApi().arbeidsgivere[0].vedtaksperioder[0].tilstand)
         håndterUtbetalt(1.vedtaksperiode, status = Oppdragstatus.AKSEPTERT)
-        sjekkAt(inspektør) {
-            !personLogg.hasErrorsOrWorse() ellers personLogg.toString()
-            arbeidsgiverOppdrag.size er 2
-            (personLogg.behov().size - behovTeller) skalVære 1 ellers personLogg.toString()
-        }
-
+        assertFalse(inspektør.personLogg.hasErrorsOrWorse())
+        assertEquals(2, inspektør.arbeidsgiverOppdrag.size)
+        assertEquals(1, inspektør.personLogg.behov().size - behovTeller)
         inspektør.arbeidsgiverOppdrag[1].inspektør.also {
             assertEquals(19.januar, it.fom(0))
             assertEquals(26.januar, it.tom(0))
             assertEquals(19.januar, it.datoStatusFom(0))
         }
-
-        sjekkAt(inspektør.personLogg.behov().last()) {
-            type er Behovtype.Utbetaling
-            detaljer()["maksdato"] er null
-            detaljer()["fagområde"] er "SPREF"
+        inspektør.personLogg.behov().last().also {
+            assertEquals(Behovtype.Utbetaling, it.type)
+            assertNull(it.detaljer()["maksdato"])
+            assertEquals("SPREF", it.detaljer()["fagområde"])
         }
-
-        sjekkAt(speilApi().arbeidsgivere[0]) {
-            vedtaksperioder[0].tilstand er TilstandstypeDTO.Annullert
-        }
+        assertEquals(TilstandstypeDTO.Annullert, speilApi().arbeidsgivere[0].vedtaksperioder[0].tilstand)
     }
-
 
     @Test
     fun `Annuller flere fagsystemid for samme arbeidsgiver`() {
         nyttVedtak(3.januar, 26.januar, 100.prosent, 3.januar)
         nyttVedtak(1.mars, 31.mars, 100.prosent, 1.mars)
-
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(2.vedtaksperiode))
         håndterUtbetalt(2.vedtaksperiode, status = Oppdragstatus.AKSEPTERT)
-        sjekkAt(speilApi().arbeidsgivere[0]) {
-            vedtaksperioder[0].tilstand er TilstandstypeDTO.Utbetalt
-            vedtaksperioder[1].tilstand er TilstandstypeDTO.Annullert
+        speilApi().arbeidsgivere[0].also {
+            assertEquals(TilstandstypeDTO.Utbetalt, it.vedtaksperioder[0].tilstand)
+            assertEquals(TilstandstypeDTO.Annullert, it.vedtaksperioder[1].tilstand)
         }
-
         sisteBehovErAnnullering(2.vedtaksperiode)
-
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
         håndterUtbetalt(1.vedtaksperiode, status = Oppdragstatus.AKSEPTERT)
-
-        sjekkAt(speilApi().arbeidsgivere[0]) {
-            vedtaksperioder[0].tilstand er TilstandstypeDTO.Annullert
-            vedtaksperioder[1].tilstand er TilstandstypeDTO.Annullert
+        speilApi().arbeidsgivere[0].also {
+            assertEquals(TilstandstypeDTO.Annullert, it.vedtaksperioder[0].tilstand)
+            assertEquals(TilstandstypeDTO.Annullert, it.vedtaksperioder[1].tilstand)
         }
-
         sisteBehovErAnnullering(1.vedtaksperiode)
     }
 
     private fun sisteBehovErAnnullering(vedtaksperiodeIdInnhenter: IdInnhenter) {
-        sjekkAt(inspektør.personLogg.behov().last()) {
-            type er Behovtype.Utbetaling
-            detaljer()["fagsystemId"] er inspektør.fagsystemId(vedtaksperiodeIdInnhenter)
-            hentLinjer()[0]["statuskode"] er "OPPH"
+        inspektør.personLogg.behov().last().also {
+            assertEquals(Behovtype.Utbetaling, it.type)
+            assertEquals(inspektør.fagsystemId(vedtaksperiodeIdInnhenter), it.detaljer()["fagsystemId"])
+            assertEquals("OPPH", it.hentLinjer()[0]["statuskode"])
         }
     }
 
@@ -129,16 +109,9 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
     @Test
     fun `Annuller oppdrag som er under utbetaling feiler`() {
         tilGodkjent(3.januar, 26.januar, 100.prosent, 3.januar)
-
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
-        sjekkAt(inspektør) {
-            personLogg.hasErrorsOrWorse() ellers personLogg.toString()
-        }
-
-        sjekkAt(speilApi().arbeidsgivere[0]) {
-            vedtaksperioder[0].tilstand er TilstandstypeDTO.TilUtbetaling
-        }
-
+        assertTrue(hendelselogg.hasErrorsOrWorse())
+        assertEquals(TilstandstypeDTO.TilUtbetaling, speilApi().arbeidsgivere[0].vedtaksperioder[0].tilstand)
         assertIngenAnnulleringsbehov()
     }
 
@@ -146,36 +119,22 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
     fun `Annuller av oppdrag med feilet utbetaling feiler`() {
         tilGodkjent(3.januar, 26.januar, 100.prosent, 3.januar)
         håndterUtbetalt(1.vedtaksperiode, status = Oppdragstatus.FEIL)
-
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
-        sjekkAt(inspektør) {
-            personLogg.hasErrorsOrWorse() ellers personLogg.toString()
-        }
-
-        sjekkAt(speilApi().arbeidsgivere[0]) {
-            vedtaksperioder[0].tilstand er TilstandstypeDTO.Feilet
-        }
-
+        assertTrue(hendelselogg.hasErrorsOrWorse())
+        assertEquals(TilstandstypeDTO.Feilet, speilApi().arbeidsgivere[0].vedtaksperioder[0].tilstand)
         assertIngenAnnulleringsbehov()
     }
-
 
     @Test
     fun `Kan ikke annullere hvis noen vedtaksperioder er til utbetaling`() {
         nyttVedtak(3.januar, 26.januar, 100.prosent, 3.januar)
         tilGodkjent(1.mars, 31.mars, 100.prosent, 1.mars)
-
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
-
-        sjekkAt(inspektør) {
-            personLogg.hasErrorsOrWorse() ellers personLogg.toString()
+        assertTrue(hendelselogg.hasErrorsOrWorse())
+        speilApi().arbeidsgivere[0].also {
+            assertEquals(TilstandstypeDTO.Utbetalt, it.vedtaksperioder[0].tilstand)
+            assertEquals(TilstandstypeDTO.TilUtbetaling, it.vedtaksperioder[1].tilstand)
         }
-
-        sjekkAt(speilApi().arbeidsgivere[0]) {
-            vedtaksperioder[0].tilstand er TilstandstypeDTO.Utbetalt
-            vedtaksperioder[1].tilstand er TilstandstypeDTO.TilUtbetaling
-        }
-
         assertIngenAnnulleringsbehov()
     }
 
@@ -189,15 +148,9 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         nyttVedtak(3.januar, 26.januar, 100.prosent, 3.januar)
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
         håndterUtbetalt(1.vedtaksperiode, status = Oppdragstatus.FEIL)
-
-        sjekkAt(inspektør) {
-            personLogg.hasErrorsOrWorse() ellers personLogg.toString()
-            arbeidsgiverOppdrag.size er 2
-        }
-
-        sjekkAt(speilApi().arbeidsgivere[0]) {
-            vedtaksperioder[0].tilstand er TilstandstypeDTO.AnnulleringFeilet
-        }
+        assertTrue(hendelselogg.hasErrorsOrWorse())
+        assertEquals(2, inspektør.arbeidsgiverOppdrag.size)
+        assertEquals(TilstandstypeDTO.AnnulleringFeilet, speilApi().arbeidsgivere[0].vedtaksperioder[0].tilstand)
     }
 
     @Test
@@ -489,9 +442,5 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         assertFalse(hendelselogg.hasErrorsOrWorse())
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
         assertFalse(inspektør.periodeErForkastet(2.vedtaksperiode))
-    }
-
-    fun <T> sjekkAt(t: T, init: T.() -> Unit) {
-        t.init()
     }
 }

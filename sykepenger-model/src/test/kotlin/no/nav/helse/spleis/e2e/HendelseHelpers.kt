@@ -14,8 +14,6 @@ import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.fail
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -128,20 +126,6 @@ private fun utbetalinger(dagTeller: Int, orgnummer: Organisasjonsnummer): List<A
             ).toLong()
     )
     return listOf(ArbeidsgiverUtbetalingsperiode(orgnummer.toString(), førsteDato, 1.desember(2017), 100.prosent, 100.daglig))
-}
-
-infix fun <T> T?.er(expected: T?) =
-    Assertions.assertEquals(expected, this)
-
-infix fun <T> T?.skalVære(expected: T?) =
-    if (expected == null) {
-        this == null
-    } else {
-        expected == this
-    }
-
-infix fun Boolean.ellers(message: String) {
-    if (!this) fail(message)
 }
 
 internal fun AbstractEndToEndTest.finnSkjæringstidspunkt(orgnummer: Organisasjonsnummer, vedtaksperiodeIdInnhenter: IdInnhenter) =
