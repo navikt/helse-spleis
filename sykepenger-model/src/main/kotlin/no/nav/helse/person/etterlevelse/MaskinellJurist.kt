@@ -1,17 +1,17 @@
 package no.nav.helse.person.etterlevelse
 
-import no.nav.helse.person.Ledd.Companion.ledd
-import no.nav.helse.person.Paragraf
-import no.nav.helse.person.Punktum.Companion.punktum
-import no.nav.helse.sykdomstidslinje.Dag.Companion.override
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 import java.time.LocalDate
 import java.time.Year
 
-class EtterlevelseObserverImpl : EtterlevelseObserver {
+class MaskinellJurist : EtterlevelseObserver {
 
-    private val vurderinger = mutableSetOf<Vurdering>()
+    private val vurderinger = mutableSetOf<ParagrafIKode>()
+
+    private fun leggTil(vurdering: ParagrafIKode) {
+        vurderinger.add(vurdering.aggreger(vurderinger.toSet()))
+    }
 
     override fun `§2`(oppfylt: Boolean) {
         super.`§2`(oppfylt)
@@ -24,23 +24,7 @@ class EtterlevelseObserverImpl : EtterlevelseObserver {
         arbeidsforhold: List<Map<String, Any?>>,
         antallOpptjeningsdager: Int
     ) {
-        vurderinger.add(
-            Vurdering(
-                oppfylt = oppfylt,
-                versjon = LocalDate.of(2020, 6, 12),
-                paragraf = Paragraf.PARAGRAF_8_2,
-                ledd = 1.ledd,
-                punktum = 1.punktum,
-                inputdata = mapOf(
-                    "skjæringstidspunkt" to skjæringstidspunkt,
-                    "tilstrekkeligAntallOpptjeningsdager" to tilstrekkeligAntallOpptjeningsdager,
-                    "arbeidsforhold" to arbeidsforhold
-                ),
-                outputdata = mapOf(
-                    "antallOpptjeningsdager" to antallOpptjeningsdager
-                )
-            )
-        )
+        leggTil(Paragraf82Ledd2(oppfylt, skjæringstidspunkt, tilstrekkeligAntallOpptjeningsdager, arbeidsforhold, antallOpptjeningsdager))
     }
 
     override fun `§8-3 ledd 1 punktum 2`(
@@ -97,8 +81,8 @@ class EtterlevelseObserverImpl : EtterlevelseObserver {
         super.`§8-13 ledd 1`(oppfylt, avvisteDager)
     }
 
-    override fun `§8-16 ledd 1`(dekningsgrad: Double, inntekt: Double, dekningsgrunnlag: Double) {
-        super.`§8-16 ledd 1`(dekningsgrad, inntekt, dekningsgrunnlag)
+    override fun `§8-16 ledd 1`(dato: LocalDate, dekningsgrad: Double, inntekt: Double, dekningsgrunnlag: Double) {
+        leggTil(Paragraf816Ledd1(dato, dekningsgrad, inntekt, dekningsgrunnlag))
     }
 
     override fun `§8-17 ledd 1 bokstav a`(arbeidsgiverperiode: List<LocalDate>, førsteNavdag: LocalDate) {

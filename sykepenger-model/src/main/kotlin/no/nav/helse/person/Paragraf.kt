@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 
-internal enum class Paragraf {
+enum class Paragraf {
     PARAGRAF_2,
     PARAGRAF_8_2,
     PARAGRAF_8_3,
@@ -17,7 +17,7 @@ internal enum class Paragraf {
     PARAGRAF_8_51
 }
 
-internal enum class Ledd(private val nummer: Int) {
+enum class Ledd(private val nummer: Int) {
     LEDD_1(1),
     LEDD_2(2),
     LEDD_3(3),
@@ -30,7 +30,7 @@ internal enum class Ledd(private val nummer: Int) {
     }
 }
 
-internal enum class Punktum(private val nummer: Int) {
+enum class Punktum(private val nummer: Int) {
     PUNKTUM_1(1),
     PUNKTUM_2(2),
     PUNKTUM_3(3),
@@ -45,8 +45,8 @@ internal enum class Punktum(private val nummer: Int) {
     }
 }
 
-internal enum class Bokstav {
+enum class Bokstav {
     BOKSTAV_A
 }
 
-internal val FOLKETRYGDLOVENS_OPPRINNELSESDATO = LocalDate.of(1997, 2, 28)
+val FOLKETRYGDLOVENS_OPPRINNELSESDATO: LocalDate = LocalDate.of(1997, 2, 28)

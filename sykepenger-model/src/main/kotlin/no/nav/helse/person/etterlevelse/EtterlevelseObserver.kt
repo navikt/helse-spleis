@@ -188,6 +188,7 @@ interface EtterlevelseObserver {
      * @param dekningsgrunnlag maks dagsats før reduksjon til 6G og reduksjon for sykmeldingsgrad
      */
     fun `§8-16 ledd 1`(
+        dato: LocalDate,
         dekningsgrad: Double,
         inntekt: Double,
         dekningsgrunnlag: Double
@@ -291,6 +292,6 @@ interface EtterlevelseObserver {
         // punktum = 1.punktum
     }
 
-    fun vurderinger(): List<Vurdering>
+    fun vurderinger(): List<ParagrafIKode>
 
 }
