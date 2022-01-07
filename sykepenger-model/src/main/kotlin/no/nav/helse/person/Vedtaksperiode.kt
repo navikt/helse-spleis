@@ -463,7 +463,6 @@ internal class Vedtaksperiode private constructor(
             søknad,
             "Mottatt flere søknader for perioden - siste søknad inneholder arbeidsdag"
         )
-        søknad.warn("Korrigert søknad er mottatt med nye opplysninger - kontroller dagene i sykmeldingsperioden")
         håndterSøknad(søknad, nesteTilstand)
     }
 

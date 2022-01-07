@@ -37,7 +37,7 @@ internal class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: 
     val avvistedager = mutableListOf<AvvistDag>()
     private val begrunnelser = mutableMapOf<LocalDate, List<Begrunnelse>>()
 
-    val økonomi = mutableListOf<Økonomi>()
+    private val økonomi = mutableMapOf<LocalDate, Økonomi>()
     val unikedager = mutableSetOf<KClass<out Utbetalingstidslinje.Utbetalingsdag>>()
 
     internal val size get() =
@@ -61,6 +61,9 @@ internal class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: 
         utbetalingstidslinje.accept(this)
     }
 
+    internal fun grad(dag: LocalDate) = økonomi.getValue(dag).medAvrundetData { grad, _, _, _, _, _, _, _, _ -> grad }
+    internal fun <R> økonomi(lambda: (Økonomi) -> R): List<R> = økonomi.values.map(lambda)
+
     internal fun totalUtbetaling() = totalUtbetaling
     internal fun totalInntekt() = totalInntekt
 
@@ -69,8 +72,8 @@ internal class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: 
 
     internal fun erNavdag(dato: LocalDate) = utbetalingstidslinje[dato] is NavDag
 
-    private fun collect(dag: Utbetalingstidslinje.Utbetalingsdag, dato: LocalDate) {
-        økonomi.add(dag.økonomi)
+    private fun collect(dag: Utbetalingstidslinje.Utbetalingsdag, dato: LocalDate, økonomi: Økonomi) {
+        this.økonomi[dato] = økonomi
         unikedager.add(dag::class)
         første(dag, dato)
         sistedag = dag
@@ -90,7 +93,7 @@ internal class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: 
     ) {
         arbeidsdagTeller += 1
         arbeidsdager.add(dag)
-        collect(dag, dato)
+        collect(dag, dato, økonomi)
     }
 
     override fun visit(
@@ -100,7 +103,7 @@ internal class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: 
     ) {
         arbeidsgiverperiodeDagTeller += 1
         arbeidsgiverdager.add(dag)
-        collect(dag, dato)
+        collect(dag, dato, økonomi)
     }
 
     override fun visit(
@@ -112,7 +115,7 @@ internal class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: 
         avvistedatoer.add(dato)
         avvistedager.add(dag)
         begrunnelser[dato] = dag.begrunnelser
-        collect(dag, dato)
+        collect(dag, dato, økonomi)
     }
 
     override fun visit(
@@ -122,7 +125,7 @@ internal class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: 
     ) {
         fridagTeller += 1
         fridager.add(dag)
-        collect(dag, dato)
+        collect(dag, dato, økonomi)
     }
 
     override fun visit(
@@ -137,7 +140,7 @@ internal class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: 
         }
         navDagTeller += 1
         navdager.add(dag)
-        collect(dag, dato)
+        collect(dag, dato, økonomi)
     }
 
     override fun visit(
@@ -147,7 +150,7 @@ internal class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: 
     ) {
         navHelgDagTeller += 1
         navHelgdager.add(dag)
-        collect(dag, dato)
+        collect(dag, dato, økonomi)
     }
 
     override fun visit(
@@ -156,7 +159,7 @@ internal class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: 
         økonomi: Økonomi
     ) {
         foreldetDagTeller += 1
-        collect(dag, dato)
+        collect(dag, dato, økonomi)
     }
 
     override fun visit(
@@ -165,6 +168,6 @@ internal class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: 
         økonomi: Økonomi
     ) {
         ukjentDagTeller += 1
-        collect(dag, dato)
+        collect(dag, dato, økonomi)
     }
 }
