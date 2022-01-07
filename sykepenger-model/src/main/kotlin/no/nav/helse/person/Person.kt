@@ -488,7 +488,7 @@ class Person private constructor(
     }
 
     internal fun beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate, aktivitetslogg: IAktivitetslogg): Sykepengegrunnlag {
-        return Sykepengegrunnlag(arbeidsgivere.beregnSykepengegrunnlag(skjæringstidspunkt), skjæringstidspunkt, aktivitetslogg)
+        return Sykepengegrunnlag.opprett(arbeidsgivere.beregnSykepengegrunnlag(skjæringstidspunkt), skjæringstidspunkt, aktivitetslogg)
     }
 
     private fun beregnSykepengegrunnlagForInfotrygd(
@@ -496,7 +496,7 @@ class Person private constructor(
         personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden: LocalDate,
         hendelse: IAktivitetslogg
     ) =
-        Sykepengegrunnlag(arbeidsgivere.beregnSykepengegrunnlag(skjæringstidspunkt, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden), hendelse)
+        Sykepengegrunnlag.opprettForInfotrygd(arbeidsgivere.beregnSykepengegrunnlag(skjæringstidspunkt, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden), skjæringstidspunkt, hendelse)
 
     internal fun beregnSammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =
         Sammenligningsgrunnlag(arbeidsgivere.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt))

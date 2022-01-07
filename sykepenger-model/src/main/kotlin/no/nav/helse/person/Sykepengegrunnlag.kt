@@ -14,7 +14,36 @@ internal class Sykepengegrunnlag(
     internal val grunnlagForSykepengegrunnlag: Inntekt,
     internal val begrensning: Begrensning
 ) {
-    private companion object {
+    internal companion object {
+        fun opprett(
+            arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
+            skjæringstidspunkt: LocalDate,
+            aktivitetslogg: IAktivitetslogg
+        ): Sykepengegrunnlag {
+            val inntekt = arbeidsgiverInntektsopplysninger.sykepengegrunnlag(aktivitetslogg)
+            val begrensning = if (inntekt > Grunnbeløp.`6G`.beløp(skjæringstidspunkt)) ER_6G_BEGRENSET else ER_IKKE_6G_BEGRENSET
+            return Sykepengegrunnlag(
+                sykepengegrunnlag(inntekt, skjæringstidspunkt, aktivitetslogg),
+                arbeidsgiverInntektsopplysninger,
+                inntekt,
+                begrensning
+            )
+        }
+
+        fun opprettForInfotrygd(
+            arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
+            skjæringstidspunkt: LocalDate,
+            aktivitetslogg: IAktivitetslogg
+        ): Sykepengegrunnlag {
+            val inntekt = arbeidsgiverInntektsopplysninger.sykepengegrunnlag(aktivitetslogg)
+            return Sykepengegrunnlag(
+                sykepengegrunnlag(inntekt, skjæringstidspunkt, aktivitetslogg),
+                arbeidsgiverInntektsopplysninger,
+                inntekt,
+                VURDERT_I_INFOTRYGD
+            )
+        }
+
         private fun sykepengegrunnlag(inntekt: Inntekt, skjæringstidspunkt: LocalDate, aktivitetslogg: IAktivitetslogg): Inntekt {
             val maksimaltSykepengegrunnlag = Grunnbeløp.`6G`.beløp(skjæringstidspunkt)
             return if (inntekt > maksimaltSykepengegrunnlag) {
@@ -39,47 +68,6 @@ internal class Sykepengegrunnlag(
         }
     }
 
-    constructor(
-        arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
-        skjæringstidspunkt: LocalDate,
-        aktivitetslogg: IAktivitetslogg
-    ) : this(
-        arbeidsgiverInntektsopplysninger,
-        skjæringstidspunkt,
-        aktivitetslogg,
-        arbeidsgiverInntektsopplysninger.sykepengegrunnlag(aktivitetslogg)
-    )
-
-    constructor(
-        arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
-        aktivitetslogg: IAktivitetslogg
-    ) : this(
-        arbeidsgiverInntektsopplysninger,
-        arbeidsgiverInntektsopplysninger.sykepengegrunnlag(aktivitetslogg)
-    )
-
-    private constructor(
-        arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
-        skjæringstidspunkt: LocalDate,
-        aktivitetslogg: IAktivitetslogg,
-        grunnlagForSykepengegrunnlag: Inntekt,
-    ): this(
-        sykepengegrunnlag(grunnlagForSykepengegrunnlag, skjæringstidspunkt, aktivitetslogg),
-        arbeidsgiverInntektsopplysninger,
-        grunnlagForSykepengegrunnlag,
-        if (grunnlagForSykepengegrunnlag > Grunnbeløp.`6G`.beløp(skjæringstidspunkt)) ER_6G_BEGRENSET else ER_IKKE_6G_BEGRENSET
-    )
-
-    private constructor(
-        arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
-        grunnlagForSykepengegrunnlag: Inntekt
-    ): this (
-        grunnlagForSykepengegrunnlag,
-        arbeidsgiverInntektsopplysninger,
-        grunnlagForSykepengegrunnlag,
-        VURDERT_I_INFOTRYGD
-    )
-
     internal fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {
         vilkårsgrunnlagHistorikkVisitor.preVisitSykepengegrunnlag(this, sykepengegrunnlag, grunnlagForSykepengegrunnlag, begrensning)
         vilkårsgrunnlagHistorikkVisitor.preVisitArbeidsgiverInntektsopplysninger()
@@ -102,4 +90,5 @@ internal class Sykepengegrunnlag(
     enum class Begrensning {
         ER_6G_BEGRENSET, ER_IKKE_6G_BEGRENSET, VURDERT_I_INFOTRYGD
     }
+
 }

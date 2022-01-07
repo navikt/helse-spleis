@@ -144,7 +144,7 @@ internal class MinimumInntektsvurderingTest {
         skjæringstidspunkt: LocalDate,
         aktivitetslogg: Aktivitetslogg,
         beløp: Inntekt
-    ) = Sykepengegrunnlag(
+    ) = Sykepengegrunnlag.opprett(
         arbeidsgiverInntektsopplysninger = listOf(
             ArbeidsgiverInntektsopplysning(
                 orgnummer = "123456789",
