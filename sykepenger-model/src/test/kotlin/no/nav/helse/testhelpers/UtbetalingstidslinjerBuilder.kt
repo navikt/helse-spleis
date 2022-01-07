@@ -38,8 +38,12 @@ internal fun tidslinjeOf(
 internal val Int.ukedager get() = Ukedager(this)
 internal operator fun LocalDate.plus(other: Ukedager) = other + this
 internal class Ukedager(private val antallUkedager: Int) {
-    // https://support.claris.com/s/article/Calculating-a-Finish-Date-Given-a-Starting-Date-and-the-Number-of-Work-Days-1503692916564
     private companion object {
+        // tabellen er en sammenslått tabell på 5 kolonner og 7 rader (én for hver ukedag) som angir hvor mange
+        // dager man skal addere med gitt ukedagen til datoen og hvor mange ukedager man skal addere
+        // feks lørdag + 1 ukedag => 2 fordi man skal først hoppe over søndag og deretter ukedagen (mandag).
+        // Et koordinat (x, y) i en 2D-tabell med w kolonner kan omgjøres til et punkt z i en 1D-tabell ved formelen z = f(x, y, w) = wx + y
+        // https://support.claris.com/s/article/Calculating-a-Finish-Date-Given-a-Starting-Date-and-the-Number-of-Work-Days-1503692916564
         private const val table = "01234012360125601456034562345612345"
         private fun String.tilleggsdager(row: DayOfWeek, col: Int) = this[(row.value - 1) * 5 + col % 5].toString().toInt()
     }
@@ -56,8 +60,10 @@ internal fun Int.AP(dekningsgrunnlag: Int) = Utbetalingsdager(
 )
 
 internal val Int.NAV get() = this.NAV(1200)
-internal fun Int.NAV(dekningsgrunnlag: Number, grad: Number = 100.0, refusjonsbeløp: Number = dekningsgrunnlag) = Utbetalingsdager(
-    antallDager = { this },
+internal fun Int.NAV(dekningsgrunnlag: Number, grad: Number = 100.0, refusjonsbeløp: Number = dekningsgrunnlag) = NAV({ this }, dekningsgrunnlag, grad, refusjonsbeløp)
+
+private fun NAV(antallDager: (LocalDate) -> Int, dekningsgrunnlag: Number, grad: Number = 100.0, refusjonsbeløp: Number = dekningsgrunnlag) = Utbetalingsdager(
+    antallDager = antallDager,
     addDagFun = Utbetalingstidslinje::addNAVdag,
     addHelgFun = Utbetalingstidslinje::addHelg,
     dekningsgrunnlag = dekningsgrunnlag,
@@ -74,14 +80,8 @@ internal fun Int.HELG(dekningsgrunnlag: Int, grad: Number = 100.0) = Utbetalings
 )
 
 internal val Int.NAVDAGER get() = this.NAVDAGER(1200)
-internal fun Int.NAVDAGER(dekningsgrunnlag: Number, grad: Number = 100.0, refusjonsbeløp: Number = dekningsgrunnlag) = Utbetalingsdager(
-    antallDager = { ChronoUnit.DAYS.between(it, it.plus((this - 1).ukedager).plusDays(1)).toInt() },
-    addDagFun = Utbetalingstidslinje::addNAVdag,
-    addHelgFun = Utbetalingstidslinje::addHelg,
-    dekningsgrunnlag = dekningsgrunnlag,
-    grad = grad,
-    arbeidsgiverbeløp = refusjonsbeløp
-)
+internal fun Int.NAVDAGER(dekningsgrunnlag: Number, grad: Number = 100.0, refusjonsbeløp: Number = dekningsgrunnlag) =
+    NAV({ ChronoUnit.DAYS.between(it, it.plus((this - 1).ukedager).plusDays(1)).toInt() }, dekningsgrunnlag, grad, refusjonsbeløp)
 
 internal val Int.ARB get() = this.ARB(1200)
 internal fun Int.ARB(dekningsgrunnlag: Int) = Utbetalingsdager(
