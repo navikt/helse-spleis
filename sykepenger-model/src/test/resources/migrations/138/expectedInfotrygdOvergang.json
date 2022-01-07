@@ -1,0 +1,46 @@
+{
+    "arbeidsgivere": [
+        {
+            "inntektshistorikk": [
+                {
+                    "id": "2979ff01-7206-45d5-b0a4-810c9b04c8c9",
+                    "inntektsopplysninger": [
+                        {
+                            "id": "616d4276-9483-4dcf-99b2-c80bf56881ce",
+                            "beløp": 31000.0,
+                            "kilde": "INFOTRYGD"
+                        }
+                    ]
+                }
+            ],
+            "organisasjonsnummer": "987654321"
+        }
+    ],
+    "vilkårsgrunnlagHistorikk": [
+        {
+            "vilkårsgrunnlag": [
+                {
+                    "skjæringstidspunkt": "2018-01-03",
+                    "type": "Infotrygd",
+                    "sykepengegrunnlag": {
+                        "sykepengegrunnlag": 372000.0,
+                        "grunnlagForSykepengegrunnlag": 372000.0,
+                        "arbeidsgiverInntektsopplysninger": [
+                            {
+                                "orgnummer": "987654321",
+                                "inntektsopplysning": {
+                                    "id": "616d4276-9483-4dcf-99b2-c80bf56881ce",
+                                    "beløp": 31000.0,
+                                    "kilde": "INFOTRYGD"
+                                }
+                            }
+                        ],
+                        "begrensning": "VURDERT_I_INFOTRYGD"
+                    },
+                    "vilkårsgrunnlagId": "d8892652-c9c3-447f-8ab7-6a45d95f014e"
+                }
+            ]
+        }
+    ],
+    "skjemaVersjon": 138
+}

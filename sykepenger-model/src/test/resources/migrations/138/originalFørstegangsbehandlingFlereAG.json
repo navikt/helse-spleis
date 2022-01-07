@@ -1,0 +1,272 @@
+{
+    "arbeidsgivere": [
+        {
+            "organisasjonsnummer": "987654321",
+            "inntektshistorikk": [
+                {
+                    "id": "3c979f3e-88d7-488f-b5f2-3ca869f4189a",
+                    "inntektsopplysninger": [
+                        {
+                            "dato": "2018-01-01",
+                            "kilde": "INNTEKTSMELDING"
+                        },
+                        {
+                            "skatteopplysninger": [
+                                {
+                                    "dato": "2018-01-01",
+                                    "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                                    "måned": "2017-10"
+                                },
+                                {
+                                    "dato": "2018-01-01",
+                                    "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                                    "måned": "2017-11"
+                                },
+                                {
+                                    "dato": "2018-01-01",
+                                    "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                                    "måned": "2017-12"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "396906af-2a8d-471a-b04b-8c574a511145",
+                            "skatteopplysninger": [
+                                {
+                                    "dato": "2018-01-01",
+                                    "kilde": "SKATT_SAMMENLIGNINGSGRUNNLAG",
+                                    "måned": "2017-01"
+                                },
+                                {
+                                    "dato": "2018-01-01",
+                                    "kilde": "SKATT_SAMMENLIGNINGSGRUNNLAG",
+                                    "måned": "2017-02"
+                                },
+                                {
+                                    "dato": "2018-01-01",
+                                    "kilde": "SKATT_SAMMENLIGNINGSGRUNNLAG",
+                                    "måned": "2017-03"
+                                },
+                                {
+                                    "dato": "2018-01-01",
+                                    "kilde": "SKATT_SAMMENLIGNINGSGRUNNLAG",
+                                    "måned": "2017-04"
+                                },
+                                {
+                                    "dato": "2018-01-01",
+                                    "kilde": "SKATT_SAMMENLIGNINGSGRUNNLAG",
+                                    "måned": "2017-05"
+                                },
+                                {
+                                    "dato": "2018-01-01",
+                                    "kilde": "SKATT_SAMMENLIGNINGSGRUNNLAG",
+                                    "måned": "2017-06"
+                                },
+                                {
+                                    "dato": "2018-01-01",
+                                    "kilde": "SKATT_SAMMENLIGNINGSGRUNNLAG",
+                                    "måned": "2017-07"
+                                },
+                                {
+                                    "dato": "2018-01-01",
+                                    "kilde": "SKATT_SAMMENLIGNINGSGRUNNLAG",
+                                    "måned": "2017-08"
+                                },
+                                {
+                                    "dato": "2018-01-01",
+                                    "kilde": "SKATT_SAMMENLIGNINGSGRUNNLAG",
+                                    "måned": "2017-09"
+                                },
+                                {
+                                    "dato": "2018-01-01",
+                                    "kilde": "SKATT_SAMMENLIGNINGSGRUNNLAG",
+                                    "måned": "2017-10"
+                                },
+                                {
+                                    "dato": "2018-01-01",
+                                    "kilde": "SKATT_SAMMENLIGNINGSGRUNNLAG",
+                                    "måned": "2017-11"
+                                },
+                                {
+                                    "dato": "2018-01-01",
+                                    "kilde": "SKATT_SAMMENLIGNINGSGRUNNLAG",
+                                    "måned": "2017-12"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "id": "c08cf43c-6a7b-4f96-854b-a6b0d2c07a35",
+                    "inntektsopplysninger": [
+                        {
+                            "dato": "2018-01-01",
+                            "kilde": "INNTEKTSMELDING"
+                        },
+                        {
+                            "id": "0228013e-04ff-4826-8529-48173ba3948e",
+                            "skatteopplysninger": [
+                                {
+                                    "dato": "2018-01-01",
+                                    "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                                    "måned": "2017-10"
+                                },
+                                {
+                                    "dato": "2018-01-01",
+                                    "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                                    "måned": "2017-11"
+                                },
+                                {
+                                    "dato": "2018-01-01",
+                                    "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                                    "måned": "2017-12"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "id": "7604c7ae-884c-45d4-8e60-9caad6bb8439",
+                    "inntektsopplysninger": [
+                        {
+                            "dato": "2018-01-01",
+                            "kilde": "INNTEKTSMELDING"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "organisasjonsnummer": "654321987",
+            "inntektshistorikk": [
+                {
+                    "id": "e9ae1fb7-d484-4b08-9069-82107d13ec6c",
+                    "inntektsopplysninger": [
+                        {
+                            "id": "415d0989-79ab-42b0-aae6-f3bde5d783ad",
+                            "skatteopplysninger": [
+                                {
+                                    "dato": "2018-01-01",
+                                    "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                                    "måned": "2017-10"
+                                },
+                                {
+                                    "dato": "2018-01-01",
+                                    "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                                    "måned": "2017-11"
+                                },
+                                {
+                                    "dato": "2018-01-01",
+                                    "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                                    "måned": "2017-12"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "35bfd801-ee4f-48c8-a35c-62030729c218",
+                            "skatteopplysninger": [
+                                {
+                                    "dato": "2018-01-01",
+                                    "kilde": "SKATT_SAMMENLIGNINGSGRUNNLAG",
+                                    "måned": "2017-01"
+                                },
+                                {
+                                    "dato": "2018-01-01",
+                                    "kilde": "SKATT_SAMMENLIGNINGSGRUNNLAG",
+                                    "måned": "2017-02"
+                                },
+                                {
+                                    "dato": "2018-01-01",
+                                    "kilde": "SKATT_SAMMENLIGNINGSGRUNNLAG",
+                                    "måned": "2017-03"
+                                },
+                                {
+                                    "dato": "2018-01-01",
+                                    "kilde": "SKATT_SAMMENLIGNINGSGRUNNLAG",
+                                    "måned": "2017-04"
+                                },
+                                {
+                                    "dato": "2018-01-01",
+                                    "kilde": "SKATT_SAMMENLIGNINGSGRUNNLAG",
+                                    "måned": "2017-05"
+                                },
+                                {
+                                    "dato": "2018-01-01",
+                                    "kilde": "SKATT_SAMMENLIGNINGSGRUNNLAG",
+                                    "måned": "2017-06"
+                                },
+                                {
+                                    "dato": "2018-01-01",
+                                    "kilde": "SKATT_SAMMENLIGNINGSGRUNNLAG",
+                                    "måned": "2017-07"
+                                },
+                                {
+                                    "dato": "2018-01-01",
+                                    "kilde": "SKATT_SAMMENLIGNINGSGRUNNLAG",
+                                    "måned": "2017-08"
+                                },
+                                {
+                                    "dato": "2018-01-01",
+                                    "kilde": "SKATT_SAMMENLIGNINGSGRUNNLAG",
+                                    "måned": "2017-09"
+                                },
+                                {
+                                    "dato": "2018-01-01",
+                                    "kilde": "SKATT_SAMMENLIGNINGSGRUNNLAG",
+                                    "måned": "2017-10"
+                                },
+                                {
+                                    "dato": "2018-01-01",
+                                    "kilde": "SKATT_SAMMENLIGNINGSGRUNNLAG",
+                                    "måned": "2017-11"
+                                },
+                                {
+                                    "dato": "2018-01-01",
+                                    "kilde": "SKATT_SAMMENLIGNINGSGRUNNLAG",
+                                    "måned": "2017-12"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "id": "2447cc4f-e342-4f6f-b2b4-63dd5f815ff5",
+                    "inntektsopplysninger": [
+                        {
+                            "id": "415d0989-79ab-42b0-aae6-f3bde5d783ad",
+                            "skatteopplysninger": [
+                                {
+                                    "dato": "2018-01-01",
+                                    "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                                    "måned": "2017-10"
+                                },
+                                {
+                                    "dato": "2018-01-01",
+                                    "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                                    "måned": "2017-11"
+                                },
+                                {
+                                    "dato": "2018-01-01",
+                                    "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                                    "måned": "2017-12"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "vilkårsgrunnlagHistorikk": [
+        {
+            "vilkårsgrunnlag": [
+                {
+                    "skjæringstidspunkt": "2018-01-01",
+                    "type": "Vilkårsprøving",
+                    "sammenligningsgrunnlag": 756000.0
+                }
+            ]
+        }
+    ],
+    "skjemaVersjon": 137
+}
