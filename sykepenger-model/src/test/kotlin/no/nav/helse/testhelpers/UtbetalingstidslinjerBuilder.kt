@@ -8,6 +8,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
 /**
  * Tar høyde for helg i dag-generering.
@@ -19,32 +20,44 @@ internal fun tidslinjeOf(
     skjæringstidspunkter: List<LocalDate> = listOf(startDato)
 ) = Utbetalingstidslinje().apply {
     val skjæringstidspunkt = { dato: LocalDate -> skjæringstidspunkter.filter { dato >= it }.maxOrNull() ?: dato }
-    utbetalingsdager.fold(startDato) { startDato, (antallDager, utbetalingsdag, helgedag, dekningsgrunnlag, grad, arbeidsgiverbeløp) ->
+    utbetalingsdager.fold(startDato) { startDato, (antallDagerFun, utbetalingsdag, helgedag, dekningsgrunnlag, grad, arbeidsgiverbeløp) ->
         var dato = startDato
+        val antallDager = antallDagerFun(startDato)
         repeat(antallDager) {
             val økonomi = Økonomi.sykdomsgrad(grad.prosent)
                 .inntekt(dekningsgrunnlag.daglig, skjæringstidspunkt = skjæringstidspunkt(dato))
                 .arbeidsgiverRefusjon(arbeidsgiverbeløp.daglig)
-            val size = this.size
             if (helgedag != null && dato.erHelg()) this.helgedag(dato, økonomi)
             else this.utbetalingsdag(dato, økonomi)
-            val forskjell = this.size - size.toLong()
-            dato = dato.plusDays(forskjell.coerceAtLeast(1))
+            dato = dato.plusDays(1)
         }
         dato
     }
 }
 
+internal val Int.ukedager get() = Ukedager(this)
+internal operator fun LocalDate.plus(other: Ukedager) = other + this
+internal class Ukedager(private val antallUkedager: Int) {
+    // https://support.claris.com/s/article/Calculating-a-Finish-Date-Given-a-Starting-Date-and-the-Number-of-Work-Days-1503692916564
+    private companion object {
+        private const val table = "01234012360125601456034562345612345"
+        private fun String.tilleggsdager(row: DayOfWeek, col: Int) = this[(row.value - 1) * 5 + col % 5].toString().toInt()
+    }
+    private fun dager(dato: LocalDate) =
+        antallUkedager / 5 * 7 + table.tilleggsdager(dato.dayOfWeek, antallUkedager)
+    operator fun plus(other: LocalDate): LocalDate = other.plusDays(dager(other).toLong())
+}
+
 internal val Int.AP get() = this.AP(1200)
 internal fun Int.AP(dekningsgrunnlag: Int) = Utbetalingsdager(
-    antallDager = this,
+    antallDager = { this },
     addDagFun = Utbetalingstidslinje::addArbeidsgiverperiodedag,
     dekningsgrunnlag = dekningsgrunnlag
 )
 
 internal val Int.NAV get() = this.NAV(1200)
 internal fun Int.NAV(dekningsgrunnlag: Number, grad: Number = 100.0, refusjonsbeløp: Number = dekningsgrunnlag) = Utbetalingsdager(
-    antallDager = this,
+    antallDager = { this },
     addDagFun = Utbetalingstidslinje::addNAVdag,
     addHelgFun = Utbetalingstidslinje::addHelg,
     dekningsgrunnlag = dekningsgrunnlag,
@@ -54,7 +67,7 @@ internal fun Int.NAV(dekningsgrunnlag: Number, grad: Number = 100.0, refusjonsbe
 
 internal val Int.HELG get() = this.HELG(1200)
 internal fun Int.HELG(dekningsgrunnlag: Int, grad: Number = 100.0) = Utbetalingsdager(
-    antallDager = this,
+    antallDager = { this },
     addDagFun = Utbetalingstidslinje::addHelg,
     dekningsgrunnlag = dekningsgrunnlag,
     grad = grad
@@ -62,19 +75,9 @@ internal fun Int.HELG(dekningsgrunnlag: Int, grad: Number = 100.0) = Utbetalings
 
 internal val Int.NAVDAGER get() = this.NAVDAGER(1200)
 internal fun Int.NAVDAGER(dekningsgrunnlag: Number, grad: Number = 100.0, refusjonsbeløp: Number = dekningsgrunnlag) = Utbetalingsdager(
-    antallDager = this,
-    addDagFun = { dagen, økonomi ->
-        var dato = dagen
-        repeat(when (dagen.dayOfWeek) {
-            DayOfWeek.SATURDAY -> 2
-            DayOfWeek.SUNDAY -> 1
-            else -> 0
-        }) {
-            addHelg(dato, økonomi)
-            dato = dato.plusDays(1)
-        }
-        addNAVdag(dato, økonomi)
-    },
+    antallDager = { ChronoUnit.DAYS.between(it, it.plus((this - 1).ukedager).plusDays(1)).toInt() },
+    addDagFun = Utbetalingstidslinje::addNAVdag,
+    addHelgFun = Utbetalingstidslinje::addHelg,
     dekningsgrunnlag = dekningsgrunnlag,
     grad = grad,
     arbeidsgiverbeløp = refusjonsbeløp
@@ -82,14 +85,14 @@ internal fun Int.NAVDAGER(dekningsgrunnlag: Number, grad: Number = 100.0, refusj
 
 internal val Int.ARB get() = this.ARB(1200)
 internal fun Int.ARB(dekningsgrunnlag: Int) = Utbetalingsdager(
-    antallDager = this,
+    antallDager = { this },
     addDagFun = Utbetalingstidslinje::addArbeidsdag,
     dekningsgrunnlag = dekningsgrunnlag
 )
 
 internal val Int.FRI get() = this.FRI(1200)
 internal fun Int.FRI(dekningsgrunnlag: Int) = Utbetalingsdager(
-    antallDager = this,
+    antallDager = { this },
     addDagFun = Utbetalingstidslinje::addFridag,
     addHelgFun = Utbetalingstidslinje::addFridag,
     dekningsgrunnlag = dekningsgrunnlag
@@ -97,14 +100,14 @@ internal fun Int.FRI(dekningsgrunnlag: Int) = Utbetalingsdager(
 
 internal val Int.FOR get() = this.FOR(1200)
 internal fun Int.FOR(dekningsgrunnlag: Int) = Utbetalingsdager(
-    antallDager = this,
+    antallDager = { this },
     addDagFun = Utbetalingstidslinje::addForeldetDag,
     dekningsgrunnlag = dekningsgrunnlag
 )
 
 internal val Int.AVV get() = this.AVV(1200)
 internal fun Int.AVV(dekningsgrunnlag: Int, grad: Number = 0) = Utbetalingsdager(
-    antallDager = this,
+    antallDager = { this },
     addDagFun = Utbetalingstidslinje::addAvvistDag,
     dekningsgrunnlag = dekningsgrunnlag,
     grad = grad
@@ -112,7 +115,7 @@ internal fun Int.AVV(dekningsgrunnlag: Int, grad: Number = 0) = Utbetalingsdager
 
 internal val Int.UTELATE
     get() = Utbetalingsdager(
-        antallDager = this,
+        antallDager = { this },
         addDagFun = { _, _ -> },
         dekningsgrunnlag = 0
     )
@@ -121,7 +124,7 @@ private fun Utbetalingstidslinje.addAvvistDag(dato: LocalDate, økonomi: Økonom
     this.addAvvistDag(dato, økonomi, listOf(Begrunnelse.SykepengedagerOppbrukt))
 
 internal data class Utbetalingsdager(
-    val antallDager: Int,
+    val antallDager: (LocalDate) -> Int,
     val addDagFun: Utbetalingstidslinje.(LocalDate, Økonomi) -> Unit,
     val addHelgFun: (Utbetalingstidslinje.(LocalDate, Økonomi) -> Unit)? = null,
     val dekningsgrunnlag: Number = 1200,

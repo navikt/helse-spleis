@@ -1,5 +1,6 @@
 package no.nav.helse.testhelpers
 
+import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -11,6 +12,22 @@ internal class UtbetalingstidslinjerBuilderTest {
     @BeforeEach
     fun setup() {
         resetSeed()
+    }
+
+    @Test
+    fun ukedager() {
+        assertEquals(4.januar, 1.januar + 3.ukedager)
+        assertEquals(5.januar, 2.januar + 3.ukedager)
+        assertEquals(8.januar, 3.januar + 3.ukedager)
+        assertEquals(8.januar, 5.januar + 1.ukedager)
+        assertEquals(8.januar, 6.januar + 0.ukedager)
+        assertEquals(9.januar, 6.januar + 1.ukedager)
+        assertEquals(8.januar, 7.januar + 0.ukedager)
+        assertEquals(9.januar, 7.januar + 1.ukedager)
+        assertEquals(15.januar, 5.januar + 6.ukedager)
+        assertEquals(28.desember, 16.januar + 248.ukedager)
+        assertEquals(19.januar, 1.januar + 14.ukedager)
+        assertEquals(22.januar, 2.januar + 14.ukedager)
     }
 
     @Test
@@ -45,6 +62,7 @@ internal class UtbetalingstidslinjerBuilderTest {
     fun `lager gitt antall navdager, men tar med helg også`() {
         val tidslinje = tidslinjeOf(14.NAVDAGER)
         assertRekkefølge(tidslinje)
+        assertEquals(1.januar til 18.januar, tidslinje.periode())
         assertEquals(4, tidslinje.inspektør.navHelgDagTeller)
         assertEquals(14, tidslinje.inspektør.navDagTeller)
     }
@@ -53,6 +71,7 @@ internal class UtbetalingstidslinjerBuilderTest {
     fun `starte på fredag`() {
         val tidslinje = tidslinjeOf(14.NAVDAGER, startDato = 5.januar)
         assertRekkefølge(tidslinje)
+        assertEquals(5.januar til 24.januar,tidslinje.periode())
         assertEquals(6, tidslinje.inspektør.navHelgDagTeller)
         assertEquals(14, tidslinje.inspektør.navDagTeller)
     }
@@ -63,6 +82,12 @@ internal class UtbetalingstidslinjerBuilderTest {
         assertRekkefølge(tidslinje)
         assertEquals(6, tidslinje.inspektør.navHelgDagTeller)
         assertEquals(14, tidslinje.inspektør.navDagTeller)
+    }
+
+    @Test
+    fun `kun fredag`() {
+        val tidslinje = tidslinjeOf(1.NAVDAGER, startDato = 5.januar)
+        assertEquals(5.januar til 5.januar, tidslinje.periode())
     }
 
     private fun assertRekkefølge(tidslinje: Utbetalingstidslinje) {
