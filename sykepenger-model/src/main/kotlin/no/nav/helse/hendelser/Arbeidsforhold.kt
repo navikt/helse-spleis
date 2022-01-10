@@ -34,7 +34,7 @@ class Arbeidsforhold(
 
     internal fun erRelevant(arbeidsgiver: Arbeidsgiver) = orgnummer == arbeidsgiver.organisasjonsnummer()
 
-    internal fun harArbeidetMerEnnTreMåneder(skjæringstidspunkt: LocalDate) = fom <= skjæringstidspunkt.withDayOfMonth(1).minusMonths(3)
+    internal fun harArbeidetMindreEnnTreMåneder(skjæringstidspunkt: LocalDate) = fom > skjæringstidspunkt.withDayOfMonth(1).minusMonths(3)
 
     internal companion object {
         internal fun List<Arbeidsforhold>.toEtterlevelseMap() = map {
@@ -70,8 +70,7 @@ class Arbeidsforhold(
         }
 
         internal fun List<Arbeidsforhold>.grupperArbeidsforholdPerOrgnummer() = groupBy { it.orgnummer }
-
-        internal fun List<Arbeidsforhold>.harJobbetDeTreSisteMånedeneFørSkjæringstidspunkt(skjæringstidspunkt: LocalDate) =
-            any { it.gjelder(skjæringstidspunkt.minusMonths(3).withDayOfMonth(1)) }
+        internal fun List<Arbeidsforhold>.harArbeidsforholdSomErNyereEnnTreMåneder(skjæringstidspunkt: LocalDate) =
+            any { it.harArbeidetMindreEnnTreMåneder(skjæringstidspunkt) }
     }
 }

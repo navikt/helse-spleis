@@ -562,6 +562,11 @@ internal interface InntekthistorikkVisitor {
     ) {
     }
 
+    fun visitIkkeRapportert(
+        dato: LocalDate
+    ) {
+    }
+
     fun visitInfotrygd(
         infotrygd: Inntektshistorikk.Infotrygd,
         id: UUID,

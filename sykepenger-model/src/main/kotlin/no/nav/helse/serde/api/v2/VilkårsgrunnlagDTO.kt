@@ -51,7 +51,7 @@ data class Arbeidsgiverinntekt(
 )
 
 enum class Inntektkilde {
-    Saksbehandler, Inntektsmelding, Infotrygd, AOrdningen
+    Saksbehandler, Inntektsmelding, Infotrygd, AOrdningen, IkkeRapportert
 }
 
 data class OmregnetÅrsinntekt(

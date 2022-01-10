@@ -14,7 +14,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_REVURDERT
 import no.nav.helse.person.Vedtaksperiode.Companion.KLAR_TIL_BEHANDLING
 import no.nav.helse.person.Vedtaksperiode.Companion.REVURDERING_IGANGSATT
 import no.nav.helse.person.Vedtaksperiode.Companion.UTEN_UTBETALING
-import no.nav.helse.person.Vedtaksperiode.Companion.harInntekt
 import no.nav.helse.person.Vedtaksperiode.Companion.harNødvendigInntekt
 import no.nav.helse.person.Vedtaksperiode.Companion.harOverlappendeUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.harOverlappendeUtbetaltePerioder
@@ -37,7 +36,6 @@ import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetaltTidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.utbetalingslinjer.UtbetalingObserver
 import no.nav.helse.utbetalingstidslinje.*
-import no.nav.helse.økonomi.Inntekt.Companion.summer
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -110,8 +108,12 @@ internal class Arbeidsgiver private constructor(
 
         internal fun List<Arbeidsgiver>.beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
             this.mapNotNull { arbeidsgiver ->
-                arbeidsgiver.inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt, arbeidsgiver.finnFørsteFraværsdag(skjæringstidspunkt))
-                    ?.let { ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, it) }
+                val inntektsopplysning = arbeidsgiver.inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt, arbeidsgiver.finnFørsteFraværsdag(skjæringstidspunkt))
+                if (inntektsopplysning == null && arbeidsgiver.harArbeidsforholdNyereEnnTreMåneder(skjæringstidspunkt)) {
+                    ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, Inntektshistorikk.IkkeRapportert(skjæringstidspunkt))
+                } else if (inntektsopplysning != null) {
+                    ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, inntektsopplysning)
+                } else null
             }
 
         internal fun List<Arbeidsgiver>.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =
@@ -988,6 +990,8 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun harAktivtArbeidsforhold(skjæringstidspunkt: LocalDate) = arbeidsforholdhistorikk.harAktivtArbeidsforhold(skjæringstidspunkt)
+
+    internal fun harArbeidsforholdNyereEnnTreMåneder(skjæringstidspunkt: LocalDate) = arbeidsforholdhistorikk.harArbeidsforholdNyereEnnTreMåneder(skjæringstidspunkt)
 
     internal fun grunnlagForSykepengegrunnlagKommerFraSkatt(skjæringstidspunkt: LocalDate) =
         inntektshistorikk.sykepengegrunnlagKommerFraSkatt(skjæringstidspunkt)

@@ -240,6 +240,23 @@ internal class Inntektshistorikk {
                 || (other is SkattComposite && other.inntektsopplysninger.any { this.skalErstattesAv(it) })
     }
 
+    internal class IkkeRapportert(
+        override val dato: LocalDate
+    ) : Inntektsopplysning {
+
+        override val prioritet = 10
+
+        override fun accept(visitor: InntekthistorikkVisitor) {
+            visitor.visitIkkeRapportert(dato)
+        }
+
+        override fun grunnlagForSykepengegrunnlag() = Inntekt.INGEN
+
+        override fun grunnlagForSammenligningsgrunnlag() = Inntekt.INGEN
+
+        override fun skalErstattesAv(other: Inntektsopplysning) = other is IkkeRapportert && this.dato == other.dato
+    }
+
     internal sealed class Skatt(
         override val dato: LocalDate,
         protected val hendelseId: UUID,

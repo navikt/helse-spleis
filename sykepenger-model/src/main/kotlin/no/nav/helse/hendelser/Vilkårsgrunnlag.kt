@@ -82,7 +82,7 @@ class Vilkårsgrunnlag(
 
     internal fun loggUkjenteArbeidsforhold(person: Person, skjæringstidspunkt: LocalDate) {
         val arbeidsforholdForSkjæringstidspunkt = arbeidsforhold.filter { it.gjelder(skjæringstidspunkt) }
-        if (arbeidsforholdForSkjæringstidspunkt.any { !it.harArbeidetMerEnnTreMåneder(skjæringstidspunkt) }) {
+        if (arbeidsforholdForSkjæringstidspunkt.any { it.harArbeidetMindreEnnTreMåneder(skjæringstidspunkt) }) {
             sikkerlogg.info("Person har et relevant arbeidsforhold som har vart mindre enn 3 måneder (8-28b) - fødselsnummer: $fødselsnummer")
         }
         person.brukOuijaBrettForÅKommunisereMedPotensielleSpøkelser(arbeidsforholdForSkjæringstidspunkt.map(Arbeidsforhold::orgnummer), skjæringstidspunkt)

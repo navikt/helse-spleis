@@ -1,6 +1,5 @@
 package no.nav.helse.serde.api
 
-import no.nav.helse.ForventetFeil
 import no.nav.helse.Organisasjonsnummer
 import no.nav.helse.Toggle
 import no.nav.helse.hendelser.*
@@ -14,6 +13,7 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.api.InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO
+import no.nav.helse.serde.api.v2.Inntektkilde
 import no.nav.helse.serde.api.v2.InntektsmeldingDTO
 import no.nav.helse.serde.api.v2.SykmeldingDTO
 import no.nav.helse.serde.api.v2.SøknadNavDTO
@@ -1415,7 +1415,6 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         assertEquals(listOf(33000.0, 32000.0, 31000.0), inntekterFraAordningen.map { it.sum })
     }
 
-    @ForventetFeil("https://trello.com/c/L2U0QoUr")
     @Test
     fun `Viser inntektsgrunnlag for arbeidsforhold som startet innen 3 måneder før skjæringstidspunktet, selvom vi ikke har inntekt`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars, 100.prosent), orgnummer = a1)
@@ -1452,8 +1451,13 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
 
         val personDto = serializePersonForSpeil(person)
 
-        //assertEquals(listOf(a1, a2).map(Organisasjonsnummer::toString), personDto.arbeidsgivere.map { it.organisasjonsnummer })
+        assertEquals(listOf(a1, a2).map(Organisasjonsnummer::toString), personDto.arbeidsgivere.map { it.organisasjonsnummer })
         assertEquals(listOf(a1, a2).map(Organisasjonsnummer::toString), personDto.inntektsgrunnlag.single().inntekter.map { it.arbeidsgiver })
+
+        val arbeidsgiverInntektA2 = personDto.vilkårsgrunnlagHistorikk.values.last()[1.januar]?.inntekter?.first { it.organisasjonsnummer == a2.toString() }
+
+        assertEquals(0.0, arbeidsgiverInntektA2?.omregnetÅrsinntekt?.beløp)
+        assertEquals(Inntektkilde.IkkeRapportert, arbeidsgiverInntektA2?.omregnetÅrsinntekt?.kilde)
     }
 
     private fun <T> Collection<T>.assertOnNonEmptyCollection(func: (T) -> Unit) {

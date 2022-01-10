@@ -294,6 +294,11 @@ internal class VilkårsgrunnlagBuilder(
                 this.inntekt = nyArbeidsgiverInntekt(IInntektkilde.Inntektsmelding, inntekt, dato)
             }
 
+            override fun visitIkkeRapportert(dato: LocalDate) {
+                val inntekt = IInntekt(0.0, 0.0, 0.0, 0)
+                this.inntekt = nyArbeidsgiverInntekt(IInntektkilde.IkkeRapportert, inntekt, dato)
+            }
+
             override fun preVisitSkatt(skattComposite: SkattComposite, id: UUID, dato: LocalDate) {
                 val (inntekt, inntekterFraAOrdningen) = SkattBuilder(skattComposite).build()
                 this.inntekt = nyArbeidsgiverInntekt(IInntektkilde.AOrdningen, inntekt, dato, inntekterFraAOrdningen)

@@ -96,13 +96,14 @@ internal data class IOmregnetÅrsinntekt(
 }
 
 internal enum class IInntektkilde {
-    Saksbehandler, Inntektsmelding, Infotrygd, AOrdningen;
+    Saksbehandler, Inntektsmelding, Infotrygd, AOrdningen, IkkeRapportert;
 
     internal fun toDTO() = when (this) {
         Saksbehandler -> Inntektkilde.Saksbehandler
         Inntektsmelding -> Inntektkilde.Inntektsmelding
         Infotrygd -> Inntektkilde.Infotrygd
         AOrdningen -> Inntektkilde.AOrdningen
+        IkkeRapportert -> Inntektkilde.IkkeRapportert
     }
 }
 

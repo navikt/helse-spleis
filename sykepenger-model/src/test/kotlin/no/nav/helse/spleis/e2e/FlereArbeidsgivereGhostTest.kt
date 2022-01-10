@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.ForventetFeil
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -641,7 +640,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         assertEquals(Inntektskilde.FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(2.vedtaksperiode))
     }
 
-    @ForventetFeil("https://trello.com/c/L2U0QoUr")
     @Test
     fun `tar med arbeidsforhold i vilkårsgrunnlag som startet innen 3 mnd før skjæringstidspunkt, selvom vi ikke har inntekt`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
@@ -684,5 +682,11 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         assertTrue(vilkårsgrunnlag.gjelderFlereArbeidsgivere())
         assertEquals(2, vilkårsgrunnlag.inntektsopplysningPerArbeidsgiver().size)
         assertEquals(setOf(a1.toString(), a2.toString()), vilkårsgrunnlag.inntektsopplysningPerArbeidsgiver().keys)
+
+        assertEquals(
+            Inntektskilde.FLERE_ARBEIDSGIVERE,
+            inspektør(a1).inntektskilde(1.vedtaksperiode)
+        )
+        assertTrue(inspektør(a1).warnings.contains("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold"))
     }
 }

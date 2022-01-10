@@ -240,7 +240,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             vilkårsgrunnlagId = UUID.randomUUID()
         )
 
-        fun harInntektFraSkatt(): Boolean = inntektsopplysningPerArbeidsgiver().values.any { it is Inntektshistorikk.SkattComposite }
+        fun harInntektFraAOrdningen(): Boolean = inntektsopplysningPerArbeidsgiver().values
+            .any { it is Inntektshistorikk.SkattComposite || it is Inntektshistorikk.IkkeRapportert }
     }
 
     internal class InfotrygdVilkårsgrunnlag(
