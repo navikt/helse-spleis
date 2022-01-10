@@ -28,7 +28,7 @@ internal class MaskinellJuristTest {
     }
 
     @Test
-    fun `enkel vurdering som gjøres flere ganger innenfor samme hendelse skal dedup'es`() {
+    fun `enkel vurdering som gjøres flere ganger innenfor samme hendelse forekommer kun en gang`() {
         etterlevelseObserver.`§8-2 ledd 1`(true, 1.januar, 28, listOf(), 28)
         etterlevelseObserver.`§8-2 ledd 1`(true, 1.januar, 28, listOf(), 28)
 
@@ -36,7 +36,7 @@ internal class MaskinellJuristTest {
     }
 
     @Test
-    fun `dedup'er ikke vurderinger som er ulike`() {
+    fun `vurderinger med ulike data utgjør hvert sitt innslag`() {
         etterlevelseObserver.`§8-2 ledd 1`(true, 1.januar, 28, listOf(), 28)
         etterlevelseObserver.`§8-2 ledd 1`(false, 1.januar, 28, listOf(), 28)
 

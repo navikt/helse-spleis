@@ -29,10 +29,12 @@ class MaskinellJurist : EtterlevelseObserver {
         leggTil(
             EnkelVurdering(
                 oppfylt = oppfylt,
-                skjæringstidspunkt = skjæringstidspunkt,
-                tilstrekkeligAntallOpptjeningsdager = tilstrekkeligAntallOpptjeningsdager,
-                arbeidsforhold = arbeidsforhold,
-                antallOpptjeningsdager = antallOpptjeningsdager,
+                input = mapOf(
+                    "skjæringstidspunkt" to skjæringstidspunkt,
+                    "tilstrekkeligAntallOpptjeningsdager" to tilstrekkeligAntallOpptjeningsdager,
+                    "arbeidsforhold" to arbeidsforhold
+                ),
+                output = mapOf("antallOpptjeningsdager" to antallOpptjeningsdager),
                 paragraf = Paragraf.PARAGRAF_8_2,
                 versjon = LocalDate.of(2020, 6, 12),
                 ledd = 1.ledd
@@ -95,7 +97,17 @@ class MaskinellJurist : EtterlevelseObserver {
     }
 
     override fun `§8-16 ledd 1`(dato: LocalDate, dekningsgrad: Double, inntekt: Double, dekningsgrunnlag: Double) {
-        leggTil(Paragraf816Ledd1(dato, dekningsgrad, inntekt, dekningsgrunnlag))
+        leggTil(
+            GrupperbarVurdering(
+                dato = dato,
+                input = mapOf("dekningsgrad" to dekningsgrad, "inntekt" to inntekt),
+                output = mapOf("dekningsgrunnlag" to dekningsgrunnlag),
+                oppfylt = true,
+                paragraf = Paragraf.PARAGRAF_8_16,
+                ledd = 1.ledd,
+                versjon = LocalDate.of(2020, 6, 12)
+            )
+        )
     }
 
     override fun `§8-17 ledd 1 bokstav a`(arbeidsgiverperiode: List<LocalDate>, førsteNavdag: LocalDate) {
