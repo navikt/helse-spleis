@@ -46,7 +46,8 @@ enum class Punktum(private val nummer: Int) {
 }
 
 enum class Bokstav {
-    BOKSTAV_A
+    BOKSTAV_A,
+    BOKSTAV_B
 }
 
 val FOLKETRYGDLOVENS_OPPRINNELSESDATO: LocalDate = LocalDate.of(1997, 2, 28)
