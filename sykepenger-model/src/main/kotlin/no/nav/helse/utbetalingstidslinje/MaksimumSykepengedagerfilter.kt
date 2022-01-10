@@ -131,7 +131,7 @@ internal class MaksimumSykepengedagerfilter(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        oppholdsdag(dato)
+        state.fridag(this, dato)
     }
 
     override fun visit(
@@ -208,6 +208,7 @@ internal class MaksimumSykepengedagerfilter(
         fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {}
         fun oppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {}
         fun sykdomshelg(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {}
+        fun fridag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) = avgrenser.oppholdsdag(dagen)
         fun entering(avgrenser: MaksimumSykepengedagerfilter) {}
         fun leaving(avgrenser: MaksimumSykepengedagerfilter) {}
 
@@ -238,6 +239,10 @@ internal class MaksimumSykepengedagerfilter(
 
             override fun oppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
                 avgrenser.state(Opphold)
+            }
+
+            override fun fridag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
+                avgrenser.opphold += 1
             }
         }
 
@@ -278,6 +283,10 @@ internal class MaksimumSykepengedagerfilter(
 
             override fun oppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
                 avgrenser.nextState(dagen)?.run { avgrenser.state(this) }
+            }
+
+            override fun fridag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
+                avgrenser.opphold += 1
             }
         }
 
