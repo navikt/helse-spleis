@@ -11,6 +11,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSammenligningsgrunn
 import no.nav.helse.person.Arbeidsgiver.Companion.harArbeidsgivereMedOverlappendeUtbetaltePerioder
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntekt
 import no.nav.helse.person.Arbeidsgiver.Companion.harUtbetaltPeriode
+import no.nav.helse.person.Arbeidsgiver.Companion.harVedtaksperiodeFor
 import no.nav.helse.person.Arbeidsgiver.Companion.kanOverstyres
 import no.nav.helse.person.Arbeidsgiver.Companion.minstEttSykepengegrunnlagSomIkkeKommerFraSkatt
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
@@ -517,6 +518,10 @@ class Person private constructor(
     }
 
     internal fun kanRevurdereInntekt(skjæringstidspunkt: LocalDate) = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) != null
+
+    internal fun harVedtaksperiodeForAnnenArbeidsgiver(arbeidsgiver: Arbeidsgiver, skjæringstidspunkt: LocalDate) = arbeidsgivere
+        .filter { it != arbeidsgiver }
+        .harVedtaksperiodeFor(skjæringstidspunkt)
 
     internal fun harNødvendigInntekt(skjæringstidspunkt: LocalDate) = arbeidsgivere.harNødvendigInntekt(skjæringstidspunkt)
 

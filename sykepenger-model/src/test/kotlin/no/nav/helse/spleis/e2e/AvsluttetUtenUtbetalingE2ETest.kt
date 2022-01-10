@@ -129,4 +129,14 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
             TilstandType.AVSLUTTET_UTEN_UTBETALING
         )
     }
+
+    @Test
+    fun `Vedtaksperioder i AVSLUTTET_UTEN_UTBETALING som treffes av en inntektsmelding slik at den får utebetaling - skal gå videre til AVVENTER_HISTORIKK`(){
+        håndterSykmelding(Sykmeldingsperiode(9.januar, 20.januar, 100.prosent))
+        håndterSøknad(Sykdom(9.januar, 20.januar, 100.prosent))
+        assertTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET_UTEN_UTBETALING)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        assertTilstand(1.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK)
+    }
 }

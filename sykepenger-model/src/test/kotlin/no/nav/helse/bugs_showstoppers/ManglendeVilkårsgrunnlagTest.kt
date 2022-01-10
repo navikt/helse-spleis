@@ -72,26 +72,26 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
         // og dermed ble også skjæringstidspunktet forskjøvet til 8. januar
         håndterInntektsmelding(
             listOf(
-                1.januar til 3.januar,
-                4.januar til 5.januar,
+                1.januar til 3.januar, //3
+                4.januar til 5.januar, // 2
                 // 6. og 7. januar er helg
-                8.januar til 12.januar,
-                13.januar til 18.januar
+                8.januar til 12.januar,// 5
+                13.januar til 18.januar // 6
             ), 8.januar
         )
 
-        håndterYtelser(4.vedtaksperiode)
+        håndterYtelser(3.vedtaksperiode)
 
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(4.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING)
+        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVSLUTTET_UTEN_UTBETALING, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING)
+        assertTilstander(4.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, AVVENTER_UFERDIG)
 
         assertTrue(inspektør.etterspurteBehov(1.vedtaksperiode).isEmpty())
         assertTrue(inspektør.etterspurteBehov(2.vedtaksperiode).isEmpty())
-        assertTrue(inspektør.etterspurteBehov(3.vedtaksperiode).isEmpty())
-        assertTrue(inspektør.etterspurteBehov(4.vedtaksperiode).map { it.type }
+        assertTrue(inspektør.etterspurteBehov(3.vedtaksperiode).map { it.type }
             .containsAll(listOf(InntekterForSammenligningsgrunnlag, Medlemskap, InntekterForSykepengegrunnlag, ArbeidsforholdV2)))
+        assertTrue(inspektør.etterspurteBehov(4.vedtaksperiode).isEmpty())
     }
 
     @Test
