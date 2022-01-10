@@ -27,7 +27,9 @@ abstract class ParagrafIKode {
             paragraf == other.paragraf &&
             ledd == other.ledd &&
             punktum == other.punktum &&
-            bokstav == other.bokstav
+            bokstav == other.bokstav &&
+            input == other.input &&
+            output == other.output
     }
 
     final override fun hashCode(): Int {
@@ -64,16 +66,11 @@ class GrupperbarVurdering private constructor(
         punktum: List<Punktum> = emptyList()
     ) : this(dato, dato, oppfylt, versjon, paragraf, ledd, bokstav, punktum, input, output)
 
-
     override fun aggreger(vurderinger: Set<ParagrafIKode>): ParagrafIKode {
-        val tidligereVurdering = vurderinger.find { it is GrupperbarVurdering } as? GrupperbarVurdering
-        if (tidligereVurdering == null || !harSammeParametre(tidligereVurdering)) return this
-
+        val tidligereVurdering = vurderinger.filterIsInstance<GrupperbarVurdering>().firstOrNull()
+        if (tidligereVurdering == null || tidligereVurdering != this) return this
         return GrupperbarVurdering(tidligereVurdering.fom, this.tom, oppfylt, versjon, paragraf, ledd, bokstav, punktum, input, output)
     }
-
-    //TODO Vurder sterkt typet equals, bytte fra Map<String,Any> til typa objekter for Input og Output
-    private fun harSammeParametre(other: GrupperbarVurdering) = input == other.input && output == other.output
 }
 
 class EnkelVurdering(
@@ -86,6 +83,5 @@ class EnkelVurdering(
     override val input: Map<String, Any>,
     override val output: Map<String, Any>
 ) : ParagrafIKode() {
-
     override fun aggreger(vurderinger: Set<ParagrafIKode>) = this
 }
