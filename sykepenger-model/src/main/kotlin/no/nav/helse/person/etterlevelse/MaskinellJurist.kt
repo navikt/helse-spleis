@@ -1,5 +1,7 @@
 package no.nav.helse.person.etterlevelse
 
+import no.nav.helse.person.Ledd.Companion.ledd
+import no.nav.helse.person.Paragraf
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 import java.time.LocalDate
@@ -24,7 +26,18 @@ class MaskinellJurist : EtterlevelseObserver {
         arbeidsforhold: List<Map<String, Any?>>,
         antallOpptjeningsdager: Int
     ) {
-        leggTil(Paragraf82Ledd2(oppfylt, skjæringstidspunkt, tilstrekkeligAntallOpptjeningsdager, arbeidsforhold, antallOpptjeningsdager))
+        leggTil(
+            EnkelVurdering(
+                oppfylt = oppfylt,
+                skjæringstidspunkt = skjæringstidspunkt,
+                tilstrekkeligAntallOpptjeningsdager = tilstrekkeligAntallOpptjeningsdager,
+                arbeidsforhold = arbeidsforhold,
+                antallOpptjeningsdager = antallOpptjeningsdager,
+                paragraf = Paragraf.PARAGRAF_8_2,
+                versjon = LocalDate.of(2020, 6, 12),
+                ledd = 1.ledd
+            )
+        )
     }
 
     override fun `§8-3 ledd 1 punktum 2`(

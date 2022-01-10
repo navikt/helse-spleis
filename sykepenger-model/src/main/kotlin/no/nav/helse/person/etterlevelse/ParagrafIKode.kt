@@ -68,16 +68,19 @@ class Paragraf816Ledd1 private constructor(
         dekningsgrad == other.dekningsgrad && inntekt == other.inntekt && dekningsgrunnlag == other.dekningsgrunnlag
 }
 
-class Paragraf82Ledd2(
+class EnkelVurdering(
     override val oppfylt: Boolean,
     private val skjæringstidspunkt: LocalDate,
     private val tilstrekkeligAntallOpptjeningsdager: Int,
     private val arbeidsforhold: List<Map<String, Any?>>,
-    private val antallOpptjeningsdager: Int
+    private val antallOpptjeningsdager: Int,
+    override val paragraf: Paragraf,
+    override val versjon: LocalDate,
+    override val ledd: Ledd,
+    override val bokstav: List<Bokstav> = emptyList(),
+    override val punktum: List<Punktum> = emptyList()
+
 ) : ParagrafIKode() {
-    override val versjon: LocalDate = LocalDate.of(2020, 6, 12)
-    override val paragraf = Paragraf.PARAGRAF_8_2
-    override val ledd = 1.ledd
 
     override fun aggreger(vurderinger: Set<ParagrafIKode>) = this
 }
