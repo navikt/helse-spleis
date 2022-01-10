@@ -128,7 +128,8 @@ data class Utbetaling(
     val personNettoBeløp: Int,
     val arbeidsgiverFagsystemId: String,
     val personFagsystemId: String,
-    val vurdering: Vurdering?
+    val vurdering: Vurdering?,
+    val id: UUID
 ) {
     fun erAnnullering() = type == "ANNULLERING"
     data class Vurdering(

@@ -136,6 +136,7 @@ data class GraphQLVurdering(
 )
 
 data class GraphQLUtbetaling(
+    val id: UUID,
     val type: String,
     val status: String,
     val arbeidsgiverNettoBelop: Int,
@@ -165,6 +166,7 @@ interface GraphQLTidslinjeperiode {
     val inntektstype: GraphQLInntektstype
     val erForkastet: Boolean
     val opprettet: LocalDateTime
+    val vedtaksperiodeId: UUID
 }
 
 data class GraphQLUberegnetPeriode(
@@ -175,7 +177,8 @@ data class GraphQLUberegnetPeriode(
     override val periodetype: GraphQLPeriodetype,
     override val inntektstype: GraphQLInntektstype,
     override val erForkastet: Boolean,
-    override val opprettet: LocalDateTime
+    override val opprettet: LocalDateTime,
+    override val vedtaksperiodeId: UUID
 ) : GraphQLTidslinjeperiode {
     override val id: UUID = UUID.randomUUID()
 }
@@ -222,6 +225,7 @@ data class GraphQLBeregnetPeriode(
     override val inntektstype: GraphQLInntektstype,
     override val erForkastet: Boolean,
     override val opprettet: LocalDateTime,
+    override val vedtaksperiodeId: UUID,
     val beregningId: UUID,
     val gjenstaendeSykedager: Int?,
     val forbrukteSykedager: Int?,

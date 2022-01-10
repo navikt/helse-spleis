@@ -82,19 +82,20 @@ internal class UtbetalingBuilder(utbetaling: InternUtbetaling): UtbetalingVisito
         val vurdering = VurderingBuilder(utbetaling).build()
         val oppdragBuilder = OppdragBuilder(utbetaling)
         this.utbetaling = IUtbetaling(
-            beregningId,
-            tidsstempel,
-            tidslinje,
-            maksdato,
-            gjenståendeSykedager,
-            forbrukteSykedager,
-            type.toString(),
-            tilstand::class.simpleName!!,
-            arbeidsgiverNettoBeløp,
-            personNettoBeløp,
-            oppdragBuilder.arbeidsgiverFagsystemId(),
-            oppdragBuilder.personFagsystemId(),
-            vurdering
+            id = id,
+            beregningId = beregningId,
+            opprettet = tidsstempel,
+            utbetalingstidslinje = tidslinje,
+            maksdato = maksdato,
+            gjenståendeSykedager = gjenståendeSykedager,
+            forbrukteSykedager = forbrukteSykedager,
+            type = type.toString(),
+            tilstand = tilstand::class.simpleName!!,
+            arbeidsgiverNettoBeløp = arbeidsgiverNettoBeløp,
+            personNettoBeløp = personNettoBeløp,
+            arbeidsgiverFagsystemId = oppdragBuilder.arbeidsgiverFagsystemId(),
+            personFagsystemId = oppdragBuilder.personFagsystemId(),
+            vurdering = vurdering
         )
     }
 }

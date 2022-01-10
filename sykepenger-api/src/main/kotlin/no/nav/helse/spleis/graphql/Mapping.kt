@@ -71,6 +71,7 @@ private fun mapDag(dag: SammenslåttDag) = GraphQLDag(
 )
 
 private fun mapUtbetaling(utbetaling: Utbetaling) = GraphQLUtbetaling(
+    id = utbetaling.id,
     type = utbetaling.type,
     status = utbetaling.status,
     arbeidsgiverNettoBelop = utbetaling.arbeidsgiverNettoBeløp,
@@ -172,6 +173,7 @@ internal fun mapTidslinjeperiode(periode: Tidslinjeperiode) =
             inntektstype = mapInntektstype(periode.inntektskilde),
             erForkastet = periode.erForkastet,
             opprettet = periode.opprettet,
+            vedtaksperiodeId = periode.vedtaksperiodeId,
             beregningId = periode.beregningId,
             gjenstaendeSykedager = periode.gjenståendeSykedager,
             forbrukteSykedager = periode.forbrukteSykedager,
@@ -202,7 +204,8 @@ internal fun mapTidslinjeperiode(periode: Tidslinjeperiode) =
             periodetype = mapPeriodetype(periode.periodetype),
             inntektstype = mapInntektstype(periode.inntektskilde),
             erForkastet = periode.erForkastet,
-            opprettet = periode.opprettet
+            opprettet = periode.opprettet,
+            vedtaksperiodeId = periode.vedtaksperiodeId,
         )
     }
 

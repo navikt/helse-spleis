@@ -236,6 +236,7 @@ internal class IVedtaksperiode(
 }
 
 internal class IUtbetaling(
+    val id: UUID,
     val beregningId: BeregningId,
     val opprettet: LocalDateTime,
     val utbetalingstidslinje: List<Utbetalingstidslinjedag>,
@@ -259,7 +260,8 @@ internal class IUtbetaling(
             personNettoBeløp,
             arbeidsgiverFagsystemId,
             personFagsystemId,
-            vurdering
+            vurdering,
+            id
         )
     }
 }
