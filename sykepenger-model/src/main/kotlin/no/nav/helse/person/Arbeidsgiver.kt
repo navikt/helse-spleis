@@ -683,7 +683,7 @@ internal class Arbeidsgiver private constructor(
         return ForkastetVedtaksperiode.arbeidsgiverperiodeFor(person, forkastede, organisasjonsnummer, sykdomstidslinje, periode)
     }
 
-    internal fun ghostPerioder() = person.skjæringstidspunkterFraSpleis()
+    internal fun ghostPerioder() = person.skjæringstidspunkterFraSpleis(organisasjonsnummer)
         .filter { skjæringstidspunkt -> vedtaksperioder.none { it.gjelder(skjæringstidspunkt) } }
         .mapNotNull { skjæringstidspunkt -> person.ghostPeriode(skjæringstidspunkt) }
 

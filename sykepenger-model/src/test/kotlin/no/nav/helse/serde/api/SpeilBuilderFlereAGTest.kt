@@ -139,4 +139,48 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         assertEquals(emptyList<GhostPeriode>(), speilJson.arbeidsgivere.single { it.organisasjonsnummer == a1.toString() }.ghostPerioder)
         assertEquals(listOf(GhostPeriode(1.februar, 20.februar)), speilJson.arbeidsgivere.single { it.organisasjonsnummer == a2.toString() }.ghostPerioder)
     }
+
+    @Test
+    fun `skal ikke lage ghosts for gamle arbeidsgivere`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar(2017), 20.januar(2017), 100.prosent), orgnummer = a3)
+        håndterSøknad(Sykdom(1.januar(2017), 20.januar(2017), 100.prosent), orgnummer = a3)
+        håndterInntektsmelding(listOf(1.januar(2017) til 16.januar(2017)), orgnummer = a3)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a3)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a3)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a3)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a3)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = true, orgnummer = a3)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = a3)
+
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt INNTEKT
+                    a2 inntekt 10000.månedlig
+                }
+            }),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektperioderForSykepengegrunnlag {
+                1.oktober(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt INNTEKT
+                    a2 inntekt 10000.månedlig
+                }
+            }, emptyList()),
+            arbeidsforhold = listOf(
+                Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),
+                Arbeidsforhold(a2.toString(), LocalDate.EPOCH, null)
+            )
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+
+        val speilJson = serializePersonForSpeil(person)
+        assertEquals(emptyList<GhostPeriode>(), speilJson.arbeidsgivere.single { it.organisasjonsnummer == a1.toString() }.ghostPerioder)
+        assertEquals(listOf(GhostPeriode(1.januar, 20.januar)), speilJson.arbeidsgivere.single { it.organisasjonsnummer == a2.toString() }.ghostPerioder)
+        assertEquals(emptyList<GhostPeriode>(), speilJson.arbeidsgivere.single { it.organisasjonsnummer == a3.toString() }.ghostPerioder)
+    }
 }

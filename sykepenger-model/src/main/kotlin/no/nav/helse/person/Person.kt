@@ -368,7 +368,7 @@ class Person private constructor(
     internal fun skjæringstidspunkter() =
         Arbeidsgiver.skjæringstidspunkter(arbeidsgivere, infotrygdhistorikk)
 
-    internal fun skjæringstidspunkterFraSpleis() = vilkårsgrunnlagHistorikk.skjæringstidspunkterFraSpleis()
+    internal fun skjæringstidspunkterFraSpleis(orgnummer: String) = vilkårsgrunnlagHistorikk.skjæringstidspunkterFraSpleis(orgnummer)
 
     internal fun trengerHistorikkFraInfotrygd(hendelse: IAktivitetslogg, cutoff: LocalDateTime? = null): Boolean {
         val tidligsteDato = arbeidsgivereMedSykdom().minOf { it.tidligsteDato() }
