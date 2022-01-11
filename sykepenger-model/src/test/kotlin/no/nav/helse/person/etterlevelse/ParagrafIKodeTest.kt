@@ -106,7 +106,7 @@ internal class ParagrafIKodeTest {
         override val input = input
         override val output = output
 
-        override fun aggreger(vurderinger: Set<ParagrafIKode>): ParagrafIKode {
+        override fun aggreger(vurderinger: List<ParagrafIKode>): List<ParagrafIKode> {
             TODO("Not yet implemented")
         }
     }

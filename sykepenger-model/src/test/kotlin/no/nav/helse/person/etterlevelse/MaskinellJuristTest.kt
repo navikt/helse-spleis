@@ -50,5 +50,70 @@ internal class MaskinellJuristTest {
         }
         assertEquals(1, etterlevelseObserver.vurderinger().size)
     }
+
+    @Test
+    fun `Grupperer vurderinger som ligger inntil hverandre`() {
+        etterlevelseObserver.`§8-16 ledd 1`(1.januar, 1.0, 1000.0, 1000.0)
+        etterlevelseObserver.`§8-16 ledd 1`(2.januar, 1.0, 1000.0, 1000.0)
+        assertEquals(1, etterlevelseObserver.vurderinger().size)
+    }
+
+    @Test
+    fun `Grupperer vurderinger som ligger inntil hverandre - motsatt rekkefølge`() {
+        etterlevelseObserver.`§8-16 ledd 1`(2.januar, 1.0, 1000.0, 1000.0)
+        etterlevelseObserver.`§8-16 ledd 1`(1.januar, 1.0, 1000.0, 1000.0)
+        assertEquals(1, etterlevelseObserver.vurderinger().size)
+    }
+
+    @Test
+    fun `Grupperer ikke vurderinger som ikke ligger inntil hverandre`() {
+        etterlevelseObserver.`§8-16 ledd 1`(1.januar, 1.0, 1000.0, 1000.0)
+        etterlevelseObserver.`§8-16 ledd 1`(3.januar, 1.0, 1000.0, 1000.0)
+        assertEquals(2, etterlevelseObserver.vurderinger().size)
+    }
+
+    @Test
+    fun `Grupperer ikke vurderinger som ikke ligger inntil hverandre - motsatt rekkefølge`() {
+        etterlevelseObserver.`§8-16 ledd 1`(3.januar, 1.0, 1000.0, 1000.0)
+        etterlevelseObserver.`§8-16 ledd 1`(1.januar, 1.0, 1000.0, 1000.0)
+        assertEquals(2, etterlevelseObserver.vurderinger().size)
+    }
+
+    @Test
+    fun `Grupperer vurderinger som ligger inntil hverandre inklusiv helg`() {
+        etterlevelseObserver.`§8-16 ledd 1`(5.januar, 1.0, 1000.0, 1000.0)
+        etterlevelseObserver.`§8-16 ledd 1`(8.januar, 1.0, 1000.0, 1000.0)
+        assertEquals(1, etterlevelseObserver.vurderinger().size)
+    }
+
+    @Test
+    fun `Grupperer vurderinger som ligger inntil hverandre inni helg`() {
+        etterlevelseObserver.`§8-16 ledd 1`(5.januar, 1.0, 1000.0, 1000.0)
+        etterlevelseObserver.`§8-16 ledd 1`(7.januar, 1.0, 1000.0, 1000.0)
+        assertEquals(1, etterlevelseObserver.vurderinger().size)
+    }
+
+    @Test
+    fun `Grupperer vurderinger som ligger inntil hverandre inni helg - eksisterende slutter i helg`() {
+        etterlevelseObserver.`§8-16 ledd 1`(6.januar, 1.0, 1000.0, 1000.0)
+        etterlevelseObserver.`§8-16 ledd 1`(8.januar, 1.0, 1000.0, 1000.0)
+        assertEquals(1, etterlevelseObserver.vurderinger().size)
+    }
+
+    @Test
+    fun `Grupperer vurderinger som ligger inntil hverandre inklusiv helg - motsatt rekkefølge`() {
+        etterlevelseObserver.`§8-16 ledd 1`(8.januar, 1.0, 1000.0, 1000.0)
+        etterlevelseObserver.`§8-16 ledd 1`(5.januar, 1.0, 1000.0, 1000.0)
+        assertEquals(1, etterlevelseObserver.vurderinger().size)
+    }
+
+    @Test
+    fun `Grupperer vurderinger som overlapper`() {
+        etterlevelseObserver.`§8-16 ledd 1`(1.januar, 1.0, 1000.0, 1000.0)
+        etterlevelseObserver.`§8-16 ledd 1`(2.januar, 1.0, 1000.0, 1000.0)
+        etterlevelseObserver.`§8-16 ledd 1`(3.januar, 1.0, 1000.0, 1000.0)
+        etterlevelseObserver.`§8-16 ledd 1`(2.januar, 1.0, 1000.0, 1000.0)
+        assertEquals(1, etterlevelseObserver.vurderinger().size)
+    }
 }
 

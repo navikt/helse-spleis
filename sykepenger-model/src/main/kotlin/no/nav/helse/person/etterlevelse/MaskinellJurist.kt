@@ -8,11 +8,10 @@ import java.time.LocalDate
 import java.time.Year
 
 class MaskinellJurist : EtterlevelseObserver {
-
-    private val vurderinger = mutableSetOf<ParagrafIKode>()
+    private var vurderinger = listOf<ParagrafIKode>()
 
     private fun leggTil(vurdering: ParagrafIKode) {
-        vurderinger.add(vurdering.aggreger(vurderinger.toSet()))
+        vurderinger = vurdering.aggreger(vurderinger)
     }
 
     override fun `§2`(oppfylt: Boolean) {
