@@ -115,5 +115,19 @@ internal class MaskinellJuristTest {
         etterlevelseObserver.`§8-16 ledd 1`(2.januar, 1.0, 1000.0, 1000.0)
         assertEquals(1, etterlevelseObserver.vurderinger().size)
     }
+
+    @Test
+    fun `Grupperer vurderinger som ligger i helg`() {
+        etterlevelseObserver.`§8-16 ledd 1`(6.januar, 1.0, 1000.0, 1000.0)
+        etterlevelseObserver.`§8-16 ledd 1`(7.januar, 1.0, 1000.0, 1000.0)
+        assertEquals(1, etterlevelseObserver.vurderinger().size)
+    }
+
+    @Test
+    fun `Grupperer vurderinger som ligger i helg - motsatt rekkefølge`() {
+        etterlevelseObserver.`§8-16 ledd 1`(7.januar, 1.0, 1000.0, 1000.0)
+        etterlevelseObserver.`§8-16 ledd 1`(6.januar, 1.0, 1000.0, 1000.0)
+        assertEquals(1, etterlevelseObserver.vurderinger().size)
+    }
 }
 
