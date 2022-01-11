@@ -35,6 +35,7 @@ data class ArbeidsgiverDTO(
     val organisasjonsnummer: String,
     val id: UUID,
     val vedtaksperioder: List<VedtaksperiodeDTOBase>,
+    val ghostPerioder: List<GhostPeriode>,
     val utbetalingshistorikk: List<UtbetalingshistorikkElementDTO>,
     val generasjoner: List<Generasjon>?
 )
@@ -95,6 +96,11 @@ data class VedtaksperiodeDTO(
     @Deprecated("Speil må bytte til sisteUtbetaling")
     val utbetalteUtbetalinger: UtbetalingerDTO = utbetalinger
 }
+
+data class GhostPeriode(
+    val fom: LocalDate,
+    val tom: LocalDate
+)
 
 data class UtbetalingerDTO(
     val arbeidsgiverUtbetaling: UtbetalingDTO?,

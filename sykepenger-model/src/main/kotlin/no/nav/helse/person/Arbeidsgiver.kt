@@ -156,6 +156,13 @@ internal class Arbeidsgiver private constructor(
         internal fun skjæringstidspunkter(arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) =
             infotrygdhistorikk.skjæringstidspunkter(arbeidsgivere.map(Arbeidsgiver::sykdomstidslinje))
 
+        internal fun Iterable<Arbeidsgiver>.ghostPeriode(skjæringstidspunkt: LocalDate): Periode? {
+            val relevanteVedtaksperioder = flatMap { it.vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt) }
+            if (relevanteVedtaksperioder.isEmpty()) return null
+            return relevanteVedtaksperioder.minOf { it.periode().start } til relevanteVedtaksperioder.maxOf { it.periode().endInclusive }
+        }
+
+
         internal fun Iterable<Arbeidsgiver>.beregnFeriepengerForAlleArbeidsgivere(
             aktørId: String,
             feriepengeberegner: Feriepengeberegner,
@@ -675,6 +682,10 @@ internal class Arbeidsgiver private constructor(
         val sykdomstidslinje = sykdomstidslinje()
         return ForkastetVedtaksperiode.arbeidsgiverperiodeFor(person, forkastede, organisasjonsnummer, sykdomstidslinje, periode)
     }
+
+    internal fun ghostPerioder() = person.skjæringstidspunkterFraSpleis()
+        .filter { skjæringstidspunkt -> vedtaksperioder.none { it.gjelder(skjæringstidspunkt) } }
+        .mapNotNull { skjæringstidspunkt -> person.ghostPeriode(skjæringstidspunkt) }
 
     internal fun infotrygdUtbetalingstidslinje() = person.infotrygdUtbetalingstidslinje(organisasjonsnummer)
 

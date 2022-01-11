@@ -1,8 +1,12 @@
 package no.nav.helse.serde.api.builders
 
 import no.nav.helse.Toggle
-import no.nav.helse.person.*
+import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.ForkastetVedtaksperiode
+import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.serde.api.ArbeidsgiverDTO
+import no.nav.helse.serde.api.GhostPeriode
 import no.nav.helse.serde.api.v2.HendelseDTO
 import no.nav.helse.serde.api.v2.buildere.GenerasjonerBuilder
 import no.nav.helse.serde.api.v2.buildere.IVilkårsgrunnlagHistorikk
@@ -18,7 +22,7 @@ internal class ArbeidsgiverBuilder(
     private val id: UUID,
     private val organisasjonsnummer: String,
     fødselsnummer: String,
-    private val inntektshistorikkBuilder: InntektshistorikkBuilder,
+    inntektshistorikkBuilder: InntektshistorikkBuilder
 ) : BuilderState() {
     private val utbetalingshistorikkBuilder = UtbetalingshistorikkBuilder()
     private val utbetalinger = mutableListOf<Utbetaling>()
@@ -48,7 +52,8 @@ internal class ArbeidsgiverBuilder(
             id = id,
             vedtaksperioder = perioderBuilder.build(hendelser, utbetalingshistorikk) + forkastetPerioderBuilder.build(hendelser, utbetalingshistorikk).filter { it.tilstand.visesNårForkastet() },
             utbetalingshistorikk = utbetalingshistorikk,
-            generasjoner = if (Toggle.SpeilApiV2.enabled) GenerasjonerBuilder(hendelser, fødselsnummer.somFødselsnummer(), vilkårsgrunnlagHistorikk, arbeidsgiver).build() else null
+            generasjoner = if (Toggle.SpeilApiV2.enabled) GenerasjonerBuilder(hendelser, fødselsnummer.somFødselsnummer(), vilkårsgrunnlagHistorikk, arbeidsgiver).build() else null,
+            ghostPerioder = arbeidsgiver.ghostPerioder().map { GhostPeriode(it.start, it.endInclusive) }
         )
     }
 

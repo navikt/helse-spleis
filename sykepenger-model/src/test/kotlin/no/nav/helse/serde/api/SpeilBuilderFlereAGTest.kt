@@ -1,0 +1,142 @@
+package no.nav.helse.serde.api
+
+import no.nav.helse.Toggle
+import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.spleis.e2e.*
+import no.nav.helse.testhelpers.*
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import java.time.LocalDate
+
+internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
+    @BeforeEach
+    fun beforeAllTests() {
+        Toggle.SpeilApiV2.enable()
+    }
+
+    @AfterEach
+    fun afterAllTests() {
+        Toggle.SpeilApiV2.pop()
+    }
+
+    @Test
+    fun `sender med ghost tidslinjer til speil`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt INNTEKT
+                    a2 inntekt 10000.månedlig
+                }
+            }),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektperioderForSykepengegrunnlag {
+                1.oktober(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt INNTEKT
+                    a2 inntekt 10000.månedlig
+                }
+            }, emptyList()),
+            arbeidsforhold = listOf(
+                Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),
+                Arbeidsforhold(a2.toString(), LocalDate.EPOCH, null)
+            )
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+
+        val speilJson = serializePersonForSpeil(person)
+        assertEquals(emptyList<GhostPeriode>(), speilJson.arbeidsgivere.single { it.organisasjonsnummer == a1.toString() }.ghostPerioder)
+        assertEquals(listOf(GhostPeriode(1.januar, 20.januar)), speilJson.arbeidsgivere.single { it.organisasjonsnummer == a2.toString() }.ghostPerioder)
+    }
+
+    @Test
+    fun `sender med ghost tidslinjer til speil med flere arbeidsgivere ulik fom`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(4.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(4.januar, 31.januar, 100.prosent), orgnummer = a2)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterInntektsmelding(listOf(4.januar til 19.januar), orgnummer = a2, beregnetInntekt = 5000.månedlig)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt INNTEKT
+                    a2 inntekt 5000.månedlig
+                    a3 inntekt 10000.månedlig
+                }
+            }),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektperioderForSykepengegrunnlag {
+                1.oktober(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt INNTEKT
+                    a2 inntekt 5000.månedlig
+                    a3 inntekt 10000.månedlig
+                }
+            }, emptyList()),
+            arbeidsforhold = listOf(
+                Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),
+                Arbeidsforhold(a3.toString(), LocalDate.EPOCH, null)
+            )
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+
+        val speilJson1 = serializePersonForSpeil(person)
+        assertEquals(emptyList<GhostPeriode>(), speilJson1.arbeidsgivere.single { it.organisasjonsnummer == a1.toString() }.ghostPerioder)
+        assertEquals(emptyList<GhostPeriode>(), speilJson1.arbeidsgivere.single { it.organisasjonsnummer == a2.toString() }.ghostPerioder)
+        assertEquals(listOf(GhostPeriode(1.januar, 31.januar)), speilJson1.arbeidsgivere.single { it.organisasjonsnummer == a3.toString() }.ghostPerioder)
+    }
+
+    @Test
+    fun `lager ikke ghosts for forkastede perioder med vilkårsgrunnlag fra spleis`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a2)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false, orgnummer = a2)
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 20.februar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.februar, 20.februar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt INNTEKT
+                    a2 inntekt 10000.månedlig
+                }
+            }),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektperioderForSykepengegrunnlag {
+                1.oktober(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt INNTEKT
+                    a2 inntekt 10000.månedlig
+                }
+            }, emptyList()),
+            arbeidsforhold = listOf(
+                Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),
+                Arbeidsforhold(a2.toString(), LocalDate.EPOCH, null)
+            )
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+
+        val speilJson = serializePersonForSpeil(person)
+        assertEquals(emptyList<GhostPeriode>(), speilJson.arbeidsgivere.single { it.organisasjonsnummer == a1.toString() }.ghostPerioder)
+        assertEquals(listOf(GhostPeriode(1.februar, 20.februar)), speilJson.arbeidsgivere.single { it.organisasjonsnummer == a2.toString() }.ghostPerioder)
+    }
+}

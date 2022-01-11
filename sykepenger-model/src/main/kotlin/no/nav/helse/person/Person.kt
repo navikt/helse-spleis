@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.utbetaling.*
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnSykepengegrunnlag
+import no.nav.helse.person.Arbeidsgiver.Companion.ghostPeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSammenligningsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.harArbeidsgivereMedOverlappendeUtbetaltePerioder
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntekt
@@ -367,6 +368,8 @@ class Person private constructor(
     internal fun skjæringstidspunkter() =
         Arbeidsgiver.skjæringstidspunkter(arbeidsgivere, infotrygdhistorikk)
 
+    internal fun skjæringstidspunkterFraSpleis() = vilkårsgrunnlagHistorikk.skjæringstidspunkterFraSpleis()
+
     internal fun trengerHistorikkFraInfotrygd(hendelse: IAktivitetslogg, cutoff: LocalDateTime? = null): Boolean {
         val tidligsteDato = arbeidsgivereMedSykdom().minOf { it.tidligsteDato() }
         return infotrygdhistorikk.oppfriskNødvendig(hendelse, tidligsteDato, cutoff)
@@ -437,6 +440,8 @@ class Person private constructor(
         }
 
     internal fun nåværendeVedtaksperioder(filter: VedtaksperiodeFilter) = arbeidsgivere.nåværendeVedtaksperioder(filter).sorted()
+
+    internal fun ghostPeriode(skjæringstidspunkt: LocalDate) = arbeidsgivere.ghostPeriode(skjæringstidspunkt)
 
     internal fun harNærliggendeUtbetaling(periode: Periode): Boolean {
         val arbeidsgiverperiode = 16L

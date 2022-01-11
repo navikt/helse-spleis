@@ -49,6 +49,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
     internal fun inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver() = historikk.firstOrNull()?.inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver()
 
+    internal fun skjæringstidspunkterFraSpleis() = historikk.firstOrNull()?.skjæringstidspunkterFraSpleis() ?: emptySet()
+
     internal fun erRelevant(organisasjonsnummer: String, skjæringstidspunkter: List<LocalDate>) = historikk.firstOrNull()?.erRelevant(organisasjonsnummer, skjæringstidspunkter) ?: false
 
     internal class Innslag(private val id: UUID, private val opprettet: LocalDateTime) {
@@ -85,6 +87,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             vilkårsgrunnlag.mapValues { (_, vilkårsgrunnlagElement) ->
                 vilkårsgrunnlagElement.inntektsopplysningPerArbeidsgiver()
             }
+
+        internal fun skjæringstidspunkterFraSpleis() = vilkårsgrunnlag.filterValues { it is Grunnlagsdata }.keys
 
         fun erRelevant(organisasjonsnummer: String, skjæringstidspunkter: List<LocalDate>) =
             skjæringstidspunkter.mapNotNull(vilkårsgrunnlag::get)
