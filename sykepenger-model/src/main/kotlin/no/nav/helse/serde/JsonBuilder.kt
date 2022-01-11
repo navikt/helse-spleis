@@ -947,6 +947,15 @@ internal class JsonBuilder : AbstractBuilder() {
             ))
         }
 
+        override fun visitIkkeRapportert(id: UUID, dato: LocalDate, tidsstempel: LocalDateTime) {
+            inntektsopplysninger.putAll(mapOf(
+                "id" to id,
+                "dato" to dato,
+                "kilde" to Inntektsopplysningskilde.IKKE_RAPPORTERT,
+                "tidsstempel" to tidsstempel
+            ))
+        }
+
         override fun visitInfotrygd(
             infotrygd: Inntektshistorikk.Infotrygd,
             id: UUID,

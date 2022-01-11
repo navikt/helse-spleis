@@ -571,6 +571,12 @@ internal data class PersonData(
                                 beløp = requireNotNull(inntektData.beløp).månedlig,
                                 tidsstempel = requireNotNull(inntektData.tidsstempel)
                             )
+                        Inntektsopplysningskilde.IKKE_RAPPORTERT ->
+                            Inntektshistorikk.IkkeRapportert(
+                                id = requireNotNull(inntektData.id),
+                                dato = requireNotNull(inntektData.dato),
+                                tidsstempel = requireNotNull(inntektData.tidsstempel)
+                            )
                         Inntektsopplysningskilde.SAKSBEHANDLER ->
                             Inntektshistorikk.Saksbehandler(
                                 id = requireNotNull(inntektData.id),

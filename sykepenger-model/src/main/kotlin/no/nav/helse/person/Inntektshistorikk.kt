@@ -241,13 +241,15 @@ internal class Inntektshistorikk {
     }
 
     internal class IkkeRapportert(
-        override val dato: LocalDate
+        private val id: UUID,
+        override val dato: LocalDate,
+        private val tidsstempel: LocalDateTime = LocalDateTime.now()
     ) : Inntektsopplysning {
 
         override val prioritet = 10
 
         override fun accept(visitor: InntekthistorikkVisitor) {
-            visitor.visitIkkeRapportert(dato)
+            visitor.visitIkkeRapportert(id, dato, tidsstempel)
         }
 
         override fun grunnlagForSykepengegrunnlag() = Inntekt.INGEN

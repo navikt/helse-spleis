@@ -164,6 +164,10 @@ class JsonBuilderTest {
         testSerialiseringAvPerson(personMedGhost())
 
     @Test
+    fun `Skal serialisere ghost uten inntekt`() =
+        testSerialiseringAvPerson(personMedGhostUtenInntekt())
+
+    @Test
     fun `Serialisering av ugyldig periode i infotrygdhistorikk`() = testSerialiseringAvPerson(personMedUgyldigPeriodeIHistorikken())
 
     private fun testSerialiseringAvPerson(person: Person) {
@@ -210,6 +214,39 @@ class JsonBuilderTest {
             håndter(inntektsmelding(fom = fom))
             håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
             håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
+            håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+            håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
+            håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
+            fangeUtbetalinger()
+            håndter(overføring())
+            håndter(utbetalt())
+            fangeVedtaksperiode()
+        }
+
+    private fun personMedGhostUtenInntekt(
+        fom: LocalDate = 1.januar,
+        tom: LocalDate = 31.januar,
+        sendtSøknad: LocalDate = 1.april,
+        søknadhendelseId: UUID = UUID.randomUUID()
+    ): Person =
+        Person(aktørId, fnr).apply {
+            håndter(sykmelding(fom = fom, tom = tom))
+            fangeVedtaksperiode()
+            håndter(
+                søknad(
+                    hendelseId = søknadhendelseId,
+                    fom = fom,
+                    tom = tom,
+                    sendtSøknad = sendtSøknad.atStartOfDay()
+                )
+            )
+            fangeSykdomstidslinje()
+            håndter(inntektsmelding(fom = fom))
+            håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+            håndter(vilkårsgrunnlag(
+                vedtaksperiodeId = vedtaksperiodeId,
+                arbeidsforhold = listOf(Arbeidsforhold(orgnummer.toString(), 1.januar(2017)), Arbeidsforhold("987654326", 1.desember(2017))))
+            )
             håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
             håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
             håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))

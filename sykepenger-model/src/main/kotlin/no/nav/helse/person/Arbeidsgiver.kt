@@ -110,7 +110,7 @@ internal class Arbeidsgiver private constructor(
             this.mapNotNull { arbeidsgiver ->
                 val inntektsopplysning = arbeidsgiver.inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt, arbeidsgiver.finnFørsteFraværsdag(skjæringstidspunkt))
                 if (inntektsopplysning == null && arbeidsgiver.harArbeidsforholdNyereEnnTreMåneder(skjæringstidspunkt)) {
-                    ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, Inntektshistorikk.IkkeRapportert(skjæringstidspunkt))
+                    ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, Inntektshistorikk.IkkeRapportert(UUID.randomUUID(), skjæringstidspunkt))
                 } else if (inntektsopplysning != null) {
                     ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, inntektsopplysning)
                 } else null

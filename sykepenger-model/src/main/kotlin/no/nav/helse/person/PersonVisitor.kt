@@ -563,7 +563,9 @@ internal interface InntekthistorikkVisitor {
     }
 
     fun visitIkkeRapportert(
-        dato: LocalDate
+        id: UUID,
+        dato: LocalDate,
+        tidsstempel: LocalDateTime
     ) {
     }
 
