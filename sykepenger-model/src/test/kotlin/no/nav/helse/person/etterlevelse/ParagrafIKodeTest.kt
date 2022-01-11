@@ -20,8 +20,26 @@ internal class ParagrafIKodeTest {
 
     @Test
     fun testEquals() {
-        val paragraf1 = testParagraf(true, LocalDate.MIN, paragraf = PARAGRAF_2, ledd = 1.ledd, bokstav = listOf(BOKSTAV_A), punktum = listOf(PUNKTUM_1))
-        val paragraf2 = testParagraf(true, LocalDate.MIN, paragraf = PARAGRAF_2, ledd = 1.ledd, bokstav = listOf(BOKSTAV_A), punktum = listOf(PUNKTUM_1))
+        val paragraf1 = testParagraf(
+            true,
+            LocalDate.MIN,
+            paragraf = PARAGRAF_2,
+            ledd = 1.ledd,
+            bokstav = listOf(BOKSTAV_A),
+            punktum = listOf(PUNKTUM_1),
+            input = mapOf("a" to "a"),
+            output = mapOf("b" to "b")
+        )
+        val paragraf2 = testParagraf(
+            true,
+            LocalDate.MIN,
+            paragraf = PARAGRAF_2,
+            ledd = 1.ledd,
+            bokstav = listOf(BOKSTAV_A),
+            punktum = listOf(PUNKTUM_1),
+            input = mapOf("a" to "a"),
+            output = mapOf("b" to "b")
+        )
         assertEquals(paragraf1, paragraf2)
     }
 
