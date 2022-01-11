@@ -1,0 +1,62 @@
+{
+    "vilkårsgrunnlagHistorikk": [
+        {
+            "vilkårsgrunnlag": [
+                {
+                    "skjæringstidspunkt": "2018-01-01",
+                    "sykepengegrunnlag": {
+                        "arbeidsgiverInntektsopplysninger": [
+                            {
+                                "orgnummer": "987654321",
+                                "inntektsopplysning": {
+                                    "id": "93ca4d6f-6226-4874-ac52-8d7ec9650034",
+                                    "dato": "2018-01-01",
+                                    "kilde": "INNTEKTSMELDING"
+                                }
+                            },
+                            {
+                                "orgnummer": "987654326",
+                                "inntektsopplysning": {}
+                            }
+                        ]
+                    }
+                },
+                {
+                    "skjæringstidspunkt": "2017-01-01",
+                    "sykepengegrunnlag": {
+                        "arbeidsgiverInntektsopplysninger": [
+                            {
+                                "orgnummer": "987654321",
+                                "inntektsopplysning": {
+                                    "id": "93ca4d6f-6226-4874-ac52-8d7ec9650034",
+                                    "dato": "2018-01-01",
+                                    "kilde": "INNTEKTSMELDING"
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "vilkårsgrunnlag": [
+                {
+                    "skjæringstidspunkt": "2017-01-01",
+                    "sykepengegrunnlag": {
+                        "arbeidsgiverInntektsopplysninger": [
+                            {
+                                "orgnummer": "987654321",
+                                "inntektsopplysning": {
+                                    "id": "93ca4d6f-6226-4874-ac52-8d7ec9650034",
+                                    "dato": "2017-01-01",
+                                    "kilde": "INNTEKTSMELDING"
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ],
+    "skjemaVersjon": 138
+}
