@@ -2,6 +2,7 @@ package no.nav.helse.person.etterlevelse
 
 import no.nav.helse.person.Ledd.Companion.ledd
 import no.nav.helse.person.Paragraf
+import no.nav.helse.person.Punktum.Companion.punktum
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 import java.time.LocalDate
@@ -64,7 +65,22 @@ class MaskinellJurist : EtterlevelseObserver {
         skjæringstidspunkt: LocalDate,
         grunnlagForSykepengegrunnlag: Inntekt
     ) {
-        super.`§8-10 ledd 2 punktum 1`(oppfylt, funnetRelevant, maksimaltSykepengegrunnlag, skjæringstidspunkt, grunnlagForSykepengegrunnlag)
+        leggTil(
+            BetingetVurdering(
+                funnetRelevant = funnetRelevant,
+                oppfylt = oppfylt,
+                LocalDate.of(2020, 1, 1),
+                Paragraf.PARAGRAF_8_10,
+                2.ledd,
+                1.punktum,
+                input = mapOf(
+                    "maksimaltSykepengegrunnlag" to maksimaltSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
+                    "skjæringstidspunkt" to skjæringstidspunkt,
+                    "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig }
+                ),
+                output = mapOf("funnetRelevant" to funnetRelevant)
+            )
+        )
     }
 
     override fun `§8-10 ledd 3`(oppfylt: Boolean) {

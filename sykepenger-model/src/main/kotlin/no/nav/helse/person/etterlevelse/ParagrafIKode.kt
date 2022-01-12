@@ -65,6 +65,23 @@ abstract class ParagrafIKode {
     }
 }
 
+class EnkelVurdering(
+    override val oppfylt: Boolean,
+    override val paragraf: Paragraf,
+    override val versjon: LocalDate,
+    override val ledd: Ledd,
+    override val punktum: List<Punktum> = emptyList(),
+    override val bokstav: List<Bokstav> = emptyList(),
+    override val input: Map<String, Any>,
+    override val output: Map<String, Any>
+) : ParagrafIKode() {
+    override fun aggreger(vurderinger: List<ParagrafIKode>): List<ParagrafIKode> {
+        return vurderinger.finnOgErstatt<EnkelVurdering> { vurderinger, other ->
+            vurderinger.erstatt(other, this)
+        }
+    }
+}
+
 class GrupperbarVurdering private constructor(
     // For enkelthets skyld, datoen objektet opprinnelig gjelder for
     private val originalDato: LocalDate,
@@ -74,8 +91,8 @@ class GrupperbarVurdering private constructor(
     override val versjon: LocalDate,
     override val paragraf: Paragraf,
     override val ledd: Ledd,
-    override val bokstav: List<Bokstav> = emptyList(),
     override val punktum: List<Punktum> = emptyList(),
+    override val bokstav: List<Bokstav> = emptyList(),
     override val input: Map<String, Any>,
     override val output: Map<String, Any>
 ) : ParagrafIKode() {
@@ -87,9 +104,9 @@ class GrupperbarVurdering private constructor(
         versjon: LocalDate,
         paragraf: Paragraf,
         ledd: Ledd,
-        bokstav: List<Bokstav> = emptyList(),
-        punktum: List<Punktum> = emptyList()
-    ) : this(dato, dato, dato, oppfylt, versjon, paragraf, ledd, bokstav, punktum, input, output)
+        punktum: List<Punktum> = emptyList(),
+        bokstav: List<Bokstav> = emptyList()
+    ) : this(dato, dato, dato, oppfylt, versjon, paragraf, ledd, punktum, bokstav, input, output)
 
     override fun aggreger(vurderinger: List<ParagrafIKode>): List<ParagrafIKode> {
         return vurderinger.finnOgErstatt<GrupperbarVurdering>() { vurderinger, other ->
@@ -107,7 +124,7 @@ class GrupperbarVurdering private constructor(
     }
 
     private fun List<ParagrafIKode>.kopierMed(other: GrupperbarVurdering, originalDato: LocalDate, fom: LocalDate, tom: LocalDate): List<ParagrafIKode> {
-        return erstatt(other, GrupperbarVurdering(originalDato, fom, tom, oppfylt, versjon, paragraf, ledd, bokstav, punktum, input, output))
+        return erstatt(other, GrupperbarVurdering(originalDato, fom, tom, oppfylt, versjon, paragraf, ledd, punktum, bokstav, input, output))
     }
 
     private fun overlapper(other: GrupperbarVurdering) = originalDato >= other.fom && originalDato <= other.tom
@@ -131,18 +148,20 @@ class GrupperbarVurdering private constructor(
     }
 }
 
-class EnkelVurdering(
+class BetingetVurdering(
+    private val funnetRelevant: Boolean,
     override val oppfylt: Boolean,
-    override val paragraf: Paragraf,
     override val versjon: LocalDate,
+    override val paragraf: Paragraf,
     override val ledd: Ledd,
-    override val bokstav: List<Bokstav> = emptyList(),
     override val punktum: List<Punktum> = emptyList(),
+    override val bokstav: List<Bokstav> = emptyList(),
     override val input: Map<String, Any>,
     override val output: Map<String, Any>
 ) : ParagrafIKode() {
     override fun aggreger(vurderinger: List<ParagrafIKode>): List<ParagrafIKode> {
-        return vurderinger.finnOgErstatt<EnkelVurdering> { vurderinger, other ->
+        if (!funnetRelevant) return vurderinger
+        return vurderinger.finnOgErstatt<BetingetVurdering>() { vurderinger, other ->
             vurderinger.erstatt(other, this)
         }
     }
