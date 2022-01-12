@@ -198,7 +198,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
         utbetalingId = UUID.fromString(inspektør.sisteBehov(Behovtype.Godkjenning).kontekst()["utbetalingId"] ?: throw IllegalStateException("Finner ikke utbetalingId i: ${inspektør.sisteBehov(
             Behovtype.Godkjenning
         ).kontekst()}")),
-        vedtaksperiodeId = "${vedtaksperiodeIdInnhenter(ORGNUMMER)}",
+        vedtaksperiodeId = "${vedtaksperiodeIdInnhenter.id(ORGNUMMER)}",
         saksbehandler = godkjentAv,
         saksbehandlerEpost = "mille.mellomleder@nav.no",
         utbetalingGodkjent = godkjent,
@@ -220,13 +220,13 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018.toString(),
             organisasjonsnummer = ORGNUMMER.toString(),
-            vedtaksperiodeId = "${vedtaksperiodeIdInnhenter(ORGNUMMER)}",
+            vedtaksperiodeId = "${vedtaksperiodeIdInnhenter.id(ORGNUMMER)}",
             utbetalingshistorikk = Utbetalingshistorikk(
                 meldingsreferanseId = meldingsreferanseId,
                 aktørId = AKTØRID,
                 fødselsnummer = UNG_PERSON_FNR_2018.toString(),
                 organisasjonsnummer = ORGNUMMER.toString(),
-                vedtaksperiodeId = "${vedtaksperiodeIdInnhenter(ORGNUMMER)}",
+                vedtaksperiodeId = "${vedtaksperiodeIdInnhenter.id(ORGNUMMER)}",
                 arbeidskategorikoder = emptyMap(),
                 harStatslønn = false,
                 perioder = utbetalinger,
@@ -314,7 +314,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
     private fun vilkårsgrunnlag(vedtaksperiodeIdInnhenter: IdInnhenter) =
         Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = "${vedtaksperiodeIdInnhenter(ORGNUMMER)}",
+            vedtaksperiodeId = "${vedtaksperiodeIdInnhenter.id(ORGNUMMER)}",
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = ORGNUMMER.toString(),
@@ -352,7 +352,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
     private fun simulering(vedtaksperiodeIdInnhenter: IdInnhenter) =
         Simulering(
             meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = "${vedtaksperiodeIdInnhenter(ORGNUMMER)}",
+            vedtaksperiodeId = "${vedtaksperiodeIdInnhenter.id(ORGNUMMER)}",
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018.toString(),
             orgnummer = ORGNUMMER.toString(),

@@ -86,7 +86,7 @@ internal class PeriodeVarslerBuilderTest: AbstractEndToEndTest() {
         val vilkårMeldingsreferanse = meldingsreferanseId(vedtaksperiodeId)
         val aktivitetsloggForegående = Vedtaksperiode.aktivitetsloggMedForegåendeUtenUtbetaling(vedtaksperiode)
         val aktivitetsloggVilkårsgrunnlag = Vedtaksperiode.hentVilkårsgrunnlagAktiviteter(vedtaksperiode)
-        return VedtaksperiodeVarslerBuilder(vedtaksperiodeId(ORGNUMMER), aktivitetsloggForegående, aktivitetsloggVilkårsgrunnlag, vilkårMeldingsreferanse).build()
+        return VedtaksperiodeVarslerBuilder(vedtaksperiodeId.id(ORGNUMMER), aktivitetsloggForegående, aktivitetsloggVilkårsgrunnlag, vilkårMeldingsreferanse).build()
     }
 
     private fun meldingsreferanseId(vedtaksperiode: IdInnhenter): UUID? {

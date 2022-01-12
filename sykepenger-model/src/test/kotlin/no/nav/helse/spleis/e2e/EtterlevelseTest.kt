@@ -1213,7 +1213,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         organisasjonsnummer: Organisasjonsnummer = ORGNUMMER,
         inspektør: EtterlevelseInspektør = EtterlevelseInspektør(person.aktivitetslogg)
     ) {
-        val resultat = inspektør.resultat(paragraf, ledd, punktum, bokstaver, vedtaksperiodeId?.invoke(organisasjonsnummer))
+        val resultat = inspektør.resultat(paragraf, ledd, punktum, bokstaver, vedtaksperiodeId?.id(organisasjonsnummer))
         assertTrue(resultat.isNotEmpty()) { "Forventet at $paragraf $ledd $punktum er vurdert" }
     }
 
@@ -1226,7 +1226,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         organisasjonsnummer: Organisasjonsnummer = ORGNUMMER,
         inspektør: EtterlevelseInspektør = EtterlevelseInspektør(person.aktivitetslogg)
     ) {
-        val resultat = inspektør.resultat(paragraf, ledd, punktum, bokstav, vedtaksperiodeId?.invoke(organisasjonsnummer))
+        val resultat = inspektør.resultat(paragraf, ledd, punktum, bokstav, vedtaksperiodeId?.id(organisasjonsnummer))
         assertTrue(resultat.isEmpty()) { "Forventet at $paragraf $ledd $punktum ikke er vurdert" }
     }
 

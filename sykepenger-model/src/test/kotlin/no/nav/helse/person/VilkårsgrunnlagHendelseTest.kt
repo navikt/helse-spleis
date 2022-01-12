@@ -100,13 +100,13 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
         person.håndter(ytelser())
         val inntektsberegningStart =
             hendelse.etterspurtBehov<String>(
-                1.vedtaksperiode(ORGNUMMER),
+                1.vedtaksperiode.id(ORGNUMMER),
                 Behovtype.InntekterForSammenligningsgrunnlag,
                 "beregningStart"
             )
         val inntektsberegningSlutt =
             hendelse.etterspurtBehov<String>(
-                1.vedtaksperiode(ORGNUMMER),
+                1.vedtaksperiode.id(ORGNUMMER),
                 Behovtype.InntekterForSammenligningsgrunnlag,
                 "beregningSlutt"
             )
@@ -225,7 +225,7 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
     ) =
         Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = "${1.vedtaksperiode(ORGNUMMER)}",
+            vedtaksperiodeId = "${1.vedtaksperiode.id(ORGNUMMER)}",
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = ORGNUMMER.toString(),
@@ -243,13 +243,13 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
         aktørId = "aktørId",
         fødselsnummer = UNG_PERSON_FNR_2018.toString(),
         organisasjonsnummer = ORGNUMMER.toString(),
-        vedtaksperiodeId = "${1.vedtaksperiode(ORGNUMMER)}",
+        vedtaksperiodeId = "${1.vedtaksperiode.id(ORGNUMMER)}",
         utbetalingshistorikk = Utbetalingshistorikk(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018.toString(),
             organisasjonsnummer = ORGNUMMER.toString(),
-            vedtaksperiodeId = "${1.vedtaksperiode(ORGNUMMER)}",
+            vedtaksperiodeId = "${1.vedtaksperiode.id(ORGNUMMER)}",
             arbeidskategorikoder = emptyMap(),
             harStatslønn = false,
             perioder = emptyList(),

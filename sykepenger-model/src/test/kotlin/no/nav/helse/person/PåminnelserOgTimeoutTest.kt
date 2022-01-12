@@ -35,7 +35,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         person.håndter(påminnelse(MOTTATT_SYKMELDING_FERDIG_GAP, 1.vedtaksperiode))
         assertEquals(MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
         assertEquals(1, hendelse.behov().size)
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode(ORGNUMMER), Behovtype.Sykepengehistorikk))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Sykepengehistorikk))
     }
 
     @Test
@@ -47,7 +47,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         person.håndter(påminnelse(AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, 1.vedtaksperiode))
         assertEquals(AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
         assertEquals(1, hendelse.behov().size)
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode(ORGNUMMER), Behovtype.Sykepengehistorikk))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Sykepengehistorikk))
     }
 
     @Test
@@ -59,7 +59,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         person.håndter(påminnelse(AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, 2.vedtaksperiode))
         assertEquals(AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, inspektør.sisteTilstand(2.vedtaksperiode))
         assertEquals(1, hendelse.behov().size)
-        assertTrue(hendelse.etterspurteBehov(2.vedtaksperiode(ORGNUMMER), Behovtype.Sykepengehistorikk))
+        assertTrue(hendelse.etterspurteBehov(2.vedtaksperiode.id(ORGNUMMER), Behovtype.Sykepengehistorikk))
     }
 
     @Test
@@ -81,9 +81,9 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         person.håndter(påminnelse(AVVENTER_VILKÅRSPRØVING, 1.vedtaksperiode))
         assertEquals(AVVENTER_VILKÅRSPRØVING, inspektør.sisteTilstand(1.vedtaksperiode))
         assertEquals(antallBehovFør, hendelse.behov().size)
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode(ORGNUMMER), Behovtype.InntekterForSammenligningsgrunnlag))
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode(ORGNUMMER), Behovtype.InntekterForSykepengegrunnlag))
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode(ORGNUMMER), Behovtype.ArbeidsforholdV2))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.InntekterForSammenligningsgrunnlag))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.InntekterForSykepengegrunnlag))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.ArbeidsforholdV2))
     }
 
     @Test
@@ -97,15 +97,15 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         person.håndter(påminnelse(AVVENTER_HISTORIKK, 1.vedtaksperiode))
         assertEquals(AVVENTER_HISTORIKK, inspektør.sisteTilstand(1.vedtaksperiode))
         assertEquals(8, hendelse.behov().size)
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode(ORGNUMMER), Behovtype.Foreldrepenger))
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode(ORGNUMMER), Behovtype.Pleiepenger))
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode(ORGNUMMER), Behovtype.Omsorgspenger))
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode(ORGNUMMER), Behovtype.Opplæringspenger))
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode(ORGNUMMER), Behovtype.Arbeidsavklaringspenger))
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode(ORGNUMMER), Behovtype.Dagpenger))
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode(ORGNUMMER), Behovtype.Institusjonsopphold))
-        assertFalse(hendelse.etterspurteBehov(1.vedtaksperiode(ORGNUMMER), Behovtype.Sykepengehistorikk))
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode(ORGNUMMER), Behovtype.Dødsinfo))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Foreldrepenger))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Pleiepenger))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Omsorgspenger))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Opplæringspenger))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Arbeidsavklaringspenger))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Dagpenger))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Institusjonsopphold))
+        assertFalse(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Sykepengehistorikk))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Dødsinfo))
     }
 
     @Test
@@ -119,15 +119,15 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         person.håndter(påminnelse(AVVENTER_HISTORIKK, 1.vedtaksperiode))
         assertEquals(AVVENTER_HISTORIKK, inspektør.sisteTilstand(1.vedtaksperiode))
         assertEquals(9, hendelse.behov().size)
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode(ORGNUMMER), Behovtype.Foreldrepenger))
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode(ORGNUMMER), Behovtype.Pleiepenger))
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode(ORGNUMMER), Behovtype.Omsorgspenger))
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode(ORGNUMMER), Behovtype.Opplæringspenger))
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode(ORGNUMMER), Behovtype.Arbeidsavklaringspenger))
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode(ORGNUMMER), Behovtype.Dagpenger))
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode(ORGNUMMER), Behovtype.Institusjonsopphold))
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode(ORGNUMMER), Behovtype.Sykepengehistorikk))
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode(ORGNUMMER), Behovtype.Dødsinfo))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Foreldrepenger))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Pleiepenger))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Omsorgspenger))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Opplæringspenger))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Arbeidsavklaringspenger))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Dagpenger))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Institusjonsopphold))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Sykepengehistorikk))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Dødsinfo))
     }
 
     @Test
@@ -282,7 +282,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
     private fun vilkårsgrunnlag() =
         Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = "${1.vedtaksperiode(ORGNUMMER)}",
+            vedtaksperiodeId = "${1.vedtaksperiode.id(ORGNUMMER)}",
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = ORGNUMMER.toString(),
@@ -320,7 +320,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
     private fun simulering() =
         Simulering(
             meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = "${1.vedtaksperiode(ORGNUMMER)}",
+            vedtaksperiodeId = "${1.vedtaksperiode.id(ORGNUMMER)}",
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018.toString(),
             orgnummer = ORGNUMMER.toString(),
@@ -378,13 +378,13 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018.toString(),
             organisasjonsnummer = ORGNUMMER.toString(),
-            vedtaksperiodeId = "${1.vedtaksperiode(ORGNUMMER)}",
+            vedtaksperiodeId = "${1.vedtaksperiode.id(ORGNUMMER)}",
             utbetalingshistorikk = Utbetalingshistorikk(
                 meldingsreferanseId = meldingsreferanseId,
                 aktørId = "aktørId",
                 fødselsnummer = UNG_PERSON_FNR_2018.toString(),
                 organisasjonsnummer = ORGNUMMER.toString(),
-                vedtaksperiodeId = "${1.vedtaksperiode(ORGNUMMER)}",
+                vedtaksperiodeId = "${1.vedtaksperiode.id(ORGNUMMER)}",
                 arbeidskategorikoder = emptyMap(),
                 harStatslønn = false,
                 perioder = listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(),17.januar(2017),  20.januar(2017),  100.prosent, 1000.daglig)),
@@ -433,7 +433,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         utbetalingId = UUID.fromString(inspektør.sisteBehov(Behovtype.Godkjenning).kontekst()["utbetalingId"] ?: throw IllegalStateException("Finner ikke utbetalingId i: ${inspektør.sisteBehov(
             Behovtype.Godkjenning
         ).kontekst()}")),
-        vedtaksperiodeId = "${1.vedtaksperiode(ORGNUMMER)}",
+        vedtaksperiodeId = "${1.vedtaksperiode.id(ORGNUMMER)}",
         saksbehandler = "Ola Nordmann",
         saksbehandlerEpost = "ola@normann.ss",
         utbetalingGodkjent = true,
@@ -448,7 +448,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         aktørId = "aktørId",
         fødselsnummer = UNG_PERSON_FNR_2018.toString(),
         organisasjonsnummer = ORGNUMMER.toString(),
-        vedtaksperiodeId = "${vedtaksperiodeIdInnhenter(ORGNUMMER)}",
+        vedtaksperiodeId = "${vedtaksperiodeIdInnhenter.id(ORGNUMMER)}",
         tilstand = tilstandType,
         antallGangerPåminnet = 1,
         tilstandsendringstidspunkt = LocalDateTime.now(),

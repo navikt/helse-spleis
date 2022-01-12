@@ -115,12 +115,12 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2021), 1.januar(2021), 100.prosent))
         håndterSøknad(Sykdom(1.januar(2021), 1.januar(2021), 100.prosent))
 
-        Assertions.assertEquals(2, observatør.hendelseider(1.vedtaksperiode(ORGNUMMER)).size)
+        Assertions.assertEquals(2, observatør.hendelseider(1.vedtaksperiode.id(ORGNUMMER)).size)
 
         val hendelseId = håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021)), førsteFraværsdag = 1.januar(2021))
 
-        Assertions.assertEquals(3, observatør.hendelseider(1.vedtaksperiode(ORGNUMMER)).size)
-        Assertions.assertTrue(hendelseId in observatør.hendelseider(1.vedtaksperiode(ORGNUMMER)))
+        Assertions.assertEquals(3, observatør.hendelseider(1.vedtaksperiode.id(ORGNUMMER)).size)
+        Assertions.assertTrue(hendelseId in observatør.hendelseider(1.vedtaksperiode.id(ORGNUMMER)))
 
         assertTilstander(
             1.vedtaksperiode,

@@ -69,7 +69,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET
         )
-        assertTrue(1.vedtaksperiode(ORGNUMMER) in observatør.utbetalteVedtaksperioder)
+        assertTrue(1.vedtaksperiode.id(ORGNUMMER) in observatør.utbetalteVedtaksperioder)
         inspektør.sykdomstidslinje.inspektør.låstePerioder.also {
             assertEquals(1, it.size)
             assertEquals(Periode(3.januar, 26.januar), it.first())
@@ -298,7 +298,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET
         )
-        assertTrue(1.vedtaksperiode(ORGNUMMER) in observatør.utbetalteVedtaksperioder)
+        assertTrue(1.vedtaksperiode.id(ORGNUMMER) in observatør.utbetalteVedtaksperioder)
     }
 
     @Test
@@ -392,7 +392,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET
         )
-        assertTrue(1.vedtaksperiode(ORGNUMMER) in observatør.utbetalteVedtaksperioder)
+        assertTrue(1.vedtaksperiode.id(ORGNUMMER) in observatør.utbetalteVedtaksperioder)
     }
 
     @Test

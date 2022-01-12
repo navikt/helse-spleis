@@ -126,7 +126,7 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 25.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 25.februar, 100.prosent))
 
-        assertFalse(3.vedtaksperiode(ORGNUMMER) in observatør.manglendeInntektsmeldingVedtaksperioder)
+        assertFalse(3.vedtaksperiode.id(ORGNUMMER) in observatør.manglendeInntektsmeldingVedtaksperioder)
 
         assertTilstander(
             3.vedtaksperiode,

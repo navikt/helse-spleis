@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.Organisasjonsnummer
 import no.nav.helse.hendelser.Hendelseskontekst
+import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.VedtaksperiodeEndretEvent
 import no.nav.helse.person.TilstandType
@@ -40,8 +41,9 @@ internal class TestObservatør : PersonObserver {
     fun hendelseider(vedtaksperiodeId: UUID) =
         vedtaksperiodeendringer[vedtaksperiodeId]?.last()?.hendelser ?: fail { "VedtaksperiodeId $vedtaksperiodeId har ingen hendelser tilknyttet" }
 
-    fun sisteVedtaksperiode() = sisteVedtaksperiode
-    fun sisteVedtaksperiode(orgnummer: Organisasjonsnummer) = vedtaksperioder.getValue(orgnummer).last()
+    fun sisteVedtaksperiode() = object : IdInnhenter {
+        override fun id(orgnummer: Organisasjonsnummer): UUID = vedtaksperioder.getValue(orgnummer).last()
+    }
     fun vedtaksperiode(orgnummer: Organisasjonsnummer, indeks: Int) = vedtaksperioder.getValue(orgnummer).toList()[indeks]
     fun vedtaksperiodeIndeks(orgnummer: Organisasjonsnummer, id: UUID) = vedtaksperioder.getValue(orgnummer).indexOf(id)
     fun bedtOmInntektsmeldingReplay(vedtaksperiodeId: UUID) = vedtaksperiodeId in inntektsmeldingReplayEventer

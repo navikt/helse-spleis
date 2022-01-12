@@ -101,13 +101,13 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018.toString(),
             organisasjonsnummer = ORGNUMMER.toString(),
-            vedtaksperiodeId = "${1.vedtaksperiode(ORGNUMMER)}",
+            vedtaksperiodeId = "${1.vedtaksperiode.id(ORGNUMMER)}",
             utbetalingshistorikk = Utbetalingshistorikk(
                 meldingsreferanseId = meldingsreferanseId,
                 aktørId = "aktørId",
                 fødselsnummer = UNG_PERSON_FNR_2018.toString(),
                 organisasjonsnummer = ORGNUMMER.toString(),
-                vedtaksperiodeId = "${1.vedtaksperiode(ORGNUMMER)}",
+                vedtaksperiodeId = "${1.vedtaksperiode.id(ORGNUMMER)}",
                 arbeidskategorikoder = emptyMap(),
                 harStatslønn = false,
                 perioder = utbetalinger,
@@ -197,7 +197,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
     private fun vilkårsgrunnlag() =
         Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = "${1.vedtaksperiode(ORGNUMMER)}",
+            vedtaksperiodeId = "${1.vedtaksperiode.id(ORGNUMMER)}",
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = ORGNUMMER.toString(),
@@ -251,7 +251,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
         utbetalingId: UUID) =
         Simulering(
             meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = "${1.vedtaksperiode(ORGNUMMER)}",
+            vedtaksperiodeId = "${1.vedtaksperiode.id(ORGNUMMER)}",
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018.toString(),
             orgnummer = ORGNUMMER.toString(),

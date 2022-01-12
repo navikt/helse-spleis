@@ -49,7 +49,7 @@ internal class EtterspurtBehov(
             vedtaksperiodeIdInnhenter: IdInnhenter,
             orgnummer: Organisasjonsnummer
         ) =
-            ikkeBesvarteBehov.firstOrNull { it.type == type && it.orgnummer == orgnummer && it.vedtaksperiodeId == vedtaksperiodeIdInnhenter(orgnummer) }
+            ikkeBesvarteBehov.firstOrNull { it.type == type && it.orgnummer == orgnummer && it.vedtaksperiodeId == vedtaksperiodeIdInnhenter.id(orgnummer) }
 
         internal fun finnEtterspurtBehov(
             ikkeBesvarteBehov: MutableList<EtterspurtBehov>,
@@ -59,7 +59,7 @@ internal class EtterspurtBehov(
             tilstand: TilstandType
         ) =
             ikkeBesvarteBehov.firstOrNull {
-                it.type == type && it.orgnummer == orgnummer && it.vedtaksperiodeId == vedtaksperiodeIdInnhenter(orgnummer) && it.tilstand == tilstand
+                it.type == type && it.orgnummer == orgnummer && it.vedtaksperiodeId == vedtaksperiodeIdInnhenter.id(orgnummer) && it.tilstand == tilstand
             }
     }
 

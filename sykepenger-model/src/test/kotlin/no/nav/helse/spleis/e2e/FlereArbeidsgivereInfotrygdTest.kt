@@ -1285,12 +1285,12 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
                 listOf(
                     mapOf(
                         "orgnummer" to a1.toString(),
-                        "vedtaksperiodeId" to 1.vedtaksperiode(a1).toString(),
+                        "vedtaksperiodeId" to 1.vedtaksperiode.id(a1).toString(),
                         "periodetype" to Periodetype.OVERGANG_FRA_IT.name
                     ),
                     mapOf(
                         "orgnummer" to a2.toString(),
-                        "vedtaksperiodeId" to 1.vedtaksperiode(a2).toString(),
+                        "vedtaksperiodeId" to 1.vedtaksperiode.id(a2).toString(),
                         "periodetype" to Periodetype.OVERGANG_FRA_IT.name
                     )
                 )
@@ -1677,8 +1677,8 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a1)
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
 
-        assertEquals(31000.00 * 12, observatør.vedtakFattetEvent[1.vedtaksperiode(a1)]?.grunnlagForSykepengegrunnlagPerArbeidsgiver?.get(a1.toString()))
-        assertEquals(12000.00, observatør.vedtakFattetEvent[1.vedtaksperiode(a1)]?.grunnlagForSykepengegrunnlagPerArbeidsgiver?.get(a2.toString()))
+        assertEquals(31000.00 * 12, observatør.vedtakFattetEvent[1.vedtaksperiode.id(a1)]?.grunnlagForSykepengegrunnlagPerArbeidsgiver?.get(a1.toString()))
+        assertEquals(12000.00, observatør.vedtakFattetEvent[1.vedtaksperiode.id(a1)]?.grunnlagForSykepengegrunnlagPerArbeidsgiver?.get(a2.toString()))
     }
 
 }

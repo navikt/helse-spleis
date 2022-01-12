@@ -359,24 +359,24 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
     ) {
         håndterSykmelding(Sykmeldingsperiode(arbeidsgiverperiode.start, syktil, 100.prosent), orgnummer = orgnummer)
         håndterSøknadMedValidering(
-            { observatør.sisteVedtaksperiode() },
+            observatør.sisteVedtaksperiode(),
             Sykdom(arbeidsgiverperiode.start, syktil, 100.prosent),
             orgnummer = orgnummer
         )
-        håndterUtbetalingshistorikk({ observatør.sisteVedtaksperiode() }, orgnummer = orgnummer)
+        håndterUtbetalingshistorikk(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
         håndterInntektsmelding(listOf(arbeidsgiverperiode), orgnummer = orgnummer)
-        håndterYtelser({ observatør.sisteVedtaksperiode() }, orgnummer = orgnummer)
-        håndterVilkårsgrunnlag({ observatør.sisteVedtaksperiode() }, inntektsvurdering = Inntektsvurdering(
+        håndterYtelser(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
+        håndterVilkårsgrunnlag(observatør.sisteVedtaksperiode(), inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 arbeidsgiverperiode.start.minusYears(1) til arbeidsgiverperiode.start.withDayOfMonth(1).minusMonths(1) inntekter {
                     orgnummer inntekt INNTEKT
                 }
             }
         ), orgnummer = orgnummer)
-        håndterYtelser({ observatør.sisteVedtaksperiode() }, orgnummer = orgnummer)
-        håndterSimulering({ observatør.sisteVedtaksperiode() }, orgnummer = orgnummer)
-        håndterUtbetalingsgodkjenning({ observatør.sisteVedtaksperiode() }, orgnummer = orgnummer)
-        håndterUtbetalt({ observatør.sisteVedtaksperiode() }, orgnummer = orgnummer)
+        håndterYtelser(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
+        håndterSimulering(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
+        håndterUtbetalingsgodkjenning(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
+        håndterUtbetalt(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
     }
 
     private fun byggPersonMedAnnullering(
@@ -386,24 +386,24 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
     ) {
         håndterSykmelding(Sykmeldingsperiode(arbeidsgiverperiode.start, syktil, 100.prosent), orgnummer = orgnummer)
         håndterSøknadMedValidering(
-            { observatør.sisteVedtaksperiode() },
+            observatør.sisteVedtaksperiode(),
             Sykdom(arbeidsgiverperiode.start, syktil, 100.prosent),
             orgnummer = orgnummer
         )
-        håndterUtbetalingshistorikk({ observatør.sisteVedtaksperiode() }, orgnummer = orgnummer)
+        håndterUtbetalingshistorikk(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
         håndterInntektsmelding(listOf(arbeidsgiverperiode), orgnummer = orgnummer)
-        håndterYtelser({ observatør.sisteVedtaksperiode() }, orgnummer = orgnummer)
-        håndterVilkårsgrunnlag({ observatør.sisteVedtaksperiode() }, inntektsvurdering = Inntektsvurdering(
+        håndterYtelser(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
+        håndterVilkårsgrunnlag(observatør.sisteVedtaksperiode(), inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 arbeidsgiverperiode.start.minusYears(1) til arbeidsgiverperiode.start.withDayOfMonth(1).minusMonths(1) inntekter {
                     orgnummer inntekt INNTEKT
                 }
             }
         ), orgnummer = orgnummer)
-        håndterYtelser({ observatør.sisteVedtaksperiode() }, orgnummer = orgnummer)
-        håndterSimulering({ observatør.sisteVedtaksperiode() }, orgnummer = orgnummer)
-        håndterUtbetalingsgodkjenning({ observatør.sisteVedtaksperiode() }, orgnummer = orgnummer)
-        håndterUtbetalt({ observatør.sisteVedtaksperiode() }, orgnummer = orgnummer)
+        håndterYtelser(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
+        håndterSimulering(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
+        håndterUtbetalingsgodkjenning(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
+        håndterUtbetalt(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
         håndterAnnullerUtbetaling(orgnummer = orgnummer)
         håndterUtbetalt()
     }
@@ -447,44 +447,44 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
     ) {
         håndterSykmelding(Sykmeldingsperiode(arbeidsgiverperiode.start, syktil, 100.prosent), orgnummer = orgnummer)
         håndterSøknadMedValidering(
-            { observatør.sisteVedtaksperiode() },
+            observatør.sisteVedtaksperiode(),
             Sykdom(arbeidsgiverperiode.start, syktil, 100.prosent),
             orgnummer = orgnummer
         )
         håndterUtbetalingshistorikk(
-            { observatør.sisteVedtaksperiode() },
+            observatør.sisteVedtaksperiode(),
             orgnummer = orgnummer,
             inntektshistorikk = listOf(Inntektsopplysning(orgnummer.toString(), 1.desember(2017), INNTEKT, true)),
             besvart = LocalDateTime.now().minusMonths(1),
             utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(orgnummer.toString(), 1.desember(2017), 31.desember(2017), 100.prosent, INNTEKT))
         )
         håndterYtelser(
-            { observatør.sisteVedtaksperiode() },
+            observatør.sisteVedtaksperiode(),
             orgnummer = orgnummer,
             inntektshistorikk = listOf(Inntektsopplysning(orgnummer.toString(), 1.desember(2017), INNTEKT, true)),
             besvart = LocalDateTime.now().minusMonths(1),
             utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(orgnummer.toString(), 1.desember(2017), 31.desember(2017), 100.prosent, INNTEKT))
         )
 
-        håndterSimulering({ observatør.sisteVedtaksperiode() }, orgnummer = orgnummer)
-        håndterUtbetalingsgodkjenning({ observatør.sisteVedtaksperiode() }, orgnummer = orgnummer)
-        håndterUtbetalt({ observatør.sisteVedtaksperiode() }, orgnummer = orgnummer)
+        håndterSimulering(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
+        håndterUtbetalingsgodkjenning(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
+        håndterUtbetalt(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 60.prosent), orgnummer = orgnummer)
         håndterSøknadMedValidering(
-            { observatør.sisteVedtaksperiode() },
+            observatør.sisteVedtaksperiode(),
             Sykdom(1.februar, 28.februar, 60.prosent),
             orgnummer = orgnummer
         )
         håndterYtelser(
-            { observatør.sisteVedtaksperiode() },
+            observatør.sisteVedtaksperiode(),
             orgnummer = orgnummer,
             inntektshistorikk = listOf(Inntektsopplysning(orgnummer.toString(), 1.desember(2017), 40000.månedlig, true)),
             utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(orgnummer.toString(), 1.desember(2017), 15.januar, 50.prosent, 40000.månedlig))
         )
 
-        håndterSimulering({ observatør.sisteVedtaksperiode() }, orgnummer = orgnummer)
-        håndterUtbetalingsgodkjenning({ observatør.sisteVedtaksperiode() }, orgnummer = orgnummer)
-        håndterUtbetalt({ observatør.sisteVedtaksperiode() }, orgnummer = orgnummer)
+        håndterSimulering(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
+        håndterUtbetalingsgodkjenning(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
+        håndterUtbetalt(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
     }
 }

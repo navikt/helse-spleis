@@ -421,7 +421,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
     ): Vilkårsgrunnlag {
         return Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = vedtaksperiodeIdInnhenter(orgnummer).toString(),
+            vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = orgnummer.toString(),

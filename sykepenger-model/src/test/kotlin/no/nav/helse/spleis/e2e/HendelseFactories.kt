@@ -191,7 +191,7 @@ internal fun AbstractEndToEndTest.vilkårsgrunnlag(
 ): Vilkårsgrunnlag {
     return Vilkårsgrunnlag(
         meldingsreferanseId = UUID.randomUUID(),
-        vedtaksperiodeId = vedtaksperiodeIdInnhenter(orgnummer).toString(),
+        vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
         aktørId = AbstractPersonTest.AKTØRID,
         fødselsnummer = fnr,
         orgnummer = orgnummer.toString(),
@@ -260,7 +260,7 @@ internal fun AbstractEndToEndTest.utbetalingshistorikk(
         aktørId = AbstractPersonTest.AKTØRID,
         fødselsnummer = fnr.toString(),
         organisasjonsnummer = orgnummer.toString(),
-        vedtaksperiodeId = vedtaksperiodeIdInnhenter(orgnummer).toString(),
+        vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
         arbeidskategorikoder = emptyMap(),
         harStatslønn = harStatslønn,
         perioder = utbetalinger,
@@ -341,7 +341,7 @@ internal fun AbstractEndToEndTest.ytelser(
 
     if (!bedtOmSykepengehistorikk && harSpesifisertSykepengehistorikk) {
         fail(
-            "Vedtaksperiode ${vedtaksperiodeIdInnhenter(orgnummer)} har ikke bedt om Sykepengehistorikk" +
+            "Vedtaksperiode ${vedtaksperiodeIdInnhenter.id(orgnummer)} har ikke bedt om Sykepengehistorikk" +
                 "\nfordi den har gjenbrukt Infotrygdhistorikk-cache." +
                 "\nTrenger ikke sende inn utbetalinger og inntektsopplysninger da." +
                 "\nEnten ta bort overflødig historikk, eller sett 'besvart'-tidspunktet tilbake i tid " +
@@ -358,7 +358,7 @@ internal fun AbstractEndToEndTest.ytelser(
             aktørId = AbstractPersonTest.AKTØRID,
             fødselsnummer = fnr.toString(),
             organisasjonsnummer = orgnummer.toString(),
-            vedtaksperiodeId = vedtaksperiodeIdInnhenter(orgnummer).toString(),
+            vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
             arbeidskategorikoder = arbeidskategorikoder,
             harStatslønn = statslønn,
             perioder = utbetalinger,
@@ -371,7 +371,7 @@ internal fun AbstractEndToEndTest.ytelser(
         aktørId = AbstractPersonTest.AKTØRID,
         fødselsnummer = fnr.toString(),
         organisasjonsnummer = orgnummer.toString(),
-        vedtaksperiodeId = vedtaksperiodeIdInnhenter(orgnummer).toString(),
+        vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
         utbetalingshistorikk = utbetalingshistorikk,
         foreldrepermisjon = Foreldrepermisjon(
             foreldrepengeytelse = foreldrepenger,
@@ -418,7 +418,7 @@ internal fun AbstractEndToEndTest.simulering(
 ) = inspektør(orgnummer).etterspurteBehov(vedtaksperiodeIdInnhenter).filter { it.type == Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering }.map { simuleringsBehov ->
     Simulering(
         meldingsreferanseId = UUID.randomUUID(),
-        vedtaksperiodeId = vedtaksperiodeIdInnhenter(orgnummer).toString(),
+        vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
         aktørId = AbstractPersonTest.AKTØRID,
         fødselsnummer = fnr.toString(),
         orgnummer = orgnummer.toString(),
@@ -492,7 +492,7 @@ internal fun AbstractEndToEndTest.utbetalingsgodkjenning(
     fødselsnummer = fnr.toString(),
     organisasjonsnummer = orgnummer.toString(),
     utbetalingId = utbetalingId,
-    vedtaksperiodeId = vedtaksperiodeIdInnhenter(orgnummer).toString(),
+    vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
     saksbehandler = "Ola Nordmann",
     saksbehandlerEpost = "ola.nordmann@nav.no",
     utbetalingGodkjent = utbetalingGodkjent,

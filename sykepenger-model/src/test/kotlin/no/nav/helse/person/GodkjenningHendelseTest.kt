@@ -93,7 +93,7 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
                 }"
             )
         ),
-        vedtaksperiodeId = "${1.vedtaksperiode(ORGNUMMER)}",
+        vedtaksperiodeId = "${1.vedtaksperiode.id(ORGNUMMER)}",
         saksbehandler = "Ola Nordmann",
         saksbehandlerEpost = "ola@nordmann.ss",
         utbetalingGodkjent = godkjent,
@@ -114,13 +114,13 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018.toString(),
             organisasjonsnummer = ORGNUMMER.toString(),
-            vedtaksperiodeId = "${1.vedtaksperiode(ORGNUMMER)}",
+            vedtaksperiodeId = "${1.vedtaksperiode.id(ORGNUMMER)}",
             utbetalingshistorikk = Utbetalingshistorikk(
                 meldingsreferanseId = meldingsreferanseId,
                 aktørId = "aktørId",
                 fødselsnummer = UNG_PERSON_FNR_2018.toString(),
                 organisasjonsnummer = ORGNUMMER.toString(),
-                vedtaksperiodeId = "${1.vedtaksperiode(ORGNUMMER)}",
+                vedtaksperiodeId = "${1.vedtaksperiode.id(ORGNUMMER)}",
                 arbeidskategorikoder = emptyMap(),
                 harStatslønn = false,
                 perioder = utbetalinger,
@@ -208,7 +208,7 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
     private fun vilkårsgrunnlag() =
         Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = "${1.vedtaksperiode(ORGNUMMER)}",
+            vedtaksperiodeId = "${1.vedtaksperiode.id(ORGNUMMER)}",
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = ORGNUMMER.toString(),
@@ -247,7 +247,7 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
     private fun simulering() =
         Simulering(
             meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = "${1.vedtaksperiode(ORGNUMMER)}",
+            vedtaksperiodeId = "${1.vedtaksperiode.id(ORGNUMMER)}",
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018.toString(),
             orgnummer = ORGNUMMER.toString(),

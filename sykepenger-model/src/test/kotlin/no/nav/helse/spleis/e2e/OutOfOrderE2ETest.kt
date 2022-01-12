@@ -608,8 +608,8 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(19.februar, 6.mars, 100.prosent))
         håndterSøknad(Sykdom(19.februar, 6.mars, 100.prosent))
-        håndterInntektsmeldingReplay(inntektsmelding, 2.vedtaksperiode(ORGNUMMER))
-        håndterInntektsmeldingReplay(inntektsmelding, 3.vedtaksperiode(ORGNUMMER))
+        håndterInntektsmeldingReplay(inntektsmelding, 2.vedtaksperiode.id(ORGNUMMER))
+        håndterInntektsmeldingReplay(inntektsmelding, 3.vedtaksperiode.id(ORGNUMMER))
 
         assertFalse(inspektør.periodeErForkastet(1.vedtaksperiode))
         assertTilstander(

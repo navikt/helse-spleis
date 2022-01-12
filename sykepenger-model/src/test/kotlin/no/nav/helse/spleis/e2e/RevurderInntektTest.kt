@@ -427,7 +427,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         val utbetalingEvent = observatør.utbetalingMedUtbetalingEventer.first()
 
         assertEquals(1, utbetalingEvent.vedtaksperiodeIder.size)
-        assertEquals(1.vedtaksperiode(ORGNUMMER), utbetalingEvent.vedtaksperiodeIder.first())
+        assertEquals(1.vedtaksperiode.id(ORGNUMMER), utbetalingEvent.vedtaksperiodeIder.first())
     }
 
     @Test
@@ -439,9 +439,9 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         val andreEvent = observatør.utbetalingMedUtbetalingEventer.last()
 
         assertEquals(1, førsteEvent.vedtaksperiodeIder.size)
-        assertEquals(1.vedtaksperiode(ORGNUMMER), førsteEvent.vedtaksperiodeIder.first())
+        assertEquals(1.vedtaksperiode.id(ORGNUMMER), førsteEvent.vedtaksperiodeIder.first())
         assertEquals(1, andreEvent.vedtaksperiodeIder.size)
-        assertEquals(2.vedtaksperiode(ORGNUMMER), andreEvent.vedtaksperiodeIder.first())
+        assertEquals(2.vedtaksperiode.id(ORGNUMMER), andreEvent.vedtaksperiodeIder.first())
     }
 
     @Test
@@ -461,8 +461,8 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         val utbetalingsevent = observatør.utbetalingMedUtbetalingEventer.last()
 
         assertEquals(2, utbetalingsevent.vedtaksperiodeIder.size)
-        assertTrue(utbetalingsevent.vedtaksperiodeIder.contains(1.vedtaksperiode(ORGNUMMER)))
-        assertTrue(utbetalingsevent.vedtaksperiodeIder.contains(2.vedtaksperiode(ORGNUMMER)))
+        assertTrue(utbetalingsevent.vedtaksperiodeIder.contains(1.vedtaksperiode.id(ORGNUMMER)))
+        assertTrue(utbetalingsevent.vedtaksperiodeIder.contains(2.vedtaksperiode.id(ORGNUMMER)))
     }
 
     @Test
@@ -474,7 +474,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         val utbetalingEvent = observatør.utbetalingMedUtbetalingEventer.first()
 
         assertEquals(1, utbetalingEvent.vedtaksperiodeIder.size)
-        assertEquals(1.vedtaksperiode(ORGNUMMER), utbetalingEvent.vedtaksperiodeIder.first())
+        assertEquals(1.vedtaksperiode.id(ORGNUMMER), utbetalingEvent.vedtaksperiodeIder.first())
     }
 
 

@@ -26,7 +26,7 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
         assertEquals(0, observatør.utbetalingMedUtbetalingEventer.size)
         assertEquals(0, observatør.utbetaltEventer.size)
         assertEquals(1, observatør.vedtakFattetEvent.size)
-        val event = observatør.vedtakFattetEvent.getValue(1.vedtaksperiode(ORGNUMMER))
+        val event = observatør.vedtakFattetEvent.getValue(1.vedtaksperiode.id(ORGNUMMER))
         assertNull(event.utbetalingId)
     }
 
@@ -39,7 +39,7 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
         assertEquals(1, observatør.utbetalingMedUtbetalingEventer.size)
         assertEquals(1, observatør.utbetaltEventer.size)
         assertEquals(1, observatør.vedtakFattetEvent.size)
-        val event = observatør.vedtakFattetEvent.getValue(1.vedtaksperiode(ORGNUMMER))
+        val event = observatør.vedtakFattetEvent.getValue(1.vedtaksperiode.id(ORGNUMMER))
         assertEquals(inspektør.utbetaling(0).inspektør.utbetalingId, event.utbetalingId)
         assertEquals(Utbetaling.Utbetalt, inspektør.utbetaling(0).inspektør.tilstand)
     }
@@ -58,7 +58,7 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
         assertEquals(0, observatør.utbetalingMedUtbetalingEventer.size)
         assertEquals(1, observatør.utbetaltEventer.size)
         assertEquals(1, observatør.vedtakFattetEvent.size)
-        val event = observatør.vedtakFattetEvent.getValue(1.vedtaksperiode(ORGNUMMER))
+        val event = observatør.vedtakFattetEvent.getValue(1.vedtaksperiode.id(ORGNUMMER))
         assertEquals(inspektør.utbetaling(0).inspektør.utbetalingId, event.utbetalingId)
         assertEquals(Utbetaling.GodkjentUtenUtbetaling, inspektør.utbetaling(0).inspektør.tilstand)
     }
