@@ -100,7 +100,8 @@ data class VedtaksperiodeDTO(
 data class GhostPeriodeDTO(
     val fom: LocalDate,
     val tom: LocalDate,
-    val skjæringstidspunkt: LocalDate
+    val skjæringstidspunkt: LocalDate,
+    val vilkårsgrunnlagHistorikkInnslagId: UUID
 )
 
 data class UtbetalingerDTO(

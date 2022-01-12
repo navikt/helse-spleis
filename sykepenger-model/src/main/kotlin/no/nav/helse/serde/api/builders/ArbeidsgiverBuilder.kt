@@ -46,20 +46,21 @@ internal class ArbeidsgiverBuilder(
 
     internal fun build(hendelser: List<HendelseDTO>, fødselsnummer: String, vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk): ArbeidsgiverDTO {
         val utbetalingshistorikk = utbetalingshistorikkBuilder.build()
-
+        val ghostPerioder = arbeidsgiver.ghostPerioder()
         return ArbeidsgiverDTO(
             organisasjonsnummer = organisasjonsnummer,
             id = id,
             vedtaksperioder = perioderBuilder.build(hendelser, utbetalingshistorikk) + forkastetPerioderBuilder.build(hendelser, utbetalingshistorikk).filter { it.tilstand.visesNårForkastet() },
             utbetalingshistorikk = utbetalingshistorikk,
             generasjoner = if (Toggle.SpeilApiV2.enabled) GenerasjonerBuilder(hendelser, fødselsnummer.somFødselsnummer(), vilkårsgrunnlagHistorikk, arbeidsgiver).build() else null,
-            ghostPerioder = arbeidsgiver.ghostPerioder().map {
+            ghostPerioder = ghostPerioder?.ghostPerioder?.map {
                 GhostPeriodeDTO(
                     fom = it.fom,
                     tom = it.tom,
-                    skjæringstidspunkt = it.skjæringstidspunkt
+                    skjæringstidspunkt = it.skjæringstidspunkt,
+                    vilkårsgrunnlagHistorikkInnslagId = ghostPerioder.historikkInnslagId
                 )
-            }
+            } ?: emptyList()
         )
     }
 

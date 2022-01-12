@@ -156,10 +156,10 @@ internal class Arbeidsgiver private constructor(
         internal fun skjæringstidspunkter(arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) =
             infotrygdhistorikk.skjæringstidspunkter(arbeidsgivere.map(Arbeidsgiver::sykdomstidslinje))
 
-        internal fun Iterable<Arbeidsgiver>.ghostPeriode(skjæringstidspunkt: LocalDate): GhostPeriode? {
+        internal fun Iterable<Arbeidsgiver>.ghostPeriode(skjæringstidspunkt: LocalDate): GhostPerioder.GhostPeriode? {
             val relevanteVedtaksperioder = flatMap { it.vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt) }
             if (relevanteVedtaksperioder.isEmpty()) return null
-            return GhostPeriode(
+            return GhostPerioder.GhostPeriode(
                 fom = relevanteVedtaksperioder.minOf { it.periode().start },
                 tom = relevanteVedtaksperioder.maxOf { it.periode().endInclusive },
                 skjæringstidspunkt = skjæringstidspunkt
@@ -687,9 +687,16 @@ internal class Arbeidsgiver private constructor(
         return ForkastetVedtaksperiode.arbeidsgiverperiodeFor(person, forkastede, organisasjonsnummer, sykdomstidslinje, periode)
     }
 
-    internal fun ghostPerioder() = person.skjæringstidspunkterFraSpleis(organisasjonsnummer)
-        .filter { skjæringstidspunkt -> vedtaksperioder.none { it.gjelder(skjæringstidspunkt) } }
-        .mapNotNull { skjæringstidspunkt -> person.ghostPeriode(skjæringstidspunkt) }
+    internal fun ghostPerioder(): GhostPerioder? {
+        val perioder = person.skjæringstidspunkterFraSpleis(organisasjonsnummer)
+            .filter { skjæringstidspunkt -> vedtaksperioder.none { it.gjelder(skjæringstidspunkt) } }
+            .mapNotNull { skjæringstidspunkt -> person.ghostPeriode(skjæringstidspunkt) }
+        if (perioder.isEmpty()) return null
+        return GhostPerioder(
+            historikkInnslagId = person.nyesteIdForVilkårsgrunnlagHistorikk(),
+            ghostPerioder = perioder
+        )
+    }
 
     internal fun infotrygdUtbetalingstidslinje() = person.infotrygdUtbetalingstidslinje(organisasjonsnummer)
 
