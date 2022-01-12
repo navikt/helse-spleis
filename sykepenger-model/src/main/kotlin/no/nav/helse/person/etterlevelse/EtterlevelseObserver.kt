@@ -292,6 +292,6 @@ interface EtterlevelseObserver {
         // punktum = 1.punktum
     }
 
-    fun vurderinger(): List<ParagrafIKode>
+    fun vurderinger(): List<JuridiskVurdering>
 
 }

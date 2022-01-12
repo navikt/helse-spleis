@@ -9,10 +9,10 @@ import java.time.LocalDate
 import java.time.Year
 
 class MaskinellJurist : EtterlevelseObserver {
-    private var vurderinger = listOf<ParagrafIKode>()
+    private var vurderinger = listOf<JuridiskVurdering>()
 
-    private fun leggTil(vurdering: ParagrafIKode) {
-        vurderinger = vurdering.aggreger(vurderinger)
+    private fun leggTil(vurdering: JuridiskVurdering) {
+        vurderinger = vurdering.sammenstill(vurderinger)
     }
 
     override fun `§2`(oppfylt: Boolean) {

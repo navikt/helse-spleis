@@ -7,13 +7,9 @@ import no.nav.helse.person.Punktum
 import java.time.DayOfWeek
 import java.time.LocalDate
 
+typealias SammenstillingStrategi<T> = (other: T) -> List<JuridiskVurdering>
 
-interface ErstatterStrategi<T : ParagrafIKode> {
-    fun erstatt(vurderinger: List<ParagrafIKode>, other: T): List<ParagrafIKode>
-}
-
-
-abstract class ParagrafIKode {
+abstract class JuridiskVurdering {
     abstract val oppfylt: Boolean
     abstract val versjon: LocalDate
     abstract val paragraf: Paragraf
@@ -25,19 +21,21 @@ abstract class ParagrafIKode {
     abstract val input: Map<String, Any>
     abstract val output: Map<String, Any>
 
-    abstract fun aggreger(vurderinger: List<ParagrafIKode>): List<ParagrafIKode>
+    abstract fun sammenstill(vurderinger: List<JuridiskVurdering>): List<JuridiskVurdering>
 
-    protected inline fun <reified T : ParagrafIKode> List<ParagrafIKode>.finnOgErstatt(strategi: ErstatterStrategi<T>): List<ParagrafIKode> {
-        val tidligereVurdering = filterIsInstance<T>().firstOrNull { it == this@ParagrafIKode }
-        if (tidligereVurdering != null) return strategi.erstatt(this, tidligereVurdering)
-        return this + this@ParagrafIKode
+    protected inline fun <reified T : JuridiskVurdering> sammenstill(
+        vurderinger: List<JuridiskVurdering>,
+        strategi: SammenstillingStrategi<T>
+    ): List<JuridiskVurdering> {
+        val tidligereVurdering = vurderinger.filterIsInstance<T>().firstOrNull { it == this }
+        if (tidligereVurdering != null) return strategi(tidligereVurdering)
+        return vurderinger + this
     }
-
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
 
-        return other is ParagrafIKode &&
+        return other is JuridiskVurdering &&
             oppfylt == other.oppfylt &&
             versjon == other.versjon &&
             paragraf == other.paragraf &&
@@ -61,7 +59,7 @@ abstract class ParagrafIKode {
     }
 
     internal companion object {
-        fun List<ParagrafIKode>.erstatt(replacee: ParagrafIKode, replacement: ParagrafIKode): List<ParagrafIKode> {
+        fun List<JuridiskVurdering>.erstatt(replacee: JuridiskVurdering, replacement: JuridiskVurdering): List<JuridiskVurdering> {
             return this.toMutableList().apply {
                 remove(replacee)
                 add(replacement)
@@ -79,10 +77,9 @@ class EnkelVurdering(
     override val bokstav: List<Bokstav> = emptyList(),
     override val input: Map<String, Any>,
     override val output: Map<String, Any>
-) : ErstatterStrategi<EnkelVurdering>, ParagrafIKode() {
-    override fun aggreger(vurderinger: List<ParagrafIKode>) = vurderinger.finnOgErstatt(this)
-
-    override fun erstatt(vurderinger: List<ParagrafIKode>, other: EnkelVurdering) = vurderinger.erstatt(other, this)
+) : JuridiskVurdering() {
+    override fun sammenstill(vurderinger: List<JuridiskVurdering>) =
+        sammenstill<EnkelVurdering>(vurderinger) { vurderinger.erstatt(it, this) }
 }
 
 class GrupperbarVurdering private constructor(
@@ -98,7 +95,7 @@ class GrupperbarVurdering private constructor(
     override val bokstav: List<Bokstav> = emptyList(),
     override val input: Map<String, Any>,
     override val output: Map<String, Any>
-) : ErstatterStrategi<GrupperbarVurdering>, ParagrafIKode() {
+) : JuridiskVurdering() {
     internal constructor(
         dato: LocalDate,
         input: Map<String, Any>,
@@ -111,11 +108,10 @@ class GrupperbarVurdering private constructor(
         bokstav: List<Bokstav> = emptyList()
     ) : this(dato, dato, dato, oppfylt, versjon, paragraf, ledd, punktum, bokstav, input, output)
 
-    override fun aggreger(vurderinger: List<ParagrafIKode>) = vurderinger.finnOgErstatt(this)
+    override fun sammenstill(vurderinger: List<JuridiskVurdering>) =
+        sammenstill<GrupperbarVurdering>(vurderinger) { grupperSammenhengende(it, vurderinger) }
 
-    override fun erstatt(vurderinger: List<ParagrafIKode>, other: GrupperbarVurdering) = grupperSammenhengende(other, vurderinger)
-
-    private fun grupperSammenhengende(other: GrupperbarVurdering, tidligereVurderinger: List<ParagrafIKode>): List<ParagrafIKode> {
+    private fun grupperSammenhengende(other: GrupperbarVurdering, tidligereVurderinger: List<JuridiskVurdering>): List<JuridiskVurdering> {
         return when {
             overlapper(other) -> tidligereVurderinger
             liggerInntilFør(other) -> tidligereVurderinger.kopierMed(other, other.originalDato, fom, other.tom)
@@ -124,7 +120,12 @@ class GrupperbarVurdering private constructor(
         }
     }
 
-    private fun List<ParagrafIKode>.kopierMed(other: GrupperbarVurdering, originalDato: LocalDate, fom: LocalDate, tom: LocalDate): List<ParagrafIKode> {
+    private fun List<JuridiskVurdering>.kopierMed(
+        other: GrupperbarVurdering,
+        originalDato: LocalDate,
+        fom: LocalDate,
+        tom: LocalDate
+    ): List<JuridiskVurdering> {
         return erstatt(other, GrupperbarVurdering(originalDato, fom, tom, oppfylt, versjon, paragraf, ledd, punktum, bokstav, input, output))
     }
 
@@ -159,8 +160,9 @@ class BetingetVurdering(
     override val bokstav: List<Bokstav> = emptyList(),
     override val input: Map<String, Any>,
     override val output: Map<String, Any>
-) : ErstatterStrategi<BetingetVurdering>, ParagrafIKode() {
-    override fun aggreger(vurderinger: List<ParagrafIKode>) = if (!funnetRelevant) vurderinger else vurderinger.finnOgErstatt(this)
-
-    override fun erstatt(vurderinger: List<ParagrafIKode>, other: BetingetVurdering) = vurderinger.erstatt(other, this)
+) : JuridiskVurdering() {
+    override fun sammenstill(vurderinger: List<JuridiskVurdering>): List<JuridiskVurdering> {
+        if (!funnetRelevant) return vurderinger
+        return sammenstill<BetingetVurdering>(vurderinger) { vurderinger.erstatt(it, this) }
+    }
 }

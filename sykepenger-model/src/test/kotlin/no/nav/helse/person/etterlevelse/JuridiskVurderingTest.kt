@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-internal class ParagrafIKodeTest {
+internal class JuridiskVurderingTest {
 
     @Test
     fun testEquals() {
@@ -114,7 +114,7 @@ internal class ParagrafIKodeTest {
         punktum: List<Punktum> = listOf(),
         input: Map<String, Any> = mapOf(),
         output: Map<String, Any> = mapOf()
-    ) = object : ParagrafIKode() {
+    ) = object : JuridiskVurdering() {
         override val oppfylt = oppfylt
         override val versjon = versjon
         override val paragraf = paragraf
@@ -124,7 +124,7 @@ internal class ParagrafIKodeTest {
         override val input = input
         override val output = output
 
-        override fun aggreger(vurderinger: List<ParagrafIKode>): List<ParagrafIKode> {
+        override fun sammenstill(vurderinger: List<JuridiskVurdering>): List<JuridiskVurdering> {
             TODO("Not yet implemented")
         }
     }
