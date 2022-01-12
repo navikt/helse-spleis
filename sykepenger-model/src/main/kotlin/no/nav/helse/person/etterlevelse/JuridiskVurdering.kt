@@ -1,10 +1,11 @@
 package no.nav.helse.person.etterlevelse
 
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMedHensynTilHelg
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.Bokstav
 import no.nav.helse.person.Ledd
 import no.nav.helse.person.Paragraf
 import no.nav.helse.person.Punktum
-import java.time.DayOfWeek
 import java.time.LocalDate
 
 typealias SammenstillingStrategi<T> = (other: T) -> List<JuridiskVurdering>
@@ -108,45 +109,16 @@ class GrupperbarVurdering private constructor(
         bokstav: List<Bokstav> = emptyList()
     ) : this(dato, dato, dato, oppfylt, versjon, paragraf, ledd, punktum, bokstav, input, output)
 
-    override fun sammenstill(vurderinger: List<JuridiskVurdering>) =
-        sammenstill<GrupperbarVurdering>(vurderinger) { grupperSammenhengende(it, vurderinger) }
+    override fun sammenstill(vurderinger: List<JuridiskVurdering>): List<JuridiskVurdering> {
+        val sammenstilt = (vurderinger + this)
+            .filterIsInstance<GrupperbarVurdering>()
+            .filter { it == this }
+            .map { it.fom til  it.tom }
+            .flatMap { it.datoer() }
+            .grupperSammenhengendePerioderMedHensynTilHelg()
+            .map { GrupperbarVurdering(originalDato, it.start, it.endInclusive, oppfylt, versjon, paragraf, ledd, punktum, bokstav, input, output) }
 
-    private fun grupperSammenhengende(other: GrupperbarVurdering, tidligereVurderinger: List<JuridiskVurdering>): List<JuridiskVurdering> {
-        return when {
-            overlapper(other) -> tidligereVurderinger
-            liggerInntilFør(other) -> tidligereVurderinger.kopierMed(other, other.originalDato, fom, other.tom)
-            liggerInntilEtter(other) -> tidligereVurderinger.kopierMed(other, other.originalDato, other.fom, tom)
-            else -> tidligereVurderinger + this
-        }
-    }
-
-    private fun List<JuridiskVurdering>.kopierMed(
-        other: GrupperbarVurdering,
-        originalDato: LocalDate,
-        fom: LocalDate,
-        tom: LocalDate
-    ): List<JuridiskVurdering> {
-        return erstatt(other, GrupperbarVurdering(originalDato, fom, tom, oppfylt, versjon, paragraf, ledd, punktum, bokstav, input, output))
-    }
-
-    private fun overlapper(other: GrupperbarVurdering) = originalDato >= other.fom && originalDato <= other.tom
-
-    private fun liggerInntilFør(other: GrupperbarVurdering) = originalDato == other.fom.minusDaysInklHelg(originalDato)
-
-    private fun liggerInntilEtter(other: GrupperbarVurdering) = originalDato.minusDaysInklHelg(other.tom) == other.tom
-
-    private fun LocalDate.minusDaysInklHelg(other: LocalDate): LocalDate {
-        return this.minusDays(
-            when (this.dayOfWeek) {
-                DayOfWeek.SUNDAY -> if (other.dayOfWeek == DayOfWeek.FRIDAY) 2 else 1
-                DayOfWeek.MONDAY -> when (other.dayOfWeek) {
-                    DayOfWeek.FRIDAY -> 3
-                    DayOfWeek.SATURDAY -> 2
-                    else -> 1
-                }
-                else -> 1
-            }
-        )
+        return vurderinger.filter { it != this } + sammenstilt
     }
 }
 

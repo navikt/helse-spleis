@@ -24,6 +24,12 @@ open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Ite
             if (siste == null || siste.endInclusive.plusDays(1) != dato) perioder.plus<Periode>(dato.somPeriode())
             else perioder.dropLast(1).plus<Periode>(siste.oppdaterTom(dato))
         }
+
+        fun List<LocalDate>.grupperSammenhengendePerioderMedHensynTilHelg() = sorted().distinct().fold(listOf<Periode>()) { perioder, dato ->
+            val siste = perioder.lastOrNull()
+            if (siste == null || !siste.endInclusive.erRettFør(dato)) perioder.plus<Periode>(dato.somPeriode())
+            else perioder.dropLast(1).plus<Periode>(siste.oppdaterTom(dato))
+        }
     }
 
     fun overlapperMed(other: Periode) =
@@ -84,6 +90,10 @@ open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Ite
 
     internal fun subset(periode: Periode) =
         Periode(start.coerceAtLeast(periode.start), endInclusive.coerceAtMost(periode.endInclusive))
+
+    internal fun datoer(): List<LocalDate> {
+         return this.map { it }
+    }
 }
 
 internal operator fun List<Periode>.contains(dato: LocalDate) = this.any { dato in it }
