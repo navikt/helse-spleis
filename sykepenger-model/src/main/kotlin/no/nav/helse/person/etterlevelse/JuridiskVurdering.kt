@@ -16,11 +16,19 @@ abstract class JuridiskVurdering {
     abstract val paragraf: Paragraf
     abstract val ledd: Ledd
     open val punktum: List<Punktum> = emptyList()
-    open val bokstav: List<Bokstav> = emptyList()
+    open val bokstaver: List<Bokstav> = emptyList()
 
     //TODO: Ta stilling til om disse skal types sterkt for å ungå problematikk med equals på komplekse datastrukturer
     abstract val input: Map<String, Any>
     abstract val output: Map<String, Any>
+
+    internal fun accept(visitor: JuridiskVurderingVisitor) {
+        visitor.preVisitVurdering(oppfylt, versjon, paragraf, ledd, punktum, bokstaver, input, output)
+        acceptSpesifikk(visitor)
+        visitor.postVisitVurdering(oppfylt, versjon, paragraf, ledd, punktum, bokstaver, input, output)
+    }
+
+    abstract fun acceptSpesifikk(visitor: JuridiskVurderingVisitor)
 
     abstract fun sammenstill(vurderinger: List<JuridiskVurdering>): List<JuridiskVurdering>
 
@@ -42,7 +50,7 @@ abstract class JuridiskVurdering {
             paragraf == other.paragraf &&
             ledd == other.ledd &&
             punktum == other.punktum &&
-            bokstav == other.bokstav &&
+            bokstaver == other.bokstaver &&
             input == other.input &&
             output == other.output
     }
@@ -53,7 +61,7 @@ abstract class JuridiskVurdering {
         result = 31 * result + paragraf.hashCode()
         result = 31 * result + ledd.hashCode()
         result = 31 * result + punktum.hashCode()
-        result = 31 * result + bokstav.hashCode()
+        result = 31 * result + bokstaver.hashCode()
         result = 31 * result + input.hashCode()
         result = 31 * result + output.hashCode()
         return result
@@ -75,12 +83,14 @@ class EnkelVurdering(
     override val versjon: LocalDate,
     override val ledd: Ledd,
     override val punktum: List<Punktum> = emptyList(),
-    override val bokstav: List<Bokstav> = emptyList(),
+    override val bokstaver: List<Bokstav> = emptyList(),
     override val input: Map<String, Any>,
     override val output: Map<String, Any>
 ) : JuridiskVurdering() {
     override fun sammenstill(vurderinger: List<JuridiskVurdering>) =
         sammenstill<EnkelVurdering>(vurderinger) { vurderinger.erstatt(it, this) }
+
+    override fun acceptSpesifikk(visitor: JuridiskVurderingVisitor) {}
 }
 
 class GrupperbarVurdering private constructor(
@@ -91,7 +101,7 @@ class GrupperbarVurdering private constructor(
     override val paragraf: Paragraf,
     override val ledd: Ledd,
     override val punktum: List<Punktum> = emptyList(),
-    override val bokstav: List<Bokstav> = emptyList(),
+    override val bokstaver: List<Bokstav> = emptyList(),
     override val input: Map<String, Any>,
     override val output: Map<String, Any>
 ) : JuridiskVurdering() {
@@ -107,8 +117,8 @@ class GrupperbarVurdering private constructor(
         bokstav: List<Bokstav> = emptyList()
     ) : this(dato, dato, oppfylt, versjon, paragraf, ledd, punktum, bokstav, input, output)
 
-    internal fun accept(visitor: GrupperbarVurderingVisitor) {
-        visitor.visitVurdering(fom, tom)
+    override fun acceptSpesifikk(visitor: JuridiskVurderingVisitor) {
+        visitor.visitGrupperbarVurdering(fom, tom)
     }
 
     override fun sammenstill(vurderinger: List<JuridiskVurdering>): List<JuridiskVurdering> {
@@ -118,7 +128,7 @@ class GrupperbarVurdering private constructor(
             .map { it.fom til  it.tom }
             .flatMap { it.datoer() }
             .grupperSammenhengendePerioderMedHensynTilHelg()
-            .map { GrupperbarVurdering(it.start, it.endInclusive, oppfylt, versjon, paragraf, ledd, punktum, bokstav, input, output) }
+            .map { GrupperbarVurdering(it.start, it.endInclusive, oppfylt, versjon, paragraf, ledd, punktum, bokstaver, input, output) }
 
         return vurderinger.filter { it != this } + sammenstilt
     }
@@ -131,12 +141,16 @@ class BetingetVurdering(
     override val paragraf: Paragraf,
     override val ledd: Ledd,
     override val punktum: List<Punktum> = emptyList(),
-    override val bokstav: List<Bokstav> = emptyList(),
+    override val bokstaver: List<Bokstav> = emptyList(),
     override val input: Map<String, Any>,
     override val output: Map<String, Any>
 ) : JuridiskVurdering() {
     override fun sammenstill(vurderinger: List<JuridiskVurdering>): List<JuridiskVurdering> {
         if (!funnetRelevant) return vurderinger
         return sammenstill<BetingetVurdering>(vurderinger) { vurderinger.erstatt(it, this) }
+    }
+
+    override fun acceptSpesifikk(visitor: JuridiskVurderingVisitor) {
+        visitor.visitBetingetVurdering(funnetRelevant)
     }
 }

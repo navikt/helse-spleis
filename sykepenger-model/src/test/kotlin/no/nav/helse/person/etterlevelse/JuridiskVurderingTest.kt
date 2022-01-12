@@ -119,7 +119,7 @@ internal class JuridiskVurderingTest {
         override val versjon = versjon
         override val paragraf = paragraf
         override val ledd = ledd
-        override val bokstav = bokstav
+        override val bokstaver = bokstav
         override val punktum = punktum
         override val input = input
         override val output = output
@@ -127,5 +127,7 @@ internal class JuridiskVurderingTest {
         override fun sammenstill(vurderinger: List<JuridiskVurdering>): List<JuridiskVurdering> {
             TODO("Not yet implemented")
         }
+
+        override fun acceptSpesifikk(visitor: JuridiskVurderingVisitor) {}
     }
 }

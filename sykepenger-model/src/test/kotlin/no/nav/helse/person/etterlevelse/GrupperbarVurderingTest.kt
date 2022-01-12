@@ -9,6 +9,8 @@ import java.time.LocalDate
 
 internal class GrupperbarVurderingTest {
 
+    private val observatør get() = JuridiskVurderingObservatør()
+
     @Test
     fun `Grupperer bare vurderinger som ligger inntil hverandre som kommer Out-Of-Order`() {
         var vurderinger = emptyList<JuridiskVurdering>()
@@ -48,12 +50,10 @@ internal class GrupperbarVurderingTest {
 
     private fun grupperbarVurdering(dato: LocalDate) = GrupperbarVurdering(dato, mapOf(), mapOf(), true, LocalDate.MAX, Paragraf.PARAGRAF_8_2, 1.ledd)
 
-    private val observatør get() = GrupperbarVurderingObservatør()
-
-    class GrupperbarVurderingObservatør : GrupperbarVurderingVisitor {
+    private class JuridiskVurderingObservatør : JuridiskVurderingVisitor {
         private lateinit var fom: LocalDate
         private lateinit var tom: LocalDate
-        override fun visitVurdering(fom: LocalDate, tom: LocalDate) {
+        override fun visitGrupperbarVurdering(fom: LocalDate, tom: LocalDate) {
             this.fom = fom
             this.tom = tom
         }
