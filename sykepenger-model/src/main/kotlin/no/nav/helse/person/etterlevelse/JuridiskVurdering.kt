@@ -84,8 +84,6 @@ class EnkelVurdering(
 }
 
 class GrupperbarVurdering private constructor(
-    // For enkelthets skyld, datoen objektet opprinnelig gjelder for
-    private val originalDato: LocalDate,
     private val fom: LocalDate,
     private val tom: LocalDate,
     override val oppfylt: Boolean,
@@ -107,7 +105,11 @@ class GrupperbarVurdering private constructor(
         ledd: Ledd,
         punktum: List<Punktum> = emptyList(),
         bokstav: List<Bokstav> = emptyList()
-    ) : this(dato, dato, dato, oppfylt, versjon, paragraf, ledd, punktum, bokstav, input, output)
+    ) : this(dato, dato, oppfylt, versjon, paragraf, ledd, punktum, bokstav, input, output)
+
+    internal fun accept(visitor: GrupperbarVurderingVisitor) {
+        visitor.visitVurdering(fom, tom)
+    }
 
     override fun sammenstill(vurderinger: List<JuridiskVurdering>): List<JuridiskVurdering> {
         val sammenstilt = (vurderinger + this)
@@ -116,7 +118,7 @@ class GrupperbarVurdering private constructor(
             .map { it.fom til  it.tom }
             .flatMap { it.datoer() }
             .grupperSammenhengendePerioderMedHensynTilHelg()
-            .map { GrupperbarVurdering(originalDato, it.start, it.endInclusive, oppfylt, versjon, paragraf, ledd, punktum, bokstav, input, output) }
+            .map { GrupperbarVurdering(it.start, it.endInclusive, oppfylt, versjon, paragraf, ledd, punktum, bokstav, input, output) }
 
         return vurderinger.filter { it != this } + sammenstilt
     }
