@@ -29,15 +29,15 @@ class MaskinellJurist : EtterlevelseObserver {
         leggTil(
             EnkelVurdering(
                 oppfylt = oppfylt,
+                versjon = LocalDate.of(2020, 6, 12),
+                paragraf = Paragraf.PARAGRAF_8_2,
+                ledd = 1.ledd,
                 input = mapOf(
                     "skjæringstidspunkt" to skjæringstidspunkt,
                     "tilstrekkeligAntallOpptjeningsdager" to tilstrekkeligAntallOpptjeningsdager,
                     "arbeidsforhold" to arbeidsforhold
                 ),
-                output = mapOf("antallOpptjeningsdager" to antallOpptjeningsdager),
-                paragraf = Paragraf.PARAGRAF_8_2,
-                versjon = LocalDate.of(2020, 6, 12),
-                ledd = 1.ledd
+                output = mapOf("antallOpptjeningsdager" to antallOpptjeningsdager)
             )
         )
     }

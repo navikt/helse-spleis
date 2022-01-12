@@ -79,8 +79,8 @@ abstract class JuridiskVurdering {
 
 class EnkelVurdering(
     override val oppfylt: Boolean,
-    override val paragraf: Paragraf,
     override val versjon: LocalDate,
+    override val paragraf: Paragraf,
     override val ledd: Ledd,
     override val punktum: List<Punktum> = emptyList(),
     override val bokstaver: List<Bokstav> = emptyList(),
