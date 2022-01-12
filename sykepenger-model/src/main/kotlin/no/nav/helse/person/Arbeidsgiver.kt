@@ -156,10 +156,14 @@ internal class Arbeidsgiver private constructor(
         internal fun skjæringstidspunkter(arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) =
             infotrygdhistorikk.skjæringstidspunkter(arbeidsgivere.map(Arbeidsgiver::sykdomstidslinje))
 
-        internal fun Iterable<Arbeidsgiver>.ghostPeriode(skjæringstidspunkt: LocalDate): Periode? {
+        internal fun Iterable<Arbeidsgiver>.ghostPeriode(skjæringstidspunkt: LocalDate): GhostPeriode? {
             val relevanteVedtaksperioder = flatMap { it.vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt) }
             if (relevanteVedtaksperioder.isEmpty()) return null
-            return relevanteVedtaksperioder.minOf { it.periode().start } til relevanteVedtaksperioder.maxOf { it.periode().endInclusive }
+            return GhostPeriode(
+                fom = relevanteVedtaksperioder.minOf { it.periode().start },
+                tom = relevanteVedtaksperioder.maxOf { it.periode().endInclusive },
+                skjæringstidspunkt = skjæringstidspunkt
+            )
         }
 
 

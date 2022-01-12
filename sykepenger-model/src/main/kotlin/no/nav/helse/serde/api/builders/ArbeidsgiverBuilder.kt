@@ -6,7 +6,7 @@ import no.nav.helse.person.ForkastetVedtaksperiode
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.serde.api.ArbeidsgiverDTO
-import no.nav.helse.serde.api.GhostPeriode
+import no.nav.helse.serde.api.GhostPeriodeDTO
 import no.nav.helse.serde.api.v2.HendelseDTO
 import no.nav.helse.serde.api.v2.buildere.GenerasjonerBuilder
 import no.nav.helse.serde.api.v2.buildere.IVilkårsgrunnlagHistorikk
@@ -53,7 +53,13 @@ internal class ArbeidsgiverBuilder(
             vedtaksperioder = perioderBuilder.build(hendelser, utbetalingshistorikk) + forkastetPerioderBuilder.build(hendelser, utbetalingshistorikk).filter { it.tilstand.visesNårForkastet() },
             utbetalingshistorikk = utbetalingshistorikk,
             generasjoner = if (Toggle.SpeilApiV2.enabled) GenerasjonerBuilder(hendelser, fødselsnummer.somFødselsnummer(), vilkårsgrunnlagHistorikk, arbeidsgiver).build() else null,
-            ghostPerioder = arbeidsgiver.ghostPerioder().map { GhostPeriode(it.start, it.endInclusive) }
+            ghostPerioder = arbeidsgiver.ghostPerioder().map {
+                GhostPeriodeDTO(
+                    fom = it.fom,
+                    tom = it.tom,
+                    skjæringstidspunkt = it.skjæringstidspunkt
+                )
+            }
         )
     }
 

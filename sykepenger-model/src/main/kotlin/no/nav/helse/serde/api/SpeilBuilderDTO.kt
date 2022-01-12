@@ -35,7 +35,7 @@ data class ArbeidsgiverDTO(
     val organisasjonsnummer: String,
     val id: UUID,
     val vedtaksperioder: List<VedtaksperiodeDTOBase>,
-    val ghostPerioder: List<GhostPeriode>,
+    val ghostPerioder: List<GhostPeriodeDTO>,
     val utbetalingshistorikk: List<UtbetalingshistorikkElementDTO>,
     val generasjoner: List<Generasjon>?
 )
@@ -97,9 +97,10 @@ data class VedtaksperiodeDTO(
     val utbetalteUtbetalinger: UtbetalingerDTO = utbetalinger
 }
 
-data class GhostPeriode(
+data class GhostPeriodeDTO(
     val fom: LocalDate,
-    val tom: LocalDate
+    val tom: LocalDate,
+    val skjæringstidspunkt: LocalDate
 )
 
 data class UtbetalingerDTO(

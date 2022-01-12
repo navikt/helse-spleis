@@ -53,8 +53,11 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
         val speilJson = serializePersonForSpeil(person)
-        assertEquals(emptyList<GhostPeriode>(), speilJson.arbeidsgivere.single { it.organisasjonsnummer == a1.toString() }.ghostPerioder)
-        assertEquals(listOf(GhostPeriode(1.januar, 20.januar)), speilJson.arbeidsgivere.single { it.organisasjonsnummer == a2.toString() }.ghostPerioder)
+        assertEquals(emptyList<GhostPeriodeDTO>(), speilJson.arbeidsgivere.single { it.organisasjonsnummer == a1.toString() }.ghostPerioder)
+        assertEquals(
+            listOf(GhostPeriodeDTO(fom = 1.januar, tom = 20.januar, skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode))),
+            speilJson.arbeidsgivere.single { it.organisasjonsnummer == a2.toString() }.ghostPerioder
+        )
     }
 
     @Test
@@ -93,9 +96,12 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
         val speilJson1 = serializePersonForSpeil(person)
-        assertEquals(emptyList<GhostPeriode>(), speilJson1.arbeidsgivere.single { it.organisasjonsnummer == a1.toString() }.ghostPerioder)
-        assertEquals(emptyList<GhostPeriode>(), speilJson1.arbeidsgivere.single { it.organisasjonsnummer == a2.toString() }.ghostPerioder)
-        assertEquals(listOf(GhostPeriode(1.januar, 31.januar)), speilJson1.arbeidsgivere.single { it.organisasjonsnummer == a3.toString() }.ghostPerioder)
+        assertEquals(emptyList<GhostPeriodeDTO>(), speilJson1.arbeidsgivere.single { it.organisasjonsnummer == a1.toString() }.ghostPerioder)
+        assertEquals(emptyList<GhostPeriodeDTO>(), speilJson1.arbeidsgivere.single { it.organisasjonsnummer == a2.toString() }.ghostPerioder)
+        assertEquals(
+            listOf(GhostPeriodeDTO(fom = 1.januar, tom = 31.januar, skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode))),
+            speilJson1.arbeidsgivere.single { it.organisasjonsnummer == a3.toString() }.ghostPerioder
+        )
     }
 
     @Test
@@ -136,8 +142,11 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
         val speilJson = serializePersonForSpeil(person)
-        assertEquals(emptyList<GhostPeriode>(), speilJson.arbeidsgivere.single { it.organisasjonsnummer == a1.toString() }.ghostPerioder)
-        assertEquals(listOf(GhostPeriode(1.februar, 20.februar)), speilJson.arbeidsgivere.single { it.organisasjonsnummer == a2.toString() }.ghostPerioder)
+        assertEquals(emptyList<GhostPeriodeDTO>(), speilJson.arbeidsgivere.single { it.organisasjonsnummer == a1.toString() }.ghostPerioder)
+        assertEquals(
+            listOf(GhostPeriodeDTO(1.februar, 20.februar, inspektør.skjæringstidspunkt(1.vedtaksperiode))),
+            speilJson.arbeidsgivere.single { it.organisasjonsnummer == a2.toString() }.ghostPerioder
+        )
     }
 
     @Test
@@ -179,8 +188,11 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
         val speilJson = serializePersonForSpeil(person)
-        assertEquals(emptyList<GhostPeriode>(), speilJson.arbeidsgivere.single { it.organisasjonsnummer == a1.toString() }.ghostPerioder)
-        assertEquals(listOf(GhostPeriode(1.januar, 20.januar)), speilJson.arbeidsgivere.single { it.organisasjonsnummer == a2.toString() }.ghostPerioder)
-        assertEquals(emptyList<GhostPeriode>(), speilJson.arbeidsgivere.single { it.organisasjonsnummer == a3.toString() }.ghostPerioder)
+        assertEquals(emptyList<GhostPeriodeDTO>(), speilJson.arbeidsgivere.single { it.organisasjonsnummer == a1.toString() }.ghostPerioder)
+        assertEquals(
+            listOf(GhostPeriodeDTO(1.januar, 20.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))),
+            speilJson.arbeidsgivere.single { it.organisasjonsnummer == a2.toString() }.ghostPerioder
+        )
+        assertEquals(emptyList<GhostPeriodeDTO>(), speilJson.arbeidsgivere.single { it.organisasjonsnummer == a3.toString() }.ghostPerioder)
     }
 }
