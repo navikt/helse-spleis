@@ -21,6 +21,7 @@ abstract class JuridiskVurdering {
     //TODO: Ta stilling til om disse skal types sterkt for å ungå problematikk med equals på komplekse datastrukturer
     abstract val input: Map<String, Any>
     abstract val output: Map<String, Any>
+    abstract val kontekster: Map<String, String>
 
     internal fun accept(visitor: JuridiskVurderingVisitor) {
         visitor.preVisitVurdering(oppfylt, versjon, paragraf, ledd, punktum, bokstaver, input, output)
@@ -52,7 +53,8 @@ abstract class JuridiskVurdering {
             punktum == other.punktum &&
             bokstaver == other.bokstaver &&
             input == other.input &&
-            output == other.output
+            output == other.output &&
+            kontekster == other.kontekster
     }
 
     override fun hashCode(): Int {
@@ -64,6 +66,7 @@ abstract class JuridiskVurdering {
         result = 31 * result + bokstaver.hashCode()
         result = 31 * result + input.hashCode()
         result = 31 * result + output.hashCode()
+        result = 31 * result + kontekster.hashCode()
         return result
     }
 
@@ -85,7 +88,8 @@ class EnkelVurdering(
     override val punktum: List<Punktum> = emptyList(),
     override val bokstaver: List<Bokstav> = emptyList(),
     override val input: Map<String, Any>,
-    override val output: Map<String, Any>
+    override val output: Map<String, Any>,
+    override val kontekster: Map<String, String>
 ) : JuridiskVurdering() {
     override fun sammenstill(vurderinger: List<JuridiskVurdering>) =
         sammenstill<EnkelVurdering>(vurderinger) { vurderinger.erstatt(it, this) }
@@ -103,7 +107,8 @@ class GrupperbarVurdering private constructor(
     override val punktum: List<Punktum> = emptyList(),
     override val bokstaver: List<Bokstav> = emptyList(),
     override val input: Map<String, Any>,
-    override val output: Map<String, Any>
+    override val output: Map<String, Any>,
+    override val kontekster: Map<String, String>
 ) : JuridiskVurdering() {
     internal constructor(
         dato: LocalDate,
@@ -114,8 +119,9 @@ class GrupperbarVurdering private constructor(
         paragraf: Paragraf,
         ledd: Ledd,
         punktum: List<Punktum> = emptyList(),
-        bokstav: List<Bokstav> = emptyList()
-    ) : this(dato, dato, oppfylt, versjon, paragraf, ledd, punktum, bokstav, input, output)
+        bokstav: List<Bokstav> = emptyList(),
+        kontekster: Map<String, String>
+    ) : this(dato, dato, oppfylt, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster)
 
     override fun acceptSpesifikk(visitor: JuridiskVurderingVisitor) {
         visitor.visitGrupperbarVurdering(fom, tom)
@@ -127,7 +133,7 @@ class GrupperbarVurdering private constructor(
             .filter { it == this }
             .map { it.fom til it.tom }
             .grupperSammenhengendePerioderMedHensynTilHelg()
-            .map { GrupperbarVurdering(it.start, it.endInclusive, oppfylt, versjon, paragraf, ledd, punktum, bokstaver, input, output) }
+            .map { GrupperbarVurdering(it.start, it.endInclusive, oppfylt, versjon, paragraf, ledd, punktum, bokstaver, input, output, kontekster) }
 
         return vurderinger.filter { it != this } + sammenstilt
     }
@@ -142,7 +148,8 @@ class BetingetVurdering(
     override val punktum: List<Punktum> = emptyList(),
     override val bokstaver: List<Bokstav> = emptyList(),
     override val input: Map<String, Any>,
-    override val output: Map<String, Any>
+    override val output: Map<String, Any>,
+    override val kontekster: Map<String, String>
 ) : JuridiskVurdering() {
     override fun sammenstill(vurderinger: List<JuridiskVurdering>): List<JuridiskVurdering> {
         if (!funnetRelevant) return vurderinger

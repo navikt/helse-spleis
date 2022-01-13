@@ -1,5 +1,6 @@
 package no.nav.helse.person.etterlevelse
 
+import no.nav.helse.person.KontekstObserver
 import no.nav.helse.person.Ledd.Companion.ledd
 import no.nav.helse.person.Paragraf
 import no.nav.helse.person.Punktum.Companion.punktum
@@ -8,11 +9,43 @@ import no.nav.helse.økonomi.Prosent
 import java.time.LocalDate
 import java.time.Year
 
-class MaskinellJurist : EtterlevelseObserver {
+class MaskinellJurist : EtterlevelseObserver, KontekstObserver {
+    private lateinit var fødselsnummer: String
+    private lateinit var aktørId: String
+    private lateinit var organisasjonsnummer: String
+    private var vedtaksperiodeId: String? = null
+    private var utbetalingId: String? = null
+
     private var vurderinger = listOf<JuridiskVurdering>()
 
     private fun leggTil(vurdering: JuridiskVurdering) {
         vurderinger = vurdering.sammenstill(vurderinger)
+    }
+
+    private fun kontekster(): Map<String, String> = mutableMapOf(
+        "fødselsnummer" to fødselsnummer,
+        "aktørId" to aktørId,
+        "organisasjonsnummer" to organisasjonsnummer
+    ).apply {
+        compute("vedtaksperiodeId") { _, _ -> vedtaksperiodeId }
+        compute("utbetalingId") { _, _ -> utbetalingId }
+    }
+
+    override fun nyPersonKontekst(fødselsnummer: String, aktørId: String) {
+        this.fødselsnummer = fødselsnummer
+        this.aktørId = aktørId
+    }
+
+    override fun nyVedtaksperiodeKontekst(vedtaksperiodeId: String) {
+        this.vedtaksperiodeId = vedtaksperiodeId
+    }
+
+    override fun nyArbeidsgiverKontekst(organisasjonsnummer: String) {
+        this.organisasjonsnummer = organisasjonsnummer
+    }
+
+    override fun nyUtbetalingKontekst(utbetalingId: String) {
+        this.utbetalingId = utbetalingId
     }
 
     override fun `§2`(oppfylt: Boolean) {
@@ -37,7 +70,8 @@ class MaskinellJurist : EtterlevelseObserver {
                     "tilstrekkeligAntallOpptjeningsdager" to tilstrekkeligAntallOpptjeningsdager,
                     "arbeidsforhold" to arbeidsforhold
                 ),
-                output = mapOf("antallOpptjeningsdager" to antallOpptjeningsdager)
+                output = mapOf("antallOpptjeningsdager" to antallOpptjeningsdager),
+                kontekster = kontekster()
             )
         )
     }
@@ -78,7 +112,8 @@ class MaskinellJurist : EtterlevelseObserver {
                     "skjæringstidspunkt" to skjæringstidspunkt,
                     "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig }
                 ),
-                output = mapOf("funnetRelevant" to funnetRelevant)
+                output = mapOf("funnetRelevant" to funnetRelevant),
+                kontekster = kontekster()
             )
         )
     }
@@ -120,7 +155,8 @@ class MaskinellJurist : EtterlevelseObserver {
                 oppfylt = true,
                 paragraf = Paragraf.PARAGRAF_8_16,
                 ledd = 1.ledd,
-                versjon = LocalDate.of(2020, 6, 12)
+                versjon = LocalDate.of(2020, 6, 12),
+                kontekster = kontekster()
             )
         )
     }

@@ -50,9 +50,10 @@ internal class BetingetVurderingTest {
         punktum: List<Punktum> = emptyList(),
         bokstaver: List<Bokstav> = emptyList(),
         input: Map<String, Any> = emptyMap(),
-        output: Map<String, Any> = emptyMap()
+        output: Map<String, Any> = emptyMap(),
+        kontekster: Map<String, String> = emptyMap()
     ) {
-        vurderinger = BetingetVurdering(funnetRelevant, oppfylt, versjon, paragraf, ledd, punktum, bokstaver, input, output).sammenstill(vurderinger)
+        vurderinger = BetingetVurdering(funnetRelevant, oppfylt, versjon, paragraf, ledd, punktum, bokstaver, input, output, kontekster).sammenstill(vurderinger)
     }
 
     private class JuridiskVurderingObservatør : JuridiskVurderingVisitor {

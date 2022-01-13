@@ -113,7 +113,8 @@ internal class JuridiskVurderingTest {
         bokstav: List<Bokstav> = listOf(),
         punktum: List<Punktum> = listOf(),
         input: Map<String, Any> = mapOf(),
-        output: Map<String, Any> = mapOf()
+        output: Map<String, Any> = mapOf(),
+        kontekster: Map<String, String> = mapOf()
     ) = object : JuridiskVurdering() {
         override val oppfylt = oppfylt
         override val versjon = versjon
@@ -123,6 +124,7 @@ internal class JuridiskVurderingTest {
         override val punktum = punktum
         override val input = input
         override val output = output
+        override val kontekster = kontekster
 
         override fun sammenstill(vurderinger: List<JuridiskVurdering>): List<JuridiskVurdering> {
             TODO("Not yet implemented")

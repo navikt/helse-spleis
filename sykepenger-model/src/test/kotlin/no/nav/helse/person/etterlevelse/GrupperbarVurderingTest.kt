@@ -152,7 +152,16 @@ internal class GrupperbarVurderingTest {
     }
 
     private fun nyVurdering(dato: LocalDate) {
-        vurderinger = GrupperbarVurdering(dato, mapOf(), mapOf(), true, LocalDate.MAX, Paragraf.PARAGRAF_8_2, 1.ledd).sammenstill(vurderinger)
+        vurderinger = GrupperbarVurdering(
+            dato = dato,
+            input = mapOf(),
+            output = mapOf(),
+            oppfylt = true,
+            versjon = LocalDate.MAX,
+            paragraf = Paragraf.PARAGRAF_8_2,
+            ledd = 1.ledd,
+            kontekster = emptyMap()
+        ).sammenstill(vurderinger)
     }
 
     private class JuridiskVurderingObservatør : JuridiskVurderingVisitor {

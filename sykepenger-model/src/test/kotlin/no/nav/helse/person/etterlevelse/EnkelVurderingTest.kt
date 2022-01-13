@@ -49,8 +49,9 @@ internal class EnkelVurderingTest {
         punktum: List<Punktum> = emptyList(),
         bokstaver: List<Bokstav> = emptyList(),
         input: Map<String, Any> = emptyMap(),
-        output: Map<String, Any> = emptyMap()
+        output: Map<String, Any> = emptyMap(),
+        kontekster: Map<String, String> = emptyMap()
     ) {
-        vurderinger = EnkelVurdering(oppfylt, versjon, paragraf, ledd, punktum, bokstaver, input, output).sammenstill(vurderinger)
+        vurderinger = EnkelVurdering(oppfylt, versjon, paragraf, ledd, punktum, bokstaver, input, output, kontekster).sammenstill(vurderinger)
     }
 }
