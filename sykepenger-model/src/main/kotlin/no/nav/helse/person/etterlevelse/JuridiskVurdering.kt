@@ -126,7 +126,6 @@ class GrupperbarVurdering private constructor(
             .filterIsInstance<GrupperbarVurdering>()
             .filter { it == this }
             .map { it.fom til  it.tom }
-            .flatMap { it.datoer() }
             .grupperSammenhengendePerioderMedHensynTilHelg()
             .map { GrupperbarVurdering(it.start, it.endInclusive, oppfylt, versjon, paragraf, ledd, punktum, bokstaver, input, output) }
 

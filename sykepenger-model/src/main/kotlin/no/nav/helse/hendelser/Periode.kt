@@ -19,17 +19,27 @@ open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Ite
 
         fun List<Periode>.slutterEtter(grense: LocalDate) = any { it.slutterEtter(grense) }
 
-        fun List<LocalDate>.grupperSammenhengendePerioder() = sorted().distinct().fold(listOf<Periode>()) { perioder, dato ->
-            val siste = perioder.lastOrNull()
-            if (siste == null || siste.endInclusive.plusDays(1) != dato) perioder.plus<Periode>(dato.somPeriode())
-            else perioder.dropLast(1).plus<Periode>(siste.oppdaterTom(dato))
-        }
+        fun List<LocalDate>.grupperSammenhengendePerioder() = this
+            .sorted()
+            .distinct()
+            .fold(listOf(), grupperSammenhengendePerioder { periode, dato -> periode.endInclusive.plusDays(1) != dato })
 
-        fun List<LocalDate>.grupperSammenhengendePerioderMedHensynTilHelg() = sorted().distinct().fold(listOf<Periode>()) { perioder, dato ->
-            val siste = perioder.lastOrNull()
-            if (siste == null || !siste.endInclusive.erRettFør(dato)) perioder.plus<Periode>(dato.somPeriode())
-            else perioder.dropLast(1).plus<Periode>(siste.oppdaterTom(dato))
-        }
+
+        fun List<Periode>.grupperSammenhengendePerioderMedHensynTilHelg() = this.flatMap { periode -> periode.map { it } }
+            .sorted()
+            .distinct()
+            .fold(listOf(), grupperSammenhengendePerioder { periode, dato -> !periode.endInclusive.erRettFør(dato) })
+
+        private fun grupperSammenhengendePerioder(erEgenPeriode: (Periode, LocalDate) -> Boolean) =
+            { perioder: List<Periode>, dato: LocalDate ->
+                when {
+                    perioder.isEmpty() || erEgenPeriode(perioder.last(), dato) -> perioder.plusElement(dato.somPeriode())
+                    else -> perioder.oppdaterSiste(perioder.last().oppdaterTom(dato))
+                }
+            }
+
+        private fun List<Periode>.oppdaterSiste(periode: Periode) = this.dropLast(1).plusElement(periode)
+
     }
 
     fun overlapperMed(other: Periode) =
@@ -90,10 +100,6 @@ open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Ite
 
     internal fun subset(periode: Periode) =
         Periode(start.coerceAtLeast(periode.start), endInclusive.coerceAtMost(periode.endInclusive))
-
-    internal fun datoer(): List<LocalDate> {
-         return this.map { it }
-    }
 }
 
 internal operator fun List<Periode>.contains(dato: LocalDate) = this.any { dato in it }

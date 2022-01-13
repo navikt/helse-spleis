@@ -180,7 +180,10 @@ internal class PeriodeTest {
         assertEquals(listOf(1.januar til 1.januar), listOf(1.januar).grupperSammenhengendePerioder())
         assertEquals(listOf(1.januar til 2.januar), listOf(2.januar, 1.januar).grupperSammenhengendePerioder())
         assertEquals(listOf(1.januar til 1.januar, 3.januar til 3.januar), listOf(1.januar, 3.januar).grupperSammenhengendePerioder())
-        assertEquals(listOf(1.januar til 5.januar, 8.januar til 8.januar), listOf(1.januar, 2.januar, 3.januar, 4.januar, 5.januar, 8.januar).grupperSammenhengendePerioder())
+        assertEquals(
+            listOf(1.januar til 5.januar, 8.januar til 8.januar),
+            listOf(1.januar, 2.januar, 3.januar, 4.januar, 5.januar, 8.januar).grupperSammenhengendePerioder()
+        )
     }
 
     @Test
