@@ -903,4 +903,36 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
 
         assertInstanceOf(VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag::class.java, person.vilkårsgrunnlagFor(1.januar))
     }
+
+    @ForventetFeil("https://trello.com/c/6C6PH2K1")
+    @Test
+    fun `IT forlengelse hvor arbeidsgiver har endret orgnummer og vi har fått nye inntektsopplysninger fra IT ved skjæringstidspunktet`() {
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a1)
+        håndterUtbetalingshistorikk(
+            1.vedtaksperiode,
+            ArbeidsgiverUtbetalingsperiode(a1.toString(), 1.januar, 31.januar, 100.prosent, INNTEKT),
+            inntektshistorikk = listOf(Inntektsopplysning(a1.toString(), 1.januar, INNTEKT, true)),
+            orgnummer = a1
+        )
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        val vilkårsgrunnlag = person.vilkårsgrunnlagFor(1.januar)
+        håndterAnnullerUtbetaling(a1, inspektør.fagsystemId(1.vedtaksperiode))
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a2)
+        håndterUtbetalingshistorikk(
+            1.vedtaksperiode,
+            ArbeidsgiverUtbetalingsperiode(a2.toString(), 1.januar, 31.januar, 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(a2.toString(), 1.februar, 28.februar, 100.prosent, INNTEKT),
+            inntektshistorikk = listOf(Inntektsopplysning(a2.toString(), 1.januar, INNTEKT, true)),
+            orgnummer = a2
+        )
+        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        assertNotSame(vilkårsgrunnlag, person.vilkårsgrunnlagFor(1.januar))
+    }
 }

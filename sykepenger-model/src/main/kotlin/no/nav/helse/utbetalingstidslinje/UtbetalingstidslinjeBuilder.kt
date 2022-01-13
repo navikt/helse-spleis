@@ -47,7 +47,8 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     private fun finnInntekt(skjæringstidspunkt: LocalDate, dato: LocalDate) = inntektPerSkjæringstidspunkt?.get(skjæringstidspunkt)
         ?: inntektPerSkjæringstidspunkt?.entries?.firstOrNull { (key) -> key in skjæringstidspunkt..dato }?.value
 
-    private fun inntektForDato(dato: LocalDate) = inntektForDatoOrNull(dato) ?: throw ManglerInntektException(dato, skjæringstidspunkter)
+    private fun inntektForDato(dato: LocalDate) = inntektForDatoOrNull(dato)
+        ?: throw ManglerInntektException(dato, skjæringstidspunkter)
 
     private fun dekningsgrunnlag(inntekt: Inntekt, dagen: LocalDate, skjæringstidspunkt: LocalDate, aktivitetslogg: IAktivitetslogg): Inntekt {
         val dekningsgrunnlag = inntekt.dekningsgrunnlag(regler, aktivitetslogg)
