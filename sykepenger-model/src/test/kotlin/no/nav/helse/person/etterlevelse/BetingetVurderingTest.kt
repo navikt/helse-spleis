@@ -12,6 +12,7 @@ import java.time.LocalDate
 
 internal class BetingetVurderingTest {
 
+    private val observatør get() = JuridiskVurderingObservatør()
     private lateinit var vurderinger: List<JuridiskVurdering>
 
     @BeforeEach
@@ -23,6 +24,7 @@ internal class BetingetVurderingTest {
     fun `Legger til betingede vurderinger`() {
         nyVurdering()
         assertEquals(1, vurderinger.size)
+        observatør.assertVurdering(vurderinger.first(), true)
     }
 
     @Test
@@ -30,6 +32,7 @@ internal class BetingetVurderingTest {
         nyVurdering()
         nyVurdering()
         assertEquals(1, vurderinger.size)
+        observatør.assertVurdering(vurderinger.first(), true)
     }
 
     @Test
@@ -50,5 +53,19 @@ internal class BetingetVurderingTest {
         output: Map<String, Any> = emptyMap()
     ) {
         vurderinger = BetingetVurdering(funnetRelevant, oppfylt, versjon, paragraf, ledd, punktum, bokstaver, input, output).sammenstill(vurderinger)
+    }
+
+    private class JuridiskVurderingObservatør : JuridiskVurderingVisitor {
+        private var funnetRelevant: Boolean? = null
+
+        override fun visitBetingetVurdering(funnetRelevant: Boolean) {
+            this.funnetRelevant = funnetRelevant
+        }
+
+        fun assertVurdering(juridiskVurdering: JuridiskVurdering, funnetRelevant: Boolean) {
+            require(juridiskVurdering is BetingetVurdering)
+            juridiskVurdering.accept(this)
+            assertEquals(funnetRelevant, this.funnetRelevant)
+        }
     }
 }
