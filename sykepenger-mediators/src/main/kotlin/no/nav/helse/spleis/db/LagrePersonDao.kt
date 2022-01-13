@@ -3,9 +3,8 @@ package no.nav.helse.spleis.db
 import kotliquery.*
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Avstemming
-import no.nav.helse.person.Person
 import no.nav.helse.person.PersonHendelse
-import no.nav.helse.serde.serialize
+import no.nav.helse.serde.SerialisertPerson
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.spleis.PostgresProbe
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
@@ -14,14 +13,13 @@ import java.util.*
 import javax.sql.DataSource
 
 internal class LagrePersonDao(private val dataSource: DataSource) {
-    fun lagrePerson(message: HendelseMessage, person: Person, hendelse: PersonHendelse, vedtak: Boolean) {
-        val serialisering = person.serialize()
+    fun lagrePerson(message: HendelseMessage, person: SerialisertPerson, hendelse: PersonHendelse, vedtak: Boolean) {
         lagrePerson(
             aktørId = hendelse.aktørId(),
             fødselsnummer = hendelse.fødselsnummer().somFødselsnummer(),
-            skjemaVersjon = serialisering.skjemaVersjon,
+            skjemaVersjon = person.skjemaVersjon,
             meldingId = message.id,
-            personJson = serialisering.json,
+            personJson = person.json,
             vedtak = vedtak
         )
     }

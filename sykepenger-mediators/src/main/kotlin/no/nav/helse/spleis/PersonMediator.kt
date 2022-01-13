@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.prometheus.client.Summary
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Periode
@@ -19,6 +20,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asOptionalLocalDate
+import no.nav.helse.serde.serialize
 import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.db.LagrePersonDao
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
@@ -43,6 +45,11 @@ internal class PersonMediator(
         private val objectMapper = jacksonObjectMapper()
             .registerModule(JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+        private val jsonSizeSummary = Summary.build("json_size", "size of entire json")
+            .register()
+        private val jsonSubsizeSummary = Summary.build("json_subsize", "sizes of various paths in json(number of characters)")
+            .labelNames("path")
+            .register()
     }
 
 
@@ -51,7 +58,16 @@ internal class PersonMediator(
     }
 
     fun finalize(rapidsConnection: RapidsConnection, lagrePersonDao: LagrePersonDao) {
-        lagrePersonDao.lagrePerson(message, person, hendelse, vedtak)
+        val serialisertPerson = person.serialize()
+        try {
+            jsonSizeSummary.observe(serialisertPerson.json.length.toDouble())
+            serialisertPerson.metrikker().forEach { metrikk ->
+                jsonSubsizeSummary.labels(metrikk.path.joinToString(".")).observe(metrikk.prosentdel())
+            }
+        } catch (e: Exception) {
+            sikkerLogg.error("Kunne ikke lage metrikker for person ${hendelse.fødselsnummer()}", e)
+        }
+        lagrePersonDao.lagrePerson(message, serialisertPerson, hendelse, vedtak)
         sendUtgåendeMeldinger(rapidsConnection)
         sendReplays(rapidsConnection)
     }

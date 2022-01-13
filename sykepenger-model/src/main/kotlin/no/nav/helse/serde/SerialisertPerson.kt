@@ -165,6 +165,17 @@ class SerialisertPerson(val json: String) {
         fun medSkjemaversjon(jsonNode: JsonNode) = JsonMigration.medSkjemaversjon(migrations, jsonNode)
     }
 
+    fun metrikker(): List<Metrikk> = Metrikk.metrikkerAv(
+        json,
+        listOf("aktivitetslogg"),
+        listOf("aktivitetslogg", "aktiviteter"),
+        listOf("aktivitetslogg", "kontekster"),
+        listOf("arbeidsgivere"),
+        listOf("arbeidsgivere", "sykdomshistorikk"),
+        listOf("vilkårsgrunnlagHistorikk"),
+        listOf("infotrygdhistorikk")
+    )
+
     val skjemaVersjon = gjeldendeVersjon()
 
     private fun migrate(jsonNode: JsonNode, meldingerSupplier: MeldingerSupplier) {
