@@ -24,22 +24,21 @@ open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Ite
             .distinct()
             .fold(listOf(), grupperSammenhengendePerioder { periode, dato -> periode.endInclusive.plusDays(1) != dato })
 
-
-        fun List<Periode>.grupperSammenhengendePerioderMedHensynTilHelg() = this.flatMap { periode -> periode.map { it } }
+        fun List<Periode>.grupperSammenhengendePerioderMedHensynTilHelg() = this
+            .flatMap { periode -> periode.map { it } }
             .sorted()
             .distinct()
             .fold(listOf(), grupperSammenhengendePerioder { periode, dato -> !periode.endInclusive.erRettFør(dato) })
 
-        private fun grupperSammenhengendePerioder(erEgenPeriode: (Periode, LocalDate) -> Boolean) =
+        private fun grupperSammenhengendePerioder(erNyPeriode: (Periode, LocalDate) -> Boolean) =
             { perioder: List<Periode>, dato: LocalDate ->
                 when {
-                    perioder.isEmpty() || erEgenPeriode(perioder.last(), dato) -> perioder.plusElement(dato.somPeriode())
+                    perioder.isEmpty() || erNyPeriode(perioder.last(), dato) -> perioder.plusElement(dato.somPeriode())
                     else -> perioder.oppdaterSiste(perioder.last().oppdaterTom(dato))
                 }
             }
 
         private fun List<Periode>.oppdaterSiste(periode: Periode) = this.dropLast(1).plusElement(periode)
-
     }
 
     fun overlapperMed(other: Periode) =

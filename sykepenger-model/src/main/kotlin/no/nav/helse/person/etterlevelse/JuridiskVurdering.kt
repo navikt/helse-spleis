@@ -125,7 +125,7 @@ class GrupperbarVurdering private constructor(
         val sammenstilt = (vurderinger + this)
             .filterIsInstance<GrupperbarVurdering>()
             .filter { it == this }
-            .map { it.fom til  it.tom }
+            .map { it.fom til it.tom }
             .grupperSammenhengendePerioderMedHensynTilHelg()
             .map { GrupperbarVurdering(it.start, it.endInclusive, oppfylt, versjon, paragraf, ledd, punktum, bokstaver, input, output) }
 
