@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.ForventetFeil
 import no.nav.helse.Toggle
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
@@ -8,6 +9,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -882,5 +884,23 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         val utbetaling = inspektør.utbetaling(0).inspektør
         assertEquals(23.januar til 31.januar, utbetaling.periode)
         assertTrue(utbetaling.utbetalingstidslinje[23.januar] is NavDag)
+    }
+
+    @ForventetFeil("https://trello.com/c/6C6PH2K1")
+    @Test
+    fun `infotrygd forlengelse med skjæringstidspunkt vi allerede har vilkårsvurdert burde bruke vilkårsgrunnlag fra infotrygd`() {
+        tilGodkjenning(fom = 1.januar, tom = 31.januar, grad = 100.prosent, førsteFraværsdag = 1.januar)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterUtbetalingshistorikk(
+            2.vedtaksperiode,
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.januar, 31.januar, 100.prosent, INNTEKT),
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER.toString(), 1.januar, INNTEKT, true))
+        )
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+
+        assertInstanceOf(VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag::class.java, person.vilkårsgrunnlagFor(1.januar))
     }
 }
