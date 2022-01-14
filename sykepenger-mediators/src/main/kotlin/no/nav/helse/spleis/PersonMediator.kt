@@ -59,14 +59,14 @@ internal class PersonMediator(
 
     fun finalize(rapidsConnection: RapidsConnection, lagrePersonDao: LagrePersonDao) {
         val serialisertPerson = person.serialize()
-        try {
+        /*try {
             jsonSizeSummary.observe(serialisertPerson.json.length.toDouble())
             serialisertPerson.metrikker().forEach { metrikk ->
                 jsonSubsizeSummary.labels(metrikk.path.joinToString(".")).observe(metrikk.prosentdel())
             }
         } catch (e: Exception) {
             sikkerLogg.error("Kunne ikke lage metrikker for person ${hendelse.fødselsnummer()}", e)
-        }
+        }*/
         lagrePersonDao.lagrePerson(message, serialisertPerson, hendelse, vedtak)
         sendUtgåendeMeldinger(rapidsConnection)
         sendReplays(rapidsConnection)
