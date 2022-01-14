@@ -591,9 +591,6 @@ internal class Vedtaksperiode private constructor(
             else -> AvventerArbeidsgivere
         }
         håndterer(nesteTilstand)
-        if (tilstand == AvventerArbeidsgivere || person.vilkårsgrunnlagFor(skjæringstidspunkt)?.gjelderFlereArbeidsgivere() == true) {
-            overlappendeVedtaksperioder.forEach { it.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE }
-        }
         Companion.gjenopptaBehandling(hendelse, person, AvventerArbeidsgivere, AvventerHistorikk)
     }
 
@@ -609,10 +606,6 @@ internal class Vedtaksperiode private constructor(
         if (første == this) {
             return første.forsøkUtbetalingSteg2(vedtaksperioder.drop(1), sykepengerettighet, hendelse)
         }
-
-        vedtaksperioder
-            .filter { this.periode.overlapperMed(it.periode) }
-            .forEach { it.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE }
 
         this.tilstand(hendelse, AvventerArbeidsgivere)
         Companion.gjenopptaBehandling(hendelse, person, AvventerArbeidsgivere, AvventerHistorikk)
@@ -704,10 +697,6 @@ internal class Vedtaksperiode private constructor(
         vedtaksperioder.forEach { it.lagRevurdering(sykepengerettighet, hendelse) }
         val første = vedtaksperioder.first()
         if (første == this) return første.forsøkRevurderingSteg2(vedtaksperioder.drop(1), hendelse)
-
-        vedtaksperioder
-            .filter { this.periode.overlapperMed(it.periode) }
-            .forEach { it.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE }
 
         this.tilstand(hendelse, AvventerArbeidsgivereRevurdering)
         Companion.gjenopptaBehandling(hendelse, person, AvventerArbeidsgivereRevurdering, AvventerHistorikkRevurdering, IKKE_FERDIG_REVURDERT)

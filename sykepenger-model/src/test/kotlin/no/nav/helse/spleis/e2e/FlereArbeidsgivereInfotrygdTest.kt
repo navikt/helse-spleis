@@ -1493,14 +1493,14 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
-        assertInntektskilde(a1, Inntektskilde.FLERE_ARBEIDSGIVERE)
-        assertInntektskilde(a2, Inntektskilde.FLERE_ARBEIDSGIVERE)
 
         håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        assertInntektskilde(a1, Inntektskilde.FLERE_ARBEIDSGIVERE)
+        assertInntektskilde(a2, Inntektskilde.FLERE_ARBEIDSGIVERE)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
 
