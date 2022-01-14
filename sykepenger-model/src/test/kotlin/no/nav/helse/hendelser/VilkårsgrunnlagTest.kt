@@ -1,6 +1,5 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.Organisasjonsnummer
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.inspectors.GrunnlagsdataInspektør
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
@@ -142,9 +141,7 @@ internal class VilkårsgrunnlagTest {
         forventetAntallOpptjeningsdager: Int,
         forventetHarOpptjening: Boolean
     ) {
-        val idInnhenter = object : IdInnhenter {
-            override fun id(orgnummer: Organisasjonsnummer): UUID = observatør.vedtaksperiode(Companion.orgnummer, 0)
-        }
+        val idInnhenter = IdInnhenter { observatør.vedtaksperiode(Companion.orgnummer, 0) }
         val grunnlagsdata = TestArbeidsgiverInspektør(person, orgnummer).vilkårsgrunnlag(idInnhenter) ?: fail("Forventet at vilkårsgrunnlag er satt")
         val grunnlagsdataInspektør = GrunnlagsdataInspektør(grunnlagsdata)
         assertEquals(forventetSammenligningsgrunnlag, grunnlagsdataInspektør.sammenligningsgrunnlag)

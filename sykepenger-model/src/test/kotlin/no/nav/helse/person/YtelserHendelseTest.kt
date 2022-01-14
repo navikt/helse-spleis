@@ -1,6 +1,5 @@
 package no.nav.helse.person
 
-import no.nav.helse.Organisasjonsnummer
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.TilstandType.*
@@ -29,9 +28,7 @@ internal class YtelserHendelseTest : AbstractEndToEndTest() {
     @Test
     fun `ytelser på feil tidspunkt`() {
         assertThrows<Aktivitetslogg.AktivitetException> {
-            person.håndter(ytelser(vedtaksperiodeIdInnhenter = object : IdInnhenter {
-                override fun id(orgnummer: Organisasjonsnummer) = UUID.randomUUID()
-            }))
+            person.håndter(ytelser(vedtaksperiodeIdInnhenter = { UUID.randomUUID() }))
         }
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))

@@ -669,9 +669,7 @@ internal fun AbstractEndToEndTest.håndterUtbetalingshistorikkUtenValidering(
     besvart: LocalDateTime = LocalDateTime.now()
 ) {
     utbetalingshistorikk(
-        vedtaksperiodeIdInnhenter = object : IdInnhenter {
-            override fun id(orgnummer: Organisasjonsnummer): UUID = UUID.randomUUID()
-        },
+        vedtaksperiodeIdInnhenter = { UUID.randomUUID() },
         utbetalinger = utbetalinger.toList(),
         inntektshistorikk = inntektshistorikk,
         orgnummer = orgnummer,

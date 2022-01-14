@@ -41,9 +41,7 @@ internal class TestObservatør : PersonObserver {
     fun hendelseider(vedtaksperiodeId: UUID) =
         vedtaksperiodeendringer[vedtaksperiodeId]?.last()?.hendelser ?: fail { "VedtaksperiodeId $vedtaksperiodeId har ingen hendelser tilknyttet" }
 
-    fun sisteVedtaksperiode() = object : IdInnhenter {
-        override fun id(orgnummer: Organisasjonsnummer): UUID = vedtaksperioder.getValue(orgnummer).last()
-    }
+    fun sisteVedtaksperiode() = IdInnhenter { orgnummer -> vedtaksperioder.getValue(orgnummer).last() }
     fun vedtaksperiode(orgnummer: Organisasjonsnummer, indeks: Int) = vedtaksperioder.getValue(orgnummer).toList()[indeks]
     fun vedtaksperiodeIndeks(orgnummer: Organisasjonsnummer, id: UUID) = vedtaksperioder.getValue(orgnummer).indexOf(id)
     fun bedtOmInntektsmeldingReplay(vedtaksperiodeId: UUID) = vedtaksperiodeId in inntektsmeldingReplayEventer

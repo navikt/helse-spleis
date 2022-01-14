@@ -27,9 +27,7 @@ internal abstract class AbstractPersonTest {
     val inspektør get() = inspektør(ORGNUMMER)
     val Organisasjonsnummer.inspektør get() = inspektør(this)
 
-    val Int.vedtaksperiode: IdInnhenter get() = object : IdInnhenter {
-        override fun id(orgnummer: Organisasjonsnummer) = this@vedtaksperiode.vedtaksperiode(orgnummer)
-    }
+    val Int.vedtaksperiode: IdInnhenter get() = IdInnhenter { orgnummer -> this@vedtaksperiode.vedtaksperiode(orgnummer) }
 
     @BeforeEach
     internal fun createTestPerson() {
@@ -47,6 +45,6 @@ internal abstract class AbstractPersonTest {
     fun inspektør(orgnummer: Organisasjonsnummer, block: TestArbeidsgiverInspektør.() -> Unit) = inspektør(orgnummer).run(block)
 }
 
-internal interface IdInnhenter {
+internal fun interface IdInnhenter {
     fun id(orgnummer: Organisasjonsnummer): UUID
 }
