@@ -145,7 +145,12 @@ internal class InfotrygdhistorikkTest {
             oppdatert = tidsstempel,
             perioder = listOf(Friperiode(1.januar,  10.januar))
         ))
-        historikk.lagreVilkårsgrunnlag(1.januar, VilkårsgrunnlagHistorikk(), sykepengegrunnlagFor(INGEN))
+        historikk.lagreVilkårsgrunnlag(
+            skjæringstidspunkt = 1.januar,
+            vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk(),
+            kanOverskriveVilkårsgrunnlag = { false },
+            sykepengegrunnlagFor = sykepengegrunnlagFor(INGEN)
+        )
         historikk.tøm()
         assertFalse(historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato))
         assertFalse(aktivitetslogg.behov().isNotEmpty()) { aktivitetslogg.toString() }
@@ -162,7 +167,12 @@ internal class InfotrygdhistorikkTest {
             oppdatert = tidsstempel1,
             perioder = listOf(Friperiode(1.januar,  10.januar))
         ))
-        historikk.lagreVilkårsgrunnlag(1.januar, VilkårsgrunnlagHistorikk(), sykepengegrunnlagFor(INGEN))
+        historikk.lagreVilkårsgrunnlag(
+            skjæringstidspunkt = 1.januar,
+            vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk(),
+            kanOverskriveVilkårsgrunnlag = { false },
+            sykepengegrunnlagFor = sykepengegrunnlagFor(INGEN)
+        )
         historikk.oppdaterHistorikk(historikkelement(
             oppdatert = tidsstempel2,
             perioder = listOf(ArbeidsgiverUtbetalingsperiode("orgnr", 1.januar,  10.januar, 100.prosent, 1000.daglig))

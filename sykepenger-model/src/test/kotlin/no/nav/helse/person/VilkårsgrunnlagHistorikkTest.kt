@@ -149,7 +149,12 @@ internal class VilkårsgrunnlagHistorikkTest {
         vilkårsgrunnlag.valider(sykepengegrunnlag(10000.månedlig), sammenligningsgrunnlag(10000.månedlig, 1.januar), 1.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
 
         historikk.lagre(1.januar, vilkårsgrunnlag)
-        infotrygdhistorikk.lagreVilkårsgrunnlag(4.januar, historikk, sykepengegrunnlagFor(INGEN))
+        infotrygdhistorikk.lagreVilkårsgrunnlag(
+            skjæringstidspunkt = 4.januar,
+            vilkårsgrunnlagHistorikk = historikk,
+            kanOverskriveVilkårsgrunnlag = { false },
+            sykepengegrunnlagFor = sykepengegrunnlagFor(INGEN)
+        )
         assertEquals(1, inspektør.vilkårsgrunnlagTeller[1])
         assertEquals(2, inspektør.vilkårsgrunnlagTeller[0])
     }
@@ -214,7 +219,12 @@ internal class VilkårsgrunnlagHistorikkTest {
                 )
             )
         }
-        historikk.lagreVilkårsgrunnlag(1.januar, vilkårsgrunnlagHistorikk, sykepengegrunnlagFor(31000.månedlig))
+        historikk.lagreVilkårsgrunnlag(
+            skjæringstidspunkt = 1.januar,
+            vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
+            kanOverskriveVilkårsgrunnlag = { false },
+            sykepengegrunnlagFor = sykepengegrunnlagFor(31000.månedlig)
+        )
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
     }
 
@@ -234,7 +244,12 @@ internal class VilkårsgrunnlagHistorikkTest {
                 )
             )
         }
-        historikk.lagreVilkårsgrunnlag(1.januar, vilkårsgrunnlagHistorikk, sykepengegrunnlagFor(31000.månedlig))
+        historikk.lagreVilkårsgrunnlag(
+            skjæringstidspunkt = 1.januar,
+            vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
+            kanOverskriveVilkårsgrunnlag = { false },
+            sykepengegrunnlagFor = sykepengegrunnlagFor(31000.månedlig)
+        )
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
     }
 
@@ -254,7 +269,12 @@ internal class VilkårsgrunnlagHistorikkTest {
                 )
             )
         }
-        historikk.lagreVilkårsgrunnlag(1.januar, vilkårsgrunnlagHistorikk, sykepengegrunnlagFor(INGEN))
+        historikk.lagreVilkårsgrunnlag(
+            skjæringstidspunkt = 1.januar,
+            vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
+            kanOverskriveVilkårsgrunnlag = { false },
+            sykepengegrunnlagFor = sykepengegrunnlagFor(INGEN)
+        )
         assertNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
     }
 
@@ -274,7 +294,12 @@ internal class VilkårsgrunnlagHistorikkTest {
                 )
             )
         }
-        historikk.lagreVilkårsgrunnlag(1.januar, vilkårsgrunnlagHistorikk, sykepengegrunnlagFor(INGEN))
+        historikk.lagreVilkårsgrunnlag(
+            skjæringstidspunkt = 1.januar,
+            vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
+            kanOverskriveVilkårsgrunnlag = { false },
+            sykepengegrunnlagFor = sykepengegrunnlagFor(INGEN)
+        )
         assertNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
     }
 
@@ -412,6 +437,46 @@ internal class VilkårsgrunnlagHistorikkTest {
                 assertEquals(Begrunnelse.MinimumInntektOver67, it.begrunnelser.first())
             }
         }
+    }
+
+    @Test
+    fun `kan overskrive vilkårsgrunnlag`() {
+        val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
+        val vilkårsgrunnlag = Vilkårsgrunnlag(
+            meldingsreferanseId = UUID.randomUUID(),
+            vedtaksperiodeId = UUID.randomUUID().toString(),
+            aktørId = "AKTØR_ID",
+            fødselsnummer = "20043769969".somFødselsnummer(),
+            orgnummer = "ORGNUMMER",
+            inntektsvurdering = Inntektsvurdering(emptyList()),
+            opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
+            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
+            arbeidsforhold = arbeidsforhold
+        )
+        vilkårsgrunnlag.valider(sykepengegrunnlag(10000.månedlig), sammenligningsgrunnlag(10000.månedlig, 1.januar), 1.januar, 1, Periodetype.FØRSTEGANGSBEHANDLING)
+        vilkårsgrunnlagHistorikk.lagre(1.januar, vilkårsgrunnlag)
+
+        val historikk = Infotrygdhistorikk().apply {
+            oppdaterHistorikk(
+                InfotrygdhistorikkElement.opprett(
+                    oppdatert = LocalDateTime.now(),
+                    hendelseId = UUID.randomUUID(),
+                    perioder = emptyList(),
+                    inntekter = listOf(Inntektsopplysning("987654321", 1.januar, 31000.månedlig, true)),
+                    arbeidskategorikoder = emptyMap(),
+                    ugyldigePerioder = emptyList(),
+                    harStatslønn = false
+                )
+            )
+        }
+        historikk.lagreVilkårsgrunnlag(
+            skjæringstidspunkt = 1.januar,
+            vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
+            kanOverskriveVilkårsgrunnlag = { true },
+            sykepengegrunnlagFor = sykepengegrunnlagFor(31000.månedlig)
+        )
+        assertInstanceOf(VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag::class.java, vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
     }
 
     private fun sykepengegrunnlag(inntekt: Inntekt) =

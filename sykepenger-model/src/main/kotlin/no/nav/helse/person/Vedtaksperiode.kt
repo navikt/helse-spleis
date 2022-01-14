@@ -2434,6 +2434,8 @@ internal class Vedtaksperiode private constructor(
         internal fun List<Vedtaksperiode>.medSkjæringstidspunkt(skjæringstidspunkt: LocalDate) =
             this.filter { it.skjæringstidspunkt == skjæringstidspunkt }
 
+        internal fun List<Vedtaksperiode>.harUtbetaling() = any { it.erUtbetalt() }
+
         internal fun List<Vedtaksperiode>.harNødvendigInntekt() =
             this.takeIf { it.isNotEmpty() }
                 ?.harInntekt() ?: true

@@ -10,6 +10,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.ghostPeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSammenligningsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.harArbeidsgivereMedOverlappendeUtbetaltePerioder
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntekt
+import no.nav.helse.person.Arbeidsgiver.Companion.harUtbetaltPeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.kanOverstyres
 import no.nav.helse.person.Arbeidsgiver.Companion.minstEttSykepengegrunnlagSomIkkeKommerFraSkatt
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
@@ -370,6 +371,8 @@ class Person private constructor(
 
     internal fun skjæringstidspunkterFraSpleis(orgnummer: String) = vilkårsgrunnlagHistorikk.skjæringstidspunkterFraSpleis(orgnummer)
 
+    internal fun kanOverskriveVilkårsgrunnlag(skjæringstidspunkt: LocalDate) = !arbeidsgivere.harUtbetaltPeriode(skjæringstidspunkt)
+
     internal fun trengerHistorikkFraInfotrygd(hendelse: IAktivitetslogg, cutoff: LocalDateTime? = null): Boolean {
         val tidligsteDato = arbeidsgivereMedSykdom().minOf { it.tidligsteDato() }
         return infotrygdhistorikk.oppfriskNødvendig(hendelse, tidligsteDato, cutoff)
@@ -460,7 +463,7 @@ class Person private constructor(
     }
 
     internal fun lagreVilkårsgrunnlagFraInfotrygd(skjæringstidspunkt: LocalDate, periode: Periode, hendelse: IAktivitetslogg) {
-        infotrygdhistorikk.lagreVilkårsgrunnlag(skjæringstidspunkt, vilkårsgrunnlagHistorikk) {
+        infotrygdhistorikk.lagreVilkårsgrunnlag(skjæringstidspunkt, vilkårsgrunnlagHistorikk, ::kanOverskriveVilkårsgrunnlag) {
             beregnSykepengegrunnlagForInfotrygd(it, periode.start, hendelse)
         }
     }
