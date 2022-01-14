@@ -238,7 +238,7 @@ internal class MaksimumSykepengedagerfilter(
             }
 
             override fun oppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
-                avgrenser.state(Opphold)
+                avgrenser.state(avgrenser.nextState(dagen) ?: Opphold)
             }
 
             override fun fridag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {

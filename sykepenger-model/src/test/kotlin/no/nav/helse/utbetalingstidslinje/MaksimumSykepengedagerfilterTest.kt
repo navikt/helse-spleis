@@ -361,6 +361,14 @@ internal class MaksimumSykepengedagerfilterTest {
     }
 
     @Test
+    fun `nødvendig opphold nådd nesten ved ferie, fullført med én arbeidsdag`() {
+        val tidslinje = tidslinjeOf(247.NAVDAGER, 181.FRI, 1.ARB, 1.NAVDAGER)
+        assertTrue(tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018).isEmpty())
+        assertEquals(1, rettighet.forbrukteSykedager)
+        assertEquals(247, rettighet.gjenståendeSykedager)
+    }
+
+    @Test
     fun `gyldig ferie påvirker 26 ukers telling`() {
         val tidslinje = tidslinjeOf(247.NAVDAGER, 182.FRI, 10.NAVDAGER)
         assertTrue(tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018).isEmpty())
