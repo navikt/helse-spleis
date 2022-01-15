@@ -7,15 +7,17 @@ package no.nav.helse
     En sykedag øker arbeidsgiverperiodetelling, hvis grensen ikke er nådd allerede
     En oppholdsdag nullstiller arbeidsgiverperiodetelling hvis grensen er nådd
  */
-internal class Arbeidsgiverperiodeteller(
+internal class Arbeidsgiverperiodeteller private constructor(
     private val oppholdsteller: Teller,
     private val sykedagteller: Teller
 ) {
     companion object {
         val NormalArbeidstaker get() = Arbeidsgiverperiodeteller(Teller(16), Teller(16))
+        val IngenArbeidsgiverperiode get() = Arbeidsgiverperiodeteller(Teller(16), Teller(0))
     }
 
-    private var state: Tilstand = Initiell
+    private val initiell: Tilstand = if (sykedagteller.ferdig()) ArbeidsgiverperiodeFerdig else Initiell
+    private var state: Tilstand = initiell
     private var observatør: Observatør = Observatør.nullObserver
 
     init {
@@ -31,6 +33,7 @@ internal class Arbeidsgiverperiodeteller(
     fun dec() = oppholdsteller.inc()
 
     private fun state(state: Tilstand) {
+        if (state == this.state) return
         this.state.leaving(this)
         this.state = state
         this.state.entering(this)
@@ -48,7 +51,7 @@ internal class Arbeidsgiverperiodeteller(
 
         override fun onReset() {
             // arbeidsgiverperiodetelling avbrutt av oppholdsdager
-            state(Initiell)
+            state(initiell)
         }
     }
 

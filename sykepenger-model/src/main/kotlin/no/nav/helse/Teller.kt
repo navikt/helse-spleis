@@ -3,10 +3,17 @@ package no.nav.helse
 internal class Teller(private val grense: Int) {
     private var observer: Observer = Observer.nullObserver
     private var rest = grense
-    private var state: Telletilstand = Initiell
+    private val initiell = if (grense == 0) Ferdig else Initiell
+    private var state: Telletilstand = initiell
 
-    fun reset() { state(Initiell) }
+    init {
+        require(grense >= 0) { "grense må være større eller lik 0" }
+    }
+
+    fun reset() { state(initiell) }
     fun observer(observer: Observer) { this.observer = observer }
+
+    fun ferdig() = state == Ferdig
 
     fun inc() {
         observer.onInc()
@@ -32,15 +39,16 @@ internal class Teller(private val grense: Int) {
         }
 
         override fun inc(teller: Teller) {
-            if (teller.rest == 1) return teller.state(Ferdig)
             teller.rest -= 1
+            if (teller.rest > 0) return
+            teller.state(Ferdig)
+            teller.observer.onGrense()
         }
     }
 
     private object Ferdig : Telletilstand {
         override fun entering(teller: Teller) {
             teller.rest = 0
-            teller.observer.onGrense()
         }
 
         override fun inc(teller: Teller) {}

@@ -7,6 +7,28 @@ import org.junit.jupiter.api.Test
 internal class ArbeidsgiverperiodetellerTest {
 
     @Test
+    fun `ingen arbeidsgiverperiode`() {
+        arbeidsgiverperiodeteller = Arbeidsgiverperiodeteller.IngenArbeidsgiverperiode
+        arbeidsgiverperiodeteller.observer(observatør)
+        repeat(15) { arbeidsgiverperiodeteller.inc() }
+        assertEquals(0, observatør.arbeidsgiverperiodedager)
+        assertEquals(15, observatør.sykedager)
+        assertFalse(observatør.arbeidsgiverperiodeFerdig)
+    }
+
+    @Test
+    fun `ingen arbeidsgiverperiode med reset`() {
+        arbeidsgiverperiodeteller = Arbeidsgiverperiodeteller.IngenArbeidsgiverperiode
+        arbeidsgiverperiodeteller.observer(observatør)
+        repeat(15) { arbeidsgiverperiodeteller.inc() }
+        repeat(16) { arbeidsgiverperiodeteller.dec() }
+        repeat(15) { arbeidsgiverperiodeteller.inc() }
+        assertEquals(0, observatør.arbeidsgiverperiodedager)
+        assertEquals(30, observatør.sykedager)
+        assertFalse(observatør.arbeidsgiverperiodeFerdig)
+    }
+
+    @Test
     fun `nesten ferdig`() {
         repeat(15) { arbeidsgiverperiodeteller.inc() }
         assertEquals(15, observatør.arbeidsgiverperiodedager)

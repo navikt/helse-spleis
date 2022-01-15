@@ -11,6 +11,39 @@ internal class TellerTest {
     private lateinit var teller: Teller
 
     @Test
+    fun `øke nullteller`() {
+        teller = Teller(0)
+        teller.observer(observatør)
+        teller.inc()
+        assertFalse(observatør.grenseNådd)
+        assertEquals(0, observatør.grenserNådd)
+        assertFalse(observatør.reset)
+    }
+
+    @Test
+    fun `øke nullteller flere ganger`() {
+        teller = Teller(0)
+        teller.observer(observatør)
+        teller.inc()
+        teller.inc()
+        assertFalse(observatør.grenseNådd)
+        assertEquals(0, observatør.grenserNådd)
+        assertFalse(observatør.reset)
+    }
+
+    @Test
+    fun `resette nullteller`() {
+        teller = Teller(0)
+        teller.observer(observatør)
+        teller.inc()
+        teller.reset()
+        teller.inc()
+        assertFalse(observatør.grenseNådd)
+        assertEquals(0, observatør.grenserNådd)
+        assertFalse(observatør.reset)
+    }
+
+    @Test
     fun `før grense`() {
         repeat(grenseverdi - 1) { teller.inc() }
         assertEquals(grenseverdi - 1, observatør.increments)
