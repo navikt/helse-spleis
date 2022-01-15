@@ -16,7 +16,7 @@ internal class Arbeidsgiverperiodeteller private constructor(
         val IngenArbeidsgiverperiode get() = Arbeidsgiverperiodeteller(Teller(16), Teller(0))
     }
 
-    private val initiell: Tilstand = if (sykedagteller.ferdig()) ArbeidsgiverperiodeFerdig else Initiell
+    private val initiell: Tilstand = if (sykedagteller.ferdig()) IngenTelling else Initiell
     private var state: Tilstand = initiell
     private var observatør: Observatør = Observatør.nullObserver
 
@@ -32,6 +32,10 @@ internal class Arbeidsgiverperiodeteller private constructor(
     fun inc() = sykedagteller.inc()
     fun dec() = oppholdsteller.inc()
 
+    fun fullfør() {
+        state = ArbeidsgiverperiodeFerdig
+    }
+
     private fun state(state: Tilstand) {
         if (state == this.state) return
         this.state.leaving(this)
@@ -46,12 +50,12 @@ internal class Arbeidsgiverperiodeteller private constructor(
         }
 
         override fun onGrense() {
-            state(ArbeidsgiverperiodeFerdig)
+            state.ferdig(this@Arbeidsgiverperiodeteller)
         }
 
         override fun onReset() {
             // arbeidsgiverperiodetelling avbrutt av oppholdsdager
-            state(initiell)
+            state.reset(this@Arbeidsgiverperiodeteller)
         }
     }
 
@@ -78,6 +82,10 @@ internal class Arbeidsgiverperiodeteller private constructor(
         fun entering(teller: Arbeidsgiverperiodeteller) {}
         fun sykedag(teller: Arbeidsgiverperiodeteller) {}
         fun oppholdsdag(teller: Arbeidsgiverperiodeteller) {}
+        fun ferdig(teller: Arbeidsgiverperiodeteller) {}
+        fun reset(teller: Arbeidsgiverperiodeteller) {
+            teller.state(Initiell)
+        }
         fun leaving(teller: Arbeidsgiverperiodeteller) {}
     }
     private object Initiell : Tilstand {
@@ -89,6 +97,10 @@ internal class Arbeidsgiverperiodeteller private constructor(
     private object PåbegyntArbeidsgiverperiode : Tilstand {
         override fun sykedag(teller: Arbeidsgiverperiodeteller) {
             teller.observatør.arbeidsgiverperiodedag()
+        }
+
+        override fun ferdig(teller: Arbeidsgiverperiodeteller) {
+            teller.state(ArbeidsgiverperiodeFerdig)
         }
 
         override fun oppholdsdag(teller: Arbeidsgiverperiodeteller) {
@@ -110,5 +122,12 @@ internal class Arbeidsgiverperiodeteller private constructor(
         override fun sykedag(teller: Arbeidsgiverperiodeteller) {
             teller.observatør.sykedag()
         }
+    }
+    private object IngenTelling : Tilstand {
+        override fun sykedag(teller: Arbeidsgiverperiodeteller) {
+            teller.observatør.sykedag()
+        }
+
+        override fun reset(teller: Arbeidsgiverperiodeteller) {}
     }
 }

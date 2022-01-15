@@ -29,6 +29,28 @@ internal class ArbeidsgiverperiodetellerTest {
     }
 
     @Test
+    fun `arbeidsgiverperiode er fullført allerede`() {
+        arbeidsgiverperiodeteller.fullfør()
+        repeat(31) { arbeidsgiverperiodeteller.inc() }
+        assertEquals(0, observatør.arbeidsgiverperiodedager)
+        assertEquals(31, observatør.sykedager)
+        assertEquals(0, observatør.arbeidsgiverperioder)
+        assertFalse(observatør.arbeidsgiverperiodeFerdig)
+    }
+
+    @Test
+    fun `arbeidsgiverperiode er fullført mens vi er midt i telling`() {
+        repeat(10) { arbeidsgiverperiodeteller.inc() }
+        repeat(10) { arbeidsgiverperiodeteller.dec() }
+        arbeidsgiverperiodeteller.fullfør()
+        repeat(31) { arbeidsgiverperiodeteller.inc() }
+        assertEquals(10, observatør.arbeidsgiverperiodedager)
+        assertEquals(31, observatør.sykedager)
+        assertEquals(0, observatør.arbeidsgiverperioder)
+        assertFalse(observatør.arbeidsgiverperiodeFerdig)
+    }
+
+    @Test
     fun `nesten ferdig`() {
         repeat(15) { arbeidsgiverperiodeteller.inc() }
         assertEquals(15, observatør.arbeidsgiverperiodedager)
