@@ -7,6 +7,7 @@ import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.testhelpers.A
+import no.nav.helse.testhelpers.F
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -31,6 +32,14 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(11, inspektør.navDagTeller)
         assertEquals(4, inspektør.navHelgDagTeller)
+    }
+
+    @Test
+    fun `ferie med i arbeidsgiverperioden`() {
+        undersøke(6.S + 6.F + 6.S)
+        assertEquals(18, inspektør.size)
+        assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(2, inspektør.navDagTeller)
     }
 
     @Test
@@ -105,6 +114,11 @@ internal class UtbetalingstidslinjeBuilderTest {
         override fun visitDag(dag: Dag.SykHelgedag, dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
             arbeidsgiverperiodeteller.inc()
             tilstand.sykdomshelg(this, dato, økonomi)
+        }
+
+        override fun visitDag(dag: Dag.Feriedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+            arbeidsgiverperiodeteller.inc()
+            tidslinje.addArbeidsgiverperiodedag(dato, Økonomi.ikkeBetalt())
         }
 
         override fun visitDag(dag: Dag.Arbeidsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
