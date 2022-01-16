@@ -6,10 +6,11 @@ import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.S
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Økonomi
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -17,17 +18,45 @@ internal class UtbetalingstidslinjeBuilderTest {
     @Test
     fun kort() {
         undersøke(15.S)
-        Assertions.assertEquals(15, inspektør.size)
-        Assertions.assertEquals(15, inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(15, inspektør.size)
+        assertEquals(15, inspektør.arbeidsgiverperiodeDagTeller)
     }
 
     @Test
     fun enkel() {
         undersøke(31.S)
-        Assertions.assertEquals(31, inspektør.size)
-        Assertions.assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
-        Assertions.assertEquals(10, inspektør.navDagTeller)
-        Assertions.assertEquals(5, inspektør.navHelgDagTeller)
+        assertEquals(31, inspektør.size)
+        assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(10, inspektør.navDagTeller)
+        assertEquals(5, inspektør.navHelgDagTeller)
+    }
+
+    @Test
+    fun `bare arbeidsdager`() {
+        undersøke(31.A)
+        assertEquals(31, inspektør.size)
+        assertEquals(23, inspektør.arbeidsdagTeller)
+        assertEquals(8, inspektør.fridagTeller)
+    }
+
+    @Test
+    fun `spredt arbeidsgiverperiode`() {
+        undersøke(10.S + 15.A + 7.S)
+        assertEquals(32, inspektør.size)
+        assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(1, inspektør.navDagTeller)
+        assertEquals(11, inspektør.arbeidsdagTeller)
+        assertEquals(4, inspektør.fridagTeller)
+    }
+
+    @Test
+    fun `nok opphold til å tilbakestille arbeidsgiverperiode`() {
+        undersøke(10.S + 16.A + 7.S)
+        assertEquals(33, inspektør.size)
+        assertEquals(17, inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(0, inspektør.navDagTeller)
+        assertEquals(12, inspektør.arbeidsdagTeller)
+        assertEquals(4, inspektør.fridagTeller)
     }
 
     private lateinit var inspektør: UtbetalingstidslinjeInspektør
@@ -69,6 +98,16 @@ internal class UtbetalingstidslinjeBuilderTest {
         override fun visitDag(dag: Dag.SykHelgedag, dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
             arbeidsgiverperiodeteller.inc()
             tilstand.sykdomshelg(this, dato, økonomi)
+        }
+
+        override fun visitDag(dag: Dag.Arbeidsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+            arbeidsgiverperiodeteller.dec()
+            tidslinje.addArbeidsdag(dato, Økonomi.ikkeBetalt())
+        }
+
+        override fun visitDag(dag: Dag.FriskHelgedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+            arbeidsgiverperiodeteller.dec()
+            tidslinje.addFridag(dato, Økonomi.ikkeBetalt())
         }
 
         private interface Tilstand {
