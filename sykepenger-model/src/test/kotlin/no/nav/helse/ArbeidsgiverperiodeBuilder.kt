@@ -22,7 +22,10 @@ internal class ArbeidsgiverperiodeBuilder(private val arbeidsgiverperiodeteller:
     }
 
     private fun tilstand(tilstand: Tilstand) {
+        if (this.tilstand == tilstand) return
+        this.tilstand.leaving(this)
         this.tilstand = tilstand
+        this.tilstand.entering(this)
     }
 
     override fun arbeidsgiverperiodedag() {
@@ -31,6 +34,10 @@ internal class ArbeidsgiverperiodeBuilder(private val arbeidsgiverperiodeteller:
 
     override fun sykedag() {
         tilstand(Utbetaling)
+    }
+
+    override fun arbeidsgiverperiodeAvbrutt() {
+        mediator.arbeidsgiverperiodeAvbrutt()
     }
 
     private fun MutableList<LocalDate>.somSykedager() {
@@ -80,6 +87,7 @@ internal class ArbeidsgiverperiodeBuilder(private val arbeidsgiverperiodeteller:
     private val fridager = mutableListOf<LocalDate>()
 
     private interface Tilstand {
+        fun entering(builder: ArbeidsgiverperiodeBuilder) {}
         fun sykdomsdag(builder: ArbeidsgiverperiodeBuilder, dato: LocalDate, økonomi: Økonomi) {
             builder.mediator.utbetalingsdag(dato, økonomi)
         }
@@ -88,6 +96,7 @@ internal class ArbeidsgiverperiodeBuilder(private val arbeidsgiverperiodeteller:
         }
         fun feriedagSomSyk(builder: ArbeidsgiverperiodeBuilder, dato: LocalDate)
         fun feriedag(builder: ArbeidsgiverperiodeBuilder, dato: LocalDate)
+        fun leaving(builder: ArbeidsgiverperiodeBuilder) {}
     }
     private object Initiell : Tilstand {
         override fun feriedag(builder: ArbeidsgiverperiodeBuilder, dato: LocalDate) {
@@ -114,6 +123,10 @@ internal class ArbeidsgiverperiodeBuilder(private val arbeidsgiverperiodeteller:
         }
     }
     private object Utbetaling : Tilstand {
+        override fun entering(builder: ArbeidsgiverperiodeBuilder) {
+            builder.mediator.arbeidsgiverperiodeFerdig()
+        }
+
         override fun feriedag(builder: ArbeidsgiverperiodeBuilder, dato: LocalDate) {
             builder.fridager.add(dato)
         }

@@ -8,4 +8,6 @@ internal interface ArbeidsgiverperiodeMediator {
     fun arbeidsdag(dato: LocalDate)
     fun arbeidsgiverperiodedag(dato: LocalDate, økonomi: Økonomi)
     fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi)
+    fun arbeidsgiverperiodeAvbrutt() {}
+    fun arbeidsgiverperiodeFerdig() {}
 }

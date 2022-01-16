@@ -6,9 +6,12 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
+import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 internal class UtbetalingstidslinjeBuilderTest {
     @Test
@@ -16,6 +19,8 @@ internal class UtbetalingstidslinjeBuilderTest {
         undersøke(15.S)
         assertEquals(15, inspektør.size)
         assertEquals(15, inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(1, perioder.size)
+        assertEquals(1.januar til 15.januar, perioder.first())
     }
 
     @Test
@@ -25,6 +30,8 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(11, inspektør.navDagTeller)
         assertEquals(4, inspektør.navHelgDagTeller)
+        assertEquals(1, perioder.size)
+        assertEquals(1.januar til 16.januar, perioder.first())
     }
 
     @Test
@@ -34,6 +41,7 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(15, inspektør.size)
         assertEquals(11, inspektør.navDagTeller)
         assertEquals(4, inspektør.navHelgDagTeller)
+        assertEquals(0, perioder.size)
     }
 
     @Test
@@ -46,6 +54,8 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(9, inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(4, inspektør.navDagTeller)
         assertEquals(2, inspektør.navHelgDagTeller)
+        assertEquals(1, perioder.size)
+        assertEquals(1.januar til 9.januar, perioder.first())
     }
 
     @Test
@@ -54,6 +64,8 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(18, inspektør.size)
         assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(2, inspektør.navDagTeller)
+        assertEquals(1, perioder.size)
+        assertEquals(1.januar til 16.januar, perioder.first())
     }
 
     @Test
@@ -63,6 +75,8 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(4, inspektør.navDagTeller)
         assertEquals(2, inspektør.navHelgDagTeller)
+        assertEquals(1, perioder.size)
+        assertEquals(1.januar til 16.januar, perioder.first())
     }
 
     @Test
@@ -71,6 +85,8 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(31, inspektør.size)
         assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(15, inspektør.fridagTeller)
+        assertEquals(1, perioder.size)
+        assertEquals(1.januar til 16.januar, perioder.first())
     }
 
     @Test
@@ -90,6 +106,9 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(17, inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(15, inspektør.fridagTeller)
         assertEquals(1, inspektør.arbeidsdagTeller)
+        assertEquals(2, perioder.size)
+        assertEquals(listOf(1.januar til 1.januar), perioder.first())
+        assertEquals(listOf(18.januar til 2.februar), perioder.last())
     }
 
     @Test
@@ -99,6 +118,9 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(17, inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(15, inspektør.fridagTeller)
         assertEquals(1, inspektør.arbeidsdagTeller)
+        assertEquals(2, perioder.size)
+        assertEquals(listOf(1.januar til 1.januar), perioder.first())
+        assertEquals(listOf(18.januar til 2.februar), perioder.last())
     }
 
     @Test
@@ -107,6 +129,9 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(38, inspektør.size)
         assertEquals(22, inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(16, inspektør.fridagTeller)
+        assertEquals(2, perioder.size)
+        assertEquals(listOf(1.januar til 6.januar), perioder.first())
+        assertEquals(listOf(23.januar til 7.februar), perioder.last())
     }
 
     @Test
@@ -115,6 +140,9 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(37, inspektør.size)
         assertEquals(21, inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(16, inspektør.fridagTeller)
+        assertEquals(2, perioder.size)
+        assertEquals(listOf(1.januar til 5.januar), perioder.first())
+        assertEquals(listOf(22.januar til 6.februar), perioder.last())
     }
 
     @Test
@@ -123,6 +151,8 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(31, inspektør.size)
         assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(15, inspektør.fridagTeller)
+        assertEquals(1, perioder.size)
+        assertEquals(listOf(16.januar til 31.januar), perioder.first())
     }
 
     @Test
@@ -131,6 +161,7 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(31, inspektør.size)
         assertEquals(23, inspektør.arbeidsdagTeller)
         assertEquals(8, inspektør.fridagTeller)
+        assertEquals(0, perioder.size)
     }
 
     @Test
@@ -141,6 +172,8 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(1, inspektør.navDagTeller)
         assertEquals(11, inspektør.arbeidsdagTeller)
         assertEquals(4, inspektør.fridagTeller)
+        assertEquals(1, perioder.size)
+        assertEquals(listOf(1.januar til 10.januar, 26.januar til 31.januar), perioder.first())
     }
 
     @Test
@@ -151,6 +184,9 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(0, inspektør.navDagTeller)
         assertEquals(12, inspektør.arbeidsdagTeller)
         assertEquals(4, inspektør.fridagTeller)
+        assertEquals(2, perioder.size)
+        assertEquals(listOf(1.januar til 10.januar), perioder.first())
+        assertEquals(listOf(27.januar til 2.februar), perioder.last())
     }
 
     private lateinit var teller: Arbeidsgiverperiodeteller
@@ -159,13 +195,54 @@ internal class UtbetalingstidslinjeBuilderTest {
     fun setup() {
         resetSeed()
         teller = Arbeidsgiverperiodeteller.NormalArbeidstaker
+        perioder.clear()
     }
+
     private lateinit var inspektør: UtbetalingstidslinjeInspektør
+    private val perioder: MutableList<Arbeidsgiverperiode> = mutableListOf()
 
     private fun undersøke(tidslinje: Sykdomstidslinje, delegator: ((Arbeidsgiverperiodeteller, SykdomstidslinjeVisitor) -> SykdomstidslinjeVisitor)? = null) {
         val builder = UtbetalingstidslinjeBuilder()
-        val arbeidsgiverperiodeBuilder = ArbeidsgiverperiodeBuilder(teller, builder)
+        val periodebuilder = ArbeidsgiverperiodeBuilderBuilder()
+        val arbeidsgiverperiodeBuilder = ArbeidsgiverperiodeBuilder(teller, Komposittmediator(periodebuilder, builder))
         tidslinje.accept(delegator?.invoke(teller, arbeidsgiverperiodeBuilder) ?: arbeidsgiverperiodeBuilder)
         inspektør = builder.result().inspektør
+        perioder.addAll(periodebuilder.result())
+    }
+
+    private class Komposittmediator(private val mediators: List<ArbeidsgiverperiodeMediator>) : ArbeidsgiverperiodeMediator {
+        constructor(vararg mediator: ArbeidsgiverperiodeMediator) : this(mediator.toList())
+
+        override fun fridag(dato: LocalDate) {
+            mediators.forEach { it.fridag(dato) }
+        }
+
+        override fun arbeidsdag(dato: LocalDate) {
+            mediators.forEach { it.arbeidsdag(dato) }
+        }
+
+        override fun arbeidsgiverperiodedag(dato: LocalDate, økonomi: Økonomi) {
+            mediators.forEach { it.arbeidsgiverperiodedag(dato, økonomi) }
+        }
+
+        override fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi) {
+            mediators.forEach { it.utbetalingsdag(dato, økonomi) }
+        }
+
+        override fun arbeidsgiverperiodeAvbrutt() {
+            mediators.forEach { it.arbeidsgiverperiodeAvbrutt() }
+        }
+
+        override fun arbeidsgiverperiodeFerdig() {
+            mediators.forEach { it.arbeidsgiverperiodeFerdig() }
+        }
+    }
+
+    private fun assertEquals(expected: Iterable<LocalDate>, actual: Arbeidsgiverperiode) {
+        assertEquals(expected.toList(), actual.toList())
+    }
+
+    private fun assertEquals(expected: List<Iterable<LocalDate>>, actual: Arbeidsgiverperiode) {
+        assertEquals(expected.flatMap { it.toList() }, actual.toList())
     }
 }
