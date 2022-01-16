@@ -43,8 +43,35 @@ internal class UtbetalingstidslinjeBuilderTest {
     }
 
     @Test
-    fun `ferie mellom utbetaling`() {
+    fun `ferie fullfører arbeidsgiverperioden`() {
+        undersøke(1.S + 15.F + 6.S)
+        assertEquals(22, inspektør.size)
+        assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(4, inspektør.navDagTeller)
+        assertEquals(2, inspektør.navHelgDagTeller)
+    }
+
+    @Test
+    fun `ferie etter utbetaling`() {
         undersøke(16.S + 15.F)
+        assertEquals(31, inspektør.size)
+        assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(15, inspektør.fridagTeller)
+    }
+
+    @Test
+    fun `ferie mellom utbetaling`() {
+        undersøke(16.S + 10.F + 5.S)
+        assertEquals(31, inspektør.size)
+        assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(3, inspektør.navDagTeller)
+        assertEquals(2, inspektør.navHelgDagTeller)
+        assertEquals(10, inspektør.fridagTeller)
+    }
+
+    @Test
+    fun `ferie som opphold før arbeidsgiverperioden`() {
+        undersøke(15.F + 16.S)
         assertEquals(31, inspektør.size)
         assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(15, inspektør.fridagTeller)
@@ -98,9 +125,12 @@ internal class UtbetalingstidslinjeBuilderTest {
             arbeidsgiverperiodeteller.observer(this)
         }
 
-        private var tilstand: Tilstand = Utbetaling
+        private var tilstand: Tilstand = Initiell
 
-        internal fun result() = tidslinje
+        internal fun result(): Utbetalingstidslinje {
+            fridager.somFeriedager()
+            return tidslinje
+        }
 
         private fun tilstand(tilstand: Tilstand) {
             this.tilstand = tilstand
@@ -114,18 +144,30 @@ internal class UtbetalingstidslinjeBuilderTest {
             tilstand(Utbetaling)
         }
 
+        fun MutableList<LocalDate>.somSykedager() {
+            onEach {
+                arbeidsgiverperiodeteller.inc()
+                tilstand.feriedagSomSyk(this@UtbetalingstidslinjeBuilder, it)
+            }.clear()
+        }
+
+        fun MutableList<LocalDate>.somFeriedager() {
+            onEach { tidslinje.addFridag(it, Økonomi.ikkeBetalt()) }.clear()
+        }
+
         override fun visitDag(dag: Dag.Sykedag, dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+            fridager.somSykedager()
             arbeidsgiverperiodeteller.inc()
             tilstand.sykdomsdag(this, dato, økonomi)
         }
 
         override fun visitDag(dag: Dag.SykHelgedag, dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+            fridager.somSykedager()
             arbeidsgiverperiodeteller.inc()
             tilstand.sykdomshelg(this, dato, økonomi)
         }
 
         override fun visitDag(dag: Dag.Feriedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
-            arbeidsgiverperiodeteller.inc()
             tilstand.feriedag(this, dato)
         }
 
@@ -139,10 +181,27 @@ internal class UtbetalingstidslinjeBuilderTest {
             tidslinje.addFridag(dato, Økonomi.ikkeBetalt())
         }
 
+        private val fridager = mutableListOf<LocalDate>()
+
         private interface Tilstand {
-            fun sykdomsdag(builder: UtbetalingstidslinjeBuilder, dato: LocalDate, økonomi: Økonomi)
-            fun sykdomshelg(builder: UtbetalingstidslinjeBuilder, dato: LocalDate, økonomi: Økonomi)
+            fun sykdomsdag(builder: UtbetalingstidslinjeBuilder, dato: LocalDate, økonomi: Økonomi) {
+                builder.tidslinje.addNAVdag(dato, økonomi)
+            }
+            fun sykdomshelg(builder: UtbetalingstidslinjeBuilder, dato: LocalDate, økonomi: Økonomi) {
+                builder.tidslinje.addHelg(dato, økonomi)
+            }
+            fun feriedagSomSyk(builder: UtbetalingstidslinjeBuilder, dato: LocalDate)
             fun feriedag(builder: UtbetalingstidslinjeBuilder, dato: LocalDate)
+        }
+        private object Initiell : Tilstand {
+            override fun feriedag(builder: UtbetalingstidslinjeBuilder, dato: LocalDate) {
+                builder.arbeidsgiverperiodeteller.dec()
+                builder.tidslinje.addFridag(dato, Økonomi.ikkeBetalt())
+            }
+
+            override fun feriedagSomSyk(builder: UtbetalingstidslinjeBuilder, dato: LocalDate) {
+                throw IllegalStateException()
+            }
         }
         private object Arbeidsgiverperiode : Tilstand {
             override fun sykdomsdag(builder: UtbetalingstidslinjeBuilder, dato: LocalDate, økonomi: Økonomi) {
@@ -151,18 +210,19 @@ internal class UtbetalingstidslinjeBuilderTest {
             override fun sykdomshelg(builder: UtbetalingstidslinjeBuilder, dato: LocalDate, økonomi: Økonomi) {
                 builder.tidslinje.addArbeidsgiverperiodedag(dato, økonomi)
             }
-            override fun feriedag(builder: UtbetalingstidslinjeBuilder, dato: LocalDate) {
+            override fun feriedagSomSyk(builder: UtbetalingstidslinjeBuilder, dato: LocalDate) {
                 builder.tidslinje.addArbeidsgiverperiodedag(dato, Økonomi.ikkeBetalt())
+            }
+            override fun feriedag(builder: UtbetalingstidslinjeBuilder, dato: LocalDate) {
+                builder.fridager.add(dato)
             }
         }
         private object Utbetaling : Tilstand {
-            override fun sykdomsdag(builder: UtbetalingstidslinjeBuilder, dato: LocalDate, økonomi: Økonomi) {
-                builder.tidslinje.addNAVdag(dato, økonomi)
-            }
-            override fun sykdomshelg(builder: UtbetalingstidslinjeBuilder, dato: LocalDate, økonomi: Økonomi) {
-                builder.tidslinje.addHelg(dato, økonomi)
-            }
             override fun feriedag(builder: UtbetalingstidslinjeBuilder, dato: LocalDate) {
+                builder.fridager.add(dato)
+            }
+
+            override fun feriedagSomSyk(builder: UtbetalingstidslinjeBuilder, dato: LocalDate) {
                 builder.tidslinje.addFridag(dato, Økonomi.ikkeBetalt())
             }
         }
