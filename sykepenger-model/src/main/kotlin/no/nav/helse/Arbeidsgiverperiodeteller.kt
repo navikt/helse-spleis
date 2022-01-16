@@ -62,9 +62,7 @@ internal class Arbeidsgiverperiodeteller private constructor(
     }
 
     private inner class Oppholdsdagobservatør : Teller.Observer {
-        override fun onInc() {
-            state.oppholdsdag(this@Arbeidsgiverperiodeteller)
-        }
+        override fun onInc() {}
 
         override fun onGrense() {
             sykedagteller.reset()
@@ -76,6 +74,7 @@ internal class Arbeidsgiverperiodeteller private constructor(
             val nullObserver = object : Observatør {}
         }
         fun arbeidsgiverperiodeFerdig() {}
+        fun arbeidsgiverperiodeAvbrutt() {}
         fun arbeidsgiverperiodedag() {}
         fun sykedag() {}
     }
@@ -83,7 +82,6 @@ internal class Arbeidsgiverperiodeteller private constructor(
     private interface Tilstand {
         fun entering(teller: Arbeidsgiverperiodeteller) {}
         fun sykedag(teller: Arbeidsgiverperiodeteller) {}
-        fun oppholdsdag(teller: Arbeidsgiverperiodeteller) {}
         fun ferdig(teller: Arbeidsgiverperiodeteller) {}
         fun reset(teller: Arbeidsgiverperiodeteller) {
             teller.state(Initiell)
@@ -91,6 +89,10 @@ internal class Arbeidsgiverperiodeteller private constructor(
         fun leaving(teller: Arbeidsgiverperiodeteller) {}
     }
     private object Initiell : Tilstand {
+        override fun entering(teller: Arbeidsgiverperiodeteller) {
+            teller.observatør.arbeidsgiverperiodeAvbrutt()
+        }
+
         override fun sykedag(teller: Arbeidsgiverperiodeteller) {
             teller.observatør.arbeidsgiverperiodedag()
             teller.state(PåbegyntArbeidsgiverperiode)
@@ -100,20 +102,8 @@ internal class Arbeidsgiverperiodeteller private constructor(
         override fun sykedag(teller: Arbeidsgiverperiodeteller) {
             teller.observatør.arbeidsgiverperiodedag()
         }
-
         override fun ferdig(teller: Arbeidsgiverperiodeteller) {
             teller.state(ArbeidsgiverperiodeFerdig)
-        }
-
-        override fun oppholdsdag(teller: Arbeidsgiverperiodeteller) {
-            teller.state(OppholdIPåbegyntArbeidsgiverperiode)
-        }
-    }
-    // Denne tilstanden har egentlig ingen praktisk betydning for tellingen
-    private object OppholdIPåbegyntArbeidsgiverperiode : Tilstand {
-        override fun sykedag(teller: Arbeidsgiverperiodeteller) {
-            teller.observatør.arbeidsgiverperiodedag()
-            teller.state(PåbegyntArbeidsgiverperiode)
         }
     }
     private object ArbeidsgiverperiodeFerdig : Tilstand {

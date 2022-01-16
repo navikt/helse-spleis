@@ -91,6 +91,7 @@ internal class ArbeidsgiverperiodetellerTest {
         assertEquals(16, observatør.arbeidsgiverperiodedager)
         assertEquals(0, observatør.sykedager)
         assertEquals(1, observatør.arbeidsgiverperioder)
+        assertFalse(observatør.arbeidsgiverperiodeAvbrutt)
         assertTrue(observatør.arbeidsgiverperiodeFerdig)
     }
 
@@ -101,6 +102,7 @@ internal class ArbeidsgiverperiodetellerTest {
         arbeidsgiverperiodeteller.inc()
         assertEquals(16, observatør.arbeidsgiverperiodedager)
         assertEquals(0, observatør.sykedager)
+        assertTrue(observatør.arbeidsgiverperiodeAvbrutt)
         assertFalse(observatør.arbeidsgiverperiodeFerdig)
     }
 
@@ -112,6 +114,7 @@ internal class ArbeidsgiverperiodetellerTest {
         assertEquals(16, observatør.arbeidsgiverperiodedager)
         assertEquals(15, observatør.sykedager)
         assertEquals(1, observatør.arbeidsgiverperioder)
+        assertFalse(observatør.arbeidsgiverperiodeAvbrutt)
         assertTrue(observatør.arbeidsgiverperiodeFerdig)
     }
 
@@ -123,6 +126,7 @@ internal class ArbeidsgiverperiodetellerTest {
         assertEquals(32, observatør.arbeidsgiverperiodedager)
         assertEquals(0, observatør.sykedager)
         assertEquals(2, observatør.arbeidsgiverperioder)
+        assertEquals(1, observatør.avbrutteArbeidsgiverperioder)
         assertTrue(observatør.arbeidsgiverperiodeFerdig)
     }
 
@@ -138,13 +142,20 @@ internal class ArbeidsgiverperiodetellerTest {
 
     private class Observatør : Arbeidsgiverperiodeteller.Observatør {
         var arbeidsgiverperiodeFerdig = false
+        var arbeidsgiverperiodeAvbrutt = false
         var arbeidsgiverperioder = 0
+        var avbrutteArbeidsgiverperioder = 0
         var arbeidsgiverperiodedager = 0
         var sykedager = 0
 
         override fun arbeidsgiverperiodeFerdig() {
             arbeidsgiverperiodeFerdig = true
             arbeidsgiverperioder += 1
+        }
+
+        override fun arbeidsgiverperiodeAvbrutt() {
+            arbeidsgiverperiodeAvbrutt = true
+            avbrutteArbeidsgiverperioder += 1
         }
 
         override fun arbeidsgiverperiodedag() {
