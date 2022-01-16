@@ -2,10 +2,12 @@ package no.nav.helse
 
 /*
     Forstår hvordan man teller arbeidsgiverperioden
+    Telling økes for hver sykedag (eller feriedag som inngår i sykdom),
+    mens alle oppholdsdager (eller feriedag som ikke inngår i sykdom) minkes.
 
-    En sykedag nullstiller oppholdstelling
-    En sykedag øker arbeidsgiverperiodetelling, hvis grensen ikke er nådd allerede
-    En oppholdsdag nullstiller arbeidsgiverperiodetelling hvis grensen er nådd
+    For hver sykedag nullstilles oppholdstelleren
+    Frem til grensen for arbeidsgiverperiodetelling er nådd telles alle sykedager som del av arbeidsgiverperioden
+    Dersom grensen for oppholdstelleren nås nullstilles arbeidsgiverperiodetelleren
  */
 internal class Arbeidsgiverperiodeteller private constructor(
     private val oppholdsteller: Teller,
