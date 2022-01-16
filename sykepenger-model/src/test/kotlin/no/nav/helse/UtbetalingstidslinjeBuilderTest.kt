@@ -8,9 +8,11 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.S
+import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -27,8 +29,8 @@ internal class UtbetalingstidslinjeBuilderTest {
         undersøke(31.S)
         assertEquals(31, inspektør.size)
         assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
-        assertEquals(10, inspektør.navDagTeller)
-        assertEquals(5, inspektør.navHelgDagTeller)
+        assertEquals(11, inspektør.navDagTeller)
+        assertEquals(4, inspektør.navHelgDagTeller)
     }
 
     @Test
@@ -57,6 +59,11 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(0, inspektør.navDagTeller)
         assertEquals(12, inspektør.arbeidsdagTeller)
         assertEquals(4, inspektør.fridagTeller)
+    }
+
+    @BeforeEach
+    fun setup() {
+        resetSeed()
     }
 
     private lateinit var inspektør: UtbetalingstidslinjeInspektør

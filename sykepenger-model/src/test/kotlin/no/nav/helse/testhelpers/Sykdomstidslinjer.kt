@@ -14,12 +14,12 @@ import java.time.LocalDateTime
 import java.util.*
 import java.util.stream.Collectors
 
-private var threadLocalDagensDato = ThreadLocal.withInitial { LocalDate.of(2018, 1, 1) }
+private var threadLocalDagensDato = ThreadLocal.withInitial { 1.januar }
 private var dagensDato: LocalDate
     get() = threadLocalDagensDato.get()
     set(value) = threadLocalDagensDato.set(value)
 
-internal fun resetSeed(frøDato: LocalDate = LocalDate.of(2018, 1, 1)) {
+internal fun resetSeed(frøDato: LocalDate = 1.januar) {
     dagensDato = frøDato
 }
 
