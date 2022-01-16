@@ -1,15 +1,14 @@
 package no.nav.helse
 
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.UtbetalingstidslinjeInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.testhelpers.A
-import no.nav.helse.testhelpers.F
-import no.nav.helse.testhelpers.S
-import no.nav.helse.testhelpers.resetSeed
+import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -32,6 +31,46 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(11, inspektør.navDagTeller)
         assertEquals(4, inspektør.navHelgDagTeller)
+    }
+
+    @Test
+    fun `arbeidsgiverperioden er ferdig tidligere`() {
+        teller.fullfør()
+        undersøke(15.S)
+        assertEquals(15, inspektør.size)
+        assertEquals(11, inspektør.navDagTeller)
+        assertEquals(4, inspektør.navHelgDagTeller)
+    }
+
+    @Test
+    fun `arbeidsgiverperioden oppdages av noen andre`() {
+        val betalteDager = listOf(10.januar til 16.januar)
+        undersøke(15.S) { teller, other ->
+            Infotrygd(teller, other, betalteDager)
+        }
+        assertEquals(15, inspektør.size)
+        assertEquals(9, inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(4, inspektør.navDagTeller)
+        assertEquals(2, inspektør.navHelgDagTeller)
+    }
+
+    private class Infotrygd(
+        private val teller: Arbeidsgiverperiodeteller,
+        private val other: SykdomstidslinjeVisitor,
+        private val betalteDager: List<Periode>
+    ) : SykdomstidslinjeVisitor by(other) {
+        override fun visitDag(dag: Dag.Sykedag, dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+            fullførArbeidsgiverperiode(dato)
+            other.visitDag(dag, dato, økonomi, kilde)
+        }
+        override fun visitDag(dag: Dag.SykHelgedag, dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+            fullførArbeidsgiverperiode(dato)
+            other.visitDag(dag, dato, økonomi, kilde)
+        }
+
+        private fun fullførArbeidsgiverperiode(dato: LocalDate) {
+            if (betalteDager.any { dato in it }) teller.fullfør()
+        }
     }
 
     @Test
@@ -139,15 +178,17 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(4, inspektør.fridagTeller)
     }
 
+    private lateinit var teller: Arbeidsgiverperiodeteller
     @BeforeEach
     fun setup() {
         resetSeed()
+        teller = Arbeidsgiverperiodeteller.NormalArbeidstaker
     }
 
     private lateinit var inspektør: UtbetalingstidslinjeInspektør
-    private fun undersøke(tidslinje: Sykdomstidslinje) {
-        val builder = UtbetalingstidslinjeBuilder(Arbeidsgiverperiodeteller.NormalArbeidstaker)
-        tidslinje.accept(builder)
+    private fun undersøke(tidslinje: Sykdomstidslinje, delegator: ((Arbeidsgiverperiodeteller, SykdomstidslinjeVisitor) -> SykdomstidslinjeVisitor)? = null) {
+        val builder = UtbetalingstidslinjeBuilder(teller)
+        tidslinje.accept(delegator?.invoke(teller, builder) ?: builder)
         inspektør = builder.result().inspektør
     }
 
