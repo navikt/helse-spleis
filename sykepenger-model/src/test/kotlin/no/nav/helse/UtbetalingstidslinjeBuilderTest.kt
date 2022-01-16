@@ -43,6 +43,14 @@ internal class UtbetalingstidslinjeBuilderTest {
     }
 
     @Test
+    fun `ferie mellom utbetaling`() {
+        undersøke(16.S + 15.F)
+        assertEquals(31, inspektør.size)
+        assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(15, inspektør.fridagTeller)
+    }
+
+    @Test
     fun `bare arbeidsdager`() {
         undersøke(31.A)
         assertEquals(31, inspektør.size)
@@ -118,7 +126,7 @@ internal class UtbetalingstidslinjeBuilderTest {
 
         override fun visitDag(dag: Dag.Feriedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
             arbeidsgiverperiodeteller.inc()
-            tidslinje.addArbeidsgiverperiodedag(dato, Økonomi.ikkeBetalt())
+            tilstand.feriedag(this, dato)
         }
 
         override fun visitDag(dag: Dag.Arbeidsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
@@ -134,6 +142,7 @@ internal class UtbetalingstidslinjeBuilderTest {
         private interface Tilstand {
             fun sykdomsdag(builder: UtbetalingstidslinjeBuilder, dato: LocalDate, økonomi: Økonomi)
             fun sykdomshelg(builder: UtbetalingstidslinjeBuilder, dato: LocalDate, økonomi: Økonomi)
+            fun feriedag(builder: UtbetalingstidslinjeBuilder, dato: LocalDate)
         }
         private object Arbeidsgiverperiode : Tilstand {
             override fun sykdomsdag(builder: UtbetalingstidslinjeBuilder, dato: LocalDate, økonomi: Økonomi) {
@@ -142,6 +151,9 @@ internal class UtbetalingstidslinjeBuilderTest {
             override fun sykdomshelg(builder: UtbetalingstidslinjeBuilder, dato: LocalDate, økonomi: Økonomi) {
                 builder.tidslinje.addArbeidsgiverperiodedag(dato, økonomi)
             }
+            override fun feriedag(builder: UtbetalingstidslinjeBuilder, dato: LocalDate) {
+                builder.tidslinje.addArbeidsgiverperiodedag(dato, Økonomi.ikkeBetalt())
+            }
         }
         private object Utbetaling : Tilstand {
             override fun sykdomsdag(builder: UtbetalingstidslinjeBuilder, dato: LocalDate, økonomi: Økonomi) {
@@ -149,6 +161,9 @@ internal class UtbetalingstidslinjeBuilderTest {
             }
             override fun sykdomshelg(builder: UtbetalingstidslinjeBuilder, dato: LocalDate, økonomi: Økonomi) {
                 builder.tidslinje.addHelg(dato, økonomi)
+            }
+            override fun feriedag(builder: UtbetalingstidslinjeBuilder, dato: LocalDate) {
+                builder.tidslinje.addFridag(dato, Økonomi.ikkeBetalt())
             }
         }
     }
