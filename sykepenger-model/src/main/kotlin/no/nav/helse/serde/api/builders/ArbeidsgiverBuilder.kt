@@ -55,7 +55,7 @@ internal class ArbeidsgiverBuilder(
             generasjoner = if (Toggle.SpeilApiV2.enabled) GenerasjonerBuilder(hendelser, fødselsnummer.somFødselsnummer(), vilkårsgrunnlagHistorikk, arbeidsgiver).build() else null,
             ghostPerioder = ghostPerioder?.ghostPerioder?.map {
                 GhostPeriodeDTO(
-                    fom = it.fom,
+                    fom = it.fom.coerceAtLeast(it.skjæringstidspunkt),
                     tom = it.tom,
                     skjæringstidspunkt = it.skjæringstidspunkt,
                     vilkårsgrunnlagHistorikkInnslagId = ghostPerioder.historikkInnslagId
