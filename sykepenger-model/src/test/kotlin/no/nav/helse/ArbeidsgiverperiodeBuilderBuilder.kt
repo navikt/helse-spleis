@@ -42,12 +42,12 @@ internal class ArbeidsgiverperiodeBuilderBuilder() : ArbeidsgiverperiodeMediator
     }
 
     private fun reset() {
-        if (perioder.isEmpty()) return
-        results.add(build())
+        build()?.also { results.add(it) }
         perioder.clear()
     }
 
-    private fun build(): Arbeidsgiverperiode {
+    internal fun build(): Arbeidsgiverperiode? {
+        if (perioder.isEmpty()) return null
         return Arbeidsgiverperiode(perioder.toList())
     }
 }

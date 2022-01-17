@@ -4,11 +4,14 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.UtbetalingstidslinjeInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.SykdomstidslinjeVisitor
+import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -42,6 +45,9 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(11, inspektør.navDagTeller)
         assertEquals(4, inspektør.navHelgDagTeller)
         assertEquals(0, perioder.size)
+        utbetalingstidslinje.forEach {
+            assertNull(it.økonomi.arbeidsgiverperiode)
+        }
     }
 
     @Test
@@ -55,7 +61,11 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(4, inspektør.navDagTeller)
         assertEquals(2, inspektør.navHelgDagTeller)
         assertEquals(1, perioder.size)
-        assertEquals(1.januar til 9.januar, perioder.first())
+        val arbeidsgiverperiode = 1.januar til 9.januar
+        assertEquals(arbeidsgiverperiode, perioder.first())
+        utbetalingstidslinje.subset(10.januar til utbetalingstidslinje.periode().endInclusive).forEach {
+            assertEquals(arbeidsgiverperiode, it.økonomi.arbeidsgiverperiode)
+        }
     }
 
     @Test
@@ -162,6 +172,9 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(23, inspektør.arbeidsdagTeller)
         assertEquals(8, inspektør.fridagTeller)
         assertEquals(0, perioder.size)
+        utbetalingstidslinje.forEach {
+            assertNull(it.økonomi.arbeidsgiverperiode)
+        }
     }
 
     @Test
@@ -173,7 +186,22 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(11, inspektør.arbeidsdagTeller)
         assertEquals(4, inspektør.fridagTeller)
         assertEquals(1, perioder.size)
-        assertEquals(listOf(1.januar til 10.januar, 26.januar til 31.januar), perioder.first())
+        val førsteDel = 1.januar til 10.januar
+        val andreDel = 26.januar til 31.januar
+        val arbeidsgiverperiode = listOf(førsteDel, andreDel)
+        assertEquals(arbeidsgiverperiode, perioder.first())
+        utbetalingstidslinje.subset(førsteDel).forEach {
+            assertEquals(førsteDel.start til it.dato, it.økonomi.arbeidsgiverperiode)
+        }
+        utbetalingstidslinje.subset(førsteDel.endInclusive.plusDays(1) til 25.januar).forEach {
+            assertEquals(førsteDel, it.økonomi.arbeidsgiverperiode)
+        }
+        utbetalingstidslinje.subset(andreDel).forEach {
+            assertEquals(listOf(førsteDel, andreDel.start til it.dato), it.økonomi.arbeidsgiverperiode)
+        }
+        utbetalingstidslinje.subset(andreDel.endInclusive.plusDays(1) til utbetalingstidslinje.periode().endInclusive).forEach {
+            assertEquals(arbeidsgiverperiode, it.økonomi.arbeidsgiverperiode)
+        }
     }
 
     @Test
@@ -185,10 +213,38 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(12, inspektør.arbeidsdagTeller)
         assertEquals(4, inspektør.fridagTeller)
         assertEquals(2, perioder.size)
-        assertEquals(listOf(1.januar til 10.januar), perioder.first())
-        assertEquals(listOf(27.januar til 2.februar), perioder.last())
+        val førsteArbeidsgiverperiode = listOf(1.januar til 10.januar)
+        val andreArbeidsgiverperiode = listOf(27.januar til 2.februar)
+        assertEquals(førsteArbeidsgiverperiode, perioder.first())
+        assertEquals(andreArbeidsgiverperiode, perioder.last())
+        utbetalingstidslinje.subset(11.januar til 25.januar).forEach {
+            assertEquals(førsteArbeidsgiverperiode, it.økonomi.arbeidsgiverperiode)
+        }
+        assertNull(utbetalingstidslinje[26.januar].økonomi.arbeidsgiverperiode)
     }
 
+    @Test
+    fun `masse opphold`() {
+        undersøke(10.S + 31.A + 7.S)
+        assertEquals(48, inspektør.size)
+        assertEquals(17, inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(0, inspektør.navDagTeller)
+        assertEquals(22, inspektør.arbeidsdagTeller)
+        assertEquals(9, inspektør.fridagTeller)
+        assertEquals(2, perioder.size)
+        val førsteArbeidsgiverperiode = listOf(1.januar til 10.januar)
+        val andreArbeidsgiverperiode = listOf(11.februar til 17.februar)
+        assertEquals(førsteArbeidsgiverperiode, perioder.first())
+        assertEquals(andreArbeidsgiverperiode, perioder.last())
+        utbetalingstidslinje.subset(11.januar til 25.januar).forEach {
+            assertEquals(førsteArbeidsgiverperiode, it.økonomi.arbeidsgiverperiode)
+        }
+        utbetalingstidslinje.subset(26.januar til 10.februar).forEach {
+            assertNull(it.økonomi.arbeidsgiverperiode)
+        }
+    }
+
+    private val Økonomi.arbeidsgiverperiode get() = this.get<Arbeidsgiverperiode?>("arbeidsgiverperiode")
     private lateinit var teller: Arbeidsgiverperiodeteller
 
     @BeforeEach
@@ -199,6 +255,7 @@ internal class UtbetalingstidslinjeBuilderTest {
     }
 
     private lateinit var inspektør: UtbetalingstidslinjeInspektør
+    private lateinit var utbetalingstidslinje: Utbetalingstidslinje
     private val perioder: MutableList<Arbeidsgiverperiode> = mutableListOf()
 
     private fun undersøke(tidslinje: Sykdomstidslinje, delegator: ((Arbeidsgiverperiodeteller, SykdomstidslinjeVisitor) -> SykdomstidslinjeVisitor)? = null) {
@@ -206,7 +263,8 @@ internal class UtbetalingstidslinjeBuilderTest {
         val periodebuilder = ArbeidsgiverperiodeBuilderBuilder()
         val arbeidsgiverperiodeBuilder = ArbeidsgiverperiodeBuilder(teller, Komposittmediator(periodebuilder, builder))
         tidslinje.accept(delegator?.invoke(teller, arbeidsgiverperiodeBuilder) ?: arbeidsgiverperiodeBuilder)
-        inspektør = builder.result().inspektør
+        utbetalingstidslinje = builder.result()
+        inspektør = utbetalingstidslinje.inspektør
         perioder.addAll(periodebuilder.result())
     }
 
@@ -238,11 +296,13 @@ internal class UtbetalingstidslinjeBuilderTest {
         }
     }
 
-    private fun assertEquals(expected: Iterable<LocalDate>, actual: Arbeidsgiverperiode) {
+    private fun assertEquals(expected: Iterable<LocalDate>, actual: Arbeidsgiverperiode?) {
+        no.nav.helse.testhelpers.assertNotNull(actual)
         assertEquals(expected.toList(), actual.toList())
     }
 
-    private fun assertEquals(expected: List<Iterable<LocalDate>>, actual: Arbeidsgiverperiode) {
+    private fun assertEquals(expected: List<Iterable<LocalDate>>, actual: Arbeidsgiverperiode?) {
+        no.nav.helse.testhelpers.assertNotNull(actual)
         assertEquals(expected.flatMap { it.toList() }, actual.toList())
     }
 }
