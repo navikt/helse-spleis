@@ -1,9 +1,9 @@
 package no.nav.helse.person
 
+import no.nav.helse.ForventetFeil
 import no.nav.helse.hendelser.Arbeidsforhold
 import no.nav.helse.testhelpers.januar
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
@@ -74,4 +74,17 @@ internal class ArbeidsforholdhistorikkTest {
         assertNotEquals(arbeidsforhold1, arbeidsforhold2)
         assertEquals(2, arbeidsforhold2.size)
     }
+
+    @ForventetFeil("parprogrammering er ping-pong-aktivitet :)")
+    @Test
+    fun `skal kunne markere et arbeidsforhold som ikke relevant for et skjæringstidspunkt`() {
+        val arbeidsforhold = listOf(Arbeidsforhold(orgnummer = "a1", fom = 31.januar(2010), tom = null))
+        val historikk = Arbeidsforholdhistorikk()
+        historikk.lagre(arbeidsforhold, 1.januar)
+        assertTrue(historikk.harRelevantArbeidsforhold(1.januar))
+        historikk.gjørArbeidsforholdInaktivt(1.januar)
+        assertTrue(historikk.harInaktivtArbeidsforhold(1.januar))
+        assertFalse(historikk.harRelevantArbeidsforhold(1.januar))
+    }
+
 }

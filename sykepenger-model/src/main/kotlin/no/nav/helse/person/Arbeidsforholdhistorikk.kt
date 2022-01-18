@@ -37,6 +37,10 @@ internal class Arbeidsforholdhistorikk private constructor(
         return historikk.last().harArbeidsforholdSomErNyereEnnTreMåneder(skjæringstidspunkt)
     }
 
+    fun gjørArbeidsforholdInaktivt(skjæringstidspunkt: LocalDate) {
+    }
+
+    fun harInaktivtArbeidsforhold(skjæringstidspunkt: LocalDate) = true
 
     internal class Innslag(private val id: UUID, private val arbeidsforhold: List<Arbeidsforhold>, private val skjæringstidspunkt: LocalDate) {
         internal fun accept(visitor: ArbeidsforholdhistorikkVisitor) {
