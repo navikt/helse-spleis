@@ -121,7 +121,7 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
         periodetype: Periodetype,
         aktiveVedtaksperioder: List<Aktivitetslogg.Aktivitet.AktivVedtaksperiode>,
         arbeidsforholdId: String?,
-        orgnummereMedAktiveArbeidsforhold: List<String>,
+        orgnummereMedRelevanteArbeidsforhold: List<String>,
         aktivitetslogg: Aktivitetslogg
     ) {
         siste!!.godkjenning(
@@ -131,7 +131,7 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
             periodetype = periodetype,
             aktiveVedtaksperioder = aktiveVedtaksperioder,
             arbeidsforholdId = arbeidsforholdId,
-            orgnummereMedAktiveArbeidsforhold = orgnummereMedAktiveArbeidsforhold,
+            orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
             aktivitetslogg = aktivitetslogg
         )
     }

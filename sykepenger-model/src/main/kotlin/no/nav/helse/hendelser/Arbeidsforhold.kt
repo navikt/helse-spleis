@@ -5,6 +5,13 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.IAktivitetslogg
 import java.time.LocalDate
 
+/**
+ * Noen begreper:
+ *
+ * Relevant -> Et relevant arbeidsforhold er et arbeidsforhold som er gjeldende for skjæringstidspunkt
+ * Aktivt -> Et aktivt arbeidsforhold er et relevant arbeidsforhold som skal taes med i beregning for skjæringstidspunkt
+ * Inaktiv -> Et inaktivt arbeidsforhold blir markert av en saksbehandler som at det ikke skal være med i beregning for skjæringstidspunkt
+ */
 class Arbeidsforhold(
     internal val orgnummer: String,
     private val fom: LocalDate,

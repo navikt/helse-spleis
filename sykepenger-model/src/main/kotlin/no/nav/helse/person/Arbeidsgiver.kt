@@ -745,7 +745,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun lagreSykepengegrunnlag(arbeidsgiverInntekt: ArbeidsgiverInntekt, skjæringstidspunkt: LocalDate, hendelse: PersonHendelse) {
-        if (harAktivtArbeidsforhold(skjæringstidspunkt)) {
+        if (harRelevantArbeidsforhold(skjæringstidspunkt)) {
             arbeidsgiverInntekt.lagreInntekter(inntektshistorikk, skjæringstidspunkt, hendelse.meldingsreferanseId())
         }
     }
@@ -1019,7 +1019,7 @@ internal class Arbeidsgiver private constructor(
         sykdomshistorikk.fyllUtPeriodeMedForventedeDager(hendelse, periode)
     }
 
-    internal fun harAktivtArbeidsforhold(skjæringstidspunkt: LocalDate) = arbeidsforholdhistorikk.harAktivtArbeidsforhold(skjæringstidspunkt)
+    internal fun harRelevantArbeidsforhold(skjæringstidspunkt: LocalDate) = arbeidsforholdhistorikk.harRelevantArbeidsforhold(skjæringstidspunkt)
 
     internal fun harArbeidsforholdNyereEnnTreMåneder(skjæringstidspunkt: LocalDate) = arbeidsforholdhistorikk.harArbeidsforholdNyereEnnTreMåneder(skjæringstidspunkt)
 
@@ -1027,7 +1027,7 @@ internal class Arbeidsgiver private constructor(
         inntektshistorikk.sykepengegrunnlagKommerFraSkatt(skjæringstidspunkt)
 
     internal fun harVedtaksperiodeMedUkjentArbeidsforhold(skjæringstidspunkt: LocalDate) =
-        !harAktivtArbeidsforhold(skjæringstidspunkt) && vedtaksperioder.any { it.gjelder(skjæringstidspunkt) }
+        !harRelevantArbeidsforhold(skjæringstidspunkt) && vedtaksperioder.any { it.gjelder(skjæringstidspunkt) }
 
     internal fun erSykmeldingenDenSistSkrevne(sykmelding: Sykmelding, hendelseIder: Set<UUID>): Boolean =
         sykdomshistorikk.erSykmeldingenDenSistSkrevne(sykmelding, hendelseIder)

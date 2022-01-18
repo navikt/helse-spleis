@@ -638,23 +638,23 @@ class Person private constructor(
             .forEach { it.fyllUtPeriodeMedForventedeDager(hendelse, periode) }
     }
 
-    private fun arbeidsgivereMedAktiveArbeidsforhold(skjæringstidspunkt: LocalDate): List<Arbeidsgiver> =
-        arbeidsgivere.filter { it.harAktivtArbeidsforhold(skjæringstidspunkt) }
+    private fun arbeidsgivereMedRelevanteArbeidsforhold(skjæringstidspunkt: LocalDate): List<Arbeidsgiver> =
+        arbeidsgivere.filter { it.harRelevantArbeidsforhold(skjæringstidspunkt) }
 
-    internal fun antallArbeidsgivereMedAktivtArbeidsforhold(skjæringstidspunkt: LocalDate) = arbeidsgivereMedAktiveArbeidsforhold(skjæringstidspunkt).size
+    internal fun antallArbeidsgivereMedRelevantArbeidsforhold(skjæringstidspunkt: LocalDate) = arbeidsgivereMedRelevanteArbeidsforhold(skjæringstidspunkt).size
 
     internal fun harVedtaksperiodeForArbeidsgiverMedUkjentArbeidsforhold(skjæringstidspunkt: LocalDate) =
         arbeidsgivere.any { it.harVedtaksperiodeMedUkjentArbeidsforhold(skjæringstidspunkt) }
 
-    internal fun orgnummereMedAktiveArbeidsforhold(skjæringstidspunkt: LocalDate) = arbeidsgivere
-        .filter { it.harAktivtArbeidsforhold(skjæringstidspunkt) }
+    internal fun orgnummereMedRelevanteArbeidsforhold(skjæringstidspunkt: LocalDate) = arbeidsgivere
+        .filter { it.harRelevantArbeidsforhold(skjæringstidspunkt) }
         .map { it.organisasjonsnummer() }
 
     internal fun harFlereArbeidsforholdMedUlikStartdato(skjæringstidspunkt: LocalDate) =
         arbeidsgivere.mapNotNull { it.finnFørsteFraværsdag(skjæringstidspunkt) }.sorted().distinct().count() > 1
 
-    internal fun harKunEtAnnetAktivtArbeidsforholdEnn(skjæringstidspunkt: LocalDate, orgnummer: String): Boolean {
-        val aktiveArbeidsforhold = arbeidsgivereMedAktiveArbeidsforhold(skjæringstidspunkt)
+    internal fun harKunEttAnnetRelevantArbeidsforholdEnn(skjæringstidspunkt: LocalDate, orgnummer: String): Boolean {
+        val aktiveArbeidsforhold = arbeidsgivereMedRelevanteArbeidsforhold(skjæringstidspunkt)
         return aktiveArbeidsforhold.size == 1 && aktiveArbeidsforhold.single().organisasjonsnummer() != orgnummer
     }
 

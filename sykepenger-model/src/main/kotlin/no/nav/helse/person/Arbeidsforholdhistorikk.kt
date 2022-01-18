@@ -23,11 +23,11 @@ internal class Arbeidsforholdhistorikk private constructor(
         visitor.postVisitArbeidsforholdhistorikk(this)
     }
 
-    internal fun harAktivtArbeidsforhold(skjæringstidspunkt: LocalDate): Boolean {
+    internal fun harRelevantArbeidsforhold(skjæringstidspunkt: LocalDate): Boolean {
         if (historikk.isEmpty()) {
             return false
         }
-        return historikk.last().harAktivtArbeidsforhold(skjæringstidspunkt)
+        return historikk.last().harRelevantArbeidsforhold(skjæringstidspunkt)
     }
 
     internal fun harArbeidsforholdNyereEnnTreMåneder(skjæringstidspunkt: LocalDate): Boolean {
@@ -48,7 +48,7 @@ internal class Arbeidsforholdhistorikk private constructor(
         internal fun erDuplikat(other: List<Arbeidsforhold>, skjæringstidspunkt: LocalDate) =
             skjæringstidspunkt == this.skjæringstidspunkt && arbeidsforhold.size == other.size && arbeidsforhold.containsAll(other)
 
-        internal fun harAktivtArbeidsforhold(skjæringstidspunkt: LocalDate) =
+        internal fun harRelevantArbeidsforhold(skjæringstidspunkt: LocalDate) =
             this.skjæringstidspunkt == skjæringstidspunkt
 
         internal fun harArbeidsforholdSomErNyereEnnTreMåneder(skjæringstidspunkt: LocalDate) =

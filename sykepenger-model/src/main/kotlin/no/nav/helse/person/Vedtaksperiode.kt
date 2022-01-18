@@ -480,7 +480,7 @@ internal class Vedtaksperiode private constructor(
             grunnlagForSykepengegrunnlag,
             sammenligningsgrunnlag,
             skjæringstidspunkt,
-            person.antallArbeidsgivereMedAktivtArbeidsforhold(skjæringstidspunkt),
+            person.antallArbeidsgivereMedRelevantArbeidsforhold(skjæringstidspunkt),
             periodetype
         )
         person.lagreVilkårsgrunnlag(skjæringstidspunkt, vilkårsgrunnlag)
@@ -1813,7 +1813,7 @@ internal class Vedtaksperiode private constructor(
                     arbeidsgiver.beregn(this, arbeidsgiverUtbetalinger, vedtaksperiode.periode)
                 }
                 onSuccess {
-                    if (vedtaksperiode.person.harKunEtAnnetAktivtArbeidsforholdEnn(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer)) {
+                    if (vedtaksperiode.person.harKunEttAnnetRelevantArbeidsforholdEnn(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer)) {
                         ytelser.warn("Den sykmeldte har skiftet arbeidsgiver, og det er beregnet at den nye arbeidsgiveren mottar refusjon lik forrige. Kontroller at dagsatsen blir riktig.")
                     } else if (vedtaksperiode.skalHaWarningForFlereArbeidsforholdUtenSykdomEllerUlikStartdato(vilkårsgrunnlag)) {
                         ytelser.warn("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold")
@@ -2009,7 +2009,7 @@ internal class Vedtaksperiode private constructor(
             periodetype = periodetype,
             aktiveVedtaksperioder = aktiveVedtaksperioder,
             arbeidsforholdId = inntektsmeldingInfo?.arbeidsforholdId,
-            orgnummereMedAktiveArbeidsforhold = person.orgnummereMedAktiveArbeidsforhold(skjæringstidspunkt),
+            orgnummereMedRelevanteArbeidsforhold = person.orgnummereMedRelevanteArbeidsforhold(skjæringstidspunkt),
             aktivitetslogg = person.aktivitetslogg
         )
     }

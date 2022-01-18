@@ -181,12 +181,12 @@ internal class Utbetaling private constructor(
         skjæringstidspunkt: LocalDate,
         periodetype: Periodetype,
         aktiveVedtaksperioder: List<Aktivitetslogg.Aktivitet.AktivVedtaksperiode>,
-        orgnummereMedAktiveArbeidsforhold: List<String>,
+        orgnummereMedRelevanteArbeidsforhold: List<String>,
         arbeidsforholdId: String?,
         aktivitetslogg: Aktivitetslogg
     ) {
         hendelse.kontekst(this)
-        tilstand.godkjenning(this, vedtaksperiode, skjæringstidspunkt, periodetype, aktiveVedtaksperioder, orgnummereMedAktiveArbeidsforhold, arbeidsforholdId, aktivitetslogg, hendelse)
+        tilstand.godkjenning(this, vedtaksperiode, skjæringstidspunkt, periodetype, aktiveVedtaksperioder, orgnummereMedRelevanteArbeidsforhold, arbeidsforholdId, aktivitetslogg, hendelse)
     }
 
     internal fun håndter(påminnelse: Utbetalingpåminnelse) {
@@ -591,7 +591,7 @@ internal class Utbetaling private constructor(
             skjæringstidspunkt: LocalDate,
             periodetype: Periodetype,
             aktiveVedtaksperioder: List<Aktivitetslogg.Aktivitet.AktivVedtaksperiode>,
-            orgnummereMedAktiveArbeidsforhold: List<String>,
+            orgnummereMedRelevanteArbeidsforhold: List<String>,
             arbeidsforholdId: String?,
             aktivitetslogg: Aktivitetslogg,
             hendelse: IAktivitetslogg
@@ -639,7 +639,7 @@ internal class Utbetaling private constructor(
             skjæringstidspunkt: LocalDate,
             periodetype: Periodetype,
             aktiveVedtaksperioder: List<Aktivitetslogg.Aktivitet.AktivVedtaksperiode>,
-            orgnummereMedAktiveArbeidsforhold: List<String>,
+            orgnummereMedRelevanteArbeidsforhold: List<String>,
             arbeidsforholdId: String?,
             aktivitetslogg: Aktivitetslogg,
             hendelse: IAktivitetslogg
@@ -654,7 +654,7 @@ internal class Utbetaling private constructor(
                 utbetalingtype = utbetaling.type,
                 inntektskilde = vedtaksperiode.inntektskilde(),
                 aktiveVedtaksperioder =  aktiveVedtaksperioder,
-                orgnummereMedAktiveArbeidsforhold = orgnummereMedAktiveArbeidsforhold,
+                orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
                 arbeidsforholdId = arbeidsforholdId
             )
         }

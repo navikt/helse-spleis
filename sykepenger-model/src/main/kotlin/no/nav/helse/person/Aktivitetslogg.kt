@@ -370,7 +370,7 @@ class Aktivitetslogg(
                     utbetalingtype: Utbetalingtype,
                     inntektskilde: Inntektskilde,
                     aktiveVedtaksperioder: List<AktivVedtaksperiode>,
-                    orgnummereMedAktiveArbeidsforhold: List<String>,
+                    orgnummereMedRelevanteArbeidsforhold: List<String>,
                     arbeidsforholdId: String?,
                 ) {
                     aktivitetslogg.behov(
@@ -386,7 +386,8 @@ class Aktivitetslogg(
 
                             }.toMap(),
                             "aktiveVedtaksperioder" to aktiveVedtaksperioder.map(AktivVedtaksperiode::toMap),
-                            "orgnummereMedAktiveArbeidsforhold" to orgnummereMedAktiveArbeidsforhold,
+                            "orgnummereMedAktiveArbeidsforhold" to orgnummereMedRelevanteArbeidsforhold,
+                            "orgnummereMedRelevanteArbeidsforhold" to orgnummereMedRelevanteArbeidsforhold,
                             "arbeidsforholdId" to arbeidsforholdId
                         )
                     )
