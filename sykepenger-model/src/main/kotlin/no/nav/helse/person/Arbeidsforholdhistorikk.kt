@@ -12,7 +12,8 @@ internal class Arbeidsforholdhistorikk private constructor(
     internal constructor() : this(mutableListOf())
 
     internal fun lagre(arbeidsforhold: List<Arbeidsforhold>, skjæringstidspunkt: LocalDate) {
-        if (historikk.isEmpty() || !historikk.last().erDuplikat(arbeidsforhold, skjæringstidspunkt)) {
+        val erDuplikat = sisteRelevanteInnslag(skjæringstidspunkt)?.erDuplikat(arbeidsforhold, skjæringstidspunkt) ?: false
+        if (!erDuplikat) {
             historikk.add(Innslag(UUID.randomUUID(), arbeidsforhold, skjæringstidspunkt))
         }
     }
@@ -23,24 +24,17 @@ internal class Arbeidsforholdhistorikk private constructor(
         visitor.postVisitArbeidsforholdhistorikk(this)
     }
 
-    internal fun harRelevantArbeidsforhold(skjæringstidspunkt: LocalDate): Boolean {
-        if (historikk.isEmpty()) {
-            return false
-        }
-        return historikk.last().harRelevantArbeidsforhold(skjæringstidspunkt)
-    }
+    internal fun harRelevantArbeidsforhold(skjæringstidspunkt: LocalDate) = sisteRelevanteInnslag(skjæringstidspunkt) != null
 
-    internal fun harArbeidsforholdNyereEnnTreMåneder(skjæringstidspunkt: LocalDate): Boolean {
-        if (historikk.isEmpty()) {
-            return false
-        }
-        return historikk.last().harArbeidsforholdSomErNyereEnnTreMåneder(skjæringstidspunkt)
-    }
+    internal fun harArbeidsforholdNyereEnnTreMåneder(skjæringstidspunkt: LocalDate) =
+        sisteRelevanteInnslag(skjæringstidspunkt)?.harArbeidsforholdSomErNyereEnnTreMåneder(skjæringstidspunkt) ?: false
 
     fun gjørArbeidsforholdInaktivt(skjæringstidspunkt: LocalDate) {
     }
 
     fun harInaktivtArbeidsforhold(skjæringstidspunkt: LocalDate) = true
+
+    private fun sisteRelevanteInnslag(skjæringstidspunkt: LocalDate) = historikk.lastOrNull { it.harRelevantArbeidsforhold(skjæringstidspunkt) }
 
     internal class Innslag(private val id: UUID, private val arbeidsforhold: List<Arbeidsforhold>, private val skjæringstidspunkt: LocalDate) {
         internal fun accept(visitor: ArbeidsforholdhistorikkVisitor) {
