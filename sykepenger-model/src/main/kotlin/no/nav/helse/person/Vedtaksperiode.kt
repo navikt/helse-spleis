@@ -310,7 +310,6 @@ internal class Vedtaksperiode private constructor(
     internal fun gjelder(skjæringstidspunkt: LocalDate) = this.skjæringstidspunkt == skjæringstidspunkt
 
     internal fun inntektskilde() = inntektskilde
-    // TODO: Kan byttes med en sjekk på vilkårsgrunnlag når AvsluttetUtenUtbetaling går gjennom vilkårsprøving https://trello.com/c/mQ4ZKeEG
     private fun harInntekt() = harInntektsmelding() || arbeidsgiver.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periode.start) != null
     private fun harInntektsmelding() = arbeidsgiver.harInntektsmelding(skjæringstidspunkt)
     private fun avgjørTilstandForInntekt(): Vedtaksperiodetilstand {
