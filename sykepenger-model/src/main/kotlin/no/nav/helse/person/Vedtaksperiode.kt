@@ -2295,6 +2295,7 @@ internal class Vedtaksperiode private constructor(
                     vedtaksperiode.person.invaliderAllePerioder(inntektsmelding, "Kan ikke flytte en vedtaksperiode i AVSLUTTET_UTEN_UTBETALING ved flere arbeidsgivere")
                     AvsluttetUtenUtbetaling
                 } else {
+                    if (Toggle.GjenopptaAvsluttetUtenUtbetaling.disabled) return@håndterInntektsmelding AvsluttetUtenUtbetaling
                     vedtaksperiode.arbeidsgiver.tidligerePeriodeRebehandles(vedtaksperiode, inntektsmelding)
                     vedtaksperiode.kontekst(inntektsmelding)
                     AvventerHistorikk

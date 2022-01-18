@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.ForventetFeil
+import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
@@ -15,7 +16,7 @@ import org.junit.jupiter.api.Test
 internal class ReberegningAvAvsluttetUtenUtbetalingE2ETest : AbstractEndToEndTest() {
 
     @Test
-    fun `reberegner avsluttet periode dersom inntektsmelding kommer inn`() {
+    fun `reberegner avsluttet periode dersom inntektsmelding kommer inn`() = Toggle.GjenopptaAvsluttetUtenUtbetaling.enable {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(1.januar til 16.januar))
@@ -106,7 +107,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingE2ETest : AbstractEndToEndTes
     }
 
     @Test
-    fun `gjenopptar behandling på neste periode avsluttet periode etter IM`() {
+    fun `gjenopptar behandling på neste periode avsluttet periode etter IM`() = Toggle.GjenopptaAvsluttetUtenUtbetaling.enable {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(21.januar, 26.januar, 100.prosent))
@@ -117,7 +118,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingE2ETest : AbstractEndToEndTes
     }
 
     @Test
-    fun `gjenopptar ikke behandling på neste periode etter at kort periode reberegnes`() {
+    fun `gjenopptar ikke behandling på neste periode etter at kort periode reberegnes`() = Toggle.GjenopptaAvsluttetUtenUtbetaling.enable {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(21.januar, 26.januar, 100.prosent))
@@ -171,29 +172,34 @@ internal class ReberegningAvAvsluttetUtenUtbetalingE2ETest : AbstractEndToEndTes
 
     @Test
     fun `Periode i MOTTATT_SYKMELDING_FERDIG_FORLENGELSE går til AVVENTER_SØKNAD_UFERDIG_FORLENGELSE, når tidligere og tilstøtende periode går fra AVSLUTTET_UTEN_UTBETALING til AVVENTER_HISTORIKK`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 18.januar, 100.prosent))
-        håndterSøknad(Sykdom(3.januar, 18.januar, 100.prosent))
+        Toggle.GjenopptaAvsluttetUtenUtbetaling.enable {
+            håndterSykmelding(Sykmeldingsperiode(3.januar, 18.januar, 100.prosent))
+            håndterSøknad(Sykdom(3.januar, 18.januar, 100.prosent))
 
-        håndterSykmelding(Sykmeldingsperiode(19.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterSykmelding(Sykmeldingsperiode(19.januar, 31.januar, 100.prosent))
+            håndterInntektsmelding(listOf(1.januar til 16.januar))
 
-        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVVENTER_HISTORIKK)
-        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_SØKNAD_UFERDIG_FORLENGELSE)
+            assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVVENTER_HISTORIKK)
+            assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_SØKNAD_UFERDIG_FORLENGELSE)
+        }
     }
 
+    // Periode i AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE går til AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE når tidligere og tilstøtende periode går fra AVSLUTTET_UTEN_UTBETALING til AVVENTER_HISTORIKK
     @Test
-    fun `Periode i AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE går til AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, når tidligere og tilstøtende periode går fra AVSLUTTET_UTEN_UTBETALING til AVVENTER_HISTORIKK`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 18.januar, 100.prosent))
-        håndterSøknad(Sykdom(3.januar, 18.januar, 100.prosent))
+    fun `Perioder etter AvsluttetUtenUtbetaling blir satt til AvventerUferdig ved gjennopptagelse av tidligere periode`() {
+        Toggle.GjenopptaAvsluttetUtenUtbetaling.enable {
+            håndterSykmelding(Sykmeldingsperiode(3.januar, 18.januar, 100.prosent))
+            håndterSøknad(Sykdom(3.januar, 18.januar, 100.prosent))
 
 
-        håndterSykmelding(Sykmeldingsperiode(19.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(19.januar, 31.januar, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(19.januar, 31.januar, 100.prosent))
+            håndterSøknad(Sykdom(19.januar, 31.januar, 100.prosent))
 
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterInntektsmelding(listOf(1.januar til 16.januar))
 
-        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVVENTER_HISTORIKK)
-        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, AVVENTER_UFERDIG)
+            assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVVENTER_HISTORIKK)
+            assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, AVVENTER_UFERDIG)
+        }
     }
 
     @Test

@@ -1,5 +1,6 @@
 package no.nav.helse.bugs_showstoppers
 
+import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.hendelser.til
@@ -80,18 +81,45 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
             ), 8.januar
         )
 
-        håndterYtelser(3.vedtaksperiode)
+        if (Toggle.DelvisRefusjon.enabled) {
+            håndterYtelser(3.vedtaksperiode)
+        } else {
+            håndterYtelser(4.vedtaksperiode)
+        }
 
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVSLUTTET_UTEN_UTBETALING, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING)
-        assertTilstander(4.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, AVVENTER_UFERDIG)
+
+        if (Toggle.DelvisRefusjon.enabled) {
+            assertTilstander(
+                3.vedtaksperiode,
+                START,
+                MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+                AVSLUTTET_UTEN_UTBETALING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_VILKÅRSPRØVING
+            )
+            assertTilstander(4.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, AVVENTER_UFERDIG)
+            assertTrue(inspektør.etterspurteBehov(3.vedtaksperiode).map { it.type }
+                .containsAll(listOf(InntekterForSammenligningsgrunnlag, Medlemskap, InntekterForSykepengegrunnlag, ArbeidsforholdV2)))
+            assertTrue(inspektør.etterspurteBehov(4.vedtaksperiode).isEmpty())
+        } else {
+            assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(
+                4.vedtaksperiode,
+                START,
+                MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+                AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE,
+                AVVENTER_HISTORIKK,
+                AVVENTER_VILKÅRSPRØVING
+            )
+            assertTrue(inspektør.etterspurteBehov(3.vedtaksperiode).isEmpty())
+            assertTrue(inspektør.etterspurteBehov(4.vedtaksperiode).map { it.type }
+                .containsAll(listOf(InntekterForSammenligningsgrunnlag, Medlemskap, InntekterForSykepengegrunnlag, ArbeidsforholdV2)))
+        }
 
         assertTrue(inspektør.etterspurteBehov(1.vedtaksperiode).isEmpty())
         assertTrue(inspektør.etterspurteBehov(2.vedtaksperiode).isEmpty())
-        assertTrue(inspektør.etterspurteBehov(3.vedtaksperiode).map { it.type }
-            .containsAll(listOf(InntekterForSammenligningsgrunnlag, Medlemskap, InntekterForSykepengegrunnlag, ArbeidsforholdV2)))
-        assertTrue(inspektør.etterspurteBehov(4.vedtaksperiode).isEmpty())
     }
 
     @Test
