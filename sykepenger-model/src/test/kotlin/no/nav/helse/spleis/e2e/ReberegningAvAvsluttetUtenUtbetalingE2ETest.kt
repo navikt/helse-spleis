@@ -117,6 +117,36 @@ internal class ReberegningAvAvsluttetUtenUtbetalingE2ETest : AbstractEndToEndTes
     }
 
     @Test
+    fun `gjenopptar ikke behandling på neste periode etter at kort periode reberegnes`() {
+        håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
+        håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(21.januar, 26.januar, 100.prosent))
+        håndterSøknad(Sykdom(21.januar, 26.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(27.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(27.januar, 31.januar, 100.prosent))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(10.januar til 25.januar))
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVSLUTTET_UTEN_UTBETALING, AVVENTER_HISTORIKK)
+        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, AVVENTER_UFERDIG)
+    }
+
+    @ForventetFeil("Det sprenger")
+    @Test
+    fun `gjenopptar ikke behandling på neste gap periode etter at kort periode reberegnes`() {
+        håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
+        håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(21.januar, 26.januar, 100.prosent))
+        håndterSøknad(Sykdom(21.januar, 26.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(30.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(30.januar, 31.januar, 100.prosent))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(10.januar til 25.januar))
+        håndterInntektsmeldingMedValidering(3.vedtaksperiode, listOf(10.januar til 25.januar), 30.januar)
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVSLUTTET_UTEN_UTBETALING, AVVENTER_HISTORIKK)
+        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+    }
+
+    @Test
     fun `gjenopptar ikke behandling på neste periode avsluttet periode etter IM dersom det er nyere vedtak`() {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
