@@ -1,54 +1,44 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.person.ArbeidsforholdhistorikkVisitor
+import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.IAktivitetslogg
 import java.time.LocalDate
 
-/**
- * Noen begreper:
- *
- * Relevant -> Et relevant arbeidsforhold er et arbeidsforhold som er gjeldende for skjæringstidspunkt
- * Aktivt -> Et aktivt arbeidsforhold er et relevant arbeidsforhold som skal taes med i beregning for skjæringstidspunkt
- * Inaktiv -> Et inaktivt arbeidsforhold blir markert av en saksbehandler som at det ikke skal være med i beregning for skjæringstidspunkt
- */
 class Arbeidsforhold(
     internal val orgnummer: String,
-    private val fom: LocalDate,
-    private val tom: LocalDate? = null
+    private val ansattFom: LocalDate,
+    private val ansattTom: LocalDate? = null
 ) {
+    internal fun tilDomeneobjekt() = Arbeidsforholdhistorikk.Arbeidsforhold(
+        ansattFom = ansattFom,
+        ansattTom = ansattTom,
+        erAktivt = true
+    )
+
     fun erSøppel() =
-        tom != null && tom < fom
+        ansattTom != null && ansattTom < ansattFom
 
     private fun erGyldig(skjæringstidspunkt: LocalDate) =
-        fom < skjæringstidspunkt && !erSøppel()
+        ansattFom < skjæringstidspunkt && !erSøppel()
 
     private fun periode(skjæringstidspunkt: LocalDate): Periode? {
         if (!erGyldig(skjæringstidspunkt)) return null
-        return fom til (tom ?: skjæringstidspunkt)
+        return ansattFom til (ansattTom ?: skjæringstidspunkt)
     }
 
-    internal fun gjelder(skjæringstidspunkt: LocalDate) = fom <= skjæringstidspunkt && (tom == null || tom >= skjæringstidspunkt)
-
-    internal fun accept(visitor: ArbeidsforholdhistorikkVisitor) {
-        visitor.visitArbeidsforhold(orgnummer, fom, tom)
-    }
-
-    override fun equals(other: Any?) = other is Arbeidsforhold
-        && orgnummer == other.orgnummer
-        && fom == other.fom
-        && tom == other.tom
+    internal fun gjelder(skjæringstidspunkt: LocalDate) = ansattFom <= skjæringstidspunkt && (ansattTom == null || ansattTom >= skjæringstidspunkt)
 
     internal fun erRelevant(arbeidsgiver: Arbeidsgiver) = orgnummer == arbeidsgiver.organisasjonsnummer()
 
-    internal fun harArbeidetMindreEnnTreMåneder(skjæringstidspunkt: LocalDate) = fom > skjæringstidspunkt.withDayOfMonth(1).minusMonths(3)
+    internal fun harArbeidetMindreEnnTreMåneder(skjæringstidspunkt: LocalDate) = ansattFom > skjæringstidspunkt.withDayOfMonth(1).minusMonths(3)
 
     internal companion object {
         internal fun List<Arbeidsforhold>.toEtterlevelseMap() = map {
             mapOf(
                 "orgnummer" to it.orgnummer,
-                "fom" to it.fom,
-                "tom" to it.tom
+                "fom" to it.ansattFom,
+                "tom" to it.ansattTom
             )
         }
 
@@ -77,7 +67,5 @@ class Arbeidsforhold(
         }
 
         internal fun List<Arbeidsforhold>.grupperArbeidsforholdPerOrgnummer() = groupBy { it.orgnummer }
-        internal fun List<Arbeidsforhold>.harArbeidsforholdSomErNyereEnnTreMåneder(skjæringstidspunkt: LocalDate) =
-            any { it.harArbeidetMindreEnnTreMåneder(skjæringstidspunkt) }
     }
 }

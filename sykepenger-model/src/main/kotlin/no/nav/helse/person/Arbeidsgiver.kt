@@ -964,7 +964,12 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun lagreArbeidsforhold(arbeidsforhold: List<Arbeidsforhold>, skjæringstidspunkt: LocalDate) {
-        arbeidsforholdhistorikk.lagre(arbeidsforhold.filter { it.erRelevant(this) }, skjæringstidspunkt)
+        arbeidsforholdhistorikk.lagre(
+            arbeidsforhold
+                .filter { it.erRelevant(this) }
+                .map { it.tilDomeneobjekt() },
+            skjæringstidspunkt
+        )
     }
 
     internal fun build(builder: IArbeidsgiverperiodetelling, periode: Periode) {

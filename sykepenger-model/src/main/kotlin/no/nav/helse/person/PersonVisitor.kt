@@ -514,7 +514,7 @@ internal interface ArbeidsforholdhistorikkVisitor {
     fun preVisitArbeidsforholdhistorikk(arbeidsforholdhistorikk: Arbeidsforholdhistorikk) {}
     fun postVisitArbeidsforholdhistorikk(arbeidsforholdhistorikk: Arbeidsforholdhistorikk) {}
 
-    fun visitArbeidsforhold(orgnummer: String, fom: LocalDate, tom: LocalDate?) {}
+    fun visitArbeidsforhold(ansattFom: LocalDate, ansattTom: LocalDate?, erAktivt: Boolean) {}
 
     fun preVisitArbeidsforholdinnslag(arbeidsforholdinnslag: Arbeidsforholdhistorikk.Innslag, id: UUID, skjæringstidspunkt: LocalDate) {}
     fun postVisitArbeidsforholdinnslag(arbeidsforholdinnslag: Arbeidsforholdhistorikk.Innslag, id: UUID, skjæringstidspunkt: LocalDate) {}

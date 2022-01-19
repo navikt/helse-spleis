@@ -1034,11 +1034,11 @@ internal data class PersonData(
             internal fun tilInnslag() = Arbeidsforholdhistorikk.Innslag(id, arbeidsforhold.map { it.tilArbeidsforhold() }, skjæringstidspunkt)
 
             data class ArbeidsforholdData(
-                val orgnummer: String,
-                val fom: LocalDate,
-                val tom: LocalDate?
+                val ansattFom: LocalDate,
+                val ansattTom: LocalDate?,
+                val erAktivt: Boolean
             ) {
-                internal fun tilArbeidsforhold() = Arbeidsforhold(orgnummer, fom, tom)
+                internal fun tilArbeidsforhold() = Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom, ansattTom, erAktivt)
             }
         }
     }

@@ -1103,8 +1103,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.preVisitArbeidsforholdinnslag(arbeidsforholdinnslag, id, skjæringstidspunkt)
     }
 
-    override fun visitArbeidsforhold(orgnummer: String, fom: LocalDate, tom: LocalDate?) {
-        delegatee.visitArbeidsforhold(orgnummer, fom, tom)
+    override fun visitArbeidsforhold(ansattFom: LocalDate, ansattTom: LocalDate?, erAktivt: Boolean) {
+        delegatee.visitArbeidsforhold(ansattFom, ansattTom, erAktivt)
     }
 
     override fun postVisitArbeidsforholdinnslag(arbeidsforholdinnslag: Arbeidsforholdhistorikk.Innslag, id: UUID, skjæringstidspunkt: LocalDate) {

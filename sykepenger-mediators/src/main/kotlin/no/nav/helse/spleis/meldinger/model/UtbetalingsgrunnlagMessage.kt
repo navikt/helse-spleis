@@ -43,8 +43,8 @@ internal class UtbetalingsgrunnlagMessage(packet: JsonMessage) : BehovMessage(pa
         .map {
             Arbeidsforhold(
                 orgnummer = it["orgnummer"].asText(),
-                fom = it["ansattSiden"].asLocalDate(),
-                tom = it["ansattTil"].asOptionalLocalDate()
+                ansattFom = it["ansattFom"].asLocalDate(),
+                ansattTom = it["ansattTom"].asOptionalLocalDate()
             )
          }
 

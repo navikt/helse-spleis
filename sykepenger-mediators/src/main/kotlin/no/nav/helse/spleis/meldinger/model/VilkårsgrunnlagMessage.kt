@@ -74,8 +74,8 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packe
         .map {
             Arbeidsforhold(
                 orgnummer = it["orgnummer"].asText(),
-                fom = it["ansattSiden"].asLocalDate(),
-                tom = it["ansattTil"].asOptionalLocalDate()
+                ansattFom = it["ansattSiden"].asLocalDate(),
+                ansattTom = it["ansattTil"].asOptionalLocalDate()
             )
         }
 

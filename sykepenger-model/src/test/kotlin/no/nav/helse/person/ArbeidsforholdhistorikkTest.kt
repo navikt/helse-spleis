@@ -1,7 +1,7 @@
 package no.nav.helse.person
 
 import no.nav.helse.ForventetFeil
-import no.nav.helse.hendelser.Arbeidsforhold
+import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold
 import no.nav.helse.testhelpers.april
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
@@ -16,8 +16,8 @@ internal class ArbeidsforholdhistorikkTest {
     @Test
     fun `Lagrer ikke duplikat av arbeidsforhold`() {
         val arbeidsforhold = listOf(
-            Arbeidsforhold(orgnummer = "a1", fom = 31.januar(2010), tom = null),
-            Arbeidsforhold(orgnummer = "a1", fom = 31.januar, tom = null)
+            Arbeidsforhold(ansattFom = 31.januar(2010), ansattTom = null, erAktivt = true),
+            Arbeidsforhold(ansattFom = 31.januar, ansattTom = null, erAktivt = true)
         )
 
         val arbeidsforholdhistorikk = Arbeidsforholdhistorikk()
@@ -37,10 +37,10 @@ internal class ArbeidsforholdhistorikkTest {
 
         val arbeidsforholdhistorikk = Arbeidsforholdhistorikk()
 
-        arbeidsforholdhistorikk.lagre(listOf(Arbeidsforhold(orgnummer = "a1", fom = 31.januar, tom = null)), 1.januar)
+        arbeidsforholdhistorikk.lagre(listOf(Arbeidsforhold(ansattFom = 31.januar, ansattTom = null, erAktivt = true)), 1.januar)
         val arbeidsforhold1 = arbeidsforholdhistorikk.hentArbeidsforholdhistorikkinnslagIder()
 
-        arbeidsforholdhistorikk.lagre(listOf(Arbeidsforhold(orgnummer = "a1", fom = 31.januar(2010), tom = null)), 1.januar)
+        arbeidsforholdhistorikk.lagre(listOf(Arbeidsforhold(ansattFom = 31.januar(2010), ansattTom = null, erAktivt = true)), 1.januar)
         val arbeidsforhold2 = arbeidsforholdhistorikk.hentArbeidsforholdhistorikkinnslagIder()
 
         assertNotEquals(arbeidsforhold1, arbeidsforhold2)
@@ -62,8 +62,8 @@ internal class ArbeidsforholdhistorikkTest {
     @Test
     fun `To like arbeidsforhold hentes for to forskjellig skjæringstidspunkt, skal lage to historikkinnslag`() {
         val arbeidsforhold = listOf(
-            Arbeidsforhold(orgnummer = "a1", fom = 31.januar(2010), tom = null),
-            Arbeidsforhold(orgnummer = "a1", fom = 31.januar, tom = null)
+            Arbeidsforhold(ansattFom = 31.januar(2010), ansattTom = null, erAktivt = true),
+            Arbeidsforhold(ansattFom = 31.januar, ansattTom = null, erAktivt = true)
         )
 
         val arbeidsforholdhistorikk = Arbeidsforholdhistorikk()
@@ -81,7 +81,7 @@ internal class ArbeidsforholdhistorikkTest {
     @ForventetFeil("parprogrammering er ping-pong-aktivitet :)")
     @Test
     fun `skal kunne markere et arbeidsforhold som ikke relevant for et skjæringstidspunkt`() {
-        val arbeidsforhold = listOf(Arbeidsforhold(orgnummer = "a1", fom = 31.januar(2010), tom = null))
+        val arbeidsforhold = listOf(Arbeidsforhold(ansattFom = 31.januar(2010), ansattTom = null, erAktivt = true))
         val historikk = Arbeidsforholdhistorikk()
         historikk.lagre(arbeidsforhold, 1.januar)
         assertTrue(historikk.harRelevantArbeidsforhold(1.januar))
@@ -92,8 +92,8 @@ internal class ArbeidsforholdhistorikkTest {
 
     @Test
     fun `harRelevantArbeidsforhold fungerer for eldre innslag i arbeidsforholdhistorikken`() {
-        val arbeidsforhold1 = listOf(Arbeidsforhold(orgnummer = "a1", fom = 31.januar(2010), tom = null))
-        val arbeidsforhold2 = listOf(Arbeidsforhold(orgnummer = "a1", fom = 31.januar(2010), tom = 30.april(2022)))
+        val arbeidsforhold1 = listOf(Arbeidsforhold(ansattFom = 31.januar(2010), ansattTom = null, erAktivt = true))
+        val arbeidsforhold2 = listOf(Arbeidsforhold(ansattFom = 31.januar(2010), ansattTom = 30.april(2022), erAktivt = true))
 
         val historikk = Arbeidsforholdhistorikk()
         historikk.lagre(arbeidsforhold1, 1.januar(2018))
@@ -110,8 +110,8 @@ internal class ArbeidsforholdhistorikkTest {
 
     @Test
     fun `har arbeidsforholdNyereEnnTreMåneder fungerer for eldre innslag i arbeidsforholdhistorikken`() {
-        val arbeidsforhold1 = listOf(Arbeidsforhold(orgnummer = "a1", fom = 1.januar(2017), tom = null))
-        val arbeidsforhold2 = listOf(Arbeidsforhold(orgnummer = "a1", fom = 1.desember(2020), tom = null))
+        val arbeidsforhold1 = listOf(Arbeidsforhold(ansattFom = 1.januar(2017), ansattTom = null, erAktivt = true))
+        val arbeidsforhold2 = listOf(Arbeidsforhold(ansattFom = 1.desember(2020), ansattTom = null, erAktivt = true))
 
         val historikk = Arbeidsforholdhistorikk()
         historikk.lagre(arbeidsforhold1, 1.januar(2018))
@@ -122,8 +122,8 @@ internal class ArbeidsforholdhistorikkTest {
 
     @Test
     fun `duplikatsjekk er ikke avhengig av rekkefølgen på innslagene som legges inn`() {
-        val arbeidsforhold1 = listOf(Arbeidsforhold(orgnummer = "a1", fom = 1.januar(2017), tom = 31.desember(2017)))
-        val arbeidsforhold2 = listOf(Arbeidsforhold(orgnummer = "a1", fom = 1.januar(2022), tom = 31.desember(2022)))
+        val arbeidsforhold1 = listOf(Arbeidsforhold(ansattFom = 1.januar(2017), ansattTom = 31.desember(2017), erAktivt = true))
+        val arbeidsforhold2 = listOf(Arbeidsforhold(ansattFom = 1.januar(2022), ansattTom = 31.desember(2022), erAktivt = true))
 
         val historikk = Arbeidsforholdhistorikk()
         historikk.lagre(arbeidsforhold1, 1.juni(2017))
