@@ -1,5 +1,7 @@
 package no.nav.helse.person.etterlevelse
 
+import no.nav.helse.Fødselsnummer
+import no.nav.helse.Organisasjonsnummer
 import no.nav.helse.person.KontekstObserver
 import no.nav.helse.person.Ledd.Companion.ledd
 import no.nav.helse.person.Paragraf
@@ -8,45 +10,87 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 import java.time.LocalDate
 import java.time.Year
+import java.util.*
 
 class MaskinellJurist : EtterlevelseObserver, KontekstObserver {
-    private lateinit var fødselsnummer: String
-    private lateinit var aktørId: String
-    private lateinit var organisasjonsnummer: String
-    private var vedtaksperiodeId: String? = null
+    private val parent: MaskinellJurist?
+    private lateinit var fødselsnummer: Fødselsnummer
+    private lateinit var organisasjonsnummer: Organisasjonsnummer
+    private var vedtaksperiodeId: UUID? = null
+
+    private var kontekster: Map<String, String> = emptyMap()
     private var utbetalingId: String? = null
 
     private var vurderinger = listOf<JuridiskVurdering>()
 
+    constructor() {
+        parent = null
+    }
+
+    private constructor(parent: MaskinellJurist) {
+        this.parent = parent
+    }
+
     private fun leggTil(vurdering: JuridiskVurdering) {
         vurderinger = vurdering.sammenstill(vurderinger)
+        parent?.leggTil(vurdering)
     }
 
-    private fun kontekster(): Map<String, String> = mutableMapOf(
-        "fødselsnummer" to fødselsnummer,
-        "aktørId" to aktørId,
-        "organisasjonsnummer" to organisasjonsnummer
+    private fun kontekster(): Map<String, String> = kontekster + mutableMapOf(
+        "fødselsnummer" to fødselsnummer.toString(),
+        "organisasjonsnummer" to organisasjonsnummer.toString()
     ).apply {
-        compute("vedtaksperiodeId") { _, _ -> vedtaksperiodeId }
-        compute("utbetalingId") { _, _ -> utbetalingId }
+        compute("vedtaksperiodeId") { _, _ -> vedtaksperiodeId.toString() }
+        compute("utbetalingId") { _, _ -> utbetalingId }}
+
+    internal fun medFnr(fødselsnummer: Fødselsnummer): MaskinellJurist {
+        return MaskinellJurist(this).also {
+            it.fødselsnummer = fødselsnummer
+        }
     }
 
-    override fun nyPersonKontekst(fødselsnummer: String, aktørId: String) {
-        this.fødselsnummer = fødselsnummer
-        this.aktørId = aktørId
+    fun medArbeidsgiver(organisasjonsnummer: Organisasjonsnummer): MaskinellJurist {
+        return MaskinellJurist(this).also {
+            it.fødselsnummer = fødselsnummer
+            it.organisasjonsnummer = organisasjonsnummer
+        }
     }
 
-    override fun nyVedtaksperiodeKontekst(vedtaksperiodeId: String) {
-        this.vedtaksperiodeId = vedtaksperiodeId
+    fun medVedtaksperiode(vedtaksperiodeId: UUID): MaskinellJurist {
+        return MaskinellJurist(this).also {
+            it.fødselsnummer = fødselsnummer
+            it.organisasjonsnummer = organisasjonsnummer
+            it.vedtaksperiodeId = vedtaksperiodeId
+        }
     }
 
-    override fun nyArbeidsgiverKontekst(organisasjonsnummer: String) {
-        this.organisasjonsnummer = organisasjonsnummer
+    fun medKontekst(vararg kontekster: Pair<String, String>): MaskinellJurist {
+        return MaskinellJurist(this).also {
+            it.fødselsnummer = fødselsnummer
+            it.organisasjonsnummer = organisasjonsnummer
+            it.vedtaksperiodeId = vedtaksperiodeId
+            it.kontekster = this.kontekster + kontekster
+        }
     }
 
-    override fun nyUtbetalingKontekst(utbetalingId: String) {
-        this.utbetalingId = utbetalingId
-    }
+
+
+//    override fun nyPersonKontekst(fødselsnummer: String, aktørId: String) {
+//        this.fødselsnummer = fødselsnummer
+//        this.aktørId = aktørId
+//    }
+//
+//    override fun nyVedtaksperiodeKontekst(vedtaksperiodeId: String) {
+//        this.vedtaksperiodeId = vedtaksperiodeId
+//    }
+//
+//    override fun nyArbeidsgiverKontekst(organisasjonsnummer: String) {
+//        this.organisasjonsnummer = organisasjonsnummer
+//    }
+//
+//    override fun nyUtbetalingKontekst(utbetalingId: String) {
+//        this.utbetalingId = utbetalingId
+//    }
 
     override fun `§2`(oppfylt: Boolean) {
         super.`§2`(oppfylt)
