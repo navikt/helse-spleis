@@ -1,5 +1,6 @@
 package no.nav.helse.person
 
+import no.nav.helse.ForventetFeil
 import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold
 import no.nav.helse.testhelpers.april
 import no.nav.helse.testhelpers.desember
@@ -87,6 +88,18 @@ internal class ArbeidsforholdhistorikkTest {
         historikk.deaktiverArbeidsforhold(1.januar)
         assertTrue(historikk.harInaktivtArbeidsforhold(1.januar))
         assertFalse(historikk.harRelevantArbeidsforhold(1.januar))
+    }
+
+    @ForventetFeil("par-progging er fett")
+    @Test
+    fun `skal kunne markere et arbeidsforhold som aktivt for et skjæringstidspunkt`() {
+        val arbeidsforhold = listOf(Arbeidsforhold(ansattFom = 31.januar(2010), ansattTom = null, erAktivt = true))
+        val historikk = Arbeidsforholdhistorikk()
+        historikk.lagre(arbeidsforhold, 1.januar)
+        historikk.deaktiverArbeidsforhold(1.januar)
+        historikk.aktiverArbeidsforhold(1.januar)
+        assertFalse(historikk.harInaktivtArbeidsforhold(1.januar))
+        assertTrue(historikk.harRelevantArbeidsforhold(1.januar))
     }
 
     @Test

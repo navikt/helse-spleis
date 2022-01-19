@@ -29,6 +29,8 @@ internal class Arbeidsforholdhistorikk private constructor(
     internal fun harArbeidsforholdNyereEnnTreMåneder(skjæringstidspunkt: LocalDate) =
         sisteInnslag(skjæringstidspunkt)?.harArbeidsforholdSomErNyereEnnTreMåneder(skjæringstidspunkt) ?: false
 
+    internal fun aktiverArbeidsforhold(skjæringstidspunkt: LocalDate) {}
+
     internal fun deaktiverArbeidsforhold(skjæringstidspunkt: LocalDate) {
         val nåværendeInnslag = requireNotNull(sisteInnslag(skjæringstidspunkt))
         historikk.add(nåværendeInnslag.deaktiverArbeidsforhold())
@@ -40,6 +42,7 @@ internal class Arbeidsforholdhistorikk private constructor(
     }
 
     private fun sisteInnslag(skjæringstidspunkt: LocalDate) = historikk.lastOrNull { it.gjelder(skjæringstidspunkt) }
+
 
     internal class Innslag(private val id: UUID, private val arbeidsforhold: List<Arbeidsforhold>, private val skjæringstidspunkt: LocalDate) {
         internal fun accept(visitor: ArbeidsforholdhistorikkVisitor) {
