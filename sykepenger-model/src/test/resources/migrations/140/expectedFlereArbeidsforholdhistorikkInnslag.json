@@ -1,0 +1,51 @@
+{
+    "arbeidsgivere": [
+        {
+            "arbeidsforholdhistorikk": [
+                {
+                    "id": "89257be2-ae27-4ed0-943d-919ac1c25a35",
+                    "skjæringstidspunkt": "2018-01-01",
+                    "arbeidsforhold": [
+                        {
+                            "ansattFom": "1970-01-01",
+                            "ansattTom": null,
+                            "erAktivt": true
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "arbeidsforholdhistorikk": [
+                {
+                    "id": "920c108f-e5c7-4c17-920b-2583b24ac2ba",
+                    "skjæringstidspunkt": "2020-01-01",
+                    "arbeidsforhold": [
+                        {
+                            "ansattFom": "1970-01-01",
+                            "ansattTom": "2020-01-01",
+                            "erAktivt": true
+                        },
+                        {
+                            "ansattFom": "2021-01-01",
+                            "ansattTom": "2022-01-01",
+                            "erAktivt": true
+                        }
+                    ]
+                },
+                {
+                    "id": "920c108f-e5c7-4c17-920b-2583b24ac2ba",
+                    "skjæringstidspunkt": "2018-01-01",
+                    "arbeidsforhold": [
+                        {
+                            "ansattFom": "1970-01-01",
+                            "ansattTom": "2020-01-01",
+                            "erAktivt": true
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "skjemaVersjon": 140
+}
