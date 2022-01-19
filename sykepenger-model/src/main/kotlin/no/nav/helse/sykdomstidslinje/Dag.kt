@@ -17,8 +17,7 @@ internal sealed class Dag(
 
     companion object {
         internal fun Map<LocalDate, Dag>.sykmeldingSkrevet(): LocalDateTime {
-            check(all { it.value.kommerFra(Sykmelding::class) })
-            return values.first().kilde.tidsstempel()
+            return SykdomstidslinjeHendelse.Hendelseskilde.tidligsteTidspunktFor(map { it.value.kilde }, Sykmelding::class)
         }
 
         internal val default: BesteStrategy = { venstre: Dag, høyre: Dag ->

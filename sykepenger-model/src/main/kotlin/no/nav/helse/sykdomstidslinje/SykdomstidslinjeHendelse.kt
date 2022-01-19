@@ -42,13 +42,17 @@ abstract class SykdomstidslinjeHendelse(
 
             private fun kildenavn(hendelse: Melding): String =
                 hendelse.simpleName ?: "Ukjent"
+
+            internal fun tidligsteTidspunktFor(kilder: List<Hendelseskilde>, type: Melding): LocalDateTime {
+                check(kilder.all { it.erAvType(type) })
+                return kilder.first().tidsstempel
+            }
         }
 
         override fun toString() = type
-        internal fun tidsstempel() = tidsstempel
         internal fun meldingsreferanseId() = meldingsreferanseId
         internal fun erAvType(meldingstype: Melding) = this.type == kildenavn(meldingstype)
-        internal fun toJson() = mapOf("type" to toString(), "id" to meldingsreferanseId(), "tidsstempel" to tidsstempel())
+        internal fun toJson() = mapOf("type" to type, "id" to meldingsreferanseId, "tidsstempel" to tidsstempel)
     }
 
     internal abstract fun sykdomstidslinje(): Sykdomstidslinje
