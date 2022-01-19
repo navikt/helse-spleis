@@ -1,6 +1,5 @@
 package no.nav.helse.person
 
-import no.nav.helse.ForventetFeil
 import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold
 import no.nav.helse.testhelpers.april
 import no.nav.helse.testhelpers.desember
@@ -78,14 +77,14 @@ internal class ArbeidsforholdhistorikkTest {
         assertEquals(2, arbeidsforhold2.size)
     }
 
-    @ForventetFeil("parprogrammering er ping-pong-aktivitet :)")
     @Test
-    fun `skal kunne markere et arbeidsforhold som ikke relevant for et skjæringstidspunkt`() {
+    fun `skal kunne markere et arbeidsforhold som inaktivt for et skjæringstidspunkt`() {
         val arbeidsforhold = listOf(Arbeidsforhold(ansattFom = 31.januar(2010), ansattTom = null, erAktivt = true))
         val historikk = Arbeidsforholdhistorikk()
         historikk.lagre(arbeidsforhold, 1.januar)
+        assertFalse(historikk.harInaktivtArbeidsforhold(1.januar))
         assertTrue(historikk.harRelevantArbeidsforhold(1.januar))
-        historikk.gjørArbeidsforholdInaktivt(1.januar)
+        historikk.deaktiverArbeidsforhold(1.januar)
         assertTrue(historikk.harInaktivtArbeidsforhold(1.januar))
         assertFalse(historikk.harRelevantArbeidsforhold(1.januar))
     }
