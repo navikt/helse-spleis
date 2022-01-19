@@ -31,12 +31,12 @@ internal class Arbeidsforholdhistorikk private constructor(
 
     internal fun aktiverArbeidsforhold(skjæringstidspunkt: LocalDate) {
         val nåværendeInnslag = requireNotNull(sisteInnslag(skjæringstidspunkt))
-        historikk.add(nåværendeInnslag.aktiverArbeidsforhold())
+        lagre(nåværendeInnslag.aktiverArbeidsforhold(), skjæringstidspunkt)
     }
 
     internal fun deaktiverArbeidsforhold(skjæringstidspunkt: LocalDate) {
         val nåværendeInnslag = requireNotNull(sisteInnslag(skjæringstidspunkt))
-        historikk.add(nåværendeInnslag.deaktiverArbeidsforhold())
+        lagre(nåværendeInnslag.deaktiverArbeidsforhold(), skjæringstidspunkt)
     }
 
     internal fun harInaktivtArbeidsforhold(skjæringstidspunkt: LocalDate): Boolean {
@@ -63,9 +63,9 @@ internal class Arbeidsforholdhistorikk private constructor(
         internal fun harArbeidsforholdSomErNyereEnnTreMåneder(skjæringstidspunkt: LocalDate) =
             arbeidsforhold.harArbeidsforholdSomErNyereEnnTreMåneder(skjæringstidspunkt)
 
-        internal fun deaktiverArbeidsforhold() = Innslag(UUID.randomUUID(), arbeidsforhold.map { it.deaktiver() }, skjæringstidspunkt)
+        internal fun deaktiverArbeidsforhold() = arbeidsforhold.map { it.deaktiver() }
 
-        internal fun aktiverArbeidsforhold() = Innslag(UUID.randomUUID(), arbeidsforhold.map { it.aktiver() }, skjæringstidspunkt)
+        internal fun aktiverArbeidsforhold() = arbeidsforhold.map { it.aktiver() }
 
         internal fun erAktivt() = arbeidsforhold.harAktivtArbeidsforhold()
     }
