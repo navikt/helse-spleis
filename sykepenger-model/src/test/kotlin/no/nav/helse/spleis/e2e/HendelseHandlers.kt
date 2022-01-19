@@ -662,6 +662,19 @@ internal fun AbstractEndToEndTest.håndterOverstyrTidslinje(
     ).håndter(Person::håndter)
 }
 
+internal fun AbstractEndToEndTest.håndterOverstyrArbeidsforhold(
+    skjæringstidspunkt: LocalDate,
+    overstyrteArbeidsforhold: List<OverstyrArbeidsforhold.ArbeidsforholdOverstyrt>
+) {
+    OverstyrArbeidsforhold(
+        meldingsreferanseId = UUID.randomUUID(),
+        fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018.toString(),
+        aktørId = AbstractPersonTest.AKTØRID,
+        skjæringstidspunkt = skjæringstidspunkt,
+        overstyrteArbeidsforhold = overstyrteArbeidsforhold
+    ).håndter(Person::håndter)
+}
+
 internal fun AbstractEndToEndTest.håndterUtbetalingshistorikkUtenValidering(
     vararg utbetalinger: Infotrygdperiode,
     inntektshistorikk: List<Inntektsopplysning> = emptyList(),

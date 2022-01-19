@@ -231,6 +231,10 @@ class Person private constructor(
         }
     }
 
+    fun håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold) {
+        overstyrArbeidsforhold.kontekst(this)
+    }
+
     fun annullert(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetalingAnnullertEvent) {
         observers.forEach { it.annullering(hendelseskontekst, event) }
     }
