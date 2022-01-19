@@ -2,7 +2,6 @@ package no.nav.helse.serde
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped
 import com.fasterxml.jackson.module.kotlin.convertValue
-import no.nav.helse.hendelser.Arbeidsforhold
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering

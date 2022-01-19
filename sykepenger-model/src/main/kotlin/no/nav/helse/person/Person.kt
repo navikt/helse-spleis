@@ -602,7 +602,7 @@ class Person private constructor(
     internal fun harArbeidsgivereMedOverlappendeUtbetaltePerioder(organisasjonsnummer: String, periode: Periode) =
         arbeidsgivere.harArbeidsgivereMedOverlappendeUtbetaltePerioder(organisasjonsnummer, periode)
 
-    internal fun lagreArbeidsforhold(orgnummer: String, arbeidsforhold: List<Arbeidsforhold>, aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate) {
+    internal fun lagreArbeidsforhold(orgnummer: String, arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>, aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate) {
         finnEllerOpprettArbeidsgiver(orgnummer, aktivitetslogg).lagreArbeidsforhold(arbeidsforhold, skjæringstidspunkt)
     }
 

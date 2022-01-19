@@ -45,8 +45,8 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
                 }
             }, emptyList()),
             arbeidsforhold = listOf(
-                Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),
-                Arbeidsforhold(a2.toString(), LocalDate.EPOCH, null)
+                Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),
+                Vilkårsgrunnlag.Arbeidsforhold(a2.toString(), LocalDate.EPOCH, null)
             )
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -95,8 +95,8 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
                 }
             }, emptyList()),
             arbeidsforhold = listOf(
-                Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),
-                Arbeidsforhold(a3.toString(), LocalDate.EPOCH, null)
+                Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),
+                Vilkårsgrunnlag.Arbeidsforhold(a3.toString(), LocalDate.EPOCH, null)
             )
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -148,8 +148,8 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
                 }
             }, emptyList()),
             arbeidsforhold = listOf(
-                Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),
-                Arbeidsforhold(a2.toString(), LocalDate.EPOCH, null)
+                Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),
+                Vilkårsgrunnlag.Arbeidsforhold(a2.toString(), LocalDate.EPOCH, null)
             )
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -201,8 +201,8 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
                 }
             }, emptyList()),
             arbeidsforhold = listOf(
-                Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),
-                Arbeidsforhold(a2.toString(), LocalDate.EPOCH, null)
+                Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),
+                Vilkårsgrunnlag.Arbeidsforhold(a2.toString(), LocalDate.EPOCH, null)
             )
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -245,8 +245,8 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
                 }
             }, emptyList()),
             arbeidsforhold = listOf(
-                Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),
-                Arbeidsforhold(a2.toString(), LocalDate.EPOCH, null)
+                Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),
+                Vilkårsgrunnlag.Arbeidsforhold(a2.toString(), LocalDate.EPOCH, null)
             )
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)

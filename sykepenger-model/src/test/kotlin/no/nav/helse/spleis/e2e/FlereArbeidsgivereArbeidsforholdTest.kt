@@ -39,8 +39,8 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 100.månedlig.repeat(12))
         )
         val arbeidsforhold = listOf(
-            Arbeidsforhold(orgnummer = a1.toString(), ansattFom = LocalDate.EPOCH, ansattTom = null),
-            Arbeidsforhold(orgnummer = a2.toString(), ansattFom = LocalDate.EPOCH, ansattTom = 1.februar)
+            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1.toString(), ansattFom = LocalDate.EPOCH, ansattTom = null),
+            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2.toString(), ansattFom = LocalDate.EPOCH, ansattTom = 1.februar)
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
@@ -72,8 +72,8 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 20000.månedlig.repeat(3))
         )
         val arbeidsforhold = listOf(
-            Arbeidsforhold(orgnummer = a1.toString(), ansattFom = LocalDate.EPOCH, ansattTom = null),
-            Arbeidsforhold(orgnummer = a2.toString(), ansattFom = LocalDate.EPOCH, ansattTom = null)
+            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1.toString(), ansattFom = LocalDate.EPOCH, ansattTom = null),
+            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2.toString(), ansattFom = LocalDate.EPOCH, ansattTom = null)
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
@@ -125,7 +125,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
                 inntekter = listOf(grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 10000.månedlig.repeat(3)))
             , arbeidsforhold = emptyList()
             ),
-            arbeidsforhold = listOf(Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null))
+            arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null))
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -172,7 +172,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         val sammenligningsgrunnlag1 = listOf(
             sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 10000.månedlig.repeat(12))
         )
-        val arbeidsforhold1 = emptyList<Arbeidsforhold>()
+        val arbeidsforhold1 = emptyList<Vilkårsgrunnlag.Arbeidsforhold>()
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
@@ -180,7 +180,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             inntektsvurdering = Inntektsvurdering(sammenligningsgrunnlag1),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter1, arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold1,
-            opptjening = Opptjeningvurdering(listOf(Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null)))
+            opptjening = Opptjeningvurdering(listOf(Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null)))
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -215,8 +215,8 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3))
         )
         val arbeidsforhold = listOf(
-            Arbeidsforhold(orgnummer = a1.toString(), ansattFom = 2.januar(2020), ansattTom = null),
-            Arbeidsforhold(orgnummer = a2.toString(), ansattFom = 1.mai(2019), ansattTom = null)
+            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1.toString(), ansattFom = 2.januar(2020), ansattTom = null),
+            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2.toString(), ansattFom = 1.mai(2019), ansattTom = null)
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
@@ -244,7 +244,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, orgnummer = a1)
 
-        val arbeidsforhold = listOf(Arbeidsforhold(a1.toString(), LocalDate.EPOCH))
+        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), LocalDate.EPOCH))
         val inntekter = listOf(grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3)))
 
         val sammenligningsgrunnlag = inntektperioderForSammenligningsgrunnlag {
@@ -296,7 +296,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 35000.månedlig.repeat(3))
         )
         val arbeidsforholdA1 = listOf(
-            Arbeidsforhold(orgnummer = a1.toString(), ansattFom = LocalDate.EPOCH, ansattTom = null)
+            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1.toString(), ansattFom = LocalDate.EPOCH, ansattTom = null)
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1, inntektshistorikk = emptyList())
         håndterVilkårsgrunnlag(
@@ -326,7 +326,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         )
 
         val arbeidsforholdA2 = listOf(
-            Arbeidsforhold(orgnummer = a2.toString(), ansattFom = LocalDate.EPOCH, ansattTom = null)
+            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2.toString(), ansattFom = LocalDate.EPOCH, ansattTom = null)
         )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
@@ -366,12 +366,12 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         )
         val inntekter1 = listOf(grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 10000.månedlig.repeat(3)))
         val arbeidsforhold1 = listOf(
-            Arbeidsforhold(a1.toString(), LocalDate.EPOCH, 1.januar),
-            Arbeidsforhold(a1.toString(), 1.januar, null), // Skal gjelde
-            Arbeidsforhold(a1.toString(), 28.februar, 1.mars), // Skal gjelde
-            Arbeidsforhold(a1.toString(), 1.mars, 31.mars), // Skal gjelde
-            Arbeidsforhold(a1.toString(), 1.februar, 28.februar),
-            Arbeidsforhold(a1.toString(), 2.mars, 31.mars)
+            Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), LocalDate.EPOCH, 1.januar),
+            Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), 1.januar, null), // Skal gjelde
+            Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), 28.februar, 1.mars), // Skal gjelde
+            Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), 1.mars, 31.mars), // Skal gjelde
+            Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), 1.februar, 28.februar),
+            Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), 2.mars, 31.mars)
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
@@ -395,8 +395,8 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         )
 
         val arbeidsforhold1 = listOf(
-            Arbeidsforhold(a1.toString(), LocalDate.EPOCH),
-            Arbeidsforhold(a2.toString(), LocalDate.EPOCH)
+            Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), LocalDate.EPOCH),
+            Vilkårsgrunnlag.Arbeidsforhold(a2.toString(), LocalDate.EPOCH)
         )
         val inntekter1 = listOf(
             grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 11400.månedlig.repeat(3)),
@@ -430,9 +430,9 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         )
 
         val arbeidsforhold2 = listOf(
-            Arbeidsforhold(a1.toString(), LocalDate.EPOCH, 31.januar),
-            Arbeidsforhold(a1.toString(), 1.mars, null),
-            Arbeidsforhold(a2.toString(), LocalDate.EPOCH, null)
+            Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), LocalDate.EPOCH, 31.januar),
+            Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), 1.mars, null),
+            Vilkårsgrunnlag.Arbeidsforhold(a2.toString(), LocalDate.EPOCH, null)
 
         )
         val inntekter2 = listOf(
@@ -508,8 +508,8 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         )
 
         val arbeidsforhold = listOf(
-            Arbeidsforhold(a1.toString(), LocalDate.EPOCH),
-            Arbeidsforhold(a2.toString(), LocalDate.EPOCH)
+            Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), LocalDate.EPOCH),
+            Vilkårsgrunnlag.Arbeidsforhold(a2.toString(), LocalDate.EPOCH)
         )
         val inntekter = listOf(
             grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3)),
@@ -544,10 +544,10 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         )
 
         val arbeidsforhold = listOf(
-            Arbeidsforhold(a1.toString(), LocalDate.EPOCH),
-            Arbeidsforhold("", LocalDate.EPOCH, 31.januar),
-            Arbeidsforhold("", LocalDate.EPOCH),
-            Arbeidsforhold(a2.toString(), LocalDate.EPOCH)
+            Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), LocalDate.EPOCH),
+            Vilkårsgrunnlag.Arbeidsforhold("", LocalDate.EPOCH, 31.januar),
+            Vilkårsgrunnlag.Arbeidsforhold("", LocalDate.EPOCH),
+            Vilkårsgrunnlag.Arbeidsforhold(a2.toString(), LocalDate.EPOCH)
         )
         val inntekter = listOf(
             grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3)),
@@ -574,7 +574,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             orgnummer = a1,
         )
 
-        val arbeidsforhold = listOf(Arbeidsforhold(a1.toString(), 1.januar))
+        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), 1.januar))
         val inntekter = listOf(grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3)))
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -608,7 +608,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
             arbeidsforhold = emptyList(),
             opptjening = Opptjeningvurdering(
-                listOf(Arbeidsforhold(a1.toString(), 1.januar(2016), null))
+                listOf(Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), 1.januar(2016), null))
             )
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -630,7 +630,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, beregnetInntekt = INNTEKT, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
-        val arbeidsforhold = listOf(Arbeidsforhold(a1.toString(), LocalDate.EPOCH))
+        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), LocalDate.EPOCH))
         val sykepengegrunnlag = listOf(
             grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3)),
             grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 1000.månedlig.repeat(3))

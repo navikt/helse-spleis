@@ -140,8 +140,8 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         )
 
         val arbeidsforhold = listOf(
-            Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),
-            Arbeidsforhold(a2.toString(), LocalDate.EPOCH, null)
+            Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),
+            Vilkårsgrunnlag.Arbeidsforhold(a2.toString(), LocalDate.EPOCH, null)
         )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)

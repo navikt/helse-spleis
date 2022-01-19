@@ -183,7 +183,7 @@ internal fun AbstractEndToEndTest.vilkårsgrunnlag(
     vedtaksperiodeIdInnhenter: IdInnhenter,
     medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
     orgnummer: Organisasjonsnummer = AbstractPersonTest.ORGNUMMER,
-    arbeidsforhold: List<Arbeidsforhold> = listOf(Arbeidsforhold(orgnummer.toString(), 1.januar(2017))),
+    arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold> = listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer.toString(), 1.januar(2017))),
     opptjening: Opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
     inntektsvurdering: Inntektsvurdering,
     inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,

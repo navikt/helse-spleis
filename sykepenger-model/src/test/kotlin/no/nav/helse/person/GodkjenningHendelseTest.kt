@@ -228,14 +228,14 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             opptjeningvurdering = Opptjeningvurdering(
                 listOf(
-                    Arbeidsforhold(
+                    Vilkårsgrunnlag.Arbeidsforhold(
                         ORGNUMMER.toString(),
                         1.januar(2017)
                     )
                 )
             ),
             arbeidsforhold = listOf(
-                Arbeidsforhold(
+                Vilkårsgrunnlag.Arbeidsforhold(
                     ORGNUMMER.toString(),
                     1.januar(2017)
                 )

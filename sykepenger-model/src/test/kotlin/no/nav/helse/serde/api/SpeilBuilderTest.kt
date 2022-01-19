@@ -83,7 +83,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), id = inntektsmeldingId)
 
         håndterYtelser(1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER.toString(), 1.januar(2017), null)))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER.toString(), 1.januar(2017), null)))
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -1245,7 +1245,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
                     a2 inntekt 400.månedlig
                 }
             }, arbeidsforhold = emptyList()),
-            arbeidsforhold = listOf(Arbeidsforhold(a1.toString(), LocalDate.EPOCH), Arbeidsforhold(a2.toString(), LocalDate.EPOCH)),
+            arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), LocalDate.EPOCH), Vilkårsgrunnlag.Arbeidsforhold(a2.toString(), LocalDate.EPOCH)),
             orgnummer = a1
         )
 
@@ -1393,10 +1393,10 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             , arbeidsforhold = emptyList()
             ),
             arbeidsforhold = listOf(
-                Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),
-                Arbeidsforhold(a2.toString(), LocalDate.EPOCH, null),
-                Arbeidsforhold(a3.toString(), LocalDate.EPOCH, null),
-                Arbeidsforhold(a4.toString(), LocalDate.EPOCH, 1.desember(2017))
+                Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),
+                Vilkårsgrunnlag.Arbeidsforhold(a2.toString(), LocalDate.EPOCH, null),
+                Vilkårsgrunnlag.Arbeidsforhold(a3.toString(), LocalDate.EPOCH, null),
+                Vilkårsgrunnlag.Arbeidsforhold(a4.toString(), LocalDate.EPOCH, 1.desember(2017))
             )
         )
         håndterYtelser(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = a1)
@@ -1440,8 +1440,8 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             , arbeidsforhold = emptyList()
             ),
             arbeidsforhold = listOf(
-                Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),
-                Arbeidsforhold(a2.toString(), 25.november(2017), null),
+                Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),
+                Vilkårsgrunnlag.Arbeidsforhold(a2.toString(), 25.november(2017), null),
             )
         )
         håndterYtelser(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = a1)

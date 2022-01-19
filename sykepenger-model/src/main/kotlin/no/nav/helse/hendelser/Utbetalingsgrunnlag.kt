@@ -1,6 +1,6 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.hendelser.Arbeidsforhold.Companion.grupperArbeidsforholdPerOrgnummer
+import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Companion.grupperArbeidsforholdPerOrgnummer
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.Person
 import org.slf4j.LoggerFactory
@@ -14,7 +14,7 @@ class Utbetalingsgrunnlag(
     private val orgnummer: String,
     private val vedtaksperiodeId: UUID,
     private val inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
-    arbeidsforhold: List<Arbeidsforhold>
+    arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>
 ) : ArbeidstakerHendelse(meldingsreferanseId) {
     private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     private val arbeidsforhold = arbeidsforhold.filter { it.orgnummer.isNotBlank() }
@@ -34,7 +34,7 @@ class Utbetalingsgrunnlag(
         if (arbeidsforholdForSkjæringstidspunkt.any { it.harArbeidetMindreEnnTreMåneder(skjæringstidspunkt) }) {
             sikkerlogg.info("Person har et relevant arbeidsforhold som har vart mindre enn 3 måneder (8-28b) - fødselsnummer: $fødselsnummer")
         }
-        person.brukOuijaBrettForÅKommunisereMedPotensielleSpøkelser(arbeidsforholdForSkjæringstidspunkt.map(Arbeidsforhold::orgnummer), skjæringstidspunkt)
+        person.brukOuijaBrettForÅKommunisereMedPotensielleSpøkelser(arbeidsforholdForSkjæringstidspunkt.map(Vilkårsgrunnlag.Arbeidsforhold::orgnummer), skjæringstidspunkt)
         person.loggUkjenteOrgnummere(arbeidsforhold.map { it.orgnummer })
     }
 

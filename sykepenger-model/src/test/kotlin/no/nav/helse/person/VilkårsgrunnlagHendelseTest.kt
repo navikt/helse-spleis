@@ -145,7 +145,7 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
     }
 
     private fun ansattSidenStart2017() =
-        listOf(Arbeidsforhold(ORGNUMMER.toString(), 1.januar(2017)))
+        listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER.toString(), 1.januar(2017)))
 
 
     private fun tolvMånederMedInntekt(beregnetInntekt: Inntekt) = inntektperioderForSammenligningsgrunnlag {
@@ -158,7 +158,7 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
         beregnetInntekt: Inntekt = 1000.månedlig,
         inntekter: List<ArbeidsgiverInntekt>,
         inntekterForSykepengegrunnlag: List<ArbeidsgiverInntekt> = emptyList(),
-        arbeidsforhold: List<Arbeidsforhold>
+        arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>
     ) {
         person.håndter(sykmelding())
         person.håndter(søknad())
@@ -221,7 +221,7 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
     private fun vilkårsgrunnlag(
         inntekter: List<ArbeidsgiverInntekt>,
         inntekterForSykepengegrunnlag: List<ArbeidsgiverInntekt>,
-        arbeidsforhold: List<Arbeidsforhold>
+        arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>
     ) =
         Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),

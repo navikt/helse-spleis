@@ -75,7 +75,7 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
                     grunnlag(a2, 1.januar(2021), 1000.månedlig.repeat(3))
                 )
             , arbeidsforhold = emptyList()),
-            arbeidsforhold = listOf(Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null), Arbeidsforhold(a2.toString(), LocalDate.EPOCH, null))
+            arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null), Vilkårsgrunnlag.Arbeidsforhold(a2.toString(), LocalDate.EPOCH, null))
         )
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -128,7 +128,7 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
                     grunnlag(a2, 1.januar(2021), 1000.månedlig.repeat(3))
                 )
             , arbeidsforhold = emptyList()),
-            arbeidsforhold = listOf(Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null), Arbeidsforhold(a2.toString(), LocalDate.EPOCH, null))
+            arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null), Vilkårsgrunnlag.Arbeidsforhold(a2.toString(), LocalDate.EPOCH, null))
         )
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)

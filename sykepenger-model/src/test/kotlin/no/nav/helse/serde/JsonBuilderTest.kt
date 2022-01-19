@@ -245,7 +245,7 @@ class JsonBuilderTest {
             håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
             håndter(vilkårsgrunnlag(
                 vedtaksperiodeId = vedtaksperiodeId,
-                arbeidsforhold = listOf(Arbeidsforhold(orgnummer.toString(), 1.januar(2017)), Arbeidsforhold("987654326", 1.desember(2017))))
+                arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer.toString(), 1.januar(2017)), Vilkårsgrunnlag.Arbeidsforhold("987654326", 1.desember(2017))))
             )
             håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
             håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
@@ -485,8 +485,8 @@ class JsonBuilderTest {
                         }
                     },
                     arbeidsforhold = listOf(
-                        Arbeidsforhold(orgnummer.toString(), LocalDate.EPOCH, null),
-                        Arbeidsforhold("654321987", LocalDate.EPOCH, null)
+                        Vilkårsgrunnlag.Arbeidsforhold(orgnummer.toString(), LocalDate.EPOCH, null),
+                        Vilkårsgrunnlag.Arbeidsforhold("654321987", LocalDate.EPOCH, null)
                     )
                 )
             )
@@ -624,7 +624,7 @@ class JsonBuilderTest {
                 orgnummer inntekt 31000.månedlig
             }
         },
-        arbeidsforhold: List<Arbeidsforhold> = listOf(Arbeidsforhold(orgnummer.toString(), 1.januar(2017)))
+        arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold> = listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer.toString(), 1.januar(2017)))
     ) = Vilkårsgrunnlag(
         meldingsreferanseId = UUID.randomUUID(),
         vedtaksperiodeId = vedtaksperiodeId,

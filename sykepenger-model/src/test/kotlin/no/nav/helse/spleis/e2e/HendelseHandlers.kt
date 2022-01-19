@@ -387,7 +387,7 @@ internal fun AbstractEndToEndTest.håndterVilkårsgrunnlag(
             })
         )
     , arbeidsforhold = emptyList()),
-    arbeidsforhold: List<Arbeidsforhold> = finnArbeidsgivere().map { Arbeidsforhold(it.toString(), LocalDate.EPOCH, null) },
+    arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold> = finnArbeidsgivere().map { Vilkårsgrunnlag.Arbeidsforhold(it.toString(), LocalDate.EPOCH, null) },
     opptjening: Opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
     fnr: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018
 ) {

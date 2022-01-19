@@ -34,7 +34,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterYtelser()
-        val arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER.toString(), 4.desember(2017), 31.januar))
+        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER.toString(), 4.desember(2017), 31.januar))
         håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold)
 
         assertOppfylt(
@@ -63,7 +63,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterYtelser()
-        val arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER.toString(), 5.desember(2017), 31.januar))
+        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER.toString(), 5.desember(2017), 31.januar))
         håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold)
 
         assertIkkeOppfylt(
@@ -228,7 +228,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 46817.årlig)
         håndterYtelser()
-        val arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER.toString(), 5.desember(2017), 31.januar))
+        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER.toString(), 5.desember(2017), 31.januar))
         håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold)
 
         assertOppfylt(
@@ -252,7 +252,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 46816.årlig)
         håndterYtelser()
-        val arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER.toString(), 5.desember(2017), 31.januar))
+        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER.toString(), 5.desember(2017), 31.januar))
         håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold)
 
         assertIkkeOppfylt(
@@ -846,7 +846,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), fnr = GAMMEL)
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 187268.årlig, fnr = GAMMEL)
         håndterYtelser(fnr = GAMMEL)
-        val arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER.toString(), 5.desember(2017), 31.januar))
+        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER.toString(), 5.desember(2017), 31.januar))
         håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold, fnr = GAMMEL)
 
         assertOppfylt(
@@ -872,7 +872,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), fnr = GAMMEL)
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 187267.årlig, fnr = GAMMEL)
         håndterYtelser(fnr = GAMMEL)
-        val arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER.toString(), 5.desember(2017), 31.januar))
+        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER.toString(), 5.desember(2017), 31.januar))
         håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold, fnr = GAMMEL)
 
         assertIkkeOppfylt(

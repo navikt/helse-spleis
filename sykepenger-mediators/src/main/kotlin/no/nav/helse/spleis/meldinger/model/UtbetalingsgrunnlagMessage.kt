@@ -1,9 +1,9 @@
 package no.nav.helse.spleis.meldinger.model
 
-import no.nav.helse.hendelser.Arbeidsforhold
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Utbetalingsgrunnlag
+import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsforholdV2
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlag
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -41,7 +41,7 @@ internal class UtbetalingsgrunnlagMessage(packet: JsonMessage) : BehovMessage(pa
 
     private val arbeidsforhold = packet["@løsning.${ArbeidsforholdV2.name}"]
         .map {
-            Arbeidsforhold(
+            Vilkårsgrunnlag.Arbeidsforhold(
                 orgnummer = it["orgnummer"].asText(),
                 ansattFom = it["ansattFom"].asLocalDate(),
                 ansattTom = it["ansattTom"].asOptionalLocalDate()

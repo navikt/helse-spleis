@@ -892,7 +892,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
     @Test
     fun `opptjening ikke ok avviser ikke dager før gjeldende skjæringstidspunkt`() {
-        val arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER.toString(), 1.januar(2017), 31.januar))
+        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER.toString(), 1.januar(2017), 31.januar))
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(
@@ -988,7 +988,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
     @Test
     fun `bevarer avviste dager fra tidligere periode og avviser dager fra skjæringstidspunkt ved opptjening ok`() {
-        val arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER.toString(), 31.desember(2017), 31.januar))
+        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER.toString(), 31.desember(2017), 31.januar))
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(

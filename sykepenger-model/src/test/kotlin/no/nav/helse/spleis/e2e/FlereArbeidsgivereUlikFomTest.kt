@@ -849,8 +849,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             )
         )
         val arbeidsforhold = listOf(
-            Arbeidsforhold(orgnummer = a1.toString(), ansattFom = LocalDate.EPOCH, ansattTom = null),
-            Arbeidsforhold(orgnummer = a2.toString(), ansattFom = LocalDate.EPOCH, ansattTom = null)
+            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1.toString(), ansattFom = LocalDate.EPOCH, ansattTom = null),
+            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2.toString(), ansattFom = LocalDate.EPOCH, ansattTom = null)
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
@@ -905,8 +905,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             )
         )
         val arbeidsforhold = listOf(
-            Arbeidsforhold(orgnummer = a1.toString(), ansattFom = LocalDate.EPOCH, ansattTom = null),
-            Arbeidsforhold(orgnummer = a2.toString(), ansattFom = LocalDate.EPOCH, ansattTom = null)
+            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1.toString(), ansattFom = LocalDate.EPOCH, ansattTom = null),
+            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2.toString(), ansattFom = LocalDate.EPOCH, ansattTom = null)
         )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)

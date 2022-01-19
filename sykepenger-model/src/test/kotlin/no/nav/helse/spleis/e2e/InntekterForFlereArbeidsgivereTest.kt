@@ -66,10 +66,10 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
                 }
             },
             arbeidsforhold = listOf(
-                Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),
-                Arbeidsforhold(a2.toString(), LocalDate.EPOCH, null),
-                Arbeidsforhold(a3.toString(), LocalDate.EPOCH, null),
-                Arbeidsforhold(a4.toString(), LocalDate.EPOCH, null)
+                Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),
+                Vilkårsgrunnlag.Arbeidsforhold(a2.toString(), LocalDate.EPOCH, null),
+                Vilkårsgrunnlag.Arbeidsforhold(a3.toString(), LocalDate.EPOCH, null),
+                Vilkårsgrunnlag.Arbeidsforhold(a4.toString(), LocalDate.EPOCH, null)
             )
         ).håndter(Person::håndter)
 
@@ -96,9 +96,9 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             }
         }
         val arbeidsforhold = listOf(
-            Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),
-            Arbeidsforhold(a3.toString(), LocalDate.EPOCH, null),
-            Arbeidsforhold(a4.toString(), LocalDate.EPOCH, null)
+            Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),
+            Vilkårsgrunnlag.Arbeidsforhold(a3.toString(), LocalDate.EPOCH, null),
+            Vilkårsgrunnlag.Arbeidsforhold(a4.toString(), LocalDate.EPOCH, null)
         )
         nyPeriode(1.januar til 31.januar, a1, INNTEKT)
 
@@ -137,8 +137,8 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         }
 
         val arbeidsforhold = listOf(
-            Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),
-            Arbeidsforhold(a2.toString(), LocalDate.EPOCH, null)
+            Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),
+            Vilkårsgrunnlag.Arbeidsforhold(a2.toString(), LocalDate.EPOCH, null)
         )
         nyPeriode(1.januar til 31.januar, a1, 25000.månedlig)
 
@@ -189,7 +189,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
                 a1 inntekt 15000
             }
         }
-        val arbeidsforhold = listOf(Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null))
+        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null))
         nyPeriode(1.januar til 31.januar, a1, 25000.månedlig)
         vilkårsgrunnlag(
             1.vedtaksperiode,
@@ -220,8 +220,8 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             }
         }
         val arbeidsforhold = listOf(
-            Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),
-            Arbeidsforhold(a2.toString(), LocalDate.EPOCH, null)
+            Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),
+            Vilkårsgrunnlag.Arbeidsforhold(a2.toString(), LocalDate.EPOCH, null)
         )
         nyPeriode(1.januar til 31.januar, a1, 25000.månedlig)
         vilkårsgrunnlag(
@@ -255,8 +255,8 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             }
         }
         val arbeidsforhold = listOf(
-            Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),
-            Arbeidsforhold(a2.toString(), 1.november, null)
+            Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),
+            Vilkårsgrunnlag.Arbeidsforhold(a2.toString(), 1.november, null)
         )
         nyPeriode(1.januar til 31.januar, a1, 25000.månedlig)
         vilkårsgrunnlag(
@@ -345,7 +345,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             )
         , arbeidsforhold = emptyList()
         )
-        val arbeidsforhold = listOf(Arbeidsforhold(a1.toString(), LocalDate.EPOCH), Arbeidsforhold(a2.toString(), LocalDate.EPOCH))
+        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), LocalDate.EPOCH), Vilkårsgrunnlag.Arbeidsforhold(a2.toString(), LocalDate.EPOCH))
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
@@ -412,7 +412,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
 
     private fun vilkårsgrunnlag(
         vedtaksperiodeIdInnhenter: IdInnhenter,
-        arbeidsforhold: List<Arbeidsforhold>? = null,
+        arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>? = null,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
         orgnummer: Organisasjonsnummer = ORGNUMMER,
         inntekter: List<ArbeidsgiverInntekt>,
@@ -434,11 +434,11 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
             opptjeningvurdering = Opptjeningvurdering(
                 arbeidsforhold ?: listOf(
-                    Arbeidsforhold(orgnummer.toString(), 1.januar(2017))
+                    Vilkårsgrunnlag.Arbeidsforhold(orgnummer.toString(), 1.januar(2017))
                 )
             ),
             arbeidsforhold = arbeidsforhold ?: listOf(
-                Arbeidsforhold(orgnummer.toString(), 1.januar(2017))
+                Vilkårsgrunnlag.Arbeidsforhold(orgnummer.toString(), 1.januar(2017))
             )
         ).apply {
             hendelselogg = this

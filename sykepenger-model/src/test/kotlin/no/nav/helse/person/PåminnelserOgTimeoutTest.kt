@@ -294,7 +294,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             opptjeningvurdering = Opptjeningvurdering(
                 listOf(
-                    Arbeidsforhold(
+                    Vilkårsgrunnlag.Arbeidsforhold(
                         ORGNUMMER.toString(),
                         1.januar(2017)
                     )
@@ -308,7 +308,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
                 }, arbeidsforhold = emptyList()
             ),
             arbeidsforhold = listOf(
-                Arbeidsforhold(
+                Vilkårsgrunnlag.Arbeidsforhold(
                     ORGNUMMER.toString(),
                     1.januar(2017)
                 )

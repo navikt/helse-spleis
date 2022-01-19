@@ -963,7 +963,7 @@ internal class Arbeidsgiver private constructor(
         )
     }
 
-    internal fun lagreArbeidsforhold(arbeidsforhold: List<Arbeidsforhold>, skjæringstidspunkt: LocalDate) {
+    internal fun lagreArbeidsforhold(arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>, skjæringstidspunkt: LocalDate) {
         arbeidsforholdhistorikk.lagre(
             arbeidsforhold
                 .filter { it.erRelevant(this) }

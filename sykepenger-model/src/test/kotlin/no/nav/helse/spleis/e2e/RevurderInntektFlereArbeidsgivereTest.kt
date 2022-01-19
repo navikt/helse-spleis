@@ -38,8 +38,8 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
                 ), arbeidsforhold = emptyList()
             ),
             arbeidsforhold = listOf(
-                Arbeidsforhold(AG1.toString(), LocalDate.EPOCH, null),
-                Arbeidsforhold(AG2.toString(), LocalDate.EPOCH, null)
+                Vilkårsgrunnlag.Arbeidsforhold(AG1.toString(), LocalDate.EPOCH, null),
+                Vilkårsgrunnlag.Arbeidsforhold(AG2.toString(), LocalDate.EPOCH, null)
             )
         )
         håndterYtelser(orgnummer = AG1)

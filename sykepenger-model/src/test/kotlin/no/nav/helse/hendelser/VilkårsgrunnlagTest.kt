@@ -66,7 +66,7 @@ internal class VilkårsgrunnlagTest {
     @Test
     fun `27 dager opptjening fører til warning`() {
         val vilkårsgrunnlag = vilkårsgrunnlag(
-            arbeidsforhold = listOf(Arbeidsforhold(orgnummer.toString(), 5.desember(2017)))
+            arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer.toString(), 5.desember(2017)))
         )
         person.håndter(vilkårsgrunnlag)
         assertGrunnlagsdata(INNTEKT, Prosent.ratio(0.0), 27, false)
@@ -77,7 +77,7 @@ internal class VilkårsgrunnlagTest {
     @Test
     fun `arbeidsforhold nyere enn første fraværsdag`() {
         val vilkårsgrunnlag = vilkårsgrunnlag(
-            arbeidsforhold = listOf(Arbeidsforhold(orgnummer.toString(), fangeSkjæringstidspunkt(person).plusDays(1)))
+            arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer.toString(), fangeSkjæringstidspunkt(person).plusDays(1)))
         )
         person.håndter(vilkårsgrunnlag)
         assertGrunnlagsdata(INNTEKT, Prosent.ratio(0.0), 0, false)
@@ -88,7 +88,7 @@ internal class VilkårsgrunnlagTest {
     @Test
     fun `28 dager opptjening fører til OK opptjening`() {
         val vilkårsgrunnlag = vilkårsgrunnlag(
-            arbeidsforhold = listOf(Arbeidsforhold(orgnummer.toString(), 4.desember(2017)))
+            arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer.toString(), 4.desember(2017)))
         )
         person.håndter(vilkårsgrunnlag)
         assertGrunnlagsdata(INNTEKT, Prosent.ratio(0.0), 28, true)
@@ -99,7 +99,7 @@ internal class VilkårsgrunnlagTest {
     @Test
     fun `arbeidsforhold kun for andre orgnr gir samme antall opptjente dager`() {
         val vilkårsgrunnlag = vilkårsgrunnlag(
-            arbeidsforhold = listOf(Arbeidsforhold("eitAnnaOrgNummer", 4.desember(2017)))
+            arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold("eitAnnaOrgNummer", 4.desember(2017)))
         )
         person.håndter(vilkårsgrunnlag)
         assertGrunnlagsdata(INNTEKT, Prosent.ratio(0.0), 28, true)
@@ -121,8 +121,8 @@ internal class VilkårsgrunnlagTest {
     @Test
     fun `Kan opptjene arbeidsdager over flere arbeidsgivere`() {
         val vilkårsgrunnlag = vilkårsgrunnlag(arbeidsforhold = listOf(
-            Arbeidsforhold("ORGNR1", 1.januar, 14.januar),
-            Arbeidsforhold("ORGNR2", 15.januar, null)
+            Vilkårsgrunnlag.Arbeidsforhold("ORGNR1", 1.januar, 14.januar),
+            Vilkårsgrunnlag.Arbeidsforhold("ORGNR2", 15.januar, null)
         ))
         vilkårsgrunnlag.valider(
             grunnlagForSykepengegrunnlag = sykepengegrunnlag(),
@@ -212,8 +212,8 @@ internal class VilkårsgrunnlagTest {
 
             }
         },
-        arbeidsforhold: List<Arbeidsforhold> = listOf(
-            Arbeidsforhold(
+        arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold> = listOf(
+            Vilkårsgrunnlag.Arbeidsforhold(
                 orgnummer.toString(),
                 4.desember(2017)
             )

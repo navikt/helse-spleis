@@ -209,7 +209,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             opptjeningvurdering = Opptjeningvurdering(
                 listOf(
-                    Arbeidsforhold(
+                    Vilkårsgrunnlag.Arbeidsforhold(
                         ORGNUMMER.toString(),
                         1.januar(2017)
                     )
@@ -223,7 +223,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
                 }, arbeidsforhold = emptyList()
             ),
             arbeidsforhold = listOf(
-                Arbeidsforhold(
+                Vilkårsgrunnlag.Arbeidsforhold(
                     ORGNUMMER.toString(),
                     1.januar(2017)
                 )

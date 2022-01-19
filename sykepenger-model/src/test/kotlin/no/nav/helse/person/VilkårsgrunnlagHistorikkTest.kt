@@ -27,7 +27,7 @@ internal class VilkårsgrunnlagHistorikkTest {
     private val inspektør get() = Vilkårgrunnlagsinspektør(historikk)
 
     companion object {
-        private val arbeidsforhold = listOf(Arbeidsforhold("123456789", 1.desember(2017)))
+        private val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold("123456789", 1.desember(2017)))
     }
 
     @Test
