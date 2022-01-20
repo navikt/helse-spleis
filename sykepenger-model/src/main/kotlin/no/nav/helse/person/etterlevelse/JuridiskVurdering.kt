@@ -21,12 +21,12 @@ abstract class JuridiskVurdering {
     //TODO: Ta stilling til om disse skal types sterkt for å ungå problematikk med equals på komplekse datastrukturer
     abstract val input: Map<String, Any>
     abstract val output: Map<String, Any>
-    abstract val kontekster: Map<String, String>
+    protected abstract val kontekster: Map<String, String>
 
     internal fun accept(visitor: JuridiskVurderingVisitor) {
-        visitor.preVisitVurdering(oppfylt, versjon, paragraf, ledd, punktum, bokstaver, input, output)
+        visitor.preVisitVurdering(oppfylt, versjon, paragraf, ledd, punktum, bokstaver, input, output, kontekster)
         acceptSpesifikk(visitor)
-        visitor.postVisitVurdering(oppfylt, versjon, paragraf, ledd, punktum, bokstaver, input, output)
+        visitor.postVisitVurdering(oppfylt, versjon, paragraf, ledd, punktum, bokstaver, input, output, kontekster)
     }
 
     abstract fun acceptSpesifikk(visitor: JuridiskVurderingVisitor)

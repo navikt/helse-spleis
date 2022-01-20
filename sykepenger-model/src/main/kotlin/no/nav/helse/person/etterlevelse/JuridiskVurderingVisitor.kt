@@ -15,7 +15,8 @@ interface JuridiskVurderingVisitor {
         punktum: List<Punktum>,
         bokstaver: List<Bokstav>,
         input: Map<String, Any>,
-        output: Map<String, Any>
+        output: Map<String, Any>,
+        kontekster: Map<String, String>
     ) {}
 
     fun visitGrupperbarVurdering(fom: LocalDate, tom: LocalDate) {}
@@ -29,6 +30,7 @@ interface JuridiskVurderingVisitor {
         punktum: List<Punktum>,
         bokstaver: List<Bokstav>,
         input: Map<String, Any>,
-        output: Map<String, Any>
+        output: Map<String, Any>,
+        kontekster: Map<String, String>
     ) {}
 }
