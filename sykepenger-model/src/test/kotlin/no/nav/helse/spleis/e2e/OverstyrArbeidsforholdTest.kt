@@ -82,4 +82,39 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         assertEquals(listOf(a1.toString(), a2.toString()), person.orgnummereMedRelevanteArbeidsforhold(skjæringstidspunkt))
         assertError(2.vedtaksperiode, "Kan ikke overstyre arbeidsforhold for en pågående behandling der én eller flere perioder er behandlet ferdig", a1)
     }
+
+    @Test
+    fun `godtar overstyring uavhengig av rekkefølgen på arbeidsgivere`() {
+        nyttVedtak(1.januar(2017), 31.januar(2017), orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a1)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),
+                Vilkårsgrunnlag.Arbeidsforhold(a2.toString(), LocalDate.EPOCH, null),
+                Vilkårsgrunnlag.Arbeidsforhold(a3.toString(), 1.desember(2017), null)
+            ),
+            inntektsvurdering = Inntektsvurdering(listOf(sammenligningsgrunnlag(a1, 1.januar, INNTEKT.repeat(12)),
+                sammenligningsgrunnlag(a2, 1.januar, INNTEKT.repeat(12))
+            )),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                inntekter = listOf(
+                    grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
+                    grunnlag(a2, 1.januar, INNTEKT.repeat(3))
+                ),
+                arbeidsforhold = emptyList()
+            ),
+            orgnummer = a2
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
+        håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a3, false)))
+    }
 }
