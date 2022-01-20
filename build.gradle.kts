@@ -44,6 +44,7 @@ allprojects {
         testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
         testImplementation("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")
         testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
+        testImplementation("com.networknt:json-schema-validator:1.0.65")
     }
 
     tasks {
