@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Inntektshistorikk
+import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.april
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
@@ -1382,5 +1383,17 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         val a4Linje = inspektør(a4).utbetalinger.last().inspektør.arbeidsgiverOppdrag.last()
         assertEquals(569, a4Linje.beløp)
+    }
+
+    @ForventetFeil("https://trello.com/c/vVcsM2tp")
+    @Test
+    fun `alle arbeidsgivere burde hoppe inn i AVVENTER_ARBEIDSGIVERE dersom de har samme skjæringstidspunkt men ikke overlapper`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a3)
+
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a3)
+        håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a3)
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_ARBEIDSGIVERE, orgnummer = a3)
     }
 }
