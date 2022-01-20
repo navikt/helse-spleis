@@ -358,12 +358,9 @@ internal class Arbeidsgiver private constructor(
         inntektsmelding.kontekst(this)
         inntektsmelding.cacheRefusjon(this)
         inntektsmelding.cacheRefusjon(refusjonshistorikk)
-        if (vedtaksperiodeId != null) {
-            if (!énHarHåndtert(inntektsmelding) { håndter(inntektsmelding, vedtaksperiodeId) })
-                return inntektsmelding.info("Vedtaksperiode overlapper ikke med replayet Inntektsmelding")
-            inntektsmelding.info("Replayer inntektsmelding til påfølgende perioder som overlapper.")
-        }
-        if (!noenHarHåndtert(inntektsmelding, Vedtaksperiode::håndter) && vedtaksperiodeId == null) {
+        if (vedtaksperiodeId != null) inntektsmelding.info("Replayer inntektsmelding til påfølgende perioder som overlapper.")
+        if (!noenHarHåndtert(inntektsmelding) { håndter(inntektsmelding, vedtaksperiodeId, vedtaksperioder.toList()) }) {
+            if (vedtaksperiodeId != null) return inntektsmelding.info("Vedtaksperiode overlapper ikke med replayet Inntektsmelding")
             inntektsmelding.error("Forventet ikke inntektsmelding. Har nok ikke mottatt sykmelding")
             if (ForkastetVedtaksperiode.sjekkOmOverlapperMedForkastet(forkastede, inntektsmelding)) {
                 person.opprettOppgave(

@@ -963,7 +963,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertEquals(8.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
     }
 
-    @ForventetFeil("https://trello.com/c/tEKdR2Co")
     @Test
     fun `Håndterer ikke inntektsmelding to ganger ved replay - hvor vi har en tidligere periode og gap`() {
         // Ved en tidligere periode resettes trimming av inntektsmelding og vi ender med å håndtere samme inntektsmelding flere ganger i en vedtaksperiode
@@ -971,13 +970,17 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         val inntektsmeldingId = håndterInntektsmelding(listOf(10.januar til 25.januar), førsteFraværsdag = 10.januar)
         håndterSykmelding(Sykmeldingsperiode(10.januar, 31.januar, 100.prosent))
+        assertNoWarnings(2.vedtaksperiode)
         håndterSøknad(Sykdom(10.januar, 31.januar, 100.prosent))
+        assertNoWarnings(2.vedtaksperiode)
         håndterInntektsmeldingReplay(inntektsmeldingId, 2.vedtaksperiode.id(ORGNUMMER))
+        assertNoWarnings(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
+        assertNoWarnings(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
+        assertNoWarnings(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
-
         assertNoWarnings(2.vedtaksperiode)
     }
 
@@ -1627,7 +1630,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertEquals(17.januar til 31.mars, inspektør.utbetalinger.last().periode)
     }
 
-    @ForventetFeil("https://trello.com/c/FXcJ4Fhc")
     @Test
     fun `vedtaksperiode i AVSLUTTET_UTEN_UTBETALING burde utvides ved replay av inntektsmelding`() {
         val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)

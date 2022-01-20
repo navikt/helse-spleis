@@ -152,15 +152,15 @@ internal class Vedtaksperiode private constructor(
         tilstand.håndter(this, søknad)
     }
 
-    internal fun håndter(inntektsmelding: Inntektsmelding, other: UUID? = null): Boolean {
-        val overlapper = overlapperMedSammenhengende(inntektsmelding) && (other == null || other == id)
+    internal fun håndter(inntektsmelding: Inntektsmelding, other: UUID?, vedtaksperioder: List<Vedtaksperiode>): Boolean {
+        val overlapper = overlapperMedSammenhengende(inntektsmelding, other, vedtaksperioder)
         return overlapper.also {
             if (it) hendelseIder.add(inntektsmelding.meldingsreferanseId())
             if (arbeidsgiver.harRefusjonOpphørt(periode.endInclusive) && !erAvsluttet()) {
                 kontekst(inntektsmelding)
                 inntektsmelding.info("Ville tidligere blitt kastet ut på grunn av refusjon: Refusjon opphører i perioden")
             }
-            if (!it) return@also inntektsmelding.trimLeft(periode.endInclusive) // TODO("https://trello.com/c/tEKdR2Co")
+            if (!it) return@also inntektsmelding.trimLeft(periode.endInclusive)
             kontekst(inntektsmelding)
             tilstand.håndter(this, inntektsmelding)
         }
@@ -388,8 +388,17 @@ internal class Vedtaksperiode private constructor(
 
     private fun overlapperMed(hendelse: SykdomstidslinjeHendelse) = hendelse.erRelevant(this.periode)
 
-    private fun overlapperMedSammenhengende(inntektsmelding: Inntektsmelding): Boolean {
-        return inntektsmelding.erRelevant(arbeidsgiver.finnSammenhengendePeriode(skjæringstidspunkt).periode())
+    private fun overlapperMedSammenhengende(inntektsmelding: Inntektsmelding, other: UUID?, vedtaksperioder: List<Vedtaksperiode>): Boolean {
+        val perioder = arbeidsgiver.finnSammenhengendePeriode(skjæringstidspunkt)
+        return inntektsmelding.erRelevant(perioder.periode()) && relevantForReplay(other, perioder, vedtaksperioder)
+    }
+
+    // IM som replayes skal kunne påvirke alle perioder som er sammenhengende med replay-perioden, men også alle evt. påfølgende perioder.
+    // Dvs. IM skal -ikke- påvirke perioder _før_ replay-perioden som ikke er i sammenheng med vedtaksperioden som ba om replay
+    private fun relevantForReplay(other: UUID?, sammenhengendePerioder: List<Vedtaksperiode>, vedtaksperioder: List<Vedtaksperiode>): Boolean {
+        if (other == null) return true // ingen replay
+        if (sammenhengendePerioder.any { it.id == other }) return true // perioden som ba om replay er en del av de sammenhengende periodene som overlapper med IM (som vedtaksperioden er en del av)
+        return this > vedtaksperioder.first { it.id == other } // vedtaksperioden er _etter_ den perioden som ba om replay
     }
 
     private fun tilstand(
