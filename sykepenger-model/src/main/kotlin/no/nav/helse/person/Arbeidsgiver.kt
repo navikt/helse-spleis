@@ -80,13 +80,20 @@ internal class Arbeidsgiver private constructor(
 
     internal companion object {
 
-        internal fun List<Arbeidsgiver>.kanOverstyres(hendelse: OverstyrTidslinje): Boolean {
+        internal fun List<Arbeidsgiver>.kanOverstyreTidslinje(hendelse: OverstyrTidslinje): Boolean {
             val overlappendePerioder = flatMap { it.overlappendePerioder(hendelse) }
             return when {
                 overlappendePerioder.any(KLAR_TIL_BEHANDLING) -> overlappendePerioder.all(KLAR_TIL_BEHANDLING)
                 overlappendePerioder.any(REVURDERING_IGANGSATT) -> overlappendePerioder.all(REVURDERING_IGANGSATT)
                 else -> true
             }
+        }
+
+        internal fun List<Arbeidsgiver>.håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold): Boolean {
+            forEach { arbeidsgiver ->
+                if (arbeidsgiver.håndter(overstyrArbeidsforhold)) return true
+            }
+            return false
         }
 
         internal fun Iterable<Arbeidsgiver>.nåværendeVedtaksperioder(filter: VedtaksperiodeFilter) =
@@ -664,6 +671,16 @@ internal class Arbeidsgiver private constructor(
         finalize(hendelse)
     }
 
+    internal fun håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold): Boolean {
+        overstyrArbeidsforhold.kontekst(this)
+        vedtaksperioder.forEach { vedtaksperiode ->
+            if (vedtaksperiode.håndter(overstyrArbeidsforhold)) {
+                return true
+            }
+        }
+        return false
+    }
+
     internal fun førstePeriodeTilRevurdering(hendelse: PersonHendelse) = vedtaksperioder
         .filter(AVVENTER_GODKJENT_REVURDERING)
         .minOrNull()
@@ -738,6 +755,10 @@ internal class Arbeidsgiver private constructor(
 
     internal fun addInntekt(hendelse: OverstyrInntekt) {
         hendelse.addInntekt(inntektshistorikk)
+    }
+
+    internal fun lagreOverstyrArbeidsforhold(skjæringstidspunkt: LocalDate, overstyring: OverstyrArbeidsforhold.ArbeidsforholdOverstyrt) {
+        overstyring.lagre(skjæringstidspunkt, arbeidsforholdhistorikk)
     }
 
     internal fun lagreSykepengegrunnlagFraInfotrygd(inntektsopplysninger: List<Inntektsopplysning>, hendelseId: UUID) {

@@ -12,7 +12,8 @@ import no.nav.helse.person.Arbeidsgiver.Companion.harArbeidsgivereMedOverlappend
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntekt
 import no.nav.helse.person.Arbeidsgiver.Companion.harUtbetaltPeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.harVedtaksperiodeFor
-import no.nav.helse.person.Arbeidsgiver.Companion.kanOverstyres
+import no.nav.helse.person.Arbeidsgiver.Companion.håndter
+import no.nav.helse.person.Arbeidsgiver.Companion.kanOverstyreTidslinje
 import no.nav.helse.person.Arbeidsgiver.Companion.minstEttSykepengegrunnlagSomIkkeKommerFraSkatt
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
 import no.nav.helse.person.Vedtaksperiode.Companion.ALLE
@@ -212,7 +213,7 @@ class Person private constructor(
 
     fun håndter(hendelse: OverstyrTidslinje) {
         hendelse.kontekst(this)
-        if (arbeidsgivere.kanOverstyres(hendelse)) {
+        if (arbeidsgivere.kanOverstyreTidslinje(hendelse)) {
             finnArbeidsgiver(hendelse).håndter(hendelse)
         } else {
             hendelse.error("Kan ikke overstyre en pågående behandling der én eller flere perioder er behandlet ferdig")
@@ -233,6 +234,8 @@ class Person private constructor(
 
     fun håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold) {
         overstyrArbeidsforhold.kontekst(this)
+        arbeidsgivere.håndter(overstyrArbeidsforhold)
+        // TODO: Error hvis ingen håndterer
     }
 
     fun annullert(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetalingAnnullertEvent) {
@@ -470,6 +473,12 @@ class Person private constructor(
     internal fun lagreVilkårsgrunnlagFraInfotrygd(skjæringstidspunkt: LocalDate, periode: Periode, hendelse: IAktivitetslogg) {
         infotrygdhistorikk.lagreVilkårsgrunnlag(skjæringstidspunkt, vilkårsgrunnlagHistorikk, ::kanOverskriveVilkårsgrunnlag) {
             beregnSykepengegrunnlagForInfotrygd(it, periode.start, hendelse)
+        }
+    }
+
+    internal fun lagreOverstyrArbeidsforhold(overstyrArbeidsforhold: OverstyrArbeidsforhold) {
+        arbeidsgivere.forEach { arbeidsgiver ->
+            overstyrArbeidsforhold.lagre(arbeidsgiver)
         }
     }
 

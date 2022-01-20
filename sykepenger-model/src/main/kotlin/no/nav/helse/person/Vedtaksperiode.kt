@@ -237,6 +237,13 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
+    internal fun håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold): Boolean {
+        if (!overstyrArbeidsforhold.erRelevant(skjæringstidspunkt)) return false
+        kontekst(overstyrArbeidsforhold)
+        hendelseIder.add(overstyrArbeidsforhold.meldingsreferanseId())
+        return tilstand.håndter(this, overstyrArbeidsforhold)
+    }
+
     internal fun håndter(hendelse: OverstyrInntekt) {
         kontekst(hendelse)
         if (forlengelseFraInfotrygd == JA) {
@@ -994,6 +1001,13 @@ internal class Vedtaksperiode private constructor(
             hendelse: OverstyrTidslinje
         ) {
             hendelse.error("Forventet ikke overstyring fra saksbehandler i %s", type.name)
+        }
+
+        fun håndter(
+            vedtaksperiode: Vedtaksperiode,
+            overstyrArbeidsforhold: OverstyrArbeidsforhold
+        ): Boolean {
+            return false
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: Utbetalingsgrunnlag) {}
@@ -1966,6 +1980,11 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
             vedtaksperiode.oppdaterHistorikk(hendelse)
             vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, overstyrArbeidsforhold: OverstyrArbeidsforhold): Boolean {
+            vedtaksperiode.person.lagreOverstyrArbeidsforhold(overstyrArbeidsforhold)
+            return true
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {

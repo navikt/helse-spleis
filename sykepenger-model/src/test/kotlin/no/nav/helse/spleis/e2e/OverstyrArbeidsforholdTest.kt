@@ -10,9 +10,8 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
-    @ForventetFeil("skal fikses i morgen 🙂")
     @Test
-    fun `fjerner et ghost tilfelle ved hjelp av overstyring`() {
+    fun `fjerner arbeidsforhold fra arbeidsforholdhistorikken ved overstyring`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
