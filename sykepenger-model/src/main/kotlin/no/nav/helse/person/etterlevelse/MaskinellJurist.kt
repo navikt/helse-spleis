@@ -2,7 +2,6 @@ package no.nav.helse.person.etterlevelse
 
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.Organisasjonsnummer
-import no.nav.helse.person.KontekstObserver
 import no.nav.helse.person.Ledd.Companion.ledd
 import no.nav.helse.person.Paragraf
 import no.nav.helse.person.Punktum.Companion.punktum
@@ -12,7 +11,7 @@ import java.time.LocalDate
 import java.time.Year
 import java.util.*
 
-class MaskinellJurist : EtterlevelseObserver, KontekstObserver {
+class MaskinellJurist : EtterlevelseObserver {
     private val parent: MaskinellJurist?
     private lateinit var fødselsnummer: Fødselsnummer
     private lateinit var organisasjonsnummer: Organisasjonsnummer
@@ -72,25 +71,6 @@ class MaskinellJurist : EtterlevelseObserver, KontekstObserver {
             it.kontekster = this.kontekster + kontekster
         }
     }
-
-
-
-//    override fun nyPersonKontekst(fødselsnummer: String, aktørId: String) {
-//        this.fødselsnummer = fødselsnummer
-//        this.aktørId = aktørId
-//    }
-//
-//    override fun nyVedtaksperiodeKontekst(vedtaksperiodeId: String) {
-//        this.vedtaksperiodeId = vedtaksperiodeId
-//    }
-//
-//    override fun nyArbeidsgiverKontekst(organisasjonsnummer: String) {
-//        this.organisasjonsnummer = organisasjonsnummer
-//    }
-//
-//    override fun nyUtbetalingKontekst(utbetalingId: String) {
-//        this.utbetalingId = utbetalingId
-//    }
 
     override fun `§2`(oppfylt: Boolean) {
         super.`§2`(oppfylt)

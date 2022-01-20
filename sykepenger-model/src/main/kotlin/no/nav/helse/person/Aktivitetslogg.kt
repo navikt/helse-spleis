@@ -7,7 +7,6 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.TidslinjegrunnlagVisitor.Periode.Companion.dager
 import no.nav.helse.person.Bokstav.BOKSTAV_A
-import no.nav.helse.person.KontekstObserver.Companion.notify
 import no.nav.helse.person.Ledd.*
 import no.nav.helse.person.Ledd.Companion.ledd
 import no.nav.helse.person.Paragraf.*
@@ -33,16 +32,11 @@ class Aktivitetslogg(
 ) : IAktivitetslogg {
     internal val aktiviteter = mutableListOf<Aktivitet>()
     private val kontekster = mutableListOf<Aktivitetskontekst>()  // Doesn't need serialization
-    private val kontekstObservers: MutableList<KontekstObserver> = mutableListOf()
 
     internal fun accept(visitor: AktivitetsloggVisitor) {
         visitor.preVisitAktivitetslogg(this)
         aktiviteter.forEach { it.accept(visitor) }
         visitor.postVisitAktivitetslogg(this)
-    }
-
-    internal fun register(observer: KontekstObserver) {
-        kontekstObservers.add(observer)
     }
 
     override fun info(melding: String, vararg params: Any?) {
@@ -72,7 +66,6 @@ class Aktivitetslogg(
     }
 
     private fun add(aktivitet: Aktivitet) {
-        kontekstObservers.notify(aktivitet.kontekst())
         this.aktiviteter.add(aktivitet)
         forelder?.add(aktivitet)
     }
@@ -138,7 +131,7 @@ class Aktivitetslogg(
     override fun behov() = Behov.filter(aktiviteter)
     private fun error() = Aktivitet.Error.filter(aktiviteter)
     private fun severe() = Aktivitet.Severe.filter(aktiviteter)
-    override fun juridiskeVurderinger() = Aktivitet.Etterlevelse.filter(aktiviteter)
+    override fun juridiskeVurderinger() = Etterlevelse.filter(aktiviteter)
 
     companion object {
         private val MODELL_KONTEKSTER: Array<String> = arrayOf("Person", "Arbeidsgiver", "Vedtaksperiode")
@@ -1189,24 +1182,6 @@ internal interface AktivitetsloggVisitor {
     }
 
     fun postVisitAktivitetslogg(aktivitetslogg: Aktivitetslogg) {}
-}
-
-interface KontekstObserver {
-    fun nyPersonKontekst(fødselsnummer: String, aktørId: String) {}
-    fun nyArbeidsgiverKontekst(organisasjonsnummer: String) {}
-    fun nyVedtaksperiodeKontekst(vedtaksperiodeId: String) {}
-    fun nyUtbetalingKontekst(utbetalingId: String) {}
-
-    companion object {
-        fun List<KontekstObserver>.notify(kontekster: Map<String, String>) {
-            forEach {
-                if (kontekster.containsKey("vedtaksperiodeId")) it.nyVedtaksperiodeKontekst(kontekster["vedtaksperiodeId"]!!)
-                if (kontekster.containsKey("fødselsnummer")) it.nyPersonKontekst(kontekster["fødselsnummer"]!!, kontekster["aktørId"]!!)
-                if (kontekster.containsKey("organisasjonsnummer")) it.nyArbeidsgiverKontekst(kontekster["organisasjonsnummer"]!!)
-                if (kontekster.containsKey("utbetalingId")) it.nyUtbetalingKontekst(kontekster["utbetalingId"]!!)
-            }
-        }
-    }
 }
 
 interface Aktivitetskontekst {
