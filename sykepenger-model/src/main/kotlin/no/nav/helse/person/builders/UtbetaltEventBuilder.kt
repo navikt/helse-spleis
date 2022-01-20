@@ -179,6 +179,7 @@ internal class UtbetaltEventBuilder(
                 Begrunnelse.ManglerMedlemskap -> ManglerMedlemskap
                 Begrunnelse.ManglerOpptjening -> ManglerOpptjening
                 Begrunnelse.Over70 -> Over70
+                Begrunnelse.NyVilkårsprøvingNødvendig -> SykepengedagerOppbrukt // TODO: Map til NyVilkårsprøvingNødvendig
             }
         }
     }

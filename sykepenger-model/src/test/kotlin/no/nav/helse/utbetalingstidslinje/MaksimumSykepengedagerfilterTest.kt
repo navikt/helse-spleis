@@ -430,6 +430,16 @@ internal class MaksimumSykepengedagerfilterTest {
         assertEquals(41, rettighet.forbrukteSykedager)
     }
 
+    @Test
+    fun `ny begrunnelse etter 26 uker med sammenhengende sykdom etter maksdato`() {
+        val tidslinje = tidslinjeOf(248.NAVDAGER, 182.NAV, 1.NAVDAGER)
+        tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018)
+        tidslinje.inspektør.avvistedatoer.dropLast(1).forEach { dato ->
+            assertEquals(listOf(Begrunnelse.SykepengedagerOppbrukt), tidslinje.inspektør.begrunnelse(dato))
+        }
+        assertEquals(listOf(Begrunnelse.NyVilkårsprøvingNødvendig), tidslinje.inspektør.begrunnelse(tidslinje.inspektør.avvistedatoer.last()))
+    }
+
     // No 26 week gap with base of 246 NAV days
     private fun tilbakevendendeSykdom(vararg utbetalingsdager: Utbetalingsdager): Utbetalingstidslinje {
         return tidslinjeOf(

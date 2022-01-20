@@ -3,12 +3,14 @@ package no.nav.helse.serde.api
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
+import no.nav.helse.serde.PersonData
 import no.nav.helse.serde.api.dto.UtbetalingshistorikkElementDTO
 import no.nav.helse.serde.api.v2.Generasjon
 import no.nav.helse.serde.api.v2.HendelseDTO
 import no.nav.helse.serde.api.v2.Vilkårsgrunnlag
 import no.nav.helse.serde.mapping.SpeilDagtype
 import no.nav.helse.serde.mapping.SpeilKildetype
+import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -271,7 +273,23 @@ enum class BegrunnelseDTO {
     EtterDødsdato,
     ManglerMedlemskap,
     ManglerOpptjening,
-    Over70,
+    Over70;
+
+    internal companion object {
+        fun fraBegrunnelse(begrunnelse: Begrunnelse) = when (begrunnelse) {
+            is Begrunnelse.SykepengedagerOppbrukt -> SykepengedagerOppbrukt
+            is Begrunnelse.SykepengedagerOppbruktOver67 -> SykepengedagerOppbrukt
+            is Begrunnelse.MinimumSykdomsgrad -> MinimumSykdomsgrad
+            is Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode -> EgenmeldingUtenforArbeidsgiverperiode
+            is Begrunnelse.MinimumInntekt -> MinimumInntekt
+            is Begrunnelse.MinimumInntektOver67 -> MinimumInntektOver67
+            is Begrunnelse.EtterDødsdato -> EtterDødsdato
+            is Begrunnelse.ManglerMedlemskap -> ManglerMedlemskap
+            is Begrunnelse.ManglerOpptjening -> ManglerOpptjening
+            is Begrunnelse.Over70 -> Over70
+            is Begrunnelse.NyVilkårsprøvingNødvendig -> SykepengedagerOppbrukt // TODO: Map til NyVilkårsprøvingNødvendig
+        }
+    }
 }
 
 enum class TilstandstypeDTO(private val visForkastet: Boolean = false) {

@@ -437,5 +437,6 @@ internal sealed class Begrunnelse(private val dagtyperSomAvvises: List<KClass<ou
     object Over70 : Begrunnelse(listOf(NavDag::class, NavHelgDag::class))
     object ManglerOpptjening : Begrunnelse()
     object ManglerMedlemskap : Begrunnelse()
+    object NyVilkårsprøvingNødvendig : Begrunnelse()
 
 }

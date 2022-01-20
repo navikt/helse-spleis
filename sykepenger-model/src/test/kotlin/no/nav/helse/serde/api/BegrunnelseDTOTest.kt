@@ -9,9 +9,8 @@ internal class BegrunnelseDTOTest {
     @Test
     fun `likt innhold i enumene`() {
         assertEquals(
-            Begrunnelse::class.sealedSubclasses.map { it.simpleName }.toSet(),
+            Begrunnelse::class.sealedSubclasses.map { it.simpleName }.filterNot { it == "NyVilkårsprøvingNødvendig" }.toSet(),
             BegrunnelseDTO.values().map(BegrunnelseDTO::toString).toSet()
         )
     }
-
 }

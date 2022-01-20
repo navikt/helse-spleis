@@ -89,6 +89,7 @@ interface PersonObserver {
                 ManglerMedlemskap,
                 ManglerOpptjening,
                 Over70,
+                // TODO: Legge til NyVilkårsprøvingNødvendig
             }
         }
     }

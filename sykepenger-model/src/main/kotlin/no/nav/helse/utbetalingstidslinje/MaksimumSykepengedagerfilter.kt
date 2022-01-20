@@ -24,7 +24,7 @@ internal class MaksimumSykepengedagerfilter(
     private val aktivitetslogg: IAktivitetslogg
 ) : UtbetalingsdagVisitor {
 
-    companion object {
+    private companion object {
         const val TILSTREKKELIG_OPPHOLD_I_SYKEDAGER = 26 * 7
         private const val HISTORISK_PERIODE_I_ÅR: Long = 3
     }
@@ -83,6 +83,7 @@ internal class MaksimumSykepengedagerfilter(
     }
 
     private fun state(nyState: State) {
+        if (this.state == nyState) return
         state.leaving(this)
         state = nyState
         state.entering(this)
@@ -98,7 +99,7 @@ internal class MaksimumSykepengedagerfilter(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        if (alder.mistetSykepengerett(dato)) state(State.Karantene) else betalbarDager[dato] = dag
+        if (alder.mistetSykepengerett(dato)) state(State.ForGammel) else betalbarDager[dato] = dag
         state.betalbarDag(this, dato)
     }
 
@@ -268,7 +269,10 @@ internal class MaksimumSykepengedagerfilter(
         object Karantene : State {
             override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
                 avgrenser.opphold += 1
-                avgrenser.avvisteDatoerMedBegrunnelse[dagen] = avgrenser.teller.begrunnelse(dagen)
+                avgrenser.avvisteDatoerMedBegrunnelse[dagen] = when (avgrenser.opphold > TILSTREKKELIG_OPPHOLD_I_SYKEDAGER) {
+                    true -> Begrunnelse.NyVilkårsprøvingNødvendig
+                    false -> avgrenser.teller.begrunnelse(dagen)
+                }
                 avgrenser.teller.hvisGrensenErNådd(
                     hvis67År = { maksdato ->
                         avgrenser.teller.`§8-51 ledd 3`(maksdato)
@@ -290,5 +294,12 @@ internal class MaksimumSykepengedagerfilter(
             }
         }
 
+        object ForGammel : State {
+            override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
+                avgrenser.avvisteDatoerMedBegrunnelse[dagen] = Begrunnelse.Over70
+            }
+
+            override fun leaving(avgrenser: MaksimumSykepengedagerfilter) = throw IllegalStateException("Kan ikke gå ut fra state ForGammel")
+        }
     }
 }

@@ -1219,7 +1219,8 @@ internal data class PersonData(
             EtterDødsdato,
             ManglerMedlemskap,
             ManglerOpptjening,
-            Over70;
+            Over70,
+            NyVilkårsprøvingNødvendig;
 
             fun tilBegrunnelse() = when (this) {
                 SykepengedagerOppbrukt -> Begrunnelse.SykepengedagerOppbrukt
@@ -1232,6 +1233,7 @@ internal data class PersonData(
                 ManglerMedlemskap -> Begrunnelse.ManglerMedlemskap
                 ManglerOpptjening -> Begrunnelse.ManglerOpptjening
                 Over70 -> Begrunnelse.Over70
+                NyVilkårsprøvingNødvendig -> Begrunnelse.NyVilkårsprøvingNødvendig
             }
 
             internal companion object {
@@ -1245,7 +1247,8 @@ internal data class PersonData(
                     is Begrunnelse.EtterDødsdato -> EtterDødsdato
                     is Begrunnelse.ManglerMedlemskap -> ManglerMedlemskap
                     is Begrunnelse.ManglerOpptjening -> ManglerOpptjening
-                    Begrunnelse.Over70 -> Over70
+                    is Begrunnelse.Over70 -> Over70
+                    is Begrunnelse.NyVilkårsprøvingNødvendig -> NyVilkårsprøvingNødvendig
                 }
             }
         }
