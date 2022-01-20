@@ -647,6 +647,24 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `Replay av inntekstmelding med forkasting`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(11.januar, 16.januar, 100.prosent))
+        håndterSøknad(Sykdom(16.januar, 16.januar, 100.prosent))
+
+        håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent))
+        val im = håndterInntektsmeldingMedValidering(3.vedtaksperiode, listOf(1.januar til 16.januar))
+        person.søppelbøtte(hendelselogg, 17.januar til 31.januar) // simulerer forkastelse av januar-perioden
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 10.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 10.februar, 100.prosent))
+        person.søppelbøtte(hendelselogg, 1.februar til 10.februar) // simulerer feil etter at perioden har bedt om replay; f.eks. ved at Utbetalingshistorikk inneholder feil, etc.
+        håndterInntektsmeldingReplay(im, 4.vedtaksperiode.id(ORGNUMMER))
+        assertForkastetPeriodeTilstander(4.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, TIL_INFOTRYGD)
+    }
+
+    @Test
     fun `Inntektsmelding utvider ikke vedtaksperiode bakover over tidligere forkastet periode`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 21.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 21.januar, 100.prosent))
