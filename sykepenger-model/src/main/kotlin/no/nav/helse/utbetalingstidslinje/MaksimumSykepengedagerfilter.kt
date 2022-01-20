@@ -94,6 +94,10 @@ internal class MaksimumSykepengedagerfilter(
         sisteBetalteDag = tidslinje.periode().endInclusive
     }
 
+    override fun postVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
+        alder.etterlevelse70år(aktivitetslogg, beregnetTidslinje.periode(), avvisteDatoer)
+    }
+
     override fun visit(
         dag: NavDag,
         dato: LocalDate,
@@ -108,6 +112,7 @@ internal class MaksimumSykepengedagerfilter(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
+        if (alder.mistetSykepengerett(dato)) state(State.ForGammel)
         state.sykdomshelg(this, dato)
     }
 
@@ -296,10 +301,18 @@ internal class MaksimumSykepengedagerfilter(
 
         object ForGammel : State {
             override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
-                avgrenser.avvisteDatoerMedBegrunnelse[dagen] = Begrunnelse.Over70
+                over70(avgrenser, dagen)
+            }
+
+            override fun sykdomshelg(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
+                over70(avgrenser, dagen)
             }
 
             override fun leaving(avgrenser: MaksimumSykepengedagerfilter) = throw IllegalStateException("Kan ikke gå ut fra state ForGammel")
+
+            private fun over70(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
+                avgrenser.avvisteDatoerMedBegrunnelse[dagen] = Begrunnelse.Over70
+            }
         }
     }
 }

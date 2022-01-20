@@ -1,8 +1,11 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.Grunnbeløp
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-3 ledd 1 punktum 2`
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-33 ledd 3`
+import no.nav.helse.person.IAktivitetslogg
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.Year
@@ -29,7 +32,7 @@ internal class Alder(private val fødselsdato: LocalDate) {
     internal fun innenfor67årsgrense(dato: LocalDate) = dato <= redusertYtelseAlder
     internal fun innenfor70årsgrense(dato: LocalDate) = dato <= sisteVirkedagFørFylte70år
     internal fun harNådd70årsgrense(dato: LocalDate) = dato >= sisteVirkedagFørFylte70år
-    internal fun mistetSykepengerett(dato: LocalDate) = dato > sisteVirkedagFørFylte70år
+    internal fun mistetSykepengerett(dato: LocalDate) = dato >= søttiårsdagen
 
     internal fun alderPåDato(dato: LocalDate) = YEARS.between(fødselsdato, dato).toInt()
 
@@ -57,5 +60,38 @@ internal class Alder(private val fødselsdato: LocalDate) {
         val feriepenger = beløp * prosentsats
         Aktivitetslogg().`§8-33 ledd 3`(beløp, opptjeningsår, prosentsats, alderVedSluttenAvÅret, feriepenger)
         return feriepenger
+    }
+
+    internal fun etterlevelse70år(aktivitetslogg: IAktivitetslogg, periode: Periode, avvisteDatoer: List<LocalDate>) {
+        førFylte70(aktivitetslogg, periode)
+        fraOgMedFylte70(aktivitetslogg, periode, avvisteDatoer)
+    }
+
+    private fun førFylte70(aktivitetslogg: IAktivitetslogg, periode: Periode) {
+        if (periode.start >= søttiårsdagen) return
+        aktivitetslogg.`§8-3 ledd 1 punktum 2`(
+            oppfylt = true,
+            syttiårsdagen = søttiårsdagen,
+            vurderingFom = periode.start,
+            vurderingTom = minOf(søttiårsdagen.minusDays(1), periode.endInclusive),
+            tidslinjeFom = periode.start,
+            tidslinjeTom = periode.endInclusive,
+            avvisteDager = emptyList()
+        )
+    }
+
+    private fun fraOgMedFylte70(aktivitetslogg: IAktivitetslogg, periode: Periode, avvisteDatoer: List<LocalDate>) {
+        val avvisteDagerFraOgMedSøtti = avvisteDatoer.filter { it >= søttiårsdagen }
+        if (avvisteDagerFraOgMedSøtti.isEmpty()) return
+        aktivitetslogg.info("Utbetaling stoppet etter $søttiårsdagen, søker fylte 70 år.")
+        aktivitetslogg.`§8-3 ledd 1 punktum 2`(
+            oppfylt = false,
+            syttiårsdagen = søttiårsdagen,
+            vurderingFom = maxOf(søttiårsdagen, periode.start),
+            vurderingTom = periode.endInclusive,
+            tidslinjeFom = periode.start,
+            tidslinjeTom = periode.endInclusive,
+            avvisteDager = avvisteDagerFraOgMedSøtti
+        )
     }
 }

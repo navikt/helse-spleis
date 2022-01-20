@@ -1,11 +1,10 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.Grunnbeløp
+import no.nav.helse.hendelser.til
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.somFødselsnummer
-import no.nav.helse.testhelpers.desember
-import no.nav.helse.testhelpers.februar
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.november
+import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -19,6 +18,7 @@ internal class AlderTest {
         val FYLLER_70_ÅR_13_JANUAR_2018 = "13014812345".somFødselsnummer().alder()
         val FYLLER_70_ÅR_14_JANUAR_2018 = "14014812345".somFødselsnummer().alder()
         val FYLLER_70_ÅR_15_JANUAR_2018 = "15014812345".somFødselsnummer().alder()
+        fun Aktivitetslogg.antallEtterlevelser() = aktiviteter.filterIsInstance<Aktivitetslogg.Aktivitet.Etterlevelse>().size
     }
 
     @Test
@@ -123,5 +123,38 @@ internal class AlderTest {
     @Test
     fun `riktig begrunnelse for minimum inntekt ved alder 67 eller under`() {
         assertEquals(Begrunnelse.MinimumInntekt, FYLLER_67_ÅR_1_JANUAR_2018.begrunnelseForMinimumInntekt(1.januar))
+    }
+
+    @Test
+    fun `etterlevelse for periode før fylte 70`() {
+        val aktivitetslogg = Aktivitetslogg()
+        Alder(1.januar(2000)).etterlevelse70år(
+            aktivitetslogg = aktivitetslogg,
+            periode = 17.mai(2069) til 31.desember(2069),
+            avvisteDatoer = emptyList()
+        )
+        assertEquals(1, aktivitetslogg.antallEtterlevelser())
+    }
+
+    @Test
+    fun `etterlevelse for periode man fyller 70`() {
+        val aktivitetslogg = Aktivitetslogg()
+        Alder(1.januar(2000)).etterlevelse70år(
+            aktivitetslogg = aktivitetslogg,
+            periode = 17.mai(2069) til 1.januar(2070),
+            avvisteDatoer = listOf(1.januar(2070))
+        )
+        assertEquals(2, aktivitetslogg.antallEtterlevelser())
+    }
+
+    @Test
+    fun `etterlevelse for periode etter fylte 70`() {
+        val aktivitetslogg = Aktivitetslogg()
+        Alder(1.januar(2000)).etterlevelse70år(
+            aktivitetslogg = aktivitetslogg,
+            periode = 1.januar(2070) til 5.januar(2070),
+            avvisteDatoer = listOf(1.januar(2070), 2.januar(2070), 3.januar(2070), 4.januar(2070), 5.januar(2070))
+        )
+        assertEquals(1, aktivitetslogg.antallEtterlevelser())
     }
 }
