@@ -88,7 +88,7 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_SØKNAD_UFERDIG_GAP)
         assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_SØKNAD_UFERDIG_FORLENGELSE)
         assertTilstander(4.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_SØKNAD_UFERDIG_GAP)
-        assertTilstander(5.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE)
+        assertTilstander(5.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_SØKNAD_UFERDIG_FORLENGELSE)
         assertTilstander(6.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
     }
 
@@ -598,7 +598,7 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
     fun `ny sykmelding med søknad etter en annen utbetalt, før en annen med søknad og inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        val inntektsmelding1 = håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -607,13 +607,14 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(7.mars, 31.mars, 100.prosent))
-        håndterSøknad(Sykdom(7.mars, 31.mars, 100.prosent))
-        val inntektsmelding = håndterInntektsmelding(listOf(19.februar til 6.mars))
-
+        håndterSøknad(Sykdom(7.mars, 31.mars, 100.prosent)) // ber om replay
+        håndterInntektsmeldingReplay(inntektsmelding1, 2.vedtaksperiode.id(ORGNUMMER))
+        val inntektsmelding2 = håndterInntektsmelding(listOf(19.februar til 6.mars)) // denne treffer ingen
         håndterSykmelding(Sykmeldingsperiode(19.februar, 6.mars, 100.prosent))
-        håndterSøknad(Sykdom(19.februar, 6.mars, 100.prosent))
-        håndterInntektsmeldingReplay(inntektsmelding, 2.vedtaksperiode.id(ORGNUMMER))
-        håndterInntektsmeldingReplay(inntektsmelding, 3.vedtaksperiode.id(ORGNUMMER))
+        håndterSøknad(Sykdom(19.februar, 6.mars, 100.prosent)) // avsluttet uten utbetaling -> ber om replay
+                                                              // samtidig går vedtaksperiode 2 inn i AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE (og ber om replay selv)
+        håndterInntektsmeldingReplay(inntektsmelding1, 3.vedtaksperiode.id(ORGNUMMER))
+        håndterInntektsmeldingReplay(inntektsmelding2, 3.vedtaksperiode.id(ORGNUMMER))
 
         assertFalse(inspektør.periodeErForkastet(1.vedtaksperiode))
         assertTilstander(
@@ -629,7 +630,6 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
             3.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVSLUTTET_UTEN_UTBETALING,
             AVSLUTTET_UTEN_UTBETALING,
             AVSLUTTET_UTEN_UTBETALING
         )
