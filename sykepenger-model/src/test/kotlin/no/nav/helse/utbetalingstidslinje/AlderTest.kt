@@ -131,7 +131,7 @@ internal class AlderTest {
         Alder(1.januar(2000)).etterlevelse70år(
             aktivitetslogg = aktivitetslogg,
             periode = 17.mai(2069) til 31.desember(2069),
-            avvisteDatoer = emptyList()
+            avvisteDager = emptySet()
         )
         assertEquals(1, aktivitetslogg.antallEtterlevelser())
     }
@@ -142,7 +142,7 @@ internal class AlderTest {
         Alder(1.januar(2000)).etterlevelse70år(
             aktivitetslogg = aktivitetslogg,
             periode = 17.mai(2069) til 1.januar(2070),
-            avvisteDatoer = listOf(1.januar(2070))
+            avvisteDager = setOf(1.januar(2070))
         )
         assertEquals(2, aktivitetslogg.antallEtterlevelser())
     }
@@ -153,7 +153,7 @@ internal class AlderTest {
         Alder(1.januar(2000)).etterlevelse70år(
             aktivitetslogg = aktivitetslogg,
             periode = 1.januar(2070) til 5.januar(2070),
-            avvisteDatoer = listOf(1.januar(2070), 2.januar(2070), 3.januar(2070), 4.januar(2070), 5.januar(2070))
+            avvisteDager = setOf(1.januar(2070), 2.januar(2070), 3.januar(2070), 4.januar(2070), 5.januar(2070))
         )
         assertEquals(1, aktivitetslogg.antallEtterlevelser())
     }

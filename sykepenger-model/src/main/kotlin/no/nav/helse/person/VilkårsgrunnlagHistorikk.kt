@@ -41,11 +41,9 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
     internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) = historikk.firstOrNull()?.vilkårsgrunnlagFor(skjæringstidspunkt)
 
-    internal fun avvisUtbetalingsdagerMedBegrunnelse(tidslinjer: List<Utbetalingstidslinje>, alder: Alder) {
-        Utbetalingstidslinje.avvis(tidslinjer, finnBegrunnelser(alder))
+    internal fun avvisInngangsvilkår(tidslinjer: List<Utbetalingstidslinje>, alder: Alder) {
+        historikk.firstOrNull()?.avvis(tidslinjer, alder)
     }
-
-    private fun finnBegrunnelser(alder: Alder): Map<LocalDate, List<Begrunnelse>> = historikk.firstOrNull()?.finnBegrunnelser(alder) ?: emptyMap()
 
     internal fun inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver() = historikk.firstOrNull()?.inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver()
 
@@ -78,11 +76,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 ?.let { vilkårsgrunnlag[it] }
                 ?.takeIf { it is InfotrygdVilkårsgrunnlag }
 
-        internal fun finnBegrunnelser(alder: Alder) =
-            vilkårsgrunnlag.mapValues { (skjæringstidspunkt, vilkårsgrunnlagElement) ->
-                vilkårsgrunnlagElement.begrunnelserForAvvisteVilkår(alder, skjæringstidspunkt)
-            }.filterValues { it.isNotEmpty() }
-
         internal fun inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver() =
             vilkårsgrunnlag.mapValues { (_, vilkårsgrunnlagElement) ->
                 vilkårsgrunnlagElement.inntektsopplysningPerArbeidsgiver()
@@ -93,9 +86,15 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             .filterValues { it.inntektsopplysningPerArbeidsgiver().containsKey(orgnummer) }
             .keys
 
-        fun erRelevant(organisasjonsnummer: String, skjæringstidspunkter: List<LocalDate>) =
+        internal fun erRelevant(organisasjonsnummer: String, skjæringstidspunkter: List<LocalDate>) =
             skjæringstidspunkter.mapNotNull(vilkårsgrunnlag::get)
                 .any { it.inntektsopplysningPerArbeidsgiver().containsKey(organisasjonsnummer) }
+
+        internal fun avvis(tidslinjer: List<Utbetalingstidslinje>, alder: Alder) {
+            vilkårsgrunnlag.forEach { (skjæringstidspunkt, element) ->
+                element.avvis(tidslinjer, skjæringstidspunkt, alder)
+            }
+        }
 
         internal companion object {
             internal fun List<Innslag>.sisteId() = this.first().id
@@ -115,7 +114,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         fun gjelderFlereArbeidsgivere(): Boolean
         fun oppdaterManglendeMinimumInntekt(person: Person, skjæringstidspunkt: LocalDate) {}
         fun sjekkAvviksprosent(aktivitetslogg: IAktivitetslogg): Boolean = true
-        fun begrunnelserForAvvisteVilkår(alder: Alder, skjæringstidspunkt: LocalDate): List<Begrunnelse>
+        fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunkt: LocalDate, alder: Alder) {}
     }
 
     internal class Grunnlagsdata(
@@ -192,13 +191,13 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         override fun inntektsopplysningPerArbeidsgiver() = sykepengegrunnlag.inntektsopplysningPerArbeidsgiver()
         override fun gjelderFlereArbeidsgivere() = inntektsopplysningPerArbeidsgiver().size > 1
 
-        override fun begrunnelserForAvvisteVilkår(alder: Alder, skjæringstidspunkt: LocalDate): List<Begrunnelse> {
-            if (vurdertOk) return emptyList()
+        override fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunkt: LocalDate, alder: Alder) {
+            if (vurdertOk) return
             val begrunnelser = mutableListOf<Begrunnelse>()
             if (medlemskapstatus == Medlemskapsvurdering.Medlemskapstatus.Nei) begrunnelser.add(Begrunnelse.ManglerMedlemskap)
             if (harMinimumInntekt == false) begrunnelser.add(alder.begrunnelseForMinimumInntekt(skjæringstidspunkt))
             if (!harOpptjening) begrunnelser.add(Begrunnelse.ManglerOpptjening)
-            return begrunnelser
+            Utbetalingstidslinje.avvis(tidslinjer, setOf(skjæringstidspunkt), begrunnelser)
         }
 
         override fun toSpesifikkKontekst() = SpesifikkKontekst(
@@ -277,8 +276,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         override fun inntektsopplysningPerArbeidsgiver() = sykepengegrunnlag.inntektsopplysningPerArbeidsgiver()
         override fun gjelderFlereArbeidsgivere() = inntektsopplysningPerArbeidsgiver().size > 1
 
-        // Vi har ingen avviste vilkår dersom vilkårsprøving er gjort i Infotrygd
-        override fun begrunnelserForAvvisteVilkår(alder: Alder, skjæringstidspunkt: LocalDate): List<Begrunnelse> = emptyList()
         override fun toSpesifikkKontekst() = SpesifikkKontekst(
             kontekstType = "vilkårsgrunnlag",
             kontekstMap = mapOf(

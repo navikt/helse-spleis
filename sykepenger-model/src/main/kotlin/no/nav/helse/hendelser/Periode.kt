@@ -19,7 +19,7 @@ open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Ite
 
         fun List<Periode>.slutterEtter(grense: LocalDate) = any { it.slutterEtter(grense) }
 
-        fun List<LocalDate>.grupperSammenhengendePerioder() = this
+        fun Iterable<LocalDate>.grupperSammenhengendePerioder() = this
             .sorted()
             .distinct()
             .fold(listOf(), grupperSammenhengendePerioder { periode, dato -> periode.endInclusive.plusDays(1) != dato })
@@ -64,7 +64,7 @@ open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Ite
     internal operator fun contains(other: Periode) =
         this.start <= other.start && this.endInclusive >= other.endInclusive
 
-    internal operator fun contains(datoer: List<LocalDate>) = datoer.any { it in this }
+    internal operator fun contains(datoer: Iterable<LocalDate>) = datoer.any { it in this }
 
     override fun toString(): String {
         return start.format(formatter) + " til " + endInclusive.format(formatter)

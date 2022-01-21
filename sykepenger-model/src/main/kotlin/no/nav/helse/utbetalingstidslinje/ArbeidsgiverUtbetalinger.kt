@@ -32,7 +32,7 @@ internal class ArbeidsgiverUtbetalinger(
         val tidslinjer = arbeidsgivere.values.toList()
         Sykdomsgradfilter(tidslinjer, periode, aktivitetslogg).filter()
         AvvisDagerEtterDødsdatofilter(tidslinjer, periode, dødsdato, aktivitetslogg).filter()
-        vilkårsgrunnlagHistorikk.avvisUtbetalingsdagerMedBegrunnelse(tidslinjer, alder)
+        vilkårsgrunnlagHistorikk.avvisInngangsvilkår(tidslinjer, alder)
         sykepengerettighet = MaksimumSykepengedagerfilter(alder, regler, periode, aktivitetslogg).filter(
             tidslinjer,
             infotrygdhistorikk.utbetalingstidslinje().kutt(periode.endInclusive)

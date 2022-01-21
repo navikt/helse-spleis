@@ -62,9 +62,9 @@ internal class Alder(private val fødselsdato: LocalDate) {
         return feriepenger
     }
 
-    internal fun etterlevelse70år(aktivitetslogg: IAktivitetslogg, periode: Periode, avvisteDatoer: List<LocalDate>) {
+    internal fun etterlevelse70år(aktivitetslogg: IAktivitetslogg, periode: Periode, avvisteDager: Set<LocalDate>) {
         førFylte70(aktivitetslogg, periode)
-        fraOgMedFylte70(aktivitetslogg, periode, avvisteDatoer)
+        fraOgMedFylte70(aktivitetslogg, periode, avvisteDager)
     }
 
     private fun førFylte70(aktivitetslogg: IAktivitetslogg, periode: Periode) {
@@ -80,8 +80,8 @@ internal class Alder(private val fødselsdato: LocalDate) {
         )
     }
 
-    private fun fraOgMedFylte70(aktivitetslogg: IAktivitetslogg, periode: Periode, avvisteDatoer: List<LocalDate>) {
-        val avvisteDagerFraOgMedSøtti = avvisteDatoer.filter { it >= søttiårsdagen }
+    private fun fraOgMedFylte70(aktivitetslogg: IAktivitetslogg, periode: Periode, avvisteDager: Set<LocalDate>) {
+        val avvisteDagerFraOgMedSøtti = avvisteDager.filter { it >= søttiårsdagen }
         if (avvisteDagerFraOgMedSøtti.isEmpty()) return
         aktivitetslogg.info("Utbetaling stoppet etter $søttiårsdagen, søker fylte 70 år.")
         aktivitetslogg.`§8-3 ledd 1 punktum 2`(

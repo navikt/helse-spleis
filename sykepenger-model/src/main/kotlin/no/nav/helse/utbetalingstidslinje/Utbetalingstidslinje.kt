@@ -61,32 +61,23 @@ internal class Utbetalingstidslinje private constructor(
         private fun Utbetalingsdag.erSykedag() =
             this is NavDag || this is NavHelgDag || this is ArbeidsgiverperiodeDag || this is AvvistDag
 
-        internal fun harAvvisteDager(tidslinjer: List<Utbetalingstidslinje>, avvistPeriode: Periode, periode: Periode, begrunnelser: List<Begrunnelse>) =
-            avvisteDager(tidslinjer, listOf(avvistPeriode), periode, begrunnelser).isNotEmpty()
-
-        internal fun avvis(tidslinjer: List<Utbetalingstidslinje>, begrunnelserForSkjæringstidspunkt: Map<LocalDate, List<Begrunnelse>>) {
-            tidslinjer.forEach { it.avvis(begrunnelserForSkjæringstidspunkt) }
-        }
-
-        internal fun avvisteDager(
+        internal fun avvis(
             tidslinjer: List<Utbetalingstidslinje>,
-            avvistePerioder: List<Periode>,
-            periode: Periode,
+            avvisteSkjæringstidspunkt: Set<LocalDate>,
             begrunnelser: List<Begrunnelse>
-        ): List<AvvistDag> {
-            tidslinjer.forEach { it.avvis(avvistePerioder, begrunnelser) }
-            return tidslinjer.flatMap { tidslinje -> tidslinje.subset(periode) }.filterIsInstance<AvvistDag>()
-        }
+        ) = tidslinjer.forEach { it.avvis(avvisteSkjæringstidspunkt, begrunnelser) }
 
         internal fun avvis(
             tidslinjer: List<Utbetalingstidslinje>,
             avvistePerioder: List<Periode>,
+            begrunnelser: List<Begrunnelse>
+        ) = tidslinjer.forEach { it.avvis(avvistePerioder, begrunnelser) }
+
+        internal fun avvisteDager(
+            tidslinjer: List<Utbetalingstidslinje>,
             periode: Periode,
-            finnBegrunnelse: (LocalDate) -> Begrunnelse
-        ): Boolean {
-            tidslinjer.forEach { it.avvis(avvistePerioder, finnBegrunnelse) }
-            return tidslinjer.flatMap { tidslinje -> tidslinje.subset(periode) }.any { it is AvvistDag }
-        }
+            begrunnelse: Begrunnelse
+        ) = tidslinjer.flatMap { it.subset(periode) }.mapNotNull { it.erAvvistMed(begrunnelse) }
     }
 
     internal fun er6GBegrenset(): Boolean {
@@ -101,26 +92,25 @@ internal class Utbetalingstidslinje private constructor(
         visitor.postVisitUtbetalingstidslinje(this)
     }
 
-    private fun avvis(avvisteDatoer: List<Periode>, begrunnelser: List<Begrunnelse>) {
-        utbetalingsdager.replaceAll {
-            if (it.dato !in avvisteDatoer) it
-            else it.avvis(begrunnelser) ?: it
+    private fun avvis(avvistePerioder: List<Periode>, begrunnelser: List<Begrunnelse>) {
+        avvis(begrunnelser) { utbetalingsdag ->
+            utbetalingsdag.dato in avvistePerioder
         }
     }
 
-    private fun avvis(avvisteDatoer: List<Periode>, finnBegrunnelse: (LocalDate) -> Begrunnelse) {
-        utbetalingsdager.replaceAll {
-            if (it.dato !in avvisteDatoer) it
-            else it.avvis(finnBegrunnelse) ?: it
-        }
-    }
-
-    private fun avvis(begrunnelserForSkjæringstidspunkt: Map<LocalDate, List<Begrunnelse>>) {
-        utbetalingsdager.forEachIndexed { index, utbetalingsdag ->
+    private fun avvis(avvisteSkjæringstidspunkt: Set<LocalDate>, begrunnelser: List<Begrunnelse>) {
+        avvis(begrunnelser) { utbetalingsdag ->
             utbetalingsdag.økonomi.medAvrundetData { _, _, _, skjæringstidspunkt, _, _, _, _, _ ->
-                begrunnelserForSkjæringstidspunkt[skjæringstidspunkt]?.also { begrunnelser ->
-                    utbetalingsdager[index] = utbetalingsdag.avvis(begrunnelser) ?: utbetalingsdag
-                }
+                skjæringstidspunkt in avvisteSkjæringstidspunkt
+            }
+        }
+    }
+
+    private fun avvis(begrunnelser: List<Begrunnelse>, strategi: (dag: Utbetalingsdag) -> Boolean) {
+        if (begrunnelser.isEmpty()) return
+        utbetalingsdager.forEachIndexed { index, utbetalingsdag ->
+            if (strategi(utbetalingsdag)) {
+                utbetalingsdag.avvis(begrunnelser)?.also { utbetalingsdager[index] = it }
             }
         }
     }
@@ -336,9 +326,6 @@ internal class Utbetalingstidslinje private constructor(
             .takeIf(List<*>::isNotEmpty)
             ?.let(::avvisDag)
 
-        internal fun avvis(finnBegrunnelse: (LocalDate) -> Begrunnelse) =
-            avvis(listOf(finnBegrunnelse(this.dato)))
-
         protected open fun avvisDag(begrunnelser: List<Begrunnelse>) = AvvistDag(dato, økonomi, begrunnelser)
 
         internal abstract fun accept(visitor: UtbetalingsdagVisitor)
@@ -346,6 +333,8 @@ internal class Utbetalingstidslinje private constructor(
         internal open fun gjødsle(refusjon: Refusjonshistorikk.Refusjon?) {
             økonomi.arbeidsgiverRefusjon(refusjon?.beløp(dato))
         }
+
+        internal open fun erAvvistMed(begrunnelse: Begrunnelse): AvvistDag? = null
 
         internal class ArbeidsgiverperiodeDag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
             override val prioritet = 30
@@ -408,6 +397,7 @@ internal class Utbetalingstidslinje private constructor(
                 /* noop */
             }
 
+            override fun erAvvistMed(begrunnelse: Begrunnelse) = takeIf { begrunnelse in begrunnelser }
         }
 
         internal class ForeldetDag(dato: LocalDate, økonomi: Økonomi) :

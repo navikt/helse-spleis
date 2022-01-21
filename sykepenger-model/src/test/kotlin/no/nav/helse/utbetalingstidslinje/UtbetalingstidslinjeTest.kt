@@ -10,14 +10,27 @@ import org.junit.jupiter.api.Test
 internal class UtbetalingstidslinjeTest {
 
     @Test
-    fun `avviser med flere begrunnelser`() {
+    fun `avviser skjæringstidspunkt med flere begrunnelser`() {
         tidslinjeOf(5.NAV).also {
-            Utbetalingstidslinje.avvis(listOf(it), mapOf(1.januar to listOf(Begrunnelse.MinimumSykdomsgrad)))
-            Utbetalingstidslinje.avvis(listOf(it), mapOf(1.januar to listOf(Begrunnelse.EtterDødsdato)))
-            Utbetalingstidslinje.avvis(listOf(it), mapOf(1.januar to listOf(Begrunnelse.ManglerMedlemskap)))
-            val dag = it[1.januar]
-            assertTrue(dag is AvvistDag)
-            assertEquals(3, (dag as AvvistDag).begrunnelser.size)
+            Utbetalingstidslinje.avvis(listOf(it), setOf(1.januar), listOf(Begrunnelse.MinimumSykdomsgrad))
+            Utbetalingstidslinje.avvis(listOf(it), setOf(1.januar), listOf(Begrunnelse.EtterDødsdato))
+            Utbetalingstidslinje.avvis(listOf(it), setOf(1.januar), listOf(Begrunnelse.ManglerMedlemskap))
+            val dag = it[1.januar] as AvvistDag
+            assertEquals(3, dag.begrunnelser.size)
+        }
+    }
+
+    @Test
+    fun `avviser perioder med flere begrunnelser`() {
+        val periode = 1.januar til 5.januar
+        tidslinjeOf(5.NAV).also {
+            Utbetalingstidslinje.avvis(listOf(it), listOf(periode), listOf(Begrunnelse.MinimumSykdomsgrad))
+            Utbetalingstidslinje.avvis(listOf(it), listOf(periode), listOf(Begrunnelse.EtterDødsdato))
+            Utbetalingstidslinje.avvis(listOf(it), listOf(periode), listOf(Begrunnelse.ManglerMedlemskap))
+            periode.forEach { dato ->
+                val dag = it[dato] as AvvistDag
+                assertEquals(3, dag.begrunnelser.size)
+            }
         }
     }
 
