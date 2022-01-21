@@ -5,12 +5,13 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.TilstandType
+import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
@@ -24,9 +25,9 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
         håndterSøknad(Sykdom(3.januar, 10.januar, 100.prosent))
         assertTilstander(
             0,
-            TilstandType.START,
-            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
-            TilstandType.AVSLUTTET_UTEN_UTBETALING,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVSLUTTET_UTEN_UTBETALING,
         )
 
         håndterSykmelding(Sykmeldingsperiode(3.mars, 26.mars, 100.prosent))
@@ -41,16 +42,16 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
 
         assertTilstander(
             2.vedtaksperiode,
-            TilstandType.START,
-            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
-            TilstandType.AVVENTER_SØKNAD_FERDIG_GAP,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_VILKÅRSPRØVING,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_SIMULERING,
-            TilstandType.AVVENTER_GODKJENNING,
-            TilstandType.TIL_UTBETALING,
-            TilstandType.AVSLUTTET
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
         )
     }
 
@@ -64,29 +65,24 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
         håndterSøknad(Sykdom(3.januar, 10.januar, 100.prosent))
         assertTilstander(
             1.vedtaksperiode,
-            TilstandType.START,
-            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
-            TilstandType.AVSLUTTET_UTEN_UTBETALING,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVSLUTTET_UTEN_UTBETALING,
         )
 
         håndterSykmelding(Sykmeldingsperiode(3.mars, 7.mars, 100.prosent))
         håndterSøknad(Sykdom(3.mars, 7.mars, 100.prosent))
         assertTilstander(
             2.vedtaksperiode,
-            TilstandType.START,
-            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
-            TilstandType.AVSLUTTET_UTEN_UTBETALING,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVSLUTTET_UTEN_UTBETALING,
         )
 
         håndterSykmelding(Sykmeldingsperiode(8.mars, 26.mars, 100.prosent))
         håndterInntektsmeldingMedValidering(3.vedtaksperiode, arbeidsgiverperioder = listOf(Periode(3.mars, 18.mars)))
 
-        assertTilstander(
-            2.vedtaksperiode,
-            TilstandType.START,
-            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
-            TilstandType.AVSLUTTET_UTEN_UTBETALING
-        )
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
 
         håndterSøknadMedValidering(3.vedtaksperiode, Sykdom(8.mars, 26.mars, 100.prosent))
         håndterYtelser(3.vedtaksperiode)
@@ -98,16 +94,16 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
 
         assertTilstander(
             3.vedtaksperiode,
-            TilstandType.START,
-            TilstandType.MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-            TilstandType.AVVENTER_SØKNAD_FERDIG_FORLENGELSE,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_VILKÅRSPRØVING,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_SIMULERING,
-            TilstandType.AVVENTER_GODKJENNING,
-            TilstandType.TIL_UTBETALING,
-            TilstandType.AVSLUTTET
+            START,
+            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_SØKNAD_FERDIG_FORLENGELSE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
         )
     }
 
@@ -116,28 +112,23 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2021), 1.januar(2021), 100.prosent))
         håndterSøknad(Sykdom(1.januar(2021), 1.januar(2021), 100.prosent))
 
-        Assertions.assertEquals(2, observatør.hendelseider(1.vedtaksperiode.id(ORGNUMMER)).size)
+        assertEquals(2, observatør.hendelseider(1.vedtaksperiode.id(ORGNUMMER)).size)
 
         val hendelseId = håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021)), førsteFraværsdag = 1.januar(2021))
 
-        Assertions.assertEquals(3, observatør.hendelseider(1.vedtaksperiode.id(ORGNUMMER)).size)
-        Assertions.assertTrue(hendelseId in observatør.hendelseider(1.vedtaksperiode.id(ORGNUMMER)))
+        assertEquals(3, observatør.hendelseider(1.vedtaksperiode.id(ORGNUMMER)).size)
+        assertTrue(hendelseId in observatør.hendelseider(1.vedtaksperiode.id(ORGNUMMER)))
 
-        assertTilstander(
-            1.vedtaksperiode,
-            TilstandType.START,
-            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
-            TilstandType.AVSLUTTET_UTEN_UTBETALING
-        )
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
     }
 
     @Test
     fun `Vedtaksperioder i AVSLUTTET_UTEN_UTBETALING som treffes av en inntektsmelding slik at den får utebetaling - skal gå videre til AVVENTER_HISTORIKK`() = Toggle.GjenopptaAvsluttetUtenUtbetaling.enable {
         håndterSykmelding(Sykmeldingsperiode(9.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(9.januar, 20.januar, 100.prosent))
-        assertTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET_UTEN_UTBETALING)
+        assertTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-        assertTilstand(1.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK)
+        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
     }
 }

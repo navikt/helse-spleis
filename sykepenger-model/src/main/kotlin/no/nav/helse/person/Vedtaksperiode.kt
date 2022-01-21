@@ -396,7 +396,8 @@ internal class Vedtaksperiode private constructor(
     // IM som replayes skal kunne påvirke alle perioder som er sammenhengende med replay-perioden, men også alle evt. påfølgende perioder.
     // Dvs. IM skal -ikke- påvirke perioder _før_ replay-perioden som ikke er i sammenheng med vedtaksperioden som ba om replay
     private fun relevantForReplay(other: UUID?, sammenhengendePerioder: List<Vedtaksperiode>, vedtaksperioder: List<Vedtaksperiode>): Boolean {
-        if (other == null || vedtaksperioder.none { it.id == other }) return true // ingen replay eller perioden som ba om replay ikke finnes mer
+        if (other == null) return true // ingen replay
+        if (vedtaksperioder.none { it.id == other }) return false // perioden som ba om replay ikke finnes mer
         if (sammenhengendePerioder.any { it.id == other }) return true // perioden som ba om replay er en del av de sammenhengende periodene som overlapper med IM (som vedtaksperioden er en del av)
         return this > vedtaksperioder.first { it.id == other } // vedtaksperioden er _etter_ den perioden som ba om replay
     }

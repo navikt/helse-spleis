@@ -302,6 +302,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVSLUTTET_UTEN_UTBETALING,
             AVSLUTTET_UTEN_UTBETALING
         )
         assertForkastetPeriodeTilstander(
