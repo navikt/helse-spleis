@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.person.*
@@ -223,6 +224,11 @@ internal fun AbstractEndToEndTest.assertError(idInnhenter: IdInnhenter, error: S
     assertTrue(errors.contains(error), "fant ikke forventet error for $orgnummer. Errors:\n${errors.joinToString("\n")}")
 }
 
+internal fun AbstractEndToEndTest.assertSevere(severe: String, vararg filtre: AktivitetsloggFilter) {
+    val severes = collectSeveres(*filtre)
+    assertTrue(severes.contains(severe), "fant ikke forventet severe. Severes:\n${severes.joinToString("\n")}")
+}
+
 internal fun AbstractEndToEndTest.collectErrors(idInnhenter: IdInnhenter, orgnummer: String): MutableList<String> {
     val errors = mutableListOf<String>()
     inspektør.personLogg.accept(object : AktivitetsloggVisitor {
@@ -233,6 +239,32 @@ internal fun AbstractEndToEndTest.collectErrors(idInnhenter: IdInnhenter, orgnum
         }
     })
     return errors
+}
+
+internal fun AbstractEndToEndTest.collectSeveres(vararg filtre: AktivitetsloggFilter): MutableList<String> {
+    val severes = mutableListOf<String>()
+    inspektør.personLogg.accept(object : AktivitetsloggVisitor {
+        override fun visitSevere(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Severe, melding: String, tidsstempel: String) {
+            if (filtre.all { filter -> kontekster.any { filter.filtrer(it) } }) {
+                severes.add(melding)
+            }
+        }
+    })
+    return severes
+}
+
+internal fun interface AktivitetsloggFilter {
+    companion object {
+        internal fun vedtaksperiode(idInnhenter: IdInnhenter, orgnummer: String): AktivitetsloggFilter = AktivitetsloggFilter { kontekst ->
+            kontekst.kontekstMap["vedtaksperiodeId"] == idInnhenter.id(orgnummer).toString()
+        }
+
+        internal fun person(fødselsnummer: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018): AktivitetsloggFilter = AktivitetsloggFilter { kontekst ->
+            kontekst.kontekstMap["fødselsnummer"] == fødselsnummer.toString()
+        }
+    }
+
+    fun filtrer(kontekst: SpesifikkKontekst): Boolean
 }
 
 internal fun AbstractEndToEndTest.assertNoErrors(idInnhenter: IdInnhenter, orgnummer: String = AbstractPersonTest.ORGNUMMER) {
