@@ -21,16 +21,16 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),
-                Vilkårsgrunnlag.Arbeidsforhold(a2.toString(), 1.desember(2017), null)
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017), null)
             )
         )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         val skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode)
-        assertEquals(listOf(a1.toString(), a2.toString()).toList(), person.orgnummereMedRelevanteArbeidsforhold(skjæringstidspunkt).toList())
+        assertEquals(listOf(a1, a2).toList(), person.orgnummereMedRelevanteArbeidsforhold(skjæringstidspunkt).toList())
         håndterOverstyrArbeidsforhold(skjæringstidspunkt, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, false)))
-        assertEquals(listOf(a1.toString()), person.orgnummereMedRelevanteArbeidsforhold(skjæringstidspunkt))
+        assertEquals(listOf(a1), person.orgnummereMedRelevanteArbeidsforhold(skjæringstidspunkt))
     }
 
     @ForventetFeil("Dette gjør vi etter lunsj")
@@ -42,8 +42,8 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),
-                Vilkårsgrunnlag.Arbeidsforhold(a2.toString(), 1.desember(2017), null)
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017), null)
             )
         )
         håndterYtelser(1.vedtaksperiode)
@@ -53,7 +53,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         val vilkårsgrunnlag = person.vilkårsgrunnlagFor(skjæringstidspunkt)
-        assertEquals(setOf(a1.toString()), vilkårsgrunnlag?.inntektsopplysningPerArbeidsgiver()?.keys)
+        assertEquals(setOf(a1), vilkårsgrunnlag?.inntektsopplysningPerArbeidsgiver()?.keys)
     }
 
     @Test
@@ -64,8 +64,8 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),
-                Vilkårsgrunnlag.Arbeidsforhold(a2.toString(), 1.desember(2017), null)
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017), null)
             )
         )
         håndterYtelser(1.vedtaksperiode)
@@ -78,7 +78,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         val skjæringstidspunkt = inspektør.skjæringstidspunkt(2.vedtaksperiode)
-        assertEquals(listOf(a1.toString(), a2.toString()).toList(), person.orgnummereMedRelevanteArbeidsforhold(skjæringstidspunkt).toList())
+        assertEquals(listOf(a1, a2).toList(), person.orgnummereMedRelevanteArbeidsforhold(skjæringstidspunkt).toList())
         assertThrows<Aktivitetslogg.AktivitetException> {
             håndterOverstyrArbeidsforhold(skjæringstidspunkt, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, false)))
         }
@@ -86,7 +86,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
             "Kan ikke overstyre arbeidsforhold for en pågående behandling der én eller flere perioder er behandlet ferdig",
             AktivitetsloggFilter.person()
         )
-        assertEquals(listOf(a1.toString(), a2.toString()), person.orgnummereMedRelevanteArbeidsforhold(skjæringstidspunkt))
+        assertEquals(listOf(a1, a2), person.orgnummereMedRelevanteArbeidsforhold(skjæringstidspunkt))
     }
 
     @Test
@@ -103,9 +103,9 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),
-                Vilkårsgrunnlag.Arbeidsforhold(a2.toString(), LocalDate.EPOCH, null),
-                Vilkårsgrunnlag.Arbeidsforhold(a3.toString(), 1.desember(2017), null)
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null),
+                Vilkårsgrunnlag.Arbeidsforhold(a3, 1.desember(2017), null)
             ),
             inntektsvurdering = Inntektsvurdering(listOf(sammenligningsgrunnlag(a1, 1.januar, INNTEKT.repeat(12)),
                 sammenligningsgrunnlag(a2, 1.januar, INNTEKT.repeat(12))
@@ -124,7 +124,6 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a3, false)))
     }
 
-    @ForventetFeil("må implementeres")
     @Test
     fun `kan ikke overstyre arbeidsforhold med sykdom`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
@@ -140,8 +139,8 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),
-                Vilkårsgrunnlag.Arbeidsforhold(a2.toString(), LocalDate.EPOCH, null),
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null),
             ),
             inntektsvurdering = Inntektsvurdering(
                 listOf(
@@ -163,5 +162,42 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         assertThrows<Aktivitetslogg.AktivitetException> {
             håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, false)))
         }
+        assertSevere("Kan ikke overstyre arbeidsforhold for en arbeidsgiver som har sykdom", AktivitetsloggFilter.person())
+    }
+
+    @Test
+    fun `kan ikke overstyre arbeidsforhold for arbeidsgiver vi ikke kjenner til`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null),
+            ),
+            inntektsvurdering = Inntektsvurdering(
+                listOf(
+                    sammenligningsgrunnlag(a1, 1.januar, INNTEKT.repeat(12)),
+                    sammenligningsgrunnlag(a2, 1.januar, INNTEKT.repeat(12))
+                )
+            ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                inntekter = listOf(
+                    grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
+                    grunnlag(a2, 1.januar, INNTEKT.repeat(3))
+                ),
+                arbeidsforhold = emptyList()
+            ),
+            orgnummer = a1
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        assertThrows<Aktivitetslogg.AktivitetException> {
+            håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a3, false)))
+        }
+        assertSevere("Kan ikke overstyre arbeidsforhold for en arbeidsgiver vi ikke kjenner til", AktivitetsloggFilter.person())
     }
 }

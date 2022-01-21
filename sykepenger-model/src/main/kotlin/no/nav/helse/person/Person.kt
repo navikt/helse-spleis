@@ -6,11 +6,11 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.utbetaling.*
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnSykepengegrunnlag
+import no.nav.helse.person.Arbeidsgiver.Companion.finn
 import no.nav.helse.person.Arbeidsgiver.Companion.ghostPeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSammenligningsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.harArbeidsgivereMedOverlappendeUtbetaltePerioder
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntekt
-import no.nav.helse.person.Arbeidsgiver.Companion.harPeriodeSomBlokkererOverstyrArbeidsforhold
 import no.nav.helse.person.Arbeidsgiver.Companion.harUtbetaltPeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.harVedtaksperiodeFor
 import no.nav.helse.person.Arbeidsgiver.Companion.håndter
@@ -235,9 +235,7 @@ class Person private constructor(
 
     fun håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold) {
         overstyrArbeidsforhold.kontekst(this)
-        if (arbeidsgivere.harPeriodeSomBlokkererOverstyrArbeidsforhold(overstyrArbeidsforhold.skjæringstidspunkt)) {
-            overstyrArbeidsforhold.severe("Kan ikke overstyre arbeidsforhold for en pågående behandling der én eller flere perioder er behandlet ferdig")
-        }
+        overstyrArbeidsforhold.valider(arbeidsgivere)
 
         arbeidsgivere.håndter(overstyrArbeidsforhold)
         // TODO: Error hvis ingen håndterer
@@ -445,8 +443,6 @@ class Person private constructor(
         hendelse.organisasjonsnummer().let { orgnr ->
             arbeidsgivere.finn(orgnr) ?: hendelse.severe("Finner ikke arbeidsgiver")
         }
-
-    private fun MutableList<Arbeidsgiver>.finn(orgnr: String) = find { it.organisasjonsnummer() == orgnr }
 
     private fun MutableList<Arbeidsgiver>.finnEllerOpprett(orgnr: String, creator: () -> Arbeidsgiver) =
         finn(orgnr) ?: run {

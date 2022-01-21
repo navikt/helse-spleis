@@ -79,6 +79,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal companion object {
+        internal fun List<Arbeidsgiver>.finn(orgnr: String) = find { it.organisasjonsnummer() == orgnr }
 
         internal fun List<Arbeidsgiver>.kanOverstyreTidslinje(hendelse: OverstyrTidslinje): Boolean {
             val overlappendePerioder = flatMap { it.overlappendePerioder(hendelse) }
