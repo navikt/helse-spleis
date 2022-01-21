@@ -269,6 +269,8 @@ internal class Vedtaksperiode private constructor(
         return tilstand.kanReberegnes
     }
 
+    internal fun blokkererOverstyring() = !(tilstand.kanReberegnes || tilstand.type == AVVENTER_GODKJENNING)
+
     internal fun periodeReberegnetFør(ny: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
         håndterEndringIEldrePeriode(ny, Vedtaksperiodetilstand::reberegnetPeriodeFør, hendelse)
     }

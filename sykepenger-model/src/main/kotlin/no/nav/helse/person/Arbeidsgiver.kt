@@ -89,6 +89,12 @@ internal class Arbeidsgiver private constructor(
             }
         }
 
+        internal fun List<Arbeidsgiver>.harPeriodeSomBlokkererOverstyrArbeidsforhold(skjæringstidspunkt: LocalDate) = any { arbeidsgiver ->
+            arbeidsgiver.vedtaksperioder
+                .filter { vedtaksperiode -> vedtaksperiode.gjelder(skjæringstidspunkt) }
+                .any { vedtaksperiode -> vedtaksperiode.blokkererOverstyring() }
+        }
+
         internal fun List<Arbeidsgiver>.håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold): Boolean {
             forEach { arbeidsgiver ->
                 if (arbeidsgiver.håndter(overstyrArbeidsforhold)) return true

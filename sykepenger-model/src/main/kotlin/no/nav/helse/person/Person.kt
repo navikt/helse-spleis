@@ -10,6 +10,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.ghostPeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSammenligningsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.harArbeidsgivereMedOverlappendeUtbetaltePerioder
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntekt
+import no.nav.helse.person.Arbeidsgiver.Companion.harPeriodeSomBlokkererOverstyrArbeidsforhold
 import no.nav.helse.person.Arbeidsgiver.Companion.harUtbetaltPeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.harVedtaksperiodeFor
 import no.nav.helse.person.Arbeidsgiver.Companion.håndter
@@ -234,6 +235,10 @@ class Person private constructor(
 
     fun håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold) {
         overstyrArbeidsforhold.kontekst(this)
+        if (arbeidsgivere.harPeriodeSomBlokkererOverstyrArbeidsforhold(overstyrArbeidsforhold.skjæringstidspunkt)) {
+            overstyrArbeidsforhold.severe("Kan ikke overstyre arbeidsforhold for en pågående behandling der én eller flere perioder er behandlet ferdig")
+        }
+
         arbeidsgivere.håndter(overstyrArbeidsforhold)
         // TODO: Error hvis ingen håndterer
     }

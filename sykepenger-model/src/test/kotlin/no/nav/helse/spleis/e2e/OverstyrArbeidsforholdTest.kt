@@ -56,7 +56,6 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         assertEquals(setOf(a1.toString()), vilkårsgrunnlag?.inntektsopplysningPerArbeidsgiver()?.keys)
     }
 
-    @ForventetFeil("Dette gjør vi også etter lunsj")
     @Test
     fun `Kan ikke overstyre arbeidsforhold for en forlengelse som allerede har tidligere utbetalinger`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
@@ -80,9 +79,14 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
         val skjæringstidspunkt = inspektør.skjæringstidspunkt(2.vedtaksperiode)
         assertEquals(listOf(a1.toString(), a2.toString()).toList(), person.orgnummereMedRelevanteArbeidsforhold(skjæringstidspunkt).toList())
-        håndterOverstyrArbeidsforhold(skjæringstidspunkt, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, false)))
+        assertThrows<Aktivitetslogg.AktivitetException> {
+            håndterOverstyrArbeidsforhold(skjæringstidspunkt, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, false)))
+        }
+        assertSevere(
+            "Kan ikke overstyre arbeidsforhold for en pågående behandling der én eller flere perioder er behandlet ferdig",
+            AktivitetsloggFilter.person()
+        )
         assertEquals(listOf(a1.toString(), a2.toString()), person.orgnummereMedRelevanteArbeidsforhold(skjæringstidspunkt))
-        assertError(2.vedtaksperiode, "Kan ikke overstyre arbeidsforhold for en pågående behandling der én eller flere perioder er behandlet ferdig", a1)
     }
 
     @Test

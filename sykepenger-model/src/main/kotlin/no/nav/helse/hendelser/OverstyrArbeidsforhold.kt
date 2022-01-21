@@ -12,7 +12,7 @@ class OverstyrArbeidsforhold(
     meldingsreferanseId: UUID,
     private val fødselsnummer: String,
     private val aktørId: String,
-    private val skjæringstidspunkt: LocalDate,
+    internal val skjæringstidspunkt: LocalDate,
     private val overstyrteArbeidsforhold: List<ArbeidsforholdOverstyrt>
 ) : PersonHendelse(meldingsreferanseId, Aktivitetslogg()) {
     override fun fødselsnummer() = fødselsnummer
