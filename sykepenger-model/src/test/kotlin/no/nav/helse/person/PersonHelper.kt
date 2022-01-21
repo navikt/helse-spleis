@@ -1,10 +1,9 @@
 package no.nav.helse.person
 
-import no.nav.helse.Organisasjonsnummer
 import org.junit.jupiter.api.Assertions
 import java.util.*
 
-internal fun Person.arbeidsgiver(orgnummer: Organisasjonsnummer): Arbeidsgiver {
+internal fun Person.arbeidsgiver(orgnummer: String): Arbeidsgiver {
     var _arbeidsgiver: Arbeidsgiver? = null
     accept(object : PersonVisitor {
         override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {

@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.ForventetFeil
-import no.nav.helse.Organisasjonsnummer
+
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.*
@@ -14,7 +14,6 @@ import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.somFødselsnummer
-import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
@@ -685,8 +684,8 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
 
     @Test
     fun `§8-30 ledd 1 - sykepengegrunnlaget utgjør aktuell månedsinntekt omregnet til årsinntekt i kontekst av §8-30 ledd 1 - flere AG`() {
-        val AG1 = "987654321".somOrganisasjonsnummer()
-        val AG2 = "123456789".somOrganisasjonsnummer()
+        val AG1 = "987654321"
+        val AG2 = "123456789"
         val inntekt = 60000
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = AG1)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = AG2)
@@ -1210,7 +1209,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         punktum: List<Punktum>? = null,
         bokstaver: List<Bokstav>? = null,
         vedtaksperiodeId: IdInnhenter? = null,
-        organisasjonsnummer: Organisasjonsnummer = ORGNUMMER,
+        organisasjonsnummer: String = ORGNUMMER,
         inspektør: EtterlevelseInspektør = EtterlevelseInspektør(person.aktivitetslogg)
     ) {
         val resultat = inspektør.resultat(paragraf, ledd, punktum, bokstaver, vedtaksperiodeId?.id(organisasjonsnummer))
@@ -1223,7 +1222,7 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
         punktum: List<Punktum>? = null,
         bokstav: List<Bokstav>? = null,
         vedtaksperiodeId: IdInnhenter? = null,
-        organisasjonsnummer: Organisasjonsnummer = ORGNUMMER,
+        organisasjonsnummer: String = ORGNUMMER,
         inspektør: EtterlevelseInspektør = EtterlevelseInspektør(person.aktivitetslogg)
     ) {
         val resultat = inspektør.resultat(paragraf, ledd, punktum, bokstav, vedtaksperiodeId?.id(organisasjonsnummer))

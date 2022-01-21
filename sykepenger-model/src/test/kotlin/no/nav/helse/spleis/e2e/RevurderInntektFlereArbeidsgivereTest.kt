@@ -4,7 +4,6 @@ import no.nav.helse.Toggle
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.inspectors.Kilde
-import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -14,8 +13,8 @@ import java.util.*
 
 internal class RevurderInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
     private companion object {
-        val AG1 = "123456789".somOrganisasjonsnummer()
-        val AG2 = "987654321".somOrganisasjonsnummer()
+        val AG1 = "123456789"
+        val AG2 = "987654321"
     }
 
     @Test

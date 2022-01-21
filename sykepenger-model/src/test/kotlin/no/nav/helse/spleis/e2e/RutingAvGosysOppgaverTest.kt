@@ -8,7 +8,6 @@ import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -112,7 +111,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
     @Test
     fun `sjekker mot utbetalinger på tvers av arbeidsgivere`() {
         // Utbetaling 17. mars til 31. mars (AGP 1-16. mars)
-        nyttVedtak(1.mars, 31.mars, orgnummer = "999999999".somOrganisasjonsnummer())
+        nyttVedtak(1.mars, 31.mars, orgnummer = "999999999")
 
         håndterSykmelding(Sykmeldingsperiode(20.februar, 12.mars, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(20.februar, 11.mars, 80.prosent))

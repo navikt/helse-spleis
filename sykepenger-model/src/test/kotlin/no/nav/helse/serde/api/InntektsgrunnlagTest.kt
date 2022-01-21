@@ -1,6 +1,5 @@
 package no.nav.helse.serde.api
 
-import no.nav.helse.Organisasjonsnummer
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -13,7 +12,6 @@ import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.api.builders.InntektshistorikkBuilder
-import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.spleis.e2e.*
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
@@ -29,15 +27,15 @@ import java.util.*
 internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
 
     private class FinnInntektshistorikk(person: Person, private val builder: InntektshistorikkBuilder) : PersonVisitor {
-        val inntektshistorikk = mutableMapOf<Organisasjonsnummer, Inntektshistorikk>()
-        private lateinit var orgnummer: Organisasjonsnummer
+        val inntektshistorikk = mutableMapOf<String, Inntektshistorikk>()
+        private lateinit var orgnummer: String
 
         init {
             person.accept(this)
         }
 
         override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
-            orgnummer = organisasjonsnummer.somOrganisasjonsnummer()
+            orgnummer = organisasjonsnummer
         }
 
         override fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {

@@ -1,6 +1,5 @@
 package no.nav.helse.person
 
-import no.nav.helse.Organisasjonsnummer
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.testhelpers.januar
@@ -96,7 +95,7 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
     private fun inntektsmelding(
         beregnetInntekt: Inntekt = 1000.månedlig,
         førsteFraværsdag: LocalDate = 1.januar,
-        virksomhetsnummer: Organisasjonsnummer = ORGNUMMER
+        virksomhetsnummer: String = ORGNUMMER
     ) =
         Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
@@ -112,7 +111,7 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
             mottatt = LocalDateTime.now()
         )
 
-    private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode, orgnr: Organisasjonsnummer = ORGNUMMER) = Sykmelding(
+    private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode, orgnr: String = ORGNUMMER) = Sykmelding(
         meldingsreferanseId = UUID.randomUUID(),
         fnr = UNG_PERSON_FNR_2018.toString(),
         aktørId = AKTØRID,
@@ -122,7 +121,7 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
         mottatt = Sykmeldingsperiode.periode(sykeperioder.toList())!!.endInclusive.atStartOfDay()
     )
 
-    private fun søknad(vararg perioder: Søknadsperiode, orgnummer: Organisasjonsnummer = ORGNUMMER) =
+    private fun søknad(vararg perioder: Søknadsperiode, orgnummer: String = ORGNUMMER) =
         Søknad(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018.toString(),

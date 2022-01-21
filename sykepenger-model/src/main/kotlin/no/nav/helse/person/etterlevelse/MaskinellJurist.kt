@@ -1,7 +1,6 @@
 package no.nav.helse.person.etterlevelse
 
 import no.nav.helse.Fødselsnummer
-import no.nav.helse.Organisasjonsnummer
 import no.nav.helse.person.Ledd.Companion.ledd
 import no.nav.helse.person.Paragraf
 import no.nav.helse.person.Punktum.Companion.punktum
@@ -14,7 +13,7 @@ import java.util.*
 class MaskinellJurist : EtterlevelseObserver {
     private val parent: MaskinellJurist?
     private lateinit var fødselsnummer: Fødselsnummer
-    private lateinit var organisasjonsnummer: Organisasjonsnummer
+    private lateinit var organisasjonsnummer: String
     private var vedtaksperiodeId: UUID? = null
 
     private var kontekster: Map<String, String> = emptyMap()
@@ -48,7 +47,7 @@ class MaskinellJurist : EtterlevelseObserver {
         }
     }
 
-    fun medArbeidsgiver(organisasjonsnummer: Organisasjonsnummer): MaskinellJurist {
+    fun medArbeidsgiver(organisasjonsnummer: String): MaskinellJurist {
         return MaskinellJurist(this).also {
             it.fødselsnummer = fødselsnummer
             it.organisasjonsnummer = organisasjonsnummer

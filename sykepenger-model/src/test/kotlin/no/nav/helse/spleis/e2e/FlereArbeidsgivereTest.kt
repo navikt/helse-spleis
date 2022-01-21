@@ -148,12 +148,12 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     fun `overlappende arbeidsgivere ikke sendt til infotrygd`() {
         gapPeriode(1.januar til 31.januar, a1)
         gapPeriode(15.januar til 15.februar, a2)
-        assertNoErrors(a1.inspektør)
-        assertNoErrors(a2.inspektør)
+        assertNoErrors(inspektør(a1))
+        assertNoErrors(inspektør(a2))
 
         historikk(a1)
-        assertNoErrors(a1.inspektør)
-        assertNoErrors(a2.inspektør)
+        assertNoErrors(inspektør(a1))
+        assertNoErrors(inspektør(a2))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
     }
@@ -161,11 +161,11 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     @Test
     fun `vedtaksperioder atskilt med betydelig tid`() {
         prosessperiode(1.januar til 31.januar, a1)
-        assertNoErrors(a1.inspektør)
+        assertNoErrors(inspektør(a1))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
 
         prosessperiode(1.mars til 31.mars, a2)
-        assertNoErrors(a2.inspektør)
+        assertNoErrors(inspektør(a2))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
     }
 
@@ -607,7 +607,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
 
-        a1.inspektør.also {
+        inspektør(a1).also {
             assertTrue(it.personLogg.hasWarningsOrWorse())
             it.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
                 assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
@@ -615,7 +615,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
                 assertEquals(11, tidslinjeInspektør.avvistDagTeller)
             }
         }
-        a2.inspektør.also {
+        inspektør(a2).also {
             assertTrue(it.personLogg.hasWarningsOrWorse())
             it.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
                 assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
@@ -654,8 +654,8 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a2)
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
 
-        assertNoWarnings(a2.inspektør)
-        assertNoWarnings(a1.inspektør)
+        assertNoWarnings(inspektør(a1))
+        assertNoWarnings(inspektør(a2))
     }
 
     @Test
@@ -935,8 +935,8 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             , arbeidsforhold = emptyList())
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        assertEquals(0, a1.inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistDagTeller)
-        assertEquals(0, a2.inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistDagTeller)
+        assertEquals(0, inspektør(a1).utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistDagTeller)
+        assertEquals(0, inspektør(a2).utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistDagTeller)
     }
 
     @ForventetFeil("https://trello.com/c/k21yUamv")

@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.ForventetFeil
-import no.nav.helse.Organisasjonsnummer
+
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.inspectors.GrunnlagsdataInspektør
@@ -313,12 +313,12 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
-        assertEquals(1.januar, a1.inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertEquals(1.januar, a1.inspektør.skjæringstidspunkt(2.vedtaksperiode))
-        assertEquals(1.januar, a2.inspektør.skjæringstidspunkt(1.vedtaksperiode))
+        assertEquals(1.januar, inspektør(a1).skjæringstidspunkt(1.vedtaksperiode))
+        assertEquals(1.januar, inspektør(a1).skjæringstidspunkt(2.vedtaksperiode))
+        assertEquals(1.januar, inspektør(a2).skjæringstidspunkt(1.vedtaksperiode))
 
-        val utbetalingslinje1 = a1.inspektør.utbetalingslinjer(0)
-        val utbetalingslinje2 = a1.inspektør.utbetalingslinjer(1)
+        val utbetalingslinje1 = inspektør(a1).utbetalingslinjer(0)
+        val utbetalingslinje2 = inspektør(a1).utbetalingslinjer(1)
 
         assertNotEquals(utbetalingslinje1, utbetalingslinje2)
         assertEquals(utbetalingslinje1.linjerUtenOpphør().last().beløp, utbetalingslinje2.linjerUtenOpphør().last().beløp)
@@ -360,8 +360,8 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
 
-        assertEquals(1, a1.inspektør.arbeidsgiverOppdrag.size)
-        assertEquals(0, a2.inspektør.arbeidsgiverOppdrag.size)
+        assertEquals(1, inspektør(a1).arbeidsgiverOppdrag.size)
+        assertEquals(0, inspektør(a2).arbeidsgiverOppdrag.size)
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
@@ -375,13 +375,13 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
 
-        assertEquals(1, a1.inspektør.arbeidsgiverOppdrag.size)
-        assertEquals(1, a2.inspektør.arbeidsgiverOppdrag.size)
+        assertEquals(1, inspektør(a1).arbeidsgiverOppdrag.size)
+        assertEquals(1, inspektør(a2).arbeidsgiverOppdrag.size)
     }
 
     private fun nyPeriode(
         periode: Periode,
-        orgnummer: Organisasjonsnummer,
+        orgnummer: String,
         inntekt: Inntekt
     ) {
         sykmelding(
@@ -414,7 +414,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         vedtaksperiodeIdInnhenter: IdInnhenter,
         arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>? = null,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-        orgnummer: Organisasjonsnummer = ORGNUMMER,
+        orgnummer: String = ORGNUMMER,
         inntekter: List<ArbeidsgiverInntekt>,
         inntekterForSykepengegrunnlag: List<ArbeidsgiverInntekt>
 

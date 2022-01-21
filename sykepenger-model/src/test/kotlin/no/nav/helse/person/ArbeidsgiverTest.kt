@@ -5,7 +5,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.somFødselsnummer
-import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.september
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -17,7 +16,7 @@ import java.util.*
 
 internal class ArbeidsgiverTest {
     private companion object {
-        val ORGNUMMER = "888888888".somOrganisasjonsnummer()
+        val ORGNUMMER = "888888888"
     }
     @Test
     fun `ny inntektsmelding legger på inntekt på inntektHistorie`() {

@@ -10,7 +10,6 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.somFødselsnummer
-import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
 import no.nav.helse.testhelpers.TestEvent.Companion.inntektsmelding
@@ -39,7 +38,7 @@ internal class ArbeidsgiverUtbetalingerTest {
         val PERSON_67_ÅR_5_JANUAR_FNR_2018 = "05015112345".somFødselsnummer()
         val PERSON_68_ÅR_1_DESEMBER_2018 = "01125112345".somFødselsnummer()
         val PERSON_70_ÅR_1_FEBRUAR_2018 = "01024812345".somFødselsnummer()
-        val ORGNUMMER = "888888888".somOrganisasjonsnummer()
+        val ORGNUMMER = "888888888"
     }
 
     @Test
