@@ -1,11 +1,10 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.Organisasjonsnummer
+
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.spleis.e2e.*
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.testhelpers.*
@@ -21,8 +20,8 @@ import java.util.*
 internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
     private companion object {
         private val alder = UNG_PERSON_FNR_2018.alder()
-        private val a1 = "456789123".somOrganisasjonsnummer()
-        private val a2 = "789456213".somOrganisasjonsnummer()
+        private val a1 = "456789123"
+        private val a2 = "789456213"
     }
 
     @Test
@@ -355,7 +354,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
     private fun byggPerson(
         arbeidsgiverperiode: Periode = 1.januar til 16.januar,
         syktil: LocalDate = 31.januar,
-        orgnummer: Organisasjonsnummer = ORGNUMMER
+        orgnummer: String = ORGNUMMER
     ) {
         håndterSykmelding(Sykmeldingsperiode(arbeidsgiverperiode.start, syktil, 100.prosent), orgnummer = orgnummer)
         håndterSøknadMedValidering(
@@ -382,7 +381,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
     private fun byggPersonMedAnnullering(
         arbeidsgiverperiode: Periode = 1.januar til 16.januar,
         syktil: LocalDate = 31.januar,
-        orgnummer: Organisasjonsnummer = ORGNUMMER
+        orgnummer: String = ORGNUMMER
     ) {
         håndterSykmelding(Sykmeldingsperiode(arbeidsgiverperiode.start, syktil, 100.prosent), orgnummer = orgnummer)
         håndterSøknadMedValidering(
@@ -443,7 +442,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
     private fun byggPersonMedOpphør(
         arbeidsgiverperiode: Periode = 1.januar til 16.januar,
         syktil: LocalDate = 31.januar,
-        orgnummer: Organisasjonsnummer = ORGNUMMER
+        orgnummer: String = ORGNUMMER
     ) {
         håndterSykmelding(Sykmeldingsperiode(arbeidsgiverperiode.start, syktil, 100.prosent), orgnummer = orgnummer)
         håndterSøknadMedValidering(

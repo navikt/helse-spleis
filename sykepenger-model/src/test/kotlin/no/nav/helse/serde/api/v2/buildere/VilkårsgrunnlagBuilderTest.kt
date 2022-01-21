@@ -1,7 +1,7 @@
 package no.nav.helse.serde.api.v2.buildere
 
 import no.nav.helse.ForventetFeil
-import no.nav.helse.Organisasjonsnummer
+
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -10,7 +10,6 @@ import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.api.v2.*
 import no.nav.helse.serde.api.v2.Vilkårsgrunnlag
-import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.spleis.e2e.*
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
@@ -29,8 +28,8 @@ import java.util.*
 internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
 
     private companion object {
-        private val AG1 = "987654321".somOrganisasjonsnummer()
-        private val AG2 = "123456789".somOrganisasjonsnummer()
+        private val AG1 = "987654321"
+        private val AG2 = "123456789"
     }
 
     private val vilkårsgrunnlag get() = VilkårsgrunnlagBuilder(person, OppsamletSammenligningsgrunnlagBuilder(person))
@@ -403,7 +402,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
 
     private fun assertInntekt(
         inntekt: Arbeidsgiverinntekt,
-        orgnummer: Organisasjonsnummer,
+        orgnummer: String,
         sammenligningsgrunnlag: Double?,
         omregnetÅrsinntekt: Double,
         inntektskilde: Inntektkilde,

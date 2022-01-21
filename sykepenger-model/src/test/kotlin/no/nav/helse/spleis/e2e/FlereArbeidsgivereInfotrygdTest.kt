@@ -1199,9 +1199,9 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a2)
 
         //Utbetalingstidslinjen blir like lang som den som går til AvventerGodkjenning
-        assertEquals(25, a1.inspektør.utbetalingstidslinjer(1.vedtaksperiode).size)
+        assertEquals(25, inspektør(a1).utbetalingstidslinjer(1.vedtaksperiode).size)
 
-        assertEquals(25, a2.inspektør.utbetalingstidslinjer(1.vedtaksperiode).size)
+        assertEquals(25, inspektør(a2).utbetalingstidslinjer(1.vedtaksperiode).size)
     }
 
     @Test
@@ -1220,7 +1220,7 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
             orgnummer = a2
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
-        assertEquals(0, a1.inspektør.utbetalingstidslinjer(1.vedtaksperiode).size)
+        assertEquals(0, inspektør(a1).utbetalingstidslinjer(1.vedtaksperiode).size)
     }
 
     @Test
@@ -1435,7 +1435,7 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
         assertInntektskilde(a1, Inntektskilde.FLERE_ARBEIDSGIVERE)
         assertInntektskilde(a2, Inntektskilde.FLERE_ARBEIDSGIVERE)
-        assertEquals("FLERE_ARBEIDSGIVERE", a1.inspektør.sisteBehov(1.vedtaksperiode).detaljer()["inntektskilde"])
+        assertEquals("FLERE_ARBEIDSGIVERE", inspektør(a1).sisteBehov(1.vedtaksperiode).detaljer()["inntektskilde"])
 
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, TIL_UTBETALING, orgnummer = a1)
@@ -1455,7 +1455,7 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
 
         assertInntektskilde(a1, Inntektskilde.FLERE_ARBEIDSGIVERE)
         assertInntektskilde(a2, Inntektskilde.FLERE_ARBEIDSGIVERE)
-        assertEquals("FLERE_ARBEIDSGIVERE", a2.inspektør.sisteBehov(1.vedtaksperiode).detaljer()["inntektskilde"])
+        assertEquals("FLERE_ARBEIDSGIVERE", inspektør(a2).sisteBehov(1.vedtaksperiode).detaljer()["inntektskilde"])
 
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
@@ -1613,7 +1613,7 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
         assertInntektskilde(a1, Inntektskilde.FLERE_ARBEIDSGIVERE)
         assertInntektskilde(a2, Inntektskilde.FLERE_ARBEIDSGIVERE)
-        assertEquals("FLERE_ARBEIDSGIVERE", a1.inspektør.sisteBehov(1.vedtaksperiode).detaljer()["inntektskilde"])
+        assertEquals("FLERE_ARBEIDSGIVERE", inspektør(a1).sisteBehov(1.vedtaksperiode).detaljer()["inntektskilde"])
 
         håndterPåminnelse(1.vedtaksperiode, orgnummer = a2, påminnetTilstand = AVVENTER_ARBEIDSGIVERE)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
@@ -1636,7 +1636,7 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a2)
         assertInntektskilde(a1, Inntektskilde.FLERE_ARBEIDSGIVERE)
         assertInntektskilde(a2, Inntektskilde.FLERE_ARBEIDSGIVERE)
-        assertEquals("FLERE_ARBEIDSGIVERE", a2.inspektør.sisteBehov(1.vedtaksperiode).detaljer()["inntektskilde"])
+        assertEquals("FLERE_ARBEIDSGIVERE", inspektør(a2).sisteBehov(1.vedtaksperiode).detaljer()["inntektskilde"])
 
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)

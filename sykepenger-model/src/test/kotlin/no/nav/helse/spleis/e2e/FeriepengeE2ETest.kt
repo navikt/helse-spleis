@@ -13,7 +13,6 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.reflection.castAsList
-import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Klassekode
@@ -273,7 +272,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `Korrigerer en ukjent arbeidsgiver hvis feriepengene er brukt opp i spleis`() {
-        val ORGNUMMER2 = "978654321".somOrganisasjonsnummer()
+        val ORGNUMMER2 = "978654321"
         håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 30.august(2020), 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.juni(2020), 30.august(2020), 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
@@ -313,7 +312,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `Ghost arbeidsgiver fra feriepengeberegner påvirker ikke senere sykepengeberegning`() {
-        val ORGNUMMER2 = "978654321".somOrganisasjonsnummer()
+        val ORGNUMMER2 = "978654321"
         håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020),
             utbetalinger = listOf(

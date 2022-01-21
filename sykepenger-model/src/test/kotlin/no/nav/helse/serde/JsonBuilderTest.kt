@@ -1,6 +1,5 @@
 package no.nav.helse.serde
 
-import no.nav.helse.Organisasjonsnummer
 import no.nav.helse.Toggle
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -20,7 +19,6 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.infotrygdhistorikk.UgyldigPeriode
 import no.nav.helse.somFødselsnummer
-import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Oppdrag
@@ -42,7 +40,7 @@ class JsonBuilderTest {
     companion object {
         private const val aktørId = "12345"
         private val fnr = "12029240045".somFødselsnummer()
-        private val orgnummer = "987654321".somOrganisasjonsnummer()
+        private val orgnummer = "987654321"
     }
 
     @BeforeEach
@@ -191,7 +189,7 @@ class JsonBuilderTest {
     private lateinit var vedtaksperiodeId: String
     private lateinit var tilstand: TilstandType
     private lateinit var sykdomstidslinje: Sykdomstidslinje
-    private val utbetalingsliste: MutableMap<Organisasjonsnummer, List<Utbetaling>> = mutableMapOf()
+    private val utbetalingsliste: MutableMap<String, List<Utbetaling>> = mutableMapOf()
 
     private fun person(
         fom: LocalDate = 1.januar,
@@ -503,9 +501,9 @@ class JsonBuilderTest {
     private fun Person.fangeUtbetalinger() {
         utbetalingsliste.clear()
         accept(object : PersonVisitor {
-            private lateinit var orgnr: Organisasjonsnummer
+            private lateinit var orgnr: String
             override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
-                orgnr = organisasjonsnummer.somOrganisasjonsnummer()
+                orgnr = organisasjonsnummer
             }
 
             override fun postVisitUtbetalinger(utbetalinger: List<Utbetaling>) {

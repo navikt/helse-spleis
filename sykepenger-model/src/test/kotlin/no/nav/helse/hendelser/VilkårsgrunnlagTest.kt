@@ -7,7 +7,6 @@ import no.nav.helse.person.*
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
 import no.nav.helse.somFødselsnummer
-import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.spleis.e2e.TestObservatør
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt
@@ -26,7 +25,7 @@ internal class VilkårsgrunnlagTest {
     private companion object {
         private const val aktørId = "123"
         private val UNG_PERSON_FNR_2018 = "12029240045".somFødselsnummer()
-        private val orgnummer = "987654321".somOrganisasjonsnummer()
+        private val orgnummer = "987654321"
         private val INNTEKT = 30000.0.månedlig
     }
 

@@ -159,11 +159,11 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
-        assertEquals(1.januar, a1.inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertEquals(1.januar, a2.inspektør.skjæringstidspunkt(1.vedtaksperiode))
+        assertEquals(1.januar, inspektør(a1).skjæringstidspunkt(1.vedtaksperiode))
+        assertEquals(1.januar, inspektør(a2).skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(
-            a1.inspektør.vilkårsgrunnlag(1.vedtaksperiode),
-            a2.inspektør.vilkårsgrunnlag(1.vedtaksperiode)
+            inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode),
+            inspektør(a2).vilkårsgrunnlag(1.vedtaksperiode)
         )
     }
 

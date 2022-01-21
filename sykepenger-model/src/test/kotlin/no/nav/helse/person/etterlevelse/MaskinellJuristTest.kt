@@ -5,7 +5,6 @@ import no.nav.helse.person.Ledd
 import no.nav.helse.person.Paragraf
 import no.nav.helse.person.Punktum
 import no.nav.helse.somFødselsnummer
-import no.nav.helse.somOrganisasjonsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -19,7 +18,7 @@ internal class MaskinellJuristTest {
         val jurist = MaskinellJurist()
 
         val personJurist = jurist.medFnr("10052088033".somFødselsnummer())
-        val arbeidgiverJurist = personJurist.medArbeidsgiver("123456789".somOrganisasjonsnummer())
+        val arbeidgiverJurist = personJurist.medArbeidsgiver("123456789")
         val vedtaksperiodeJurist = arbeidgiverJurist.medVedtaksperiode(UUID.fromString("6bce6c83-28ab-4a8c-b7f6-8402988bc8fc"))
         val spesifikKontekst = vedtaksperiodeJurist.medKontekst("søknadsId" to "asdasd-asd-asd-asds")
 

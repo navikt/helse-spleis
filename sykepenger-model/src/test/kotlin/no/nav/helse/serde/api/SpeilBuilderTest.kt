@@ -1,6 +1,6 @@
 package no.nav.helse.serde.api
 
-import no.nav.helse.Organisasjonsnummer
+
 import no.nav.helse.Toggle
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Dagtype.Feriedag
@@ -19,7 +19,6 @@ import no.nav.helse.serde.api.v2.SykmeldingDTO
 import no.nav.helse.serde.api.v2.SøknadNavDTO
 import no.nav.helse.serde.mapping.SpeilDagtype
 import no.nav.helse.serde.reflection.Utbetalingstatus
-import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.spleis.e2e.*
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
@@ -1358,7 +1357,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
 
     @Test
     fun `Flere arbeidsgivere med ghosts`() {
-        val a5 = "567891234".somOrganisasjonsnummer()
+        val a5 = "567891234"
         håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 15.mars, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
@@ -1409,8 +1408,8 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             .single().inntekter
             .single { it.arbeidsgiver == a2.toString() }.omregnetÅrsinntekt!!.inntekterFraAOrdningen!!
 
-        assertEquals(listOf(a1, a2).map(Organisasjonsnummer::toString), personDto.arbeidsgivere.map { it.organisasjonsnummer })
-        assertEquals(listOf(a1, a2, a4).map(Organisasjonsnummer::toString), personDto.inntektsgrunnlag.single().inntekter.map { it.arbeidsgiver })
+        assertEquals(listOf(a1, a2).map(String::toString), personDto.arbeidsgivere.map { it.organisasjonsnummer })
+        assertEquals(listOf(a1, a2, a4).map(String::toString), personDto.inntektsgrunnlag.single().inntekter.map { it.arbeidsgiver })
         assertEquals(3, inntekterFraAordningen.size)
         assertEquals(listOf(33000.0, 32000.0, 31000.0), inntekterFraAordningen.map { it.sum })
     }
@@ -1451,8 +1450,8 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
 
         val personDto = serializePersonForSpeil(person)
 
-        assertEquals(listOf(a1, a2).map(Organisasjonsnummer::toString), personDto.arbeidsgivere.map { it.organisasjonsnummer })
-        assertEquals(listOf(a1, a2).map(Organisasjonsnummer::toString), personDto.inntektsgrunnlag.single().inntekter.map { it.arbeidsgiver })
+        assertEquals(listOf(a1, a2).map(String::toString), personDto.arbeidsgivere.map { it.organisasjonsnummer })
+        assertEquals(listOf(a1, a2).map(String::toString), personDto.inntektsgrunnlag.single().inntekter.map { it.arbeidsgiver })
 
         val arbeidsgiverInntektA2 = personDto.vilkårsgrunnlagHistorikk.values.last()[1.januar]?.inntekter?.first { it.organisasjonsnummer == a2.toString() }
 

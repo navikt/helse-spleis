@@ -25,7 +25,7 @@ class Inntektsopplysning private constructor(
 
     internal fun valider(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate, nødnummer: Nødnummer): Boolean {
         if (!erRelevant(skjæringstidspunkt)) return true
-        if (orgnummer.isBlank()) aktivitetslogg.error("Organisasjonsnummer for inntektsopplysning fra Infotrygd mangler")
+        if (orgnummer.isBlank()) aktivitetslogg.error("String for inntektsopplysning fra Infotrygd mangler")
         else if (orgnummer in nødnummer) aktivitetslogg.error("Det er registrert bruk av på nødnummer")
         return !aktivitetslogg.hasErrorsOrWorse()
     }

@@ -4,7 +4,6 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.spleis.e2e.*
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
@@ -16,8 +15,8 @@ import org.junit.jupiter.api.Test
 internal class SammenligningsgrunnlagBuilderTest : AbstractEndToEndTest() {
 
     private companion object {
-        private val AG1 = "987654321".somOrganisasjonsnummer()
-        private val AG2 = "123456789".somOrganisasjonsnummer()
+        private val AG1 = "987654321"
+        private val AG2 = "123456789"
     }
 
     private val grunnlag get() = OppsamletSammenligningsgrunnlagBuilder(person)

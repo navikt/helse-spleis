@@ -1,6 +1,5 @@
 package no.nav.helse.inspectors
 
-import no.nav.helse.Organisasjonsnummer
 import no.nav.helse.antallEtterspurteBehov
 import no.nav.helse.etterspurteBehov
 import no.nav.helse.etterspurteBehovFinnes
@@ -23,7 +22,7 @@ import java.util.*
 
 internal class TestArbeidsgiverInspektør(
     private val person: Person,
-    val orgnummer: Organisasjonsnummer
+    val orgnummer: String
 ) : ArbeidsgiverVisitor, VilkårsgrunnlagHistorikkVisitor {
     internal var vedtaksperiodeTeller: Int = 0
         private set
@@ -84,7 +83,7 @@ internal class TestArbeidsgiverInspektør(
         }
     }
 
-    private class HentAktivitetslogg(person: Person, private val valgfriOrgnummer: Organisasjonsnummer?) : PersonVisitor {
+    private class HentAktivitetslogg(person: Person, private val valgfriOrgnummer: String?) : PersonVisitor {
         lateinit var aktivitetslogg: Aktivitetslogg
         lateinit var arbeidsgiver: Arbeidsgiver
         val vilkårsgrunnlagHistorikk = mutableListOf<Pair<LocalDate,VilkårsgrunnlagHistorikk.Grunnlagsdata>>()

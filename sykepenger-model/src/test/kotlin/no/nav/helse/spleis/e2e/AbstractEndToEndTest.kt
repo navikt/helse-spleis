@@ -6,7 +6,6 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.person.*
-import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.BeforeEach
@@ -49,7 +48,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         assertTilstander(
             vedtaksperiodeIdInnhenter = vedtaksperiodeIdInnhenter,
             tilstander = tilstander,
-            orgnummer = arbeidsgiver.organisasjonsnummer().somOrganisasjonsnummer(),
+            orgnummer = arbeidsgiver.organisasjonsnummer(),
             inspektør = this
         )
     }
