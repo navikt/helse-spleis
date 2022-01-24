@@ -672,8 +672,7 @@ class Person private constructor(
         return aktiveArbeidsforhold.size == 1 && aktiveArbeidsforhold.single().organisasjonsnummer() != orgnummer
     }
 
-    internal fun vilkårsprøvEtterNyInntekt(hendelse: OverstyrInntekt) {
-        val skjæringstidspunkt = hendelse.skjæringstidspunkt
+    internal fun vilkårsprøvEtterNyInntekt(hendelse: PersonHendelse, skjæringstidspunkt: LocalDate) {
         val sykepengegrunnlag = beregnSykepengegrunnlag(skjæringstidspunkt, hendelse)
         val sammenligningsgrunnlag = beregnSammenligningsgrunnlag(skjæringstidspunkt)
             ?: hendelse.severe("Fant ikke sammenligningsgrunnlag for skjæringstidspunkt: ${skjæringstidspunkt}. Kan ikke revurdere inntekt.")
@@ -690,7 +689,7 @@ class Person private constructor(
 
         when (val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)) {
             is VilkårsgrunnlagHistorikk.Grunnlagsdata -> {
-                val harMinimumInntekt = validerMinimumInntekt(hendelse, fødselsnummer, hendelse.skjæringstidspunkt, sykepengegrunnlag)
+                val harMinimumInntekt = validerMinimumInntekt(hendelse, fødselsnummer, skjæringstidspunkt, sykepengegrunnlag)
                 val grunnlagselement = grunnlag.kopierGrunnlagsdataMed(
                     sykepengegrunnlag = sykepengegrunnlag,
                     sammenligningsgrunnlag = sammenligningsgrunnlag,
@@ -710,5 +709,4 @@ class Person private constructor(
     internal fun infotrygdUtbetalingstidslinje(organisasjonsnummer: String) = infotrygdhistorikk.utbetalingstidslinje(organisasjonsnummer)
 
     internal fun loggførHendelsesreferanse(orgnummer: String, skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID) = arbeidsgivere.forEach { it.loggførHendelsesreferanse(orgnummer, skjæringstidspunkt, meldingsreferanseId) }
-
 }

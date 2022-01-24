@@ -1436,7 +1436,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
             vedtaksperiode.person.nyInntekt(hendelse)
-            vedtaksperiode.person.vilkårsprøvEtterNyInntekt(hendelse)
+            vedtaksperiode.person.vilkårsprøvEtterNyInntekt(hendelse, vedtaksperiode.skjæringstidspunkt)
             if (!hendelse.hasErrorsOrWorse()) {
                 vedtaksperiode.tilstand(hendelse, AvventerHistorikkRevurdering)
             } else {
@@ -2000,6 +2000,8 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, overstyrArbeidsforhold: OverstyrArbeidsforhold): Boolean {
             vedtaksperiode.person.lagreOverstyrArbeidsforhold(overstyrArbeidsforhold)
+            vedtaksperiode.person.vilkårsprøvEtterNyInntekt(overstyrArbeidsforhold, vedtaksperiode.skjæringstidspunkt)
+            vedtaksperiode.tilstand(overstyrArbeidsforhold, AvventerHistorikk)
             return true
         }
 

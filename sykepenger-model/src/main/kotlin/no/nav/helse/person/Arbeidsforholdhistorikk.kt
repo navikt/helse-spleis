@@ -107,7 +107,7 @@ internal class Arbeidsforholdhistorikk private constructor(
 
         companion object {
             internal fun List<Arbeidsforhold>.harArbeidsforholdSomErNyereEnnTreMåneder(skjæringstidspunkt: LocalDate) =
-                any { it.harArbeidetMindreEnnTreMåneder(skjæringstidspunkt) }
+                any { it.harArbeidetMindreEnnTreMåneder(skjæringstidspunkt) && it.erAktivt }
 
             internal fun Collection<Arbeidsforhold>.harAktivtArbeidsforhold() = any { it.erAktivt }
         }

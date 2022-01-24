@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.ForventetFeil
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.testhelpers.desember
@@ -33,7 +32,6 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         assertEquals(listOf(a1), person.orgnummereMedRelevanteArbeidsforhold(skjæringstidspunkt))
     }
 
-    @ForventetFeil("Dette gjør vi etter lunsj")
     @Test
     fun `Overstyring av arbeidsforhold fører til et nytt vilkårsgrunnlag med nye inntektsopplysninger`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
