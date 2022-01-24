@@ -1109,7 +1109,7 @@ internal class Vedtaksperiode private constructor(
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
 
         override fun tidligerePeriodeRebehandles(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.tilstand(hendelse, AvventerSøknadUferdigForlengelse)
+            vedtaksperiode.tilstand(hendelse, MottattSykmeldingUferdigForlengelse)
         }
 
         override fun håndterTidligereUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
