@@ -3,12 +3,15 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.*
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
+import java.time.LocalDateTime
+import no.nav.helse.person.TilstandType.TIL_INFOTRYGD as TIL_INFOTRYGD1
 
 internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
     @Test
@@ -271,5 +274,44 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         val vilkårsgrunnlag = person.vilkårsgrunnlagFor(1.januar)
         assertEquals(setOf(a2, a3), vilkårsgrunnlag?.inntektsopplysningPerArbeidsgiver()?.keys)
+    }
+
+    @ForventetFeil("trenger implementasjon")
+    @Test
+    fun `kan ikke overstyre arbeidsforhold dersom ingen vedtaksperioder kan håndtere hendelsen`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null)
+            ),
+            inntektsvurdering = Inntektsvurdering(
+                listOf(
+                    sammenligningsgrunnlag(a1, 1.januar, INNTEKT.repeat(12)),
+                    sammenligningsgrunnlag(a2, 1.januar, 1000.månedlig.repeat(1))
+                )
+            ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                inntekter = listOf(
+                    grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
+                    grunnlag(a2, 1.januar, 1000.månedlig.repeat(1))
+                ),
+                arbeidsforhold = emptyList()
+            ),
+            orgnummer = a1
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterPåminnelse(1.vedtaksperiode, AVVENTER_GODKJENNING, LocalDateTime.MIN, orgnummer = a1) // Forkaster vedtaksperiode pga makstid
+        assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD1)
+        assertThrows<Aktivitetslogg.AktivitetException> {
+            håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, false)))
+        }
+        assertSevere("Kan ikke overstyre arbeidsforhold fordi ingen vedtaksperioder håndterte hendelsen", AktivitetsloggFilter.person())
     }
 }
