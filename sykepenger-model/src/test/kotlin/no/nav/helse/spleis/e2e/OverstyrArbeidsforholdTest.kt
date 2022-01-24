@@ -1,10 +1,7 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.ForventetFeil
-import no.nav.helse.desember
-import no.nav.helse.februar
+import no.nav.helse.*
 import no.nav.helse.hendelser.*
-import no.nav.helse.januar
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -240,5 +237,39 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         val vilkårsgrunnlag = person.vilkårsgrunnlagFor(1.januar)
         assertEquals(setOf(a1, a2), vilkårsgrunnlag?.inntektsopplysningPerArbeidsgiver()?.keys)
         assertEquals(setOf(a1, a2, a3), vilkårsgrunnlag?.sammenligningsgrunnlagPerArbeidsgiver()?.keys)
+    }
+
+    @Test
+    fun `tar med inntekt fra inntektsmelding selv om vi ikke finner et aktivt arbeidsforhold i arbeidsforholdhistorikken`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, 30.november(2017)),
+                Vilkårsgrunnlag.Arbeidsforhold(a3, LocalDate.EPOCH),
+            ),
+            inntektsvurdering = Inntektsvurdering(
+                inntekter = listOf(
+                    sammenligningsgrunnlag(a1, 1.januar, INNTEKT.repeat(12)),
+                    sammenligningsgrunnlag(a3, 1.januar, INNTEKT.repeat(12))
+                )
+            ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                inntekter = listOf(
+                    grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
+                    grunnlag(a3, 1.januar, INNTEKT.repeat(3))
+                ),
+                arbeidsforhold = emptyList()
+            ),
+            orgnummer = a2
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
+        val vilkårsgrunnlag = person.vilkårsgrunnlagFor(1.januar)
+        assertEquals(setOf(a2, a3), vilkårsgrunnlag?.inntektsopplysningPerArbeidsgiver()?.keys)
     }
 }
