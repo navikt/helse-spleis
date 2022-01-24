@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggle
+import no.nav.helse.*
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
@@ -8,11 +8,6 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.serde.api.BegrunnelseDTO
-import no.nav.helse.somFødselsnummer
-import no.nav.helse.testhelpers.desember
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.juli
-import no.nav.helse.testhelpers.mars
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals

@@ -1,10 +1,10 @@
 package no.nav.helse.person
 
+import no.nav.helse.april
+import no.nav.helse.desember
+import no.nav.helse.januar
+import no.nav.helse.juni
 import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold
-import no.nav.helse.testhelpers.april
-import no.nav.helse.testhelpers.desember
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.juni
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

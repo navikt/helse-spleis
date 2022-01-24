@@ -4,7 +4,7 @@ import no.nav.helse.Grunnbeløp
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.testhelpers.NAV
-import no.nav.helse.testhelpers.april
+import no.nav.helse.april
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag.Companion.reflectedArbeidsgiverBeløp
 import no.nav.helse.økonomi.Inntekt.Companion.daglig

@@ -5,7 +5,7 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.assertNotNull
-import no.nav.helse.testhelpers.januar
+import no.nav.helse.januar
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje

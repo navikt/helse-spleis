@@ -1,10 +1,13 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Fødselsnummer
+import no.nav.helse.desember
 
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.hendelser.utbetaling.*
+import no.nav.helse.januar
+import no.nav.helse.oktober
 import no.nav.helse.person.*
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode

@@ -4,8 +4,8 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.TestEvent
-import no.nav.helse.testhelpers.februar
-import no.nav.helse.testhelpers.januar
+import no.nav.helse.februar
+import no.nav.helse.januar
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent

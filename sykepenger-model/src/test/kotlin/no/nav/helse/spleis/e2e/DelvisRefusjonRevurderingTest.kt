@@ -3,8 +3,8 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.Toggle
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.*
-import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent

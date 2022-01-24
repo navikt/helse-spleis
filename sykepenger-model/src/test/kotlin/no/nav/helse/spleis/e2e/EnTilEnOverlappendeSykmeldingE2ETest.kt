@@ -5,10 +5,10 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
+import no.nav.helse.januar
+import no.nav.helse.oktober
 import no.nav.helse.person.TilstandType.*
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.oktober
-import no.nav.helse.testhelpers.september
+import no.nav.helse.september
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue

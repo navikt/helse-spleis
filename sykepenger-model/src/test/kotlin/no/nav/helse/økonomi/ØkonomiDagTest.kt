@@ -1,8 +1,11 @@
 package no.nav.helse.økonomi
 
-import no.nav.helse.Grunnbeløp
+import no.nav.helse.*
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.ARB
+import no.nav.helse.testhelpers.AVV
+import no.nav.helse.testhelpers.NAV
+import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje

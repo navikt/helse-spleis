@@ -5,9 +5,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.ForlengelseFraInfotrygd
-import no.nav.helse.testhelpers.april
-import no.nav.helse.testhelpers.februar
-import no.nav.helse.testhelpers.januar
+import no.nav.helse.april
+import no.nav.helse.februar
+import no.nav.helse.januar
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test

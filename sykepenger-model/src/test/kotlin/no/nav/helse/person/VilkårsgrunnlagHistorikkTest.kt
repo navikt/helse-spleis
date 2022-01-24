@@ -21,6 +21,8 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
+import no.nav.helse.desember
+import no.nav.helse.januar
 
 internal class VilkårsgrunnlagHistorikkTest {
     private val historikk = VilkårsgrunnlagHistorikk()

@@ -1,6 +1,9 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.desember
+import no.nav.helse.februar
 import no.nav.helse.hendelser.til
+import no.nav.helse.januar
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions.assertEquals

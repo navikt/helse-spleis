@@ -1,16 +1,14 @@
 package no.nav.helse.person.builders
 
 import no.nav.helse.hendelser.Medlemskapsvurdering
-import no.nav.helse.hendelser.VilkårsgrunnlagTest
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.*
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.NAV
-import no.nav.helse.testhelpers.januar
+import no.nav.helse.januar
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Oppdrag
-import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue

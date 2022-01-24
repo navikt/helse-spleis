@@ -20,6 +20,9 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.januar
+import no.nav.helse.oktober
+import no.nav.helse.desember
 
 internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
 

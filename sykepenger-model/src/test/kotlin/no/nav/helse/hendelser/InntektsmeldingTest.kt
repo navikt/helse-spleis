@@ -6,9 +6,9 @@ import no.nav.helse.hentInfo
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.sykdomstidslinje.Dag.*
-import no.nav.helse.testhelpers.februar
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.mars
+import no.nav.helse.februar
+import no.nav.helse.januar
+import no.nav.helse.mars
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN

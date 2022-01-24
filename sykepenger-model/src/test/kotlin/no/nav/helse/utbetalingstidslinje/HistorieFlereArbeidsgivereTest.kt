@@ -1,9 +1,9 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.til
-import no.nav.helse.testhelpers.februar
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.mars
+import no.nav.helse.februar
+import no.nav.helse.januar
+import no.nav.helse.mars
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import org.junit.jupiter.api.Test
 

@@ -17,6 +17,11 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.januar
+import no.nav.helse.april
+import no.nav.helse.mai
+import no.nav.helse.september
+import no.nav.helse.desember
 
 internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
     private lateinit var hendelse: ArbeidstakerHendelse

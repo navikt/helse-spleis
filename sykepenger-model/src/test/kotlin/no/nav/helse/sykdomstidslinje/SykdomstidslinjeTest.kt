@@ -1,5 +1,6 @@
 package no.nav.helse.sykdomstidslinje
 
+import no.nav.helse.*
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.sykdomstidslinje.Dag.Companion.default

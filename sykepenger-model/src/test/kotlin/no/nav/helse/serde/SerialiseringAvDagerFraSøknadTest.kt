@@ -7,8 +7,8 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Person
 import no.nav.helse.somFødselsnummer
-import no.nav.helse.testhelpers.april
-import no.nav.helse.testhelpers.januar
+import no.nav.helse.april
+import no.nav.helse.januar
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach

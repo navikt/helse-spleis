@@ -3,7 +3,7 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.testhelpers.NAV
-import no.nav.helse.testhelpers.januar
+import no.nav.helse.januar
 import no.nav.helse.testhelpers.tidslinjeOf
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach

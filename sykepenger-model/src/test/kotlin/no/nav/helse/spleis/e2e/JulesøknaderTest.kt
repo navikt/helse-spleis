@@ -5,8 +5,8 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.TilstandType
-import no.nav.helse.testhelpers.desember
-import no.nav.helse.testhelpers.november
+import no.nav.helse.desember
+import no.nav.helse.november
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test

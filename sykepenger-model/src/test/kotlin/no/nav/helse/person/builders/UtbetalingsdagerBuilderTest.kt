@@ -1,5 +1,6 @@
 package no.nav.helse.person.builders
 
+import no.nav.helse.januar
 import no.nav.helse.person.PersonObserver.Utbetalingsdag
 import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.*
 import no.nav.helse.serde.api.BegrunnelseDTO

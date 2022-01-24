@@ -26,6 +26,16 @@ import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 import java.time.Year
 import kotlin.math.roundToInt
+import no.nav.helse.januar
+import no.nav.helse.mars
+import no.nav.helse.mai
+import no.nav.helse.juni
+import no.nav.helse.juli
+import no.nav.helse.august
+import no.nav.helse.september
+import no.nav.helse.oktober
+import no.nav.helse.november
+import no.nav.helse.desember
 
 internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     private val logCollector = LogCollector()

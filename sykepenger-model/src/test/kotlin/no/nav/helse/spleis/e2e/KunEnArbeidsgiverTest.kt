@@ -30,6 +30,18 @@ import java.time.YearMonth
 import java.time.temporal.TemporalAdjusters.firstDayOfMonth
 import java.time.temporal.TemporalAdjusters.lastDayOfMonth
 import java.util.*
+import no.nav.helse.januar
+import no.nav.helse.februar
+import no.nav.helse.mars
+import no.nav.helse.april
+import no.nav.helse.mai
+import no.nav.helse.juni
+import no.nav.helse.juli
+import no.nav.helse.august
+import no.nav.helse.september
+import no.nav.helse.oktober
+import no.nav.helse.november
+import no.nav.helse.desember
 
 internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 

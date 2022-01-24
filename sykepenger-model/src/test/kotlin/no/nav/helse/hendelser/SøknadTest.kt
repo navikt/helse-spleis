@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.*
 import no.nav.helse.hendelser.Søknad.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.hentErrors
@@ -8,7 +9,6 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test

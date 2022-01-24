@@ -6,6 +6,10 @@ import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import no.nav.helse.desember
+import no.nav.helse.februar
+import no.nav.helse.januar
+import no.nav.helse.mars
 
 internal class UtbetalingstidslinjeTest {
 

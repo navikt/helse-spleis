@@ -3,10 +3,10 @@ package no.nav.helse.hendelser
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Sykepengegrunnlag
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
-import no.nav.helse.testhelpers.desember
+import no.nav.helse.desember
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
-import no.nav.helse.testhelpers.januar
+import no.nav.helse.januar
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig

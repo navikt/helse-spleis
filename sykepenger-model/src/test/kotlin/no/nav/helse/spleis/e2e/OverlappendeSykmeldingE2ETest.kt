@@ -7,7 +7,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.TilstandType.*
-import no.nav.helse.testhelpers.januar
+import no.nav.helse.januar
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*

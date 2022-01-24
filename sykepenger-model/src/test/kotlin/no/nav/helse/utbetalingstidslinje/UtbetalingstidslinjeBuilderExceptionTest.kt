@@ -4,7 +4,7 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.testhelpers.TestEvent
-import no.nav.helse.testhelpers.januar
+import no.nav.helse.januar
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

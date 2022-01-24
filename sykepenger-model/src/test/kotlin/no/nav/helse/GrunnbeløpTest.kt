@@ -1,9 +1,5 @@
 package no.nav.helse
 
-import no.nav.helse.testhelpers.april
-import no.nav.helse.testhelpers.mai
-import no.nav.helse.testhelpers.oktober
-import no.nav.helse.testhelpers.september
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.assertEquals

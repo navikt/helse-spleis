@@ -1,8 +1,11 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.UtbetalingstidslinjeInspektør
 import no.nav.helse.inspectors.inspektør
+import no.nav.helse.januar
+import no.nav.helse.mars
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions.*

@@ -2,10 +2,10 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.november
+import no.nav.helse.oktober
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.somFødselsnummer
-import no.nav.helse.testhelpers.november
-import no.nav.helse.testhelpers.oktober
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue

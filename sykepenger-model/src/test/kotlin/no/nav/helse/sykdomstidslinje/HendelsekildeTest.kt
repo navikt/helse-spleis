@@ -1,7 +1,7 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.testhelpers.TestEvent
-import no.nav.helse.testhelpers.januar
+import no.nav.helse.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows

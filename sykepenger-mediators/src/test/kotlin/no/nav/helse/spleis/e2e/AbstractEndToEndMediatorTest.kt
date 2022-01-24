@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import com.zaxxer.hikari.HikariConfig
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.januar
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.person.TilstandType
 import no.nav.helse.serde.reflection.Utbetalingstatus
@@ -16,7 +17,6 @@ import no.nav.helse.spleis.db.PersonPostgresRepository
 import no.nav.helse.spleis.e2e.SpleisDataSource.migratedDb
 import no.nav.helse.spleis.meldinger.TestRapid
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
-import no.nav.helse.testhelpers.januar
 import no.nav.inntektsmeldingkontrakt.OpphoerAvNaturalytelse
 import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.syfo.kafka.felles.FravarDTO

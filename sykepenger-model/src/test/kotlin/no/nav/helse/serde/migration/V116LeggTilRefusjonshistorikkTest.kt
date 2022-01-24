@@ -3,7 +3,7 @@ package no.nav.helse.serde.migration
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.serde.serdeObjectMapper
-import no.nav.helse.testhelpers.januar
+import no.nav.helse.januar
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test

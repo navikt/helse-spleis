@@ -1,7 +1,11 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.april
+import no.nav.helse.februar
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.januar
+import no.nav.helse.mars
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.*

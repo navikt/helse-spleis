@@ -1,9 +1,9 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
-import no.nav.helse.testhelpers.februar
-import no.nav.helse.testhelpers.januar
+import no.nav.helse.januar
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -103,9 +103,9 @@ internal class ArbeidsgiverperiodetellerTest {
 
     @Test
     fun `ferie teller ikke med i arbeidsgiverperiodetelling dersom dagen etter ferie er noe annet enn sykedag`() {
-        1.januar().tell()
+        1.januar.tell()
         (2.januar til 31.januar).feriedager()
-        1.februar().oppholdsdag()
+        1.februar.oppholdsdag()
         assertEquals(1, strategi.antallDagerSomInngårIArbeidsgiverperiodetelling)
         assertEquals(30, strategi.antallSykedagerEllerFridagerSomIkkeInngårIArbeidsgiverperiodetelling)
         assertEquals(0, observatør.arbeidsgiverperioder())

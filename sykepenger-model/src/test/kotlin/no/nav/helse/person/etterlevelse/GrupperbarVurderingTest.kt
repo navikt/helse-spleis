@@ -2,7 +2,7 @@ package no.nav.helse.person.etterlevelse
 
 import no.nav.helse.person.Ledd.Companion.ledd
 import no.nav.helse.person.Paragraf
-import no.nav.helse.testhelpers.januar
+import no.nav.helse.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

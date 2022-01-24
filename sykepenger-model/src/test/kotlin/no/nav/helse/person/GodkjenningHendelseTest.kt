@@ -15,6 +15,9 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.januar
+import no.nav.helse.oktober
+import no.nav.helse.desember
 
 internal class GodkjenningHendelseTest : AbstractPersonTest() {
     private companion object {

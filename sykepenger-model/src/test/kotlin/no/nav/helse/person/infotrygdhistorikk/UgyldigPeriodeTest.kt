@@ -1,6 +1,6 @@
 package no.nav.helse.person.infotrygdhistorikk
 
-import no.nav.helse.testhelpers.januar
+import no.nav.helse.januar
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 

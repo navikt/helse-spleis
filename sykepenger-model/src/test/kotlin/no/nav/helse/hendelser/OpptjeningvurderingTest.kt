@@ -1,10 +1,10 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.testhelpers.desember
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.november
-import no.nav.helse.testhelpers.september
+import no.nav.helse.desember
+import no.nav.helse.januar
+import no.nav.helse.november
+import no.nav.helse.september
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

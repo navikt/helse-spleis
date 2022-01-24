@@ -13,10 +13,10 @@ import no.nav.helse.serde.api.v2.Generasjon
 import no.nav.helse.serde.api.v2.Tidslinjeperiode
 import no.nav.helse.serde.api.v2.UberegnetPeriode
 import no.nav.helse.spleis.e2e.*
-import no.nav.helse.testhelpers.desember
-import no.nav.helse.testhelpers.februar
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.mars
+import no.nav.helse.desember
+import no.nav.helse.februar
+import no.nav.helse.januar
+import no.nav.helse.mars
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals

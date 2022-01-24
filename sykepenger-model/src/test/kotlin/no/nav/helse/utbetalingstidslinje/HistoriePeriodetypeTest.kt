@@ -1,5 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.*
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.inspectors.inspektør
@@ -9,7 +10,6 @@ import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
-import no.nav.helse.somFødselsnummer
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.testhelpers.*

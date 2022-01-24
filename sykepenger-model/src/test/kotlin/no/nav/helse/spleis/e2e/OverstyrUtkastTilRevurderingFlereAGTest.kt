@@ -2,8 +2,8 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.TilstandType.*
-import no.nav.helse.testhelpers.februar
-import no.nav.helse.testhelpers.januar
+import no.nav.helse.februar
+import no.nav.helse.januar
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Fridag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
 import org.junit.jupiter.api.Test

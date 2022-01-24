@@ -8,13 +8,13 @@ import no.nav.helse.Toggle.Companion.disable
 import no.nav.helse.Toggle.Companion.enable
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
+import no.nav.helse.januar
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spleis.MessageMediator
 import no.nav.helse.spleis.TestHendelseMediator
 import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
-import no.nav.helse.testhelpers.januar
 import no.nav.inntektsmeldingkontrakt.Naturalytelse
 import no.nav.inntektsmeldingkontrakt.OpphoerAvNaturalytelse
 import no.nav.inntektsmeldingkontrakt.Periode

@@ -7,10 +7,10 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.testhelpers.april
+import no.nav.helse.april
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
-import no.nav.helse.testhelpers.mai
-import no.nav.helse.testhelpers.mars
+import no.nav.helse.mai
+import no.nav.helse.mars
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals

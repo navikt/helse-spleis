@@ -5,9 +5,9 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.januar
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
-import no.nav.helse.testhelpers.januar
 import no.nav.syfo.kafka.felles.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

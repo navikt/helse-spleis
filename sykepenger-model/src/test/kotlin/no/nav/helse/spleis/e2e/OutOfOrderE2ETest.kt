@@ -1,11 +1,11 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.*
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utdanning
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.TilstandType.*
-import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test

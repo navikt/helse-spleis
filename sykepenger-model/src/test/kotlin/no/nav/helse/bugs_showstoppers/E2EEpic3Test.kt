@@ -1,6 +1,6 @@
 package no.nav.helse.bugs_showstoppers
 
-import no.nav.helse.Grunnbeløp
+import no.nav.helse.*
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
@@ -15,7 +15,7 @@ import no.nav.helse.serde.serialize
 import no.nav.helse.spleis.e2e.*
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.*
-import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Inntekt.Companion.daglig

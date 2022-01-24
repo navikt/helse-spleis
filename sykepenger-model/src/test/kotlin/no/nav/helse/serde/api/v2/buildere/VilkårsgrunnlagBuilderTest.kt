@@ -11,9 +11,9 @@ import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.api.v2.*
 import no.nav.helse.serde.api.v2.Vilkårsgrunnlag
 import no.nav.helse.spleis.e2e.*
-import no.nav.helse.testhelpers.desember
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.mars
+import no.nav.helse.desember
+import no.nav.helse.januar
+import no.nav.helse.mars
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals

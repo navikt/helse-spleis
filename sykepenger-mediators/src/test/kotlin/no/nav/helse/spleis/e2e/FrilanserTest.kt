@@ -1,8 +1,8 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.januar
 import no.nav.helse.spleis.TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning
 import no.nav.helse.spleis.TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Arbeidsforhold
-import no.nav.helse.testhelpers.januar
 import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.syfo.kafka.felles.FravarDTO
 import no.nav.syfo.kafka.felles.FravarstypeDTO

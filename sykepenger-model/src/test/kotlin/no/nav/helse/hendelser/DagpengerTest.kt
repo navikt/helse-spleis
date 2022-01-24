@@ -1,7 +1,7 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.mars
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.testhelpers.mars
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test

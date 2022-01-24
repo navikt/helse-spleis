@@ -1,12 +1,8 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.*
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
-import no.nav.helse.somFødselsnummer
-import no.nav.helse.testhelpers.april
-import no.nav.helse.testhelpers.februar
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.mars
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.Year

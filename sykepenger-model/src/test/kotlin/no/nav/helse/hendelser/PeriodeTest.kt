@@ -1,8 +1,8 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.*
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.slutterEtter
-import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows

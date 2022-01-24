@@ -1,9 +1,9 @@
 package no.nav.helse.utbetalingslinjer
 
+import no.nav.helse.*
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
-import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Endringskode.*
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
 import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse

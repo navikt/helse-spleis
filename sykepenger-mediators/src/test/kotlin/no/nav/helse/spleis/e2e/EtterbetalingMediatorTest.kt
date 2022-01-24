@@ -1,8 +1,8 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.mai
+import no.nav.helse.oktober
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
-import no.nav.helse.testhelpers.mai
-import no.nav.helse.testhelpers.oktober
 import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
 import org.junit.jupiter.api.Test

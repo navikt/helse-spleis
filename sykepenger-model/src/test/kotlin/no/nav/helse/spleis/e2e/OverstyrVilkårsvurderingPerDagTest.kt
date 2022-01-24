@@ -2,7 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
-import no.nav.helse.testhelpers.januar
+import no.nav.helse.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

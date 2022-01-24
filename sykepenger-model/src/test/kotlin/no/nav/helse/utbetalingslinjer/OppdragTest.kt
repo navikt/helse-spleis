@@ -4,8 +4,8 @@ import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.testhelpers.desember
-import no.nav.helse.testhelpers.januar
+import no.nav.helse.desember
+import no.nav.helse.januar
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime

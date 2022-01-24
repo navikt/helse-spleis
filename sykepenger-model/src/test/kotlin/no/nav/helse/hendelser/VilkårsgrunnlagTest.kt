@@ -1,12 +1,12 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.inspectors.GrunnlagsdataInspektør
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.person.*
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
-import no.nav.helse.somFødselsnummer
 import no.nav.helse.spleis.e2e.TestObservatør
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt

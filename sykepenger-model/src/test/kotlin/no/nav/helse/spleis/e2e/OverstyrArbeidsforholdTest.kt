@@ -2,9 +2,9 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.testhelpers.desember
-import no.nav.helse.testhelpers.februar
-import no.nav.helse.testhelpers.januar
+import no.nav.helse.desember
+import no.nav.helse.februar
+import no.nav.helse.januar
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

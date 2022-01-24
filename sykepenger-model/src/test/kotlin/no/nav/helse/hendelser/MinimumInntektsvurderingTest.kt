@@ -6,8 +6,8 @@ import no.nav.helse.person.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Sykepengegrunnlag
 import no.nav.helse.somFødselsnummer
-import no.nav.helse.testhelpers.april
-import no.nav.helse.testhelpers.mai
+import no.nav.helse.april
+import no.nav.helse.mai
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.assertFalse

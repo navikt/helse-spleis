@@ -10,7 +10,7 @@ import no.nav.helse.serde.api.v2.HendelseDTO
 import no.nav.helse.serde.api.v2.InntektsmeldingDTO
 import no.nav.helse.serde.api.v2.SykmeldingDTO
 import no.nav.helse.serde.api.v2.SøknadNavDTO
-import no.nav.helse.testhelpers.desember
+import no.nav.helse.desember
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import java.time.LocalDate

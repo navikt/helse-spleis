@@ -1,10 +1,10 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.testhelpers.april
-import no.nav.helse.testhelpers.februar
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.mars
+import no.nav.helse.april
+import no.nav.helse.februar
+import no.nav.helse.januar
+import no.nav.helse.mars
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

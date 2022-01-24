@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.*
 import no.nav.helse.ForventetFeil
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Companion.WARN_UENIGHET_ARBEIDSGIVERPERIODE

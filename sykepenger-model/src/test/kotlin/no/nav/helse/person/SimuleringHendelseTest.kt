@@ -1,6 +1,6 @@
 package no.nav.helse.person
 
-import no.nav.helse.Toggle
+import no.nav.helse.*
 import no.nav.helse.Toggle.Companion.enable
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom

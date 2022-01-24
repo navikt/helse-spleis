@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.testhelpers.januar
+import no.nav.helse.januar
 import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Test

@@ -1,7 +1,7 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.Medlemskapsvurdering
-import no.nav.helse.testhelpers.januar
+import no.nav.helse.januar
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosent

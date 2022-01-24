@@ -1,4 +1,4 @@
-package no.nav.helse.testhelpers
+package no.nav.helse
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

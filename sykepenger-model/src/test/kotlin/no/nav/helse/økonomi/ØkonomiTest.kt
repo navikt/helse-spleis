@@ -1,7 +1,7 @@
 package no.nav.helse.økonomi
 
 import no.nav.helse.hendelser.til
-import no.nav.helse.testhelpers.januar
+import no.nav.helse.januar
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig

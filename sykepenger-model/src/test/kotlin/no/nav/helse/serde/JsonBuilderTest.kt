@@ -1,6 +1,6 @@
 package no.nav.helse.serde
 
-import no.nav.helse.Toggle
+import no.nav.helse.*
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.*
@@ -18,7 +18,6 @@ import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.infotrygdhistorikk.UgyldigPeriode
-import no.nav.helse.somFødselsnummer
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Oppdrag

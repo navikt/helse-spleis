@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.ForventetFeil
-
+import no.nav.helse.*
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.*
@@ -13,8 +12,8 @@ import no.nav.helse.person.Punktum.Companion.punktum
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.somFødselsnummer
-import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
+import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent

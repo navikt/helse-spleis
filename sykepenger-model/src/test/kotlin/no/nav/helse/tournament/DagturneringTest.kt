@@ -1,8 +1,8 @@
 package no.nav.helse.tournament
 
+import no.nav.helse.*
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.testhelpers.*
 import no.nav.helse.testhelpers.TestEvent.Companion.inntektsmelding
 import no.nav.helse.testhelpers.TestEvent.Companion.sykmelding
 import no.nav.helse.testhelpers.TestEvent.Companion.søknad

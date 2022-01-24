@@ -19,6 +19,9 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.januar
+import no.nav.helse.oktober
+import no.nav.helse.desember
 
 internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
     private val SAKSBEHANDLER_IDENT = "O123456"

@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggle
+import no.nav.helse.*
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
@@ -9,7 +9,6 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig

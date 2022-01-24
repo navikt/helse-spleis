@@ -5,9 +5,9 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
+import no.nav.helse.januar
+import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.*
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.mars
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals

@@ -1,7 +1,10 @@
 package no.nav.helse.sykdomstidslinje
 
+import no.nav.helse.desember
+import no.nav.helse.februar
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
+import no.nav.helse.januar
 import no.nav.helse.perioder
 import no.nav.helse.testhelpers.*
 import no.nav.helse.tournament.Dagturnering

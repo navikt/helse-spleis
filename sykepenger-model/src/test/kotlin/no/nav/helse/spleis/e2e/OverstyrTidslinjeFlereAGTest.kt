@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.til
-import no.nav.helse.testhelpers.januar
+import no.nav.helse.januar
 import org.junit.jupiter.api.Test
 
 internal class OverstyrTidslinjeFlereAGTest : AbstractEndToEndTest() {

@@ -5,11 +5,11 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.mockk
 import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.januar
 import no.nav.helse.person.TilstandType
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.spleis.meldinger.TestRapid
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
-import no.nav.helse.testhelpers.januar
 import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.assertFalse

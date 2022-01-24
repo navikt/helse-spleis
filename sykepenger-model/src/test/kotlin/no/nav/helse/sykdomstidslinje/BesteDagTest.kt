@@ -1,7 +1,7 @@
 package no.nav.helse.sykdomstidslinje
 
+import no.nav.helse.mandag
 import no.nav.helse.testhelpers.TestEvent
-import no.nav.helse.testhelpers.mandag
 import no.nav.helse.tournament.Dagturnering
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi

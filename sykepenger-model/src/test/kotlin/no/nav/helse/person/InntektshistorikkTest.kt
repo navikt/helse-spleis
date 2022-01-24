@@ -1,5 +1,6 @@
 package no.nav.helse.person
 
+import no.nav.helse.*
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til

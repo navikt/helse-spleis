@@ -1,5 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.*
 import no.nav.helse.hendelser.til
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*

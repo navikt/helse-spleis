@@ -1,7 +1,7 @@
 package no.nav.helse.serde.api
 
 
-import no.nav.helse.Toggle
+import no.nav.helse.*
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Dagtype.Feriedag
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.*

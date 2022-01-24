@@ -6,10 +6,10 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.Dag.Feriedag
-import no.nav.helse.testhelpers.februar
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.juli
-import no.nav.helse.testhelpers.mars
+import no.nav.helse.februar
+import no.nav.helse.januar
+import no.nav.helse.juli
+import no.nav.helse.mars
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

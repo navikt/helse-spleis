@@ -1,10 +1,10 @@
 package no.nav.helse.spleis.e2e
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.januar
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
-import no.nav.helse.testhelpers.januar
 import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.*

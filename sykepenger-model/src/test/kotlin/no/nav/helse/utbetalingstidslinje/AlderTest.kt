@@ -1,10 +1,8 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.Grunnbeløp
+import no.nav.helse.*
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.somFødselsnummer
-import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test

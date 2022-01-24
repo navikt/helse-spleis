@@ -1,7 +1,9 @@
 package no.nav.helse.testhelpers
 
+import no.nav.helse.desember
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
+import no.nav.helse.januar
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach

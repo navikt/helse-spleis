@@ -1,10 +1,9 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggle
+import no.nav.helse.*
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.spleis.TestMessageFactory
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
-import no.nav.helse.testhelpers.*
 import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.*

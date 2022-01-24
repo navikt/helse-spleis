@@ -7,9 +7,9 @@ import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.mai
-import no.nav.helse.testhelpers.mars
+import no.nav.helse.januar
+import no.nav.helse.mai
+import no.nav.helse.mars
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test

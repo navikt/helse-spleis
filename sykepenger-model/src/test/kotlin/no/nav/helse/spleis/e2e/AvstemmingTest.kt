@@ -2,12 +2,12 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.Avstemming
 import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.januar
+import no.nav.helse.mai
+import no.nav.helse.mars
 import no.nav.helse.person.TilstandType
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.serde.reflection.castAsList
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.mai
-import no.nav.helse.testhelpers.mars
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue

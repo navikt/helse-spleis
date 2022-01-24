@@ -10,8 +10,8 @@ import no.nav.helse.person.Aktivitetskontekst
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.SpesifikkKontekst
 import no.nav.helse.person.TilstandType.*
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.mars
+import no.nav.helse.januar
+import no.nav.helse.mars
 import no.nav.helse.utbetalingslinjer.Utbetaling.GodkjentUtenUtbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Sendt
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje

@@ -11,8 +11,8 @@ import no.nav.helse.serde.api.builders.OppdragDTO
 import no.nav.helse.serde.api.dto.UtbetalingshistorikkElementDTO.UtbetalingDTO.Companion.tilstandFor
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.serde.reflection.Utbetalingstatus.*
-import no.nav.helse.testhelpers.desember
-import no.nav.helse.testhelpers.januar
+import no.nav.helse.desember
+import no.nav.helse.januar
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype.*
 import org.junit.jupiter.api.Assertions.assertEquals

@@ -1,7 +1,10 @@
 package no.nav.helse.person.infotrygdhistorikk
 
+import no.nav.helse.februar
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
+import no.nav.helse.januar
+import no.nav.helse.mars
 import no.nav.helse.person.*
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.serde.PersonData

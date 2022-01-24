@@ -1,9 +1,9 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.desember
+import no.nav.helse.januar
+import no.nav.helse.november
 import no.nav.helse.spleis.TestMessageFactory.*
-import no.nav.helse.testhelpers.desember
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.november
 import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
 import org.junit.jupiter.api.Test

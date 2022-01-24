@@ -15,7 +15,7 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.testhelpers.Inntektperioder
-import no.nav.helse.testhelpers.januar
+import no.nav.helse.januar
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt
 import org.junit.jupiter.api.fail

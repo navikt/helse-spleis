@@ -2,7 +2,6 @@ package no.nav.helse
 
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.merge
-import no.nav.helse.testhelpers.mandag
 import no.nav.helse.tournament.Dagturnering
 
 internal val mandag = 1.mandag

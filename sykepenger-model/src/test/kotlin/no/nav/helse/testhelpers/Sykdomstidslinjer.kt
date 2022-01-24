@@ -1,6 +1,7 @@
 package no.nav.helse.testhelpers
 
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.januar
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.sykdomstidslinje.Dag

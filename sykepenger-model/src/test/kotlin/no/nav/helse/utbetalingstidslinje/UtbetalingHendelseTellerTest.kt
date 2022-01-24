@@ -2,10 +2,10 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.somFødselsnummer
-import no.nav.helse.testhelpers.desember
-import no.nav.helse.testhelpers.februar
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.mai
+import no.nav.helse.desember
+import no.nav.helse.februar
+import no.nav.helse.januar
+import no.nav.helse.mai
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

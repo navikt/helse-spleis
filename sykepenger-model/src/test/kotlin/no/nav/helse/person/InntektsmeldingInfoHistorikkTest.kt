@@ -3,7 +3,7 @@ package no.nav.helse.person
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
-import no.nav.helse.testhelpers.januar
+import no.nav.helse.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

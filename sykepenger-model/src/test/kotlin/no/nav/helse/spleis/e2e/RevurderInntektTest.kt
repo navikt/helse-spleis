@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.*
 import no.nav.helse.ForventetFeil
-import no.nav.helse.Toggle
 import no.nav.helse.Toggle.Companion.disable
 import no.nav.helse.Toggle.Companion.enable
 import no.nav.helse.hendelser.*
@@ -15,7 +15,6 @@ import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig

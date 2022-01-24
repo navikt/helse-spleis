@@ -2,6 +2,7 @@ package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.inspektør
+import no.nav.helse.januar
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions.assertEquals

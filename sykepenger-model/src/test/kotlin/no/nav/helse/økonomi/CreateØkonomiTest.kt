@@ -3,6 +3,7 @@ package no.nav.helse.økonomi
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
+import no.nav.helse.januar
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.serde.PersonData
@@ -10,7 +11,6 @@ import no.nav.helse.serde.PersonData.ArbeidsgiverData.PeriodeData
 import no.nav.helse.serde.PersonData.UtbetalingstidslinjeData
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.testhelpers.januar
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
