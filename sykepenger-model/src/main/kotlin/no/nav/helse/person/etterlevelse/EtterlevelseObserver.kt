@@ -291,7 +291,4 @@ interface EtterlevelseObserver {
         // versjon = LocalDate.of(2011, 12, 16),
         // punktum = 1.punktum
     }
-
-    fun vurderinger(): List<JuridiskVurdering>
-
 }

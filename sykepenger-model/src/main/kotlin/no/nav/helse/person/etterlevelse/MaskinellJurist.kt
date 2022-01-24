@@ -1,6 +1,8 @@
 package no.nav.helse.person.etterlevelse
 
 import no.nav.helse.Fødselsnummer
+import no.nav.helse.person.Aktivitetskontekst
+import no.nav.helse.person.KontekstObserver
 import no.nav.helse.person.Ledd.Companion.ledd
 import no.nav.helse.person.Paragraf
 import no.nav.helse.person.Punktum.Companion.punktum
@@ -8,67 +10,27 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 import java.time.LocalDate
 import java.time.Year
-import java.util.*
 
-class MaskinellJurist : EtterlevelseObserver {
+class MaskinellJurist private constructor(
+    private val fødselsnummer: Fødselsnummer,
     private val parent: MaskinellJurist?
-    private lateinit var fødselsnummer: Fødselsnummer
-    private lateinit var organisasjonsnummer: String
-    private var vedtaksperiodeId: UUID? = null
-
-    private var kontekster: Map<String, String> = emptyMap()
-    private var utbetalingId: String? = null
+) : EtterlevelseObserver, KontekstObserver {
+    private val kontekster: MutableMap<String, String> = mutableMapOf("fødselsnummer" to fødselsnummer.toString())
 
     private var vurderinger = listOf<JuridiskVurdering>()
 
-    constructor() {
-        parent = null
-    }
-
-    private constructor(parent: MaskinellJurist) {
-        this.parent = parent
-    }
+    constructor(fødselsnummer: Fødselsnummer): this(fødselsnummer, null)
 
     private fun leggTil(vurdering: JuridiskVurdering) {
         vurderinger = vurdering.sammenstill(vurderinger)
         parent?.leggTil(vurdering)
     }
 
-    private fun kontekster(): Map<String, String> = kontekster + mutableMapOf(
-        "fødselsnummer" to fødselsnummer.toString(),
-        "organisasjonsnummer" to organisasjonsnummer.toString()
-    ).apply {
-        compute("vedtaksperiodeId") { _, _ -> vedtaksperiodeId.toString() }
-        compute("utbetalingId") { _, _ -> utbetalingId }}
+    private fun kontekster(): Map<String, String> = this.kontekster.toMap()
 
-    internal fun medFnr(fødselsnummer: Fødselsnummer): MaskinellJurist {
-        return MaskinellJurist(this).also {
-            it.fødselsnummer = fødselsnummer
-        }
-    }
-
-    fun medArbeidsgiver(organisasjonsnummer: String): MaskinellJurist {
-        return MaskinellJurist(this).also {
-            it.fødselsnummer = fødselsnummer
-            it.organisasjonsnummer = organisasjonsnummer
-        }
-    }
-
-    fun medVedtaksperiode(vedtaksperiodeId: UUID): MaskinellJurist {
-        return MaskinellJurist(this).also {
-            it.fødselsnummer = fødselsnummer
-            it.organisasjonsnummer = organisasjonsnummer
-            it.vedtaksperiodeId = vedtaksperiodeId
-        }
-    }
-
-    fun medKontekst(vararg kontekster: Pair<String, String>): MaskinellJurist {
-        return MaskinellJurist(this).also {
-            it.fødselsnummer = fødselsnummer
-            it.organisasjonsnummer = organisasjonsnummer
-            it.vedtaksperiodeId = vedtaksperiodeId
-            it.kontekster = this.kontekster + kontekster
-        }
+    override fun nyKontekst(kontekst: Aktivitetskontekst) {
+        val spesifikk = kontekst.toSpesifikkKontekst()
+        kontekster.putAll(spesifikk.kontekstMap)
     }
 
     override fun `§2`(oppfylt: Boolean) {
@@ -226,5 +188,5 @@ class MaskinellJurist : EtterlevelseObserver {
         super.`§8-51 ledd 3`(oppfylt, maksSykepengedagerOver67, gjenståendeSykedager, forbrukteSykedager, maksdato)
     }
 
-    override fun vurderinger() = vurderinger.toList()
+    fun vurderinger() = vurderinger.toList()
 }
