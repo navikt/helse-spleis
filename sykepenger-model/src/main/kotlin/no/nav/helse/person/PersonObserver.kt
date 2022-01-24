@@ -4,6 +4,7 @@ import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Påminnelse
+import no.nav.helse.serde.api.BegrunnelseDTO
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -171,9 +172,22 @@ interface PersonObserver {
 
     data class Utbetalingsdag(
         val dato: LocalDate,
-        val type: String,
-        val begrunnelser: List<String>?
-    )
+        val type: Dagtype,
+        val begrunnelser: List<BegrunnelseDTO>? = null
+    ) {
+        enum class Dagtype {
+            ArbeidsgiverperiodeDag,
+            NavDag,
+            NavHelgDag,
+            Arbeidsdag,
+            Fridag,
+            AvvistDag,
+            UkjentDag,
+            ForeldetDag,
+            Permisjonsdag,
+            Feriedag
+        }
+    }
 
     data class FeriepengerUtbetaltEvent(
         val arbeidsgiverOppdrag: Map<String, Any?>,

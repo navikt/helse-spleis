@@ -4,10 +4,8 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.contains
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.Refusjonshistorikk
 import no.nav.helse.person.UtbetalingsdagVisitor
-import no.nav.helse.serde.PersonData
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
@@ -279,32 +277,6 @@ internal class Utbetalingstidslinje private constructor(
                     else -> "?"
                 }
         }.trim()
-    }
-
-    fun tilUtbetalingsdager(fridagplog: (Utbetalingsdag) -> String): List<PersonObserver.Utbetalingsdag> {
-        return map { utbetalingsdag ->
-            PersonObserver.Utbetalingsdag(
-                utbetalingsdag.dato,
-                mapDagtype(utbetalingsdag, fridagplog),
-                mapBegrunnelser(utbetalingsdag)
-            )
-        }
-    }
-
-    private fun mapBegrunnelser(utbetalingsdag: Utbetalingsdag) =
-        if (utbetalingsdag is AvvistDag)
-            utbetalingsdag.begrunnelser.map { begrunnelse -> begrunnelse.javaClass.simpleName }
-        else null
-
-    private fun mapDagtype(dag: Utbetalingsdag, fridagplog: (Utbetalingsdag) -> String) = when (dag) {
-        is Arbeidsdag -> PersonData.UtbetalingstidslinjeData.TypeData.Arbeidsdag.name
-        is ArbeidsgiverperiodeDag -> PersonData.UtbetalingstidslinjeData.TypeData.ArbeidsgiverperiodeDag.name
-        is NavDag -> PersonData.UtbetalingstidslinjeData.TypeData.NavDag.name
-        is NavHelgDag -> PersonData.UtbetalingstidslinjeData.TypeData.NavHelgDag.name
-        is UkjentDag -> PersonData.UtbetalingstidslinjeData.TypeData.UkjentDag.name
-        is AvvistDag -> PersonData.UtbetalingstidslinjeData.TypeData.AvvistDag.name
-        is ForeldetDag -> PersonData.UtbetalingstidslinjeData.TypeData.ForeldetDag.name
-        is Fridag -> fridagplog(dag)
     }
 
     internal sealed class Utbetalingsdag(

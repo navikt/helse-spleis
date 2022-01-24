@@ -5,7 +5,9 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Person
+import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType.*
+import no.nav.helse.serde.api.BegrunnelseDTO
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
@@ -49,10 +51,10 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
-        val avvisteDager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == "AvvistDag" }
-        val arbeidsgiverperiodedager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == "ArbeidsgiverperiodeDag" }
-        val navDager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == "NavDag" }
-        val navHelgedager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == "NavHelgDag" }
+        val avvisteDager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == PersonObserver.Utbetalingsdag.Dagtype.AvvistDag }
+        val arbeidsgiverperiodedager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == PersonObserver.Utbetalingsdag.Dagtype.ArbeidsgiverperiodeDag}
+        val navDager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == PersonObserver.Utbetalingsdag.Dagtype.NavDag }
+        val navHelgedager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == PersonObserver.Utbetalingsdag.Dagtype.NavHelgDag }
 
         assertEquals(15, avvisteDager.size)
         assertEquals(16, arbeidsgiverperiodedager.size)
@@ -96,12 +98,12 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
-        val avvisteDager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == "AvvistDag" }
-        val arbeidsgiverperiodedager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == "ArbeidsgiverperiodeDag" }
+        val avvisteDager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == PersonObserver.Utbetalingsdag.Dagtype.AvvistDag }
+        val arbeidsgiverperiodedager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == PersonObserver.Utbetalingsdag.Dagtype.ArbeidsgiverperiodeDag}
 
         assertEquals(5, avvisteDager.size)
         assertEquals(16 + 16, arbeidsgiverperiodedager.size)
-        assertTrue(avvisteDager.all { it.begrunnelser == listOf("Over70") })
+        assertTrue(avvisteDager.all { it.begrunnelser == listOf(BegrunnelseDTO.Over70) })
         assertTrue(arbeidsgiverperiodedager.all { it.begrunnelser == null })
     }
 

@@ -22,10 +22,10 @@ import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.medSkjæringstidspunkt
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.periode
+import no.nav.helse.person.builders.UtbetalingsdagerBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.reflection.Utbetalingstatus
-import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -537,6 +537,8 @@ internal class Arbeidsgiver private constructor(
         utbetalingstidslinje: Utbetalingstidslinje,
         ident: String,
     ) {
+        val builder = UtbetalingsdagerBuilder(sykdomshistorikk.sykdomstidslinje())
+        utbetalingstidslinje.accept(builder)
         person.utbetalingUtbetalt(
             hendelseskontekst,
             PersonObserver.UtbetalingUtbetaltEvent(
@@ -554,7 +556,7 @@ internal class Arbeidsgiver private constructor(
                 automatiskBehandling = automatiskBehandling,
                 arbeidsgiverOppdrag = arbeidsgiverOppdrag.toHendelseMap(),
                 personOppdrag = personOppdrag.toHendelseMap(),
-                utbetalingsdager = utbetalingstidslinje.tilUtbetalingsdager(fridagplog(sykdomshistorikk.sykdomstidslinje())),
+                utbetalingsdager = builder.result(),
                 vedtaksperiodeIder = vedtaksperioder.iderMedUtbetaling(id) + forkastede.iderMedUtbetaling(id),
                 ident = ident
             )
@@ -579,6 +581,8 @@ internal class Arbeidsgiver private constructor(
         utbetalingstidslinje: Utbetalingstidslinje,
         epost: String,
     ) {
+        val builder = UtbetalingsdagerBuilder(sykdomshistorikk.sykdomstidslinje())
+        utbetalingstidslinje.accept(builder)
         person.utbetalingUtenUtbetaling(
             hendelseskontekst,
             PersonObserver.UtbetalingUtbetaltEvent(
@@ -595,7 +599,7 @@ internal class Arbeidsgiver private constructor(
                 automatiskBehandling = automatiskBehandling,
                 arbeidsgiverOppdrag = arbeidsgiverOppdrag.toHendelseMap(),
                 personOppdrag = personOppdrag.toHendelseMap(),
-                utbetalingsdager = utbetalingstidslinje.tilUtbetalingsdager(fridagplog(sykdomshistorikk.sykdomstidslinje())),
+                utbetalingsdager = builder.result(),
                 vedtaksperiodeIder = vedtaksperioder.iderMedUtbetaling(id) + forkastede.iderMedUtbetaling(id),
                 ident = ident,
                 korrelasjonsId = korrelasjonsId
@@ -1069,14 +1073,6 @@ internal class Arbeidsgiver private constructor(
         vedtaksperioder.filter { it.gjelder(skjæringstidspunkt) }.forEach { it.loggførHendelsesreferanse(meldingsreferanseId) }
     }
 
-    private fun fridagplog(sykdomstidslinje: Sykdomstidslinje): (Utbetalingstidslinje.Utbetalingsdag) -> String = { utbetalingsdag ->
-        require(utbetalingsdag is Utbetalingstidslinje.Utbetalingsdag.Fridag) { "Fridagplogen trenger Fridag" }
-        when (sykdomstidslinje[utbetalingsdag.dato]) {
-            is Dag.Feriedag -> "Feriedag"
-            is Dag.Permisjonsdag -> "Permisjonsdag"
-            else -> "Fridag"
-        }
-    }
 
     fun harFerdigstiltPeriode() = vedtaksperioder.any(ER_ELLER_HAR_VÆRT_AVSLUTTET) || forkastede.harAvsluttedePerioder()
 

@@ -7,9 +7,11 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.serde.api.BegrunnelseDTO
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
@@ -425,13 +427,13 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode)
 
-        val avvisteDager = observatør.utbetalingMedUtbetalingEventer.first().utbetalingsdager.filter { it.type == "AvvistDag"}
-        val ikkeAvvisteDager = observatør.utbetalingMedUtbetalingEventer.first().utbetalingsdager.filter { it.type != "AvvistDag"}
+        val avvisteDager = observatør.utbetalingMedUtbetalingEventer.first().utbetalingsdager.filter { it.type == PersonObserver.Utbetalingsdag.Dagtype.AvvistDag }
+        val ikkeAvvisteDager = observatør.utbetalingMedUtbetalingEventer.first().utbetalingsdager.filter { it.type != PersonObserver.Utbetalingsdag.Dagtype.AvvistDag }
 
         assertEquals(1, observatør.utbetalingMedUtbetalingEventer.size)
         assertEquals(7, avvisteDager.size)
         assertEquals(23, ikkeAvvisteDager.size)
-        assertTrue(avvisteDager.all { it.begrunnelser == listOf("MinimumSykdomsgrad") })
+        assertTrue(avvisteDager.all { it.begrunnelser == listOf(BegrunnelseDTO.MinimumSykdomsgrad) })
         assertTrue(ikkeAvvisteDager.all { it.begrunnelser == null })
     }
 }
