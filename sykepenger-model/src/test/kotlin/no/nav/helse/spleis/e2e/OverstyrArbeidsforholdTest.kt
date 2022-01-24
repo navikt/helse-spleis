@@ -1,10 +1,12 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.hendelser.*
-import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.ForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
+import no.nav.helse.hendelser.*
 import no.nav.helse.januar
+import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -197,5 +199,46 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
             håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a3, false)))
         }
         assertSevere("Kan ikke overstyre arbeidsforhold for en arbeidsgiver vi ikke kjenner til", AktivitetsloggFilter.person())
+    }
+
+    @ForventetFeil("trenger implementasjon")
+    @Test
+    fun `deaktivering av arbeidsforhold uten sykdom fører til nytt sykepengegrunnlag uten arbeidsforholdet, selv med inntekt`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null),
+                Vilkårsgrunnlag.Arbeidsforhold(a3, LocalDate.EPOCH, null),
+            ),
+            inntektsvurdering = Inntektsvurdering(
+                listOf(
+                    sammenligningsgrunnlag(a1, 1.januar, INNTEKT.repeat(12)),
+                    sammenligningsgrunnlag(a2, 1.januar, INNTEKT.repeat(12)),
+                    sammenligningsgrunnlag(a3, 1.januar, 1000.månedlig.repeat(1))
+                )
+            ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                inntekter = listOf(
+                    grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
+                    grunnlag(a2, 1.januar, INNTEKT.repeat(3)),
+                    grunnlag(a3, 1.januar, 1000.månedlig.repeat(1)) // Liten inntekt som saksbehandler ikke ser på som relevant
+                ),
+                arbeidsforhold = emptyList()
+            ),
+            orgnummer = a1
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a3, false)))
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        val vilkårsgrunnlag = person.vilkårsgrunnlagFor(1.januar)
+        assertEquals(setOf(a1, a2), vilkårsgrunnlag?.inntektsopplysningPerArbeidsgiver()?.keys)
+        assertEquals(setOf(a1, a2, a3), vilkårsgrunnlag?.sammenligningsgrunnlagPerArbeidsgiver()?.keys)
     }
 }
