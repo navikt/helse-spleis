@@ -8,40 +8,63 @@ import java.time.LocalDate
 import kotlin.math.max
 
 internal class UtbetalingTeller private constructor(
-    private var fom: LocalDate,
     private val alder: Alder,
     private val arbeidsgiverRegler: ArbeidsgiverRegler,
-    private var betalteDager: Int,
-    private var gammelpersonDager: Int,
+    private var forbrukteDager: Int,
+    private var gammelPersonDager: Int,
     private val aktivitetslogg: IAktivitetslogg
 ) {
+    private companion object {
+        private const val HISTORISK_PERIODE_I_ÅR: Long = 3
+
+    }
+    private lateinit var startdatoSykepengerettighet: LocalDate
+    private lateinit var startdatoTreårsvindu: LocalDate
+    private val betalteDager = mutableSetOf<LocalDate>()
+
     internal constructor(alder: Alder, arbeidsgiverRegler: ArbeidsgiverRegler, aktivitetslogg: IAktivitetslogg) :
-        this(LocalDate.MIN, alder, arbeidsgiverRegler, 0, 0, aktivitetslogg)
+        this(alder, arbeidsgiverRegler, 0,0,aktivitetslogg)
+
 
     internal fun begrunnelse(dato: LocalDate): Begrunnelse {
         // avslag skal begrunnes med SykepengedagerOppbrukt (§ 8-15) så lenge man har brukt ordinær kvote;
         // uavhengig om man er over eller under 67
-        if (betalteDager >= arbeidsgiverRegler.maksSykepengedager()) return SykepengedagerOppbrukt
+        if (forbrukteDager >= arbeidsgiverRegler.maksSykepengedager()) return SykepengedagerOppbrukt
         return alder.begrunnelseForAlder(dato)
     }
 
     internal fun inkrementer(dato: LocalDate) {
-        betalteDager += 1
+        if (forbrukteDager == 0) {
+            startdatoSykepengerettighet = dato
+            startdatoTreårsvindu = dato.minusYears(HISTORISK_PERIODE_I_ÅR)
+        }
+        betalteDager.add(dato)
+        forbrukteDager += 1
         if (alder.innenfor67årsgrense(dato)) return
-        gammelpersonDager += 1
+        gammelPersonDager += 1
     }
 
     internal fun dekrementer(dato: LocalDate) {
-        if (dato < fom) return
-        betalteDager = max(0, betalteDager - 1)
-        // trenger ikke dekrementere gammelpersonDager fordi
-        // de ikke ikke bli mer enn tre år gamle innen man fyller 70
+        val nyStartdatoTreårsvindu = dato.minusYears(HISTORISK_PERIODE_I_ÅR)
+        if (nyStartdatoTreårsvindu >= startdatoSykepengerettighet) {
+            startdatoTreårsvindu.datesUntil(nyStartdatoTreårsvindu).filter { it in betalteDager }.forEach { dekrementer ->
+                dekrementerDag(dekrementer)
+            }
+        }
+        startdatoTreårsvindu = nyStartdatoTreårsvindu
     }
 
-    internal fun resett(dato: LocalDate) {
-        fom = dato
-        betalteDager = 0
-        gammelpersonDager = 0
+    private fun dekrementerDag(dato: LocalDate) {
+        if (dato < startdatoSykepengerettighet) return
+        forbrukteDager = max(0, forbrukteDager - 1)
+    }
+
+    internal fun resett() {
+        betalteDager.clear()
+        startdatoSykepengerettighet = LocalDate.MIN
+        startdatoTreårsvindu = LocalDate.MIN
+        forbrukteDager = 0
+        gammelPersonDager = 0
     }
 
     private var påGrensenTilstand: PåGrensenTilstand = object : PåGrensenTilstand {}
@@ -85,7 +108,7 @@ internal class UtbetalingTeller private constructor(
             oppfylt = false,
             maksSykepengedagerOver67 = arbeidsgiverRegler.maksSykepengedagerOver67(),
             gjenståendeSykedager = 0,
-            forbrukteSykedager = betalteDager,
+            forbrukteSykedager = forbrukteDager,
             maksdato = maksdato
         )
 
@@ -102,8 +125,8 @@ internal class UtbetalingTeller private constructor(
     }
 
     internal fun erFørMaksdato(dato: LocalDate): Boolean {
-        val harNåddMaksSykepengedager = betalteDager >= arbeidsgiverRegler.maksSykepengedager()
-        val harNåddMaksSykepengedagerOver67 = gammelpersonDager >= arbeidsgiverRegler.maksSykepengedagerOver67()
+        val harNåddMaksSykepengedager = forbrukteDager >= arbeidsgiverRegler.maksSykepengedager()
+        val harNåddMaksSykepengedagerOver67 = gammelPersonDager >= arbeidsgiverRegler.maksSykepengedagerOver67()
         val harFylt70 = alder.harNådd70årsgrense(dato)
         //TODO: Aktivitetslogg().`§8-12 ledd 1`(oppfylt = !harNåddMaksSykepengedager)
         when {
@@ -121,7 +144,7 @@ internal class UtbetalingTeller private constructor(
         return forrigeResultat!!.let { (_, maksdato) -> maksdato }
     }
 
-    internal fun forbrukteDager() = betalteDager
+    internal fun forbrukteDager() = forbrukteDager
 
     internal fun gjenståendeSykepengedager(sisteUtbetalingsdag: LocalDate): Int {
         beregnGjenståendeSykepengedager(sisteUtbetalingsdag)
@@ -130,7 +153,7 @@ internal class UtbetalingTeller private constructor(
 
     private fun beregnGjenståendeSykepengedager(sisteUtbetalingsdag: LocalDate) {
         val faktiskeDagerTeller = this
-        val gjenståendeDagerTeller = UtbetalingTeller(fom, alder, arbeidsgiverRegler, betalteDager, gammelpersonDager, aktivitetslogg)
+        val gjenståendeDagerTeller = UtbetalingTeller(alder, arbeidsgiverRegler, forbrukteDager, gammelPersonDager, aktivitetslogg)
         var result = sisteUtbetalingsdag
         var teller = 0
         while (gjenståendeDagerTeller.erFørMaksdato(result)) {
@@ -149,7 +172,7 @@ internal class UtbetalingTeller private constructor(
             faktiskeDagerTeller.forrigeResultat = nyttResultat
             gjenståendeDagerTeller.hvisGrensenErNådd(
                 hvis67År = {
-                    gjenståendeDagerTeller.`§8-51 ledd 3 - beregning`(faktiskeDagerTeller.betalteDager, teller, result)
+                    gjenståendeDagerTeller.`§8-51 ledd 3 - beregning`(faktiskeDagerTeller.forbrukteDager, teller, result)
                 }
             )
         }

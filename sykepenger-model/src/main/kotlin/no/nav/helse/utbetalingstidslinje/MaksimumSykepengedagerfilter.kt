@@ -26,7 +26,6 @@ internal class MaksimumSykepengedagerfilter(
 
     private companion object {
         const val TILSTREKKELIG_OPPHOLD_I_SYKEDAGER = 26 * 7
-        private const val HISTORISK_PERIODE_I_ÅR: Long = 3
     }
 
     private lateinit var sisteUkedag: LocalDate
@@ -35,7 +34,6 @@ internal class MaksimumSykepengedagerfilter(
     private lateinit var teller: UtbetalingTeller
     private var opphold = 0
     private lateinit var sakensStartdato: LocalDate  // Date of first NAV payment in a new 248 period
-    private lateinit var dekrementerfom: LocalDate  // Three year boundary from first sick day after a work day
     private val begrunnelserForAvvisteDager = mutableMapOf<Begrunnelse, MutableSet<LocalDate>>()
     private val avvisteDager get() = begrunnelserForAvvisteDager.values.flatten().toSet()
     private val betalbarDager = mutableMapOf<LocalDate, NavDag>()
@@ -187,7 +185,7 @@ internal class MaksimumSykepengedagerfilter(
                 avvisteDager.filter { sakensStartdato <= it }
             )
             aktivitetslogg.`§8-12 ledd 2`(dagen, TILSTREKKELIG_OPPHOLD_I_SYKEDAGER, tidslinjegrunnlag, beregnetTidslinje)
-            teller.resett(dagen.plusDays(1))
+            teller.resett()
             return State.Initiell
         }
         if (state == State.Karantene) return null
@@ -211,16 +209,6 @@ internal class MaksimumSykepengedagerfilter(
         return State.Karantene
     }
 
-    private fun dekrementer(tom: LocalDate) {
-        val dekrementertom = tom.minusYears(HISTORISK_PERIODE_I_ÅR)
-        if (dekrementertom >= sakensStartdato) {
-            dekrementerfom.datesUntil(dekrementertom).forEach { dato ->
-                betalbarDager[dato]?.also { teller.dekrementer(dato) }
-            }
-        }
-        dekrementerfom = dekrementertom
-    }
-
     private interface State {
         fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {}
         fun oppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {}
@@ -236,9 +224,9 @@ internal class MaksimumSykepengedagerfilter(
 
             override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
                 avgrenser.sakensStartdato = dagen
-                avgrenser.dekrementerfom = dagen.minusYears(HISTORISK_PERIODE_I_ÅR)
                 avgrenser.teller.inkrementer(dagen)
                 avgrenser.sisteBetalteDag = dagen
+                avgrenser.teller.dekrementer(dagen)
                 avgrenser.state(Syk)
             }
         }
@@ -268,7 +256,7 @@ internal class MaksimumSykepengedagerfilter(
             override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
                 avgrenser.teller.inkrementer(dagen)
                 avgrenser.sisteBetalteDag = dagen
-                avgrenser.dekrementer(dagen)
+                avgrenser.teller.dekrementer(dagen)
                 avgrenser.state(avgrenser.nextState(dagen) ?: Syk)
             }
 

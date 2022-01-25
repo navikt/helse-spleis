@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-internal class UtbetalingHendelseTellerTest {
+internal class UtbetalingTellerTest {
     internal val UNG_PERSON_FNR_2018 = "15010052345".somFødselsnummer().alder()
     internal val PERSON_67_ÅR_FNR_2018 = "15015112345".somFødselsnummer().alder()
     internal val PERSON_70_ÅR_FNR_2018 = "15014812345".somFødselsnummer().alder()
@@ -44,7 +44,7 @@ internal class UtbetalingHendelseTellerTest {
     fun `Person under 67 år får utbetalt 248 `() {
         grense(UNG_PERSON_FNR_2018, 248)
         assertFalse(grense.erFørMaksdato(31.desember))
-        grense.resett(31.desember)
+        grense.resett()
         assertTrue(grense.erFørMaksdato(31.desember))
     }
 
@@ -52,7 +52,7 @@ internal class UtbetalingHendelseTellerTest {
     fun `Person under 67`() {
         grense(UNG_PERSON_FNR_2018, 247)
         assertTrue(grense.erFørMaksdato(30.desember))
-        grense.dekrementer(1.januar)
+        grense.dekrementer(2.januar(2021))
         grense.inkrementer(30.desember)
         assertTrue(grense.erFørMaksdato(30.desember))
         grense.inkrementer(31.desember)
@@ -89,7 +89,7 @@ internal class UtbetalingHendelseTellerTest {
 
     private fun grense(alder: Alder, dager: Int, dato: LocalDate = 1.januar) {
         grense = UtbetalingTeller(alder, ArbeidsgiverRegler.Companion.NormalArbeidstaker, Aktivitetslogg()).apply {
-            this.resett(dato)
+            this.resett()
             (0 until dager).forEach { this.inkrementer(dato.plusDays(it.toLong())) }
         }
     }
