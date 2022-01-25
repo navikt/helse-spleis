@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.utbetaling.*
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.harAvsluttedePerioder
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.iderMedUtbetaling
+import no.nav.helse.person.Inntektshistorikk.IkkeRapportert
 import no.nav.helse.person.Vedtaksperiode.*
 import no.nav.helse.person.Vedtaksperiode.Companion.ALLE
 import no.nav.helse.person.Vedtaksperiode.Companion.AVVENTER_GODKJENT_REVURDERING
@@ -121,15 +122,18 @@ internal class Arbeidsgiver private constructor(
                 else inntektsopplysninger + ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, inntektsopplysning)
             }
 
-        internal fun List<Arbeidsgiver>.beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
-            this.mapNotNull { arbeidsgiver ->
-                val inntektsopplysning = arbeidsgiver.inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt, arbeidsgiver.finnFørsteFraværsdag(skjæringstidspunkt))
-                if (inntektsopplysning == null && arbeidsgiver.harArbeidsforholdNyereEnnTreMåneder(skjæringstidspunkt)) {
-                    ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, Inntektshistorikk.IkkeRapportert(UUID.randomUUID(), skjæringstidspunkt))
-                } else if (inntektsopplysning != null) {
-                    ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, inntektsopplysning)
-                } else null
+        internal fun List<Arbeidsgiver>.beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate) = mapNotNull { arbeidsgiver ->
+            val førsteFraværsdag = arbeidsgiver.finnFørsteFraværsdag(skjæringstidspunkt)
+            val inntektsopplysning = arbeidsgiver.inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag)
+            when {
+                arbeidsgiver.harInaktivtArbeidsforhold(skjæringstidspunkt) -> null
+                inntektsopplysning == null && arbeidsgiver.harArbeidsforholdNyereEnnTreMåneder(skjæringstidspunkt) -> {
+                    ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, IkkeRapportert(UUID.randomUUID(), skjæringstidspunkt))
+                }
+                inntektsopplysning != null -> ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, inntektsopplysning)
+                else -> null
             }
+        }
 
         internal fun List<Arbeidsgiver>.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =
             this.mapNotNull { arbeidsgiver ->
@@ -831,6 +835,8 @@ internal class Arbeidsgiver private constructor(
             return gjenopptaBehandling()
         }
     }
+
+    private fun harInaktivtArbeidsforhold(skjæringstidspunkt: LocalDate) = arbeidsforholdhistorikk.harInaktivtArbeidsforhold(skjæringstidspunkt)
 
     internal fun kanReberegnes(vedtaksperiode: Vedtaksperiode) = vedtaksperioder.all { it.kanReberegne(vedtaksperiode) }
 
