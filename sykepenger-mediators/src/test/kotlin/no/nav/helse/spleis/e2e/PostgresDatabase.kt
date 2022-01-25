@@ -7,6 +7,7 @@ import kotliquery.using
 import no.nav.helse.spleis.e2e.SpleisDataSource.migratedDb
 import org.flywaydb.core.Flyway
 import org.testcontainers.containers.PostgreSQLContainer
+import org.testcontainers.containers.wait.strategy.HostPortWaitStrategy
 
 object PostgresContainer {
     val instance by lazy {
@@ -19,6 +20,7 @@ object PostgresContainer {
 object SpleisDataSource {
     private val instance: HikariDataSource by lazy {
         HikariDataSource().apply {
+            initializationFailTimeout = 5000
             username = PostgresContainer.instance.username
             password = PostgresContainer.instance.password
             jdbcUrl = PostgresContainer.instance.jdbcUrl
