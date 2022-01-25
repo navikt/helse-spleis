@@ -1,6 +1,5 @@
 package no.nav.helse.testhelpers
 
-import no.nav.helse.desember
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -14,22 +13,6 @@ internal class UtbetalingstidslinjerBuilderTest {
     @BeforeEach
     fun setup() {
         resetSeed()
-    }
-
-    @Test
-    fun ukedager() {
-        assertEquals(4.januar, 1.januar + 3.ukedager)
-        assertEquals(5.januar, 2.januar + 3.ukedager)
-        assertEquals(8.januar, 3.januar + 3.ukedager)
-        assertEquals(8.januar, 5.januar + 1.ukedager)
-        assertEquals(8.januar, 6.januar + 0.ukedager)
-        assertEquals(9.januar, 6.januar + 1.ukedager)
-        assertEquals(8.januar, 7.januar + 0.ukedager)
-        assertEquals(9.januar, 7.januar + 1.ukedager)
-        assertEquals(15.januar, 5.januar + 6.ukedager)
-        assertEquals(28.desember, 16.januar + 248.ukedager)
-        assertEquals(19.januar, 1.januar + 14.ukedager)
-        assertEquals(22.januar, 2.januar + 14.ukedager)
     }
 
     @Test

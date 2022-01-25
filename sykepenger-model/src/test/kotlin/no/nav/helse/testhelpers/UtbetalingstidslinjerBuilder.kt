@@ -1,12 +1,13 @@
 package no.nav.helse.testhelpers
 
+import no.nav.helse.plus
 import no.nav.helse.sykdomstidslinje.erHelg
+import no.nav.helse.ukedager
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
-import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
@@ -33,23 +34,6 @@ internal fun tidslinjeOf(
         }
         dato
     }
-}
-
-internal val Int.ukedager get() = Ukedager(this)
-internal operator fun LocalDate.plus(other: Ukedager) = other + this
-internal class Ukedager(private val antallUkedager: Int) {
-    private companion object {
-        // tabellen er en sammenslått tabell på 5 kolonner og 7 rader (én for hver ukedag) som angir hvor mange
-        // dager man skal addere med gitt ukedagen til datoen og hvor mange ukedager man skal addere
-        // feks lørdag + 1 ukedag => 2 fordi man skal først hoppe over søndag og deretter ukedagen (mandag).
-        // Et koordinat (x, y) i en 2D-tabell med w kolonner kan omgjøres til et punkt z i en 1D-tabell ved formelen z = f(x, y, w) = wx + y
-        // https://support.claris.com/s/article/Calculating-a-Finish-Date-Given-a-Starting-Date-and-the-Number-of-Work-Days-1503692916564
-        private const val table = "01234012360125601456034562345612345"
-        private fun String.tilleggsdager(row: DayOfWeek, col: Int) = this[(row.value - 1) * 5 + col % 5].toString().toInt()
-    }
-    private fun dager(dato: LocalDate) =
-        antallUkedager / 5 * 7 + table.tilleggsdager(dato.dayOfWeek, antallUkedager)
-    operator fun plus(other: LocalDate): LocalDate = other.plusDays(dager(other).toLong())
 }
 
 internal val Int.AP get() = this.AP(1200)
