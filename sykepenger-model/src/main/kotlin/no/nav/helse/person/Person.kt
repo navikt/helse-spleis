@@ -255,8 +255,9 @@ class Person private constructor(
         overstyrArbeidsforhold.kontekst(this)
         overstyrArbeidsforhold.valider(arbeidsgivere)
 
-        arbeidsgivere.håndter(overstyrArbeidsforhold)
-        // TODO: Error hvis ingen håndterer
+        if (!arbeidsgivere.håndter(overstyrArbeidsforhold)) {
+            overstyrArbeidsforhold.severe("Kan ikke overstyre arbeidsforhold fordi ingen vedtaksperioder håndterte hendelsen")
+        }
     }
 
     fun annullert(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetalingAnnullertEvent) {

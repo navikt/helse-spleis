@@ -1,7 +1,10 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.*
+import no.nav.helse.desember
+import no.nav.helse.februar
 import no.nav.helse.hendelser.*
+import no.nav.helse.januar
+import no.nav.helse.november
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -275,7 +278,6 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         assertEquals(setOf(a2, a3), vilkårsgrunnlag?.inntektsopplysningPerArbeidsgiver()?.keys)
     }
 
-    @ForventetFeil("trenger implementasjon")
     @Test
     fun `kan ikke overstyre arbeidsforhold dersom ingen vedtaksperioder kan håndtere hendelsen`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
