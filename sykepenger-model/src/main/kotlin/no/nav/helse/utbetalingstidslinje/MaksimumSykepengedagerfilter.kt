@@ -36,7 +36,6 @@ internal class MaksimumSykepengedagerfilter(
     private lateinit var sakensStartdato: LocalDate  // Date of first NAV payment in a new 248 period
     private val begrunnelserForAvvisteDager = mutableMapOf<Begrunnelse, MutableSet<LocalDate>>()
     private val avvisteDager get() = begrunnelserForAvvisteDager.values.flatten().toSet()
-    private val betalbarDager = mutableMapOf<LocalDate, NavDag>()
     private lateinit var beregnetTidslinje: Utbetalingstidslinje
     private lateinit var tidslinjegrunnlag: List<Utbetalingstidslinje>
 
@@ -112,7 +111,7 @@ internal class MaksimumSykepengedagerfilter(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        if (alder.mistetSykepengerett(dato)) state(State.ForGammel) else betalbarDager[dato] = dag
+        if (alder.mistetSykepengerett(dato)) state(State.ForGammel)
         state.betalbarDag(this, dato)
     }
 
