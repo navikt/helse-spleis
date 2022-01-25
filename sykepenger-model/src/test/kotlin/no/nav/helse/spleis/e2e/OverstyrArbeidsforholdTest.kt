@@ -313,4 +313,42 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         }
         assertSevere("Kan ikke overstyre arbeidsforhold fordi ingen vedtaksperioder håndterte hendelsen", AktivitetsloggFilter.person())
     }
+
+    @Test
+    fun `vi vilkårsprøver krav om minimum inntekt ved overstyring av arbeidsforhold`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1, beregnetInntekt = 3800.månedlig)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null),
+            ),
+            inntektsvurdering = Inntektsvurdering(
+                listOf(
+                    sammenligningsgrunnlag(a1, 1.januar, 3800.månedlig.repeat(12)),
+                    sammenligningsgrunnlag(a2, 1.januar, 300.månedlig.repeat(12))
+                )
+            ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                inntekter = listOf(
+                    grunnlag(a1, 1.januar, 3800.månedlig.repeat(3)),
+                    grunnlag(a2, 1.januar, 300.månedlig.repeat(3))
+                ),
+                arbeidsforhold = emptyList()
+            ),
+            orgnummer = a1
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, false)))
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        val vilkårsgrunnlag = person.vilkårsgrunnlagFor(1.januar)
+        assertWarn("Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag", inspektør(a1).personLogg)
+        assertEquals(setOf(a1), vilkårsgrunnlag?.inntektsopplysningPerArbeidsgiver()?.keys)
+        assertEquals(setOf(a1, a2), vilkårsgrunnlag?.sammenligningsgrunnlagPerArbeidsgiver()?.keys)
+    }
 }
