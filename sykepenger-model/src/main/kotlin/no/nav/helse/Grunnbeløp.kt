@@ -95,13 +95,6 @@ internal class Grunnbeløp private constructor(private val multiplier: Double) {
         val `1G` = Grunnbeløp(1.0)
 
         private fun Inntekt.gyldigFra(gyldigFra: LocalDate, virkningsdato: LocalDate = gyldigFra) = HistoriskGrunnbeløp(this, gyldigFra, virkningsdato)
-        private fun Int.januar(år: Int) = LocalDate.of(år, 1, this)
-        private fun Int.april(år: Int) = LocalDate.of(år, 4, this)
-        private fun Int.mai(år: Int) = LocalDate.of(år, 5, this)
-        private fun Int.juli(år: Int) = LocalDate.of(år, 7, this)
-        private fun Int.september(år: Int) = LocalDate.of(år, 9, this)
-        private fun Int.oktober(år: Int) = LocalDate.of(år, 10, this)
-        private fun Int.desember(år: Int) = LocalDate.of(år, 12, this)
     }
 
     private class HistoriskGrunnbeløp(private val beløp: Inntekt, private val gyldigFra: LocalDate, private val virkningsdato: LocalDate = gyldigFra) {
