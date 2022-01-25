@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.januar
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.september
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -36,7 +37,7 @@ internal class ArbeidsgiverTest {
             begrunnelseForReduksjonEllerIkkeUtbetalt = null,
             mottatt = LocalDateTime.now()
         )
-        val person = Person("aktørId", "01010112345".somFødselsnummer())
+        val person = Person("aktørId", "01010112345".somFødselsnummer(), MaskinellJurist())
         person.håndter(sykmelding(Sykmeldingsperiode(10.september, 26.september, 100.prosent)))
         person.håndter(inntektsmelding)
         assertEquals(

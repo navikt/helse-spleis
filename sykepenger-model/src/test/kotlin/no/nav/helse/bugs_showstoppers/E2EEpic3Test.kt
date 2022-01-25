@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -1391,7 +1392,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(23.august(2020), 14.september(2020), 100.prosent))
         håndterSøknad(Sykdom(23.august(2020), 14.september(2020), 100.prosent))
 
-        person = SerialisertPerson(person.serialize().json).deserialize()
+        person = SerialisertPerson(person.serialize().json).deserialize(MaskinellJurist())
 
         val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 17.august(2020), 22.august(2020), 100.prosent, 1000.daglig)
         val inntekter = listOf(Inntektsopplysning(ORGNUMMER.toString(), 17.august(2020), INNTEKT, true))

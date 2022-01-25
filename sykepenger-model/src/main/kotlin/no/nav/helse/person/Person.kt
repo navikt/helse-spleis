@@ -18,6 +18,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.kanOverstyreTidslinje
 import no.nav.helse.person.Arbeidsgiver.Companion.minstEttSykepengegrunnlagSomIkkeKommerFraSkatt
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
 import no.nav.helse.person.Vedtaksperiode.Companion.ALLE
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.filter.Brukerutbetalingfilter
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -40,7 +41,8 @@ class Person private constructor(
     private val opprettet: LocalDateTime,
     private val infotrygdhistorikk: Infotrygdhistorikk,
     private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
-    private var dødsdato: LocalDate?
+    private var dødsdato: LocalDate?,
+    private val jurist: MaskinellJurist
 ) : Aktivitetskontekst {
     private companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
@@ -48,8 +50,19 @@ class Person private constructor(
 
     constructor(
         aktørId: String,
-        fødselsnummer: Fødselsnummer
-    ) : this(aktørId, fødselsnummer, mutableListOf(), Aktivitetslogg(), LocalDateTime.now(), Infotrygdhistorikk(), VilkårsgrunnlagHistorikk(), null)
+        fødselsnummer: Fødselsnummer,
+        jurist: MaskinellJurist
+    ) : this(
+        aktørId,
+        fødselsnummer,
+        mutableListOf(),
+        Aktivitetslogg(),
+        LocalDateTime.now(),
+        Infotrygdhistorikk(),
+        VilkårsgrunnlagHistorikk(),
+        null,
+        jurist.medFødselsnummer(fødselsnummer)
+    )
 
     private val observers = mutableListOf<PersonObserver>()
 
@@ -113,7 +126,7 @@ class Person private constructor(
         utbetalingshistorikk.sikreAtArbeidsgivereEksisterer {
             arbeidsgivere.finnEllerOpprett(it) {
                 utbetalingshistorikk.info("Ny arbeidsgiver med organisasjonsnummer %s for denne personen", it)
-                Arbeidsgiver(this, it)
+                Arbeidsgiver(this, it, jurist)
             }
         }
         arbeidsgivere.beregnFeriepengerForAlleArbeidsgivere(aktørId, feriepengeberegner, utbetalingshistorikk)
@@ -144,7 +157,12 @@ class Person private constructor(
             arbeidsgivere = arbeidsgivereMedSykdom().associateWith {
                 infotrygdhistorikk.builder(
                     organisasjonsnummer = it.organisasjonsnummer(),
-                    builder = it.builder(regler, skjæringstidspunkter, vilkårsgrunnlagHistorikk.inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver(), hendelse)
+                    builder = it.builder(
+                        regler,
+                        skjæringstidspunkter,
+                        vilkårsgrunnlagHistorikk.inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver(),
+                        hendelse
+                    )
                 )
             },
             infotrygdhistorikk = infotrygdhistorikk,
@@ -436,7 +454,7 @@ class Person private constructor(
     private fun finnEllerOpprettArbeidsgiver(orgnummer: String, aktivitetslogg: IAktivitetslogg) =
         arbeidsgivere.finnEllerOpprett(orgnummer) {
             aktivitetslogg.info("Ny arbeidsgiver med organisasjonsnummer %s for denne personen", orgnummer)
-            Arbeidsgiver(this, orgnummer)
+            Arbeidsgiver(this, orgnummer, jurist)
         }
 
     private fun finnArbeidsgiver(hendelse: ArbeidstakerHendelse) =
@@ -458,7 +476,7 @@ class Person private constructor(
     internal fun harNærliggendeUtbetaling(periode: Periode): Boolean {
         val arbeidsgiverperiode = 16L
         val farligOmråde = periode.let { it.start.minusDays(arbeidsgiverperiode) til it.endInclusive.plusYears(3) }
-        return arbeidsgivere.any { it.harOverlappendeUtbetaling(farligOmråde)}
+        return arbeidsgivere.any { it.harOverlappendeUtbetaling(farligOmråde) }
     }
 
     internal fun lagreDødsdato(dødsdato: LocalDate) {
@@ -519,7 +537,12 @@ class Person private constructor(
         personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden: LocalDate,
         hendelse: IAktivitetslogg
     ) =
-        Sykepengegrunnlag.opprettForInfotrygd(arbeidsgivere.beregnSykepengegrunnlag(skjæringstidspunkt, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden), skjæringstidspunkt, hendelse)
+        Sykepengegrunnlag.opprettForInfotrygd(
+            arbeidsgivere.beregnSykepengegrunnlag(
+                skjæringstidspunkt,
+                personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden
+            ), skjæringstidspunkt, hendelse
+        )
 
     internal fun beregnSammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =
         Sammenligningsgrunnlag(arbeidsgivere.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt))
@@ -527,7 +550,7 @@ class Person private constructor(
     private fun finnArbeidsgiverForInntekter(arbeidsgiver: String, aktivitetslogg: IAktivitetslogg): Arbeidsgiver {
         return arbeidsgivere.finnEllerOpprett(arbeidsgiver) {
             aktivitetslogg.info("Ny arbeidsgiver med organisasjonsnummer %s for denne personen", arbeidsgiver)
-            Arbeidsgiver(this, arbeidsgiver)
+            Arbeidsgiver(this, arbeidsgiver, jurist)
         }
     }
 
@@ -539,7 +562,8 @@ class Person private constructor(
 
     internal fun harNødvendigInntekt(skjæringstidspunkt: LocalDate) = arbeidsgivere.harNødvendigInntekt(skjæringstidspunkt)
 
-    internal fun minstEttSykepengegrunnlagSomIkkeKommerFraSkatt(skjæringstidspunkt: LocalDate) = arbeidsgivere.minstEttSykepengegrunnlagSomIkkeKommerFraSkatt(skjæringstidspunkt)
+    internal fun minstEttSykepengegrunnlagSomIkkeKommerFraSkatt(skjæringstidspunkt: LocalDate) =
+        arbeidsgivere.minstEttSykepengegrunnlagSomIkkeKommerFraSkatt(skjæringstidspunkt)
 
     internal fun harFlereArbeidsgivereMedSykdom() = arbeidsgivereMedSykdom().count() > 1
 
@@ -616,7 +640,12 @@ class Person private constructor(
     internal fun harArbeidsgivereMedOverlappendeUtbetaltePerioder(organisasjonsnummer: String, periode: Periode) =
         arbeidsgivere.harArbeidsgivereMedOverlappendeUtbetaltePerioder(organisasjonsnummer, periode)
 
-    internal fun lagreArbeidsforhold(orgnummer: String, arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>, aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate) {
+    internal fun lagreArbeidsforhold(
+        orgnummer: String,
+        arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>,
+        aktivitetslogg: IAktivitetslogg,
+        skjæringstidspunkt: LocalDate
+    ) {
         finnEllerOpprettArbeidsgiver(orgnummer, aktivitetslogg).lagreArbeidsforhold(arbeidsforhold, skjæringstidspunkt)
     }
 
@@ -648,7 +677,7 @@ class Person private constructor(
 
     internal fun fyllUtPeriodeMedForventedeDager(hendelse: PersonHendelse, periode: Periode, skjæringstidspunkt: LocalDate) {
         vilkårsgrunnlagFor(skjæringstidspunkt)!!.inntektsopplysningPerArbeidsgiver().keys
-            .map { arbeidsgivere.finn(it)!!  }
+            .map { arbeidsgivere.finn(it)!! }
             .forEach { it.fyllUtPeriodeMedForventedeDager(hendelse, periode) }
     }
 
@@ -708,5 +737,6 @@ class Person private constructor(
 
     internal fun infotrygdUtbetalingstidslinje(organisasjonsnummer: String) = infotrygdhistorikk.utbetalingstidslinje(organisasjonsnummer)
 
-    internal fun loggførHendelsesreferanse(orgnummer: String, skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID) = arbeidsgivere.forEach { it.loggførHendelsesreferanse(orgnummer, skjæringstidspunkt, meldingsreferanseId) }
+    internal fun loggførHendelsesreferanse(orgnummer: String, skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID) =
+        arbeidsgivere.forEach { it.loggførHendelsesreferanse(orgnummer, skjæringstidspunkt, meldingsreferanseId) }
 }

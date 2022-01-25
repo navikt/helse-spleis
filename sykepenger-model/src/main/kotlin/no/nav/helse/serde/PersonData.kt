@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.*
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.infotrygdhistorikk.*
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.ArbeidsforholdhistorikkInnslagData.Companion.tilArbeidsforholdhistorikk
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.InntektsmeldingInfoHistorikkElementData.Companion.finn
@@ -51,7 +52,7 @@ internal data class PersonData(
     private val modelAktivitetslogg get() = aktivitetslogg?.konverterTilAktivitetslogg() ?: Aktivitetslogg()
 
     //FIXME: Å bruke reflection for å finne konstruktør ødelegger hele greia med privat konstruktør.
-    private val person = Person::class.primaryConstructor!!
+    private fun person(jurist: MaskinellJurist) = Person::class.primaryConstructor!!
         .apply { isAccessible = true }
         .call(
             aktørId,
@@ -61,15 +62,19 @@ internal data class PersonData(
             opprettet,
             infotrygdhistorikk.tilModellObjekt(),
             vilkårsgrunnlagHistorikk.tilModellObjekt(),
-            dødsdato
+            dødsdato,
+            jurist
         )
 
-    internal fun createPerson(): Person {
+    internal fun createPerson(jurist: MaskinellJurist): Person {
+        val personJurist = jurist.medFødselsnummer(fødselsnummer.somFødselsnummer())
+        val person = person(personJurist)
         arbeidsgivereliste.addAll(this.arbeidsgivere.map {
             it.konverterTilArbeidsgiver(
                 person,
                 this.aktørId,
-                this.fødselsnummer
+                this.fødselsnummer,
+                personJurist
             )
         })
         return person
@@ -403,8 +408,10 @@ internal data class PersonData(
         internal fun konverterTilArbeidsgiver(
             person: Person,
             aktørId: String,
-            fødselsnummer: String
+            fødselsnummer: String,
+            jurist: MaskinellJurist
         ): Arbeidsgiver {
+            val arbeidsgiverJurist = jurist.medOrganisasjonsnummer(organisasjonsnummer)
             val arbeidsgiver = Arbeidsgiver.JsonRestorer.restore(
                 person,
                 organisasjonsnummer,
@@ -419,7 +426,8 @@ internal data class PersonData(
                 refusjonOpphører,
                 refusjonshistorikk.parseRefusjon(),
                 arbeidsforholdhistorikk.tilArbeidsforholdhistorikk(),
-                inntektsmeldingInfo.tilInntektsmeldingInfoHistorikk()
+                inntektsmeldingInfo.tilInntektsmeldingInfoHistorikk(),
+                arbeidsgiverJurist
             )
 
             vedtaksperiodeliste.addAll(this.vedtaksperioder.map {
@@ -430,7 +438,8 @@ internal data class PersonData(
                     fødselsnummer,
                     this.organisasjonsnummer,
                     utbetalingMap,
-                    inntektsmeldingInfo
+                    inntektsmeldingInfo,
+                    arbeidsgiverJurist
                 )
             })
 
@@ -443,7 +452,8 @@ internal data class PersonData(
                         fødselsnummer,
                         this.organisasjonsnummer,
                         utbetalingMap,
-                        inntektsmeldingInfo
+                        inntektsmeldingInfo,
+                        arbeidsgiverJurist
                     ), årsak
                 )
             })
@@ -819,7 +829,8 @@ internal data class PersonData(
                 fødselsnummer: String,
                 organisasjonsnummer: String,
                 utbetalinger: Map<UUID, Utbetaling>,
-                inntektsmeldingInfoHistorikk: List<InntektsmeldingInfoHistorikkElementData>
+                inntektsmeldingInfoHistorikk: List<InntektsmeldingInfoHistorikkElementData>,
+                jurist: MaskinellJurist
             ): Vedtaksperiode {
                 return Vedtaksperiode::class.primaryConstructor!!
                     .apply { isAccessible = true }
@@ -842,7 +853,8 @@ internal data class PersonData(
                         forlengelseFraInfotrygd,
                         inntektskilde,
                         opprettet,
-                        oppdatert
+                        oppdatert,
+                        jurist.medVedtaksperiode(id, hendelseIder.toList())
                     )
             }
 

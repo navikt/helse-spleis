@@ -6,7 +6,7 @@ import no.nav.helse.økonomi.Prosent
 import java.time.LocalDate
 import java.time.Year
 
-interface EtterlevelseObserver {
+interface SubsumsjonObserver {
 
     /**
      * Vurdering av medlemskap

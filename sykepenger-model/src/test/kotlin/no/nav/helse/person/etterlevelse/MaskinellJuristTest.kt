@@ -5,41 +5,40 @@ import no.nav.helse.somFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.util.*
 
 internal class MaskinellJuristTest {
 
     @Test
     fun `jurist lytter på endringer av kontekst`() {
-        val jurist = MaskinellJurist("10052088033".somFødselsnummer())
+        val vedtaksperiodeJurist = MaskinellJurist()
+            .medFødselsnummer("10052088033".somFødselsnummer())
+            .medOrganisasjonsnummer("123456789")
+            .medVedtaksperiode(UUID.fromString("6bce6c83-28ab-4a8c-b7f6-8402988bc8fc"), emptyList())
 
-        jurist.nyKontekst(Kontekst("Arbeidsgiver", mapOf("organisasjonsnummer" to "123456789")))
-        jurist.nyKontekst(Kontekst("Vedtaksperiode", mapOf("vedtaksperiodeId" to "6bce6c83-28ab-4a8c-b7f6-8402988bc8fc")))
-        jurist.nyKontekst(Kontekst("Søknad", mapOf("søknadId" to "44ad28ba-5841-426a-a060-d0f54348f20e")))
-
-        jurist.`§8-2 ledd 1`(true, LocalDate.now(), 1, emptyList(), 1)
+        vedtaksperiodeJurist.`§8-2 ledd 1`(true, LocalDate.now(), 1, emptyList(), 1)
 
         assertKontekster(
-            jurist.vurderinger()[0],
+            vedtaksperiodeJurist.vurderinger()[0],
             "fødselsnummer" to "10052088033",
             "organisasjonsnummer" to "123456789",
-            "vedtaksperiodeId" to "6bce6c83-28ab-4a8c-b7f6-8402988bc8fc",
-            "søknadId" to "44ad28ba-5841-426a-a060-d0f54348f20e"
+            "vedtaksperiodeId" to "6bce6c83-28ab-4a8c-b7f6-8402988bc8fc"
         )
     }
 
     @Test
     fun `alltid nyeste kontekst som gjelder`() {
-        val jurist = MaskinellJurist("10052088033".somFødselsnummer())
+        val arbeidsgiverJurist = MaskinellJurist()
+            .medFødselsnummer("10052088033".somFødselsnummer())
+            .medOrganisasjonsnummer("123456789")
+            .medOrganisasjonsnummer("987654321")
 
-        jurist.nyKontekst(Kontekst("Vedtaksperiode", mapOf("vedtaksperiodeId" to "6bce6c83-28ab-4a8c-b7f6-8402988bc8fc")))
-        jurist.nyKontekst(Kontekst("Vedtaksperiode", mapOf("vedtaksperiodeId" to "cf7fafd2-b7f3-43dc-95d0-dd66f0d20c35")))
-
-        jurist.`§8-2 ledd 1`(true, LocalDate.now(), 1, emptyList(), 1)
+        arbeidsgiverJurist.`§8-2 ledd 1`(true, LocalDate.now(), 1, emptyList(), 1)
 
         assertKontekster(
-            jurist.vurderinger()[0],
+            arbeidsgiverJurist.vurderinger()[0],
             "fødselsnummer" to "10052088033",
-            "vedtaksperiodeId" to "cf7fafd2-b7f3-43dc-95d0-dd66f0d20c35",
+            "organisasjonsnummer" to "987654321",
         )
     }
 
@@ -70,9 +69,5 @@ internal class MaskinellJuristTest {
             kontekster.toList().sortedBy { it.first },
             inspektør.kontekster.toList().sortedBy { it.first }
         )
-    }
-
-    private class Kontekst(private val kontekstType: String, private val verdier: Map<String, String> = emptyMap()): Aktivitetskontekst {
-        override fun toSpesifikkKontekst(): SpesifikkKontekst = SpesifikkKontekst(kontekstType, verdier)
     }
 }

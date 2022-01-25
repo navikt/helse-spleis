@@ -1,8 +1,6 @@
 package no.nav.helse.person.etterlevelse
 
 import no.nav.helse.Fødselsnummer
-import no.nav.helse.person.Aktivitetskontekst
-import no.nav.helse.person.KontekstObserver
 import no.nav.helse.person.Ledd.Companion.ledd
 import no.nav.helse.person.Paragraf
 import no.nav.helse.person.Punktum.Companion.punktum
@@ -10,16 +8,16 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 import java.time.LocalDate
 import java.time.Year
+import java.util.*
 
 class MaskinellJurist private constructor(
-    private val fødselsnummer: Fødselsnummer,
-    private val parent: MaskinellJurist?
-) : EtterlevelseObserver, KontekstObserver {
-    private val kontekster: MutableMap<String, String> = mutableMapOf("fødselsnummer" to fødselsnummer.toString())
+    private val parent: MaskinellJurist?,
+    private val kontekster: Map<String, String>
+) : SubsumsjonObserver {
 
     private var vurderinger = listOf<JuridiskVurdering>()
 
-    constructor(fødselsnummer: Fødselsnummer): this(fødselsnummer, null)
+    constructor(): this(null, emptyMap())
 
     private fun leggTil(vurdering: JuridiskVurdering) {
         vurderinger = vurdering.sammenstill(vurderinger)
@@ -28,10 +26,10 @@ class MaskinellJurist private constructor(
 
     private fun kontekster(): Map<String, String> = this.kontekster.toMap()
 
-    override fun nyKontekst(kontekst: Aktivitetskontekst) {
-        val spesifikk = kontekst.toSpesifikkKontekst()
-        kontekster.putAll(spesifikk.kontekstMap)
-    }
+    fun medFødselsnummer(fødselsnummer: Fødselsnummer) = kopierMedKontekst(mapOf("fødselsnummer" to fødselsnummer.toString()))
+    fun medOrganisasjonsnummer(organisasjonsnummer: String) = kopierMedKontekst(mapOf("organisasjonsnummer" to organisasjonsnummer))
+    fun medVedtaksperiode(vedtaksperiodeId: UUID, hendelseIder: List<UUID>) = kopierMedKontekst(mapOf("vedtaksperiodeId" to vedtaksperiodeId.toString()))
+    private fun kopierMedKontekst(kontekster: Map<String, String>) = MaskinellJurist(this, this.kontekster + kontekster)
 
     override fun `§2`(oppfylt: Boolean) {
         super.`§2`(oppfylt)

@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.spleis.e2e.TestObservatør
 import org.junit.jupiter.api.BeforeEach
@@ -32,7 +33,7 @@ internal abstract class AbstractPersonTest {
     }
 
     protected fun createTestPerson(fødselsnummer: Fødselsnummer) {
-        person = Person(AKTØRID, fødselsnummer)
+        person = Person(AKTØRID, fødselsnummer, MaskinellJurist())
         observatør = TestObservatør().also { person.addObserver(it) }
     }
 

@@ -5,6 +5,7 @@ import com.apurebase.kgraphql.schema.dsl.SchemaBuilder
 import io.ktor.application.*
 import io.ktor.auth.*
 import no.nav.helse.Toggle
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.dao.PersonDao
 import no.nav.helse.spleis.dto.håndterPerson
@@ -20,7 +21,7 @@ internal fun SchemaBuilder.personSchema(personDao: PersonDao, hendelseDao: Hende
     query("person") {
         resolver { fnr: String ->
             personDao.hentPersonFraFnr(fnr.toLong())
-                ?.deserialize { hendelseDao.hentAlleHendelser(fnr.toLong()) }
+                ?.deserialize(MaskinellJurist()) { hendelseDao.hentAlleHendelser(fnr.toLong()) }
                 ?.let { håndterPerson(it, hendelseDao) }
                 ?.let { person ->
                     GraphQLPerson(

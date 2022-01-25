@@ -7,6 +7,7 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.*
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.serde.PersonData
 import no.nav.helse.serde.PersonData.InfotrygdhistorikkElementData.Companion.tilModellObjekt
 import no.nav.helse.somFødselsnummer
@@ -119,7 +120,7 @@ internal class InfotrygdhistorikkTest {
             oppdatert = tidsstempel,
             inntekter = emptyList()
         ))
-        historikk.addInntekter(Person("", "01010112345".somFødselsnummer()), aktivitetslogg)
+        historikk.addInntekter(Person("", "01010112345".somFødselsnummer(), MaskinellJurist()), aktivitetslogg)
         historikk.tøm()
         assertFalse(historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato))
         assertFalse(aktivitetslogg.behov().isNotEmpty()) { aktivitetslogg.toString() }
@@ -133,7 +134,7 @@ internal class InfotrygdhistorikkTest {
             oppdatert = tidsstempel,
             inntekter = listOf(Inntektsopplysning("orgnr", 1.januar, 1000.daglig, true))
         ))
-        historikk.addInntekter(Person("", "10101012345".somFødselsnummer()), aktivitetslogg)
+        historikk.addInntekter(Person("", "10101012345".somFødselsnummer(), MaskinellJurist()), aktivitetslogg)
         historikk.tøm()
         assertFalse(historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato))
         assertFalse(aktivitetslogg.behov().isNotEmpty()) { aktivitetslogg.toString() }

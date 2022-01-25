@@ -9,6 +9,7 @@ import no.nav.helse.person.Person
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.april
 import no.nav.helse.januar
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -24,7 +25,7 @@ internal class SerialiseringAvDagerFraSøknadTest {
         val jsonBuilder = JsonBuilder()
         person.accept(jsonBuilder)
         val personDeserialisert = SerialisertPerson(jsonBuilder.toString())
-            .deserialize()
+            .deserialize(MaskinellJurist())
 
         assertJsonEquals(person, personDeserialisert)
     }
@@ -35,7 +36,7 @@ internal class SerialiseringAvDagerFraSøknadTest {
         person.accept(jsonBuilder)
         val json = jsonBuilder.toString()
 
-        val result = SerialisertPerson(json).deserialize()
+        val result = SerialisertPerson(json).deserialize(MaskinellJurist())
         val jsonBuilder2 = JsonBuilder()
         result.accept(jsonBuilder2)
         val json2 = jsonBuilder2.toString()
@@ -56,7 +57,7 @@ internal class SerialiseringAvDagerFraSøknadTest {
     internal fun setup() {
         aktivitetslogg = Aktivitetslogg()
 
-        person = Person(aktørId, fnr.somFødselsnummer()).apply {
+        person = Person(aktørId, fnr.somFødselsnummer(), MaskinellJurist()).apply {
             håndter(sykmelding)
             håndter(søknad)
         }

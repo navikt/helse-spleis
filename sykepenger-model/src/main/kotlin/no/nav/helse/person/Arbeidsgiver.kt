@@ -24,6 +24,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.medSkjæringstidspunkt
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.periode
 import no.nav.helse.person.builders.UtbetalingsdagerBuilder
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.reflection.Utbetalingstatus
@@ -56,9 +57,10 @@ internal class Arbeidsgiver private constructor(
     private val refusjonOpphører: MutableList<LocalDate?>,
     internal val refusjonshistorikk: Refusjonshistorikk,
     private val arbeidsforholdhistorikk: Arbeidsforholdhistorikk,
-    private val inntektsmeldingInfo: InntektsmeldingInfoHistorikk
+    private val inntektsmeldingInfo: InntektsmeldingInfoHistorikk,
+    private val jurist: MaskinellJurist
 ) : Aktivitetskontekst, UtbetalingObserver {
-    internal constructor(person: Person, organisasjonsnummer: String) : this(
+    internal constructor(person: Person, organisasjonsnummer: String, jurist: MaskinellJurist) : this(
         person = person,
         organisasjonsnummer = organisasjonsnummer,
         id = UUID.randomUUID(),
@@ -72,7 +74,8 @@ internal class Arbeidsgiver private constructor(
         refusjonOpphører = mutableListOf(),
         refusjonshistorikk = Refusjonshistorikk(),
         arbeidsforholdhistorikk = Arbeidsforholdhistorikk(),
-        inntektsmeldingInfo = InntektsmeldingInfoHistorikk()
+        inntektsmeldingInfo = InntektsmeldingInfoHistorikk(),
+        jurist.medOrganisasjonsnummer(organisasjonsnummer)
     )
 
     init {
@@ -859,7 +862,8 @@ internal class Arbeidsgiver private constructor(
         return Vedtaksperiode(
             person = person,
             arbeidsgiver = this,
-            hendelse = hendelse
+            hendelse = hendelse,
+            jurist = jurist
         ).also {
             vedtaksperioder.add(it)
             vedtaksperioder.sort()
@@ -1114,7 +1118,8 @@ internal class Arbeidsgiver private constructor(
                 refusjonOpphører: List<LocalDate?>,
                 refusjonshistorikk: Refusjonshistorikk,
                 arbeidsforholdhistorikk: Arbeidsforholdhistorikk,
-                inntektsmeldingInfo: InntektsmeldingInfoHistorikk
+                inntektsmeldingInfo: InntektsmeldingInfoHistorikk,
+                jurist: MaskinellJurist
             ) = Arbeidsgiver(
                 person,
                 organisasjonsnummer,
@@ -1129,7 +1134,8 @@ internal class Arbeidsgiver private constructor(
                 refusjonOpphører.toMutableList(),
                 refusjonshistorikk,
                 arbeidsforholdhistorikk,
-                inntektsmeldingInfo
+                inntektsmeldingInfo,
+                jurist
             )
         }
     }

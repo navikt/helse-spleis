@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.serde.api.BegrunnelseDTO
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterEach
@@ -34,7 +35,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
 
     @Test
     fun `Person over 70 får alle dager etter AGP avvist med Over70 som begrunnelse`() {
-        person = Person(AKTØRID, FYLLER_70_TIENDE_JANUAR)
+        person = Person(AKTØRID, FYLLER_70_TIENDE_JANUAR, MaskinellJurist())
         observatør = TestObservatør().also { person.addObserver(it) }
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
@@ -70,7 +71,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
 
     @Test
     fun `Får ikke plutselig penger igjen etter 26 uker hvis over 70 år`() {
-        person = Person(AKTØRID, FYLLER_70_TIENDE_JANUAR)
+        person = Person(AKTØRID, FYLLER_70_TIENDE_JANUAR, MaskinellJurist())
         observatør = TestObservatør().also { person.addObserver(it) }
 
         håndterSykmelding(Sykmeldingsperiode(20.desember(2017), 9.januar, 100.prosent))
@@ -104,7 +105,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
 
     @Test
     fun `Maksdato settes til dagen før 70årsdagen uavhengig av opptjente sykedager dersom person fyller 70 i perioden`() {
-        person = Person(AKTØRID, FYLLER_70_TIENDE_JANUAR)
+        person = Person(AKTØRID, FYLLER_70_TIENDE_JANUAR, MaskinellJurist())
         observatør = TestObservatør().also { person.addObserver(it) }
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
@@ -121,7 +122,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
 
     @Test
     fun `Maksdato settes til dagen før 70årsdagen også for perioder etter fylte 70`() {
-        person = Person(AKTØRID, FYLLER_70_TIENDE_JANUAR)
+        person = Person(AKTØRID, FYLLER_70_TIENDE_JANUAR, MaskinellJurist())
         observatør = TestObservatør().also { person.addObserver(it) }
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
@@ -138,7 +139,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
 
     @Test
     fun `Maksdato settes til virkedagen før 70årsdagen hvis bursdagen er på en søndag`() {
-        person = Person(AKTØRID, FYLLER_70_FJORTENDE_JANUAR)
+        person = Person(AKTØRID, FYLLER_70_FJORTENDE_JANUAR, MaskinellJurist())
         observatør = TestObservatør().also { person.addObserver(it) }
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
@@ -154,7 +155,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
 
     @Test
     fun `Maksdato settes til virkedagen før 70årsdagen hvis bursdagen er på en mandag`() {
-        person = Person(AKTØRID, FYLLER_70_TOOGTYVENDE_JANUAR)
+        person = Person(AKTØRID, FYLLER_70_TOOGTYVENDE_JANUAR, MaskinellJurist())
         observatør = TestObservatør().also { person.addObserver(it) }
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))

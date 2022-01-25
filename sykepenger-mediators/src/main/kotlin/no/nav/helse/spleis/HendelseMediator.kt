@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.utbetaling.*
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonHendelse
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.spleis.db.HendelseRepository
@@ -191,20 +192,18 @@ internal class HendelseMediator(
         hendelse: Hendelse,
         handler: (Person) -> Unit
     ) {
-        val person = person(hendelse)
+        val jurist = MaskinellJurist()
+        val person = person(hendelse, jurist)
         val personMediator = PersonMediator(person, message, hendelse, hendelseRepository)
         person.addObserver(VedtaksperiodeProbe)
         handler(person)
         finalize(personMediator, message, hendelse)
     }
 
-    private fun person(hendelse: PersonHendelse): Person {
+    private fun person(hendelse: PersonHendelse, jurist: MaskinellJurist): Person {
         return personRepository.hentPerson(hendelse.fødselsnummer().somFødselsnummer())
-            ?.deserialize { hendelseRepository.hentAlleHendelser(hendelse.fødselsnummer().somFødselsnummer()) } ?:
-            Person(
-                aktørId = hendelse.aktørId(),
-                fødselsnummer = hendelse.fødselsnummer().somFødselsnummer()
-            )
+            ?.deserialize(jurist) { hendelseRepository.hentAlleHendelser(hendelse.fødselsnummer().somFødselsnummer()) }
+            ?: Person(aktørId = hendelse.aktørId(), fødselsnummer = hendelse.fødselsnummer().somFødselsnummer(), jurist = jurist)
     }
 
     private fun finalize(personMediator: PersonMediator, message: HendelseMessage, hendelse: PersonHendelse) {

@@ -11,6 +11,7 @@ import io.ktor.routing.*
 import io.ktor.util.pipeline.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.serde.serialize
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.dao.PersonDao
@@ -36,7 +37,7 @@ internal fun Application.spesialistApi(dataSource: DataSource, authProviderName:
                     sikkerLogg.info("Serverer person-snapshot for fødselsnummer $fnr")
                     try {
                         personDao.hentPersonFraFnr(fnr)
-                            ?.deserialize { hendelseDao.hentAlleHendelser(fnr) }
+                            ?.deserialize(MaskinellJurist()) { hendelseDao.hentAlleHendelser(fnr) }
                             ?.let { håndterPerson(it, hendelseDao) }
                             ?.let { call.respond(it) }
                             ?: call.respond(HttpStatusCode.NotFound, "Resource not found")
@@ -61,7 +62,7 @@ internal fun Application.spannerApi(dataSource: DataSource, authProviderName: St
                 withContext(Dispatchers.IO) {
                     val fnr = fnr(personDao)
                     val person = personDao.hentPersonFraFnr(fnr) ?: throw NotFoundException("Kunne ikke finne person for fødselsnummer")
-                    call.respond(person.deserialize { hendelseDao.hentAlleHendelser(fnr) }.serialize().json)
+                    call.respond(person.deserialize(MaskinellJurist()) { hendelseDao.hentAlleHendelser(fnr) }.serialize().json)
                 }
             }
 

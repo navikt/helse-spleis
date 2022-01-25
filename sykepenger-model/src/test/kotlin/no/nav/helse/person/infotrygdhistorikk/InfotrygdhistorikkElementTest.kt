@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.*
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -668,7 +669,7 @@ internal class InfotrygdhistorikkElementTest {
     @Test
     fun `element uten inntekter låses ikke`() {
         val element = historikkelement(inntekter = emptyList())
-        element.addInntekter(Person("", "01010112345".somFødselsnummer()), aktivitetslogg)
+        element.addInntekter(Person("", "01010112345".somFødselsnummer(), MaskinellJurist()), aktivitetslogg)
         assertTrue(element.kanSlettes())
     }
 
@@ -679,7 +680,7 @@ internal class InfotrygdhistorikkElementTest {
                 Inntektsopplysning(ORGNUMMER, 1.januar, 1234.månedlig, true)
             )
         )
-        element.addInntekter(Person("", "01010112345".somFødselsnummer()), aktivitetslogg)
+        element.addInntekter(Person("", "01010112345".somFødselsnummer(), MaskinellJurist()), aktivitetslogg)
         assertFalse(element.kanSlettes())
     }
 

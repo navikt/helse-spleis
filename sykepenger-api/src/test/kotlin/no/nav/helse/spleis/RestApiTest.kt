@@ -16,6 +16,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.person.Person
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.serde.serialize
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.spleis.config.AzureAdAppConfig
@@ -152,7 +153,7 @@ internal class RestApiTest {
             begrunnelseForReduksjonEllerIkkeUtbetalt = null,
             mottatt = LocalDateTime.now()
         )
-        val person = Person(AKTØRID, UNG_PERSON_FNR.somFødselsnummer())
+        val person = Person(AKTØRID, UNG_PERSON_FNR.somFødselsnummer(), MaskinellJurist())
         person.håndter(sykmelding)
         person.håndter(inntektsmelding)
         dataSource.lagrePerson(AKTØRID, UNG_PERSON_FNR, person)

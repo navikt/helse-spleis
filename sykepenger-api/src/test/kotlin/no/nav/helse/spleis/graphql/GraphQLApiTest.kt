@@ -4,6 +4,7 @@ import no.nav.helse.Toggle
 import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
 import no.nav.helse.person.Person
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.spleis.AbstractObservableTest
 import no.nav.helse.spleis.objectMapper
@@ -35,7 +36,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
 
     @BeforeEach
     internal fun setup() {
-        person = Person(AKTØRID, UNG_PERSON_FNR.somFødselsnummer())
+        person = Person(AKTØRID, UNG_PERSON_FNR.somFødselsnummer(), MaskinellJurist())
         observatør = TestObservatør().also { person.addObserver(it) }
         person.håndter(sykmelding())
         person.håndter(søknad())

@@ -6,6 +6,7 @@ import no.nav.helse.inspectors.UtbetalingstidslinjeInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.*
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
@@ -264,7 +265,7 @@ internal class ArbeidsgiverUtbetalingerTest {
         historiskTidslinje: Utbetalingstidslinje,
         vilkårsgrunnlagElement: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement? = null
     ) {
-        val person = Person("aktørid", fnr)
+        val person = Person("aktørid", fnr, MaskinellJurist())
         // seed arbeidsgiver med sykdomshistorikk
         person.håndter(
             Sykmelding(

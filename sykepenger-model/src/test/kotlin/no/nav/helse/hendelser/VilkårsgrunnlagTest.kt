@@ -7,6 +7,7 @@ import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.person.*
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.spleis.e2e.TestObservatør
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt
@@ -35,7 +36,7 @@ internal class VilkårsgrunnlagTest {
 
     @BeforeEach
     fun setup() {
-        person = Person(aktørId, UNG_PERSON_FNR_2018)
+        person = Person(aktørId, UNG_PERSON_FNR_2018, MaskinellJurist())
         person.addObserver(observatør)
         person.håndter(sykmelding())
         person.håndter(inntektsmelding())

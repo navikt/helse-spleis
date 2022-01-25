@@ -7,6 +7,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.*
 import no.nav.helse.person.Periodetype.*
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
@@ -39,8 +40,8 @@ internal class HistoriePeriodetypeTest {
 
     @BeforeEach
     fun setup() {
-        person = Person(aktørId, UNG_PERSON_FNR_2018)
-        arbeidsgiver = Arbeidsgiver(person, AG1)
+        person = Person(aktørId, UNG_PERSON_FNR_2018, MaskinellJurist())
+        arbeidsgiver = Arbeidsgiver(person, AG1, MaskinellJurist())
         person.håndter(Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018.toString(),

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.mockk
 import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.somFødselsnummer
 import org.junit.jupiter.api.Assertions.*
@@ -51,7 +52,7 @@ class BehovMediatorTest {
 
     @BeforeEach
     fun setup() {
-        person = Person(aktørId, fødselsnummer.somFødselsnummer())
+        person = Person(aktørId, fødselsnummer.somFødselsnummer(), MaskinellJurist())
         aktivitetslogg = Aktivitetslogg()
         behovMediator = BehovMediator(testRapid, mockk(relaxed = true))
         messages.clear()

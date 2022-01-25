@@ -8,6 +8,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.helse.person.Person
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.serde.migration.*
 
 internal val serdeObjectMapper = jacksonObjectMapper()
@@ -187,14 +188,14 @@ class SerialisertPerson(val json: String) {
         }
     }
 
-    fun deserialize(meldingerSupplier: MeldingerSupplier = MeldingerSupplier.empty): Person {
+    fun deserialize(jurist: MaskinellJurist, meldingerSupplier: MeldingerSupplier = MeldingerSupplier.empty): Person {
         val jsonNode = serdeObjectMapper.readTree(json)
 
         migrate(jsonNode, meldingerSupplier)
 
         try {
             val personData: PersonData = requireNotNull(serdeObjectMapper.treeToValue(jsonNode))
-            return personData.createPerson()
+            return personData.createPerson(jurist)
         } catch (err: Exception) {
             throw DeserializationException("Feil under oversetting til modellobjekter: ${err.message}", err)
         }

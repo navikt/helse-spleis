@@ -30,6 +30,7 @@ import no.nav.helse.person.Periodetype.*
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.builders.UtbetaltEventBuilder
 import no.nav.helse.person.builders.VedtakFattetBuilder
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
@@ -66,7 +67,8 @@ internal class Vedtaksperiode private constructor(
     private var forlengelseFraInfotrygd: ForlengelseFraInfotrygd = ForlengelseFraInfotrygd.IKKE_ETTERSPURT,
     private var inntektskilde: Inntektskilde,
     private val opprettet: LocalDateTime,
-    private var oppdatert: LocalDateTime = opprettet
+    private var oppdatert: LocalDateTime = opprettet,
+    private val jurist: MaskinellJurist
 ) : Aktivitetskontekst, Comparable<Vedtaksperiode> {
 
     private val skjæringstidspunkt get() = skjæringstidspunktFraInfotrygd ?: person.skjæringstidspunkt(periode)
@@ -75,11 +77,13 @@ internal class Vedtaksperiode private constructor(
     internal constructor(
         person: Person,
         arbeidsgiver: Arbeidsgiver,
-        hendelse: Sykmelding
+        hendelse: Sykmelding,
+        jurist: MaskinellJurist,
+        id: UUID = UUID.randomUUID()
     ) : this(
         person = person,
         arbeidsgiver = arbeidsgiver,
-        id = UUID.randomUUID(),
+        id = id,
         aktørId = hendelse.aktørId(),
         fødselsnummer = hendelse.fødselsnummer(),
         organisasjonsnummer = hendelse.organisasjonsnummer(),
@@ -93,7 +97,8 @@ internal class Vedtaksperiode private constructor(
         utbetalinger = VedtaksperiodeUtbetalinger(arbeidsgiver),
         utbetalingstidslinje = Utbetalingstidslinje(),
         inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
-        opprettet = LocalDateTime.now()
+        opprettet = LocalDateTime.now(),
+        jurist = jurist.medVedtaksperiode(id, mutableListOf())
     )
 
     internal fun accept(visitor: VedtaksperiodeVisitor) {
