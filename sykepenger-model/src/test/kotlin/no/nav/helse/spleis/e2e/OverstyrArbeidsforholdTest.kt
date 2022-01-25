@@ -347,7 +347,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, false)))
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        assertWarn("Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag", inspektør(a1).personLogg)
+        assertWarning(1.vedtaksperiode, "Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag", orgnummer = a1)
     }
 
     @Test
@@ -382,7 +382,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, false)))
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        assertWarn("Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.", inspektør(a1).personLogg) // takk dent. (fredet kommentar)
+        assertWarning(1.vedtaksperiode, "Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.", orgnummer = a1) // takk dent. (fredet kommentar)
     }
 
     @ForventetFeil("må implementeres")

@@ -776,7 +776,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING_REVURDERING,
             REVURDERING_FEILET
         )
-        assertWarn("Utbetaling av revurdert periode ble avvist av saksbehandler. Utbetalingen må annulleres", inspektør.personLogg)
+        assertWarning(1.vedtaksperiode, "Utbetaling av revurdert periode ble avvist av saksbehandler. Utbetalingen må annulleres")
     }
 
     @Test
@@ -811,7 +811,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING_REVURDERING,
             REVURDERING_FEILET
         )
-        assertWarn("Simulering av revurdert utbetaling feilet. Utbetalingen må annulleres", inspektør.personLogg)
+        assertWarning(1.vedtaksperiode, "Simulering av revurdert utbetaling feilet. Utbetalingen må annulleres")
     }
 
     @Test

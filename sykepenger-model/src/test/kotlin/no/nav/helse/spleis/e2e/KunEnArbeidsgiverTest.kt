@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.*
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
@@ -13,7 +14,7 @@ import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
-import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.AvvistDag
@@ -30,18 +31,6 @@ import java.time.YearMonth
 import java.time.temporal.TemporalAdjusters.firstDayOfMonth
 import java.time.temporal.TemporalAdjusters.lastDayOfMonth
 import java.util.*
-import no.nav.helse.januar
-import no.nav.helse.februar
-import no.nav.helse.mars
-import no.nav.helse.april
-import no.nav.helse.mai
-import no.nav.helse.juni
-import no.nav.helse.juli
-import no.nav.helse.august
-import no.nav.helse.september
-import no.nav.helse.oktober
-import no.nav.helse.november
-import no.nav.helse.desember
 
 internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
@@ -331,8 +320,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         inspektør.also {
             assertWarnings(it)
-            assertWarn("Utdanning oppgitt i perioden i søknaden.", it.personLogg)
-            assertWarn("Utenlandsopphold oppgitt i perioden i søknaden.", it.personLogg)
+            assertWarning(1.vedtaksperiode, "Utdanning oppgitt i perioden i søknaden.")
+            assertWarning(1.vedtaksperiode, "Utenlandsopphold oppgitt i perioden i søknaden.")
             assertEquals(3, it.sykdomshistorikk.size)
             assertEquals(18, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
             assertEquals(6, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])

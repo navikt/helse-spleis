@@ -72,15 +72,6 @@ internal fun AbstractEndToEndTest.assertUtbetalingsbeløp(
     }
 }
 
-internal fun assertWarn(message: String, aktivitetslogg: Aktivitetslogg) {
-    var fant = false
-    aktivitetslogg.accept(object : AktivitetsloggVisitor {
-        override fun visitWarn(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Warn, melding: String, tidsstempel: String) {
-            if (message == melding) fant = true
-        }
-    })
-    assertTrue(fant)
-}
 internal fun AbstractEndToEndTest.assertHendelseIder(
     vararg hendelseIder: UUID,
     orgnummer: String,
