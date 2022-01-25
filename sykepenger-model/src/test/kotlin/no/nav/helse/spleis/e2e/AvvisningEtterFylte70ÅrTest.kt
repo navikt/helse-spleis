@@ -51,10 +51,10 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
         val navDager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == PersonObserver.Utbetalingsdag.Dagtype.NavDag }
         val navHelgedager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == PersonObserver.Utbetalingsdag.Dagtype.NavHelgDag }
 
-        assertEquals(15, avvisteDager.size)
+        assertEquals(11, avvisteDager.size)
         assertEquals(16, arbeidsgiverperiodedager.size)
         assertEquals(0, navDager.size)
-        assertEquals(0, navHelgedager.size)
+        assertEquals(4, navHelgedager.size)
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -96,7 +96,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
         val avvisteDager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == PersonObserver.Utbetalingsdag.Dagtype.AvvistDag }
         val arbeidsgiverperiodedager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == PersonObserver.Utbetalingsdag.Dagtype.ArbeidsgiverperiodeDag}
 
-        assertEquals(5, avvisteDager.size)
+        assertEquals(3, avvisteDager.size)
         assertEquals(16 + 16, arbeidsgiverperiodedager.size)
         assertTrue(avvisteDager.all { it.begrunnelser == listOf(BegrunnelseDTO.Over70) })
         assertTrue(arbeidsgiverperiodedager.all { it.begrunnelser == null })

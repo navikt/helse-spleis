@@ -27,12 +27,12 @@ internal class AvvisDagerEtterDødsdatofilterTest {
     }
 
     @Test
-    fun `helg avvises`() {
+    fun `helg avvises ikke`() {
         val tidslinjer = listOf(tidslinjeOf(16.AP, 5.NAV))
         val periode = Periode(1.januar, 21.januar)
         undersøke(tidslinjer, 19.januar, periode)
         assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
-        assertEquals(2, inspektør.avvistDagTeller)
+        assertEquals(0, inspektør.avvistDagTeller)
         assertEquals(3, inspektør.navDagTeller)
     }
 
@@ -62,7 +62,7 @@ internal class AvvisDagerEtterDødsdatofilterTest {
         val periode = Periode(1.januar, 23.januar)
         undersøke(tidslinjer, 19.januar, periode)
         assertEquals(3, inspektør.navDagTeller)
-        assertEquals(4, inspektør.avvistDagTeller)
+        assertEquals(2, inspektør.avvistDagTeller)
     }
 
     @Test
@@ -71,7 +71,7 @@ internal class AvvisDagerEtterDødsdatofilterTest {
         val periode = Periode(1.januar, 23.januar)
         undersøke(tidslinjer, 1.januar, periode)
         assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
-        assertEquals(7, inspektør.avvistDagTeller)
+        assertEquals(5, inspektør.avvistDagTeller)
     }
 
     @Test
@@ -82,8 +82,8 @@ internal class AvvisDagerEtterDødsdatofilterTest {
         )
         val periode = Periode(1.januar, 21.januar)
         undersøke(tidslinjer, 1.januar, periode)
-        assertEquals(5, tidslinjer.first().inspektør.avvistDagTeller)
-        assertEquals(5, tidslinjer.last().inspektør.avvistDagTeller)
+        assertEquals(3, tidslinjer.first().inspektør.avvistDagTeller)
+        assertEquals(3, tidslinjer.last().inspektør.avvistDagTeller)
     }
 
     private fun undersøke(tidslinjer: List<Utbetalingstidslinje>, dødsdato: LocalDate?, periode: Periode) {

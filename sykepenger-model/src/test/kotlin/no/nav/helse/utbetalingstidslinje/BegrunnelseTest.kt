@@ -11,9 +11,9 @@ internal class BegrunnelseTest {
     private val økonomi = Økonomi.ikkeBetalt()
 
     @Test
-    fun `dødsdato avviser ukedager og helger`() {
+    fun `dødsdato avviser ukedager`() {
         assertTrue(Begrunnelse.EtterDødsdato.skalAvvises(NavDag(1.januar, økonomi)))
-        assertTrue(Begrunnelse.EtterDødsdato.skalAvvises(NavHelgDag(1.januar, økonomi)))
+        assertFalse(Begrunnelse.EtterDødsdato.skalAvvises(NavHelgDag(1.januar, økonomi)))
     }
 
     @Test
@@ -23,9 +23,14 @@ internal class BegrunnelseTest {
     }
 
     @Test
+    fun `over70 avviser ikke helg`() {
+        assertTrue(Begrunnelse.Over70.skalAvvises(NavDag(1.januar, økonomi)))
+        assertFalse(Begrunnelse.Over70.skalAvvises(NavHelgDag(1.januar, økonomi)))
+    }
+
+    @Test
     fun `avviser med flere begrunnelser`() {
-        val dag = NavHelgDag(1.januar, økonomi)
-        assertNull(dag.avvis(listOf(Begrunnelse.MinimumSykdomsgrad)))
-        assertEquals(1, dag.avvis(listOf(Begrunnelse.MinimumSykdomsgrad, Begrunnelse.EtterDødsdato))?.begrunnelser?.size)
+        val dag = NavDag(1.januar, økonomi)
+        assertEquals(2, dag.avvis(listOf(Begrunnelse.MinimumSykdomsgrad, Begrunnelse.MinimumInntekt))?.begrunnelser?.size ?: 0)
     }
 }

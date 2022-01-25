@@ -21,7 +21,7 @@ internal class DødIPeriodenTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, dødsdato = 18.januar)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, dødsdato = 18.januar)
-        assertEquals(13, inspektør.utbetalinger.first().utbetalingstidslinje().inspektør.avvistDagTeller)
+        assertEquals(9, inspektør.utbetalinger.first().utbetalingstidslinje().inspektør.avvistDagTeller)
     }
 
     @Test
@@ -44,9 +44,9 @@ internal class DødIPeriodenTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, dødsdato = 31.desember(2017))
         inspektør.utbetalinger.first().utbetalingstidslinje().inspektør.also {
-            assertEquals(15, it.avvistDagTeller)
+            assertEquals(11, it.avvistDagTeller)
             assertEquals(16, it.arbeidsgiverperiodeDagTeller)
-            assertEquals(0, it.navHelgDagTeller)
+            assertEquals(4, it.navHelgDagTeller)
         }
     }
 

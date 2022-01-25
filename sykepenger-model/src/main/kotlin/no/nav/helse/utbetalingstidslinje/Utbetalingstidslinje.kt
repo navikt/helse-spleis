@@ -18,7 +18,6 @@ import no.nav.helse.økonomi.Økonomi
 import no.nav.helse.økonomi.Økonomi.Companion.avgrensTilArbeidsgiverperiode
 import java.time.DayOfWeek
 import java.time.LocalDate
-import kotlin.reflect.KClass
 
 /**
  * Forstår utbetalingsforpliktelser for en bestemt arbeidsgiver
@@ -385,9 +384,9 @@ internal class Utbetalingstidslinje private constructor(
     }
 }
 
-internal sealed class Begrunnelse(private val dagtyperSomAvvises: List<KClass<out Utbetalingsdag>> = listOf(NavDag::class)) {
+internal sealed class Begrunnelse() {
 
-    internal fun skalAvvises(utbetalingsdag: Utbetalingsdag) = utbetalingsdag is AvvistDag || utbetalingsdag::class in dagtyperSomAvvises
+    internal fun skalAvvises(utbetalingsdag: Utbetalingsdag) = utbetalingsdag is AvvistDag || utbetalingsdag is NavDag
 
     object SykepengedagerOppbrukt : Begrunnelse()
     object SykepengedagerOppbruktOver67 : Begrunnelse()
@@ -395,8 +394,8 @@ internal sealed class Begrunnelse(private val dagtyperSomAvvises: List<KClass<ou
     object MinimumInntektOver67 : Begrunnelse()
     object EgenmeldingUtenforArbeidsgiverperiode : Begrunnelse()
     object MinimumSykdomsgrad : Begrunnelse()
-    object EtterDødsdato : Begrunnelse(listOf(NavDag::class, NavHelgDag::class))
-    object Over70 : Begrunnelse(listOf(NavDag::class, NavHelgDag::class))
+    object EtterDødsdato : Begrunnelse()
+    object Over70 : Begrunnelse()
     object ManglerOpptjening : Begrunnelse()
     object ManglerMedlemskap : Begrunnelse()
     object NyVilkårsprøvingNødvendig : Begrunnelse()
