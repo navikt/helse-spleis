@@ -401,13 +401,12 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
             ),
             inntektsvurdering = Inntektsvurdering(
                 listOf(
-                    sammenligningsgrunnlag(a1, 1.januar, INNTEKT.repeat(12)),
                     sammenligningsgrunnlag(a2, 1.januar, INNTEKT.repeat(12))
                 )
             ),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                 inntekter = listOf(
-                    grunnlag(a2, 1.januar, INNTEKT.repeat(3))
+                    grunnlag(a2, 1.januar, 1000.månedlig.repeat(3))
                 ),
                 arbeidsforhold = emptyList()
             ),
@@ -417,7 +416,11 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, false)))
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        assertWarning(1.vedtaksperiode, "Perioden er avslått på grunn av manglende opptjening", orgnummer = a1)
+        assertWarning(
+            1.vedtaksperiode,
+            "Perioden er avslått på grunn av manglende opptjening. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene???",
+            orgnummer = a1
+        )
         assertInstanceOf(Utbetalingstidslinje.Utbetalingsdag.AvvistDag::class.java, inspektør.sisteUtbetalingUtbetalingstidslinje()[31.januar])
     }
 }
