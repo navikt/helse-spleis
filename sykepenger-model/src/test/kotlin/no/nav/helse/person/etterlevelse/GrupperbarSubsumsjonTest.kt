@@ -11,7 +11,7 @@ import java.time.LocalDate
 
 internal class GrupperbarSubsumsjonTest {
 
-    private val observatør get() = JuridiskVurderingObservatør()
+    private val observatør get() = SubsumsjonObservatør()
 
     private lateinit var vurderinger: List<Subsumsjon>
 
@@ -165,10 +165,10 @@ internal class GrupperbarSubsumsjonTest {
         ).sammenstill(vurderinger)
     }
 
-    private class JuridiskVurderingObservatør : JuridiskVurderingVisitor {
+    private class SubsumsjonObservatør : SubsumsjonVisitor {
         private lateinit var fom: LocalDate
         private lateinit var tom: LocalDate
-        override fun visitGrupperbarVurdering(fom: LocalDate, tom: LocalDate) {
+        override fun visitGrupperbarSubsumsjon(fom: LocalDate, tom: LocalDate) {
             this.fom = fom
             this.tom = tom
         }

@@ -13,7 +13,7 @@ import java.time.LocalDate
 
 internal class BetingetSubsumsjonTest {
 
-    private val observatør get() = JuridiskVurderingObservatør()
+    private val observatør get() = SubsumsjonObservatør()
     private lateinit var vurderinger: List<Subsumsjon>
 
     @BeforeEach
@@ -57,10 +57,10 @@ internal class BetingetSubsumsjonTest {
         vurderinger = BetingetSubsumsjon(funnetRelevant, utfall, versjon, paragraf, ledd, punktum, bokstaver, input, output, kontekster).sammenstill(vurderinger)
     }
 
-    private class JuridiskVurderingObservatør : JuridiskVurderingVisitor {
+    private class SubsumsjonObservatør : SubsumsjonVisitor {
         private var funnetRelevant: Boolean? = null
 
-        override fun visitBetingetVurdering(funnetRelevant: Boolean) {
+        override fun visitBetingetSubsumsjon(funnetRelevant: Boolean) {
             this.funnetRelevant = funnetRelevant
         }
 

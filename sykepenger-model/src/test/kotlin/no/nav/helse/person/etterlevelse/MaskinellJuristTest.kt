@@ -46,14 +46,14 @@ internal class MaskinellJuristTest {
     }
 
     private fun assertKontekster(subsumsjon: Subsumsjon, vararg kontekster: Pair<String, String>) {
-        val inspektør = object : JuridiskVurderingVisitor {
+        val inspektør = object : SubsumsjonVisitor {
             lateinit var kontekster: Map<String, String>
 
             init {
                 subsumsjon.accept(this)
             }
 
-            override fun preVisitVurdering(
+            override fun preVisitSubsumsjon(
                 utfall: Subsumsjon.Utfall,
                 versjon: LocalDate,
                 paragraf: Paragraf,

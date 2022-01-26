@@ -133,6 +133,6 @@ internal class SubsumsjonTest {
             TODO("Not yet implemented")
         }
 
-        override fun acceptSpesifikk(visitor: JuridiskVurderingVisitor) {}
+        override fun acceptSpesifikk(visitor: SubsumsjonVisitor) {}
     }
 }

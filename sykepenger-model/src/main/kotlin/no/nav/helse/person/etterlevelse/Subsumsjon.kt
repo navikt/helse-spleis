@@ -28,13 +28,13 @@ abstract class Subsumsjon {
     abstract val output: Map<String, Any>
     protected abstract val kontekster: Map<String, String>
 
-    internal fun accept(visitor: JuridiskVurderingVisitor) {
-        visitor.preVisitVurdering(utfall, versjon, paragraf, ledd, punktum, bokstaver, input, output, kontekster)
+    internal fun accept(visitor: SubsumsjonVisitor) {
+        visitor.preVisitSubsumsjon(utfall, versjon, paragraf, ledd, punktum, bokstaver, input, output, kontekster)
         acceptSpesifikk(visitor)
-        visitor.postVisitVurdering(utfall, versjon, paragraf, ledd, punktum, bokstaver, input, output, kontekster)
+        visitor.postVisitSubsumsjon(utfall, versjon, paragraf, ledd, punktum, bokstaver, input, output, kontekster)
     }
 
-    abstract fun acceptSpesifikk(visitor: JuridiskVurderingVisitor)
+    abstract fun acceptSpesifikk(visitor: SubsumsjonVisitor)
 
     abstract fun sammenstill(subsumsjoner: List<Subsumsjon>): List<Subsumsjon>
 
@@ -99,7 +99,7 @@ class EnkelSubsumsjon(
     override fun sammenstill(subsumsjoner: List<Subsumsjon>) =
         sammenstill<EnkelSubsumsjon>(subsumsjoner) { subsumsjoner.erstatt(it, this) }
 
-    override fun acceptSpesifikk(visitor: JuridiskVurderingVisitor) {}
+    override fun acceptSpesifikk(visitor: SubsumsjonVisitor) {}
 }
 
 class GrupperbarSubsumsjon private constructor(
@@ -128,8 +128,8 @@ class GrupperbarSubsumsjon private constructor(
         kontekster: Map<String, String>
     ) : this(dato, dato, utfall, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster)
 
-    override fun acceptSpesifikk(visitor: JuridiskVurderingVisitor) {
-        visitor.visitGrupperbarVurdering(fom, tom)
+    override fun acceptSpesifikk(visitor: SubsumsjonVisitor) {
+        visitor.visitGrupperbarSubsumsjon(fom, tom)
     }
 
     override fun sammenstill(subsumsjoner: List<Subsumsjon>): List<Subsumsjon> {
@@ -161,7 +161,7 @@ class BetingetSubsumsjon(
         return sammenstill<BetingetSubsumsjon>(subsumsjoner) { subsumsjoner.erstatt(it, this) }
     }
 
-    override fun acceptSpesifikk(visitor: JuridiskVurderingVisitor) {
-        visitor.visitBetingetVurdering(funnetRelevant)
+    override fun acceptSpesifikk(visitor: SubsumsjonVisitor) {
+        visitor.visitBetingetSubsumsjon(funnetRelevant)
     }
 }

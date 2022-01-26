@@ -7,14 +7,14 @@ import no.nav.helse.person.Punktum
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
-import no.nav.helse.person.etterlevelse.JuridiskVurderingVisitor
+import no.nav.helse.person.etterlevelse.SubsumsjonVisitor
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import org.junit.jupiter.api.Assertions.assertEquals
 import java.time.LocalDate
 import java.util.*
 
 
-internal class SubsumsjonInspektør(jurist: MaskinellJurist) : JuridiskVurderingVisitor {
+internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor {
 
     private val subsumsjoner = mutableListOf<Subsumsjon>()
 
@@ -97,7 +97,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : JuridiskVurdering
         finnSubsumsjon(expectedParagraf, expectedVersjon, expectedLedd, expectedPunktum, expectedBokstaver, utfall)
     }
 
-    override fun preVisitVurdering(
+    override fun preVisitSubsumsjon(
         utfall: Utfall,
         versjon: LocalDate,
         paragraf: Paragraf,

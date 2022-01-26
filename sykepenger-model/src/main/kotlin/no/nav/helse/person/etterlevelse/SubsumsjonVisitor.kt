@@ -6,8 +6,8 @@ import no.nav.helse.person.Paragraf
 import no.nav.helse.person.Punktum
 import java.time.LocalDate
 
-interface JuridiskVurderingVisitor {
-    fun preVisitVurdering(
+interface SubsumsjonVisitor {
+    fun preVisitSubsumsjon(
         utfall: Subsumsjon.Utfall,
         versjon: LocalDate,
         paragraf: Paragraf,
@@ -19,10 +19,10 @@ interface JuridiskVurderingVisitor {
         kontekster: Map<String, String>
     ) {}
 
-    fun visitGrupperbarVurdering(fom: LocalDate, tom: LocalDate) {}
-    fun visitBetingetVurdering(funnetRelevant: Boolean) {}
+    fun visitGrupperbarSubsumsjon(fom: LocalDate, tom: LocalDate) {}
+    fun visitBetingetSubsumsjon(funnetRelevant: Boolean) {}
 
-    fun postVisitVurdering(
+    fun postVisitSubsumsjon(
         utfall: Subsumsjon.Utfall,
         versjon: LocalDate,
         paragraf: Paragraf,
