@@ -64,8 +64,8 @@ class MaskinellJurist private constructor(
     override fun `§8-3 ledd 1 punktum 2`(
         oppfylt: Boolean,
         syttiårsdagen: LocalDate,
-        vurderingFom: LocalDate,
-        vurderingTom: LocalDate,
+        utfallFom: LocalDate,
+        utfallTom: LocalDate,
         tidslinjeFom: LocalDate,
         tidslinjeTom: LocalDate,
         avvisteDager: List<LocalDate>
@@ -79,8 +79,8 @@ class MaskinellJurist private constructor(
                 punktum = 2.punktum,
                 input = mapOf(
                     "syttiårsdagen" to syttiårsdagen,
-                    "vurderingFom" to vurderingFom,
-                    "vurderingTom" to vurderingTom,
+                    "utfallFom" to utfallFom,
+                    "utfallTom" to utfallTom,
                     "tidslinjeFom" to tidslinjeFom,
                     "tidslinjeTom" to tidslinjeTom
                 ),
@@ -146,12 +146,35 @@ class MaskinellJurist private constructor(
         oppfylt: Boolean,
         fom: LocalDate,
         tom: LocalDate,
+        tidslinjegrunnlag: List<List<Map<String, Any>>>,
+        beregnetTidslinje: List<Map<String, Any>>,
         gjenståendeSykedager: Int,
         forbrukteSykedager: Int,
         maksdato: LocalDate,
         avvisteDager: List<LocalDate>
     ) {
-        super.`§8-12 ledd 1 punktum 1`(oppfylt, fom, tom, gjenståendeSykedager, forbrukteSykedager, maksdato, avvisteDager)
+        leggTil(
+            EnkelSubsumsjon(
+                utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
+                versjon = LocalDate.of(2021, 5, 21),
+                paragraf = Paragraf.PARAGRAF_8_12,
+                ledd = 1.ledd,
+                punktum = 1.punktum,
+                input = mapOf(
+                    "fom" to fom,
+                    "tom" to tom,
+                    "tidslinjegrunnlag" to tidslinjegrunnlag,
+                    "beregnetTidslinje" to beregnetTidslinje
+                ),
+                output = mapOf(
+                    "gjenståendeSykedager" to gjenståendeSykedager,
+                    "forbrukteSykedager" to forbrukteSykedager,
+                    "maksdato" to maksdato,
+                    "avvisteDager" to avvisteDager.grupperSammenhengendePerioder()
+                ),
+                kontekster = kontekster()
+            )
+        )
     }
 
     override fun `§8-12 ledd 2`(dato: LocalDate, tilstrekkeligOppholdISykedager: Int) {

@@ -1,8 +1,11 @@
 package no.nav.helse.person.etterlevelse
 
 import no.nav.helse.person.*
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver.UtbetalingstidslinjeVisitor.Periode.Companion.dager
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
+import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.time.Year
 
@@ -47,8 +50,8 @@ interface SubsumsjonObserver {
      *
      * @param oppfylt hvorvidt sykmeldte har fylt 70 år. Oppfylt så lenge sykmeldte ikke er 70 år eller eldre
      * @param syttiårsdagen dato sykmeldte fyller 70 år
-     * @param vurderingFom fra-og-med-dato [oppfylt]-vurderingen gjelder for
-     * @param vurderingTom til-og-med-dato [oppfylt]-vurderingen gjelder for
+     * @param utfallFom fra-og-med-dato [oppfylt]-vurderingen gjelder for
+     * @param utfallTom til-og-med-dato [oppfylt]-vurderingen gjelder for
      * @param tidslinjeFom fra-og-med-dato vurderingen gjøres for
      * @param tidslinjeTom til-og-med-dato vurderingen gjøres for
      * @param avvisteDager alle dager vurderingen ikke er [oppfylt] for. Tom dersom sykmeldte ikke fyller 70 år mellom [tidslinjeFom] og [tidslinjeTom]
@@ -56,8 +59,8 @@ interface SubsumsjonObserver {
     fun `§8-3 ledd 1 punktum 2`(
         oppfylt: Boolean,
         syttiårsdagen: LocalDate,
-        vurderingFom: LocalDate,
-        vurderingTom: LocalDate,
+        utfallFom: LocalDate,
+        utfallTom: LocalDate,
         tidslinjeFom: LocalDate,
         tidslinjeTom: LocalDate,
         avvisteDager: List<LocalDate>
@@ -132,8 +135,8 @@ interface SubsumsjonObserver {
         oppfylt: Boolean,
         fom: LocalDate,
         tom: LocalDate,
-        //tidslinjegrunnlag: List<Utbetalingstidslinje>,
-        //beregnetTidslinje: Utbetalingstidslinje,
+        tidslinjegrunnlag: List<List<Map<String, Any>>>,
+        beregnetTidslinje: List<Map<String, Any>>,
         gjenståendeSykedager: Int,
         forbrukteSykedager: Int,
         maksdato: LocalDate,
@@ -290,5 +293,59 @@ interface SubsumsjonObserver {
     ) {
         // versjon = LocalDate.of(2011, 12, 16),
         // punktum = 1.punktum
+    }
+
+    private class UtbetalingstidslinjeVisitor(utbetalingstidslinje: Utbetalingstidslinje) : UtbetalingsdagVisitor {
+        private val navdager = mutableListOf<Periode>()
+        private var forrigeDato: LocalDate? = null
+
+        private class Periode(
+            val fom: LocalDate,
+            var tom: LocalDate,
+            val dagtype: String
+        ) {
+            companion object {
+                fun List<Periode>.dager() = map {
+                    mapOf(
+                        "fom" to it.fom,
+                        "tom" to it.tom,
+                        "dagtype" to it.dagtype
+                    )
+                }
+            }
+        }
+
+        init {
+            utbetalingstidslinje.accept(this)
+        }
+
+        fun dager() = navdager.dager()
+
+        override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag, dato: LocalDate, økonomi: Økonomi) {
+            visit(dato, "NAVDAG")
+        }
+
+        override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag, dato: LocalDate, økonomi: Økonomi) {
+            visit(dato, "NAVDAG")
+        }
+
+        override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag, dato: LocalDate, økonomi: Økonomi) {
+            if (forrigeDato != null && forrigeDato?.plusDays(1) == dato) visit(dato, "FRIDAG")
+        }
+
+        private fun visit(dato: LocalDate, dagtype: String) {
+            forrigeDato = dato
+            if (navdager.isEmpty() || dagtype != navdager.last().dagtype || navdager.last().tom.plusDays(1) != dato) {
+                navdager.add(Periode(dato, dato, dagtype))
+            } else {
+                navdager.last().tom = dato
+            }
+        }
+    }
+
+    companion object {
+        internal fun List<Utbetalingstidslinje>.toSubsumsjonFormat(): List<List<Map<String, Any>>> = map { it.toSubsumsjonFormat() }
+
+        internal fun Utbetalingstidslinje.toSubsumsjonFormat(): List<Map<String, Any>> = UtbetalingstidslinjeVisitor(this).dager()
     }
 }

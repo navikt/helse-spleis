@@ -2,11 +2,11 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-12 ledd 1 punktum 1`
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-12 ledd 2`
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.toSubsumsjonFormat
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.UkjentDag
 import no.nav.helse.økonomi.Økonomi
@@ -63,12 +63,12 @@ internal class MaksimumSykepengedagerfilter(
         beregnetTidslinje.accept(this)
         if (::sakensStartdato.isInitialized) {
             val avvisteDager = avvisteDager.filter { sakensStartdato <= it }
-            aktivitetslogg.`§8-12 ledd 1 punktum 1`(
+            jurist.`§8-12 ledd 1 punktum 1`(
                 avvisteDager !in periode,
                 this.avvisteDager.firstOrNull() ?: sakensStartdato,
                 this.avvisteDager.lastOrNull() ?: sisteBetalteDag,
-                tidslinjegrunnlag,
-                beregnetTidslinje,
+                tidslinjegrunnlag.toSubsumsjonFormat(),
+                beregnetTidslinje.toSubsumsjonFormat(),
                 gjenståendeSykedager(),
                 forbrukteSykedager(),
                 maksdato(),
@@ -174,12 +174,12 @@ internal class MaksimumSykepengedagerfilter(
     private fun nextState(dagen: LocalDate): State? {
         if (opphold >= TILSTREKKELIG_OPPHOLD_I_SYKEDAGER) {
             val gjenståendeSykedager = gjenståendeSykedager()
-            aktivitetslogg.`§8-12 ledd 1 punktum 1`(
+            jurist.`§8-12 ledd 1 punktum 1`(
                 avvisteDager.filter { sakensStartdato <= it } !in periode,
                 avvisteDager.firstOrNull() ?: sakensStartdato,
                 avvisteDager.lastOrNull() ?: sisteBetalteDag,
-                tidslinjegrunnlag,
-                beregnetTidslinje,
+                tidslinjegrunnlag.toSubsumsjonFormat(),
+                beregnetTidslinje.toSubsumsjonFormat(),
                 gjenståendeSykedager,
                 forbrukteSykedager(),
                 maksdato(),
@@ -194,12 +194,12 @@ internal class MaksimumSykepengedagerfilter(
 
         teller.hvisGrensenErNådd(
             hvis248Dager = {
-                aktivitetslogg.`§8-12 ledd 1 punktum 1`(
+                jurist.`§8-12 ledd 1 punktum 1`(
                     true,
                     sakensStartdato,
                     sisteBetalteDag,
-                    tidslinjegrunnlag,
-                    beregnetTidslinje,
+                    tidslinjegrunnlag.toSubsumsjonFormat(),
+                    beregnetTidslinje.toSubsumsjonFormat(),
                     gjenståendeSykedager(),
                     forbrukteSykedager(),
                     maksdato(),

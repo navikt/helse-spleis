@@ -89,8 +89,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             versjon = 16.desember(2011),
             input = mapOf(
                 "syttiårsdagen" to 20.januar,
-                "vurderingFom" to 1.januar,
-                "vurderingTom" to 19.januar,
+                "utfallFom" to 1.januar,
+                "utfallTom" to 19.januar,
                 "tidslinjeFom" to 1.januar,
                 "tidslinjeTom" to 31.januar
             ),
@@ -106,8 +106,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             versjon = 16.desember(2011),
             input = mapOf(
                 "syttiårsdagen" to 20.januar,
-                "vurderingFom" to 20.januar,
-                "vurderingTom" to 31.januar,
+                "utfallFom" to 20.januar,
+                "utfallTom" to 31.januar,
                 "tidslinjeFom" to 1.januar,
                 "tidslinjeTom" to 31.januar
             ),
@@ -135,8 +135,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             versjon = 16.desember(2011),
             input = mapOf(
                 "syttiårsdagen" to 1.februar,
-                "vurderingFom" to 1.januar,
-                "vurderingTom" to 31.januar,
+                "utfallFom" to 1.januar,
+                "utfallTom" to 31.januar,
                 "tidslinjeFom" to 1.januar,
                 "tidslinjeTom" to 31.januar
             ),
@@ -164,8 +164,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             versjon = 16.desember(2011),
             input = mapOf(
                 "syttiårsdagen" to 1.januar,
-                "vurderingFom" to 1.januar,
-                "vurderingTom" to 31.januar,
+                "utfallFom" to 1.januar,
+                "utfallTom" to 31.januar,
                 "tidslinjeFom" to 1.januar,
                 "tidslinjeTom" to 31.januar
             ),
@@ -194,8 +194,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             versjon = 16.desember(2011),
             input = mapOf(
                 "syttiårsdagen" to 1.januar,
-                "vurderingFom" to 1.januar,
-                "vurderingTom" to 16.januar,
+                "utfallFom" to 1.januar,
+                "utfallTom" to 16.januar,
                 "tidslinjeFom" to 1.januar,
                 "tidslinjeTom" to 16.januar
             ),
@@ -321,6 +321,88 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "grunnlagForSykepengegrunnlag" to 561805.0
             ),
             output = mapOf()
+        )
+    }
+
+
+    @Test
+    fun `§8-12 ledd 1 punktum 1 - Brukt færre enn 248 dager`() {
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 50.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 50.prosent, 50.prosent))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+
+        SubsumsjonInspektør(jurist).assertOppfylt(
+            paragraf = Paragraf.PARAGRAF_8_12,
+            ledd = Ledd.LEDD_1,
+            punktum = 1.punktum,
+            versjon = 21.mai(2021),
+            input = mapOf(
+                "fom" to 19.januar,
+                "tom" to 26.januar,
+                "tidslinjegrunnlag" to listOf(listOf(mapOf("fom" to 19.januar, "tom" to 26.januar, "dagtype" to "NAVDAG")), emptyList()),
+                "beregnetTidslinje" to listOf(mapOf("fom" to 19.januar, "tom" to 26.januar, "dagtype" to "NAVDAG"))
+            ),
+            output = mapOf(
+                "gjenståendeSykedager" to 242,
+                "forbrukteSykedager" to 6,
+                "maksdato" to 1.januar(2019),
+                "avvisteDager" to emptyList<Periode>()
+            )
+        )
+    }
+
+    @Test
+    fun `§8-12 ledd 1 punktum 1 - Brukt flere enn 248 dager`() {
+        håndterSykmelding(Sykmeldingsperiode(3.januar(2018), 11.januar(2019), 50.prosent))
+        håndterSøknadMedValidering(
+            1.vedtaksperiode,
+            Søknad.Søknadsperiode.Sykdom(3.januar(2018), 11.januar(2019), 50.prosent, 50.prosent),
+            sendtTilNAVEllerArbeidsgiver = 3.januar(2018)
+        )
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar(2018), 18.januar(2018))))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+
+        SubsumsjonInspektør(jurist).assertOppfylt(
+            paragraf = Paragraf.PARAGRAF_8_12,
+            ledd = Ledd.LEDD_1,
+            punktum = 1.punktum,
+            versjon = 21.mai(2021),
+            input = mapOf(
+                "fom" to 19.januar,
+                "tom" to 1.januar(2019),
+                "tidslinjegrunnlag" to listOf(listOf(mapOf("fom" to 19.januar, "tom" to 11.januar(2019), "dagtype" to "NAVDAG")), emptyList()),
+                "beregnetTidslinje" to listOf(mapOf("fom" to 19.januar, "tom" to 11.januar(2019), "dagtype" to "NAVDAG"))
+            ),
+            output = mapOf(
+                "gjenståendeSykedager" to 0,
+                "forbrukteSykedager" to 248,
+                "maksdato" to 1.januar(2019),
+                "avvisteDager" to emptyList<Periode>()
+            )
+        )
+
+        SubsumsjonInspektør(jurist).assertIkkeOppfylt(
+            paragraf = Paragraf.PARAGRAF_8_12,
+            ledd = Ledd.LEDD_1,
+            punktum = 1.punktum,
+            versjon = 21.mai(2021),
+            input = mapOf(
+                "fom" to 2.januar(2019),
+                "tom" to 11.januar(2019),
+                "tidslinjegrunnlag" to listOf(listOf(mapOf("fom" to 19.januar, "tom" to 11.januar(2019), "dagtype" to "NAVDAG")), emptyList()),
+                "beregnetTidslinje" to listOf(mapOf("fom" to 19.januar, "tom" to 11.januar(2019), "dagtype" to "NAVDAG"))
+            ),
+            output = mapOf(
+                "gjenståendeSykedager" to 0,
+                "forbrukteSykedager" to 248,
+                "maksdato" to 1.januar(2019),
+                "avvisteDager" to listOf(2.januar(2019) til 4.januar(2019), 7.januar(2019) til 11.januar(2019))
+            )
         )
     }
 }

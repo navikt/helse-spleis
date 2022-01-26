@@ -72,8 +72,8 @@ internal class Alder(private val fødselsdato: LocalDate) {
         jurist.`§8-3 ledd 1 punktum 2`(
             oppfylt = true,
             syttiårsdagen = syttiårsdagen,
-            vurderingFom = periode.start,
-            vurderingTom = minOf(syttiårsdagen.minusDays(1), periode.endInclusive),
+            utfallFom = periode.start,
+            utfallTom = minOf(syttiårsdagen.minusDays(1), periode.endInclusive),
             tidslinjeFom = periode.start,
             tidslinjeTom = periode.endInclusive,
             avvisteDager = emptyList()
@@ -87,8 +87,8 @@ internal class Alder(private val fødselsdato: LocalDate) {
         jurist.`§8-3 ledd 1 punktum 2`(
             oppfylt = false,
             syttiårsdagen = syttiårsdagen,
-            vurderingFom = maxOf(syttiårsdagen, periode.start),
-            vurderingTom = periode.endInclusive,
+            utfallFom = maxOf(syttiårsdagen, periode.start),
+            utfallTom = periode.endInclusive,
             tidslinjeFom = periode.start,
             tidslinjeTom = periode.endInclusive,
             avvisteDager = avvisteDagerFraOgMedSøtti
