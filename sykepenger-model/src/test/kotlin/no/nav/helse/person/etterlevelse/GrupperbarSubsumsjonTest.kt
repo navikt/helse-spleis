@@ -3,17 +3,17 @@ package no.nav.helse.person.etterlevelse
 import no.nav.helse.januar
 import no.nav.helse.person.Ledd.Companion.ledd
 import no.nav.helse.person.Paragraf
-import no.nav.helse.person.etterlevelse.JuridiskVurdering.Utfall.VILKAR_OPPFYLT
+import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-internal class GrupperbarVurderingTest {
+internal class GrupperbarSubsumsjonTest {
 
     private val observatør get() = JuridiskVurderingObservatør()
 
-    private lateinit var vurderinger: List<JuridiskVurdering>
+    private lateinit var vurderinger: List<Subsumsjon>
 
     @BeforeEach
     fun beforeEach() {
@@ -153,7 +153,7 @@ internal class GrupperbarVurderingTest {
     }
 
     private fun nyVurdering(dato: LocalDate) {
-        vurderinger = GrupperbarVurdering(
+        vurderinger = GrupperbarSubsumsjon(
             dato = dato,
             input = mapOf(),
             output = mapOf(),
@@ -173,9 +173,9 @@ internal class GrupperbarVurderingTest {
             this.tom = tom
         }
 
-        fun assertVurdering(juridiskVurdering: JuridiskVurdering, fom: LocalDate, tom: LocalDate) {
-            require(juridiskVurdering is GrupperbarVurdering)
-            juridiskVurdering.accept(this)
+        fun assertVurdering(subsumsjon: Subsumsjon, fom: LocalDate, tom: LocalDate) {
+            require(subsumsjon is GrupperbarSubsumsjon)
+            subsumsjon.accept(this)
             assertEquals(fom, this.fom)
             assertEquals(tom, this.tom)
         }

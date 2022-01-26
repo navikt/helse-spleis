@@ -5,17 +5,17 @@ import no.nav.helse.person.Ledd
 import no.nav.helse.person.Ledd.Companion.ledd
 import no.nav.helse.person.Paragraf
 import no.nav.helse.person.Punktum
-import no.nav.helse.person.etterlevelse.JuridiskVurdering.Utfall
-import no.nav.helse.person.etterlevelse.JuridiskVurdering.Utfall.VILKAR_IKKE_OPPFYLT
-import no.nav.helse.person.etterlevelse.JuridiskVurdering.Utfall.VILKAR_OPPFYLT
+import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall
+import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
+import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-internal class EnkelVurderingTest {
+internal class EnkelSubsumsjonTest {
 
-    private lateinit var vurderinger: List<JuridiskVurdering>
+    private lateinit var vurderinger: List<Subsumsjon>
 
     @BeforeEach
     fun beforeEach() {
@@ -55,6 +55,6 @@ internal class EnkelVurderingTest {
         output: Map<String, Any> = emptyMap(),
         kontekster: Map<String, String> = emptyMap()
     ) {
-        vurderinger = EnkelVurdering(utfall, versjon, paragraf, ledd, punktum, bokstaver, input, output, kontekster).sammenstill(vurderinger)
+        vurderinger = EnkelSubsumsjon(utfall, versjon, paragraf, ledd, punktum, bokstaver, input, output, kontekster).sammenstill(vurderinger)
     }
 }

@@ -4,9 +4,9 @@ import no.nav.helse.person.Bokstav
 import no.nav.helse.person.Ledd
 import no.nav.helse.person.Paragraf
 import no.nav.helse.person.Punktum
-import no.nav.helse.person.etterlevelse.JuridiskVurdering.Utfall
-import no.nav.helse.person.etterlevelse.JuridiskVurdering.Utfall.VILKAR_IKKE_OPPFYLT
-import no.nav.helse.person.etterlevelse.JuridiskVurdering.Utfall.VILKAR_OPPFYLT
+import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall
+import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
+import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
 import no.nav.helse.person.etterlevelse.JuridiskVurderingVisitor
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import org.junit.jupiter.api.Assertions.assertEquals

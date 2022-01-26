@@ -5,7 +5,7 @@ import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.person.Ledd.Companion.ledd
 import no.nav.helse.person.Paragraf
 import no.nav.helse.person.Punktum.Companion.punktum
-import no.nav.helse.person.etterlevelse.JuridiskVurdering.Utfall.*
+import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.*
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 import java.time.LocalDate
@@ -17,11 +17,11 @@ class MaskinellJurist private constructor(
     private val kontekster: Map<String, String>
 ) : SubsumsjonObserver {
 
-    private var vurderinger = listOf<JuridiskVurdering>()
+    private var vurderinger = listOf<Subsumsjon>()
 
     constructor(): this(null, emptyMap())
 
-    private fun leggTil(vurdering: JuridiskVurdering) {
+    private fun leggTil(vurdering: Subsumsjon) {
         vurderinger = vurdering.sammenstill(vurderinger)
         parent?.leggTil(vurdering)
     }
@@ -45,7 +45,7 @@ class MaskinellJurist private constructor(
         antallOpptjeningsdager: Int
     ) {
         leggTil(
-            EnkelVurdering(
+            EnkelSubsumsjon(
                 utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
                 versjon = LocalDate.of(2020, 6, 12),
                 paragraf = Paragraf.PARAGRAF_8_2,
@@ -71,7 +71,7 @@ class MaskinellJurist private constructor(
         avvisteDager: List<LocalDate>
     ) {
         leggTil(
-            EnkelVurdering(
+            EnkelSubsumsjon(
                 utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
                 versjon = LocalDate.of(2011, 12, 16),
                 paragraf = Paragraf.PARAGRAF_8_3,
@@ -101,7 +101,7 @@ class MaskinellJurist private constructor(
         grunnlagForSykepengegrunnlag: Inntekt
     ) {
         leggTil(
-            BetingetVurdering(
+            BetingetSubsumsjon(
                 funnetRelevant = funnetRelevant,
                 utfall = VILKAR_BEREGNET,
                 LocalDate.of(2020, 1, 1),
@@ -149,7 +149,7 @@ class MaskinellJurist private constructor(
 
     override fun `§8-16 ledd 1`(dato: LocalDate, dekningsgrad: Double, inntekt: Double, dekningsgrunnlag: Double) {
         leggTil(
-            GrupperbarVurdering(
+            GrupperbarSubsumsjon(
                 dato = dato,
                 input = mapOf("dekningsgrad" to dekningsgrad, "inntekt" to inntekt),
                 output = mapOf("dekningsgrunnlag" to dekningsgrunnlag),

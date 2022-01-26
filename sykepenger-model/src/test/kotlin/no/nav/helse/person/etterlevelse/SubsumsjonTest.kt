@@ -11,15 +11,15 @@ import no.nav.helse.person.Paragraf.PARAGRAF_8_16
 import no.nav.helse.person.Punktum
 import no.nav.helse.person.Punktum.PUNKTUM_1
 import no.nav.helse.person.Punktum.PUNKTUM_2
-import no.nav.helse.person.etterlevelse.JuridiskVurdering.Utfall
-import no.nav.helse.person.etterlevelse.JuridiskVurdering.Utfall.VILKAR_IKKE_OPPFYLT
-import no.nav.helse.person.etterlevelse.JuridiskVurdering.Utfall.VILKAR_OPPFYLT
+import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall
+import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
+import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-internal class JuridiskVurderingTest {
+internal class SubsumsjonTest {
 
     @Test
     fun testEquals() {
@@ -118,7 +118,7 @@ internal class JuridiskVurderingTest {
         input: Map<String, Any> = mapOf(),
         output: Map<String, Any> = mapOf(),
         kontekster: Map<String, String> = mapOf()
-    ) = object : JuridiskVurdering() {
+    ) = object : Subsumsjon() {
         override val utfall = utfall
         override val versjon = versjon
         override val paragraf = paragraf
@@ -129,7 +129,7 @@ internal class JuridiskVurderingTest {
         override val output = output
         override val kontekster = kontekster
 
-        override fun sammenstill(vurderinger: List<JuridiskVurdering>): List<JuridiskVurdering> {
+        override fun sammenstill(vurderinger: List<Subsumsjon>): List<Subsumsjon> {
             TODO("Not yet implemented")
         }
 

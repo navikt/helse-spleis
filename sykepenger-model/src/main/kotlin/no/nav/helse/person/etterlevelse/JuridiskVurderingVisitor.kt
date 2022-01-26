@@ -8,7 +8,7 @@ import java.time.LocalDate
 
 interface JuridiskVurderingVisitor {
     fun preVisitVurdering(
-        utfall: JuridiskVurdering.Utfall,
+        utfall: Subsumsjon.Utfall,
         versjon: LocalDate,
         paragraf: Paragraf,
         ledd: Ledd,
@@ -23,7 +23,7 @@ interface JuridiskVurderingVisitor {
     fun visitBetingetVurdering(funnetRelevant: Boolean) {}
 
     fun postVisitVurdering(
-        utfall: JuridiskVurdering.Utfall,
+        utfall: Subsumsjon.Utfall,
         versjon: LocalDate,
         paragraf: Paragraf,
         ledd: Ledd,

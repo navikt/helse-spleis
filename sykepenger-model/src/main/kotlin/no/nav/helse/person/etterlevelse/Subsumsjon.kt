@@ -8,9 +8,9 @@ import no.nav.helse.person.Paragraf
 import no.nav.helse.person.Punktum
 import java.time.LocalDate
 
-typealias SammenstillingStrategi<T> = (other: T) -> List<JuridiskVurdering>
+typealias SammenstillingStrategi<T> = (other: T) -> List<Subsumsjon>
 
-abstract class JuridiskVurdering {
+abstract class Subsumsjon {
 
     enum class Utfall {
         VILKAR_OPPFYLT, VILKAR_IKKE_OPPFYLT, VILKAR_UAVKLART, VILKAR_BEREGNET
@@ -36,12 +36,12 @@ abstract class JuridiskVurdering {
 
     abstract fun acceptSpesifikk(visitor: JuridiskVurderingVisitor)
 
-    abstract fun sammenstill(vurderinger: List<JuridiskVurdering>): List<JuridiskVurdering>
+    abstract fun sammenstill(vurderinger: List<Subsumsjon>): List<Subsumsjon>
 
-    protected inline fun <reified T : JuridiskVurdering> sammenstill(
-        vurderinger: List<JuridiskVurdering>,
+    protected inline fun <reified T : Subsumsjon> sammenstill(
+        vurderinger: List<Subsumsjon>,
         strategi: SammenstillingStrategi<T>
-    ): List<JuridiskVurdering> {
+    ): List<Subsumsjon> {
         val tidligereVurdering = vurderinger.filterIsInstance<T>().firstOrNull { it == this }
         if (tidligereVurdering != null) return strategi(tidligereVurdering)
         return vurderinger + this
@@ -50,7 +50,7 @@ abstract class JuridiskVurdering {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
 
-        return other is JuridiskVurdering &&
+        return other is Subsumsjon &&
             utfall == other.utfall &&
             versjon == other.versjon &&
             paragraf == other.paragraf &&
@@ -76,7 +76,7 @@ abstract class JuridiskVurdering {
     }
 
     internal companion object {
-        fun List<JuridiskVurdering>.erstatt(replacee: JuridiskVurdering, replacement: JuridiskVurdering): List<JuridiskVurdering> {
+        fun List<Subsumsjon>.erstatt(replacee: Subsumsjon, replacement: Subsumsjon): List<Subsumsjon> {
             return this.toMutableList().apply {
                 remove(replacee)
                 add(replacement)
@@ -85,7 +85,7 @@ abstract class JuridiskVurdering {
     }
 }
 
-class EnkelVurdering(
+class EnkelSubsumsjon(
     override val utfall: Utfall,
     override val versjon: LocalDate,
     override val paragraf: Paragraf,
@@ -95,14 +95,14 @@ class EnkelVurdering(
     override val input: Map<String, Any>,
     override val output: Map<String, Any>,
     override val kontekster: Map<String, String>
-) : JuridiskVurdering() {
-    override fun sammenstill(vurderinger: List<JuridiskVurdering>) =
-        sammenstill<EnkelVurdering>(vurderinger) { vurderinger.erstatt(it, this) }
+) : Subsumsjon() {
+    override fun sammenstill(vurderinger: List<Subsumsjon>) =
+        sammenstill<EnkelSubsumsjon>(vurderinger) { vurderinger.erstatt(it, this) }
 
     override fun acceptSpesifikk(visitor: JuridiskVurderingVisitor) {}
 }
 
-class GrupperbarVurdering private constructor(
+class GrupperbarSubsumsjon private constructor(
     private val fom: LocalDate,
     private val tom: LocalDate,
     override val utfall: Utfall,
@@ -114,7 +114,7 @@ class GrupperbarVurdering private constructor(
     override val input: Map<String, Any>,
     override val output: Map<String, Any>,
     override val kontekster: Map<String, String>
-) : JuridiskVurdering() {
+) : Subsumsjon() {
     internal constructor(
         dato: LocalDate,
         input: Map<String, Any>,
@@ -132,19 +132,19 @@ class GrupperbarVurdering private constructor(
         visitor.visitGrupperbarVurdering(fom, tom)
     }
 
-    override fun sammenstill(vurderinger: List<JuridiskVurdering>): List<JuridiskVurdering> {
+    override fun sammenstill(vurderinger: List<Subsumsjon>): List<Subsumsjon> {
         val sammenstilt = (vurderinger + this)
-            .filterIsInstance<GrupperbarVurdering>()
+            .filterIsInstance<GrupperbarSubsumsjon>()
             .filter { it == this }
             .map { it.fom til it.tom }
             .grupperSammenhengendePerioderMedHensynTilHelg()
-            .map { GrupperbarVurdering(it.start, it.endInclusive, utfall, versjon, paragraf, ledd, punktum, bokstaver, input, output, kontekster) }
+            .map { GrupperbarSubsumsjon(it.start, it.endInclusive, utfall, versjon, paragraf, ledd, punktum, bokstaver, input, output, kontekster) }
 
         return vurderinger.filter { it != this } + sammenstilt
     }
 }
 
-class BetingetVurdering(
+class BetingetSubsumsjon(
     private val funnetRelevant: Boolean,
     override val utfall: Utfall,
     override val versjon: LocalDate,
@@ -155,10 +155,10 @@ class BetingetVurdering(
     override val input: Map<String, Any>,
     override val output: Map<String, Any>,
     override val kontekster: Map<String, String>
-) : JuridiskVurdering() {
-    override fun sammenstill(vurderinger: List<JuridiskVurdering>): List<JuridiskVurdering> {
+) : Subsumsjon() {
+    override fun sammenstill(vurderinger: List<Subsumsjon>): List<Subsumsjon> {
         if (!funnetRelevant) return vurderinger
-        return sammenstill<BetingetVurdering>(vurderinger) { vurderinger.erstatt(it, this) }
+        return sammenstill<BetingetSubsumsjon>(vurderinger) { vurderinger.erstatt(it, this) }
     }
 
     override fun acceptSpesifikk(visitor: JuridiskVurderingVisitor) {

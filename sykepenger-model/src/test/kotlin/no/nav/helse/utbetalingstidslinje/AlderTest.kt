@@ -7,13 +7,12 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Ledd.LEDD_1
 import no.nav.helse.person.Paragraf.PARAGRAF_8_3
 import no.nav.helse.person.Punktum.Companion.punktum
-import no.nav.helse.person.etterlevelse.JuridiskVurdering.Utfall.VILKAR_IKKE_OPPFYLT
-import no.nav.helse.person.etterlevelse.JuridiskVurdering.Utfall.VILKAR_OPPFYLT
+import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
+import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
 internal class AlderTest {
 

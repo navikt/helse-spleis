@@ -5,16 +5,16 @@ import no.nav.helse.person.Ledd
 import no.nav.helse.person.Ledd.Companion.ledd
 import no.nav.helse.person.Paragraf
 import no.nav.helse.person.Punktum
-import no.nav.helse.person.etterlevelse.JuridiskVurdering.Utfall
+import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-internal class BetingetVurderingTest {
+internal class BetingetSubsumsjonTest {
 
     private val observatør get() = JuridiskVurderingObservatør()
-    private lateinit var vurderinger: List<JuridiskVurdering>
+    private lateinit var vurderinger: List<Subsumsjon>
 
     @BeforeEach
     fun beforeEach() {
@@ -54,7 +54,7 @@ internal class BetingetVurderingTest {
         output: Map<String, Any> = emptyMap(),
         kontekster: Map<String, String> = emptyMap()
     ) {
-        vurderinger = BetingetVurdering(funnetRelevant, utfall, versjon, paragraf, ledd, punktum, bokstaver, input, output, kontekster).sammenstill(vurderinger)
+        vurderinger = BetingetSubsumsjon(funnetRelevant, utfall, versjon, paragraf, ledd, punktum, bokstaver, input, output, kontekster).sammenstill(vurderinger)
     }
 
     private class JuridiskVurderingObservatør : JuridiskVurderingVisitor {
@@ -64,9 +64,9 @@ internal class BetingetVurderingTest {
             this.funnetRelevant = funnetRelevant
         }
 
-        fun assertVurdering(juridiskVurdering: JuridiskVurdering, funnetRelevant: Boolean) {
-            require(juridiskVurdering is BetingetVurdering)
-            juridiskVurdering.accept(this)
+        fun assertVurdering(subsumsjon: Subsumsjon, funnetRelevant: Boolean) {
+            require(subsumsjon is BetingetSubsumsjon)
+            subsumsjon.accept(this)
             assertEquals(funnetRelevant, this.funnetRelevant)
         }
     }
