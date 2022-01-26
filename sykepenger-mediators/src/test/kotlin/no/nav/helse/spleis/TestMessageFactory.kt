@@ -361,6 +361,11 @@ internal class TestMessageFactory(
         val ansattTil: LocalDate?
     )
 
+    data class ArbeidsforholdOverstyrt(
+        val orgnummer: String,
+        val erAktivt: Boolean
+    )
+
     data class InntekterForSykepengegrunnlagFraLøsning(
         val måned: YearMonth,
         val inntekter: List<Inntekt>,
@@ -817,6 +822,22 @@ internal class TestMessageFactory(
                 "organisasjonsnummer" to organisasjonsnummer,
                 "månedligInntekt" to inntekt,
                 "skjæringstidspunkt" to skjæringstidspunkt
+            ))
+    }
+
+
+    fun lagOverstyrArbeidsforhold(skjæringstidspunkt: LocalDate, overstyrteArbeidsforhold: List<ArbeidsforholdOverstyrt>): String {
+        return nyHendelse(
+            "overstyr_arbeidsforhold", mutableMapOf(
+                "aktørId" to aktørId,
+                "fødselsnummer" to fødselsnummer,
+                "skjæringstidspunkt" to skjæringstidspunkt,
+                "overstyrteArbeidsforhold" to overstyrteArbeidsforhold.map {
+                    mapOf(
+                        "orgnummer" to it.orgnummer,
+                        "erAktivt" to it.erAktivt
+                    )
+                }
             ))
     }
 
