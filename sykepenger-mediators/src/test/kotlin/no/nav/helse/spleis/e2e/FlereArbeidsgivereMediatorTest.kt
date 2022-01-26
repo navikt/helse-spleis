@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.ForventetFeil
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType
 import no.nav.helse.spleis.TestMessageFactory
@@ -315,5 +316,53 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
 
         assertEquals(listOf(testRapid.inspektør.vedtaksperiodeId(0), testRapid.inspektør.vedtaksperiodeId(1)).sorted(), vedtaksperiodeIder)
         assertEquals(listOf("arbeidsgiver 1", "arbeidsgiver 2").sorted(), orgnumre)
+    }
+
+    @ForventetFeil("Må implementereres")
+    @Test
+    fun `overstyring av arbeidsforhold fører til tilstandsendring`() {
+        val a1 = "ag1"
+        val a2 = "ag2"
+        sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100), orgnummer = a1)
+        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)), orgnummer = a1)
+        sendInntektsmelding(listOf(Periode(1.januar, 16.januar)), 1.januar, orgnummer = a1)
+        sendYtelser(0, orgnummer = a1)
+        sendVilkårsgrunnlag(
+            vedtaksperiodeIndeks = 0,
+            skjæringstidspunkt = 1.januar,
+            orgnummer = a1,
+            inntekter = sammenligningsgrunnlag(
+                1.januar, listOf(
+                    TestMessageFactory.InntekterForSammenligningsgrunnlagFraLøsning.Inntekt(INNTEKT, a1),
+                    TestMessageFactory.InntekterForSammenligningsgrunnlagFraLøsning.Inntekt(1000.0, a2),
+                )
+            ),
+            arbeidsforhold = listOf(
+                TestMessageFactory.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+                TestMessageFactory.Arbeidsforhold(a2, LocalDate.EPOCH, null)
+            ),
+            inntekterForSykepengegrunnlag = sykepengegrunnlag(
+                1.januar, listOf(
+                    TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(INNTEKT, a1),
+                    TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(1000.0, a2),
+                )
+            )
+        )
+        sendYtelser(0, orgnummer = a1)
+        sendSimulering(0, orgnummer = a1, status = SimuleringMessage.Simuleringstatus.OK)
+        sendOverstyringArbeidsforhold(1.januar, listOf(TestMessageFactory.ArbeidsforholdOverstyrt(a1, false)))
+        sendYtelser(0, orgnummer = a1)
+        assertTilstander(
+            0,
+            "MOTTATT_SYKMELDING_FERDIG_GAP",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVVENTER_HISTORIKK",
+            "AVVENTER_VILKÅRSPRØVING",
+            "AVVENTER_HISTORIKK",
+            "AVVENTER_SIMULERING",
+            "AVVENTER_GODKJENNING",
+            "AVVENTER_HISTORIKK",
+            "AVVENTER_GODKJENNING"
+        )
     }
 }

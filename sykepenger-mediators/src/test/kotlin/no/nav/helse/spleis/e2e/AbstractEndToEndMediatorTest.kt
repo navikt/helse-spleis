@@ -468,6 +468,13 @@ internal abstract class AbstractEndToEndMediatorTest {
         testRapid.sendTestMessage(meldingsfabrikk.lagOverstyringInntekt(inntekt, skjæringstidspunkt))
     }
 
+    protected fun sendOverstyringArbeidsforhold(
+        skjæringstidspunkt: LocalDate,
+        overstyrteArbeidsforhold: List<ArbeidsforholdOverstyrt>
+    ) {
+        testRapid.sendTestMessage(meldingsfabrikk.lagOverstyrArbeidsforhold(skjæringstidspunkt, overstyrteArbeidsforhold))
+    }
+
     protected fun assertUtbetalingtype(utbetalingIndeks: Int, type: String) {
         assertEquals(
             type,
