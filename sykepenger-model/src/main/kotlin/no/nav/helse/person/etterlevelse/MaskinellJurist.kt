@@ -128,7 +128,7 @@ class MaskinellJurist private constructor(
                     "skjæringstidspunkt" to skjæringstidspunkt,
                     "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig }
                 ),
-                output = mapOf("funnetRelevant" to funnetRelevant),
+                output = mapOf(),
                 kontekster = kontekster()
             )
         )

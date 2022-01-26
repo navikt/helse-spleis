@@ -289,7 +289,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "skjæringstidspunkt" to 1.januar,
                 "grunnlagForSykepengegrunnlag" to 561805.0
             ),
-            output = mapOf("funnetRelevant" to true)
+            output = mapOf()
         )
     }
 
@@ -301,15 +301,26 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent))
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
-            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.januar, 31.januar, 100.prosent, inntekt)),
+            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, inntekt)),
             inntektshistorikk = listOf(
-                Inntektsopplysning(ORGNUMMER.toString(), 1.januar, inntekt, true)
+                Inntektsopplysning(ORGNUMMER, 1.januar, inntekt, true)
             )
         )
         håndterYtelser()
         håndterSimulering()
         håndterUtbetalingsgodkjenning()
         håndterUtbetalt()
-        SubsumsjonInspektør(jurist).assertVurdert(paragraf = Paragraf.PARAGRAF_8_10, ledd = Ledd.LEDD_2, punktum = 1.punktum)
+        SubsumsjonInspektør(jurist).assertBeregnet(
+            paragraf = Paragraf.PARAGRAF_8_10,
+            ledd = Ledd.LEDD_2,
+            punktum = 1.punktum,
+            versjon = 1.januar(2020),
+            input = mapOf(
+                "maksimaltSykepengegrunnlag" to 561804.0,
+                "skjæringstidspunkt" to 1.januar,
+                "grunnlagForSykepengegrunnlag" to 561805.0
+            ),
+            output = mapOf()
+        )
     }
 }
