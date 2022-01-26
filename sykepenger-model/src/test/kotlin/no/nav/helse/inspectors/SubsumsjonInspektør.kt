@@ -46,7 +46,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : JuridiskVurdering
                 && bokstav?.equals(it.bokstaver) ?: true
                 && vedtaksperiodeId?.equals(it.vedtaksperiodeIdFraSporing()) ?: true
         }.let {
-            assertEquals(1, it.size, "Forventer en, og kun en subsumsjon for vilkåret")
+            assertEquals(1, it.size, "Forventer en, og kun en subsumsjon for vilkåret. Subsumsjoner funnet: $it")
             it.first()
         }
 
@@ -76,7 +76,6 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : JuridiskVurdering
     ) {
         val resultat = finnSubsumsjon(paragraf, versjon, ledd, punktum, bokstaver, VILKAR_IKKE_OPPFYLT)
         assertEquals(VILKAR_IKKE_OPPFYLT, resultat.utfall) { "Forventet ikke oppfylt $paragraf $ledd $punktum" }
-        assertParagraf(paragraf, ledd, versjon, punktum, bokstaver, VILKAR_IKKE_OPPFYLT)
         assertResultat(inputdata, outputdata, resultat)
     }
 
