@@ -56,6 +56,8 @@ internal class Vilkårgrunnlagsinspektør(historikk: VilkårsgrunnlagHistorikk) 
     }
 }
 
+internal val VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.inspektør get() = GrunnlagsdataInspektør(this)
+
 internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement) : VilkårsgrunnlagHistorikkVisitor {
     internal lateinit var sykepengegrunnlag: Sykepengegrunnlag
         private set

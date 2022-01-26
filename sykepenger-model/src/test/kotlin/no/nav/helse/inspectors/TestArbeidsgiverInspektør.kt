@@ -3,7 +3,6 @@ package no.nav.helse.inspectors
 import no.nav.helse.antallEtterspurteBehov
 import no.nav.helse.etterspurteBehov
 import no.nav.helse.etterspurteBehovFinnes
-import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.*
@@ -13,8 +12,6 @@ import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
-import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Prosent
 import org.junit.jupiter.api.fail
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -24,6 +21,8 @@ internal class TestArbeidsgiverInspektør(
     private val person: Person,
     val orgnummer: String
 ) : ArbeidsgiverVisitor, VilkårsgrunnlagHistorikkVisitor {
+    private val personInspektør = person.inspektør
+
     internal var vedtaksperiodeTeller: Int = 0
         private set
     private var vedtaksperiodeindeks = 0
@@ -37,7 +36,7 @@ internal class TestArbeidsgiverInspektør(
     private val fagsystemIder = mutableMapOf<Int, String>()
     private val vedtaksperiodeForkastet = mutableMapOf<Int, Boolean>()
     val utbetalingstidslinjeberegningData = mutableListOf<UtbetalingstidslinjeberegningData>()
-    internal val personLogg: Aktivitetslogg
+    internal val personLogg get() = personInspektør.aktivitetslogg
     internal lateinit var arbeidsgiver: Arbeidsgiver
     internal val inntektInspektør get() = InntektshistorikkInspektør(arbeidsgiver)
     internal lateinit var sykdomshistorikk: Sykdomshistorikk
@@ -66,19 +65,11 @@ internal class TestArbeidsgiverInspektør(
     private val hendelseIder = mutableMapOf<Int, Set<UUID>>()
     private val inntektskilder = mutableMapOf<Int, Inntektskilde>()
     private val periodetyper = mutableMapOf<Int, Periodetype>()
-    internal val vilkårsgrunnlagHistorikk: MutableList<Pair<LocalDate, VilkårsgrunnlagHistorikk.Grunnlagsdata>>
-    internal var warnings: List<String>
-    private var personInspektør: HentAktivitetslogg
 
-    private val vilkårsgrunnlagHistorikkInnslag: List<InnslagId>
-    internal fun vilkårsgrunnlagHistorikkInnslag() = vilkårsgrunnlagHistorikkInnslag.sortedByDescending { it.timestamp }.toList()
+    internal fun vilkårsgrunnlagHistorikkInnslag() = personInspektør.vilkårsgrunnlagHistorikkInnslag()
 
     init {
-        personInspektør = HentAktivitetslogg(person, orgnummer).also { results ->
-            personLogg = results.aktivitetslogg
-            warnings = results.warnings
-            vilkårsgrunnlagHistorikk = results.vilkårsgrunnlagHistorikk
-            vilkårsgrunnlagHistorikkInnslag = results.vilkårsgrunnlagHistorikkInnslag.toList()
+        HentAktivitetslogg(person, orgnummer).also { results ->
             results.arbeidsgiver.accept(this)
         }
     }
@@ -86,9 +77,6 @@ internal class TestArbeidsgiverInspektør(
     private class HentAktivitetslogg(person: Person, private val valgfriOrgnummer: String?) : PersonVisitor {
         lateinit var aktivitetslogg: Aktivitetslogg
         lateinit var arbeidsgiver: Arbeidsgiver
-        val vilkårsgrunnlagHistorikk = mutableListOf<Pair<LocalDate,VilkårsgrunnlagHistorikk.Grunnlagsdata>>()
-        val warnings = mutableListOf<String>()
-        val vilkårsgrunnlagHistorikkInnslag: MutableList<InnslagId> = mutableListOf()
 
         init {
             person.accept(this)
@@ -102,31 +90,6 @@ internal class TestArbeidsgiverInspektør(
             if (organisasjonsnummer == valgfriOrgnummer?.toString()) this.arbeidsgiver = arbeidsgiver
             if (this::arbeidsgiver.isInitialized) return
             this.arbeidsgiver = arbeidsgiver
-        }
-
-        override fun preVisitGrunnlagsdata(
-            skjæringstidspunkt: LocalDate,
-            grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
-            sykepengegrunnlag: Sykepengegrunnlag,
-            sammenligningsgrunnlag: Inntekt,
-            avviksprosent: Prosent?,
-            antallOpptjeningsdagerErMinst: Int,
-            harOpptjening: Boolean,
-            medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
-            harMinimumInntekt: Boolean?,
-            vurdertOk: Boolean,
-            meldingsreferanseId: UUID?,
-            vilkårsgrunnlagId: UUID
-        ) {
-            vilkårsgrunnlagHistorikk.add(skjæringstidspunkt to grunnlagsdata)
-        }
-
-        override fun preVisitInnslag(innslag: VilkårsgrunnlagHistorikk.Innslag, id: UUID, opprettet: LocalDateTime) {
-            vilkårsgrunnlagHistorikkInnslag.add(InnslagId(id, opprettet))
-        }
-
-        override fun visitWarn(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Warn, melding: String, tidsstempel: String) {
-            warnings.add(melding)
         }
     }
 

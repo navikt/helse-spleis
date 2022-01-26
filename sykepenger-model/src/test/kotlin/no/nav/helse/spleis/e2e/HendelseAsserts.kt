@@ -181,6 +181,12 @@ internal fun AbstractEndToEndTest.assertWarning(idInnhenter: IdInnhenter, warnin
     assertTrue(warnings.contains(warning), "fant ikke forventet warning for $orgnummer. Warnings:\n${warnings.joinToString("\n")}")
 }
 
+
+internal fun AbstractEndToEndTest.assertNoWarning(idInnhenter: IdInnhenter, warning: String, orgnummer: String = AbstractPersonTest.ORGNUMMER) {
+    val warnings = collectWarnings(idInnhenter, orgnummer)
+    assertFalse(warnings.contains(warning), "fant ikke forventet warning for $orgnummer. Warnings:\n${warnings.joinToString("\n")}")
+}
+
 private fun AbstractEndToEndTest.collectWarnings(idInnhenter: IdInnhenter, orgnummer: String): MutableList<String> {
     val warnings = mutableListOf<String>()
     inspektør.personLogg.accept(object : AktivitetsloggVisitor {

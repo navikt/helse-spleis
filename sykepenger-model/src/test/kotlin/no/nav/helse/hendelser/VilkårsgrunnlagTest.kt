@@ -9,7 +9,10 @@ import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.spleis.e2e.TestObservatør
-import no.nav.helse.testhelpers.*
+import no.nav.helse.spleis.e2e.assertWarningTekst
+import no.nav.helse.testhelpers.fangeSkjæringstidspunkt
+import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
+import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosent
@@ -104,7 +107,7 @@ internal class VilkårsgrunnlagTest {
         person.håndter(vilkårsgrunnlag)
         assertGrunnlagsdata(INNTEKT, Prosent.ratio(0.0), 28, true)
         assertEquals(TilstandType.AVVENTER_HISTORIKK, hentTilstand()?.type)
-        assertEquals("Arbeidsgiver er ikke registrert i Aa-registeret.", inspektør().warnings.single())
+        assertWarningTekst(inspektør(), "Arbeidsgiver er ikke registrert i Aa-registeret.")
     }
 
     @Test

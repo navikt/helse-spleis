@@ -1,14 +1,12 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.*
-import no.nav.helse.ForventetFeil
 import no.nav.helse.Toggle.Companion.disable
 import no.nav.helse.Toggle.Companion.enable
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.inspectors.GrunnlagsdataInspektør
 import no.nav.helse.inspectors.Kilde
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.OppdragVisitor
@@ -41,8 +39,6 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode)
 
-        val grunnlagsdataInspektør = GrunnlagsdataInspektør(inspektør.vilkårsgrunnlagHistorikk[0].second)
-
         assertTilstander(
             0,
             START,
@@ -62,11 +58,11 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET,
         )
-
         assertEquals(15741, inspektør.utbetalinger.first().inspektør.arbeidsgiverOppdrag.nettoBeløp())
         assertEquals(506, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.nettoBeløp())
 
-        assertEquals(2, inspektør.vilkårsgrunnlagHistorikk.size)
+        val grunnlagsdataInspektør = person.inspektør.grunnlagsdata(0).inspektør
+        assertEquals(2, person.inspektør.antallGrunnlagsdata())
         assertEquals(3, grunnlagsdataInspektør.avviksprosent?.roundToInt())
 
         val tidligereBeregning = inspektør.utbetalingstidslinjeberegningData.first()

@@ -13,7 +13,8 @@ import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class DelvisRefusjonTest : AbstractEndToEndTest() {
@@ -96,41 +97,39 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
 
     @Test
     fun `Arbeidsgiverperiode tilstøter Infotrygd`() {
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
 
-            håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
-            håndterUtbetalingshistorikk(
-                1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 17.januar, 31.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
-                    Inntektsopplysning(ORGNUMMER.toString(), 17.januar, INNTEKT, true)
-                )
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterUtbetalingshistorikk(
+            1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 17.januar, 31.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
+                Inntektsopplysning(ORGNUMMER.toString(), 17.januar, INNTEKT, true)
             )
-            håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            håndterUtbetalt(1.vedtaksperiode)
-            assertEquals(0, inspektør.warnings.size)
-            assertFalse(inspektør.warnings.contains("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler."))
-        }
+        )
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+        assertNoWarnings(1.vedtaksperiode)
+    }
 
     @Test
     fun `Arbeidsgiverperiode tilstøter ikke Infotrygd`() {
-            håndterInntektsmelding(listOf(1.november(2017) til 16.november(2017)))
+        håndterInntektsmelding(listOf(1.november(2017) til 16.november(2017)))
 
-            håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
-            håndterUtbetalingshistorikk(
-                1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 17.januar, 31.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
-                    Inntektsopplysning(ORGNUMMER.toString(), 17.januar, INNTEKT, true)
-                )
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterUtbetalingshistorikk(
+            1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 17.januar, 31.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
+                Inntektsopplysning(ORGNUMMER.toString(), 17.januar, INNTEKT, true)
             )
-            håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            håndterUtbetalt(1.vedtaksperiode)
-            assertEquals(1, inspektør.warnings.size)
-            assertTrue(inspektør.warnings.contains("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler."))
-        }
+        )
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+        assertWarning(1.vedtaksperiode, "Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.")
+    }
 
     @Test
     fun `Finner refusjon ved forlengelse fra Infotrygd`() {
@@ -150,8 +149,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(1.vedtaksperiode)
-        assertEquals(0, inspektør.warnings.size)
-        assertFalse(inspektør.warnings.contains("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler."))
+        assertNoWarnings(1.vedtaksperiode)
     }
 
     @Test
