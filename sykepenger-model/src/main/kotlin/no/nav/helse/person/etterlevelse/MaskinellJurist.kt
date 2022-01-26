@@ -17,13 +17,13 @@ class MaskinellJurist private constructor(
     private val kontekster: Map<String, String>
 ) : SubsumsjonObserver {
 
-    private var vurderinger = listOf<Subsumsjon>()
+    private var subsumsjoner = listOf<Subsumsjon>()
 
     constructor(): this(null, emptyMap())
 
-    private fun leggTil(vurdering: Subsumsjon) {
-        vurderinger = vurdering.sammenstill(vurderinger)
-        parent?.leggTil(vurdering)
+    private fun leggTil(subsumsjon: Subsumsjon) {
+        subsumsjoner = subsumsjon.sammenstill(subsumsjoner)
+        parent?.leggTil(subsumsjon)
     }
 
     private fun kontekster(): Map<String, String> = this.kontekster.toMap()
@@ -204,5 +204,5 @@ class MaskinellJurist private constructor(
         super.`§8-51 ledd 3`(oppfylt, maksSykepengedagerOver67, gjenståendeSykedager, forbrukteSykedager, maksdato)
     }
 
-    fun vurderinger() = vurderinger.toList()
+    fun subsumsjoner() = subsumsjoner.toList()
 }

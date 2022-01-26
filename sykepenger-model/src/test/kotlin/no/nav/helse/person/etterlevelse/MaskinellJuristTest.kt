@@ -22,7 +22,7 @@ internal class MaskinellJuristTest {
         vedtaksperiodeJurist.`§8-2 ledd 1`(true, LocalDate.now(), 1, emptyList(), 1)
 
         assertKontekster(
-            vedtaksperiodeJurist.vurderinger()[0],
+            vedtaksperiodeJurist.subsumsjoner()[0],
             "fødselsnummer" to "10052088033",
             "organisasjonsnummer" to "123456789",
             "vedtaksperiodeId" to "6bce6c83-28ab-4a8c-b7f6-8402988bc8fc"
@@ -39,7 +39,7 @@ internal class MaskinellJuristTest {
         arbeidsgiverJurist.`§8-2 ledd 1`(true, LocalDate.now(), 1, emptyList(), 1)
 
         assertKontekster(
-            arbeidsgiverJurist.vurderinger()[0],
+            arbeidsgiverJurist.subsumsjoner()[0],
             "fødselsnummer" to "10052088033",
             "organisasjonsnummer" to "987654321",
         )

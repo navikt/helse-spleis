@@ -21,7 +21,6 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 4.desember(2017), 31.januar))
         håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold)
 
-
         SubsumsjonInspektør(jurist).assertOppfylt(
             paragraf = Paragraf.PARAGRAF_8_2,
             ledd = Ledd.LEDD_1,

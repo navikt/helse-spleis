@@ -33,7 +33,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
     }
 
     init {
-        jurist.vurderinger().forEach { it.accept(this) }
+        jurist.subsumsjoner().forEach { it.accept(this) }
     }
 
     private fun finnSubsumsjon(paragraf: Paragraf, versjon: LocalDate, ledd: Ledd?, punktum: List<Punktum>?, bokstav: List<Bokstav>?, utfall: Utfall? = null, vedtaksperiodeId: UUID? = null) =
