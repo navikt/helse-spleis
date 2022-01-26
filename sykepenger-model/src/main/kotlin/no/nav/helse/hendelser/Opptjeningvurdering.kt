@@ -18,10 +18,10 @@ class Opptjeningvurdering(
     internal fun harOpptjening() =
         antallOpptjeningsdager >= TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER
 
-    internal fun valider(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate, jurist: SubsumsjonObserver): Boolean {
+    internal fun valider(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver): Boolean {
         antallOpptjeningsdager = Vilkårsgrunnlag.Arbeidsforhold.opptjeningsdager(arbeidsforhold, aktivitetslogg, skjæringstidspunkt)
         val harOpptjening = harOpptjening()
-        jurist.`§8-2 ledd 1`(harOpptjening, skjæringstidspunkt, TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER, arbeidsforhold.toEtterlevelseMap(), antallOpptjeningsdager)
+        subsumsjonObserver.`§8-2 ledd 1`(harOpptjening, skjæringstidspunkt, TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER, arbeidsforhold.toEtterlevelseMap(), antallOpptjeningsdager)
         if (harOpptjening) aktivitetslogg.info("Har minst %d dager opptjening", TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER)
         else aktivitetslogg.warn("Perioden er avslått på grunn av manglende opptjening")
         return harOpptjening

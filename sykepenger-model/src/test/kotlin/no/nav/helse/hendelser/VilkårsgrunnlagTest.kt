@@ -133,7 +133,7 @@ internal class VilkårsgrunnlagTest {
             skjæringstidspunkt = 31.januar,
             antallArbeidsgivereFraAareg = 1,
             periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
-            jurist = MaskinellJurist()
+            subsumsjonObserver = MaskinellJurist()
         )
 
         assertFalse(vilkårsgrunnlag.hasWarningsOrWorse())
