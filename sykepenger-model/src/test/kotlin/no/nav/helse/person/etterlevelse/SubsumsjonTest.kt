@@ -129,7 +129,7 @@ internal class SubsumsjonTest {
         override val output = output
         override val kontekster = kontekster
 
-        override fun sammenstill(vurderinger: List<Subsumsjon>): List<Subsumsjon> {
+        override fun sammenstill(subsumsjoner: List<Subsumsjon>): List<Subsumsjon> {
             TODO("Not yet implemented")
         }
 

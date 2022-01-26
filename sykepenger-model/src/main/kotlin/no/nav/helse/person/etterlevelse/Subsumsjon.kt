@@ -36,15 +36,15 @@ abstract class Subsumsjon {
 
     abstract fun acceptSpesifikk(visitor: JuridiskVurderingVisitor)
 
-    abstract fun sammenstill(vurderinger: List<Subsumsjon>): List<Subsumsjon>
+    abstract fun sammenstill(subsumsjoner: List<Subsumsjon>): List<Subsumsjon>
 
     protected inline fun <reified T : Subsumsjon> sammenstill(
-        vurderinger: List<Subsumsjon>,
+        subsumsjoner: List<Subsumsjon>,
         strategi: SammenstillingStrategi<T>
     ): List<Subsumsjon> {
-        val tidligereVurdering = vurderinger.filterIsInstance<T>().firstOrNull { it == this }
-        if (tidligereVurdering != null) return strategi(tidligereVurdering)
-        return vurderinger + this
+        val tidligereSubsumsjon = subsumsjoner.filterIsInstance<T>().firstOrNull { it == this }
+        if (tidligereSubsumsjon != null) return strategi(tidligereSubsumsjon)
+        return subsumsjoner + this
     }
 
     override fun equals(other: Any?): Boolean {
@@ -96,8 +96,8 @@ class EnkelSubsumsjon(
     override val output: Map<String, Any>,
     override val kontekster: Map<String, String>
 ) : Subsumsjon() {
-    override fun sammenstill(vurderinger: List<Subsumsjon>) =
-        sammenstill<EnkelSubsumsjon>(vurderinger) { vurderinger.erstatt(it, this) }
+    override fun sammenstill(subsumsjoner: List<Subsumsjon>) =
+        sammenstill<EnkelSubsumsjon>(subsumsjoner) { subsumsjoner.erstatt(it, this) }
 
     override fun acceptSpesifikk(visitor: JuridiskVurderingVisitor) {}
 }
@@ -132,15 +132,15 @@ class GrupperbarSubsumsjon private constructor(
         visitor.visitGrupperbarVurdering(fom, tom)
     }
 
-    override fun sammenstill(vurderinger: List<Subsumsjon>): List<Subsumsjon> {
-        val sammenstilt = (vurderinger + this)
+    override fun sammenstill(subsumsjoner: List<Subsumsjon>): List<Subsumsjon> {
+        val sammenstilt = (subsumsjoner + this)
             .filterIsInstance<GrupperbarSubsumsjon>()
             .filter { it == this }
             .map { it.fom til it.tom }
             .grupperSammenhengendePerioderMedHensynTilHelg()
             .map { GrupperbarSubsumsjon(it.start, it.endInclusive, utfall, versjon, paragraf, ledd, punktum, bokstaver, input, output, kontekster) }
 
-        return vurderinger.filter { it != this } + sammenstilt
+        return subsumsjoner.filter { it != this } + sammenstilt
     }
 }
 
@@ -156,9 +156,9 @@ class BetingetSubsumsjon(
     override val output: Map<String, Any>,
     override val kontekster: Map<String, String>
 ) : Subsumsjon() {
-    override fun sammenstill(vurderinger: List<Subsumsjon>): List<Subsumsjon> {
-        if (!funnetRelevant) return vurderinger
-        return sammenstill<BetingetSubsumsjon>(vurderinger) { vurderinger.erstatt(it, this) }
+    override fun sammenstill(subsumsjoner: List<Subsumsjon>): List<Subsumsjon> {
+        if (!funnetRelevant) return subsumsjoner
+        return sammenstill<BetingetSubsumsjon>(subsumsjoner) { subsumsjoner.erstatt(it, this) }
     }
 
     override fun acceptSpesifikk(visitor: JuridiskVurderingVisitor) {
