@@ -7,7 +7,6 @@ import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.time.YearMonth
 
 internal class TrengerInntektsmeldingTest : AbstractEndToEndMediatorTest() {
 
@@ -26,7 +25,7 @@ internal class TrengerInntektsmeldingTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 5.august(2021), tom = 3.september(2021), sykmeldingsgrad = 100))
         sendSøknad(1, listOf(SoknadsperiodeDTO(fom = 5.august(2021), tom = 3.september(2021), sykmeldingsgrad = 100)))
         sendYtelserUtenSykepengehistorikk(1)
-        sendVilkårsgrunnlag(1, 1.rangeTo(6).map { YearMonth.of(2021, it) to INNTEKT * 2 })
+        sendVilkårsgrunnlag(1, skjæringstidspunkt = 21.juli(2021))
         sendYtelserUtenSykepengehistorikk(1)
         sendSimulering(1, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenning(1)

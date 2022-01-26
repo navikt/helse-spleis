@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType
+import no.nav.helse.spleis.TestMessageFactory
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.syfo.kafka.felles.InntektskildeDTO
@@ -9,6 +10,7 @@ import no.nav.syfo.kafka.felles.InntektskildetypeDTO
 import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -21,8 +23,8 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
         sendSøknad(
             vedtaksperiodeIndeks = 0,
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
-            orgnummer = "orgnummer1",
-            andreInntektskilder = listOf(InntektskildeDTO(InntektskildetypeDTO.ANDRE_ARBEIDSFORHOLD, true))
+            andreInntektskilder = listOf(InntektskildeDTO(InntektskildetypeDTO.ANDRE_ARBEIDSFORHOLD, true)),
+            orgnummer = "orgnummer1"
         )
 
         assertTilstander(
@@ -34,8 +36,8 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
         sendSøknad(
             vedtaksperiodeIndeks = 1,
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
-            orgnummer = "orgnummer2",
-            andreInntektskilder = listOf(InntektskildeDTO(InntektskildetypeDTO.ANDRE_ARBEIDSFORHOLD, true))
+            andreInntektskilder = listOf(InntektskildeDTO(InntektskildetypeDTO.ANDRE_ARBEIDSFORHOLD, true)),
+            orgnummer = "orgnummer2"
         )
 
         assertTilstander(
@@ -52,15 +54,15 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
         sendSøknad(
             vedtaksperiodeIndeks = 0,
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
-            orgnummer = "orgnummer1",
-            andreInntektskilder = listOf(InntektskildeDTO(InntektskildetypeDTO.ANDRE_ARBEIDSFORHOLD, true))
+            andreInntektskilder = listOf(InntektskildeDTO(InntektskildetypeDTO.ANDRE_ARBEIDSFORHOLD, true)),
+            orgnummer = "orgnummer1"
         )
 
         sendSøknad(
             vedtaksperiodeIndeks = 1,
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
-            orgnummer = "orgnummer2",
-            andreInntektskilder = listOf(InntektskildeDTO(InntektskildetypeDTO.JORDBRUKER_FISKER_REINDRIFTSUTOVER, true))
+            andreInntektskilder = listOf(InntektskildeDTO(InntektskildetypeDTO.JORDBRUKER_FISKER_REINDRIFTSUTOVER, true)),
+            orgnummer = "orgnummer2"
         )
 
         assertTilstander(
@@ -83,15 +85,15 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
         sendSøknad(
             vedtaksperiodeIndeks = 0,
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
-            orgnummer = "orgnummer1",
-            andreInntektskilder = listOf(InntektskildeDTO(InntektskildetypeDTO.ANDRE_ARBEIDSFORHOLD, true))
+            andreInntektskilder = listOf(InntektskildeDTO(InntektskildetypeDTO.ANDRE_ARBEIDSFORHOLD, true)),
+            orgnummer = "orgnummer1"
         )
 
         sendSøknad(
             vedtaksperiodeIndeks = 1,
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
-            orgnummer = "orgnummer2",
-            andreInntektskilder = listOf(InntektskildeDTO(InntektskildetypeDTO.ANDRE_ARBEIDSFORHOLD, false))
+            andreInntektskilder = listOf(InntektskildeDTO(InntektskildetypeDTO.ANDRE_ARBEIDSFORHOLD, false)),
+            orgnummer = "orgnummer2"
         )
 
         assertTilstander(
@@ -203,7 +205,7 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
         sendYtelser(0)
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
-        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
+        sendSimulering(0, status = SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenning(0)
         sendUtbetaling()
         assertUtbetalingTilstander(0, "IKKE_UTBETALT", "GODKJENT", "SENDT", "OVERFØRT", "UTBETALT")
@@ -242,7 +244,7 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
         sendYtelser(0)
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
-        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
+        sendSimulering(0, status = SimuleringMessage.Simuleringstatus.OK)
 
         sendNySøknad(SoknadsperiodeDTO(fom = 27.januar, tom = 31.januar, sykmeldingsgrad = 100))
         sendSøknad(
@@ -279,9 +281,9 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
         sendSøknad(
             1,
             listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)),
-            orgnummer = a2,
+            andreInntektskilder = listOf(InntektskildeDTO(InntektskildetypeDTO.FOSTERHJEMGODTGJORELSE, true)),
             sendtNav = LocalDateTime.MAX,
-            andreInntektskilder = listOf(InntektskildeDTO(InntektskildetypeDTO.FOSTERHJEMGODTGJORELSE, true))
+            orgnummer = a2
         )
 
         val melding = testRapid.inspektør.meldinger("trenger_ikke_inntektsmelding")

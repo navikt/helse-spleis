@@ -2,11 +2,11 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.mai
 import no.nav.helse.oktober
+import no.nav.helse.spleis.TestMessageFactory
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
 import org.junit.jupiter.api.Test
-import java.time.YearMonth
 
 internal class EtterbetalingMediatorTest : AbstractEndToEndMediatorTest() {
 
@@ -17,8 +17,16 @@ internal class EtterbetalingMediatorTest : AbstractEndToEndMediatorTest() {
         val merEnn6GInntekt = 60000.0
         sendInntektsmelding(0, listOf(Periode(fom = 1.mai(2020), tom = 16.mai(2020))), førsteFraværsdag = 1.mai(2020), beregnetInntekt = merEnn6GInntekt)
         sendYtelser(0)
-        sendVilkårsgrunnlag(0,
-            inntekter = (5.rangeTo(12).map { YearMonth.of(2019, it) to merEnn6GInntekt } + 1.rangeTo(4).map { YearMonth.of(2020, it) to merEnn6GInntekt })
+        sendVilkårsgrunnlag(
+            0,
+            inntekter = sammenligningsgrunnlag(
+                skjæringstidspunkt = 1.mai(2020),
+                inntekter = listOf(TestMessageFactory.InntekterForSammenligningsgrunnlagFraLøsning.Inntekt(merEnn6GInntekt, ORGNUMMER))
+            ),
+            inntekterForSykepengegrunnlag = sykepengegrunnlag(
+                skjæringstidspunkt = 1.mai(2020),
+                inntekter = listOf(TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(merEnn6GInntekt, ORGNUMMER))
+            )
         )
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)

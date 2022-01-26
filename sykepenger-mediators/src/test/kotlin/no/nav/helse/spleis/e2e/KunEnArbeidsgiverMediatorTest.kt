@@ -488,7 +488,12 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         verify(exactly = 0) { hendelseRepository.markerSomBehandlet(meldingId) }
         sendInntektsmelding(0, listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar, meldingId = meldingId.toString())
         verify(exactly = 1) { hendelseRepository.markerSomBehandlet(meldingId) }
-        sendInntektsmeldingReplay(0, listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar, meldingId = meldingId.toString())
+        sendInntektsmeldingReplay(
+            vedtaksperiodeIndeks = 0,
+            arbeidsgiverperiode = listOf(Periode(fom = 1.januar, tom = 16.januar)),
+            førsteFraværsdag = 1.januar,
+            meldingId = meldingId.toString()
+        )
         verify(exactly = 2) { hendelseRepository.markerSomBehandlet(meldingId) }
     }
 

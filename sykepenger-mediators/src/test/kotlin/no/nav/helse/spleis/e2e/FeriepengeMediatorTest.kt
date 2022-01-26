@@ -8,7 +8,6 @@ import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import java.time.YearMonth
 
 internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
 
@@ -18,7 +17,7 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 1.juni(2020), tom = 16.juni(2020))), førsteFraværsdag = 1.juni(2020))
         sendYtelser(0)
-        sendVilkårsgrunnlag(0, (1..12).map { YearMonth.of(2019, it).plusMonths(5) to INNTEKT })
+        sendVilkårsgrunnlag(0, skjæringstidspunkt = 1.juni(2020))
         sendYtelserUtenSykepengehistorikk(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenning(0)
@@ -77,7 +76,7 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 1.juni(2020), tom = 16.juni(2020))), førsteFraværsdag = 1.juni(2020))
         sendYtelser(0)
-        sendVilkårsgrunnlag(0, (1..12).map { YearMonth.of(2019, it).plusMonths(5) to INNTEKT })
+        sendVilkårsgrunnlag(0, skjæringstidspunkt = 1.juni(2020))
         sendYtelserUtenSykepengehistorikk(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenning(0)
@@ -150,7 +149,7 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 1.juni(2020), tom = 16.juni(2020))), førsteFraværsdag = 1.juni(2020))
         sendYtelser(0)
-        sendVilkårsgrunnlag(0, (1..12).map { YearMonth.of(2019, it).plusMonths(5) to INNTEKT })
+        sendVilkårsgrunnlag(0, skjæringstidspunkt = 1.juni(2020))
         sendYtelserUtenSykepengehistorikk(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenning(0)
@@ -223,7 +222,7 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 1.juni(2020), tom = 16.juni(2020))), førsteFraværsdag = 1.juni(2020))
         sendYtelser(0)
-        sendVilkårsgrunnlag(0, (1..12).map { YearMonth.of(2019, it).plusMonths(5) to INNTEKT })
+        sendVilkårsgrunnlag(0, skjæringstidspunkt = 1.juni(2020))
         sendYtelserUtenSykepengehistorikk(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenning(0)
