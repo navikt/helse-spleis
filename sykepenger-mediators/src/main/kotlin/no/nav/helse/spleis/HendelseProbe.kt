@@ -84,6 +84,10 @@ object HendelseProbe {
         tell("OverstyrInntekt")
     }
 
+    fun onOverstyrArbeidsforhold() {
+        tell("OverstyrArbeidsforhold")
+    }
+
     private fun tell(navn: String) {
         hendelseCounter.labels(navn).inc()
     }

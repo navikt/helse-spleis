@@ -11,16 +11,14 @@ internal class OverstyrArbeidsforholdRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ): HendelseRiver(rapidsConnection, messageMediator) {
-    override val eventName: String
-        get() = "overstyr_arbeidsforhold"
+    override val eventName = "overstyr_arbeidsforhold"
 
-    override val riverName: String
-        get() = "Overstyr arbeidsforhold"
+    override val riverName = "Overstyr arbeidsforhold"
 
     override fun createMessage(packet: JsonMessage) = OverstyrArbeidsforholdMessage(packet)
 
     override fun validate(message: JsonMessage) {
-        message.requireKey("aktørId", "fødselsnummer")
+        message.requireKey("aktørId", "fødselsnummer", "organisasjonsnummer")
         message.require("skjæringstidspunkt", JsonNode::asLocalDate)
         message.requireArray("overstyrteArbeidsforhold") {
             requireKey("orgnummer")

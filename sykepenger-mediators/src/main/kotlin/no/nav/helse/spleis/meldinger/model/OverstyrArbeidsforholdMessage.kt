@@ -9,9 +9,8 @@ import java.time.LocalDate
 internal class OverstyrArbeidsforholdMessage(val packet: JsonMessage): HendelseMessage(packet) {
 
     override val fødselsnummer: String = packet["fødselsnummer"].asText()
-
-    private val aktørId: String = packet["aktørId"].asText()
-    private val skjæringstidspunkt: LocalDate = packet["skjæringstidspunkt"].asLocalDate()
+    private val aktørId = packet["aktørId"].asText()
+    private val skjæringstidspunkt = packet["skjæringstidspunkt"].asLocalDate()
     private val overstyrteArbeidsforhold = packet["overstyrteArbeidsforhold"]
         .map {
             OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(
@@ -21,7 +20,16 @@ internal class OverstyrArbeidsforholdMessage(val packet: JsonMessage): HendelseM
         }
 
     override fun behandle(mediator: IHendelseMediator) {
-        TODO("Not yet implemented")
+        mediator.behandle(
+            this,
+            overstyrArbeidsforhold = OverstyrArbeidsforhold(
+                meldingsreferanseId = id,
+                fødselsnummer = fødselsnummer,
+                aktørId = aktørId,
+                skjæringstidspunkt = skjæringstidspunkt,
+                overstyrteArbeidsforhold = overstyrteArbeidsforhold
+            )
+        )
     }
 
 }

@@ -318,7 +318,6 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
         assertEquals(listOf("arbeidsgiver 1", "arbeidsgiver 2").sorted(), orgnumre)
     }
 
-    @ForventetFeil("Må implementereres")
     @Test
     fun `overstyring av arbeidsforhold fører til tilstandsendring`() {
         val a1 = "ag1"
@@ -350,8 +349,9 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
         )
         sendYtelser(0, orgnummer = a1)
         sendSimulering(0, orgnummer = a1, status = SimuleringMessage.Simuleringstatus.OK)
-        sendOverstyringArbeidsforhold(1.januar, listOf(TestMessageFactory.ArbeidsforholdOverstyrt(a1, false)))
+        sendOverstyringArbeidsforhold(1.januar, listOf(TestMessageFactory.ArbeidsforholdOverstyrt(a2, false)))
         sendYtelser(0, orgnummer = a1)
+        sendSimulering(0, orgnummer = a1, status = SimuleringMessage.Simuleringstatus.OK)
         assertTilstander(
             0,
             "MOTTATT_SYKMELDING_FERDIG_GAP",
@@ -362,6 +362,7 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
             "AVVENTER_SIMULERING",
             "AVVENTER_GODKJENNING",
             "AVVENTER_HISTORIKK",
+            "AVVENTER_SIMULERING",
             "AVVENTER_GODKJENNING"
         )
     }
