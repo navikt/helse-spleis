@@ -491,9 +491,9 @@ class Person private constructor(
         vilkårsgrunnlagHistorikk.lagre(skjæringstidspunkt, vilkårsgrunnlag)
     }
 
-    internal fun lagreVilkårsgrunnlagFraInfotrygd(skjæringstidspunkt: LocalDate, periode: Periode, hendelse: IAktivitetslogg) {
+    internal fun lagreVilkårsgrunnlagFraInfotrygd(skjæringstidspunkt: LocalDate, periode: Periode, hendelse: IAktivitetslogg, subsumsjonObserver: SubsumsjonObserver) {
         infotrygdhistorikk.lagreVilkårsgrunnlag(skjæringstidspunkt, vilkårsgrunnlagHistorikk, ::kanOverskriveVilkårsgrunnlag) {
-            beregnSykepengegrunnlagForInfotrygd(it, periode.start, hendelse)
+            beregnSykepengegrunnlagForInfotrygd(it, periode.start, hendelse, subsumsjonObserver)
         }
     }
 
@@ -530,20 +530,21 @@ class Person private constructor(
         finnArbeidsgiverForInntekter(orgnummer, aktivitetslogg).lagreSykepengegrunnlagFraInfotrygd(inntektsopplysninger, hendelseId)
     }
 
-    internal fun beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate, aktivitetslogg: IAktivitetslogg): Sykepengegrunnlag {
-        return Sykepengegrunnlag.opprett(arbeidsgivere.beregnSykepengegrunnlag(skjæringstidspunkt), skjæringstidspunkt, aktivitetslogg)
+    internal fun beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate, aktivitetslogg: IAktivitetslogg, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag {
+        return Sykepengegrunnlag.opprett(arbeidsgivere.beregnSykepengegrunnlag(skjæringstidspunkt), skjæringstidspunkt, aktivitetslogg, subsumsjonObserver)
     }
 
     private fun beregnSykepengegrunnlagForInfotrygd(
         skjæringstidspunkt: LocalDate,
         personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden: LocalDate,
-        hendelse: IAktivitetslogg
+        hendelse: IAktivitetslogg,
+        subsumsjonObserver: SubsumsjonObserver
     ) =
         Sykepengegrunnlag.opprettForInfotrygd(
             arbeidsgivere.beregnSykepengegrunnlag(
                 skjæringstidspunkt,
                 personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden
-            ), skjæringstidspunkt, hendelse
+            ), skjæringstidspunkt, hendelse, subsumsjonObserver
         )
 
     internal fun beregnSammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =
@@ -704,7 +705,7 @@ class Person private constructor(
     }
 
     internal fun vilkårsprøvEtterNyInntekt(hendelse: PersonHendelse, skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver) {
-        val sykepengegrunnlag = beregnSykepengegrunnlag(skjæringstidspunkt, hendelse)
+        val sykepengegrunnlag = beregnSykepengegrunnlag(skjæringstidspunkt, hendelse, subsumsjonObserver)
         val sammenligningsgrunnlag = beregnSammenligningsgrunnlag(skjæringstidspunkt)
         val avviksprosent = sykepengegrunnlag.avviksprosent(sammenligningsgrunnlag.sammenligningsgrunnlag)
 

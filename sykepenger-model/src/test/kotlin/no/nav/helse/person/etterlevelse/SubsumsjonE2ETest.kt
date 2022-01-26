@@ -6,6 +6,8 @@ import no.nav.helse.inspectors.SubsumsjonInspektør
 import no.nav.helse.person.Ledd
 import no.nav.helse.person.Paragraf
 import no.nav.helse.person.Punktum.Companion.punktum
+import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
+import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.spleis.e2e.*
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -26,7 +28,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             paragraf = Paragraf.PARAGRAF_8_2,
             ledd = Ledd.LEDD_1,
             versjon = 12.juni(2020),
-            inputdata = mapOf(
+            input = mapOf(
                 "skjæringstidspunkt" to 1.januar,
                 "tilstrekkeligAntallOpptjeningsdager" to 28,
                 "arbeidsforhold" to listOf(
@@ -37,7 +39,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                     )
                 )
             ),
-            outputdata = mapOf("antallOpptjeningsdager" to 28)
+            output = mapOf("antallOpptjeningsdager" to 28)
         )
     }
 
@@ -54,7 +56,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             paragraf = Paragraf.PARAGRAF_8_2,
             ledd = Ledd.LEDD_1,
             versjon = 12.juni(2020),
-            inputdata = mapOf(
+            input = mapOf(
                 "skjæringstidspunkt" to 1.januar,
                 "tilstrekkeligAntallOpptjeningsdager" to 28,
                 "arbeidsforhold" to listOf(
@@ -65,7 +67,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                     )
                 )
             ),
-            outputdata = mapOf("antallOpptjeningsdager" to 27)
+            output = mapOf("antallOpptjeningsdager" to 27)
         )
     }
 
@@ -85,14 +87,14 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ledd = Ledd.LEDD_1,
             punktum = 2.punktum,
             versjon = 16.desember(2011),
-            inputdata = mapOf(
+            input = mapOf(
                 "syttiårsdagen" to 20.januar,
                 "vurderingFom" to 1.januar,
                 "vurderingTom" to 19.januar,
                 "tidslinjeFom" to 1.januar,
                 "tidslinjeTom" to 31.januar
             ),
-            outputdata = mapOf(
+            output = mapOf(
                 "avvisteDager" to emptyList<Periode>()
             )
         )
@@ -102,14 +104,14 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ledd = Ledd.LEDD_1,
             punktum = 2.punktum,
             versjon = 16.desember(2011),
-            inputdata = mapOf(
+            input = mapOf(
                 "syttiårsdagen" to 20.januar,
                 "vurderingFom" to 20.januar,
                 "vurderingTom" to 31.januar,
                 "tidslinjeFom" to 1.januar,
                 "tidslinjeTom" to 31.januar
             ),
-            outputdata = mapOf(
+            output = mapOf(
                 "avvisteDager" to listOf(20.januar til 31.januar)
             )
         )
@@ -131,14 +133,14 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ledd = Ledd.LEDD_1,
             punktum = 2.punktum,
             versjon = 16.desember(2011),
-            inputdata = mapOf(
+            input = mapOf(
                 "syttiårsdagen" to 1.februar,
                 "vurderingFom" to 1.januar,
                 "vurderingTom" to 31.januar,
                 "tidslinjeFom" to 1.januar,
                 "tidslinjeTom" to 31.januar
             ),
-            outputdata = mapOf(
+            output = mapOf(
                 "avvisteDager" to emptyList<Periode>()
             )
         )
@@ -160,14 +162,14 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ledd = Ledd.LEDD_1,
             punktum = 2.punktum,
             versjon = 16.desember(2011),
-            inputdata = mapOf(
+            input = mapOf(
                 "syttiårsdagen" to 1.januar,
                 "vurderingFom" to 1.januar,
                 "vurderingTom" to 31.januar,
                 "tidslinjeFom" to 1.januar,
                 "tidslinjeTom" to 31.januar
             ),
-            outputdata = mapOf(
+            output = mapOf(
                 "avvisteDager" to listOf(17.januar til 31.januar)
             )
         )
@@ -190,14 +192,14 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ledd = Ledd.LEDD_1,
             punktum = 2.punktum,
             versjon = 16.desember(2011),
-            inputdata = mapOf(
+            input = mapOf(
                 "syttiårsdagen" to 1.januar,
                 "vurderingFom" to 1.januar,
                 "vurderingTom" to 16.januar,
                 "tidslinjeFom" to 1.januar,
                 "tidslinjeTom" to 16.januar
             ),
-            outputdata = mapOf(
+            output = mapOf(
                 "avvisteDager" to emptyList<Periode>()
             )
         )
@@ -217,12 +219,12 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ledd = Ledd.LEDD_2,
             punktum = 1.punktum,
             versjon = 16.desember(2011),
-            inputdata = mapOf(
+            input = mapOf(
                 "skjæringstidspunkt" to 1.januar,
                 "grunnlagForSykepengegrunnlag" to 46817.0,
                 "minimumInntekt" to 46817.0
             ),
-            outputdata = emptyMap()
+            output = emptyMap()
         )
         SubsumsjonInspektør(jurist).assertIkkeVurdert(Paragraf.PARAGRAF_8_51, Ledd.LEDD_2, 1.punktum)
     }
@@ -241,13 +243,73 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ledd = Ledd.LEDD_2,
             punktum = 1.punktum,
             versjon = 16.desember(2011),
-            inputdata = mapOf(
+            input = mapOf(
                 "skjæringstidspunkt" to 1.januar,
                 "grunnlagForSykepengegrunnlag" to 46816.0,
                 "minimumInntekt" to 46817.0
             ),
-            outputdata = emptyMap()
+            output = emptyMap()
         )
         SubsumsjonInspektør(jurist).assertIkkeVurdert(Paragraf.PARAGRAF_8_51, Ledd.LEDD_2, 1.punktum)
+    }
+
+
+    @Test
+    fun `§8-10 ledd 2 punktum 1 - inntekt overstiger ikke maksimum sykepengegrunnlag`() {
+        val maksimumSykepengegrunnlag2018 = (93634 * 6).årlig // 6G
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = maksimumSykepengegrunnlag2018)
+        håndterYtelser()
+        håndterVilkårsgrunnlag(inntekt = maksimumSykepengegrunnlag2018)
+        SubsumsjonInspektør(jurist).assertIkkeVurdert(
+            paragraf = Paragraf.PARAGRAF_8_10,
+            ledd = Ledd.LEDD_2,
+            punktum = 1.punktum,
+            versjon = 1.januar(2020)
+        )
+    }
+
+    @Test
+    fun `§8-10 ledd 2 punktum 1 - inntekt overstiger maksimum sykepengegrunnlag`() {
+        val maksimumSykepengegrunnlag2018 = (93634 * 6).årlig // 6G
+        val inntekt = maksimumSykepengegrunnlag2018.plus(1.årlig)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntekt)
+        håndterYtelser()
+        håndterVilkårsgrunnlag(inntekt = inntekt)
+        SubsumsjonInspektør(jurist).assertBeregnet(
+            paragraf = Paragraf.PARAGRAF_8_10,
+            ledd = Ledd.LEDD_2,
+            punktum = 1.punktum,
+            versjon = 1.januar(2020),
+            input = mapOf(
+                "maksimaltSykepengegrunnlag" to 561804.0,
+                "skjæringstidspunkt" to 1.januar,
+                "grunnlagForSykepengegrunnlag" to 561805.0
+            ),
+            output = mapOf("funnetRelevant" to true)
+        )
+    }
+
+    @Test
+    fun `§8-10 ledd 2 punktum 1 - vurderes ved overgang fra Infotrygd`() {
+        val maksimumSykepengegrunnlag2018 = (93634 * 6).årlig // 6G
+        val inntekt = maksimumSykepengegrunnlag2018.plus(1.årlig)
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterUtbetalingshistorikk(
+            1.vedtaksperiode,
+            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.januar, 31.januar, 100.prosent, inntekt)),
+            inntektshistorikk = listOf(
+                Inntektsopplysning(ORGNUMMER.toString(), 1.januar, inntekt, true)
+            )
+        )
+        håndterYtelser()
+        håndterSimulering()
+        håndterUtbetalingsgodkjenning()
+        håndterUtbetalt()
+        SubsumsjonInspektør(jurist).assertVurdert(paragraf = Paragraf.PARAGRAF_8_10, ledd = Ledd.LEDD_2, punktum = 1.punktum)
     }
 }

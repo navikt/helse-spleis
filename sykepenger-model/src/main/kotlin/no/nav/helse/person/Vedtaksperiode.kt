@@ -498,7 +498,7 @@ internal class Vedtaksperiode private constructor(
     private fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag, nesteTilstand: Vedtaksperiodetilstand) {
         vilkårsgrunnlag.lagreInntekter(person, skjæringstidspunkt)
 
-        val grunnlagForSykepengegrunnlag = person.beregnSykepengegrunnlag(skjæringstidspunkt, vilkårsgrunnlag)
+        val grunnlagForSykepengegrunnlag = person.beregnSykepengegrunnlag(skjæringstidspunkt, vilkårsgrunnlag, jurist)
         val sammenligningsgrunnlag = person.beregnSammenligningsgrunnlag(skjæringstidspunkt)
 
         vilkårsgrunnlag.valider(
@@ -1807,7 +1807,7 @@ internal class Vedtaksperiode private constructor(
                 }
                 onSuccess { infotrygdhistorikk.addInntekter(person, this) }
                 onSuccess {
-                    person.lagreVilkårsgrunnlagFraInfotrygd(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode(), ytelser)
+                    person.lagreVilkårsgrunnlagFraInfotrygd(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode(), ytelser, vedtaksperiode.jurist)
                 }
                 validerHvis(
                     "Forventer minst ett sykepengegrunnlag som er fra inntektsmelding eller Infotrygd",

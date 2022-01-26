@@ -6,6 +6,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.januar
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -111,7 +112,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
     private fun grunnlagsdata(skjæringstidspunkt: LocalDate, vurdertOk: Boolean = true, harOpptjening: Boolean = true, harMinimumInntekt: Boolean = true, erMedlem: Boolean = true) =
         VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = skjæringstidspunkt,
-            sykepengegrunnlag = Sykepengegrunnlag.opprett(emptyList(), skjæringstidspunkt, Aktivitetslogg()),
+            sykepengegrunnlag = Sykepengegrunnlag.opprett(emptyList(), skjæringstidspunkt, Aktivitetslogg(), MaskinellJurist()),
             sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
             avviksprosent = 0.0.prosent,
             antallOpptjeningsdagerErMinst = 28,

@@ -1,10 +1,10 @@
 package no.nav.helse.person
 
 import no.nav.helse.Grunnbeløp
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-10 ledd 2 punktum 1`
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.sykepengegrunnlag
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.inntektsopplysningPerArbeidsgiver
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.*
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
 
@@ -18,12 +18,13 @@ internal class Sykepengegrunnlag(
         fun opprett(
             arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
             skjæringstidspunkt: LocalDate,
-            aktivitetslogg: IAktivitetslogg
+            aktivitetslogg: IAktivitetslogg,
+            subsumsjonObserver: SubsumsjonObserver
         ): Sykepengegrunnlag {
             val inntekt = arbeidsgiverInntektsopplysninger.sykepengegrunnlag(aktivitetslogg)
             val begrensning = if (inntekt > Grunnbeløp.`6G`.beløp(skjæringstidspunkt)) ER_6G_BEGRENSET else ER_IKKE_6G_BEGRENSET
             return Sykepengegrunnlag(
-                sykepengegrunnlag(inntekt, skjæringstidspunkt, aktivitetslogg),
+                sykepengegrunnlag(inntekt, skjæringstidspunkt, subsumsjonObserver),
                 arbeidsgiverInntektsopplysninger,
                 inntekt,
                 begrensning
@@ -33,38 +34,27 @@ internal class Sykepengegrunnlag(
         fun opprettForInfotrygd(
             arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
             skjæringstidspunkt: LocalDate,
-            aktivitetslogg: IAktivitetslogg
+            aktivitetslogg: IAktivitetslogg,
+            subsumsjonObserver: SubsumsjonObserver
         ): Sykepengegrunnlag {
             val inntekt = arbeidsgiverInntektsopplysninger.sykepengegrunnlag(aktivitetslogg)
             return Sykepengegrunnlag(
-                sykepengegrunnlag(inntekt, skjæringstidspunkt, aktivitetslogg),
+                sykepengegrunnlag(inntekt, skjæringstidspunkt, subsumsjonObserver),
                 arbeidsgiverInntektsopplysninger,
                 inntekt,
                 VURDERT_I_INFOTRYGD
             )
         }
 
-        private fun sykepengegrunnlag(inntekt: Inntekt, skjæringstidspunkt: LocalDate, aktivitetslogg: IAktivitetslogg): Inntekt {
+        private fun sykepengegrunnlag(inntekt: Inntekt, skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver): Inntekt {
             val maksimaltSykepengegrunnlag = Grunnbeløp.`6G`.beløp(skjæringstidspunkt)
-            return if (inntekt > maksimaltSykepengegrunnlag) {
-                aktivitetslogg.`§8-10 ledd 2 punktum 1`(
-                    oppfylt = true,
-                    funnetRelevant = true,
-                    maksimaltSykepengegrunnlag = maksimaltSykepengegrunnlag,
-                    skjæringstidspunkt = skjæringstidspunkt,
-                    grunnlagForSykepengegrunnlag = inntekt
-                )
-                maksimaltSykepengegrunnlag
-            } else {
-                aktivitetslogg.`§8-10 ledd 2 punktum 1`(
-                    oppfylt = true,
-                    funnetRelevant = false,
-                    maksimaltSykepengegrunnlag = maksimaltSykepengegrunnlag,
-                    skjæringstidspunkt = skjæringstidspunkt,
-                    grunnlagForSykepengegrunnlag = inntekt
-                )
-                inntekt
-            }
+            subsumsjonObserver.`§8-10 ledd 2 punktum 1`(
+                funnetRelevant = inntekt > maksimaltSykepengegrunnlag,
+                maksimaltSykepengegrunnlag = maksimaltSykepengegrunnlag,
+                skjæringstidspunkt = skjæringstidspunkt,
+                grunnlagForSykepengegrunnlag = inntekt
+            )
+            return inntekt.coerceAtMost(maksimaltSykepengegrunnlag)
         }
     }
 

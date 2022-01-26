@@ -3,8 +3,7 @@ package no.nav.helse.inspectors
 import no.nav.helse.person.*
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall
-import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
-import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
+import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.*
 import no.nav.helse.person.etterlevelse.SubsumsjonVisitor
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -50,19 +49,32 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
             it.first()
         }
 
+    internal fun assertBeregnet(
+        paragraf: Paragraf,
+        versjon: LocalDate,
+        ledd: Ledd,
+        punktum: List<Punktum> = emptyList(),
+        bokstaver: List<Bokstav> = emptyList(),
+        input: Map<String, Any>,
+        output: Map<String, Any>,
+    ) {
+        val resultat = finnSubsumsjon(paragraf, versjon, ledd, punktum, bokstaver, VILKAR_BEREGNET)
+        assertEquals(VILKAR_BEREGNET, resultat.utfall) { "Forventet oppfylt $paragraf $ledd $punktum" }
+        assertResultat(input, output, resultat)
+    }
+
     internal fun assertOppfylt(
         paragraf: Paragraf,
         versjon: LocalDate,
         ledd: Ledd,
         punktum: List<Punktum> = emptyList(),
         bokstaver: List<Bokstav> = emptyList(),
-        inputdata: Map<String, Any>,
-        outputdata: Map<String, Any>,
+        input: Map<String, Any>,
+        output: Map<String, Any>,
     ) {
         val resultat = finnSubsumsjon(paragraf, versjon, ledd, punktum, bokstaver, VILKAR_OPPFYLT)
         assertEquals(VILKAR_OPPFYLT, resultat.utfall) { "Forventet oppfylt $paragraf $ledd $punktum" }
-        assertParagraf(paragraf, ledd, versjon, punktum, bokstaver, VILKAR_OPPFYLT)
-        assertResultat(inputdata, outputdata, resultat)
+        assertResultat(input, output, resultat)
     }
 
     internal fun assertIkkeOppfylt(
@@ -71,12 +83,12 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         ledd: Ledd,
         punktum: List<Punktum> = emptyList(),
         bokstaver: List<Bokstav> = emptyList(),
-        inputdata: Map<String, Any>,
-        outputdata: Map<String, Any>,
+        input: Map<String, Any>,
+        output: Map<String, Any>,
     ) {
         val resultat = finnSubsumsjon(paragraf, versjon, ledd, punktum, bokstaver, VILKAR_IKKE_OPPFYLT)
         assertEquals(VILKAR_IKKE_OPPFYLT, resultat.utfall) { "Forventet ikke oppfylt $paragraf $ledd $punktum" }
-        assertResultat(inputdata, outputdata, resultat)
+        assertResultat(input, output, resultat)
     }
 
     internal fun assertVurdert(
