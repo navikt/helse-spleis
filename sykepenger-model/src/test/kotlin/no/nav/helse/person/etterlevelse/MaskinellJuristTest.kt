@@ -1,6 +1,9 @@
 package no.nav.helse.person.etterlevelse
 
-import no.nav.helse.person.*
+import no.nav.helse.person.Bokstav
+import no.nav.helse.person.Ledd
+import no.nav.helse.person.Paragraf
+import no.nav.helse.person.Punktum
 import no.nav.helse.somFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -51,7 +54,7 @@ internal class MaskinellJuristTest {
             }
 
             override fun preVisitVurdering(
-                oppfylt: Boolean,
+                utfall: JuridiskVurdering.Utfall,
                 versjon: LocalDate,
                 paragraf: Paragraf,
                 ledd: Ledd,

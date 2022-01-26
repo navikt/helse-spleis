@@ -5,6 +5,9 @@ import no.nav.helse.person.Ledd
 import no.nav.helse.person.Ledd.Companion.ledd
 import no.nav.helse.person.Paragraf
 import no.nav.helse.person.Punktum
+import no.nav.helse.person.etterlevelse.JuridiskVurdering.Utfall
+import no.nav.helse.person.etterlevelse.JuridiskVurdering.Utfall.VILKAR_IKKE_OPPFYLT
+import no.nav.helse.person.etterlevelse.JuridiskVurdering.Utfall.VILKAR_OPPFYLT
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -35,14 +38,14 @@ internal class EnkelVurderingTest {
 
     @Test
     fun `vurderinger med ulike data utgjør hvert sitt innslag`() {
-        nyVurdering(true)
-        nyVurdering(false)
+        nyVurdering(VILKAR_OPPFYLT)
+        nyVurdering(VILKAR_IKKE_OPPFYLT)
 
         assertEquals(2, vurderinger.size)
     }
 
     private fun nyVurdering(
-        oppfylt: Boolean = true,
+        utfall: Utfall = VILKAR_OPPFYLT,
         versjon: LocalDate = LocalDate.MAX,
         paragraf: Paragraf = Paragraf.PARAGRAF_8_2,
         ledd: Ledd = 1.ledd,
@@ -52,6 +55,6 @@ internal class EnkelVurderingTest {
         output: Map<String, Any> = emptyMap(),
         kontekster: Map<String, String> = emptyMap()
     ) {
-        vurderinger = EnkelVurdering(oppfylt, versjon, paragraf, ledd, punktum, bokstaver, input, output, kontekster).sammenstill(vurderinger)
+        vurderinger = EnkelVurdering(utfall, versjon, paragraf, ledd, punktum, bokstaver, input, output, kontekster).sammenstill(vurderinger)
     }
 }

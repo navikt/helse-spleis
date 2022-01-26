@@ -4,6 +4,7 @@ import no.nav.helse.Fødselsnummer
 import no.nav.helse.person.Ledd.Companion.ledd
 import no.nav.helse.person.Paragraf
 import no.nav.helse.person.Punktum.Companion.punktum
+import no.nav.helse.person.etterlevelse.JuridiskVurdering.Utfall.*
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 import java.time.LocalDate
@@ -44,7 +45,7 @@ class MaskinellJurist private constructor(
     ) {
         leggTil(
             EnkelVurdering(
-                oppfylt = oppfylt,
+                utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
                 versjon = LocalDate.of(2020, 6, 12),
                 paragraf = Paragraf.PARAGRAF_8_2,
                 ledd = 1.ledd,
@@ -76,7 +77,6 @@ class MaskinellJurist private constructor(
     }
 
     override fun `§8-10 ledd 2 punktum 1`(
-        oppfylt: Boolean,
         funnetRelevant: Boolean,
         maksimaltSykepengegrunnlag: Inntekt,
         skjæringstidspunkt: LocalDate,
@@ -85,7 +85,7 @@ class MaskinellJurist private constructor(
         leggTil(
             BetingetVurdering(
                 funnetRelevant = funnetRelevant,
-                oppfylt = oppfylt,
+                utfall = VILKAR_BEREGNET,
                 LocalDate.of(2020, 1, 1),
                 Paragraf.PARAGRAF_8_10,
                 2.ledd,
@@ -135,7 +135,7 @@ class MaskinellJurist private constructor(
                 dato = dato,
                 input = mapOf("dekningsgrad" to dekningsgrad, "inntekt" to inntekt),
                 output = mapOf("dekningsgrunnlag" to dekningsgrunnlag),
-                oppfylt = true,
+                utfall = VILKAR_BEREGNET,
                 paragraf = Paragraf.PARAGRAF_8_16,
                 ledd = 1.ledd,
                 versjon = LocalDate.of(2020, 6, 12),

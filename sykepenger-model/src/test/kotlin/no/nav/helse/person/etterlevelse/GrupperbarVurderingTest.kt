@@ -1,8 +1,9 @@
 package no.nav.helse.person.etterlevelse
 
+import no.nav.helse.januar
 import no.nav.helse.person.Ledd.Companion.ledd
 import no.nav.helse.person.Paragraf
-import no.nav.helse.januar
+import no.nav.helse.person.etterlevelse.JuridiskVurdering.Utfall.VILKAR_OPPFYLT
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -156,7 +157,7 @@ internal class GrupperbarVurderingTest {
             dato = dato,
             input = mapOf(),
             output = mapOf(),
-            oppfylt = true,
+            utfall = VILKAR_OPPFYLT,
             versjon = LocalDate.MAX,
             paragraf = Paragraf.PARAGRAF_8_2,
             ledd = 1.ledd,

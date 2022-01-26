@@ -5,6 +5,7 @@ import no.nav.helse.person.Ledd
 import no.nav.helse.person.Ledd.Companion.ledd
 import no.nav.helse.person.Paragraf
 import no.nav.helse.person.Punktum
+import no.nav.helse.person.etterlevelse.JuridiskVurdering.Utfall
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -43,7 +44,7 @@ internal class BetingetVurderingTest {
 
     private fun nyVurdering(
         funnetRelevant: Boolean = true,
-        oppfylt: Boolean = true,
+        utfall: Utfall = Utfall.VILKAR_OPPFYLT,
         versjon: LocalDate = LocalDate.MAX,
         paragraf: Paragraf = Paragraf.PARAGRAF_8_2,
         ledd: Ledd = 1.ledd,
@@ -53,7 +54,7 @@ internal class BetingetVurderingTest {
         output: Map<String, Any> = emptyMap(),
         kontekster: Map<String, String> = emptyMap()
     ) {
-        vurderinger = BetingetVurdering(funnetRelevant, oppfylt, versjon, paragraf, ledd, punktum, bokstaver, input, output, kontekster).sammenstill(vurderinger)
+        vurderinger = BetingetVurdering(funnetRelevant, utfall, versjon, paragraf, ledd, punktum, bokstaver, input, output, kontekster).sammenstill(vurderinger)
     }
 
     private class JuridiskVurderingObservatør : JuridiskVurderingVisitor {

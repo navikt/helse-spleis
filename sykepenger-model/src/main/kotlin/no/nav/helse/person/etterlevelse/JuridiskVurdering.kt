@@ -11,7 +11,12 @@ import java.time.LocalDate
 typealias SammenstillingStrategi<T> = (other: T) -> List<JuridiskVurdering>
 
 abstract class JuridiskVurdering {
-    abstract val oppfylt: Boolean
+
+    enum class Utfall {
+        VILKAR_OPPFYLT, VILKAR_IKKE_OPPFYLT, VILKAR_UAVKLART, VILKAR_BEREGNET
+    }
+
+    abstract val utfall: Utfall
     abstract val versjon: LocalDate
     abstract val paragraf: Paragraf
     abstract val ledd: Ledd
@@ -24,9 +29,9 @@ abstract class JuridiskVurdering {
     protected abstract val kontekster: Map<String, String>
 
     internal fun accept(visitor: JuridiskVurderingVisitor) {
-        visitor.preVisitVurdering(oppfylt, versjon, paragraf, ledd, punktum, bokstaver, input, output, kontekster)
+        visitor.preVisitVurdering(utfall, versjon, paragraf, ledd, punktum, bokstaver, input, output, kontekster)
         acceptSpesifikk(visitor)
-        visitor.postVisitVurdering(oppfylt, versjon, paragraf, ledd, punktum, bokstaver, input, output, kontekster)
+        visitor.postVisitVurdering(utfall, versjon, paragraf, ledd, punktum, bokstaver, input, output, kontekster)
     }
 
     abstract fun acceptSpesifikk(visitor: JuridiskVurderingVisitor)
@@ -46,7 +51,7 @@ abstract class JuridiskVurdering {
         if (this === other) return true
 
         return other is JuridiskVurdering &&
-            oppfylt == other.oppfylt &&
+            utfall == other.utfall &&
             versjon == other.versjon &&
             paragraf == other.paragraf &&
             ledd == other.ledd &&
@@ -58,7 +63,7 @@ abstract class JuridiskVurdering {
     }
 
     override fun hashCode(): Int {
-        var result = oppfylt.hashCode()
+        var result = utfall.hashCode()
         result = 31 * result + versjon.hashCode()
         result = 31 * result + paragraf.hashCode()
         result = 31 * result + ledd.hashCode()
@@ -81,7 +86,7 @@ abstract class JuridiskVurdering {
 }
 
 class EnkelVurdering(
-    override val oppfylt: Boolean,
+    override val utfall: Utfall,
     override val versjon: LocalDate,
     override val paragraf: Paragraf,
     override val ledd: Ledd,
@@ -100,7 +105,7 @@ class EnkelVurdering(
 class GrupperbarVurdering private constructor(
     private val fom: LocalDate,
     private val tom: LocalDate,
-    override val oppfylt: Boolean,
+    override val utfall: Utfall,
     override val versjon: LocalDate,
     override val paragraf: Paragraf,
     override val ledd: Ledd,
@@ -114,14 +119,14 @@ class GrupperbarVurdering private constructor(
         dato: LocalDate,
         input: Map<String, Any>,
         output: Map<String, Any>,
-        oppfylt: Boolean,
+        utfall: Utfall,
         versjon: LocalDate,
         paragraf: Paragraf,
         ledd: Ledd,
         punktum: List<Punktum> = emptyList(),
         bokstav: List<Bokstav> = emptyList(),
         kontekster: Map<String, String>
-    ) : this(dato, dato, oppfylt, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster)
+    ) : this(dato, dato, utfall, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster)
 
     override fun acceptSpesifikk(visitor: JuridiskVurderingVisitor) {
         visitor.visitGrupperbarVurdering(fom, tom)
@@ -133,7 +138,7 @@ class GrupperbarVurdering private constructor(
             .filter { it == this }
             .map { it.fom til it.tom }
             .grupperSammenhengendePerioderMedHensynTilHelg()
-            .map { GrupperbarVurdering(it.start, it.endInclusive, oppfylt, versjon, paragraf, ledd, punktum, bokstaver, input, output, kontekster) }
+            .map { GrupperbarVurdering(it.start, it.endInclusive, utfall, versjon, paragraf, ledd, punktum, bokstaver, input, output, kontekster) }
 
         return vurderinger.filter { it != this } + sammenstilt
     }
@@ -141,7 +146,7 @@ class GrupperbarVurdering private constructor(
 
 class BetingetVurdering(
     private val funnetRelevant: Boolean,
-    override val oppfylt: Boolean,
+    override val utfall: Utfall,
     override val versjon: LocalDate,
     override val paragraf: Paragraf,
     override val ledd: Ledd,
