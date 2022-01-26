@@ -1,9 +1,10 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.desember
 import no.nav.helse.januar
 import no.nav.helse.november
+import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.september
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -86,7 +87,7 @@ internal class OpptjeningvurderingTest {
     private fun undersøke(arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>, test: (Opptjeningvurdering) -> Unit): Boolean {
         aktivitetslogg = Aktivitetslogg()
         val opptjeningvurdering = Opptjeningvurdering(arbeidsforhold)
-        return opptjeningvurdering.valider(aktivitetslogg, SKJÆRINGSTIDSPUNKT).also {
+        return opptjeningvurdering.valider(aktivitetslogg, SKJÆRINGSTIDSPUNKT, MaskinellJurist()).also {
             test(opptjeningvurdering)
         }
     }

@@ -23,6 +23,7 @@ internal abstract class AbstractPersonTest {
 
     lateinit var person: Person
     lateinit var observatør: TestObservatør
+    lateinit var jurist: MaskinellJurist
     val inspektør get() = inspektør(ORGNUMMER)
 
     val Int.vedtaksperiode: IdInnhenter get() = IdInnhenter { orgnummer -> this@vedtaksperiode.vedtaksperiode(orgnummer) }
@@ -33,7 +34,8 @@ internal abstract class AbstractPersonTest {
     }
 
     protected fun createTestPerson(fødselsnummer: Fødselsnummer) {
-        person = Person(AKTØRID, fødselsnummer, MaskinellJurist())
+        jurist = MaskinellJurist()
+        person = Person(AKTØRID, fødselsnummer, jurist)
         observatør = TestObservatør().also { person.addObserver(it) }
     }
 

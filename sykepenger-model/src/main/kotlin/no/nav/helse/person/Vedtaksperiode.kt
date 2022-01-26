@@ -506,7 +506,8 @@ internal class Vedtaksperiode private constructor(
             sammenligningsgrunnlag,
             skjæringstidspunkt,
             person.antallArbeidsgivereMedRelevantArbeidsforhold(skjæringstidspunkt),
-            periodetype
+            periodetype,
+            jurist
         )
         person.lagreVilkårsgrunnlag(skjæringstidspunkt, vilkårsgrunnlag)
         if (vilkårsgrunnlag.hasErrorsOrWorse()) {

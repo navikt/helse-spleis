@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.Person
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VedtaksperiodeUtbetalinger
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
@@ -14,10 +15,13 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import org.junit.jupiter.api.Assertions
 
-@JsonIgnoreProperties("person")
+@JsonIgnoreProperties("jurist")
+private class PersonMixin
+
+@JsonIgnoreProperties("person", "jurist")
 private class ArbeidsgiverMixin
 
-@JsonIgnoreProperties("person", "arbeidsgiver")
+@JsonIgnoreProperties("person", "arbeidsgiver", "jurist")
 private class VedtaksperiodeMixin
 
 @JsonIgnoreProperties("arbeidsgiver")
@@ -37,6 +41,7 @@ private val objectMapper = jacksonObjectMapper()
     .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     .setMixIns(
         mutableMapOf(
+            Person::class.java to PersonMixin::class.java,
             Arbeidsgiver::class.java to ArbeidsgiverMixin::class.java,
             Vedtaksperiode::class.java to VedtaksperiodeMixin::class.java,
             VedtaksperiodeUtbetalinger::class.java to VedtaksperiodeUtbetalingerMixin::class.java,

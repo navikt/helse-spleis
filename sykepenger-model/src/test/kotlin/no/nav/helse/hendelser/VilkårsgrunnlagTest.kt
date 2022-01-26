@@ -132,7 +132,8 @@ internal class VilkårsgrunnlagTest {
             sammenligningsgrunnlag = sammenligningsgrunnlag(skjæringstidspunkt = 31.januar),
             skjæringstidspunkt = 31.januar,
             antallArbeidsgivereFraAareg = 1,
-            periodetype = Periodetype.FØRSTEGANGSBEHANDLING
+            periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
+            jurist = MaskinellJurist()
         )
 
         assertFalse(vilkårsgrunnlag.hasWarningsOrWorse())
@@ -144,7 +145,7 @@ internal class VilkårsgrunnlagTest {
         forventetAntallOpptjeningsdager: Int,
         forventetHarOpptjening: Boolean
     ) {
-        val idInnhenter = IdInnhenter { observatør.vedtaksperiode(Companion.orgnummer, 0) }
+        val idInnhenter = IdInnhenter { observatør.vedtaksperiode(orgnummer, 0) }
         val grunnlagsdata = TestArbeidsgiverInspektør(person, orgnummer).vilkårsgrunnlag(idInnhenter) ?: fail("Forventet at vilkårsgrunnlag er satt")
         val grunnlagsdataInspektør = GrunnlagsdataInspektør(grunnlagsdata)
         assertEquals(forventetSammenligningsgrunnlag, grunnlagsdataInspektør.sammenligningsgrunnlag)
@@ -217,7 +218,7 @@ internal class VilkårsgrunnlagTest {
         },
         arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold> = listOf(
             Vilkårsgrunnlag.Arbeidsforhold(
-                orgnummer.toString(),
+                orgnummer,
                 4.desember(2017)
             )
         )
@@ -226,7 +227,7 @@ internal class VilkårsgrunnlagTest {
         vedtaksperiodeId = vedtaksperiodeId(),
         aktørId = aktørId,
         fødselsnummer = UNG_PERSON_FNR_2018,
-        orgnummer = orgnummer.toString(),
+        orgnummer = orgnummer,
         inntektsvurdering = Inntektsvurdering(inntektsmåneder),
         opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
         medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
@@ -238,7 +239,7 @@ internal class VilkårsgrunnlagTest {
         meldingsreferanseId = UUID.randomUUID(),
         fnr = UNG_PERSON_FNR_2018.toString(),
         aktørId = aktørId,
-        orgnummer = orgnummer.toString(),
+        orgnummer = orgnummer,
         sykeperioder = listOf(Sykmeldingsperiode(16.januar, 30.januar, 100.prosent)),
         sykmeldingSkrevet = 1.april.atStartOfDay(),
         mottatt = 1.april.atStartOfDay()

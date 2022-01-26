@@ -1,8 +1,8 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Companion.toEtterlevelseMap
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-2 ledd 1`
 import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import java.time.LocalDate
 
 class Opptjeningvurdering(
@@ -18,10 +18,10 @@ class Opptjeningvurdering(
     internal fun harOpptjening() =
         antallOpptjeningsdager >= TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER
 
-    internal fun valider(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate): Boolean {
+    internal fun valider(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate, jurist: SubsumsjonObserver): Boolean {
         antallOpptjeningsdager = Vilkårsgrunnlag.Arbeidsforhold.opptjeningsdager(arbeidsforhold, aktivitetslogg, skjæringstidspunkt)
         val harOpptjening = harOpptjening()
-        aktivitetslogg.`§8-2 ledd 1`(harOpptjening, skjæringstidspunkt, TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER, arbeidsforhold.toEtterlevelseMap(), antallOpptjeningsdager)
+        jurist.`§8-2 ledd 1`(harOpptjening, skjæringstidspunkt, TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER, arbeidsforhold.toEtterlevelseMap(), antallOpptjeningsdager)
         if (harOpptjening) aktivitetslogg.info("Har minst %d dager opptjening", TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER)
         else aktivitetslogg.warn("Perioden er avslått på grunn av manglende opptjening")
         return harOpptjening

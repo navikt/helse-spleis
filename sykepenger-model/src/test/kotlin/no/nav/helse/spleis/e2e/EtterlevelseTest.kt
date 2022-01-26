@@ -27,64 +27,6 @@ import java.util.*
 internal class EtterlevelseTest : AbstractEndToEndTest() {
 
     @Test
-    fun `§8-2 ledd 1 - opptjeningstid tilfredstilt`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterYtelser()
-        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER.toString(), 4.desember(2017), 31.januar))
-        håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold)
-
-        assertOppfylt(
-            paragraf = PARAGRAF_8_2,
-            ledd = LEDD_1,
-            punktum = 1.punktum,
-            versjon = 12.juni(2020),
-            inputdata = mapOf(
-                "skjæringstidspunkt" to 1.januar,
-                "tilstrekkeligAntallOpptjeningsdager" to 28,
-                "arbeidsforhold" to listOf(
-                    mapOf(
-                        "orgnummer" to ORGNUMMER.toString(),
-                        "fom" to 4.desember(2017),
-                        "tom" to 31.januar
-                    )
-                )
-            ),
-            outputdata = mapOf("antallOpptjeningsdager" to 28)
-        )
-    }
-
-    @Test
-    fun `§8-2 ledd 1 - opptjeningstid ikke tilfredstilt`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterYtelser()
-        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER.toString(), 5.desember(2017), 31.januar))
-        håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold)
-
-        assertIkkeOppfylt(
-            paragraf = PARAGRAF_8_2,
-            ledd = LEDD_1,
-            punktum = 1.punktum,
-            versjon = 12.juni(2020),
-            inputdata = mapOf(
-                "skjæringstidspunkt" to 1.januar,
-                "tilstrekkeligAntallOpptjeningsdager" to 28,
-                "arbeidsforhold" to listOf(
-                    mapOf(
-                        "orgnummer" to ORGNUMMER.toString(),
-                        "fom" to 5.desember(2017),
-                        "tom" to 31.januar
-                    )
-                )
-            ),
-            outputdata = mapOf("antallOpptjeningsdager" to 27)
-        )
-    }
-
-    @Test
     fun `§8-3 ledd 1 punktum 2 - fyller 70`() {
         val fnr = "20014835841".somFødselsnummer()
         createTestPerson(fnr)

@@ -3,6 +3,7 @@ package no.nav.helse.hendelser
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Companion.grupperArbeidsforholdPerOrgnummer
 import no.nav.helse.person.*
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.*
@@ -35,7 +36,8 @@ class Vilkårsgrunnlag(
         sammenligningsgrunnlag: Sammenligningsgrunnlag,
         skjæringstidspunkt: LocalDate,
         antallArbeidsgivereFraAareg: Int,
-        periodetype: Periodetype
+        periodetype: Periodetype,
+        jurist: MaskinellJurist
     ): IAktivitetslogg {
         if (grunnlagForSykepengegrunnlag.inntektsopplysningPerArbeidsgiver().values.all { it is Inntektshistorikk.SkattComposite }) {
             error("Bruker mangler nødvendig inntekt ved validering av Vilkårsgrunnlag")
@@ -49,7 +51,7 @@ class Vilkårsgrunnlag(
             sammenligningsgrunnlag.sammenligningsgrunnlag,
             antallArbeidsgivereFraAareg
         )
-        val opptjeningvurderingOk = opptjeningvurdering.valider(this, skjæringstidspunkt)
+        val opptjeningvurderingOk = opptjeningvurdering.valider(this, skjæringstidspunkt, jurist)
         val medlemskapsvurderingOk = medlemskapsvurdering.valider(this, periodetype)
         val minimumInntektvurderingOk = validerMinimumInntekt(this, fødselsnummer, skjæringstidspunkt, grunnlagForSykepengegrunnlag)
 
