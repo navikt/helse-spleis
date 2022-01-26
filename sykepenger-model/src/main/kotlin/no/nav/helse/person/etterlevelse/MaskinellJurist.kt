@@ -1,6 +1,7 @@
 package no.nav.helse.person.etterlevelse
 
 import no.nav.helse.Fødselsnummer
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.person.Ledd.Companion.ledd
 import no.nav.helse.person.Paragraf
 import no.nav.helse.person.Punktum.Companion.punktum
@@ -69,7 +70,24 @@ class MaskinellJurist private constructor(
         tidslinjeTom: LocalDate,
         avvisteDager: List<LocalDate>
     ) {
-        super.`§8-3 ledd 1 punktum 2`(oppfylt, syttiårsdagen, vurderingFom, vurderingTom, tidslinjeFom, tidslinjeTom, avvisteDager)
+        leggTil(
+            EnkelVurdering(
+                utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
+                versjon = LocalDate.of(2011, 12, 16),
+                paragraf = Paragraf.PARAGRAF_8_3,
+                ledd = 1.ledd,
+                punktum = 2.punktum,
+                input = mapOf(
+                    "syttiårsdagen" to syttiårsdagen,
+                    "vurderingFom" to vurderingFom,
+                    "vurderingTom" to vurderingTom,
+                    "tidslinjeFom" to tidslinjeFom,
+                    "tidslinjeTom" to tidslinjeTom
+                ),
+                output = mapOf("avvisteDager" to avvisteDager.grupperSammenhengendePerioder()),
+                kontekster = kontekster()
+            )
+        )
     }
 
     override fun `§8-3 ledd 2 punktum 1`(oppfylt: Boolean, skjæringstidspunkt: LocalDate, grunnlagForSykepengegrunnlag: Inntekt, minimumInntekt: Inntekt) {

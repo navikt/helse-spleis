@@ -36,10 +36,11 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : JuridiskVurdering
         jurist.vurderinger().forEach { it.accept(this) }
     }
 
-    private fun finnSubsumsjon(paragraf: Paragraf, versjon: LocalDate, ledd: Ledd?, punktum: List<Punktum>?, bokstav: List<Bokstav>?, vedtaksperiodeId: UUID? = null) =
+    private fun finnSubsumsjon(paragraf: Paragraf, versjon: LocalDate, ledd: Ledd?, punktum: List<Punktum>?, bokstav: List<Bokstav>?, utfall: Utfall? = null, vedtaksperiodeId: UUID? = null) =
         subsumsjoner.filter {
             it.paragraf == paragraf
                 && versjon == it.versjon
+                && utfall?.equals(it.utfall) ?: true
                 && ledd?.equals(it.ledd) ?: true
                 && punktum?.equals(it.punktum) ?: true
                 && bokstav?.equals(it.bokstaver) ?: true
@@ -58,9 +59,9 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : JuridiskVurdering
         inputdata: Map<String, Any>,
         outputdata: Map<String, Any>,
     ) {
-        val resultat = finnSubsumsjon(paragraf, versjon, ledd, punktum, bokstaver)
+        val resultat = finnSubsumsjon(paragraf, versjon, ledd, punktum, bokstaver, VILKAR_OPPFYLT)
         assertEquals(VILKAR_OPPFYLT, resultat.utfall) { "Forventet oppfylt $paragraf $ledd $punktum" }
-        assertParagraf(paragraf, ledd, versjon, punktum, bokstaver)
+        assertParagraf(paragraf, ledd, versjon, punktum, bokstaver, VILKAR_OPPFYLT)
         assertResultat(inputdata, outputdata, resultat)
     }
 
@@ -73,9 +74,9 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : JuridiskVurdering
         inputdata: Map<String, Any>,
         outputdata: Map<String, Any>,
     ) {
-        val resultat = finnSubsumsjon(paragraf, versjon, ledd, punktum, bokstaver)
+        val resultat = finnSubsumsjon(paragraf, versjon, ledd, punktum, bokstaver, VILKAR_IKKE_OPPFYLT)
         assertEquals(VILKAR_IKKE_OPPFYLT, resultat.utfall) { "Forventet ikke oppfylt $paragraf $ledd $punktum" }
-        assertParagraf(paragraf, ledd, versjon, punktum, bokstaver)
+        assertParagraf(paragraf, ledd, versjon, punktum, bokstaver, VILKAR_IKKE_OPPFYLT)
         assertResultat(inputdata, outputdata, resultat)
     }
 
@@ -92,9 +93,9 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : JuridiskVurdering
         expectedVersjon: LocalDate,
         expectedPunktum: List<Punktum> = emptyList(),
         expectedBokstaver: List<Bokstav> = emptyList(),
-
+        utfall: Utfall? = null
     ) {
-        finnSubsumsjon(expectedParagraf, expectedVersjon, expectedLedd, expectedPunktum, expectedBokstaver)
+        finnSubsumsjon(expectedParagraf, expectedVersjon, expectedLedd, expectedPunktum, expectedBokstaver, utfall)
     }
 
     override fun preVisitVurdering(

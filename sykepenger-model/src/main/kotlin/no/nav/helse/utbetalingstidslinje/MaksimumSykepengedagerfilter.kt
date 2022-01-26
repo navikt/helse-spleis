@@ -6,6 +6,7 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresul
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-12 ledd 2`
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.UtbetalingsdagVisitor
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.UkjentDag
 import no.nav.helse.økonomi.Økonomi
@@ -21,7 +22,8 @@ internal class MaksimumSykepengedagerfilter(
     private val alder: Alder,
     private val arbeidsgiverRegler: ArbeidsgiverRegler,
     private val periode: Periode,
-    private val aktivitetslogg: IAktivitetslogg
+    private val aktivitetslogg: IAktivitetslogg,
+    private val jurist: SubsumsjonObserver
 ) : UtbetalingsdagVisitor {
 
     private companion object {
@@ -103,7 +105,7 @@ internal class MaksimumSykepengedagerfilter(
     }
 
     override fun postVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
-        alder.etterlevelse70år(aktivitetslogg, beregnetTidslinje.periode(), avvisteDager)
+        alder.etterlevelse70år(aktivitetslogg, beregnetTidslinje.periode(), avvisteDager, jurist)
     }
 
     override fun visit(

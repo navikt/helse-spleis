@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
@@ -489,7 +490,8 @@ internal class MaksimumSykepengedagerfilterTest {
             fnr.somFødselsnummer().alder(),
             NormalArbeidstaker,
             periode ?: (this + personTidslinje).periode(),
-            aktivitetslogg
+            aktivitetslogg,
+            jurist = MaskinellJurist()
         ).filter(listOf(this), personTidslinje)
         return inspektør.avvistedatoer
     }

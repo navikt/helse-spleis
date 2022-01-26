@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import java.time.LocalDate
 
@@ -17,23 +18,35 @@ internal class ArbeidsgiverUtbetalinger(
 ) {
     internal lateinit var sykepengerettighet: Sykepengerettighet
 
-    internal fun beregn(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String, periode: Periode, virkningsdato: LocalDate = periode.endInclusive) {
+    internal fun beregn(
+        aktivitetslogg: IAktivitetslogg,
+        organisasjonsnummer: String,
+        periode: Periode,
+        virkningsdato: LocalDate = periode.endInclusive,
+        jurist: SubsumsjonObserver
+    ) {
         val tidslinjer = arbeidsgivere
             .onEach { (arbeidsgiver, builder) -> arbeidsgiver.build(builder, periode) }
             .mapValues { (_, builder) -> builder.result() }
             .filterValues { it.isNotEmpty() }
-        filtrer(aktivitetslogg, tidslinjer, periode, virkningsdato)
+        filtrer(aktivitetslogg, tidslinjer, periode, virkningsdato, jurist)
         tidslinjer.forEach { (arbeidsgiver, utbetalingstidslinje) ->
             arbeidsgiver.lagreUtbetalingstidslinjeberegning(organisasjonsnummer, utbetalingstidslinje, vilkårsgrunnlagHistorikk)
         }
     }
 
-    private fun filtrer(aktivitetslogg: IAktivitetslogg, arbeidsgivere: Map<Arbeidsgiver, Utbetalingstidslinje>, periode: Periode, virkningsdato: LocalDate) {
+    private fun filtrer(
+        aktivitetslogg: IAktivitetslogg,
+        arbeidsgivere: Map<Arbeidsgiver, Utbetalingstidslinje>,
+        periode: Periode,
+        virkningsdato: LocalDate,
+        jurist: SubsumsjonObserver
+    ) {
         val tidslinjer = arbeidsgivere.values.toList()
         Sykdomsgradfilter(tidslinjer, periode, aktivitetslogg).filter()
         AvvisDagerEtterDødsdatofilter(tidslinjer, periode, dødsdato, aktivitetslogg).filter()
         vilkårsgrunnlagHistorikk.avvisInngangsvilkår(tidslinjer, alder)
-        sykepengerettighet = MaksimumSykepengedagerfilter(alder, regler, periode, aktivitetslogg).filter(
+        sykepengerettighet = MaksimumSykepengedagerfilter(alder, regler, periode, aktivitetslogg, jurist).filter(
             tidslinjer,
             infotrygdhistorikk.utbetalingstidslinje().kutt(periode.endInclusive)
         )

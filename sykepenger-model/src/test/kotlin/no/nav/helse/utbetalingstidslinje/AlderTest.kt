@@ -2,10 +2,18 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.*
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.SubsumsjonInspektør
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.Ledd.LEDD_1
+import no.nav.helse.person.Paragraf.PARAGRAF_8_3
+import no.nav.helse.person.Punktum.Companion.punktum
+import no.nav.helse.person.etterlevelse.JuridiskVurdering.Utfall.VILKAR_IKKE_OPPFYLT
+import no.nav.helse.person.etterlevelse.JuridiskVurdering.Utfall.VILKAR_OPPFYLT
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 internal class AlderTest {
 
@@ -16,7 +24,6 @@ internal class AlderTest {
         val FYLLER_70_ÅR_13_JANUAR_2018 = "13014812345".somFødselsnummer().alder()
         val FYLLER_70_ÅR_14_JANUAR_2018 = "14014812345".somFødselsnummer().alder()
         val FYLLER_70_ÅR_15_JANUAR_2018 = "15014812345".somFødselsnummer().alder()
-        fun Aktivitetslogg.antallEtterlevelser() = aktiviteter.filterIsInstance<Aktivitetslogg.Aktivitet.Etterlevelse>().size
     }
 
     @Test
@@ -125,34 +132,38 @@ internal class AlderTest {
 
     @Test
     fun `etterlevelse for periode før fylte 70`() {
-        val aktivitetslogg = Aktivitetslogg()
+        val jurist = MaskinellJurist()
         Alder(1.januar(2000)).etterlevelse70år(
-            aktivitetslogg = aktivitetslogg,
+            aktivitetslogg = Aktivitetslogg(),
             periode = 17.mai(2069) til 31.desember(2069),
-            avvisteDager = emptySet()
+            avvisteDager = emptySet(),
+            jurist = jurist
         )
-        assertEquals(1, aktivitetslogg.antallEtterlevelser())
+        SubsumsjonInspektør(jurist).assertParagraf(PARAGRAF_8_3, LEDD_1, 16.desember(2011), 2.punktum)
     }
 
     @Test
     fun `etterlevelse for periode man fyller 70`() {
-        val aktivitetslogg = Aktivitetslogg()
+        val jurist = MaskinellJurist()
         Alder(1.januar(2000)).etterlevelse70år(
-            aktivitetslogg = aktivitetslogg,
+            aktivitetslogg = Aktivitetslogg(),
             periode = 17.mai(2069) til 1.januar(2070),
-            avvisteDager = setOf(1.januar(2070))
+            avvisteDager = setOf(1.januar(2070)),
+            jurist = jurist
         )
-        assertEquals(2, aktivitetslogg.antallEtterlevelser())
+        SubsumsjonInspektør(jurist).assertParagraf(PARAGRAF_8_3, LEDD_1, 16.desember(2011), 2.punktum, utfall = VILKAR_OPPFYLT)
+        SubsumsjonInspektør(jurist).assertParagraf(PARAGRAF_8_3, LEDD_1, 16.desember(2011), 2.punktum, utfall = VILKAR_IKKE_OPPFYLT)
     }
 
     @Test
     fun `etterlevelse for periode etter fylte 70`() {
-        val aktivitetslogg = Aktivitetslogg()
+        val jurist = MaskinellJurist()
         Alder(1.januar(2000)).etterlevelse70år(
-            aktivitetslogg = aktivitetslogg,
+            aktivitetslogg = Aktivitetslogg(),
             periode = 1.januar(2070) til 5.januar(2070),
-            avvisteDager = setOf(1.januar(2070), 2.januar(2070), 3.januar(2070), 4.januar(2070), 5.januar(2070))
+            avvisteDager = setOf(1.januar(2070), 2.januar(2070), 3.januar(2070), 4.januar(2070), 5.januar(2070)),
+            jurist = jurist
         )
-        assertEquals(1, aktivitetslogg.antallEtterlevelser())
+        SubsumsjonInspektør(jurist).assertParagraf(PARAGRAF_8_3, LEDD_1, 16.desember(2011), 2.punktum, utfall = VILKAR_IKKE_OPPFYLT)
     }
 }

@@ -25,6 +25,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.periode
 import no.nav.helse.person.builders.UtbetalingsdagerBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.reflection.Utbetalingstatus
@@ -1015,9 +1016,9 @@ internal class Arbeidsgiver private constructor(
         builder.build(sykdomstidslinje(), periode)
     }
 
-    internal fun beregn(aktivitetslogg: IAktivitetslogg, arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger, periode: Periode): Boolean {
+    internal fun beregn(aktivitetslogg: IAktivitetslogg, arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger, periode: Periode, jurist: SubsumsjonObserver): Boolean {
         try {
-            arbeidsgiverUtbetalinger.beregn(aktivitetslogg, organisasjonsnummer, periode)
+            arbeidsgiverUtbetalinger.beregn(aktivitetslogg, organisasjonsnummer, periode, jurist = jurist)
         } catch (err: UtbetalingstidslinjeBuilderException) {
             err.logg(aktivitetslogg)
         }
