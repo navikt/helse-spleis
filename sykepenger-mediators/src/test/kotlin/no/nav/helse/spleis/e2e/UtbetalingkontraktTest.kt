@@ -95,7 +95,7 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         sendUtbetalingsgodkjenning(0)
         sendUtbetaling()
         val utbetalt = testRapid.inspektør.siste("utbetaling_utbetalt")
-        assertUtbetalt(utbetalt)
+        assertUtbetaltInkluderAvviste(utbetalt)
     }
 
     @Test
@@ -166,6 +166,14 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         assertAnnullert(utbetalt, arbeidsgiverAnnulering = false, personAnnullering = true)
     }
 
+    private fun assertUtbetaltInkluderAvviste(melding: JsonNode) {
+        assertUtbetalt(melding)
+        melding.path("utbetalingsdager").toList().filter { it["type"].asText() == "AvvistDag" }.also { avvisteDager ->
+            assertTrue(avvisteDager.isNotEmpty())
+            assertTrue(avvisteDager.all { it.hasNonNull("begrunnelser") })
+        }
+    }
+
     private fun assertUtbetalt(melding: JsonNode) {
         assertTrue(melding.path("utbetalingId").asText().isNotEmpty())
         assertTrue(melding.path("korrelasjonsId").asText().isNotEmpty())
@@ -179,7 +187,6 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         assertTrue(melding.path("ident").asText().isNotEmpty())
         assertTrue(melding.path("epost").asText().isNotEmpty())
         assertTrue(melding.path("utbetalingsdager").toList().isNotEmpty())
-        assertTrue(melding.path("utbetalingsdager").toList().filter { it["type"].asText() == "AvvistDag" }.all { it.hasNonNull("begrunnelser") })
         assertDatotid(melding.path("tidspunkt").asText())
         assertTrue(melding.path("automatiskBehandling").isBoolean)
         assertOppdragdetaljer(melding.path("arbeidsgiverOppdrag"), false)
