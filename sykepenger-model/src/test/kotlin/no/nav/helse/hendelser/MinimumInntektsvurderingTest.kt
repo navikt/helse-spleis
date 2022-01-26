@@ -8,6 +8,7 @@ import no.nav.helse.person.Sykepengegrunnlag
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.april
 import no.nav.helse.mai
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -117,7 +118,8 @@ internal class MinimumInntektsvurderingTest {
                 aktivitetslogg = aktivitetslogg,
                 fødselsnummer = fødselsnummer,
                 skjæringstidspunkt = skjæringstidspunkt,
-                grunnlagForSykepengegrunnlag = sykepengegrunnlag(skjæringstidspunkt, this.aktivitetslogg, beløp)
+                grunnlagForSykepengegrunnlag = sykepengegrunnlag(skjæringstidspunkt, this.aktivitetslogg, beløp),
+                MaskinellJurist()
             )
         )
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
@@ -134,7 +136,8 @@ internal class MinimumInntektsvurderingTest {
                 aktivitetslogg = aktivitetslogg,
                 fødselsnummer = fødselsnummer,
                 skjæringstidspunkt = skjæringstidspunkt,
-                grunnlagForSykepengegrunnlag = sykepengegrunnlag(skjæringstidspunkt, this.aktivitetslogg, beløp)
+                grunnlagForSykepengegrunnlag = sykepengegrunnlag(skjæringstidspunkt, this.aktivitetslogg, beløp),
+                MaskinellJurist()
             )
         )
         assertTrue(aktivitetslogg.hasWarningsOrWorse())

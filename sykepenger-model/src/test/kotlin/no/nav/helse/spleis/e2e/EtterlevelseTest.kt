@@ -27,54 +27,6 @@ import java.util.*
 internal class EtterlevelseTest : AbstractEndToEndTest() {
 
     @Test
-    fun `§8-3 ledd 2 punktum 1 - har minimum inntekt halv G`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 46817.årlig)
-        håndterYtelser()
-        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER.toString(), 5.desember(2017), 31.januar))
-        håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold)
-
-        assertOppfylt(
-            paragraf = PARAGRAF_8_3,
-            ledd = LEDD_2,
-            punktum = 1.punktum,
-            versjon = 16.desember(2011),
-            inputdata = mapOf(
-                "skjæringstidspunkt" to 1.januar,
-                "grunnlagForSykepengegrunnlag" to 46817.0,
-                "minimumInntekt" to 46817.0
-            ),
-            outputdata = emptyMap()
-        )
-        assertIkkeVurdert(PARAGRAF_8_51, LEDD_2, 1.punktum)
-    }
-
-    @Test
-    fun `§8-3 ledd 2 punktum 1 - har inntekt mindre enn en halv G`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 46816.årlig)
-        håndterYtelser()
-        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER.toString(), 5.desember(2017), 31.januar))
-        håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold)
-
-        assertIkkeOppfylt(
-            paragraf = PARAGRAF_8_3,
-            ledd = LEDD_2,
-            punktum = 1.punktum,
-            versjon = 16.desember(2011),
-            inputdata = mapOf(
-                "skjæringstidspunkt" to 1.januar,
-                "grunnlagForSykepengegrunnlag" to 46816.0,
-                "minimumInntekt" to 46817.0
-            ),
-            outputdata = emptyMap()
-        )
-        assertIkkeVurdert(PARAGRAF_8_51, LEDD_2, 1.punktum)
-    }
-
-    @Test
     fun `§8-10 ledd 2 punktum 1 - inntekt overstiger ikke maksimum sykepengegrunnlag`() {
         val maksimumSykepengegrunnlag2018 = (93634 * 6).årlig // 6G
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))

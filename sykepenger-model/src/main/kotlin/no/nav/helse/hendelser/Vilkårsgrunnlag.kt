@@ -53,7 +53,7 @@ class Vilkårsgrunnlag(
         )
         val opptjeningvurderingOk = opptjeningvurdering.valider(this, skjæringstidspunkt, jurist)
         val medlemskapsvurderingOk = medlemskapsvurdering.valider(this, periodetype)
-        val minimumInntektvurderingOk = validerMinimumInntekt(this, fødselsnummer, skjæringstidspunkt, grunnlagForSykepengegrunnlag)
+        val minimumInntektvurderingOk = validerMinimumInntekt(this, fødselsnummer, skjæringstidspunkt, grunnlagForSykepengegrunnlag, jurist)
 
         grunnlagsdata = VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = skjæringstidspunkt,

@@ -91,7 +91,22 @@ class MaskinellJurist private constructor(
     }
 
     override fun `§8-3 ledd 2 punktum 1`(oppfylt: Boolean, skjæringstidspunkt: LocalDate, grunnlagForSykepengegrunnlag: Inntekt, minimumInntekt: Inntekt) {
-        super.`§8-3 ledd 2 punktum 1`(oppfylt, skjæringstidspunkt, grunnlagForSykepengegrunnlag, minimumInntekt)
+        leggTil(
+            EnkelSubsumsjon(
+                utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
+                versjon = LocalDate.of(2011, 12, 16),
+                paragraf = Paragraf.PARAGRAF_8_3,
+                ledd = 2.ledd,
+                punktum = 1.punktum,
+                input = mapOf(
+                    "skjæringstidspunkt" to skjæringstidspunkt,
+                    "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
+                    "minimumInntekt" to minimumInntekt.reflection { årlig, _, _, _ -> årlig }
+                ),
+                output = emptyMap(),
+                kontekster = kontekster()
+            )
+        )
     }
 
     override fun `§8-10 ledd 2 punktum 1`(

@@ -7,6 +7,7 @@ import no.nav.helse.person.Ledd
 import no.nav.helse.person.Paragraf
 import no.nav.helse.person.Punktum.Companion.punktum
 import no.nav.helse.spleis.e2e.*
+import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 
@@ -200,5 +201,53 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "avvisteDager" to emptyList<Periode>()
             )
         )
+    }
+
+    @Test
+    fun `§8-3 ledd 2 punktum 1 - har minimum inntekt halv G`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 46817.årlig)
+        håndterYtelser()
+        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 5.desember(2017), 31.januar))
+        håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold)
+
+        SubsumsjonInspektør(jurist).assertOppfylt(
+            paragraf = Paragraf.PARAGRAF_8_3,
+            ledd = Ledd.LEDD_2,
+            punktum = 1.punktum,
+            versjon = 16.desember(2011),
+            inputdata = mapOf(
+                "skjæringstidspunkt" to 1.januar,
+                "grunnlagForSykepengegrunnlag" to 46817.0,
+                "minimumInntekt" to 46817.0
+            ),
+            outputdata = emptyMap()
+        )
+        SubsumsjonInspektør(jurist).assertIkkeVurdert(Paragraf.PARAGRAF_8_51, Ledd.LEDD_2, 1.punktum)
+    }
+
+    @Test
+    fun `§8-3 ledd 2 punktum 1 - har inntekt mindre enn en halv G`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 46816.årlig)
+        håndterYtelser()
+        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 5.desember(2017), 31.januar))
+        håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold)
+
+        SubsumsjonInspektør(jurist).assertIkkeOppfylt(
+            paragraf = Paragraf.PARAGRAF_8_3,
+            ledd = Ledd.LEDD_2,
+            punktum = 1.punktum,
+            versjon = 16.desember(2011),
+            inputdata = mapOf(
+                "skjæringstidspunkt" to 1.januar,
+                "grunnlagForSykepengegrunnlag" to 46816.0,
+                "minimumInntekt" to 46817.0
+            ),
+            outputdata = emptyMap()
+        )
+        SubsumsjonInspektør(jurist).assertIkkeVurdert(Paragraf.PARAGRAF_8_51, Ledd.LEDD_2, 1.punktum)
     }
 }
