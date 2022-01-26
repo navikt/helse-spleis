@@ -13,7 +13,7 @@ internal object SubsumsjonAssertions {
     private val schema by lazy {
         JsonSchemaFactory
             .getInstance(V7)
-            .getSchema(URI("https://raw.githubusercontent.com/navikt/helse/main/subsumsjon/json-schema-1.0.0.json"))
+            .getSchema(URI("https://raw.githubusercontent.com/navikt/helse/46360e1cfcabe1bd6cc7f75475b7aa2ac2ae2523/subsumsjon/json-schema-1.0.0.json"))
     }
 
     internal fun assertSubsumsjonsmelding(melding: JsonNode) {

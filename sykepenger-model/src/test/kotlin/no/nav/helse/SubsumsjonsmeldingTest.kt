@@ -34,7 +34,7 @@ internal class SubsumsjonsmeldingTest {
             "output": {
                 "foo": 2
             },
-            "utfall": "VILKÅR_BEREGNET"
+            "utfall": "VILKAR_BEREGNET"
         }
         """
         assertSubsumsjonsmelding(melding)
