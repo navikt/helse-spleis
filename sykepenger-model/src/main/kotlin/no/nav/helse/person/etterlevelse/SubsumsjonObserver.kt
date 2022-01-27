@@ -1,6 +1,6 @@
 package no.nav.helse.person.etterlevelse
 
-import no.nav.helse.person.*
+import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.UtbetalingstidslinjeVisitor.Periode.Companion.dager
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
@@ -151,17 +151,18 @@ interface SubsumsjonObserver {
      *
      * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-12)
      *
-     * Merk: ikke noe oppfylt-parameter, da denne alltid er oppfylt, fordi vurderingen kun gjøres når ny rett til sykepenger oppnås
+     * @param oppfylt **true** dersom det har vært tilstrekelig opphold TODO: Dobbelsjekk teksten
      * @param dato dato vurdering av hjemmel gjøres
      * @param tilstrekkeligOppholdISykedager antall dager med opphold i ytelsen som nødvendig for å oppnå ny rett til sykepenger
      * @param tidslinjegrunnlag alle tidslinjer det tas utgangspunkt i ved bygging av [beregnetTidslinje]
      * @param beregnetTidslinje tidslinje det tas utgangspunkt i ved utbetaling for aktuell vedtaksperiode
      */
     fun `§8-12 ledd 2`(
+        oppfylt: Boolean,
         dato: LocalDate,
         tilstrekkeligOppholdISykedager: Int,
-        //tidslinjegrunnlag: List<Utbetalingstidslinje>,
-        //beregnetTidslinje: Utbetalingstidslinje
+        tidslinjegrunnlag: List<List<Map<String, Any>>>,
+        beregnetTidslinje: List<Map<String, Any>>
     ) {
         // versjon = LocalDate.of(2021, 5, 21)
     }

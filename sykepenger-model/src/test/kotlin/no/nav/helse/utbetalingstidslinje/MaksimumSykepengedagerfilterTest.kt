@@ -491,7 +491,7 @@ internal class MaksimumSykepengedagerfilterTest {
             NormalArbeidstaker,
             periode ?: (this + personTidslinje).periode(),
             aktivitetslogg,
-            jurist = MaskinellJurist()
+            subsumsjonObserver = MaskinellJurist()
         ).filter(listOf(this), personTidslinje)
         return inspektør.avvistedatoer
     }

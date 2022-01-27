@@ -2,7 +2,6 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-12 ledd 2`
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
@@ -23,7 +22,7 @@ internal class MaksimumSykepengedagerfilter(
     private val arbeidsgiverRegler: ArbeidsgiverRegler,
     private val periode: Periode,
     private val aktivitetslogg: IAktivitetslogg,
-    private val jurist: SubsumsjonObserver
+    private val subsumsjonObserver: SubsumsjonObserver
 ) : UtbetalingsdagVisitor {
 
     private companion object {
@@ -63,7 +62,7 @@ internal class MaksimumSykepengedagerfilter(
         beregnetTidslinje.accept(this)
         if (::sakensStartdato.isInitialized) {
             val avvisteDager = avvisteDager.filter { sakensStartdato <= it }
-            jurist.`§8-12 ledd 1 punktum 1`(
+            subsumsjonObserver.`§8-12 ledd 1 punktum 1`(
                 avvisteDager !in periode,
                 this.avvisteDager.firstOrNull() ?: sakensStartdato,
                 this.avvisteDager.lastOrNull() ?: sisteBetalteDag,
@@ -105,7 +104,7 @@ internal class MaksimumSykepengedagerfilter(
     }
 
     override fun postVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
-        alder.etterlevelse70år(aktivitetslogg, beregnetTidslinje.periode(), avvisteDager, jurist)
+        alder.etterlevelse70år(aktivitetslogg, beregnetTidslinje.periode(), avvisteDager, subsumsjonObserver)
     }
 
     override fun visit(
@@ -173,7 +172,13 @@ internal class MaksimumSykepengedagerfilter(
 
     private fun nextState(dagen: LocalDate): State? {
         if (opphold >= TILSTREKKELIG_OPPHOLD_I_SYKEDAGER) {
-            aktivitetslogg.`§8-12 ledd 2`(dagen, TILSTREKKELIG_OPPHOLD_I_SYKEDAGER, tidslinjegrunnlag, beregnetTidslinje)
+            subsumsjonObserver.`§8-12 ledd 2`(
+                true,
+                dagen,
+                TILSTREKKELIG_OPPHOLD_I_SYKEDAGER,
+                tidslinjegrunnlag.toSubsumsjonFormat(),
+                beregnetTidslinje.toSubsumsjonFormat()
+            )
             teller.resett()
             return State.Initiell
         }
@@ -182,7 +187,7 @@ internal class MaksimumSykepengedagerfilter(
 
         teller.hvisGrensenErNådd(
             hvis248Dager = {
-                jurist.`§8-12 ledd 1 punktum 1`(
+                subsumsjonObserver.`§8-12 ledd 1 punktum 1`(
                     true,
                     sakensStartdato,
                     sisteBetalteDag,

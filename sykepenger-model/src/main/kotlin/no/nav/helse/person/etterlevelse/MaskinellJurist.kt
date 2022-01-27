@@ -177,8 +177,29 @@ class MaskinellJurist private constructor(
         )
     }
 
-    override fun `§8-12 ledd 2`(dato: LocalDate, tilstrekkeligOppholdISykedager: Int) {
-        super.`§8-12 ledd 2`(dato, tilstrekkeligOppholdISykedager)
+    override fun `§8-12 ledd 2`(
+        oppfylt: Boolean,
+        dato: LocalDate,
+        tilstrekkeligOppholdISykedager: Int,
+        tidslinjegrunnlag: List<List<Map<String, Any>>>,
+        beregnetTidslinje: List<Map<String, Any>>
+    ) {
+        leggTil(EnkelSubsumsjon(
+            utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
+            versjon = LocalDate.of(2021, 5, 21),
+            paragraf = Paragraf.PARAGRAF_8_12,
+            ledd = 2.ledd,
+            punktum = emptyList(),
+            bokstaver = emptyList(),
+            input = mapOf(
+                "dato" to dato,
+                "tilstrekkeligOppholdISykedager" to tilstrekkeligOppholdISykedager,
+                "tidslinjegrunnlag" to tidslinjegrunnlag,
+                "beregnetTidslinje" to beregnetTidslinje
+            ),
+            output = emptyMap(),
+            kontekster = kontekster()
+        ))
     }
 
     override fun `§8-13 ledd 1`(oppfylt: Boolean, avvisteDager: List<LocalDate>) {

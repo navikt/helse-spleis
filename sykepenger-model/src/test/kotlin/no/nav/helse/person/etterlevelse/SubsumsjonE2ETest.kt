@@ -405,4 +405,49 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             )
         )
     }
+
+    @Test
+    fun `§8-12 ledd 2 - Bruker har vært arbeidsfør i 26 uker`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 50.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 50.prosent, 50.prosent))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        håndterSykmelding(Sykmeldingsperiode(17.juli, 31.august, 50.prosent))
+        håndterSøknadMedValidering(2.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(17.juli, 31.august, 50.prosent, 50.prosent))
+        håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(17.juli, 1.august)))
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt(2.vedtaksperiode)
+
+        SubsumsjonInspektør(jurist).assertOppfylt(
+            paragraf = Paragraf.PARAGRAF_8_12,
+            ledd = Ledd.LEDD_2,
+            punktum = emptyList(), // TODO: Avklare at det er ok å droppe punktum range
+            versjon = 21.mai(2021),
+            input = mapOf(
+                "dato" to 1.august,
+                "tilstrekkeligOppholdISykedager" to 182, //26 uker * 7 dager
+                "tidslinjegrunnlag" to listOf(
+                    listOf(
+                        mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG"),
+                        mapOf("fom" to 2.august, "tom" to 31.august, "dagtype" to "NAVDAG")
+                    ), emptyList()
+                ),
+                "beregnetTidslinje" to listOf(
+                    mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG"),
+                    mapOf("fom" to 2.august, "tom" to 31.august, "dagtype" to "NAVDAG")
+                )
+            ),
+            output = emptyMap()
+        )
+    }
 }
