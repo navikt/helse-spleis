@@ -95,6 +95,9 @@ spec:
           application: spesialist
           access: readwrite
         - team: tbd
+          application: spotter
+          access: readwrite
+        - team: tbd
           application: spetakkel
           access: readwrite
         - team: tbd
