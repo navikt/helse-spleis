@@ -104,6 +104,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         is EtterbetalingMessage -> GRUNNBELØPSREGULERING
         is OverstyrTidslinjeMessage -> OVERSTYRTIDSLINJE
         is OverstyrInntektMessage -> OVERSTYRINNTEKT
+        is OverstyrArbeidsforholdMessage -> OVERSTYRARBEIDSFORHOLD
         is UtbetalingsgrunnlagMessage -> UTBETALINGSGRUNNLAG
         is UtbetalingshistorikkForFeriepengerMessage -> null //TODO: Skal lagres som UTBETALINGSHISTORIKK_FOR_FERIEPENGER
         is AvstemmingMessage,
@@ -134,6 +135,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         PERSONPÅMINNELSE,
         OVERSTYRTIDSLINJE,
         OVERSTYRINNTEKT,
+        OVERSTYRARBEIDSFORHOLD,
         UTBETALINGPÅMINNELSE,
         YTELSER,
         UTBETALINGSGRUNNLAG,
