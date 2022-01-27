@@ -173,18 +173,6 @@ internal class MaksimumSykepengedagerfilter(
 
     private fun nextState(dagen: LocalDate): State? {
         if (opphold >= TILSTREKKELIG_OPPHOLD_I_SYKEDAGER) {
-            val gjenståendeSykedager = gjenståendeSykedager()
-            jurist.`§8-12 ledd 1 punktum 1`(
-                avvisteDager.filter { sakensStartdato <= it } !in periode,
-                avvisteDager.firstOrNull() ?: sakensStartdato,
-                avvisteDager.lastOrNull() ?: sisteBetalteDag,
-                tidslinjegrunnlag.toSubsumsjonFormat(),
-                beregnetTidslinje.toSubsumsjonFormat(),
-                gjenståendeSykedager,
-                forbrukteSykedager(),
-                maksdato(),
-                avvisteDager.filter { sakensStartdato <= it }
-            )
             aktivitetslogg.`§8-12 ledd 2`(dagen, TILSTREKKELIG_OPPHOLD_I_SYKEDAGER, tidslinjegrunnlag, beregnetTidslinje)
             teller.resett()
             return State.Initiell
