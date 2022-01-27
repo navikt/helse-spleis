@@ -8,9 +8,8 @@ class MetrikkTest {
 
     @Test
     fun `regner ut prosentandel av enkeltverdi i forhold til total json`() {
-        assertProsent(
+        assertStørrelse(
             forventetStreng = """"value"""",
-            totalStørrelse = totalStørrelse,
             metrikk = Metrikk.metrikkerAv(
                 json,
                 listOf("key")
@@ -20,9 +19,8 @@ class MetrikkTest {
 
     @Test
     fun `regner ut prosentandel av objekt i forhold til total json`() {
-        assertProsent(
+        assertStørrelse(
             forventetStreng = """{"key":"value"}""",
-            totalStørrelse = totalStørrelse,
             metrikk = Metrikk.metrikkerAv(
                 json,
                 listOf("indreVerdi")
@@ -32,9 +30,8 @@ class MetrikkTest {
 
     @Test
     fun `regner ut prosentandel av indre verdi i forhold til total json`() {
-        assertProsent(
+        assertStørrelse(
             forventetStreng = """"value"""",
-            totalStørrelse = totalStørrelse,
             metrikk = Metrikk.metrikkerAv(
                 json,
                 listOf("indreVerdi", "key")
@@ -44,9 +41,8 @@ class MetrikkTest {
 
     @Test
     fun `regner ut prosentandel av innhold i liste i forhold til total json`() {
-        assertProsent(
+        assertStørrelse(
             forventetStreng = """"hei""oof"""",
-            totalStørrelse = totalStørrelse,
             metrikk = Metrikk.metrikkerAv(
                 json,
                 listOf("liste")
@@ -56,9 +52,8 @@ class MetrikkTest {
 
     @Test
     fun `regner ut prosentandel av verdier i indre objekt i liste i forhold til total json`() {
-        assertProsent(
+        assertStørrelse(
             forventetStreng = """"hei""oof"""",
-            totalStørrelse = totalStørrelse,
             metrikk = Metrikk.metrikkerAv(
                 json,
                 listOf("listeMedObjekter", "key")
@@ -68,9 +63,8 @@ class MetrikkTest {
 
     @Test
     fun `regner ut prosentandel av liste med verdier i indre objekt i liste i forhold til total json`() {
-        assertProsent(
+        assertStørrelse(
             forventetStreng = """"hei""oof""hei""oof"""",
-            totalStørrelse = totalStørrelse,
             metrikk = Metrikk.metrikkerAv(
                 json,
                 listOf("listeMedIndreObjektMedListe", "liste")
@@ -78,9 +72,8 @@ class MetrikkTest {
         )
     }
 
-    private fun assertProsent(forventetStreng: String, totalStørrelse: Int, metrikk: Metrikk) {
-        val forventetProsentdel = forventetStreng.length.toDouble() / totalStørrelse.toDouble()
-        assertEquals(forventetProsentdel, metrikk.prosentdel())
+    private fun assertStørrelse(forventetStreng: String, metrikk: Metrikk) {
+        assertEquals(forventetStreng.length, metrikk.størrelse())
     }
 
 

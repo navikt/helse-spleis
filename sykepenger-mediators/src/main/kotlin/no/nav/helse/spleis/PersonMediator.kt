@@ -46,9 +46,13 @@ internal class PersonMediator(
             .registerModule(JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
         private val jsonSizeSummary = Summary.build("json_size", "size of entire json")
+            .quantile(.05, .01)
+            .quantile(.01, .001)
             .register()
-        private val jsonSubsizeSummary = Summary.build("json_subsize", "sizes of various paths in json(number of characters)")
+        private val jsonSubsizeSummary = Summary.build("json_path_size", "sizes of various paths in json(number of characters)")
             .labelNames("path")
+            .quantile(.05, .01)
+            .quantile(.01, .001)
             .register()
     }
 
@@ -62,7 +66,7 @@ internal class PersonMediator(
         try {
             jsonSizeSummary.observe(serialisertPerson.json.length.toDouble())
             serialisertPerson.metrikker().forEach { metrikk ->
-                jsonSubsizeSummary.labels(metrikk.path.joinToString(".")).observe(metrikk.prosentdel())
+                jsonSubsizeSummary.labels(metrikk.path.joinToString(".")).observe(metrikk.størrelse().toDouble())
             }
         } catch (e: Exception) {
             sikkerLogg.error("Kunne ikke lage metrikker for person ${hendelse.fødselsnummer()}", e)
