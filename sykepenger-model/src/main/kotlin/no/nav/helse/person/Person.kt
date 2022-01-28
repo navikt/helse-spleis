@@ -741,4 +741,8 @@ class Person private constructor(
 
     internal fun loggførHendelsesreferanse(orgnummer: String, skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID) =
         arbeidsgivere.forEach { it.loggførHendelsesreferanse(orgnummer, skjæringstidspunkt, meldingsreferanseId) }
+
+    internal fun tidligerePerioderFerdigBehandlet(vedtaksperiode: Vedtaksperiode): Boolean {
+        return arbeidsgivere.all { it.tidligerePerioderFerdigBehandlet(vedtaksperiode) }
+    }
 }

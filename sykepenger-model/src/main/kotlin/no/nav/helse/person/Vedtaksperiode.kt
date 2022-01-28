@@ -1736,8 +1736,8 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             super.håndter(vedtaksperiode, påminnelse)
-            if (!vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode)) return
-            sikkerlogg.warn("Vedtaksperioden ${vedtaksperiode.id} er i $type, men alle perioder foran er ferdigbehandlet")
+            if (!vedtaksperiode.person.tidligerePerioderFerdigBehandlet(vedtaksperiode)) return
+            sikkerlogg.warn("Vedtaksperioden ${vedtaksperiode.id} er i $type, men alle perioder foran (hos alle arbeidsgivere) er ferdigbehandlet")
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
