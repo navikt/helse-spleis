@@ -151,7 +151,7 @@ interface SubsumsjonObserver {
      *
      * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-12)
      *
-     * @param oppfylt **true** dersom det har vært tilstrekelig opphold TODO: Dobbelsjekk teksten
+     * @param oppfylt **true** dersom det har vært tilstrekelig opphold
      * @param dato dato vurdering av hjemmel gjøres
      * @param tilstrekkeligOppholdISykedager antall dager med opphold i ytelsen som nødvendig for å oppnå ny rett til sykepenger
      * @param tidslinjegrunnlag alle tidslinjer det tas utgangspunkt i ved bygging av [beregnetTidslinje]
@@ -185,28 +185,17 @@ interface SubsumsjonObserver {
      *
      * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-16)
      *
-     * Merk: Alltid oppfylt
-     *
+     * @param dato dagen [dekningsgrunnlag] beregnes for
      * @param dekningsgrad hvor stor andel av inntekten det ytes sykepenger av
      * @param inntekt inntekt for aktuell arbeidsgiver
      * @param dekningsgrunnlag maks dagsats før reduksjon til 6G og reduksjon for sykmeldingsgrad
      */
-    fun `§8-16 ledd 1`(
-        dato: LocalDate,
-        dekningsgrad: Double,
-        inntekt: Double,
-        dekningsgrunnlag: Double
-    ) {
-        // versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
-        // punktum = 1.punktum
-    }
+    fun `§8-16 ledd 1`(dato: LocalDate, dekningsgrad: Double, inntekt: Double, dekningsgrunnlag: Double) {}
 
     /**
-     * Vurdering av når
+     * Vurdering av når utbetaling av sykepenger tidligst skal starte
      *
-     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-16)
-     *
-     * Merk: Alltid oppfylt
+     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-17)
      *
      * @param arbeidsgiverperiode alle arbeidsgiverperiode-dager
      * @param førsteNavdag første dag NAV skal utbetale
