@@ -142,7 +142,9 @@ class Person private constructor(
         ytelser.oppdaterHistorikk(infotrygdhistorikk)
         ytelser.lagreDødsdato(this)
 
-        finnArbeidsgiver(ytelser).håndter(ytelser, { arbeidsgiverUtbetalinger(hendelse = it) }, infotrygdhistorikk)
+        finnArbeidsgiver(ytelser).håndter(ytelser, infotrygdhistorikk) { aktivitetslogg, subsumsjonObserver ->
+            arbeidsgiverUtbetalinger(hendelse = aktivitetslogg, subsumsjonObserver = subsumsjonObserver)
+        }
     }
 
     internal fun arbeidsgiverperiodeFor(orgnummer: String, sykdomstidslinje: Sykdomstidslinje, kuttdato: LocalDate, periode: Periode): Arbeidsgiverperiode? {
@@ -151,7 +153,11 @@ class Person private constructor(
         return builder.result(periode)
     }
 
-    private fun arbeidsgiverUtbetalinger(regler: ArbeidsgiverRegler = NormalArbeidstaker, hendelse: IAktivitetslogg): ArbeidsgiverUtbetalinger {
+    private fun arbeidsgiverUtbetalinger(
+        regler: ArbeidsgiverRegler = NormalArbeidstaker,
+        hendelse: IAktivitetslogg,
+        subsumsjonObserver: SubsumsjonObserver
+    ): ArbeidsgiverUtbetalinger {
         val skjæringstidspunkter = skjæringstidspunkter()
         return ArbeidsgiverUtbetalinger(
             regler = regler,
@@ -162,14 +168,16 @@ class Person private constructor(
                         regler,
                         skjæringstidspunkter,
                         vilkårsgrunnlagHistorikk.inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver(),
-                        hendelse
+                        hendelse,
+                        subsumsjonObserver
                     )
                 )
             },
             infotrygdhistorikk = infotrygdhistorikk,
             alder = fødselsnummer.alder(),
             dødsdato = dødsdato,
-            vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk
+            vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
+            subsumsjonObserver = subsumsjonObserver
         )
     }
 
@@ -491,7 +499,12 @@ class Person private constructor(
         vilkårsgrunnlagHistorikk.lagre(skjæringstidspunkt, vilkårsgrunnlag)
     }
 
-    internal fun lagreVilkårsgrunnlagFraInfotrygd(skjæringstidspunkt: LocalDate, periode: Periode, hendelse: IAktivitetslogg, subsumsjonObserver: SubsumsjonObserver) {
+    internal fun lagreVilkårsgrunnlagFraInfotrygd(
+        skjæringstidspunkt: LocalDate,
+        periode: Periode,
+        hendelse: IAktivitetslogg,
+        subsumsjonObserver: SubsumsjonObserver
+    ) {
         infotrygdhistorikk.lagreVilkårsgrunnlag(skjæringstidspunkt, vilkårsgrunnlagHistorikk, ::kanOverskriveVilkårsgrunnlag) {
             beregnSykepengegrunnlagForInfotrygd(it, periode.start, hendelse, subsumsjonObserver)
         }
@@ -530,7 +543,11 @@ class Person private constructor(
         finnArbeidsgiverForInntekter(orgnummer, aktivitetslogg).lagreSykepengegrunnlagFraInfotrygd(inntektsopplysninger, hendelseId)
     }
 
-    internal fun beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate, aktivitetslogg: IAktivitetslogg, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag {
+    internal fun beregnSykepengegrunnlag(
+        skjæringstidspunkt: LocalDate,
+        aktivitetslogg: IAktivitetslogg,
+        subsumsjonObserver: SubsumsjonObserver
+    ): Sykepengegrunnlag {
         return Sykepengegrunnlag.opprett(arbeidsgivere.beregnSykepengegrunnlag(skjæringstidspunkt), skjæringstidspunkt, aktivitetslogg, subsumsjonObserver)
     }
 

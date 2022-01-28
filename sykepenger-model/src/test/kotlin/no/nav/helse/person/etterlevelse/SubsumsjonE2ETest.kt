@@ -53,7 +53,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterYtelser()
-        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER.toString(), 5.desember(2017), 31.januar))
+        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 5.desember(2017), 31.januar))
         håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold)
 
         SubsumsjonInspektør(jurist).assertIkkeOppfylt(
@@ -65,7 +65,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "tilstrekkeligAntallOpptjeningsdager" to 28,
                 "arbeidsforhold" to listOf(
                     mapOf(
-                        "orgnummer" to ORGNUMMER.toString(),
+                        "orgnummer" to ORGNUMMER,
                         "fom" to 5.desember(2017),
                         "tom" to 31.januar
                     )
@@ -512,6 +512,29 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "avvisteDager" to avvisteDager
             ),
             output = emptyMap()
+        )
+    }
+
+    @Test
+    fun `§8-16 ledd 1 - dekningsgrad`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+
+        SubsumsjonInspektør(jurist).assertBeregnet(
+            Paragraf.PARAGRAF_8_16,
+            ledd = 1.ledd,
+            versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
+            input = mapOf(
+                "dekningsgrad" to 1.0,
+                "inntekt" to 372000.0
+            ),
+            output = mapOf(
+                "dekningsgrunnlag" to 372000.0
+            )
         )
     }
 }

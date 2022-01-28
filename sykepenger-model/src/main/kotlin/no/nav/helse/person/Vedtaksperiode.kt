@@ -31,6 +31,7 @@ import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.builders.UtbetaltEventBuilder
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
@@ -182,7 +183,7 @@ internal class Vedtaksperiode private constructor(
         tilstand.håndter(person, arbeidsgiver, this, utbetalingshistorikk, infotrygdhistorikk)
     }
 
-    internal fun håndter(ytelser: Ytelser, infotrygdhistorikk: Infotrygdhistorikk, arbeidsgiverUtbetalinger: (IAktivitetslogg) -> ArbeidsgiverUtbetalinger) {
+    internal fun håndter(ytelser: Ytelser, infotrygdhistorikk: Infotrygdhistorikk, arbeidsgiverUtbetalinger: (IAktivitetslogg, SubsumsjonObserver) -> ArbeidsgiverUtbetalinger) {
         if (!ytelser.erRelevant(id)) return
         kontekst(ytelser)
         tilstand.håndter(person, arbeidsgiver, this, ytelser, infotrygdhistorikk, arbeidsgiverUtbetalinger)
@@ -986,7 +987,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             ytelser: Ytelser,
             infotrygdhistorikk: Infotrygdhistorikk,
-            arbeidsgiverUtbetalingerFun: (IAktivitetslogg) -> ArbeidsgiverUtbetalinger
+            arbeidsgiverUtbetalingerFun: (IAktivitetslogg, SubsumsjonObserver) -> ArbeidsgiverUtbetalinger
         ) {
             ytelser.error("Forventet ikke ytelsehistorikk i %s", type.name)
         }
@@ -1372,7 +1373,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             ytelser: Ytelser,
             infotrygdhistorikk: Infotrygdhistorikk,
-            arbeidsgiverUtbetalingerFun: (IAktivitetslogg) -> ArbeidsgiverUtbetalinger
+            arbeidsgiverUtbetalingerFun: (IAktivitetslogg, SubsumsjonObserver) -> ArbeidsgiverUtbetalinger
         ) {
             val tmpLog = Aktivitetslogg()
             validation(tmpLog) {
@@ -1392,9 +1393,9 @@ internal class Vedtaksperiode private constructor(
                     vedtaksperiode.tilstand(ytelser, RevurderingFeilet)
                 }
                 valider { ytelser.valider(vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt) }
-                val arbeidsgiverUtbetalinger = arbeidsgiverUtbetalingerFun(ytelser)
+                val arbeidsgiverUtbetalinger = arbeidsgiverUtbetalingerFun(ytelser, vedtaksperiode.jurist)
                 valider("Feil ved kalkulering av utbetalingstidslinjer") {
-                    arbeidsgiver.beregn(this, arbeidsgiverUtbetalinger, vedtaksperiode.periode, vedtaksperiode.jurist)
+                    arbeidsgiver.beregn(this, arbeidsgiverUtbetalinger, vedtaksperiode.periode)
                 }
                 onSuccess {
                     tmpLog.accept(AktivitetsloggDeescalator(ytelser))
@@ -1790,7 +1791,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             ytelser: Ytelser,
             infotrygdhistorikk: Infotrygdhistorikk,
-            arbeidsgiverUtbetalingerFun: (IAktivitetslogg) -> ArbeidsgiverUtbetalinger
+            arbeidsgiverUtbetalingerFun: (IAktivitetslogg, SubsumsjonObserver) -> ArbeidsgiverUtbetalinger
         ) {
             val periodetype = vedtaksperiode.periodetype
             validation(ytelser) {
@@ -1859,8 +1860,8 @@ internal class Vedtaksperiode private constructor(
                 lateinit var arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger
                 valider("Feil ved kalkulering av utbetalingstidslinjer") {
                     person.fyllUtPeriodeMedForventedeDager(ytelser, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt)
-                    arbeidsgiverUtbetalinger = arbeidsgiverUtbetalingerFun(ytelser)
-                    arbeidsgiver.beregn(this, arbeidsgiverUtbetalinger, vedtaksperiode.periode, vedtaksperiode.jurist)
+                    arbeidsgiverUtbetalinger = arbeidsgiverUtbetalingerFun(ytelser, vedtaksperiode.jurist)
+                    arbeidsgiver.beregn(this, arbeidsgiverUtbetalinger, vedtaksperiode.periode)
                 }
                 onSuccess {
                     if (vedtaksperiode.person.harKunEttAnnetRelevantArbeidsforholdEnn(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer)) {

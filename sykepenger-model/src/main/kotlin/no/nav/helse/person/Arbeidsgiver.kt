@@ -403,7 +403,11 @@ internal class Arbeidsgiver private constructor(
         finalize(utbetalingshistorikk)
     }
 
-    internal fun håndter(ytelser: Ytelser, arbeidsgiverUtbetalinger: (IAktivitetslogg) -> ArbeidsgiverUtbetalinger, infotrygdhistorikk: Infotrygdhistorikk) {
+    internal fun håndter(
+        ytelser: Ytelser,
+        infotrygdhistorikk: Infotrygdhistorikk,
+        arbeidsgiverUtbetalinger: (IAktivitetslogg, SubsumsjonObserver) -> ArbeidsgiverUtbetalinger
+    ) {
         ytelser.kontekst(this)
         håndter(ytelser) { håndter(ytelser, infotrygdhistorikk, arbeidsgiverUtbetalinger) }
         finalize(ytelser)
@@ -991,7 +995,8 @@ internal class Arbeidsgiver private constructor(
         regler: ArbeidsgiverRegler,
         skjæringstidspunkter: List<LocalDate>,
         inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver: Map<LocalDate, Map<String, Inntektshistorikk.Inntektsopplysning>>?,
-        hendelse: IAktivitetslogg
+        hendelse: IAktivitetslogg,
+        subsumsjonObserver: SubsumsjonObserver
     ): UtbetalingstidslinjeBuilder {
         return UtbetalingstidslinjeBuilder(
             skjæringstidspunkter = skjæringstidspunkter,
@@ -999,7 +1004,8 @@ internal class Arbeidsgiver private constructor(
                 inntektsopplysningPerArbeidsgiver[organisasjonsnummer]
             },
             arbeidsgiverRegler = regler,
-            aktivitetslogg = hendelse
+            aktivitetslogg = hendelse,
+            subsumsjonObserver = subsumsjonObserver
         )
     }
 
@@ -1016,9 +1022,9 @@ internal class Arbeidsgiver private constructor(
         builder.build(sykdomstidslinje(), periode)
     }
 
-    internal fun beregn(aktivitetslogg: IAktivitetslogg, arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger, periode: Periode, jurist: SubsumsjonObserver): Boolean {
+    internal fun beregn(aktivitetslogg: IAktivitetslogg, arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger, periode: Periode): Boolean {
         try {
-            arbeidsgiverUtbetalinger.beregn(aktivitetslogg, organisasjonsnummer, periode, jurist = jurist)
+            arbeidsgiverUtbetalinger.beregn(aktivitetslogg, organisasjonsnummer, periode)
         } catch (err: UtbetalingstidslinjeBuilderException) {
             err.logg(aktivitetslogg)
         }

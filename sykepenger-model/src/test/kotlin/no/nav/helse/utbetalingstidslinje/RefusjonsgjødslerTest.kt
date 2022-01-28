@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.*
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
@@ -350,7 +351,8 @@ internal class RefusjonsgjødslerTest {
             val tidslinje = UtbetalingstidslinjeBuilder(
                 skjæringstidspunkter = inntektsopplysning.keys.toList(),
                 inntektPerSkjæringstidspunkt = inntektsopplysning,
-                aktivitetslogg = Aktivitetslogg()
+                aktivitetslogg = Aktivitetslogg(),
+                subsumsjonObserver = MaskinellJurist()
             ).apply { forlengelsestrategi(strategi)}.also { it.build(this, periode()!!) }.result()
             verifiserRekkefølge(tidslinje)
             return tidslinje

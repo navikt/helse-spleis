@@ -14,7 +14,8 @@ internal class ArbeidsgiverUtbetalinger(
     private val infotrygdhistorikk: Infotrygdhistorikk,
     private val alder: Alder,
     private val dødsdato: LocalDate?,
-    private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
+    private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
+    private val subsumsjonObserver: SubsumsjonObserver
 ) {
     internal lateinit var sykepengerettighet: Sykepengerettighet
 
@@ -22,14 +23,13 @@ internal class ArbeidsgiverUtbetalinger(
         aktivitetslogg: IAktivitetslogg,
         organisasjonsnummer: String,
         periode: Periode,
-        virkningsdato: LocalDate = periode.endInclusive,
-        jurist: SubsumsjonObserver
+        virkningsdato: LocalDate = periode.endInclusive
     ) {
         val tidslinjer = arbeidsgivere
             .onEach { (arbeidsgiver, builder) -> arbeidsgiver.build(builder, periode) }
             .mapValues { (_, builder) -> builder.result() }
             .filterValues { it.isNotEmpty() }
-        filtrer(aktivitetslogg, tidslinjer, periode, virkningsdato, jurist)
+        filtrer(aktivitetslogg, tidslinjer, periode, virkningsdato)
         tidslinjer.forEach { (arbeidsgiver, utbetalingstidslinje) ->
             arbeidsgiver.lagreUtbetalingstidslinjeberegning(organisasjonsnummer, utbetalingstidslinje, vilkårsgrunnlagHistorikk)
         }
@@ -40,7 +40,6 @@ internal class ArbeidsgiverUtbetalinger(
         arbeidsgivere: Map<Arbeidsgiver, Utbetalingstidslinje>,
         periode: Periode,
         virkningsdato: LocalDate,
-        subsumsjonObserver: SubsumsjonObserver
     ) {
         val tidslinjer = arbeidsgivere.values.toList()
         Sykdomsgradfilter(tidslinjer, periode, aktivitetslogg, subsumsjonObserver).filter()

@@ -8,6 +8,7 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntektshistorikk
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
@@ -960,7 +961,8 @@ internal class UtbetalingstidslinjeBuilderTest {
         tidslinje = UtbetalingstidslinjeBuilder(
             skjæringstidspunkter = skjæringstidspunkter,
             inntektPerSkjæringstidspunkt = inntektsopplysningPerSkjæringstidspunkt,
-            aktivitetslogg = Aktivitetslogg()
+            aktivitetslogg = Aktivitetslogg(),
+            subsumsjonObserver = MaskinellJurist()
         ).apply { forlengelsestrategi(strategi) }.also { it.build(this, periode()!!) }.result()
         verifiserRekkefølge(tidslinje)
     }

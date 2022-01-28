@@ -338,9 +338,10 @@ internal class ArbeidsgiverUtbetalingerTest {
             infotrygdhistorikk,
             fnr.alder(),
             null,
-            vilkårsgrunnlagHistorikk
+            vilkårsgrunnlagHistorikk,
+            MaskinellJurist()
         ).also {
-            it.beregn(aktivitetslogg, "88888888", Periode(1.januar, 31.desember(2019)), jurist = MaskinellJurist())
+            it.beregn(aktivitetslogg, "88888888", Periode(1.januar, 31.desember(2019)))
             maksdato = it.sykepengerettighet.maksdato
             gjenståendeSykedager = it.sykepengerettighet.gjenståendeSykedager
             forbrukteSykedager = it.sykepengerettighet.forbrukteSykedager

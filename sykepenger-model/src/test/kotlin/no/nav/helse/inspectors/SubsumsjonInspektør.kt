@@ -45,7 +45,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
                 && bokstav?.equals(it.bokstaver) ?: true
                 && vedtaksperiodeId?.equals(it.vedtaksperiodeIdFraSporing()) ?: true
         }.let {
-            assertEquals(1, it.size, "Forventer en, og kun en subsumsjon for vilkåret. Subsumsjoner funnet: $it")
+            assertEquals(1, it.size, "Forventer en, og kun en subsumsjon for vilkåret. Subsumsjoner funnet: $subsumsjoner")
             it.first()
         }
 

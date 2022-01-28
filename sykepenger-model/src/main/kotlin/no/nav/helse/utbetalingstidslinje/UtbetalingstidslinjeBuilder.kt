@@ -3,6 +3,7 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-17 ledd 1 bokstav a`
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Inntektshistorikk
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException.ManglerInntektException
@@ -23,7 +24,8 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     private val skjæringstidspunkter: List<LocalDate>,
     private val inntektPerSkjæringstidspunkt: Map<LocalDate, Inntektshistorikk.Inntektsopplysning?>?,
     arbeidsgiverRegler: ArbeidsgiverRegler = NormalArbeidstaker,
-    private val aktivitetslogg: IAktivitetslogg
+    private val aktivitetslogg: IAktivitetslogg,
+    private val subsumsjonObserver: SubsumsjonObserver
 ) : AbstractArbeidsgiverperiodetelling(arbeidsgiverRegler), IUtbetalingstidslinjeBuilder {
     private val tidslinje = Utbetalingstidslinje()
     private var harArbeidsgiverperiode = false
@@ -50,8 +52,8 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     private fun inntektForDato(dato: LocalDate) = inntektForDatoOrNull(dato)
         ?: throw ManglerInntektException(dato, skjæringstidspunkter)
 
-    private fun dekningsgrunnlag(inntekt: Inntekt, dagen: LocalDate, skjæringstidspunkt: LocalDate, aktivitetslogg: IAktivitetslogg): Inntekt {
-        val dekningsgrunnlag = inntekt.dekningsgrunnlag(regler, aktivitetslogg)
+    private fun dekningsgrunnlag(inntekt: Inntekt, dagen: LocalDate, skjæringstidspunkt: LocalDate): Inntekt {
+        val dekningsgrunnlag = inntekt.dekningsgrunnlag(dagen, regler, subsumsjonObserver)
         if (dekningsgrunnlag < INGEN) throw NegativDekningsgrunnlagException(dekningsgrunnlag, dagen, skjæringstidspunkt)
         return dekningsgrunnlag
     }
@@ -60,7 +62,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         inntektForDatoOrNull(dato)?.let { (skjæringstidspunkt, inntekt) ->
             inntekt(
                 aktuellDagsinntekt = inntekt,
-                dekningsgrunnlag = dekningsgrunnlag(inntekt, dato, skjæringstidspunkt, aktivitetslogg),
+                dekningsgrunnlag = dekningsgrunnlag(inntekt, dato, skjæringstidspunkt),
                 skjæringstidspunkt = skjæringstidspunkt
             )
         } ?: this
@@ -97,7 +99,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         val (skjæringstidspunkt, inntekt) = inntektForDato(dagen)
         tidslinje.addForeldetDag(dagen, økonomi.inntekt(
             aktuellDagsinntekt = inntekt,
-            dekningsgrunnlag = dekningsgrunnlag(inntekt, dagen, skjæringstidspunkt, aktivitetslogg),
+            dekningsgrunnlag = dekningsgrunnlag(inntekt, dagen, skjæringstidspunkt),
             skjæringstidspunkt = skjæringstidspunkt,
             arbeidsgiverperiode = arbeidsgiverperiode
         ))
@@ -116,7 +118,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         val (skjæringstidspunkt, inntekt) = inntektForDato(dato)
         tidslinje.addNAVdag(dato, økonomi.inntekt(
             aktuellDagsinntekt = inntekt,
-            dekningsgrunnlag = dekningsgrunnlag(inntekt, dato, skjæringstidspunkt, aktivitetslogg),
+            dekningsgrunnlag = dekningsgrunnlag(inntekt, dato, skjæringstidspunkt),
             skjæringstidspunkt = skjæringstidspunkt,
             arbeidsgiverperiode = arbeidsgiverperiode
         ))

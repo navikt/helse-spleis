@@ -228,7 +228,7 @@ class MaskinellJurist private constructor(
                 utfall = VILKAR_BEREGNET,
                 paragraf = Paragraf.PARAGRAF_8_16,
                 ledd = 1.ledd,
-                versjon = LocalDate.of(2020, 6, 12),
+                versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
                 kontekster = kontekster()
             )
         )
