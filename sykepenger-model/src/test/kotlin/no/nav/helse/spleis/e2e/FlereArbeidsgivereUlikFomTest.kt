@@ -1393,4 +1393,28 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a3)
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_ARBEIDSGIVERE, orgnummer = a3)
     }
+
+    @ForventetFeil("todo")
+    @Test
+    fun `forlengelse av AVSLUTTET_UTEN_UTBETALING skal ikke gå til AVVENTER_HISTORIKK ved flere arbeidsgivere om IM kommer først`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = a2)
+
+        håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
+        håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent), orgnummer = a2)
+
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_SØKNAD_FERDIG_FORLENGELSE,
+            AVVENTER_ARBEIDSGIVERE,
+            orgnummer = a2
+        )
+    }
 }
