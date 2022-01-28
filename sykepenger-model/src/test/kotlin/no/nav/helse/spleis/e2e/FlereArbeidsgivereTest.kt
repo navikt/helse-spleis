@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.*
-import no.nav.helse.ForventetFeil
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -9,7 +8,8 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
+import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -1037,5 +1037,29 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
         // TODO: Utvid testen med IM og utbetaling for AG3
+    }
+
+    @ForventetFeil("todo")
+    @Test
+    fun `forlengelse av AVSLUTTET_UTEN_UTBETALING skal ikke gå til AVVENTER_HISTORIKK ved flere arbeidsgivere om IM kommer først`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = a2)
+
+        håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
+        håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent), orgnummer = a2)
+
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_SØKNAD_FERDIG_FORLENGELSE,
+            AVVENTER_ARBEIDSGIVERE,
+            orgnummer = a2
+        )
     }
 }
