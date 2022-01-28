@@ -3,7 +3,9 @@ package no.nav.helse.person.etterlevelse
 import no.nav.helse.*
 import no.nav.helse.hendelser.*
 import no.nav.helse.inspectors.SubsumsjonInspektør
+import no.nav.helse.person.FOLKETRYGDLOVENS_OPPRINNELSESDATO
 import no.nav.helse.person.Ledd
+import no.nav.helse.person.Ledd.Companion.ledd
 import no.nav.helse.person.Paragraf
 import no.nav.helse.person.Punktum.Companion.punktum
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -12,6 +14,8 @@ import no.nav.helse.spleis.e2e.*
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
+import java.time.DayOfWeek
+import java.time.LocalDate
 
 internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
 
@@ -458,6 +462,54 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                     mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG"),
                     mapOf("fom" to 2.august, "tom" to 31.august, "dagtype" to "NAVDAG")
                 )
+            ),
+            output = emptyMap()
+        )
+    }
+
+    @Test
+    fun `§8-13 ledd 1 - Sykmeldte har 20 prosent uføregrad`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 20.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 20.prosent, 80.prosent))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        SubsumsjonInspektør(jurist).assertOppfylt(
+            paragraf = Paragraf.PARAGRAF_8_13,
+            ledd = 1.ledd,
+            versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
+            input = mapOf(
+                "avvisteDager" to emptyList<LocalDate>()
+            ),
+            output = emptyMap()
+        )
+    }
+
+    @Test
+    fun `§8-13 ledd 1 - Sykmeldte har under 20 prosent uføregrad`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 19.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 19.prosent, 81.prosent))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+
+        val avvisteDager = (17..31)
+            .map { it.januar }
+            .filter { it.dayOfWeek != DayOfWeek.SATURDAY && it.dayOfWeek != DayOfWeek.SUNDAY }
+
+        SubsumsjonInspektør(jurist).assertIkkeOppfylt(
+            paragraf = Paragraf.PARAGRAF_8_13,
+            ledd = 1.ledd,
+            versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
+            input = mapOf(
+                "avvisteDager" to avvisteDager
             ),
             output = emptyMap()
         )

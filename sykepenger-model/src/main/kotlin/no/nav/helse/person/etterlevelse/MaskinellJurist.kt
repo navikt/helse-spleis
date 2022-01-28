@@ -2,6 +2,8 @@ package no.nav.helse.person.etterlevelse
 
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
+import no.nav.helse.person.FOLKETRYGDLOVENS_OPPRINNELSESDATO
+import no.nav.helse.person.Ledd
 import no.nav.helse.person.Ledd.Companion.ledd
 import no.nav.helse.person.Paragraf
 import no.nav.helse.person.Punktum.Companion.punktum
@@ -204,7 +206,17 @@ class MaskinellJurist private constructor(
     }
 
     override fun `§8-13 ledd 1`(oppfylt: Boolean, avvisteDager: List<LocalDate>) {
-        super.`§8-13 ledd 1`(oppfylt, avvisteDager)
+        leggTil(
+            EnkelSubsumsjon(
+                utfall = if(oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
+                paragraf = Paragraf.PARAGRAF_8_13,
+                ledd = Ledd.LEDD_1,
+                versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
+                input = mapOf("avvisteDager" to avvisteDager),
+                output = emptyMap(),
+                kontekster = kontekster()
+            )
+        )
     }
 
     override fun `§8-16 ledd 1`(dato: LocalDate, dekningsgrad: Double, inntekt: Double, dekningsgrunnlag: Double) {

@@ -7,6 +7,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -111,7 +112,7 @@ internal class SykdomsgradfilterTest {
 
     private fun undersøke(tidslinjer: List<Utbetalingstidslinje>, periode: Periode) {
         aktivitetslogg = Aktivitetslogg()
-        Sykdomsgradfilter(tidslinjer, periode, aktivitetslogg).filter()
+        Sykdomsgradfilter(tidslinjer, periode, aktivitetslogg, MaskinellJurist()).filter()
         inspektør = tidslinjer.inspektør(0)
     }
 

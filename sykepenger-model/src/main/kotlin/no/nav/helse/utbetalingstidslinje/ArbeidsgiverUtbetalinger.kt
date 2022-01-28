@@ -40,13 +40,13 @@ internal class ArbeidsgiverUtbetalinger(
         arbeidsgivere: Map<Arbeidsgiver, Utbetalingstidslinje>,
         periode: Periode,
         virkningsdato: LocalDate,
-        jurist: SubsumsjonObserver
+        subsumsjonObserver: SubsumsjonObserver
     ) {
         val tidslinjer = arbeidsgivere.values.toList()
-        Sykdomsgradfilter(tidslinjer, periode, aktivitetslogg).filter()
+        Sykdomsgradfilter(tidslinjer, periode, aktivitetslogg, subsumsjonObserver).filter()
         AvvisDagerEtterDødsdatofilter(tidslinjer, periode, dødsdato, aktivitetslogg).filter()
         vilkårsgrunnlagHistorikk.avvisInngangsvilkår(tidslinjer, alder)
-        sykepengerettighet = MaksimumSykepengedagerfilter(alder, regler, periode, aktivitetslogg, jurist).filter(
+        sykepengerettighet = MaksimumSykepengedagerfilter(alder, regler, periode, aktivitetslogg, subsumsjonObserver).filter(
             tidslinjer,
             infotrygdhistorikk.utbetalingstidslinje().kutt(periode.endInclusive)
         )
