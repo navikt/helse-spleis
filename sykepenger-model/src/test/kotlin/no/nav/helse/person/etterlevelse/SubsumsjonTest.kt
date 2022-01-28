@@ -129,9 +129,7 @@ internal class SubsumsjonTest {
         override val output = output
         override val kontekster = kontekster
 
-        override fun sammenstill(subsumsjoner: List<Subsumsjon>): List<Subsumsjon> {
-            TODO("Not yet implemented")
-        }
+        override fun sammenstill(subsumsjoner: List<Subsumsjon>): List<Subsumsjon> = emptyList()
 
         override fun acceptSpesifikk(visitor: SubsumsjonVisitor) {}
     }

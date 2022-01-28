@@ -23,7 +23,6 @@ abstract class Subsumsjon {
     open val punktum: List<Punktum> = emptyList()
     open val bokstaver: List<Bokstav> = emptyList()
 
-    //TODO: Ta stilling til om disse skal types sterkt for å ungå problematikk med equals på komplekse datastrukturer
     abstract val input: Map<String, Any>
     abstract val output: Map<String, Any>
     protected abstract val kontekster: Map<String, String>
