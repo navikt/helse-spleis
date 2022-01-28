@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.*
-import no.nav.helse.ForventetFeil
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Companion.WARN_UENIGHET_ARBEIDSGIVERPERIODE
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
@@ -14,7 +13,7 @@ import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.sykdomstidslinje.Dag
-import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -1231,48 +1230,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, orgnummer = a2)
-    }
-
-    @Test
-    fun `vilkårsvurdering med flere arbeidsgivere skal ikke medføre at vi går ut av avventer inntektsmelding ferdig forlengelse pga GjennopptaBehandling`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent), orgnummer = a2)
-        håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar, 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
-        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = a2)
-        håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent), orgnummer = a2)
-        håndterYtelser(2.vedtaksperiode, orgnummer = a2)
-        val skjæringstidspunkt = inspektør(a2).skjæringstidspunkt(2.vedtaksperiode)
-        val inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
-            skjæringstidspunkt.minusMonths(12L).withDayOfMonth(1) til skjæringstidspunkt.minusMonths(1L).withDayOfMonth(1) inntekter {
-                a1 inntekt INNTEKT
-                a2 inntekt INNTEKT
-            }
-        })
-        val inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = listOf(a1, a2).map { arbeidsgiver ->
-            ArbeidsgiverInntekt(arbeidsgiver.toString(), (0..2).map {
-                val yearMonth = YearMonth.from(skjæringstidspunkt).minusMonths(3L - it)
-                ArbeidsgiverInntekt.MånedligInntekt.Sykepengegrunnlag(
-                    yearMonth = yearMonth,
-                    type = ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
-                    inntekt = INNTEKT,
-                    fordel = "fordel",
-                    beskrivelse = "beskrivelse"
-                )
-            })
-        }, arbeidsforhold = emptyList())
-        håndterVilkårsgrunnlag(2.vedtaksperiode, inntektsvurdering = inntektsvurdering, inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag, orgnummer = a2)
-
-        håndterSykmelding(Sykmeldingsperiode(17.februar, 20.februar, 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(17.februar, 20.februar, 100.prosent), orgnummer = a1)
-
-        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
-        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, orgnummer = a1)
-        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
-        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_SØKNAD_UFERDIG_FORLENGELSE, AVVENTER_SØKNAD_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
     }
 
     @Test

@@ -1039,7 +1039,6 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         // TODO: Utvid testen med IM og utbetaling for AG3
     }
 
-    @ForventetFeil("todo")
     @Test
     fun `forlengelse av AVSLUTTET_UTEN_UTBETALING skal ikke gå til AVVENTER_HISTORIKK ved flere arbeidsgivere om IM kommer først`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent), orgnummer = a1)

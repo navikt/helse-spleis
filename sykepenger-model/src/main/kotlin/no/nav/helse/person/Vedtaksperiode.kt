@@ -1597,7 +1597,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            vedtaksperiode.håndterSøknad(søknad, AvventerHistorikk)
+            vedtaksperiode.forberedMuligUtbetaling(søknad)
             søknad.info("Fullført behandling av søknad")
         }
 

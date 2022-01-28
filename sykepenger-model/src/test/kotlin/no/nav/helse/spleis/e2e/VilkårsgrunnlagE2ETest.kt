@@ -14,47 +14,6 @@ import org.junit.jupiter.api.Test
 import java.time.YearMonth
 
 internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
-
-    @Test
-    fun `vilkårsvurdering med flere arbeidsgivere`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent), orgnummer = a2)
-        håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar, 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
-        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = a2)
-        håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent), orgnummer = a2)
-        håndterYtelser(2.vedtaksperiode, orgnummer = a2)
-        val skjæringstidspunkt = inspektør(a2).skjæringstidspunkt(2.vedtaksperiode)
-        val inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
-            skjæringstidspunkt.minusMonths(12L).withDayOfMonth(1) til skjæringstidspunkt.minusMonths(1L).withDayOfMonth(1) inntekter {
-                a1 inntekt INNTEKT
-                a2 inntekt INNTEKT
-            }
-        })
-        val inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = listOf(a1, a2).map { arbeidsgiver ->
-            ArbeidsgiverInntekt(arbeidsgiver.toString(), (0..2).map {
-                val yearMonth = YearMonth.from(skjæringstidspunkt).minusMonths(3L - it)
-                ArbeidsgiverInntekt.MånedligInntekt.Sykepengegrunnlag(
-                    yearMonth = yearMonth,
-                    type = ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
-                    inntekt = INNTEKT,
-                    fordel = "fordel",
-                    beskrivelse = "beskrivelse"
-                )
-            })
-        }, arbeidsforhold = emptyList())
-        håndterVilkårsgrunnlag(2.vedtaksperiode, inntektsvurdering = inntektsvurdering, inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag, orgnummer = a2)
-        håndterUtbetalingshistorikk(2.vedtaksperiode, orgnummer = a1)
-
-        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
-        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, orgnummer = a1)
-        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
-        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_SØKNAD_UFERDIG_FORLENGELSE, AVVENTER_SØKNAD_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
-    }
-
     @Test
     fun `mer enn 25% avvik lager kun én errormelding i aktivitetsloggen`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
