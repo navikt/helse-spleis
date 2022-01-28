@@ -2046,7 +2046,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun trengerGodkjenning(hendelse: IAktivitetslogg) {
-        val aktiveVedtaksperioder = person.nåværendeVedtaksperioder(IKKE_FERDIG_BEHANDLET).map {
+        val aktiveVedtaksperioder = person.nåværendeVedtaksperioder(KLAR_TIL_BEHANDLING).map {
             val periodetype = it.periodetype
             Aktivitetslogg.Aktivitet.AktivVedtaksperiode(
                 it.arbeidsgiver.organisasjonsnummer(),
