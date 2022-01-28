@@ -49,7 +49,7 @@ internal class Sykepengegrunnlag(
         private fun sykepengegrunnlag(inntekt: Inntekt, skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver): Inntekt {
             val maksimaltSykepengegrunnlag = Grunnbeløp.`6G`.beløp(skjæringstidspunkt)
             subsumsjonObserver.`§8-10 ledd 2 punktum 1`(
-                funnetRelevant = inntekt > maksimaltSykepengegrunnlag,
+                erBegrenset = inntekt > maksimaltSykepengegrunnlag,
                 maksimaltSykepengegrunnlag = maksimaltSykepengegrunnlag,
                 skjæringstidspunkt = skjæringstidspunkt,
                 grunnlagForSykepengegrunnlag = inntekt

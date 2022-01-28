@@ -94,13 +94,13 @@ interface SubsumsjonObserver {
      *
      * Merk: er alltid oppfylt
      *
-     * @param funnetRelevant dersom hjemlen slår inn ved at [grunnlagForSykepengegrunnlag] blir begrenset til [maksimaltSykepengegrunnlag]
+     * @param erBegrenset dersom hjemlen slår inn ved at [grunnlagForSykepengegrunnlag] blir begrenset til [maksimaltSykepengegrunnlag]
      * @param maksimaltSykepengegrunnlag maksimalt årlig beløp utbetaling skal beregnes ut fra
      * @param skjæringstidspunkt dato [maksimaltSykepengegrunnlag] settes ut fra
      * @param grunnlagForSykepengegrunnlag total inntekt på tvers av alle relevante arbeidsgivere
      */
     fun `§8-10 ledd 2 punktum 1`(
-        funnetRelevant: Boolean,
+        erBegrenset: Boolean,
         maksimaltSykepengegrunnlag: Inntekt,
         skjæringstidspunkt: LocalDate,
         grunnlagForSykepengegrunnlag: Inntekt

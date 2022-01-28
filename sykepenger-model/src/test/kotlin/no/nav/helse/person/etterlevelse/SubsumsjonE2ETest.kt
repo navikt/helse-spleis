@@ -262,11 +262,19 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = maksimumSykepengegrunnlag2018)
         håndterYtelser()
         håndterVilkårsgrunnlag(inntekt = maksimumSykepengegrunnlag2018)
-        SubsumsjonInspektør(jurist).assertIkkeVurdert(
+        SubsumsjonInspektør(jurist).assertBeregnet(
             paragraf = Paragraf.PARAGRAF_8_10,
             ledd = Ledd.LEDD_2,
             punktum = 1.punktum,
-            versjon = 1.januar(2020)
+            versjon = 1.januar(2020),
+            input = mapOf(
+                "maksimaltSykepengegrunnlag" to 561804.0,
+                "skjæringstidspunkt" to 1.januar,
+                "grunnlagForSykepengegrunnlag" to 561804.0
+            ),
+            output = mapOf(
+                "erBegrenset" to false
+            )
         )
     }
 
@@ -289,7 +297,9 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "skjæringstidspunkt" to 1.januar,
                 "grunnlagForSykepengegrunnlag" to 561805.0
             ),
-            output = mapOf()
+            output = mapOf(
+                "erBegrenset" to true
+            )
         )
     }
 
@@ -320,7 +330,9 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "skjæringstidspunkt" to 1.januar,
                 "grunnlagForSykepengegrunnlag" to 561805.0
             ),
-            output = mapOf()
+            output = mapOf(
+                "erBegrenset" to true
+            )
         )
     }
 

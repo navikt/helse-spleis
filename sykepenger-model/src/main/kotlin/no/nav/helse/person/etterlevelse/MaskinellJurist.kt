@@ -110,14 +110,13 @@ class MaskinellJurist private constructor(
     }
 
     override fun `§8-10 ledd 2 punktum 1`(
-        funnetRelevant: Boolean,
+        erBegrenset: Boolean,
         maksimaltSykepengegrunnlag: Inntekt,
         skjæringstidspunkt: LocalDate,
         grunnlagForSykepengegrunnlag: Inntekt
     ) {
         leggTil(
-            BetingetSubsumsjon(
-                funnetRelevant = funnetRelevant,
+            EnkelSubsumsjon(
                 utfall = VILKAR_BEREGNET,
                 LocalDate.of(2020, 1, 1),
                 Paragraf.PARAGRAF_8_10,
@@ -128,7 +127,9 @@ class MaskinellJurist private constructor(
                     "skjæringstidspunkt" to skjæringstidspunkt,
                     "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig }
                 ),
-                output = mapOf(),
+                output = mapOf(
+                    "erBegrenset" to erBegrenset
+                ),
                 kontekster = kontekster()
             )
         )
