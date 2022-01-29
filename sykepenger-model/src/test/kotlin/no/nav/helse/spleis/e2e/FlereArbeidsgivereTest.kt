@@ -701,7 +701,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
 
-        person.invaliderAllePerioder(inspektør.personLogg, feilmelding = "Feil med vilje")
+        person.invaliderAllePerioder(hendelselogg, feilmelding = "Feil med vilje")
 
         håndterSykmelding(Sykmeldingsperiode(spleisPeriodeA2.start, spleisPeriodeA2.endInclusive, 100.prosent), orgnummer = a2)
         håndterSøknad(Sykdom(spleisPeriodeA2.start, spleisPeriodeA2.endInclusive, 100.prosent), orgnummer = a2)

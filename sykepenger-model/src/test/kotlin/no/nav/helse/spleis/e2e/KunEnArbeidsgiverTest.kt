@@ -2171,7 +2171,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = ORGNUMMER)
         håndterUtbetalt(1.vedtaksperiode, orgnummer = ORGNUMMER)
 
-        person.invaliderAllePerioder(inspektør.personLogg, feilmelding = "Feil med vilje")
+        person.invaliderAllePerioder(hendelselogg, feilmelding = "Feil med vilje")
 
         håndterSykmelding(Sykmeldingsperiode(spleisPeriode2.start, spleisPeriode2.endInclusive, 100.prosent), orgnummer = ORGNUMMER)
         håndterSøknad(Sykdom(spleisPeriode2.start, spleisPeriode2.endInclusive, 100.prosent), orgnummer = ORGNUMMER)
