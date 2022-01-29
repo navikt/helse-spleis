@@ -1061,4 +1061,29 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             orgnummer = a2
         )
     }
+
+    @ForventetFeil("😱")
+    @Test
+    fun `GjenopptaBehandling poker ikke fremtidig periode for en annen arbeidsgiver videre ved tidligere uferdige perioder`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(1.mai, 31.mai, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(1.mai, 31.mai, 100.prosent), orgnummer = a2)
+        håndterInntektsmelding(listOf(1.mai til 16.mai), orgnummer = a2)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_UFERDIG, orgnummer = a2)
+    }
 }
