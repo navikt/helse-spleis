@@ -1739,11 +1739,6 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndterOverlappendeSøknad(søknad)
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (!vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode)) return super.håndter(vedtaksperiode, påminnelse)
-            vedtaksperiode.tilstand(påminnelse, AvventerHistorikk)
-        }
-
         override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
             if (!vedtaksperiode.harInntekt()) return vedtaksperiode.tilstand(gjenopptaBehandling, AvventerInntektsmeldingEllerHistorikkFerdigGap)
             vedtaksperiode.tilstand(gjenopptaBehandling, AvventerHistorikk)
