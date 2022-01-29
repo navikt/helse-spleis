@@ -183,7 +183,7 @@ internal class Vedtaksperiode private constructor(
         tilstand.håndter(person, arbeidsgiver, this, utbetalingshistorikk, infotrygdhistorikk)
     }
 
-    internal fun håndter(ytelser: Ytelser, infotrygdhistorikk: Infotrygdhistorikk, arbeidsgiverUtbetalinger: (IAktivitetslogg, SubsumsjonObserver) -> ArbeidsgiverUtbetalinger) {
+    internal fun håndter(ytelser: Ytelser, infotrygdhistorikk: Infotrygdhistorikk, arbeidsgiverUtbetalinger: (SubsumsjonObserver) -> ArbeidsgiverUtbetalinger) {
         if (!ytelser.erRelevant(id)) return
         kontekst(ytelser)
         tilstand.håndter(person, arbeidsgiver, this, ytelser, infotrygdhistorikk, arbeidsgiverUtbetalinger)
@@ -987,7 +987,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             ytelser: Ytelser,
             infotrygdhistorikk: Infotrygdhistorikk,
-            arbeidsgiverUtbetalingerFun: (IAktivitetslogg, SubsumsjonObserver) -> ArbeidsgiverUtbetalinger
+            arbeidsgiverUtbetalingerFun: (SubsumsjonObserver) -> ArbeidsgiverUtbetalinger
         ) {
             ytelser.error("Forventet ikke ytelsehistorikk i %s", type.name)
         }
@@ -1373,7 +1373,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             ytelser: Ytelser,
             infotrygdhistorikk: Infotrygdhistorikk,
-            arbeidsgiverUtbetalingerFun: (IAktivitetslogg, SubsumsjonObserver) -> ArbeidsgiverUtbetalinger
+            arbeidsgiverUtbetalingerFun: (SubsumsjonObserver) -> ArbeidsgiverUtbetalinger
         ) {
             val tmpLog = Aktivitetslogg()
             validation(tmpLog) {
@@ -1393,7 +1393,7 @@ internal class Vedtaksperiode private constructor(
                     vedtaksperiode.tilstand(ytelser, RevurderingFeilet)
                 }
                 valider { ytelser.valider(vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt) }
-                val arbeidsgiverUtbetalinger = arbeidsgiverUtbetalingerFun(ytelser, vedtaksperiode.jurist)
+                val arbeidsgiverUtbetalinger = arbeidsgiverUtbetalingerFun(vedtaksperiode.jurist)
                 valider("Feil ved kalkulering av utbetalingstidslinjer") {
                     arbeidsgiver.beregn(this, arbeidsgiverUtbetalinger, vedtaksperiode.periode)
                 }
@@ -1791,7 +1791,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             ytelser: Ytelser,
             infotrygdhistorikk: Infotrygdhistorikk,
-            arbeidsgiverUtbetalingerFun: (IAktivitetslogg, SubsumsjonObserver) -> ArbeidsgiverUtbetalinger
+            arbeidsgiverUtbetalingerFun: (SubsumsjonObserver) -> ArbeidsgiverUtbetalinger
         ) {
             val periodetype = vedtaksperiode.periodetype
             validation(ytelser) {
@@ -1860,7 +1860,7 @@ internal class Vedtaksperiode private constructor(
                 lateinit var arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger
                 valider("Feil ved kalkulering av utbetalingstidslinjer") {
                     person.fyllUtPeriodeMedForventedeDager(ytelser, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt)
-                    arbeidsgiverUtbetalinger = arbeidsgiverUtbetalingerFun(ytelser, vedtaksperiode.jurist)
+                    arbeidsgiverUtbetalinger = arbeidsgiverUtbetalingerFun(vedtaksperiode.jurist)
                     arbeidsgiver.beregn(this, arbeidsgiverUtbetalinger, vedtaksperiode.periode)
                 }
                 onSuccess {

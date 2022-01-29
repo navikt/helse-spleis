@@ -6,7 +6,6 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -961,7 +960,6 @@ internal class UtbetalingstidslinjeBuilderTest {
         tidslinje = UtbetalingstidslinjeBuilder(
             skjæringstidspunkter = skjæringstidspunkter,
             inntektPerSkjæringstidspunkt = inntektsopplysningPerSkjæringstidspunkt,
-            aktivitetslogg = Aktivitetslogg(),
             subsumsjonObserver = MaskinellJurist()
         ).apply { forlengelsestrategi(strategi) }.also { it.build(this, periode()!!) }.result()
         verifiserRekkefølge(tidslinje)

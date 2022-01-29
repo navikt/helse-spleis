@@ -142,8 +142,8 @@ class Person private constructor(
         ytelser.oppdaterHistorikk(infotrygdhistorikk)
         ytelser.lagreDødsdato(this)
 
-        finnArbeidsgiver(ytelser).håndter(ytelser, infotrygdhistorikk) { aktivitetslogg, subsumsjonObserver ->
-            arbeidsgiverUtbetalinger(hendelse = aktivitetslogg, subsumsjonObserver = subsumsjonObserver)
+        finnArbeidsgiver(ytelser).håndter(ytelser, infotrygdhistorikk) { subsumsjonObserver ->
+            arbeidsgiverUtbetalinger(subsumsjonObserver = subsumsjonObserver)
         }
     }
 
@@ -155,7 +155,6 @@ class Person private constructor(
 
     private fun arbeidsgiverUtbetalinger(
         regler: ArbeidsgiverRegler = NormalArbeidstaker,
-        hendelse: IAktivitetslogg,
         subsumsjonObserver: SubsumsjonObserver
     ): ArbeidsgiverUtbetalinger {
         val skjæringstidspunkter = skjæringstidspunkter()
@@ -168,7 +167,6 @@ class Person private constructor(
                         regler,
                         skjæringstidspunkter,
                         vilkårsgrunnlagHistorikk.inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver(),
-                        hendelse,
                         subsumsjonObserver
                     )
                 )

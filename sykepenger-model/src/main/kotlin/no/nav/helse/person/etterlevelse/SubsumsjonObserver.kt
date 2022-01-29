@@ -200,13 +200,7 @@ interface SubsumsjonObserver {
      * @param arbeidsgiverperiode alle arbeidsgiverperiode-dager
      * @param førsteNavdag første dag NAV skal utbetale
      */
-    fun `§8-17 ledd 1 bokstav a`(
-        arbeidsgiverperiode: List<LocalDate>,
-        førsteNavdag: LocalDate
-    ) {
-        // versjon = LocalDate.of(2018, 1, 1),
-        // punktum = 1.punktum,
-    }
+    fun `§8-17 ledd 1 bokstav a`(arbeidsgiverperiode: List<LocalDate>, førsteNavdag: LocalDate) {}
 
     @Suppress("UNUSED_PARAMETER")
     fun `§8-17 ledd 2`(oppfylt: Boolean) {

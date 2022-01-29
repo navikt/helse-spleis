@@ -1,6 +1,5 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-17 ledd 1 bokstav a`
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
@@ -24,7 +23,6 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     private val skjæringstidspunkter: List<LocalDate>,
     private val inntektPerSkjæringstidspunkt: Map<LocalDate, Inntektshistorikk.Inntektsopplysning?>?,
     arbeidsgiverRegler: ArbeidsgiverRegler = NormalArbeidstaker,
-    private val aktivitetslogg: IAktivitetslogg,
     private val subsumsjonObserver: SubsumsjonObserver
 ) : AbstractArbeidsgiverperiodetelling(arbeidsgiverRegler), IUtbetalingstidslinjeBuilder {
     private val tidslinje = Utbetalingstidslinje()
@@ -111,7 +109,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
 
     private fun addNAVdag(dato: LocalDate, arbeidsgiverperiode: Arbeidsgiverperiode?, økonomi: Økonomi) {
         if (harArbeidsgiverperiode) {
-            aktivitetslogg.`§8-17 ledd 1 bokstav a`(arbeidsgiverperiode?.toList() ?: emptyList(), førsteNavdag = dato)
+            subsumsjonObserver.`§8-17 ledd 1 bokstav a`(arbeidsgiverperiode?.toList() ?: emptyList(), førsteNavdag = dato)
             harArbeidsgiverperiode = false
         }
 

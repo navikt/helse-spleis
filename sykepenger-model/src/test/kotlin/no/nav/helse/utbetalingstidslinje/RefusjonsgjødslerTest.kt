@@ -351,7 +351,6 @@ internal class RefusjonsgjødslerTest {
             val tidslinje = UtbetalingstidslinjeBuilder(
                 skjæringstidspunkter = inntektsopplysning.keys.toList(),
                 inntektPerSkjæringstidspunkt = inntektsopplysning,
-                aktivitetslogg = Aktivitetslogg(),
                 subsumsjonObserver = MaskinellJurist()
             ).apply { forlengelsestrategi(strategi)}.also { it.build(this, periode()!!) }.result()
             verifiserRekkefølge(tidslinje)

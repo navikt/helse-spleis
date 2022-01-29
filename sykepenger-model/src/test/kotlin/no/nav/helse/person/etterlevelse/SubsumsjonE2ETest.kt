@@ -3,11 +3,13 @@ package no.nav.helse.person.etterlevelse
 import no.nav.helse.*
 import no.nav.helse.hendelser.*
 import no.nav.helse.inspectors.SubsumsjonInspektør
+import no.nav.helse.person.Bokstav.BOKSTAV_A
 import no.nav.helse.person.FOLKETRYGDLOVENS_OPPRINNELSESDATO
 import no.nav.helse.person.Ledd
 import no.nav.helse.person.Ledd.Companion.ledd
 import no.nav.helse.person.Paragraf
 import no.nav.helse.person.Punktum.Companion.punktum
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.spleis.e2e.*
@@ -536,5 +538,60 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "dekningsgrunnlag" to 372000.0
             )
         )
+    }
+
+    @Test
+    fun `§8-17 ledd 1 bokstav a - trygden yter sykepenger ved utløp av arbeidsgiverperioden`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+
+        SubsumsjonInspektør(jurist).assertBeregnet(
+            paragraf = Paragraf.PARAGRAF_8_17,
+            ledd = 1.ledd,
+            bokstaver = listOf(BOKSTAV_A),
+            versjon = 1.januar,
+            input = mapOf(
+                "arbeidsgiverperioder" to listOf(
+                    mapOf("fom" to 1.januar, "tom" to 16.januar)
+                )
+            ),
+            output = mapOf("førsteUtbetalingsdag" to 17.januar)
+        )
+    }
+
+    @Test
+    fun `§8-17 ledd 1 bokstav a - trygden yter sykepenger dersom arbeidsgiverperioden avslutter på en fredag`() {
+        håndterSykmelding(Sykmeldingsperiode(4.januar, 22.januar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(4.januar, 22.januar, 100.prosent))
+        håndterInntektsmelding(listOf(4.januar til 19.januar), beregnetInntekt = INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+
+        SubsumsjonInspektør(jurist).assertBeregnet(
+            paragraf = Paragraf.PARAGRAF_8_17,
+            ledd = 1.ledd,
+            bokstaver = listOf(BOKSTAV_A),
+            versjon = 1.januar,
+            input = mapOf(
+                "arbeidsgiverperioder" to listOf(
+                    mapOf("fom" to 4.januar, "tom" to 19.januar)
+                )
+            ),
+            output = mapOf("førsteUtbetalingsdag" to 22.januar)
+        )
+    }
+
+    @Test
+    fun `§8-17 ledd 1 bokstav a - trygden yter ikke sykepenger dersom arbeidsgiverperioden ikke er fullført`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 16.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
+        assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET_UTEN_UTBETALING)
+        SubsumsjonInspektør(jurist).assertIkkeVurdert(paragraf = Paragraf.PARAGRAF_8_17, ledd = 1.ledd, bokstav = listOf(BOKSTAV_A))
     }
 }

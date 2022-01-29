@@ -2,10 +2,12 @@ package no.nav.helse.person.etterlevelse
 
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
+import no.nav.helse.person.Bokstav.BOKSTAV_A
 import no.nav.helse.person.FOLKETRYGDLOVENS_OPPRINNELSESDATO
 import no.nav.helse.person.Ledd
 import no.nav.helse.person.Ledd.Companion.ledd
 import no.nav.helse.person.Paragraf
+import no.nav.helse.person.Paragraf.PARAGRAF_8_17
 import no.nav.helse.person.Punktum.Companion.punktum
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.*
 import no.nav.helse.økonomi.Inntekt
@@ -235,7 +237,24 @@ class MaskinellJurist private constructor(
     }
 
     override fun `§8-17 ledd 1 bokstav a`(arbeidsgiverperiode: List<LocalDate>, førsteNavdag: LocalDate) {
-        super.`§8-17 ledd 1 bokstav a`(arbeidsgiverperiode, førsteNavdag)
+        leggTil(
+            EnkelSubsumsjon(
+                VILKAR_BEREGNET,
+                LocalDate.of(2018, 1, 1),
+                paragraf = PARAGRAF_8_17,
+                ledd = 1.ledd,
+                bokstaver = listOf(BOKSTAV_A),
+                input = mapOf(
+                    "arbeidsgiverperioder" to arbeidsgiverperiode.grupperSammenhengendePerioder().map {
+                        mapOf("fom" to it.start, "tom" to it.endInclusive)
+                    }
+                ),
+                output = mapOf(
+                    "førsteUtbetalingsdag" to førsteNavdag
+                 ),
+                kontekster = kontekster()
+            )
+        )
     }
 
     override fun `§8-17 ledd 2`(oppfylt: Boolean) {
