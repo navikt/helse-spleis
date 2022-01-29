@@ -829,6 +829,10 @@ internal class Vedtaksperiode private constructor(
                 påminnelse.tilstandsendringstidspunkt()
             )
         ) return håndterMakstid(vedtaksperiode, påminnelse)
+        if (this.type.name.contains("_UFERDIG") && arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode))
+            sikkerlogg.warn("Vedtaksperioden ${vedtaksperiode.id} er i $type, men alle perioder foran er ferdigbehandlet", keyValue("vedtaksperiodeId", id), keyValue("tilstand", type))
+        else if (this.type.name.contains("_FERDIG") && !arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode))
+            sikkerlogg.warn("Vedtaksperioden ${vedtaksperiode.id} er i $type, men det er perioder foran som er under behandling", keyValue("vedtaksperiodeId", id), keyValue("tilstand", type))
         håndter(vedtaksperiode, påminnelse)
     }
 
