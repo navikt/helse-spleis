@@ -1584,7 +1584,6 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndterSøknad(søknad, nesteTilstand)
             søknad.info("Fullført behandling av søknad")
         }
-
     }
 
     internal object AvventerSøknadFerdigForlengelse : Vedtaksperiodetilstand {

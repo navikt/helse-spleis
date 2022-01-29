@@ -472,6 +472,11 @@ internal class Arbeidsgiver private constructor(
         return énHarHåndtert(påminnelse, Vedtaksperiode::håndter).also { finalize(påminnelse) }
     }
 
+    internal fun håndter(gjenopptaBehandling: GjenopptaBehandling) {
+        gjenopptaBehandling.kontekst(this)
+        énHarHåndtert(gjenopptaBehandling, Vedtaksperiode::håndter)
+    }
+
     internal fun håndter(hendelse: AnnullerUtbetaling) {
         hendelse.kontekst(this)
         hendelse.info("Håndterer annullering")
@@ -921,8 +926,7 @@ internal class Arbeidsgiver private constructor(
     private fun finalize(hendelse: ArbeidstakerHendelse) {
         while (skalGjenopptaBehandling) {
             skalGjenopptaBehandling = false
-            val gjenopptaBehandling = GjenopptaBehandling(hendelse)
-            énHarHåndtert(gjenopptaBehandling, Vedtaksperiode::håndter)
+            person.sendGjenopptaBehandling(hendelse)
             Vedtaksperiode.gjenopptaBehandling(hendelse, person, AvventerArbeidsgivere, AvventerHistorikk)
             Vedtaksperiode.gjenopptaBehandling(hendelse, person, AvventerArbeidsgivereRevurdering, AvventerHistorikkRevurdering, IKKE_FERDIG_REVURDERT)
         }
