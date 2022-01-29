@@ -268,7 +268,7 @@ class Person private constructor(
         }
     }
 
-    internal fun gjenopptaBehandling(hendelse: PersonHendelse) {
+    internal fun gjenopptaBehandling(hendelse: IAktivitetslogg) {
         arbeidsgivere.gjenopptaBehandling(hendelse)
     }
 
@@ -420,7 +420,7 @@ class Person private constructor(
         return infotrygdhistorikk.oppfriskNødvendig(hendelse, tidligsteDato, cutoff)
     }
 
-    internal fun trengerHistorikkFraInfotrygd(hendelse: PersonHendelse, vedtaksperiode: Vedtaksperiode, cutoff: LocalDateTime? = null) {
+    internal fun trengerHistorikkFraInfotrygd(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode, cutoff: LocalDateTime? = null) {
         if (trengerHistorikkFraInfotrygd(hendelse, cutoff)) return hendelse.info("Må oppfriske Infotrygdhistorikken")
         hendelse.info("Trenger ikke oppfriske Infotrygdhistorikken, bruker lagret historikk")
         vedtaksperiode.håndterHistorikkFraInfotrygd(hendelse, infotrygdhistorikk)
@@ -452,12 +452,12 @@ class Person private constructor(
         hendelse.info(melding)
     }
 
-    internal fun invaliderAllePerioder(hendelse: PersonHendelse, feilmelding: String?) {
+    internal fun invaliderAllePerioder(hendelse: IAktivitetslogg, feilmelding: String?) {
         feilmelding?.also(hendelse::error)
         arbeidsgivere.forEach { it.søppelbøtte(hendelse, ALLE, ForkastetÅrsak.IKKE_STØTTET) }
     }
 
-    internal fun revurderingHarFeilet(event: PersonHendelse) {
+    internal fun revurderingHarFeilet(event: IAktivitetslogg) {
         arbeidsgivere.forEach { it.håndterRevurderingFeilet(event) }
     }
 
@@ -600,7 +600,7 @@ class Person private constructor(
     internal fun ingenUkjenteArbeidsgivere(vedtaksperiode: Vedtaksperiode, skjæringstidspunkt: LocalDate) =
         Arbeidsgiver.ingenUkjenteArbeidsgivere(arbeidsgivere, vedtaksperiode, infotrygdhistorikk, skjæringstidspunkt)
 
-    internal fun søppelbøtte(hendelse: PersonHendelse, periode: Periode) {
+    internal fun søppelbøtte(hendelse: IAktivitetslogg, periode: Periode) {
         infotrygdhistorikk.tøm()
         arbeidsgivere.forEach { it.søppelbøtte(hendelse, it.tidligereOgEttergølgende(periode), ForkastetÅrsak.IKKE_STØTTET) }
     }

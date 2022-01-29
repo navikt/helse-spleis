@@ -205,18 +205,17 @@ internal class Arbeidsgiver private constructor(
             filter { it.organisasjonsnummer != "0" }.forEach { it.utbetalFeriepenger(aktørId, feriepengeberegner, utbetalingshistorikkForFeriepenger) }
         }
 
-        internal fun Iterable<Arbeidsgiver>.gjenopptaBehandling(hendelse: PersonHendelse) = forEach { arbeidsgiver ->
-            val gjenopptaBehandling = GjenopptaBehandling(hendelse)
+        internal fun Iterable<Arbeidsgiver>.gjenopptaBehandling(gjenopptaBehandling: IAktivitetslogg) = forEach { arbeidsgiver ->
             gjenopptaBehandling.kontekst(arbeidsgiver)
-            arbeidsgiver.énHarHåndtert(gjenopptaBehandling, Vedtaksperiode::håndter)
+            arbeidsgiver.énHarHåndtert(gjenopptaBehandling, Vedtaksperiode::gjenopptaBehandling)
             Vedtaksperiode.gjenopptaBehandling(
-                hendelse = hendelse,
+                hendelse = gjenopptaBehandling,
                 person = arbeidsgiver.person,
                 nåværendeTilstand = AvventerArbeidsgivere,
                 nesteTilstand = AvventerHistorikk
             )
             Vedtaksperiode.gjenopptaBehandling(
-                hendelse = hendelse,
+                hendelse = gjenopptaBehandling,
                 person = arbeidsgiver.person,
                 nåværendeTilstand = AvventerArbeidsgivereRevurdering,
                 nesteTilstand = AvventerHistorikkRevurdering,
@@ -510,7 +509,7 @@ internal class Arbeidsgiver private constructor(
         etterutbetaling.håndter(hendelse)
     }
 
-    fun håndterRevurderingFeilet(event: PersonHendelse) {
+    fun håndterRevurderingFeilet(event: IAktivitetslogg) {
         vedtaksperioder.forEach {
             it.håndterRevurderingFeilet(event)
         }
@@ -799,7 +798,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun søppelbøtte(
-        hendelse: PersonHendelse,
+        hendelse: IAktivitetslogg,
         filter: VedtaksperiodeFilter,
         årsak: ForkastetÅrsak
     ) {
@@ -909,11 +908,6 @@ internal class Arbeidsgiver private constructor(
 
     internal fun fordelRevurdertUtbetaling(hendelse: ArbeidstakerHendelse, utbetaling: Utbetaling) {
         håndter(hendelse) { håndterRevurdertUtbetaling(utbetaling, hendelse) }
-    }
-
-    internal class GjenopptaBehandling(private val hendelse: PersonHendelse) : PersonHendelse(hendelse.meldingsreferanseId(), hendelse) {
-        override fun aktørId() = hendelse.aktørId()
-        override fun fødselsnummer() = hendelse.fødselsnummer()
     }
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
