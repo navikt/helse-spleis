@@ -134,8 +134,8 @@ data class UtbetalingshistorikkElementDTO(
                     TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
                     TilstandType.AVVENTER_ARBEIDSGIVERE -> TilstandstypeDTO.VenterPåKiling
                     TilstandType.TIL_INFOTRYGD -> TilstandstypeDTO.TilInfotrygd
-                    TilstandType.UTBETALING_FEILET,
-                    TilstandType.REVURDERING_FEILET -> TilstandstypeDTO.Feilet
+                    TilstandType.UTBETALING_FEILET -> TilstandstypeDTO.Feilet
+                    TilstandType.REVURDERING_FEILET -> TilstandstypeDTO.RevurderingFeilet
                     TilstandType.TIL_UTBETALING -> TilstandstypeDTO.TilUtbetaling
                     TilstandType.AVVENTER_GODKJENNING_REVURDERING,
                     TilstandType.AVVENTER_GODKJENNING -> TilstandstypeDTO.Oppgaver
