@@ -8,6 +8,7 @@ import no.nav.helse.person.Ledd
 import no.nav.helse.person.Ledd.Companion.ledd
 import no.nav.helse.person.Paragraf
 import no.nav.helse.person.Paragraf.PARAGRAF_8_17
+import no.nav.helse.person.Paragraf.PARAGRAF_8_51
 import no.nav.helse.person.Punktum.Companion.punktum
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.*
 import no.nav.helse.økonomi.Inntekt
@@ -320,8 +321,29 @@ class MaskinellJurist private constructor(
         super.`§8-33 ledd 3`(grunnlagForFeriepenger, opptjeningsår, prosentsats, alder, feriepenger)
     }
 
-    override fun `§8-51 ledd 2`(oppfylt: Boolean, skjæringstidspunkt: LocalDate, grunnlagForSykepengegrunnlag: Inntekt, minimumInntekt: Inntekt) {
-        super.`§8-51 ledd 2`(oppfylt, skjæringstidspunkt, grunnlagForSykepengegrunnlag, minimumInntekt)
+    override fun `§8-51 ledd 2`(
+        oppfylt: Boolean,
+        skjæringstidspunkt: LocalDate,
+        alderPåSkjæringstidspunkt: Int,
+        grunnlagForSykepengegrunnlag: Inntekt,
+        minimumInntekt: Inntekt
+    ) {
+        leggTil(
+            EnkelSubsumsjon(
+                utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
+                versjon = LocalDate.of(2011, 12, 16),
+                paragraf = PARAGRAF_8_51,
+                ledd = Ledd.LEDD_2,
+                input = mapOf(
+                    "skjæringstidspunkt" to skjæringstidspunkt,
+                    "alderPåSkjæringstidspunkt" to alderPåSkjæringstidspunkt,
+                    "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
+                    "minimumInntekt" to minimumInntekt.reflection { årlig, _, _, _ -> årlig }
+                ),
+                output = emptyMap(),
+                kontekster = kontekster()
+            )
+        )
     }
 
     override fun `§8-51 ledd 3`(oppfylt: Boolean, maksSykepengedagerOver67: Int, gjenståendeSykedager: Int, forbrukteSykedager: Int, maksdato: LocalDate) {

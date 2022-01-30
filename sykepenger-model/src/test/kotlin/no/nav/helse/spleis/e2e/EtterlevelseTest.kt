@@ -52,58 +52,6 @@ internal class EtterlevelseTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `§8-51 ledd 2 - har minimum inntekt 2G - over 67 år`() {
-        val GAMMEL = "01014500065".somFødselsnummer()
-        createTestPerson(GAMMEL)
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), fnr = GAMMEL)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), fnr = GAMMEL)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 187268.årlig, fnr = GAMMEL)
-        håndterYtelser(fnr = GAMMEL)
-        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER.toString(), 5.desember(2017), 31.januar))
-        håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold, fnr = GAMMEL)
-
-        assertOppfylt(
-            paragraf = PARAGRAF_8_51,
-            ledd = LEDD_2,
-            punktum = 1.punktum,
-            versjon = 16.desember(2011),
-            inputdata = mapOf(
-                "skjæringstidspunkt" to 1.januar,
-                "grunnlagForSykepengegrunnlag" to 187268.0,
-                "minimumInntekt" to 187268.0
-            ),
-            outputdata = emptyMap()
-        )
-        assertIkkeVurdert(PARAGRAF_8_3, ledd = LEDD_2, 1.punktum)
-    }
-
-    @Test
-    fun `§8-51 ledd 2 - har inntekt mindre enn 2G - over 67 år`() {
-        val GAMMEL = "01014500065".somFødselsnummer()
-        createTestPerson(GAMMEL)
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), fnr = GAMMEL)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), fnr = GAMMEL)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 187267.årlig, fnr = GAMMEL)
-        håndterYtelser(fnr = GAMMEL)
-        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER.toString(), 5.desember(2017), 31.januar))
-        håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold, fnr = GAMMEL)
-
-        assertIkkeOppfylt(
-            paragraf = PARAGRAF_8_51,
-            ledd = LEDD_2,
-            punktum = 1.punktum,
-            versjon = 16.desember(2011),
-            inputdata = mapOf(
-                "skjæringstidspunkt" to 1.januar,
-                "grunnlagForSykepengegrunnlag" to 187267.0,
-                "minimumInntekt" to 187268.0
-            ),
-            outputdata = emptyMap()
-        )
-        assertIkkeVurdert(PARAGRAF_8_3, ledd = LEDD_2, 1.punktum)
-    }
-
-    @Test
     fun `§8-51 ledd 3 - 60 sykedager etter fylte 67 år - syk 61 dager etter fylte 67 år`() {
         val GAMMEL = "01025100065".somFødselsnummer()
         createTestPerson(GAMMEL)

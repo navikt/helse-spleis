@@ -786,4 +786,68 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         SubsumsjonInspektør(jurist).assertIkkeVurdert(PARAGRAF_8_30, LEDD_2, vedtaksperiodeId = 1.vedtaksperiode)
         SubsumsjonInspektør(jurist).assertVurdert(PARAGRAF_8_30, LEDD_2, vedtaksperiodeId = 2.vedtaksperiode)
     }
+
+    @Test
+    fun `§8-51 ledd 2 - er ikke over 67 år`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 187268.årlig)
+        håndterYtelser()
+        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 5.desember(2017), 31.januar))
+        håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold)
+
+        SubsumsjonInspektør(jurist).assertIkkeVurdert(PARAGRAF_8_51, ledd = LEDD_2)
+    }
+
+    @Test
+    fun `§8-51 ledd 2 - har minimum inntekt 2G - over 67 år`() {
+        val GAMMEL = "01014500065".somFødselsnummer()
+        createTestPerson(GAMMEL)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), fnr = GAMMEL)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), fnr = GAMMEL)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 187268.årlig, fnr = GAMMEL)
+        håndterYtelser(fnr = GAMMEL)
+        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 5.desember(2017), 31.januar))
+        håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold, fnr = GAMMEL)
+
+        SubsumsjonInspektør(jurist).assertOppfylt(
+            paragraf = PARAGRAF_8_51,
+            ledd = LEDD_2,
+            versjon = 16.desember(2011),
+            input = mapOf(
+                "skjæringstidspunkt" to 1.januar,
+                "alderPåSkjæringstidspunkt" to 73,
+                "grunnlagForSykepengegrunnlag" to 187268.0,
+                "minimumInntekt" to 187268.0
+            ),
+            output = emptyMap()
+        )
+        SubsumsjonInspektør(jurist).assertIkkeVurdert(PARAGRAF_8_3, ledd = LEDD_2, 1.punktum)
+    }
+
+    @Test
+    fun `§8-51 ledd 2 - har inntekt mindre enn 2G - over 67 år`() {
+        val GAMMEL = "01014500065".somFødselsnummer()
+        createTestPerson(GAMMEL)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), fnr = GAMMEL)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), fnr = GAMMEL)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 187267.årlig, fnr = GAMMEL)
+        håndterYtelser(fnr = GAMMEL)
+        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 5.desember(2017), 31.januar))
+        håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold, fnr = GAMMEL)
+
+        SubsumsjonInspektør(jurist).assertIkkeOppfylt(
+            paragraf = PARAGRAF_8_51,
+            ledd = LEDD_2,
+            versjon = 16.desember(2011),
+            input = mapOf(
+                "skjæringstidspunkt" to 1.januar,
+                "alderPåSkjæringstidspunkt" to 73,
+                "grunnlagForSykepengegrunnlag" to 187267.0,
+                "minimumInntekt" to 187268.0
+            ),
+            output = emptyMap()
+        )
+        SubsumsjonInspektør(jurist).assertIkkeVurdert(PARAGRAF_8_3, ledd = LEDD_2, 1.punktum)
+    }
 }

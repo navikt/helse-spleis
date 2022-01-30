@@ -261,6 +261,7 @@ interface SubsumsjonObserver {
     fun `§8-51 ledd 2`(
         oppfylt: Boolean,
         skjæringstidspunkt: LocalDate,
+        alderPåSkjæringstidspunkt: Int,
         grunnlagForSykepengegrunnlag: Inntekt,
         minimumInntekt: Inntekt
     ) {
