@@ -74,9 +74,9 @@ interface SubsumsjonObserver {
      * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-3)
      *
      * @param oppfylt hvorvidt sykmeldte har inntekt lik eller større enn minimum inntekt
-     * @param skjæringstidspunkt dato som minimum inntekt settes ut fra
+     * @param skjæringstidspunkt dato det tas utgangspunkt i ved vurdering av minimum inntekt
      * @param grunnlagForSykepengegrunnlag total inntekt på tvers av alle relevante arbeidsgivere
-     * @param minimumInntekt beløpet som settes basert på [skjæringstidspunkt], og som vurderes mot [grunnlagForSykepengegrunnlag]
+     * @param minimumInntekt minimum beløp [grunnlagForSykepengegrunnlag] må være lik eller større enn for at vilkåret skal være [oppfylt]
      */
     fun `§8-3 ledd 2 punktum 1`(
         oppfylt: Boolean,
@@ -258,16 +258,24 @@ interface SubsumsjonObserver {
     ) {
     }
 
+    /**
+     * Vurdering av krav til minimum inntekt ved alder mellom 67 og 70 år
+     *
+     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-51)
+     *
+     * @param oppfylt dersom vedkommende har inntekt større enn eller lik to ganger grunnbeløpet. Det er en forutsetning at vedkommende er mellom 67 og 70 år
+     * @param skjæringstidspunkt dato det tas utgangspunkt i ved vurdering av minimum inntekt
+     * @param alderPåSkjæringstidspunkt alder på skjæringstidspunktet
+     * @param grunnlagForSykepengegrunnlag total inntekt på tvers av alle relevante arbeidsgivere
+     * @param minimumInntekt minimum beløp [grunnlagForSykepengegrunnlag] må være lik eller større enn for at vilkåret skal være [oppfylt]
+     */
     fun `§8-51 ledd 2`(
         oppfylt: Boolean,
         skjæringstidspunkt: LocalDate,
         alderPåSkjæringstidspunkt: Int,
         grunnlagForSykepengegrunnlag: Inntekt,
         minimumInntekt: Inntekt
-    ) {
-        // versjon = LocalDate.of(2011, 12, 16),
-        // punktum = 1.punktum
-    }
+    ) {}
 
     fun `§8-51 ledd 3`(
         oppfylt: Boolean,
