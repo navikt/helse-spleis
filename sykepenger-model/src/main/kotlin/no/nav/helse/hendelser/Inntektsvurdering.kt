@@ -2,11 +2,11 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.antallMåneder
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.kilder
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-30 ledd 2 punktum 1`
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonHendelse
 import no.nav.helse.person.Sykepengegrunnlag
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Prosent.Companion.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT
@@ -22,13 +22,16 @@ class Inntektsvurdering(private val inntekter: List<ArbeidsgiverInntekt>) {
         grunnlagForSykepengegrunnlag: Sykepengegrunnlag,
         sammenligningsgrunnlag: Inntekt,
         antallArbeidsgivereFraAareg: Int,
+        subsumsjonObserver: SubsumsjonObserver
     ): Boolean {
         if (inntekter.antallMåneder() > 12) aktivitetslogg.error("Forventer 12 eller færre inntektsmåneder")
         if (inntekter.kilder(3) > antallArbeidsgivereFraAareg) {
             aktivitetslogg.warn("Bruker har flere inntektskilder de siste tre månedene enn arbeidsforhold som er oppdaget i Aa-registeret.")
         }
         avviksprosent = grunnlagForSykepengegrunnlag.avviksprosent(sammenligningsgrunnlag)
-        return validerAvvik(aktivitetslogg, avviksprosent, grunnlagForSykepengegrunnlag.grunnlagForSykepengegrunnlag, sammenligningsgrunnlag) { melding, tillattAvvik ->
+        return validerAvvik(
+            aktivitetslogg, avviksprosent, grunnlagForSykepengegrunnlag.grunnlagForSykepengegrunnlag, sammenligningsgrunnlag, subsumsjonObserver
+        ) { melding, tillattAvvik ->
             error(melding, tillattAvvik)
         }
     }
@@ -42,10 +45,11 @@ class Inntektsvurdering(private val inntekter: List<ArbeidsgiverInntekt>) {
             avvik: Prosent,
             grunnlagForSykepengegrunnlag: Inntekt,
             sammenligningsgrunnlag: Inntekt,
+            subsumsjonObserver: SubsumsjonObserver,
             onFailure: IAktivitetslogg.(melding: String, tillattAvvik: Double) -> Unit
         ): Boolean {
             val harAkseptabeltAvvik = sjekkAvvik(avvik, aktivitetslogg, onFailure)
-            aktivitetslogg.`§8-30 ledd 2 punktum 1`(harAkseptabeltAvvik, MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT, grunnlagForSykepengegrunnlag, sammenligningsgrunnlag, avvik)
+            subsumsjonObserver.`§8-30 ledd 2 punktum 1`(harAkseptabeltAvvik, MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT, grunnlagForSykepengegrunnlag, sammenligningsgrunnlag, avvik)
             return harAkseptabeltAvvik
         }
 

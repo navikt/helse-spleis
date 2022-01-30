@@ -34,7 +34,7 @@ class MaskinellJurist private constructor(
 
     fun medFødselsnummer(fødselsnummer: Fødselsnummer) = kopierMedKontekst(mapOf("fødselsnummer" to fødselsnummer.toString()))
     fun medOrganisasjonsnummer(organisasjonsnummer: String) = kopierMedKontekst(mapOf("organisasjonsnummer" to organisasjonsnummer))
-    fun medVedtaksperiode(vedtaksperiodeId: UUID, hendelseIder: List<UUID>) = kopierMedKontekst(mapOf("vedtaksperiodeId" to vedtaksperiodeId.toString()))
+    fun medVedtaksperiode(vedtaksperiodeId: UUID, hendelseIder: List<UUID>) = kopierMedKontekst(mapOf("vedtaksperiode" to vedtaksperiodeId.toString()))
     private fun kopierMedKontekst(kontekster: Map<String, String>) = MaskinellJurist(this, this.kontekster + kontekster)
 
     override fun `§2`(oppfylt: Boolean) {
@@ -292,7 +292,24 @@ class MaskinellJurist private constructor(
         sammenligningsgrunnlag: Inntekt,
         avvik: Prosent
     ) {
-        super.`§8-30 ledd 2 punktum 1`(oppfylt, maksimaltTillattAvvikPåÅrsinntekt, grunnlagForSykepengegrunnlag, sammenligningsgrunnlag, avvik)
+        leggTil(
+            EnkelSubsumsjon(
+                utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
+                versjon = LocalDate.of(2017, 4, 5),
+                paragraf = Paragraf.PARAGRAF_8_30,
+                ledd = 2.ledd,
+                punktum = 1.punktum,
+                input = mapOf(
+                    "maksimaltTillattAvvikPåÅrsinntekt" to maksimaltTillattAvvikPåÅrsinntekt.prosent(),
+                    "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
+                    "sammenligningsgrunnlag" to sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig }
+                ),
+                output = mapOf(
+                    "avvik" to avvik.prosent()
+                ),
+                kontekster = kontekster()
+            )
+        )
     }
 
     override fun `§8-33 ledd 1`() {

@@ -7,6 +7,7 @@ import no.nav.helse.desember
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.januar
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -60,7 +61,8 @@ internal class InntektsvurderingTest {
             aktivitetslogg,
             grunnlagForSykepengegrunnlag,
             sammenligningsgrunnlag,
-            antallArbeidsgivereFraAareg
+            antallArbeidsgivereFraAareg,
+            MaskinellJurist()
         )
     }
 

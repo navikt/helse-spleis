@@ -728,7 +728,8 @@ class Person private constructor(
             hendelse,
             avviksprosent,
             sykepengegrunnlag.grunnlagForSykepengegrunnlag,
-            sammenligningsgrunnlag.sammenligningsgrunnlag
+            sammenligningsgrunnlag.sammenligningsgrunnlag,
+            subsumsjonObserver
         ) { _, maksimaltTillattAvvik ->
             warn("Har mer enn %.0f %% avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.", maksimaltTillattAvvik)
         }

@@ -49,7 +49,8 @@ class Vilkårsgrunnlag(
             this,
             grunnlagForSykepengegrunnlag,
             sammenligningsgrunnlag.sammenligningsgrunnlag,
-            antallArbeidsgivereFraAareg
+            antallArbeidsgivereFraAareg,
+            subsumsjonObserver
         )
         val opptjeningvurderingOk = opptjeningvurdering.valider(this, skjæringstidspunkt, subsumsjonObserver)
         val medlemskapsvurderingOk = medlemskapsvurdering.valider(this, periodetype)

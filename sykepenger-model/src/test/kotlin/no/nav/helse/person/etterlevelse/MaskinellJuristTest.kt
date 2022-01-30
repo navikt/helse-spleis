@@ -25,7 +25,7 @@ internal class MaskinellJuristTest {
             vedtaksperiodeJurist.subsumsjoner()[0],
             "fødselsnummer" to "10052088033",
             "organisasjonsnummer" to "123456789",
-            "vedtaksperiodeId" to "6bce6c83-28ab-4a8c-b7f6-8402988bc8fc"
+            "vedtaksperiode" to "6bce6c83-28ab-4a8c-b7f6-8402988bc8fc"
         )
     }
 

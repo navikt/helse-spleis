@@ -5,9 +5,10 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.inspectors.SubsumsjonInspektør
 import no.nav.helse.person.Bokstav.BOKSTAV_A
 import no.nav.helse.person.FOLKETRYGDLOVENS_OPPRINNELSESDATO
-import no.nav.helse.person.Ledd
 import no.nav.helse.person.Ledd.Companion.ledd
-import no.nav.helse.person.Paragraf
+import no.nav.helse.person.Ledd.LEDD_1
+import no.nav.helse.person.Ledd.LEDD_2
+import no.nav.helse.person.Paragraf.*
 import no.nav.helse.person.Punktum.Companion.punktum
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -34,8 +35,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold)
 
         SubsumsjonInspektør(jurist).assertOppfylt(
-            paragraf = Paragraf.PARAGRAF_8_2,
-            ledd = Ledd.LEDD_1,
+            paragraf = PARAGRAF_8_2,
+            ledd = LEDD_1,
             versjon = 12.juni(2020),
             input = mapOf(
                 "skjæringstidspunkt" to 1.januar,
@@ -62,8 +63,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold)
 
         SubsumsjonInspektør(jurist).assertIkkeOppfylt(
-            paragraf = Paragraf.PARAGRAF_8_2,
-            ledd = Ledd.LEDD_1,
+            paragraf = PARAGRAF_8_2,
+            ledd = LEDD_1,
             versjon = 12.juni(2020),
             input = mapOf(
                 "skjæringstidspunkt" to 1.januar,
@@ -92,8 +93,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterYtelser(fnr = fnr)
 
         SubsumsjonInspektør(jurist).assertOppfylt(
-            paragraf = Paragraf.PARAGRAF_8_3,
-            ledd = Ledd.LEDD_1,
+            paragraf = PARAGRAF_8_3,
+            ledd = LEDD_1,
             punktum = 2.punktum,
             versjon = 16.desember(2011),
             input = mapOf(
@@ -109,8 +110,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         )
 
         SubsumsjonInspektør(jurist).assertIkkeOppfylt(
-            paragraf = Paragraf.PARAGRAF_8_3,
-            ledd = Ledd.LEDD_1,
+            paragraf = PARAGRAF_8_3,
+            ledd = LEDD_1,
             punktum = 2.punktum,
             versjon = 16.desember(2011),
             input = mapOf(
@@ -138,8 +139,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterYtelser(fnr = fnr)
 
         SubsumsjonInspektør(jurist).assertOppfylt(
-            paragraf = Paragraf.PARAGRAF_8_3,
-            ledd = Ledd.LEDD_1,
+            paragraf = PARAGRAF_8_3,
+            ledd = LEDD_1,
             punktum = 2.punktum,
             versjon = 16.desember(2011),
             input = mapOf(
@@ -167,8 +168,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterYtelser(fnr = fnr)
 
         SubsumsjonInspektør(jurist).assertIkkeOppfylt(
-            paragraf = Paragraf.PARAGRAF_8_3,
-            ledd = Ledd.LEDD_1,
+            paragraf = PARAGRAF_8_3,
+            ledd = LEDD_1,
             punktum = 2.punktum,
             versjon = 16.desember(2011),
             input = mapOf(
@@ -197,8 +198,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterYtelser(fnr = fnr)
 
         SubsumsjonInspektør(jurist).assertIkkeOppfylt(
-            paragraf = Paragraf.PARAGRAF_8_3,
-            ledd = Ledd.LEDD_1,
+            paragraf = PARAGRAF_8_3,
+            ledd = LEDD_1,
             punktum = 2.punktum,
             versjon = 16.desember(2011),
             input = mapOf(
@@ -224,8 +225,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold)
 
         SubsumsjonInspektør(jurist).assertOppfylt(
-            paragraf = Paragraf.PARAGRAF_8_3,
-            ledd = Ledd.LEDD_2,
+            paragraf = PARAGRAF_8_3,
+            ledd = LEDD_2,
             punktum = 1.punktum,
             versjon = 16.desember(2011),
             input = mapOf(
@@ -235,7 +236,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ),
             output = emptyMap()
         )
-        SubsumsjonInspektør(jurist).assertIkkeVurdert(Paragraf.PARAGRAF_8_51, Ledd.LEDD_2, 1.punktum)
+        SubsumsjonInspektør(jurist).assertIkkeVurdert(PARAGRAF_8_51, LEDD_2, 1.punktum)
     }
 
     @Test
@@ -248,8 +249,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold)
 
         SubsumsjonInspektør(jurist).assertIkkeOppfylt(
-            paragraf = Paragraf.PARAGRAF_8_3,
-            ledd = Ledd.LEDD_2,
+            paragraf = PARAGRAF_8_3,
+            ledd = LEDD_2,
             punktum = 1.punktum,
             versjon = 16.desember(2011),
             input = mapOf(
@@ -259,7 +260,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ),
             output = emptyMap()
         )
-        SubsumsjonInspektør(jurist).assertIkkeVurdert(Paragraf.PARAGRAF_8_51, Ledd.LEDD_2, 1.punktum)
+        SubsumsjonInspektør(jurist).assertIkkeVurdert(PARAGRAF_8_51, LEDD_2, 1.punktum)
     }
 
 
@@ -272,8 +273,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterYtelser()
         håndterVilkårsgrunnlag(inntekt = maksimumSykepengegrunnlag2018)
         SubsumsjonInspektør(jurist).assertBeregnet(
-            paragraf = Paragraf.PARAGRAF_8_10,
-            ledd = Ledd.LEDD_2,
+            paragraf = PARAGRAF_8_10,
+            ledd = LEDD_2,
             punktum = 1.punktum,
             versjon = 1.januar(2020),
             input = mapOf(
@@ -297,8 +298,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterYtelser()
         håndterVilkårsgrunnlag(inntekt = inntekt)
         SubsumsjonInspektør(jurist).assertBeregnet(
-            paragraf = Paragraf.PARAGRAF_8_10,
-            ledd = Ledd.LEDD_2,
+            paragraf = PARAGRAF_8_10,
+            ledd = LEDD_2,
             punktum = 1.punktum,
             versjon = 1.januar(2020),
             input = mapOf(
@@ -330,8 +331,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning()
         håndterUtbetalt()
         SubsumsjonInspektør(jurist).assertBeregnet(
-            paragraf = Paragraf.PARAGRAF_8_10,
-            ledd = Ledd.LEDD_2,
+            paragraf = PARAGRAF_8_10,
+            ledd = LEDD_2,
             punktum = 1.punktum,
             versjon = 1.januar(2020),
             input = mapOf(
@@ -356,8 +357,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
 
         SubsumsjonInspektør(jurist).assertOppfylt(
-            paragraf = Paragraf.PARAGRAF_8_12,
-            ledd = Ledd.LEDD_1,
+            paragraf = PARAGRAF_8_12,
+            ledd = LEDD_1,
             punktum = 1.punktum,
             versjon = 21.mai(2021),
             input = mapOf(
@@ -389,8 +390,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
 
         SubsumsjonInspektør(jurist).assertOppfylt(
-            paragraf = Paragraf.PARAGRAF_8_12,
-            ledd = Ledd.LEDD_1,
+            paragraf = PARAGRAF_8_12,
+            ledd = LEDD_1,
             punktum = 1.punktum,
             versjon = 21.mai(2021),
             input = mapOf(
@@ -408,8 +409,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         )
 
         SubsumsjonInspektør(jurist).assertIkkeOppfylt(
-            paragraf = Paragraf.PARAGRAF_8_12,
-            ledd = Ledd.LEDD_1,
+            paragraf = PARAGRAF_8_12,
+            ledd = LEDD_1,
             punktum = 1.punktum,
             versjon = 21.mai(2021),
             input = mapOf(
@@ -450,8 +451,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt(2.vedtaksperiode)
 
         SubsumsjonInspektør(jurist).assertOppfylt(
-            paragraf = Paragraf.PARAGRAF_8_12,
-            ledd = Ledd.LEDD_2,
+            paragraf = PARAGRAF_8_12,
+            ledd = LEDD_2,
             punktum = emptyList(), // TODO: Avklare at det er ok å droppe punktum range
             versjon = 21.mai(2021),
             input = mapOf(
@@ -485,7 +486,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode)
 
         SubsumsjonInspektør(jurist).assertOppfylt(
-            paragraf = Paragraf.PARAGRAF_8_13,
+            paragraf = PARAGRAF_8_13,
             ledd = 1.ledd,
             versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
             input = mapOf(
@@ -510,7 +511,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             .filter { it.dayOfWeek != DayOfWeek.SATURDAY && it.dayOfWeek != DayOfWeek.SUNDAY }
 
         SubsumsjonInspektør(jurist).assertIkkeOppfylt(
-            paragraf = Paragraf.PARAGRAF_8_13,
+            paragraf = PARAGRAF_8_13,
             ledd = 1.ledd,
             versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
             input = mapOf(
@@ -530,7 +531,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
 
         SubsumsjonInspektør(jurist).assertBeregnet(
-            Paragraf.PARAGRAF_8_16,
+            paragraf = PARAGRAF_8_16,
             ledd = 1.ledd,
             versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
             input = mapOf(
@@ -553,7 +554,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
 
         SubsumsjonInspektør(jurist).assertBeregnet(
-            paragraf = Paragraf.PARAGRAF_8_17,
+            paragraf = PARAGRAF_8_17,
             ledd = 1.ledd,
             bokstaver = listOf(BOKSTAV_A),
             versjon = 1.januar,
@@ -576,7 +577,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
 
         SubsumsjonInspektør(jurist).assertBeregnet(
-            paragraf = Paragraf.PARAGRAF_8_17,
+            paragraf = PARAGRAF_8_17,
             ledd = 1.ledd,
             bokstaver = listOf(BOKSTAV_A),
             versjon = 1.januar,
@@ -595,7 +596,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 16.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
         assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET_UTEN_UTBETALING)
-        SubsumsjonInspektør(jurist).assertIkkeVurdert(paragraf = Paragraf.PARAGRAF_8_17, ledd = 1.ledd, bokstav = listOf(BOKSTAV_A))
+        SubsumsjonInspektør(jurist).assertIkkeVurdert(paragraf = PARAGRAF_8_17, ledd = 1.ledd, bokstav = listOf(BOKSTAV_A))
     }
 
     @Test
@@ -608,7 +609,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
 
         SubsumsjonInspektør(jurist).assertBeregnet(
-            Paragraf.PARAGRAF_8_30,
+            paragraf = PARAGRAF_8_30,
             ledd = 1.ledd,
             versjon = 1.januar(2019),
             input = mapOf("beregnetMånedsinntektPerArbeidsgiver" to mapOf(ORGNUMMER to 31000.0)),
@@ -627,7 +628,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
 
         SubsumsjonInspektør(jurist).assertBeregnet(
-            paragraf = Paragraf.PARAGRAF_8_30,
+            paragraf = PARAGRAF_8_30,
             ledd = 1.ledd,
             versjon = 1.januar(2019),
             input = mapOf("beregnetMånedsinntektPerArbeidsgiver" to mapOf(ORGNUMMER to 60000.0)),
@@ -668,7 +669,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
 
         SubsumsjonInspektør(jurist).assertBeregnet(
-            paragraf = Paragraf.PARAGRAF_8_30,
+            paragraf = PARAGRAF_8_30,
             ledd = 1.ledd,
             versjon = 1.januar(2019),
             input = mapOf(
@@ -679,5 +680,110 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ),
             output = mapOf("grunnlagForSykepengegrunnlag" to 1440000.0)
         )
+    }
+
+    @Test
+    fun `§8-30 ledd 2 punktum 1 - under 25 prosent avvik`() {
+        val beregnetInntekt = 31000.0
+        val sammenligningsgrunnlag = 31000.0
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = beregnetInntekt.månedlig)
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, sammenligningsgrunnlag.månedlig)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        SubsumsjonInspektør(jurist).assertOppfylt(
+            paragraf = PARAGRAF_8_30,
+            ledd = 2.ledd,
+            punktum = 1.punktum,
+            versjon = LocalDate.of(2017, 4, 5),
+            input = mapOf(
+                "maksimaltTillattAvvikPåÅrsinntekt" to 25.0,
+                "grunnlagForSykepengegrunnlag" to beregnetInntekt * 12,
+                "sammenligningsgrunnlag" to sammenligningsgrunnlag * 12
+            ),
+            output = mapOf(
+                "avvik" to 0.0
+            )
+        )
+    }
+
+    @Test
+    fun `§8-30 ledd 2 punktum 1 - akkurat 25 prosent avvik`() {
+        val beregnetInntekt = 38750.0
+        val sammenligningsgrunnlag = 31000.0
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = beregnetInntekt.månedlig)
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, sammenligningsgrunnlag.månedlig)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        SubsumsjonInspektør(jurist).assertOppfylt(
+            paragraf = PARAGRAF_8_30,
+            ledd = 2.ledd,
+            punktum = 1.punktum,
+            versjon = LocalDate.of(2017, 4, 5),
+            input = mapOf(
+                "maksimaltTillattAvvikPåÅrsinntekt" to 25.0,
+                "grunnlagForSykepengegrunnlag" to beregnetInntekt * 12,
+                "sammenligningsgrunnlag" to sammenligningsgrunnlag * 12
+            ),
+            output = mapOf(
+                "avvik" to 25.0
+            )
+        )
+    }
+
+    @Test
+    fun `§8-30 ledd 2 punktum 1 - over 25 prosent avvik`() {
+        val beregnetInntekt = 38781.0
+        val sammenligningsgrunnlag = 31000.0
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = beregnetInntekt.månedlig)
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, sammenligningsgrunnlag.månedlig)
+
+        SubsumsjonInspektør(jurist).assertIkkeOppfylt(
+            paragraf = PARAGRAF_8_30,
+            ledd = 2.ledd,
+            punktum = 1.punktum,
+            versjon = LocalDate.of(2017, 4, 5),
+            input = mapOf(
+                "maksimaltTillattAvvikPåÅrsinntekt" to 25.0,
+                "grunnlagForSykepengegrunnlag" to beregnetInntekt * 12,
+                "sammenligningsgrunnlag" to sammenligningsgrunnlag * 12
+            ),
+            output = mapOf(
+                "avvik" to 25.1
+            )
+        )
+    }
+
+    @Test
+    fun `§8-30 ledd 2 - gjør ikke ny juridisk vurdering ved sjekk av inntektsavvik i forlengelse av kort periode`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 1.januar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 1.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+
+        håndterSykmelding(Sykmeldingsperiode(2.januar, 31.januar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(2.januar, 31.januar, 100.prosent))
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt(2.vedtaksperiode)
+
+        SubsumsjonInspektør(jurist).assertIkkeVurdert(PARAGRAF_8_30, LEDD_2, vedtaksperiodeId = 1.vedtaksperiode)
+        SubsumsjonInspektør(jurist).assertVurdert(PARAGRAF_8_30, LEDD_2, vedtaksperiodeId = 2.vedtaksperiode)
     }
 }
