@@ -1,6 +1,6 @@
 package no.nav.helse.person
 
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-30 ledd 1`
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 
@@ -13,12 +13,12 @@ internal class ArbeidsgiverInntektsopplysning(private val orgnummer: String, pri
     }
 
     companion object {
-        internal fun List<ArbeidsgiverInntektsopplysning>.sykepengegrunnlag(aktivitetslogg: IAktivitetslogg): Inntekt {
+        internal fun List<ArbeidsgiverInntektsopplysning>.sykepengegrunnlag(subsumsjonObserver: SubsumsjonObserver): Inntekt {
             val grunnlagForSykepengegrunnlag = map { it.inntektsopplysning.grunnlagForSykepengegrunnlag() }.summer()
             val grunnlagForSykepengegrunnlagPerArbeidsgiver = this
                 .associateBy { it.orgnummer }
                 .mapValues { it.value.inntektsopplysning.grunnlagForSykepengegrunnlag() }
-            aktivitetslogg.`§8-30 ledd 1`(grunnlagForSykepengegrunnlagPerArbeidsgiver, grunnlagForSykepengegrunnlag)
+            subsumsjonObserver.`§8-30 ledd 1`(grunnlagForSykepengegrunnlagPerArbeidsgiver, grunnlagForSykepengegrunnlag)
             return grunnlagForSykepengegrunnlag
         }
         internal fun List<ArbeidsgiverInntektsopplysning>.sammenligningsgrunnlag(): Inntekt {

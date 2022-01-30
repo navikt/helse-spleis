@@ -13,6 +13,9 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.spleis.e2e.*
+import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
+import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
@@ -593,5 +596,88 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
         assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET_UTEN_UTBETALING)
         SubsumsjonInspektør(jurist).assertIkkeVurdert(paragraf = Paragraf.PARAGRAF_8_17, ledd = 1.ledd, bokstav = listOf(BOKSTAV_A))
+    }
+
+    @Test
+    fun `§8-30 ledd 1 - sykepengegrunnlaget utgjør aktuell månedsinntekt omregnet til årsinntekt i kontekst av §8-30 ledd 1`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+
+        SubsumsjonInspektør(jurist).assertBeregnet(
+            Paragraf.PARAGRAF_8_30,
+            ledd = 1.ledd,
+            versjon = 1.januar(2019),
+            input = mapOf("beregnetMånedsinntektPerArbeidsgiver" to mapOf(ORGNUMMER to 31000.0)),
+            output = mapOf("grunnlagForSykepengegrunnlag" to 372000.0)
+        )
+    }
+
+    @Test
+    fun `§8-30 ledd 1 - sykepengegrunnlaget utgjør aktuell månedsinntekt omregnet til årsinntekt i kontekst av §8-30 ledd 1 selv om beløpet overstiger 6G`() {
+        val inntekt = 60000
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntekt.månedlig)
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt.månedlig)
+        håndterYtelser(1.vedtaksperiode)
+
+        SubsumsjonInspektør(jurist).assertBeregnet(
+            paragraf = Paragraf.PARAGRAF_8_30,
+            ledd = 1.ledd,
+            versjon = 1.januar(2019),
+            input = mapOf("beregnetMånedsinntektPerArbeidsgiver" to mapOf(ORGNUMMER to 60000.0)),
+            output = mapOf("grunnlagForSykepengegrunnlag" to 720000.0))
+    }
+
+    @Test
+    fun `§8-30 ledd 1 - sykepengegrunnlaget utgjør aktuell månedsinntekt omregnet til årsinntekt i kontekst av §8-30 ledd 1 - flere AG`() {
+        val AG1 = "987654321"
+        val AG2 = "123456789"
+        val inntekt = 60000
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = AG1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = AG2)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = AG1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = AG2)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntekt.månedlig, orgnummer = AG1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntekt.månedlig, orgnummer = AG2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            orgnummer = AG1,
+            inntektsvurdering = Inntektsvurdering(
+                inntekter = inntektperioderForSammenligningsgrunnlag {
+                    1.januar(2017) til 1.desember(2017) inntekter {
+                        AG1 inntekt inntekt
+                        AG2 inntekt inntekt
+                    }
+                }
+            ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                inntekter = inntektperioderForSykepengegrunnlag {
+                    1.oktober(2017) til 1.desember(2017) inntekter {
+                        AG1 inntekt inntekt
+                        AG2 inntekt inntekt
+                    }
+                }, arbeidsforhold = emptyList())
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
+
+        SubsumsjonInspektør(jurist).assertBeregnet(
+            paragraf = Paragraf.PARAGRAF_8_30,
+            ledd = 1.ledd,
+            versjon = 1.januar(2019),
+            input = mapOf(
+                "beregnetMånedsinntektPerArbeidsgiver" to mapOf(
+                    AG1 to 60000.0,
+                    AG2 to 60000.0
+                )
+            ),
+            output = mapOf("grunnlagForSykepengegrunnlag" to 1440000.0)
+        )
     }
 }

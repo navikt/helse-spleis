@@ -160,7 +160,6 @@ internal class MinimumInntektsvurderingTest {
             )
         ),
         skjæringstidspunkt = skjæringstidspunkt,
-        aktivitetslogg = aktivitetslogg,
         subsumsjonObserver = MaskinellJurist()
     )
 }

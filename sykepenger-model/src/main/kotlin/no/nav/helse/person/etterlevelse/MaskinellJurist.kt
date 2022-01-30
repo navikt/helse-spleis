@@ -266,7 +266,23 @@ class MaskinellJurist private constructor(
     }
 
     override fun `§8-30 ledd 1`(grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Inntekt>, grunnlagForSykepengegrunnlag: Inntekt) {
-        super.`§8-30 ledd 1`(grunnlagForSykepengegrunnlagPerArbeidsgiver, grunnlagForSykepengegrunnlag)
+        val beregnetMånedsinntektPerArbeidsgiver = grunnlagForSykepengegrunnlagPerArbeidsgiver
+            .mapValues { it.value.reflection { _, månedlig, _, _ -> månedlig } }
+        leggTil(
+            EnkelSubsumsjon(
+                utfall = VILKAR_BEREGNET,
+                versjon = LocalDate.of(2019, 1, 1),
+                paragraf = Paragraf.PARAGRAF_8_30,
+                ledd = Ledd.LEDD_1,
+                input = mapOf(
+                    "beregnetMånedsinntektPerArbeidsgiver" to beregnetMånedsinntektPerArbeidsgiver
+                ),
+                output = mapOf(
+                    "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig }
+                ),
+                kontekster = kontekster()
+            )
+        )
     }
 
     override fun `§8-30 ledd 2 punktum 1`(

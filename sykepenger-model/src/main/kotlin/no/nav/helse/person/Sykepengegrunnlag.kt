@@ -18,10 +18,9 @@ internal class Sykepengegrunnlag(
         fun opprett(
             arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
             skjæringstidspunkt: LocalDate,
-            aktivitetslogg: IAktivitetslogg,
             subsumsjonObserver: SubsumsjonObserver
         ): Sykepengegrunnlag {
-            val inntekt = arbeidsgiverInntektsopplysninger.sykepengegrunnlag(aktivitetslogg)
+            val inntekt = arbeidsgiverInntektsopplysninger.sykepengegrunnlag(subsumsjonObserver)
             val begrensning = if (inntekt > Grunnbeløp.`6G`.beløp(skjæringstidspunkt)) ER_6G_BEGRENSET else ER_IKKE_6G_BEGRENSET
             return Sykepengegrunnlag(
                 sykepengegrunnlag(inntekt, skjæringstidspunkt, subsumsjonObserver),
@@ -34,10 +33,9 @@ internal class Sykepengegrunnlag(
         fun opprettForInfotrygd(
             arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
             skjæringstidspunkt: LocalDate,
-            aktivitetslogg: IAktivitetslogg,
             subsumsjonObserver: SubsumsjonObserver
         ): Sykepengegrunnlag {
-            val inntekt = arbeidsgiverInntektsopplysninger.sykepengegrunnlag(aktivitetslogg)
+            val inntekt = arbeidsgiverInntektsopplysninger.sykepengegrunnlag(subsumsjonObserver)
             return Sykepengegrunnlag(
                 sykepengegrunnlag(inntekt, skjæringstidspunkt, subsumsjonObserver),
                 arbeidsgiverInntektsopplysninger,

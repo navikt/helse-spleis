@@ -546,7 +546,7 @@ class Person private constructor(
         aktivitetslogg: IAktivitetslogg,
         subsumsjonObserver: SubsumsjonObserver
     ): Sykepengegrunnlag {
-        return Sykepengegrunnlag.opprett(arbeidsgivere.beregnSykepengegrunnlag(skjæringstidspunkt), skjæringstidspunkt, aktivitetslogg, subsumsjonObserver)
+        return Sykepengegrunnlag.opprett(arbeidsgivere.beregnSykepengegrunnlag(skjæringstidspunkt), skjæringstidspunkt, subsumsjonObserver)
     }
 
     private fun beregnSykepengegrunnlagForInfotrygd(
@@ -559,7 +559,7 @@ class Person private constructor(
             arbeidsgivere.beregnSykepengegrunnlag(
                 skjæringstidspunkt,
                 personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden
-            ), skjæringstidspunkt, hendelse, subsumsjonObserver
+            ), skjæringstidspunkt, subsumsjonObserver
         )
 
     internal fun beregnSammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =
