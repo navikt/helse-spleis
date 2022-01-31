@@ -40,7 +40,7 @@ internal class Alder(private val fødselsdato: LocalDate) {
 
     internal fun minimumInntekt(dato: LocalDate) = (if (forhøyetInntektskrav(dato)) Grunnbeløp.`2G` else Grunnbeløp.halvG).beløp(dato)
 
-    // Forhøyet inntektskrav gjelder fra dagen _etter_ 67-årsdagen - se §8-51 andre ledd der det spesifiseres _mellom_.
+    // Forhøyet inntektskrav gjelder fra dagen _etter_ 67-årsdagen - se § 8-51 andre ledd der det spesifiseres _mellom_.
     internal fun forhøyetInntektskrav(dato: LocalDate) = dato > forhøyetInntektskravAlder
 
     internal fun begrunnelseForMinimumInntekt(skjæringstidspunkt: LocalDate) =
