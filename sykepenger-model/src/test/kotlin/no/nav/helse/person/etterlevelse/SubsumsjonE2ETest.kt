@@ -5,9 +5,8 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.inspectors.SubsumsjonInspektør
 import no.nav.helse.person.Bokstav.BOKSTAV_A
 import no.nav.helse.person.FOLKETRYGDLOVENS_OPPRINNELSESDATO
+import no.nav.helse.person.Ledd.*
 import no.nav.helse.person.Ledd.Companion.ledd
-import no.nav.helse.person.Ledd.LEDD_1
-import no.nav.helse.person.Ledd.LEDD_2
 import no.nav.helse.person.Paragraf.*
 import no.nav.helse.person.Punktum.Companion.punktum
 import no.nav.helse.person.TilstandType
@@ -637,36 +636,36 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `§8-30 ledd 1 - sykepengegrunnlaget utgjør aktuell månedsinntekt omregnet til årsinntekt i kontekst av §8-30 ledd 1 - flere AG`() {
-        val AG1 = "987654321"
-        val AG2 = "123456789"
+        val ag1 = "987654321"
+        val ag2 = "123456789"
         val inntekt = 60000
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = AG1)
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = AG2)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = AG1)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = AG2)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntekt.månedlig, orgnummer = AG1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntekt.månedlig, orgnummer = AG2)
-        håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = ag1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = ag2)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = ag1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = ag2)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntekt.månedlig, orgnummer = ag1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntekt.månedlig, orgnummer = ag2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = ag1)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            orgnummer = AG1,
+            orgnummer = ag1,
             inntektsvurdering = Inntektsvurdering(
                 inntekter = inntektperioderForSammenligningsgrunnlag {
                     1.januar(2017) til 1.desember(2017) inntekter {
-                        AG1 inntekt inntekt
-                        AG2 inntekt inntekt
+                        ag1 inntekt inntekt
+                        ag2 inntekt inntekt
                     }
                 }
             ),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                 inntekter = inntektperioderForSykepengegrunnlag {
                     1.oktober(2017) til 1.desember(2017) inntekter {
-                        AG1 inntekt inntekt
-                        AG2 inntekt inntekt
+                        ag1 inntekt inntekt
+                        ag2 inntekt inntekt
                     }
                 }, arbeidsforhold = emptyList())
         )
-        håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = ag1)
 
         SubsumsjonInspektør(jurist).assertBeregnet(
             paragraf = PARAGRAF_8_30,
@@ -674,8 +673,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             versjon = 1.januar(2019),
             input = mapOf(
                 "beregnetMånedsinntektPerArbeidsgiver" to mapOf(
-                    AG1 to 60000.0,
-                    AG2 to 60000.0
+                    ag1 to 60000.0,
+                    ag2 to 60000.0
                 )
             ),
             output = mapOf("grunnlagForSykepengegrunnlag" to 1440000.0)
@@ -801,14 +800,14 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `§8-51 ledd 2 - har minimum inntekt 2G - over 67 år`() {
-        val GAMMEL = "01014500065".somFødselsnummer()
-        createTestPerson(GAMMEL)
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), fnr = GAMMEL)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), fnr = GAMMEL)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 187268.årlig, fnr = GAMMEL)
-        håndterYtelser(fnr = GAMMEL)
+        val personOver67år = "01014500065".somFødselsnummer()
+        createTestPerson(personOver67år)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), fnr = personOver67år)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), fnr = personOver67år)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 187268.årlig, fnr = personOver67år)
+        håndterYtelser(fnr = personOver67år)
         val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 5.desember(2017), 31.januar))
-        håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold, fnr = GAMMEL)
+        håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold, fnr = personOver67år)
 
         SubsumsjonInspektør(jurist).assertOppfylt(
             paragraf = PARAGRAF_8_51,
@@ -827,14 +826,14 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `§8-51 ledd 2 - har inntekt mindre enn 2G - over 67 år`() {
-        val GAMMEL = "01014500065".somFødselsnummer()
-        createTestPerson(GAMMEL)
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), fnr = GAMMEL)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), fnr = GAMMEL)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 187267.årlig, fnr = GAMMEL)
-        håndterYtelser(fnr = GAMMEL)
+        val personOver67år = "01014500065".somFødselsnummer()
+        createTestPerson(personOver67år)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), fnr = personOver67år)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), fnr = personOver67år)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 187267.årlig, fnr = personOver67år)
+        håndterYtelser(fnr = personOver67år)
         val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 5.desember(2017), 31.januar))
-        håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold, fnr = GAMMEL)
+        håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold, fnr = personOver67år)
 
         SubsumsjonInspektør(jurist).assertIkkeOppfylt(
             paragraf = PARAGRAF_8_51,
@@ -849,5 +848,272 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             output = emptyMap()
         )
         SubsumsjonInspektør(jurist).assertIkkeVurdert(PARAGRAF_8_3, ledd = LEDD_2, 1.punktum)
+    }
+
+    @Test
+    fun `§8-51 ledd 3 - 60 sykedager etter fylte 67 år - syk 61 dager etter fylte 67 år`() {
+        val personOver67år = "01025100065".somFødselsnummer()
+        createTestPerson(personOver67år)
+        nyttVedtak(1.januar, 31.januar, fnr = personOver67år)
+        forlengVedtak(1.februar, 28.februar, fnr = personOver67år)
+        forlengVedtak(1.mars, 31.mars, fnr = personOver67år)
+        forlengVedtak(1.april, 27.april, fnr = personOver67år)
+
+        SubsumsjonInspektør(jurist).assertOppfylt(
+            paragraf = PARAGRAF_8_51,
+            ledd = LEDD_3,
+            versjon = 16.desember(2011),
+            input = mapOf(
+                "maksSykepengedagerOver67" to 60
+            ),
+            output = mapOf(
+                "gjenståendeSykedager" to 61,
+                "forbrukteSykedager" to 11,
+                "maksdato" to 26.april
+            ),
+            vedtaksperiodeId = 1.vedtaksperiode
+        )
+
+        SubsumsjonInspektør(jurist).assertOppfylt(
+            paragraf = PARAGRAF_8_51,
+            ledd = LEDD_3,
+            versjon = 16.desember(2011),
+            input = mapOf(
+                "maksSykepengedagerOver67" to 60
+            ),
+            output = mapOf(
+                "gjenståendeSykedager" to 41,
+                "forbrukteSykedager" to 31,
+                "maksdato" to 26.april
+            ),
+            vedtaksperiodeId = 2.vedtaksperiode
+        )
+
+        SubsumsjonInspektør(jurist).assertOppfylt(
+            paragraf = PARAGRAF_8_51,
+            ledd = LEDD_3,
+            versjon = 16.desember(2011),
+            input = mapOf(
+                "maksSykepengedagerOver67" to 60
+            ),
+            output = mapOf(
+                "gjenståendeSykedager" to 19,
+                "forbrukteSykedager" to 53,
+                "maksdato" to 26.april
+            ),
+            vedtaksperiodeId = 3.vedtaksperiode
+        )
+
+        SubsumsjonInspektør(jurist).assertIkkeOppfylt(
+            paragraf = PARAGRAF_8_51,
+            ledd = LEDD_3,
+            versjon = 16.desember(2011),
+            input = mapOf(
+                "maksSykepengedagerOver67" to 60
+            ),
+            output = mapOf(
+                "gjenståendeSykedager" to 0,
+                "forbrukteSykedager" to 72,
+                "maksdato" to 26.april
+            ),
+            vedtaksperiodeId = 4.vedtaksperiode
+        )
+
+        SubsumsjonInspektør(jurist).assertOppfylt(
+            paragraf = PARAGRAF_8_51,
+            ledd = LEDD_3,
+            versjon = 16.desember(2011),
+            input = mapOf(
+                "maksSykepengedagerOver67" to 60
+            ),
+            output = mapOf(
+                "gjenståendeSykedager" to 0,
+                "forbrukteSykedager" to 72,
+                "maksdato" to 26.april
+            ),
+             vedtaksperiodeId = 4.vedtaksperiode
+        )
+    }
+
+    @Test
+    fun `§8-51 ledd 3 - 60 sykedager etter fylte 67 år - frisk på 60-årsdagen så total sykedager blir en dag mindre uten at maksdato endres`() {
+        val personOver67år = "01025100065".somFødselsnummer()
+        createTestPerson(personOver67år)
+
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), fnr = personOver67år)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), fnr = personOver67år)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, fnr = personOver67år)
+        håndterYtelser(1.vedtaksperiode, fnr = personOver67år)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, fnr = personOver67år)
+        håndterYtelser(1.vedtaksperiode, fnr = personOver67år)
+        håndterSimulering(1.vedtaksperiode, fnr = personOver67år)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, fnr = personOver67år)
+        håndterUtbetalt(1.vedtaksperiode, fnr = personOver67år)
+
+        håndterSykmelding(Sykmeldingsperiode(2.februar, 28.februar, 100.prosent), fnr = personOver67år)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(2.februar, 28.februar, 100.prosent), fnr = personOver67år)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 2.februar, fnr = personOver67år)
+        håndterYtelser(2.vedtaksperiode, fnr = personOver67år)
+        håndterVilkårsgrunnlag(2.vedtaksperiode, fnr = personOver67år)
+        håndterYtelser(2.vedtaksperiode, fnr = personOver67år)
+        håndterSimulering(2.vedtaksperiode, fnr = personOver67år)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, fnr = personOver67år)
+        håndterUtbetalt(2.vedtaksperiode, fnr = personOver67år)
+
+        SubsumsjonInspektør(jurist).assertOppfylt(
+            paragraf = PARAGRAF_8_51,
+            ledd = LEDD_3,
+            versjon = 16.desember(2011),
+            input = mapOf(
+                "maksSykepengedagerOver67" to 60
+            ),
+            output = mapOf(
+                "gjenståendeSykedager" to 61,
+                "forbrukteSykedager" to 11,
+                "maksdato" to 26.april
+            ),
+            vedtaksperiodeId = 1.vedtaksperiode
+        )
+
+        SubsumsjonInspektør(jurist).assertOppfylt(
+            paragraf = PARAGRAF_8_51,
+            ledd = LEDD_3,
+            versjon = 16.desember(2011),
+            input = mapOf(
+                "maksSykepengedagerOver67" to 60
+            ),
+            output = mapOf(
+                "gjenståendeSykedager" to 41,
+                "forbrukteSykedager" to 30,
+                "maksdato" to 26.april
+            ),
+            vedtaksperiodeId = 2.vedtaksperiode
+        )
+    }
+
+    @Test
+    fun `§8-51 ledd 3 - 60 sykedager etter fylte 67 år - frisk dagen etter 67-årsdagen så maksdato flyttes en dag`() {
+        val personOver67år = "01025100065".somFødselsnummer()
+        createTestPerson(personOver67år)
+
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 1.februar, 100.prosent), fnr = personOver67år)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 1.februar, 100.prosent), fnr = personOver67år)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, fnr = personOver67år)
+        håndterYtelser(1.vedtaksperiode, fnr = personOver67år)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, fnr = personOver67år)
+        håndterYtelser(1.vedtaksperiode, fnr = personOver67år)
+        håndterSimulering(1.vedtaksperiode, fnr = personOver67år)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, fnr = personOver67år)
+        håndterUtbetalt(1.vedtaksperiode, fnr = personOver67år)
+
+        håndterSykmelding(Sykmeldingsperiode(3.februar, 28.februar, 100.prosent), fnr = personOver67år)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.februar, 28.februar, 100.prosent), fnr = personOver67år)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 3.februar, fnr = personOver67år)
+        håndterYtelser(2.vedtaksperiode, fnr = personOver67år)
+        håndterVilkårsgrunnlag(2.vedtaksperiode, fnr = personOver67år)
+        håndterYtelser(2.vedtaksperiode, fnr = personOver67år)
+        håndterSimulering(2.vedtaksperiode, fnr = personOver67år)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, fnr = personOver67år)
+        håndterUtbetalt(2.vedtaksperiode, fnr = personOver67år)
+
+        SubsumsjonInspektør(jurist).assertOppfylt(
+            paragraf = PARAGRAF_8_51,
+            ledd = LEDD_3,
+            versjon = 16.desember(2011),
+            input = mapOf(
+                "maksSykepengedagerOver67" to 60
+            ),
+            output = mapOf(
+                "gjenståendeSykedager" to 60,
+                "forbrukteSykedager" to 12,
+                "maksdato" to 26.april
+            ),
+            vedtaksperiodeId = 1.vedtaksperiode
+        )
+
+        SubsumsjonInspektør(jurist).assertOppfylt(
+            paragraf = PARAGRAF_8_51,
+            ledd = LEDD_3,
+            versjon = 16.desember(2011),
+            input = mapOf(
+                "maksSykepengedagerOver67" to 60
+            ),
+            output = mapOf(
+                "gjenståendeSykedager" to 42,
+                "forbrukteSykedager" to 30,
+                "maksdato" to 27.april
+            ),
+            vedtaksperiodeId = 2.vedtaksperiode
+        )
+    }
+
+    @Test
+    fun `§8-51 ledd 3 - 60 sykedager etter fylte 67 år - syk 60 dager etter fylte 67 år`() {
+        val personOver67år = "01025100065".somFødselsnummer()
+        createTestPerson(personOver67år)
+        nyttVedtak(1.januar, 31.januar, fnr = personOver67år)
+        forlengVedtak(1.februar, 28.februar, fnr = personOver67år)
+        forlengVedtak(1.mars, 31.mars, fnr = personOver67år)
+        forlengVedtak(1.april, 26.april, fnr = personOver67år)
+
+        SubsumsjonInspektør(jurist).assertOppfylt(
+            paragraf = PARAGRAF_8_51,
+            ledd = LEDD_3,
+            versjon = 16.desember(2011),
+            input = mapOf(
+                "maksSykepengedagerOver67" to 60
+            ),
+            output = mapOf(
+                "gjenståendeSykedager" to 61,
+                "forbrukteSykedager" to 11,
+                "maksdato" to 26.april
+            ),
+            vedtaksperiodeId = 1.vedtaksperiode
+        )
+
+        SubsumsjonInspektør(jurist).assertOppfylt(
+            paragraf = PARAGRAF_8_51,
+            ledd = LEDD_3,
+            versjon = 16.desember(2011),
+            input = mapOf(
+                "maksSykepengedagerOver67" to 60
+            ),
+            output = mapOf(
+                "gjenståendeSykedager" to 41,
+                "forbrukteSykedager" to 31,
+                "maksdato" to 26.april
+            ),
+            vedtaksperiodeId = 2.vedtaksperiode
+        )
+
+        SubsumsjonInspektør(jurist).assertOppfylt(
+            paragraf = PARAGRAF_8_51,
+            ledd = LEDD_3,
+            versjon = 16.desember(2011),
+            input = mapOf(
+                "maksSykepengedagerOver67" to 60
+            ),
+            output = mapOf(
+                "gjenståendeSykedager" to 19,
+                "forbrukteSykedager" to 53,
+                "maksdato" to 26.april
+            ),
+            vedtaksperiodeId = 3.vedtaksperiode
+        )
+
+        SubsumsjonInspektør(jurist).assertOppfylt(
+            paragraf = PARAGRAF_8_51,
+            ledd = LEDD_3,
+            versjon = 16.desember(2011),
+            input = mapOf(
+                "maksSykepengedagerOver67" to 60
+            ),
+            output = mapOf(
+                "gjenståendeSykedager" to 0,
+                "forbrukteSykedager" to 72,
+                "maksdato" to 26.april
+            ),
+            vedtaksperiodeId = 4.vedtaksperiode
+        )
     }
 }

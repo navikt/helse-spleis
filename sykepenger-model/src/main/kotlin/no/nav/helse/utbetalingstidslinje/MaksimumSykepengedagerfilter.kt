@@ -57,7 +57,7 @@ internal class MaksimumSykepengedagerfilter(
             .reduce(Utbetalingstidslinje::plus)
             .plus(personTidslinje)
         tidslinjegrunnlag = tidslinjer + listOf(personTidslinje)
-        teller = UtbetalingTeller(alder, arbeidsgiverRegler, aktivitetslogg)
+        teller = UtbetalingTeller(alder, arbeidsgiverRegler, subsumsjonObserver)
         state = State.Initiell
         beregnetTidslinje.accept(this)
         if (::sakensStartdato.isInitialized) {

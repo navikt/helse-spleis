@@ -1,11 +1,11 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.mai
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -88,7 +88,7 @@ internal class UtbetalingTellerTest {
     }
 
     private fun grense(alder: Alder, dager: Int, dato: LocalDate = 1.januar) {
-        grense = UtbetalingTeller(alder, ArbeidsgiverRegler.Companion.NormalArbeidstaker, Aktivitetslogg()).apply {
+        grense = UtbetalingTeller(alder, ArbeidsgiverRegler.Companion.NormalArbeidstaker, MaskinellJurist()).apply {
             this.resett()
             (0 until dager).forEach { this.inkrementer(dato.plusDays(it.toLong())) }
         }

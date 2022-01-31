@@ -24,7 +24,7 @@ class MaskinellJurist private constructor(
 
     private var subsumsjoner = listOf<Subsumsjon>()
 
-    constructor(): this(null, emptyMap())
+    constructor() : this(null, emptyMap())
 
     private fun leggTil(subsumsjon: Subsumsjon) {
         subsumsjoner = subsumsjon.sammenstill(subsumsjoner)
@@ -190,28 +190,30 @@ class MaskinellJurist private constructor(
         tidslinjegrunnlag: List<List<Map<String, Any>>>,
         beregnetTidslinje: List<Map<String, Any>>
     ) {
-        leggTil(EnkelSubsumsjon(
-            utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
-            versjon = LocalDate.of(2021, 5, 21),
-            paragraf = Paragraf.PARAGRAF_8_12,
-            ledd = 2.ledd,
-            punktum = emptyList(),
-            bokstaver = emptyList(),
-            input = mapOf(
-                "dato" to dato,
-                "tilstrekkeligOppholdISykedager" to tilstrekkeligOppholdISykedager,
-                "tidslinjegrunnlag" to tidslinjegrunnlag,
-                "beregnetTidslinje" to beregnetTidslinje
-            ),
-            output = emptyMap(),
-            kontekster = kontekster()
-        ))
+        leggTil(
+            EnkelSubsumsjon(
+                utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
+                versjon = LocalDate.of(2021, 5, 21),
+                paragraf = Paragraf.PARAGRAF_8_12,
+                ledd = 2.ledd,
+                punktum = emptyList(),
+                bokstaver = emptyList(),
+                input = mapOf(
+                    "dato" to dato,
+                    "tilstrekkeligOppholdISykedager" to tilstrekkeligOppholdISykedager,
+                    "tidslinjegrunnlag" to tidslinjegrunnlag,
+                    "beregnetTidslinje" to beregnetTidslinje
+                ),
+                output = emptyMap(),
+                kontekster = kontekster()
+            )
+        )
     }
 
     override fun `§8-13 ledd 1`(oppfylt: Boolean, avvisteDager: List<LocalDate>) {
         leggTil(
             EnkelSubsumsjon(
-                utfall = if(oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
+                utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
                 paragraf = Paragraf.PARAGRAF_8_13,
                 ledd = Ledd.LEDD_1,
                 versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
@@ -252,7 +254,7 @@ class MaskinellJurist private constructor(
                 ),
                 output = mapOf(
                     "førsteUtbetalingsdag" to førsteNavdag
-                 ),
+                ),
                 kontekster = kontekster()
             )
         )
@@ -347,7 +349,23 @@ class MaskinellJurist private constructor(
     }
 
     override fun `§8-51 ledd 3`(oppfylt: Boolean, maksSykepengedagerOver67: Int, gjenståendeSykedager: Int, forbrukteSykedager: Int, maksdato: LocalDate) {
-        super.`§8-51 ledd 3`(oppfylt, maksSykepengedagerOver67, gjenståendeSykedager, forbrukteSykedager, maksdato)
+        leggTil(
+            EnkelSubsumsjon(
+                utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
+                versjon = LocalDate.of(2011, 12, 16),
+                paragraf = PARAGRAF_8_51,
+                ledd = Ledd.LEDD_3,
+                input = mapOf(
+                    "maksSykepengedagerOver67" to maksSykepengedagerOver67
+                ),
+                output = mapOf(
+                    "gjenståendeSykedager" to gjenståendeSykedager,
+                    "forbrukteSykedager" to forbrukteSykedager,
+                    "maksdato" to maksdato
+                ),
+                kontekster = kontekster()
+            )
+        )
     }
 
     fun subsumsjoner() = subsumsjoner.toList()

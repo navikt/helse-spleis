@@ -277,16 +277,18 @@ interface SubsumsjonObserver {
         minimumInntekt: Inntekt
     ) {}
 
-    fun `§8-51 ledd 3`(
-        oppfylt: Boolean,
-        maksSykepengedagerOver67: Int,
-        gjenståendeSykedager: Int,
-        forbrukteSykedager: Int,
-        maksdato: LocalDate
-    ) {
-        // versjon = LocalDate.of(2011, 12, 16),
-        // punktum = 1.punktum
-    }
+    /**
+     * Vurdering av maksimalt antall sykepengedager ved fytle 67 år
+     *
+     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-51)
+     *
+     * @param oppfylt dersom vedkommende ikke har brukt opp alle sykepengedagene sine. Det er en forutsetning at vedkommende er mellom 67 og 70 år
+     * @param maksSykepengedagerOver67 maksimalt antall sykepengedager ved fylte 67 år
+     * @param gjenståendeSykedager antall gjenstående sykedager
+     * @param forbrukteSykedager antall forbrukte sykedager
+     * @param maksdato siste utbetalingsdag av sykepenger
+     */
+    fun `§8-51 ledd 3`(oppfylt: Boolean, maksSykepengedagerOver67: Int, gjenståendeSykedager: Int, forbrukteSykedager: Int, maksdato: LocalDate) {}
 
     private class UtbetalingstidslinjeVisitor(utbetalingstidslinje: Utbetalingstidslinje) : UtbetalingsdagVisitor {
         private val navdager = mutableListOf<Periode>()

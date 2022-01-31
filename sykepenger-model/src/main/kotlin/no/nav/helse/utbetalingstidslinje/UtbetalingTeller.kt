@@ -1,7 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-51 ledd 3`
-import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.SykepengedagerOppbrukt
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -12,7 +11,7 @@ internal class UtbetalingTeller private constructor(
     private val arbeidsgiverRegler: ArbeidsgiverRegler,
     private var forbrukteDager: Int,
     private var gammelPersonDager: Int,
-    private val aktivitetslogg: IAktivitetslogg
+    private val subsumsjonObserver: SubsumsjonObserver
 ) {
     private companion object {
         private const val HISTORISK_PERIODE_I_ÅR: Long = 3
@@ -22,8 +21,8 @@ internal class UtbetalingTeller private constructor(
     private lateinit var startdatoTreårsvindu: LocalDate
     private val betalteDager = mutableSetOf<LocalDate>()
 
-    internal constructor(alder: Alder, arbeidsgiverRegler: ArbeidsgiverRegler, aktivitetslogg: IAktivitetslogg) :
-        this(alder, arbeidsgiverRegler, 0,0,aktivitetslogg)
+    internal constructor(alder: Alder, arbeidsgiverRegler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver) :
+        this(alder, arbeidsgiverRegler, 0, 0, subsumsjonObserver)
 
 
     internal fun begrunnelse(dato: LocalDate): Begrunnelse {
@@ -104,18 +103,17 @@ internal class UtbetalingTeller private constructor(
     }
 
     internal fun `§8-51 ledd 3`(maksdato: LocalDate) {
-        aktivitetslogg.`§8-51 ledd 3`(
+        subsumsjonObserver.`§8-51 ledd 3`(
             oppfylt = false,
             maksSykepengedagerOver67 = arbeidsgiverRegler.maksSykepengedagerOver67(),
             gjenståendeSykedager = 0,
             forbrukteSykedager = forbrukteDager,
             maksdato = maksdato
         )
-
     }
 
     private fun `§8-51 ledd 3 - beregning`(forbrukteSykedager: Int, gjenståendeSykedager: Int, maksdato: LocalDate) {
-        aktivitetslogg.`§8-51 ledd 3`(
+        subsumsjonObserver.`§8-51 ledd 3`(
             oppfylt = true,
             maksSykepengedagerOver67 = arbeidsgiverRegler.maksSykepengedagerOver67(),
             gjenståendeSykedager = gjenståendeSykedager,
@@ -153,7 +151,7 @@ internal class UtbetalingTeller private constructor(
 
     private fun beregnGjenståendeSykepengedager(sisteUtbetalingsdag: LocalDate) {
         val faktiskeDagerTeller = this
-        val gjenståendeDagerTeller = UtbetalingTeller(alder, arbeidsgiverRegler, forbrukteDager, gammelPersonDager, aktivitetslogg)
+        val gjenståendeDagerTeller = UtbetalingTeller(alder, arbeidsgiverRegler, forbrukteDager, gammelPersonDager, subsumsjonObserver)
         var result = sisteUtbetalingsdag
         var teller = 0
         while (gjenståendeDagerTeller.erFørMaksdato(result)) {

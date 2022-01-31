@@ -1,6 +1,7 @@
 package no.nav.helse.inspectors
 
 import no.nav.helse.person.*
+import no.nav.helse.person.AbstractPersonTest.Companion.ORGNUMMER
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.*
@@ -45,7 +46,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
                 && bokstav?.equals(it.bokstaver) ?: true
                 && vedtaksperiodeId?.equals(it.vedtaksperiodeIdFraSporing()) ?: true
         }.let {
-            assertEquals(1, it.size, "Forventer en, og kun en subsumsjon for vilkåret. Subsumsjoner funnet: $subsumsjoner")
+            assertEquals(1, it.size, "Forventer en, og kun en subsumsjon for vilkåret. Subsumsjoner funnet: $it")
             it.first()
         }
 
@@ -71,8 +72,10 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         bokstaver: List<Bokstav> = emptyList(),
         input: Map<String, Any>,
         output: Map<String, Any>,
+        vedtaksperiodeId: IdInnhenter? = null,
+        organisasjonsnummer: String = ORGNUMMER
     ) {
-        val resultat = finnSubsumsjon(paragraf, versjon, ledd, punktum, bokstaver, VILKAR_OPPFYLT)
+        val resultat = finnSubsumsjon(paragraf, versjon, ledd, punktum, bokstaver, VILKAR_OPPFYLT, vedtaksperiodeId?.id(organisasjonsnummer))
         assertEquals(VILKAR_OPPFYLT, resultat.utfall) { "Forventet oppfylt $paragraf $ledd $punktum" }
         assertResultat(input, output, resultat)
     }
@@ -85,8 +88,10 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         bokstaver: List<Bokstav> = emptyList(),
         input: Map<String, Any>,
         output: Map<String, Any>,
+        vedtaksperiodeId: IdInnhenter? = null,
+        organisasjonsnummer: String = ORGNUMMER
     ) {
-        val resultat = finnSubsumsjon(paragraf, versjon, ledd, punktum, bokstaver, VILKAR_IKKE_OPPFYLT)
+        val resultat = finnSubsumsjon(paragraf, versjon, ledd, punktum, bokstaver, VILKAR_IKKE_OPPFYLT, vedtaksperiodeId?.id(organisasjonsnummer))
         assertEquals(VILKAR_IKKE_OPPFYLT, resultat.utfall) { "Forventet ikke oppfylt $paragraf $ledd $punktum" }
         assertResultat(input, output, resultat)
     }
