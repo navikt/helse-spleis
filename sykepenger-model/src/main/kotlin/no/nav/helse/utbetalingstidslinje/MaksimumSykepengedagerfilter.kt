@@ -64,8 +64,9 @@ internal class MaksimumSykepengedagerfilter(
             val avvisteDager = avvisteDager.filter { sakensStartdato <= it }
             subsumsjonObserver.`§ 8-12 ledd 1 punktum 1`(
                 avvisteDager !in periode,
-                this.avvisteDager.firstOrNull() ?: sakensStartdato,
-                this.avvisteDager.lastOrNull() ?: sisteBetalteDag,
+                periode,
+                avvisteDager.firstOrNull() ?: sakensStartdato,
+                avvisteDager.lastOrNull() ?: sisteBetalteDag,
                 tidslinjegrunnlag.toSubsumsjonFormat(),
                 beregnetTidslinje.toSubsumsjonFormat(),
                 gjenståendeSykedager(),
@@ -171,16 +172,20 @@ internal class MaksimumSykepengedagerfilter(
     }
 
     private fun nextState(dagen: LocalDate): State? {
-        if (opphold >= TILSTREKKELIG_OPPHOLD_I_SYKEDAGER) {
+        (opphold >= TILSTREKKELIG_OPPHOLD_I_SYKEDAGER).let { harTilstrekkeligOpphold ->
             subsumsjonObserver.`§ 8-12 ledd 2`(
-                true,
-                dagen,
-                TILSTREKKELIG_OPPHOLD_I_SYKEDAGER,
-                tidslinjegrunnlag.toSubsumsjonFormat(),
-                beregnetTidslinje.toSubsumsjonFormat()
+                oppfylt = harTilstrekkeligOpphold,
+                dato = dagen,
+                gjenståendeSykepengedager = gjenståendeSykedager(),
+                beregnetAntallOppholdsdager = opphold,
+                tilstrekkeligOppholdISykedager = TILSTREKKELIG_OPPHOLD_I_SYKEDAGER,
+                tidslinjegrunnlag = tidslinjegrunnlag.toSubsumsjonFormat(),
+                beregnetTidslinje = beregnetTidslinje.toSubsumsjonFormat(),
             )
-            teller.resett()
-            return State.Initiell
+            if (harTilstrekkeligOpphold) {
+                teller.resett()
+                return State.Initiell
+            }
         }
         if (state == State.Karantene) return null
         if (teller.erFørMaksdato(dagen)) return null
@@ -189,6 +194,7 @@ internal class MaksimumSykepengedagerfilter(
             hvis248Dager = {
                 subsumsjonObserver.`§ 8-12 ledd 1 punktum 1`(
                     true,
+                    periode,
                     sakensStartdato,
                     sisteBetalteDag,
                     tidslinjegrunnlag.toSubsumsjonFormat(),

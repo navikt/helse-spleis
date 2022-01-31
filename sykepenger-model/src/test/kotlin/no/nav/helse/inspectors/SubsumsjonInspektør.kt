@@ -75,7 +75,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         vedtaksperiodeId: IdInnhenter? = null,
         organisasjonsnummer: String = ORGNUMMER
     ) {
-        val resultat = finnSubsumsjon(paragraf, versjon, ledd, punktum, bokstaver, VILKAR_OPPFYLT, vedtaksperiodeId?.id(organisasjonsnummer))
+        val resultat = finnSubsumsjon(paragraf, versjon, ledd, punktum, bokstaver, VILKAR_OPPFYLT, vedtaksperiodeId = vedtaksperiodeId?.id(organisasjonsnummer))
         assertEquals(VILKAR_OPPFYLT, resultat.utfall) { "Forventet oppfylt $paragraf $ledd $punktum" }
         assertResultat(input, output, resultat)
     }
@@ -91,7 +91,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         vedtaksperiodeId: IdInnhenter? = null,
         organisasjonsnummer: String = ORGNUMMER
     ) {
-        val resultat = finnSubsumsjon(paragraf, versjon, ledd, punktum, bokstaver, VILKAR_IKKE_OPPFYLT, vedtaksperiodeId?.id(organisasjonsnummer))
+        val resultat = finnSubsumsjon(paragraf, versjon, ledd, punktum, bokstaver, VILKAR_IKKE_OPPFYLT, vedtaksperiodeId = vedtaksperiodeId?.id(organisasjonsnummer))
         assertEquals(VILKAR_IKKE_OPPFYLT, resultat.utfall) { "Forventet ikke oppfylt $paragraf $ledd $punktum" }
         assertResultat(input, output, resultat)
     }
@@ -103,7 +103,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         bokstaver: List<Bokstav>? = null,
         vedtaksperiodeId: IdInnhenter? = null,
         versjon: LocalDate? = null,
-        organisasjonsnummer: String = AbstractPersonTest.ORGNUMMER
+        organisasjonsnummer: String = ORGNUMMER
     ) {
         assertDoesNotThrow("Forventet at $paragraf $ledd $punktum er vurdert") {
             finnSubsumsjon(paragraf, versjon, ledd, punktum, bokstaver, null, vedtaksperiodeId?.id(organisasjonsnummer))
@@ -117,7 +117,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         bokstav: List<Bokstav>? = null,
         vedtaksperiodeId: IdInnhenter? = null,
         versjon: LocalDate? = null,
-        organisasjonsnummer: String = AbstractPersonTest.ORGNUMMER
+        organisasjonsnummer: String = ORGNUMMER
     ) {
         assertThrows<AssertionFailedError> {
             finnSubsumsjon(paragraf, versjon, ledd, punktum, bokstav, null, vedtaksperiodeId?.id(organisasjonsnummer))

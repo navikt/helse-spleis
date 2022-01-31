@@ -16,11 +16,13 @@ import no.nav.helse.spleis.e2e.*
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.temporal.TemporalAdjusters
 
 internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
 
@@ -361,9 +363,9 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             punktum = 1.punktum,
             versjon = 21.mai(2021),
             input = mapOf(
-                "fom" to 19.januar,
-                "tom" to 26.januar,
-                "tidslinjegrunnlag" to listOf(listOf(mapOf("fom" to 19.januar, "tom" to 26.januar, "dagtype" to "NAVDAG")), emptyList()),
+                "utfallFom" to 19.januar,
+                "utfallTom" to 26.januar,
+                "tidslinjegrunnlag" to listOf(listOf(mapOf("fom" to 19.januar, "tom" to 26.januar, "dagtype" to "NAVDAG"))),
                 "beregnetTidslinje" to listOf(mapOf("fom" to 19.januar, "tom" to 26.januar, "dagtype" to "NAVDAG"))
             ),
             output = mapOf(
@@ -394,9 +396,9 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             punktum = 1.punktum,
             versjon = 21.mai(2021),
             input = mapOf(
-                "fom" to 19.januar,
-                "tom" to 1.januar(2019),
-                "tidslinjegrunnlag" to listOf(listOf(mapOf("fom" to 19.januar, "tom" to 11.januar(2019), "dagtype" to "NAVDAG")), emptyList()),
+                "utfallFom" to 19.januar,
+                "utfallTom" to 1.januar(2019),
+                "tidslinjegrunnlag" to listOf(listOf(mapOf("fom" to 19.januar, "tom" to 11.januar(2019), "dagtype" to "NAVDAG"))),
                 "beregnetTidslinje" to listOf(mapOf("fom" to 19.januar, "tom" to 11.januar(2019), "dagtype" to "NAVDAG"))
             ),
             output = mapOf(
@@ -413,9 +415,9 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             punktum = 1.punktum,
             versjon = 21.mai(2021),
             input = mapOf(
-                "fom" to 2.januar(2019),
-                "tom" to 11.januar(2019),
-                "tidslinjegrunnlag" to listOf(listOf(mapOf("fom" to 19.januar, "tom" to 11.januar(2019), "dagtype" to "NAVDAG")), emptyList()),
+                "utfallFom" to 2.januar(2019),
+                "utfallTom" to 11.januar(2019),
+                "tidslinjegrunnlag" to listOf(listOf(mapOf("fom" to 19.januar, "tom" to 11.januar(2019), "dagtype" to "NAVDAG"))),
                 "beregnetTidslinje" to listOf(mapOf("fom" to 19.januar, "tom" to 11.januar(2019), "dagtype" to "NAVDAG"))
             ),
             output = mapOf(
@@ -426,6 +428,51 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             )
         )
     }
+
+    @Test
+    fun `§8-12 ledd 1 punktum 1 - Blir kun vurdert en gang etter ny periode med ny rett til sykepenger`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar(2018), 31.januar(2018), 100.prosent))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar(2018), 16.januar(2018))))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar(2018), 31.januar(2018), 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.januar(2018))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+
+        repeat(11) {
+            val fom = 1.januar(2018).plusMonths(it + 1L).with(TemporalAdjusters.firstDayOfMonth())
+            val tom = fom.with(TemporalAdjusters.lastDayOfMonth())
+
+            håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent), sendtTilNAVEllerArbeidsgiver = tom)
+
+            håndterYtelser((it + 2).vedtaksperiode)
+            håndterSimulering((it + 2).vedtaksperiode)
+            håndterUtbetalingsgodkjenning((it + 2).vedtaksperiode, true)
+            håndterUtbetalt((it + 2).vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        }
+
+        håndterSykmelding(Sykmeldingsperiode(16.juni(2019), 31.juli(2019), 50.prosent))
+        håndterSøknadMedValidering(13.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(16.juni(2019), 31.juli(2019), 50.prosent, 50.prosent))
+        håndterInntektsmeldingMedValidering(13.vedtaksperiode, listOf(Periode(16.juni(2019), 31.juli(2019))))
+        håndterYtelser(13.vedtaksperiode)
+        håndterVilkårsgrunnlag(13.vedtaksperiode, INNTEKT)
+        håndterYtelser(13.vedtaksperiode)
+        håndterSimulering(13.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(13.vedtaksperiode)
+        håndterUtbetalt(13.vedtaksperiode)
+
+        SubsumsjonInspektør(jurist).assertVurdert(
+            paragraf = PARAGRAF_8_12,
+            ledd = 1.ledd,
+            punktum = 1.punktum,
+            versjon = LocalDate.of(2021, 5, 21),
+            vedtaksperiodeId = 13.vedtaksperiode
+        )
+    }
+
 
     @Test
     fun `§ 8-12 ledd 2 - Bruker har vært arbeidsfør i 26 uker`() {
@@ -449,10 +496,16 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt(2.vedtaksperiode)
 
+
+        SubsumsjonInspektør(jurist).assertIkkeVurdert(
+            paragraf = PARAGRAF_8_12,
+            ledd = LEDD_2,
+            versjon = 21.mai(2021),
+            vedtaksperiodeId = 1.vedtaksperiode
+        )
         SubsumsjonInspektør(jurist).assertOppfylt(
             paragraf = PARAGRAF_8_12,
             ledd = LEDD_2,
-            punktum = emptyList(), // TODO: Avklare at det er ok å droppe punktum range
             versjon = 21.mai(2021),
             input = mapOf(
                 "dato" to 1.august,
@@ -461,15 +514,68 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                     listOf(
                         mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG"),
                         mapOf("fom" to 2.august, "tom" to 31.august, "dagtype" to "NAVDAG")
-                    ), emptyList()
+                    )
                 ),
                 "beregnetTidslinje" to listOf(
                     mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG"),
                     mapOf("fom" to 2.august, "tom" to 31.august, "dagtype" to "NAVDAG")
                 )
             ),
-            output = emptyMap()
+            output = emptyMap(),
+            vedtaksperiodeId = 2.vedtaksperiode
         )
+    }
+
+    @Test
+    fun `§8-12 ledd 2 - Bruker har ikke vært arbeidsfør i 26 uker`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar(2018), 31.januar(2018), 100.prosent))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar(2018), 16.januar(2018))))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar(2018), 31.januar(2018), 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.januar(2018))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+
+        repeat(11) {
+            val fom = 1.januar(2018).plusMonths(it + 1L).with(TemporalAdjusters.firstDayOfMonth())
+            val tom = fom.with(TemporalAdjusters.lastDayOfMonth())
+
+            håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent), sendtTilNAVEllerArbeidsgiver = tom)
+
+            håndterYtelser((it + 2).vedtaksperiode)
+            håndterSimulering((it + 2).vedtaksperiode)
+            håndterUtbetalingsgodkjenning((it + 2).vedtaksperiode, true)
+            håndterUtbetalt((it + 2).vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        }
+
+        håndterSykmelding(Sykmeldingsperiode(1.januar(2019), 31.januar(2019), 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar(2019), 31.januar(2019), 100.prosent), sendtTilNAVEllerArbeidsgiver = 31.januar(2019))
+        håndterYtelser(13.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(13.vedtaksperiode, true)
+        håndterUtbetalt(13.vedtaksperiode)
+
+        SubsumsjonInspektør(jurist).assertIkkeOppfylt(
+            paragraf = PARAGRAF_8_12,
+            ledd = LEDD_2,
+            punktum = emptyList(),
+            versjon = 21.mai(2021),
+            input = mapOf(
+                "dato" to 28.desember,
+                "tilstrekkeligOppholdISykedager" to 182,
+                "tidslinjegrunnlag" to listOf(
+                    listOf(
+                        mapOf("fom" to 17.januar, "tom" to 31.januar(2019), "dagtype" to "NAVDAG")
+                    )
+                ),
+                "beregnetTidslinje" to listOf(mapOf("fom" to 17.januar, "tom" to 31.januar(2019), "dagtype" to "NAVDAG"))
+            ),
+            output = emptyMap(),
+            vedtaksperiodeId = 13.vedtaksperiode
+        )
+
     }
 
     @Test

@@ -1,7 +1,9 @@
 package no.nav.helse.person.etterlevelse
 
 import no.nav.helse.Fødselsnummer
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.Bokstav.BOKSTAV_A
 import no.nav.helse.person.FOLKETRYGDLOVENS_OPPRINNELSESDATO
 import no.nav.helse.person.Ledd
@@ -150,6 +152,7 @@ class MaskinellJurist private constructor(
 
     override fun `§ 8-12 ledd 1 punktum 1`(
         oppfylt: Boolean,
+        periode: Periode,
         fom: LocalDate,
         tom: LocalDate,
         tidslinjegrunnlag: List<List<Map<String, Any>>>,
@@ -160,15 +163,16 @@ class MaskinellJurist private constructor(
         avvisteDager: List<LocalDate>
     ) {
         leggTil(
-            EnkelSubsumsjon(
+            BetingetSubsumsjon(
+                funnetRelevant = periode.overlapperMed(fom til tom),
                 utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
                 versjon = LocalDate.of(2021, 5, 21),
                 paragraf = Paragraf.PARAGRAF_8_12,
                 ledd = 1.ledd,
                 punktum = 1.punktum,
                 input = mapOf(
-                    "fom" to fom,
-                    "tom" to tom,
+                    "utfallFom" to fom,
+                    "utfallTom" to tom,
                     "tidslinjegrunnlag" to tidslinjegrunnlag,
                     "beregnetTidslinje" to beregnetTidslinje
                 ),
@@ -186,12 +190,15 @@ class MaskinellJurist private constructor(
     override fun `§ 8-12 ledd 2`(
         oppfylt: Boolean,
         dato: LocalDate,
+        gjenståendeSykepengedager: Int,
+        beregnetAntallOppholdsdager: Int,
         tilstrekkeligOppholdISykedager: Int,
         tidslinjegrunnlag: List<List<Map<String, Any>>>,
         beregnetTidslinje: List<Map<String, Any>>
     ) {
         leggTil(
-            EnkelSubsumsjon(
+            BetingetSubsumsjon(
+            funnetRelevant = oppfylt || gjenståendeSykepengedager == 0, // Bare relevant om det er ny rett på sykepenger eller om vilkåret ikke er oppfylt
                 utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
                 versjon = LocalDate.of(2021, 5, 21),
                 paragraf = Paragraf.PARAGRAF_8_12,

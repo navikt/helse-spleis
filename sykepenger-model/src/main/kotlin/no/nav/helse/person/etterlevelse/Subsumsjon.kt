@@ -74,6 +74,10 @@ abstract class Subsumsjon {
         return result
     }
 
+    override fun toString(): String {
+        return "$paragraf $ledd ${if (punktum.isEmpty()) "" else punktum[0]} ${if (bokstaver.isEmpty()) "" else bokstaver[0]} [$utfall]"
+    }
+
     internal companion object {
         fun List<Subsumsjon>.erstatt(replacee: Subsumsjon, replacement: Subsumsjon): List<Subsumsjon> {
             return this.toMutableList().apply {
