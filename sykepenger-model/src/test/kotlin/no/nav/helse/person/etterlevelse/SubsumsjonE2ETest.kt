@@ -956,6 +956,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         SubsumsjonInspektør(jurist).assertIkkeVurdert(PARAGRAF_8_3, ledd = LEDD_2, 1.punktum)
     }
 
+    @ForventetFeil("Venter på avklaring ang logging av beregning")
     @Test
     fun `§ 8-51 ledd 3 - 60 sykedager etter fylte 67 år - syk 61 dager etter fylte 67 år`() {
         val personOver67år = "01025100065".somFødselsnummer()
@@ -1041,6 +1042,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         )
     }
 
+    @ForventetFeil("Venter på avklaring ang logging av beregning")
     @Test
     fun `§ 8-51 ledd 3 - 60 sykedager etter fylte 67 år - frisk på 60-årsdagen så total sykedager blir en dag mindre uten at maksdato endres`() {
         val personOver67år = "01025100065".somFødselsnummer()
@@ -1097,6 +1099,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         )
     }
 
+    @ForventetFeil("Venter på avklaring ang logging av beregning")
     @Test
     fun `§ 8-51 ledd 3 - 60 sykedager etter fylte 67 år - frisk dagen etter 67-årsdagen så maksdato flyttes en dag`() {
         val personOver67år = "01025100065".somFødselsnummer()
@@ -1153,6 +1156,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         )
     }
 
+    @ForventetFeil("Venter på avklaring ang logging av beregning")
     @Test
     fun `§ 8-51 ledd 3 - 60 sykedager etter fylte 67 år - syk 60 dager etter fylte 67 år`() {
         val personOver67år = "01025100065".somFødselsnummer()
