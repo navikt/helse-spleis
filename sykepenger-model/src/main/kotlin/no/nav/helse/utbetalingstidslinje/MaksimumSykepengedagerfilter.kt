@@ -234,6 +234,7 @@ internal class MaksimumSykepengedagerfilter(
                 avgrenser.teller.inkrementer(dagen)
                 avgrenser.sisteBetalteDag = dagen
                 avgrenser.nextState(dagen)?.run { avgrenser.state(this) }
+                avgrenser.opphold = 0
             }
 
             override fun oppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
