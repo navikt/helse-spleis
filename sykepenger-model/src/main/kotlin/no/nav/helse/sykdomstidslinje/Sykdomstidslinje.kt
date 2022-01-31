@@ -326,29 +326,6 @@ internal class Sykdomstidslinje private constructor(
             kilde: Hendelseskilde
         ) = if (dato < avskjæringsdato) ForeldetSykedag(dato, økonomi, kilde) else Sykedag(dato, økonomi, kilde)
 
-        internal fun foreldetSykedag(
-            førsteDato: LocalDate,
-            sisteDato: LocalDate,
-            grad: Prosentdel,
-            kilde: Hendelseskilde
-        ) =
-            Sykdomstidslinje(
-                førsteDato.datesUntil(sisteDato.plusDays(1))
-                    .collect(
-                        toMap(
-                            { it },
-                            {
-                                Økonomi.sykdomsgrad(grad).let { økonomi ->
-                                    if (it.erHelg()) SykHelgedag(it, økonomi, kilde) else ForeldetSykedag(
-                                        it,
-                                        økonomi,
-                                        kilde
-                                    )
-                                }
-                            })
-                    )
-            )
-
         internal fun arbeidsgiverdager(
             førsteDato: LocalDate,
             sisteDato: LocalDate,

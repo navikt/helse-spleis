@@ -41,9 +41,10 @@ internal val Int.U
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.K
-    get() = Sykdomstidslinje.foreldetSykedag(
+    get() = Sykdomstidslinje.sykedager(
         dagensDato,
         dagensDato.plusDays(this.toLong() - 1),
+        dagensDato.plusMonths(4),
         100.prosent,
         TestHendelse.kilde
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
