@@ -24,11 +24,9 @@ internal class MaksimumSykepengedagerfilter(
     }
 
     private lateinit var sisteDag: LocalDate
-    private lateinit var sisteBetalteDag: LocalDate
     private lateinit var state: State
     private lateinit var teller: UtbetalingTeller
     private var opphold = 0
-    private lateinit var sakensStartdato: LocalDate  // Date of first NAV payment in a new 248 period
     private val begrunnelserForAvvisteDager = mutableMapOf<Begrunnelse, MutableSet<LocalDate>>()
     private val avvisteDager get() = begrunnelserForAvvisteDager.values.flatten().toSet()
     private lateinit var beregnetTidslinje: Utbetalingstidslinje
@@ -40,13 +38,27 @@ internal class MaksimumSykepengedagerfilter(
         }.add(dag)
     }
 
-    private val maksimumSykepengersporing = object : Alder.MaksimumSykepenger.Begrunnelse {
-        override fun `§ 8-12 ledd 1 punktum 1`(dato: LocalDate, gjenståendeSykepengedager: Int) {
-            // TODO: venter på avklaring om vi skal lagre vurdering for beregninger
+    private val karantenesporing = object : Alder.MaksimumSykepenger.Begrunnelse {
+        override fun `§ 8-12 ledd 1 punktum 1`(dato: LocalDate, forbrukteDager: Int, gjenståendeDager: Int) {
+            val sakensStartdato = teller.startdatoSykepengerettighet() ?: return
+
+            val avvisteDager = avvisteDager.filter { sakensStartdato <= it }
+            val oppfylt = avvisteDager.none { it in periode }
+            subsumsjonObserver.`§ 8-12 ledd 1 punktum 1`(
+                oppfylt,
+                periode,
+                if (oppfylt) sakensStartdato else avvisteDager.firstOrNull() ?: sakensStartdato,
+                if (oppfylt) teller.sisteBetalteDag() else avvisteDager.lastOrNull() ?: dato,
+                tidslinjegrunnlag.toSubsumsjonFormat(),
+                beregnetTidslinje.toSubsumsjonFormat(),
+                gjenståendeDager,
+                forbrukteDager,
+                dato,
+                avvisteDager
+            )
         }
 
-        override fun `§ 8-51 ledd 3`(dato: LocalDate, gjenståendeSykepengedager: Int) {
-            // TODO: venter på avklaring om vi skal lagre vurdering for beregninger
+        override fun `§ 8-51 ledd 3`(dato: LocalDate, forbrukteDager: Int, gjenståendeDager: Int) {
             /*aktivitetslogg.`§8-51 ledd 3`(
                 oppfylt = gjenståendeSykepengedager > 0,
                 maksSykepengedagerOver67 = arbeidsgiverRegler.maksSykepengedagerOver67(),
@@ -56,9 +68,7 @@ internal class MaksimumSykepengedagerfilter(
             )*/
         }
 
-        override fun `§ 8-3 ledd 1 punktum 2`(dato: LocalDate, gjenståendeSykepengedager: Int) {
-            // TODO: venter på avklaring om vi skal lagre vurdering for beregninger
-        }
+        override fun `§ 8-3 ledd 1 punktum 2`(dato: LocalDate, forbrukteDager: Int, gjenståendeDager: Int) {}
     }
 
     internal fun filter(tidslinjer: List<Utbetalingstidslinje>, personTidslinje: Utbetalingstidslinje): Alder.MaksimumSykepenger {
@@ -66,29 +76,12 @@ internal class MaksimumSykepengedagerfilter(
             .reduce(Utbetalingstidslinje::plus)
             .plus(personTidslinje)
         tidslinjegrunnlag = tidslinjer + listOf(personTidslinje)
-        teller = UtbetalingTeller(alder, arbeidsgiverRegler, subsumsjonObserver)
+        teller = UtbetalingTeller(alder, arbeidsgiverRegler)
         state = State.Initiell
         beregnetTidslinje.accept(this)
 
-        val maksimumSykepenger = teller.maksimumSykepenger(sisteBetalteDag, sisteDag)
-        val maksdato = maksimumSykepenger.sisteDag(maksimumSykepengersporing)
-        val gjenståendeSykedager = maksimumSykepenger.gjenståendeDager(maksimumSykepengersporing)
-        val forbrukteSykedager = maksimumSykepenger.forbrukteDager()
-
-        if (::sakensStartdato.isInitialized) {
-            val avvisteDager = avvisteDager.filter { sakensStartdato <= it }
-            subsumsjonObserver.`§ 8-12 ledd 1 punktum 1`(
-                avvisteDager !in periode,
-                periode,
-                avvisteDager.firstOrNull() ?: sakensStartdato,
-                avvisteDager.lastOrNull() ?: sisteBetalteDag,
-                tidslinjegrunnlag.toSubsumsjonFormat(),
-                beregnetTidslinje.toSubsumsjonFormat(),
-                gjenståendeSykedager,
-                forbrukteSykedager,
-                maksdato,
-                avvisteDager
-            )
+        val maksimumSykepenger = teller.maksimumSykepenger(sisteDag).also {
+            it.sisteDag(karantenesporing)
         }
 
         begrunnelserForAvvisteDager.forEach { (begrunnelse, avvisteDager) ->
@@ -116,10 +109,10 @@ internal class MaksimumSykepengedagerfilter(
 
     override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
         sisteDag = tidslinje.periode().endInclusive
-        sisteBetalteDag = sisteDag // TODO: fjerne sisteBetalteDag
     }
 
     override fun postVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
+        // TODO: logge juridisk vurdering for 70 år i "karantenesporing"
         alder.etterlevelse70år(aktivitetslogg, beregnetTidslinje.periode(), avvisteDager, subsumsjonObserver)
     }
 
@@ -187,11 +180,12 @@ internal class MaksimumSykepengedagerfilter(
     }
 
     private fun nextState(dagen: LocalDate): State? {
+        val maksimumSykepenger = teller.maksimumSykepenger(dagen)
         (opphold >= TILSTREKKELIG_OPPHOLD_I_SYKEDAGER).let { harTilstrekkeligOpphold ->
             subsumsjonObserver.`§ 8-12 ledd 2`(
                 oppfylt = harTilstrekkeligOpphold,
                 dato = dagen,
-                gjenståendeSykepengedager = teller.maksimumSykepenger(sisteBetalteDag).gjenståendeDager(),
+                gjenståendeSykepengedager = maksimumSykepenger.gjenståendeDager(),
                 beregnetAntallOppholdsdager = opphold,
                 tilstrekkeligOppholdISykedager = TILSTREKKELIG_OPPHOLD_I_SYKEDAGER,
                 tidslinjegrunnlag = tidslinjegrunnlag.toSubsumsjonFormat(),
@@ -203,8 +197,7 @@ internal class MaksimumSykepengedagerfilter(
             }
         }
         if (state == State.Karantene) return null
-        if (teller.erFørMaksdato(dagen)) return null
-
+        if (maksimumSykepenger.sisteDag() > dagen) return null
         return State.Karantene
     }
 
@@ -222,9 +215,7 @@ internal class MaksimumSykepengedagerfilter(
             }
 
             override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
-                avgrenser.sakensStartdato = dagen
                 avgrenser.teller.inkrementer(dagen)
-                avgrenser.sisteBetalteDag = dagen
                 avgrenser.teller.dekrementer(dagen)
                 avgrenser.state(Syk)
             }
@@ -237,7 +228,6 @@ internal class MaksimumSykepengedagerfilter(
 
             override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
                 avgrenser.teller.inkrementer(dagen)
-                avgrenser.sisteBetalteDag = dagen
                 avgrenser.nextState(dagen)?.run { avgrenser.state(this) }
                 avgrenser.opphold = 0
             }
@@ -255,7 +245,6 @@ internal class MaksimumSykepengedagerfilter(
 
             override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
                 avgrenser.teller.inkrementer(dagen)
-                avgrenser.sisteBetalteDag = dagen
                 avgrenser.teller.dekrementer(dagen)
                 avgrenser.state(avgrenser.nextState(dagen) ?: Syk)
             }
@@ -272,39 +261,16 @@ internal class MaksimumSykepengedagerfilter(
 
         object Karantene : State {
             override fun entering(avgrenser: MaksimumSykepengedagerfilter) {
-                val maksimumSykepenger = avgrenser.teller.maksimumSykepenger(avgrenser.sisteBetalteDag)
-                val maksdato = maksimumSykepenger.sisteDag(avgrenser.maksimumSykepengersporing)
-                val gjenståendeSykedager = maksimumSykepenger.gjenståendeDager(avgrenser.maksimumSykepengersporing)
-                val forbrukteSykedager = maksimumSykepenger.forbrukteDager()
-                avgrenser.teller.hvisGrensenErNådd(
-                    hvis248Dager = {
-                        avgrenser.subsumsjonObserver.`§ 8-12 ledd 1 punktum 1`(
-                            true,
-                            avgrenser.periode,
-                            avgrenser.sakensStartdato,
-                            avgrenser.sisteBetalteDag,
-                            avgrenser.tidslinjegrunnlag.toSubsumsjonFormat(),
-                            avgrenser.beregnetTidslinje.toSubsumsjonFormat(),
-                            gjenståendeSykedager,
-                            forbrukteSykedager,
-                            maksdato,
-                            avgrenser.avvisteDager.filter { avgrenser.sakensStartdato <= it }
-                        )
-                    }
-                )
+                // logger juridisk vurdering for hvorfor sykepengedagene er brukt opp
+                avgrenser.teller.maksimumSykepenger().sisteDag(avgrenser.karantenesporing)
             }
 
             override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
                 avgrenser.opphold += 1
                 avgrenser.avvisDag(dagen, when (avgrenser.opphold > TILSTREKKELIG_OPPHOLD_I_SYKEDAGER) {
                     true -> Begrunnelse.NyVilkårsprøvingNødvendig
-                    false -> avgrenser.teller.begrunnelse(dagen)
+                    false -> avgrenser.teller.maksimumSykepenger().begrunnelse()
                 })
-                avgrenser.teller.hvisGrensenErNådd(
-                    hvis67År = { maksdato ->
-                        avgrenser.teller.`§8-51 ledd 3`(maksdato)
-                    }
-                )
             }
 
             override fun sykdomshelg(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {

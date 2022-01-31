@@ -1,67 +1,66 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.*
-import no.nav.helse.person.etterlevelse.MaskinellJurist
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class UtbetalingTellerTest {
-    internal val UNG_PERSON_FNR_2018 = "15010052345".somFødselsnummer().alder()
-    internal val PERSON_67_ÅR_FNR_2018 = "15015112345".somFødselsnummer().alder()
-    internal val PERSON_70_ÅR_FNR_2018 = "15014812345".somFødselsnummer().alder()
+    private val UNG_PERSON_FNR_2018 = "15010052345".somFødselsnummer().alder()
+    private val PERSON_67_ÅR_FNR_2018 = "15015112345".somFødselsnummer().alder()
+    private val PERSON_70_ÅR_FNR_2018 = "15014812345".somFødselsnummer().alder()
     private lateinit var grense: UtbetalingTeller
 
     @Test
     fun `Person under 67 år får utbetalt 248 dager`() {
         grense(UNG_PERSON_FNR_2018, 247)
-        assertTrue(grense.erFørMaksdato(31.desember))
+        assertEquals(1, grense.maksimumSykepenger().gjenståendeDager())
         grense.inkrementer(31.desember)
-        assertFalse(grense.erFørMaksdato(31.desember))
+        assertEquals(0, grense.maksimumSykepenger().gjenståendeDager())
     }
 
-    @Test
+   @Test
     fun `Person som blir 67 år får utbetalt 60 dager etter 67 årsdagen`() {
         grense(PERSON_67_ÅR_FNR_2018, 15 + 59)
-        assertTrue(grense.erFørMaksdato(31.desember))
+        assertEquals(1, grense.maksimumSykepenger().gjenståendeDager())
         grense.inkrementer(31.desember)
-        assertFalse(grense.erFørMaksdato(31.desember))
+        assertEquals(0, grense.maksimumSykepenger().gjenståendeDager())
     }
 
     @Test
     fun `Person som blir 70 år har ikke utbetaling på 70 årsdagen`() {
         grense(PERSON_70_ÅR_FNR_2018, 11)
-        assertTrue(grense.erFørMaksdato(11.januar))
+        assertEquals(1, grense.maksimumSykepenger().gjenståendeDager())
         grense.inkrementer(12.januar)
-        assertFalse(grense.erFørMaksdato(12.januar))
+        assertEquals(0, grense.maksimumSykepenger().gjenståendeDager())
     }
 
     @Test
     fun `Person under 67 år får utbetalt 248 `() {
         grense(UNG_PERSON_FNR_2018, 248)
-        assertFalse(grense.erFørMaksdato(31.desember))
+        assertEquals(0, grense.maksimumSykepenger().gjenståendeDager())
         grense.resett()
-        assertTrue(grense.erFørMaksdato(31.desember))
+        assertEquals(248, grense.maksimumSykepenger(1.januar).gjenståendeDager())
     }
 
     @Test
     fun `Person under 67`() {
         grense(UNG_PERSON_FNR_2018, 247)
-        assertTrue(grense.erFørMaksdato(30.desember))
+        assertEquals(1, grense.maksimumSykepenger().gjenståendeDager())
         grense.dekrementer(2.januar(2021))
         grense.inkrementer(30.desember)
-        assertTrue(grense.erFørMaksdato(30.desember))
+        assertEquals(1, grense.maksimumSykepenger().gjenståendeDager())
         grense.inkrementer(31.desember)
-        assertFalse(grense.erFørMaksdato(31.desember))
+        assertEquals(0, grense.maksimumSykepenger().gjenståendeDager())
     }
 
     @Test
     fun `Reset decrement impact`() {
         grense(UNG_PERSON_FNR_2018, 247)
-        assertTrue(grense.erFørMaksdato(30.desember))
+        assertEquals(1, grense.maksimumSykepenger().gjenståendeDager())
         grense.dekrementer(1.januar.minusDays(1))
         grense.inkrementer(31.desember)
-        assertFalse(grense.erFørMaksdato(31.desember))
+        assertEquals(0, grense.maksimumSykepenger().gjenståendeDager())
     }
 
     @Test
@@ -84,7 +83,7 @@ internal class UtbetalingTellerTest {
     }
 
     private fun grense(alder: Alder, dager: Int, dato: LocalDate = 1.januar) {
-        grense = UtbetalingTeller(alder, ArbeidsgiverRegler.Companion.NormalArbeidstaker, MaskinellJurist()).apply {
+        grense = UtbetalingTeller(alder, ArbeidsgiverRegler.Companion.NormalArbeidstaker).apply {
             this.resett()
             (0 until dager).forEach { this.inkrementer(dato.plusDays(it.toLong())) }
         }

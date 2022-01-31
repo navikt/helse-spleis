@@ -111,7 +111,7 @@ internal class Alder(private val fødselsdato: LocalDate) {
         beregningFom: LocalDate,
         private val forbrukteDager: Int,
         private val sisteDag: LocalDate,
-        private val hjemmelstrategi: Begrunnelse.(LocalDate, Int) -> Unit
+        private val tilstand: Tilstand
     ) {
         private val gjenståendeDager = if (sisteDag <= beregningFom) 0 else beregningFom.datesUntil(sisteDag)
             .filter { it.dayOfWeek !in setOf(SATURDAY, SUNDAY) }
@@ -124,6 +124,7 @@ internal class Alder(private val fødselsdato: LocalDate) {
         }
 
         internal fun forbrukteDager() = forbrukteDager
+        internal fun begrunnelse() = tilstand.begrunnAvvisning()
 
         internal fun gjenståendeDager(begrunnelse: Begrunnelse? = null): Int {
             sporBegrunnelse(begrunnelse)
@@ -132,24 +133,42 @@ internal class Alder(private val fødselsdato: LocalDate) {
 
         private fun sporBegrunnelse(begrunnelse: Begrunnelse?) {
             if (begrunnelse == null) return
-            hjemmelstrategi(begrunnelse, sisteDag, gjenståendeDager)
+            tilstand.sporBegrunnelse()(begrunnelse, sisteDag, forbrukteDager, gjenståendeDager)
+        }
+
+        private interface Tilstand {
+            fun sporBegrunnelse(): Begrunnelse.(LocalDate, Int, Int) -> Unit
+            fun begrunnAvvisning(): no.nav.helse.utbetalingstidslinje.Begrunnelse
+
+            object Under67 : Tilstand {
+                override fun sporBegrunnelse() = Begrunnelse::`§ 8-12 ledd 1 punktum 1`
+                override fun begrunnAvvisning() = no.nav.helse.utbetalingstidslinje.Begrunnelse.SykepengedagerOppbrukt
+            }
+            object Over67 : Tilstand {
+                override fun sporBegrunnelse() = Begrunnelse::`§ 8-51 ledd 3`
+                override fun begrunnAvvisning() = no.nav.helse.utbetalingstidslinje.Begrunnelse.SykepengedagerOppbruktOver67
+            }
+            object Over70 : Tilstand {
+                override fun sporBegrunnelse() = Begrunnelse::`§ 8-3 ledd 1 punktum 2`
+                override fun begrunnAvvisning() = no.nav.helse.utbetalingstidslinje.Begrunnelse.Over70
+            }
         }
 
         interface Begrunnelse {
-            fun `§ 8-12 ledd 1 punktum 1`(dato: LocalDate, gjenståendeSykepengedager: Int) {}
-            fun `§ 8-51 ledd 3`(dato: LocalDate, gjenståendeSykepengedager: Int) {}
-            fun `§ 8-3 ledd 1 punktum 2`(dato: LocalDate, gjenståendeSykepengedager: Int) {}
+            fun `§ 8-12 ledd 1 punktum 1`(dato: LocalDate, forbrukteDager: Int, gjenståendeDager: Int) {}
+            fun `§ 8-51 ledd 3`(dato: LocalDate, forbrukteDager: Int, gjenståendeDager: Int) {}
+            fun `§ 8-3 ledd 1 punktum 2`(dato: LocalDate, forbrukteDager: Int, gjenståendeDager: Int) {}
         }
 
         internal companion object {
             internal fun ordinærRett(dato: LocalDate, forbrukteDager: Int, gjenståendeSykepengedager: Int) =
-                MaksimumSykepenger(dato,forbrukteDager, dato + gjenståendeSykepengedager.ukedager, Begrunnelse::`§ 8-12 ledd 1 punktum 1`)
+                MaksimumSykepenger(dato,forbrukteDager, dato + gjenståendeSykepengedager.ukedager, Tilstand.Under67)
 
             internal fun begrensetRett(dato: LocalDate, forbrukteDager: Int, alder: Alder, gjenståendeSykepengedagerOver67: Int) =
-                MaksimumSykepenger(dato, forbrukteDager, if (alder.innenfor67årsgrense(dato)) alder.redusertYtelseAlder + MAKS_SYKEPENGEDAGER_OVER_67.ukedager else dato + gjenståendeSykepengedagerOver67.ukedager, Begrunnelse::`§ 8-51 ledd 3`)
+                MaksimumSykepenger(dato, forbrukteDager, if (alder.innenfor67årsgrense(dato)) alder.redusertYtelseAlder + MAKS_SYKEPENGEDAGER_OVER_67.ukedager else dato + gjenståendeSykepengedagerOver67.ukedager, Tilstand.Over67)
 
             internal fun absoluttSisteDagMedSykepenger(dato: LocalDate, forbrukteDager: Int, sisteDag: LocalDate) =
-                MaksimumSykepenger(dato, forbrukteDager, sisteDag, Begrunnelse::`§ 8-3 ledd 1 punktum 2`)
+                MaksimumSykepenger(dato, forbrukteDager, sisteDag, Tilstand.Over70)
 
             internal fun minsteAv(vararg dato: MaksimumSykepenger) =
                 dato.minByOrNull { it.sisteDag }!!

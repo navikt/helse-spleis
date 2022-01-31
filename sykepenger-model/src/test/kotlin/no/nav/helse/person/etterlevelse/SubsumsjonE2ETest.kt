@@ -15,8 +15,8 @@ import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.spleis.e2e.*
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
-import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
@@ -346,7 +346,6 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             )
         )
     }
-
 
     @Test
     fun `§ 8-12 ledd 1 punktum 1 - Brukt færre enn 248 dager`() {
