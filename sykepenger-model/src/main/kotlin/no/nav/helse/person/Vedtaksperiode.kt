@@ -46,6 +46,7 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
+import java.time.temporal.ChronoUnit
 import java.util.*
 
 internal class Vedtaksperiode private constructor(
@@ -1112,10 +1113,18 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
+    private fun makstidForMottattSykemeldingTilstander(vedtaksperiode: Vedtaksperiode) =
+        vedtaksperiode.periode.endInclusive
+            .plusMonths(3)
+            .plusMonths(1)
+            .withDayOfMonth(1)
+            .atStartOfDay()
+            .minus(1, ChronoUnit.NANOS)
+
     internal object MottattSykmeldingFerdigForlengelse : Vedtaksperiodetilstand {
         override val type = MOTTATT_SYKMELDING_FERDIG_FORLENGELSE
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime) =
-            tilstandsendringstidspunkt.plusMonths(12)
+            vedtaksperiode.makstidForMottattSykemeldingTilstander(vedtaksperiode)
 
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
 
@@ -1149,7 +1158,7 @@ internal class Vedtaksperiode private constructor(
     internal object MottattSykmeldingUferdigForlengelse : Vedtaksperiodetilstand {
         override val type = MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime) =
-            tilstandsendringstidspunkt.plusMonths(12)
+            vedtaksperiode.makstidForMottattSykemeldingTilstander(vedtaksperiode)
 
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
         override fun håndterTidligereUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {}
@@ -1181,8 +1190,8 @@ internal class Vedtaksperiode private constructor(
 
     internal object MottattSykmeldingFerdigGap : Vedtaksperiodetilstand {
         override val type = MOTTATT_SYKMELDING_FERDIG_GAP
-        override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime) =
-            tilstandsendringstidspunkt.plusMonths(12)
+        override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
+            vedtaksperiode.makstidForMottattSykemeldingTilstander(vedtaksperiode)
 
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
 
@@ -1220,7 +1229,7 @@ internal class Vedtaksperiode private constructor(
     internal object MottattSykmeldingUferdigGap : Vedtaksperiodetilstand {
         override val type = MOTTATT_SYKMELDING_UFERDIG_GAP
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime) =
-            tilstandsendringstidspunkt.plusMonths(12)
+            vedtaksperiode.makstidForMottattSykemeldingTilstander(vedtaksperiode)
 
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
 

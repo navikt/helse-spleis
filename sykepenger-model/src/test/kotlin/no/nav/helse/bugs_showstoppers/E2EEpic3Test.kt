@@ -232,7 +232,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             5.januar
         )
 
-        håndterPåminnelse(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, LocalDateTime.now().minusMonths(13))
+        håndterPåminnelse(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP)
 
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
