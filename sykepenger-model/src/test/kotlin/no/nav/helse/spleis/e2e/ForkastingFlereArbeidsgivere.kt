@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.ForventetFeil
 import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
@@ -25,7 +24,6 @@ import java.time.LocalDateTime
  * basert på noen trivielle errors.
  */
 internal class ForkastingFlereArbeidsgivere : AbstractEndToEndTest() {
-    @ForventetFeil("Behandling på gjenopptas på tvers av flere arbeidsgivere")
     @Test
     fun `feil i utbetalingshistorikk skal ikke medføre at perioder hos annen AG blir stuck`() = Toggle.FlereArbeidsgivereFraInfotrygd.disable {
         setupTest()
@@ -42,7 +40,6 @@ internal class ForkastingFlereArbeidsgivere : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a2)
     }
 
-    @ForventetFeil("Behandling på gjenopptas på tvers av flere arbeidsgivere")
     @Test
     fun `feil i overlappende søknad hos AG1 skal ikke medføre at perioder hos annen AG blir stuck`() {
         setupTest()
@@ -54,7 +51,6 @@ internal class ForkastingFlereArbeidsgivere : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a2)
     }
 
-    @ForventetFeil("Behandling på gjenopptas på tvers av flere arbeidsgivere")
     @Test
     fun `feil i overlappende søknad hos AG2 skal ikke medføre at perioder hos annen AG blir stuck`() {
         setupTest()
@@ -66,7 +62,6 @@ internal class ForkastingFlereArbeidsgivere : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a2)
     }
 
-    @ForventetFeil("Behandling på gjenopptas på tvers av flere arbeidsgivere")
     @Test
     fun `makstid på periode hos AG2 skal ikke medføre at perioder hos annen AG blir stuck`() {
         setupTest()
@@ -78,7 +73,6 @@ internal class ForkastingFlereArbeidsgivere : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a2)
     }
 
-    @ForventetFeil("Behandling på gjenopptas på tvers av flere arbeidsgivere")
     @Test
     fun `makstid på periode hos AG1 skal ikke medføre at perioder hos annen AG blir stuck`() {
         setupTest()

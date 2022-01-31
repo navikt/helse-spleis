@@ -470,7 +470,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
-            AVVENTER_UFERDIG,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -524,7 +524,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
-            AVVENTER_UFERDIG,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -667,7 +667,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             2.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
-            AVVENTER_SØKNAD_UFERDIG_GAP,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_SØKNAD_FERDIG_GAP,
             AVVENTER_HISTORIKK
         )

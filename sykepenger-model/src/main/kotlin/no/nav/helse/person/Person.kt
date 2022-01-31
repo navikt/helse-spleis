@@ -8,6 +8,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeid
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.finn
 import no.nav.helse.person.Arbeidsgiver.Companion.ghostPeriode
+import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSammenligningsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.harArbeidsgivereMedOverlappendeUtbetaltePerioder
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntekt
@@ -265,6 +266,10 @@ class Person private constructor(
         if (!arbeidsgivere.håndter(overstyrArbeidsforhold)) {
             overstyrArbeidsforhold.severe("Kan ikke overstyre arbeidsforhold fordi ingen vedtaksperioder håndterte hendelsen")
         }
+    }
+
+    internal fun gjenopptaBehandling(hendelse: IAktivitetslogg) {
+        arbeidsgivere.gjenopptaBehandling(hendelse)
     }
 
     fun annullert(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetalingAnnullertEvent) {

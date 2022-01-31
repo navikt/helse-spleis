@@ -204,6 +204,24 @@ internal class Arbeidsgiver private constructor(
         ) {
             filter { it.organisasjonsnummer != "0" }.forEach { it.utbetalFeriepenger(aktørId, feriepengeberegner, utbetalingshistorikkForFeriepenger) }
         }
+
+        internal fun Iterable<Arbeidsgiver>.gjenopptaBehandling(gjenopptaBehandling: IAktivitetslogg) = forEach { arbeidsgiver ->
+            gjenopptaBehandling.kontekst(arbeidsgiver)
+            arbeidsgiver.énHarHåndtert(gjenopptaBehandling, Vedtaksperiode::gjenopptaBehandling)
+            Vedtaksperiode.gjenopptaBehandling(
+                hendelse = gjenopptaBehandling,
+                person = arbeidsgiver.person,
+                nåværendeTilstand = AvventerArbeidsgivere,
+                nesteTilstand = AvventerHistorikk
+            )
+            Vedtaksperiode.gjenopptaBehandling(
+                hendelse = gjenopptaBehandling,
+                person = arbeidsgiver.person,
+                nåværendeTilstand = AvventerArbeidsgivereRevurdering,
+                nesteTilstand = AvventerHistorikkRevurdering,
+                filter = IKKE_FERDIG_REVURDERT
+            )
+        }
     }
 
     internal fun accept(visitor: ArbeidsgiverVisitor) {
@@ -344,7 +362,6 @@ internal class Arbeidsgiver private constructor(
             }
         }
         if (sykmelding.hasErrorsOrWorse()) person.emitHendelseIkkeHåndtert(sykmelding)
-        finalize(sykmelding)
     }
 
     internal fun håndter(søknad: Søknad) {
@@ -358,7 +375,6 @@ internal class Arbeidsgiver private constructor(
             if (harNærliggendeUtbetaling) person.emitOpprettOppgaveForSpeilsaksbehandlereEvent(søknad) else person.emitOpprettOppgaveEvent(søknad)
             person.emitHendelseIkkeHåndtert(søknad)
         }
-        finalize(søknad)
     }
 
     internal fun harRefusjonOpphørt(periodeTom: LocalDate): Boolean {
@@ -389,8 +405,6 @@ internal class Arbeidsgiver private constructor(
             else
                 inntektsmelding.info("Ingen forkastede vedtaksperioder overlapper med uforventet inntektsmelding")
         }
-
-        finalize(inntektsmelding)
     }
 
     internal fun håndter(inntektsmelding: InntektsmeldingReplay) {
@@ -400,7 +414,6 @@ internal class Arbeidsgiver private constructor(
     internal fun håndter(utbetalingshistorikk: Utbetalingshistorikk, infotrygdhistorikk: Infotrygdhistorikk) {
         utbetalingshistorikk.kontekst(this)
         håndter(utbetalingshistorikk) { håndter(utbetalingshistorikk, infotrygdhistorikk) }
-        finalize(utbetalingshistorikk)
     }
 
     internal fun håndter(
@@ -410,39 +423,33 @@ internal class Arbeidsgiver private constructor(
     ) {
         ytelser.kontekst(this)
         håndter(ytelser) { håndter(ytelser, infotrygdhistorikk, arbeidsgiverUtbetalinger) }
-        finalize(ytelser)
     }
 
     internal fun håndter(utbetalingsgodkjenning: Utbetalingsgodkjenning) {
         utbetalingsgodkjenning.kontekst(this)
         utbetalinger.forEach { it.håndter(utbetalingsgodkjenning) }
         håndter(utbetalingsgodkjenning, Vedtaksperiode::håndter)
-        finalize(utbetalingsgodkjenning)
     }
 
     internal fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag) {
         vilkårsgrunnlag.kontekst(this)
         håndter(vilkårsgrunnlag, Vedtaksperiode::håndter)
-        finalize(vilkårsgrunnlag)
     }
 
     internal fun håndter(utbetalingsgrunnlag: Utbetalingsgrunnlag) {
         utbetalingsgrunnlag.kontekst(this)
         håndter(utbetalingsgrunnlag, Vedtaksperiode::håndter)
-        finalize(utbetalingsgrunnlag)
     }
 
     internal fun håndter(simulering: Simulering) {
         simulering.kontekst(this)
         utbetalinger.forEach { it.håndter(simulering) }
         håndter(simulering, Vedtaksperiode::håndter)
-        finalize(simulering)
     }
 
     internal fun håndter(utbetaling: UtbetalingOverført) {
         utbetaling.kontekst(this)
         utbetalinger.forEach { it.håndter(utbetaling) }
-        finalize(utbetaling)
     }
 
     internal fun håndter(utbetalingHendelse: UtbetalingHendelse) {
@@ -458,18 +465,16 @@ internal class Arbeidsgiver private constructor(
     private fun håndterUtbetaling(utbetaling: UtbetalingHendelse) {
         utbetalinger.forEach { it.håndter(utbetaling) }
         håndter(utbetaling, Vedtaksperiode::håndter)
-        finalize(utbetaling)
     }
 
     internal fun håndter(påminnelse: Utbetalingpåminnelse) {
         påminnelse.kontekst(this)
         utbetalinger.forEach { it.håndter(påminnelse) }
-        finalize(påminnelse)
     }
 
     internal fun håndter(påminnelse: Påminnelse): Boolean {
         påminnelse.kontekst(this)
-        return énHarHåndtert(påminnelse, Vedtaksperiode::håndter).also { finalize(påminnelse) }
+        return énHarHåndtert(påminnelse, Vedtaksperiode::håndter)
     }
 
     internal fun håndter(hendelse: AnnullerUtbetaling) {
@@ -481,7 +486,6 @@ internal class Arbeidsgiver private constructor(
         nyUtbetaling(annullering)
         annullering.håndter(hendelse)
         søppelbøtte(hendelse, ALLE, ForkastetÅrsak.ANNULLERING)
-        finalize(hendelse)
     }
 
     internal fun håndter(arbeidsgivere: List<Arbeidsgiver>, hendelse: Grunnbeløpsregulering, vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk) {
@@ -680,7 +684,6 @@ internal class Arbeidsgiver private constructor(
     internal fun håndter(hendelse: OverstyrTidslinje) {
         hendelse.kontekst(this)
         håndter(hendelse, Vedtaksperiode::håndter)
-        finalize(hendelse)
     }
 
     internal fun håndter(hendelse: OverstyrInntekt) {
@@ -688,7 +691,6 @@ internal class Arbeidsgiver private constructor(
         vedtaksperioder
             .firstOrNull { it.kanHåndtereOverstyring(hendelse) }
             ?.håndter(hendelse)
-        finalize(hendelse)
     }
 
     internal fun håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold): Boolean {
@@ -810,7 +812,7 @@ internal class Arbeidsgiver private constructor(
                         fjernDager(it.periode())
                     }
                 if (vedtaksperioder.isEmpty()) sykdomshistorikk.tøm()
-                gjenopptaBehandling()
+                person.gjenopptaBehandling(hendelse)
             }
     }
 
@@ -840,7 +842,7 @@ internal class Arbeidsgiver private constructor(
         håndter(hendelse) { nyRevurderingFør(vedtaksperiode, hendelse) }
         if (hendelse.hasErrorsOrWorse()) {
             hendelse.info("Revurdering blokkeres, gjenopptar behandling")
-            return gjenopptaBehandling()
+            return person.gjenopptaBehandling(hendelse)
         }
     }
 
@@ -852,7 +854,7 @@ internal class Arbeidsgiver private constructor(
         håndter(hendelse) { periodeReberegnetFør(vedtaksperiode, hendelse) }
         if (!hendelse.hasErrorsOrWorse()) return
         hendelse.info("Reberegning blokkeres, gjenopptar behandling")
-        gjenopptaBehandling()
+        person.gjenopptaBehandling(hendelse)
     }
 
     // Fredet funksjonsnavn
@@ -906,37 +908,6 @@ internal class Arbeidsgiver private constructor(
 
     internal fun fordelRevurdertUtbetaling(hendelse: ArbeidstakerHendelse, utbetaling: Utbetaling) {
         håndter(hendelse) { håndterRevurdertUtbetaling(utbetaling, hendelse) }
-    }
-
-    private var skalGjenopptaBehandling = false
-    internal fun gjenopptaBehandling() {
-        skalGjenopptaBehandling = true
-    }
-
-    private var skalGjenopptaRevurdering = false
-    internal fun gjenopptaRevurdering() {
-        skalGjenopptaRevurdering = true
-    }
-
-    private fun finalize(hendelse: ArbeidstakerHendelse) {
-        while (skalGjenopptaBehandling) {
-            skalGjenopptaBehandling = false
-            val gjenopptaBehandling = GjenopptaBehandling(hendelse)
-            énHarHåndtert(gjenopptaBehandling, Vedtaksperiode::håndter)
-            Vedtaksperiode.gjenopptaBehandling(hendelse, person, AvventerArbeidsgivere, AvventerHistorikk)
-            Vedtaksperiode.gjenopptaBehandling(hendelse, person, AvventerArbeidsgivereRevurdering, AvventerHistorikkRevurdering, IKKE_FERDIG_REVURDERT)
-        }
-
-        while (skalGjenopptaRevurdering) {
-            skalGjenopptaRevurdering = false
-            Vedtaksperiode.gjenopptaBehandling(hendelse, person, AvventerArbeidsgivereRevurdering, AvventerHistorikkRevurdering, IKKE_FERDIG_REVURDERT)
-        }
-    }
-
-    internal class GjenopptaBehandling(private val hendelse: ArbeidstakerHendelse) : ArbeidstakerHendelse(hendelse) {
-        override fun organisasjonsnummer() = hendelse.organisasjonsnummer()
-        override fun aktørId() = hendelse.aktørId()
-        override fun fødselsnummer() = hendelse.fødselsnummer()
     }
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
@@ -1103,7 +1074,7 @@ internal class Arbeidsgiver private constructor(
         .filter { it > vedtaksperiode }
         .all(UTEN_UTBETALING)
 
-    internal fun tidligerePeriodeRebehandles(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+    internal fun tidligerePeriodeRebehandles(vedtaksperiode: Vedtaksperiode, hendelse: PersonHendelse) {
         tilstøtendeBak(vedtaksperiode)?.tidligerePeriodeRebehandles(hendelse)
     }
 

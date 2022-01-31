@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.ForventetFeil
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
@@ -33,7 +32,6 @@ internal class OverstyrTidslinjeFlereAGTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_UFERDIG, a2)
     }
 
-    @ForventetFeil("Dersom det er riktig at arbeidsgiver 2 påvirkes, skal uansett arbeidsgiver 2 få Gjennoppta behandling når arbeidsgiver 1 avsluttes")
     @Test
     fun `overstyre og utbetalte en eldre periode hos en arbeidsgiver`() {
         nyttVedtak(1.januar, 31.januar, orgnummer = a1)
@@ -51,7 +49,6 @@ internal class OverstyrTidslinjeFlereAGTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, a2)
     }
 
-    @ForventetFeil("skal gå til en ferdig tilstand når revurdert periode er avsluttet")
     @Test
     fun `gap-vedtaksperiode med sykmelding og søknad skal gå til en ferdig tilstand etter revurdert periode er avsluttet igjen`() {
         nyttVedtak(1.januar, 31.januar, orgnummer = a1)
@@ -77,7 +74,6 @@ internal class OverstyrTidslinjeFlereAGTest : AbstractEndToEndTest() {
         )
     }
 
-    @ForventetFeil("skal gå til en ferdig tilstand når revurdert periode er avsluttet")
     @Test
     fun `forlengelse med sykmelding og søknad skal gå til en ferdig tilstand etter revurdert periode er avsluttet igjen`() {
         nyttVedtak(1.januar, 31.januar, orgnummer = a1)
@@ -106,7 +102,6 @@ internal class OverstyrTidslinjeFlereAGTest : AbstractEndToEndTest() {
         )
     }
 
-    @ForventetFeil("skal gå til en ferdig tilstand når revurdert periode er avsluttet")
     @Test
     fun `gap-vedtaksperiode med kun sykmelding skal gå til en ferdig tilstand etter revurdert periode er avsluttet igjen`() {
         nyttVedtak(1.januar, 31.januar, orgnummer = a1)
@@ -130,7 +125,6 @@ internal class OverstyrTidslinjeFlereAGTest : AbstractEndToEndTest() {
         )
     }
 
-    @ForventetFeil("skal gå til en ferdig tilstand når revurdert periode er avsluttet")
     @Test
     fun `forlengelse med kun sykmelding skal gå til en ferdig tilstand etter revurdert periode er avsluttet igjen`() {
         nyttVedtak(1.januar, 31.januar, orgnummer = a1)
@@ -157,7 +151,6 @@ internal class OverstyrTidslinjeFlereAGTest : AbstractEndToEndTest() {
         )
     }
 
-    @ForventetFeil("skal gå til en ferdig tilstand når revurdert periode er avsluttet")
     @Test
     fun `gap-vedtaksperiode med sykmelding og inntektsmelding skal gå til en ferdig tilstand etter revurdert periode er avsluttet igjen`() {
         nyttVedtak(1.januar, 31.januar, orgnummer = a1)
@@ -182,7 +175,6 @@ internal class OverstyrTidslinjeFlereAGTest : AbstractEndToEndTest() {
         )
     }
 
-    @ForventetFeil("skal gå til en ferdig tilstand når revurdert periode er avsluttet")
     @Test
     fun `forlengelse med sykmelding og inntektsmelding skal gå til en ferdig tilstand etter revurdert periode er avsluttet igjen`() {
         nyttVedtak(1.januar, 31.januar, orgnummer = a1)
@@ -190,11 +182,8 @@ internal class OverstyrTidslinjeFlereAGTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(15.september, 30.september, 100.prosent), orgnummer = a2)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(15.september, 30.september, 100.prosent), orgnummer = a2)
 
-        håndterSykmelding(Sykmeldingsperiode(15.september, 30.september, 100.prosent), orgnummer = a2)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(15.september, 30.september, 100.prosent), orgnummer = a2)
-
         håndterSykmelding(Sykmeldingsperiode(1.oktober, 30.oktober, 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(listOf(1.oktober til 16.oktober), orgnummer = a2)
+        håndterInntektsmelding(listOf(15.september til 30.september), orgnummer = a2)
 
         håndterOverstyrTidslinje((29.januar til 29.januar).map { manuellFeriedag(it) }, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -203,6 +192,7 @@ internal class OverstyrTidslinjeFlereAGTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, a2)
         assertTilstander(
             2.vedtaksperiode,
             START,
